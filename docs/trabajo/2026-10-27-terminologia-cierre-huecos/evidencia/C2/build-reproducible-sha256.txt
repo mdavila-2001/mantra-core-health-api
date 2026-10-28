@@ -1,4 +1,6 @@
-6e28187f43f9a456ac0b36e7047258dd13d7eb4677ac07afdfb9191e783a14af  relations-orphadata.ndjson
-de3bc1b9523a6d9623451494619a96c11ac9eb2b6f79253604135b157440dfa8  terms-mesh-c23.ndjson
-54f4ccd1dbaf5ce8fe322741785bbbd1aab18d2f23775d4c55ac086efbce784e  crosswalk-wikidata-hpo.ndjson
-0f3d31192985ec8e03b6a37e38d7e7a68fad9a4c5488eedad2dc6bf1706e52fe  crosswalk-medgen-cui.ndjson
+8bc4920752ef2d263b358b2bdb3e4b6229615c075958f53931aaf1f4a32fd7fd  relations-orphadata.ndjson
+66c628ca83a8af7784717b65af2ddd69e21cce9dd959aa18af9d3a46228e8a74  terms-mesh-c23.ndjson
+24d1746b2d9166ec9c660a9f3382d855a9c455f384c30ac097ec18c9110531c1  crosswalk-wikidata-hpo.ndjson
+247eb5a7b9e92fe2ae7af537d8d54063977d978181d07dc3bb84f6e6c705875a  crosswalk-medgen-cui.ndjson
+
+Reproducible también desde data/: se borró el snapshot local de Wikidata y el ndjson/, se restauró con unpack-data.mjs (data/wikidata-p3841-snapshot.json.gz + data/sources-manifest.json.gz, SHA-256 640281f1… del snapshot) y se reconstruyó: los 4 SHA-256 coinciden con los de arriba.

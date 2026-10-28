@@ -96,7 +96,7 @@ const RE_POSSIBLE = /may be copyright protected|if a copyright exists/i;
  */
 export function classifyContentLicense(archetype, overrides = {}) {
   const ov = overrides[archetype.archetypeId];
-  if (ov) return { status: ov.status, evidence: [{ field: 'override', text: ov.quote, url: ov.url, checkedAt: ov.checkedAt }], rule: 'override' };
+  if (ov) return { status: ov.status, ...(ov.approvalKey ? { approvalKey: ov.approvalKey, approvalReason: ov.approvalReason } : {}), evidence: [{ field: 'override', text: ov.quote, url: ov.url, checkedAt: ov.checkedAt }], rule: 'override' };
   const rights = rightsSentences(archetype);
   const free = rights.filter((s) => RE_DECLARED_FREE.test(s.text));
   const third = rights.filter((s) => RE_THIRD_PARTY.test(s.text) && !(s.field === 'copyright' && MODELLING_ORGS.test(s.text)) && !RE_DECLARED_FREE.test(s.text));
@@ -114,6 +114,13 @@ export function classifyContentLicense(archetype, overrides = {}) {
 
 /** Estados cuyo contenido (ítems y respuestas) se puede cargar. */
 export const CONTENT_LOADABLE = new Set(['declared-free', 'openehr-model', 'verified-free']);
+
+/**
+ * Estados con la licencia leída pero con una decisión del propietario sin tomar: las filas de contenido se GENERAN (así la
+ * decisión se puede ejecutar sin volver a armar) pero llevan `ownerApproval` y el cargador las omite salvo
+ * `--owner-approved=<clave>` (ver `load-nursing-care.mjs`).
+ */
+export const OWNER_APPROVAL_STATUSES = new Set(['pending-owner-decision']);
 
 // --- Subconjunto de enfermería (navegación, no juicio clínico) ----------------
 
@@ -194,7 +201,9 @@ export const CKM_PROFILE = {
 
 /**
  * @param {ReturnType<import('./adl.mjs').parseArchetype>} archetype
- * @param {{ path: string, commit: string, retrievedAt: string, repoUrl: string, overrides?: object, profile?: typeof CKM_PROFILE }} ctx
+ * `retrievedAt` ya no entra en la fila (el hash del corpus no depende de la fecha de descarga): vive en `sources.meta.json`
+ * y el cargador la agrega al guardar la procedencia.
+ * @param {{ path: string, commit: string, repoUrl: string, overrides?: object, profile?: typeof CKM_PROFILE }} ctx
  */
 export function archetypeRows(archetype, ctx) {
   const profile = ctx.profile ?? CKM_PROFILE;
@@ -203,7 +212,8 @@ export function archetypeRows(archetype, ctx) {
   const esLang = pickSpanish(ontologyLanguages(archetype));
   const od = archetype.description?.other_details ?? {};
   const contentLicense = profile.classify(archetype, ctx);
-  const loadContent = profile.loadable.has(contentLicense.status);
+  const loadContent = profile.loadable.has(contentLicense.status) || OWNER_APPROVAL_STATUSES.has(contentLicense.status);
+  const approvalKey = OWNER_APPROVAL_STATUSES.has(contentLicense.status) ? contentLicense.approvalKey : null;
   const nursing = profile.rules(archetype);
   const uri = `${ctx.repoUrl}/blob/${ctx.commit}/${ctx.path}`;
   const provenance = {
@@ -211,7 +221,6 @@ export function archetypeRows(archetype, ctx) {
     sourceId: id,
     version: od.revision ?? null,
     uri,
-    retrievedAt: ctx.retrievedAt,
     commit: ctx.commit,
     path: ctx.path,
     lifecycleState: archetype.description?.lifecycle_state ?? null,
@@ -253,6 +262,7 @@ export function archetypeRows(archetype, ctx) {
     detailsOriginal: details(archetype, orig),
     contentLicense,
     contentLoaded: loadContent,
+    ...(approvalKey ? { contentOwnerApproval: approvalKey } : {}),
     nursingRules: nursing,
     glossaryEligible: nursing.some((r) => profile.glossaryRule(r)),
     bindings: bindingsFor(rootAt),
@@ -289,6 +299,7 @@ export function archetypeRows(archetype, ctx) {
       esTranslator: es ? translator(archetype, esLang) : null,
       contentLicense,
       contentLoaded: true,
+      ...(approvalKey ? { ownerApproval: approvalKey } : {}),
       nursingRules: nursing,
       bindings: bindingsFor(at),
       provenance,

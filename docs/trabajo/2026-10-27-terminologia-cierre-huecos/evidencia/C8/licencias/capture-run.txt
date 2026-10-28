@@ -1,0 +1,12 @@
+[captura] omaha-faq-1: 200 215214 B, 1177 caracteres
+[captura] mosug-kbs-copyright: 200 281455 B, 200 caracteres
+[captura] glasgow-permissions: 200 11967 B, 371 caracteres
+[captura] news2-copyright: 200 87318 B, 977 caracteres
+[captura] braden-license: 200 1154871 B, 420 caracteres
+[captura] barthel-medchi-via-strokengine: 200 250532 B, 427 caracteres
+[captura] sanidad-aviso-legal: 200 31355 B, 1243 caracteres
+[captura] imss-gpc-375: 200 1035839 B, 546 caracteres
+[captura] guiasalud-aviso: 200 131670 B, 420 caracteres
+[captura] nnac-bolivia: 200 7363673 B, 220 caracteres
+[captura] datos-gov-co-pbs-license: 200 33482 B, 331 caracteres
+[captura] ley-23-1982-art-41: 200 276321 B, 274 caracteres

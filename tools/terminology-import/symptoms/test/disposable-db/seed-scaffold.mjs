@@ -18,6 +18,11 @@ import { join } from 'node:path';
 import { deterministicId } from '../../../lib/glossary-es/common.mjs';
 
 const args = process.argv.slice(2);
+// Misma guarda que fresh-db.sh: sólo bases desechables.
+if (process.env.DISPOSABLE_DB !== '1' || !/_test$/.test(process.env.DB_NAME ?? '') || !(process.env.DB_HOST ?? '').match(/^(\/|localhost$|127\.0\.0\.1$)/)) {
+  console.error('seed-scaffold.mjs se niega: exige DISPOSABLE_DB=1, DB_NAME terminado en _test y DB_HOST local.');
+  process.exit(4);
+}
 const KEYS = [
   'terminology:state:active',
   'terminology:state:draft',

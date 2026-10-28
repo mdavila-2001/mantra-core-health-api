@@ -2,165 +2,195 @@ TAP version 13
 # Subtest: Orphadata: asociaciones EN+ES con frecuencia, criterio diagnóstico y fuentes, tal como se publican
 ok 1 - Orphadata: asociaciones EN+ES con frecuencia, criterio diagnóstico y fuentes, tal como se publican
   ---
-  duration_ms: 3.820292
+  duration_ms: 3.809411
   type: 'test'
   ...
 # Subtest: Orphadata: id HPO sin resolver se cuenta y se descarta; alt_id se remapea y se anota
 ok 2 - Orphadata: id HPO sin resolver se cuenta y se descarta; alt_id se remapea y se anota
   ---
-  duration_ms: 1.103126
+  duration_ms: 1.153592
   type: 'test'
   ...
 # Subtest: Orphadata: la tabla clase→HPO coincide con HPOA en el par compartido (control cruzado)
 ok 3 - Orphadata: la tabla clase→HPO coincide con HPOA en el par compartido (control cruzado)
   ---
-  duration_ms: 1.93039
+  duration_ms: 2.742163
   type: 'test'
   ...
 # Subtest: MeSH C23: sólo descriptores con árbol C23, jerarquía por número de árbol, sinónimos por alcance
 ok 4 - MeSH C23: sólo descriptores con árbol C23, jerarquía por número de árbol, sinónimos por alcance
   ---
-  duration_ms: 14.017121
+  duration_ms: 18.530486
   type: 'test'
   ...
 # Subtest: MeSH: el XML se lee directo del .zip (deflate) sin unzip
 ok 5 - MeSH: el XML se lee directo del .zip (deflate) sin unzip
   ---
-  duration_ms: 14.575253
+  duration_ms: 27.817771
   type: 'test'
   ...
 # Subtest: MeSH ↔ otros sistemas: sólo por xref publicado (MESH:Dxxxxx), nunca por nombre
 ok 6 - MeSH ↔ otros sistemas: sólo por xref publicado (MESH:Dxxxxx), nunca por nombre
   ---
-  duration_ms: 0.467099
+  duration_ms: 3.298967
   type: 'test'
   ...
 # Subtest: Wikidata P3841: cruce publicado; un id mal escrito en Wikidata no se corrige
 ok 7 - Wikidata P3841: cruce publicado; un id mal escrito en Wikidata no se corrige
   ---
-  duration_ms: 1.448821
+  duration_ms: 1.240661
   type: 'test'
   ...
 # Subtest: plan v4.2.50: columnas reales, nivel de evidencia, frecuencia del value set, n/m y vigencia
 ok 8 - plan v4.2.50: columnas reales, nivel de evidencia, frecuencia del value set, n/m y vigencia
   ---
-  duration_ms: 1.72228
+  duration_ms: 1.274333
   type: 'test'
   ...
 # Subtest: plan v4.2.50: Orphadata y HPOA afirman la misma arista con evidencias distintas (1:N), sin duplicar
 ok 9 - plan v4.2.50: Orphadata y HPOA afirman la misma arista con evidencias distintas (1:N), sin duplicar
   ---
-  duration_ms: 1.693377
+  duration_ms: 1.383335
   type: 'test'
   ...
 # Subtest: nivel de evidencia: curado vs automático; un código desconocido es un error, no un valor por defecto
 ok 10 - nivel de evidencia: curado vs automático; un código desconocido es un error, no un valor por defecto
   ---
-  duration_ms: 0.66336
+  duration_ms: 0.811059
+  type: 'test'
+  ...
+# Subtest: MedGen: mismo CUI ⇒ cruce entre los sistemas del corpus; sólo identificadores, sólo fuentes aceptadas
+ok 11 - MedGen: mismo CUI ⇒ cruce entre los sistemas del corpus; sólo identificadores, sólo fuentes aceptadas
+  ---
+  duration_ms: 2.223947
+  type: 'test'
+  ...
+# Subtest: procedencia por fila: SHA-256 de entrada y versión en Orphadata, Wikidata y MedGen
+ok 12 - procedencia por fila: SHA-256 de entrada y versión en Orphadata, Wikidata y MedGen
+  ---
+  duration_ms: 0.880396
+  type: 'test'
+  ...
+# Subtest: la consulta SPARQL de Wikidata se normaliza: mismo contenido en otro orden = mismos bytes
+ok 13 - la consulta SPARQL de Wikidata se normaliza: mismo contenido en otro orden = mismos bytes
+  ---
+  duration_ms: 4.621319
+  type: 'test'
+  ...
+# Subtest: HPO: sin la aprobación del propietario los cargadores no escriben (código de salida 3)
+ok 14 - HPO: sin la aprobación del propietario los cargadores no escriben (código de salida 3)
+  ---
+  duration_ms: 0.311496
+  type: 'test'
+  ...
+# Subtest: fresh-db.sh se niega a borrar una base que no es desechable
+ok 15 - fresh-db.sh se niega a borrar una base que no es desechable
+  ---
+  duration_ms: 10.827274
   type: 'test'
   ...
 # Subtest: HPO: nombre ES sólo de la traducción OFFICIAL; definición y sinónimos EN verbatim
-ok 11 - HPO: nombre ES sólo de la traducción OFFICIAL; definición y sinónimos EN verbatim
+ok 16 - HPO: nombre ES sólo de la traducción OFFICIAL; definición y sinónimos EN verbatim
   ---
-  duration_ms: 7.509167
+  duration_ms: 8.71433
   type: 'test'
   ...
 # Subtest: babelon: ignora estados distintos de OFFICIAL
-ok 12 - babelon: ignora estados distintos de OFFICIAL
+ok 17 - babelon: ignora estados distintos de OFFICIAL
   ---
-  duration_ms: 0.173196
+  duration_ms: 0.280843
   type: 'test'
   ...
 # Subtest: HPO: resolutor de ids viejos sólo por alt_id/replaced_by declarados
-ok 13 - HPO: resolutor de ids viejos sólo por alt_id/replaced_by declarados
+ok 18 - HPO: resolutor de ids viejos sólo por alt_id/replaced_by declarados
   ---
-  duration_ms: 0.355382
+  duration_ms: 0.594768
   type: 'test'
   ...
 # Subtest: OBO: sinónimo con alcance, xref con calificadores, is_a sin comentario
-ok 14 - OBO: sinónimo con alcance, xref con calificadores, is_a sin comentario
+ok 19 - OBO: sinónimo con alcance, xref con calificadores, is_a sin comentario
   ---
-  duration_ms: 0.572847
+  duration_ms: 0.595805
   type: 'test'
   ...
 # Subtest: SYMP: términos vigentes con su sistema de primer nivel; obsoletos fuera
-ok 15 - SYMP: términos vigentes con su sistema de primer nivel; obsoletos fuera
+ok 20 - SYMP: términos vigentes con su sistema de primer nivel; obsoletos fuera
   ---
-  duration_ms: 9.588451
+  duration_ms: 14.471548
   type: 'test'
   ...
 # Subtest: HPOA: frecuencia, evidencia y referencias tal como vienen; NOT queda negado
-ok 16 - HPOA: frecuencia, evidencia y referencias tal como vienen; NOT queda negado
+ok 21 - HPOA: frecuencia, evidencia y referencias tal como vienen; NOT queda negado
   ---
-  duration_ms: 1.024272
+  duration_ms: 1.162089
   type: 'test'
   ...
 # Subtest: parseFrequency: vacío → null; formato desconocido se conserva sin interpretar
-ok 17 - parseFrequency: vacío → null; formato desconocido se conserva sin interpretar
+ok 22 - parseFrequency: vacío → null; formato desconocido se conserva sin interpretar
   ---
-  duration_ms: 0.132108
+  duration_ms: 0.174153
   type: 'test'
   ...
 # Subtest: DOID OWL: has symptom (RO:0002452) también dentro de equivalentClass anidado
-ok 18 - DOID OWL: has symptom (RO:0002452) también dentro de equivalentClass anidado
+ok 23 - DOID OWL: has symptom (RO:0002452) también dentro de equivalentClass anidado
   ---
-  duration_ms: 1.192849
+  duration_ms: 0.593793
   type: 'test'
   ...
 # Subtest: Mondo: rasgos HP declarados y equivalencias equivalentTo
-ok 19 - Mondo: rasgos HP declarados y equivalencias equivalentTo
+ok 24 - Mondo: rasgos HP declarados y equivalencias equivalentTo
   ---
-  duration_ms: 2.268599
+  duration_ms: 4.194445
   type: 'test'
   ...
 # Subtest: enfermedades comunes: DOID con ceros a la izquierda sólo se normaliza si el id existe
-ok 20 - enfermedades comunes: DOID con ceros a la izquierda sólo se normaliza si el id existe
+ok 25 - enfermedades comunes: DOID con ceros a la izquierda sólo se normaliza si el id existe
   ---
-  duration_ms: 0.803954
+  duration_ms: 0.952572
   type: 'test'
   ...
 # Subtest: cruces: prefijo Orphanet de Monarch = ORPHA de HPOA; CUI compartido marca solapamiento
-ok 21 - cruces: prefijo Orphanet de Monarch = ORPHA de HPOA; CUI compartido marca solapamiento
+ok 26 - cruces: prefijo Orphanet de Monarch = ORPHA de HPOA; CUI compartido marca solapamiento
   ---
-  duration_ms: 0.319292
+  duration_ms: 0.371958
   type: 'test'
   ...
 # Subtest: plan de términos: display ES oficial, sólo sinónimos EXACT como designación, ids deterministas
-ok 22 - plan de términos: display ES oficial, sólo sinónimos EXACT como designación, ids deterministas
+ok 27 - plan de términos: display ES oficial, sólo sinónimos EXACT como designación, ids deterministas
   ---
-  duration_ms: 1.019556
+  duration_ms: 0.936022
   type: 'test'
   ...
 # Subtest: plan de relaciones: NOT → SYMPTOM_EXCLUDED, aspecto I fuera, frecuencia HPO resuelta
-ok 23 - plan de relaciones: NOT → SYMPTOM_EXCLUDED, aspecto I fuera, frecuencia HPO resuelta
+ok 28 - plan de relaciones: NOT → SYMPTOM_EXCLUDED, aspecto I fuera, frecuencia HPO resuelta
   ---
-  duration_ms: 1.205617
+  duration_ms: 1.429125
   type: 'test'
   ...
 # Subtest: sistemas de enfermedad por defecto = formatos confirmados por seed-diseases (\#688)
-ok 24 - sistemas de enfermedad por defecto = formatos confirmados por seed-diseases (\#688)
+ok 29 - sistemas de enfermedad por defecto = formatos confirmados por seed-diseases (\#688)
   ---
-  duration_ms: 0.261096
+  duration_ms: 0.259053
   type: 'test'
   ...
 # Subtest: NCIt: signos por tipo semántico, sin los descendientes de C2991 (recorte real de 24.04e, donde Colic cuelga de C2991)
-ok 25 - NCIt: signos por tipo semántico, sin los descendientes de C2991 (recorte real de 24.04e, donde Colic cuelga de C2991)
+ok 30 - NCIt: signos por tipo semántico, sin los descendientes de C2991 (recorte real de 24.04e, donde Colic cuelga de C2991)
   ---
-  duration_ms: 9.818215
+  duration_ms: 15.086832
   type: 'test'
   ...
 # Subtest: pack-data: partición por líneas en gzip válidos que reconstruyen el original
-ok 26 - pack-data: partición por líneas en gzip válidos que reconstruyen el original
+ok 31 - pack-data: partición por líneas en gzip válidos que reconstruyen el original
   ---
-  duration_ms: 4.935329
+  duration_ms: 6.610114
   type: 'test'
   ...
-1..26
-# tests 26
+1..31
+# tests 31
 # suites 0
-# pass 26
+# pass 31
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 129.64618
+# duration_ms 191.050149

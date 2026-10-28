@@ -1,0 +1,20 @@
+descarga 1 (hashes)
+eaddfa078696c18f80df203931345674674d3a1056b0adea09ecefcc29287c63 ursing-care/omaha-system.ndjson
+0cdb5fcfec0e7716501a70b4ef2a1de505418e352571926ebb8154124cf975e6 nursing-care/openehr-ckm.ndjson
+f554821118f5c066612d0dd69eb6595fbb55c67db690c2726fc29793a62fbb53 are/es-msssi-cmdic-13606.ndjson
+577df059b29900c93088586c409d62f1813f2b7c2544c3cc2d780d63d8449ba2 ing-terminology-registry.ndjson
+descarga FRESCA 65 s después (hashes)
+eaddfa078696c18f80df203931345674674d3a1056b0adea09ecefcc29287c63 ursing-care/omaha-system.ndjson
+0cdb5fcfec0e7716501a70b4ef2a1de505418e352571926ebb8154124cf975e6 nursing-care/openehr-ckm.ndjson
+f554821118f5c066612d0dd69eb6595fbb55c67db690c2726fc29793a62fbb53 are/es-msssi-cmdic-13606.ndjson
+577df059b29900c93088586c409d62f1813f2b7c2544c3cc2d780d63d8449ba2 ing-terminology-registry.ndjson
+
+site-problems retrievedAt distinto | sha256 del archivo igual
+site-interventions retrievedAt distinto | sha256 del archivo igual
+site-prso retrievedAt distinto | sha256 del archivo igual
+site-prso-image retrievedAt distinto | sha256 del archivo igual
+site-faq retrievedAt distinto | sha256 del archivo igual
+site-overview retrievedAt distinto | sha256 del archivo igual
+mosug-kbs-supplement retrievedAt distinto | sha256 del archivo igual
+istanbul-form-i retrievedAt distinto | sha256 del archivo igual
+CORPUS IDÉNTICO entre descargas

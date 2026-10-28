@@ -1,0 +1,223 @@
+{
+  "generatedAt": "2026-10-27T23:54:39.163Z",
+  "cache": "/tmp/claude-0/-home-user/d54e8fca-588a-538f-8209-b411160eadd8/scratchpad/build-C6/cache/drug-treatments-http",
+  "files": {
+    "chembl/drug_indication.ndjson": {
+      "source": "chembl",
+      "url": "https://www.ebi.ac.uk/chembl/api/data/drug_indication.json",
+      "note": "60055 registros, ChEMBL_37 (2026-05-01), páginas de 1000, ordenados por drugind_id",
+      "retrievedAt": "2026-10-27T23:37:51.481Z",
+      "sha256": "29f053677aea1ef71de005c7fa864385c74b37b89e2e011d16105512a876722c",
+      "bytes": 31498597
+    },
+    "chembl/molecule-atc.tsv": {
+      "source": "chembl-atc",
+      "url": "https://www.ebi.ac.uk/chembl/api/data/molecule.json?molecule_chembl_id__in=<80 ids>&only=molecule_chembl_id,atc_classifications",
+      "note": "10382 moléculas consultadas (molecule_chembl_id y parent de cada indicación)",
+      "retrievedAt": "2026-10-27T23:39:50.712Z",
+      "sha256": "6a43b5838d8010f5b4976d97e4d47d9364569bcf99833e3f499c0f84b55e789c",
+      "bytes": 84834
+    },
+    "civic/predictive-evidence.ndjson": {
+      "source": "civic",
+      "url": "https://civicdb.org/api/graphql",
+      "note": "evidenceItems(evidenceType: PREDICTIVE, status: ACCEPTED), 2912 items, páginas de 100, ordenados por id",
+      "retrievedAt": "2026-10-27T23:40:10.555Z",
+      "sha256": "a161d3a61afcbd0feab54ee98a0d75076373cb73cffd013187c3783af55fa874",
+      "bytes": 1314072
+    },
+    "clinicaltrials/drug-studies.ndjson": {
+      "source": "clinicaltrials",
+      "url": "https://clinicaltrials.gov/api/v2/studies",
+      "note": "API 2.0.5, dataTimestamp 2026-10-27T09:00:04; filtro AREA[InterventionType](DRUG OR BIOLOGICAL) AND AREA[StudyType]INTERVENTIONAL; campos NCTId,Phase,OverallStatus,StudyType,InterventionType,ConditionMeshId,ConditionMeshTerm,InterventionMeshId,InterventionMeshTerm; 223264 estudios; términos MeSH de conditionBrowseModule/interventionBrowseModule (los asigna ClinicalTrials.gov)",
+      "retrievedAt": "2026-10-27T23:44:18.504Z",
+      "sha256": "51e86834a2c329414c5d5df2e383f04a41859839da6cc2ba4d46cce512ee434d",
+      "bytes": 39223085
+    },
+    "drugcentral/identifier.tsv": {
+      "source": "drugcentral",
+      "url": "https://unmtid-dbs.net/download/DrugCentral/2027/db_dump/Drugcentral_2026-09-25.pgdump",
+      "derivedFrom": [
+        {
+          "url": "https://unmtid-dbs.net/download/DrugCentral/2027/db_dump/Drugcentral_2026-09-25.pgdump",
+          "sha256": "5afea88f6a1916f250c28c10ab988e7464ca6fd5ccf2c42f080600473de732dc",
+          "bytes": 1378106682
+        }
+      ],
+      "note": "pg_restore --data-only -t …; identifier: solo RXNORM, ChEMBL_ID, DRUGBANK_ID, UNII, MESH_*, CHEBI; 30535 filas",
+      "retrievedAt": "2026-10-27T23:40:26.654Z",
+      "sha256": "5a39a669952dd33921b4faf8810758c354ada00d18a18b058eb535d7b486fe24",
+      "bytes": 791331
+    },
+    "drugcentral/license-privacy.html": {
+      "source": "drugcentral",
+      "url": "https://drugcentral.org/privacy",
+      "note": "página de licencia de DrugCentral (evidencia de la licencia; no la lee ningún parser)",
+      "retrievedAt": "2026-10-27T23:40:23.178Z",
+      "sha256": "d7188986d25981cc0c8e86c93c7650aa3b75a8dc0e07753a4e8e8da102d49d80",
+      "bytes": 6412
+    },
+    "drugcentral/omop_relationship.tsv": {
+      "source": "drugcentral",
+      "url": "https://unmtid-dbs.net/download/DrugCentral/2027/db_dump/Drugcentral_2026-09-25.pgdump",
+      "derivedFrom": [
+        {
+          "url": "https://unmtid-dbs.net/download/DrugCentral/2027/db_dump/Drugcentral_2026-09-25.pgdump",
+          "sha256": "5afea88f6a1916f250c28c10ab988e7464ca6fd5ccf2c42f080600473de732dc",
+          "bytes": 1378106682
+        }
+      ],
+      "note": "pg_restore --data-only -t …; omop_relationship sin columnas SNOMED CT; 42515 filas; valores con tab/salto de línea reemplazados por espacio: 2; sin UMLS CUI: 0 solo con SNOMED CT (no se guarda), 3879 sin ningún código",
+      "retrievedAt": "2026-10-27T23:40:26.642Z",
+      "sha256": "96aca259600ff68abd8d7ad2d56c00b272c4a4f4352fe0882f8879a408d17898",
+      "bytes": 3037699
+    },
+    "drugcentral/struct2atc.tsv": {
+      "source": "drugcentral",
+      "url": "https://unmtid-dbs.net/download/DrugCentral/2027/db_dump/Drugcentral_2026-09-25.pgdump",
+      "derivedFrom": [
+        {
+          "url": "https://unmtid-dbs.net/download/DrugCentral/2027/db_dump/Drugcentral_2026-09-25.pgdump",
+          "sha256": "5afea88f6a1916f250c28c10ab988e7464ca6fd5ccf2c42f080600473de732dc",
+          "bytes": 1378106682
+        }
+      ],
+      "note": "pg_restore --data-only -t …; struct2atc: solo el código ATC (sin la tabla atc, que trae nombres de la OMS); 5430 filas",
+      "retrievedAt": "2026-10-27T23:40:26.660Z",
+      "sha256": "eb36377f6b619cdc487b31c6f84e22e45cd4abbea958f5d9a611ee527a285441",
+      "bytes": 69369
+    },
+    "drugcentral/structures.tsv": {
+      "source": "drugcentral",
+      "url": "https://unmtid-dbs.net/download/DrugCentral/2027/db_dump/Drugcentral_2026-09-25.pgdump",
+      "derivedFrom": [
+        {
+          "url": "https://unmtid-dbs.net/download/DrugCentral/2027/db_dump/Drugcentral_2026-09-25.pgdump",
+          "sha256": "5afea88f6a1916f250c28c10ab988e7464ca6fd5ccf2c42f080600473de732dc",
+          "bytes": 1378106682
+        }
+      ],
+      "note": "pg_restore --data-only -t …; structures: solo id y name; 5116 filas",
+      "retrievedAt": "2026-10-27T23:40:26.666Z",
+      "sha256": "8aae3aa78bda9488319fe7dcc75eb9838df9546da179078e845d33cb12854758",
+      "bytes": 92232
+    },
+    "eeml/recommendations.ndjson": {
+      "source": "eeml",
+      "url": "https://list.essentialmeds.org/recommendations/",
+      "note": "1132 páginas /recommendations/N (ids de la portada https://list.essentialmeds.org/); campos estructurados, sin formulaciones",
+      "retrievedAt": "2026-10-27T23:54:39.162Z",
+      "sha256": "7cbfca58a426512fe02d58170c9e3535a536be44d8f371f3950780a2a9c72431",
+      "bytes": 534930
+    },
+    "ema/medicines.tsv": {
+      "source": "ema",
+      "url": "https://www.ema.europa.eu/en/documents/report/medicines-output-medicines-report_en.xlsx",
+      "etag": "\"ce2097bdd733cd8b8ec920d43a1f3187db797ec3f8109ff94bbd7b6b94626975\"",
+      "lastModified": "Tue, 27 Oct 2026 17:05:10 GMT",
+      "derivedFrom": [
+        {
+          "url": "https://www.ema.europa.eu/en/documents/report/medicines-output-medicines-report_en.xlsx",
+          "sha256": "07b1a415c4e6a9f2923a45b59fa3e6293b1353446eee0f4fd4b42ce408581854",
+          "bytes": 904545
+        }
+      ],
+      "note": "hoja «Medicine», fila de cabecera 9; columnas 9 (sin el texto de la indicación); 2754 filas",
+      "retrievedAt": "2026-10-27T23:36:49.457Z",
+      "sha256": "ca0c93eeb10e2963aa3705680988bac751325a55238bc970e95f0cf99e2727f9",
+      "bytes": 544720
+    },
+    "medrt/Core_MEDRT_2026.10.05_XML.xml": {
+      "source": "medrt",
+      "url": "https://evs.nci.nih.gov/ftp1/MED-RT/Core_MEDRT_XML.zip",
+      "etag": "\"1b879f062726a04c72eb3432b03f1906\"",
+      "lastModified": "Mon, 05 Oct 2026 18:40:48 GMT",
+      "derivedFrom": [
+        {
+          "url": "https://evs.nci.nih.gov/ftp1/MED-RT/Core_MEDRT_XML.zip",
+          "sha256": "00f54f5d17b4d62947ae497a1f1628d7324f49801b0f74e64f655f6ef79040af",
+          "bytes": 2575384
+        }
+      ],
+      "note": "unzip -p Core_MEDRT_2026.10.05_XML.xml",
+      "retrievedAt": "2026-10-27T23:26:45.462Z",
+      "sha256": "36c460ecf36c18288c4a3cfb8dbe02f18d422bf632e2c7afca36622229e85240",
+      "bytes": 45569499
+    },
+    "medrt/MED-RT Documentation.pdf": {
+      "source": "medrt",
+      "url": "https://evs.nci.nih.gov/ftp1/MED-RT/Core_MEDRT_XML.zip",
+      "etag": "\"1b879f062726a04c72eb3432b03f1906\"",
+      "lastModified": "Mon, 05 Oct 2026 18:40:48 GMT",
+      "derivedFrom": [
+        {
+          "url": "https://evs.nci.nih.gov/ftp1/MED-RT/Core_MEDRT_XML.zip",
+          "sha256": "00f54f5d17b4d62947ae497a1f1628d7324f49801b0f74e64f655f6ef79040af",
+          "bytes": 2575384
+        }
+      ],
+      "note": "unzip -p MED-RT Documentation.pdf",
+      "retrievedAt": "2026-10-27T23:26:45.537Z",
+      "sha256": "25a30535b297c9d529853d41d4d29f93695c3cff294b597ee1e1eb0f3b55c50a",
+      "bytes": 664901
+    },
+    "mesh/concept-descriptor.tsv": {
+      "source": "mesh-concepts",
+      "url": "https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.xml",
+      "etag": "\"12a7477f-658dd6d1e8f80\"",
+      "lastModified": "Wed, 12 Aug 2026 18:05:02 GMT",
+      "derivedFrom": [
+        {
+          "url": "https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.xml",
+          "sha256": "449792ed59ba4d60035e44724352f7361ec0dc945b67dcd821a50ff32f81bcdb",
+          "bytes": 312952703
+        }
+      ],
+      "note": "DescriptorUI, DescriptorName (encabezado principal) + ConceptUI/PreferredConceptYN de cada DescriptorRecord",
+      "retrievedAt": "2026-10-27T23:36:43.098Z",
+      "sha256": "ebd43bba3c3ddb506bab7a2a5f5999b004e0e0e441cf9cf182a344e8cfaa5984",
+      "bytes": 2350895
+    },
+    "opentargets/clinical_report_ema.ndjson": {
+      "source": "opentargets",
+      "url": "https://ftp.ebi.ac.uk/pub/databases/opentargets/platform/26.09/output/clinical_report/00000000.parquet",
+      "etag": "\"4868275-65ae78bffb440\"",
+      "lastModified": "Mon, 07 Sep 2026 16:59:53 GMT",
+      "derivedFrom": [
+        {
+          "url": "https://ftp.ebi.ac.uk/pub/databases/opentargets/platform/26.09/output/clinical_report/00000000.parquet",
+          "sha256": "ba0ea48b129182de119f5d676bb1483e6225ba65857a31b7319b65c0e6b8fa25",
+          "bytes": 75924085
+        }
+      ],
+      "note": "extract-opentargets.py (pyarrow): provider == EMA y type == INDICATION",
+      "retrievedAt": "2026-10-27T23:39:45.964Z",
+      "sha256": "83e952c81a4ecdd6932349df96144b73d5a1ae17a0ba6b56b318f205aa6ef64c",
+      "bytes": 1082910
+    },
+    "rxclass/rxcui-atc.tsv": {
+      "source": "rxclass-atc",
+      "url": "https://rxnav.nlm.nih.gov/REST/rxclass/classMembers.json?classId=<ATC nivel 4>&relaSource=ATC",
+      "note": "939 pedidos classMembers (uno por clase ATC de nivel 4 de allClasses.json?classTypes=ATC1-4); se descarta SourceName",
+      "retrievedAt": "2026-10-27T23:36:13.364Z",
+      "sha256": "353934d0227fbd275010216a47d853037d59116a0931b0914988bda031ecc5fb",
+      "bytes": 113801
+    },
+    "wikidata/item-ids.ndjson": {
+      "source": "wikidata-ids",
+      "url": "https://query.wikidata.org/sparql",
+      "note": "6553 ítems: etiqueta en inglés, P31 y propiedades P3345, P592, P715, P652, P267, P486, P683, P699, P5270, P2892, P494, P4229, P7329, P492, P1550, P1748",
+      "retrievedAt": "2026-10-27T23:45:07.972Z",
+      "sha256": "61281e16a0eb20d80278c82282ac5ec540855853edb008adf97ee8bab7a289d7",
+      "bytes": 1241396
+    },
+    "wikidata/treatment-statements.ndjson": {
+      "source": "wikidata",
+      "url": "https://query.wikidata.org/sparql",
+      "note": "SELECT ?stmt ?s ?o ?rank refs(P248) de p:P2176 y p:P2175, paginado de a 1500, ORDER BY ?stmt",
+      "retrievedAt": "2026-10-27T23:42:24.328Z",
+      "sha256": "cc6480376baaa1fdb0990d3e0f1026db1863403277f78966b05b1f996873a386",
+      "bytes": 2422499
+    }
+  }
+}

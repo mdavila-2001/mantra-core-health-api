@@ -3,14 +3,16 @@
 //
 // Cada entrada dice QUÉ se verificó, DÓNDE (URL), CUÁNDO y con qué nivel de
 // evidencia. «secondary» = lo afirma una fuente que no es el titular (buscador,
-// Wikipedia, LOINC, una guía clínica); «primary» = lo dice el titular. La red del
-// contenedor donde se escribió esto (2026-10-24) no llegaba a los sitios de los
-// titulares, así que casi todo es secundario y queda para confirmar.
+// Wikipedia, LOINC, una guía clínica); «primary» = lo dice el titular. Las entradas del
+// 2026-10-24 son casi todas secundarias (la red de entonces no llegaba a los titulares); las
+// marcadas `checkedAt: '2026-10-27'` se leyeron ese día en el sitio del titular.
 //
-// Esta tabla NO habilita contenido por sí sola: el importador carga ítems y
-// respuestas de una escala sólo si su estado es `declared-free` (lo dice el
-// propio arquetipo) o `verified-free` (override con evidencia primaria). Hoy no
-// hay ningún `verified-free`.
+// Esta tabla NO habilita contenido por sí sola. El contenido de una escala se carga sólo si su estado es
+// `declared-free` (lo dice el propio arquetipo) o `verified-free` (`LICENSE_OVERRIDES`, evidencia primaria sin
+// reservas). Con evidencia primaria PERO una decisión del propietario sin tomar, el estado es
+// `pending-owner-decision`: las filas se generan y se versionan, y el cargador las OMITE salvo
+// `--owner-approved=<clave>` (ver `load-nursing-care.mjs`). Hoy no hay ningún `verified-free`; hay dos
+// `pending-owner-decision`: la escala de Glasgow (clave `glasgow-coma-scale`) y el Omaha System (`omaha-system`).
 //
 // `url` es la dirección que devolvió la búsqueda o que cita la propia fuente;
 // `null` cuando no se obtuvo ninguna (no se completa de memoria).
@@ -24,11 +26,12 @@ export const CHECKED_AT = '2026-10-24';
  */
 export const TERMINOLOGY_LICENSES = {
   oms: {
-    status: 'public-domain-terms',
-    loadable: true,
-    blockedBy: null,
+    status: 'public-domain-terms-pending-owner-decision',
+    loadable: false,
+    blockedBy: 'owner-decision',
+    approvalKey: 'omaha-system',
     checkedAt: '2026-10-27',
-    summary: 'FAQ oficial, pregunta 1 (leída el 2026-10-27): «The Omaha System has existed in the public domain since 1975, and, therefore, is not held under copyright. The complete terms, definitions, and codes are presented in Appendix A and Appendix E of the 2005 book; they may be used by anyone without permission and without a licensing fee […]. However, the terms and structure must be used as described in the 2005 book, and referenced (ie 2005 book or Website).» El resto del libro (guía del usuario) tiene copyright de Health Connections Press, y «developers and companies who design and sell software based on the Omaha System are also required to observe copyright laws related to the book and should contact Health Connections Press». Cargado en `omaha-system` (ver SOURCES.md): lo que el sitio y el suplemento del MOSUG publican; los códigos numéricos y los signos/síntomas de 24 problemas están sólo en el libro.',
+    summary: 'FAQ oficial, pregunta 1 (leída el 2026-10-27): «The Omaha System has existed in the public domain since 1975, and, therefore, is not held under copyright. The complete terms, definitions, and codes are presented in Appendix A and Appendix E of the 2005 book; they may be used by anyone without permission and without a licensing fee […]. However, the terms and structure must be used as described in the 2005 book, and referenced (ie 2005 book or Website).» Pero: «Other sections of the book including the User’s Guide are held under copyright by Health Connections Press […]. Developers and companies who design and sell software based on the Omaha System are also required to observe copyright laws related to the book and should contact Health Connections Press.» Cargar los términos en un producto comercial queda a la espera de que el propietario confirme con la editorial que entra en el uso libre: el corpus (320 conceptos) se arma y se versiona, pero el cargador lo OMITE salvo `--owner-approved=omaha-system`.',
     url: 'https://www.omahasystem.org/faq',
     evidence: 'primary (FAQ del sitio oficial, descargado y leído el 2026-10-27; SHA-256 en omaha-meta)',
   },
@@ -162,7 +165,7 @@ export const SCALE_LICENSE_NOTES = {
   },
   'openEHR-EHR-OBSERVATION.glasgow_coma_scale.v1': {
     holder: 'University of Glasgow (GCS); Sir Graham Teasdale (GCS Aid, GCS-P)',
-    summary: 'Página oficial de permisos (leída el 2026-10-27): «The Glasgow Coma Scale (GCS), GCS Aid, GCS-P score, GCS P-Age CT prognostic charts and GCS verbal score imputation tool may all be used for clinical care and clinical research at no cost. No license is required. The copywrite of Glasgow University (GCS), and Sir Graham Teasdale (GCS Aid, GCS-P, GCS-P Age CT prognostic charts and imputation tool) should be acknowledged.» Habilitado con `LICENSE_OVERRIDES` sólo para la escala de adultos (`glasgow_coma_scale.v1`); la pediátrica es otra adaptación y no está cubierta por esa página.',
+    summary: 'Página oficial de permisos (leída el 2026-10-27): «The Glasgow Coma Scale (GCS), GCS Aid, GCS-P score, GCS P-Age CT prognostic charts and GCS verbal score imputation tool may all be used for clinical care and clinical research at no cost. No license is required. The copywrite of Glasgow University (GCS), and Sir Graham Teasdale (GCS Aid, GCS-P, GCS-P Age CT prognostic charts and imputation tool) should be acknowledged.» El permiso cubre «clinical care and clinical research»: incluir la escala en un catálogo de terminología de un producto no es, sin más, ninguno de los dos usos; además las filas vienen de un arquetipo CC BY-SA (obra derivada con *share-alike*, decisión legal ya abierta para todo CKM). Por eso NO se habilita sin decisión del propietario (`pending-owner-decision`): las filas se generan y se versionan, y el cargador las omite salvo `--owner-approved=glasgow-coma-scale`. Sólo escala de adultos; la pediátrica es otra adaptación.',
     url: 'https://www.glasgowcomascale.org/permissions/',
     evidence: 'primary (titular; página leída el 2026-10-27)',
   },
@@ -181,12 +184,15 @@ export const SCALE_LICENSE_NOTES = {
 };
 
 /**
- * Escalas cuyo contenido (ítems y respuestas) SÍ se carga, con evidencia PRIMARIA del titular (URL, fecha y cita).
- * Cada entrada es la entrada de `classifyContentLicense(…, overrides)`.
+ * Estado de licencia fijado con evidencia PRIMARIA del titular (URL, fecha y cita): entrada de
+ * `classifyContentLicense(…, overrides)`. `verified-free` carga el contenido; `pending-owner-decision` lo genera pero el cargador
+ * lo omite hasta que el propietario lo apruebe (`approvalKey`).
  */
 export const LICENSE_OVERRIDES = {
   'openEHR-EHR-OBSERVATION.glasgow_coma_scale.v1': {
-    status: 'verified-free',
+    status: 'pending-owner-decision',
+    approvalKey: 'glasgow-coma-scale',
+    approvalReason: 'El permiso del titular cubre «clinical care and clinical research at no cost»; falta que el propietario decida si un catálogo de terminología entra en ese uso y cómo trata el share-alike del arquetipo CC BY-SA.',
     quote: 'The Glasgow Coma Scale (GCS), GCS Aid, GCS-P score, GCS P-Age CT prognostic charts and GCS verbal score imputation tool may all be used for clinical care and clinical research at no cost. No license is required. The copywrite of Glasgow University (GCS), and Sir Graham Teasdale (GCS Aid, GCS-P, GCS-P Age CT prognostic charts and imputation tool) should be acknowledged.',
     url: 'https://www.glasgowcomascale.org/permissions/',
     checkedAt: '2026-10-27',

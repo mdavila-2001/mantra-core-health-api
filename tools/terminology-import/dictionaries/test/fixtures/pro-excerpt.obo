@@ -1,0 +1,422 @@
+format-version: 1.2
+data-version: 73.1
+date: 15:09:2026 15:44
+saved-by: dnatale
+auto-generated-by: PRO dB
+synonymtypedef: Gene-based "Synonyms based on current or previous gene name, ORF name, or ordered locus name." RELATED
+synonymtypedef: NC-IUPHAR "Official label of the IUPHAR Nomenclature Committee." EXACT
+synonymtypedef: PRO-common-name "Label appended to organism-specific terms in place of scientific name." EXACT
+synonymtypedef: PRO-org-label "Unique short label for PRO terms for display purposes; based on organism gene symbol." EXACT
+synonymtypedef: PRO-proteoform-ftid "Synonyms for proteoforms based on use of UniProtKb feature identifier (FTId) and positions and types of modifications or variations." EXACT
+synonymtypedef: PRO-proteoform-std "Synonyms for proteoforms based on use of UniProtKb accession, subsequence range, and positions and types of modifications or variations." EXACT
+synonymtypedef: PRO-short-label "Unique short label for PRO terms for display purposes; based on orthology or--if such is not asserted--on the organism gene symbol." EXACT
+synonymtypedef: PSI-MOD-label "Unique short label curated by PSI-MOD." EXACT
+synonymtypedef: Reactome-displayName "Name of protein entity used by Reactome." EXACT
+idspace: PR http://purl.obolibrary.org/obo/PR_
+idspace: BFO http://purl.obolibrary.org/obo/BFO_
+idspace: CHEBI http://purl.obolibrary.org/obo/CHEBI_
+idspace: CL http://purl.obolibrary.org/obo/CL_
+idspace: COB http://purl.obolibrary.org/obo/COB_
+idspace: DOID http://purl.obolibrary.org/obo/DOID_
+idspace: GNO http://purl.obolibrary.org/obo/GNO_
+idspace: GO http://purl.obolibrary.org/obo/GO_
+idspace: HOM http://purl.obolibrary.org/obo/HOM_
+idspace: ICEO http://purl.obolibrary.org/obo/ICEO_
+idspace: MA http://purl.obolibrary.org/obo/MA_
+idspace: MOD http://purl.obolibrary.org/obo/MOD_
+idspace: MONDO http://purl.obolibrary.org/obo/MONDO_
+idspace: MRO http://purl.obolibrary.org/obo/MRO_
+idspace: NCBITaxon http://purl.obolibrary.org/obo/NCBITaxon_
+idspace: OBI http://purl.obolibrary.org/obo/OBI_
+idspace: OGG http://purl.obolibrary.org/obo/OGG_
+idspace: RO http://purl.obolibrary.org/obo/RO_
+idspace: SO http://purl.obolibrary.org/obo/SO_
+idspace: DTO http://www.drugtargetontology.org/dto/DTO_
+idspace: NCBIGene http://www.ncbi.nlm.nih.gov/gene/
+idspace: HGNC http://www.genenames.org/cgi-bin/gene_symbol_report?hgnc_id=
+idspace: CGNC http://birdgenenames.org/cgnc/GeneReport?id=
+idspace: MGI http://www.informatics.jax.org/marker/MGI:
+idspace: MGI_ref http://www.informatics.jax.org/reference/MGI:
+idspace: MGI_allele http://www.informatics.jax.org/allele/MGI:
+idspace: EcoGene http://www.ecogene.org/gene/
+idspace: EcoCyc http://biocyc.org/ECOLI/NEW-IMAGE?object=
+idspace: SGD http://www.yeastgenome.org/locus/
+idspace: PomBase http://www.pombase.org/spombe/result/
+idspace: dictyBase http://dictybase.org/gene/
+idspace: FlyBase http://flybase.org/reports/
+idspace: RGD http://rgd.mcw.edu/rgdweb/report/gene/main.html?id=
+idspace: TAIR http://www.arabidopsis.org/servlets/TairObject?type=locus&name=
+idspace: Araport https://bar.utoronto.ca/thalemine/portal.do?externalids=
+idspace: WormBase http://www.wormbase.org/species/c_elegans/gene/
+idspace: ZFIN http://zfin.org/action/marker/view/
+idspace: UniProtKB http://purl.uniprot.org/uniprot/
+idspace: UniProtKB_VAR https://web.expasy.org/variant_pages/
+idspace: Reactome http://www.reactome.org/content/detail/
+idspace: IEDB_epitope https://www.iedb.org/epitope/
+idspace: PhosphoSitePlus http://www.phosphosite.org/siteAction.do?id=
+idspace: PMID http://www.ncbi.nlm.nih.gov/pubmed/
+idspace: OMA http://omabrowser.org/cgi-bin/gateway.pl?f=DisplayEntry&p2=orthologs&p1=
+idspace: BioGRID http://thebiogrid.org/
+idspace: IUPHAR http://www.guidetopharmacology.org/GRAC/
+idspace: IUPHARfam http://www.guidetopharmacology.org/GRAC/FamilyDisplayForward?familyId=
+idspace: IUPHARobj http://www.guidetopharmacology.org/GRAC/ObjectDisplayForward?objectId=
+idspace: Alzforum_mut http://www.alzforum.org/mutations/
+idspace: Pfam http://pfam.xfam.org/family/
+idspace: PRINTS http://www.bioinf.manchester.ac.uk/cgi-bin/dbbrowser/sprint/searchprintss.cgi?display_opts=Prints&queryform=false&prints_accn=
+idspace: HIstome_var_Hs http://www.actrec.gov.in/histome2/Human/histone_info.php?Dtype=variants&prot=
+idspace: HIstome_ptm_Hs http://www.actrec.gov.in/histome2/Human/ptm_sp.php?ptm_sp=
+idspace: HIstome_var_Mm http://www.actrec.gov.in/histome2/Mouse/histone_info.php?Dtype=variants&prot=
+idspace: HIstome_ptm_Mm http://www.actrec.gov.in/histome2/Mouse/ptm_sp.php?ptm_sp=
+idspace: HIstome_var_Rn http://www.actrec.gov.in/histome2/Rat/histone_info.php?Dtype=variants&prot=
+idspace: HIstome_ptm_Rn http://www.actrec.gov.in/histome2/Rat/ptm_sp.php?ptm_sp=
+idspace: UniCarbKB http://unicarbkb.org/structure/
+idspace: UniCarbFT http://unicarbkb.org/swissprotFT?feature=
+idspace: GlyTouCan https://glytoucan.org/Structures/Glycans/
+idspace: GlyGen https://www.glygen.org/protein/
+idspace: TDR http://repository.topdownproteomics.org/proteoforms/
+idspace: Ensembl http://www.ensembl.org/id/
+idspace: EnsemblBacteria http://www.ensemblgenomes.org/id/
+idspace: EnsemblMetazoa http://www.ensemblgenomes.org/id/
+idspace: Wikipedia https://en.wikipedia.org/wiki/
+idspace: GenBank https://www.ncbi.nlm.nih.gov/nuccore/
+idspace: GenPept https://www.ncbi.nlm.nih.gov/protein/
+idspace: RefSeq https://www.ncbi.nlm.nih.gov/protein/
+idspace: EMBL https://www.ebi.ac.uk/ena/data/view/
+idspace: EST https://www.ncbi.nlm.nih.gov/nucest/
+idspace: InterPro https://www.ebi.ac.uk/interpro/entry/
+idspace: PDB https://www.rcsb.org/structure/
+idspace: OMIM https://www.omim.org/entry/
+idspace: PIRSF https://proteininformationresource.org/cgi-bin/ipcSF?id=
+idspace: PANTHER http://www.pantherdb.org/panther/family.do?clsAccession=
+idspace: PID http://www.ndexbio.org/#/search?searchType=Networks&searchTermExpansion=false&searchString=
+idspace: IntAct https://www.ebi.ac.uk/intact/interaction/
+idspace: CP https://www.ebi.ac.uk/complexportal/complex/
+idspace: KinBase http://kinase.com/web/current/kinbase/genes/Subfamily/
+idspace: iPTMnet https://research.bioinformatics.udel.edu/iptmnet/entry/
+idspace: VectorBase https://www.vectorbase.org/id/
+idspace: ISBN https://catalog.loc.gov/vwebv/search?searchCode1=KNUM&searchType=2&searchArg1=
+idspace: IRO https://legacy.vectorbase.org/ontology-browser?cv=MIRO&t=IRO:
+idspace: MIRO https://legacy.vectorbase.org/ontology-browser?cv=MIRO&t=MIRO:
+idspace: Allergome https://www.allergome.org/script/dettaglio.php?id_molecule=
+default-namespace: protein
+remark: The PRotein Ontology is licensed under CC BY 4.0. Please see http://obofoundry.org/ontology/pr for details.
+remark: Use reasoner in Protege to see the correct hierarchy.
+ontology: pr
+property_value: http://purl.org/dc/terms/description "The PRotein Ontology (PRO) formally defines taxon-specific and taxon-neutral protein-related entities in three major areas: proteins related by evolution; proteins produced from a given gene; and protein-containing complexes." xsd:string
+property_value: http://purl.org/dc/terms/license http://creativecommons.org/licenses/by/4.0/
+property_value: http://purl.org/dc/terms/title "PRotein Ontology" xsd:string
+property_value: IAO:0000700 PR:000000001
+property_value: IAO:0000700 PR:000050098
+
+[Typedef]
+id: 1to1_ortholog_of
+name: 1to1_ortholog_of
+def: "If a and b are genes, a 1to1_ortholog_of b iff neither a nor b was duplicated after the speciation event that created them. If a and b are proteins, then a 1to1_ortholog_of b iff a has_gene_template some gene A and b has_gene_template some gene B and A 1to1_ortholog_of B." [PRO:DAN]
+comment: Definition is modeled after the definition in the Homology Ontology term HOM:0000020.
+is_transitive: true
+
+[Typedef]
+id: capable_of
+name: capable_of
+xref: RO:0002215
+is_transitive: false
+
+[Typedef]
+id: confers_resistance_to
+name: confers_resistance_to
+is_transitive: false
+
+[Typedef]
+id: derives_from
+name: derives_from
+xref: RO:0001000
+is_transitive: true
+
+[Typedef]
+id: expressed_in
+name: expressed_in
+xref: RO:0002206
+is_transitive: false
+
+[Typedef]
+id: has_component
+name: has_component
+xref: RO:0002180
+is_transitive: false
+
+[Typedef]
+id: has_constituent_monomer
+name: has_constituent_monomer
+def: "A relation that holds between a polymer and its constituent monomers. P has_constituent_monomer c if and only if P has_component multiple instances of c and each instance of c is covalently attached to another instance of c." [PRO:DAN]
+comment: The constituent monomers need not be covalently attached in an end-to-end manner; that is, polymers with internal connections (e.g., polyubiquitin) can use this relation, as can circular polymers (e.g., plasmids) and multi-branched polymers (e.g., glycans). This relation, as non-transitive, allows one to indicate the number of instances of c.
+xref: RO:0020337
+is_transitive: false
+is_a: has_component ! has_component
+
+[Typedef]
+id: has_gene_template
+name: has_gene_template
+def: "See document https://docs.google.com/document/d/15iVMtMyYbQSlvUDgn2XUaDzpwkB0USZI for full definition." [PRO:DAN]
+is_transitive: false
+is_a: RO:0002330
+
+[Typedef]
+id: has_part
+name: has_part
+xref: BFO:0000051
+is_transitive: true
+
+[Typedef]
+id: has_quality
+name: has_quality
+xref: RO:0000086
+is_transitive: false
+
+[Typedef]
+id: has_role
+name: has_role
+xref: RO:0000087
+is_transitive: false
+
+[Typedef]
+id: involved_in
+name: involved_in
+xref: RO:0002331
+is_transitive: false
+
+[Typedef]
+id: lacks_part
+name: lacks_part
+def: "A negation of the has_part relation." [PRO:DAN]
+is_transitive: false
+
+[Typedef]
+id: located_in
+name: located_in
+xref: RO:0001025
+is_transitive: true
+
+[Typedef]
+id: non-covalently_bound_to
+name: non-covalently_bound_to
+def: "A relation that holds between two distinct chemical entities that are held in close proximity to each other specifically via the force of non-covalent interactions. Such entities will colocalize at all times of the interaction." [PRO:DAN]
+xref: RO:0020339
+domain: CHEBI:24431 ! chemical entity
+range: CHEBI:24431 ! chemical entity
+is_symmetric: true
+is_transitive: false
+is_a: RO:0002436
+
+[Typedef]
+id: obsolete_has_modification
+name: obsolete has_modification
+def: "OBSOLETE." [PRO:DAN]
+comment: Made obsolete since the intent could be captured using existing relations.
+is_transitive: false
+is_obsolete: true
+
+[Typedef]
+id: obsolete_lacks_modification
+name: obsolete lacks_modification
+def: "OBSOLETE. Shortcut relation to indicate negation of the has_modification relation." [PRO:DAN]
+comment: Made obsolete since the intent could be captured using negation of existing relations.
+is_transitive: false
+is_obsolete: true
+
+[Typedef]
+id: in_taxon
+name: in_taxon
+xref: RO:0002162
+is_transitive: false
+
+[Typedef]
+id: output_of
+name: output_of
+xref: RO:0002353
+is_transitive: false
+
+[Typedef]
+id: part_of
+name: part_of
+xref: BFO:0000050
+is_transitive: true
+
+[Typedef]
+id: participates_in
+name: participates_in
+xref: RO:0000056
+is_transitive: false
+
+[Typedef]
+id: term_tracker_item
+name: term tracker item
+
+[Term]
+id: COB:0000013
+name: molecule
+def: "A material entity that consists of two or more atoms that are all connected via covalent bonds such that any atom can be transitively connected with any other atom." []
+
+[Term]
+id: PR:000018263
+name: amino acid chain
+def: "A molecule that consists of amino acid residues (unmodified amino-acid residues and/or modified amino-acid residues) linked by peptide bonds or derivatives of such bonds." [PRO:DAN, PRO:JSG]
+comment: Category=polymer.
+synonym: "peptide" NARROW [PRO:DAN]
+synonym: "polypeptide" NARROW [PRO:DAN]
+is_a: COB:0000013 ! molecule
+relationship: has_constituent_monomer CHEBI:33708 {minCardinality="2"} ! amino-acid residue
+
+[Term]
+id: PR:000000001
+name: protein
+def: "An amino acid chain that is canonically produced de novo by ribosome-mediated translation of a genetically-encoded mRNA, and any derivatives thereof." [PRO:DAN, PRO:WCB]
+comment: Note that the definition allows for experimentally-manipulated genes, and allows for artifically-produced derivatives that mimic those found naturally. Note also that the definition excludes protein complexes, which some also consider a protein. Those who wish to refer to a class representing both senses of the word are directed to PR:000064867 ("protein-containing molecular entity"). Proteins (in the sense defined here) that descended from a common ancestor can be classified into families and superfamilies composed of products of evolutionarily-related genes. The domain architecture of a protein is described by the order of its constituent domains. Proteins with the same domains in the same order are defined as homeomorphic [PRO:WCB].
+synonym: "native protein" NARROW [IEDB:BP]
+synonym: "natural protein" EXACT [PRO:DAN]
+is_a: PR:000018263 ! amino acid chain
+intersection_of: PR:000018263 ! amino acid chain
+intersection_of: has_gene_template SO:0001217 ! protein_coding_gene
+intersection_of: output_of GO:0006412 ! translation
+relationship: has_gene_template SO:0001217 ! protein_coding_gene
+relationship: has_part PR:000000001 ! protein
+relationship: output_of GO:0006412 ! translation
+
+[Term]
+id: PR:000003035
+name: cellular tumor antigen p53
+def: "A protein that is a translation product of the human TP53 gene or a 1:1 ortholog thereof." [PRO:CNA]
+comment: Category=gene.
+synonym: "antigen NY-CO-13" EXACT []
+synonym: "P53" RELATED Gene-based []
+synonym: "phosphoprotein p53" EXACT []
+synonym: "TP53" EXACT PRO-short-label [PRO:DNx]
+synonym: "Trp53" RELATED Gene-based []
+synonym: "tumor suppressor p53" EXACT []
+xref: PIRSF:PIRSF002089
+is_a: PR:000000001 ! protein
+
+[Term]
+id: PR:000003036
+name: cellular tumor antigen p53 isoform 1
+def: "A cellular tumor antigen p53 that is a translation product of some mRNA whose exon structure and start site selection renders it capable of giving rise to a protein with the amino acid sequence represented by UniProtKB:P04637-1 or a 1:1 ortholog thereof." [PRO:CNA]
+comment: Category=sequence.
+synonym: "TP53/iso:1" EXACT PRO-short-label [PRO:DNx]
+is_a: PR:000003035 ! cellular tumor antigen p53
+
+[Term]
+id: PR:000003037
+name: cellular tumor antigen p53 isoform 1 unmodified form
+def: "A cellular tumor antigen p53 isoform 1 that has not been subjected to any co- or post-translational residue modification or peptide bond cleavage." [PRO:CNA]
+comment: Category=modification.
+synonym: "TP53/iso:1/UnMod" EXACT PRO-short-label [PRO:DNx]
+synonym: "unmodified p53" EXACT [PMID:19339993]
+is_a: PR:000003036 ! cellular tumor antigen p53 isoform 1
+intersection_of: PR:000003036 ! cellular tumor antigen p53 isoform 1
+intersection_of: lacks_part PR:000025513 ! modified amino-acid residue
+disjoint_from: PR:000018264 ! proteolytic cleavage product
+relationship: lacks_part PR:000025513 ! modified amino-acid residue
+
+[Term]
+id: PR:000000008
+name: TGF-beta-like cystine-knot cytokine
+def: "A protein that has a core domain composition consisting of a signal peptide, a variable propeptide region and a Transforming growth factor beta like domain (Pfam:PF00019), which is a cystine-knot domain containing four conserved beta strands, S1-S4, which form two antiparallel beta sheets (SI-S2 and S3-S4) interconnected by three disulfide bridges in a knot-like topology. Cystines [II-V] and [III-VI] form a ring through which the remaining disulfide bond (Cys[I-IV]) penetrates. Insertion of different variable regions into this common motif has given rise to various subclasses of the growth factor cystine-knot domain." [PRO:CNA]
+comment: Category=family.
+synonym: "TGF-beta superfamily" RELATED []
+xref: PIRSF:PIRSF800009
+is_a: PR:000000001 ! protein
+
+[Term]
+id: PR:000000098
+name: growth/differentiation factor
+def: "A TGF-beta-like cystine-knot cytokine that is closely related to the BMP family. These are produced as dimeric precursors and undergo post-translational processing for activation, requiring cleavage to release the bioactive C-terminal peptide. GDFs act as signaling molecules during embryonic tendon/ligament formation." [PRO:CNA]
+comment: Category=family.
+is_a: PR:000000008 ! TGF-beta-like cystine-knot cytokine
+
+[Term]
+id: PR:000000281
+name: growth/differentiation factor 5
+def: "A growth/differentiation factor that is a translation product of the human GDF5 gene or a 1:1 ortholog thereof." [PRO:CNA]
+comment: Category=gene.
+synonym: "BMP-14" EXACT []
+synonym: "BMP14" RELATED Gene-based []
+synonym: "bone morphogenetic protein 14" EXACT []
+synonym: "Bp" RELATED Gene-based []
+synonym: "cartilage-derived morphogenetic protein 1" EXACT []
+synonym: "CDMP-1" EXACT []
+synonym: "CDMP1" RELATED Gene-based []
+synonym: "GDF-5" EXACT []
+synonym: "GDF5" EXACT PRO-short-label [PRO:DNx]
+synonym: "radotermin" EXACT []
+is_a: PR:000000098 ! growth/differentiation factor
+
+[Term]
+id: PR:000036194
+name: eukaryotic protein
+def: "A protein that is encoded in the genome of some Eukaryota." [PRO:DAN]
+synonym: "Eukaryota protein" EXACT [PRO:DAN]
+is_a: PR:000000001 ! protein
+intersection_of: PR:000000001 ! protein
+intersection_of: in_taxon NCBITaxon:2759 ! Eukaryota
+disjoint_from: PR:000036195 ! bacterial protein
+disjoint_from: PR:000036196 ! archaeal protein
+disjoint_from: PR:000036197 ! viral protein
+relationship: in_taxon NCBITaxon:2759 ! Eukaryota
+
+[Term]
+id: PR:000029032
+name: Mus musculus protein
+def: "A protein that is encoded in the genome of Mus musculus." [PRO:DAN]
+synonym: "mouse protein" EXACT PRO-short-label [PRO:DAN]
+is_a: PR:000036194 ! eukaryotic protein
+intersection_of: PR:000000001 ! protein
+intersection_of: in_taxon NCBITaxon:10090 ! Mus musculus
+relationship: in_taxon NCBITaxon:10090 ! Mus musculus
+
+[Term]
+id: PR:P43027
+name: growth/differentiation factor 5 (mouse)
+def: "A growth/differentiation factor 5 that is encoded in the genome of mouse." [OMA:P43027, PRO:DNx]
+comment: Category=organism-gene.
+synonym: "BMP-14 (mouse)" EXACT [UniProtKB:P43027]
+synonym: "Bmp14" RELATED Gene-based [UniProtKB:P43027]
+synonym: "bone morphogenetic protein 14 (mouse)" EXACT [UniProtKB:P43027]
+synonym: "Bp" RELATED Gene-based [UniProtKB:P43027]
+synonym: "Gdf-5" RELATED Gene-based [UniProtKB:P43027]
+synonym: "GDF-5 (mouse)" EXACT [UniProtKB:P43027]
+synonym: "Gdf5" RELATED Gene-based [UniProtKB:P43027]
+synonym: "mGDF5" EXACT PRO-short-label [PRO:DNx]
+xref: UniProtKB:P43027
+is_a: PR:000000281 ! growth/differentiation factor 5
+is_a: PR:000029032 ! Mus musculus protein
+intersection_of: PR:000000281 ! growth/differentiation factor 5
+intersection_of: in_taxon NCBITaxon:10090 ! Mus musculus
+relationship: has_gene_template MGI:95688 ! Gdf5 (mouse)
+relationship: in_taxon NCBITaxon:10090 ! Mus musculus
+
+[Term]
+id: PR:000000441
+name: growth/differentiation factor 5 sequence variant 5 (mouse)
+def: "A growth/differentiation factor 5 (mouse) that has a frameshift at the position equivalent to residue 376 of the amino acid sequence represented by UniProtKB:P43027." [PMID:8145850, PRO:CNA, PRO:DAN]
+comment: Category=organism-sequence. Note: Variant was found in a derivative of the A/J strain.
+synonym: "mGDF5/var:5" EXACT PRO-short-label [PRO:DNx]
+is_a: PR:P43027 ! growth/differentiation factor 5 (mouse)
+relationship: in_taxon NCBITaxon:10090 ! Mus musculus
+
+[Term]
+id: Araport:AT1G01010
+name: NAC001 (Arabidopsis thaliana)
+namespace: gene
+def: "A protein coding gene NAC001 in Arabidopsis thaliana." [PRO:DNx]
+comment: Category=external.
+is_a: SO:0001217 ! protein_coding_gene
+relationship: in_taxon NCBITaxon:3702 ! Arabidopsis thaliana
+
+[Term]
+id: Araport:AT1G01020
+name: ARV1 (Arabidopsis thaliana)
+namespace: gene
+def: "A protein coding gene ARV1 in Arabidopsis thaliana." [PRO:DNx]
+comment: Category=external.
+is_a: SO:0001217 ! protein_coding_gene
+relationship: in_taxon NCBITaxon:3702 ! Arabidopsis thaliana
+

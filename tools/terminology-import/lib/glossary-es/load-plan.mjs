@@ -128,6 +128,22 @@ export const CODE_SYSTEMS = {
       },
     ]),
   ),
+  'nci-diccionario-cancer-es': {
+    sourceCode: 'NCI_GLOSSARY',
+    sourceName: 'Diccionarios del Instituto Nacional del Cáncer (NCI, EE. UU.)',
+    owner: 'National Cancer Institute (NIH)',
+    officialUrl: 'https://www.cancer.gov/espanol/publicaciones/diccionario',
+    name: 'Diccionario de cáncer del NCI (en español)',
+    version: null,
+  },
+  'nci-diccionario-genetica-es': {
+    sourceCode: 'NCI_GLOSSARY',
+    sourceName: 'Diccionarios del Instituto Nacional del Cáncer (NCI, EE. UU.)',
+    owner: 'National Cancer Institute (NIH)',
+    officialUrl: 'https://www.cancer.gov/espanol/publicaciones/diccionario',
+    name: 'Diccionario de genética del NCI (en español)',
+    version: null,
+  },
   'loinc-es': {
     sourceCode: 'REGENSTRIEF_LOINC_ES',
     sourceName: 'LOINC — variante lingüística en castellano (Regenstrief)',

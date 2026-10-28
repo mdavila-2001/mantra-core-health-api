@@ -16,7 +16,7 @@
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { HttpClient, nowIso, sha256File, writeJson } from '../lib/glossary-es/common.mjs';
-import { ABBREVIATION_SOURCE, FMA_SOURCE, HGNC_SOURCE, OBO_SOURCES, ORGANISM_SOURCES } from './lib/sources.mjs';
+import { ABBREVIATION_SOURCE, ABREMES_SOURCE, C7_OBO_SOURCES, EMDN_SOURCE, FMA_SOURCE, HGNC_SOURCE, MESH_SOURCE, OBO_SOURCES, ORGANISM_SOURCES } from './lib/sources.mjs';
 import { SOURCES_DIR, MANIFEST_PATH } from './lib/paths.mjs';
 
 const args = process.argv.slice(2);
@@ -25,7 +25,7 @@ const only = args.filter((a) => !a.startsWith('--'));
 
 function fileList() {
   const out = [];
-  for (const s of [...OBO_SOURCES, FMA_SOURCE, HGNC_SOURCE, ABBREVIATION_SOURCE]) for (const f of s.files) out.push({ sourceId: s.id, ...f });
+  for (const s of [...OBO_SOURCES, FMA_SOURCE, HGNC_SOURCE, ABBREVIATION_SOURCE, ...C7_OBO_SOURCES, MESH_SOURCE, EMDN_SOURCE, ABREMES_SOURCE]) for (const f of s.files) out.push({ sourceId: s.id, ...f });
   for (const f of Object.values(ORGANISM_SOURCES.files)) out.push({ sourceId: ORGANISM_SOURCES.id, ...f });
   return only.length ? out.filter((f) => only.includes(f.sourceId)) : out;
 }

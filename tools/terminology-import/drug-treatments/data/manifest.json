@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-24T00:49:57.917Z",
-  "cache": "/home/user/glossary-data-build/cache/drug-treatments",
+  "generatedAt": "2026-10-27T23:48:48.634Z",
+  "cache": "/tmp/claude-0/-home-user/d54e8fca-588a-538f-8209-b411160eadd8/scratchpad/build-C6/cache/drug-treatments",
   "entries": {
     "dhimmel__indications@11d535ba0884": {
       "repo": "https://github.com/dhimmel/indications.git",
       "commit": "11d535ba0884ee56c3cd5756fdfb4985f313bd80",
       "committedAt": "2016-03-15T12:38:50-07:00",
-      "retrievedAt": "2026-10-24T00:49:53.353Z",
+      "retrievedAt": "2026-10-27T23:48:43.473Z",
       "sources": [
         "labeledin",
         "pharmacotherapydb"
@@ -38,7 +38,7 @@
       "repo": "https://github.com/olegursu/drugtarget.git",
       "commit": "64630f7c2bc050f5af0a7cac7b08e778125284bc",
       "committedAt": "2016-11-16T08:48:25-07:00",
-      "retrievedAt": "2026-10-24T00:49:54.429Z",
+      "retrievedAt": "2026-10-27T23:48:44.554Z",
       "sources": [
         "drugcentral-2016"
       ],
@@ -65,7 +65,7 @@
       "repo": "https://github.com/SuLab/DrugMechDB.git",
       "commit": "aef224217071216748740c10faeb6db8e3f15901",
       "committedAt": "2026-06-02T18:25:55-07:00",
-      "retrievedAt": "2026-10-24T00:49:55.676Z",
+      "retrievedAt": "2026-10-27T23:48:46.008Z",
       "sources": [
         "drugmechdb"
       ],
@@ -88,7 +88,7 @@
       "repo": "https://github.com/monarch-initiative/maxo-annotations.git",
       "commit": "42edd966faac5229ce7c35fc3848f2e6b3d45bda",
       "committedAt": "2026-08-18T11:41:20-06:00",
-      "retrievedAt": "2026-10-24T00:49:56.621Z",
+      "retrievedAt": "2026-10-27T23:48:47.114Z",
       "sources": [
         "maxo"
       ],
@@ -107,7 +107,7 @@
       "repo": "https://github.com/monarch-initiative/mondo.git",
       "commit": "a645ab571f5b0881a184c28b84d0f9050432dc53",
       "committedAt": "2026-10-22T17:12:17-04:00",
-      "retrievedAt": "2026-10-24T00:49:57.867Z",
+      "retrievedAt": "2026-10-27T23:48:48.613Z",
       "sources": [
         "mondo"
       ],

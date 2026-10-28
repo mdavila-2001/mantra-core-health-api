@@ -1,0 +1,25 @@
+=== RESUMEN CIMA ===
+{
+  "source": "aemps-cima",
+  "endpoint": "https://cima.aemps.es/cima/rest",
+  "retrievedAt": "2026-10-27T23:08:05.177Z",
+  "reportedTotal": 25502,
+  "medicamentosUnicos": 25502,
+  "medicamentosSinVtm": 2,
+  "vtm": 2381,
+  "productos": 25500,
+  "productosSinDetalle": 0,
+  "conDefinicion": 2278,
+  "conImagen": 1113,
+  "conAtc": 2381,
+  "seccionesFichaTecnica": 13219,
+  "seccionesVaciasO404": 467,
+  "http": {
+    "requests": 39314,
+    "retries": 0,
+    "cacheHits": 0,
+    "failures": 0,
+    "bytes": 471581707
+  },
+  "segundos": 2553
+}

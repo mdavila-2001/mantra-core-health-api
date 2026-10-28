@@ -1,0 +1,97 @@
+format-version: 1.2
+data-version: chebi/256
+date: 06:10:2026 11:26
+saved-by: chebi
+subsetdef: 1:STAR "Preliminary entries"
+subsetdef: 2:STAR "Annotated by 3rd party"
+subsetdef: 3:STAR "Manually annotated by ChEBI Team"
+synonymtypedef: BRAND:NAME "BRAND NAME"
+synonymtypedef: http://purl.obolibrary.org/obo/chebi/INN "INN"
+synonymtypedef: IUPAC:NAME "IUPAC NAME"
+default-namespace: chebi_ontology
+idspace: chemrof https://w3id.org/chemrof/ 
+idspace: foaf http://xmlns.com/foaf/0.1/ 
+idspace: oboInOwl http://www.geneontology.org/formats/oboInOwl# 
+idspace: terms http://purl.org/dc/terms/ 
+remark: ChEBI subsumes and replaces the Chemical Ontology first. This ontology was developed by Michael Ashburner and Pankaj Jaiswal. Data was cuarated by The ChEBI Curation Team. For any queries contact chebi-help@ebi.ac.uk
+ontology: chebi_lite
+property_value: foaf:homepage "https://www.ebi.ac.uk/chebi" xsd:anyURI
+property_value: owl:versionInfo "256" xsd:string
+property_value: terms:description "Chemical Entities of Biological Interest, also known as ChEBI, is a chemical database and ontology of molecular entities focused on 'small' chemical compounds, that is part of the Open Biomedical Ontologies (OBO) effort at the European Bioinformatics Institute (EBI)." xsd:string
+property_value: terms:license https://creativecommons.org/licenses/by/4.0/
+property_value: terms:title "ChEBI Ontology" xsd:string
+
+[Term]
+id: CHEBI:103210
+name: hexahydrophthalic anhydride
+def: "A cyclic dicarboxylic anhydride that is the cyclic anhydride of hexahydrophthalic acid." []
+subset: 3:STAR
+is_a: CHEBI:36609 ! cyclic dicarboxylic anhydride
+is_a: CHEBI:47022 ! tetrahydrofurandione
+relationship: RO:0000087 CHEBI:50904 ! has role allergen
+
+[Term]
+id: CHEBI:116735
+name: benzocaine
+alt_id: CHEBI:3030
+def: "A benzoate ester having 4-aminobenzoic acid as the acid component and ethanol as the alcohol component. A surface anaesthetic, it is used to suppress the gag reflex, and as a lubricant and topical anaesthetic on the larynx, mouth, nasal cavity, respiratory tract, oesophagus, rectum, urinary tract, and vagina." []
+subset: 3:STAR
+is_a: CHEBI:36054 ! benzoate ester
+is_a: CHEBI:48975 ! substituted aniline
+relationship: RO:0000087 CHEBI:139492 ! has role sensitiser
+relationship: RO:0000087 CHEBI:35480 ! has role analgesic
+relationship: RO:0000087 CHEBI:38867 ! has role anaesthetic
+relationship: RO:0000087 CHEBI:48425 ! has role topical anaesthetic
+relationship: RO:0000087 CHEBI:50177 ! has role dermatologic drug
+relationship: RO:0000087 CHEBI:50904 ! has role allergen
+relationship: RO:0000087 CHEBI:59683 ! has role antipruritic drug
+relationship: RO:0000087 CHEBI:65023 ! has role anti-asthmatic agent
+relationship: RO:0000087 CHEBI:67079 ! has role anti-inflammatory agent
+relationship: RO:0000087 CHEBI:74518 ! has role anti-obesity agent
+relationship: RO:0000087 CHEBI:747329 ! has role lubricant
+relationship: RO:0000087 CHEBI:77715 ! has role nasal decongestant
+
+[Term]
+id: CHEBI:134498
+name: (4R)-limonene 1-hydroperoxide
+def: "(4<i>R</i>)-Limonene hydroperoxide where the hydroperoxy group is located at position 1 of the limonene skeleton; one of the two main allergenic hydroperoxides formed by autoxidation of (4<i>R</i>)-limonene." []
+subset: 3:STAR
+is_a: CHEBI:134497 ! (4R)-limonene hydroperoxide
+relationship: RO:0000087 CHEBI:50904 ! has role allergen
+
+[Term]
+id: CHEBI:143231
+name: carbohydrate allergen
+def: "Any carbohydrate, carbohydrate derivative or derived substituent group which causes the onset of an allergic reaction." []
+subset: 3:STAR
+is_a: CHEBI:50904 ! allergen
+
+[Term]
+id: CHEBI:50904
+name: allergen
+def: "A chemical compound, or part thereof, which causes the onset of an allergic reaction by interacting with any of the molecular pathways involved in an allergy." []
+subset: 3:STAR
+is_a: CHEBI:52209 ! aetiopathogenetic role
+
+[Term]
+id: CHEBI:52209
+name: aetiopathogenetic role
+def: "A role played by the molecular entity or part thereof which causes the development of a pathological process." []
+subset: 3:STAR
+is_a: CHEBI:24432 ! biological role
+
+[Term]
+id: CHEBI:88184
+name: metal allergen
+def: "Any metal which causes the onset of an allergic reaction." []
+subset: 3:STAR
+is_a: CHEBI:33521 ! metal atom
+relationship: RO:0000087 CHEBI:50904 ! has role allergen
+
+[Term]
+id: CHEBI:88188
+name: drug allergen
+def: "Any drug which causes the onset of an allergic reaction." []
+subset: 3:STAR
+is_a: CHEBI:23888 ! drug
+is_a: CHEBI:50904 ! allergen

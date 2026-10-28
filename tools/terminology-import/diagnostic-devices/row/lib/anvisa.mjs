@@ -98,7 +98,8 @@ function commonFields(lines, ctx) {
       : {}),
     validity: textOrNull(first.VALIDADE_REGISTRO_CADASTRO),
     dataUpdatedAt: anvisaUpdateStamp(first.DT_ATUALIZACAO_DADO),
-    mirror: ctx.mirror,
+    ...(ctx.mirror ? { mirror: ctx.mirror } : {}),
+    ...(ctx.official ? { official: ctx.official } : {}),
     officialPortal: ctx.officialPortal,
   };
   const classe = textOrNull(first.CLASSE_RISCO);

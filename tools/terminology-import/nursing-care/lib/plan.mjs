@@ -53,7 +53,7 @@ export const SOURCES = {
     name: 'Omaha System (Omaha System Partnership / Martin, 2005)',
     owner: 'Omaha System (Health Connections Press; términos y estructura en el dominio público desde 1975)',
     officialUrl: 'https://www.omahasystem.org/',
-    license: `Dominio público para términos, definiciones y códigos (FAQ oficial, pregunta 1); deben usarse con la estructura del libro de 2005 y citarlo o citar el sitio: ${OMAHA_CITATION} Definiciones y signos/síntomas de 18 problemas: Minnesota Omaha System Users Group (2010), «may be used without permission», citando a los autores.`,
+    license: `Dominio público para términos, definiciones y códigos (FAQ oficial, pregunta 1); deben usarse con la estructura del libro de 2005 y citarlo o citar el sitio: ${OMAHA_CITATION} Definiciones y signos/síntomas de 18 problemas: Minnesota Omaha System Users Group (2010), «may be used without permission», citando a los autores. DECISIÓN DEL PROPIETARIO pendiente: la FAQ pide contactar a la editorial a quien vende software basado en Omaha; el cargador omite este code system salvo --owner-approved=omaha-system.`,
     csName: 'Omaha System — esquema de clasificación de problemas, esquema de intervenciones y escala de calificación de resultados (PRSO)',
   },
   [REGISTRY_CODE_SYSTEM]: {
@@ -122,6 +122,7 @@ export function propertiesFor(row) {
     // lo justo para ubicar la fila en la fuente (el resto cuelga del arquetipo por PART_OF).
     ...js('nursing-provenance', row.kind === 'node' || row.kind === 'value' ? { source: p.source, sourceId: `${row.archetypeId}::${row.atCode}`, version: p.version, commit: p.commit, path: p.path, uri: p.uri } : p),
   ];
+  if (row.ownerApproval || row.contentOwnerApproval) out.push(prop(row, 'owner_approval_required', 'string', row.ownerApproval ?? row.contentOwnerApproval));
   if (row.codeSystem === OMAHA_CODE_SYSTEM) {
     // la procedencia completa va en `omaha-provenance`; `nursing-provenance` (pensada para CKM) sobra
     out.splice(0, out.length, ...out.filter((x) => x.code !== 'nursing-provenance'));

@@ -1,0 +1,51 @@
+=== Wikidata + Commons → imágenes del glosario ===
+[wikidata] P4229 (ICD-10-CM) + P18: 2056 filas
+[wikidata] P494 (CIE-10 (OMS)) + P18: 1666 filas
+[wikidata] P486 (MeSH descriptor ID) + P18: 11118 filas
+[wikidata] P267 (código ATC) + P18: 358 filas
+[wikidata] P4338 (LOINC) + P18: 38 filas
+[wikidata] P267 (código ATC) + P117: 3356 filas
+[commons] 1000/13591 (69s)
+[commons] 2000/13591 (188s)
+[commons] 3000/13591 (308s)
+[commons] 4000/13591 (428s)
+[commons] 5000/13591 (549s)
+[commons] 6000/13591 (666s)
+[commons] 7000/13591 (790s)
+[commons] 8000/13591 (909s)
+[commons] 9000/13591 (1028s)
+[commons] 10000/13591 (1149s)
+[commons] 11000/13591 (1269s)
+[commons] 12000/13591 (1390s)
+[commons] 13000/13591 (1510s)
+[commons] 13591/13591 (1615s)
+{
+  "source": "wikidata-commons",
+  "retrievedAt": "2026-10-27T23:26:39.349Z",
+  "sparql": "https://query.wikidata.org/sparql",
+  "perQuery": {
+    "P4229/P18": 2056,
+    "P494/P18": 1666,
+    "P486/P18": 11118,
+    "P267/P18": 358,
+    "P4338/P18": 38,
+    "P267/P117": 3356
+  },
+  "uniqueFiles": 13591,
+  "rows": 18590,
+  "descartadasSinLicenciaLibre": 2,
+  "sinMetadatosCommons": 0,
+  "license": "Datos de Wikidata: CC0. Cada imagen: la licencia de su archivo en Commons (campo imageLicense), con atribución obligatoria según la licencia.",
+  "http": {
+    "requests": 276,
+    "retries": 27,
+    "cacheHits": 3,
+    "failures": 0,
+    "bytes": 38690782
+  },
+  "segundos": 1645
+}
+
+real	27m25.255s
+user	0m2.640s
+sys	0m0.442s

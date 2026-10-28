@@ -28,7 +28,18 @@ export const TERM_LAYERS = [
   'wikidata-anatomia',
   'loinc-es',
   'inlasa-aranceles',
+  'nci-diccionario-cancer-es',
+  'nci-diccionario-genetica-es',
 ];
+
+/**
+ * Capas por omisión. Con `GLOSSARY_CIE_FULL=1` se agrega `cie10es-procedimientos` (78 948 códigos
+ * ICD-10-PCS en castellano, sin definición) y `isGlossaryDxLevel` deja pasar todos los niveles de
+ * diagnóstico. Es una decisión de producto (ver README): por omisión sigue como estaba.
+ */
+export function defaultTermLayers() {
+  return process.env.GLOSSARY_CIE_FULL === '1' ? [...TERM_LAYERS, 'cie10es-procedimientos'] : TERM_LAYERS;
+}
 
 /** Aristas de Wikidata (enfermedad → síntoma, medicamento, especialidad…); ver `wikidata-relations.mjs`. */
 export const RELATION_EDGES_LAYER = 'wikidata-relaciones';
@@ -41,7 +52,7 @@ const LAYER_FILTERS = {
   'cie10es-diagnosticos': (row) => isGlossaryDxLevel(row.code),
 };
 
-export function loadCorpus({ layers = TERM_LAYERS, log = console.warn } = {}) {
+export function loadCorpus({ layers = defaultTermLayers(), log = console.warn } = {}) {
   const imagesPath = ndjsonPath('wikidata-images');
   const idx = existsSync(imagesPath) ? indexImages(readNdjson(imagesPath)) : new Map();
   const rows = [];

@@ -26,6 +26,23 @@ import {
 const http = new HttpClient({ concurrency: 1, minDelayMs: 1000 });
 const CACHE = cacheDir('wikidata');
 
+/**
+ * WDQS corta una consulta que pasa de 60 s a mitad de la respuesta (200 con el
+ * JSON truncado y el texto de la consulta pegado al final). `getJsonCached` no
+ * cachea lo que no parsea, así que se reintenta con espera creciente.
+ */
+async function sparqlCached(url, cachePath, attempts = 3) {
+  for (let i = 1; ; i++) {
+    try {
+      return await http.getJsonCached(url, cachePath);
+    } catch (err) {
+      if (!(err instanceof SyntaxError) || i >= attempts) throw err;
+      console.warn(`[wikidata] respuesta SPARQL truncada o inválida (intento ${i}/${attempts}): ${err.message}`);
+      await new Promise((r) => setTimeout(r, 30_000 * i));
+    }
+  }
+}
+
 async function main() {
   const t0 = Date.now();
   const retrievedAt = nowIso();
@@ -42,7 +59,7 @@ async function main() {
   const perQuery = {};
   for (const [prop, imgProp] of queries) {
     const url = `${SPARQL_ENDPOINT}?format=json&query=${encodeURIComponent(sparqlFor(prop, imgProp))}`;
-    const json = await http.getJsonCached(url, join(CACHE, `sparql-${prop}-${imgProp}.json`));
+    const json = await sparqlCached(url, join(CACHE, `sparql-${prop}-${imgProp}.json`));
     const rows = sparqlBindings(json, prop, imgProp).filter((r) => r.code && r.file);
     perQuery[`${prop}/${imgProp}`] = rows.length;
     raw.push(...rows);

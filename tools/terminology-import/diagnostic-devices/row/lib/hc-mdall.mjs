@@ -18,7 +18,12 @@ import { isoDateOrNull, makeRow, textOrNull } from './row.mjs';
 const ROMAN = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV' };
 
 /** Índices por clave para unir licencias, compañías e identificadores. */
-export function indexMdall({ activeLicences, archiveLicences, companies }) {
+export function indexMdall({
+  activeLicences,
+  archiveLicences,
+  companies,
+  devices = [],
+}) {
   const licences = new Map();
   for (const l of archiveLicences)
     licences.set(l.original_licence_no, { ...l, file: 'archive' });
@@ -26,7 +31,8 @@ export function indexMdall({ activeLicences, archiveLicences, companies }) {
   for (const l of activeLicences)
     licences.set(l.original_licence_no, { ...l, file: 'active' });
   const companyById = new Map(companies.map((c) => [c.company_id, c]));
-  return { licences, companyById };
+  const deviceNames = new Map(devices.map((d) => [d.device_id, d.trade_name]));
+  return { licences, companyById, deviceNames };
 }
 
 function licenceFields(licence, company, ctx) {
@@ -79,7 +85,8 @@ function licenceExtra(licence, company, ctx) {
       ? { licenceEndDate: isoDateOrNull(licence.end_date) }
       : {}),
     ...(address ? { manufacturerAddress: address } : {}),
-    mirror: ctx.mirror,
+    ...(ctx.mirror ? { mirror: ctx.mirror } : {}),
+    ...(ctx.official ? { official: ctx.official } : {}),
     officialPortal: ctx.officialPortal,
   };
 }
@@ -114,12 +121,24 @@ export function* mdallRows(index, identifiers, ctx, stats = {}) {
       stats.withoutCompany += 1;
       continue;
     }
+    // El archivo oficial de `device` trae el nombre comercial de cada
+    // dispositivo (`trade_name`): es la marca; el nombre de la licencia queda
+    // en `extra.licenceName`.
+    const tradeName = textOrNull(index.deviceNames?.get(d.device_id));
+    const fields = licenceFields(licence, company, ctx);
+    if (tradeName !== null) {
+      stats.withDeviceTradeName = (stats.withDeviceTradeName ?? 0) + 1;
+      if (tradeName !== fields.brandName) fields.licenceName = fields.brandName;
+      fields.brandName = tradeName;
+    }
+    const { licenceName, ...common } = fields;
     yield makeRow({
       source: 'hc-mdall',
       sourceRecordId: id,
       model: textOrNull(d.device_identifier),
-      ...licenceFields(licence, company, ctx),
+      ...common,
       extra: {
+        ...(licenceName ? { licenceName } : {}),
         deviceId: d.device_id,
         ...(isoDateOrNull(d.first_licence_dt)
           ? { deviceFirstLicenceDate: isoDateOrNull(d.first_licence_dt) }

@@ -35,7 +35,7 @@
     "version": "2026",
     "concepts": 966,
     "designations": 2653,
-    "properties": 11820,
+    "properties": 12786,
     "isA": 1037,
     "maps": 0,
     "glossaryMembers": 0
@@ -98,5 +98,5 @@
       "remappedIds": 0
     }
   ],
-  "segundos": 9
+  "segundos": 10
 }

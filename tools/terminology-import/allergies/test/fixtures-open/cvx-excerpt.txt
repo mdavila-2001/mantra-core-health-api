@@ -1,0 +1,8 @@
+19        |BCG|Bacillus Calmette-Guerin vaccine||Active|False|2010/05/28
+27        |botulinum antitoxin|botulinum antitoxin||Active|True|2020/09/04
+01        |DTP|diphtheria, tetanus toxoids and pertussis vaccine||Inactive|False|2010/05/28
+111       |Influenza, live, trivalent, intranasal, PF|Influenza, live, trivalent, intranasal, preservative free|HCP administered, trivalent code reactivated for 2024/2025 season|Active|False|2025/07/15
+75        |Vaccinia (smallpox, monkeypox), live|Vaccinia (smallpox, monkeypox) vaccine, live||Active|False|2025/11/19
+998       |no vaccine administered|no vaccine administered|Code 998 was added for use in VXU HL7 messages where the OBX segment is nested with the RXA segment, but the message does not contain information about a vaccine administration. An example of this use is to report the vaccines due next for a patient when no vaccine administration is being reported.|Inactive|True|2023/03/09
+999       |unknown|unknown vaccine or immune globulin|This CVX code has little utility and should rarely be used.|Inactive|True|2020/10/27
+500       |COVID-19 Non-US Vaccine, UNSPECIFIED|SARS-COV-2 (COVID-19) Non-US Vaccine, UNSPECIFIED|Unspecified code to be used to record historic Non-US COVID-19 administration.  May be used if the specific product or CVX code is not known.|Non-US|False|2025/09/09

@@ -1,0 +1,51 @@
+=== MedlinePlus en español → glosario ES ===
+[medlineplus] temas: 2033 en el XML; 1016 en español
+[medlineplus:pruebas] 50/302 (52s)
+[medlineplus:pruebas] 100/302 (105s)
+[medlineplus:pruebas] 150/302 (158s)
+[medlineplus:pruebas] 200/302 (211s)
+[medlineplus:pruebas] 250/302 (264s)
+[medlineplus:pruebas] 300/302 (318s)
+[medlineplus:pruebas] 302/302 (320s)
+{
+  "source": "nlm-medlineplus-es",
+  "retrievedAt": "2026-10-27T23:09:07.591Z",
+  "topicsXml": {
+    "url": "https://medlineplus.gov/xml/mplus_topics_2026-10-27.xml",
+    "sha256": "256eacdbb4dc480cd8a6b299fbebdba99b77e1d400a757c7ecf343b52b8db336",
+    "topicsInXml": 2033,
+    "spanishTopics": 1016,
+    "byCategory": {
+      "other": 126,
+      "disease": 770,
+      "signs-symptoms": 38,
+      "treatment": 28,
+      "diagnostic-test": 18,
+      "procedure": 36
+    },
+    "withDefinition": 1011
+  },
+  "labGuides": {
+    "indexUrl": "https://medlineplus.gov/spanish/pruebas-de-laboratorio/",
+    "linksInIndex": 302,
+    "rows": 302,
+    "skippedWithoutStructure": [],
+    "byCategory": {
+      "lab": 162,
+      "diagnostic-test": 134,
+      "other": 6
+    }
+  },
+  "http": {
+    "requests": 305,
+    "retries": 0,
+    "cacheHits": 0,
+    "failures": 0,
+    "bytes": 43386995
+  },
+  "segundos": 325
+}
+
+real	5m25.314s
+user	0m2.369s
+sys	0m1.346s

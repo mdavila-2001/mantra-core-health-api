@@ -1,0 +1,7 @@
+ABRYSVO|RSV, bivalent, protein subunit RSVpreF, diluent reconstituted, 0.5 mL, PF|305       |Pfizer, Inc|PFR       |Active|Active|2023/07/12|
+ACAM2000|Vaccinia (smallpox, monkeypox), live|75        |Emergent BioSolutions|MIP       |Active|Active|2022/06/10|
+ACAM2000|Vaccinia (smallpox, monkeypox), live|75        |Acambis, Inc|ACA       |Inactive|Inactive|2010/05/28|
+ACTHIB|Hib (PRP-T)|48        |Sanofi Pasteur|PMC       |Active|Active|2010/05/28|
+DRYVAX|Vaccinia (smallpox, monkeypox), live|75        ||          |Inactive|Inactive|2010/09/01|
+HIBERIX|Hib (PRP-T)|48        |GlaxoSmithKline|SKB       |Active|Active|2010/05/28|
+OMNIHIB|Hib (PRP-T)|48        ||          |Inactive|Inactive|2010/09/01|

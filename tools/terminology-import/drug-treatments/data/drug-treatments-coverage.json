@@ -1,5 +1,5 @@
 {
-  "assertions": 18032,
+  "assertions": 341019,
   "byType": {
     "labeledin:expert-label-indication": {
       "n": 1334,
@@ -40,6 +40,118 @@
     "maxo:contraindicated": {
       "n": 1,
       "polarity": "negative"
+    },
+    "medrt:may_prevent": {
+      "n": 2789,
+      "polarity": "positive"
+    },
+    "medrt:may_treat": {
+      "n": 15507,
+      "polarity": "positive"
+    },
+    "medrt:may_diagnose": {
+      "n": 158,
+      "polarity": "diagnostic"
+    },
+    "medrt:CI_with": {
+      "n": 11548,
+      "polarity": "negative"
+    },
+    "chembl:indication-phase-2": {
+      "n": 22345,
+      "polarity": "investigational"
+    },
+    "chembl:indication-phase-4": {
+      "n": 8683,
+      "polarity": "positive"
+    },
+    "chembl:indication-phase-3": {
+      "n": 14779,
+      "polarity": "investigational"
+    },
+    "chembl:indication-phase-1": {
+      "n": 13034,
+      "polarity": "investigational"
+    },
+    "chembl:indication-phase-0.5": {
+      "n": 1090,
+      "polarity": "investigational"
+    },
+    "chembl:indication-phase-unknown": {
+      "n": 124,
+      "polarity": "investigational"
+    },
+    "drugcentral:indication": {
+      "n": 9681,
+      "polarity": "positive"
+    },
+    "drugcentral:reduce-risk": {
+      "n": 1,
+      "polarity": "positive"
+    },
+    "drugcentral:contraindication": {
+      "n": 26851,
+      "polarity": "negative"
+    },
+    "drugcentral:off-label-use": {
+      "n": 1981,
+      "polarity": "positive"
+    },
+    "drugcentral:symptomatic-treatment": {
+      "n": 2,
+      "polarity": "positive"
+    },
+    "drugcentral:diagnosis": {
+      "n": 1,
+      "polarity": "diagnostic"
+    },
+    "wikidata:P2175": {
+      "n": 6661,
+      "polarity": "positive"
+    },
+    "wikidata:P2176": {
+      "n": 6845,
+      "polarity": "positive"
+    },
+    "eeml:recommendation": {
+      "n": 1068,
+      "polarity": "positive"
+    },
+    "ema:therapeutic-area-authorised": {
+      "n": 2514,
+      "polarity": "positive"
+    },
+    "opentargets:ema-human-drugs-indication": {
+      "n": 2331,
+      "polarity": "positive"
+    },
+    "civic:predictive-does-not-support-resistance": {
+      "n": 273,
+      "polarity": "conditional"
+    },
+    "civic:predictive-supports-resistance": {
+      "n": 950,
+      "polarity": "conditional"
+    },
+    "civic:predictive-supports-sensitivity-response": {
+      "n": 1700,
+      "polarity": "conditional"
+    },
+    "civic:predictive-does-not-support-sensitivity-response": {
+      "n": 193,
+      "polarity": "conditional"
+    },
+    "civic:predictive-supports-adverse-response": {
+      "n": 15,
+      "polarity": "conditional"
+    },
+    "civic:predictive-supports-reduced-sensitivity": {
+      "n": 16,
+      "polarity": "conditional"
+    },
+    "clinicaltrials:studied-in-registered-study": {
+      "n": 171847,
+      "polarity": "investigational"
     }
   },
   "bySource": {
@@ -47,11 +159,23 @@
     "pharmacotherapydb": 1388,
     "drugcentral-2016": 9094,
     "drugmechdb": 4662,
-    "maxo": 38
+    "maxo": 38,
+    "medrt": 30002,
+    "chembl": 60055,
+    "drugcentral": 38517,
+    "wikidata": 13506,
+    "eeml": 1068,
+    "ema": 2514,
+    "opentargets": 2331,
+    "civic": 3147,
+    "clinicaltrials": 171847
   },
   "byPolarity": {
-    "positive": 17788,
-    "negative": 244
+    "positive": 75851,
+    "negative": 38643,
+    "diagnostic": 159,
+    "investigational": 223219,
+    "conditional": 3147
   },
   "passes": [
     {
@@ -63,7 +187,7 @@
         "drugmechdb"
       ],
       "assertions": 17994,
-      "newPairs": 13939
+      "newPairs": 13926
     },
     {
       "number": 2,
@@ -72,14 +196,51 @@
       ],
       "assertions": 38,
       "newPairs": 33
+    },
+    {
+      "number": 6,
+      "sources": [
+        "medrt"
+      ],
+      "assertions": 30002,
+      "newPairs": 12766
+    },
+    {
+      "number": 7,
+      "sources": [
+        "chembl",
+        "drugcentral",
+        "wikidata"
+      ],
+      "assertions": 112078,
+      "newPairs": 13043
+    },
+    {
+      "number": 8,
+      "sources": [
+        "eeml",
+        "ema",
+        "opentargets"
+      ],
+      "assertions": 5913,
+      "newPairs": 2839
+    },
+    {
+      "number": 9,
+      "sources": [
+        "civic",
+        "clinicaltrials"
+      ],
+      "assertions": 174994,
+      "newPairs": 0
     }
   ],
-  "distinctPositivePairs": 13972,
-  "distinctConditions": 2117,
-  "conditionsWithPositiveRelation": 2112,
-  "conditionsOnlyNegative": 5,
-  "distinctDrugs": 2414,
-  "assertionsWithDrugCentralDrug": 16890,
-  "assertionsWithMondoCondition": 12452,
-  "assertionsWithAtc": 0
+  "distinctPositivePairs": 42607,
+  "distinctConditions": 8433,
+  "conditionsWithPositiveRelation": 5014,
+  "conditionsOnlyNegative": 3419,
+  "distinctDrugs": 21970,
+  "assertionsWithDrugCentralDrug": 225490,
+  "assertionsWithMondoCondition": 252552,
+  "assertionsWithAtc": 228242
 }

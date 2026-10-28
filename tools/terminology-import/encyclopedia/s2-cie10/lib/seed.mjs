@@ -20,7 +20,9 @@ export function loadCieTerms(seedDir) {
       .filter((f) => /^page-\d+\.json$/.test(f))
       .sort((a, b) => Number(a.match(/\d+/)[0]) - Number(b.match(/\d+/)[0]));
     for (const page of pages) {
-      for (const t of JSON.parse(readFileSync(join(dir, page), 'utf8'))) {
+      // Schema v2 de los shards: `{ categoryKey, page, items }`. La v1 era un arreglo pelado.
+      const pageJson = JSON.parse(readFileSync(join(dir, page), 'utf8'));
+      for (const t of Array.isArray(pageJson) ? pageJson : pageJson.items) {
         if (t.source !== GLOSSARY_SOURCE) continue;
         terms.push({
           code: t.code,

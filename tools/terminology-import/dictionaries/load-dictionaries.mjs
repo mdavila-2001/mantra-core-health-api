@@ -19,6 +19,10 @@
 // en esa versión se reusa (UNIQUE(code_system_version_id, code)) y todo lo
 // demás cuelga del id que ya tenía.
 //
+// Memoria acotada: ChEBI + NCIt + PRO + FMA suman más de un millón de conceptos y no caben juntos en
+// 2,5 GB. Cada fuente se lee en streaming por tandas (2 000 filas) y se recorre en tres barridos: conceptos,
+// designaciones y propiedades; y, con todos los conceptos ya en la base, relaciones y concept_maps.
+//
 // Idempotente: ids deterministas + `ON CONFLICT DO NOTHING`; la segunda corrida
 // inserta 0 (salvo el lote de auditoría catalog_import_batches, uno por corrida).
 // No actualiza filas existentes. Sin DDL.
@@ -32,10 +36,11 @@
 
 import 'dotenv/config';
 import pg from 'pg';
-import { existsSync } from 'node:fs';
+import { createReadStream, existsSync } from 'node:fs';
+import { createInterface } from 'node:readline';
 import { join } from 'node:path';
 import { nowIso, readNdjson, writeJson } from '../lib/glossary-es/common.mjs';
-import { ABBREVIATION_SOURCE, FMA_SOURCE, HGNC_SOURCE, OBO_SOURCES, ORGANISM_SOURCES, PREFIX_CODE_SYSTEM } from './lib/sources.mjs';
+import { ABBREVIATION_SOURCE, ABREMES_SOURCE, C7_OBO_SOURCES, EMDN_SOURCE, FMA_SOURCE, HGNC_SOURCE, MESH_SOURCE, OBO_SOURCES, ORGANISM_SOURCES, corpusKey } from './lib/sources.mjs';
 import { NDJSON_DIR } from './lib/paths.mjs';
 import {
   CONCEPT, RELATION_TYPE, codeSystemPlan, conceptId, conceptMapId, conceptTuple, designationTuples, esLabelTuples, isDefaultLoaded, lookupKeys, md5uuid, propertyTuples, relationshipTuples,
@@ -48,6 +53,7 @@ const DRY_RUN = !args.includes('--apply');
 const INCLUDE = new Set(argList('--include'));
 const ONLY = new Set(argList('--only'));
 const BATCH = 1000;
+const CHUNK = 2000;
 
 const DB_CONFIG = {
   host: process.env.DB_HOST ?? 'localhost',
@@ -57,26 +63,58 @@ const DB_CONFIG = {
   database: process.env.DB_NAME ?? 'mantra_redesa_health',
 };
 
-const SOURCES = [ORGANISM_SOURCES, ...OBO_SOURCES, FMA_SOURCE, HGNC_SOURCE, ABBREVIATION_SOURCE];
+const SOURCES = [ORGANISM_SOURCES, ...OBO_SOURCES, FMA_SOURCE, HGNC_SOURCE, ABBREVIATION_SOURCE, ...C7_OBO_SOURCES, MESH_SOURCE, EMDN_SOURCE, ABREMES_SOURCE];
 
-function loadCorpus() {
+const layerPath = (source) => join(NDJSON_DIR, `${source.id}.ndjson`);
+
+/** Fuentes presentes en disco y seleccionadas por --only. */
+function activeSources() {
   const out = [];
   for (const source of SOURCES) {
     if (ONLY.size && !ONLY.has(source.id)) continue;
-    const p = join(NDJSON_DIR, `${source.id}.ndjson`);
-    if (!existsSync(p)) { console.warn(`[load] capa ausente (se omite): ${source.id}`); continue; }
-    const all = readNdjson(p);
-    const rows = all.filter((r) => isDefaultLoaded(source, r, INCLUDE));
-    out.push({ source, rows, skipped: all.length - rows.length });
+    if (!existsSync(layerPath(source))) { console.warn(`[load] capa ausente (se omite): ${source.id}`); continue; }
+    out.push(source);
   }
-  const edgesPath = join(NDJSON_DIR, 'disease-agents.ndjson');
-  const esPath = join(NDJSON_DIR, 'wikidata-es-labels.ndjson');
-  return {
-    layers: out.filter((l) => l.rows.length),
-    skipped: out.filter((l) => !l.rows.length).map((l) => l.source.id),
-    edges: existsSync(edgesPath) ? readNdjson(edgesPath) : [],
-    esLabels: existsSync(esPath) ? readNdjson(esPath) : [],
-  };
+  return out;
+}
+
+/** Filas que entran en la carga, por tandas y en streaming. Cuenta también las filas saltadas por política. */
+async function* layerChunks(source, counters = { skipped: 0 }, size = CHUNK) {
+  const rl = createInterface({ input: createReadStream(layerPath(source), { encoding: 'utf8' }), crlfDelay: Infinity });
+  let chunk = [];
+  for await (const line of rl) {
+    if (line.trim() === '') continue;
+    const row = JSON.parse(line);
+    if (!isDefaultLoaded(source, row, INCLUDE)) { counters.skipped++; continue; }
+    chunk.push(row);
+    if (chunk.length >= size) { yield chunk; chunk = []; }
+  }
+  if (chunk.length) yield chunk;
+}
+
+/** Barrido previo: claves cargadas (para filtrar relaciones) y versión de cada fuente. Copias planas de las claves. */
+async function scanLayers(sources) {
+  const loadedKeys = new Set();
+  const layers = [];
+  for (const source of sources) {
+    const counters = { skipped: 0 };
+    const versions = new Set();
+    const retrieved = new Set();
+    let count = 0;
+    for await (const chunk of layerChunks(source, counters)) {
+      for (const r of chunk) {
+        loadedKeys.add(Buffer.from(r.key, 'utf8').toString('utf8'));
+        if (r.provenance.version) versions.add(r.provenance.version);
+        retrieved.add(r.provenance.retrievedAt.slice(0, 10));
+        count++;
+      }
+    }
+    if (!count) { console.log(`[load] sin filas por política (opt-in): ${source.id} (${counters.skipped} saltadas)`); continue; }
+    // Misma regla que versionOf (load-plan.mjs) sin tener todas las filas a mano.
+    const version = versions.size ? [...versions].sort().at(-1) : [...retrieved].sort().at(-1);
+    layers.push({ source, count, skipped: counters.skipped, plan: codeSystemPlan(source, [{ provenance: { version: versions.size ? version : null, retrievedAt: `${version}T00:00:00.000Z` } }]) });
+  }
+  return { layers, loadedKeys };
 }
 
 async function insertMany(client, table, columns, tuples, casts) {
@@ -94,6 +132,15 @@ async function insertMany(client, table, columns, tuples, casts) {
   }
   return inserted;
 }
+
+const COLS = {
+  concepts: [['id', 'code_system_version_id', 'code', 'display', 'definition', 'state_concept_id'], ['uuid', 'uuid', null, null, null, 'uuid']],
+  designations: [['id', 'concept_id', 'language_concept_id', 'designation_type_concept_id', 'value', 'preferred'], ['uuid', 'uuid', 'uuid', 'uuid', null, null]],
+  properties: [['id', 'concept_id', 'property_code', 'data_type', 'value_json'], ['uuid', 'uuid', null, 'terminology.technical_data_type', 'jsonb']],
+  relationships: [['id', 'source_concept_id', 'target_concept_id', 'relationship_type_concept_id', 'ordinal'], ['uuid', 'uuid', 'uuid', 'uuid', null]],
+  conceptMaps: [['id', 'source_concept_id', 'target_concept_id', 'equivalence_concept_id', 'context', 'version', 'state_concept_id'], ['uuid', 'uuid', 'uuid', 'uuid', null, null, 'uuid']],
+};
+const insertInto = (client, table, tuples) => insertMany(client, table === 'conceptMaps' ? 'concept_maps' : table === 'relationships' ? 'concept_relationships' : table === 'concepts' ? 'catalog_concepts' : table === 'designations' ? 'concept_designations' : 'concept_properties', COLS[table][0], tuples, COLS[table][1]);
 
 async function assertPrerequisites(client) {
   const needed = { ...CONCEPT, ...RELATION_TYPE };
@@ -159,45 +206,14 @@ async function loadLookups(client) {
   };
 }
 
-function plan() {
-  const { layers, skipped, edges, esLabels } = loadCorpus();
-  const loadedKeys = new Set(layers.flatMap((l) => l.rows.map((r) => r.key)));
-  // Nombres ES de Wikidata: sólo para conceptos que se cargan en esta corrida.
-  const esByKey = new Map();
-  for (const r of esLabels) {
-    const key = `${r.codeSystem}|${r.code}`;
-    if (!loadedKeys.has(key)) continue;
-    if (!esByKey.has(key)) esByKey.set(key, []);
-    esByKey.get(key).push(r);
-  }
-  const es = [...esByKey].map(([key, rows]) => esLabelTuples(key, rows));
-  return {
-    layers: layers.map((l) => {
-      const p = codeSystemPlan(l.source, l.rows);
-      return {
-        ...p,
-        layer: l,
-        concepts: l.rows.map((r) => conceptTuple(r, p.version.id)),
-        designations: l.rows.flatMap(designationTuples),
-        properties: l.rows.flatMap(propertyTuples),
-        relationships: l.rows.flatMap((r) => relationshipTuples(r, loadedKeys)),
-      };
-    }),
-    skipped,
-    edges,
-    loadedKeys,
-    esLabels: { concepts: es.length, designations: es.flatMap((x) => x.designations), properties: es.map((x) => x.property) },
-  };
-}
-
 /** Xrefs → concept_maps, sólo hacia conceptos que existen (corpus cargado o base). */
 function conceptMapTuples(row, lookups, keyToId, version) {
   const out = [];
   const src = keyToId.get(row.key);
   for (const x of row.xrefs) {
-    const prefix = x.id.split(':')[0];
     const targets = [];
-    const internal = keyToId.get(`${PREFIX_CODE_SYSTEM[prefix] ?? ''}|${x.id}`);
+    const internalKey = corpusKey(x.id);
+    const internal = internalKey ? keyToId.get(internalKey) : null;
     if (internal) targets.push({ id: internal, via: 'corpus' });
     targets.push(...lookups.resolve(x.id));
     for (const t of targets) {
@@ -208,7 +224,6 @@ function conceptMapTuples(row, lookups, keyToId, version) {
   }
   return out;
 }
-
 
 /** Aristas enfermedad → organismo hacia enfermedades ya cargadas en la base. */
 function diseaseAgentTuples(edges, lookups, keyToId) {
@@ -231,18 +246,48 @@ function diseaseAgentTuples(edges, lookups, keyToId) {
   return { tuples: out, stats };
 }
 
+/** Nombres ES de Wikidata (wikidata-es-labels.ndjson) sólo para conceptos que se cargan en esta corrida. */
+function esLabelPlan(loadedKeys) {
+  const esPath = join(NDJSON_DIR, 'wikidata-es-labels.ndjson');
+  const byKey = new Map();
+  if (existsSync(esPath)) {
+    for (const r of readNdjson(esPath)) {
+      const key = `${r.codeSystem}|${r.code}`;
+      if (!loadedKeys.has(key)) continue;
+      if (!byKey.has(key)) byKey.set(key, []);
+      byKey.get(key).push(r);
+    }
+  }
+  const es = [...byKey].map(([key, rows]) => esLabelTuples(key, rows));
+  return { concepts: es.length, designations: es.flatMap((x) => x.designations), properties: es.map((x) => x.property) };
+}
+
 async function main() {
   const t0 = Date.now();
   console.log(`=== Carga de diccionarios médicos a terminology.* ${DRY_RUN ? '(DRY-RUN por defecto, sin base)' : '(APPLY explícito)'} ===`);
-  const p = plan();
-  const summary = p.layers.map((l) => ({
-    source: l.layer.source.id, codeSystem: l.codeSystem.internalCode, version: l.version.version, skippedByPolicy: l.layer.skipped,
-    concepts: l.concepts.length, designations: l.designations.length, properties: l.properties.length, relationships: l.relationships.length,
-  }));
-  const totals = Object.fromEntries(['concepts', 'designations', 'properties', 'relationships'].map((k) => [k, summary.reduce((n, s) => n + s[k], 0)]));
-  console.log(JSON.stringify({ include: [...INCLUDE], notLoaded: p.skipped, summary, totals, diseaseAgentEdges: p.edges.length, wikidataEsLabels: { concepts: p.esLabels.concepts, designations: p.esLabels.designations.length } }, null, 2));
+  const sources = activeSources();
+  const { layers, loadedKeys } = await scanLayers(sources);
+  const edgesPath = join(NDJSON_DIR, 'disease-agents.ndjson');
+  const edges = existsSync(edgesPath) ? readNdjson(edgesPath) : [];
+  const es = esLabelPlan(loadedKeys);
+
   if (DRY_RUN) {
-    writeJson(join(NDJSON_DIR, '..', 'load-plan.dry-run.json'), { generatedAt: nowIso(), include: [...INCLUDE], summary, totals, sample: p.layers.map((l) => ({ codeSystem: l.codeSystem, version: l.version, concept: l.concepts[0], designation: l.designations[0], relationship: l.relationships[0] ?? null })) }, true);
+    const summary = [];
+    for (const l of layers) {
+      const s = { source: l.source.id, codeSystem: l.plan.codeSystem.internalCode, version: l.plan.version.version, skippedByPolicy: l.skipped, concepts: 0, designations: 0, properties: 0, relationships: 0 };
+      for await (const chunk of layerChunks(l.source)) {
+        s.concepts += chunk.length;
+        for (const r of chunk) {
+          s.designations += designationTuples(r).length;
+          s.properties += propertyTuples(r).length;
+          s.relationships += relationshipTuples(r, loadedKeys).length;
+        }
+      }
+      summary.push(s);
+    }
+    const totals = Object.fromEntries(['concepts', 'designations', 'properties', 'relationships'].map((k) => [k, summary.reduce((n, s) => n + s[k], 0)]));
+    console.log(JSON.stringify({ include: [...INCLUDE], summary, totals, diseaseAgentEdges: edges.length, wikidataEsLabels: { concepts: es.concepts, designations: es.designations.length } }, null, 2));
+    writeJson(join(NDJSON_DIR, '..', 'load-plan.dry-run.json'), { generatedAt: nowIso(), include: [...INCLUDE], summary, totals }, true);
     console.log('Plan escrito. No se tocó ninguna base (xrefs y aristas a enfermedades se resuelven contra la base en --apply).');
     return;
   }
@@ -256,47 +301,57 @@ async function main() {
     const remap = new Map(); // id determinista propio → id real (concepto que ya existía)
     const fix = (tuples, idx) => { if (remap.size) for (const t of tuples) for (const i of idx) t[i] = remap.get(t[i]) ?? t[i]; return tuples; };
     const done = [];
-    for (const l of p.layers) {
+    for (const l of layers) {
       const startedAt = new Date();
-      const cs = await ensureCodeSystem(client, l);
-      for (const c of l.concepts) c[1] = cs.versionId;
-      const r = { source: l.layer.source.id, codeSystem: l.codeSystem.internalCode, reusedCodeSystem: cs.reusedCodeSystem };
-      r.concepts = await insertMany(client, 'catalog_concepts', ['id', 'code_system_version_id', 'code', 'display', 'definition', 'state_concept_id'], l.concepts, ['uuid', 'uuid', null, null, null, 'uuid']);
+      const cs = await ensureCodeSystem(client, l.plan);
+      const r = { source: l.source.id, codeSystem: l.plan.codeSystem.internalCode, reusedCodeSystem: cs.reusedCodeSystem, concepts: 0, designations: 0, properties: 0, conceptsReused: 0 };
+      // Barrido 1: conceptos.
+      for await (const chunk of layerChunks(l.source)) {
+        const tuples = chunk.map((row) => conceptTuple(row, cs.versionId));
+        r.concepts += await insertInto(client, 'concepts', tuples);
+      }
       // Ids reales por (versión, código): si otra sesión ya tenía el concepto, se cuelga del suyo.
       const { rows } = await client.query('SELECT code, id FROM terminology.catalog_concepts WHERE code_system_version_id = $1', [cs.versionId]);
       const real = new Map(rows.map((x) => [x.code, x.id]));
-      r.conceptsReused = 0;
-      for (const row of l.layer.rows) {
-        const id = real.get(row.code);
-        keyToId.set(row.key, id);
-        if (id !== conceptId(row.key)) { remap.set(conceptId(row.key), id); r.conceptsReused++; }
+      // Barrido 2: designaciones y propiedades (más claves de los ids reales).
+      for await (const chunk of layerChunks(l.source)) {
+        for (const row of chunk) {
+          const id = real.get(row.code);
+          keyToId.set(Buffer.from(row.key, 'utf8').toString('utf8'), id);
+          if (id !== conceptId(row.key)) { remap.set(conceptId(row.key), id); r.conceptsReused++; }
+        }
+        r.designations += await insertInto(client, 'designations', fix(chunk.flatMap(designationTuples), [1]));
+        r.properties += await insertInto(client, 'properties', fix(chunk.flatMap(propertyTuples), [1]));
       }
-      r.designations = await insertMany(client, 'concept_designations', ['id', 'concept_id', 'language_concept_id', 'designation_type_concept_id', 'value', 'preferred'], fix(l.designations, [1]), ['uuid', 'uuid', 'uuid', 'uuid', null, null]);
-      r.properties = await insertMany(client, 'concept_properties', ['id', 'concept_id', 'property_code', 'data_type', 'value_json'], fix(l.properties, [1]), ['uuid', 'uuid', null, 'terminology.technical_data_type', 'jsonb']);
       done.push({ l, r, cs, startedAt });
+      console.log(`[load] ${JSON.stringify(r)}`);
     }
     const lookups = await loadLookups(client);
     for (const { l, r, cs, startedAt } of done) {
-      r.relationships = await insertMany(client, 'concept_relationships', ['id', 'source_concept_id', 'target_concept_id', 'relationship_type_concept_id', 'ordinal'], fix(l.relationships, [1, 2]), ['uuid', 'uuid', 'uuid', 'uuid', null]);
-      const maps = l.layer.rows.flatMap((row) => conceptMapTuples(row, lookups, keyToId, l.version.version));
-      r.conceptMaps = await insertMany(client, 'concept_maps', ['id', 'source_concept_id', 'target_concept_id', 'equivalence_concept_id', 'context', 'version', 'state_concept_id'], maps, ['uuid', 'uuid', 'uuid', 'uuid', null, null, 'uuid']);
+      // Barrido 3: relaciones y concept_maps, con todos los conceptos ya en la base.
+      r.relationships = 0;
+      r.conceptMaps = 0;
+      for await (const chunk of layerChunks(l.source)) {
+        r.relationships += await insertInto(client, 'relationships', fix(chunk.flatMap((row) => relationshipTuples(row, loadedKeys)), [1, 2]));
+        r.conceptMaps += await insertInto(client, 'conceptMaps', chunk.flatMap((row) => conceptMapTuples(row, lookups, keyToId, l.plan.version.version)));
+      }
       const total = r.concepts + r.designations + r.properties + r.relationships + r.conceptMaps;
       await client.query(
         `INSERT INTO terminology.catalog_import_batches (id, source_id, code_system_version_id, started_at, finished_at, total_read, total_inserted, total_errors, checksum, recorded_at)
          VALUES ($1::uuid, $2::uuid, $3::uuid, $4, now(), $5, $6, 0, $7, now())`,
-        [md5uuid(`mantra:dictionaries:batch:${l.codeSystem.internalCode}:${startedAt.toISOString()}`), cs.sourceId, cs.versionId, startedAt, l.layer.rows.length, total, md5uuid(l.layer.rows.map((x) => x.key).join('|'))],
+        [md5uuid(`mantra:dictionaries:batch:${l.plan.codeSystem.internalCode}:${startedAt.toISOString()}`), cs.sourceId, cs.versionId, startedAt, l.count, total, md5uuid(`${l.source.id}:${l.count}`)],
       );
       result.push(r);
       console.log(`[load] ${JSON.stringify(r)}`);
     }
-    if (p.esLabels.concepts) {
-      const d = await insertMany(client, 'concept_designations', ['id', 'concept_id', 'language_concept_id', 'designation_type_concept_id', 'value', 'preferred'], fix(p.esLabels.designations, [1]), ['uuid', 'uuid', 'uuid', 'uuid', null, null]);
-      const pr = await insertMany(client, 'concept_properties', ['id', 'concept_id', 'property_code', 'data_type', 'value_json'], fix(p.esLabels.properties, [1]), ['uuid', 'uuid', null, 'terminology.technical_data_type', 'jsonb']);
-      result.push({ source: 'wikidata-es-labels', concepts: p.esLabels.concepts, designations: d, properties: pr });
+    if (es.concepts) {
+      const d = await insertInto(client, 'designations', fix(es.designations, [1]));
+      const pr = await insertInto(client, 'properties', fix(es.properties, [1]));
+      result.push({ source: 'wikidata-es-labels', concepts: es.concepts, designations: d, properties: pr });
       console.log(`[load] ${JSON.stringify(result.at(-1))}`);
     }
-    const agents = diseaseAgentTuples(p.edges, lookups, keyToId);
-    const inserted = await insertMany(client, 'concept_relationships', ['id', 'source_concept_id', 'target_concept_id', 'relationship_type_concept_id', 'ordinal'], agents.tuples, ['uuid', 'uuid', 'uuid', 'uuid', null]);
+    const agents = diseaseAgentTuples(edges, lookups, keyToId);
+    const inserted = await insertInto(client, 'relationships', agents.tuples);
     result.push({ source: 'disease-agents', ...agents.stats, inserted, lookups: lookups.sizes });
     console.log(`[load] disease-agents ${JSON.stringify(result.at(-1))}`);
   } finally {

@@ -1,0 +1,14 @@
+[fetch] orphanet-es: https://www.orphadata.com/data/xml/es_product1.xml
+[fetch] orphanet-prevalence: https://www.orphadata.com/data/xml/es_product9_prev.xml
+[fetch] orphanet-ages: https://www.orphadata.com/data/xml/es_product9_ages.xml
+[fetch] hpo-ontology: https://github.com/obophenotype/human-phenotype-ontology/releases/latest/download/hp.json
+[fetch] hpo-annotations: https://github.com/obophenotype/human-phenotype-ontology/releases/latest/download/phenotype.hpoa
+[fetch] hpo-es: https://raw.githubusercontent.com/obophenotype/hpo-translations/main/babelon/hp-es.babelon.tsv
+[fetch] mondo: https://github.com/monarch-initiative/mondo/releases/latest/download/mondo.json
+[fetch] icd10cm-tabular: https://ftp.cdc.gov/pub/Health_Statistics/NCHS/Publications/ICD10CM/2025/icd10cm-table-index-2025.zip
+[fetch] disease-ontology: https://raw.githubusercontent.com/DiseaseOntology/HumanDiseaseOntology/main/src/ontology/doid.obo
+[fetch] 9 fuentes en /tmp/claude-0/-home-user/d54e8fca-588a-538f-8209-b411160eadd8/scratchpad/build-C9/cache/encyclopedia-s2
+
+real	0m20.207s
+user	0m1.516s
+sys	0m1.795s

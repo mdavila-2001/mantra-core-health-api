@@ -1,0 +1,66 @@
+=== Diccionarios del NCI en español → glosario ES ===
+[nci] Cancer.gov-Patient: 9402 informados, 9402 bajados, 0 sin nombre/definición, 0 repetidos
+[nci] Cancer.gov-HealthProfessional: 2 informados, 2 bajados, 0 sin nombre/definición, 0 repetidos
+[nci] Genetics-HealthProfessional: 242 informados, 242 bajados, 0 sin nombre/definición, 0 repetidos
+[nci] Genetics-Patient: 1 informados, 1 bajados, 0 sin nombre/definición, 0 repetidos
+{
+  "source": "nci-glossary",
+  "endpoint": "https://webapis.cancer.gov/glossary/v1",
+  "retrievedAt": "2026-10-27T23:40:31.152Z",
+  "perDictionary": [
+    {
+      "dictionary": "Cancer.gov",
+      "audience": "Patient",
+      "reportedCount": 9402,
+      "fetched": 9402,
+      "sinNombreODefinicion": 0,
+      "repetidos": 0
+    },
+    {
+      "dictionary": "Cancer.gov",
+      "audience": "HealthProfessional",
+      "reportedCount": 2,
+      "fetched": 2,
+      "sinNombreODefinicion": 0,
+      "repetidos": 0
+    },
+    {
+      "dictionary": "Genetics",
+      "audience": "HealthProfessional",
+      "reportedCount": 242,
+      "fetched": 242,
+      "sinNombreODefinicion": 0,
+      "repetidos": 0
+    },
+    {
+      "dictionary": "Genetics",
+      "audience": "Patient",
+      "reportedCount": 1,
+      "fetched": 1,
+      "sinNombreODefinicion": 0,
+      "repetidos": 0
+    }
+  ],
+  "layers": {
+    "nci-diccionario-cancer-es": {
+      "terms": 9404,
+      "conNombreEnIngles": 9400
+    },
+    "nci-diccionario-genetica-es": {
+      "terms": 243,
+      "conNombreEnIngles": 242
+    }
+  },
+  "http": {
+    "requests": 56,
+    "retries": 0,
+    "cacheHits": 0,
+    "failures": 0,
+    "bytes": 12037077
+  },
+  "segundos": 65
+}
+
+real	1m4.633s
+user	0m0.994s
+sys	0m0.150s

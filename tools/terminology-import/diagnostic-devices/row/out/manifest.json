@@ -1,16 +1,8 @@
 {
   "region": "row",
-  "generatedAt": "2026-10-24T04:19:46.367Z",
+  "generatedAt": "2026-10-28T00:00:17.983Z",
   "formatVersion": 1,
   "files": [
-    {
-      "path": "anvisa-produtos.ndjson.gz",
-      "source": "anvisa-produtos",
-      "sourceVersion": "DT_ATUALIZACAO_DADO 2025-06-17T19:00:01 (espejo victoracioly/g.stec@8a4c6ca3)",
-      "rows": 93770,
-      "bytes": 9014019,
-      "sha256": "c4095b2b2b50f5e2a861d21d863e0f89db7b3cc5b8a06fc31f38e7957c89e053"
-    },
     {
       "path": "anvisa-produtos-modelos.ndjson.gz",
       "source": "anvisa-produtos-modelos",
@@ -18,6 +10,54 @@
       "rows": 1027762,
       "bytes": 44748647,
       "sha256": "59510f491dd710027c44a3a41c7fded94b07471d4baa9b13a106a57bc3ddc6e9"
+    },
+    {
+      "path": "anvisa-produtos.ndjson.gz",
+      "source": "anvisa-produtos",
+      "sourceVersion": "TA_PRODUTO_SAUDE_SITE.csv Last-Modified Tue, 13 Oct 2026 19:09:34 GMT; DT_ATUALIZACAO_DADO 2026-10-12T19:00:00",
+      "rows": 100681,
+      "bytes": 9634267,
+      "sha256": "07b5fed5fd536307878ce81b13be978b9334dfded377da93d8779bd80a7cdf6e"
+    },
+    {
+      "path": "cdsco-import-licences.ndjson.gz",
+      "source": "cdsco-import-licences",
+      "sourceVersion": "MD - Medical Devices, licencias emitidas hasta 2026-10-01 (espejo vishnuu-patil/india-meddevice-intelligence@62e88588)",
+      "rows": 25792,
+      "bytes": 7372002,
+      "sha256": "40ebea47f5563f8b35cdb30f652c24d31ed66dc9c549085a293256f0357a19d1"
+    },
+    {
+      "path": "hc-mdall-0001.ndjson.gz",
+      "source": "hc-mdall",
+      "sourceVersion": "MDALL API last_refresh_dt 2026-10-26",
+      "rows": 1803563,
+      "bytes": 47145242,
+      "sha256": "b1a58fa46c5ea4a7ae4a80632a0a9bcd4036f3ee06375f56abe92be5b41ed69f"
+    },
+    {
+      "path": "hc-mdall-0002.ndjson.gz",
+      "source": "hc-mdall",
+      "sourceVersion": "MDALL API last_refresh_dt 2026-10-26",
+      "rows": 1273779,
+      "bytes": 47136023,
+      "sha256": "d0207100b032fcd11320b634cb50d8f6431204c461e6c5c54ad4808e208f076f"
+    },
+    {
+      "path": "hc-mdall-0003.ndjson.gz",
+      "source": "hc-mdall",
+      "sourceVersion": "MDALL API last_refresh_dt 2026-10-26",
+      "rows": 85224,
+      "bytes": 2772120,
+      "sha256": "2a7fdb0d4d28d90c884158abf4297d1cc68fb4147723d88c22d5aeb6a76b3a33"
+    },
+    {
+      "path": "invima-registros.ndjson.gz",
+      "source": "invima-registros",
+      "sourceVersion": "y4qt-w6tk rowsUpdatedAt 2026-10-16T12:28:35.000Z",
+      "rows": 34051,
+      "bytes": 3422512,
+      "sha256": "c35e26408d062478b92144afb6f3dbb29966c3f17b550d5d95f0101f43cac82b"
     },
     {
       "path": "pmda-approvals.ndjson.gz",
@@ -28,20 +68,12 @@
       "sha256": "7c77504106d2974f67c4173f24716b9ebbbde27d66c3d60ce290c97c433794b1"
     },
     {
-      "path": "hc-mdall-0001.ndjson.gz",
-      "source": "hc-mdall",
-      "sourceVersion": "MDALL last_refresh_dt 2020-02-07 (espejo misterrPink1/symmetric@a43a1a58)",
-      "rows": 1853405,
-      "bytes": 47150922,
-      "sha256": "be4015158c0da6393da74410303b047ea6a27702eeaddcf5b9f066c6af319caf"
-    },
-    {
-      "path": "hc-mdall-0002.ndjson.gz",
-      "source": "hc-mdall",
-      "sourceVersion": "MDALL last_refresh_dt 2020-02-07 (espejo misterrPink1/symmetric@a43a1a58)",
-      "rows": 479831,
-      "bytes": 13524736,
-      "sha256": "09c9aa6055e5b1778f35e54b7cc804efd97ca9f13c1e6ac2f6f7ee818123dab1"
+      "path": "tfda-licences.ndjson.gz",
+      "source": "tfda-licences",
+      "sourceVersion": "68_2.csv Last-Modified 2026-10-27; 異動日期 máx. 2026/10/22",
+      "rows": 104928,
+      "bytes": 13739278,
+      "sha256": "6756f3465ae3194ad58fad1a0260ae1e8a35884903048774970e11a5fec69992"
     },
     {
       "path": "tga-daen.ndjson.gz",
@@ -50,20 +82,12 @@
       "rows": 18917,
       "bytes": 1111185,
       "sha256": "f6ae0b982f8bb1bac614136c7255242f40c4250f168f3ec6f5e63c9e55ac6e84"
-    },
-    {
-      "path": "cdsco-import-licences.ndjson.gz",
-      "source": "cdsco-import-licences",
-      "sourceVersion": "MD - Medical Devices, licencias emitidas hasta 2026-10-01 (espejo vishnuu-patil/india-meddevice-intelligence@62e88588)",
-      "rows": 25792,
-      "bytes": 7372002,
-      "sha256": "40ebea47f5563f8b35cdb30f652c24d31ed66dc9c549085a293256f0357a19d1"
     }
   ],
   "stats": {
     "anvisa-produtos": {
-      "inputLines": 108492,
-      "rows": 93770
+      "inputLines": 116008,
+      "rows": 100681
     },
     "anvisa-produtos-modelos": {
       "inputFiles": 33,
@@ -77,13 +101,15 @@
       "withoutManufacturer": 3
     },
     "hc-mdall": {
-      "licences": 62087,
-      "companies": 6448,
+      "licences": 74246,
+      "companies": 7680,
+      "devices": 285533,
       "orphanIdentifiers": 0,
-      "duplicateIdentifiers": 1,
+      "duplicateIdentifiers": 4,
       "withoutCompany": 0,
+      "withDeviceTradeName": 3162563,
       "licencesWithoutDevices": 3,
-      "rows": 2333236
+      "rows": 3162566
     },
     "tga-daen": {
       "fullReports": 92702,
@@ -96,19 +122,23 @@
       "rows": 25792,
       "badLicence": 0,
       "withoutManufacturer": 0
+    },
+    "tfda-licences": {
+      "inputRows": 104928,
+      "rows": 104928,
+      "duplicateLicenceNumbers": 11473,
+      "withoutManufacturer": 0
+    },
+    "invima-registros": {
+      "inputRows": 366753,
+      "rows": 34051,
+      "groups": 34051,
+      "withoutManufacturerRole": 40,
+      "withoutAnyName": 0,
+      "unmappedCountries": {}
     }
   },
   "gaps": [
-    {
-      "source": "anvisa-produtos",
-      "reason": "403 del proxy (dados.anvisa.gov.br); se usó un espejo de 2025-06-17",
-      "url": "https://dados.anvisa.gov.br/dados/"
-    },
-    {
-      "source": "hc-mdall",
-      "reason": "403 del proxy (health-products.canada.ca); solo hay espejo de 2020-02-07",
-      "url": "https://health-products.canada.ca/mdall-limh/"
-    },
     {
       "source": "tga-artg",
       "reason": "403 del proxy (www.tga.gov.au); el ARTG completo no tiene espejo; solo hay DAEN parcial",

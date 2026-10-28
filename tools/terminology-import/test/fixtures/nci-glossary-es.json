@@ -1,0 +1,84 @@
+{
+ "cancerPatient": [
+  {
+   "termId": 743915,
+   "language": "es",
+   "dictionary": "Cancer.gov",
+   "audience": "Patient",
+   "termName": "(S)-malato de cabozantinib",
+   "firstLetter": "#",
+   "prettyUrlName": "s-malato-de-cabozantinib",
+   "pronunciation": {
+    "key": null,
+    "audio": "https://nci-media.cancer.gov/pdq/media/audio/746311.mp3"
+   },
+   "definition": {
+    "html": "Medicamento que se usa solo o con otros medicamentos bajo la marca comercial Cabometyx, para el tratamiento de ciertos tipos de cáncer de tiroides diferenciado, carcinoma hepatocelular (tipo de cáncer de hígado), tumores neuroendocrinos y carcinoma de células renales (tipo de cáncer de riñón). También se emplea bajo la marca comercial Cometriq para tratar ciertos tipos de cáncer de tiroides medular. Además, el  (S)-malato de cabozantinib está en estudio para el tratamiento de otros tipos de cáncer. Este medicamento bloquea ciertas proteínas, lo que quizás evite la multiplicación de células cancerosas. Asimismo, tal vez impida la formación de vasos sanguíneos nuevos que los tumores necesitan para crecer. El (S)-malato de cabozantinib es un tipo de inhibidor de tirosina–cinasas y de inhibidor de la angiogénesis.",
+    "text": "Medicamento que se usa solo o con otros medicamentos bajo la marca comercial Cabometyx, para el tratamiento de ciertos tipos de cáncer de tiroides diferenciado, carcinoma hepatocelular (tipo de cáncer de hígado), tumores neuroendocrinos y carcinoma de células renales (tipo de cáncer de riñón). También se emplea bajo la marca comercial Cometriq para tratar ciertos tipos de cáncer de tiroides medular. Además, el  (S)-malato de cabozantinib está en estudio para el tratamiento de otros tipos de cáncer. Este medicamento bloquea ciertas proteínas, lo que quizás evite la multiplicación de células cancerosas. Asimismo, tal vez impida la formación de vasos sanguíneos nuevos que los tumores necesitan para crecer. El (S)-malato de cabozantinib es un tipo de inhibidor de tirosina–cinasas y de inhibidor de la angiogénesis."
+   },
+   "otherLanguages": [
+    {
+     "language": "en",
+     "termName": "cabozantinib-s-malate",
+     "prettyUrlName": "cabozantinib-s-malate"
+    }
+   ],
+   "relatedResources": [],
+   "media": []
+  },
+  {
+   "termId": 346520,
+   "language": "es",
+   "dictionary": "Cancer.gov",
+   "audience": "Patient",
+   "termName": "acceso ampliado",
+   "firstLetter": "a",
+   "prettyUrlName": "acceso-ampliado",
+   "pronunciation": {
+    "key": null,
+    "audio": "https://nci-media.cancer.gov/pdq/media/audio/731122.mp3"
+   },
+   "definition": {
+    "html": "Manera de ofrecer un tratamiento  en fase de investigación a un paciente que no puede recibir el tratamiento en un ensayo clínico, pero que tiene una afección grave y potencialmente mortal para la que no hay tratamiento. El acceso ampliado permite que estos pacientes reciban terapias contra el cáncer que son prometedoras, que aún no se terminaron de estudiar o no se aprobaron cuando no hay otras opciones de tratamiento. También se llama acceso expandido y uso compasivo.",
+    "text": "Manera de ofrecer un tratamiento  en fase de investigación a un paciente que no puede recibir el tratamiento en un ensayo clínico, pero que tiene una afección grave y potencialmente mortal para la que no hay tratamiento. El acceso ampliado permite que estos pacientes reciban terapias contra el cáncer que son prometedoras, que aún no se terminaron de estudiar o no se aprobaron cuando no hay otras opciones de tratamiento. También se llama acceso expandido y uso compasivo."
+   },
+   "otherLanguages": [
+    {
+     "language": "en",
+     "termName": "expanded access",
+     "prettyUrlName": "expanded-access"
+    }
+   ],
+   "relatedResources": [],
+   "media": []
+  }
+ ],
+ "geneticsProf": [
+  {
+   "termId": 768575,
+   "language": "es",
+   "dictionary": "Genetics",
+   "audience": "HealthProfessional",
+   "termName": "ADN constitucional",
+   "firstLetter": "a",
+   "prettyUrlName": "adn-constitucional",
+   "pronunciation": {
+    "key": null,
+    "audio": "https://nci-media.cancer.gov/pdq/media/audio/771247.mp3"
+   },
+   "definition": {
+    "html": "Se refiere al ADN de los tejidos derivados de las células reproductoras (óvulos o espermatozoides) que se incorpora en el ADN de todas las células de la descendencia. Una mutación en la línea germinal pasa del progenitor a su descendencia. También se llama ADN de la línea germinal.",
+    "text": "Se refiere al ADN de los tejidos derivados de las células reproductoras (óvulos o espermatozoides) que se incorpora en el ADN de todas las células de la descendencia. Una mutación en la línea germinal pasa del progenitor a su descendencia. También se llama ADN de la línea germinal."
+   },
+   "otherLanguages": [
+    {
+     "language": "en",
+     "termName": "constitutional DNA",
+     "prettyUrlName": "constitutional-dna"
+    }
+   ],
+   "relatedResources": [],
+   "media": []
+  }
+ ]
+}

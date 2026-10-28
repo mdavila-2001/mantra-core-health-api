@@ -3,7 +3,8 @@
 // Catálogo de alergias · etapa 2 (NDJSON común → `terminology.*`).
 //
 // Lee `glossary-data-build/ndjson/allergy-catalog.ndjson` (lo escribe
-// build-allergy-catalog.mjs) y carga:
+// build-allergy-catalog.mjs) y, además, el de la tanda 2 (`allergy-catalog-open.ndjson`,
+// build-allergy-open.mjs; conceptos nuevos y parches sobre los de la tanda 1) y carga:
 //   terminology_sources / code_systems / code_system_versions   uno por code system
 //   catalog_concepts        un concepto por registro (id = md5 de codeSystem+código)
 //   concept_designations    nombre preferido EN y, si la fuente lo publica, ES; sinónimos
@@ -29,7 +30,7 @@
 
 import 'dotenv/config';
 import pg from 'pg';
-import { createReadStream, existsSync } from 'node:fs';
+import { createReadStream, existsSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
@@ -42,7 +43,9 @@ import { NDJSON_DIR } from './lib/sources.mjs';
 
 const DRY_RUN = process.argv.includes('--dry-run');
 const FROM_REPO = process.argv.includes('--from-repo');
-const REPO_DATA = join(dirname(fileURLToPath(import.meta.url)), 'data', 'allergy-catalog.ndjson.gz');
+const DATA_DIR = join(dirname(fileURLToPath(import.meta.url)), 'data');
+const REPO_DATA = join(DATA_DIR, 'allergy-catalog.ndjson.gz');
+const SKIP_OPEN = process.argv.includes('--base-only');
 const BATCH = 1000;
 
 const DB_CONFIG = {
@@ -65,14 +68,34 @@ function catalogSource() {
   throw new Error(`Falta ${built} y ${REPO_DATA}. Corré primero build-allergy-catalog.mjs.`);
 }
 
+async function readLines(input) {
+  const out = [];
+  for await (const line of createInterface({ input, crlfDelay: Infinity })) if (line.trim() !== '') out.push(JSON.parse(line));
+  return out;
+}
+
+/** Tanda 2: el NDJSON recién construido o, en un clon limpio, las partes comprimidas de `data/`. */
+async function readOpen() {
+  const built = join(NDJSON_DIR, 'allergy-catalog-open.ndjson');
+  if (!FROM_REPO && existsSync(built)) {
+    console.log(`Leyendo ${built}`);
+    return readLines(createReadStream(built));
+  }
+  const parts = existsSync(DATA_DIR) ? readdirSync(DATA_DIR).filter((f) => /^allergy-catalog-open\.part-\d+\.ndjson\.gz$/.test(f)).sort() : [];
+  const out = [];
+  for (const f of parts) {
+    console.log(`Leyendo ${join(DATA_DIR, f)}`);
+    out.push(...(await readLines(createReadStream(join(DATA_DIR, f)).pipe(createGunzip()))));
+  }
+  return out;
+}
+
 async function readRecords() {
   const source = catalogSource();
   console.log(`Leyendo ${source.path}`);
-  const records = [];
-  for await (const line of createInterface({ input: source.input(), crlfDelay: Infinity })) {
-    if (line.trim() !== '') records.push(JSON.parse(line));
-  }
-  return records;
+  const records = await readLines(source.input());
+  const open = SKIP_OPEN ? [] : await readOpen();
+  return { records: [...records, ...open.filter((l) => !l.patch)], patches: open.filter((l) => l.patch) };
 }
 
 /** INSERT por lotes con `ON CONFLICT DO NOTHING`; devuelve las filas realmente nuevas. */
@@ -124,7 +147,7 @@ async function loadCodeSystem(client, plan) {
   const { rows: cs } = await client.query('SELECT id FROM terminology.code_systems WHERE internal_code = $1', [plan.codeSystem.internalCode]);
   await client.query(
     `INSERT INTO terminology.code_system_versions (id, code_system_id, version, published_at, is_default, state_concept_id, created_at, updated_at, row_version)
-     VALUES ($1::uuid, $2::uuid, $3, now(), true, $4::uuid, now(), now(), 1) ON CONFLICT DO NOTHING`,
+     VALUES ($1::uuid, $2::uuid, $3, now(), NOT EXISTS (SELECT 1 FROM terminology.code_system_versions d WHERE d.code_system_id = $2::uuid AND d.is_default), $4::uuid, now(), now(), 1) ON CONFLICT DO NOTHING`,
     [plan.version.id, cs[0].id, plan.version.version, INTERNAL.TERM_ACTIVE],
   );
   const { rows: csv } = await client.query('SELECT id FROM terminology.code_system_versions WHERE code_system_id = $1 AND version = $2', [cs[0].id, plan.version.version]);
@@ -136,10 +159,10 @@ async function loadCodeSystem(client, plan) {
 async function main() {
   const t0 = Date.now();
   console.log(`=== Carga del catálogo de alergias a terminology.* ${DRY_RUN ? '(DRY-RUN, sin base)' : ''} ===`);
-  const records = await readRecords();
-  const plan = buildPlan(records);
+  const { records, patches } = await readRecords();
+  const plan = buildPlan(records, patches);
   const summary = {
-    codeSystems: plan.codeSystems.map((p) => ({ codeSystem: p.codeSystem.internalCode, version: p.version.version, concepts: p.records.length })),
+    codeSystems: plan.codeSystems.map((p) => ({ codeSystem: p.codeSystem.internalCode, origin: p.origin, version: p.version.version, concepts: p.records.length })),
     concepts: records.length,
     designations: plan.designations.length,
     properties: plan.properties.length,
@@ -147,6 +170,10 @@ async function main() {
     valueSets: plan.valueSets.length,
     members: plan.members.length,
     conceptMaps: plan.conceptMaps.length,
+    patches: patches.length,
+    patchDesignations: plan.patches.designations.length,
+    patchProperties: plan.patches.properties.length,
+    patchMembers: plan.patches.members.length,
   };
   console.log(JSON.stringify(summary, null, 2));
 
@@ -166,7 +193,7 @@ async function main() {
     const batches = [];
     for (const cs of plan.codeSystems) {
       const r = await loadCodeSystem(client, cs);
-      result.codeSystems.push({ codeSystem: cs.codeSystem.internalCode, concepts: r.concepts });
+      result.codeSystems.push({ codeSystem: cs.codeSystem.internalCode, origin: cs.origin, concepts: r.concepts });
       batches.push({ cs, ...r });
     }
     result.designations = await insertMany(client, 'concept_designations', ['id', 'concept_id', 'language_concept_id', 'designation_type_concept_id', 'value', 'preferred'], plan.designations.map((d) => [d.id, d.conceptId, d.lang, d.type, d.value, d.preferred]), ['uuid', 'uuid', 'uuid', 'uuid', null, 'boolean']);
@@ -175,6 +202,10 @@ async function main() {
     result.valueSets = await insertMany(client, 'value_sets', ['id', 'internal_code', 'name', 'canonical_url', 'description', 'state_concept_id'], plan.valueSets.map((v) => [v.id, v.code, v.name, v.canonicalUrl, v.description, INTERNAL.TERM_ACTIVE]), ['uuid', null, null, null, null, 'uuid']);
     result.valueSetVersions = await insertMany(client, 'value_set_versions', ['id', 'value_set_id', 'version', 'is_default', 'state_concept_id'], plan.valueSets.map((v) => [v.versionId, v.id, '1', true, INTERNAL.TERM_ACTIVE]), ['uuid', 'uuid', null, 'boolean', 'uuid']);
     result.members = await insertMany(client, 'value_set_members', ['id', 'value_set_version_id', 'concept_id', 'included'], plan.members.map((m) => [m.id, m.versionId, m.conceptId, true]), ['uuid', 'uuid', 'uuid', 'boolean']);
+    // parches de la tanda 2 sobre conceptos ya existentes (designaciones, propiedades, pertenencia a value sets)
+    result.patchDesignations = await insertMany(client, 'concept_designations', ['id', 'concept_id', 'language_concept_id', 'designation_type_concept_id', 'value', 'preferred'], plan.patches.designations.map((d) => [d.id, d.conceptId, d.lang, d.type, d.value, d.preferred]), ['uuid', 'uuid', 'uuid', 'uuid', null, 'boolean']);
+    result.patchProperties = await insertMany(client, 'concept_properties', ['id', 'concept_id', 'property_code', 'data_type', 'value_json'], plan.patches.properties.map((p) => [p.id, p.conceptId, p.code, p.dataType, JSON.stringify(p.value)]), ['uuid', 'uuid', null, 'terminology.technical_data_type', 'jsonb']);
+    result.patchMembers = await insertMany(client, 'value_set_members', ['id', 'value_set_version_id', 'concept_id', 'included'], plan.patches.members.map((m) => [m.id, m.versionId, m.conceptId, true]), ['uuid', 'uuid', 'uuid', 'boolean']);
     const { rows: present } = await client.query('SELECT id::text FROM terminology.catalog_concepts WHERE id = ANY($1::uuid[])', [plan.conceptMaps.map((m) => m.source)]);
     const have = new Set(present.map((r) => r.id));
     const maps = plan.conceptMaps.filter((m) => have.has(m.source));
@@ -184,7 +215,7 @@ async function main() {
       await client.query(
         `INSERT INTO terminology.catalog_import_batches (id, source_id, code_system_version_id, started_at, finished_at, total_read, total_inserted, total_errors, checksum, recorded_at)
          VALUES ($1::uuid, $2::uuid, $3::uuid, $4, now(), $5, $6, 0, $7, now())`,
-        [md5uuid(`mantra:allergy-catalog:batch:${b.cs.codeSystem.internalCode}:${started.toISOString()}`), b.sourceId, b.versionId, started, b.cs.records.length, b.concepts, md5uuid(b.cs.records.map((r) => r.id).join('|'))],
+        [md5uuid(`mantra:allergy-catalog:batch:${b.cs.codeSystem.internalCode}:${b.cs.origin}:${started.toISOString()}`), b.sourceId, b.versionId, started, b.cs.records.length, b.concepts, md5uuid(b.cs.records.map((r) => r.id).join('|'))],
       );
     }
     await client.query('COMMIT');

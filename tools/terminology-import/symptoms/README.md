@@ -19,4 +19,10 @@ Ontology, anotaciones de enfermedades comunes de HPO, **Orphadata producto 4**),
 | 2b/2c | `load-wikidata-crosswalk.mjs`, `load-medgen-crosswalk.mjs` | Cruces HPO↔Wikidata y por CUI (idempotentes) |
 | 3 | `load-disease-phenotypes.mjs` | Relaciones enfermedad → síntoma contra `terminology.concept_relationship_evidence` del modelo v4.2.50 (patch v4250, e8bd453). Aborta sin escribir si falta la tabla o los value sets |
 
-Pruebas: `node --test "tools/terminology-import/symptoms/test/*.test.mjs"` (27, con recortes reales). Base desechable para probar los cargadores: `test/disposable-db/` (`fresh-db.sh` aplica el DDL de `database/SQL` y el patch v4250 del repo del modelo, sin tocarlo).
+Pruebas: `node --test "tools/terminology-import/symptoms/test/*.test.mjs"` (31, con recortes reales). Base desechable para probar los cargadores: `test/disposable-db/` (`fresh-db.sh` aplica el DDL de `database/SQL` y el patch v4250 del repo del modelo, sin tocarlo).
+
+**Aprobación de HPO.** Los cargadores que escriben contenido de HPO (`load-symptoms.mjs`, `load-disease-phenotypes.mjs`,
+`load-wikidata-crosswalk.mjs`, `load-medgen-crosswalk.mjs`) se niegan a escribir (salida 3) sin `--accept-hpo-terms` o
+`MANTRA_HPO_TERMS_ACCEPTED=1`: la lectura de la licencia de HPO está pendiente del propietario (`SOURCES.md` ¹).
+**Procedencia versionada:** `data/sources-manifest.json.gz` (SHA-256 de cada fuente) y `data/wikidata-p3841-snapshot.json.gz`
+(consulta normalizada); `unpack-data.mjs` los restaura.

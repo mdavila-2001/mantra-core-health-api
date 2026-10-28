@@ -103,36 +103,74 @@ function parseXref(value) {
  * obsolete, replacedBy[], consider[], comment, other{} }.
  */
 export function parseObo(text) {
-  const header = {};
-  const terms = [];
-  const typedefs = [];
-  let cur = null;
-  let kind = 'header';
-  const lines = text.split(/\r?\n/);
-  for (const raw of lines) {
-    const line = raw.trim();
-    if (line === '' || line.startsWith('!')) continue;
-    const stanza = line.match(/^\[(\w+)\]$/);
-    if (stanza) {
-      kind = stanza[1];
-      cur = newEntry();
-      if (kind === 'Term') terms.push(cur);
-      else if (kind === 'Typedef') typedefs.push(cur);
-      else cur = null; // [Instance] u otros: se ignoran
-      continue;
-    }
-    const idx = line.indexOf(':');
-    if (idx < 0) continue;
-    const tag = line.slice(0, idx).trim();
-    const value = line.slice(idx + 1).trim();
-    if (kind === 'header') {
-      (header[tag] ??= []).push(value);
-      continue;
-    }
-    if (!cur) continue;
-    applyTag(cur, tag, value);
+  const st = newOboState();
+  for (const raw of text.split(/\r?\n/)) feedOboLine(st, raw);
+  if (st.cur) compactEntry(st.cur);
+  return { header: st.header, terms: st.terms, typedefs: st.typedefs };
+}
+
+/** Estado de un parseo incremental (línea a línea): para archivos de cientos de MB que no caben como un solo string. */
+export function newOboState() {
+  return { header: {}, terms: [], typedefs: [], cur: null, kind: 'header' };
+}
+
+/**
+ * Procesa UNA línea. `opts.skipTags` (Set) descarta tags enteros antes de
+ * parsearlos (p. ej. `property_value`, que en ChEBI lleva SMILES e InChI);
+ * `opts.keepProperty(property)` conserva sólo los property_value que devuelva true.
+ */
+export function feedOboLine(st, raw, opts = {}) {
+  const line = raw.trim();
+  if (line === '' || line.startsWith('!')) return;
+  const stanza = line.match(/^\[(\w+)\]$/);
+  if (stanza) {
+    if (st.cur) compactEntry(st.cur);
+    st.kind = stanza[1];
+    st.cur = newEntry();
+    if (st.kind === 'Term') st.terms.push(st.cur);
+    else if (st.kind === 'Typedef') st.typedefs.push(st.cur);
+    else st.cur = null; // [Instance] u otros: se ignoran
+    return;
   }
-  return { header, terms, typedefs };
+  const idx = line.indexOf(':');
+  if (idx < 0) return;
+  const tag = line.slice(0, idx).trim();
+  const value = line.slice(idx + 1).trim();
+  if (st.kind === 'header') {
+    (st.header[tag] ??= []).push(value);
+    return;
+  }
+  if (!st.cur) return;
+  if (opts.skipTags?.has(tag)) return;
+  // `keepId(id)`: descarta de entrada los términos ajenos (PRO trae 90 mil genes externos de otras bases) sin guardarlos.
+  if (tag === 'id' && st.kind === 'Term' && opts.keepId && !opts.keepId(value)) {
+    st.terms.pop();
+    st.cur = null;
+    return;
+  }
+  if (tag === 'property_value' && opts.keepProperty && !opts.keepProperty(value.split(/\s+/)[0])) return;
+  applyTag(st.cur, tag, value);
+}
+
+/** Igual que parseObo pero leyendo el archivo en streaming (memoria acotada al resultado, no al texto). */
+export async function parseOboFile(path, opts = {}) {
+  const { createReadStream } = await import('node:fs');
+  const { createInterface } = await import('node:readline');
+  const st = newOboState();
+  const rl = createInterface({ input: createReadStream(path, { encoding: 'utf8' }), crlfDelay: Infinity });
+  for await (const raw of rl) feedOboLine(st, raw, opts);
+  if (st.cur) compactEntry(st.cur);
+  return { header: st.header, terms: st.terms, typedefs: st.typedefs };
+}
+
+const EMPTY_ARRAY = Object.freeze([]);
+const EMPTY_OBJECT = Object.freeze({});
+const ARRAY_FIELDS = ['defXrefs', 'synonyms', 'xrefs', 'isA', 'relationships', 'intersectionOf', 'subsets', 'altIds', 'propertyValues', 'replacedBy', 'consider'];
+
+/** Al cerrar un término, los arreglos vacíos pasan a ser uno solo compartido (de sólo lectura): con 300 mil términos son cientos de MB. */
+function compactEntry(e) {
+  for (const f of ARRAY_FIELDS) if (e[f].length === 0) e[f] = EMPTY_ARRAY;
+  if (Object.keys(e.other).length === 0) e.other = EMPTY_OBJECT;
 }
 
 function newEntry() {
@@ -159,7 +197,7 @@ function applyTag(e, tag, rawValue) {
     case 'comment': e.comment = rawValue; break;
     case 'synonym': {
       const s = parseSynonym(body);
-      if (s) e.synonyms.push(s);
+      if (s) e.synonyms.push(Object.keys(qualifiers).length ? { ...s, qualifiers } : s);
       break;
     }
     case 'xref': {

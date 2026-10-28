@@ -45,7 +45,7 @@ async function main() {
   const rows = [];
   for (const code of codes) {
     const hit = await lookup(code);
-    rows.push({ loincNum: code, bindingsInCkm: bound.get(code), resolved: Boolean(hit), ...(hit ?? {}), source: 'NLM Clinical Table Search Service, tabla loinc_items (subconjunto público de LOINC)', url: `${API}?terms=${code}&sf=LOINC_NUM`, fetchedAt });
+    rows.push({ loincNum: code, bindingsInCkm: bound.get(code), resolved: Boolean(hit), ...(hit ?? {}), source: 'NLM Clinical Table Search Service, tabla loinc_items (subconjunto público de LOINC)', url: `${API}?terms=${code}&sf=LOINC_NUM` }); // sin fecha en la fila: va en loinc-links-report
   }
   await writeNdjson(join(NURSING_OUT, 'loinc-links.ndjson'), rows);
 

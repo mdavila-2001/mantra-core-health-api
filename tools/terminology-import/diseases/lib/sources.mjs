@@ -42,6 +42,8 @@ export const LICENSES = {
   HPO: 'Licencia propia de HPO (LICENSE.md del repo remite a https://hpo.jax.org/app/license): uso libre con atribución y versión',
   PHENOPACKET_STORE: 'BSD-3-Clause (https://github.com/monarch-initiative/phenopacket-store/blob/main/LICENSE) — Monarch Initiative',
   MEDLINEPLUS: 'MedlinePlus (U.S. National Library of Medicine): los resúmenes de temas de salud son de dominio público; atribución pedida: «Fuente: MedlinePlus, National Library of Medicine». La Enciclopedia A.D.A.M. y las monografías de medicamentos NO son de dominio público y no se usan; de este archivo sólo se toman los pares descriptor MeSH → tema. https://medlineplus.gov/about/using/usingcontent/',
+  MEDLINEPLUS_GENETICS: 'Dominio público (obra del gobierno federal de EE. UU.): «Summaries on Genetics pages, including health condition, gene, and chromosome pages» figuran como contenido sin copyright en https://medlineplus.gov/about/using/usingcontent/ ; se pide atribución: «Fuente: MedlinePlus, National Library of Medicine»',
+  WIKIDATA: 'CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/) — datos estructurados de Wikidata (https://www.wikidata.org/wiki/Wikidata:Licensing); las etiquetas en castellano las escribe la comunidad, no son traducción oficial',
   MESH: 'Uso libre con atribución («Courtesy of the U.S. National Library of Medicine», https://www.nlm.nih.gov/databases/download/terms_and_conditions_mesh.html) — MeSH 2026, National Library of Medicine',
   NANDO: 'CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/), declarada en el README del repositorio aidrd/nando («Licens: CC-BY 4.0 | DBCLS») — DBCLS / NIBIOHN',
   ONCOTREE: 'CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/), declarada en la sección License del README de cBioPortal/oncotree — Memorial Sloan Kettering Cancer Center',
@@ -244,6 +246,14 @@ export const SOURCE_FILES = [
     license: LICENSES.MEDLINEPLUS,
   },
   {
+    key: 'medlineplus-genetics',
+    file: 'medlineplus/ghr-summaries.xml',
+    url: 'https://medlineplus.gov/download/ghr-summaries.xml',
+    publisher: 'MedlinePlus Genetics (U.S. National Library of Medicine) — compendio de resúmenes (condiciones, genes y cromosomas; sólo se usan las condiciones)',
+    version: '2026-10-27 (esquema ghr-summaries-20250602)',
+    license: LICENSES.MEDLINEPLUS_GENETICS,
+  },
+  {
     key: 'efo',
     file: 'efo/efo.obo',
     url: 'https://github.com/EBISPOT/efo/releases/download/v3.95.0/efo.obo',
@@ -302,6 +312,34 @@ export const MEASURE_FILES = [
   },
 ];
 
+/** Más fuentes independientes que sólo se MIDEN (ids de enfermedad que citan): ninguna aporta nomenclatura propia que cargar. */
+MEASURE_FILES.push(
+  {
+    key: 'gencc',
+    file: 'gencc/gencc-submissions.tsv',
+    url: 'https://search.thegencc.org/download/action/submissions-export-tsv',
+    publisher: 'GenCC — Gene Curation Coalition (envíos gen-enfermedad de ClinGen, Orphanet, PanelApp y otros)',
+    version: 'descarga del 2026-10-27',
+    license: 'CC0 1.0 según la política de GenCC (https://thegencc.org); sólo se miden los ids de enfermedad (columna disease_curie), no se carga nada.',
+  },
+  {
+    key: 'orphadata-en-product6',
+    file: 'orphanet/en_product6.xml',
+    url: 'https://www.orphadata.com/data/xml/en_product6.xml',
+    publisher: 'Orphanet (INSERM US14) — enfermedades raras con sus genes (producto 6; no existe versión es_product6)',
+    version: 'descarga del 2026-10-27',
+    license: LICENSES.ORPHANET,
+  },
+  {
+    key: 'orphadata-en-product9-prev',
+    file: 'orphanet/en_product9_prev.xml',
+    url: 'https://www.orphadata.com/data/xml/en_product9_prev.xml',
+    publisher: 'Orphanet (INSERM US14) — prevalencia y epidemiología (producto 9)',
+    version: 'descarga del 2026-10-27',
+    license: LICENSES.ORPHANET,
+  },
+);
+
 const MONARCH_KG = 'https://storage.googleapis.com/data-public-monarchinitiative/monarch-kg/2026-10-07/transform_output';
 /**
  * Ingestas del Monarch KG 2026-10-07 (bucket público de Monarch = data.monarchinitiative.org):
@@ -338,4 +376,30 @@ export const GARD = {
   aboutUrl: 'https://rarediseases.info.nih.gov/about',
   version: '2026-09',
   license: LICENSES.GARD,
+};
+
+/**
+ * Wikidata (CC0): enfermedades con nombre en castellano y las que ningún otro sistema del catálogo identifica.
+ * Las baja `fetch-wikidata.mjs` por SPARQL. Las propiedades se verifican por su etiqueta antes de usarlas.
+ */
+export const WIKIDATA = {
+  dir: join(SOURCES_DIR, 'wikidata'),
+  endpoint: 'https://query.wikidata.org/sparql',
+  license: LICENSES.WIKIDATA,
+  properties: {
+    P31: { label: 'instance of' },
+    P279: { label: 'subclass of' },
+    P5270: { label: 'Mondo ID', id: true },
+    P699: { label: 'Disease Ontology ID', id: true },
+    P1550: { label: 'Orphanet ID', id: true },
+    P486: { label: 'MeSH descriptor ID', id: true },
+    P6680: { label: 'MeSH term ID', id: true },
+    P492: { label: 'OMIM ID', id: true },
+    P1748: { label: 'NCI Thesaurus ID', id: true },
+    P7329: { label: 'ICD-11 ID (MMS)', id: true },
+    P7807: { label: 'ICD-11 ID (Foundation)', id: true },
+    P494: { label: 'ICD-10 ID', id: true },
+    P4229: { label: 'ICD-10-CM', id: true },
+    P2892: { label: 'UMLS CUI', id: true },
+  },
 };

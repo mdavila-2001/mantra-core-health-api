@@ -15,6 +15,7 @@ import { fileURLToPath } from 'node:url';
 import { deterministicId } from '../../lib/glossary-es/common.mjs';
 import { CONCEPT, md5uuid, valueSetId, valueSetMemberId, valueSetVersionId } from '../../lib/glossary-es/load-plan.mjs';
 import { conceptIdOf, hl7Code } from './catalog.mjs';
+import { OPEN_CODE_SYSTEMS, OPEN_VALUE_SETS } from './open-sources.mjs';
 import { CODE_SYSTEMS, RXNORM_LEXICAL_GROUPS, VALUE_SETS } from './sources.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -39,6 +40,7 @@ const LANG = { es: INTERNAL.LANG_ES, en: INTERNAL.LANG_EN };
 export function allValueSets() {
   return {
     ...VALUE_SETS,
+    ...OPEN_VALUE_SETS,
     ...Object.fromEntries(
       RXNORM_LEXICAL_GROUPS.map((g) => [
         `allergy-substances-rxnorm-${g.key}`,
@@ -54,25 +56,38 @@ function versionOf(records) {
   return [...parts].sort().join('+').slice(0, 250);
 }
 
+/** Los registros de la tanda 2 llevan `pass >= 21`; los de la tanda 1, no. */
+const originOf = (r) => ((r.pass ?? 0) >= 21 ? 'open' : 'base');
+
+/**
+ * Un plan por (code system, tanda): cada tanda trae su propia versión de origen. La de la tanda 1 conserva
+ * el id y el texto de versión de siempre (así nada ya cargado cambia); la de la tanda 2 es otra
+ * `code_system_version` del mismo code system.
+ */
 export function codeSystemPlans(records) {
   const groups = new Map();
   for (const r of records) {
-    if (!groups.has(r.codeSystem)) groups.set(r.codeSystem, []);
-    groups.get(r.codeSystem).push(r);
+    const key = `${r.codeSystem}\u0000${originOf(r)}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(r);
   }
-  return [...groups.entries()].map(([internalCode, recs]) => {
-    const def = CODE_SYSTEMS[internalCode];
-    if (!def) throw new Error(`code system sin definición: ${internalCode}`);
-    const version = versionOf(recs);
-    const licenses = [...new Set(recs.map((r) => r.provenance.license))].join(' · ');
-    return {
-      internalCode,
-      records: recs,
-      source: { id: md5uuid(`mantra:allergy-catalog:source:${def.sourceCode}`), code: def.sourceCode, name: def.name, owner: def.owner, officialUrl: def.officialUrl, license: licenses },
-      codeSystem: { id: md5uuid(`mantra:allergy-catalog:cs:${internalCode}`), internalCode, name: def.name, canonicalUrl: `https://mantracore.health/fhir/CodeSystem/${internalCode}` },
-      version: { id: md5uuid(`mantra:allergy-catalog:csv:${internalCode}:${version}`), version },
-    };
-  });
+  return [...groups.entries()]
+    .sort(([a], [b]) => (a < b ? -1 : 1))
+    .map(([key, recs]) => {
+      const [internalCode, origin] = key.split('\u0000');
+      const def = CODE_SYSTEMS[internalCode] ?? OPEN_CODE_SYSTEMS[internalCode];
+      if (!def) throw new Error(`code system sin definición: ${internalCode}`);
+      const version = versionOf(recs);
+      const licenses = [...new Set(recs.map((r) => r.provenance.license))].join(' · ');
+      return {
+        internalCode,
+        origin,
+        records: recs,
+        source: { id: md5uuid(`mantra:allergy-catalog:source:${def.sourceCode}`), code: def.sourceCode, name: def.name, owner: def.owner, officialUrl: def.officialUrl, license: licenses },
+        codeSystem: { id: md5uuid(`mantra:allergy-catalog:cs:${internalCode}`), internalCode, name: def.name, canonicalUrl: `https://mantracore.health/fhir/CodeSystem/${internalCode}` },
+        version: { id: md5uuid(`mantra:allergy-catalog:csv:${internalCode}:${version}`), version },
+      };
+    });
 }
 
 const prop = (conceptId, code, dataType, value) => ({ id: md5uuid(`mantra:allergy-catalog:property:${code}:${conceptId}`), conceptId, code, dataType, value });
@@ -82,7 +97,7 @@ export function propertiesFor(r) {
   const out = [
     prop(r.id, 'allergy_provenance', 'json', r.provenance),
     prop(r.id, 'source_license', 'string', r.provenance.license),
-    prop(r.id, 'source_url', 'string', r.provenance.artifactUrl),
+    ...(r.provenance.artifactUrl ? [prop(r.id, 'source_url', 'string', r.provenance.artifactUrl)] : []),
     prop(r.id, 'source_retrieved_at', 'string', r.provenance.retrievedAt),
     prop(r.id, 'display_language', 'string', r.displayLanguage),
   ];
@@ -135,8 +150,26 @@ export function enumConceptMaps(enumCodes = JSON.parse(readFileSync(ENUM_CODES_P
   return out;
 }
 
+/**
+ * Parches de la tanda 2 sobre conceptos que ya existen: designaciones nuevas, propiedades nuevas y
+ * pertenencia a value sets. Mismos ids deterministas; los que ya estén se ignoran con `ON CONFLICT DO NOTHING`.
+ */
+export function patchPlan(patches) {
+  const designations = [];
+  const properties = [];
+  const members = [];
+  for (const p of patches) {
+    p.designations.forEach((d) =>
+      designations.push({ id: md5uuid(`mantra:allergy-catalog:designation-patch:${p.id}:${d.lang}:${d.preferred ? 'p' : 's'}:${d.value}`), conceptId: p.id, lang: LANG[d.lang], type: d.preferred ? INTERNAL.DESIG_PREFERRED : INTERNAL.DESIG_SYNONYM, value: d.value, preferred: d.preferred }),
+    );
+    for (const [code, value] of Object.entries(p.properties)) if (value !== null && value !== undefined) properties.push(prop(p.id, code, typeof value === 'string' ? 'string' : 'json', value));
+    for (const vs of p.valueSets) members.push({ id: valueSetMemberId(vs, p.id), versionId: valueSetVersionId(vs), conceptId: p.id });
+  }
+  return { designations, properties, members };
+}
+
 /** Plan completo: lo que se insertaría, sin tocar la base. */
-export function buildPlan(records) {
+export function buildPlan(records, patches = []) {
   const valueSets = allValueSets();
   const known = new Set(records.map((r) => r.id));
   const relationships = records.flatMap(relationshipsFor);
@@ -153,5 +186,6 @@ export function buildPlan(records) {
     valueSets: Object.entries(valueSets).map(([code, def]) => ({ code, id: valueSetId(code), versionId: valueSetVersionId(code), canonicalUrl: `https://mantracore.health/fhir/ValueSet/${code}`, ...def })),
     members,
     conceptMaps: enumConceptMaps(),
+    patches: patchPlan(patches),
   };
 }

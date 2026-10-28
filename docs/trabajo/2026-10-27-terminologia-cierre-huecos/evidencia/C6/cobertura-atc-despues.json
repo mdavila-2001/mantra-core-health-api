@@ -1,0 +1,100 @@
+{
+  "assertions": 341019,
+  "assertionsWithAtc": 228242,
+  "drugsDistinct": 21970,
+  "drugsSingleIngredient": 21668,
+  "drugsSingleIngredientWithAtc": 5466,
+  "distinctAtcLevel5Codes": 5315,
+  "atcAddedByCrosswalkVia": {
+    "rxclass-atc": 319551,
+    "chembl-atc": 375700,
+    "wikidata-ids": 1515968,
+    "drugcentral-ids": 575069
+  },
+  "bySource": {
+    "labeledin": {
+      "assertions": 2850,
+      "withAtc": 2759,
+      "atcFromSourceCode": 0,
+      "atcFromCrosswalk": 2759
+    },
+    "pharmacotherapydb": {
+      "assertions": 1388,
+      "withAtc": 1355,
+      "atcFromSourceCode": 0,
+      "atcFromCrosswalk": 1355
+    },
+    "drugcentral-2016": {
+      "assertions": 9094,
+      "withAtc": 8471,
+      "atcFromSourceCode": 0,
+      "atcFromCrosswalk": 8471
+    },
+    "drugmechdb": {
+      "assertions": 4662,
+      "withAtc": 4464,
+      "atcFromSourceCode": 0,
+      "atcFromCrosswalk": 4464
+    },
+    "maxo": {
+      "assertions": 38,
+      "withAtc": 30,
+      "atcFromSourceCode": 0,
+      "atcFromCrosswalk": 30
+    },
+    "medrt": {
+      "assertions": 30002,
+      "withAtc": 18027,
+      "atcFromSourceCode": 0,
+      "atcFromCrosswalk": 18027
+    },
+    "chembl": {
+      "assertions": 60055,
+      "withAtc": 43030,
+      "atcFromSourceCode": 0,
+      "atcFromCrosswalk": 43030
+    },
+    "drugcentral": {
+      "assertions": 38517,
+      "withAtc": 35966,
+      "atcFromSourceCode": 0,
+      "atcFromCrosswalk": 35966
+    },
+    "wikidata": {
+      "assertions": 13506,
+      "withAtc": 12757,
+      "atcFromSourceCode": 11947,
+      "atcFromCrosswalk": 12739
+    },
+    "eeml": {
+      "assertions": 1068,
+      "withAtc": 1068,
+      "atcFromSourceCode": 1068,
+      "atcFromCrosswalk": 0
+    },
+    "ema": {
+      "assertions": 2514,
+      "withAtc": 2514,
+      "atcFromSourceCode": 2514,
+      "atcFromCrosswalk": 0
+    },
+    "opentargets": {
+      "assertions": 2331,
+      "withAtc": 2073,
+      "atcFromSourceCode": 0,
+      "atcFromCrosswalk": 2073
+    },
+    "civic": {
+      "assertions": 3147,
+      "withAtc": 0,
+      "atcFromSourceCode": 0,
+      "atcFromCrosswalk": 0
+    },
+    "clinicaltrials": {
+      "assertions": 171847,
+      "withAtc": 95728,
+      "atcFromSourceCode": 0,
+      "atcFromCrosswalk": 95728
+    }
+  }
+}

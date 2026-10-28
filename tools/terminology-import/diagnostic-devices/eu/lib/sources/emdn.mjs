@@ -20,6 +20,7 @@ export const EMDN_HEADER_SPEC = {
   term: {
     aliases: [
       'term',
+      'term emdn',
       'EMDN term',
       'description',
       'EMDN description',
@@ -139,18 +140,32 @@ export function discoverExcelLinks(html, pageUrl) {
   return [...out];
 }
 
+/**
+ * El Excel oficial 2026 trae una fila de título («EMDN_v.2026») antes de los
+ * encabezados: la fila de encabezados es la que tiene la columna «CODE».
+ */
+export function findEmdnHeaderRow(rows) {
+  return rows.findIndex((r) =>
+    r.some((v) => /^(?:emdn\s+)?(?:code|codice)$/i.test(String(v ?? '').trim())),
+  );
+}
+
+/** Los encabezados oficiales llevan la versión: «TERM EMDN (v.2026)» → «TERM EMDN». */
+export const cleanEmdnHeaderCell = (v) =>
+  String(v ?? '')
+    .replace(/\s*\(v\.?\s*\d+\)/i, '')
+    .trim();
+
 /** Lee la primera hoja de un .xlsx con la librería `xlsx` ya declarada en el repo. */
 export async function readFirstSheet(path) {
   const XLSX = (await import('xlsx')).default;
   const wb = XLSX.readFile(path);
   const sheet = wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false });
-  const headerIdx = rows.findIndex((r) =>
-    r.some((v) => /emdn|code|codice/i.test(String(v ?? ''))),
-  );
+  const headerIdx = findEmdnHeaderRow(rows);
   if (headerIdx < 0)
     throw new Error(`No se encontró la fila de encabezados en ${path}`);
-  const header = rows[headerIdx].map((v) => String(v ?? '').trim());
+  const header = rows[headerIdx].map(cleanEmdnHeaderCell);
   const records = rows
     .slice(headerIdx + 1)
     .map((r) => Object.fromEntries(header.map((h, j) => [h, r[j] ?? ''])));

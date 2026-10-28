@@ -7,11 +7,21 @@
 # que dar lo mismo (es idempotente) y eso se comprueba acá.
 #
 # Uso (Postgres 16 local, p. ej. initdb en /var/tmp/pg-C2):
-#   DB_HOST=/var/tmp/pgsock-C2 DB_PORT=55402 DB_USER=mantra DB_NAME=symptoms_test \
+#   DISPOSABLE_DB=1 DB_HOST=/var/tmp/pgsock-C2 DB_PORT=55402 DB_USER=mantra DB_NAME=symptoms_test \
 #   MODEL_REPO=/home/user/mantra-core-health-model \
 #   sh tools/terminology-import/symptoms/test/disposable-db/fresh-db.sh
 # Nunca contra una base real.
 set -e
+# GUARDA: este script hace `drop database $DB_NAME`. Sólo corre contra una base desechable:
+#   - DISPOSABLE_DB=1 explícito, y
+#   - nombre que termina en _test (nunca postgres, template*, ni un nombre de entorno real), y
+#   - servidor local (socket Unix, localhost o 127.0.0.1).
+refuse() { echo "fresh-db.sh se niega: $1" >&2; exit 4; }
+[ "${DISPOSABLE_DB:-}" = "1" ] || refuse "falta DISPOSABLE_DB=1 (confirmación de que la base es desechable)"
+: "${DB_HOST:?falta DB_HOST}" "${DB_PORT:?falta DB_PORT}" "${DB_USER:?falta DB_USER}" "${DB_NAME:?falta DB_NAME}"
+case "$DB_NAME" in postgres|template0|template1) refuse "DB_NAME=$DB_NAME es una base del sistema";; esac
+case "$DB_NAME" in *_test) ;; *) refuse "DB_NAME=$DB_NAME no termina en _test";; esac
+case "$DB_HOST" in /*|localhost|127.0.0.1) ;; *) refuse "DB_HOST=$DB_HOST no es local";; esac
 ROOT=$(cd "$(dirname "$0")/../../../../.." && pwd)
 MODEL_REPO=${MODEL_REPO:-/home/user/mantra-core-health-model}
 Q="psql -q -h $DB_HOST -p $DB_PORT -U $DB_USER"

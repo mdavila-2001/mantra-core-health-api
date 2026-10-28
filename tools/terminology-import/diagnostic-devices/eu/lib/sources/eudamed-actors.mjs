@@ -133,3 +133,65 @@ export function normalizeActorRow(row, ctx) {
     ),
   );
 }
+
+// -----------------------------------------------------------------------------
+// Data Lake oficial: GET /actors (verificado el 2026-10-27, 34 campos).
+// Se conserva lo que identifica a la ORGANIZACIÓN: SRN, nombre, nombre
+// abreviado, rol, estado, VAT, país, ciudad, sitio web. Se descartan a
+// propósito ACT_EMAIL, ACT_TELEPHONE y PRRC_FIRST_NAME / PRRC_FAMILY_NAME
+// (persona responsable del cumplimiento normativo): son datos de personas
+// físicas y no sirven para el catálogo.
+// -----------------------------------------------------------------------------
+
+export const DATALAKE_ACTOR_PERSONAL_FIELDS = Object.freeze([
+  'ACT_EMAIL',
+  'ACT_TELEPHONE',
+  'PRRC_FIRST_NAME',
+  'PRRC_FAMILY_NAME',
+]);
+
+/** Fila de GET /actors → registro de actor (misma forma que `normalizeActorRow`). */
+export function normalizeDatalakeActor(row, ctx) {
+  const srn = clean(row.ACTOR_ID);
+  if (!srn || !SRN_RE.test(srn)) return null;
+  const iso = clean(row.ACT_COUNTRY_ISO2_CODE)?.toUpperCase() ?? null;
+  const rec = makeDeviceRecord({
+    source: SOURCE,
+    sourceRecordId: srn,
+    sourceUrl: `https://api.datalake.sante.service.ec.europa.eu/eudamed/actors?ACTOR_ID=${encodeURIComponent(srn)}&format=json&api-version=v1.0`,
+    sourceVersion: `eudamed-public-api-v1.0;actor-version=${row.VERSION ?? '?'}`,
+    retrievedAt: ctx.retrievedAt,
+    manufacturerName: row.NAME,
+    manufacturerCountry: iso && /^[A-Z]{2}$/.test(iso) ? iso : SRN_RE.exec(srn)[1],
+    manufacturerRegistryId: `srn:${srn}`,
+    extra: {
+      role: clean(row.ACTOR_TYPE),
+      actorStatus: clean(row.STATUS),
+      statusFromDate: clean(row.STATUS_FROM_DATE),
+      abbreviatedName: clean(row.ABBREVIATED_NAME),
+      vatNumber: clean(row.EUROPEAN_VAT_NUMBER),
+      city: clean(row.ACT_ADDR_CITY_NAME),
+      countryName: clean(row.ACT_COUNTRY_NAME),
+      website: clean(row.ACT_WEBSITE),
+      official: ctx.official,
+    },
+  });
+  return Object.fromEntries(
+    Object.entries(rec).filter(([k]) =>
+      ['source', 'sourceRecordId', 'sourceUrl', 'sourceVersion', 'retrievedAt',
+        'manufacturerName', 'manufacturerCountry', 'manufacturerRegistryId', 'extra'].includes(k),
+    ),
+  );
+}
+
+/** Por SRN, la versión mayor (el endpoint puede traer versiones históricas). */
+export function currentDatalakeActors(rows) {
+  const best = new Map();
+  for (const r of rows) {
+    const id = clean(r.ACTOR_ID);
+    if (!id) continue;
+    const prev = best.get(id);
+    if (!prev || (Number(r.VERSION) || 0) > (Number(prev.VERSION) || 0)) best.set(id, r);
+  }
+  return [...best.values()];
+}

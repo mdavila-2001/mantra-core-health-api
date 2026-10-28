@@ -1,0 +1,20 @@
+ tamano_total 
+--------------
+ 917 MB
+(1 row)
+
+           internal_code           | visibles 
+-----------------------------------+----------
+ glossary-all-terms                |   183162
+ glossary-category-diagnostic-test |      704
+ glossary-category-disease         |    86027
+ glossary-category-imaging         |     3441
+ glossary-category-other           |    15166
+ glossary-category-pharmacology    |     1169
+ glossary-category-procedure       |    69999
+ glossary-category-signs-symptoms  |     1268
+ glossary-category-specialty       |      101
+ glossary-category-treatment       |     5287
+(10 rows)
+
+320 MB

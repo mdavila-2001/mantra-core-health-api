@@ -1,0 +1,178 @@
+=== Carga del catálogo de alergias a terminology.*  ===
+Leyendo /home/user/mantra-core-health-api/tools/terminology-import/allergies/data/allergy-catalog.ndjson.gz
+Leyendo /home/user/mantra-core-health-api/tools/terminology-import/allergies/data/allergy-catalog-open.part-01.ndjson.gz
+{
+  "codeSystems": [
+    {
+      "codeSystem": "allergy-chebi",
+      "origin": "base",
+      "version": "ecto@http://purl.obolibrary.org/obo/ecto/releases/2026-07-28/ecto.owl",
+      "concepts": 86
+    },
+    {
+      "codeSystem": "allergy-chebi",
+      "origin": "open",
+      "version": "chebi-lite@chebi/256",
+      "concepts": 266
+    },
+    {
+      "codeSystem": "allergy-cvx-vaccines",
+      "origin": "base",
+      "version": "phinvads@0.12.0+vsac@0.24.0",
+      "concepts": 275
+    },
+    {
+      "codeSystem": "allergy-cvx-vaccines",
+      "origin": "open",
+      "version": "cdc-cvx@descarga 2026-10-27 (cada fila de cvx.txt trae «Last Updated»)",
+      "concepts": 12
+    },
+    {
+      "codeSystem": "allergy-doid",
+      "origin": "base",
+      "version": "doid@releases/2026-09-30/doid.obo",
+      "concepts": 176
+    },
+    {
+      "codeSystem": "allergy-eu-additives",
+      "origin": "open",
+      "version": "eurlex-1333@02008R1333-20260818",
+      "concepts": 336
+    },
+    {
+      "codeSystem": "allergy-eu-allergens",
+      "origin": "open",
+      "version": "eurlex-1169@02011R1169-20250401",
+      "concepts": 14
+    },
+    {
+      "codeSystem": "allergy-fda-major-allergens",
+      "origin": "open",
+      "version": "usc-21-321@US Code 2023 (título 21)",
+      "concepts": 9
+    },
+    {
+      "codeSystem": "allergy-fda-unii",
+      "origin": "open",
+      "version": "gsrs@2026-10-27",
+      "concepts": 505
+    },
+    {
+      "codeSystem": "allergy-foodon",
+      "origin": "base",
+      "version": "foodon@http://purl.obolibrary.org/obo/foodon/releases/2026-09-20/foodon.owl",
+      "concepts": 20
+    },
+    {
+      "codeSystem": "allergy-hl7-fhir",
+      "origin": "base",
+      "version": "fhir-r5-core@5.0.0+hl7-terminology@1.0.0+hl7-terminology@1.0.1+hl7-terminology@3.0.0",
+      "concepts": 50
+    },
+    {
+      "codeSystem": "allergy-hpo",
+      "origin": "base",
+      "version": "hpo@hp/releases/2026-09-01",
+      "concepts": 19178
+    },
+    {
+      "codeSystem": "allergy-iuis-allergens",
+      "origin": "open",
+      "version": "iuis@2026-10-26",
+      "concepts": 2801
+    },
+    {
+      "codeSystem": "allergy-iuis-sources",
+      "origin": "open",
+      "version": "iuis@2026-10-26",
+      "concepts": 423
+    },
+    {
+      "codeSystem": "allergy-medrt-classes",
+      "origin": "open",
+      "version": "rxnav@10052026",
+      "concepts": 11947
+    },
+    {
+      "codeSystem": "allergy-mesh",
+      "origin": "open",
+      "version": "mesh@2026",
+      "concepts": 68
+    },
+    {
+      "codeSystem": "allergy-mondo",
+      "origin": "base",
+      "version": "mondo@a645ab571f5b0881a184c28b84d0f9050432dc53",
+      "concepts": 15
+    },
+    {
+      "codeSystem": "allergy-ncit",
+      "origin": "open",
+      "version": "ncit@26.09d",
+      "concepts": 132
+    },
+    {
+      "codeSystem": "allergy-ndfrt-drug-classes",
+      "origin": "base",
+      "version": "vsac@20180301",
+      "concepts": 12994
+    },
+    {
+      "codeSystem": "allergy-oae",
+      "origin": "base",
+      "version": "oae@http://purl.obolibrary.org/obo/oae/releases/2026-04-15/oae.owl",
+      "concepts": 35
+    },
+    {
+      "codeSystem": "allergy-off-additives",
+      "origin": "base",
+      "version": "off-additives@c8bb42e08aefdb8b5b8577ab787120b1bde9cf34",
+      "concepts": 725
+    },
+    {
+      "codeSystem": "allergy-off-allergens",
+      "origin": "base",
+      "version": "off-allergens@c8bb42e08aefdb8b5b8577ab787120b1bde9cf34",
+      "concepts": 26
+    },
+    {
+      "codeSystem": "allergy-patch-test-series",
+      "origin": "open",
+      "version": "dailymed-true-test@SPL setid 2f082b68-dc74-418a-9e6f-b3c285b41d44+europepmc-ebs@PMC13238334+europepmc-ebs@PMC13441338",
+      "concepts": 114
+    },
+    {
+      "codeSystem": "allergy-rxnorm-ingredients",
+      "origin": "base",
+      "version": "vsac@05052025",
+      "concepts": 21923
+    },
+    {
+      "codeSystem": "allergy-rxnorm-ingredients",
+      "origin": "open",
+      "version": "rxnav@10052026",
+      "concepts": 321
+    },
+    {
+      "codeSystem": "allergy-uniprot",
+      "origin": "open",
+      "version": "uniprot@2026_03",
+      "concepts": 1027
+    }
+  ],
+  "concepts": 73478,
+  "designations": 124650,
+  "properties": 515908,
+  "relationships": 26478,
+  "valueSets": 27,
+  "members": 128304,
+  "conceptMaps": 20,
+  "patches": 30070,
+  "patchDesignations": 5732,
+  "patchProperties": 57673,
+  "patchMembers": 0
+}
+ERROR FATAL en load-allergy-catalog: Error: INSERT en concept_properties falló (lote 516): null value in column "value_json" of relation "concept_properties" violates not-null constraint
+    at insertMany (file:///home/user/mantra-core-health-api/tools/terminology-import/allergies/load-allergy-catalog.mjs:121:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async main (file:///home/user/mantra-core-health-api/tools/terminology-import/allergies/load-allergy-catalog.mjs:200:25)

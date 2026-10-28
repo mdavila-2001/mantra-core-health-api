@@ -1,0 +1,100 @@
+{
+  "source": "wikidata",
+  "retrievedAt": "2026-10-27T23:14:48.109Z",
+  "sparql": "https://query.wikidata.org/sparql",
+  "itemsConIdTA": 2040,
+  "filas": 1905,
+  "excluidosPorNoSerEstructuraAnatomica": 135,
+  "clasesRecorridas": 2354,
+  "conDescripcion": 709,
+  "conImagen": 1227,
+  "http": {
+    "requests": 85,
+    "retries": 7,
+    "cacheHits": 0,
+    "failures": 0,
+    "bytes": 54104228
+  },
+  "segundos": 446,
+  "ejemplosExcluidos": [
+    {
+      "q": "Q1002794",
+      "es": "Foramen Mastoide",
+      "en": "mastoid foramen"
+    },
+    {
+      "q": "Q1002805",
+      "es": "Agujero sacro anterior",
+      "en": "Anterior sacral foramina"
+    },
+    {
+      "q": "Q1032735",
+      "es": "Canales incisivos",
+      "en": "incisive canal"
+    },
+    {
+      "q": "Q1032740",
+      "es": "canal mandibular",
+      "en": "mandibular canal"
+    },
+    {
+      "q": "Q1046019",
+      "es": "Carunculae hymenales",
+      "en": "carunculae hymenales"
+    },
+    {
+      "q": "Q1051911",
+      "es": "cavidad del septo pelúcido",
+      "en": "cavum septum pellucidum"
+    },
+    {
+      "q": "Q11681869",
+      "es": "flexión",
+      "en": "flexion"
+    },
+    {
+      "q": "Q1174313",
+      "es": "Diastema",
+      "en": "diastema"
+    },
+    {
+      "q": "Q1185859",
+      "es": "Fosa romboidal",
+      "en": "Rhomboid fossa"
+    },
+    {
+      "q": "Q1219805",
+      "es": "mucosa",
+      "en": "mucous membrane"
+    },
+    {
+      "q": "Q1384981",
+      "es": "extensión",
+      "en": "extension"
+    },
+    {
+      "q": "Q1425673",
+      "es": "Vértice",
+      "en": "vertex"
+    },
+    {
+      "q": "Q1436580",
+      "es": "Hiato de Winslow",
+      "en": "omental foramen"
+    },
+    {
+      "q": "Q1436590",
+      "es": "Foramen lacerum",
+      "en": "foramen lacerum"
+    },
+    {
+      "q": "Q1436603",
+      "es": "Agujero redondo menor",
+      "en": "foramen spinosum"
+    }
+  ]
+}
+
+real	7m26.394s
+user	0m2.003s
+sys	0m0.639s

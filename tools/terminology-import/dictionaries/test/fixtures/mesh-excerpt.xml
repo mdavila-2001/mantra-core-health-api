@@ -1,0 +1,4783 @@
+<?xml version="1.0"?>
+<!DOCTYPE DescriptorRecordSet SYSTEM "https://www.nlm.nih.gov/databases/dtd/nlmdescriptorrecordset_20260101.dtd">
+<DescriptorRecordSet LanguageCode = "eng">
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D000082</DescriptorUI>
+  <DescriptorName>
+   <String>Acetaminophen</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2015</Year>
+   <Month>11</Month>
+   <Day>23</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1965</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <HistoryNote>1965; for ACEPHEN use MECLOFENOXATE 1990-2002
+  </HistoryNote>
+  <PublicMeSHNote>1965; for ACEPHEN see MECLOFENOXATE 1990-2002
+  </PublicMeSHNote>
+    <PharmacologicalActionList>
+     <PharmacologicalAction>
+      <DescriptorReferredTo>
+       <DescriptorUI>D018712</DescriptorUI>
+        <DescriptorName>
+         <String>Analgesics, Non-Narcotic</String>
+        </DescriptorName>
+      </DescriptorReferredTo>
+     </PharmacologicalAction>
+     <PharmacologicalAction>
+      <DescriptorReferredTo>
+       <DescriptorUI>D058633</DescriptorUI>
+        <DescriptorName>
+         <String>Antipyretics</String>
+        </DescriptorName>
+      </DescriptorReferredTo>
+     </PharmacologicalAction>
+    </PharmacologicalActionList>
+  <TreeNumberList>
+   <TreeNumber>D02.065.199.092.040</TreeNumber>
+   <TreeNumber>D02.092.146.113.092.040</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0000115</ConceptUI>
+    <ConceptName>
+     <String>Acetaminophen</String>
+    </ConceptName>
+    <CASN1Name>Acetamide, N-(4-hydroxyphenyl)-</CASN1Name>
+    <RegistryNumberList>
+    <RegistryNumber>362O9ITL9D</RegistryNumber>
+    </RegistryNumberList>
+    <ScopeNote>Analgesic antipyretic derivative of acetanilide. It has weak anti-inflammatory properties and is used as a common analgesic, but may cause liver, blood cell, and kidney damage.
+    </ScopeNote>
+    <RelatedRegistryNumberList>
+     <RelatedRegistryNumber>103-90-2 (Acetaminophen)</RelatedRegistryNumber>
+    </RelatedRegistryNumberList>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0000115</Concept1UI>
+     <Concept2UI>M0000114</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0000115</Concept1UI>
+     <Concept2UI>M0000116</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000115</Concept1UI>
+     <Concept2UI>M0000117</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000115</Concept1UI>
+     <Concept2UI>M0000118</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000115</Concept1UI>
+     <Concept2UI>M0000119</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000115</Concept1UI>
+     <Concept2UI>M0000120</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000115</Concept1UI>
+     <Concept2UI>M0000121</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000115</Concept1UI>
+     <Concept2UI>M0418290</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T000213</TermUI>
+      <String>Acetaminophen</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>FDA SRS (2014)</ThesaurusID>
+       <ThesaurusID>USP (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000216</TermUI>
+      <String>N-Acetyl-p-aminophenol</String>
+      <DateCreated>
+       <Year>1980</Year>
+       <Month>08</Month>
+       <Day>13</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000212</TermUI>
+      <String>Acetamidophenol</String>
+      <DateCreated>
+       <Year>1977</Year>
+       <Month>11</Month>
+       <Day>18</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000214</TermUI>
+      <String>Acetominophen</String>
+      <DateCreated>
+       <Year>1981</Year>
+       <Month>06</Month>
+       <Day>25</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T494124</TermUI>
+      <String>APAP</String>
+      <DateCreated>
+       <Year>2002</Year>
+       <Month>05</Month>
+       <Day>15</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>BAN (19XX)</ThesaurusID>
+       <ThesaurusID>FDA SRS (2014)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000217</TermUI>
+      <String>p-Acetamidophenol</String>
+      <DateCreated>
+       <Year>1980</Year>
+       <Month>08</Month>
+       <Day>13</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000218</TermUI>
+      <String>p-Hydroxyacetanilide</String>
+      <DateCreated>
+       <Year>1980</Year>
+       <Month>08</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000219</TermUI>
+      <String>Paracetamol</String>
+      <DateCreated>
+       <Year>1974</Year>
+       <Month>03</Month>
+       <Day>29</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>BAN (19XX)</ThesaurusID>
+       <ThesaurusID>FDA SRS (2014)</ThesaurusID>
+       <ThesaurusID>INN (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000215</TermUI>
+      <String>Hydroxyacetanilide</String>
+      <DateCreated>
+       <Year>1974</Year>
+       <Month>03</Month>
+       <Day>29</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000220</TermUI>
+      <String>N-(4-Hydroxyphenyl)acetanilide</String>
+      <DateCreated>
+       <Year>1995</Year>
+       <Month>03</Month>
+       <Day>30</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1996)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0000116</ConceptUI>
+    <ConceptName>
+     <String>Algotropyl</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0000115</Concept1UI>
+     <Concept2UI>M0000116</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="TRD"  RecordPreferredTermYN="N">
+      <TermUI>T000221</TermUI>
+      <String>Algotropyl</String>
+      <DateCreated>
+       <Year>1980</Year>
+       <Month>08</Month>
+       <Day>25</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0000117</ConceptUI>
+    <ConceptName>
+     <String>Acamol</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000115</Concept1UI>
+     <Concept2UI>M0000117</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="TRD"  RecordPreferredTermYN="N">
+      <TermUI>T000222</TermUI>
+      <String>Acamol</String>
+      <DateCreated>
+       <Year>1993</Year>
+       <Month>09</Month>
+       <Day>02</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1995)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0000118</ConceptUI>
+    <ConceptName>
+     <String>Anacin-3</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000115</Concept1UI>
+     <Concept2UI>M0000118</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="TRD"  RecordPreferredTermYN="N">
+      <TermUI>T000223</TermUI>
+      <String>Anacin-3</String>
+      <DateCreated>
+       <Year>1986</Year>
+       <Month>11</Month>
+       <Day>19</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="TRD"  RecordPreferredTermYN="N">
+      <TermUI>T000223</TermUI>
+      <String>Anacin3</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="TRD"  RecordPreferredTermYN="N">
+      <TermUI>T000223</TermUI>
+      <String>Anacin 3</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0000119</ConceptUI>
+    <ConceptName>
+     <String>Datril</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000115</Concept1UI>
+     <Concept2UI>M0000119</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000224</TermUI>
+      <String>Datril</String>
+      <DateCreated>
+       <Year>1986</Year>
+       <Month>11</Month>
+       <Day>19</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0000120</ConceptUI>
+    <ConceptName>
+     <String>Panadol</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000115</Concept1UI>
+     <Concept2UI>M0000120</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="TRD"  RecordPreferredTermYN="N">
+      <TermUI>T000225</TermUI>
+      <String>Panadol</String>
+      <DateCreated>
+       <Year>1983</Year>
+       <Month>09</Month>
+       <Day>15</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0000121</ConceptUI>
+    <ConceptName>
+     <String>Tylenol</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000115</Concept1UI>
+     <Concept2UI>M0000121</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="TRD"  RecordPreferredTermYN="N">
+      <TermUI>T000226</TermUI>
+      <String>Tylenol</String>
+      <DateCreated>
+       <Year>1983</Year>
+       <Month>02</Month>
+       <Day>23</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0000114</ConceptUI>
+    <ConceptName>
+     <String>Acetaco</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0000115</Concept1UI>
+     <Concept2UI>M0000114</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="TRD"  RecordPreferredTermYN="N">
+      <TermUI>T000211</TermUI>
+      <String>Acetaco</String>
+      <DateCreated>
+       <Year>1986</Year>
+       <Month>10</Month>
+       <Day>22</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0418290</ConceptUI>
+    <ConceptName>
+     <String>Acephen</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000115</Concept1UI>
+     <Concept2UI>M0418290</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="TRD"  RecordPreferredTermYN="N">
+      <TermUI>T007288</TermUI>
+      <String>Acephen</String>
+      <DateCreated>
+       <Year>1990</Year>
+       <Month>05</Month>
+       <Day>09</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1991)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D000083</DescriptorUI>
+  <DescriptorName>
+   <String>Acetanilides</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2015</Year>
+   <Month>11</Month>
+   <Day>23</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1968</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <HistoryNote>79; was ACETANILIDE 1968-78, was ACETANILID 1963-67
+  </HistoryNote>
+  <OnlineNote>use ACETANILIDES to search ACETANILIDE 1968-78 &amp; ACETANILID 1966-67
+  </OnlineNote>
+  <PublicMeSHNote>79; was ACETANILIDE 1968-78, was ACETANILID 1963-67
+  </PublicMeSHNote>
+  <SeeRelatedList>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D044482</DescriptorUI>
+     <DescriptorName>
+      <String>Benzeneacetamides</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+  </SeeRelatedList>
+  <TreeNumberList>
+   <TreeNumber>D02.065.199.092</TreeNumber>
+   <TreeNumber>D02.092.146.113.092</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0000123</ConceptUI>
+    <ConceptName>
+     <String>Acetanilides</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ScopeNote>Compounds based on N-phenylacetamide, that are similar in structure to 2-PHENYLACETAMIDES. They are precursors of many other compounds. They were formerly used as ANALGESICS and ANTIPYRETICS, but often caused lethal METHEMOGLOBINEMIA.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T000229</TermUI>
+      <String>Acetanilides</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1968)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T567065</TermUI>
+      <String>N-Phenylacetamides</String>
+      <DateCreated>
+       <Year>2004</Year>
+       <Month>01</Month>
+       <Day>05</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2005)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T567066</TermUI>
+      <String>Acetylanilines</String>
+      <DateCreated>
+       <Year>2004</Year>
+       <Month>01</Month>
+       <Day>05</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2005)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D000577</DescriptorUI>
+  <DescriptorName>
+   <String>Amides</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2020</Year>
+   <Month>05</Month>
+   <Day>27</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1966</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <TreeNumberList>
+   <TreeNumber>D02.065</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0000897</ConceptUI>
+    <ConceptName>
+     <String>Amides</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ScopeNote>Organic compounds containing the -CO-NH2 radical. Amides are derived from acids by replacement of -OH by -NH2 or from ammonia by the replacement of H by an acyl group. (From Grant &amp; Hackh's Chemical Dictionary, 5th ed)
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T001757</TermUI>
+      <String>Amides</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1966)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T001003184</TermUI>
+      <String>Amide</String>
+      <DateCreated>
+       <Year>2019</Year>
+       <Month>12</Month>
+       <Day>19</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2021)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D000588</DescriptorUI>
+  <DescriptorName>
+   <String>Amines</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2020</Year>
+   <Month>05</Month>
+   <Day>27</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1966</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <TreeNumberList>
+   <TreeNumber>D02.092</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0000913</ConceptUI>
+    <ConceptName>
+     <String>Amines</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ScopeNote>A group of compounds derived from ammonia by substituting organic radicals for the hydrogens. (From Grant &amp; Hackh's Chemical Dictionary, 5th ed)
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T001785</TermUI>
+      <String>Amines</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>POPLINE (1984)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T001004500</TermUI>
+      <String>Amine</String>
+      <DateCreated>
+       <Year>2019</Year>
+       <Month>12</Month>
+       <Day>31</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2021)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D000700</DescriptorUI>
+  <DescriptorName>
+   <String>Analgesics</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2020</Year>
+   <Month>05</Month>
+   <Day>27</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1966</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>general or unspecified; prefer specific groups
+  </Annotation>
+  <HistoryNote>78; ANALGESICS AND ANTIPYRETICS was heading 1963-77
+  </HistoryNote>
+  <NLMClassificationNumber>QV 95</NLMClassificationNumber>
+  <OnlineNote>use ANALGESICS to search ANALGESICS AND ANTIPYRETICS 1966-77
+  </OnlineNote>
+  <PublicMeSHNote>78; ANALGESICS AND ANTIPYRETICS was heading 1963-77
+  </PublicMeSHNote>
+  <SeeRelatedList>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D000777</DescriptorUI>
+     <DescriptorName>
+      <String>Anesthetics</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D010146</DescriptorUI>
+     <DescriptorName>
+      <String>Pain</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+  </SeeRelatedList>
+  <TreeNumberList>
+   <TreeNumber>D27.505.696.663.850.014</TreeNumber>
+   <TreeNumber>D27.505.954.427.040</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0001067</ConceptUI>
+    <ConceptName>
+     <String>Analgesics</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ScopeNote>Compounds capable of relieving pain without the loss of CONSCIOUSNESS.
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0001067</Concept1UI>
+     <Concept2UI>M0497986</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T002117</TermUI>
+      <String>Analgesics</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1966)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000996223</TermUI>
+      <String>Analgesic</String>
+      <DateCreated>
+       <Year>2019</Year>
+       <Month>11</Month>
+       <Day>14</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2021)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T002120</TermUI>
+      <String>Analgesic Agents</String>
+      <DateCreated>
+       <Year>1994</Year>
+       <Month>11</Month>
+       <Day>30</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1996)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T002120</TermUI>
+      <String>Agents, Analgesic</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T002121</TermUI>
+      <String>Analgesic Drugs</String>
+      <DateCreated>
+       <Year>1994</Year>
+       <Month>11</Month>
+       <Day>30</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1996)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T002121</TermUI>
+      <String>Drugs, Analgesic</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T002118</TermUI>
+      <String>Anodynes</String>
+      <DateCreated>
+       <Year>1978</Year>
+       <Month>12</Month>
+       <Day>15</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0497986</ConceptUI>
+    <ConceptName>
+     <String>Antinociceptive Agents</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ScopeNote>Compounds that show activity in animal models of human PAIN such as tail flick and hot plate assays.
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0001067</Concept1UI>
+     <Concept2UI>M0497986</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T002119</TermUI>
+      <String>Antinociceptive Agents</String>
+      <DateCreated>
+       <Year>1977</Year>
+       <Month>04</Month>
+       <Day>21</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T002119</TermUI>
+      <String>Agents, Antinociceptive</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D000813</DescriptorUI>
+  <DescriptorName>
+   <String>Anilides</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2015</Year>
+   <Month>10</Month>
+   <Day>08</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1966</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <TreeNumberList>
+   <TreeNumber>D02.065.199</TreeNumber>
+   <TreeNumber>D02.092.146.113</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0001214</ConceptUI>
+    <ConceptName>
+     <String>Anilides</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ScopeNote>Any aromatic amide obtained by acylation of aniline.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T002413</TermUI>
+      <String>Anilides</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1966)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D000814</DescriptorUI>
+  <DescriptorName>
+   <String>Aniline Compounds</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2020</Year>
+   <Month>05</Month>
+   <Day>27</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1966</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <TreeNumberList>
+   <TreeNumber>D02.092.146</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0001215</ConceptUI>
+    <ConceptName>
+     <String>Aniline Compounds</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ScopeNote>Compounds that include the aminobenzene structure.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T002414</TermUI>
+      <String>Aniline Compounds</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <EntryVersion>ANILINE CPDS</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1966)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T002414</TermUI>
+      <String>Compounds, Aniline</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T001003297</TermUI>
+      <String>Phenylamine</String>
+      <DateCreated>
+       <Year>2019</Year>
+       <Month>12</Month>
+       <Day>19</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2021)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000887645</TermUI>
+      <String>Anilines</String>
+      <DateCreated>
+       <Year>2015</Year>
+       <Month>10</Month>
+       <Day>07</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2017)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T002415</TermUI>
+      <String>Phenylamines</String>
+      <DateCreated>
+       <Year>1975</Year>
+       <Month>07</Month>
+       <Day>08</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D001499</DescriptorUI>
+  <DescriptorName>
+   <String>Bayes Theorem</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2021</Year>
+   <Month>03</Month>
+   <Day>26</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1991</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>IM general only
+  </Annotation>
+  <HistoryNote>91(75); was see under PROBABILITY 1975-90
+  </HistoryNote>
+  <OnlineNote>search PROBABILITY 1968-74
+  </OnlineNote>
+  <PublicMeSHNote>91; was see under PROBABILITY 1975-90
+  </PublicMeSHNote>
+  <PreviousIndexingList>
+   <PreviousIndexing>Probability (1966-1974)</PreviousIndexing>
+  </PreviousIndexingList>
+  <TreeNumberList>
+   <TreeNumber>E05.318.740.600.200</TreeNumber>
+   <TreeNumber>N05.715.360.750.625.150</TreeNumber>
+   <TreeNumber>N06.850.520.830.600.200</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0002234</ConceptUI>
+    <ConceptName>
+     <String>Bayes Theorem</String>
+    </ConceptName>
+    <ScopeNote>A theorem in probability theory named for Thomas Bayes (1702-1761). In epidemiology, it is used to obtain the probability of disease in a group of people with some characteristic on the basis of the overall rate of that disease and of the likelihood of that characteristic in healthy and diseased individuals. The most familiar application is in clinical decision analysis where it is used for estimating the probability of a particular diagnosis given the appearance of some symptoms or test result.
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0002234</Concept1UI>
+     <Concept2UI>M0002235</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0002234</Concept1UI>
+     <Concept2UI>M0002236</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0002234</Concept1UI>
+     <Concept2UI>M0002237</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0002234</Concept1UI>
+     <Concept2UI>M0002238</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="EPO"  RecordPreferredTermYN="Y">
+      <TermUI>T004352</TermUI>
+      <String>Bayes Theorem</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1975)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="EPO"  RecordPreferredTermYN="N">
+      <TermUI>T004352</TermUI>
+      <String>Theorem, Bayes</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0002235</ConceptUI>
+    <ConceptName>
+     <String>Bayesian Analysis</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0002234</Concept1UI>
+     <Concept2UI>M0002235</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="EPO"  RecordPreferredTermYN="N">
+      <TermUI>T004354</TermUI>
+      <String>Bayesian Analysis</String>
+      <DateCreated>
+       <Year>1986</Year>
+       <Month>06</Month>
+       <Day>20</Day>
+      </DateCreated>
+      <EntryVersion>BAYESIAN ANAL</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000870906</TermUI>
+      <String>Bayesian Approach</String>
+      <DateCreated>
+       <Year>2014</Year>
+       <Month>11</Month>
+       <Day>18</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2016)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000870906</TermUI>
+      <String>Approach, Bayesian</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000870906</TermUI>
+      <String>Approachs, Bayesian</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000870906</TermUI>
+      <String>Bayesian Approachs</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="EPO"  RecordPreferredTermYN="N">
+      <TermUI>T004353</TermUI>
+      <String>Analysis, Bayesian</String>
+      <DateCreated>
+       <Year>1986</Year>
+       <Month>06</Month>
+       <Day>20</Day>
+      </DateCreated>
+      <EntryVersion>ANAL BAYESIAN</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0002236</ConceptUI>
+    <ConceptName>
+     <String>Bayesian Forecast</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0002234</Concept1UI>
+     <Concept2UI>M0002236</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="EPO"  RecordPreferredTermYN="N">
+      <TermUI>T004355</TermUI>
+      <String>Bayesian Forecast</String>
+      <DateCreated>
+       <Year>1986</Year>
+       <Month>06</Month>
+       <Day>20</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="EPO"  RecordPreferredTermYN="N">
+      <TermUI>T004355</TermUI>
+      <String>Forecast, Bayesian</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0002237</ConceptUI>
+    <ConceptName>
+     <String>Bayesian Method</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0002234</Concept1UI>
+     <Concept2UI>M0002237</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="EPO"  RecordPreferredTermYN="N">
+      <TermUI>T004356</TermUI>
+      <String>Bayesian Method</String>
+      <DateCreated>
+       <Year>1986</Year>
+       <Month>06</Month>
+       <Day>20</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="EPO"  RecordPreferredTermYN="N">
+      <TermUI>T004356</TermUI>
+      <String>Method, Bayesian</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0002238</ConceptUI>
+    <ConceptName>
+     <String>Bayesian Prediction</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0002234</Concept1UI>
+     <Concept2UI>M0002238</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="EPO"  RecordPreferredTermYN="N">
+      <TermUI>T004357</TermUI>
+      <String>Bayesian Prediction</String>
+      <DateCreated>
+       <Year>1986</Year>
+       <Month>06</Month>
+       <Day>20</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="EPO"  RecordPreferredTermYN="N">
+      <TermUI>T004357</TermUI>
+      <String>Prediction, Bayesian</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="EPO"  RecordPreferredTermYN="N">
+      <TermUI>T001095544</TermUI>
+      <String>Bayesian Estimation</String>
+      <DateCreated>
+       <Year>2021</Year>
+       <Month>01</Month>
+       <Day>25</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2022)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="EPO"  RecordPreferredTermYN="N">
+      <TermUI>T001095544</TermUI>
+      <String>Estimation, Bayesian</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D002491</DescriptorUI>
+  <DescriptorName>
+   <String>Central Nervous System Agents</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2005</Year>
+   <Month>08</Month>
+   <Day>15</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1979</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>general or unspecified; prefer specifics
+  </Annotation>
+  <HistoryNote>79; was NON MESH before 1979
+  </HistoryNote>
+  <NLMClassificationNumber>QV 76.5</NLMClassificationNumber>
+  <OnlineNote>consider also CENTRAL NERVOUS SYSTEM /DE &amp; BRAIN /DE
+  </OnlineNote>
+  <PublicMeSHNote>79
+  </PublicMeSHNote>
+  <TreeNumberList>
+   <TreeNumber>D27.505.954.427</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0003803</ConceptUI>
+    <ConceptName>
+     <String>Central Nervous System Agents</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ScopeNote>A class of drugs producing both physiological and psychological effects through a variety of mechanisms. They can be divided into specific agents, e.g., affecting an identifiable molecular mechanism unique to target cells bearing receptors for that agent, and nonspecific agents, those producing effects on different target cells and acting by diverse molecular mechanisms. Those with nonspecific mechanisms are generally further classed according to whether they produce behavioral depression or stimulation. Those with specific mechanisms are classed by locus of action or specific therapeutic use. (From Gilman AG, et al., Goodman and Gilman's The Pharmacological Basis of Therapeutics, 8th ed, p252)
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T007264</TermUI>
+      <String>Central Nervous System Agents</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <EntryVersion>CNS AGENTS</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1979)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T007265</TermUI>
+      <String>Central Nervous System Drugs</String>
+      <DateCreated>
+       <Year>1994</Year>
+       <Month>04</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <EntryVersion>CNS DRUGS</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1995)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D003430</DescriptorUI>
+  <DescriptorName>
+   <String>Cross-Sectional Studies</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2018</Year>
+   <Month>06</Month>
+   <Day>29</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1990</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>IM general only; coordinate NIM with specific disease (IM); specify geographic term if pertinent
+  </Annotation>
+  <HistoryNote>90(75); was see under EPIDEMIOLOGIC METHODS 1975-89; PREVALENCE STUDIES was heading 1989
+  </HistoryNote>
+  <OnlineNote>use CROSS-SECTIONAL STUDIES to search PREVALENCE STUDIES 1989
+  </OnlineNote>
+  <PublicMeSHNote>90; was see under EPIDEMIOLOGIC METHODS 1975-89; PREVALENCE STUDIES was heading 1989
+  </PublicMeSHNote>
+  <TreeNumberList>
+   <TreeNumber>E05.318.372.500.875</TreeNumber>
+   <TreeNumber>N05.715.360.330.500.875</TreeNumber>
+   <TreeNumber>N06.850.520.450.500.875</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0005345</ConceptUI>
+    <ConceptName>
+     <String>Cross-Sectional Studies</String>
+    </ConceptName>
+    <ScopeNote>Studies in which the presence or absence of disease or other health-related variables are determined in each member of the study population or in a representative sample at one particular time. This contrasts with LONGITUDINAL STUDIES which are followed over a period of time.
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0005345</Concept1UI>
+     <Concept2UI>M0005346</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T009982</TermUI>
+      <String>Cross-Sectional Studies</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1975)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009982</TermUI>
+      <String>Cross Sectional Studies</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009982</TermUI>
+      <String>Cross-Sectional Study</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009982</TermUI>
+      <String>Studies, Cross-Sectional</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009982</TermUI>
+      <String>Study, Cross-Sectional</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009983</TermUI>
+      <String>Cross-Sectional Survey</String>
+      <DateCreated>
+       <Year>1978</Year>
+       <Month>12</Month>
+       <Day>22</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009983</TermUI>
+      <String>Cross Sectional Survey</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009983</TermUI>
+      <String>Cross-Sectional Surveys</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009983</TermUI>
+      <String>Survey, Cross-Sectional</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009983</TermUI>
+      <String>Surveys, Cross-Sectional</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009984</TermUI>
+      <String>Surveys, Disease Frequency</String>
+      <DateCreated>
+       <Year>1992</Year>
+       <Month>12</Month>
+       <Day>29</Day>
+      </DateCreated>
+      <EntryVersion>SURVEYS DIS FREQUENCY</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1994)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009984</TermUI>
+      <String>Disease Frequency Survey</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009984</TermUI>
+      <String>Survey, Disease Frequency</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009985</TermUI>
+      <String>Disease Frequency Surveys</String>
+      <DateCreated>
+       <Year>1989</Year>
+       <Month>05</Month>
+       <Day>12</Day>
+      </DateCreated>
+      <EntryVersion>DIS FREQUENCY SURVEYS</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1990)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009980</TermUI>
+      <String>Analysis, Cross-Sectional</String>
+      <DateCreated>
+       <Year>1988</Year>
+       <Month>08</Month>
+       <Day>03</Day>
+      </DateCreated>
+      <EntryVersion>ANAL CROSS SECTIONAL</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009980</TermUI>
+      <String>Analyses, Cross-Sectional</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009980</TermUI>
+      <String>Analysis, Cross Sectional</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009980</TermUI>
+      <String>Cross-Sectional Analyses</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009980</TermUI>
+      <String>Cross-Sectional Analysis</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009981</TermUI>
+      <String>Cross Sectional Analysis</String>
+      <DateCreated>
+       <Year>1986</Year>
+       <Month>12</Month>
+       <Day>31</Day>
+      </DateCreated>
+      <EntryVersion>CROSS SECTIONAL ANAL</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>POPLINE (1984)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009981</TermUI>
+      <String>Analyses, Cross Sectional</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009981</TermUI>
+      <String>Cross Sectional Analyses</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0005346</ConceptUI>
+    <ConceptName>
+     <String>Prevalence Studies</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0005345</Concept1UI>
+     <Concept2UI>M0005346</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009986</TermUI>
+      <String>Prevalence Studies</String>
+      <DateCreated>
+       <Year>1989</Year>
+       <Month>05</Month>
+       <Day>25</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1990)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009986</TermUI>
+      <String>Prevalence Study</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009986</TermUI>
+      <String>Studies, Prevalence</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T009986</TermUI>
+      <String>Study, Prevalence</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D004778</DescriptorUI>
+  <DescriptorName>
+   <String>Environment and Public Health</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2015</Year>
+   <Month>06</Month>
+   <Day>05</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1998</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>used for searching; INDEXER: Do not use; CATALOGER: Do not use
+  </Annotation>
+  <HistoryNote>1998; use explode 1970-1997
+  </HistoryNote>
+  <PublicMeSHNote>1998
+  </PublicMeSHNote>
+  <TreeNumberList>
+   <TreeNumber>N06</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0007503</ConceptUI>
+    <ConceptName>
+     <String>Environment and Public Health</String>
+    </ConceptName>
+    <ScopeNote>Natural and man-made environments and their impact on public health.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T014604</TermUI>
+      <String>Environment and Public Health</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <EntryVersion>ENVIR PUBLIC HEALTH</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1966)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D004812</DescriptorUI>
+  <DescriptorName>
+   <String>Epidemiologic Methods</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2015</Year>
+   <Month>06</Month>
+   <Day>30</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1967</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>IM general only; coordinate NIM with disease / epidemiol (IM); specify geographic term if pertinent
+  </Annotation>
+  <HistoryNote>67(65)
+  </HistoryNote>
+  <PublicMeSHNote>67
+  </PublicMeSHNote>
+  <TreeNumberList>
+   <TreeNumber>E05.318</TreeNumber>
+   <TreeNumber>N06.850.520</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0007544</ConceptUI>
+    <ConceptName>
+     <String>Epidemiologic Methods</String>
+    </ConceptName>
+    <ScopeNote>Research techniques that focus on study designs and data gathering methods in human and animal populations.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T014675</TermUI>
+      <String>Epidemiologic Methods</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <EntryVersion>EPIDEMIOL METHODS</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>POPLINE (1978)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T014673</TermUI>
+      <String>Epidemiologic Method</String>
+      <DateCreated>
+       <Year>1993</Year>
+       <Month>01</Month>
+       <Day>29</Day>
+      </DateCreated>
+      <EntryVersion>EPIDEMIOL METHOD</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1994)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T014673</TermUI>
+      <String>Method, Epidemiologic</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T014674</TermUI>
+      <String>Methods, Epidemiologic</String>
+      <DateCreated>
+       <Year>1986</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <EntryVersion>METHODS EPIDEMIOL</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T014676</TermUI>
+      <String>Epidemiological Methods</String>
+      <DateCreated>
+       <Year>1978</Year>
+       <Month>06</Month>
+       <Day>28</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T014676</TermUI>
+      <String>Epidemiological Method</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T014676</TermUI>
+      <String>Method, Epidemiological</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T014676</TermUI>
+      <String>Methods, Epidemiological</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D006262</DescriptorUI>
+  <DescriptorName>
+   <String>Health</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2022</Year>
+   <Month>04</Month>
+   <Day>13</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1966</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <EntryCombinationList>
+   <EntryCombination>
+    <ECIN>
+     <DescriptorReferredTo>
+      <DescriptorUI>D006262</DescriptorUI>
+      <DescriptorName>
+       <String>Health</String>
+      </DescriptorName>
+     </DescriptorReferredTo>
+     <QualifierReferredTo>
+      <QualifierUI>Q000193</QualifierUI>
+      <QualifierName>
+       <String>education</String>
+      </QualifierName>
+     </QualifierReferredTo>
+    </ECIN>
+    <ECOUT>
+     <DescriptorReferredTo>
+      <DescriptorUI>D006266</DescriptorUI>
+      <DescriptorName>
+       <String>Health Education</String>
+      </DescriptorName>
+     </DescriptorReferredTo>
+    </ECOUT>
+   </EntryCombination>
+  </EntryCombinationList>
+  <TreeNumberList>
+   <TreeNumber>N01.400</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0009825</ConceptUI>
+    <ConceptName>
+     <String>Health</String>
+    </ConceptName>
+    <ScopeNote>The state of the organism when it functions optimally without evidence of disease.
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0009825</Concept1UI>
+     <Concept2UI>M0391144</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0009825</Concept1UI>
+     <Concept2UI>M000752840</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T018961</TermUI>
+      <String>Health</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>BIOETHICS (1989)</ThesaurusID>
+       <ThesaurusID>POPLINE (1978)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0391144</ConceptUI>
+    <ConceptName>
+     <String>Normality</String>
+    </ConceptName>
+    <ScopeNote>The state of conforming to a type, standard, or regular pattern. (Merriam-Webster's Collegiate Dictionary, 10th ed)
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0009825</Concept1UI>
+     <Concept2UI>M0391144</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T451475</TermUI>
+      <String>Normality</String>
+      <DateCreated>
+       <Year>2001</Year>
+       <Month>06</Month>
+       <Day>19</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>BIOETHICS (1974)</ThesaurusID>
+       <ThesaurusID>NLM (2002)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T451475</TermUI>
+      <String>Normalities</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T481305</TermUI>
+      <String>Normalcy</String>
+      <DateCreated>
+       <Year>2002</Year>
+       <Month>02</Month>
+       <Day>08</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2003)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T481305</TermUI>
+      <String>Normalcies</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M000752840</ConceptUI>
+    <ConceptName>
+     <String>Individual Health</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0009825</Concept1UI>
+     <Concept2UI>M000752840</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T001113644</TermUI>
+      <String>Individual Health</String>
+      <DateCreated>
+       <Year>2021</Year>
+       <Month>10</Month>
+       <Day>28</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2023)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T001113644</TermUI>
+      <String>Health, Individual</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D006281</DescriptorUI>
+  <DescriptorName>
+   <String>Health Occupations</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2018</Year>
+   <Month>07</Month>
+   <Day>13</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1968</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>do not confuse with OCCUPATIONAL HEALTH; ALLIED HEALTH OCCUPATIONS is also available; for health aides consider  HEALTH WORKFORCE or ALLIED HEALTH PERSONNEL or specifics
+  </Annotation>
+  <HistoryNote>68; was HEALTH PROFESSIONS 1963-67
+  </HistoryNote>
+  <OnlineNote>use HEALTH OCCUPATIONS to search HEALTH PROFESSIONS 1966-67
+  </OnlineNote>
+  <PublicMeSHNote>68; was HEALTH PROFESSIONS 1963-67
+  </PublicMeSHNote>
+  <TreeNumberList>
+   <TreeNumber>H02</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0009857</ConceptUI>
+    <ConceptName>
+     <String>Health Occupations</String>
+    </ConceptName>
+    <ScopeNote>Professions or other business activities directed to the cure and prevention of disease. For occupations of medical personnel who are not physicians but who are working in the fields of medical technology, physical therapy, etc., ALLIED HEALTH OCCUPATIONS is available.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T019027</TermUI>
+      <String>Health Occupations</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <EntryVersion>HEALTH OCCUP</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1968)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T019027</TermUI>
+      <String>Health Occupation</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T019028</TermUI>
+      <String>Health Professions</String>
+      <DateCreated>
+       <Year>1974</Year>
+       <Month>03</Month>
+       <Day>30</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T019028</TermUI>
+      <String>Health Profession</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T019028</TermUI>
+      <String>Profession, Health</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T019028</TermUI>
+      <String>Professions, Health</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D006298</DescriptorUI>
+  <DescriptorName>
+   <String>Health Services Administration</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2008</Year>
+   <Month>07</Month>
+   <Day>08</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1998</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>general or unspecified; prefer specific health service with /organ
+  </Annotation>
+  <HistoryNote>1998; use explode 1970-97
+  </HistoryNote>
+  <NLMClassificationNumber>W 84</NLMClassificationNumber>
+  <PublicMeSHNote>1998
+  </PublicMeSHNote>
+  <PreviousIndexingList>
+   <PreviousIndexing>Public Health Administration (1969-1997)</PreviousIndexing>
+  </PreviousIndexingList>
+  <TreeNumberList>
+   <TreeNumber>H02.269</TreeNumber>
+   <TreeNumber>N04</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0009900</ConceptUI>
+    <ConceptName>
+     <String>Health Services Administration</String>
+    </ConceptName>
+    <ScopeNote>The organization and administration of health services dedicated to the delivery of health care.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T019091</TermUI>
+      <String>Health Services Administration</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <EntryVersion>HEALTH SERV ADMIN</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>POPLINE (1978)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T019090</TermUI>
+      <String>Administration, Health Services</String>
+      <DateCreated>
+       <Year>1997</Year>
+       <Month>01</Month>
+       <Day>09</Day>
+      </DateCreated>
+      <EntryVersion>ADMIN HEALTH SERV</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1998)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D008433</DescriptorUI>
+  <DescriptorName>
+   <String>Mathematics</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2013</Year>
+   <Month>07</Month>
+   <Day>09</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1966</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>the discipline (education, history, etc) only; use MATHEMATICAL CONCEPTS or specifics treed under it for numeric concepts including concepts in arithmetic, geometry and calculus
+  </Annotation>
+  <TreeNumberList>
+   <TreeNumber>H01.548</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0013125</ConceptUI>
+    <ConceptName>
+     <String>Mathematics</String>
+    </ConceptName>
+    <ScopeNote>The deductive study of shape, quantity, and dependence. (From McGraw-Hill Dictionary of Scientific and Technical Terms, 6th ed)
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T025072</TermUI>
+      <String>Mathematics</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1966)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T025072</TermUI>
+      <String>Mathematic</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D008511</DescriptorUI>
+  <DescriptorName>
+   <String>Medicine</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2021</Year>
+   <Month>07</Month>
+   <Day>06</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1963</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>medicine only as a field, profession or discipline: differentiate from DELIVERY OF HEALTH CARE where the patient is emphasized; very general; it is divided broadly into experimental medicine ( = BIOMEDICAL RESEARCH) &amp; CLINICAL MEDICINE, a specialty devoted to the diagnosis &amp; management of human patients; / legislation &amp; jurisprudence = LEGISLATION, MEDICAL or JURISPRUDENCE or FORENSIC MEDICINE; LEGAL MEDICINE see FORENSIC MEDICINE is also available
+  </Annotation>
+  <HistoryNote>1963
+  </HistoryNote>
+  <PublicMeSHNote>1963; for SPECIALTIES, MEDICAL see SPECIALTIES, MEDICAL 1968-2009
+  </PublicMeSHNote>
+  <EntryCombinationList>
+   <EntryCombination>
+    <ECIN>
+     <DescriptorReferredTo>
+      <DescriptorUI>D008511</DescriptorUI>
+      <DescriptorName>
+       <String>Medicine</String>
+      </DescriptorName>
+     </DescriptorReferredTo>
+     <QualifierReferredTo>
+      <QualifierUI>Q000191</QualifierUI>
+      <QualifierName>
+       <String>economics</String>
+      </QualifierName>
+     </QualifierReferredTo>
+    </ECIN>
+    <ECOUT>
+     <DescriptorReferredTo>
+      <DescriptorUI>D004470</DescriptorUI>
+      <DescriptorName>
+       <String>Economics, Medical</String>
+      </DescriptorName>
+     </DescriptorReferredTo>
+    </ECOUT>
+   </EntryCombination>
+   <EntryCombination>
+    <ECIN>
+     <DescriptorReferredTo>
+      <DescriptorUI>D008511</DescriptorUI>
+      <DescriptorName>
+       <String>Medicine</String>
+      </DescriptorName>
+     </DescriptorReferredTo>
+     <QualifierReferredTo>
+      <QualifierUI>Q000193</QualifierUI>
+      <QualifierName>
+       <String>education</String>
+      </QualifierName>
+     </QualifierReferredTo>
+    </ECIN>
+    <ECOUT>
+     <DescriptorReferredTo>
+      <DescriptorUI>D004501</DescriptorUI>
+      <DescriptorName>
+       <String>Education, Medical</String>
+      </DescriptorName>
+     </DescriptorReferredTo>
+    </ECOUT>
+   </EntryCombination>
+   <EntryCombination>
+    <ECIN>
+     <DescriptorReferredTo>
+      <DescriptorUI>D008511</DescriptorUI>
+      <DescriptorName>
+       <String>Medicine</String>
+      </DescriptorName>
+     </DescriptorReferredTo>
+     <QualifierReferredTo>
+      <QualifierUI>Q000266</QualifierUI>
+      <QualifierName>
+       <String>history</String>
+      </QualifierName>
+     </QualifierReferredTo>
+    </ECIN>
+    <ECOUT>
+     <DescriptorReferredTo>
+      <DescriptorUI>D006666</DescriptorUI>
+      <DescriptorName>
+       <String>History of Medicine</String>
+      </DescriptorName>
+     </DescriptorReferredTo>
+    </ECOUT>
+   </EntryCombination>
+   <EntryCombination>
+    <ECIN>
+     <DescriptorReferredTo>
+      <DescriptorUI>D008511</DescriptorUI>
+      <DescriptorName>
+       <String>Medicine</String>
+      </DescriptorName>
+     </DescriptorReferredTo>
+     <QualifierReferredTo>
+      <QualifierUI>Q000331</QualifierUI>
+      <QualifierName>
+       <String>legislation &amp; jurisprudence</String>
+      </QualifierName>
+     </QualifierReferredTo>
+    </ECIN>
+    <ECOUT>
+     <DescriptorReferredTo>
+      <DescriptorUI>D007883</DescriptorUI>
+      <DescriptorName>
+       <String>Legislation, Medical</String>
+      </DescriptorName>
+     </DescriptorReferredTo>
+    </ECOUT>
+   </EntryCombination>
+   <EntryCombination>
+    <ECIN>
+     <DescriptorReferredTo>
+      <DescriptorUI>D008511</DescriptorUI>
+      <DescriptorName>
+       <String>Medicine</String>
+      </DescriptorName>
+     </DescriptorReferredTo>
+     <QualifierReferredTo>
+      <QualifierUI>Q000941</QualifierUI>
+      <QualifierName>
+       <String>ethics</String>
+      </QualifierName>
+     </QualifierReferredTo>
+    </ECIN>
+    <ECOUT>
+     <DescriptorReferredTo>
+      <DescriptorUI>D004992</DescriptorUI>
+      <DescriptorName>
+       <String>Ethics, Medical</String>
+      </DescriptorName>
+     </DescriptorReferredTo>
+    </ECOUT>
+   </EntryCombination>
+  </EntryCombinationList>
+  <SeeRelatedList>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D004470</DescriptorUI>
+     <DescriptorName>
+      <String>Economics, Medical</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D004501</DescriptorUI>
+     <DescriptorName>
+      <String>Education, Medical</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D006666</DescriptorUI>
+     <DescriptorName>
+      <String>History of Medicine</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D007348</DescriptorUI>
+     <DescriptorName>
+      <String>Insurance, Health</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D007883</DescriptorUI>
+     <DescriptorName>
+      <String>Legislation, Medical</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+  </SeeRelatedList>
+  <TreeNumberList>
+   <TreeNumber>H02.403</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0013251</ConceptUI>
+    <ConceptName>
+     <String>Medicine</String>
+    </ConceptName>
+    <ScopeNote>The art and science of studying, performing research on, preventing, diagnosing, and treating disease, as well as the maintenance of health.
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0013251</Concept1UI>
+     <Concept2UI>M0020217</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0013251</Concept1UI>
+     <Concept2UI>M000742208</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T025327</TermUI>
+      <String>Medicine</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>BIOETHICS (1974)</ThesaurusID>
+       <ThesaurusID>NLM (1963)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0020217</ConceptUI>
+    <ConceptName>
+     <String>Specialties, Medical</String>
+    </ConceptName>
+    <ScopeNote>Various branches of medical practice limited to specialized areas.
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0013251</Concept1UI>
+     <Concept2UI>M0020217</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038426</TermUI>
+      <String>Specialties, Medical</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <EntryVersion>SPECIALTIES MED</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1968)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038423</TermUI>
+      <String>Medical Specialties</String>
+      <DateCreated>
+       <Year>1989</Year>
+       <Month>12</Month>
+       <Day>04</Day>
+      </DateCreated>
+      <EntryVersion>MED SPECIALTIES</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1991)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038424</TermUI>
+      <String>Medical Specialty</String>
+      <DateCreated>
+       <Year>1989</Year>
+       <Month>12</Month>
+       <Day>04</Day>
+      </DateCreated>
+      <EntryVersion>MED SPECIALTY</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1991)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038425</TermUI>
+      <String>Specialty, Medical</String>
+      <DateCreated>
+       <Year>1989</Year>
+       <Month>12</Month>
+       <Day>04</Day>
+      </DateCreated>
+      <EntryVersion>SPECIALTY MED</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1991)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038428</TermUI>
+      <String>Specialities, Medical</String>
+      <DateCreated>
+       <Year>1996</Year>
+       <Month>03</Month>
+       <Day>15</Day>
+      </DateCreated>
+      <EntryVersion>SPECIALITIES MED</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1996)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038428</TermUI>
+      <String>Medical Speciality</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038428</TermUI>
+      <String>Speciality, Medical</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038427</TermUI>
+      <String>Medical Specialities</String>
+      <DateCreated>
+       <Year>1996</Year>
+       <Month>03</Month>
+       <Day>15</Day>
+      </DateCreated>
+      <EntryVersion>MED SPECIALITIES</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>BIOETHICS (1996)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M000742208</ConceptUI>
+    <ConceptName>
+     <String>Insurance Medicine</String>
+    </ConceptName>
+    <ScopeNote>Evidence-informed decisions related to health insurance coverage and health-related judgements based on diagnosis, prognosis, and effectiveness of interventions. (From www.insurance.cochrane.org assessed 12/28/2020)
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0013251</Concept1UI>
+     <Concept2UI>M000742208</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T001093890</TermUI>
+      <String>Insurance Medicine</String>
+      <DateCreated>
+       <Year>2020</Year>
+       <Month>12</Month>
+       <Day>28</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2022)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T001093890</TermUI>
+      <String>Insurance Medicines</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T001093890</TermUI>
+      <String>Medicine, Insurance</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T001093890</TermUI>
+      <String>Medicines, Insurance</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D008919</DescriptorUI>
+  <DescriptorName>
+   <String>Investigative Techniques</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2018</Year>
+   <Month>02</Month>
+   <Day>28</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1998</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>used for searching; INDEXER: Do not use; CATALOGER: Do not use
+  </Annotation>
+  <HistoryNote>1998
+  </HistoryNote>
+  <PublicMeSHNote>1998
+  </PublicMeSHNote>
+  <TreeNumberList>
+   <TreeNumber>E05</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0013923</ConceptUI>
+    <ConceptName>
+     <String>Investigative Techniques</String>
+    </ConceptName>
+    <ScopeNote>Investigative techniques used in pre-clinical and clinical research, epidemiology, chemistry, immunology, genetics, etc. They do not include techniques specifically applied to DIAGNOSIS; THERAPEUTICS; anesthesia and analgesia; SURGICAL PROCEDURES, OPERATIVE; and DENTISTRY.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T026662</TermUI>
+      <String>Investigative Techniques</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1966)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T026662</TermUI>
+      <String>Investigative Technique</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T026662</TermUI>
+      <String>Technique, Investigative</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T026662</TermUI>
+      <String>Techniques, Investigative</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T026661</TermUI>
+      <String>Investigative Technics</String>
+      <DateCreated>
+       <Year>1996</Year>
+       <Month>09</Month>
+       <Day>26</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1998)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T026661</TermUI>
+      <String>Investigative Technic</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T026661</TermUI>
+      <String>Technic, Investigative</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T026661</TermUI>
+      <String>Technics, Investigative</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D009930</DescriptorUI>
+  <DescriptorName>
+   <String>Organic Chemicals</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2020</Year>
+   <Month>05</Month>
+   <Day>27</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1998</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>general or unspecified; prefer specific groups or specific chemicals
+  </Annotation>
+  <HistoryNote>98; use explode 1967-97
+  </HistoryNote>
+  <PublicMeSHNote>98
+  </PublicMeSHNote>
+  <TreeNumberList>
+   <TreeNumber>D02</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0015401</ConceptUI>
+    <ConceptName>
+     <String>Organic Chemicals</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ScopeNote>A broad class of substances containing carbon and its derivatives. Many of these chemicals will frequently contain hydrogen with or without oxygen, nitrogen, sulfur, phosphorus, and other elements. They exist in either carbon chain or carbon ring form.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T029381</TermUI>
+      <String>Organic Chemicals</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1966)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T029381</TermUI>
+      <String>Chemicals, Organic</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000998325</TermUI>
+      <String>Organic Chemical</String>
+      <DateCreated>
+       <Year>2019</Year>
+       <Month>11</Month>
+       <Day>20</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2021)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000998325</TermUI>
+      <String>Chemical, Organic</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D010811</DescriptorUI>
+  <DescriptorName>
+   <String>Natural Science Disciplines</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2008</Year>
+   <Month>07</Month>
+   <Day>08</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1998</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>general or unspecified; prefer specifics
+  </Annotation>
+  <HistoryNote>2009 (1998)
+  </HistoryNote>
+  <PublicMeSHNote>2009; see NATURAL SCIENCES 2002-2008; see PHYSICAL SCIENCES 1998-2001
+  </PublicMeSHNote>
+  <PreviousIndexingList>
+   <PreviousIndexing>Science (1966-1997)</PreviousIndexing>
+  </PreviousIndexingList>
+  <TreeNumberList>
+   <TreeNumber>H01</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0016787</ConceptUI>
+    <ConceptName>
+     <String>Natural Science Disciplines</String>
+    </ConceptName>
+    <ScopeNote>The sciences dealing with processes observable in nature.
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0016787</Concept1UI>
+     <Concept2UI>M0388503</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T714526</TermUI>
+      <String>Natural Science Disciplines</String>
+      <DateCreated>
+       <Year>2008</Year>
+       <Month>02</Month>
+       <Day>15</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2009)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T714526</TermUI>
+      <String>Discipline, Natural Science</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T714526</TermUI>
+      <String>Disciplines, Natural Science</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T714526</TermUI>
+      <String>Natural Science Discipline</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T031887</TermUI>
+      <String>Natural Sciences</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1966)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T031887</TermUI>
+      <String>Natural Science</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T031887</TermUI>
+      <String>Science, Natural</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T031887</TermUI>
+      <String>Sciences, Natural</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0388503</ConceptUI>
+    <ConceptName>
+     <String>Physical Sciences</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0016787</Concept1UI>
+     <Concept2UI>M0388503</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T448495</TermUI>
+      <String>Physical Sciences</String>
+      <DateCreated>
+       <Year>2001</Year>
+       <Month>05</Month>
+       <Day>30</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2002)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T448495</TermUI>
+      <String>Physical Science</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T448495</TermUI>
+      <String>Science, Physical</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T448495</TermUI>
+      <String>Sciences, Physical</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D011154</DescriptorUI>
+  <DescriptorName>
+   <String>Population Characteristics</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2016</Year>
+   <Month>07</Month>
+   <Day>01</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1998</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>INDEXER: Do not use
+  </Annotation>
+  <HistoryNote>98; use explode 1970-97
+  </HistoryNote>
+  <PublicMeSHNote>98
+  </PublicMeSHNote>
+  <PreviousIndexingList>
+   <PreviousIndexing>Population (1971-1997)</PreviousIndexing>
+  </PreviousIndexingList>
+  <TreeNumberList>
+   <TreeNumber>N01</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0017292</ConceptUI>
+    <ConceptName>
+     <String>Population Characteristics</String>
+    </ConceptName>
+    <ScopeNote>Qualities and characterization of various types of populations within a social or geographic group, with emphasis on demography, health status, and socioeconomic factors.
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0017292</Concept1UI>
+     <Concept2UI>M0017293</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0017292</Concept1UI>
+     <Concept2UI>M0017294</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T032835</TermUI>
+      <String>Population Characteristics</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>POPLINE (1978)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T032835</TermUI>
+      <String>Characteristic, Population</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T032835</TermUI>
+      <String>Characteristics, Population</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T032835</TermUI>
+      <String>Population Characteristic</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0017293</ConceptUI>
+    <ConceptName>
+     <String>Population Statistics</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0017292</Concept1UI>
+     <Concept2UI>M0017293</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T032836</TermUI>
+      <String>Population Statistics</String>
+      <DateCreated>
+       <Year>1997</Year>
+       <Month>02</Month>
+       <Day>12</Day>
+      </DateCreated>
+      <EntryVersion>POPULATION STATIST</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>POPLINE (1981)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T032836</TermUI>
+      <String>Statistics, Population</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0017294</ConceptUI>
+    <ConceptName>
+     <String>Population Heterogeneity</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0017292</Concept1UI>
+     <Concept2UI>M0017294</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T032837</TermUI>
+      <String>Population Heterogeneity</String>
+      <DateCreated>
+       <Year>1997</Year>
+       <Month>02</Month>
+       <Day>12</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1998)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T032837</TermUI>
+      <String>Heterogeneity, Population</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D011336</DescriptorUI>
+  <DescriptorName>
+   <String>Probability</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2008</Year>
+   <Month>07</Month>
+   <Day>08</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1968</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>IM for probability as a statist concept; NIM as coord for relative frequency of occur of specific dis, physiol response, etc.; see note under RISK &amp; RISK FACTORS; coord NIM with specific disease or other concept (IM)
+  </Annotation>
+  <HistoryNote>68(64)
+  </HistoryNote>
+  <PublicMeSHNote>68
+  </PublicMeSHNote>
+  <TreeNumberList>
+   <TreeNumber>E05.318.740.600</TreeNumber>
+   <TreeNumber>G17.680</TreeNumber>
+   <TreeNumber>N05.715.360.750.625</TreeNumber>
+   <TreeNumber>N06.850.520.830.600</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0017597</ConceptUI>
+    <ConceptName>
+     <String>Probability</String>
+    </ConceptName>
+    <ScopeNote>The study of chance processes or the relative frequency characterizing a chance process.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T033419</TermUI>
+      <String>Probability</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2000)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T033419</TermUI>
+      <String>Probabilities</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D011634</DescriptorUI>
+  <DescriptorName>
+   <String>Public Health</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2018</Year>
+   <Month>02</Month>
+   <Day>28</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1966</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>specialty; do not confuse with NATIONAL HEALTH PROGRAMS
+  </Annotation>
+  <EntryCombinationList>
+   <EntryCombination>
+    <ECIN>
+     <DescriptorReferredTo>
+      <DescriptorUI>D011634</DescriptorUI>
+      <DescriptorName>
+       <String>Public Health</String>
+      </DescriptorName>
+     </DescriptorReferredTo>
+     <QualifierReferredTo>
+      <QualifierUI>Q000458</QualifierUI>
+      <QualifierName>
+       <String>organization &amp; administration</String>
+      </QualifierName>
+     </QualifierReferredTo>
+    </ECIN>
+    <ECOUT>
+     <DescriptorReferredTo>
+      <DescriptorUI>D011635</DescriptorUI>
+      <DescriptorName>
+       <String>Public Health Administration</String>
+      </DescriptorName>
+     </DescriptorReferredTo>
+    </ECOUT>
+   </EntryCombination>
+  </EntryCombinationList>
+  <SeeRelatedList>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D011315</DescriptorUI>
+     <DescriptorName>
+      <String>Preventive Medicine</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D012936</DescriptorUI>
+     <DescriptorName>
+      <String>Social Medicine</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D015047</DescriptorUI>
+     <DescriptorName>
+      <String>Zoonoses</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+  </SeeRelatedList>
+  <TreeNumberList>
+   <TreeNumber>H02.403.720</TreeNumber>
+   <TreeNumber>N01.400.550</TreeNumber>
+   <TreeNumber>N06.850</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0018089</ConceptUI>
+    <ConceptName>
+     <String>Public Health</String>
+    </ConceptName>
+    <ScopeNote>Branch of medicine concerned with the prevention and control of disease and disability, and the promotion of physical and mental health of the population on the international, national, state, or municipal level.
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="BRD">
+     <Concept1UI>M0018089</Concept1UI>
+     <Concept2UI>M0018088</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T034347</TermUI>
+      <String>Public Health</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1966)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T034347</TermUI>
+      <String>Health, Public</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000908383</TermUI>
+      <String>Community Health</String>
+      <DateCreated>
+       <Year>2016</Year>
+       <Month>09</Month>
+       <Day>30</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2018)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000908383</TermUI>
+      <String>Health, Community</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0018088</ConceptUI>
+    <ConceptName>
+     <String>Environment, Preventive Medicine and Public Health</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="BRD">
+     <Concept1UI>M0018089</Concept1UI>
+     <Concept2UI>M0018088</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T034346</TermUI>
+      <String>Environment, Preventive Medicine and Public Health</String>
+      <DateCreated>
+       <Year>1979</Year>
+       <Month>08</Month>
+       <Day>03</Day>
+      </DateCreated>
+      <EntryVersion>ENVIR PREV MED PUBLIC HEALTH</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T034345</TermUI>
+      <String>Environment, Preventive Medicine &amp; Public Health</String>
+      <DateCreated>
+       <Year>1978</Year>
+       <Month>12</Month>
+       <Day>26</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D011787</DescriptorUI>
+  <DescriptorName>
+   <String>Quality of Health Care</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2021</Year>
+   <Month>05</Month>
+   <Day>10</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1968</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>IM
+  </Annotation>
+  <HistoryNote>1968
+  </HistoryNote>
+  <PublicMeSHNote>1968
+  </PublicMeSHNote>
+  <SeeRelatedList>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D011367</DescriptorUI>
+     <DescriptorName>
+      <String>Professional Staff Committees</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D016749</DescriptorUI>
+     <DescriptorName>
+      <String>National Practitioner Data Bank</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D000090004</DescriptorUI>
+     <DescriptorName>
+      <String>Ambulatory Care Sensitive Conditions</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+  </SeeRelatedList>
+  <TreeNumberList>
+   <TreeNumber>N04.761</TreeNumber>
+   <TreeNumber>N05.715</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0018320</ConceptUI>
+    <ConceptName>
+     <String>Quality of Health Care</String>
+    </ConceptName>
+    <ScopeNote>The levels of excellence which characterize the health service or health care provided based on accepted standards of quality.
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="BRD">
+     <Concept1UI>M0018320</Concept1UI>
+     <Concept2UI>M000634203</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T034829</TermUI>
+      <String>Quality of Health Care</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1999)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T034829</TermUI>
+      <String>Health Care Quality</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000897795</TermUI>
+      <String>Quality of Care</String>
+      <DateCreated>
+       <Year>2016</Year>
+       <Month>03</Month>
+       <Day>28</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2017)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000897795</TermUI>
+      <String>Care Quality</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T034830</TermUI>
+      <String>Quality of Healthcare</String>
+      <DateCreated>
+       <Year>1997</Year>
+       <Month>01</Month>
+       <Day>14</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1998)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T034830</TermUI>
+      <String>Healthcare Quality</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M000634203</ConceptUI>
+    <ConceptName>
+     <String>Pharmacy Audit</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="BRD">
+     <Concept1UI>M0018320</Concept1UI>
+     <Concept2UI>M000634203</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000928589</TermUI>
+      <String>Pharmacy Audit</String>
+      <DateCreated>
+       <Year>2017</Year>
+       <Month>07</Month>
+       <Day>11</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2018)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000928589</TermUI>
+      <String>Audit, Pharmacy</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000928589</TermUI>
+      <String>Pharmacy Audits</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D013223</DescriptorUI>
+  <DescriptorName>
+   <String>Statistics as Topic</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2018</Year>
+   <Month>07</Month>
+   <Day>02</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>2008</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>prefer the qualifier /statist with non-disease terms; statistics on a disease = /epidemiol; do not confuse with MATHEMATICS; do not confuse with the Publication Type STATISTICS
+  </Annotation>
+  <HistoryNote>2008(1963)
+  </HistoryNote>
+  <PublicMeSHNote>2008; see STATISTICS 1963-2007
+  </PublicMeSHNote>
+  <SeeRelatedList>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D001699</DescriptorUI>
+     <DescriptorName>
+      <String>Biometry</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D011594</DescriptorUI>
+     <DescriptorName>
+      <String>Psychometrics</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D012963</DescriptorUI>
+     <DescriptorName>
+      <String>Sociometric Techniques</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D015201</DescriptorUI>
+     <DescriptorName>
+      <String>Meta-Analysis as Topic</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D015233</DescriptorUI>
+     <DescriptorName>
+      <String>Models, Statistical</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D015706</DescriptorUI>
+     <DescriptorName>
+      <String>Bibliometrics</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+  </SeeRelatedList>
+  <TreeNumberList>
+   <TreeNumber>E05.318.740</TreeNumber>
+   <TreeNumber>H01.548.832</TreeNumber>
+   <TreeNumber>N05.715.360.750</TreeNumber>
+   <TreeNumber>N06.850.520.830</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0020458</ConceptUI>
+    <ConceptName>
+     <String>Statistics as Topic</String>
+    </ConceptName>
+    <ScopeNote>Works about the science and art of collecting, summarizing, and analyzing data that are subject to random variation.
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0020458</Concept1UI>
+     <Concept2UI>M0020451</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0020458</Concept1UI>
+     <Concept2UI>M0020455</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0020458</Concept1UI>
+     <Concept2UI>M0020456</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0020458</Concept1UI>
+     <Concept2UI>M0020457</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0020458</Concept1UI>
+     <Concept2UI>M0020459</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0020458</Concept1UI>
+     <Concept2UI>M0020460</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0020458</Concept1UI>
+     <Concept2UI>M0020461</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T700800</TermUI>
+      <String>Statistics as Topic</String>
+      <DateCreated>
+       <Year>2007</Year>
+       <Month>06</Month>
+       <Day>26</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2008)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0020455</ConceptUI>
+    <ConceptName>
+     <String>Multiple Classification Analysis</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0020458</Concept1UI>
+     <Concept2UI>M0020455</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038837</TermUI>
+      <String>Multiple Classification Analysis</String>
+      <DateCreated>
+       <Year>1978</Year>
+       <Month>12</Month>
+       <Day>26</Day>
+      </DateCreated>
+      <EntryVersion>MULTIPLE CLASS ANAL</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1978)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038837</TermUI>
+      <String>Analyses, Multiple Classification</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038837</TermUI>
+      <String>Classification Analyses, Multiple</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038837</TermUI>
+      <String>Classification Analysis, Multiple</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038837</TermUI>
+      <String>Multiple Classification Analyses</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0020456</ConceptUI>
+    <ConceptName>
+     <String>Statistics, Service</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0020458</Concept1UI>
+     <Concept2UI>M0020456</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038839</TermUI>
+      <String>Statistics, Service</String>
+      <DateCreated>
+       <Year>1995</Year>
+       <Month>03</Month>
+       <Day>08</Day>
+      </DateCreated>
+      <EntryVersion>STATIST SERV</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1996)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038838</TermUI>
+      <String>Service Statistics</String>
+      <DateCreated>
+       <Year>1978</Year>
+       <Month>12</Month>
+       <Day>26</Day>
+      </DateCreated>
+      <EntryVersion>SERV STATIST</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1978)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0020457</ConceptUI>
+    <ConceptName>
+     <String>Statistical Study</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0020458</Concept1UI>
+     <Concept2UI>M0020457</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038840</TermUI>
+      <String>Statistical Study</String>
+      <DateCreated>
+       <Year>1978</Year>
+       <Month>12</Month>
+       <Day>26</Day>
+      </DateCreated>
+      <EntryVersion>STATIST STUDY</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1978)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038840</TermUI>
+      <String>Statistical Studies</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038840</TermUI>
+      <String>Studies, Statistical</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038840</TermUI>
+      <String>Study, Statistical</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0020459</ConceptUI>
+    <ConceptName>
+     <String>Estimation Techniques</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0020458</Concept1UI>
+     <Concept2UI>M0020459</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038843</TermUI>
+      <String>Estimation Techniques</String>
+      <DateCreated>
+       <Year>1990</Year>
+       <Month>01</Month>
+       <Day>11</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1991)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038843</TermUI>
+      <String>Estimation Technique</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038843</TermUI>
+      <String>Technique, Estimation</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038843</TermUI>
+      <String>Techniques, Estimation</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038842</TermUI>
+      <String>Estimation Technics</String>
+      <DateCreated>
+       <Year>1978</Year>
+       <Month>12</Month>
+       <Day>26</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1978)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038842</TermUI>
+      <String>Technics, Estimation</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0020460</ConceptUI>
+    <ConceptName>
+     <String>Indirect Estimation Techniques</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0020458</Concept1UI>
+     <Concept2UI>M0020460</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038845</TermUI>
+      <String>Indirect Estimation Techniques</String>
+      <DateCreated>
+       <Year>1990</Year>
+       <Month>01</Month>
+       <Day>11</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1991)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038845</TermUI>
+      <String>Estimation Technique, Indirect</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038845</TermUI>
+      <String>Estimation Techniques, Indirect</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038845</TermUI>
+      <String>Indirect Estimation Technique</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038845</TermUI>
+      <String>Technique, Indirect Estimation</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038845</TermUI>
+      <String>Techniques, Indirect Estimation</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038844</TermUI>
+      <String>Indirect Estimation Technics</String>
+      <DateCreated>
+       <Year>1986</Year>
+       <Month>12</Month>
+       <Day>31</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1978)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038844</TermUI>
+      <String>Estimation Technic, Indirect</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038844</TermUI>
+      <String>Estimation Technics, Indirect</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038844</TermUI>
+      <String>Indirect Estimation Technic</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038844</TermUI>
+      <String>Technic, Indirect Estimation</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038844</TermUI>
+      <String>Technics, Indirect Estimation</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0020451</ConceptUI>
+    <ConceptName>
+     <String>Area Analysis</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0020458</Concept1UI>
+     <Concept2UI>M0020451</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038832</TermUI>
+      <String>Area Analysis</String>
+      <DateCreated>
+       <Year>1978</Year>
+       <Month>12</Month>
+       <Day>26</Day>
+      </DateCreated>
+      <EntryVersion>AREA ANAL</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1978)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038832</TermUI>
+      <String>Analyses, Area</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T038832</TermUI>
+      <String>Area Analyses</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0020461</ConceptUI>
+    <ConceptName>
+     <String>Tables and Charts as Topic</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0020458</Concept1UI>
+     <Concept2UI>M0020461</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T700516</TermUI>
+      <String>Tables and Charts as Topic</String>
+      <DateCreated>
+       <Year>2007</Year>
+       <Month>06</Month>
+       <Day>24</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2008)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D016020</DescriptorUI>
+  <DescriptorName>
+   <String>Epidemiologic Study Characteristics</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2018</Year>
+   <Month>07</Month>
+   <Day>01</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1998</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>used for searching; INDEXER: Do not use; CATALOGER: Do not use
+  </Annotation>
+  <HistoryNote>2018 (1998)
+  </HistoryNote>
+  <PublicMeSHNote>2018; EPIDEMIOLOGIC STUDY CHARACTERISTICS AS TOPIC 1998-2017
+  </PublicMeSHNote>
+  <PreviousIndexingList>
+   <PreviousIndexing>Epidemiologic Methods (1966-1997)</PreviousIndexing>
+   <PreviousIndexing>Epidemiology (1966-1997)</PreviousIndexing>
+   <PreviousIndexing>Research (1966-1997)</PreviousIndexing>
+  </PreviousIndexingList>
+  <TreeNumberList>
+   <TreeNumber>E05.318.372</TreeNumber>
+   <TreeNumber>N05.715.360.330</TreeNumber>
+   <TreeNumber>N06.850.520.450</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0024492</ConceptUI>
+    <ConceptName>
+     <String>Epidemiologic Study Characteristics</String>
+    </ConceptName>
+    <ScopeNote>Works about types and formulations of studies used in epidemiological research.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T047558</TermUI>
+      <String>Epidemiologic Study Characteristics</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <EntryVersion>EPIDEMIOL STUDY CHARACTERISTICS</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1990)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T047558</TermUI>
+      <String>Study Characteristic, Epidemiologic</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T047558</TermUI>
+      <String>Study Characteristics, Epidemiologic</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D016021</DescriptorUI>
+  <DescriptorName>
+   <String>Epidemiologic Studies</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2019</Year>
+   <Month>05</Month>
+   <Day>24</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1998</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>exam &amp; anal of data leading to epidemiol conclusions: differentiate from EPIDEMIOLOGY, the specialty; GEN or unspecified; prefer specifics
+  </Annotation>
+  <HistoryNote>98; use explode 1990-97
+  </HistoryNote>
+  <PublicMeSHNote>98
+  </PublicMeSHNote>
+  <PreviousIndexingList>
+   <PreviousIndexing>Epidemiology (1967-1997)</PreviousIndexing>
+  </PreviousIndexingList>
+  <TreeNumberList>
+   <TreeNumber>E05.318.372.500</TreeNumber>
+   <TreeNumber>N05.715.360.330.500</TreeNumber>
+   <TreeNumber>N06.850.520.450.500</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0024493</ConceptUI>
+    <ConceptName>
+     <String>Epidemiologic Studies</String>
+    </ConceptName>
+    <ScopeNote>Studies designed to examine associations, commonly, hypothesized causal relations. They are usually concerned with identifying or measuring the effects of risk factors or exposures. The common types of analytic study are CASE-CONTROL STUDIES; COHORT STUDIES; and CROSS-SECTIONAL STUDIES.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T047560</TermUI>
+      <String>Epidemiologic Studies</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <EntryVersion>EPIDEMIOL STUDIES</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1990)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T047559</TermUI>
+      <String>Studies, Epidemiologic</String>
+      <DateCreated>
+       <Year>1997</Year>
+       <Month>02</Month>
+       <Day>24</Day>
+      </DateCreated>
+      <EntryVersion>STUDIES EPIDEMIOL</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1998)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T047559</TermUI>
+      <String>Epidemiologic Study</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T047559</TermUI>
+      <String>Study, Epidemiologic</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T047561</TermUI>
+      <String>Epidemiological Studies</String>
+      <DateCreated>
+       <Year>1996</Year>
+       <Month>10</Month>
+       <Day>16</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1998)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T047561</TermUI>
+      <String>Epidemiological Study</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T047561</TermUI>
+      <String>Studies, Epidemiological</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T047561</TermUI>
+      <String>Study, Epidemiological</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D017530</DescriptorUI>
+  <DescriptorName>
+   <String>Health Care Quality, Access, and Evaluation</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2015</Year>
+   <Month>06</Month>
+   <Day>05</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1998</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>used for searching; INDEXER: Do not use; CATALOGER: Do not use
+  </Annotation>
+  <HistoryNote>98; use explode
+  </HistoryNote>
+  <PublicMeSHNote>98
+  </PublicMeSHNote>
+  <TreeNumberList>
+   <TreeNumber>N05</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0026589</ConceptUI>
+    <ConceptName>
+     <String>Health Care Quality, Access, and Evaluation</String>
+    </ConceptName>
+    <ScopeNote>The concept concerned with all aspects of the quality, accessibility, and appraisal of health care and health care delivery.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T052605</TermUI>
+      <String>Health Care Quality, Access, and Evaluation</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1993)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T052606</TermUI>
+      <String>Healthcare Quality, Access, and Evaluation</String>
+      <DateCreated>
+       <Year>1997</Year>
+       <Month>01</Month>
+       <Day>10</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1998)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D017531</DescriptorUI>
+  <DescriptorName>
+   <String>Health Care Evaluation Mechanisms</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2015</Year>
+   <Month>06</Month>
+   <Day>05</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1998</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>INDEXER: Do not use
+  </Annotation>
+  <HistoryNote>98; use explode
+  </HistoryNote>
+  <PublicMeSHNote>98
+  </PublicMeSHNote>
+  <PreviousIndexingList>
+   <PreviousIndexing>Quality of Health Care (1966-1997)</PreviousIndexing>
+  </PreviousIndexingList>
+  <TreeNumberList>
+   <TreeNumber>N05.715.360</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0026590</ConceptUI>
+    <ConceptName>
+     <String>Health Care Evaluation Mechanisms</String>
+    </ConceptName>
+    <ScopeNote>Methods and techniques used in evaluating the quality of health care, its planning, and delivery.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T052607</TermUI>
+      <String>Health Care Evaluation Mechanisms</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1993)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T052608</TermUI>
+      <String>Healthcare Evaluation Mechanisms</String>
+      <DateCreated>
+       <Year>1997</Year>
+       <Month>01</Month>
+       <Day>10</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1998)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T052608</TermUI>
+      <String>Evaluation Mechanism, Healthcare</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T052608</TermUI>
+      <String>Evaluation Mechanisms, Healthcare</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T052608</TermUI>
+      <String>Healthcare Evaluation Mechanism</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T052608</TermUI>
+      <String>Mechanism, Healthcare Evaluation</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T052608</TermUI>
+      <String>Mechanisms, Healthcare Evaluation</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D018373</DescriptorUI>
+  <DescriptorName>
+   <String>Peripheral Nervous System Agents</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2011</Year>
+   <Month>06</Month>
+   <Day>24</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1998</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>general or unspecified; prefer specifics; note entry term PERIPHERAL NERVOUS SYSTEM EFFECT: use only for the peripheral nervous system effect of a chemical substance
+  </Annotation>
+  <HistoryNote>98; use explode 1995-97
+  </HistoryNote>
+  <NLMClassificationNumber>QV 76.5</NLMClassificationNumber>
+  <PublicMeSHNote>98
+  </PublicMeSHNote>
+  <TreeNumberList>
+   <TreeNumber>D27.505.696.663</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0027599</ConceptUI>
+    <ConceptName>
+     <String>Peripheral Nervous System Agents</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ScopeNote>Drugs that act principally at one or more sites within the peripheral neuroeffector systems, the autonomic system, and motor nerve-skeletal system. (From Smith and Reynard, Textbook of Pharmacology, 1991, p75)
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0027599</Concept1UI>
+     <Concept2UI>M0556209</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T054787</TermUI>
+      <String>Peripheral Nervous System Agents</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <EntryVersion>PNS AGENTS</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1995)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T054788</TermUI>
+      <String>Peripheral Nervous System Drugs</String>
+      <DateCreated>
+       <Year>1997</Year>
+       <Month>03</Month>
+       <Day>14</Day>
+      </DateCreated>
+      <EntryVersion>PNS DRUGS</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1998)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0556209</ConceptUI>
+    <ConceptName>
+     <String>Peripheral Nervous System Effect</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0027599</Concept1UI>
+     <Concept2UI>M0556209</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T788110</TermUI>
+      <String>Peripheral Nervous System Effect</String>
+      <DateCreated>
+       <Year>2011</Year>
+       <Month>03</Month>
+       <Day>30</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2012)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T788111</TermUI>
+      <String>Peripheral Nervous System Effects</String>
+      <DateCreated>
+       <Year>2011</Year>
+       <Month>03</Month>
+       <Day>30</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2012)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D018689</DescriptorUI>
+  <DescriptorName>
+   <String>Sensory System Agents</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2008</Year>
+   <Month>07</Month>
+   <Day>10</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1998</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>general or unspecified; prefer specifics
+  </Annotation>
+  <HistoryNote>98; use explode 1995-97
+  </HistoryNote>
+  <PublicMeSHNote>98
+  </PublicMeSHNote>
+  <TreeNumberList>
+   <TreeNumber>D27.505.696.663.850</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0028003</ConceptUI>
+    <ConceptName>
+     <String>Sensory System Agents</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ScopeNote>Drugs that act on neuronal sensory receptors resulting in an increase, decrease, or modification of afferent nerve activity. (From Smith and Reynard, Textbook of Pharmacology, 1991, p367)
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T055647</TermUI>
+      <String>Sensory System Agents</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1995)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T055647</TermUI>
+      <String>Agents, Sensory System</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T055647</TermUI>
+      <String>System Agents, Sensory</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T055648</TermUI>
+      <String>Sensory System Drugs</String>
+      <DateCreated>
+       <Year>1997</Year>
+       <Month>03</Month>
+       <Day>14</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1998)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T055648</TermUI>
+      <String>Drugs, Sensory System</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T055648</TermUI>
+      <String>System Drugs, Sensory</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D018712</DescriptorUI>
+  <DescriptorName>
+   <String>Analgesics, Non-Narcotic</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2021</Year>
+   <Month>06</Month>
+   <Day>30</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1995</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <HistoryNote>95; ANTIPYRETICS was see ANTI-INFLAMMATORY AGENTS, NON-STEROIDAL 1990-94; was see ANALGESICS, ANTI-INFAMMATORY 1978-89; was see ANALGESICS AND ANTIPYRETICS 1975-77; was see under ANALGESICS AND ANTIPYRETICS 1963-74
+  </HistoryNote>
+  <NLMClassificationNumber>QV 95</NLMClassificationNumber>
+  <OnlineNote>use ANTI-INFLAMMATORY AGENTS, NON-STEROIDAL to search ANTIPYRETICS 1978-94; use ANALGESICS 1966-77
+  </OnlineNote>
+  <PublicMeSHNote>95; ANTIPYRETICS was see ANTI-INFLAMMATORY AGENTS, NON-STEROIDAL 1990-94; was see ANALGESICS, ANTI-INFAMMATORY 1978-89; was see ANALGESICS AND ANTIPYRETICS 1975-77; was see under ANALGESICS AND ANTIPYRETICS 1963-74
+  </PublicMeSHNote>
+  <PreviousIndexingList>
+   <PreviousIndexing>Analgesics (1966-1994)</PreviousIndexing>
+  </PreviousIndexingList>
+  <TreeNumberList>
+   <TreeNumber>D27.505.696.663.850.014.040</TreeNumber>
+   <TreeNumber>D27.505.954.427.040.100</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0028038</ConceptUI>
+    <ConceptName>
+     <String>Analgesics, Non-Narcotic</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ScopeNote>A subclass of analgesic agents that typically do not bind to OPIOID RECEPTORS and are not addictive. Many non-narcotic analgesics are offered as NONPRESCRIPTION DRUGS.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T055715</TermUI>
+      <String>Analgesics, Non-Narcotic</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1995)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T055715</TermUI>
+      <String>Analgesics, Non Narcotic</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T055715</TermUI>
+      <String>Non-Narcotic Analgesics</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000997661</TermUI>
+      <String>Non-Opioid Analgesic</String>
+      <DateCreated>
+       <Year>2019</Year>
+       <Month>11</Month>
+       <Day>19</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2021)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000997661</TermUI>
+      <String>Analgesic, Non-Opioid</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000997662</TermUI>
+      <String>Nonopioid Analgesic</String>
+      <DateCreated>
+       <Year>2019</Year>
+       <Month>11</Month>
+       <Day>19</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2021)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000997662</TermUI>
+      <String>Analgesic, Nonopioid</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000926681</TermUI>
+      <String>Non-Opioid Analgesics</String>
+      <DateCreated>
+       <Year>2017</Year>
+       <Month>06</Month>
+       <Day>12</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2018)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000926681</TermUI>
+      <String>Analgesics, Non-Opioid</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000926681</TermUI>
+      <String>Non Opioid Analgesics</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T055716</TermUI>
+      <String>Analgesics, Nonnarcotic</String>
+      <DateCreated>
+       <Year>1994</Year>
+       <Month>05</Month>
+       <Day>03</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1995)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T055716</TermUI>
+      <String>Nonnarcotic Analgesics</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T055717</TermUI>
+      <String>Analgesics, Nonopioid</String>
+      <DateCreated>
+       <Year>1994</Year>
+       <Month>01</Month>
+       <Day>31</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1995)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T001089307</TermUI>
+      <String>Non Opioid Analgesic</String>
+      <DateCreated>
+       <Year>2020</Year>
+       <Month>10</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2022)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T001089307</TermUI>
+      <String>Analgesic, Non Opioid</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T001089307</TermUI>
+      <String>Opioid Analgesic, Non</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T055718</TermUI>
+      <String>Nonopioid Analgesics</String>
+      <DateCreated>
+       <Year>1994</Year>
+       <Month>01</Month>
+       <Day>31</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1995)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D020164</DescriptorUI>
+  <DescriptorName>
+   <String>Chemical Actions and Uses</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2024</Year>
+   <Month>08</Month>
+   <Day>09</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1999</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>used for searching; INDEXER: Do not use; CATALOGER: Do not use
+  </Annotation>
+  <HistoryNote>1999
+  </HistoryNote>
+  <PublicMeSHNote>1999
+  </PublicMeSHNote>
+  <TreeNumberList>
+   <TreeNumber>D27</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0029889</ConceptUI>
+    <ConceptName>
+     <String>Chemical Actions and Uses</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ScopeNote>A group of pharmacologic activities, effects on living systems and the environment, and modes of employment of drugs and chemicals. They are broken into actions, which describe their effects, and uses, which describe how they are employed.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T059960</TermUI>
+      <String>Chemical Actions and Uses</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1999)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D020228</DescriptorUI>
+  <DescriptorName>
+   <String>Pharmacologic Actions</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2021</Year>
+   <Month>06</Month>
+   <Day>30</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1999</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>used for searching; INDEXER: Do not use; CATALOGER: Do not use
+  </Annotation>
+  <HistoryNote>2004(1999)
+  </HistoryNote>
+  <PublicMeSHNote>2004; see CHEMICAL ACTIONS 1999-2003
+  </PublicMeSHNote>
+  <SeeRelatedList>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D002620</DescriptorUI>
+     <DescriptorName>
+      <String>Pharmacological and Toxicological Phenomena</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D004358</DescriptorUI>
+     <DescriptorName>
+      <String>Drug Therapy</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+  </SeeRelatedList>
+  <TreeNumberList>
+   <TreeNumber>D27.505</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0029902</ConceptUI>
+    <ConceptName>
+     <String>Pharmacologic Actions</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ScopeNote>A broad category of chemical actions and uses that result in the prevention, treatment, cure or diagnosis of disease. Included here are drugs and chemicals that act by altering normal body functions, such as the REPRODUCTIVE CONTROL AGENTS and ANESTHETICS. Effects of chemicals on the environment are also included.
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="BRD">
+     <Concept1UI>M0029902</Concept1UI>
+     <Concept2UI>M0448593</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T059982</TermUI>
+      <String>Pharmacologic Actions</String>
+      <DateCreated>
+       <Year>1998</Year>
+       <Month>02</Month>
+       <Day>18</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1999)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T059982</TermUI>
+      <String>Actions, Pharmacologic</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T001089384</TermUI>
+      <String>Pharmacologic Action</String>
+      <DateCreated>
+       <Year>2020</Year>
+       <Month>10</Month>
+       <Day>05</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2022)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T001089384</TermUI>
+      <String>Action, Pharmacologic</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0448593</ConceptUI>
+    <ConceptName>
+     <String>Chemical Actions</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="BRD">
+     <Concept1UI>M0029902</Concept1UI>
+     <Concept2UI>M0448593</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T059983</TermUI>
+      <String>Chemical Actions</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1999)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T059983</TermUI>
+      <String>Actions, Chemical</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T001089383</TermUI>
+      <String>Chemical Action</String>
+      <DateCreated>
+       <Year>2020</Year>
+       <Month>10</Month>
+       <Day>05</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2022)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T001089383</TermUI>
+      <String>Action, Chemical</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D045505</DescriptorUI>
+  <DescriptorName>
+   <String>Physiological Effects of Drugs</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2015</Year>
+   <Month>06</Month>
+   <Day>05</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>2004</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>used for searching; INDEXER: Do not use; CATALOGER: Do not use
+  </Annotation>
+  <HistoryNote>2004
+  </HistoryNote>
+  <PublicMeSHNote>2004
+  </PublicMeSHNote>
+  <TreeNumberList>
+   <TreeNumber>D27.505.696</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0448540</ConceptUI>
+    <ConceptName>
+     <String>Physiological Effects of Drugs</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ScopeNote>Activities which affect organs and systemic functions without regard to a particular disease.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T538909</TermUI>
+      <String>Physiological Effects of Drugs</String>
+      <DateCreated>
+       <Year>2003</Year>
+       <Month>04</Month>
+       <Day>22</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2004)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T538911</TermUI>
+      <String>Drug Effects on Physiology</String>
+      <DateCreated>
+       <Year>2003</Year>
+       <Month>04</Month>
+       <Day>22</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2004)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T538910</TermUI>
+      <String>Drug Physiological Effects</String>
+      <DateCreated>
+       <Year>2003</Year>
+       <Month>04</Month>
+       <Day>22</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2004)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T538910</TermUI>
+      <String>Effects, Drug Physiological</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T538910</TermUI>
+      <String>Physiological Effects, Drug</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D045506</DescriptorUI>
+  <DescriptorName>
+   <String>Therapeutic Uses</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2020</Year>
+   <Month>05</Month>
+   <Day>27</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>2004</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>used for searching; INDEXER: Do not use; CATALOGER: Do not use
+  </Annotation>
+  <HistoryNote>2004
+  </HistoryNote>
+  <PublicMeSHNote>2004
+  </PublicMeSHNote>
+  <TreeNumberList>
+   <TreeNumber>D27.505.954</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0448541</ConceptUI>
+    <ConceptName>
+     <String>Therapeutic Uses</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ScopeNote>Uses of chemicals which affect the course of conditions, diseases, syndromes or pathology to benefit the health of an individual.
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0448541</Concept1UI>
+     <Concept2UI>M0590320</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T538912</TermUI>
+      <String>Therapeutic Uses</String>
+      <DateCreated>
+       <Year>2003</Year>
+       <Month>04</Month>
+       <Day>22</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2004)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T538912</TermUI>
+      <String>Uses, Therapeutic</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T001005262</TermUI>
+      <String>Therapeutic Use</String>
+      <DateCreated>
+       <Year>2020</Year>
+       <Month>01</Month>
+       <Day>13</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2021)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T001005262</TermUI>
+      <String>Use, Therapeutic</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0590320</ConceptUI>
+    <ConceptName>
+     <String>Therapeutic Effects</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0448541</Concept1UI>
+     <Concept2UI>M0590320</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T853321</TermUI>
+      <String>Therapeutic Effects</String>
+      <DateCreated>
+       <Year>2014</Year>
+       <Month>01</Month>
+       <Day>10</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2015)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T853321</TermUI>
+      <String>Effects, Therapeutic</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000996404</TermUI>
+      <String>Therapeutic Effect</String>
+      <DateCreated>
+       <Year>2019</Year>
+       <Month>11</Month>
+       <Day>14</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2021)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000996404</TermUI>
+      <String>Effect, Therapeutic</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D055641</DescriptorUI>
+  <DescriptorName>
+   <String>Mathematical Concepts</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2009</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>2009</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>general or unspecified; prefer specifics
+  </Annotation>
+  <HistoryNote>2009
+  </HistoryNote>
+  <PublicMeSHNote>2009
+  </PublicMeSHNote>
+  <TreeNumberList>
+   <TreeNumber>G17</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0519203</ConceptUI>
+    <ConceptName>
+     <String>Mathematical Concepts</String>
+    </ConceptName>
+    <ScopeNote>Numeric or quantitative entities, descriptions, properties, relationships, operations, and events.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T716978</TermUI>
+      <String>Mathematical Concepts</String>
+      <DateCreated>
+       <Year>2008</Year>
+       <Month>03</Month>
+       <Day>28</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2009)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T716978</TermUI>
+      <String>Concept, Mathematical</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T716978</TermUI>
+      <String>Concepts, Mathematical</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T716978</TermUI>
+      <String>Mathematical Concept</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+</DescriptorRecordSet>

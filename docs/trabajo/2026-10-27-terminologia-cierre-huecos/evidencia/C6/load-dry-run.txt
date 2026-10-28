@@ -1,0 +1,99 @@
+=== Tratamientos farmacológicos → terminology.* (DRY-RUN, sin base) ===
+[load] leyendo 19 partes versionadas de /home/user/mantra-core-health-api/tools/terminology-import/drug-treatments/data
+[
+  {
+    "codeSystem": "drug-treatment-relation-types",
+    "version": "1",
+    "concepts": 46,
+    "properties": 180
+  },
+  {
+    "codeSystem": "drug-treatment-assertions-labeledin",
+    "version": "11d535ba0884ee56c3cd5756fdfb4985f313bd80",
+    "concepts": 2850,
+    "properties": 45639
+  },
+  {
+    "codeSystem": "drug-treatment-assertions-pharmacotherapydb",
+    "version": "11d535ba0884ee56c3cd5756fdfb4985f313bd80",
+    "concepts": 1388,
+    "properties": 24984
+  },
+  {
+    "codeSystem": "drug-treatment-assertions-drugcentral-2016",
+    "version": "64630f7c2bc050f5af0a7cac7b08e778125284bc",
+    "concepts": 9094,
+    "properties": 163692
+  },
+  {
+    "codeSystem": "drug-treatment-assertions-drugmechdb",
+    "version": "aef224217071216748740c10faeb6db8e3f15901",
+    "concepts": 4662,
+    "properties": 83916
+  },
+  {
+    "codeSystem": "drug-treatment-assertions-maxo",
+    "version": "42edd966faac5229ce7c35fc3848f2e6b3d45bda",
+    "concepts": 38,
+    "properties": 684
+  },
+  {
+    "codeSystem": "drug-treatment-assertions-medrt",
+    "version": "MED-RT-2026.10.05",
+    "concepts": 30002,
+    "properties": 540036
+  },
+  {
+    "codeSystem": "drug-treatment-assertions-chembl",
+    "version": "ChEMBL_37",
+    "concepts": 60055,
+    "properties": 1020935
+  },
+  {
+    "codeSystem": "drug-treatment-assertions-drugcentral",
+    "version": "DrugCentral-2026-09-25",
+    "concepts": 38517,
+    "properties": 693306
+  },
+  {
+    "codeSystem": "drug-treatment-assertions-wikidata",
+    "version": "wikidata-2026-10-27",
+    "concepts": 13506,
+    "properties": 243108
+  },
+  {
+    "codeSystem": "drug-treatment-assertions-eeml",
+    "version": "eEML-2026-10-27",
+    "concepts": 1068,
+    "properties": 19224
+  },
+  {
+    "codeSystem": "drug-treatment-assertions-ema",
+    "version": "EMA-medicines-2026-10-27",
+    "concepts": 2514,
+    "properties": 45252
+  },
+  {
+    "codeSystem": "drug-treatment-assertions-opentargets",
+    "version": "OpenTargets-26.09",
+    "concepts": 2331,
+    "properties": 42145
+  },
+  {
+    "codeSystem": "drug-treatment-assertions-civic",
+    "version": "CIViC-2026-10-27",
+    "concepts": 3147,
+    "properties": 56986
+  },
+  {
+    "codeSystem": "drug-treatment-assertions-clinicaltrials",
+    "version": "CTgov-2026-10-27",
+    "concepts": 171847,
+    "properties": 3093246
+  }
+]
+DRY-RUN: no se tocó ninguna base. Las relaciones estructurales se calculan contra la base en --apply.
+
+real	0m29.667s
+user	0m29.072s
+sys	0m2.147s

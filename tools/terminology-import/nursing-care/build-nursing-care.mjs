@@ -55,7 +55,7 @@ async function main() {
     }
     if (seen.has(archetype.archetypeId)) throw new Error(`Arquetipo repetido en el espejo: ${archetype.archetypeId}`);
     seen.add(archetype.archetypeId);
-    const out = archetypeRows(archetype, { path: relative(ckm.dir, f), commit: ckm.commit, retrievedAt: ckm.retrievedAt, repoUrl: ckm.repoUrl, overrides: LICENSE_OVERRIDES });
+    const out = archetypeRows(archetype, { path: relative(ckm.dir, f), commit: ckm.commit, repoUrl: ckm.repoUrl, overrides: LICENSE_OVERRIDES });
     const note = SCALE_LICENSE_NOTES[archetype.archetypeId];
     if (note) out[0].licenseVerification = note;
     rows.push(...out);
@@ -74,7 +74,7 @@ async function main() {
   if (!report) throw new Error(`Falta ${NURSING_REPORT_ID} en ${msssiDir}`);
   const targets = slotTargets(report.a, msssiParsed.map((x) => x.a.archetypeId));
   const profile = msssiProfile(targets);
-  const msssi = msssiParsed.flatMap(({ f, a }) => archetypeRows(a, { path: relative(adlArchetypes.dir, f), commit: adlArchetypes.commit, retrievedAt: adlArchetypes.retrievedAt, repoUrl: adlArchetypes.repoUrl, profile }));
+  const msssi = msssiParsed.flatMap(({ f, a }) => archetypeRows(a, { path: relative(adlArchetypes.dir, f), commit: adlArchetypes.commit, repoUrl: adlArchetypes.repoUrl, profile }));
   const msssiCodes = new Set();
   for (const r of msssi) {
     if (msssiCodes.has(r.code)) throw new Error(`Código repetido (CMDIC): ${r.code}`);

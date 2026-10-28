@@ -1,0 +1,86 @@
+[
+ {
+  "ID": -197,
+  "CODE": "APPLICABLE_LEGISLATION_ID",
+  "LANGUAGE": "en",
+  "VALUE": "MDR (REGULATION (EU) 2017/745 on medical devices)"
+ },
+ {
+  "ID": -157,
+  "CODE": "RISK_CLASS_ID",
+  "LANGUAGE": "en",
+  "VALUE": "IVD General"
+ },
+ {
+  "ID": -203,
+  "CODE": "RISK_CLASS_ID",
+  "LANGUAGE": "en",
+  "VALUE": "Class I"
+ },
+ {
+  "ID": -192,
+  "CODE": "PLACED_ON_THE_MARKET_ID",
+  "LANGUAGE": "en",
+  "VALUE": "Sweden"
+ },
+ {
+  "ID": -199,
+  "CODE": "RISK_CLASS_ID",
+  "LANGUAGE": "en",
+  "VALUE": "Class A"
+ },
+ {
+  "ID": -11,
+  "CODE": "DEVICE_STATUS_TYPE_ID",
+  "LANGUAGE": "en",
+  "VALUE": "On the EU market"
+ },
+ {
+  "ID": -198,
+  "CODE": "APPLICABLE_LEGISLATION_ID",
+  "LANGUAGE": "en",
+  "VALUE": "IVDR (REGULATION (EU) 2017/746 on in vitro diagnostic medical devices)"
+ },
+ {
+  "ID": -74,
+  "CODE": "PLACED_ON_THE_MARKET_ID",
+  "LANGUAGE": "en",
+  "VALUE": "France"
+ },
+ {
+  "ID": -245,
+  "CODE": "PLACED_ON_THE_MARKET_ID",
+  "LANGUAGE": "en",
+  "VALUE": "Türkiye"
+ },
+ {
+  "ID": -13,
+  "CODE": "PLACED_ON_THE_MARKET_ID",
+  "LANGUAGE": "en",
+  "VALUE": "Austria"
+ },
+ {
+  "ID": -55,
+  "CODE": "APPLICABLE_LEGISLATION_ID",
+  "LANGUAGE": "en",
+  "VALUE": "IVDD (Directive 98/79/EC on in vitro Diagnostic Medical Devices)"
+ },
+ {
+  "ID": -200,
+  "CODE": "RISK_CLASS_ID",
+  "LANGUAGE": "en",
+  "VALUE": "Class B"
+ },
+ {
+  "ID": -204,
+  "CODE": "RISK_CLASS_ID",
+  "LANGUAGE": "en",
+  "VALUE": "Class IIa"
+ },
+ {
+  "ID": -1306,
+  "CODE": "STATUS_ID",
+  "LANGUAGE": "en",
+  "VALUE": "Active"
+ }
+]

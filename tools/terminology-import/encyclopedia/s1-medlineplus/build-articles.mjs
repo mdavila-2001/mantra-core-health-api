@@ -44,7 +44,9 @@ function readSeedTerms(shardsDir) {
     if (!dir.isDirectory()) continue;
     for (const file of readdirSync(join(shardsDir, dir.name))) {
       if (!/^page-\d+\.json$/.test(file)) continue;
-      for (const row of JSON.parse(readFileSync(join(shardsDir, dir.name, file), 'utf8'))) {
+      // Schema v2 de los shards: `{ categoryKey, page, items }`. La v1 era un arreglo pelado.
+      const page = JSON.parse(readFileSync(join(shardsDir, dir.name, file), 'utf8'));
+      for (const row of Array.isArray(page) ? page : page.items) {
         if (MEDLINEPLUS_SOURCES.has(row.source)) terms.set(row.slug, row);
       }
     }

@@ -11,9 +11,9 @@
 //   node tools/terminology-import/symptoms/fetch-symptom-sources.mjs --refresh
 // =============================================================================
 
-import { createReadStream, createWriteStream, existsSync, statSync } from 'node:fs';
+import { createReadStream, createWriteStream, existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { USER_AGENT, ensureDir, nowIso, writeJson } from '../lib/glossary-es/common.mjs';
@@ -44,8 +44,19 @@ async function download(url, path) {
   }
 }
 
+/** Resultado SPARQL JSON → bindings ordenados y JSON estable: el mismo contenido da el mismo SHA-256. */
+export function normalizeSparqlJson(text) {
+  const j = JSON.parse(text);
+  const key = (b) => `${b.item?.value}|${b.hpo?.value}|${b.rel?.value ?? ''}`;
+  j.results.bindings.sort((a, b) => key(a).localeCompare(key(b)));
+  return JSON.stringify({ head: j.head, results: j.results }, null, 1) + '\n';
+}
+
 async function main() {
-  const manifest = { generatedAt: nowIso(), dir: SOURCES_DIR, files: [] };
+  const manifestPath = join(SOURCES_DIR, 'manifest.json');
+  const previous = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf8')).files : [];
+  // Sin ruta local: la carpeta de descargas no forma parte de la procedencia.
+  const manifest = { generatedAt: nowIso(), files: [] };
   for (const s of SOURCE_FILES) {
     const path = sourcePath(s.file);
     const fresh = REFRESH || !existsSync(path);
@@ -53,6 +64,7 @@ async function main() {
       if (fresh) {
         console.log(`[fetch] ${s.key} ← ${s.url}`);
         await download(s.url, path);
+        if (s.normalize === 'sparql-json') writeFileSync(path, normalizeSparqlJson(readFileSync(path, 'utf8')));
       } else {
         console.log(`[fetch] ${s.key}: ya está (${s.file}); --refresh para volver a bajar`);
       }
@@ -63,6 +75,9 @@ async function main() {
       continue;
     }
     const st = statSync(path);
+    const digest = await sha256(path);
+    // Un archivo que no se volvió a bajar conserva la fecha de descarga ya registrada (si el SHA-256 coincide).
+    const prior = previous.find((f) => f.key === s.key && f.sha256 === digest);
     manifest.files.push({
       key: s.key,
       file: s.file,
@@ -70,8 +85,8 @@ async function main() {
       owner: s.owner,
       license: s.license,
       bytes: st.size,
-      sha256: await sha256(path),
-      retrievedAt: (fresh ? new Date() : st.mtime).toISOString(),
+      sha256: digest,
+      retrievedAt: fresh ? new Date().toISOString() : prior?.retrievedAt ?? st.mtime.toISOString(),
       declaredVersion: readDeclaredVersion(s, path),
     });
   }
@@ -79,7 +94,9 @@ async function main() {
   console.log(JSON.stringify(manifest.files.map((f) => ({ key: f.key, version: f.declaredVersion, bytes: f.bytes, error: f.error })), null, 2));
 }
 
-main().catch((err) => {
-  console.error('ERROR FATAL en fetch-symptom-sources:', err);
-  process.exitCode = 1;
-});
+if (basename(process.argv[1] ?? '') === 'fetch-symptom-sources.mjs') {
+  main().catch((err) => {
+    console.error('ERROR FATAL en fetch-symptom-sources:', err);
+    process.exitCode = 1;
+  });
+}

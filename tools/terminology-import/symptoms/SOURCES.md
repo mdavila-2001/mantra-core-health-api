@@ -23,11 +23,11 @@ misma licencia y atribución (HPO, Orphanet vía HPOA, Mondo, DO, SYMP, NCIt).
 | `ncit` | [ncit.obo](https://github.com/ncit-obo-org/ncit-obo-edition/releases/download/v2026-03-19/ncit.obo) | 26.02d (2026-03-19) | 248 162 694 | `8fdc2d29c9ebd91a` | CC BY 4.0 según términos de uso de NCI EVS (el `.obo` no la declara) ³ |
 | `hpo-common-disease` | [common_disease_annot.tar.gz](https://storage.googleapis.com/data-public-monarchinitiative/hpo/common_disease_annot.tar.gz) | 2015 (Groza et al., AJHG 97:111) | 6 724 219 | `4c871573d57199cd` | HPO license ¹ (README del bucket) |
 | `monarch-hpoa-edges` | [hpoa_disease_to_phenotype_edges.tsv](https://storage.googleapis.com/data-public-monarchinitiative/monarch-kg/latest/transform_output/hpoa_disease_to_phenotype_edges.tsv) | KG 2026-10-07 | 73 917 456 | `ea89c38c162ab7d3` | sólo para medir saturación; no se carga |
-| `orphadata-en-product4` | [en_product4.xml](https://www.orphadata.com/data/xml/en_product4.xml) | 2026-06-23 (`JDBOR date`) | 47 893 357 | ver manifest | CC BY 4.0 (la declara el XML) ⁴ |
-| `orphadata-es-product4` | [es_product4.xml](https://www.orphadata.com/data/xml/es_product4.xml) | 2026-06-23 | 47 971 442 | ver manifest | CC BY 4.0 (la declara el XML) ⁴ |
+| `orphadata-en-product4` | [en_product4.xml](https://www.orphadata.com/data/xml/en_product4.xml) | 2026-06-23 (`JDBOR date`) | 47 893 357 | `4f44e8a61201` | CC BY 4.0 (la declara el XML) ⁴ |
+| `orphadata-es-product4` | [es_product4.xml](https://www.orphadata.com/data/xml/es_product4.xml) | 2026-06-23 | 47 971 442 | `d30f029b3662` | CC BY 4.0 (la declara el XML) ⁴ |
 | `mesh-desc` | [desc2026.zip](https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.zip) | MeSH 2026 | 16 812 755 | `bb73dfdfe78cbfcd` ⁵ | libre con atribución a NLM e indicación de versión ⁶ |
-| `wikidata-p3841` | consulta SPARQL de `WIKIDATA_P3841_QUERY` (`lib/sources.mjs`) | consulta en vivo del 2026-10-27 | 2 094 507 | ver manifest | CC0 1.0 |
-| `medgen-mgconso` | [MGCONSO.RRF.gz](https://ftp.ncbi.nlm.nih.gov/pub/medgen/MGCONSO.RRF.gz) | sin versión declarada | 15 819 991 | ver manifest | dato público de NCBI; sólo se leen CUI y códigos de HPO, MeSH y NCIt ⁷ |
+| `wikidata-p3841` | consulta SPARQL de `WIKIDATA_P3841_QUERY` (`lib/sources.mjs`) | consulta en vivo del 2026-10-28 (resultado normalizado, ver abajo) | 2 094 507 | `640281f13497` | CC0 1.0 |
+| `medgen-mgconso` | [MGCONSO.RRF.gz](https://ftp.ncbi.nlm.nih.gov/pub/medgen/MGCONSO.RRF.gz) | sin versión declarada (fecha de descarga en el manifiesto) | 15 819 991 | `769baf61c3bd` | dato público de NCBI; sólo se leen CUI y códigos de HPO, MeSH y NCIt ⁷ |
 
 ¹ **HPO license** — el archivo declara `dcterms:license https://hpo.jax.org/app/license`.
 **Verificada el 2026-10-27** (texto completo en
@@ -103,6 +103,41 @@ SAB `HPO`, `MSH` y `NCI`, y de ellas **únicamente el CUI y el código**; ningú
 El CUI como clave ya tiene precedente aceptado en el repo (los CUI que declara NCIt y
 SYMP se cargan en `xrefs`; `seed-diseases` carga `umls` «sólo el CUI»). Si el
 propietario decide que no, se omite `load-medgen-crosswalk.mjs` y no se pierde nada más.
+
+## Procedencia por fila y reproducibilidad
+
+- **Manifiesto versionado:** `data/sources-manifest.json.gz` (sin rutas locales) trae, de las 14 fuentes
+  (las 9 originales y las 5 nuevas), URL, bytes, **SHA-256 completo**, fecha de descarga, versión declarada
+  y licencia. Es el `manifest.json` de `fetch-symptom-sources.mjs`; `unpack-data.mjs` lo restaura y el build
+  lo lee de ahí cuando no hay descarga local. Para las 9 originales la fecha es la de la re-descarga del
+  2026-10-27/28 (SHA-256 idéntico al del 2026-10-24); sus filas ya versionadas conservan su
+  `retrievedAt` original.
+- **Filas nuevas** (`relations-orphadata`, `crosswalk-wikidata-hpo`, `crosswalk-medgen-cui`, `terms-mesh-c23`)
+  llevan cada una `version`, `retrievedAt`, `license` y el SHA-256 del archivo de entrada
+  (`inputSha256`; Orphadata: el de los XML EN y ES; MeSH: `sourceFileSha256`, y como propiedad
+  `source_input_sha256` en la base). Las filas de HPO, SYMP, NCIt y las relaciones originales se versionaron
+  sin hash de entrada: su SHA-256 está en este manifiesto, no por fila (reescribir 20 MB no aporta evidencia nueva).
+- **Wikidata es una consulta en vivo.** El resultado se guarda **normalizado** (bindings ordenados, JSON
+  estable) en `data/wikidata-p3841-snapshot.json.gz` con su SHA-256 y fecha; desde ahí el build es
+  reproducible sin repetir la consulta (comprobado: borrar el snapshot local, `unpack-data.mjs`, rebuild →
+  mismos SHA-256, `evidencia/C2/build-reproducible-sha256.txt`).
+
+**Licencias leídas y capturadas:** NCIt (CC BY 4.0), MeSH (términos de NLM) y Orphadata (CC BY 4.0 en la
+cabecera del XML), textualmente, en `docs/trabajo/2026-10-27-terminologia-cierre-huecos/evidencia/C2/licencias-capturas-2026-10-27.txt`;
+HPO en `licencia-hpo-2026-10-27.txt`. Esas cadenas son las que se guardan en `source_license`.
+
+**LOINC / Regenstrief:** este corpus **no contiene LOINC**: 0 apariciones de «LOINC» o «Regenstrief» en
+ninguno de los `data/*.gz` (comprobado con `zcat … | grep -ci`), y ninguna de las fuentes cargadas lo redistribuye
+(MedGen sí tiene nombres de LOINC en `MGCONSO`; no se leen). Por eso no se agrega el aviso de derechos de LOINC
+a estos datos; si algún carril de laboratorio cruza con estos códigos, el aviso va en el suyo.
+
+**HPO: aprobación explícita.** Los cargadores que escriben contenido de HPO o que cuelgan de él
+(`load-symptoms.mjs` con el sistema `hpo`, `load-disease-phenotypes.mjs`, `load-wikidata-crosswalk.mjs`,
+`load-medgen-crosswalk.mjs`) **se niegan a escribir (salida 3)** sin `--accept-hpo-terms` o
+`MANTRA_HPO_TERMS_ACCEPTED=1`. No es un trámite: marca que alguien asumió la lectura de ¹ (cláusula de
+«uso no comercial» del sitio). Lo que se vio: la licencia de los archivos (3 condiciones, uso libre) y el
+aviso legal del sitio (uso personal/no comercial del contenido del sitio, «research and educational
+purposes»). Qué rige para este producto **no está resuelto**; el dry-run sí corre sin la aprobación.
 
 ## Fuentes evaluadas y no cargadas
 

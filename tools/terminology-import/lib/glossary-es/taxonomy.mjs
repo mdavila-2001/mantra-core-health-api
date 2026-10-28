@@ -124,6 +124,9 @@ export function rBlockTags(code) {
 export const GLOSSARY_MAX_DX_CODE_LENGTH = 4;
 
 export function isGlossaryDxLevel(code) {
+  // `GLOSSARY_CIE_FULL=1` (decisión del propietario, 2026-10-27): entran TODOS los niveles de
+  // CIE-10-ES Diagnósticos (hasta 7 caracteres) y se suma la capa de Procedimientos (ICD-10-PCS).
+  if (process.env.GLOSSARY_CIE_FULL === '1') return true;
   return String(code).replace('.', '').length <= GLOSSARY_MAX_DX_CODE_LENGTH;
 }
 

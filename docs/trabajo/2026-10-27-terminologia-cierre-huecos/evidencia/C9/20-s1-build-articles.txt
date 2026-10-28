@@ -1,0 +1,11 @@
+{
+  "termsInScope": 1318,
+  "articles": 1318,
+  "rejected": 64,
+  "sections": 5218,
+  "images": 476
+}
+
+real	1m57.209s
+user	0m3.337s
+sys	0m0.681s

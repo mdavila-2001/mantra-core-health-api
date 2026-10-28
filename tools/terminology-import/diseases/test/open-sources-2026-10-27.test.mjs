@@ -14,6 +14,7 @@ import { icd10KeysFromWhoMap, icd10MultipleTargets } from '../lib/citations.mjs'
 import { EXTERNAL_TARGETS } from '../lib/code-systems.mjs';
 import { parseSimpleTabulation } from '../lib/icd11.mjs';
 import { attachMedlineplus, medlineplusMeshPairs } from '../lib/medlineplus.mjs';
+import { buildMedlineplusGenetics, parseGhrConditions } from '../lib/medlineplus-genetics.mjs';
 import { md5uuid } from '../../lib/glossary-es/load-plan.mjs';
 import { planFor } from '../lib/plan.mjs';
 import { isDiseaseDescriptor, parentTree, readDescriptors, readSupplementals } from '../lib/mesh.mjs';
@@ -268,4 +269,20 @@ test('MedlinePlus: el tema en español hereda los descriptores MeSH de su tema i
   assert.equal(plan.externalMaps.length, 1);
   assert.equal(plan.externalMaps[0][2], md5uuid('mantra:glossary-es:concept:medlineplus-es-1743'));
   assert.equal(EXTERNAL_TARGETS['medlineplus-es']('1743'), plan.externalMaps[0][2]);
+});
+
+test('MedlinePlus Genetics: condición con sinónimos, descripción en texto plano y claves; SNOMED CT descartado', () => {
+  const conds = parseGhrConditions(join(FX, 'ghr_summaries_2026-10-27.sample.xml'));
+  assert.equal(conds.length, 2);
+  const { records } = buildMedlineplusGenetics(conds, meta, '2026-10-27');
+  const by = new Map(records.map((r) => [r.display, r]));
+  const del = by.get('15q24 microdeletion');
+  assert.deepEqual(del.designations.map((d) => d.value), ['15q24 microdeletion', '15q24 deletion', '15q24 microdeletion syndrome', 'Interstitial deletion of chromosome 15q24']);
+  assert.match(del.definition, /^15q24 microdeletion is a chromosomal change in which a small piece of chromosome 15 is deleted in each cell\./);
+  assert.ok(del.definition.includes('q24.\n15q24 microdeletion is associated'), 'los párrafos quedan separados');
+  assert.deepEqual(del.xrefs.map((x) => `${x.cs}:${x.code}`), ['umls:C4310804', 'mesh:D025063', 'omim:613406']);
+  assert.ok(!JSON.stringify(del).includes('699308002'), 'SNOMED CT no se carga ni como referencia');
+  assert.equal(del.provenance.uri, 'https://medlineplus.gov/genetics/condition/15q24-microdeletion');
+  const alz = by.get([...by.keys()].find((k) => /alzheimer/i.test(k)));
+  assert.ok(alz.xrefs.some((x) => x.cs === 'icd10cm' && x.external === true), 'ICD-10-CM: mapeo condicional al concepto de import-icd10cm');
 });

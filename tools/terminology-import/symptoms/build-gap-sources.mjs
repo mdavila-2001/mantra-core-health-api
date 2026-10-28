@@ -71,7 +71,7 @@ async function main() {
   // --- Pasada 9: Orphadata producto 4 ------------------------------------------
   const pEn = provenanceFor('orphadata-en-product4');
   const pEs = provenanceFor('orphadata-es-product4');
-  const orpha = orphadataRows(readFileSync(sourcePath(sourceByKey('orphadata-en-product4').file), 'utf8'), readFileSync(sourcePath(sourceByKey('orphadata-es-product4').file), 'utf8'), resolveHp, { retrievedAt: pEn.retrievedAt, license: pEn.license });
+  const orpha = orphadataRows(readFileSync(sourcePath(sourceByKey('orphadata-en-product4').file), 'utf8'), readFileSync(sourcePath(sourceByKey('orphadata-es-product4').file), 'utf8'), resolveHp, { retrievedAt: pEn.retrievedAt, license: pEn.license, sha256En: pEn.sha256, sha256Es: pEs.sha256 });
   for (const r of orpha.rows) r.aspect = subontologyOf.get(r.phenotype) === 'HP:0000118' ? 'P' : `not-phenotype:${subontologyOf.get(r.phenotype) ?? null}`;
   await writeNdjson(nd('relations-orphadata'), orpha.rows);
   const hpoaRows = readNdjson(nd('relations-hpoa'));
@@ -112,7 +112,7 @@ async function main() {
     { hpo: new Set(termsHpo.map((r) => r.code)), 'mesh-c23': new Set(mesh.rows.map((r) => r.code)), ncit: new Set(termsNcit.map((r) => r.code)) },
     sympByCui,
     xrefDeclaredPairs({ hpo: termsHpo, symp: termsSymp, ncit: termsNcit, 'mesh-c23': mesh.rows }),
-    { version: pMg.version, retrievedAt: pMg.retrievedAt, license: pMg.license },
+    { version: pMg.version, retrievedAt: pMg.retrievedAt, license: pMg.license, sha256: pMg.sha256 },
   );
   await writeNdjson(nd('crosswalk-medgen-cui'), mg.rows);
   // MeSH ya representado por otro sistema del corpus: por xref que declara la fuente, o por el mismo CUI en MedGen.
@@ -123,7 +123,7 @@ async function main() {
 
   // --- Pasada 11: Wikidata P3841 -------------------------------------------------
   const pWd = provenanceFor('wikidata-p3841');
-  const wd = wikidataHpoRows(JSON.parse(readFileSync(sourcePath(sourceByKey('wikidata-p3841').file), 'utf8')), resolveHp, { retrievedAt: pWd.retrievedAt, license: pWd.license, queryUrl: 'https://query.wikidata.org/sparql (consulta WIKIDATA_P3841_QUERY, lib/sources.mjs)' });
+  const wd = wikidataHpoRows(JSON.parse(readFileSync(sourcePath(sourceByKey('wikidata-p3841').file), 'utf8')), resolveHp, { retrievedAt: pWd.retrievedAt, license: pWd.license, queryUrl: 'https://query.wikidata.org/sparql (consulta WIKIDATA_P3841_QUERY, lib/sources.mjs)', sha256: pWd.sha256, version: `consulta SPARQL del ${pWd.retrievedAt.slice(0, 10)}` });
   await writeNdjson(nd('crosswalk-wikidata-hpo'), wd.rows);
   const hpoCodes = new Set(termsHpo.map((r) => r.code));
   const wdResolved = wd.rows.filter((r) => r.hpo && hpoCodes.has(r.hpo));

@@ -32,7 +32,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { CONCEPT, RELATION_TYPE } from '../lib/glossary-es/load-plan.mjs';
 import { join } from 'node:path';
 
-import { CORPUS_PATH, REPO_DATA_DIR, readGzParts } from './lib/common.mjs';
+import { CORPUS_PATH, META_PATH, REPO_DATA_DIR, readGzParts } from './lib/common.mjs';
 import { batchPlans, boSourcePlan, buildPlan, codeSystemPlans } from './lib/load-plan.mjs';
 import { loadModelSpecialties } from './lib/rules.mjs';
 
@@ -47,22 +47,28 @@ const DB_CONFIG = {
   database: process.env.DB_NAME ?? 'mantra_redesa_health',
 };
 
+/** `retrievedAt` (fecha de descarga de las fuentes) no está en los registros —no entra en el hash del corpus—: se agrega al guardar la procedencia. */
+function withRetrievedAt(records, retrievedAt) {
+  return records.map((r) => (r.reuse ? r : { ...r, source: { ...r.source, retrievedAt } }));
+}
+
 function readCorpus() {
   const path = CORPUS_PATH();
   if (existsSync(path)) {
     console.log(`Corpus: ${path}`);
-    return readFileSync(path, 'utf8')
+    const records = readFileSync(path, 'utf8')
       .split('\n')
       .filter((l) => l.trim() !== '')
       .map((l) => JSON.parse(l));
+    return withRetrievedAt(records, JSON.parse(readFileSync(META_PATH(), 'utf8')).retrievedAt);
   }
   const manifestPath = join(REPO_DATA_DIR, 'MANIFEST.json');
   if (!existsSync(manifestPath)) throw new Error(`Falta ${path} y no hay copia en ${REPO_DATA_DIR}. Corré primero build-specialty-services.mjs.`);
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
   const records = readGzParts(REPO_DATA_DIR, manifest.corpus).map((l) => JSON.parse(l));
   if (records.length !== manifest.records) throw new Error(`data/: ${records.length} registros, el manifiesto declara ${manifest.records}`);
-  console.log(`Corpus: copia versionada de ${REPO_DATA_DIR} (armado ${manifest.builtAt})`);
-  return records;
+  console.log(`Corpus: copia versionada de ${REPO_DATA_DIR} (descarga de las fuentes ${manifest.retrievedAt})`);
+  return withRetrievedAt(records, manifest.retrievedAt);
 }
 
 async function insertMany(client, table, columns, tuples, casts, { audit = true } = {}) {

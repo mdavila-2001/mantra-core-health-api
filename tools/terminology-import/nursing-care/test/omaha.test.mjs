@@ -6,8 +6,9 @@ import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import {
-  OMAHA_CODE_SYSTEM, PRSO, buildOmahaRows, interventionTargetClaim, parseFaqLicense, parseInterventionScheme, parseMosugModifiers, parseMosugProblemPages, parseMosugProblems, parseProblemClassification, parseProblemModifiers, parseTwoColumnBullets,
+  OMAHA_CODE_SYSTEM, PRSO, buildOmahaRows, hydrateOmahaProvenance, interventionTargetClaim, parseFaqLicense, parseInterventionScheme, parseMosugModifiers, parseMosugProblemPages, parseMosugProblems, parseProblemClassification, parseProblemModifiers, parseTwoColumnBullets,
 } from '../lib/omaha.mjs';
+import { applyOwnerApproval } from '../load-nursing-care.mjs';
 import { codeSystemPlan, conceptId, definitionOf, designationsFor, displayOf, propertiesFor, relationshipsFor } from '../lib/plan.mjs';
 
 const FX = join(dirname(fileURLToPath(import.meta.url)), 'fixtures', 'omaha');
@@ -97,8 +98,28 @@ test('PRSO: la transcripción de la imagen coincide con las listas de respuesta 
 
 const META_FILE = (n) => ({ url: `https://example.org/${n}`, sha256: 'a'.repeat(64), retrievedAt: '2026-10-27T23:00:00.000Z', contentType: 'text/html' });
 const meta = { files: Object.fromEntries(['site-problems', 'site-interventions', 'site-prso-image', 'site-faq', 'mosug-kbs-supplement'].map((k) => [k, META_FILE(k)])) };
-const rows = buildOmahaRows({ problems, modifiers: parseProblemModifiers(problemsHtml), interventions, faq: parseFaqLicense(faqHtml), mosugProblems, mosugPages, mosugModifierDefs: parseMosugModifiers(pdfText) }, meta);
+const rawRows = buildOmahaRows({ problems, modifiers: parseProblemModifiers(problemsHtml), interventions, faq: parseFaqLicense(faqHtml), mosugProblems, mosugPages, mosugModifierDefs: parseMosugModifiers(pdfText) }, meta);
+// La procedencia de las filas no lleva fecha ni SHA-256 de la descarga (no entran en el hash del corpus): se agregan desde `omaha-meta`.
+const rows = hydrateOmahaProvenance(rawRows, meta.files);
 const byCode = new Map(rows.map((r) => [r.code, r]));
+
+test('reproducibilidad: las filas no dependen de la fecha ni de los bytes de la descarga', () => {
+  const other = Object.fromEntries(Object.entries(meta.files).map(([k, v]) => [k, { ...v, sha256: 'b'.repeat(64), retrievedAt: '2030-01-01T00:00:00.000Z' }]));
+  const again = buildOmahaRows({ problems, modifiers: parseProblemModifiers(problemsHtml), interventions, faq: parseFaqLicense(faqHtml), mosugProblems, mosugPages, mosugModifierDefs: parseMosugModifiers(pdfText) }, { files: other });
+  assert.equal(JSON.stringify(again), JSON.stringify(rawRows));
+  assert.ok(!JSON.stringify(rawRows).includes('retrievedAt') && !/[0-9a-f]{64}/.test(JSON.stringify(rawRows)));
+  assert.equal(rows[0].provenance.retrievedAt, '2026-10-27T23:00:00.000Z');
+});
+
+test('licencia: todo Omaha espera la decisión del propietario y por defecto no se carga', () => {
+  assert.ok(rows.every((r) => r.ownerApproval === 'omaha-system'));
+  assert.equal(byCode.get('problem/income').provenance.license.status, 'public-domain-terms-pending-owner-decision');
+  assert.match(byCode.get('problem/income').provenance.license.summary, /contact(ar)?|Health Connections Press/);
+  const none = applyOwnerApproval({ [OMAHA_CODE_SYSTEM]: rows }, new Set());
+  assert.deepEqual(none.rowsByCs, {});
+  assert.deepEqual(none.omitted, [{ codeSystem: OMAHA_CODE_SYSTEM, key: 'omaha-system', rows: rows.length }]);
+  assert.equal(applyOwnerApproval({ [OMAHA_CODE_SYSTEM]: rows }, new Set(['omaha-system'])).rowsByCs[OMAHA_CODE_SYSTEM].length, rows.length);
+});
 
 test('filas: conteos por clase, códigos únicos, padres presentes y procedencia en cada fila', () => {
   const count = rows.reduce((m, r) => ((m[r.kind] = (m[r.kind] ?? 0) + 1), m), {});
@@ -150,7 +171,10 @@ import { parseNdjsonText, readRepoDataset } from '../lib/repo-data.mjs';
 
 test('overrides de licencia: cada uno trae estado, cita, URL https del titular y fecha', () => {
   for (const [id, ov] of Object.entries(LICENSE_OVERRIDES)) {
-    assert.equal(ov.status, 'verified-free', id);
+    // Cambio de comportamiento esperado (2026-10-27): Glasgow pasa de `verified-free` a `pending-owner-decision` (el permiso cubre atención clínica e
+    // investigación, y las filas vienen de un arquetipo CC BY-SA). Ningún override es `verified-free` hasta que el propietario decida.
+    assert.equal(ov.status, 'pending-owner-decision', id);
+    assert.ok(ov.approvalKey && ov.approvalReason, id);
     assert.ok(ov.quote.length > 40 && /^https:\/\//.test(ov.url) && /^\d{4}-\d{2}-\d{2}$/.test(ov.checkedAt), id);
   }
   assert.deepEqual(Object.keys(LICENSE_OVERRIDES), ['openEHR-EHR-OBSERVATION.glasgow_coma_scale.v1']);
@@ -159,29 +183,39 @@ test('overrides de licencia: cada uno trae estado, cita, URL https del titular y
   assert.equal(LICENSE_OVERRIDES['openEHR-EHR-OBSERVATION.news2.v1'], undefined);
 });
 
-test('classifyContentLicense: el override gana y deja la evidencia primaria', () => {
+test('classifyContentLicense: el override gana, deja la evidencia primaria y la clave de aprobación', () => {
   const a = { archetypeId: 'openEHR-EHR-OBSERVATION.glasgow_coma_scale.v1', definition: { nodes: [] }, originalLanguage: 'en' };
   const c = classifyContentLicense(a, LICENSE_OVERRIDES);
-  assert.equal(c.status, 'verified-free');
+  assert.equal(c.status, 'pending-owner-decision');
+  assert.equal(c.approvalKey, 'glasgow-coma-scale');
   assert.equal(c.evidence[0].url, 'https://www.glasgowcomascale.org/permissions/');
-  assert.equal(classifyContentLicense({ ...a, archetypeId: 'openEHR-EHR-OBSERVATION.glasgow_coma_scale_paediatric.v0' }, LICENSE_OVERRIDES).status === 'verified-free', false);
+  assert.notEqual(classifyContentLicense({ ...a, archetypeId: 'openEHR-EHR-OBSERVATION.glasgow_coma_scale_paediatric.v0' }, LICENSE_OVERRIDES).status, 'pending-owner-decision');
 });
 
-test('Omaha: el registro de terminologías la marca con evidencia primaria y fecha propia', () => {
+test('Omaha: el registro de terminologías la marca con evidencia primaria, fecha propia y decisión pendiente', () => {
   assert.equal(TERMINOLOGY_LICENSES.oms.evidence.startsWith('primary'), true);
+  assert.equal(TERMINOLOGY_LICENSES.oms.loadable, false);
   assert.equal(TERMINOLOGY_LICENSES.oms.checkedAt, '2026-10-27');
 });
 
-test('datos versionados: Glasgow adulto con contenido y puntajes 1–4, 1–5 y 1–6; la pediátrica sigue retenida', () => {
+test('datos versionados: Glasgow adulto con contenido condicionado a la aprobación; la pediátrica sigue retenida', () => {
   const rows = parseNdjsonText(readRepoDataset('openehr-ckm'));
   const adult = rows.filter((r) => r.archetypeId === 'openEHR-EHR-OBSERVATION.glasgow_coma_scale.v1');
-  assert.equal(adult[0].contentLicense.status, 'verified-free');
-  assert.equal(adult[0].contentLoaded, true);
-  const ordinals = adult.filter((r) => r.kind === 'value').map((r) => r.ordinalValue);
-  assert.deepEqual(ordinals, [1, 2, 3, 4, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 6]);
+  assert.equal(adult[0].contentLicense.status, 'pending-owner-decision');
+  assert.equal(adult[0].contentOwnerApproval, 'glasgow-coma-scale');
+  const content = adult.filter((r) => r.kind !== 'archetype');
+  assert.equal(content.length, 22);
+  assert.ok(content.every((r) => r.ownerApproval === 'glasgow-coma-scale'));
+  assert.deepEqual(content.filter((r) => r.kind === 'value').map((r) => r.ordinalValue), [1, 2, 3, 4, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 6]);
   const paed = rows.filter((r) => r.archetypeId === 'openEHR-EHR-OBSERVATION.glasgow_coma_scale_paediatric.v0');
   assert.equal(paed.length, 1);
   assert.equal(paed[0].contentLoaded, false);
+  // por defecto el cargador omite los 22 y la raíz dice que su contenido NO está cargado; con la aprobación entran
+  const none = applyOwnerApproval({ 'openehr-ckm': rows }, new Set());
+  assert.equal(none.rowsByCs['openehr-ckm'].length, rows.length - 22);
+  assert.equal(none.rowsByCs['openehr-ckm'].find((r) => r.code === adult[0].code).contentLoaded, false);
+  assert.deepEqual(none.omitted, [{ codeSystem: 'openehr-ckm', key: 'glasgow-coma-scale', rows: 22 }]);
+  assert.equal(applyOwnerApproval({ 'openehr-ckm': rows }, new Set(['glasgow-coma-scale'])).rowsByCs['openehr-ckm'].length, rows.length);
 });
 
 test('datos versionados: Omaha coincide con lo que construye el armado (mismos conteos)', () => {
@@ -196,6 +230,8 @@ test('datos versionados: Omaha coincide con lo que construye el armado (mismos c
   const cmdic = JSON.parse(readRepoDataset('cmdic-license-verification'));
   assert.equal(cmdic.zipVsCorpus.differing, 0);
   assert.equal(cmdic.status, 'reuse-allowed-with-conditions');
+  const msssi = parseNdjsonText(readRepoDataset('es-msssi-cmdic-13606'));
+  assert.ok(msssi.every((r) => r.contentLicense.status === 'reuse-allowed-with-conditions' && r.provenance.retrievedAt === undefined));
   const links = JSON.parse(readRepoDataset('loinc-links-report'));
   assert.equal(links.resolvedInPublicSubset, links.boundTermCodes);
 });

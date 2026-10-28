@@ -1,0 +1,132 @@
+{
+  "capas": {
+    "cie10es-diagnosticos": {
+      "archivo": true,
+      "filas": 102131,
+      "enTermLayers": true,
+      "conDefinicion": 0,
+      "conImagen": 0,
+      "porCategoria": {
+        "disease": 86027,
+        "signs-symptoms": 938,
+        "other": 15166
+      },
+      "codigosFinales": 74260,
+      "nivelGlosario3o4Caracteres": 12051
+    },
+    "cie10es-procedimientos": {
+      "archivo": false
+    },
+    "cima": {
+      "archivo": true,
+      "filas": 2381,
+      "enTermLayers": true,
+      "conDefinicion": 2278,
+      "conImagen": 1113,
+      "porCategoria": {
+        "pharmacology": 2381
+      }
+    },
+    "medlineplus-es": {
+      "archivo": true,
+      "filas": 1016,
+      "enTermLayers": true,
+      "conDefinicion": 1011,
+      "conImagen": 0,
+      "porCategoria": {
+        "other": 126,
+        "disease": 770,
+        "signs-symptoms": 38,
+        "treatment": 28,
+        "diagnostic-test": 18,
+        "procedure": 36
+      }
+    },
+    "medlineplus-es-pruebas": {
+      "archivo": true,
+      "filas": 302,
+      "enTermLayers": true,
+      "conDefinicion": 302,
+      "conImagen": 0,
+      "porCategoria": {
+        "lab": 162,
+        "diagnostic-test": 134,
+        "other": 6
+      }
+    },
+    "wikidata-anatomia": {
+      "archivo": true,
+      "filas": 1905,
+      "enTermLayers": true,
+      "conDefinicion": 709,
+      "conImagen": 1227,
+      "porCategoria": {
+        "anatomy": 1905
+      }
+    },
+    "wikidata-images": {
+      "archivo": true,
+      "filas": 18590,
+      "enTermLayers": false
+    },
+    "loinc-es": {
+      "archivo": false
+    },
+    "inlasa-aranceles": {
+      "archivo": false
+    },
+    "nci-diccionario-cancer-es": {
+      "archivo": true,
+      "filas": 9404,
+      "enTermLayers": true,
+      "conDefinicion": 9404,
+      "conImagen": 0,
+      "porCategoria": {
+        "other": 9404
+      }
+    },
+    "nci-diccionario-genetica-es": {
+      "archivo": true,
+      "filas": 243,
+      "enTermLayers": true,
+      "conDefinicion": 243,
+      "conImagen": 0,
+      "porCategoria": {
+        "other": 243
+      }
+    }
+  },
+  "corpus": {
+    "total": 28617,
+    "porCapa": {
+      "cie10es-diagnosticos": 12051,
+      "cima": 2381,
+      "medlineplus-es": 1016,
+      "medlineplus-es-pruebas": 302,
+      "wikidata-anatomia": 1905,
+      "nci-diccionario-cancer-es": 9404,
+      "nci-diccionario-genetica-es": 243,
+      "wikidata-relaciones (fichas creadas)": 1315
+    },
+    "relacionesHuerfanas": 0,
+    "grafo": {
+      "jerarquiaCie10": 10134,
+      "anatomiaTa98": 1744,
+      "etiquetasHeredadas": 1196
+    },
+    "porCategoria": {
+      "disease": 10040,
+      "signs-symptoms": 821,
+      "other": 12095,
+      "pharmacology": 2828,
+      "treatment": 354,
+      "diagnostic-test": 273,
+      "procedure": 36,
+      "lab": 162,
+      "anatomy": 1905,
+      "specialty": 103
+    },
+    "conDefinicion": 15439,
+    "conImagen": 5689
+  }
+}

@@ -1,5 +1,25 @@
 # Fuentes — equipos de diagnóstico, registros de Europa
 
+## Estado 2026-10-27 (re-sondeo del carril C10): las fuentes oficiales responden
+
+El 2026-10-24 esta sesión no alcanzaba ningún host oficial. Hoy sí. Lo que sigue
+reemplaza a la tabla «Estado 2026-10-24» más abajo (que queda como historia). El
+sondeo completo, host por host, está en
+`docs/trabajo/2026-10-27-terminologia-cierre-huecos/evidencia/C10/M1-sondeo-2026-10-27.tsv`
+(`node ../probe-sources.mjs`).
+
+| Fuente | Resultado de hoy | Licencia / términos (leídos hoy) | Qué se hizo |
+|---|---|---|---|
+| **EMDN v2026** (`webgate.ec.europa.eu/dyna2/emdn/build/EMDN v2026_EN..xlsx`, Last-Modified 2026-09-25) | 200, 382 642 B, 8 516 códigos | Comisión Europea: contenido «licensed under CC BY 4.0» salvo aviso (`commission.europa.eu/legal-notice_en`) | Oficial reemplaza a las réplicas de la V2 (8 453). La página `health.ec.europa.eu/...emdn_en` ya no enlaza el Excel: lo enlaza la app de la EMDN. La v2026 **retiró** el código `Z120306` que la V2 tenía (telemetría de signos vitales): sigue en `INCLUDED_TYPE_PREFIXES` para clasificar equipos antiguos. |
+| **EUDAMED Data Lake** `/udi`, `/actors`, `/reference` (`api.datalake.sante.service.ec.europa.eu/eudamed`) | 200 sin clave, 1 000 filas por página, `api-version=v1.0` obligatorio | Portal de desarrolladores: «Open Access: All data is freely available for use and consumption»; datos de la Comisión: CC BY 4.0 | `fetch-eudamed.mjs` recorre todo `/udi` por `nextLink`; `fetch-official.mjs` baja `/actors` y `/reference`. Hallazgos contra el servicio real: los filtros son de igualdad exacta, `NOMENCLATURE_CODE` trae un espacio inicial y a veces varios códigos separados por coma (por eso no se filtra por código en el servidor), y el cursor `$after` cambia en cada página. `/actors` trae e-mail, teléfono y la persona responsable (PRRC): se descartan. |
+| **EUDAMED portal** (`ec.europa.eu/tools/eudamed/api/...`) | 200 | Sin términos específicos leídos | Solo se usa `udiDiData/{uuid}` como `sourceUrl` verificable de cada fila (200). Certificados y organismo notificado (`basicUdiData`) siguen sin descargarse. |
+| **BD/RDM** (Ministero della Salute, `DISPO_RDM_1_20261026_csv.zip`, 57 MB, 2 437 994 registros) | 200 | IODL v2.0 (ficha leída hoy) | Se exportan los registros con CND categoría **W** («DISPOSITIVI MEDICO-DIAGNOSTICI IN VITRO (D. Lgs. 332/2000)», título publicado en la CND). El resto (Z11/Z12 y demás) queda sin exportar: curaduría. El código fiscal de 16 caracteres (persona física) no se conserva. |
+| **CND** (`DISPO_RDM_74_20261001.csv`, 11 115 filas con vigencias) | 200 | IODL v2.0 | Descargada y registrada; entra a la taxonomía de `master/` a través de los códigos que traen los registros. |
+| **MHRA PARD** | 200, es una app React sin descarga masiva | Su FAQ «What is GMDN?» (leída hoy): extraer contenido GMDN «for creating and supporting commercial services such as alternative categorisation, mapping … or AI training» exige licencia de la GMDN Agency | **Hueco por licencia.** No se raspa. |
+| **swissdamed** | 200, app Vue; sin archivo abierto | Las condiciones de Swissmedic prohíben la extracción automatizada sin autorización (leídas el 2026-10-24); hoy no se encontró un texto de reutilización específico de swissdamed | **Hueco por términos.** No se descarga. |
+| **NANDO** | 200 | Reutilización con atribución (Decisión 2011/833/UE) | No es un registro de equipos (organismos notificados). |
+| **BfArM, AEMPS, ANSM** | 200 | — | Sin registro nacional descargable (remiten a EUDAMED). |
+
 Registro canónico en código: [`lib/sources.mjs`](lib/sources.mjs). Esta tabla lo resume con el
 estado de acceso comprobado desde la sesión del 2026-10-24.
 

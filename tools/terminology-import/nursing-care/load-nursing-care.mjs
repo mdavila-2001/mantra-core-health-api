@@ -20,6 +20,9 @@
 //   node tools/terminology-import/nursing-care/load-nursing-care.mjs            # dry-run, sin base
 //   node tools/terminology-import/nursing-care/load-nursing-care.mjs --apply    # carga (.env DB_*)
 //   … --from-repo-data   lee los datos versionados en nursing-care/data/ aunque haya build local
+//   … --owner-approved=omaha-system,glasgow-coma-scale --approval-ref="quién, cuándo, dónde consta"
+//        carga lo que espera la decisión del propietario (por defecto se OMITE: Omaha por la FAQ de la editorial; Glasgow por el alcance
+//        del permiso y el share-alike del arquetipo)
 // =============================================================================
 
 import 'dotenv/config';
@@ -29,12 +32,12 @@ import { join } from 'node:path';
 import { nowIso, readNdjson, writeJson } from '../lib/glossary-es/common.mjs';
 import { CONCEPT, valueSetVersionId } from '../lib/glossary-es/load-plan.mjs';
 import { CODE_SYSTEM } from './lib/ckm.mjs';
-import { NURSING_OUT, SOURCES_META } from './lib/paths.mjs';
+import { NURSING_OUT, OMAHA_META, SOURCES_META } from './lib/paths.mjs';
 import {
   LANG_EN, NURSING_VALUE_SET, REL_IS_A, REL_PART_OF, codeSystemPlan, conceptId, definitionOf, designationsFor, displayOf, id, loincRequestsFor, membershipsFor, propertiesFor, relationshipsFor,
 } from './lib/plan.mjs';
 import { MSSSI_CODE_SYSTEM } from './lib/msssi.mjs';
-import { OMAHA_CODE_SYSTEM, OMAHA_VERSION } from './lib/omaha.mjs';
+import { OMAHA_CODE_SYSTEM, OMAHA_VERSION, hydrateOmahaProvenance } from './lib/omaha.mjs';
 import { REGISTRY_CODE_SYSTEM } from './lib/registry.mjs';
 import { parseNdjsonText, readManifest, readRepoDataset } from './lib/repo-data.mjs';
 
@@ -42,6 +45,13 @@ const args = process.argv.slice(2);
 if (args.includes('--dry-run') && args.includes('--apply')) throw new Error('Use --dry-run o --apply, no ambos.');
 const DRY_RUN = !args.includes('--apply');
 const FROM_REPO_DATA = args.includes('--from-repo-data');
+// Aprobación del propietario para contenido con licencia leída pero decisión pendiente (Omaha, Glasgow): sin esto se OMITE.
+const flagValue = (name) => args.find((a) => a.startsWith(`${name}=`))?.slice(name.length + 1) ?? null;
+const OWNER_APPROVED = new Set((flagValue('--owner-approved') ?? '').split(',').map((x) => x.trim()).filter(Boolean));
+const APPROVAL_REF = flagValue('--approval-ref');
+export const KNOWN_APPROVAL_KEYS = ['omaha-system', 'glasgow-coma-scale'];
+for (const k of OWNER_APPROVED) if (!KNOWN_APPROVAL_KEYS.includes(k)) throw new Error(`--owner-approved: clave desconocida «${k}» (válidas: ${KNOWN_APPROVAL_KEYS.join(', ')})`);
+if (OWNER_APPROVED.size > 0 && !APPROVAL_REF) throw new Error('--owner-approved exige --approval-ref="quién aprobó, cuándo y dónde consta" (queda en la salida de la corrida)');
 const BATCH = 1000;
 
 const DB_CONFIG = {
@@ -53,6 +63,42 @@ const DB_CONFIG = {
 };
 
 const LOINC_CODE_SYSTEMS = ['loinc', 'loinc-es'];
+
+/**
+ * Omite lo que espera una decisión del propietario: filas con `ownerApproval` (contenido de Glasgow, todo Omaha) cuya clave no está
+ * en `approved`; la raíz de un arquetipo con `contentOwnerApproval` pasa a `contentLoaded: false`. Un code system que se queda sin
+ * filas no se crea.
+ * @returns {{ rowsByCs: Record<string, object[]>, omitted: {codeSystem: string, key: string, rows: number}[] }}
+ */
+export function applyOwnerApproval(rowsByCs, approved) {
+  const out = {};
+  const omitted = [];
+  for (const [cs, rows] of Object.entries(rowsByCs)) {
+    const kept = [];
+    const dropped = new Map();
+    for (const r of rows) {
+      if (r.ownerApproval && !approved.has(r.ownerApproval)) {
+        dropped.set(r.ownerApproval, (dropped.get(r.ownerApproval) ?? 0) + 1);
+        continue;
+      }
+      kept.push(r.contentOwnerApproval && !approved.has(r.contentOwnerApproval) ? { ...r, contentLoaded: false } : r);
+    }
+    for (const [key, n] of dropped) omitted.push({ codeSystem: cs, key, rows: n });
+    if (kept.length > 0) out[cs] = kept;
+  }
+  return { rowsByCs: out, omitted };
+}
+
+/** `retrievedAt` no vive en las filas (no entra en su hash): se agrega desde los metadatos de la descarga. */
+export function hydrateSourceDates(rowsByCs, meta, omahaFiles) {
+  const date = { [CODE_SYSTEM]: meta.ckm?.retrievedAt, [MSSSI_CODE_SYSTEM]: meta.adlArchetypes?.retrievedAt, [REGISTRY_CODE_SYSTEM]: meta.tho?.retrievedAt };
+  const out = {};
+  for (const [cs, rows] of Object.entries(rowsByCs)) {
+    if (cs === OMAHA_CODE_SYSTEM) out[cs] = hydrateOmahaProvenance(rows, omahaFiles);
+    else out[cs] = rows.map((r) => ({ ...r, provenance: { ...r.provenance, retrievedAt: date[cs] } }));
+  }
+  return out;
+}
 
 export function buildPlan(rowsByCs, versions) {
   return Object.entries(rowsByCs).map(([cs, rows]) => {
@@ -131,8 +177,15 @@ function readInputs() {
   if (!FROM_REPO_DATA && existsSync(omahaLocal)) rowsByCs[OMAHA_CODE_SYSTEM] = readNdjson(omahaLocal);
   else if (readManifest()?.datasets?.[OMAHA_CODE_SYSTEM]) rowsByCs[OMAHA_CODE_SYSTEM] = parseNdjsonText(readRepoDataset(OMAHA_CODE_SYSTEM));
   if (rowsByCs[OMAHA_CODE_SYSTEM]) versions[OMAHA_CODE_SYSTEM] = OMAHA_VERSION;
+  const omahaLocalMeta = !FROM_REPO_DATA && existsSync(OMAHA_META);
+  const omahaFiles = rowsByCs[OMAHA_CODE_SYSTEM] ? JSON.parse(omahaLocalMeta ? readFileSync(OMAHA_META, 'utf8') : readRepoDataset('omaha-meta')).files : null;
+  const hydrated = hydrateSourceDates(rowsByCs, meta, omahaFiles);
+  const { rowsByCs: approvedRows, omitted } = applyOwnerApproval(hydrated, OWNER_APPROVED);
+  for (const o of omitted) console.log(`[omitido] ${o.codeSystem}: ${o.rows} filas esperan la decisión del propietario («${o.key}»). Para cargarlas: --owner-approved=${o.key} --approval-ref="…"`);
+  for (const k of OWNER_APPROVED) console.log(`[aprobado por el propietario] ${k} — ${APPROVAL_REF}`);
+  for (const cs of Object.keys(versions)) if (!approvedRows[cs]) delete versions[cs];
   console.log(`[entrada] ${fromRepo ? 'datos versionados en tools/terminology-import/nursing-care/data/' : NURSING_OUT}`);
-  return { meta, rowsByCs, versions };
+  return { meta, rowsByCs: approvedRows, versions };
 }
 
 async function main() {

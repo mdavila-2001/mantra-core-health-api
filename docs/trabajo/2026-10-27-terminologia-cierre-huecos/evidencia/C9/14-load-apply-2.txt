@@ -1,0 +1,242 @@
+=== Carga del glosario ES a terminology.* (APPLY explícito) ===
+[corpus] capa ausente (se omite): loinc-es
+[corpus] capa ausente (se omite): inlasa-aranceles
+{
+  "perLayer": {
+    "cie10es-diagnosticos": 12051,
+    "cima": 2381,
+    "medlineplus-es": 1016,
+    "medlineplus-es-pruebas": 302,
+    "wikidata-anatomia": 1905,
+    "nci-diccionario-cancer-es": 9404,
+    "nci-diccionario-genetica-es": 243,
+    "wikidata-relaciones (fichas creadas)": 1315
+  },
+  "orphanRelations": 0,
+  "valueSets": 31,
+  "summary": [
+    {
+      "codeSystem": "cie10es-diagnosticos-2026",
+      "version": "2026",
+      "concepts": 12051,
+      "designations": 12051,
+      "properties": 142941,
+      "memberships": 35548,
+      "relationships": 37802
+    },
+    {
+      "codeSystem": "cima-vtm",
+      "version": "2026-10-27",
+      "concepts": 2381,
+      "designations": 2381,
+      "properties": 45303,
+      "memberships": 6815,
+      "relationships": 3399
+    },
+    {
+      "codeSystem": "medlineplus-es",
+      "version": "2026-10-27",
+      "concepts": 1016,
+      "designations": 3552,
+      "properties": 16556,
+      "memberships": 3110,
+      "relationships": 5073
+    },
+    {
+      "codeSystem": "medlineplus-es-lab",
+      "version": "2026-10-27",
+      "concepts": 302,
+      "designations": 826,
+      "properties": 4530,
+      "memberships": 604,
+      "relationships": 0
+    },
+    {
+      "codeSystem": "wikidata-anatomia",
+      "version": "2026-10-27",
+      "concepts": 1905,
+      "designations": 5508,
+      "properties": 20499,
+      "memberships": 5611,
+      "relationships": 641
+    },
+    {
+      "codeSystem": "nci-diccionario-cancer-es",
+      "version": "2026-10-27",
+      "concepts": 9404,
+      "designations": 9404,
+      "properties": 131656,
+      "memberships": 28212,
+      "relationships": 0
+    },
+    {
+      "codeSystem": "nci-diccionario-genetica-es",
+      "version": "2026-10-27",
+      "concepts": 243,
+      "designations": 243,
+      "properties": 3402,
+      "memberships": 486,
+      "relationships": 0
+    },
+    {
+      "codeSystem": "wikidata-sintoma",
+      "version": "2026-10-27",
+      "concepts": 318,
+      "designations": 318,
+      "properties": 3357,
+      "memberships": 904,
+      "relationships": 809
+    },
+    {
+      "codeSystem": "wikidata-medicamento",
+      "version": "2026-10-27",
+      "concepts": 447,
+      "designations": 447,
+      "properties": 5286,
+      "memberships": 1247,
+      "relationships": 1258
+    },
+    {
+      "codeSystem": "wikidata-tratamiento",
+      "version": "2026-10-27",
+      "concepts": 326,
+      "designations": 326,
+      "properties": 3693,
+      "memberships": 948,
+      "relationships": 689
+    },
+    {
+      "codeSystem": "wikidata-especialidad",
+      "version": "2026-10-27",
+      "concepts": 103,
+      "designations": 103,
+      "properties": 1182,
+      "memberships": 286,
+      "relationships": 4648
+    },
+    {
+      "codeSystem": "wikidata-prueba",
+      "version": "2026-10-27",
+      "concepts": 121,
+      "designations": 121,
+      "properties": 1239,
+      "memberships": 348,
+      "relationships": 611
+    }
+  ]
+}
+[load] {"codeSystem":"cie10es-diagnosticos-2026","concepts":0,"designations":0,"properties":0,"memberships":0,"relationships":0}
+[load] {"codeSystem":"cima-vtm","concepts":0,"designations":0,"properties":0,"memberships":0,"relationships":0}
+[load] {"codeSystem":"medlineplus-es","concepts":0,"designations":0,"properties":0,"memberships":0,"relationships":0}
+[load] {"codeSystem":"medlineplus-es-lab","concepts":0,"designations":0,"properties":0,"memberships":0,"relationships":0}
+[load] {"codeSystem":"wikidata-anatomia","concepts":0,"designations":0,"properties":0,"memberships":0,"relationships":0}
+[load] {"codeSystem":"nci-diccionario-cancer-es","concepts":0,"designations":0,"properties":0,"memberships":0,"relationships":0}
+[load] {"codeSystem":"nci-diccionario-genetica-es","concepts":0,"designations":0,"properties":0,"memberships":0,"relationships":0}
+[load] {"codeSystem":"wikidata-sintoma","concepts":0,"designations":0,"properties":0,"memberships":0,"relationships":0}
+[load] {"codeSystem":"wikidata-medicamento","concepts":0,"designations":0,"properties":0,"memberships":0,"relationships":0}
+[load] {"codeSystem":"wikidata-tratamiento","concepts":0,"designations":0,"properties":0,"memberships":0,"relationships":0}
+[load] {"codeSystem":"wikidata-especialidad","concepts":0,"designations":0,"properties":0,"memberships":0,"relationships":0}
+[load] {"codeSystem":"wikidata-prueba","concepts":0,"designations":0,"properties":0,"memberships":0,"relationships":0}
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "result": [
+    {
+      "codeSystem": "cie10es-diagnosticos-2026",
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "memberships": 0,
+      "relationships": 0
+    },
+    {
+      "codeSystem": "cima-vtm",
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "memberships": 0,
+      "relationships": 0
+    },
+    {
+      "codeSystem": "medlineplus-es",
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "memberships": 0,
+      "relationships": 0
+    },
+    {
+      "codeSystem": "medlineplus-es-lab",
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "memberships": 0,
+      "relationships": 0
+    },
+    {
+      "codeSystem": "wikidata-anatomia",
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "memberships": 0,
+      "relationships": 0
+    },
+    {
+      "codeSystem": "nci-diccionario-cancer-es",
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "memberships": 0,
+      "relationships": 0
+    },
+    {
+      "codeSystem": "nci-diccionario-genetica-es",
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "memberships": 0,
+      "relationships": 0
+    },
+    {
+      "codeSystem": "wikidata-sintoma",
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "memberships": 0,
+      "relationships": 0
+    },
+    {
+      "codeSystem": "wikidata-medicamento",
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "memberships": 0,
+      "relationships": 0
+    },
+    {
+      "codeSystem": "wikidata-tratamiento",
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "memberships": 0,
+      "relationships": 0
+    },
+    {
+      "codeSystem": "wikidata-especialidad",
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "memberships": 0,
+      "relationships": 0
+    },
+    {
+      "codeSystem": "wikidata-prueba",
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "memberships": 0,
+      "relationships": 0
+    }
+  ],
+  "segundos": 18
+}

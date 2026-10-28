@@ -13,12 +13,14 @@
 //
 // Uso:
 //   node tools/terminology-import/specialty-services/build-specialty-services.mjs
+//   node tools/terminology-import/specialty-services/build-specialty-services.mjs --write-repo-data   # ÚNICA forma de pisar data/ (versionado)
+//   node tools/terminology-import/specialty-services/build-specialty-services.mjs --out <dir>         # copia comprimida en otro lado
 //   node tools/terminology-import/specialty-services/build-specialty-services.mjs --report   # imprime la tabla de cobertura en markdown
 // =============================================================================
 
 import { execFileSync } from 'node:child_process';
 import { statSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 
 import { BUILD_DIR, CORPUS_PATH, META_PATH, REPO_DATA_DIR, ensureDir, fetchCached, readTarGzMember, sha256, writeGzParts } from './lib/common.mjs';
 import { buildCorpus, coverage } from './lib/corpus.mjs';
@@ -36,6 +38,12 @@ import {
 } from './lib/sources.mjs';
 
 const REPORT = process.argv.includes('--report');
+// El armado ya NO reescribe `data/` (lo versionado) por defecto: escribe la copia comprimida en `<BUILD_DIR>/repo-data-preview/`
+// (o en `--out <dir>`). Pisar `data/` exige `--write-repo-data`, explícito.
+const outIdx = process.argv.indexOf('--out');
+const WRITE_REPO_DATA = process.argv.includes('--write-repo-data');
+if (WRITE_REPO_DATA && outIdx >= 0) throw new Error('--write-repo-data y --out son excluyentes');
+const OUT_DIR = WRITE_REPO_DATA ? REPO_DATA_DIR : outIdx >= 0 ? resolve(process.argv[outIdx + 1]) : join(BUILD_DIR, 'repo-data-preview');
 
 async function loadFonasa() {
   const t = SOURCES.fonasa.transport;
@@ -108,14 +116,14 @@ async function main() {
   const retrievedAt = new Date(Math.max(...[...fonasa.cachePaths, ...cups.cachePaths, ...cups2025.cachePaths].map((f) => statSync(f).mtimeMs))).toISOString();
 
   const corpus = buildCorpus(
-    { fonasaRows: fonasa.rows, cupsAgreed: cups.agreed, cupsOnlyA: cups.onlyA, cups2025Rows: cups2025.rows, bo, retrievedAt, transports: { fonasa: fonasa.transport, cups: cups.transport, cups2025: cups2025.transport } },
+    { fonasaRows: fonasa.rows, cupsAgreed: cups.agreed, cupsOnlyA: cups.onlyA, cups2025Rows: cups2025.rows, bo, transports: { fonasa: fonasa.transport, cups: cups.transport, cups2025: cups2025.transport } },
     compileRules(rules),
   );
   const cov = coverage(corpus.records, model.specialties);
 
   writeFileSync(CORPUS_PATH(), corpus.records.map((r) => JSON.stringify(r)).join('\n') + '\n');
   const meta = {
-    builtAt: retrievedAt,
+    retrievedAt,
     rulesVersion: rules.version,
     modelSnapshot: model.source,
     fonasa: { rows: fonasa.rows.length, verifiedAgainstPdf: fonasa.check, transport: fonasa.transport },
@@ -131,20 +139,20 @@ async function main() {
   };
   writeFileSync(META_PATH(), JSON.stringify(meta, null, 2));
 
-  const corpusParts = writeGzParts(REPO_DATA_DIR, 'specialty-services', corpus.records.map((r) => JSON.stringify(r)));
-  const metaParts = writeGzParts(REPO_DATA_DIR, 'specialty-services.meta', [JSON.stringify(meta)]);
+  const corpusParts = writeGzParts(OUT_DIR, 'specialty-services', corpus.records.map((r) => JSON.stringify(r)));
+  const metaParts = writeGzParts(OUT_DIR, 'specialty-services.meta', [JSON.stringify(meta)]);
   const manifest = {
     _nota: 'Corpus normalizado de servicios por especialidad. Lo escribe build-specialty-services.mjs; lo lee load-specialty-services.mjs cuando no hay armado local. Las fuentes crudas no se versionan: se vuelven a bajar con URL y SHA-256 fijos (SOURCES.md).',
-    builtAt: retrievedAt,
+    retrievedAt,
     rulesVersion: rules.version,
     records: meta.records,
     relations: meta.relations,
     corpus: corpusParts,
     meta: metaParts,
   };
-  writeFileSync(join(REPO_DATA_DIR, 'MANIFEST.json'), JSON.stringify(manifest, null, 2) + '\n');
+  writeFileSync(join(OUT_DIR, 'MANIFEST.json'), JSON.stringify(manifest, null, 2) + '\n');
 
-  console.log(JSON.stringify({ corpus: CORPUS_PATH(), records: meta.records, relations: meta.relations, fonasa: { rows: meta.fonasa.rows, checkedAgainstPdf: fonasa.check.checked }, cups: cups.cross, gaps: corpus.gaps.length, unmatched: corpus.unmatched.length }, null, 2));
+  console.log(JSON.stringify({ corpus: CORPUS_PATH(), copiaComprimidaEn: OUT_DIR, pisaData: WRITE_REPO_DATA, records: meta.records, relations: meta.relations, fonasa: { rows: meta.fonasa.rows, checkedAgainstPdf: fonasa.check.checked }, cups: cups.cross, gaps: corpus.gaps.length, unmatched: corpus.unmatched.length }, null, 2));
   if (REPORT) console.log(`\n${markdownCoverage(cov)}`);
 }
 

@@ -1,0 +1,40 @@
+      {
+        "codeSystem": "allergy-ndfrt-drug-classes",
+        "origin": "base",
+        "concepts": 12994
+      },
+      {
+        "codeSystem": "allergy-oae",
+        "origin": "base",
+        "concepts": 35
+      },
+      {
+        "codeSystem": "allergy-off-additives",
+        "origin": "base",
+        "concepts": 725
+      },
+      {
+        "codeSystem": "allergy-off-allergens",
+        "origin": "base",
+        "concepts": 26
+      },
+      {
+        "codeSystem": "allergy-rxnorm-ingredients",
+        "origin": "base",
+        "concepts": 21923
+      }
+    ],
+    "designations": 99639,
+    "properties": 354869,
+    "relationships": 24187,
+    "valueSets": 27,
+    "valueSetVersions": 27,
+    "members": 92631,
+    "patchDesignations": 0,
+    "patchProperties": 0,
+    "patchMembers": 0,
+    "conceptMapsSkipped": 20,
+    "conceptMaps": 0
+  },
+  "segundos": 19
+}

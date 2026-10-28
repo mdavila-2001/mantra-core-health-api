@@ -72,4 +72,6 @@ test('corpus: CUPS 2025 aporta servicios con evidencia de descriptor y estado «
   assert.deepEqual(r.evidence.map((e) => [e.specialty, e.basis]), [['REHABILITACION_ORAL', 'descriptor']]);
   assert.ok(corpus.gaps.some((g) => g.source === 'cups2025' && g.phrase === 'CIRUGIA MAXILOFACIAL'));
   assert.equal(corpus.unmatched.length, 0);
+  // el hash del corpus no depende de la fecha de descarga: los registros no llevan `retrievedAt`
+  assert.ok(!JSON.stringify(corpus.records).includes('retrievedAt'));
 });

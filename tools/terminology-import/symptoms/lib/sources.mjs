@@ -105,7 +105,7 @@ export const SOURCE_FILES = [
     // coincide en los dos lados.
     url: 'https://github.com/ncit-obo-org/ncit-obo-edition/releases/download/v2026-03-19/ncit.obo',
     owner: 'NCI Thesaurus (National Cancer Institute, EVS) — edición OBO (ncit-obo-org)',
-    license: 'CC BY 4.0 según los términos de uso de NCI EVS (https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/ThesaurusTermsofUse.htm, registrados en docs/terminology-expansion/SOURCE-REGISTER.md): atribuir a NCI con la versión y no presentar un derivado como la edición oficial; el .obo no la declara — reconfirmar',
+    license: 'CC BY 4.0 (términos de uso de NCI EVS, https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/ThesaurusTermsofUse.htm, leídos el 2026-10-27: «The NCI Thesaurus™ is released under the Creative Commons Attribution 4.0 International license (CC BY 4.0)»). Atribuir a NCI con la versión; el nombre «NCI Thesaurus» está registrado y sólo identifica la edición publicada por NCI',
     versionFrom: 'obo-data-version',
   },
   {
@@ -147,7 +147,8 @@ export const SOURCE_FILES = [
     url: `https://query.wikidata.org/sparql?format=json&query=${encodeURIComponent(WIKIDATA_P3841_QUERY)}`,
     owner: 'Wikidata (Wikimedia Foundation) — propiedad P3841 «Human Phenotype Ontology ID»',
     license: WIKIDATA_LICENSE,
-    fixedVersion: 'consulta en vivo',
+    fixedVersion: 'consulta SPARQL en vivo (el archivo es el resultado normalizado: bindings ordenados; su SHA-256 y fecha viajan en data/sources-manifest.json)',
+    normalize: 'sparql-json',
   },
   {
     key: 'medgen-mgconso',

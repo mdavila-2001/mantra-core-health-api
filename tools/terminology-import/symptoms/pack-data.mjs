@@ -23,11 +23,20 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { gzipSync } from 'node:zlib';
-import { DATA_DIR, OUT_DIR } from './lib/sources.mjs';
+import { DATA_DIR, OUT_DIR, SOURCES_DIR, sourceByKey, sourcePath } from './lib/sources.mjs';
 
 export const PART_LIMIT = 45 * 1024 * 1024;
 /** Reportes chicos que acompañan al corpus. */
 const EXTRA_JSON = ['coverage.json', 'saturation.json', 'gap-coverage.json', 'saturation-gaps.json'];
+/**
+ * Archivos que vienen de las fuentes, no del build, pero sin los cuales el build no se
+ * reproduce desde data/: el manifiesto de procedencia (sin rutas locales) y el resultado
+ * normalizado de la consulta SPARQL a Wikidata, que es en vivo y no se puede repetir idéntico.
+ */
+export const SOURCE_FILES_IN_DATA = {
+  'sources-manifest.json': () => join(SOURCES_DIR, 'manifest.json'),
+  'wikidata-p3841-snapshot.json': () => sourcePath(sourceByKey('wikidata-p3841').file),
+};
 
 const sha256 = (buf) => createHash('sha256').update(buf).digest('hex');
 const gzip = (buf) => gzipSync(buf, { level: 9 });
@@ -88,9 +97,9 @@ function main() {
     manifest.files.push(entry);
     console.log(`[pack] ${name}: ${entry.rows} filas → ${entry.parts.map((p) => `${p.file} (${(p.gzBytes / 1048576).toFixed(1)} MB)`).join(', ')}`);
   }
-  for (const name of EXTRA_JSON) {
+  for (const name of [...EXTRA_JSON, ...Object.keys(SOURCE_FILES_IN_DATA)]) {
     if (only && !only.has(name)) continue;
-    const p = join(OUT_DIR, name);
+    const p = SOURCE_FILES_IN_DATA[name] ? SOURCE_FILES_IN_DATA[name]() : join(OUT_DIR, name);
     if (!existsSync(p)) continue;
     const raw = readFileSync(p);
     const gz = gzip(raw);

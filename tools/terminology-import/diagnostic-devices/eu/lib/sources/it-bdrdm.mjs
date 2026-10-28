@@ -41,6 +41,21 @@ export function assertColumnMap(map, header) {
 }
 
 /**
+ * Id publicado del fabricante: la partida IVA / VAT number si existe; si no, el
+ * código fiscal **solo si es el de una persona jurídica** (11 dígitos). Un
+ * código fiscal de 16 caracteres es el de una persona física (empresario
+ * individual): es un dato personal y no se conserva.
+ */
+/** «2008-10-16 00:00:00» (formato de la fuente) → «2008-10-16». */
+const dt = (v) => isoDate(v ? v.replace(' ', 'T') : v);
+
+export function manufacturerRegistryId(vat, fiscalCode) {
+  if (vat) return `vat:${vat.replace(/\s+/g, '')}`;
+  if (fiscalCode && /^\d{11}$/.test(fiscalCode)) return `it-cf:${fiscalCode}`;
+  return null;
+}
+
+/**
  * Una fila del CSV → registro común. `map.columns` dice qué columna alimenta
  * cada campo común; las no mapeadas quedan en null.
  */
@@ -59,19 +74,21 @@ export function normalizeBdrdmRow(row, map, ctx) {
     deviceTypeName: get('cndName'),
     manufacturerName: get('manufacturerName'),
     manufacturerCountry: get('manufacturerCountry'),
-    manufacturerRegistryId: get('manufacturerRegistryId'),
+    manufacturerRegistryId: manufacturerRegistryId(get('vatNumber'), get('fiscalCode')),
     brandName: get('brandName'),
     model: get('model'),
     udiDi: get('udiDi'),
     riskClass: get('riskClass') ? `it-bdrdm:${get('riskClass')}` : null,
     authorizationId: null,
-    authorizationDate: isoDate(get('registrationDate')),
+    authorizationDate: dt(get('registrationDate')),
     status: get('status'),
     extra: {
+      validityEndDate:
+        dt(get('validityEnd')) === '9999-12-31' ? null : dt(get('validityEnd')),
       registrationDateRaw: get('registrationDate'),
       recordType: get('recordType'),
       repertorio: get('repertorio'),
-      endOfMarketingDate: get('endOfMarketingDate'),
+      endOfMarketingDate: dt(get('endOfMarketingDate')),
     },
   });
 }

@@ -161,7 +161,11 @@ export function resolveAtc(drugCodes, atcIndexes, { combination = false } = {}) 
       }
     }
   }
-  return uniqueBy(added, (x) => `${x.code}|${x.via}|${x.from}`);
+  // Un mismo ATC puede venir del mismo cruce por varios códigos del fármaco (RxCUI, ChEMBL, DrugBank…): se deja
+  // uno solo por (ATC, cruce) con el primer código que lo justifica, en el orden en que `drugCodes` los trae.
+  const first = new Map();
+  for (const x of added) if (!first.has(`${x.code}|${x.via}`)) first.set(`${x.code}|${x.via}`, x);
+  return [...first.values()];
 }
 
 /** Aplica los cruces a una afirmación (devuelve una copia con `crosswalk` y `pairKey`). */

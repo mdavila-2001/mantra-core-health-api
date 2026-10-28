@@ -1,0 +1,415 @@
+{
+  "generatedAt": "2026-10-28T00:06:49.440Z",
+  "baseConcepts": 55503,
+  "sources": {
+    "iuis": {
+      "version": "descarga 2026-10-27 (la base no publica número de versión; cada fila trae DateAdded/DateUpdated)",
+      "retrievedAt": "2026-10-27T23:21:50.255Z",
+      "license": "Descarga libre con cita (allergen.org/downloads.php)",
+      "files": 5,
+      "digest": null
+    },
+    "uniprot": {
+      "version": "UniProt 2026_03 (02-September-2026)",
+      "retrievedAt": "2026-10-27T23:21:53.367Z",
+      "license": "CC-BY-4.0",
+      "files": 2,
+      "digest": null
+    },
+    "cdc-cvx": {
+      "version": "descarga 2026-10-27 (cada fila de cvx.txt trae «Last Updated»)",
+      "retrievedAt": "2026-10-27T23:21:55.556Z",
+      "license": "Dominio público (obra del gobierno de EE. UU.)",
+      "files": 3,
+      "digest": null
+    },
+    "chebi-lite": {
+      "version": "ChEBI 256 (2026-10-06)",
+      "retrievedAt": "2026-10-27T23:22:03.458Z",
+      "license": "CC-BY-4.0",
+      "files": 3,
+      "digest": null
+    },
+    "eurlex-1169": {
+      "version": "texto consolidado 02011R1169-20250401",
+      "retrievedAt": "2026-10-27T23:28:31.907Z",
+      "license": "Reutilización autorizada con cita de la fuente (Decisión 2011/833/UE)",
+      "files": 3,
+      "digest": null
+    },
+    "eurlex-1333": {
+      "version": "consolidado 02008R1333-20260818",
+      "retrievedAt": "2026-10-27T23:28:31.920Z",
+      "license": "Reutilización autorizada con cita de la fuente (Decisión 2011/833/UE)",
+      "files": 2,
+      "digest": null
+    },
+    "usc-21-321": {
+      "version": "United States Code, edición 2023, título 21, §321 (GovInfo todavía no publica 2024 ni 2025: responde 200 con una página de error)",
+      "retrievedAt": "2026-10-27T23:29:09.882Z",
+      "license": "Dominio público (obra del gobierno de EE. UU.)",
+      "files": 1,
+      "digest": null
+    },
+    "europepmc-ebs": {
+      "version": "Europe PMC fullTextXML",
+      "retrievedAt": "2026-10-27T23:22:31.633Z",
+      "license": "CC-BY-4.0 (PMC13238334 y PMC13441338)",
+      "files": 4,
+      "digest": null
+    },
+    "mesh": {
+      "version": "MeSH 2026 (desc2026.gz, que el servidor entrega descomprimido)",
+      "retrievedAt": "2026-10-28T00:06:33.928Z",
+      "license": "Uso libre con cita: «Courtesy of the U.S. National Library of Medicine» (términos de descarga de NLM)",
+      "files": 2,
+      "digest": null
+    },
+    "ncit": {
+      "version": "NCIt 26.09d (2026-09-28)",
+      "retrievedAt": "2026-10-27T23:24:07.079Z",
+      "license": "CC-BY-4.0",
+      "files": 135,
+      "digest": null
+    },
+    "openfda": {
+      "version": "openFDA NDC last_updated 2026-10-27",
+      "retrievedAt": "2026-10-27T23:24:11.260Z",
+      "license": "CC0-1.0 (openFDA)",
+      "files": 4,
+      "digest": null
+    },
+    "dailymed": {
+      "version": "DailyMed v2 (spls por NDC de openFDA)",
+      "retrievedAt": "2026-10-27T23:43:40.126Z",
+      "license": "Dominio público (etiquetas SPL enviadas a la FDA; DailyMed sin restricción de uso)",
+      "files": null,
+      "digest": {
+        "count": 75,
+        "sha256": "2dc3d9720ad0acb186c62bbab5f0cad1af9ca9595a86ce9159bd75d2aa60a155"
+      }
+    },
+    "dailymed-true-test": {
+      "version": "SPL setid 2f082b68-dc74-418a-9e6f-b3c285b41d44",
+      "retrievedAt": "2026-10-27T23:43:40.619Z",
+      "license": "Etiqueta pública de un producto licenciado por la FDA (DailyMed)",
+      "files": 1,
+      "digest": null
+    },
+    "gsrs": {
+      "version": "GSRS 2026-10-27 (cada sustancia trae lastEdited/version)",
+      "retrievedAt": "2026-10-27T23:48:29.468Z",
+      "license": "Dominio público (FDA/NCATS)",
+      "files": null,
+      "digest": {
+        "count": 517,
+        "sha256": "698aacffdfd0c4ce889bd374d65e8f9c1f85fec0a911d88edef18245f2745cbe"
+      }
+    },
+    "rxnav": {
+      "version": "RxNorm 05-Oct-2026 (RxNav API 3.1.356)",
+      "retrievedAt": "2026-10-27T23:56:45.665Z",
+      "license": "RxNorm: sin restricción para las cadenas propias de NLM (SAB=RXNORM); MED-RT (VA) dominio público",
+      "files": 9,
+      "digest": null
+    },
+    "wikidata": {
+      "version": "Wikidata Query Service (consulta por identificador exacto)",
+      "retrievedAt": "2026-10-28T00:02:58.429Z",
+      "license": "CC0-1.0",
+      "files": 168,
+      "digest": null
+    }
+  },
+  "passes": [
+    {
+      "n": 21,
+      "key": "iuis-sources",
+      "title": "WHO/IUIS — fuentes biológicas (especies) y su agrupación taxonómica",
+      "read": 423,
+      "added": 423,
+      "duplicates": 0,
+      "patches": 0
+    },
+    {
+      "n": 22,
+      "key": "iuis-allergens",
+      "title": "WHO/IUIS — moléculas alergénicas con nomenclatura oficial",
+      "read": 1169,
+      "added": 1169,
+      "duplicates": 0,
+      "patches": 0
+    },
+    {
+      "n": 23,
+      "key": "iuis-isoallergens",
+      "title": "WHO/IUIS — isoalérgenos",
+      "read": 1632,
+      "added": 1632,
+      "duplicates": 0,
+      "patches": 0
+    },
+    {
+      "n": 24,
+      "key": "uniprot-kw0020",
+      "title": "UniProtKB — palabra clave KW-0020 «Allergen»",
+      "read": 1027,
+      "added": 1027,
+      "duplicates": 0,
+      "patches": 0
+    },
+    {
+      "n": 25,
+      "key": "cdc-cvx",
+      "title": "CDC — CVX completo con estado oficial",
+      "read": 287,
+      "added": 12,
+      "duplicates": 0,
+      "patches": 275
+    },
+    {
+      "n": 26,
+      "key": "cdc-cvx-tradenames",
+      "title": "CDC — nombres comerciales de vacunas (tradename.txt)",
+      "read": 151,
+      "added": 0,
+      "duplicates": 0,
+      "patches": 151
+    },
+    {
+      "n": 27,
+      "key": "rxnorm-current",
+      "title": "RxNorm vigente (IN/PIN/MIN) vía RxNav",
+      "read": 22244,
+      "added": 321,
+      "duplicates": 0,
+      "patches": 21923
+    },
+    {
+      "n": 28,
+      "key": "rxclass",
+      "title": "RxClass — clases MED-RT/EPC/VA vigentes y miembros EPC",
+      "read": 16830,
+      "added": 11947,
+      "duplicates": 0,
+      "patches": 4883
+    },
+    {
+      "n": 29,
+      "key": "chebi-full",
+      "title": "ChEBI 256 completo — rol «allergen» y sus roles descendientes",
+      "read": 352,
+      "added": 266,
+      "duplicates": 86,
+      "patches": 0
+    },
+    {
+      "n": 30,
+      "key": "ncit",
+      "title": "NCI Thesaurus — Allergen (C62651) e Hypersensitivity (C3114)",
+      "read": 132,
+      "added": 132,
+      "duplicates": 0,
+      "patches": 0
+    },
+    {
+      "n": 31,
+      "key": "eu-1169-annex-ii",
+      "title": "Reglamento (UE) 1169/2011, anexo II — 14 grupos (castellano e inglés oficiales)",
+      "read": 14,
+      "added": 14,
+      "duplicates": 0,
+      "patches": 0
+    },
+    {
+      "n": 32,
+      "key": "eu-1333-additives",
+      "title": "Reglamento (CE) 1333/2008, anexo II parte B — aditivos con número E",
+      "read": 336,
+      "added": 336,
+      "duplicates": 0,
+      "patches": 0
+    },
+    {
+      "n": 33,
+      "key": "us-major-allergens",
+      "title": "FDCA §201(qq) — alérgenos alimentarios mayores de EE. UU.",
+      "read": 9,
+      "added": 9,
+      "duplicates": 0,
+      "patches": 0
+    },
+    {
+      "n": 34,
+      "key": "fda-unii-allergenics",
+      "title": "FDA — sustancias activas (UNII) de extractos alergénicos (openFDA NDC + DailyMed SPL + GSRS)",
+      "read": 505,
+      "added": 505,
+      "duplicates": 0,
+      "patches": 0
+    },
+    {
+      "n": 35,
+      "key": "ebs-patch-test",
+      "title": "Serie basal europea (ESCD) — artículos abiertos de Europa PMC",
+      "read": 57,
+      "added": 57,
+      "duplicates": 0,
+      "patches": 0
+    },
+    {
+      "n": 36,
+      "key": "true-test",
+      "title": "T.R.U.E. TEST — etiqueta SPL de DailyMed",
+      "read": 57,
+      "added": 57,
+      "duplicates": 0,
+      "patches": 0
+    },
+    {
+      "n": 37,
+      "key": "mesh",
+      "title": "MeSH — Allergens (D23.050.063) e Hypersensitivity (C20.543)",
+      "read": 68,
+      "added": 68,
+      "duplicates": 0,
+      "patches": 0
+    },
+    {
+      "n": 38,
+      "key": "wikidata-es",
+      "title": "Wikidata (CC0) — etiquetas en castellano por identificador exacto",
+      "read": 3167,
+      "added": 0,
+      "duplicates": 0,
+      "patches": 3167
+    }
+  ],
+  "discarded": [],
+  "notes": {
+    "cvxTradenamesWithoutConcept": 0,
+    "rxnormRetired": {
+      "notInCurrentIngredientList": 3,
+      "statuses": {
+        "NotCurrent": 3
+      }
+    },
+    "rxclassRenamed": [
+      {
+        "classId": "N0000000137",
+        "ndfrt_2018": "IGF Type 1 Receptor Interactions [MoA]",
+        "rxclass_now": "Insulin-like Growth Factor-1 Receptor Interactions"
+      },
+      {
+        "classId": "N0000178294",
+        "ndfrt_2018": "Antidote [TC]",
+        "rxclass_now": "Antidotes, Deterrents, and Toxicologic Agents"
+      }
+    ],
+    "epcMembers": {
+      "classesWithMembers": 677,
+      "rxcuiWithEpc": 2339
+    },
+    "chebiRoleClasses": [
+      "CHEBI:143204",
+      "CHEBI:143231",
+      "CHEBI:143252",
+      "CHEBI:176575",
+      "CHEBI:176578",
+      "CHEBI:18208",
+      "CHEBI:2676",
+      "CHEBI:27446",
+      "CHEBI:27638",
+      "CHEBI:28073",
+      "CHEBI:28112",
+      "CHEBI:28694",
+      "CHEBI:28971",
+      "CHEBI:2956",
+      "CHEBI:30501",
+      "CHEBI:33363",
+      "CHEBI:3393",
+      "CHEBI:49423",
+      "CHEBI:49566",
+      "CHEBI:49786",
+      "CHEBI:50076",
+      "CHEBI:50904",
+      "CHEBI:5098",
+      "CHEBI:52060",
+      "CHEBI:52427",
+      "CHEBI:58974",
+      "CHEBI:6827",
+      "CHEBI:6919",
+      "CHEBI:7447",
+      "CHEBI:8232",
+      "CHEBI:88184",
+      "CHEBI:88186",
+      "CHEBI:88187",
+      "CHEBI:88188",
+      "CHEBI:9587"
+    ],
+    "fdaUnii": {
+      "ndcAllergenicProducts": 2286,
+      "splProductsLinkedToNdc": 2605,
+      "splProductsNotAllergenicNdc": 610,
+      "activeSubstances": 505,
+      "gsrsMissing": 0
+    },
+    "wikidata": {
+      "targets": 24519,
+      "matched": 7908,
+      "withSpanishLabel": 3167,
+      "ambiguousItem": 40,
+      "noItem": 16571
+    }
+  },
+  "totals": {
+    "newConcepts": 17975,
+    "withSpanishDisplay": 350,
+    "patches": 30070,
+    "byCodeSystem": {
+      "allergy-iuis-sources": 423,
+      "allergy-iuis-allergens": 2801,
+      "allergy-uniprot": 1027,
+      "allergy-cvx-vaccines": 12,
+      "allergy-rxnorm-ingredients": 321,
+      "allergy-medrt-classes": 11947,
+      "allergy-chebi": 266,
+      "allergy-ncit": 132,
+      "allergy-eu-allergens": 14,
+      "allergy-eu-additives": 336,
+      "allergy-fda-major-allergens": 9,
+      "allergy-fda-unii": 505,
+      "allergy-patch-test-series": 114,
+      "allergy-mesh": 68
+    },
+    "byValueSet": {
+      "allergy-substances": 17790,
+      "allergy-substances-allergen-source": 330,
+      "allergy-substances-allergen-molecule": 2801,
+      "allergy-substances-protein-allergen": 1027,
+      "allergy-substances-vaccine": 12,
+      "allergy-substances-medication-ingredient": 321,
+      "allergy-substances-rxnorm-venom": 1,
+      "allergy-substances-drug-class-medrt": 11947,
+      "allergy-substances-chemical-allergen": 266,
+      "allergy-conditions": 92,
+      "allergy-substances-ncit-allergen": 106,
+      "allergy-substances-eu-allergen": 14,
+      "allergy-substances-eu-additive": 336,
+      "allergy-substances-us-major-allergen": 9,
+      "allergy-substances-allergenic-extract-substance": 505,
+      "allergy-substances-patch-test": 114,
+      "allergy-substances-mesh-allergen": 2
+    },
+    "patchedBySystem": {
+      "allergy-cvx-vaccines": 416,
+      "allergy-rxnorm-ingredients": 26984,
+      "allergy-ndfrt-drug-classes": 2544,
+      "allergy-chebi": 66,
+      "allergy-doid": 57,
+      "allergy-mondo": 3
+    }
+  },
+  "ndjsonSha256": "380cf4adb78e39d2490142f6fdbe189ea50ca3bfe710a4f1eddd98d498795055",
+  "seconds": 6
+}

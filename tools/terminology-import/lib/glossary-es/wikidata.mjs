@@ -86,8 +86,13 @@ export const CODE_PROPERTIES = {
 
 /** Consulta SPARQL: ítems con código `prop` e imagen (`imgProp`), con etiqueta y descripción en castellano. */
 export function sparqlFor(prop, imgProp = 'P18') {
+  // La unión código+imagen va en una subconsulta y las etiquetas/descripciones
+  // ES se piden después: el mismo conjunto de filas, pero WDQS resuelve primero
+  // la unión chica. Con las dos OPTIONAL en el mismo nivel la consulta de MeSH
+  // (11 118 ítems con imagen) superaba los 60 s del servicio y devolvía el JSON
+  // truncado (2026-10-27).
   return `SELECT ?item ?code ?img ?esLabel ?esDesc WHERE {
-  ?item wdt:${prop} ?code ; wdt:${imgProp} ?img .
+  { SELECT ?item ?code ?img WHERE { ?item wdt:${prop} ?code ; wdt:${imgProp} ?img } }
   OPTIONAL { ?item rdfs:label ?esLabel FILTER(LANG(?esLabel) = "es") }
   OPTIONAL { ?item schema:description ?esDesc FILTER(LANG(?esDesc) = "es") }
 }`;

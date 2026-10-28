@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-27T23:16:36.839Z",
+  "generatedAt": "2026-10-28T00:03:27.323Z",
   "headersFound": 33,
   "orderMismatches": [],
   "signsSymptoms": [
@@ -8,94 +8,140 @@
       "number": 1,
       "mosug": 6,
       "form": 6,
-      "equal": true
+      "equal": true,
+      "lastIsOther": true,
+      "parentOk": true,
+      "digitMismatches": []
     },
     {
       "problem": "Residence",
       "number": 3,
       "mosug": 15,
       "form": 15,
-      "equal": true
+      "equal": true,
+      "lastIsOther": true,
+      "parentOk": true,
+      "digitMismatches": []
     },
     {
       "problem": "Mental health",
       "number": 11,
       "mosug": 18,
       "form": 18,
-      "equal": true
+      "equal": true,
+      "lastIsOther": true,
+      "parentOk": true,
+      "digitMismatches": []
     },
     {
       "problem": "Neglect",
       "number": 14,
       "mosug": 7,
       "form": 7,
-      "equal": true
+      "equal": true,
+      "lastIsOther": true,
+      "parentOk": true,
+      "digitMismatches": []
     },
     {
       "problem": "Abuse",
       "number": 15,
       "mosug": 9,
       "form": 9,
-      "equal": true
+      "equal": true,
+      "lastIsOther": true,
+      "parentOk": true,
+      "digitMismatches": []
     },
     {
       "problem": "Growth and development",
       "number": 16,
       "mosug": 5,
       "form": 5,
-      "equal": true
+      "equal": true,
+      "lastIsOther": true,
+      "parentOk": true,
+      "digitMismatches": []
     },
     {
       "problem": "Cognition",
       "number": 21,
       "mosug": 11,
       "form": 11,
-      "equal": true
+      "equal": true,
+      "lastIsOther": true,
+      "parentOk": true,
+      "digitMismatches": []
     },
     {
       "problem": "Pregnancy",
       "number": 32,
       "mosug": 7,
       "form": 7,
-      "equal": true
+      "equal": true,
+      "lastIsOther": true,
+      "parentOk": true,
+      "digitMismatches": []
     },
     {
       "problem": "Postpartum",
       "number": 33,
       "mosug": 7,
       "form": 7,
-      "equal": true
+      "equal": true,
+      "lastIsOther": true,
+      "parentOk": true,
+      "digitMismatches": []
     },
     {
       "problem": "Nutrition",
       "number": 35,
       "mosug": 12,
       "form": 12,
-      "equal": true
+      "equal": true,
+      "lastIsOther": true,
+      "parentOk": true,
+      "digitMismatches": []
     },
     {
       "problem": "Physical activity",
       "number": 37,
       "mosug": 4,
       "form": 4,
-      "equal": true
+      "equal": true,
+      "lastIsOther": true,
+      "parentOk": true,
+      "digitMismatches": []
     },
     {
       "problem": "Substance use",
       "number": 39,
       "mosug": 10,
       "form": 10,
-      "equal": true
+      "equal": true,
+      "lastIsOther": true,
+      "parentOk": true,
+      "digitMismatches": []
     },
     {
       "problem": "Family planning",
       "number": 40,
       "mosug": 7,
       "form": 7,
-      "equal": true
+      "equal": true,
+      "lastIsOther": true,
+      "parentOk": true,
+      "digitMismatches": []
     }
   ],
   "problemsCrosschecked": 33,
   "signsSymptomsCompared": 13,
-  "signsSymptomsEqual": 13
+  "signsSymptomsEqual": 13,
+  "assignmentChecks": {
+    "problems": 13,
+    "lastIsOther": 13,
+    "parentOk": 13,
+    "numericMismatches": 0,
+    "note": "No verifica el texto de cada signo (el formulario está en turco): verifica total, orden por columnas (último = otro), problema padre y números por posición."
+  }
 }

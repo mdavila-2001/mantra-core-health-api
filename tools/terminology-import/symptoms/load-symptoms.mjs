@@ -31,6 +31,7 @@ import { existsSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { nowIso, readNdjson, writeJson } from '../lib/glossary-es/common.mjs';
 import { valueSetVersionId } from '../lib/glossary-es/load-plan.mjs';
+import { hpoApproved } from './lib/approvals.mjs';
 import { DB_CONFIG, conceptIdsByCode, ensureCodeSystem, insertMany } from './lib/db.mjs';
 import {
   CONCEPT, GLOSSARY_VALUE_SETS, codeSystemPlan, conceptId, conceptTuple, designationsFor, displayOf, glossaryFor, isARelationships, isGlossaryTerm, mapsFor, md5uuid, propertiesFor,
@@ -108,6 +109,8 @@ async function main() {
     return;
   }
 
+  // Todo lo que se carga acá, o es HPO, o cuelga de HPO (is-a, mapas, glosario): sin aprobación no se escribe.
+  if (SYSTEMS.includes('hpo') && !hpoApproved()) return;
   const client = new pg.Client(DB_CONFIG);
   await client.connect();
   const result = [];

@@ -1,0 +1,309 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-27T23:56:11.305Z",
+  "total": 28617,
+  "withDefinition": 15439,
+  "withImage": 5689,
+  "categories": [
+    {
+      "key": "anatomy",
+      "name": "Anatomía",
+      "count": 1905,
+      "pages": 4,
+      "withDefinition": 709,
+      "withImage": 1227
+    },
+    {
+      "key": "signs-symptoms",
+      "name": "Signos y síntomas",
+      "count": 821,
+      "pages": 2,
+      "withDefinition": 228,
+      "withImage": 101
+    },
+    {
+      "key": "disease",
+      "name": "Enfermedades",
+      "count": 10040,
+      "pages": 21,
+      "withDefinition": 1251,
+      "withImage": 2628
+    },
+    {
+      "key": "specialty",
+      "name": "Especialidades médicas",
+      "count": 103,
+      "pages": 1,
+      "withDefinition": 85,
+      "withImage": 0
+    },
+    {
+      "key": "diagnostic-test",
+      "name": "Pruebas diagnósticas",
+      "count": 273,
+      "pages": 1,
+      "withDefinition": 202,
+      "withImage": 10
+    },
+    {
+      "key": "procedure",
+      "name": "Procedimientos",
+      "count": 36,
+      "pages": 1,
+      "withDefinition": 36,
+      "withImage": 20
+    },
+    {
+      "key": "treatment",
+      "name": "Tratamientos",
+      "count": 354,
+      "pages": 1,
+      "withDefinition": 281,
+      "withImage": 14
+    },
+    {
+      "key": "pharmacology",
+      "name": "Farmacología clínica",
+      "count": 2828,
+      "pages": 6,
+      "withDefinition": 2699,
+      "withImage": 1583
+    },
+    {
+      "key": "lab",
+      "name": "Laboratorio",
+      "count": 162,
+      "pages": 1,
+      "withDefinition": 162,
+      "withImage": 0
+    },
+    {
+      "key": "imaging",
+      "name": "Imagenología",
+      "count": 0,
+      "pages": 0,
+      "withDefinition": 0,
+      "withImage": 0
+    },
+    {
+      "key": "care",
+      "name": "Cuidados de enfermería",
+      "count": 0,
+      "pages": 0,
+      "withDefinition": 0,
+      "withImage": 0
+    },
+    {
+      "key": "other",
+      "name": "Otros términos",
+      "count": 12095,
+      "pages": 25,
+      "withDefinition": 9786,
+      "withImage": 106
+    }
+  ],
+  "tags": [
+    {
+      "key": "urgency",
+      "name": "Urgencia",
+      "count": 81
+    },
+    {
+      "key": "chronic",
+      "name": "Crónico",
+      "count": 0
+    },
+    {
+      "key": "pediatric",
+      "name": "Pediatría",
+      "count": 526
+    },
+    {
+      "key": "cardiovascular",
+      "name": "Cardiovascular",
+      "count": 1380
+    },
+    {
+      "key": "respiratory",
+      "name": "Respiratorio",
+      "count": 654
+    },
+    {
+      "key": "endocrine",
+      "name": "Endocrino",
+      "count": 675
+    },
+    {
+      "key": "infectious",
+      "name": "Infeccioso",
+      "count": 1581
+    },
+    {
+      "key": "mental-health",
+      "name": "Salud mental",
+      "count": 718
+    },
+    {
+      "key": "musculoskeletal",
+      "name": "Musculoesquelético",
+      "count": 1393
+    },
+    {
+      "key": "digestive",
+      "name": "Digestivo",
+      "count": 1050
+    },
+    {
+      "key": "renal",
+      "name": "Renal",
+      "count": 381
+    },
+    {
+      "key": "urologic",
+      "name": "Urológico",
+      "count": 149
+    },
+    {
+      "key": "dermatologic",
+      "name": "Dermatológico",
+      "count": 733
+    },
+    {
+      "key": "oncologic",
+      "name": "Oncológico",
+      "count": 10759
+    },
+    {
+      "key": "gyn-ob",
+      "name": "Ginecoobstétrico",
+      "count": 972
+    },
+    {
+      "key": "neurologic",
+      "name": "Neurológico",
+      "count": 1235
+    },
+    {
+      "key": "hematologic",
+      "name": "Hematológico e inmunitario",
+      "count": 281
+    },
+    {
+      "key": "ophthalmologic",
+      "name": "Oftalmológico",
+      "count": 373
+    },
+    {
+      "key": "ent",
+      "name": "Otorrinolaringológico",
+      "count": 204
+    },
+    {
+      "key": "congenital",
+      "name": "Congénito",
+      "count": 723
+    },
+    {
+      "key": "trauma",
+      "name": "Traumatismos y envenenamientos",
+      "count": 3017
+    }
+  ],
+  "sources": [
+    {
+      "source": "sanidad-cie10es-2026",
+      "sourceName": "CIE-10-ES Diagnósticos, 6.ª edición 2026 — Ministerio de Sanidad (tabla de referencia del 2025-05-22)",
+      "count": 12051,
+      "retrievedAt": "2026-10-27T23:07:32.713Z",
+      "license": "Ministerio de Sanidad, aviso legal (https://www.sanidad.gob.es/avisoLegal/home.htm): reutilización autorizada, también comercial, citando la fuente y la fecha de última actualización y sin desnaturalizar el contenido. CIE-10-ES es la traducción oficial de ICD-10-CM (© NCHS) e ICD-10-PCS (© CMS), obras del gobierno de EE. UU."
+    },
+    {
+      "source": "aemps-cima",
+      "sourceName": "CIMA — Centro de Información online de Medicamentos de la AEMPS",
+      "count": 2381,
+      "retrievedAt": "2026-10-27T23:08:05.177Z",
+      "license": "AEMPS, aviso legal: «Se autoriza la reproducción total o parcial de los contenidos de la web, siempre que se cite expresamente su origen» (con fecha de última actualización del documento). https://www.aemps.gob.es/aviso-legal/"
+    },
+    {
+      "source": "nlm-medlineplus-es",
+      "sourceName": "MedlinePlus en español — Temas de salud (U.S. National Library of Medicine)",
+      "count": 1016,
+      "retrievedAt": "2026-10-27T23:09:07.591Z",
+      "license": "MedlinePlus (U.S. National Library of Medicine): los resúmenes de temas de salud y la información de pruebas médicas son de dominio público; atribución pedida: «Fuente: MedlinePlus, National Library of Medicine». La Enciclopedia A.D.A.M. y las monografías de medicamentos NO son de dominio público y no se importan. https://medlineplus.gov/about/using/usingcontent/"
+    },
+    {
+      "source": "nlm-medlineplus-es-pruebas",
+      "sourceName": "MedlinePlus en español — Pruebas médicas (U.S. National Library of Medicine)",
+      "count": 302,
+      "retrievedAt": "2026-10-27T23:09:07.591Z",
+      "license": "MedlinePlus (U.S. National Library of Medicine): los resúmenes de temas de salud y la información de pruebas médicas son de dominio público; atribución pedida: «Fuente: MedlinePlus, National Library of Medicine». La Enciclopedia A.D.A.M. y las monografías de medicamentos NO son de dominio público y no se importan. https://medlineplus.gov/about/using/usingcontent/"
+    },
+    {
+      "source": "wikidata",
+      "sourceName": "Wikidata — estructuras anatómicas (Q4936952) con identificador TA98 (P1323) o TA2 (P7173); etiqueta y descripción ES de la comunidad",
+      "count": 1905,
+      "retrievedAt": "2026-10-27T23:14:48.109Z",
+      "license": "Wikidata: datos bajo CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/). Etiquetas y descripciones en castellano aportadas por la comunidad de Wikidata. Imagen: licencia de su archivo en Wikimedia Commons."
+    },
+    {
+      "source": "nci-glossary",
+      "sourceName": "Diccionario de cáncer del NCI (en español, para pacientes)",
+      "count": 9647,
+      "retrievedAt": "2026-10-27T23:40:31.152Z",
+      "license": "NCI, «Reuse of NCI Information» (https://www.cancer.gov/policies/copyright-reuse): «Unless otherwise indicated, all text within National Cancer Institute (NCI) products is free of copyright and may be reused without our permission. Credit the National Cancer Institute as the source.» Se cita al NCI como fuente en cada fila; los gráficos de NCI pueden tener derechos de terceros y no se importan."
+    },
+    {
+      "source": "wikidata-relaciones",
+      "sourceName": "Wikidata — síntoma o signo declarado por la enfermedad (P780); etiqueta y descripción ES de la comunidad",
+      "count": 1315,
+      "retrievedAt": "2026-10-27T23:54:16.517Z",
+      "license": "CC0 1.0 (Wikidata, dominio público)"
+    }
+  ],
+  "layers": {
+    "cie10es-diagnosticos": 12051,
+    "cima": 2381,
+    "medlineplus-es": 1016,
+    "medlineplus-es-pruebas": 302,
+    "wikidata-anatomia": 1905,
+    "nci-diccionario-cancer-es": 9404,
+    "nci-diccionario-genetica-es": 243,
+    "wikidata-relaciones (fichas creadas)": 1315
+  },
+  "orphanRelationsDropped": 0,
+  "detailFiles": 13859,
+  "searchIndexLetters": [
+    "0-9",
+    "a",
+    "b",
+    "c",
+    "d",
+    "e",
+    "f",
+    "g",
+    "h",
+    "i",
+    "j",
+    "k",
+    "l",
+    "m",
+    "n",
+    "o",
+    "otros",
+    "p",
+    "q",
+    "r",
+    "s",
+    "t",
+    "u",
+    "v",
+    "w",
+    "x",
+    "y",
+    "z"
+  ],
+  "pageSize": 500,
+  "note": "Sólo términos importados de fuentes oficiales (reviewStatus = external-source). Los 69 curados, las capas de data/glossary/ del front y las láminas de anatomía NO están acá.",
+  "imagesIndexed": 15744,
+  "segundos": 7
+}

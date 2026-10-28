@@ -1,0 +1,7 @@
+load-symptoms: salida 3
+load-disease-phenotypes: salida 3
+load-wikidata-crosswalk: salida 3
+load-medgen-crosswalk: salida 3
+HPO: falta la aprobación del propietario para cargar contenido de HPO.
+La licencia de HPO es de uso libre con tres condiciones (reconocer y citar al HPO Consortium; indicar fecha/versión al mostrarlo públicamente;
+no alterar contenido ni relaciones lógicas), pero el aviso legal del sitio habla de «personal, noncommercial use» y «research and educational purposes».

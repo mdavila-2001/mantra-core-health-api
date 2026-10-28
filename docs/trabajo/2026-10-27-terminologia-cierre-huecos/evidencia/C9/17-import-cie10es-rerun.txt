@@ -1,0 +1,41 @@
+=== CIE-10-ES 2026 (Ministerio de Sanidad) → glosario ES ===
+[cie10es] diagnosticos: 102131 términos (102448 filas en la hoja; capítulos y bloques van como jerarquía) → {"disease":86027,"signs-symptoms":938,"other":15166}
+[cie10es] procedimientos: 78948 términos (78948 filas en la hoja; capítulos y bloques van como jerarquía) → {"procedure":69999,"treatment":4938,"diagnostic-test":570,"imaging":3441}
+{
+  "source": "sanidad-cie10es-2026",
+  "retrievedAt": "2026-10-27T23:58:44.064Z",
+  "files": [
+    {
+      "file": "Diagnosticos_Tabla_Referencia_CIE10ES_2026.xlsx",
+      "url": "https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/CIE10/2026/Diagnosticos_Tabla_Referencia_CIE10ES_2026.xlsx",
+      "sha256": "3695159d8f9a5a77e7ecdcee29657debbee4ed74b470a6d6143e99c80a5782fc",
+      "editionDate": "2025-05-22",
+      "sheet": "ES2026 Completa + Marcadores",
+      "sheetDataRows": 102448,
+      "terms": 102131,
+      "finalCodes": 74260,
+      "byCategory": {
+        "disease": 86027,
+        "signs-symptoms": 938,
+        "other": 15166
+      }
+    },
+    {
+      "file": "Procedimientos_Tabla_Referencia_CIE10ES_2026.xlsx",
+      "url": "https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/CIE10/2026/Procedimientos_Tabla_Referencia_CIE10ES_2026.xlsx",
+      "sha256": "8c091285d7e0817f326307d2bf2743dc47cd31ce7cded59b122f5607f3e36ba3",
+      "editionDate": "2026-06-02",
+      "sheet": "ES2026 Completa + Marcadores",
+      "sheetDataRows": 78948,
+      "terms": 78948,
+      "finalCodes": 78948,
+      "byCategory": {
+        "procedure": 69999,
+        "treatment": 4938,
+        "diagnostic-test": 570,
+        "imaging": 3441
+      }
+    }
+  ],
+  "segundos": 13
+}

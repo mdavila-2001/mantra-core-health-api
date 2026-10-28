@@ -246,3 +246,57 @@ test('MedGen: mismo CUI ⇒ cruce entre los sistemas del corpus; sólo identific
   assert.match(t[4], /^UMLS CUI C0000737 compartido \(NCBI MedGen\): HP:0002027 ↔ D015746$/);
   assert.equal(mapTupleFor(rows[1], (cs, c) => ids[`${cs}|${c}`], 'ver'), null, 'si falta un concepto en la base no se escribe');
 });
+
+// --- Procedencia por fila, aprobación de HPO y guarda de la base desechable ----------------------
+
+test('procedencia por fila: SHA-256 de entrada y versión en Orphadata, Wikidata y MedGen', () => {
+  const o = orphadataRows(fx('orphadata-en-excerpt.xml'), fx('orphadata-es-excerpt.xml'), passThrough, { ...PROV, sha256En: 'a'.repeat(64), sha256Es: 'b'.repeat(64) });
+  assert.ok(o.rows.every((r) => r.inputSha256.en === 'a'.repeat(64) && r.inputSha256.es === 'b'.repeat(64) && r.version === '2026-06-23' && r.retrievedAt && r.license));
+  const w = wikidataHpoRows(JSON.parse(fx('wikidata-p3841-excerpt.json')), hpoIdResolver(hp), { retrievedAt: PROV.retrievedAt, license: PROV.license, queryUrl: 'q', sha256: 'c'.repeat(64), version: 'consulta SPARQL del 2026-10-28' });
+  assert.ok(w.rows.every((r) => r.inputSha256 === 'c'.repeat(64) && r.version === 'consulta SPARQL del 2026-10-28'));
+  const m = medgenLinks(fx('medgen-mgconso-excerpt.rrf'), { hpo: new Set(['HP:0002027']), 'mesh-c23': new Set(['D015746']), ncit: new Set() }, new Map(), new Set(), { version: 'v', retrievedAt: PROV.retrievedAt, license: 'l', sha256: 'd'.repeat(64) });
+  assert.ok(m.rows.length > 0 && m.rows.every((r) => r.inputSha256 === 'd'.repeat(64)));
+});
+
+test('la consulta SPARQL de Wikidata se normaliza: mismo contenido en otro orden = mismos bytes', async () => {
+  const { normalizeSparqlJson } = await import('../fetch-symptom-sources.mjs');
+  const j = JSON.parse(fx('wikidata-p3841-excerpt.json'));
+  const shuffled = { head: j.head, results: { bindings: [...j.results.bindings].reverse() } };
+  assert.equal(normalizeSparqlJson(JSON.stringify(j)), normalizeSparqlJson(JSON.stringify(shuffled)));
+});
+
+test('HPO: sin la aprobación del propietario los cargadores no escriben (código de salida 3)', async () => {
+  const { hpoApproved } = await import('../lib/approvals.mjs');
+  const before = process.exitCode;
+  const silent = console.error;
+  console.error = () => {};
+  try {
+    assert.equal(hpoApproved([], {}), false);
+    assert.equal(process.exitCode, 3);
+    process.exitCode = before;
+    assert.equal(hpoApproved(['--apply'], {}), false);
+    process.exitCode = before;
+    assert.equal(hpoApproved(['--apply', '--accept-hpo-terms'], {}), true);
+    assert.equal(hpoApproved([], { MANTRA_HPO_TERMS_ACCEPTED: '1' }), true);
+    assert.equal(hpoApproved([], { MANTRA_HPO_TERMS_ACCEPTED: '0' }), false);
+  } finally {
+    console.error = silent;
+    process.exitCode = before;
+  }
+});
+
+test('fresh-db.sh se niega a borrar una base que no es desechable', async () => {
+  const { spawnSync } = await import('node:child_process');
+  const script = join(FX, '..', 'disposable-db', 'fresh-db.sh');
+  const run = (env) => spawnSync('sh', [script], { env: { PATH: process.env.PATH, ...env }, encoding: 'utf8' });
+  for (const env of [
+    { DB_HOST: '/tmp', DB_PORT: '1', DB_USER: 'u', DB_NAME: 'x_test' }, // sin DISPOSABLE_DB=1
+    { DISPOSABLE_DB: '1', DB_HOST: '/tmp', DB_PORT: '1', DB_USER: 'u', DB_NAME: 'mantra_prod' }, // nombre sin _test
+    { DISPOSABLE_DB: '1', DB_HOST: 'db.example.com', DB_PORT: '1', DB_USER: 'u', DB_NAME: 'x_test' }, // servidor remoto
+    { DISPOSABLE_DB: '1', DB_HOST: '/tmp', DB_PORT: '1', DB_USER: 'u', DB_NAME: 'postgres' },
+  ]) {
+    const r = run(env);
+    assert.equal(r.status, 4, `debía negarse: ${JSON.stringify(env)} → ${r.stderr}`);
+    assert.match(r.stderr, /se niega/);
+  }
+});

@@ -14,7 +14,7 @@ import { msssiProfile, slotTargets } from '../lib/msssi.mjs';
 
 const FIX = join(dirname(fileURLToPath(import.meta.url)), 'fixtures');
 const read = (name) => readFileSync(join(FIX, name), 'utf8');
-const CTX = { path: 'local/archetypes/entry/observation/x.adl', commit: 'c3fdc43dcf0eb7ef0cfe60f548fcdebc24c70094', retrievedAt: '2026-10-24T00:53:37Z', repoUrl: 'https://github.com/openEHR/CKM-mirror' };
+const CTX = { path: 'local/archetypes/entry/observation/x.adl', commit: 'c3fdc43dcf0eb7ef0cfe60f548fcdebc24c70094', repoUrl: 'https://github.com/openEHR/CKM-mirror' };
 
 const ecog = parseArchetype(read('openEHR-EHR-OBSERVATION.ecog.v2.adl'));
 const fluid = parseArchetype(read('openEHR-EHR-OBSERVATION.fluid_balance.v1.adl'));
@@ -143,7 +143,10 @@ test('Registro: 12 terminologías ANA con OID y URI verbatim de HL7 THO 7.0.1', 
   const oms = rows.find((r) => r.code === 'oms');
   assert.equal(oms.nameOriginal, 'Omaha System');
   assert.equal(oms.hl7.oid, '2.16.840.1.113883.6.98');
-  assert.equal(oms.license.status, 'public-domain-terms');
+  // Cambio de comportamiento esperado (2026-10-27): Omaha ya NO es cargable por defecto (decisión del propietario con la editorial).
+  assert.equal(oms.license.status, 'public-domain-terms-pending-owner-decision');
+  assert.equal(oms.license.loadable, false);
+  assert.equal(oms.license.approvalKey, 'omaha-system');
   assert.equal(rows.find((r) => r.code === 'nanda-i').license.loadable, false);
 });
 
@@ -195,7 +198,12 @@ ontology
   const profile = msssiProfile(targets);
   const rows = archetypeRows(report, { ...CTX, profile });
   assert.equal(rows[0].nameEs, 'Informe Cuidados Enfermeria');
-  assert.equal(rows[0].contentLicense.status, 'official-publication-license-not-stated');
+  // Cambio de comportamiento esperado (2026-10-27): el Aviso legal del Ministerio, leído ese día, autoriza la reutilización
+  // con 3 condiciones; ya no corresponde «licencia no declarada». La aserción sigue exigiendo estado, evidencia y condiciones.
+  assert.equal(rows[0].contentLicense.status, 'reuse-allowed-with-conditions');
+  assert.equal(rows[0].contentLicense.evidence[0].field, 'reuse-notice');
+  assert.equal(rows[0].contentLicense.conditions.length, 3);
+  assert.equal(rows[0].contentLoaded, true);
   assert.deepEqual(rows[0].nursingRules, ['M1-nursing-care-report']);
   assert.ok(inGlossary(rows[0]));
   const slot = rows.find((r) => r.atCode === 'at0015');

@@ -36,6 +36,7 @@ import pg from 'pg';
 import { existsSync, readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { nowIso, readNdjson, writeJson } from '../lib/glossary-es/common.mjs';
+import { hpoApproved } from './lib/approvals.mjs';
 import { DB_CONFIG, conceptIdsByCode, insertMany } from './lib/db.mjs';
 import { CODE_SYSTEMS, md5uuid, versionId } from './lib/load-plan.mjs';
 import { DEFAULT_DISEASE_SYSTEMS, EVIDENCE_VALUE_SETS, REL, RELATION_SOURCES, diseaseSystemsFromJson, phenotypeResolver, relationsPlan } from './lib/relations-plan.mjs';
@@ -179,6 +180,8 @@ async function main() {
     return;
   }
 
+  // Las aristas apuntan a conceptos HPO y HPOA/enfermedades comunes son contenido de HPO.
+  if (!hpoApproved()) return;
   const client = new pg.Client(DB_CONFIG);
   await client.connect();
   try {

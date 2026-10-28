@@ -1,0 +1,7 @@
+{
+  "termsInScope": 1318,
+  "articles": 1318,
+  "rejected": 64,
+  "sections": 5218,
+  "images": 476
+}

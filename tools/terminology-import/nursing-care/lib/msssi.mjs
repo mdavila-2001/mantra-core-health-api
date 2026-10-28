@@ -9,9 +9,11 @@
 // nombran por id los arquetipos que lo componen: esa es la relación publicada
 // que se usa para marcar el subconjunto de enfermería (regla M2).
 //
-// Licencia: los archivos no declaran licencia y el repositorio no tiene archivo
-// LICENSE. Se cargan con estado `official-publication-license-not-stated` y la
-// base legal anotada (ver `LEGAL_BASIS`); queda para confirmar con el Ministerio.
+// Licencia (leída el 2026-10-27, `verify-cmdic-license.mjs`): los archivos ADL no llevan licencia propia, pero el Aviso
+// legal del portal del Ministerio de Sanidad autoriza la reutilización de la información del sitio «salvo indicación
+// expresa en contrario», para usos comerciales y no comerciales, con tres condiciones (no desnaturalizar, citar la
+// fuente y mencionar la fecha de la última actualización), y la página de los arquetipos no declara excepción. Estado
+// `reuse-allowed-with-conditions` (ver `REUSE_NOTICE`). Antes del 2026-10-27 era `official-publication-license-not-stated`.
 // =============================================================================
 
 export const MSSSI_CODE_SYSTEM = 'es-msssi-cmdic-13606';
@@ -19,6 +21,16 @@ export const MSSSI_SUBDIR = 'Reference/ISO_13606/Spanish_MOH/ADL_14';
 export const ADL_ARCHETYPES_REPO_URL = 'https://github.com/openEHR/adl-archetypes';
 
 export const NURSING_REPORT_ID = 'CEN-EN13606-COMPOSITION.InformeCuidadosEnfermeria.v1';
+
+/** Cláusula verbatim del Aviso legal (captura completa en `data/cmdic-license-verification.json.gz`). */
+export const REUSE_NOTICE = {
+  field: 'reuse-notice',
+  text: 'La información disponible en este sitio web, salvo indicación expresa en contrario, es susceptible de reutilización; quedando autorizada su reproducción total o parcial, modificación, distribución y comunicación, para usos comerciales y no comerciales, con sujeción a las siguientes condiciones: Queda prohibida en cualquier circunstancia la desnaturalización del contenido de la información. El usuario queda obligado a citar la fuente de los documentos objeto de la reutilización. El usuario queda obligado a mencionar la fecha de la última actualización de los documentos objeto de la reutilización.',
+  url: 'https://www.sanidad.gob.es/avisoLegal/home.htm',
+  checkedAt: '2026-10-27',
+  conditions: ['no desnaturalizar el contenido', 'citar la fuente', 'mencionar la fecha de la última actualización'],
+  pageStatesException: false,
+};
 
 export const LEGAL_BASIS = [
   {
@@ -33,7 +45,7 @@ export const LEGAL_BASIS = [
   },
   {
     field: 'publisher',
-    text: 'Ministerio de Sanidad, «Recursos de Modelado Clínico (arquetipos)»: materiales elaborados para el Ministerio por la Universidad Politécnica de Valencia con VeraTech e Indizen, basados en UNE-EN ISO 13606. No se encontró una licencia de uso declarada.',
+    text: 'Ministerio de Sanidad, «Recursos de Modelado Clínico (arquetipos)»: materiales elaborados para el Ministerio por la Universidad Politécnica de Valencia con VeraTech e Indizen, basados en UNE-EN ISO 13606. Los archivos no llevan licencia propia: rige el Aviso legal del portal (ver REUSE_NOTICE).',
     url: 'https://www.sanidad.gob.es/profesionales/hcdsns/areaRecursosSem/Rec_mod_clinico_arquetipos.htm',
   },
 ];
@@ -65,8 +77,8 @@ export function msssiProfile(targets) {
     termRmTypes: new Set(['SECTION', 'ENTRY', 'CLUSTER', 'ELEMENT']),
     includeSlots: true,
     rmClass: (id) => /^CEN-EN13606-([A-Z_]+)\./.exec(id)?.[1] ?? null,
-    classify: () => ({ status: 'official-publication-license-not-stated', evidence: LEGAL_BASIS, rule: 'msssi-cmdic' }),
-    loadable: new Set(['official-publication-license-not-stated']),
+    classify: () => ({ status: 'reuse-allowed-with-conditions', conditions: REUSE_NOTICE.conditions, evidence: [REUSE_NOTICE, ...LEGAL_BASIS], rule: 'msssi-cmdic' }),
+    loadable: new Set(['reuse-allowed-with-conditions']),
     rules: (a) => MSSSI_RULES.filter((r) => r.test(a, { slotTargets: targets })).map((r) => r.key),
     // M2 incluye datos demográficos y administrativos del informe (dirección, centro):
     // van al value set de enfermería, no al glosario de cuidados.

@@ -80,5 +80,9 @@ export function loadSeedPharmacology(dir) {
   return readdirSync(dir)
     .filter((f) => /^page-\d+\.json$/.test(f))
     .sort((a, b) => Number(a.match(/\d+/)[0]) - Number(b.match(/\d+/)[0]))
-    .flatMap((f) => JSON.parse(readFileSync(join(dir, f), 'utf8')));
+    // Schema v2 de los shards: `{ categoryKey, page, items }`. La v1 era un arreglo pelado.
+    .flatMap((f) => {
+      const page = JSON.parse(readFileSync(join(dir, f), 'utf8'));
+      return Array.isArray(page) ? page : page.items;
+    });
 }

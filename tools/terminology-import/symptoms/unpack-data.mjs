@@ -13,7 +13,8 @@ import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { gunzipSync } from 'node:zlib';
-import { DATA_DIR, OUT_DIR } from './lib/sources.mjs';
+import { dirname } from 'node:path';
+import { DATA_DIR, OUT_DIR, SOURCES_DIR, sourceByKey, sourcePath } from './lib/sources.mjs';
 
 const sha256 = (buf) => createHash('sha256').update(buf).digest('hex');
 
@@ -27,7 +28,13 @@ for (const f of manifest.files) {
   });
   const raw = Buffer.concat(chunks);
   if (sha256(raw) !== f.sha256) throw new Error(`SHA-256 distinto al reconstruir ${f.name}`);
-  const target = f.name.endsWith('.ndjson') ? join(OUT_DIR, 'ndjson', f.name) : join(OUT_DIR, f.name);
+  // Los dos archivos de procedencia vuelven a la carpeta de fuentes, donde los lee el build.
+  const target =
+    f.name === 'sources-manifest.json' ? join(SOURCES_DIR, 'manifest.json')
+    : f.name === 'wikidata-p3841-snapshot.json' ? sourcePath(sourceByKey('wikidata-p3841').file)
+    : f.name.endsWith('.ndjson') ? join(OUT_DIR, 'ndjson', f.name)
+    : join(OUT_DIR, f.name);
+  mkdirSync(dirname(target), { recursive: true });
   writeFileSync(target, raw);
   console.log(`[unpack] ${f.name}${f.rows != null ? ` (${f.rows} filas)` : ''} → ${target}`);
 }

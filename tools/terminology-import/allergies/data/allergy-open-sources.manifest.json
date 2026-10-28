@@ -1,0 +1,2656 @@
+{
+  "sources": {
+    "iuis": {
+      "key": "iuis",
+      "owner": "WHO/IUIS Allergen Nomenclature Sub-Committee",
+      "license": "Descarga libre con cita (allergen.org/downloads.php)",
+      "licenseEvidence": "allergen.org/downloads.php: «The contents of the WHO/IUIS Allergen Nomenclature Database is free to download. Please acknowledge the use of the database in your publications and presentation by citing the URL of the database website (https://www.allergen.org) and one of the recent official publications of the WHO/IUIS Allergen Nomenclature Sub-Committee». robots.txt: Crawl-delay 3 (se respeta).",
+      "retrievedAt": "2026-10-27T23:21:50.255Z",
+      "version": "descarga 2026-10-27 (la base no publica número de versión; cada fila trae DateAdded/DateUpdated)",
+      "files": [
+        {
+          "path": "iuis/allergen.csv",
+          "url": "https://www.allergen.org/csv.php?table=allergen",
+          "bytes": 460677,
+          "sha256": "93a1fcf23cce24b355e045044d956e65f31d3c0d79f39a4509a7cc3e5b595886",
+          "headers": {
+            "content-type": "application/vnd.ms-excel"
+          }
+        },
+        {
+          "path": "iuis/isoallergen.csv",
+          "url": "https://www.allergen.org/csv.php?table=isoallergen",
+          "bytes": 2164027,
+          "sha256": "7a3aaafb4c4acf2928141ba3214ff0feb162a74c8725ec5dd88c7c2e5ea351cf",
+          "headers": {
+            "content-type": "application/vnd.ms-excel"
+          }
+        },
+        {
+          "path": "iuis/idmapping.csv",
+          "url": "https://www.allergen.org/csv.php?table=idmapping",
+          "bytes": 45212,
+          "sha256": "c8141b02cf4590cb8ac6dc1e1375c046b556311f9c091573aae27cea2d95dfbd",
+          "headers": {
+            "content-type": "application/vnd.ms-excel"
+          }
+        },
+        {
+          "path": "iuis/downloads.html",
+          "url": "https://www.allergen.org/downloads.php",
+          "bytes": 6856,
+          "sha256": "7abb9792db64dc045f1872f2f39e8e00880e175d9016b8d1ba0697d1e3e997da",
+          "headers": {
+            "content-type": "text/html; charset=UTF-8"
+          }
+        },
+        {
+          "path": "iuis/robots.txt",
+          "url": "https://www.allergen.org/robots.txt",
+          "bytes": 29,
+          "sha256": "b4dc42d05d3b0b3c80ee7c06f49b5cfe6d11c942565f64902c3ce31748ecc641",
+          "headers": {
+            "last-modified": "Sat, 03 Oct 2026 05:17:41 GMT",
+            "etag": "\"1d-65ce8c4aa25aa\"",
+            "content-type": "text/plain"
+          }
+        }
+      ]
+    },
+    "uniprot": {
+      "key": "uniprot",
+      "owner": "UniProt Consortium (EMBL-EBI, SIB, PIR)",
+      "license": "CC-BY-4.0",
+      "licenseEvidence": "UniProt publica su contenido bajo Creative Commons Attribution 4.0 (https://www.uniprot.org/help/license).",
+      "retrievedAt": "2026-10-27T23:21:53.367Z",
+      "version": "UniProt 2026_03 (02-September-2026)",
+      "files": [
+        {
+          "path": "uniprot/uniprotkb-kw0020.tsv",
+          "url": "https://rest.uniprot.org/uniprotkb/stream?compressed=false&format=tsv&fields=accession,id,protein_name,gene_names,organism_name,organism_id,cc_allergen,keyword,reviewed,protein_existence,length&query=keyword%3AKW-0020",
+          "bytes": 466412,
+          "sha256": "5f24a12fd87269894de4493ffd4e57dad2d0a249b49ad006bbaf0563ef6f66aa",
+          "headers": {
+            "x-uniprot-release": "2026_03",
+            "x-uniprot-release-date": "02-September-2026",
+            "content-type": "text/plain;format=tsv"
+          }
+        },
+        {
+          "path": "uniprot/keyword-KW-0020.json",
+          "url": "https://rest.uniprot.org/keywords/KW-0020",
+          "bytes": 502,
+          "sha256": "6d1c31391b4887f37dbc09892bb743c80a23b7bd72262e6711759ef350a75ddc",
+          "headers": {
+            "x-uniprot-release": "2026_03",
+            "x-uniprot-release-date": "02-September-2026",
+            "content-type": "application/json"
+          }
+        }
+      ]
+    },
+    "cdc-cvx": {
+      "key": "cdc-cvx",
+      "owner": "U.S. Centers for Disease Control and Prevention — IIS code sets",
+      "license": "Dominio público (obra del gobierno de EE. UU.)",
+      "licenseEvidence": "Código CVX publicado por el CDC (www2a.cdc.gov/vaccines/iis/iisstandards). Contenido de una agencia federal de EE. UU.: sin restricción de copyright (17 U.S.C. §105).",
+      "retrievedAt": "2026-10-27T23:21:55.556Z",
+      "version": "descarga 2026-10-27 (cada fila de cvx.txt trae «Last Updated»)",
+      "files": [
+        {
+          "path": "cdc-cvx/cvx.txt",
+          "url": "https://www2a.cdc.gov/vaccines/iis/iisstandards/downloads/cvx.txt",
+          "bytes": 55005,
+          "sha256": "efd2a6770f0f648ce76e10ac2889602b2ea8fa8ca4b63deb33ca883e7d0d7413",
+          "headers": {
+            "last-modified": "Thu, 17 Sep 2026 22:04:21 GMT",
+            "etag": "\"1efdf17df046dd1:0\"",
+            "content-type": "text/plain"
+          }
+        },
+        {
+          "path": "cdc-cvx/tradename.txt",
+          "url": "https://www2a.cdc.gov/vaccines/iis/iisstandards/downloads/tradename.txt",
+          "bytes": 28227,
+          "sha256": "71828ea5df7203106f7bed0c23b17f7cae1ceeea7d931bae75fba594f9a18cf9",
+          "headers": {
+            "last-modified": "Thu, 17 Sep 2026 21:01:33 GMT",
+            "etag": "\"ab839eb8e746dd1:0\"",
+            "content-type": "text/plain"
+          }
+        },
+        {
+          "path": "cdc-cvx/mvx.txt",
+          "url": "https://www2a.cdc.gov/vaccines/iis/iisstandards/downloads/mvx.txt",
+          "bytes": 7688,
+          "sha256": "4c0c145b4609d0c687e51987effbe808af4e55b7dcebdaf947660d3915600ed8",
+          "headers": {
+            "last-modified": "Thu, 17 Sep 2026 21:01:24 GMT",
+            "etag": "\"abe1db3e746dd1:0\"",
+            "content-type": "text/plain"
+          }
+        }
+      ]
+    },
+    "chebi-lite": {
+      "key": "chebi-lite",
+      "owner": "ChEBI (EMBL-EBI)",
+      "license": "CC-BY-4.0",
+      "licenseEvidence": "LICENSE del directorio es «Attribution 4.0 International» y la cabecera de chebi_lite.obo declara «terms:license https://creativecommons.org/licenses/by/4.0/». AMBIGÜEDAD: el README del mismo directorio dice «CC Attribution-ShareAlike 4.0». Se aplica la más estricta para la atribución (citar la URL y la versión de ChEBI) y se consulta al propietario.",
+      "retrievedAt": "2026-10-27T23:22:03.458Z",
+      "version": "ChEBI 256 (2026-10-06)",
+      "files": [
+        {
+          "path": "chebi-lite/chebi_lite.obo.gz",
+          "url": "https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi_lite.obo.gz",
+          "bytes": 7859656,
+          "sha256": "9244f8d10bc29d5aba81de248bf63cc94a4a8ca90e644c703508e9c18272b61b",
+          "headers": {
+            "last-modified": "Tue, 06 Oct 2026 10:57:26 GMT",
+            "etag": "\"77edc8-65d29dd3b19d7\"",
+            "content-type": "application/x-gzip"
+          }
+        },
+        {
+          "path": "chebi-lite/LICENSE",
+          "url": "https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/LICENSE",
+          "bytes": 18655,
+          "sha256": "fe7b4ce83b8381cc5b216bbb4af73c570688d1b819c73bbaed8ca401f4677cd6",
+          "headers": {
+            "last-modified": "Tue, 06 Oct 2026 10:57:29 GMT",
+            "etag": "\"48df-65d29dd602a6d\""
+          }
+        },
+        {
+          "path": "chebi-lite/README",
+          "url": "https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/README",
+          "bytes": 4329,
+          "sha256": "1066fe1d933431a6e783887d290dbf439a2658b2532ccf978583560bf8a6b009",
+          "headers": {
+            "last-modified": "Tue, 06 Oct 2026 10:57:29 GMT",
+            "etag": "\"10e9-65d29dd6028c7\""
+          }
+        }
+      ]
+    },
+    "eurlex-1169": {
+      "key": "eurlex-1169",
+      "owner": "Unión Europea — Reglamento (UE) n.º 1169/2011 (Oficina de Publicaciones, EUR-Lex/Cellar)",
+      "license": "Reutilización autorizada con cita de la fuente (Decisión 2011/833/UE)",
+      "licenseEvidence": "Decisión 2011/833/UE de la Comisión (reutilización de los documentos de la Comisión), descargada de Cellar (32011D0833). Los textos jurídicos de la UE se reutilizan citando la fuente y sin distorsionarlos.",
+      "retrievedAt": "2026-10-27T23:28:31.907Z",
+      "version": "texto consolidado 02011R1169-20250401",
+      "celex": {
+        "consolidated": "02011R1169-20250401",
+        "reuseDecision": "32011D0833"
+      },
+      "files": [
+        {
+          "path": "eurlex-1169/02011R1169-20250401.spa.xhtml",
+          "url": "http://publications.europa.eu/resource/celex/02011R1169-20250401",
+          "bytes": 434194,
+          "sha256": "033c2593cd4215dba04cf5a88e2ffa30cedeec6ff14a46e83593f3eb41f772ca"
+        },
+        {
+          "path": "eurlex-1169/02011R1169-20250401.eng.xhtml",
+          "url": "http://publications.europa.eu/resource/celex/02011R1169-20250401",
+          "bytes": 400040,
+          "sha256": "6667d2257606b2296602ccb5b7b9f2ea624d67372b27158a22a51d2ec85f1538"
+        },
+        {
+          "path": "eurlex-1169/32011D0833.spa.xhtml",
+          "url": "http://publications.europa.eu/resource/celex/32011D0833",
+          "bytes": 47920,
+          "sha256": "f588665de8101a6d31284c4c21d9b60b8323c03f7ba6841da9d93b99b019b2ef"
+        }
+      ]
+    },
+    "eurlex-1333": {
+      "key": "eurlex-1333",
+      "owner": "Unión Europea — Reglamento (CE) n.º 1333/2008, anexo II (Oficina de Publicaciones, EUR-Lex/Cellar)",
+      "license": "Reutilización autorizada con cita de la fuente (Decisión 2011/833/UE)",
+      "licenseEvidence": "ídem eurlex-1169. Se usa la versión consolidada (informativa); el texto auténtico es el del Diario Oficial.",
+      "retrievedAt": "2026-10-27T23:28:31.920Z",
+      "version": "consolidado 02008R1333-20260818",
+      "celex": {
+        "consolidated": "02008R1333-20260818"
+      },
+      "files": [
+        {
+          "path": "eurlex-1333/02008R1333-20260818.spa.xhtml",
+          "url": "http://publications.europa.eu/resource/celex/02008R1333-20260818",
+          "bytes": 4552726,
+          "sha256": "d7eb69e1a7b845705a7fee082cfab498f42e7535989ed2278bbf58cc4efc3654"
+        },
+        {
+          "path": "eurlex-1333/02008R1333-20260818.eng.xhtml",
+          "url": "http://publications.europa.eu/resource/celex/02008R1333-20260818",
+          "bytes": 4408536,
+          "sha256": "52ec5710c690bcd174ef7f5dfb463e1d2113103a1368851eca683c3ce2944e8c"
+        }
+      ]
+    },
+    "usc-21-321": {
+      "key": "usc-21-321",
+      "owner": "U.S. Government Publishing Office — United States Code, título 21, §321(qq)",
+      "license": "Dominio público (obra del gobierno de EE. UU.)",
+      "licenseEvidence": "Texto de ley federal publicado por GovInfo; las leyes no tienen copyright.",
+      "retrievedAt": "2026-10-27T23:29:09.882Z",
+      "version": "United States Code, edición 2023, título 21, §321 (GovInfo todavía no publica 2024 ni 2025: responde 200 con una página de error)",
+      "files": [
+        {
+          "path": "usc-21-321/USCODE-2023-title21-sec321.htm",
+          "url": "https://www.govinfo.gov/content/pkg/USCODE-2023-title21/html/USCODE-2023-title21-chap9-subchapII-sec321.htm",
+          "bytes": 84631,
+          "sha256": "41a2badfe9201f954a7599cc74b0c47ae17c24fd0db7683e5a7db66274f9e6f2"
+        }
+      ]
+    },
+    "europepmc-ebs": {
+      "key": "europepmc-ebs",
+      "owner": "Contact Dermatitis / ESSCA y grupo EBS (artículo en acceso abierto, vía Europe PMC)",
+      "license": "CC-BY-4.0 (PMC13238334 y PMC13441338)",
+      "licenseEvidence": "Europe PMC (search, resultType=core) devuelve license=«cc by» y isOpenAccess=Y para ambos artículos; el XML de texto completo lleva la declaración de licencia.",
+      "retrievedAt": "2026-10-27T23:22:31.633Z",
+      "version": "Europe PMC fullTextXML",
+      "files": [
+        {
+          "path": "europepmc-ebs/PMC13238334.xml",
+          "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC13238334/fullTextXML",
+          "bytes": 243592,
+          "sha256": "ef6a703455d87a02b55a903e7bc9b055bd8fb4a5948179eab8064dc711da7001"
+        },
+        {
+          "path": "europepmc-ebs/PMC13238334.search.json",
+          "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=PMCID%3APMC13238334&format=json&resultType=core",
+          "bytes": 19444,
+          "sha256": "96c88e1e857618fe7e2d0fbafd4987f97d33c6179b4f871c3a8b0fa0d5e95992"
+        },
+        {
+          "path": "europepmc-ebs/PMC13441338.xml",
+          "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC13441338/fullTextXML",
+          "bytes": 146732,
+          "sha256": "f0e771b21f014d758846ff640ac21711bfa09f2138c49f64c68f203643770f92"
+        },
+        {
+          "path": "europepmc-ebs/PMC13441338.search.json",
+          "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=PMCID%3APMC13441338&format=json&resultType=core",
+          "bytes": 17785,
+          "sha256": "bca7dc78fbee3c85d3248e55d67ffdb8736139477d9951ca5f61635d06d439e2"
+        }
+      ]
+    },
+    "mesh": {
+      "key": "mesh",
+      "owner": "U.S. National Library of Medicine — Medical Subject Headings (MeSH)",
+      "license": "Uso libre con cita: «Courtesy of the U.S. National Library of Medicine» (términos de descarga de NLM)",
+      "licenseEvidence": "nlm.nih.gov/databases/download/terms_and_conditions.html: «No charges, usage fees or royalties are paid to NLM for this data»; quien use los datos acepta citar a NLM («Courtesy of the U.S. National Library of Medicine»), no insinuar respaldo, y quien los redistribuya mantiene la versión vigente o avisa que no lo es. Sólo MeSH en inglés: los términos en castellano (DeCS/BIREME) no se tocan.",
+      "retrievedAt": "2026-10-28T00:06:33.928Z",
+      "fingerprint": "45ee66cc9b25f06e07d104c6cada979edaa14cb1953fde78b72aa3660df23bb9",
+      "version": "MeSH 2026 (desc2026.gz, que el servidor entrega descomprimido)",
+      "files": [
+        {
+          "path": "mesh/desc2026.xml",
+          "url": "https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.gz",
+          "bytes": 312952703,
+          "sha256": "449792ed59ba4d60035e44724352f7361ec0dc945b67dcd821a50ff32f81bcdb"
+        },
+        {
+          "path": "mesh/desc2026.allergy-subset.xml",
+          "url": "https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.gz",
+          "bytes": 1012413,
+          "sha256": "470851e061e20dd456d2793cf51f6274dec646432b6f90433eb5ef7cd2b46038",
+          "note": "subconjunto: descriptores bajo D23.050.063 y C20.543 del archivo completo (sha256 en el primer archivo)"
+        }
+      ]
+    },
+    "ncit": {
+      "key": "ncit",
+      "owner": "National Cancer Institute — Enterprise Vocabulary Services (NCI Thesaurus)",
+      "license": "CC-BY-4.0",
+      "licenseEvidence": "La ficha del NCIt OBO Edition en el registro de OBO Foundry (ontology/ncit.md) declara «license: CC BY 4.0»; las páginas de EVS alcanzables hoy no publican el texto de la licencia (el ReadMe.txt del FTP no la menciona). Confirmar con el propietario.",
+      "retrievedAt": "2026-10-27T23:24:07.079Z",
+      "version": "NCIt 26.09d (2026-09-28)",
+      "roots": [
+        "C62651",
+        "C3114"
+      ],
+      "files": [
+        {
+          "path": "ncit/terminologies.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/metadata/terminologies?latest=true&terminology=ncit",
+          "bytes": 1191,
+          "sha256": "f97e9a3b1c5a7c8759991baeeb40833a897778d6f769d9d4bc91b732bed6e750"
+        },
+        {
+          "path": "ncit/descendants-C62651.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C62651/descendants?include=minimal&pageSize=5000",
+          "bytes": 7663,
+          "sha256": "ce930c11f8fae25531d8a35f704ef29791c3f1e57ea8c5ea32002c58edeee5ba"
+        },
+        {
+          "path": "ncit/descendants-C3114.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C3114/descendants?include=minimal&pageSize=5000",
+          "bytes": 1707,
+          "sha256": "146010bb64f5f1e03efdf68ad8b9d7fcf2338265738b78d5fae232e2a4a033e9"
+        },
+        {
+          "path": "ncit/concepts/C107101.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C107101?include=synonyms,definitions,properties,parents",
+          "bytes": 2008,
+          "sha256": "b75e6e2ba7de4dc81acab38fc467c2d77880af2fa6347406a6ea92ffe67c00e1"
+        },
+        {
+          "path": "ncit/concepts/C114345.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C114345?include=synonyms,definitions,properties,parents",
+          "bytes": 1497,
+          "sha256": "d0ad3b4b142f892efbba29f1b82b2602db69a1c4815dab027d4eedd9166fc5c9"
+        },
+        {
+          "path": "ncit/concepts/C114346.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C114346?include=synonyms,definitions,properties,parents",
+          "bytes": 1650,
+          "sha256": "ff5344cccee17a111af71ce294a50b0f576a313f6d5aeff1e5ecadb0a1cd2983"
+        },
+        {
+          "path": "ncit/concepts/C114476.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C114476?include=synonyms,definitions,properties,parents",
+          "bytes": 2561,
+          "sha256": "68a86345888343e1430937f77178e9756e6917f8cdb07249b9106202e1cbc58e"
+        },
+        {
+          "path": "ncit/concepts/C172303.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C172303?include=synonyms,definitions,properties,parents",
+          "bytes": 937,
+          "sha256": "5369e12e7f21205bfe1ed5170708628a61ac6de1f83b5b852d03aa986ba3a8b9"
+        },
+        {
+          "path": "ncit/concepts/C172304.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C172304?include=synonyms,definitions,properties,parents",
+          "bytes": 1036,
+          "sha256": "b5997c310fd8e9e2501dfc2f365c5b9ac0686b7a14cd296b9c5bd4571619ba0d"
+        },
+        {
+          "path": "ncit/concepts/C172306.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C172306?include=synonyms,definitions,properties,parents",
+          "bytes": 928,
+          "sha256": "9b0ce64cf655dc40d5f57a2ada8286acea0d905eb888c593b10a0c410b3a7076"
+        },
+        {
+          "path": "ncit/concepts/C172307.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C172307?include=synonyms,definitions,properties,parents",
+          "bytes": 1138,
+          "sha256": "ab89355fc836b47a3874dbf7299c99a35d7d35d4d6e2caab081cd31ad30f5cc3"
+        },
+        {
+          "path": "ncit/concepts/C172308.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C172308?include=synonyms,definitions,properties,parents",
+          "bytes": 973,
+          "sha256": "d2b7098e15a43dcb65434d380525153fcde6699d8cd4b765e73292906a028148"
+        },
+        {
+          "path": "ncit/concepts/C172310.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C172310?include=synonyms,definitions,properties,parents",
+          "bytes": 914,
+          "sha256": "64977546ed1a6dda8822d5ebb8b686a9b23da7c68ab44deae436d7da30fd6eab"
+        },
+        {
+          "path": "ncit/concepts/C172311.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C172311?include=synonyms,definitions,properties,parents",
+          "bytes": 914,
+          "sha256": "cd3631f6fa79d6f3aef10bcd5b5fd61e6f029f9a0ad584c3a0e3c17afcacfa85"
+        },
+        {
+          "path": "ncit/concepts/C172313.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C172313?include=synonyms,definitions,properties,parents",
+          "bytes": 912,
+          "sha256": "b84d46eafd05e5a9c3f06cbd91e8771e96e58053cca4328736aaef5666da9eee"
+        },
+        {
+          "path": "ncit/concepts/C172316.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C172316?include=synonyms,definitions,properties,parents",
+          "bytes": 866,
+          "sha256": "4a97db8271545204bc48681ac4238e40d4096486ff10c0580d582db19906f9f1"
+        },
+        {
+          "path": "ncit/concepts/C172317.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C172317?include=synonyms,definitions,properties,parents",
+          "bytes": 860,
+          "sha256": "12371d90db592715231016e077f6306e25ba6e0c1ad3ac4b9eafe5530519dd99"
+        },
+        {
+          "path": "ncit/concepts/C172320.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C172320?include=synonyms,definitions,properties,parents",
+          "bytes": 920,
+          "sha256": "036c276a3e02daa36db51c4060ac56089975425f8d65f65657d5269fe739b2fc"
+        },
+        {
+          "path": "ncit/concepts/C172321.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C172321?include=synonyms,definitions,properties,parents",
+          "bytes": 981,
+          "sha256": "c2a4a3d360f7fe4f3695a94c93fa36666f945ac46ec56749ce560768930f0a96"
+        },
+        {
+          "path": "ncit/concepts/C175520.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C175520?include=synonyms,definitions,properties,parents",
+          "bytes": 1113,
+          "sha256": "123a5f1a0eb8949a22e179ed4b6b3129cd6386f5aa50b7b3875427e91a54e0dc"
+        },
+        {
+          "path": "ncit/concepts/C175521.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C175521?include=synonyms,definitions,properties,parents",
+          "bytes": 938,
+          "sha256": "41c1890e5174ec9d42c220606a2a3092cd3bb3355cdf7dc9854810bfc854699a"
+        },
+        {
+          "path": "ncit/concepts/C175522.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C175522?include=synonyms,definitions,properties,parents",
+          "bytes": 1020,
+          "sha256": "56852b5936336337990e6bac1e0e6ecd602fc32e5cf6bfd4d141d817a4dc2659"
+        },
+        {
+          "path": "ncit/concepts/C189452.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189452?include=synonyms,definitions,properties,parents",
+          "bytes": 1338,
+          "sha256": "91701b81cb0367389bd8b395b736517fba0f05eb0d8545c4aed60c00c5ad565e"
+        },
+        {
+          "path": "ncit/concepts/C189453.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189453?include=synonyms,definitions,properties,parents",
+          "bytes": 1281,
+          "sha256": "077ade625081880de6e425148d51aa805fba005951cef67e622bb528a46f9bb2"
+        },
+        {
+          "path": "ncit/concepts/C189454.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189454?include=synonyms,definitions,properties,parents",
+          "bytes": 1231,
+          "sha256": "f579c4a4225cd1bdf5d51fbec04de3c2b6d59e23a1d50d00da22780497956f77"
+        },
+        {
+          "path": "ncit/concepts/C189455.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189455?include=synonyms,definitions,properties,parents",
+          "bytes": 1417,
+          "sha256": "78dbf0d03a692acc5e003f84801cb5ff3d949a7b8c1a05be63fbef02ce6e34f4"
+        },
+        {
+          "path": "ncit/concepts/C189456.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189456?include=synonyms,definitions,properties,parents",
+          "bytes": 1581,
+          "sha256": "3f1392d58430910414ecaffbef772b807cc93cad0ab9976fc1c06881e7e917d5"
+        },
+        {
+          "path": "ncit/concepts/C189457.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189457?include=synonyms,definitions,properties,parents",
+          "bytes": 1124,
+          "sha256": "a472f871d3f283c73e0a25cd46eadaf62daa50ba7555f18a66d5ece5d50053c0"
+        },
+        {
+          "path": "ncit/concepts/C189458.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189458?include=synonyms,definitions,properties,parents",
+          "bytes": 1394,
+          "sha256": "db276f45aa4a169c2e330bf01c35bf8f1fd99aa8e66f69f648c9c0755d2856c4"
+        },
+        {
+          "path": "ncit/concepts/C189459.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189459?include=synonyms,definitions,properties,parents",
+          "bytes": 1430,
+          "sha256": "16489793f1e5c047603cb44617dedd67b823cce07a22a7c28ba766be0fefb2c1"
+        },
+        {
+          "path": "ncit/concepts/C189460.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189460?include=synonyms,definitions,properties,parents",
+          "bytes": 1173,
+          "sha256": "07f37a7157ff718d7a0031aa97fc7bc0082e00c1cff56938b43a5f3b5fd15ece"
+        },
+        {
+          "path": "ncit/concepts/C189461.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189461?include=synonyms,definitions,properties,parents",
+          "bytes": 1176,
+          "sha256": "5478c51dad23fffad57442640fedac3adda6f4da9bb0fcf3a399de1a84eb2e4c"
+        },
+        {
+          "path": "ncit/concepts/C189462.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189462?include=synonyms,definitions,properties,parents",
+          "bytes": 1318,
+          "sha256": "7a6d144fb867f812619b95e437e4e384b3ce359474276a48d62b05fca5f84471"
+        },
+        {
+          "path": "ncit/concepts/C189463.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189463?include=synonyms,definitions,properties,parents",
+          "bytes": 1158,
+          "sha256": "bd1390fc6214f0b16e8c86fce6fa4c6f08ab92fa1cd979852e362042195bc061"
+        },
+        {
+          "path": "ncit/concepts/C189464.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189464?include=synonyms,definitions,properties,parents",
+          "bytes": 1255,
+          "sha256": "396df1d1c88fe522bd26e417088b88af0a225cf5478f8648fecb9716c57de432"
+        },
+        {
+          "path": "ncit/concepts/C189465.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189465?include=synonyms,definitions,properties,parents",
+          "bytes": 1183,
+          "sha256": "b9ea0fbde7e29bc85bd66d74134da32410ce68d1ae09dcc3fe6302e1ba00053c"
+        },
+        {
+          "path": "ncit/concepts/C189466.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189466?include=synonyms,definitions,properties,parents",
+          "bytes": 1182,
+          "sha256": "0cc383d0e2a6a69c50e6da68ae32654c4cc884c3a255ff6c558c7bbbb45e20f8"
+        },
+        {
+          "path": "ncit/concepts/C189467.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189467?include=synonyms,definitions,properties,parents",
+          "bytes": 1381,
+          "sha256": "15160fe8de73e8b1348a3637a9162299b6d68c84a6e6b093f2b40312c628565c"
+        },
+        {
+          "path": "ncit/concepts/C189468.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189468?include=synonyms,definitions,properties,parents",
+          "bytes": 1108,
+          "sha256": "e37865f5b5d905edd74a84e71c8ae6fb7f426dee7bcd49f5d0978417b1bbb3a5"
+        },
+        {
+          "path": "ncit/concepts/C189469.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189469?include=synonyms,definitions,properties,parents",
+          "bytes": 1125,
+          "sha256": "e1fb9ce81e496d54da499d33f42c9ac9f0f57bc7e54ab78ba44651794b28d8c0"
+        },
+        {
+          "path": "ncit/concepts/C189470.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189470?include=synonyms,definitions,properties,parents",
+          "bytes": 1455,
+          "sha256": "07f2437509322f10843001f57e1de46514707be30dc6eb679c3d4ab433a45327"
+        },
+        {
+          "path": "ncit/concepts/C189471.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189471?include=synonyms,definitions,properties,parents",
+          "bytes": 1174,
+          "sha256": "a5da2253c4d9a70e204e3df01abbb568423b13447ef32f2041c7fcf8d940bf10"
+        },
+        {
+          "path": "ncit/concepts/C189472.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189472?include=synonyms,definitions,properties,parents",
+          "bytes": 1375,
+          "sha256": "9063f8ae047c6dc7d768f957733c9ca9c5ef2aebe4235ddfd736f8c41edab09d"
+        },
+        {
+          "path": "ncit/concepts/C189473.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189473?include=synonyms,definitions,properties,parents",
+          "bytes": 1174,
+          "sha256": "3486b65eb22f6c24ec35f937f98da2f51063dba1da6c74663958bb2198f53247"
+        },
+        {
+          "path": "ncit/concepts/C189474.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189474?include=synonyms,definitions,properties,parents",
+          "bytes": 1439,
+          "sha256": "84ec4f72c15d632dfe2f726f1f98fca946068d3dc206e1d5092c3cf9add519c7"
+        },
+        {
+          "path": "ncit/concepts/C189475.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189475?include=synonyms,definitions,properties,parents",
+          "bytes": 1314,
+          "sha256": "bbe51205d4d6e13905a11d2a4fdcff7ea0ec49bbbe83ce5a0f0a2d1771f42128"
+        },
+        {
+          "path": "ncit/concepts/C189476.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189476?include=synonyms,definitions,properties,parents",
+          "bytes": 1359,
+          "sha256": "0a08d6353316a86024da8ec26d40948ef32810c97ed78ce75c25180f7714ff3f"
+        },
+        {
+          "path": "ncit/concepts/C189477.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189477?include=synonyms,definitions,properties,parents",
+          "bytes": 1344,
+          "sha256": "a6b36256aae2d754445feca853fd7e9fd082bff68c47bcb5f751b18a9801b1c8"
+        },
+        {
+          "path": "ncit/concepts/C189478.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189478?include=synonyms,definitions,properties,parents",
+          "bytes": 1349,
+          "sha256": "524f189243e58e146dd65ec971f9a8a716b1fd70ededfc1f18868c7a4a57db4a"
+        },
+        {
+          "path": "ncit/concepts/C189479.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189479?include=synonyms,definitions,properties,parents",
+          "bytes": 1374,
+          "sha256": "98127fe0a0057c50bb3fb017c295541ec0916b09a880bdd184581a4cf799beac"
+        },
+        {
+          "path": "ncit/concepts/C189480.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189480?include=synonyms,definitions,properties,parents",
+          "bytes": 1544,
+          "sha256": "25a3508956daccad4233c341a581493eecbd71fb633c468aa28caa3b40370479"
+        },
+        {
+          "path": "ncit/concepts/C189481.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189481?include=synonyms,definitions,properties,parents",
+          "bytes": 1454,
+          "sha256": "0b73ab5c380727b5ba8c1aecc41c1a5ae11858296293181033a3892adc23af83"
+        },
+        {
+          "path": "ncit/concepts/C189482.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189482?include=synonyms,definitions,properties,parents",
+          "bytes": 1115,
+          "sha256": "f6ea41d139f76c45c9c2bae235521feebf2075059b176dcd8caac590f02b2df8"
+        },
+        {
+          "path": "ncit/concepts/C189483.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189483?include=synonyms,definitions,properties,parents",
+          "bytes": 1421,
+          "sha256": "10736be36563d72f33018ab79d70cf2fc1fce9e054cd86a194c78ff0fbcdb379"
+        },
+        {
+          "path": "ncit/concepts/C189484.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189484?include=synonyms,definitions,properties,parents",
+          "bytes": 1466,
+          "sha256": "51bd57d8c3825815c27074204f952989e764937fa70c45a18703e62ad58ccf51"
+        },
+        {
+          "path": "ncit/concepts/C189485.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189485?include=synonyms,definitions,properties,parents",
+          "bytes": 1551,
+          "sha256": "1144e8b9bbd14858a402af866b418a2d45acd00b9faadc1b9f3d14ce3f578636"
+        },
+        {
+          "path": "ncit/concepts/C189486.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189486?include=synonyms,definitions,properties,parents",
+          "bytes": 1565,
+          "sha256": "8da1138c11a0d86b8a1e9eb320e9a74aa8db69900534fcbd73f5c03d93577b3e"
+        },
+        {
+          "path": "ncit/concepts/C189487.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189487?include=synonyms,definitions,properties,parents",
+          "bytes": 1338,
+          "sha256": "f500a45ab2eaf9accdcf3c08ce6539e1dbfd9dc41d0af7f60c5b1bdd9ab47f62"
+        },
+        {
+          "path": "ncit/concepts/C189488.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189488?include=synonyms,definitions,properties,parents",
+          "bytes": 1185,
+          "sha256": "c591f5a2526aba73fae143289a6da9dc289084706164f811659b7e7e2a440278"
+        },
+        {
+          "path": "ncit/concepts/C189489.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189489?include=synonyms,definitions,properties,parents",
+          "bytes": 1382,
+          "sha256": "7fb75b3d935a4c93c16f1acb4a05c8aac1aa57b400866f624810d1b9cde6fe88"
+        },
+        {
+          "path": "ncit/concepts/C189490.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189490?include=synonyms,definitions,properties,parents",
+          "bytes": 1473,
+          "sha256": "825afe15e342b5016eea48bbb51a67432f4ecc4c7d267415e2f95add80d45973"
+        },
+        {
+          "path": "ncit/concepts/C189491.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C189491?include=synonyms,definitions,properties,parents",
+          "bytes": 1137,
+          "sha256": "efd7c2d391f42340f80b65651843c9b49a942a894855d2676f02a5c018921a5f"
+        },
+        {
+          "path": "ncit/concepts/C199874.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C199874?include=synonyms,definitions,properties,parents",
+          "bytes": 1506,
+          "sha256": "610610e2825305512b56ec961bf379e5dfaab734ad9ff7ebb952364c71ce9f2a"
+        },
+        {
+          "path": "ncit/concepts/C199875.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C199875?include=synonyms,definitions,properties,parents",
+          "bytes": 1305,
+          "sha256": "21a438202495bf1550cef8af37035cde278e0466bf19233c77f0fe1201e75e9d"
+        },
+        {
+          "path": "ncit/concepts/C199876.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C199876?include=synonyms,definitions,properties,parents",
+          "bytes": 1347,
+          "sha256": "6ac7839dce7ba60d5571689739292d4c6eab9b2c8c1a857d90930654e67f9b77"
+        },
+        {
+          "path": "ncit/concepts/C199877.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C199877?include=synonyms,definitions,properties,parents",
+          "bytes": 1472,
+          "sha256": "926656fd96d5f9b667114c1a42ca9207b5ef12811c554dd5303a5084e3238da2"
+        },
+        {
+          "path": "ncit/concepts/C199878.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C199878?include=synonyms,definitions,properties,parents",
+          "bytes": 1345,
+          "sha256": "7047e4c4b38b9ed765e2620e2a5560a2b75b464da99f08df6c912fa7d634b10f"
+        },
+        {
+          "path": "ncit/concepts/C199879.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C199879?include=synonyms,definitions,properties,parents",
+          "bytes": 1407,
+          "sha256": "46348f175a2ce4b15a81cd92cb3ef25f41bd4b0f243b57dad2511094e8b5e23b"
+        },
+        {
+          "path": "ncit/concepts/C199880.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C199880?include=synonyms,definitions,properties,parents",
+          "bytes": 1258,
+          "sha256": "44e6789ddb9beb292c4c0065cc11cb9ea75f7a672248ea4118f8fdabe148bd48"
+        },
+        {
+          "path": "ncit/concepts/C199881.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C199881?include=synonyms,definitions,properties,parents",
+          "bytes": 1264,
+          "sha256": "1e2e26a5267409b3e5ea2f500666495fc1652c242de638d4456a5c6815e1961d"
+        },
+        {
+          "path": "ncit/concepts/C199882.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C199882?include=synonyms,definitions,properties,parents",
+          "bytes": 1262,
+          "sha256": "36a68261b7005b4b270620704918f1ea4963ff8f701e4da95ff843d69735cbcc"
+        },
+        {
+          "path": "ncit/concepts/C199883.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C199883?include=synonyms,definitions,properties,parents",
+          "bytes": 1375,
+          "sha256": "1b64db64b2e5018ce6b5fd32d9160faa7d5cd0b404357b6ed34cca482c927957"
+        },
+        {
+          "path": "ncit/concepts/C199884.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C199884?include=synonyms,definitions,properties,parents",
+          "bytes": 1167,
+          "sha256": "8c3a16c527f77ec120ea3d55585931d843a0c9e30585a3c253dbc8bb6f8ab36a"
+        },
+        {
+          "path": "ncit/concepts/C199885.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C199885?include=synonyms,definitions,properties,parents",
+          "bytes": 1146,
+          "sha256": "9e71ae1f5d1d8887e544be8fd4f5ea5ae075c85f274c3734bd38fb276570c50f"
+        },
+        {
+          "path": "ncit/concepts/C201392.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C201392?include=synonyms,definitions,properties,parents",
+          "bytes": 1433,
+          "sha256": "2bca46c3adf68161bf05b53f213da1b0525ae1e1110271aad2be00cd6bda4b87"
+        },
+        {
+          "path": "ncit/concepts/C201393.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C201393?include=synonyms,definitions,properties,parents",
+          "bytes": 1435,
+          "sha256": "8fb31e9a1d295a80f7b997407ef9da2a3ee0ed8eed1c02c03d92d52e7a7c9fc8"
+        },
+        {
+          "path": "ncit/concepts/C201398.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C201398?include=synonyms,definitions,properties,parents",
+          "bytes": 1490,
+          "sha256": "ccd357ba879d05ce9d067e4c4f8ffc501bb5eaedfda61f83a3ff5e89f20685ef"
+        },
+        {
+          "path": "ncit/concepts/C201399.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C201399?include=synonyms,definitions,properties,parents",
+          "bytes": 1331,
+          "sha256": "94ee7c9680a96734d875f746b344bf2cfe5e97b8621272b2d06e197c5cedfef7"
+        },
+        {
+          "path": "ncit/concepts/C201401.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C201401?include=synonyms,definitions,properties,parents",
+          "bytes": 1519,
+          "sha256": "d0b19e4d974533cedabed8eaf12842ab11d32a038678ce7ae9ff66933813aec5"
+        },
+        {
+          "path": "ncit/concepts/C201402.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C201402?include=synonyms,definitions,properties,parents",
+          "bytes": 1490,
+          "sha256": "29a45196c886015516aa69786550244fb2a4c45dc96ec9c48e6086d1b1481f5a"
+        },
+        {
+          "path": "ncit/concepts/C201403.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C201403?include=synonyms,definitions,properties,parents",
+          "bytes": 1532,
+          "sha256": "87a670ed5ebd0fb3c86c85e26ab2b9fb4044515673271abdd445d3612b0e800d"
+        },
+        {
+          "path": "ncit/concepts/C201404.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C201404?include=synonyms,definitions,properties,parents",
+          "bytes": 1415,
+          "sha256": "73898d254ec6152bb557c776334f7fcb56f2553105b7f3143acc15701bbae387"
+        },
+        {
+          "path": "ncit/concepts/C201405.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C201405?include=synonyms,definitions,properties,parents",
+          "bytes": 1307,
+          "sha256": "95f5c9eb8631120b2d98ee3d366f75c7da7c499859fc64db062b925861154197"
+        },
+        {
+          "path": "ncit/concepts/C201406.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C201406?include=synonyms,definitions,properties,parents",
+          "bytes": 1560,
+          "sha256": "54ee74e28e2935117c2ff7847e2318c2ddd8a1c3ebd54355f1261af357cb9949"
+        },
+        {
+          "path": "ncit/concepts/C201407.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C201407?include=synonyms,definitions,properties,parents",
+          "bytes": 1279,
+          "sha256": "009366ad5bcbb5311b65b2efe8ffae47285dea14fbd3731b831b11346206f846"
+        },
+        {
+          "path": "ncit/concepts/C201408.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C201408?include=synonyms,definitions,properties,parents",
+          "bytes": 1284,
+          "sha256": "d6e76eb94a4f8ba276e778335383c825540b1665823965234abc39ebb8a45c92"
+        },
+        {
+          "path": "ncit/concepts/C202350.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C202350?include=synonyms,definitions,properties,parents",
+          "bytes": 1277,
+          "sha256": "111bedf5a78bf19d268c82d6ea05126e49ec61afb3d5d1633b5a7436ff4bb7ef"
+        },
+        {
+          "path": "ncit/concepts/C202351.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C202351?include=synonyms,definitions,properties,parents",
+          "bytes": 1320,
+          "sha256": "d43907b262e38a014ce01b30500cec27038b287ca5c48b2844b3946892c46563"
+        },
+        {
+          "path": "ncit/concepts/C202352.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C202352?include=synonyms,definitions,properties,parents",
+          "bytes": 1322,
+          "sha256": "c7f29a43d3846320b2b03a0da5c907d99843c5af56275ce3569775deef277302"
+        },
+        {
+          "path": "ncit/concepts/C202353.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C202353?include=synonyms,definitions,properties,parents",
+          "bytes": 1503,
+          "sha256": "58876ca17b1c1e04554fd748bb9696051f8d0dfa1b6148e2024e8122641011c6"
+        },
+        {
+          "path": "ncit/concepts/C202354.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C202354?include=synonyms,definitions,properties,parents",
+          "bytes": 1430,
+          "sha256": "e37b63421dbdafcf0426fc81ba03d2d1ad8b0c9182a7bc5ddd666bbdce95af53"
+        },
+        {
+          "path": "ncit/concepts/C202355.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C202355?include=synonyms,definitions,properties,parents",
+          "bytes": 1289,
+          "sha256": "80213b1eea2a8a8a73b102739048e7ac51248da9bdba3bc777eadfaab4e46aab"
+        },
+        {
+          "path": "ncit/concepts/C202356.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C202356?include=synonyms,definitions,properties,parents",
+          "bytes": 1252,
+          "sha256": "d6e0c2e230256c125a47c0124f3d3b27363b0f596dcfd26a0b7d3c57a1cdcfc4"
+        },
+        {
+          "path": "ncit/concepts/C202357.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C202357?include=synonyms,definitions,properties,parents",
+          "bytes": 1352,
+          "sha256": "786a2b4c402a54e9592e50385d063c714abde890f323f4a767c4bf56aa332df3"
+        },
+        {
+          "path": "ncit/concepts/C202358.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C202358?include=synonyms,definitions,properties,parents",
+          "bytes": 1280,
+          "sha256": "8ee91a07fad4f0b07592a235189d9b185ec5b6f86b7ad4d776c3cd32974907d9"
+        },
+        {
+          "path": "ncit/concepts/C202359.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C202359?include=synonyms,definitions,properties,parents",
+          "bytes": 1299,
+          "sha256": "2ad8ea0daf2442c2faafc3ae246677f0e8a5bf7e59449f5cf8908762e2310af2"
+        },
+        {
+          "path": "ncit/concepts/C202360.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C202360?include=synonyms,definitions,properties,parents",
+          "bytes": 1415,
+          "sha256": "9c2b99a6c7470ca0dda3c24d824e6562757fe836b3633f2a822203ecdcf78201"
+        },
+        {
+          "path": "ncit/concepts/C202361.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C202361?include=synonyms,definitions,properties,parents",
+          "bytes": 1328,
+          "sha256": "5f9845e3e1d1573b48293abbd2f964558bbe5db1619f3b3cf40baa5f3612db2d"
+        },
+        {
+          "path": "ncit/concepts/C202362.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C202362?include=synonyms,definitions,properties,parents",
+          "bytes": 1399,
+          "sha256": "78dd2296f939ae7dd8759f45497e86b27877ae15b3851f44c6830c35762aba2e"
+        },
+        {
+          "path": "ncit/concepts/C202363.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C202363?include=synonyms,definitions,properties,parents",
+          "bytes": 1350,
+          "sha256": "021d03cc53b76ba66eebfec105acca5a4dab825538865be77c5248b2ca6e5af7"
+        },
+        {
+          "path": "ncit/concepts/C202364.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C202364?include=synonyms,definitions,properties,parents",
+          "bytes": 1261,
+          "sha256": "7494aef731ac387694e1696175c7f9808a3acdc7a07c57f1187200419d72a47a"
+        },
+        {
+          "path": "ncit/concepts/C202366.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C202366?include=synonyms,definitions,properties,parents",
+          "bytes": 1212,
+          "sha256": "4dc60367d621ca23c353fb04f4f2a561291b66eaab457c99c8bd5ab41e4d33b4"
+        },
+        {
+          "path": "ncit/concepts/C202367.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C202367?include=synonyms,definitions,properties,parents",
+          "bytes": 1310,
+          "sha256": "988d409f197240c9aae519f947a10fe8a9b72696b50664825949ff922a09dfa8"
+        },
+        {
+          "path": "ncit/concepts/C202368.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C202368?include=synonyms,definitions,properties,parents",
+          "bytes": 1406,
+          "sha256": "69b85ed2a76d9239449f40c10a1d6a322e24543978293212a52eaf0450f43a73"
+        },
+        {
+          "path": "ncit/concepts/C202369.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C202369?include=synonyms,definitions,properties,parents",
+          "bytes": 1267,
+          "sha256": "e26b6d47bf59d35fb3c5a7c8bfc6d795d82b8d9e9b7fab5b4e0e91f0137a7724"
+        },
+        {
+          "path": "ncit/concepts/C202370.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C202370?include=synonyms,definitions,properties,parents",
+          "bytes": 1409,
+          "sha256": "9d16a90d00d34096459fe18a45d2661e247d853654d7e2c8ef85fd50eeef31af"
+        },
+        {
+          "path": "ncit/concepts/C204623.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C204623?include=synonyms,definitions,properties,parents",
+          "bytes": 1328,
+          "sha256": "204e9981d48b33104ccfe116b62bf18c263b49d15b433bae1e36b3e07fc7674a"
+        },
+        {
+          "path": "ncit/concepts/C226844.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C226844?include=synonyms,definitions,properties,parents",
+          "bytes": 888,
+          "sha256": "f087a04130d5991ef2645a67ea2dc53645595f1062ae8572e1ab12ae9c05e14a"
+        },
+        {
+          "path": "ncit/concepts/C226845.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C226845?include=synonyms,definitions,properties,parents",
+          "bytes": 752,
+          "sha256": "7926116f95beed9190f66b3fc31a23e528f2ffa32a78fb4d0085b36a2a7ff8fb"
+        },
+        {
+          "path": "ncit/concepts/C226846.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C226846?include=synonyms,definitions,properties,parents",
+          "bytes": 680,
+          "sha256": "8d5bb412cea9b2f5768a40286c532fed409a84ab030a3d4200a3e49b8172b715"
+        },
+        {
+          "path": "ncit/concepts/C226847.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C226847?include=synonyms,definitions,properties,parents",
+          "bytes": 739,
+          "sha256": "0e4eff74131fb7bc07ed38fd4ba8686b715c58320fc8288b8fb688934cbe889e"
+        },
+        {
+          "path": "ncit/concepts/C226848.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C226848?include=synonyms,definitions,properties,parents",
+          "bytes": 744,
+          "sha256": "bda73af2646039e248d41d06cf3124af20850d75679acad9bb719b31cbfbbfab"
+        },
+        {
+          "path": "ncit/concepts/C226849.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C226849?include=synonyms,definitions,properties,parents",
+          "bytes": 828,
+          "sha256": "6fb3ce6421850f75326f85baef9168f152c7c708f3c2f13ccee7b1e8d3b0e09f"
+        },
+        {
+          "path": "ncit/concepts/C226850.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C226850?include=synonyms,definitions,properties,parents",
+          "bytes": 809,
+          "sha256": "96d22d22a6481a7c8276fabe067ab60314f1cf6fc928c758ccc9967bc4c942e7"
+        },
+        {
+          "path": "ncit/concepts/C226851.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C226851?include=synonyms,definitions,properties,parents",
+          "bytes": 1165,
+          "sha256": "4b8ed28c025cda835c850b94df3cdb3a39e4a0125b057fab6043ac29708c0d72"
+        },
+        {
+          "path": "ncit/concepts/C226854.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C226854?include=synonyms,definitions,properties,parents",
+          "bytes": 844,
+          "sha256": "160b8a38257a808dc35aa6964639179dd0eae10a811f47c1fd5cfec47015864c"
+        },
+        {
+          "path": "ncit/concepts/C226855.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C226855?include=synonyms,definitions,properties,parents",
+          "bytes": 737,
+          "sha256": "352ac9c69b1c6d529f3bf2b11f2cfbd534e98b410c27070f8ad58598a02a688e"
+        },
+        {
+          "path": "ncit/concepts/C226856.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C226856?include=synonyms,definitions,properties,parents",
+          "bytes": 808,
+          "sha256": "aa13f7c95b2e7b59a46dceea7d06e0b47912ae8ce17a9f900621cb0fb6d43b33"
+        },
+        {
+          "path": "ncit/concepts/C226857.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C226857?include=synonyms,definitions,properties,parents",
+          "bytes": 738,
+          "sha256": "b2f8dfb0b4cef809cadc9e38e54e5176e33532b1252bdc16b3e45a88093da635"
+        },
+        {
+          "path": "ncit/concepts/C226858.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C226858?include=synonyms,definitions,properties,parents",
+          "bytes": 686,
+          "sha256": "8531769469c445454696f4b6c476ef31263315b90cb7f52e7e1602efa9098287"
+        },
+        {
+          "path": "ncit/concepts/C226859.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C226859?include=synonyms,definitions,properties,parents",
+          "bytes": 802,
+          "sha256": "57804e1d1d844de29d8c1d236853dc64421c1cbba09d334a36e4d407f32a5829"
+        },
+        {
+          "path": "ncit/concepts/C226860.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C226860?include=synonyms,definitions,properties,parents",
+          "bytes": 883,
+          "sha256": "d0596742c5c81cf252fd3c5bc904ffd8cbfb0495927df3fce3150fe1e0384ef3"
+        },
+        {
+          "path": "ncit/concepts/C226861.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C226861?include=synonyms,definitions,properties,parents",
+          "bytes": 763,
+          "sha256": "a1cddf1f46bc5c88fdc3a2f1e428d56a8cba59a3abfeb85a3cf744b35e433a44"
+        },
+        {
+          "path": "ncit/concepts/C226862.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C226862?include=synonyms,definitions,properties,parents",
+          "bytes": 883,
+          "sha256": "32973dcdda44fcd39529487e4c5ff3c93ac74a7d0714c58b8cc65023f24c6c2a"
+        },
+        {
+          "path": "ncit/concepts/C226863.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C226863?include=synonyms,definitions,properties,parents",
+          "bytes": 735,
+          "sha256": "851f6a1eb1fc76b9ef48b67e294611136ae2d54635e49c4381b965a30f4c0475"
+        },
+        {
+          "path": "ncit/concepts/C226864.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C226864?include=synonyms,definitions,properties,parents",
+          "bytes": 745,
+          "sha256": "585f7964964d70f43a731c95e57a507bdc8ecb0302daa92878befd9d8a9a6d35"
+        },
+        {
+          "path": "ncit/concepts/C226865.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C226865?include=synonyms,definitions,properties,parents",
+          "bytes": 805,
+          "sha256": "2639a7745844d0228187436792e829dbc7307a6ae132e7f4d5e140c8e0a928dd"
+        },
+        {
+          "path": "ncit/concepts/C3114.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C3114?include=synonyms,definitions,properties,parents",
+          "bytes": 2682,
+          "sha256": "1549cff222ff3e901711d7120e227f42ad1f8799d52457fb0a2d74f81a338d2e"
+        },
+        {
+          "path": "ncit/concepts/C3115.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C3115?include=synonyms,definitions,properties,parents",
+          "bytes": 3077,
+          "sha256": "d8a434ad41eefde973eabdc35e0aad5de173c03295944d95c85ea498bf4fdd8e"
+        },
+        {
+          "path": "ncit/concepts/C3116.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C3116?include=synonyms,definitions,properties,parents",
+          "bytes": 2489,
+          "sha256": "b5a9a23c789c00531c99e08927bd6e2018c404a08d45c03b9d211e8ee734df60"
+        },
+        {
+          "path": "ncit/concepts/C3432.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C3432?include=synonyms,definitions,properties,parents",
+          "bytes": 2704,
+          "sha256": "c582c691d83b7ede7d5c1eabf9f0089e231055472a8684fa0151628cc83e3422"
+        },
+        {
+          "path": "ncit/concepts/C34400.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C34400?include=synonyms,definitions,properties,parents",
+          "bytes": 835,
+          "sha256": "57e71b1a34a9ac79c3428a8fa3a3247515ce810c9409d13974851f55ce958260"
+        },
+        {
+          "path": "ncit/concepts/C3668.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C3668?include=synonyms,definitions,properties,parents",
+          "bytes": 1134,
+          "sha256": "b846f43e0c550ce182e24ec0510eb1e11caa7a9e7bb01b1e159e9334c983d848"
+        },
+        {
+          "path": "ncit/concepts/C62651.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C62651?include=synonyms,definitions,properties,parents",
+          "bytes": 1176,
+          "sha256": "430f5cff0a34dd53cdb1d7cb21bc77d958a219546d7d2ecb9a37d89c473eb654"
+        },
+        {
+          "path": "ncit/concepts/C79718.json",
+          "url": "https://api-evsrest.nci.nih.gov/api/v1/concept/ncit/C79718?include=synonyms,definitions,properties,parents",
+          "bytes": 2254,
+          "sha256": "07e17d81e998ecfd3c527c048bf32ca2dbc55b327162f011197187f68eecf1fd"
+        }
+      ]
+    },
+    "openfda": {
+      "key": "openfda",
+      "owner": "U.S. Food and Drug Administration — openFDA (NDC)",
+      "license": "CC0-1.0 (openFDA)",
+      "licenseEvidence": "La respuesta de la API enlaza https://open.fda.gov/license/ y https://open.fda.gov/terms/: datos públicos del gobierno de EE. UU., CC0 1.0.",
+      "retrievedAt": "2026-10-27T23:24:11.260Z",
+      "version": "openFDA NDC last_updated 2026-10-27",
+      "files": [
+        {
+          "path": "openfda/ndc-standardized-allergenic-00.json",
+          "url": "https://api.fda.gov/drug/ndc.json?search=product_type.exact%3A%22STANDARDIZED%20ALLERGENIC%22&limit=1000&skip=0",
+          "bytes": 236483,
+          "sha256": "b8a07fdd7125af3455199954e98ca57ad034b0a46d250b9f8270ef25fdab56d1"
+        },
+        {
+          "path": "openfda/ndc-non-standardized-allergenic-00.json",
+          "url": "https://api.fda.gov/drug/ndc.json?search=product_type.exact%3A%22NON-STANDARDIZED%20ALLERGENIC%22&limit=1000&skip=0",
+          "bytes": 1751894,
+          "sha256": "70ae331a32f45cf3cdfafb6452cf480a90872b6c630de3e434d156729c22af0b"
+        },
+        {
+          "path": "openfda/ndc-non-standardized-allergenic-01.json",
+          "url": "https://api.fda.gov/drug/ndc.json?search=product_type.exact%3A%22NON-STANDARDIZED%20ALLERGENIC%22&limit=1000&skip=1000",
+          "bytes": 1746263,
+          "sha256": "f954b778c0170516859eca8eaab828c7e57de8ef56f0d1d30a9c27ec1b4936fe"
+        },
+        {
+          "path": "openfda/ndc-non-standardized-allergenic-02.json",
+          "url": "https://api.fda.gov/drug/ndc.json?search=product_type.exact%3A%22NON-STANDARDIZED%20ALLERGENIC%22&limit=1000&skip=2000",
+          "bytes": 325013,
+          "sha256": "f9f9e987acd9efeef090db1531a657c5a39ad78fd7bd879c6fa545acd6d5e640"
+        }
+      ]
+    },
+    "dailymed": {
+      "key": "dailymed",
+      "owner": "U.S. National Library of Medicine — DailyMed (etiquetas SPL de la FDA)",
+      "license": "Dominio público (etiquetas SPL enviadas a la FDA; DailyMed sin restricción de uso)",
+      "licenseEvidence": "DailyMed publica las etiquetas SPL como datos públicos (https://dailymed.nlm.nih.gov/dailymed/app-support.cfm). El texto de cada etiqueta es del titular del registro; se toma sólo el identificador UNII y el nombre de cada ingrediente.",
+      "retrievedAt": "2026-10-27T23:43:40.126Z",
+      "version": "DailyMed v2 (spls por NDC de openFDA)",
+      "ndcProducts": 2286,
+      "ndcWithoutSpl": 0,
+      "setIds": 75,
+      "splDigest": {
+        "count": 75,
+        "sha256": "2dc3d9720ad0acb186c62bbab5f0cad1af9ca9595a86ce9159bd75d2aa60a155"
+      },
+      "mapFile": {
+        "path": "dailymed/ndc-to-setid.json",
+        "sha256": "6fe242fc6a0021c2a843dc5d4ee1d8abbca4d38978a32a7e6bf76046e6433f4c"
+      }
+    },
+    "dailymed-true-test": {
+      "key": "dailymed-true-test",
+      "owner": "SmartPractice (etiqueta SPL del T.R.U.E. TEST, vía DailyMed)",
+      "license": "Etiqueta pública de un producto licenciado por la FDA (DailyMed)",
+      "licenseEvidence": "Etiqueta SPL publicada en DailyMed. Se toman los nombres y UNII de los alérgenos como figuran en la etiqueta.",
+      "retrievedAt": "2026-10-27T23:43:40.619Z",
+      "version": "SPL setid 2f082b68-dc74-418a-9e6f-b3c285b41d44",
+      "files": [
+        {
+          "path": "dailymed-true-test/true-test.xml",
+          "url": "https://dailymed.nlm.nih.gov/dailymed/services/v2/spls/2f082b68-dc74-418a-9e6f-b3c285b41d44.xml",
+          "bytes": 439558,
+          "sha256": "4ead2f457ca3aabab1486bb7620f2f1723829ccd0faaa940130452936b4c9e27",
+          "headers": {
+            "content-type": "application/xml"
+          }
+        }
+      ]
+    },
+    "gsrs": {
+      "key": "gsrs",
+      "owner": "U.S. FDA / NCATS — Global Substance Registration System (GSRS) y UNII",
+      "license": "Dominio público (FDA/NCATS)",
+      "licenseEvidence": "El GSRS y los UNII son un registro de la FDA, de acceso público y sin restricción (https://gsrs.ncats.nih.gov).",
+      "retrievedAt": "2026-10-27T23:48:29.468Z",
+      "version": "GSRS 2026-10-27 (cada sustancia trae lastEdited/version)",
+      "uniiCount": 517,
+      "digest": {
+        "count": 517,
+        "sha256": "698aacffdfd0c4ce889bd374d65e8f9c1f85fec0a911d88edef18245f2745cbe"
+      }
+    },
+    "rxnav": {
+      "key": "rxnav",
+      "owner": "U.S. National Library of Medicine — RxNorm / RxClass (RxNav)",
+      "license": "RxNorm: sin restricción para las cadenas propias de NLM (SAB=RXNORM); MED-RT (VA) dominio público",
+      "licenseEvidence": "Términos de RxNorm (nlm.nih.gov/research/umls/rxnorm/docs/termsofservice.html): las cadenas de RxNorm (SAB=RXNORM) no tienen restricción adicional. MED-RT es del Department of Veterans Affairs (dominio público). No se toman clases con fuente SNOMED CT (DISPOS, STRUCT) ni ATC (WHO).",
+      "retrievedAt": "2026-10-27T23:56:45.665Z",
+      "fingerprint": "5c220c058b2696590b95b084d63c2f19cebe71bfa3613c4482e2ae27c7814ebb",
+      "version": "RxNorm 05-Oct-2026 (RxNav API 3.1.356)",
+      "files": [
+        {
+          "path": "rxnav/version.json",
+          "url": "https://rxnav.nlm.nih.gov/REST/version.json",
+          "bytes": 48,
+          "sha256": "f8155f29c123d26e71c9e4aed23750e5df462150440e29b43b9b148c09dd3445"
+        },
+        {
+          "path": "rxnav/allconcepts-IN-PIN-MIN.json",
+          "url": "https://rxnav.nlm.nih.gov/REST/allconcepts.json?tty=IN+PIN+MIN",
+          "bytes": 1498572,
+          "sha256": "56fbba1a493109d3ac6f5f34beddab462b0882846dc98a3dc894d2925ab91657"
+        },
+        {
+          "path": "rxnav/allClasses-EPC.json",
+          "url": "https://rxnav.nlm.nih.gov/REST/rxclass/allClasses.json?classTypes=EPC",
+          "bytes": 68104,
+          "sha256": "3624b452be0c1d8108239400436ac71727df4b84f6524674d3949bc8753701db"
+        },
+        {
+          "path": "rxnav/allClasses-MOA.json",
+          "url": "https://rxnav.nlm.nih.gov/REST/rxclass/allClasses.json?classTypes=MOA",
+          "bytes": 72371,
+          "sha256": "1143c0395695f991ddc3500fe1f383249dbbef6141bd04f4e007bfdb274e0468"
+        },
+        {
+          "path": "rxnav/allClasses-PE.json",
+          "url": "https://rxnav.nlm.nih.gov/REST/rxclass/allClasses.json?classTypes=PE",
+          "bytes": 180551,
+          "sha256": "5dcfa85ccfe94cfea83f32d234dba2552a454cddfb737563bd46ffe61fd3428f"
+        },
+        {
+          "path": "rxnav/allClasses-PK.json",
+          "url": "https://rxnav.nlm.nih.gov/REST/rxclass/allClasses.json?classTypes=PK",
+          "bytes": 4539,
+          "sha256": "475f18d3e61a23ef0d1c7907b7c6afe4e67026cb68c90b9eef2c948e6f87cc0b"
+        },
+        {
+          "path": "rxnav/allClasses-TC.json",
+          "url": "https://rxnav.nlm.nih.gov/REST/rxclass/allClasses.json?classTypes=TC",
+          "bytes": 5557,
+          "sha256": "5d962345d09eedaecb66a2940c8a3cf5e270832aa00c9c689af74010035dad35"
+        },
+        {
+          "path": "rxnav/allClasses-CHEM.json",
+          "url": "https://rxnav.nlm.nih.gov/REST/rxclass/allClasses.json?classTypes=CHEM",
+          "bytes": 783665,
+          "sha256": "207ef31f38bbce7f8785b1abfa057b7f911f24509b36ff42505704fb6ef8463f"
+        },
+        {
+          "path": "rxnav/allClasses-VA.json",
+          "url": "https://rxnav.nlm.nih.gov/REST/rxclass/allClasses.json?classTypes=VA",
+          "bytes": 45258,
+          "sha256": "4cecef5379a707aeb74d1ae8500a07befea5e34ec3118a0ac34da9dba077fd35"
+        }
+      ],
+      "membersEpc": {
+        "count": 762,
+        "sha256": "56d5afec746d7a8c853e22e6997e602280e8bf8ebe56822076a3956a74135458"
+      },
+      "statusOfRetired": {
+        "count": 3,
+        "sha256": "6829364e5936e8d6082555e0cb7f31ef6c6a9ef04de7c59142bfca2c82472e9b"
+      }
+    },
+    "wikidata": {
+      "key": "wikidata",
+      "owner": "Wikidata (Wikimedia Foundation)",
+      "license": "CC0-1.0",
+      "licenseEvidence": "Wikidata publica los datos estructurados bajo CC0 1.0 (https://www.wikidata.org/wiki/Wikidata:Licensing).",
+      "retrievedAt": "2026-10-28T00:02:58.429Z",
+      "fingerprint": "f18cf6c9d7f5e45a4ec1465d9fec09db0433d53846cd7304dd1c4ce1785ae69b",
+      "version": "Wikidata Query Service (consulta por identificador exacto)",
+      "queryTemplate": "SELECT ?v ?item ?es ?alias WHERE { VALUES ?v { \"<id>\" } ?item wdt:Pxxx ?v . OPTIONAL { ?item rdfs:label ?es . FILTER(lang(?es) = \"es\") } OPTIONAL { ?item skos:altLabel ?alias . FILTER(lang(?alias) = \"es\") } }",
+      "properties": {
+        "P3345": 22244,
+        "P699": 176,
+        "P5270": 15,
+        "P683": 352,
+        "P352": 1027,
+        "P1748": 132,
+        "P652": 505,
+        "P486": 68
+      },
+      "files": [
+        {
+          "path": "wikidata/P1748-0000.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 9617,
+          "sha256": "f421958aa6179503d0ba54d19d57df689ed0ab5c5f5d7b68eebb54bbc2140be4",
+          "prop": "P1748",
+          "ids": 132
+        },
+        {
+          "path": "wikidata/P3345-0000.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 4527,
+          "sha256": "09b26827027b7a00c7f67b5d2a9443ff10905a7cd51e609c98490dfce2af3564",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0001.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 303,
+          "sha256": "f65eb23407411b3ca74189ed2f131aba591faccd5b11a75c57873379e83591e4",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0002.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 303,
+          "sha256": "61f4ba522f796d44b888323895d4424bb5e1255efc80ca22de4c58fc8632c7e9",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0003.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 303,
+          "sha256": "36599898df72c4bdba518fd373a17af5205031a030c91b402fd052fbc4fee8b1",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0004.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 435,
+          "sha256": "eb3841cf67949c1be362c89a55e9681dcebc173c81c3c46116bd96ea6893d9e4",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0005.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 610,
+          "sha256": "f36dbf5cafcf299eeba69ae5f9bda5e5fa117918c2d183bceec283d7affb41e6",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0006.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 623,
+          "sha256": "79787f00dfc49b2c34d1817a36383a6ee2acd8d1d63c2d06eb189665d7707001",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0007.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 106,
+          "sha256": "200c414e29f78194a1ab1bd7880cf31e943a8bec41e84ca7089701537d8e6804",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0008.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 106,
+          "sha256": "200c414e29f78194a1ab1bd7880cf31e943a8bec41e84ca7089701537d8e6804",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0009.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 106,
+          "sha256": "200c414e29f78194a1ab1bd7880cf31e943a8bec41e84ca7089701537d8e6804",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0010.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 303,
+          "sha256": "2c4969147924cea75a5bc16ceec9897696e9f77bd370f82da60fac3d32cde246",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0011.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 303,
+          "sha256": "b1735ccf2dda6900a85863656bac1ab01e28022f7e5e6dcdf22efa34e475653e",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0012.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 16201,
+          "sha256": "b1b487432415ccffa6b5b59e8ef18b85d5cec1a43ee9a80f6896d9b8433d5e63",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0013.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 29095,
+          "sha256": "31fcba43932c9fc4c4389ffa9b4fee7371db9b3f25982b1d491f2facd6beeeff",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0014.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 32603,
+          "sha256": "cea3f4486fb651624f393f52a8b36a578e8232bb10e0735f6b22b2e96e24e03f",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0015.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 23616,
+          "sha256": "1b63745551af46acb7d18b68d7d3218f28ff03784809f86c972b6f39a62add78",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0016.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 28140,
+          "sha256": "416e101787b264f27bb507e5954b758e29a25cb85cb5456d8a1b72adfa86f171",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0017.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 14463,
+          "sha256": "80cffea78bc5380479f95ea9122f53fd1a445fb1e2e423c86787e8df2e742e33",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0018.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 16022,
+          "sha256": "cec7e81a5d55eb4b9992abe2f7e10e49c337a64056c839f7aa1085f8a44c79aa",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0019.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 10356,
+          "sha256": "d003a3d7d3a7e89445041d0e53dc8db4eeae037a32604765860ac7f33db52ba2",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0020.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 9910,
+          "sha256": "47ea665adc4790d7bb8b3890cd46d06718a239b8b2d214c6708344cbb72c088b",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0021.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 2412,
+          "sha256": "e455e04e989dc0d18809c86ab72a8805612628abd0e9a612a50685dfe500a133",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0022.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 1129,
+          "sha256": "c54f1d286be34bd6d67e5da87fef99b0872431f401e81b64d84f44919be9dd83",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0023.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 1533,
+          "sha256": "5548da69782a7692a195ba126b6a0cb874b3934417ab534891f2eb925481b409",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0024.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 1767,
+          "sha256": "88a3adebe7a148df171ab172667c7c697fca7e67c4eca71b8755453c0350843f",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0025.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 303,
+          "sha256": "c28d31f9a791ee653dfb9bb6c801834b6a72fa41d0bf20586daa33a882eb1e66",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0026.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 15917,
+          "sha256": "e962020294265d30233037438dedd31a9bc0100c4f891f1f7bc9446fddcba39d",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0027.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 24528,
+          "sha256": "6046b3edd392973ce130caa305c25b77cd50fca94cce769c29ee58147cbee414",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0028.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 22146,
+          "sha256": "005cea3d604bf9098d9eada447ef24d1248df656f200b6e22ae0788dc3934217",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0029.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 23019,
+          "sha256": "6433f4283eac28a269685752161bab297123ed4820b0a96ca41c553e1a029b4d",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0030.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 13015,
+          "sha256": "e8bba9b4fef14461e924656fd2c9224fa4b952b40293eeb2e14eb238428947a5",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0031.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 18945,
+          "sha256": "6543e050ac2a874ffaee8c84d8d4bc747c5ec033c9395a84fc6d9e49b46a8d01",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0032.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 19994,
+          "sha256": "789875d51aa09f65a281c603a97e00296a7ee0e41e435cd7a24bf81ec78ced9d",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0033.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 30222,
+          "sha256": "f8dba48eb1c807596231b134f9f1b7cdac8e89eb140bcb5620f02ecaefba22c6",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0034.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 11706,
+          "sha256": "56570b0d1f931bbb7ccb839001259983eb3a2f7347b1785b6d8524573291515d",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0035.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 9270,
+          "sha256": "be3a309c4b3970baa7ccbb3453b157d109d313e8ccf0b28c74ad6e330bd2f040",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0036.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 11452,
+          "sha256": "0d93c28648397c486e72956f818a5ca647de06e501260f888c1cc6eeeed646d9",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0037.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 42480,
+          "sha256": "1aefd5b84c758f58959ee163456b37fadd640d10a4f62bc3a40a9494c3c6d8e6",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0038.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 17394,
+          "sha256": "449a819e412ace2a425c87a0198907017efdde9660eca4267edfcc701010d7e9",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0039.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 18635,
+          "sha256": "89268101e15a15bcef0e790b5dad8e1d5a54f73395f893d7927db0fb03a9de70",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0040.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 24321,
+          "sha256": "8ccdbb9e6e5a36e1c3bfc422476c1ff98ecac988ee232f08fa3f7ccee029a061",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0041.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 22945,
+          "sha256": "4ff124019fa9470a915834e3837ff96f39532eb1cd5235f7a61403c23e4417bb",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0042.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 20644,
+          "sha256": "2c2444ec95788bd6c52f438b0305a8b7da44e67aadc9eaedb6c2c34fbedc730f",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0043.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 6997,
+          "sha256": "6c105a89562c08b185d82b97ec2fb78eee730b770d1be2cbd1fa9f086ed570ff",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0044.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 10289,
+          "sha256": "648bf2d172e79aff2b39ebda64fb221da265360ed6380cdc4be0465cc3c96a4d",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0045.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 26949,
+          "sha256": "707391accdb16af50acc2e869580a6ef4bd67da552edd9ce4d2cd02ebd365fb5",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0046.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 16915,
+          "sha256": "0baac1371bd931d853139c0e578ff8ba8f2360da52277358ed7b0e82789d70d3",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0047.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 19641,
+          "sha256": "75ae877ca18bebd3515baf048b02c83b932f5d5c39e1b14df700c8583cb1697f",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0048.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 25223,
+          "sha256": "ca5ba15a3398923492ec675d5028995a1b3b21e897bf784163a00eac165edf98",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0049.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 30027,
+          "sha256": "0816829ef56c70de5c078a4b95354e1ad4ff75174c6bdabb521ee4357c97bc46",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0050.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 9948,
+          "sha256": "6393ec3b17d03fbe4288af7f42b0d090c556319f218f57ff7e6a538ea58b9807",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0051.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 17850,
+          "sha256": "6ff39e747f74fd3211bb7a8cea3e5a31a51a49ceec03484ae7f39a0956a442fc",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0052.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 13109,
+          "sha256": "9c7a369b583c60d779c3c2cccf62a55c5c5412a940a9cd07750642680aa0ae93",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0053.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 18383,
+          "sha256": "d83c75b2b9dda4784c572128c6d43b2bd6584d60801149955a1bb9d8e7b70862",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0054.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 13405,
+          "sha256": "25ac9394952503db9a47333be04e2348d87a8dcf1c0b6cf916cdcd1778595b73",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0055.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 12188,
+          "sha256": "b243a8579929068435689e64eb48a7c9847ef2aae7a8191a5b52a39868004370",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0056.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 18484,
+          "sha256": "c7e8e7f36645736625749441035c3afb7af28cf4476362ae168a509fa46e2265",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0057.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 14546,
+          "sha256": "eab6daa7b735eae3b440ef7e2cf8b44b0f1c2e63b8679dd596a3e1d28fe8cbd6",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0058.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 26665,
+          "sha256": "08f736a94714ea73560171aa37d2a81bb57049f094a689dec9100e732e56fe13",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0059.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 33265,
+          "sha256": "f6a2c5e14907f70dd181e6cc55d16a203f959815461c84097cea5ff4126935c5",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0060.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 21731,
+          "sha256": "ab42e620f7b429ced31cce9caf4f536362e861d91c736b871a6c9966d2a23e59",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0061.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 17148,
+          "sha256": "54973ce524e30b059708930beb435417372b139cade8c4489dfa31f59f3e162f",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0062.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 14712,
+          "sha256": "533e6fc4d0189e184c9b4dfdabf3945ec15cea4d6a9e08a26222b78e0a60e106",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0063.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 15168,
+          "sha256": "4209a6aa29838cdef75549766287ea12cd40263f8b05ee76cc44e2ad1c0a1133",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0064.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 8792,
+          "sha256": "a5c4bde9b6a40d443f69126a983cfaa7d3816a8a8822b066407e95ba18b95f54",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0065.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 19691,
+          "sha256": "83f0cba7accce5226f9356b56806b183d7ba85ffc22b53e28e26887eeaae8136",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0066.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 33775,
+          "sha256": "356ef7a74b7578e66369e2e626429c7fe491a8b9c8198e854f42e4b9e6fac471",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0067.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 18809,
+          "sha256": "aad44aa727e1c4e8f36055e1d9f77c7fdac83ddb1e45951481857a32339c028c",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0068.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 13242,
+          "sha256": "43c9425451ba780953a2a89cd7957992c1c3802076c9ad3c08fcdc5d71e2cd38",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0069.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 16033,
+          "sha256": "766ff05b81999b2de48ef41cf919ff2e97213ef58cfea23e45a3e106402c7eca",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0070.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 9165,
+          "sha256": "74f52fd4197c91d2222e66c57ca16e1c856d4842662962642a8b21a60f8e719d",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0071.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 19138,
+          "sha256": "abfd2b867dd178d5f001a7c30e173518dd8cfb704f871558db33196d520c1f01",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0072.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 13026,
+          "sha256": "53c601e8688d97a5bf85013b90e5352593ec018c3b9badc2d60571554243ffa5",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0073.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 30948,
+          "sha256": "2cc12791972ac99cdcd3c06a017cf6108e63cebff6d9ea8b649bb579d1617c96",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0074.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 17791,
+          "sha256": "15abd806d431130ef05a8c29b36799ff23c4eb5cd603c08f82dedaaae54ffbca",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0075.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 15381,
+          "sha256": "c58f825568c61cf7535b2d5243791d51dd4c99e2b892f72f07cecac1c60f5883",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0076.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 11450,
+          "sha256": "9ff941eb7283b3150c78bc5dfd842d7d749da43bec444a7cd1890fe4b747b274",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0077.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 2911,
+          "sha256": "b270d4c9381dc95be619fa1c929d7c5c78044637546285b23e2e993072345c44",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0078.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 11300,
+          "sha256": "21d34d39b9d68b310c3f2684e7a5516e3a9582f29ff54c370f6a6b9c67a30194",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0079.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 20738,
+          "sha256": "8e04038be1cbb212deeea142610304b995262ab8301c51e9bcc3f08ea9297cac",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0080.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 5086,
+          "sha256": "90b85f4199b9203bcaa113201f4eaed8d9a6fb47b7195b5c74060f6cc54d40bd",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0081.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 8821,
+          "sha256": "856e0d2fb5daf744f683a989b98bbd26f31e037d8daa572a1f55d02d71b88fd7",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0082.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 5947,
+          "sha256": "eefa5fc132044b51a91a66261bddd33a13cee30e0cc6eaaa9f4fa5362713c300",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0083.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 9111,
+          "sha256": "0034dfc7cafd455ffcb5b4971cb5a6c7e2079e20416781301753bb0e59a96b8e",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0084.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 15881,
+          "sha256": "35c6aed4d9b2b35aae214181c17eed2025a7846609b7d27d384ea6126656fd01",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0085.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 7323,
+          "sha256": "3ec1afc61a72ffb15b24693c47c98f7b58a0076c36a4c63567cb6b06590a61a6",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0086.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 8278,
+          "sha256": "5eb767dbb462a97ec0d64b777b872d1373f887e83ba7eadabf76e985a1fd7aca",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0087.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 14141,
+          "sha256": "5dd664548629f1f814db578d7423157724fbab8912ada8d59fb29e3d61e1b856",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0088.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 17889,
+          "sha256": "99fea56babe07fc212a1d1b60b3a0a094304e75cd281be6e08e82d17456d9831",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0089.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 7690,
+          "sha256": "2a36a6937d9c4c11a84c84a504f93f078c28db5d1e8061d12cdb8275fffb2f82",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0090.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 20086,
+          "sha256": "8c27168c673ee37bb5dc066050d3d6760dedadcb3c0e0dcc5231e98caf3e7e5f",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0091.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 21471,
+          "sha256": "7b1369ba43c363abac3ad9b90d334efd00e212b1ee4311e04f0e3123b60be4a0",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0092.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 15351,
+          "sha256": "014643baa986f3de35f7f570f53f3117322f7cf98ae0938d06c7589c8c4a8520",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0093.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 20508,
+          "sha256": "e0d2895f7aac3fe87adcb4f3934fdd1cbec8d34c03e9fa7ea46ed31475fdc2dd",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0094.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 16120,
+          "sha256": "bede1221cfd3ee64c8d3a377d1930af4a5d8933670e903834391727a20a0028e",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0095.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 6023,
+          "sha256": "4a4dbf0a595e0c0a6721975441750aac99cc16e37d6f10ad9f6431d852856cfb",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0096.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 1629,
+          "sha256": "1145454a3c9dffa5a5f3299268db617cabcc61b661b809fc246096c35070c812",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0097.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 1721,
+          "sha256": "06a99097c872b7e3805d10df017102ba265426318ca9f0d863b63aa0163fe5f2",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0098.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 14250,
+          "sha256": "9cea5c28e83819600efa60b0662808273c38da19861e52cf3cb1d1e59645c1f3",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0099.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 9321,
+          "sha256": "6ca10bef467f6163e7bb5905dcbd9b1dcfe930c339abff673ff2645b6cdf2740",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0100.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 20778,
+          "sha256": "3f61cf98d07108023a3cb0e01635d759e4e9dd6032b0b18b9b5e1981a1ff30d3",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0101.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 3165,
+          "sha256": "4efc188c7fe3367e322b9b700f4f9f6852eb73df4bc616ef5071aeb30dc6a9aa",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0102.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 11415,
+          "sha256": "7560e7331315cda0bcb7928fa7066e5fa35512b1bf8a15d68a6a69b56cd39fb6",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0103.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 4135,
+          "sha256": "62f768c52b748b52177bce973810b3f1c2eccbbba450810ab94bcd07a227995e",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0104.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 1950,
+          "sha256": "af7ffabb2ef0eb2b2063bd2938b89222fe1e969f884396831cc3db5083eb7d55",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0105.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 2685,
+          "sha256": "9c149bda5a0a78ecee32fb55ab4c19f8c24a93eee76cc538ec7e970a2feb4f52",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0106.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 6597,
+          "sha256": "95e78dc5a61eb05d26c1c28c12e02025b76d04e5ab04539b4538b96c0facd269",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0107.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 797,
+          "sha256": "6d5814a2494337b6ec426f76920a9feaacf1c7d81fefb30d6f34abfab386d812",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0108.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 5310,
+          "sha256": "a19d6a190d99bf468767cfe323132a70c577f7e027f112facd174b69d23ebb2f",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0109.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 3178,
+          "sha256": "6c7819d7022c33db87e885958c19fb84b35146f4552af122a47ecb27b3d8d8f5",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0110.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 1302,
+          "sha256": "6edaf73e07d727af2d3a9cb4816b34e31bdd7ab968c7cb0418d73c9a4c6d49dd",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0111.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 1916,
+          "sha256": "7f33b1c365a98b64390bebfa8abfb68363f46e42e3f4c33870b52bfbd37efa02",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0112.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 6188,
+          "sha256": "7d5eb0c368f48d0d7d6fc1a462f0048228826c9892349bb741c072bc3f5a344a",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0113.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 2280,
+          "sha256": "4835d29192d79ee2e556818d9b9e2653f4894adf58c65e286390a27480cb2b16",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0114.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 523,
+          "sha256": "2ae868bf8076790e16caa31d103e3db7bf5ac8a577fa8b6f6266145bf87ab024",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0115.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 4375,
+          "sha256": "df29d1e08e38948cb3b60947c8745cb13f3bad7939718a5d2c0e6e09fd3d8fe0",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0116.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 3362,
+          "sha256": "7c605c99f4bd898ee93310688a326a79d5ca17a6ba56d15799f403766cac987a",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0117.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 12255,
+          "sha256": "2b65397f865f12cf5adb274855b09b15939cd68ae85c1095101652f992688dfe",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0118.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 27493,
+          "sha256": "61bab5cb11624abf130607922ad650d6c0901a2fe5d6bcd93cc169e4f3f3d905",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0119.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 43717,
+          "sha256": "f51002dec722a6a54d45fbe74cd192942d063d480eb8d3951fdcf3671df6ccea",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0120.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 26995,
+          "sha256": "46a27e4a8b190088cf206f71c5a75c9619c644c47f08f92702bc8ce301d75cbe",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0121.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 30739,
+          "sha256": "74b23b70af01ccace5e90ce3b2aab98020336c63e15d5731ccf158f5eafaa5ff",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0122.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 59394,
+          "sha256": "82567dbabe70191b3f27ecff4f5c9c85d9b583e248514a03de8d1c5c2af293e7",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0123.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 52247,
+          "sha256": "0636ae8ef40082f43002ac229b96320140253b72556a1328ace9836fd65dcf3b",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0124.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 38386,
+          "sha256": "8abb3e1670a75ef470767d3c02a67f9abc860e139f83479518ecf49d191ce980",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0125.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 24459,
+          "sha256": "469e80308812a184cc006992e4a4a266f049861541ee53cb8d2144ffd0e2955c",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0126.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 42596,
+          "sha256": "24281589aef038772281e165353e6cc87d754e88a645435f58e729a517131a1a",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0127.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 36103,
+          "sha256": "4df117b4a6089dbf32c1e72da4b35685f5ca874cd3c8ca58d284fc725b513092",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0128.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 37661,
+          "sha256": "d52cbc8fd5abe78beef5bca6aa578a7af9dfc0c564737cfda528067e8f0b8ae3",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0129.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 48638,
+          "sha256": "5a8a09c409d735a08b3087ec092d83507749dd5ab6fe1e20aa82ed8595ab582a",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0130.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 38331,
+          "sha256": "2df0953a5c9a76bc02c25a2c19c22f667cca430d665f81d8035c06076e4260a3",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0131.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 33590,
+          "sha256": "7bdb2a1d261707d6ca1b8e4aaa50dd68aad512f805309327f7030ef58dffb8f9",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0132.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 45114,
+          "sha256": "b17259ca8562ce9f3a87158aff6011d6692a3bc50e1eaac4f738b47bbdcb2765",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0133.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 27849,
+          "sha256": "06d62423de7d6f26f49b1341fbd11d55298add925f5a0568e0c7be46c5f60933",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0134.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 3703,
+          "sha256": "03db52358faa71224dffd9dd3b3e026f2f3c179dbae78593ff18d5ed24a74b17",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0135.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 5371,
+          "sha256": "99855aa8b1fec5087923720b233445772e0ca817ac2e8dcd46eec214f6759f5f",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0136.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 31945,
+          "sha256": "1e12ab77a789d070b8ebf740c9e9fe7ddb6e026b15ddc3bf8146d8b2fbda303a",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0137.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 53929,
+          "sha256": "489544d49933fe03a199acfb31185f8d04f42b86d6a022637daad8bb884b635e",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0138.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 33522,
+          "sha256": "f72a8af1bd2244e7d783fa64465ceb31a06e7f775c47a4b99457eb42cb96fe14",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0139.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 7858,
+          "sha256": "3ab9e5028522be04cfab666194c61a11c112d7994b03f4b59c3f8a5cc8b86274",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0140.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 14168,
+          "sha256": "3faa125e245bb694da3f70109d325801ff2c4aabecce301796d3d8268c6e3c87",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0141.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 27987,
+          "sha256": "8febc266919e79a157d0cd0a19a0036e3e5df6467abdb0d84567f6a2905775cf",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0142.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 3876,
+          "sha256": "40db08f52555ac8a31564a83b68b1d827dbe2872cee158bb3b222b5bef1f648b",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0143.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 20902,
+          "sha256": "21a2e3cf27191d76bd4a473cbc9ceb1ed83d31448ed19bb4bca57bfea98cf8d8",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0144.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 17214,
+          "sha256": "0c434c66079b654a4bec93675781ccdfd46d8452c3920199d6c37907b635c85f",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0145.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 14598,
+          "sha256": "324c4017c203523a2c8b6407f2d96f539f8e5a70039951e63be21ff066594b34",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0146.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 19679,
+          "sha256": "961fc6be93ec09b68535276b6d67e6b24cf3e38a2014afe75a62b98317148232",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0147.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 42060,
+          "sha256": "e32bfbfa546c79c58b8d545d2bf3f26ef034b01084f41a8afde7ede3a43939db",
+          "prop": "P3345",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P3345-0148.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 5788,
+          "sha256": "fcf0810fb0abe0fd3a1fc11ff342d56a15f582784deba89a370e3a996d51b576",
+          "prop": "P3345",
+          "ids": 44
+        },
+        {
+          "path": "wikidata/P352-0000.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 106,
+          "sha256": "200c414e29f78194a1ab1bd7880cf31e943a8bec41e84ca7089701537d8e6804",
+          "prop": "P352",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P352-0001.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 746,
+          "sha256": "a9765cdaeb0d3af4794b18294bdbf9d84abe2a7202693871045ddd20ea6b8e2c",
+          "prop": "P352",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P352-0002.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 4425,
+          "sha256": "f05bf8ed0b96e5b6aa560fb580ec01ad73f018a059762f2efbc8a0d6357389ff",
+          "prop": "P352",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P352-0003.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 1087,
+          "sha256": "f7d88d5cd66241f695f78faa02c8e09ecd6aa920993b1dc3d329a6eb4f0b401f",
+          "prop": "P352",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P352-0004.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 499,
+          "sha256": "a1f796d34a259d98beb6329076bd24ab68266a9632f4944d99f080dae25ec60c",
+          "prop": "P352",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P352-0005.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 302,
+          "sha256": "f596df75b9e52a21d550b44b893e4e78b7de348591e33969f2c4e9b3b1ecf88c",
+          "prop": "P352",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P352-0006.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 696,
+          "sha256": "819ad835a760c4379c6ae7a63feb36850d9d39992aba788e044bd20c1ccfce0f",
+          "prop": "P352",
+          "ids": 127
+        },
+        {
+          "path": "wikidata/P486-0000.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 43920,
+          "sha256": "abfda2e50504b4784b388d1a61160253d57d47e56a1c4c5e2d1f0f05f8010d12",
+          "prop": "P486",
+          "ids": 68
+        },
+        {
+          "path": "wikidata/P5270-0000.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 2603,
+          "sha256": "15bfeb19ce87232fdaa45fbb7e53abc6da322616ff93acc6dfe2e78877c80ffa",
+          "prop": "P5270",
+          "ids": 15
+        },
+        {
+          "path": "wikidata/P652-0000.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 54301,
+          "sha256": "dafc2e18fee9955c53e934469ef87bd40b33a5a2187087833153d71fd0a9d268",
+          "prop": "P652",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P652-0001.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 37292,
+          "sha256": "cf5ae0194947122b671a21a426539909d243c4241cc7202f48d2ca358f258f79",
+          "prop": "P652",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P652-0002.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 41241,
+          "sha256": "db6fb13d1308c07f032a4f84c13dba3a19fd002bd6225dec997ad26fce9097cb",
+          "prop": "P652",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P652-0003.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 14750,
+          "sha256": "5dc25217d5233a5d9f3cbecadfc87c1f620d688b4e90fe292e805b818ec32e61",
+          "prop": "P652",
+          "ids": 55
+        },
+        {
+          "path": "wikidata/P683-0000.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 78264,
+          "sha256": "662ff5829996f1b9f41af05ffd0fe94717ffd06b21082fb78ab5541207bfa253",
+          "prop": "P683",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P683-0001.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 33540,
+          "sha256": "b19ea80517c39842995229ca5b1280cf7ac4045c08ab2c3bb25db6b8104e065e",
+          "prop": "P683",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P683-0002.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 17257,
+          "sha256": "b3a5c1dab4295bb653f8a3e07b55c04ac683cb426de101bc66af94c9f2b1fe94",
+          "prop": "P683",
+          "ids": 52
+        },
+        {
+          "path": "wikidata/P699-0000.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 37189,
+          "sha256": "7321da08e44b2c09dccd4b66993f165c97a366bc57fa6f1e302928623e750aef",
+          "prop": "P699",
+          "ids": 150
+        },
+        {
+          "path": "wikidata/P699-0001.json",
+          "url": "https://query.wikidata.org/sparql",
+          "bytes": 13368,
+          "sha256": "6652aaf892d3da300e8a2b9606bbbc1cffd94b84a7355798cfc7872bf2fa4788",
+          "prop": "P699",
+          "ids": 26
+        }
+      ]
+    }
+  }
+}

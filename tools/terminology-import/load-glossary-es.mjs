@@ -33,7 +33,7 @@ import 'dotenv/config';
 import pg from 'pg';
 import { join } from 'node:path';
 import { BUILD_DIR, nowIso, writeJson } from './lib/glossary-es/common.mjs';
-import { TERM_LAYERS, loadCorpus } from './lib/glossary-es/corpus.mjs';
+import { defaultTermLayers, loadCorpus } from './lib/glossary-es/corpus.mjs';
 import {
   CONCEPT, RELATION_TYPE, codeSystemPlan, conceptId, designationsFor, md5uuid, membershipsFor, propertiesFor, relationshipsFor, valueSetCodesFor, valueSetVersionId,
 } from './lib/glossary-es/load-plan.mjs';
@@ -43,7 +43,7 @@ if (args.includes('--dry-run') && args.includes('--apply')) {
   throw new Error('Use --dry-run o --apply, no ambos.');
 }
 const DRY_RUN = !args.includes('--apply');
-const layersArg = args.includes('--layers') ? args[args.indexOf('--layers') + 1].split(',') : TERM_LAYERS;
+const layersArg = args.includes('--layers') ? args[args.indexOf('--layers') + 1].split(',') : defaultTermLayers();
 const BATCH = 1000;
 
 const DB_CONFIG = {

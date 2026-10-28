@@ -19,7 +19,7 @@
 //   … --skip-regions                                                 (solo fuentes propias)
 // =============================================================================
 
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -112,61 +112,96 @@ console.log(
   `taxonomía FDA: ${pcdRows.length} product codes; paneles IVD medidos: ${[...ivdPanels].sort().join(', ')}`,
 );
 
-// --- 1b. EMDN completa (copia fijada + verificación con una segunda copia) ---
-const emdnFile = MIRRORS['batirmedical-emdn'].files.emdn;
-const emdnRowsA = parseEmdn(
-  readFileSync(mirrorFilePath('batirmedical-emdn', 'emdn'), 'utf8'),
-);
-const emdnRowsB = parseEmdnTsv(
-  readFileSync(mirrorFilePath('lisadonlon-emdn', 'emdn'), 'utf8'),
-);
-const emdnCheck = compareEmdnCopies(emdnRowsA, emdnRowsB);
-// Términos distintos entre copias del mismo archivo: no se elige uno, se para.
-if (emdnCheck.differ.length)
-  throw new Error(
-    `EMDN: las copias difieren en ${emdnCheck.differ.slice(0, 10).join(', ')}`,
+// --- 1b. EMDN completa -------------------------------------------------------
+// Con `--eu-dir` y el Excel oficial (v2026, `eu/out/emdn/ec-emdn-*.ndjson.gz`)
+// se usa ese; si no, las dos copias fijadas de la V2 (con verificación cruzada).
+const officialEmdnFile = argValue('--eu-dir')
+  ? join(resolve(argValue('--eu-dir')), 'emdn', 'ec-emdn-0001.ndjson.gz')
+  : null;
+let emdn;
+let emdnCheck;
+const fromB = new Set();
+if (officialEmdnFile && existsSync(officialEmdnFile)) {
+  const official = [];
+  for await (const r of readNdjsonGz(officialEmdnFile)) official.push(r);
+  const categoryTitle = new Map(
+    official.filter((r) => r.level === 1).map((r) => [r.code, r.display]),
   );
-// Un código que falta en una copia (pérdida al extraer) se toma de la otra, citándola.
-const onlyB = new Set(emdnCheck.onlyB);
-const emdnRows = [...emdnRowsA, ...emdnRowsB.filter((r) => onlyB.has(r.code))];
-const fromB = new Set(emdnCheck.onlyB);
-const emdn = emdnNodes(emdnRows, {
-  source: emdnFile.source,
-  sourceUrl: emdnFile.officialUrl,
-  sourceVersion: `EMDN V2 · ${mirrorVersion('batirmedical-emdn')}`,
-  retrievedAt,
-  mirror: {
-    repo: MIRRORS['batirmedical-emdn'].repo,
-    commit: MIRRORS['batirmedical-emdn'].commit,
-    path: emdnFile.path,
-    sha256: emdnFile.sha256,
-  },
-  verifiedAgainst: {
-    repo: MIRRORS['lisadonlon-emdn'].repo,
-    commit: MIRRORS['lisadonlon-emdn'].commit,
-    path: MIRRORS['lisadonlon-emdn'].files.emdn.path,
-  },
-});
-if (emdn.problems.length)
-  throw new Error(
-    `EMDN: estructura inconsistente: ${emdn.problems.slice(0, 5).join('; ')}`,
+  const rows = official.map((r) => ({
+    category: r.category,
+    categoryDescription: categoryTitle.get(r.category) ?? '',
+    code: r.code,
+    term: r.display,
+    level: r.level,
+    terminal: r.terminal,
+  }));
+  emdn = emdnNodes(rows, {
+    source: 'ec-emdn',
+    sourceUrl: official[0].sourceFileUrl ?? official[0].sourceUrl,
+    sourceVersion: official[0].sourceVersion,
+    retrievedAt: official[0].retrievedAt,
+  });
+  emdnCheck = { rowsA: rows.length, rowsB: 0, onlyA: [], onlyB: [], differ: [], official: true };
+  if (emdn.problems.length)
+    throw new Error(`EMDN: estructura inconsistente: ${emdn.problems.slice(0, 5).join('; ')}`);
+  for (const n of emdn.nodes) taxonomy.addNode(n);
+  console.log(`taxonomía EMDN OFICIAL: ${emdn.nodes.length} términos (${official[0].sourceVersion})`);
+} else {
+  const emdnFile = MIRRORS['batirmedical-emdn'].files.emdn;
+  const emdnRowsA = parseEmdn(
+    readFileSync(mirrorFilePath('batirmedical-emdn', 'emdn'), 'utf8'),
   );
-for (const n of emdn.nodes) {
-  if (fromB.has(n.code))
-    n.provenance = {
-      ...n.provenance,
-      mirror: {
-        repo: MIRRORS['lisadonlon-emdn'].repo,
-        commit: MIRRORS['lisadonlon-emdn'].commit,
-        path: MIRRORS['lisadonlon-emdn'].files.emdn.path,
-      },
-      note: 'falta en la copia principal',
-    };
-  taxonomy.addNode(n);
+  const emdnRowsB = parseEmdnTsv(
+    readFileSync(mirrorFilePath('lisadonlon-emdn', 'emdn'), 'utf8'),
+  );
+  emdnCheck = compareEmdnCopies(emdnRowsA, emdnRowsB);
+  // Términos distintos entre copias del mismo archivo: no se elige uno, se para.
+  if (emdnCheck.differ.length)
+    throw new Error(
+      `EMDN: las copias difieren en ${emdnCheck.differ.slice(0, 10).join(', ')}`,
+    );
+  // Un código que falta en una copia (pérdida al extraer) se toma de la otra, citándola.
+  const onlyB = new Set(emdnCheck.onlyB);
+  const emdnRows = [...emdnRowsA, ...emdnRowsB.filter((r) => onlyB.has(r.code))];
+  for (const c of emdnCheck.onlyB) fromB.add(c);
+  emdn = emdnNodes(emdnRows, {
+    source: emdnFile.source,
+    sourceUrl: emdnFile.officialUrl,
+    sourceVersion: `EMDN V2 · ${mirrorVersion('batirmedical-emdn')}`,
+    retrievedAt,
+    mirror: {
+      repo: MIRRORS['batirmedical-emdn'].repo,
+      commit: MIRRORS['batirmedical-emdn'].commit,
+      path: emdnFile.path,
+      sha256: emdnFile.sha256,
+    },
+    verifiedAgainst: {
+      repo: MIRRORS['lisadonlon-emdn'].repo,
+      commit: MIRRORS['lisadonlon-emdn'].commit,
+      path: MIRRORS['lisadonlon-emdn'].files.emdn.path,
+    },
+  });
+  if (emdn.problems.length)
+    throw new Error(
+      `EMDN: estructura inconsistente: ${emdn.problems.slice(0, 5).join('; ')}`,
+    );
+  for (const n of emdn.nodes) {
+    if (fromB.has(n.code))
+      n.provenance = {
+        ...n.provenance,
+        mirror: {
+          repo: MIRRORS['lisadonlon-emdn'].repo,
+          commit: MIRRORS['lisadonlon-emdn'].commit,
+          path: MIRRORS['lisadonlon-emdn'].files.emdn.path,
+        },
+        note: 'falta en la copia principal',
+      };
+    taxonomy.addNode(n);
+  }
+  console.log(
+    `taxonomía EMDN: ${emdn.nodes.length} términos (copia A ${emdnCheck.rowsA}, copia B ${emdnCheck.rowsB}; solo en A: ${emdnCheck.onlyA.join(', ') || '—'}; solo en B: ${emdnCheck.onlyB.join(', ') || '—'})`,
+  );
 }
-console.log(
-  `taxonomía EMDN: ${emdn.nodes.length} términos (copia A ${emdnCheck.rowsA}, copia B ${emdnCheck.rowsB}; solo en A: ${emdnCheck.onlyA.join(', ') || '—'}; solo en B: ${emdnCheck.onlyB.join(', ') || '—'})`,
-);
 
 // --- 2. Fuentes de filas ------------------------------------------------------
 // Las filas se recorren en streaming (varias pasadas) sin tenerlas todas en
@@ -255,19 +290,57 @@ for (const region of REGIONS) {
   });
 }
 
-/** Todas las filas válidas y únicas, en el mismo orden en cada pasada. */
+// Memoria (tope 2 500 MB): las filas de una misma fuente repiten decenas de
+// millones de veces las mismas cadenas (versión, fecha de descarga, fabricante,
+// clase, estado, claves de tipo). Se internan para que cada una exista una vez.
+const INTERNED = new Map();
+const intern = (s) => {
+  if (typeof s !== 'string' || s.length > 400) return s;
+  const hit = INTERNED.get(s);
+  if (hit !== undefined) return hit;
+  INTERNED.set(s, s);
+  return s;
+};
+const INTERN_FIELDS = [
+  'source',
+  'sourceVersion',
+  'retrievedAt',
+  'deviceTypeCode',
+  'deviceTypeSystem',
+  'deviceTypeName',
+  'manufacturerName',
+  'manufacturerCountry',
+  'manufacturerRegistryId',
+  'brandName',
+  'riskClass',
+  'status',
+  'authorizationDate',
+];
+
+/**
+ * Todas las filas válidas y únicas, en el mismo orden en cada pasada. La
+ * unicidad (`source` + `sourceRecordId`) se controla dentro de cada fuente: las
+ * partes de una fuente son contiguas y una clave global de millones de filas no
+ * cabe en el tope de memoria.
+ */
 async function* validRows(onRead) {
-  const seen = new Set();
+  let seen = new Set();
+  let seenSource = null;
   const take = function* (row, region) {
     const errors = validateRow(row);
     onRead?.(row, region, errors, false);
     if (errors.length) return;
+    if (row.source !== seenSource) {
+      seen = new Set();
+      seenSource = row.source;
+    }
     const k = rowKey(row);
     if (seen.has(k)) {
       onRead?.(row, region, [], true);
       return;
     }
     seen.add(k);
+    for (const f of INTERN_FIELDS) if (row[f] != null) row[f] = intern(row[f]);
     row._region = region;
     yield row;
   };
@@ -383,6 +456,7 @@ const slim = (row) => {
 let notDiagnosticRows = 0;
 for await (const row of validRows()) {
   const decision = taxonomy.decideRow(row);
+  decision.types = decision.types.map(intern);
   const d = decision.diagnostic;
   if (d === true) {
     keep.push({ ...slim(row), _decision: decision });
@@ -397,8 +471,10 @@ for await (const row of validRows()) {
   const d = taxonomy.decideRow(row);
   if (d.diagnostic !== null) continue;
   undeterminedSeen++;
-  if (modelKeys(row).some((k) => dxKeys.has(k)))
+  if (modelKeys(row).some((k) => dxKeys.has(k))) {
+    d.types = d.types.map(intern);
     keep.push({ ...slim(row), _decision: d });
+  }
   else {
     if (!d.types.length) undeterminedNoType++;
     // Sin nodo en la taxonomía: se cuenta por nomenclatura declarada.

@@ -1,0 +1,49 @@
+# sondeo 2026-10-27T23:19:43.502Z
+region	fuente	resultado	url
+us	api.fda.gov device/510k	HTTP 200	https://api.fda.gov/device/510k.json?limit=1
+us	download.open.fda.gov index	HTTP 206	https://api.fda.gov/download.json
+us	accessgudid	HTTP 404	https://accessgudid.nlm.nih.gov/download_files
+us	fda classification	HTTP 302	https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpcd/classification.cfm
+eu	EMDN xlsx	HTTP 206	https://webgate.ec.europa.eu/dyna2/emdn/build/EMDN%20v2026_EN..xlsx
+eu	EUDAMED datalake /reference	HTTP 200	https://api.datalake.sante.service.ec.europa.eu/eudamed/reference?LANGUAGE=en&format=json&api-version=v1.0
+eu	EUDAMED datalake /actors	HTTP 200	https://api.datalake.sante.service.ec.europa.eu/eudamed/actors?format=json&api-version=v1.0
+eu	EUDAMED datalake /udi	HTTP 200	https://api.datalake.sante.service.ec.europa.eu/eudamed/udi?format=json&api-version=v1.0
+eu	EUDAMED portal udiDiData	HTTP 200	https://ec.europa.eu/tools/eudamed/api/devices/udiDiData?page=0&pageSize=1&size=1&iso2Code=en&languageIso2Code=en
+eu	MHRA PARD	HTTP 206	https://pard.mhra.gov.uk/
+eu	swissdamed	HTTP 206	https://swissdamed.ch/
+eu	Swissmedic	HTTP 302	https://www.swissmedic.ch/
+eu	IT BD/RDM ficha	HTTP 206	https://www.dati.salute.gov.it/it/dataset/dispositivi-medici/
+eu	IT CND ficha	HTTP 206	https://www.dati.salute.gov.it/it/dataset/classificazione-nazionale-dei-dispositivi-medici-cnd/
+eu	NANDO	HTTP 206	https://webgate.ec.europa.eu/single-market-compliance-space/notified-bodies
+eu	BfArM	HTTP 200	https://www.bfarm.de/EN/Medical-devices/_node.html
+eu	AEMPS	HTTP 200	https://www.aemps.gob.es/
+eu	ANSM	HTTP 200	https://ansm.sante.fr/
+row	ANVISA dados abertos	HTTP 206	https://dados.anvisa.gov.br/dados/CONSULTAS/PRODUTOS/
+row	Health Canada MDALL API licence	HTTP 200	https://health-products.canada.ca/api/medical-devices/licence/?id=1561
+row	TGA www	SIN-RESPUESTA (curl 92: curl: (92) HTTP/2 stream 1 was not closed cleanly: INTERNAL_ERROR (err 2))	https://www.tga.gov.au/resources/artg
+row	TGA compliance.health.gov.au	HTTP 200	https://compliance.health.gov.au/artg/
+row	TGA DAEN	HTTP 200	https://apps.tga.gov.au/Prod/devices/daen-entry.aspx
+row	PMDA review info	HTTP 416	https://www.pmda.go.jp/review-services/drug-reviews/review-information/devices/0018.html
+row	NMPA UDI	HTTP 200	https://udi.nmpa.gov.cn/
+row	MFDS data.go.kr	HTTP 200	https://www.data.go.kr/
+row	MFDS emedi	SIN-RESPUESTA (curl 35: curl: (35) Recv failure: Connection reset by peer)	https://emedi.mfds.go.kr/
+row	CDSCO	HTTP 302	https://cdsco.gov.in/
+row	CDSCO MD online	HTTP 302	https://cdscomdonline.gov.in/
+row	COFEPRIS datos.gob.mx	HTTP 403	https://datos.gob.mx/
+row	COFEPRIS gob.mx	HTTP 200	https://www.gob.mx/cofepris
+row	TFDA data.gov.tw 9576	HTTP 200	https://data.gov.tw/api/v2/rest/dataset/9576
+row	HSA data.gov.sg	HTTP 200	https://data.gov.sg/
+row	AMAR data.gov.il	HTTP 403	https://data.gov.il/
+row	SFDA	PROXY-403	https://medicaldevice.sfda.gov.sa/
+row	Thai FDA open	PROXY-403	https://open.fda.moph.go.th/
+row	MDA Malaysia	HTTP 200	https://portal.mda.gov.my/
+row	INVIMA datos.gov.co	HTTP 200	https://www.datos.gov.co/
+row	ANMAT datos.gob.ar	HTTP 502	https://datos.gob.ar/
+row	DIGEMID	HTTP 418	https://www.datosabiertos.gob.pe/
+row	AGEMED	HTTP 206	https://www.agemed.gob.bo/
+row	WHO PQ IVD	HTTP 200	https://extranet.who.int/prequal/vitro-diagnostics/prequalified/in-vitro-diagnostics
+row	UNICEF supply	HTTP 301	https://supply.unicef.org/
+master	Wikidata SPARQL	HTTP 400	https://query.wikidata.org/sparql?query=SELECT%201&format=json
+master	GLEIF api	HTTP 200	https://api.gleif.org/api/v1/lei-records?page%5Bsize%5D=1
+master	GLEIF golden copy	HTTP 403	https://goldencopy.gleif.org/
+master	Zenodo	HTTP 200	https://zenodo.org/api/records?size=1

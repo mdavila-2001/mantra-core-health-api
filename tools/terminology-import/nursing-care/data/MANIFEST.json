@@ -8,10 +8,10 @@
         {
           "file": "openehr-ckm.part-001.ndjson.gz",
           "rows": 8037,
-          "bytes": 28874692,
-          "sha256": "9dc5d1b5062e54efbdc8d0ea016afad106949e343abf99c376aba9f1ad5fffa8",
-          "gzBytes": 1202980,
-          "gzSha256": "a28c90748a476be058ff6d3e1e6b1fffbb44d8089b68c0b695651ff963cb53d2"
+          "bytes": 28552825,
+          "sha256": "0cdb5fcfec0e7716501a70b4ef2a1de505418e352571926ebb8154124cf975e6",
+          "gzBytes": 1199764,
+          "gzSha256": "14e19a9e57d6992b45be5eb68a1bdb8c9dc8d2df709ce7addaa451e9bf8fd8c5"
         }
       ]
     },
@@ -22,10 +22,10 @@
         {
           "file": "es-msssi-cmdic-13606.part-001.ndjson.gz",
           "rows": 617,
-          "bytes": 1726251,
-          "sha256": "e4e8dd603afc68d276e74689d25ce7f8feb84ffd2324bf01156e9289a4f58bb4",
-          "gzBytes": 40664,
-          "gzSha256": "000b77b646cc6f738a8f9525a0b330c01b9687b261b8ac03455023e9a718cc76"
+          "bytes": 2333379,
+          "sha256": "f554821118f5c066612d0dd69eb6595fbb55c67db690c2726fc29793a62fbb53",
+          "gzBytes": 45195,
+          "gzSha256": "1f688d7d1a6702b6d1089c7c46ec8d37620d12c9efd35e11f99270d3722a1117"
         }
       ]
     },
@@ -36,10 +36,10 @@
         {
           "file": "nursing-terminology-registry.part-001.ndjson.gz",
           "rows": 12,
-          "bytes": 30947,
-          "sha256": "a8a778d8b44478268e31e6e5c5e79f7c4564d899b46cbe72b53a1347147c5ce4",
-          "gzBytes": 6178,
-          "gzSha256": "88522387ed1fed9ef2d99d956290357016d21808b59b71fa160f8021bbf521f4"
+          "bytes": 30624,
+          "sha256": "577df059b29900c93088586c409d62f1813f2b7c2544c3cc2d780d63d8449ba2",
+          "gzBytes": 6201,
+          "gzSha256": "3c2ffeee3fcaf65c66f6725f26fc4884b89b5f5eeddfbd5756ff5ff7f84c6790"
         }
       ]
     },
@@ -50,10 +50,10 @@
         {
           "file": "coverage.json.gz",
           "rows": null,
-          "bytes": 15864,
-          "sha256": "5205e2670dfdd910cce8802c6930a4c9a8cc1edfe8abb22b5651509ca80fffb4",
-          "gzBytes": 3698,
-          "gzSha256": "08a2adddd5332f7fa243c5ba60eaf783bbd083994ade772bb1ef7309ede7de28"
+          "bytes": 15905,
+          "sha256": "a385ed14c87d119749d5ce51c0f602a5bb4c774e9f4c962db0e7b61d1560c14c",
+          "gzBytes": 3711,
+          "gzSha256": "0a20f064d1f374633869e68627539d011a67c0d37c92da3b35cb862379f36f9f"
         }
       ]
     },
@@ -65,9 +65,9 @@
           "file": "link-check.json.gz",
           "rows": null,
           "bytes": 726,
-          "sha256": "61cd5177599e167a64d5bcfeaa6bc1ea8df8468c5c24d3f53c3a2cfbccbd02b3",
-          "gzBytes": 299,
-          "gzSha256": "4da6ba2fc4d6d34d75980f59bd7af5f3332cee6947b0c836c9e34c2728087797"
+          "sha256": "5496b2afdeea6e257b17eb131fe44478f35e5faa8562d3f42cbb1762c04df532",
+          "gzBytes": 298,
+          "gzSha256": "6bf25f9a5cded5c6e27fbec91b865baccaaaeec35ba33a5138ce5960253f435e"
         }
       ]
     },
@@ -79,9 +79,9 @@
           "file": "sources-meta.json.gz",
           "rows": null,
           "bytes": 999,
-          "sha256": "24466ee98010a25f4e886071c277afb2ac8c556d44892c3f4aae6ee288306d1b",
-          "gzBytes": 536,
-          "gzSha256": "bd0219eb1004bb867f71a2fd43177fec6ee27993cf9a9472b21aa27edf7df945"
+          "sha256": "442d95c0a8e3bdbb241550c63c58adee0014ca39c35f644e6332879e3251851f",
+          "gzBytes": 537,
+          "gzSha256": "db26d3b80512befc9a2e64b481c70edb2da44f33d0b8d812f4ee12e7a1e6d73c"
         }
       ]
     },
@@ -92,10 +92,10 @@
         {
           "file": "omaha-system.part-001.ndjson.gz",
           "rows": 320,
-          "bytes": 754384,
-          "sha256": "c8081a80375b6027222dcfc9f47437c571dac8ff55d6cbb64c2c0083e407d60c",
-          "gzBytes": 21722,
-          "gzSha256": "51e604d1cf7a41176c85685a4f658170347254d1c91853b4d8f820b956ebc631"
+          "bytes": 782776,
+          "sha256": "eaddfa078696c18f80df203931345674674d3a1056b0adea09ecefcc29287c63",
+          "gzBytes": 21767,
+          "gzSha256": "127b1d22383138998953aed3ebb7381b11a6f1d3caaae9f05aa4e5dfb15dbe1d"
         }
       ]
     },
@@ -107,9 +107,9 @@
           "file": "omaha-meta.json.gz",
           "rows": null,
           "bytes": 4235,
-          "sha256": "3ffa00fb6d374b89146991e9871db09eb9e9ce5fd8037112f7f7603cf91526da",
-          "gzBytes": 1201,
-          "gzSha256": "36557295fcaa16736f36618ecd74433180486ac7addff1e6241dd06bc4abe848"
+          "sha256": "43e8ef5e4d6d35b2337c3d8f1c3b4f35d1249e3d97fabb27c0d66c709540d1a7",
+          "gzBytes": 1200,
+          "gzSha256": "61623dbc3377edfcdf4bec4b4edf6f2384591a22f0952b5a06b84845e538e340"
         }
       ]
     },
@@ -121,9 +121,9 @@
           "file": "omaha-coverage.json.gz",
           "rows": null,
           "bytes": 4459,
-          "sha256": "a1ecb49401436dcb1ffd4117aac10e95163913dfd1ab1027e43b859c34c8d236",
-          "gzBytes": 1817,
-          "gzSha256": "b12fd48816fb6bf2d3e942335b7868db0f159371c19168f78f02a93a6822d824"
+          "sha256": "a18053e8af408903c0923798a0125ae442e7d16c2ef91d741ac294d87a8d944b",
+          "gzBytes": 1813,
+          "gzSha256": "3f101de6d6e74bc9acad2e6010dbfee80320efc55b8c19047dac8fe7ead28675"
         }
       ]
     },
@@ -134,10 +134,10 @@
         {
           "file": "omaha-crosscheck.json.gz",
           "rows": null,
-          "bytes": 1778,
-          "sha256": "bd93d194dd73b95b06d34209a0284912253a7dec211edbfd01078e6d47d4dd64",
-          "gzBytes": 435,
-          "gzSha256": "14f858b337fb4a25cd9ced4ef5217088026770dd59f7f35ece6f55cb9524753f"
+          "bytes": 3113,
+          "sha256": "464fc3ee4c99a4855c1b1250ea5088cc5e8921b96eaceb868450623a7e723234",
+          "gzBytes": 616,
+          "gzSha256": "7a4ebb7d5a033d668d5dfc46c6a2cc4fa4fb179822d55b8f7d64e08c68f8926a"
         }
       ]
     },
@@ -149,9 +149,9 @@
           "file": "cmdic-license-verification.json.gz",
           "rows": null,
           "bytes": 2451,
-          "sha256": "21d790127c8cf2e45b3556e9b06e69f17601f723c58e2a94b9ad03fe0fba8e71",
+          "sha256": "9681f7cf9822939ec66395beb59b2104242b8475c65e2aae28366be2804fae84",
           "gzBytes": 959,
-          "gzSha256": "0a80e1c57cadcd73eb15bb366309cc385654f84f1bf0697053d4af53a7211e3d"
+          "gzSha256": "6fb7292e26b03743cf39ed4e525446f214ae0dabc12d909bf46956cdddd2b5f8"
         }
       ]
     },
@@ -162,10 +162,10 @@
         {
           "file": "loinc-links.part-001.ndjson.gz",
           "rows": 47,
-          "bytes": 24696,
-          "sha256": "f2e3775e9f332a67faed8fe31996d738cb4bc9002f3467e0477c635e47991e95",
-          "gzBytes": 2475,
-          "gzSha256": "ddfa1d640e7bfeed7c954742d31be8de83824274c43afa4599714fb273cad84b"
+          "bytes": 22863,
+          "sha256": "8d95679b43b4e4fa510220c213dde6bc40fd352fc23b1ce8bb88614c518a0332",
+          "gzBytes": 2400,
+          "gzSha256": "67849252627f43ea49492ec1e4e305031a8f27ebbf1fb3106e00c13ad1bc5294"
         }
       ]
     },
@@ -177,9 +177,9 @@
           "file": "loinc-links-report.json.gz",
           "rows": null,
           "bytes": 1109,
-          "sha256": "a61e15d8a58d08263195f074d4b539f32e4fa42ff2d98355852faeac5604ba05",
+          "sha256": "3ac121bed3178b2c38ccf5a8f46ed79b73c4e5c5a8747b1310e3277cfd3c1800",
           "gzBytes": 562,
-          "gzSha256": "bcbb84ddc88f6b6574a8ca1ae7ec6d8fee8bb55ae43393a74ee174f1d0588763"
+          "gzSha256": "23832fa51f843c657932725df70d26392a68e9782d9588981a7d778e51886602"
         }
       ]
     },
@@ -191,9 +191,9 @@
           "file": "loinc-omaha-terms.json.gz",
           "rows": null,
           "bytes": 476089,
-          "sha256": "e209afd4a204a95be9032d5c19b77d115bb5a2548711cf77a6dc0df27be5d184",
+          "sha256": "0a160bc3075b5b131f0783b2fc299e74064a2138df077dd26648a228bc49e0df",
           "gzBytes": 10724,
-          "gzSha256": "8d7cb31f2fbee7949097ea6247ddf62d13e03664944bcadd57039cbd43976ed1"
+          "gzSha256": "9ea0442a1ea06b1c26a9ed04f6de871b66d829df97667c2e0cee08b2c617d7eb"
         }
       ]
     }

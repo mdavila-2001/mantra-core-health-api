@@ -18,6 +18,7 @@ import pg from 'pg';
 import { existsSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { readNdjson } from '../lib/glossary-es/common.mjs';
+import { hpoApproved } from './lib/approvals.mjs';
 import { DB_CONFIG, insertMany } from './lib/db.mjs';
 import { CONCEPT, md5uuid } from './lib/load-plan.mjs';
 import { OUT_DIR } from './lib/sources.mjs';
@@ -47,6 +48,7 @@ async function main() {
   const version = `NCBI MedGen MGCONSO, descarga del ${rows[0]?.retrievedAt.slice(0, 10)}`;
   console.log(`=== Cruces por CUI de MedGen (${APPLY ? 'APPLY' : 'DRY-RUN'}) — ${rows.length} pares ===`);
   if (!APPLY) return;
+  if (!hpoApproved()) return; // mapas desde/hacia conceptos HPO
   const client = new pg.Client(DB_CONFIG);
   await client.connect();
   try {

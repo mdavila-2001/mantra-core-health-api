@@ -1,0 +1,124 @@
+<document>
+<manufacturedProduct>
+                     <manufacturedProduct>
+                        <code code="65044-2015" codeSystem="2.16.840.1.113883.6.69"/>
+                        <name>Pollens - Trees, Oak, Red Quercus rubra</name>
+                        <formCode code="C42945" displayName="INJECTION, SOLUTION" codeSystem="2.16.840.1.113883.3.26.1.1"/>
+                        <asEntityWithGeneric>
+                           <genericMedicine>
+                              <name>Oak, Red Quercus rubra</name>
+                           </genericMedicine>
+                        </asEntityWithGeneric>
+                        <ingredient classCode="ACTIB">
+                           <quantity>
+                              <numerator unit="g" value="0.05"/>
+                              <denominator unit="mL" value="1"/>
+                           </quantity>
+                           <ingredientSubstance>
+                              <code code="SVW19ET93C" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>QUERCUS RUBRA POLLEN</name>
+                              <activeMoiety>
+                                 <activeMoiety>
+                                    <code code="SVW19ET93C" codeSystem="2.16.840.1.113883.4.9"/>
+                                    <name>QUERCUS RUBRA POLLEN</name>
+                                 </activeMoiety>
+                              </activeMoiety>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="PDC6A3C0OX" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>GLYCERIN</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="451W47IQ8X" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>SODIUM CHLORIDE</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="8MDF5V39QO" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>SODIUM BICARBONATE</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <asContent>
+                           <quantity>
+                              <numerator unit="mL" value="5"/>
+                              <denominator value="1"/>
+                           </quantity>
+                           <containerPackagedProduct>
+                              <code code="65044-2015-1" codeSystem="2.16.840.1.113883.6.69"/>
+                              <formCode code="C43226" displayName="VIAL" codeSystem="2.16.840.1.113883.3.26.1.1"/>
+                           </containerPackagedProduct>
+                           <subjectOf>
+                              <characteristic>
+                                 <code code="SPLCMBPRDTP" codeSystem="2.16.840.1.113883.1.11.19255"/>
+                                 <value code="C112160" displayName="Type 0: Not a Combination Product" codeSystem="2.16.840.1.113883.3.26.1.1" xsi:type="CV"/>
+                              </characteristic>
+                           </subjectOf>
+                        </asContent>
+                     </manufacturedProduct>
+<manufacturedProduct>
+                     <manufacturedProduct>
+                        <code code="65044-2051" codeSystem="2.16.840.1.113883.6.69"/>
+                        <name>Pollens - Trees, Olive Olea europaea</name>
+                        <formCode code="C42945" displayName="INJECTION, SOLUTION" codeSystem="2.16.840.1.113883.3.26.1.1"/>
+                        <asEntityWithGeneric>
+                           <genericMedicine>
+                              <name>Olive Olea europaea</name>
+                           </genericMedicine>
+                        </asEntityWithGeneric>
+                        <ingredient classCode="ACTIB">
+                           <quantity>
+                              <numerator unit="g" value="0.05"/>
+                              <denominator unit="mL" value="1"/>
+                           </quantity>
+                           <ingredientSubstance>
+                              <code code="43R41XZ627" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>OLEA EUROPAEA POLLEN</name>
+                              <activeMoiety>
+                                 <activeMoiety>
+                                    <code code="43R41XZ627" codeSystem="2.16.840.1.113883.4.9"/>
+                                    <name>OLEA EUROPAEA POLLEN</name>
+                                 </activeMoiety>
+                              </activeMoiety>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="PDC6A3C0OX" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>GLYCERIN</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="451W47IQ8X" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>SODIUM CHLORIDE</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <ingredient classCode="IACT">
+                           <ingredientSubstance>
+                              <code code="8MDF5V39QO" codeSystem="2.16.840.1.113883.4.9"/>
+                              <name>SODIUM BICARBONATE</name>
+                           </ingredientSubstance>
+                        </ingredient>
+                        <asContent>
+                           <quantity>
+                              <numerator unit="mL" value="5"/>
+                              <denominator value="1"/>
+                           </quantity>
+                           <containerPackagedProduct>
+                              <code code="65044-2051-1" codeSystem="2.16.840.1.113883.6.69"/>
+                              <formCode code="C43226" displayName="VIAL" codeSystem="2.16.840.1.113883.3.26.1.1"/>
+                           </containerPackagedProduct>
+                           <subjectOf>
+                              <characteristic>
+                                 <code code="SPLCMBPRDTP" codeSystem="2.16.840.1.113883.1.11.19255"/>
+                                 <value code="C112160" displayName="Type 0: Not a Combination Product" codeSystem="2.16.840.1.113883.3.26.1.1" xsi:type="CV"/>
+                              </characteristic>
+                           </subjectOf>
+                        </asContent>
+                     </manufacturedProduct>
+</document>

@@ -60,6 +60,7 @@ export function medgenLinks(text, codes, sympByCui, declared, prov) {
           version: prov.version,
           retrievedAt: prov.retrievedAt,
           license: prov.license,
+          inputSha256: prov.sha256 ?? null,
           key: md5(['medgen-cui', cui, a.codeSystem, a.code, b.codeSystem, b.code]),
         });
       }

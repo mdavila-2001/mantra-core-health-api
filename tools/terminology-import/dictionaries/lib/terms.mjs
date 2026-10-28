@@ -70,11 +70,11 @@ export function assertPredicateLabels(typedefs, sourceId) {
 }
 
 /** Xrefs conservados (con anotación) y conteo de descartados por prefijo. */
-export function splitXrefs(xrefs, dropped) {
+export function splitXrefs(xrefs, dropped, extraDropped = {}) {
   const kept = [];
   for (const x of xrefs) {
     const p = xrefPrefix(x.id);
-    if (DROPPED_XREF_PREFIXES[p]) {
+    if (DROPPED_XREF_PREFIXES[p] || extraDropped[p]) {
       dropped[p] = (dropped[p] ?? 0) + 1;
       continue;
     }
@@ -161,13 +161,19 @@ export function oboTermRow(t, ctx) {
   const exact = [];
   const other = [];
   for (const s of t.synonyms) {
+    // Sinónimos que la propia fuente atribuye a un tercero con licencia restrictiva (KEGG, DrugBank, HMDB, ChEMBL…): no se cargan.
+    if (source.dropSynonym?.(s)) {
+      ctx.droppedSynonyms[source.id] = (ctx.droppedSynonyms[source.id] ?? 0) + 1;
+      continue;
+    }
     if (s.scope === 'EXACT' && s.value !== t.name) exact.push(s.value);
     else if (s.value !== t.name) other.push({ value: s.value, scope: s.scope, ...(s.type ? { type: s.type } : {}) });
   }
+  const code = source.codeOf ? source.codeOf(t.id) : t.id;
   return {
-    key: `${source.codeSystem}|${t.id}`,
+    key: `${source.codeSystem}|${code}`,
     codeSystem: source.codeSystem,
-    code: t.id,
+    code,
     domain: source.domain,
     lang: 'en',
     display: t.name,
@@ -175,15 +181,48 @@ export function oboTermRow(t, ctx) {
     definitionXrefs: t.defXrefs,
     synonymsExact: [...new Set(exact)],
     synonymsOther: other,
-    xrefs: splitXrefs(t.xrefs, ctx.droppedXrefs),
+    xrefs: splitXrefs(t.xrefs, ctx.droppedXrefs, source.dropXrefPrefixes),
     subsets: t.subsets,
     namespace: t.namespace,
     altIds: t.altIds,
     relations,
     otherRelations,
-    extra: {},
+    extra: source.extraOf ? source.extraOf(t) : {},
     provenance: provenance(source, t.id, ctx),
   };
+}
+
+/**
+ * Rama y nivel de carga de cada término según la jerarquía is_a que publica la
+ * fuente (no se elige a mano): `source.branches` = [{ root, domain, tier }], el
+ * primero que contenga al término manda; `source.excludeRoots` saca ramas
+ * enteras (p. ej. la rama de enfermedades de NCIt, que carga otra sesión).
+ * Devuelve Map id → { excluded } | { domain, tier }.
+ */
+export function assignBranches(terms, source) {
+  const byId = new Map(terms.map((t) => [t.id, t]));
+  const children = new Map();
+  for (const t of terms) for (const p of t.isA) {
+    if (!children.has(p.target)) children.set(p.target, []);
+    children.get(p.target).push(t.id);
+  }
+  const below = (root) => {
+    if (!byId.has(root)) throw new Error(`[${source.id}] la raíz de rama ${root} no está en el archivo: el formato o la versión cambiaron`);
+    const seen = new Set([root]);
+    const queue = [root];
+    while (queue.length) for (const c of children.get(queue.shift()) ?? []) if (!seen.has(c)) { seen.add(c); queue.push(c); }
+    return seen;
+  };
+  const excluded = new Set();
+  for (const r of source.excludeRoots ?? []) for (const id of below(r)) excluded.add(id);
+  const branchSets = (source.branches ?? []).map((b) => ({ ...b, ids: below(b.root) }));
+  const out = new Map();
+  for (const t of terms) {
+    if (excluded.has(t.id)) { out.set(t.id, { excluded: true }); continue; }
+    const b = branchSets.find((x) => x.ids.has(t.id));
+    out.set(t.id, b ? { domain: b.domain, tier: b.tier, branch: b.root } : { domain: source.fallbackDomain ?? source.domain, tier: source.tierOf ? source.tierOf(t) : source.fallbackTier ?? 'default', branch: null });
+  }
+  return out;
 }
 
 export function provenance(source, id, ctx) {
@@ -224,13 +263,29 @@ export function oboSourceRows(parsed, source, file, { lineage } = {}) {
     excluded = r.excluded;
     stats.nonHumanDirect = r.direct;
   }
-  const ctx = { source, typedefs, file, dataVersion: headerValue(parsed.header, 'data-version'), droppedXrefs: stats.droppedXrefs };
+  const dataVersion = headerValue(parsed.header, 'data-version');
+  if (source.expectDataVersion && dataVersion !== source.expectDataVersion) {
+    throw new Error(`[${source.id}] data-version «${dataVersion}» distinta de la fijada «${source.expectDataVersion}»: el archivo bajado no es el que describe el registro`);
+  }
+  const droppedSynonyms = source.dropSynonym ? (stats.droppedSynonyms = {}) : {};
+  const ctx = { source, typedefs, file, dataVersion, droppedXrefs: stats.droppedXrefs, droppedSynonyms };
+  const assigned = source.branches || source.excludeRoots ? assignBranches(own.filter((t) => !t.obsolete && t.name), source) : null;
+  if (assigned) { stats.excludedBranch = 0; stats.byDomain = {}; stats.byTier = {}; }
   const rows = [];
   for (const t of own) {
     if (t.obsolete) { stats.obsolete++; continue; }
     if (!t.name) { stats.unnamed++; continue; }
     if (excluded.has(t.id)) { stats.nonHuman++; continue; }
-    rows.push(oboTermRow(t, ctx));
+    const a = assigned?.get(t.id);
+    if (a?.excluded) { stats.excludedBranch++; continue; }
+    const row = oboTermRow(t, ctx);
+    if (a) {
+      row.domain = a.domain;
+      row.tier = a.tier;
+      stats.byDomain[a.domain] = (stats.byDomain[a.domain] ?? 0) + 1;
+      stats.byTier[a.tier] = (stats.byTier[a.tier] ?? 0) + 1;
+    }
+    rows.push(row);
   }
   stats.rows = rows.length;
   stats.dataVersion = ctx.dataVersion;

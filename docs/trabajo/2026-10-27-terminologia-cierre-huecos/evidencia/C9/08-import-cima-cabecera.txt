@@ -1,0 +1,3 @@
+=== CIMA (AEMPS) → glosario ES (Farmacología clínica) ===
+[cima:listado] 20/127 (6s)
+[cima:listado] 40/127 (9s)

@@ -1,21 +1,24 @@
 {
-  "verified": false,
-  "note": "Completar mirando el encabezado real del CSV (build.mjs lo imprime) y pasar verified a true. Solo progressivo_dm_ass y tipologia_dm están confirmados por el diccionario v2.0; el resto queda en null hasta verlo.",
+  "verified": true,
+  "note": "Verificado el 2026-10-27 contra el encabezado real de DISPO_RDM_1_20261026.csv (16 columnas más una vacía al final) y el diccionario v2.0 del Ministero della Salute. Lo que la fuente no publica queda en null: no hay país del fabricante, UDI-DI ni clase de riesgo.",
   "columns": {
     "recordNumber": "progressivo_dm_ass",
     "recordType": "tipologia_dm",
-    "cndCode": null,
-    "cndName": null,
-    "manufacturerName": null,
+    "cndCode": "classificazione_cnd",
+    "cndName": "descrizione_cnd",
+    "manufacturerName": "fabbricante_assemblatore",
     "manufacturerCountry": null,
     "manufacturerRegistryId": null,
-    "brandName": null,
-    "model": null,
+    "brandName": "denominazione_commerciale",
+    "model": "cod_catalogo_fabbr_ass",
     "udiDi": null,
     "riskClass": null,
-    "registrationDate": null,
+    "registrationDate": "data_prima_pubblicazione",
     "status": null,
-    "repertorio": null,
-    "endOfMarketingDate": null
+    "repertorio": "iscrizione_repertorio",
+    "endOfMarketingDate": "data_fine_commercio",
+    "validityEnd": "data_fine_validita",
+    "vatNumber": "PARTITAIVA_VATNUMBER_MAND",
+    "fiscalCode": "cod_fiscale"
   }
 }

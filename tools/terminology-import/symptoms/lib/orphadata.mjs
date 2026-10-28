@@ -177,6 +177,7 @@ export function orphadataRows(enXml, esXml, resolveHp, prov) {
         sourceUri: d.expertLink,
         retrievedAt: prov.retrievedAt,
         license: prov.license,
+        inputSha256: { en: prov.sha256En ?? null, es: prov.sha256Es ?? null },
         key: md5(['orphadata', a.id]),
       });
     }

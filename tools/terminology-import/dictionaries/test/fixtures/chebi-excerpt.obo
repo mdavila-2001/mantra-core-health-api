@@ -1,0 +1,1143 @@
+format-version: 1.2
+data-version: 256
+date: 06:10:2026 11:26
+saved-by: chebi
+subsetdef: 1:STAR "Preliminary entries"
+subsetdef: 2:STAR "Annotated by 3rd party"
+subsetdef: 3:STAR "Manually annotated by ChEBI Team"
+synonymtypedef: BRAND:NAME "BRAND NAME"
+synonymtypedef: http://purl.obolibrary.org/obo/chebi/INN "INN"
+synonymtypedef: IUPAC:NAME "IUPAC NAME"
+default-namespace: chebi_ontology
+idspace: chemrof https://w3id.org/chemrof/ 
+idspace: foaf http://xmlns.com/foaf/0.1/ 
+idspace: oboInOwl http://www.geneontology.org/formats/oboInOwl# 
+idspace: terms http://purl.org/dc/terms/ 
+remark: ChEBI subsumes and replaces the Chemical Ontology first. This ontology was developed by Michael Ashburner and Pankaj Jaiswal. Data was cuarated by The ChEBI Curation Team. For any queries contact chebi-help@ebi.ac.uk
+ontology: chebi
+property_value: foaf:homepage "https://www.ebi.ac.uk/chebi" xsd:anyURI
+property_value: owl:versionInfo "256" xsd:string
+property_value: terms:description "Chemical Entities of Biological Interest, also known as ChEBI, is a chemical database and ontology of molecular entities focused on 'small' chemical compounds, that is part of the Open Biomedical Ontologies (OBO) effort at the European Bioinformatics Institute (EBI)." xsd:string
+property_value: terms:license https://creativecommons.org/licenses/by/4.0/
+property_value: terms:title "ChEBI Ontology" xsd:string
+
+[Typedef]
+id: BFO:0000051
+name: has part
+xref: BFO:0000051
+is_cyclic: false
+is_transitive: true
+
+[Typedef]
+id: RO:0000087
+name: has role
+xref: RO:0000087
+is_cyclic: false
+is_transitive: false
+
+[Typedef]
+id: RO:0018033
+name: is conjugate base of
+is_cyclic: true
+is_transitive: false
+inverse_of: RO:0018034 ! is conjugate acid of
+
+[Typedef]
+id: RO:0018034
+name: is conjugate acid of
+is_cyclic: true
+is_transitive: false
+
+[Typedef]
+id: RO:0018036
+name: is tautomer of
+is_cyclic: true
+is_transitive: true
+
+[Typedef]
+id: RO:0018037
+name: is substituent group from
+is_cyclic: false
+is_transitive: false
+
+[Typedef]
+id: RO:0018038
+name: has functional parent
+is_cyclic: false
+is_transitive: false
+
+[Typedef]
+id: RO:0018039
+name: is enantiomer of
+is_cyclic: true
+is_transitive: false
+
+[Typedef]
+id: RO:0018040
+name: has parent hydride
+is_cyclic: false
+is_transitive: false
+
+[Term]
+id: CHEBI:50906
+name: role
+def: "A role is particular behaviour which a material entity may exhibit." []
+subset: 3:STAR
+
+[Term]
+id: CHEBI:24432
+name: biological role
+def: "A role played by the molecular entity or part thereof within a biological context." []
+subset: 3:STAR
+synonym: "biological function" RELATED [chebi]
+is_a: CHEBI:50906 ! role
+
+[Term]
+id: CHEBI:52209
+name: aetiopathogenetic role
+def: "A role played by the molecular entity or part thereof which causes the development of a pathological process." []
+subset: 3:STAR
+synonym: "etiopathogenetic agent" RELATED [chebi]
+synonym: "etiopathogenetic role" RELATED [chebi]
+is_a: CHEBI:24432 ! biological role
+
+[Term]
+id: CHEBI:50908
+name: hepatotoxic agent
+def: "A role played by a chemical compound exhibiting itself through the ability to induce damage to the liver in animals." []
+subset: 3:STAR
+synonym: "agente hepatotoxico" RELATED [chebi]
+synonym: "hepatotoxic agents" RELATED [chebi]
+synonym: "hepatotoxicant" RELATED [chebi]
+synonym: "hepatotoxicants" RELATED [chebi]
+synonym: "hepatotoxin" RELATED [chebi]
+synonym: "hepatotoxins" RELATED [chebi]
+synonym: "hepatoxic agent" RELATED [chebi]
+synonym: "hepatoxicant" RELATED [chebi]
+is_a: CHEBI:52209 ! aetiopathogenetic role
+
+[Term]
+id: CHEBI:24431
+name: chemical entity
+def: "A chemical entity is a physical entity of interest in chemistry including molecular entities, parts thereof, and chemical substances." []
+subset: 3:STAR
+synonym: "chemical entity" RELATED [uniprot_ft]
+
+[Term]
+id: CHEBI:23367
+name: molecular entity
+def: "Any constitutionally or isotopically distinct atom, molecule, ion, ion pair, radical, radical ion, complex, conformer etc., identifiable as a separately distinguishable entity." []
+subset: 3:STAR
+synonym: "entidad molecular" RELATED [iupac]
+synonym: "entidades moleculares" RELATED [iupac]
+synonym: "entite moleculaire" RELATED [iupac]
+synonym: "molecular entities" RELATED [iupac]
+synonym: "molecular entity" EXACT IUPAC:NAME [IUPAC]
+synonym: "molecular entity" RELATED IUPAC:NAME [iupac]
+synonym: "molekulare Entitaet" RELATED [chebi]
+is_a: CHEBI:24431 ! chemical entity
+
+[Term]
+id: CHEBI:24835
+name: inorganic molecular entity
+def: "A molecular entity that contains no carbon." []
+subset: 3:STAR
+synonym: "anorganische Verbindungen" RELATED [chebi]
+synonym: "inorganic compounds" RELATED [chebi]
+synonym: "inorganic entity" RELATED [chebi]
+synonym: "inorganic molecular entities" RELATED [chebi]
+synonym: "inorganics" RELATED [chebi]
+is_a: CHEBI:23367 ! molecular entity
+
+[Term]
+id: CHEBI:33579
+name: main group molecular entity
+def: "A molecular entity containing one or more atoms from any of groups 1, 2, 13, 14, 15, 16, 17, and 18 of the periodic table." []
+subset: 3:STAR
+synonym: "main group compounds" RELATED [chebi]
+synonym: "main group molecular entities" RELATED [chebi]
+is_a: CHEBI:23367 ! molecular entity
+relationship: BFO:0000051 CHEBI:33318 ! has part main group element atom
+
+[Term]
+id: CHEBI:33674
+name: s-block molecular entity
+def: "An s-block molecular entity is a molecular entity containing one or more atoms of an s-block element." []
+subset: 3:STAR
+synonym: "s-block compounds" RELATED [chebi]
+synonym: "s-block molecular entities" RELATED [chebi]
+synonym: "s-block molecular entity" RELATED [chebi]
+is_a: CHEBI:33579 ! main group molecular entity
+relationship: BFO:0000051 CHEBI:33559 ! has part s-block element atom
+
+[Term]
+id: CHEBI:33608
+name: hydrogen molecular entity
+subset: 3:STAR
+synonym: "hydrogen compounds" RELATED [chebi]
+synonym: "hydrogen molecular entities" RELATED [chebi]
+is_a: CHEBI:33674 ! s-block molecular entity
+relationship: BFO:0000051 CHEBI:49637 ! has part hydrogen atom
+
+[Term]
+id: CHEBI:36357
+name: polyatomic entity
+def: "Any molecular entity consisting of more than one atom." []
+subset: 3:STAR
+synonym: "polyatomic entities" RELATED [chebi]
+is_a: CHEBI:23367 ! molecular entity
+relationship: BFO:0000051 CHEBI:24433 ! has part group
+
+[Term]
+id: CHEBI:37577
+name: heteroatomic molecular entity
+def: "A molecular entity consisting of two or more chemical elements." []
+subset: 3:STAR
+synonym: "chemical compound" RELATED [chebi]
+synonym: "heteroatomic molecular entities" RELATED [chebi]
+is_a: CHEBI:36357 ! polyatomic entity
+
+[Term]
+id: CHEBI:33692
+name: hydrides
+def: "Hydrides are chemical compounds of hydrogen with other chemical elements." []
+subset: 3:STAR
+is_a: CHEBI:33608 ! hydrogen molecular entity
+is_a: CHEBI:37577 ! heteroatomic molecular entity
+
+[Term]
+id: CHEBI:33242
+name: inorganic hydride
+subset: 3:STAR
+synonym: "inorganic hydrides" RELATED [chebi]
+is_a: CHEBI:24835 ! inorganic molecular entity
+is_a: CHEBI:33692 ! hydrides
+
+[Term]
+id: CHEBI:33675
+name: p-block molecular entity
+def: "A main group molecular entity that contains one or more atoms of a p-block element." []
+subset: 3:STAR
+synonym: "p-block compounds" RELATED [chebi]
+synonym: "p-block molecular entities" RELATED [chebi]
+synonym: "p-block molecular entitiy" RELATED [chebi]
+is_a: CHEBI:33579 ! main group molecular entity
+relationship: BFO:0000051 CHEBI:33560 ! has part p-block element atom
+
+[Term]
+id: CHEBI:33304
+name: chalcogen molecular entity
+def: "Any p-block molecular entity containing a chalcogen." []
+subset: 3:STAR
+synonym: "chalcogen compounds" RELATED [chebi]
+synonym: "chalcogen molecular entities" RELATED [chebi]
+synonym: "chalcogen molecular entity" RELATED [chebi]
+is_a: CHEBI:33675 ! p-block molecular entity
+relationship: BFO:0000051 CHEBI:33303 ! has part chalcogen
+
+[Term]
+id: CHEBI:36902
+name: chalcogen hydride
+subset: 3:STAR
+synonym: "chalcogen hydride" RELATED [chebi]
+synonym: "chalcogen hydrides" RELATED [chebi]
+is_a: CHEBI:33242 ! inorganic hydride
+is_a: CHEBI:33304 ! chalcogen molecular entity
+
+[Term]
+id: CHEBI:33693
+name: oxygen hydride
+subset: 3:STAR
+synonym: "hydrides of oxygen" RELATED [chebi]
+synonym: "oxygen hydride" RELATED [chebi]
+synonym: "oxygen hydrides" RELATED [chebi]
+is_a: CHEBI:36902 ! chalcogen hydride
+
+[Term]
+id: CHEBI:37176
+name: mononuclear parent hydride
+subset: 3:STAR
+synonym: "mononuclear hydride" RELATED [chebi]
+synonym: "mononuclear hydrides" RELATED [iupac]
+synonym: "mononuclear parent hydrides" EXACT IUPAC:NAME [IUPAC]
+synonym: "mononuclear parent hydrides" RELATED IUPAC:NAME [iupac]
+is_a: CHEBI:33692 ! hydrides
+
+[Term]
+id: CHEBI:25806
+name: oxygen molecular entity
+subset: 3:STAR
+synonym: "oxygen molecular entities" RELATED [chebi]
+synonym: "oxygen molecular entity" RELATED [chebi]
+is_a: CHEBI:33304 ! chalcogen molecular entity
+relationship: BFO:0000051 CHEBI:25805 ! has part oxygen atom
+
+[Term]
+id: CHEBI:24651
+name: hydroxides
+def: "Hydroxides are chemical compounds containing a hydroxy group or salts containing hydroxide (OH<small><sup>−</small></sup>)." []
+subset: 3:STAR
+is_a: CHEBI:25806 ! oxygen molecular entity
+is_a: CHEBI:33608 ! hydrogen molecular entity
+is_a: CHEBI:37577 ! heteroatomic molecular entity
+relationship: BFO:0000051 CHEBI:43176 ! has part hydroxy group
+
+[Term]
+id: CHEBI:52625
+name: inorganic hydroxy compound
+subset: 3:STAR
+synonym: "inorganic hydroxides" RELATED [chebi]
+is_a: CHEBI:24651 ! hydroxides
+is_a: CHEBI:24835 ! inorganic molecular entity
+
+[Term]
+id: CHEBI:15377
+name: water
+alt_id: CHEBI:10743
+alt_id: CHEBI:13352
+alt_id: CHEBI:27313
+alt_id: CHEBI:42043
+alt_id: CHEBI:42857
+alt_id: CHEBI:43228
+alt_id: CHEBI:44292
+alt_id: CHEBI:44701
+alt_id: CHEBI:44819
+alt_id: CHEBI:5585
+def: "An oxygen hydride consisting of an oxygen atom that is covalently bonded to two hydrogen atoms" []
+subset: 3:STAR
+synonym: "[OH2]" RELATED [iupac]
+synonym: "acqua" RELATED [chebi]
+synonym: "agua" RELATED [chebi]
+synonym: "aqua" RELATED [chebi]
+synonym: "BOUND WATER" RELATED [pdb-ccd]
+synonym: "dihydridooxygen" RELATED [iupac]
+synonym: "dihydrogen oxide" RELATED [iupac]
+synonym: "eau" RELATED [chebi]
+synonym: "H(2)O" RELATED [uniprot_ft]
+synonym: "H2O" RELATED [kegg.compound]
+synonym: "HOH" RELATED [chebi]
+synonym: "hydrogen hydroxide" RELATED [chebi]
+synonym: "oxidane" EXACT IUPAC:NAME [IUPAC]
+synonym: "oxidane" RELATED IUPAC:NAME [iupac]
+synonym: "Wasser" RELATED [chebi]
+synonym: "WATER" EXACT [PDBeChem]
+synonym: "WATER" RELATED [pdb-ccd]
+synonym: "Water" EXACT [KEGG_COMPOUND]
+synonym: "Water" RELATED [kegg.compound]
+synonym: "water" EXACT IUPAC:NAME [IUPAC]
+synonym: "water" RELATED IUPAC:NAME [iupac]
+xref: cas:7732-18-5 {source="cas"}
+xref: gmelin:117 {source="gmelin"}
+xref: hmdb:HMDB0002111 {source="hmdb"}
+xref: kegg.compound:C00001 {source="kegg.compound"}
+xref: kegg.drug:D00001 {source="kegg.drug"}
+xref: metacyc.compound:WATER {source="metacyc.compound"}
+xref: molbase:1 {source="molbase"}
+xref: pdb-ccd:HOH {source="pdb-ccd"}
+xref: reaxys:3587155 {source="reaxys"}
+xref: wikipedia.en:Water {source="wikipedia.en"}
+is_a: CHEBI:33693 ! oxygen hydride
+is_a: CHEBI:37176 ! mononuclear parent hydride
+is_a: CHEBI:52625 ! inorganic hydroxy compound
+relationship: RO:0000087 CHEBI:48360 ! has role amphiprotic solvent
+relationship: RO:0000087 CHEBI:75771 ! has role mouse metabolite
+relationship: RO:0000087 CHEBI:75772 ! has role Saccharomyces cerevisiae metabolite
+relationship: RO:0000087 CHEBI:76413 ! has role greenhouse gas
+relationship: RO:0000087 CHEBI:76971 ! has role Escherichia coli metabolite
+relationship: RO:0000087 CHEBI:77746 ! has role human metabolite
+relationship: RO:0018033 CHEBI:29412 ! is conjugate base of oxonium
+relationship: RO:0018034 CHEBI:16234 ! is conjugate acid of hydroxide
+property_value: chemrof:charge "0" xsd:integer
+property_value: chemrof:generalized_empirical_formula "H2O" xsd:string
+property_value: chemrof:inchi_key_string "XLYOFNOQVPJJNP-UHFFFAOYSA-N" xsd:string
+property_value: chemrof:inchi_string "InChI=1S/H2O/h1H2" xsd:string
+property_value: chemrof:mass "18.015" xsd:decimal
+property_value: chemrof:monoisotopic_mass "18.01056" xsd:decimal
+property_value: chemrof:smiles_string "[H]O[H]" xsd:string
+
+[Term]
+id: CHEBI:33582
+name: carbon group molecular entity
+subset: 3:STAR
+synonym: "carbon group molecular entities" RELATED [chebi]
+synonym: "carbon group molecular entity" RELATED [chebi]
+is_a: CHEBI:33675 ! p-block molecular entity
+relationship: BFO:0000051 CHEBI:33306 ! has part carbon group element atom
+
+[Term]
+id: CHEBI:50860
+name: organic molecular entity
+alt_id: CHEBI:25700
+alt_id: CHEBI:33244
+def: "Any molecular entity that contains carbon." []
+subset: 3:STAR
+synonym: "organic compounds" RELATED [chebi]
+synonym: "organic entity" RELATED [chebi]
+synonym: "organic molecular entities" RELATED [chebi]
+is_a: CHEBI:33582 ! carbon group molecular entity
+relationship: BFO:0000051 CHEBI:27594 ! has part carbon atom
+
+[Term]
+id: CHEBI:33285
+name: heteroorganic entity
+def: "A heteroorganic entity is an organic molecular entity in which carbon atoms or organic groups are bonded directly to one or more heteroatoms." []
+subset: 3:STAR
+synonym: "heteroorganic entities" RELATED [chebi]
+synonym: "organoelement compounds" RELATED [chebi]
+is_a: CHEBI:50860 ! organic molecular entity
+
+[Term]
+id: CHEBI:33302
+name: pnictogen molecular entity
+def: "A p-block molecular entity containing any pnictogen." []
+subset: 3:STAR
+synonym: "pnictogen molecular entities" RELATED [chebi]
+synonym: "pnictogen molecular entity" RELATED [chebi]
+is_a: CHEBI:33675 ! p-block molecular entity
+relationship: BFO:0000051 CHEBI:33300 ! has part pnictogen
+
+[Term]
+id: CHEBI:51143
+name: nitrogen molecular entity
+alt_id: CHEBI:25556
+alt_id: CHEBI:7594
+subset: 3:STAR
+synonym: "nitrogen compounds" RELATED [chebi]
+synonym: "nitrogen molecular entities" RELATED [chebi]
+synonym: "Nitrogenous compounds" RELATED [kegg.compound]
+xref: kegg.compound:C06061 {source="kegg.compound"}
+is_a: CHEBI:33302 ! pnictogen molecular entity
+relationship: BFO:0000051 CHEBI:25555 ! has part nitrogen atom
+
+[Term]
+id: CHEBI:35352
+name: organonitrogen compound
+def: "Any heteroorganic entity containing at least one carbon-nitrogen bond." []
+subset: 3:STAR
+synonym: "organonitrogen compounds" EXACT IUPAC:NAME [IUPAC]
+synonym: "organonitrogen compounds" RELATED IUPAC:NAME [iupac]
+synonym: "organonitrogens" RELATED [chebi]
+is_a: CHEBI:33285 ! heteroorganic entity
+is_a: CHEBI:51143 ! nitrogen molecular entity
+
+[Term]
+id: CHEBI:22315
+name: alkaloid
+def: "Any of the naturally occurring, basic nitrogen compounds (mostly heterocyclic) occurring mostly in the plant kingdom, but also found in bacteria, fungi, and animals. By extension, certain neutral compounds biogenetically related to basic alkaloids are also classed as alkaloids. Amino acids, peptides, proteins, nucleotides, nucleic acids, amino sugars and antibiotics are not normally regarded as alkaloids. Compounds in which the nitrogen is  exocyclic (dopamine, mescaline, serotonin, etc.) are usually classed as amines rather than alkaloids." []
+subset: 3:STAR
+synonym: "alcaloide" RELATED [chebi]
+synonym: "alcaloides" RELATED [chebi]
+synonym: "Alkaloid" RELATED [chebi]
+synonym: "Alkaloide" RELATED [chebi]
+synonym: "alkaloids" EXACT IUPAC:NAME [IUPAC]
+synonym: "alkaloids" RELATED IUPAC:NAME [iupac]
+xref: wikipedia.en:Alkaloid {source="wikipedia.en"}
+is_a: CHEBI:35352 ! organonitrogen compound
+relationship: RO:0000087 CHEBI:25212 ! has role metabolite
+
+[Term]
+id: CHEBI:24921
+name: isoquinoline alkaloid
+def: "Any alkaloid that has a structure based on an isoquinoline nucleus. They are derived from the amino acids like tyrosine and phenylalanine." []
+subset: 3:STAR
+synonym: "isoquinoline alkaloids" RELATED [chebi]
+is_a: CHEBI:22315 ! alkaloid
+
+[Term]
+id: CHEBI:22750
+name: benzylisoquinoline alkaloid
+def: "Any isoquinoline alkaloid based on a benzylisoquinoline skeleton." []
+subset: 3:STAR
+synonym: "benzylisoquinoline alkaloids" RELATED [chebi]
+is_a: CHEBI:24921 ! isoquinoline alkaloid
+
+[Term]
+id: CHEBI:133004
+name: bisbenzylisoquinoline alkaloid
+def: "A type of benzylisoquinoline alkaloid whose structures are built up of two benzylisoquinoline units linked by ether bridges. Various structural patterns resulting from additional bridging between the two units by direct carbon-carbon bridging or by methylenedioxy groups are common." []
+subset: 3:STAR
+synonym: "bis(benzylisoquinoline) alkaloid" RELATED [chebi]
+synonym: "bis(benzylisoquinoline) alkaloids" RELATED [chebi]
+synonym: "bis-benzylisoquinoline alkaloid" RELATED [chebi]
+synonym: "bis-benzylisoquinoline alkaloids" RELATED [chebi]
+synonym: "bisbenzylisoquinoline alkaloids" RELATED [chebi]
+xref: pubmed:1955879 {source="pubmed"}
+xref: pubmed:2191354 {source="pubmed"}
+xref: pubmed:3323421 {source="pubmed"}
+is_a: CHEBI:22750 ! benzylisoquinoline alkaloid
+
+[Term]
+id: CHEBI:10
+name: (+)-Atherospermoline
+subset: 2:STAR
+synonym: "(+)-Atherospermoline" RELATED [kegg.compound]
+xref: cas:21008-67-3 {source="cas"}
+xref: kegg.compound:C11141 {source="kegg.compound"}
+xref: knapsack:C00001814 {source="knapsack"}
+is_a: CHEBI:133004 ! bisbenzylisoquinoline alkaloid
+property_value: chemrof:charge "0" xsd:integer
+property_value: chemrof:generalized_empirical_formula "C36H38N2O6" xsd:string
+property_value: chemrof:inchi_key_string "XGEAUXVPBXUBKN-NSOVKSMOSA-N" xsd:string
+property_value: chemrof:inchi_string "InChI=1S/C36H38N2O6/c1-37-13-11-23-18-31(41-3)32-20-26(23)27(37)15-21-5-8-25(9-6-21)43-30-17-22(7-10-29(30)39)16-28-34-24(12-14-38(28)2)19-33(42-4)35(40)36(34)44-32/h5-10,17-20,27-28,39-40H,11-16H2,1-4H3/t27-,28-/m0/s1" xsd:string
+property_value: chemrof:mass "594.708" xsd:decimal
+property_value: chemrof:monoisotopic_mass "594.27299" xsd:decimal
+property_value: chemrof:smiles_string "COc1cc2c3cc1Oc1c(O)c(OC)cc4c1[C@H](Cc1ccc(O)c(c1)Oc1ccc(cc1)C[C@@H]3N(C)CC2)N(C)CC4" xsd:string
+
+[Term]
+id: CHEBI:25367
+name: molecule
+def: "Any polyatomic entity that is an electrically neutral entity consisting of more than one atom." []
+subset: 3:STAR
+synonym: "molecula" RELATED [iupac]
+synonym: "molecule" RELATED [iupac]
+synonym: "molecules" RELATED [iupac]
+synonym: "Molekuel" RELATED [chebi]
+synonym: "neutral molecular compounds" RELATED [iupac]
+is_a: CHEBI:36357 ! polyatomic entity
+
+[Term]
+id: CHEBI:33595
+name: cyclic compound
+def: "Any molecule that consists of a series of atoms joined together to form a ring." []
+subset: 3:STAR
+synonym: "cyclic compounds" RELATED [chebi]
+xref: wikipedia.en:Cyclic_compound {source="wikipedia.en"}
+is_a: CHEBI:25367 ! molecule
+
+[Term]
+id: CHEBI:72695
+name: organic molecule
+def: "Any molecule that consists of at least one carbon atom as part of the electrically neutral entity." []
+subset: 3:STAR
+synonym: "organic compound" RELATED [chebi]
+synonym: "organic compounds" RELATED [chebi]
+synonym: "organic molecules" RELATED [chebi]
+is_a: CHEBI:25367 ! molecule
+is_a: CHEBI:50860 ! organic molecular entity
+
+[Term]
+id: CHEBI:33832
+name: organic cyclic compound
+def: "Any organic molecule that consists of atoms connected in the form of a ring." []
+subset: 3:STAR
+synonym: "organic cyclic compounds" RELATED [chebi]
+is_a: CHEBI:33595 ! cyclic compound
+is_a: CHEBI:72695 ! organic molecule
+
+[Term]
+id: CHEBI:5686
+name: heterocyclic compound
+def: "A cyclic compound having as ring members atoms of at least two different elements." []
+subset: 3:STAR
+synonym: "compuesto heterociclico" RELATED [iupac]
+synonym: "compuestos heterociclicos" RELATED [iupac]
+synonym: "heterocycle" RELATED [chebi]
+synonym: "Heterocyclic compound" RELATED [kegg.compound]
+synonym: "heterocyclic compounds" RELATED [chebi]
+is_a: CHEBI:33595 ! cyclic compound
+
+[Term]
+id: CHEBI:24532
+name: organic heterocyclic compound
+def: "A cyclic compound having as ring members atoms of carbon and at least of one other element." []
+subset: 3:STAR
+synonym: "organic heterocycle" RELATED [chebi]
+synonym: "organic heterocyclic compounds" RELATED [chebi]
+is_a: CHEBI:33285 ! heteroorganic entity
+is_a: CHEBI:33832 ! organic cyclic compound
+is_a: CHEBI:5686 ! heterocyclic compound
+
+[Term]
+id: CHEBI:33635
+name: polycyclic compound
+subset: 3:STAR
+synonym: "polycyclic compounds" RELATED [chebi]
+is_a: CHEBI:33595 ! cyclic compound
+
+[Term]
+id: CHEBI:33671
+name: heteropolycyclic compound
+def: "A polycyclic compound in which at least one of the rings contains at least one non-carbon atom." []
+subset: 3:STAR
+synonym: "heteropolycyclic compounds" EXACT IUPAC:NAME [IUPAC]
+synonym: "heteropolycyclic compounds" RELATED IUPAC:NAME [iupac]
+synonym: "polyheterocyclic compounds" RELATED [chebi]
+is_a: CHEBI:33635 ! polycyclic compound
+is_a: CHEBI:5686 ! heterocyclic compound
+
+[Term]
+id: CHEBI:38166
+name: organic heteropolycyclic compound
+alt_id: CHEBI:25429
+alt_id: CHEBI:38075
+subset: 3:STAR
+synonym: "organic heteropolycyclic compounds" RELATED [chebi]
+is_a: CHEBI:24532 ! organic heterocyclic compound
+is_a: CHEBI:33671 ! heteropolycyclic compound
+
+[Term]
+id: CHEBI:38834
+name: benzofurochromene
+def: "An organic heteropolycyclic compound whose skeleton consists of a chromene ring fused onto a 1-benzofuran ring, together with their substituted derivatives." []
+subset: 3:STAR
+synonym: "benzofurochromenes" RELATED [chebi]
+is_a: CHEBI:38166 ! organic heteropolycyclic compound
+
+[Term]
+id: CHEBI:72544
+name: flavonoids
+def: "Any organic molecular entity whose stucture is based on derivatives of a phenyl-substituted 1-phenylpropane possessing a C<small><sub>15</sub></small> or C<small><sub>16</sub></small> skeleton, or such a structure which is condensed with a C<small><sub>6</sub></small>-C<small><sub>3</sub></small> lignan precursors. The term is a 'superclass' comprising all members of the classes of flavonoid, isoflavonoid, neoflavonoid, chalcones, dihydrochalcones, aurones, pterocarpan, coumestans, rotenoid, flavonolignan, homoflavonoid and flavonoid oligomers. Originally restricted to natural products, the term is also applied to synthetic compounds related to them." []
+subset: 3:STAR
+synonym: "flavonoid" RELATED [chebi]
+xref: wikipedia.en:Flavonoids {source="wikipedia.en"}
+is_a: CHEBI:25806 ! oxygen molecular entity
+is_a: CHEBI:50860 ! organic molecular entity
+
+[Term]
+id: CHEBI:26377
+name: pterocarpans
+alt_id: CHEBI:60953
+def: "Members of the class of benzofurochromene with a 6a,11a-dihydro-6<em>H</em>-[1]benzofuro[3,2-<em>c</em>]chromene skeleton and its substituted derivatives. They generally bear structural resemblance to isoflavanoids that possess antibiotic activity and are produced by plant tissues in response to infection. They are the 3,4-dihydroderivatives of coumestans." []
+subset: 3:STAR
+synonym: "isoflavonoid phytoalexin" RELATED [chebi]
+synonym: "isoflavonoid phytoalexins" RELATED [chebi]
+xref: metacyc.compound:PTEROCARPANS {source="metacyc.compound"}
+xref: wikipedia.en:Pterocarpan {source="wikipedia.en"}
+is_a: CHEBI:38834 ! benzofurochromene
+is_a: CHEBI:72544 ! flavonoids
+property_value: chemrof:charge "0" xsd:integer
+property_value: chemrof:generalized_empirical_formula "C15O2R12" xsd:string
+property_value: chemrof:mass "212.159" xsd:decimal
+property_value: chemrof:monoisotopic_mass "211.98983" xsd:decimal
+property_value: chemrof:smiles_string "*c1c(*)c(*)c2c(c1*)OC(*)(*)C1(*)c3c(*)c(*)c(*)c(*)c3OC21*" xsd:string
+
+[Term]
+id: CHEBI:16114
+name: medicarpin
+alt_id: CHEBI:14576
+alt_id: CHEBI:18492
+alt_id: CHEBI:25177
+alt_id: CHEBI:27497
+def: "A member of the class of pterocarpans that is 3-hydroxyptercarpan with a methoxy substituent at position 9." []
+subset: 3:STAR
+synonym: "9-methoxy-6a,11a-dihydro-6H-[1]benzofuro[3,2-c]chromen-3-ol" EXACT IUPAC:NAME [IUPAC]
+synonym: "9-methoxy-6a,11a-dihydro-6H-[1]benzofuro[3,2-c]chromen-3-ol" RELATED IUPAC:NAME [iupac]
+synonym: "medicarpin" RELATED [uniprot_ft]
+xref: beilstein:1322055 {source="beilstein"}
+is_a: CHEBI:26377 ! pterocarpans
+relationship: RO:0000087 CHEBI:26115 ! has role phytoalexin
+property_value: chemrof:charge "0" xsd:integer
+property_value: chemrof:generalized_empirical_formula "C16H14O4" xsd:string
+property_value: chemrof:inchi_key_string "NSRJSISNDPOJOP-UHFFFAOYSA-N" xsd:string
+property_value: chemrof:inchi_string "InChI=1S/C16H14O4/c1-18-10-3-5-11-13-8-19-14-6-9(17)2-4-12(14)16(13)20-15(11)7-10/h2-7,13,16-17H,8H2,1H3" xsd:string
+property_value: chemrof:mass "270.284" xsd:decimal
+property_value: chemrof:monoisotopic_mass "270.08921" xsd:decimal
+property_value: chemrof:smiles_string "COc1ccc2c(c1)OC1c3ccc(O)cc3OCC21" xsd:string
+
+[Term]
+id: CHEBI:100
+name: (-)-medicarpin
+def: "The (−)-enantiomer of medicarpin." []
+subset: 3:STAR
+synonym: "(-)-Medicarpin" RELATED [kegg.compound]
+synonym: "(-)-medicarpin" RELATED [uniprot_ft]
+synonym: "(6aR,11aR)-9-methoxy-6a,11a-dihydro-6H-[1]benzofuro[3,2-c]chromen-3-ol" EXACT IUPAC:NAME [IUPAC]
+synonym: "(6aR,11aR)-9-methoxy-6a,11a-dihydro-6H-[1]benzofuro[3,2-c]chromen-3-ol" RELATED IUPAC:NAME [iupac]
+synonym: "medicarpin" RELATED [chemidplus]
+xref: beilstein:1257009 {source="beilstein"}
+xref: cas:32383-76-9 {source="cas"}
+xref: kegg.compound:C10503 {source="kegg.compound"}
+xref: knapsack:C00002547 {source="knapsack"}
+is_a: CHEBI:16114 ! medicarpin
+relationship: RO:0000087 CHEBI:76924 ! has role plant metabolite
+relationship: RO:0018039 CHEBI:6714 ! is enantiomer of (+)-medicarpin
+property_value: chemrof:charge "0" xsd:integer
+property_value: chemrof:generalized_empirical_formula "C16H14O4" xsd:string
+property_value: chemrof:inchi_key_string "NSRJSISNDPOJOP-BBRMVZONSA-N" xsd:string
+property_value: chemrof:inchi_string "InChI=1S/C16H14O4/c1-18-10-3-5-11-13-8-19-14-6-9(17)2-4-12(14)16(13)20-15(11)7-10/h2-7,13,16-17H,8H2,1H3/t13-,16-/m0/s1" xsd:string
+property_value: chemrof:mass "270.284" xsd:decimal
+property_value: chemrof:monoisotopic_mass "270.08921" xsd:decimal
+property_value: chemrof:smiles_string "[H][C@@]12COc3cc(O)ccc3[C@]1([H])Oc1cc(OC)ccc12" xsd:string
+
+[Term]
+id: CHEBI:33655
+name: aromatic compound
+def: "A cyclically conjugated molecular entity with a stability (due to delocalization) significantly greater than that of a hypothetical localized structure (e.g. Kekulé structure) is said to possess aromatic character." []
+subset: 3:STAR
+synonym: "aromatic compounds" EXACT IUPAC:NAME [IUPAC]
+synonym: "aromatic compounds" RELATED IUPAC:NAME [iupac]
+synonym: "aromatic molecular entity" EXACT IUPAC:NAME [IUPAC]
+synonym: "aromatic molecular entity" RELATED IUPAC:NAME [iupac]
+synonym: "aromatics" RELATED [chebi]
+synonym: "aromatische Verbindungen" RELATED [chebi]
+is_a: CHEBI:33595 ! cyclic compound
+
+[Term]
+id: CHEBI:33659
+name: organic aromatic compound
+subset: 3:STAR
+synonym: "organic aromatic compounds" RELATED [chebi]
+is_a: CHEBI:33655 ! aromatic compound
+is_a: CHEBI:33832 ! organic cyclic compound
+
+[Term]
+id: CHEBI:38101
+name: organonitrogen heterocyclic compound
+def: "Any organonitrogen compound containing a cyclic component with nitrogen and at least one other element as ring member atoms." []
+subset: 3:STAR
+synonym: "heterocyclic organonitrogen compounds" RELATED [chebi]
+synonym: "organonitrogen heterocyclic compounds" RELATED [chebi]
+is_a: CHEBI:24532 ! organic heterocyclic compound
+is_a: CHEBI:35352 ! organonitrogen compound
+
+[Term]
+id: CHEBI:26513
+name: quinolines
+def: "A class of aromatic heterocyclic compounds each of which contains a benzene ring <em>ortho</em> fused to carbons 2 and 3 of a pyridine ring." []
+subset: 3:STAR
+is_a: CHEBI:33659 ! organic aromatic compound
+is_a: CHEBI:38101 ! organonitrogen heterocyclic compound
+
+[Term]
+id: CHEBI:23765
+name: quinolone
+subset: 3:STAR
+synonym: "quinolones" RELATED [chebi]
+is_a: CHEBI:26513 ! quinolines
+
+[Term]
+id: CHEBI:24833
+name: oxoacid
+def: "A compound which contains oxygen, at least one other element, and at least one hydrogen bound to oxygen, and which produces a conjugate base by loss of positive hydrogen ion(s) (hydrons)." []
+subset: 3:STAR
+synonym: "oxacids" RELATED [chebi]
+synonym: "oxiacids" RELATED [chebi]
+synonym: "oxo acid" RELATED [chebi]
+synonym: "oxoacid" EXACT IUPAC:NAME [IUPAC]
+synonym: "oxoacid" RELATED IUPAC:NAME [iupac]
+synonym: "oxoacids" EXACT IUPAC:NAME [IUPAC]
+synonym: "oxoacids" RELATED IUPAC:NAME [iupac]
+synonym: "oxy-acids" RELATED [chebi]
+synonym: "oxyacids" RELATED [chebi]
+is_a: CHEBI:24651 ! hydroxides
+relationship: RO:0000087 CHEBI:39141 ! has role Bronsted acid
+
+[Term]
+id: CHEBI:36962
+name: organochalcogen compound
+def: "An organochalcogen compound is a compound containing at least one carbon-chalcogen bond." []
+subset: 3:STAR
+synonym: "organochalcogen compound" RELATED [chebi]
+synonym: "organochalcogen compounds" RELATED [chebi]
+is_a: CHEBI:33285 ! heteroorganic entity
+is_a: CHEBI:33304 ! chalcogen molecular entity
+
+[Term]
+id: CHEBI:36963
+name: organooxygen compound
+def: "An organochalcogen compound containing at least one carbon-oxygen bond." []
+subset: 3:STAR
+synonym: "organooxygen compound" RELATED [chebi]
+synonym: "organooxygen compounds" RELATED [chebi]
+xref: pubmed:17586126 {source="pubmed"}
+is_a: CHEBI:25806 ! oxygen molecular entity
+is_a: CHEBI:36962 ! organochalcogen compound
+
+[Term]
+id: CHEBI:35605
+name: carbon oxoacid
+subset: 3:STAR
+synonym: "carbon oxoacids" RELATED [chebi]
+synonym: "oxoacids of carbon" RELATED [chebi]
+is_a: CHEBI:24833 ! oxoacid
+is_a: CHEBI:36963 ! organooxygen compound
+
+[Term]
+id: CHEBI:36587
+name: organic oxo compound
+def: "Organic compounds containing an oxygen atom, =O, doubly bonded to carbon or another element." []
+subset: 3:STAR
+synonym: "organic oxo compounds" RELATED [chebi]
+synonym: "oxo compounds" EXACT IUPAC:NAME [IUPAC]
+synonym: "oxo compounds" RELATED IUPAC:NAME [iupac]
+is_a: CHEBI:72695 ! organic molecule
+relationship: BFO:0000051 CHEBI:46629 ! has part oxo group
+
+[Term]
+id: CHEBI:36586
+name: carbonyl compound
+def: "Any compound containing the carbonyl group, C=O. The term is commonly used in the restricted sense of aldehydes and ketones, although it actually includes carboxylic acids and derivatives." []
+subset: 3:STAR
+synonym: "carbonyl compounds" EXACT IUPAC:NAME [IUPAC]
+synonym: "carbonyl compounds" RELATED IUPAC:NAME [iupac]
+is_a: CHEBI:36587 ! organic oxo compound
+is_a: CHEBI:36963 ! organooxygen compound
+relationship: BFO:0000051 CHEBI:23019 ! has part carbonyl group
+
+[Term]
+id: CHEBI:64709
+name: organic acid
+def: "Any organic molecular entity that is acidic and contains carbon in covalent linkage." []
+subset: 3:STAR
+synonym: "organic acids" RELATED [chebi]
+is_a: CHEBI:50860 ! organic molecular entity
+
+[Term]
+id: CHEBI:33575
+name: carboxylic acid
+alt_id: CHEBI:13428
+alt_id: CHEBI:13627
+alt_id: CHEBI:23027
+def: "A carbon oxoacid acid carrying at least one ‒C(=O)OH group and having the structure RC(=O)OH, where R is any any monovalent functional group. Carboxylic acids are the most common type of organic acid." []
+subset: 3:STAR
+synonym: "acide carboxylique" RELATED [iupac]
+synonym: "acides carboxyliques" RELATED [iupac]
+synonym: "acido carboxilico" RELATED [iupac]
+synonym: "acidos carboxilicos" RELATED [iupac]
+synonym: "Carbonsaeure" RELATED [chebi]
+synonym: "Carbonsaeuren" RELATED [chebi]
+synonym: "carboxylic acid" EXACT IUPAC:NAME [IUPAC]
+synonym: "carboxylic acid" RELATED IUPAC:NAME [iupac]
+synonym: "carboxylic acids" EXACT IUPAC:NAME [IUPAC]
+synonym: "carboxylic acids" RELATED IUPAC:NAME [iupac]
+synonym: "Karbonsaeure" RELATED [chebi]
+synonym: "RC(=O)OH" RELATED [iupac]
+xref: pubmed:17147560 {source="pubmed"}
+xref: pubmed:18433345 {source="pubmed"}
+xref: wikipedia.en:Carboxylic_acid {source="wikipedia.en"}
+is_a: CHEBI:35605 ! carbon oxoacid
+is_a: CHEBI:36586 ! carbonyl compound
+is_a: CHEBI:64709 ! organic acid
+relationship: BFO:0000051 CHEBI:46883 ! has part carboxy group
+relationship: RO:0018034 CHEBI:29067 ! is conjugate acid of carboxylic acid anion
+property_value: chemrof:charge "0" xsd:integer
+property_value: chemrof:generalized_empirical_formula "CHO2R" xsd:string
+property_value: chemrof:mass "45.017" xsd:decimal
+property_value: chemrof:monoisotopic_mass "44.99765" xsd:decimal
+property_value: chemrof:smiles_string "*C(=O)O" xsd:string
+
+[Term]
+id: CHEBI:33859
+name: aromatic carboxylic acid
+alt_id: CHEBI:13817
+alt_id: CHEBI:13821
+alt_id: CHEBI:2830
+def: "Any carboxylic acid in which the carboxy group is directly bonded to an aromatic ring." []
+subset: 3:STAR
+synonym: "aromatic carboxylic acids" RELATED [chebi]
+is_a: CHEBI:33575 ! carboxylic acid
+is_a: CHEBI:33659 ! organic aromatic compound
+relationship: RO:0018034 CHEBI:91007 ! is conjugate acid of aromatic carboxylate
+
+[Term]
+id: CHEBI:26512
+name: quinolinemonocarboxylic acid
+def: "Any aromatic carboxylic acid that contains a quinoline moiety that is substituted by one carboxy substituent." []
+subset: 3:STAR
+synonym: "quinolinemonocarboxylic acids" RELATED [chebi]
+is_a: CHEBI:26513 ! quinolines
+is_a: CHEBI:33859 ! aromatic carboxylic acid
+relationship: RO:0018034 CHEBI:38773 ! is conjugate acid of quinolinemonocarboxylate
+
+[Term]
+id: CHEBI:50047
+name: organic amino compound
+def: "A compound formally derived from ammonia by replacing one, two or three hydrogen atoms by organyl groups." []
+subset: 3:STAR
+synonym: "organic amino compounds" RELATED [chebi]
+is_a: CHEBI:35352 ! organonitrogen compound
+is_a: CHEBI:50860 ! organic molecular entity
+relationship: RO:0000087 CHEBI:39142 ! has role Bronsted base
+relationship: RO:0018040 CHEBI:16134 ! has parent hydride ammonia
+
+[Term]
+id: CHEBI:33860
+name: aromatic amine
+alt_id: CHEBI:13827
+alt_id: CHEBI:22622
+alt_id: CHEBI:22646
+alt_id: CHEBI:2834
+alt_id: CHEBI:2863
+def: "An amino compound in which the amino group is linked directly to an aromatic system." []
+subset: 3:STAR
+synonym: "aromatic amines" RELATED [chebi]
+synonym: "aryl amine" RELATED [chebi]
+synonym: "aryl amines" RELATED [chebi]
+synonym: "arylamine" RELATED [chebi]
+synonym: "arylamines" RELATED [chebi]
+is_a: CHEBI:33659 ! organic aromatic compound
+is_a: CHEBI:50047 ! organic amino compound
+
+[Term]
+id: CHEBI:36709
+name: aminoquinoline
+def: "Any member of the class of quinolines in which the quinoline skeleton is substituted by one or more amino or substituted-amino groups." []
+subset: 3:STAR
+synonym: "aminoquinoline" RELATED [chebi]
+synonym: "aminoquinolines" RELATED [chebi]
+is_a: CHEBI:26513 ! quinolines
+is_a: CHEBI:33860 ! aromatic amine
+
+[Term]
+id: CHEBI:33661
+name: monocyclic compound
+subset: 3:STAR
+synonym: "monocyclic compounds" RELATED [chebi]
+is_a: CHEBI:33595 ! cyclic compound
+
+[Term]
+id: CHEBI:33670
+name: heteromonocyclic compound
+subset: 3:STAR
+synonym: "heteromonocyclic compound" EXACT IUPAC:NAME [IUPAC]
+synonym: "heteromonocyclic compound" RELATED IUPAC:NAME [iupac]
+synonym: "heteromonocyclic compounds" EXACT IUPAC:NAME [IUPAC]
+synonym: "heteromonocyclic compounds" RELATED IUPAC:NAME [iupac]
+is_a: CHEBI:33661 ! monocyclic compound
+is_a: CHEBI:5686 ! heterocyclic compound
+
+[Term]
+id: CHEBI:25693
+name: organic heteromonocyclic compound
+subset: 3:STAR
+synonym: "organic heteromonocyclic compounds" RELATED [chebi]
+is_a: CHEBI:24532 ! organic heterocyclic compound
+is_a: CHEBI:33670 ! heteromonocyclic compound
+
+[Term]
+id: CHEBI:26144
+name: piperazines
+subset: 3:STAR
+is_a: CHEBI:25693 ! organic heteromonocyclic compound
+is_a: CHEBI:38101 ! organonitrogen heterocyclic compound
+
+[Term]
+id: CHEBI:50996
+name: tertiary amino compound
+def: "A compound formally derived from ammonia by replacing three hydrogen atoms by organyl groups." []
+subset: 3:STAR
+synonym: "tertiary amino compounds" RELATED [chebi]
+is_a: CHEBI:50047 ! organic amino compound
+relationship: RO:0018033 CHEBI:137982 ! is conjugate base of tertiary ammonium ion
+
+[Term]
+id: CHEBI:46848
+name: N-arylpiperazine
+subset: 3:STAR
+synonym: "N-arylpiperazines" RELATED [chebi]
+is_a: CHEBI:26144 ! piperazines
+is_a: CHEBI:33860 ! aromatic amine
+is_a: CHEBI:50996 ! tertiary amino compound
+
+[Term]
+id: CHEBI:33597
+name: homocyclic compound
+def: "A cyclic compound having as ring members atoms of the same element only." []
+subset: 3:STAR
+synonym: "homocyclic compound" EXACT IUPAC:NAME [IUPAC]
+synonym: "homocyclic compound" RELATED IUPAC:NAME [iupac]
+synonym: "homocyclic compounds" EXACT IUPAC:NAME [IUPAC]
+synonym: "homocyclic compounds" RELATED IUPAC:NAME [iupac]
+synonym: "isocyclic compounds" RELATED [iupac]
+is_a: CHEBI:33595 ! cyclic compound
+
+[Term]
+id: CHEBI:33598
+name: carbocyclic compound
+def: "A homocyclic compound in which all of the ring members are carbon atoms." []
+subset: 3:STAR
+synonym: "carbocycle" RELATED [chebi]
+synonym: "carbocyclic compound" EXACT IUPAC:NAME [IUPAC]
+synonym: "carbocyclic compound" RELATED IUPAC:NAME [iupac]
+synonym: "carbocyclic compounds" EXACT IUPAC:NAME [IUPAC]
+synonym: "carbocyclic compounds" RELATED IUPAC:NAME [iupac]
+is_a: CHEBI:33597 ! homocyclic compound
+is_a: CHEBI:33832 ! organic cyclic compound
+
+[Term]
+id: CHEBI:51454
+name: cyclopropanes
+def: "Cyclopropane and its derivatives formed by substitution." []
+subset: 3:STAR
+is_a: CHEBI:33598 ! carbocyclic compound
+
+[Term]
+id: CHEBI:24531
+name: heterocyclic antibiotic
+subset: 1:STAR
+synonym: "heterocyclic antibiotics" RELATED [chebi]
+is_a: CHEBI:24532 ! organic heterocyclic compound
+relationship: RO:0000087 CHEBI:33281 ! has role antimicrobial agent
+
+[Term]
+id: CHEBI:25558
+name: organonitrogen heterocyclic antibiotic
+subset: 3:STAR
+synonym: "organonitrogen heterocyclic antibiotics" RELATED [chebi]
+is_a: CHEBI:24531 ! heterocyclic antibiotic
+is_a: CHEBI:38101 ! organonitrogen heterocyclic compound
+
+[Term]
+id: CHEBI:86324
+name: quinolone antibiotic
+def: "An organonitrogen heterocyclic antibiotic whose structure contains a quinolone or quinolone-related skeleton." []
+subset: 3:STAR
+synonym: "quinolone antibiotics" RELATED [chebi]
+is_a: CHEBI:25558 ! organonitrogen heterocyclic antibiotic
+relationship: RO:0000087 CHEBI:33281 ! has role antimicrobial agent
+
+[Term]
+id: CHEBI:24471
+name: halogen molecular entity
+subset: 3:STAR
+synonym: "halogen compounds" RELATED [chebi]
+synonym: "halogen molecular entities" RELATED [chebi]
+synonym: "halogen molecular entity" RELATED [chebi]
+is_a: CHEBI:33675 ! p-block molecular entity
+relationship: BFO:0000051 CHEBI:24473 ! has part halogen
+
+[Term]
+id: CHEBI:37578
+name: halide
+def: "Any heteroatomic molecular entity that is a chemical compound of halogen with other chemical elements." []
+subset: 3:STAR
+synonym: "halides" RELATED [chebi]
+xref: wikipedia.en:Halide {source="wikipedia.en"}
+is_a: CHEBI:24471 ! halogen molecular entity
+is_a: CHEBI:37577 ! heteroatomic molecular entity
+
+[Term]
+id: CHEBI:17792
+name: organohalogen compound
+alt_id: CHEBI:13444
+alt_id: CHEBI:36684
+alt_id: CHEBI:8767
+def: "A compound containing at least one carbon-halogen bond (where X is a halogen atom)." []
+subset: 3:STAR
+synonym: "organic halide" RELATED [kegg.compound]
+synonym: "organic halides" RELATED [chebi]
+synonym: "organohalogen compounds" RELATED [chebi]
+synonym: "RX" RELATED [uniprot_ft]
+synonym: "RX" RELATED [kegg.compound]
+xref: kegg.compound:C01322 {source="kegg.compound"}
+xref: metacyc.compound:Organohalogen-Compounds {source="metacyc.compound"}
+is_a: CHEBI:33285 ! heteroorganic entity
+is_a: CHEBI:37578 ! halide
+property_value: chemrof:charge "0" xsd:integer
+property_value: chemrof:generalized_empirical_formula "RX" xsd:string
+property_value: chemrof:smiles_string "**" xsd:string
+
+[Term]
+id: CHEBI:24062
+name: fluorine molecular entity
+subset: 3:STAR
+synonym: "fluorine compounds" RELATED [chebi]
+synonym: "fluorine molecular entities" RELATED [chebi]
+synonym: "fluorine molecular entity" RELATED [chebi]
+is_a: CHEBI:24471 ! halogen molecular entity
+relationship: BFO:0000051 CHEBI:24061 ! has part fluorine atom
+
+[Term]
+id: CHEBI:37143
+name: organofluorine compound
+def: "An organofluorine compound is a compound containing at least one carbon-fluorine bond." []
+subset: 3:STAR
+synonym: "fluoroorganic compound" RELATED [chebi]
+synonym: "fluoroorganic compounds" RELATED [chebi]
+synonym: "fluoroorganics" RELATED [chebi]
+synonym: "fluororganische Verbindungen" RELATED [chebi]
+synonym: "organofluorine compound" RELATED [chebi]
+synonym: "organofluorine compounds" RELATED [chebi]
+xref: metacyc.compound:Fluorides {source="metacyc.compound"}
+is_a: CHEBI:17792 ! organohalogen compound
+is_a: CHEBI:24062 ! fluorine molecular entity
+property_value: chemrof:charge "0" xsd:integer
+property_value: chemrof:generalized_empirical_formula "FR" xsd:string
+property_value: chemrof:mass "18.998" xsd:decimal
+property_value: chemrof:monoisotopic_mass "18.9984" xsd:decimal
+property_value: chemrof:smiles_string "*F" xsd:string
+
+[Term]
+id: CHEBI:87211
+name: fluoroquinolone antibiotic
+def: "An organonitrogen heterocyclic antibiotic containing a quinolone (or quinolone-like) moiety and which have a fluorine atom attached to the central ring system." []
+subset: 3:STAR
+synonym: "fluoroquinolone antibiotics" RELATED [chebi]
+xref: pubmed:24947193 {source="pubmed"}
+xref: pubmed:25226071 {source="pubmed"}
+xref: pubmed:8386356 {source="pubmed"}
+is_a: CHEBI:25558 ! organonitrogen heterocyclic antibiotic
+is_a: CHEBI:37143 ! organofluorine compound
+relationship: RO:0000087 CHEBI:33281 ! has role antimicrobial agent
+
+[Term]
+id: CHEBI:100241
+name: ciprofloxacin
+alt_id: CHEBI:102718
+alt_id: CHEBI:3717
+alt_id: CHEBI:41638
+def: "A  quinolone that is quinolin-4(1<em>H</em>)-one bearing cyclopropyl, carboxylic acid, fluoro and piperazin-1-yl substituents at positions 1, 3, 6 and 7, respectively." []
+subset: 3:STAR
+synonym: "1-cyclopropyl-6-fluoro-1,4-dihydro-4-oxo-7-(1-piperazinyl)-3-quinolinecarboxylic acid" RELATED [chemidplus]
+synonym: "1-cyclopropyl-6-fluoro-4-oxo-7-(piperazin-1-yl)-1,4-dihydroquinoline-3-carboxylic acid" EXACT IUPAC:NAME [IUPAC]
+synonym: "1-cyclopropyl-6-fluoro-4-oxo-7-(piperazin-1-yl)-1,4-dihydroquinoline-3-carboxylic acid" RELATED [chembl]
+synonym: "1-cyclopropyl-6-fluoro-4-oxo-7-(piperazin-1-yl)-1,4-dihydroquinoline-3-carboxylic acid" RELATED IUPAC:NAME [iupac]
+synonym: "1-Cyclopropyl-6-fluoro-4-oxo-7-piperazin-1-yl-1,4-dihydro-quinoline-3-carboxylic acid" RELATED [chembl]
+synonym: "1-CYCLOPROPYL-6-FLUORO-4-OXO-7-PIPERAZIN-1-YL-1,4-DIHYDROQUINOLINE-3-CARBOXYLIC ACID" RELATED [pdb-ccd]
+synonym: "1-cyclopropyl-6-fluoro-4-oxo-7-piperazin-1-ylquinoline-3-carboxylic acid" RELATED [chembl]
+synonym: "1-Cyclopropyl-6-fluoro-7-(4-methyl-piperazin-1-yl)-4-oxo-1,4-dihydro-quinoline-3-carboxylic acid" RELATED [chembl]
+synonym: "1-cyclopropyl-6-fluoro-7-hexahydro-1-pyrazinyl-4-oxo-1,4-dihydro-3-quinolinecarboxylic acid" RELATED [chembl]
+synonym: "Ciprofloxacin" RELATED [kegg.compound]
+synonym: "ciprofloxacin" RELATED http://purl.obolibrary.org/obo/chebi/INN [chemidplus]
+synonym: "ciprofloxacin" RELATED [chembl]
+synonym: "ciprofloxacine" RELATED http://purl.obolibrary.org/obo/chebi/INN [chemidplus]
+synonym: "ciprofloxacino" RELATED http://purl.obolibrary.org/obo/chebi/INN [chemidplus]
+synonym: "ciprofloxacinum" RELATED http://purl.obolibrary.org/obo/chebi/INN [chemidplus]
+xref: cas:85721-33-1 {source="cas"}
+xref: drugbank:DB00537 {source="drugbank"}
+xref: drugcentral:659 {source="drugcentral"}
+xref: hmdb:HMDB0014677 {source="hmdb"}
+xref: kegg.compound:C05349 {source="kegg.compound"}
+xref: kegg.drug:D00186 {source="kegg.drug"}
+xref: lincs.smallmolecule:LSM-5226 {source="lincs.smallmolecule"}
+xref: patent:DE3142854 {source="patent"}
+xref: patent:US4670444 {source="patent"}
+xref: pdb-ccd:CPF {source="pdb-ccd"}
+xref: pubmed:10397494 {source="pubmed"}
+xref: pubmed:10737746 {source="pubmed"}
+xref: reaxys:3568352 {source="reaxys"}
+xref: vsdb:1763 {source="vsdb"}
+xref: wikipedia.en:Ciprofloxacin {source="wikipedia.en"}
+is_a: CHEBI:23765 ! quinolone
+is_a: CHEBI:26512 ! quinolinemonocarboxylic acid
+is_a: CHEBI:36709 ! aminoquinoline
+is_a: CHEBI:46848 ! N-arylpiperazine
+is_a: CHEBI:51454 ! cyclopropanes
+is_a: CHEBI:86324 ! quinolone antibiotic
+is_a: CHEBI:87211 ! fluoroquinolone antibiotic
+relationship: RO:0000087 CHEBI:22587 ! has role antiviral agent
+relationship: RO:0000087 CHEBI:33281 ! has role antimicrobial agent
+relationship: RO:0000087 CHEBI:33282 ! has role antibacterial agent
+relationship: RO:0000087 CHEBI:35441 ! has role antiinfective agent
+relationship: RO:0000087 CHEBI:35610 ! has role antineoplastic agent
+relationship: RO:0000087 CHEBI:35620 ! has role vasodilator agent
+relationship: RO:0000087 CHEBI:35703 ! has role xenobiotic
+relationship: RO:0000087 CHEBI:35842 ! has role antirheumatic drug
+relationship: RO:0000087 CHEBI:36047 ! has role antibacterial drug
+relationship: RO:0000087 CHEBI:49201 ! has role anti-ulcer drug
+relationship: RO:0000087 CHEBI:50750 ! has role EC 5.99.1.3 [DNA topoisomerase (ATP-hydrolysing)] inhibitor
+relationship: RO:0000087 CHEBI:53559 ! has role topoisomerase IV inhibitor
+relationship: RO:0000087 CHEBI:55323 ! has role antidiarrhoeal drug
+relationship: RO:0000087 CHEBI:59517 ! has role DNA synthesis inhibitor
+relationship: RO:0000087 CHEBI:66981 ! has role ophthalmology drug
+relationship: RO:0000087 CHEBI:78298 ! has role environmental contaminant
+relationship: RO:0018033 CHEBI:192486 ! is conjugate base of ciprofloxacin(1+)
+relationship: RO:0018036 CHEBI:192484 ! is tautomer of ciprofloxacin zwitterion
+property_value: chemrof:charge "0" xsd:integer
+property_value: chemrof:generalized_empirical_formula "C17H18FN3O3" xsd:string
+property_value: chemrof:inchi_key_string "MYSWGUAQZAJSOK-UHFFFAOYSA-N" xsd:string
+property_value: chemrof:inchi_string "InChI=1S/C17H18FN3O3/c18-13-7-11-14(8-15(13)20-5-3-19-4-6-20)21(10-1-2-10)9-12(16(11)22)17(23)24/h7-10,19H,1-6H2,(H,23,24)" xsd:string
+property_value: chemrof:mass "331.347" xsd:decimal
+property_value: chemrof:monoisotopic_mass "331.13322" xsd:decimal
+property_value: chemrof:smiles_string "O=C(O)c1cn(C2CC2)c2cc(N3CCNCC3)c(F)cc2c1=O" xsd:string
+

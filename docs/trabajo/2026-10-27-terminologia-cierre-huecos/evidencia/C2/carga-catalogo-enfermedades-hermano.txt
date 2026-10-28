@@ -83,5 +83,5 @@ Totales: {
       "externalMaps": 0
     }
   },
-  "segundos": 26
+  "segundos": 43
 }

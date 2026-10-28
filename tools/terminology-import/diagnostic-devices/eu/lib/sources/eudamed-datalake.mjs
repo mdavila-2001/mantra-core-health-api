@@ -43,14 +43,18 @@ export function parsePage(body) {
   return { rows: body.value, nextLink: next };
 }
 
-/** El enlace de continuación tiene que apuntar al mismo origen y ruta, sin cambiar la consulta. */
+/**
+ * El enlace de continuación tiene que apuntar al mismo origen y ruta, sin
+ * cambiar la consulta. `$after` es el cursor de paginación del servicio (cambia
+ * en cada página: es lo único que puede variar).
+ */
 export function assertSafeNext(nextLink, previousUrl) {
   const prev = new URL(previousUrl);
   const next = new URL(nextLink);
   if (next.origin !== prev.origin || next.pathname !== prev.pathname)
     throw new Error(`nextLink fuera de la consulta original: ${nextLink}`);
   for (const [k, v] of prev.searchParams)
-    if (next.searchParams.get(k) !== v)
+    if (k !== '$after' && next.searchParams.get(k) !== v)
       throw new Error(`nextLink cambió el parámetro ${k}`);
   return next.toString();
 }

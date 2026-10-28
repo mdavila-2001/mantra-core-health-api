@@ -22,6 +22,7 @@ import { buildDoid, buildEfo, buildIcd11Mms, buildMondo, buildOrphanet, readOrph
 import { buildGard, buildMesh, buildNando, buildNcitFlat, buildOncotree, parseGardCsv, parseNcitCuiMap, parseNcitFlat } from './lib/records-extra.mjs';
 import { citeHpoAnnotations, citeHpoCommonDiseases, citePhenopackets, icd10KeysFromWhoMap, icd10MultipleTargets, resolveDoidCode } from './lib/citations.mjs';
 import { attachMedlineplus, medlineplusMeshPairs } from './lib/medlineplus.mjs';
+import { buildMedlineplusGenetics, parseGhrConditions } from './lib/medlineplus-genetics.mjs';
 import { readDescriptors, readSupplementals } from './lib/mesh.mjs';
 import { resolveXrefs } from './lib/resolve.mjs';
 import { SNAPSHOT_DIR, writeSnapshot } from './lib/snapshot.mjs';
@@ -107,6 +108,8 @@ async function main() {
     GARD.version,
   );
   console.log(`[gard] ${gard.records.length} (${JSON.stringify(gard.counts)})`);
+  const ghr = buildMedlineplusGenetics(parseGhrConditions(m['medlineplus-genetics'].path), m['medlineplus-genetics'], '2026-10-27');
+  console.log(`[medlineplus-genetics] ${ghr.records.length}`);
   const nando = buildNando(readFileSync(m.nando.path, 'utf8'), m.nando);
   console.log(`[nando] ${nando.records.length} (versión ${nando.version}; licencia declarada en el archivo: ${nando.header?.license})`);
   const oncotree = buildOncotree(JSON.parse(readFileSync(m.oncotree.path, 'utf8')), m.oncotree, '2025-10-03');
@@ -123,7 +126,7 @@ async function main() {
   );
 
   // MeSH y NCIt traen, además de su nomenclatura propia, los UI/códigos que citan las demás fuentes.
-  const citers = [...mondo.records, ...orphanet.records, ...doid.records, ...icd11.records, ...efo.records, ...gard.records, ...nando.records, ...oncotree.records];
+  const citers = [...mondo.records, ...orphanet.records, ...doid.records, ...icd11.records, ...efo.records, ...gard.records, ...ghr.records, ...nando.records, ...oncotree.records];
   const citedMesh = citedCodes(citers, citations, 'mesh');
   const citedNcit = citedCodes(citers, citations, 'ncit-disease');
   const descriptors = await readDescriptors(join(m['mesh-desc'].unzippedTo, 'desc2026.xml'));
@@ -148,7 +151,7 @@ async function main() {
   );
   for (const r of icd11.records) r.xrefs = r.xrefs.filter((x) => x.cs !== 'icd11-foundation' || citedFoundation.has(x.code));
 
-  const records = [...mondo.records, ...orphanet.records, ...doid.records, ...ncit.records, ...ncit.xrefRecords, ...icd11.records, ...efo.records, ...mesh.records, ...gard.records, ...nando.records, ...oncotree.records];
+  const records = [...mondo.records, ...orphanet.records, ...doid.records, ...ncit.records, ...ncit.xrefRecords, ...icd11.records, ...efo.records, ...mesh.records, ...gard.records, ...ghr.records, ...nando.records, ...oncotree.records];
   const who10 = icd10KeysFromWhoMap(mapping('10To11MapToOneCategory.txt'));
   const multiple = icd10MultipleTargets(mapping('10To11MapToMultipleCategories.txt'));
   const mmsCodes = new Set(icd11.records.map((r) => r.code));
@@ -186,6 +189,7 @@ async function main() {
     'efo-disease': fileOf('efo'),
     mesh: [...fileOf('mesh-desc', 'mesh-supp', 'medlineplus-topics'), ...keyFiles.filter((k) => ['mondo', 'orphanet-es-product1', 'doid', 'hpo-annotations'].includes(k.key))],
     gard: fileOf('gard-list', 'gard-trimmed', 'gard-singles'),
+    'medlineplus-genetics': fileOf('medlineplus-genetics'),
     nando: fileOf('nando'),
     oncotree: fileOf('oncotree'),
     ...Object.fromEntries([...byCs.keys()].filter((cs) => SYSTEMS[cs]?.keyOnly).map((cs) => [cs, keyFiles])),
@@ -203,6 +207,7 @@ async function main() {
       'efo-disease': efo.version,
       mesh: mesh.version,
       gard: gard.version,
+      'medlineplus-genetics': ghr.version,
       nando: nando.version,
       oncotree: oncotree.version,
       keys: KEY_VERSION,

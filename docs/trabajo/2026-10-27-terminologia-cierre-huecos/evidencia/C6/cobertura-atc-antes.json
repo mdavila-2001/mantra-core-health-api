@@ -1,0 +1,41 @@
+{
+  "assertions": 18032,
+  "assertionsWithAtc": 0,
+  "drugsDistinct": 2414,
+  "drugsSingleIngredient": 2403,
+  "drugsSingleIngredientWithAtc": 0,
+  "distinctAtcLevel5Codes": 0,
+  "atcAddedByCrosswalkVia": {},
+  "bySource": {
+    "labeledin": {
+      "assertions": 2850,
+      "withAtc": 0,
+      "atcFromSourceCode": 0,
+      "atcFromCrosswalk": 0
+    },
+    "pharmacotherapydb": {
+      "assertions": 1388,
+      "withAtc": 0,
+      "atcFromSourceCode": 0,
+      "atcFromCrosswalk": 0
+    },
+    "drugcentral-2016": {
+      "assertions": 9094,
+      "withAtc": 0,
+      "atcFromSourceCode": 0,
+      "atcFromCrosswalk": 0
+    },
+    "drugmechdb": {
+      "assertions": 4662,
+      "withAtc": 0,
+      "atcFromSourceCode": 0,
+      "atcFromCrosswalk": 0
+    },
+    "maxo": {
+      "assertions": 38,
+      "withAtc": 0,
+      "atcFromSourceCode": 0,
+      "atcFromCrosswalk": 0
+    }
+  }
+}

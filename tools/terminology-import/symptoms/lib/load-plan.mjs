@@ -128,6 +128,7 @@ export function propertiesFor(row, labelOf) {
     ...str('source_url', row.sourceUri),
     ...str('source_version', row.version),
     ...str('source_retrieved_at', row.retrievedAt),
+    ...str('source_input_sha256', row.sourceFileSha256 ?? row.inputSha256 ?? null),
     ...str('source_license', row.license),
     ...js('source_definition', row.definition ? { lang: row.definitionLang, text: row.definition, refs: row.definitionRefs ?? [] } : null),
     ...js('es_name_provenance', row.esName ? { kind: row.esNameKind, source: 'HPO Translation Project — hp-es.babelon.tsv (translation_status = OFFICIAL)', url: 'https://github.com/obophenotype/hpo-translations/blob/main/babelon/hp-es.babelon.tsv' } : null),

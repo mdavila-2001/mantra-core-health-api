@@ -1,0 +1,65 @@
+--- conceptos por code system
+        internal_code        | count 
+-----------------------------+-------
+ cie10es-diagnosticos-2026   | 12051
+ nci-diccionario-cancer-es   |  9404
+ cima-vtm                    |  2381
+ wikidata-anatomia           |  1905
+ medlineplus-es              |  1016
+ wikidata-medicamento        |   447
+ wikidata-tratamiento        |   326
+ wikidata-sintoma            |   318
+ medlineplus-es-lab          |   302
+ nci-diccionario-genetica-es |   243
+ wikidata-prueba             |   121
+ wikidata-especialidad       |   103
+ mantra-core                 |    12
+(13 rows)
+
+--- huerfanos: conceptos sin designacion preferida ES
+ count 
+-------
+     0
+(1 row)
+
+--- huerfanos: conceptos sin miembro de glossary-all-terms
+ count 
+-------
+     0
+(1 row)
+
+--- duplicados: (code_system_version, code) repetidos
+ count 
+-------
+     0
+(1 row)
+
+--- duplicados: slug repetido
+ count 
+-------
+     0
+(1 row)
+
+--- nulos indebidos: display vacio / definicion vacia
+ display_vacio | definicion_vacia 
+---------------+------------------
+             0 |                0
+(1 row)
+
+--- nulos indebidos: procedencia ausente (source_url, source_retrieved_at, source_license)
+ ok | count 
+----+-------
+(0 rows)
+
+--- relaciones: extremos inexistentes
+ count 
+-------
+     0
+(1 row)
+
+--- lotes de importacion
+ count 
+-------
+    24
+(1 row)
+

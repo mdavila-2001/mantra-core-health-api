@@ -23,6 +23,7 @@ import pg from 'pg';
 import { existsSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { nowIso, readNdjson, writeJson } from '../lib/glossary-es/common.mjs';
+import { hpoApproved } from './lib/approvals.mjs';
 import { DB_CONFIG, conceptIdsByCode, insertMany } from './lib/db.mjs';
 import { CODE_SYSTEMS, CONCEPT, md5uuid } from './lib/load-plan.mjs';
 import { OUT_DIR } from './lib/sources.mjs';
@@ -72,6 +73,7 @@ async function main() {
     writeJson(join(OUT_DIR, 'wikidata-crosswalk.dry-run.json', ), { generatedAt: nowIso(), rows: rows.length, hpoTerms: byHpo.size, unresolved: rows.filter((r) => !r.hpo).length }, true);
     return;
   }
+  if (!hpoApproved()) return; // escribe propiedades sobre conceptos HPO
   const client = new pg.Client(DB_CONFIG);
   await client.connect();
   try {

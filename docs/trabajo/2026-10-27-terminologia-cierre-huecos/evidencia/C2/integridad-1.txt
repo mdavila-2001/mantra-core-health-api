@@ -123,6 +123,6 @@ Pager usage is off.
 == 17. tamaño de la base
  tamano 
 --------
- 932 MB
+ 933 MB
 (1 row)
 

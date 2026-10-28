@@ -18,28 +18,28 @@
     {
       "name": "crosswalk-medgen-cui.ndjson",
       "rows": 1790,
-      "bytes": 1033804,
-      "sha256": "0f3d31192985ec8e03b6a37e38d7e7a68fad9a4c5488eedad2dc6bf1706e52fe",
+      "bytes": 1178794,
+      "sha256": "247eb5a7b9e92fe2ae7af537d8d54063977d978181d07dc3bb84f6e6c705875a",
       "parts": [
         {
           "file": "crosswalk-medgen-cui.ndjson.gz",
           "rows": 1790,
-          "gzBytes": 59599,
-          "gzSha256": "95b299f22a9ea8effdbd60100d47b0d8f18ece96995928245b4d878639df6d8d"
+          "gzBytes": 60068,
+          "gzSha256": "7002cb0e611cdde8b93357272391d2819ffda44f98dbc03f3f72dedaa48f8e32"
         }
       ]
     },
     {
       "name": "crosswalk-wikidata-hpo.ndjson",
       "rows": 4876,
-      "bytes": 2500496,
-      "sha256": "54f4ccd1dbaf5ce8fe322741785bbbd1aab18d2f23775d4c55ac086efbce784e",
+      "bytes": 3105120,
+      "sha256": "24d1746b2d9166ec9c660a9f3382d855a9c455f384c30ac097ec18c9110531c1",
       "parts": [
         {
           "file": "crosswalk-wikidata-hpo.ndjson.gz",
           "rows": 4876,
-          "gzBytes": 185603,
-          "gzSha256": "2a1e9701c910369770e69db7249e26d4f409b85dbe454c67ad78ae57a5336983"
+          "gzBytes": 189557,
+          "gzSha256": "a86b454755b9efa6252841ad540b96dafa2a2a83fe7b1baac328e4e55a871309"
         }
       ]
     },
@@ -61,13 +61,13 @@
       "name": "gap-coverage.json",
       "rows": null,
       "bytes": 4100,
-      "sha256": "264d3ac24755a98cbcbfcdf872c4f4eb9e2a5ea29aa4c78c13d438c8b3e41408",
+      "sha256": "046a13dbb5c05716a7ef8ab57556144c0b607e4882cd89bef5489626fa8abb51",
       "parts": [
         {
           "file": "gap-coverage.json.gz",
           "rows": null,
           "gzBytes": 1450,
-          "gzSha256": "9d99a1d84ceb8d87d2f89451d754008b3ed71ca8d9564c9abc2c2561ed7a47fb"
+          "gzSha256": "abf00dc19c413cacd4210ca8905ced40c4fdd4a53ff848765bea0a36d2048ab5"
         }
       ]
     },
@@ -130,14 +130,14 @@
     {
       "name": "relations-orphadata.ndjson",
       "rows": 116661,
-      "bytes": 155616184,
-      "sha256": "6e28187f43f9a456ac0b36e7047258dd13d7eb4677ac07afdfb9191e783a14af",
+      "bytes": 174281944,
+      "sha256": "8bc4920752ef2d263b358b2bdb3e4b6229615c075958f53931aaf1f4a32fd7fd",
       "parts": [
         {
           "file": "relations-orphadata.ndjson.gz",
           "rows": 116661,
-          "gzBytes": 6690947,
-          "gzSha256": "5a9e011e7ddd07d7bc90661321f24dafa467e2537a2e81130eb0e3a888ecb1d8"
+          "gzBytes": 6956436,
+          "gzSha256": "868952b621fcfde4c1368d7b3125bb6172b5710c96acf228167d8a696eb4367b"
         }
       ]
     },
@@ -145,13 +145,13 @@
       "name": "saturation-gaps.json",
       "rows": null,
       "bytes": 4319,
-      "sha256": "d7c53ba08c286a2d4ff2e4129da4cbf6bd6c316d387bc22da9e16736b9856168",
+      "sha256": "62520fee5aac8975ee9a47bed53990c0dd67cdb2bb708633a2ad88dae16a9dff",
       "parts": [
         {
           "file": "saturation-gaps.json.gz",
           "rows": null,
-          "gzBytes": 1335,
-          "gzSha256": "a743190670cb133291d30b36e26e785907630c262d44986aaabff31a82a6fcaf"
+          "gzBytes": 1336,
+          "gzSha256": "c9921e0da45a7ce1933d5f8d607a7d7349f09f3445cdadcc17a0cc64ebdfe076"
         }
       ]
     },
@@ -166,6 +166,20 @@
           "rows": null,
           "gzBytes": 484,
           "gzSha256": "17903e11bcc020c8529f15a5386263a7ea44c78c5450e4ecff658f480caf00e6"
+        }
+      ]
+    },
+    {
+      "name": "sources-manifest.json",
+      "rows": null,
+      "bytes": 10540,
+      "sha256": "a5b007e9af2d96a63ec89481c781781f49d86c9040e15d2b67570cf585e04d95",
+      "parts": [
+        {
+          "file": "sources-manifest.json.gz",
+          "rows": null,
+          "gzBytes": 3403,
+          "gzSha256": "63378b05d8858484daf15e85ee9e159a7c3f1bd5b7dc1a55870a08c06edb139b"
         }
       ]
     },
@@ -187,13 +201,13 @@
       "name": "terms-mesh-c23.ndjson",
       "rows": 966,
       "bytes": 1696699,
-      "sha256": "de3bc1b9523a6d9623451494619a96c11ac9eb2b6f79253604135b157440dfa8",
+      "sha256": "66c628ca83a8af7784717b65af2ddd69e21cce9dd959aa18af9d3a46228e8a74",
       "parts": [
         {
           "file": "terms-mesh-c23.ndjson.gz",
           "rows": 966,
-          "gzBytes": 226991,
-          "gzSha256": "ae62e01a52b6a967495305dc60cbbfc932a499c2205f926396dff5a6e144de43"
+          "gzBytes": 226993,
+          "gzSha256": "06129d4c693e115aec0814428074a90ad550bd668526a63b6887f3df6fcaef9e"
         }
       ]
     },
@@ -222,6 +236,20 @@
           "rows": 895,
           "gzBytes": 60471,
           "gzSha256": "00d0d669da60ca6f7fda2fff3ee629691d3f7b4fad617fcbd3fa26027100336f"
+        }
+      ]
+    },
+    {
+      "name": "wikidata-p3841-snapshot.json",
+      "rows": null,
+      "bytes": 1835201,
+      "sha256": "640281f13497bbfe99676f8d950260308fcdfd0b6df7020b68ca4cfa2a6307c7",
+      "parts": [
+        {
+          "file": "wikidata-p3841-snapshot.json.gz",
+          "rows": null,
+          "gzBytes": 140588,
+          "gzSha256": "49de778074c3afc2b4ebd74d77576bd95cdfff4529c7676225327476f8d11076"
         }
       ]
     }

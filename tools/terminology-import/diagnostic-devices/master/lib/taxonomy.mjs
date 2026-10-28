@@ -56,6 +56,26 @@ export const IVD_LICENCE_TYPES = Object.freeze({
   },
 });
 
+/**
+ * CND (Italia): la categoría W está titulada por el propio Ministero della
+ * Salute «DISPOSITIVI MEDICO-DIAGNOSTICI IN VITRO (D. Lgs. 332/2000)» (archivo
+ * DISPO_RDM_74, categoría W, leído el 2026-10-27). Las demás categorías
+ * (Z11/Z12 mezclan diagnóstico y terapia, igual que en la EMDN) no deciden.
+ */
+export const CND_IVD_CATEGORY = 'W';
+export const CND_IVD_TITLE = 'DISPOSITIVI MEDICO-DIAGNOSTICI IN VITRO (D. Lgs. 332/2000)';
+export const CND_URL =
+  'https://www.dati.salute.gov.it/it/dataset/classificazione-nazionale-dei-dispositivi-medici-cnd/';
+
+/**
+ * INVIMA (Colombia): el grupo con que el propio registro clasifica cada
+ * registro sanitario. Dos grupos son, por su título publicado, de diagnóstico
+ * in vitro; «MEDICO QUIRURGICOS» y «ODONTOLOGICOS» no deciden.
+ */
+export const INVIMA_IVD_GROUPS = Object.freeze(['REACTIVO DIAGNOSTICO', 'REACTIVOS IN VITRO']);
+export const INVIMA_URL = 'https://www.datos.gov.co/d/y4qt-w6tk';
+export const normalizeLabel = (s) => String(s ?? '').trim().replace(/\s+/g, ' ').toUpperCase();
+
 export const nodeKey = (system, code, name) =>
   `${system}|${code ?? `name:${(name ?? '').trim().toUpperCase()}`}`;
 
@@ -153,6 +173,22 @@ export class Taxonomy {
         });
       } else if (t.system === 'emdn' && t.code) {
         this.addEmdn(t.code, t.name, prov);
+      } else if (t.system === 'cnd' && t.code) {
+        this.addCnd(t.code, t.name, prov);
+      } else if (t.system === 'co:invima-grupo' && !existing) {
+        const ivd = INVIMA_IVD_GROUPS.includes(normalizeLabel(t.name));
+        this.addNode({
+          system: t.system,
+          code: t.code,
+          name: t.name,
+          definition: null,
+          parent: null,
+          diagnostic: ivd ? true : null,
+          branch: ivd ? 'ivd' : null,
+          basis: ivd ? 'invima-grupo-ivd' : null,
+          attributes: ivd ? { criterionUrl: INVIMA_URL } : {},
+          provenance: prov,
+        });
       } else if (!existing) {
         this.addNode({
           system: t.system,
@@ -201,6 +237,25 @@ export class Taxonomy {
       }
     }
     return keys;
+  }
+
+  addCnd(code, name, provenance) {
+    const ivd = code.startsWith(CND_IVD_CATEGORY);
+    return this.addNode({
+      system: 'cnd',
+      code,
+      name,
+      definition: null,
+      parent: emdnParent(code),
+      diagnostic: ivd ? true : null,
+      branch: ivd ? 'ivd' : null,
+      basis: ivd ? 'cnd-category-w' : null,
+      attributes: {
+        category: code.slice(0, 1),
+        ...(ivd ? { categoryTitle: CND_IVD_TITLE, criterionUrl: CND_URL } : {}),
+      },
+      provenance,
+    });
   }
 
   addEmdn(code, name, provenance) {

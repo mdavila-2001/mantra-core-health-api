@@ -1,0 +1,121 @@
+=== Tratamientos farmacológicos → terminology.* (CARGA REAL) ===
+[load] leyendo 19 partes versionadas de /home/user/mantra-core-health-api/tools/terminology-import/drug-treatments/data
+
+[load] destinos usados por sistema: {"RXCUI":["rxnorm_full"],"DRUGCENTRAL":[],"MESH":["mesh"],"CHEMBL":[],"UNII":[],"DRUGBANK":[],"CHEBI":[],"ATC":["atc-sample"],"UMLS":[],"MONDO":["mondo"],"DOID":[],"EFO":[],"NCIT":[],"OMIM":[],"ICD11":[],"ORPHA":[],"ICD10CM":["icd10cm"],"ICD10WHO":[]}
+[load] enlace: {"labeledin":{"assertions":2850,"drug":2811,"condition":1745,"both":1724},"pharmacotherapydb":{"assertions":1388,"drug":1370,"condition":1388,"both":1370},"drugcentral-2016":{"assertions":9094,"drug":8702,"condition":5592,"both":5308},"drugmechdb":{"assertions":4662,"drug":4536,"condition":4653,"both":4527},"maxo":{"assertions":38,"drug":31,"condition":35,"both":30},"medrt":{"assertions":30002,"drug":29673,"condition":29075,"both":28751},"chembl":{"assertions":60055,"drug":42015,"condition":60055,"both":42015},"drugcentral":{"assertions":38517,"drug":37699,"condition":21186,"both":20703},"wikidata":{"assertions":13506,"drug":13242,"condition":13174,"both":12916},"eeml":{"assertions":1068,"drug":959,"condition":0,"both":0},"ema":{"assertions":2514,"drug":2119,"condition":2424,"both":2042},"opentargets":{"assertions":2331,"drug":2065,"condition":2157,"both":1910},"civic":{"assertions":3147,"drug":0,"condition":3144,"both":0},"clinicaltrials":{"assertions":171847,"drug":138042,"condition":170940,"both":137289}}
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "result": [
+    {
+      "codeSystem": "drug-treatment-relation-types",
+      "concepts": 46,
+      "properties": 180,
+      "relationships": 0,
+      "read": 46
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-labeledin",
+      "concepts": 2850,
+      "properties": 45639,
+      "relationships": 19068,
+      "read": 2850
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-pharmacotherapydb",
+      "concepts": 1388,
+      "properties": 24984,
+      "relationships": 8558,
+      "read": 1388
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-drugcentral-2016",
+      "concepts": 9094,
+      "properties": 163692,
+      "relationships": 52346,
+      "read": 9094
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-drugmechdb",
+      "concepts": 4662,
+      "properties": 83916,
+      "relationships": 29185,
+      "read": 4662
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-maxo",
+      "concepts": 38,
+      "properties": 684,
+      "relationships": 162,
+      "read": 38
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-medrt",
+      "concepts": 30002,
+      "properties": 540036,
+      "relationships": 139222,
+      "read": 30002
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-chembl",
+      "concepts": 60055,
+      "properties": 1020935,
+      "relationships": 295637,
+      "read": 60055
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-drugcentral",
+      "concepts": 38517,
+      "properties": 693306,
+      "relationships": 200698,
+      "read": 38517
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-wikidata",
+      "concepts": 13506,
+      "properties": 243108,
+      "relationships": 94864,
+      "read": 13506
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-eeml",
+      "concepts": 1068,
+      "properties": 19224,
+      "relationships": 978,
+      "read": 1068
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-ema",
+      "concepts": 2514,
+      "properties": 45252,
+      "relationships": 6741,
+      "read": 2514
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-opentargets",
+      "concepts": 2331,
+      "properties": 42145,
+      "relationships": 11022,
+      "read": 2331
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-civic",
+      "concepts": 3147,
+      "properties": 56986,
+      "relationships": 4407,
+      "read": 3147
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-clinicaltrials",
+      "concepts": 171847,
+      "properties": 3093246,
+      "relationships": 735893,
+      "read": 171847
+    }
+  ],
+  "segundos": 296
+}
+
+real	4m56.021s
+user	1m10.698s
+sys	0m4.867s

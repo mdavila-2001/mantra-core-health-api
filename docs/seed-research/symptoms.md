@@ -124,7 +124,7 @@ cuentan relaciones de aspecto P no negadas. Cálculo reproducible en
 |---:|---|---:|---:|---|
 | 9 | Orphadata producto 4 EN+ES (2026-06-23): 4 357 enfermedades, 116 664 asociaciones | 0 | **0** | Cero por causa real: sus 116 612 pares distintos son **exactamente** los de HPOA (HPOA es la integración de este producto). Aporta 116 471 filas de evidencia directa de Orphanet (fecha de validación, PMID, marca de criterio diagnóstico en 1 132 y de signo patognomónico en 19) |
 | 10 | MeSH 2026 `desc2026.xml`, árbol C23: 31 110 descriptores leídos, 966 en C23 | 966 (481 sin equivalente publicado en otro sistema; 485 ya representados por xref o por el mismo CUI en MedGen, pero se cargan igual: es otro code system con su jerarquía) | 0 | C23.888 Signs and Symptoms 416 · C23.550 Pathologic Processes 425 · C23.300 Anatomical 118 · C23.149 Morphological 6 · cabeza 1 |
-| 11 | Wikidata P3841 (consulta del 2026-10-27): 4 876 ítems–HPO | 0 | 0 | Sólo cruce; 4 843 términos HPO del corpus con ítem |
+| 11 | Wikidata P3841 (consulta del 2026-10-28): 4 876 ítems–HPO | 0 | 0 | Sólo cruce; 4 843 términos HPO del corpus con ítem |
 | 12 | NCBI MedGen `MGCONSO` (sólo CUI y códigos de HPO/MeSH/NCIt) | 0 | 0 | 1 790 pares con el mismo CUI (HPO↔MeSH 575, HPO↔NCIt 734, MeSH↔NCIt 324, HPO↔SYMP 58, NCIt↔SYMP 52, MeSH↔SYMP 47) |
 | 13 | Re-descarga de las 9 fuentes originales | **0** | **0** | Cero por causa real: el SHA-256 de las 9 es idéntico al del 2026-10-24 (HPO 2026-09-01, HPOA 2026-09-02, SYMP 2026-07-30, DO 2026-09-30, Mondo 2026-10-06, NCIt 26.02d) |
 
@@ -293,7 +293,7 @@ OMS). Esta sesión **no** los duplica ni crea un `icd10-who` propio.
   `glossary-provenance`. Es el **mismo concepto** del sistema `hpo`, no una copia.
 - **Riesgo de duplicado, ahora medible.** Las fichas `wikidata-sintoma-*` del glosario
   no declaran su id HPO, pero Wikidata sí publica el cruce (P3841 *Human Phenotype
-  Ontology ID*): el 2026-10-27 `query.wikidata.org` responde 200 y se bajaron 4 876
+  Ontology ID*): el 2026-10-27/28 `query.wikidata.org` responde 200 y se bajaron 4 876
   declaraciones (4 799 ítems, 4 868 ids de HPO distintos; 4 843 términos HPO del corpus
   tienen ítem; 42 ids son `alt_id` de HPO y se remapean al vigente; **1 id está mal escrito
   en Wikidata** —`HP:000962`, ítem Q1640998— y se deja sin resolver, no se corrige).
@@ -362,8 +362,17 @@ glosario en esta base), y las columnas/valor-set que el modelo no tiene (§ Mode
    y Orphadata, y `STATISTICAL_LITERATURE` a lo extraído automáticamente (HPOA IEA,
    enfermedades comunes ITM/IEA: 160 018 filas). Cambiar la regla es una línea
    (`evidenceTierCode`, `lib/relations-plan.mjs`). Confirmar con el dueño del modelo (autor del commit e8bd453).
-2. **Licencia de HPO**: la leyenda de atribución y la versión tienen que mostrarse en el
-   producto; confirmar la lectura de la cláusula de «noncommercial use» (§ Huecos).
+2. **Licencia de HPO — NO resuelta, y la carga ahora la exige explícita.** La licencia de los
+   archivos (texto verificado el 2026-10-27) es de uso libre con tres condiciones: reconocer y citar
+   al HPO Consortium, indicar fecha/versión al mostrarlo públicamente y no alterar contenido ni
+   relaciones. Pero el *Warranty, Disclaimer, and Copyright Notice* del mismo sitio autoriza «personal,
+   noncommercial use» del contenido del sitio y lo declara «for research and educational purposes».
+   Si eso alcanza a los archivos descargables en un producto comercial es una lectura jurídica que no
+   me corresponde cerrar. Por eso `load-symptoms.mjs` (sistema `hpo`), `load-disease-phenotypes.mjs` y
+   los dos cruces **se niegan a escribir sin `--accept-hpo-terms`** (o `MANTRA_HPO_TERMS_ACCEPTED=1`,
+   salida 3): quien lo pase asume esa decisión. Las pruebas en la base desechable se corrieron con el
+   flag; sin él se negaron los cuatro (`evidencia/C2/hpo-sin-aprobacion.txt`). Confirmar con el
+   propietario / asesoría legal, y mostrar la leyenda de atribución en el producto.
 3. **MedGen CUI** (`load-medgen-crosswalk.mjs`): cargar o no los 1 790 cruces por CUI.
    Hay precedente (CUI como clave en `seed-diseases` y en los `xrefs` de NCIt/SYMP), pero
    el CUI es un identificador de UMLS.
@@ -392,12 +401,12 @@ node tools/terminology-import/symptoms/build-gap-sources.mjs            # Orphad
 node tools/terminology-import/symptoms/pack-data.mjs                    # regenera data/ para commitear
 node tools/terminology-import/symptoms/pack-data.mjs --only relations-orphadata,terms-mesh-c23,crosswalk-wikidata-hpo,crosswalk-medgen-cui,gap-coverage.json,saturation-gaps.json   # sólo lo nuevo
 node tools/terminology-import/symptoms/load-symptoms.mjs                # dry-run: plan y conteos
-node tools/terminology-import/symptoms/load-symptoms.mjs --apply        # términos (.env DB_*); --glossary opcional
+node tools/terminology-import/symptoms/load-symptoms.mjs --apply --accept-hpo-terms   # términos (.env DB_*); sin el flag se niega (decisión 2); --glossary opcional
 node tools/terminology-import/symptoms/load-disease-phenotypes.mjs      # dry-run del plan de relaciones
 node tools/terminology-import/symptoms/load-disease-phenotypes.mjs --check   # modelo + resolución, sin escribir
 node tools/terminology-import/symptoms/load-disease-phenotypes.mjs --apply   # exige concept_relationship_evidence (v4.2.50) y los value sets de evidencia/frecuencia
 node tools/terminology-import/symptoms/load-wikidata-crosswalk.mjs --apply   # HPO ↔ Wikidata P3841
 node tools/terminology-import/symptoms/load-medgen-crosswalk.mjs --apply     # cruces por CUI (decisión 3)
-node --test "tools/terminology-import/symptoms/test/*.test.mjs"         # 27 pruebas con recortes reales
-sh tools/terminology-import/symptoms/test/disposable-db/fresh-db.sh      # Postgres desechable: DDL + patch v4250 del modelo + scaffold (ver el script)
+node --test "tools/terminology-import/symptoms/test/*.test.mjs"         # 31 pruebas con recortes reales
+DISPOSABLE_DB=1 DB_NAME=…_test … sh tools/terminology-import/symptoms/test/disposable-db/fresh-db.sh   # Postgres desechable (se niega si no es local, no termina en _test o falta DISPOSABLE_DB=1): DDL + patch v4250 del modelo + scaffold (ver el script)
 ```

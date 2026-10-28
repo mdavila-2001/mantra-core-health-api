@@ -20,7 +20,11 @@ export function loadSeedRows(seedDir = SEED_DIR, categories = S4_CATEGORIES) {
     const pages = readdirSync(dir)
       .filter((f) => /^page-\d+\.json$/.test(f))
       .sort((a, b) => Number(a.match(/\d+/)[0]) - Number(b.match(/\d+/)[0]));
-    for (const page of pages) rows.push(...JSON.parse(readFileSync(join(dir, page), 'utf8')));
+    for (const page of pages) {
+      // Schema v2 de los shards: `{ categoryKey, page, items }`. La v1 era un arreglo pelado.
+      const json = JSON.parse(readFileSync(join(dir, page), 'utf8'));
+      rows.push(...(Array.isArray(json) ? json : json.items));
+    }
   }
   return rows;
 }

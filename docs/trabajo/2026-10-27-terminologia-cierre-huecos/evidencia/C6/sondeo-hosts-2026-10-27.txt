@@ -1,0 +1,33 @@
+200 2873B text/html  https://evs.nci.nih.gov/ftp1/MED-RT/
+200 2575384B application/zip  https://evs.nci.nih.gov/ftp1/MED-RT/Core_MEDRT_XML.zip
+200 113104B application/json;charset=utf-8  https://rxnav.nlm.nih.gov/REST/rxclass/allClasses.json?classTypes=ATC1-4
+200 48B application/json;charset=utf-8  https://rxnav.nlm.nih.gov/REST/version.json
+200 212B application/json  https://www.ebi.ac.uk/chembl/api/data/status.json
+200 5399B text/html;charset=UTF-8  https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/
+200 595B application/json  https://www.ebi.ac.uk/chembl/api/data/drug_indication.json?limit=1
+200 2615B text/html  https://platform.opentargets.org/api/v4/graphql
+200 10750B text/html;charset=UTF-8  https://ftp.ebi.ac.uk/pub/databases/opentargets/platform/
+200 197B application/sparql-results+json;charset=utf-8  https://query.wikidata.org/sparql?query=SELECT%20%3Fs%20WHERE%7B%3Fs%20wdt%3AP2176%20%3Fo%7D%20LIMIT%201&format=json
+200 27917B text/html; charset=utf-8  https://drugcentral.org/
+200 14772B text/html; charset=utf-8  https://drugcentral.org/download
+200 7690B application/json  https://clinicaltrials.gov/api/v2/studies?pageSize=1
+200 85750B text/html; charset=utf-8  https://www.ema.europa.eu/en/medicines/download-medicine-data
+403 162B text/html  https://civicdb.org/downloads
+200 34078B text/html; charset=utf-8  https://drugs.ncats.io/
+302 2774B text/html; charset=utf-8  https://ctdbase.org/downloads/
+200 10176B application/json  https://zenodo.org/api/records?q=chembl&size=1
+200 16448041B application/octet-stream  https://purl.obolibrary.org/obo/maxo.owl
+200 1107B text/html;charset=UTF-8  https://ftp.ncbi.nlm.nih.gov/pub/lu/LabeledIn/
+200 3933B application/json; charset=utf-8  https://api.fda.gov/drug/label.json?limit=1
+200 1295185B text/html; charset=UTF-8  https://list.essentialmeds.org/
+200 14461B text/html; charset=ISO-8859-1  https://www.whocc.no/atc_ddd_index/
+200 312952703B text/xml  https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.xml
+200 120696702B   https://nlmpubs.nlm.nih.gov/projects/mesh/rdf/2026/mesh2026.nt.gz
+200 1340B application/rdf+json;charset=utf-8  https://id.nlm.nih.gov/mesh/M0027589.json
+200 702B application/json;charset=utf-8  https://rxnav.nlm.nih.gov/REST/rxclass/class/byRxcui.json?rxcui=161&relaSource=ATC
+200 2B application/json;charset=utf-8  https://rxnav.nlm.nih.gov/REST/rxclass/classMembers.json?classId=N02BE01&relaSource=ATC
+200 123B application/json;charset=utf-8  https://rxnav.nlm.nih.gov/REST/rxclass/relaSources.json
+200 19908B text/html  https://lhncbc.nlm.nih.gov/RxNav/TermsofService.html
+200 21509B text/html  https://www.nlm.nih.gov/research/umls/rxnorm/docs/termsofservice.html
+302 2774B text/html; charset=utf-8  https://ctdbase.org/about/legal.jsp
+200 6676B application/xml; charset=utf-8  https://www.ebi.ac.uk/chembl/api/data/drug_indication/schema

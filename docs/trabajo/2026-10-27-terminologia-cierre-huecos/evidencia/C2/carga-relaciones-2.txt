@@ -40,5 +40,5 @@
     "evidence": 0
   },
   "remappedRelationships": 0,
-  "segundos": 40
+  "segundos": 42
 }

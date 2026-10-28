@@ -1,5 +1,5 @@
 // =============================================================================
-// Corpus de servicios por especialidad (puro): de las filas de cada fuente a
+// Corpus de servicios por especialidad (puro; sin fechas: `retrievedAt` vive en el manifiesto y en `meta`, así el hash del corpus no cambia con una descarga nueva): de las filas de cada fuente a
 // registros `{ servicio, evidencia[] }`, más los huecos y las frases sin regla.
 //
 // Entra al corpus sólo un servicio con al menos UNA especialidad del modelo
@@ -66,7 +66,7 @@ function applyPerformer(compiled, sourceKey, row, evidence, gaps, unmatched) {
   }
 }
 
-export function buildCorpus({ fonasaRows, cupsAgreed, cupsOnlyA = [], cups2025Rows = [], bo, retrievedAt, transports }, compiled) {
+export function buildCorpus({ fonasaRows, cupsAgreed, cupsOnlyA = [], cups2025Rows = [], bo, transports }, compiled) {
   const records = [];
   const gaps = new Tally();
   const unmatched = new Tally();
@@ -93,7 +93,7 @@ export function buildCorpus({ fonasaRows, cupsAgreed, cupsOnlyA = [], cups2025Ro
       codeSystem: SOURCES.fonasa.codeSystem,
       code: row.code,
       display: row.display,
-      source: sourceBlock(SOURCES.fonasa, { group: g.group, retrievedAt, transport: transports.fonasa }),
+      source: sourceBlock(SOURCES.fonasa, { group: g.group, transport: transports.fonasa }),
       reviewStatus: 'copy-verified',
       evidence,
     });
@@ -111,7 +111,7 @@ export function buildCorpus({ fonasaRows, cupsAgreed, cupsOnlyA = [], cups2025Ro
       codeSystem: SOURCES.cups.codeSystem,
       code: row.code,
       display: row.display,
-      source: sourceBlock(SOURCES.cups, { retrievedAt, transport: transports.cups }),
+      source: sourceBlock(SOURCES.cups, { transport: transports.cups }),
       reviewStatus: row.reviewStatus,
       evidence,
     });
@@ -129,7 +129,7 @@ export function buildCorpus({ fonasaRows, cupsAgreed, cupsOnlyA = [], cups2025Ro
       codeSystem: SOURCES.cups2025.codeSystem,
       code: row.code,
       display: row.display,
-      source: sourceBlock(SOURCES.cups2025, { chapter: row.chapter, retrievedAt, transport: transports.cups2025 }),
+      source: sourceBlock(SOURCES.cups2025, { chapter: row.chapter, transport: transports.cups2025 }),
       reviewStatus: 'official',
       evidence,
     });

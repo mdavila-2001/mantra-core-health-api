@@ -1,0 +1,20 @@
+fecha: 2026-10-27T23:23:18Z
+200	https://cima.aemps.es/cima/rest/medicamentos?pagina=1
+206	https://api.fda.gov/download.json
+206	https://download.open.fda.gov/drug/label/drug-label-0001-of-0014.json.zip
+200	https://rxnav.nlm.nih.gov/REST/rxcui.json?idtype=ATC&id=N02BE01
+200	https://dailymed.nlm.nih.gov/dailymed/services/v2/spls.json?pagesize=1
+206	https://www.ema.europa.eu/en/medicines/download-medicine-data
+301	https://www.whocc.no/atc_ddd_index/
+200	https://list.essentialmeds.org/
+200	https://www.who.int/publications/i/item/WHO-MHP-HPS-EML-2023.02
+206	https://iris.who.int/
+200	https://api.cpicpgx.org/v1/drug?limit=1
+curl: (56) CONNECT tunnel failed, response 502
+000	https://api.pharmgkb.org/v1/data/drug?limit=1
+200	https://www.clinpgx.org/
+200	https://ddinter2.scbdd.com/
+200	https://www.ebi.ac.uk/chembl/api/data/status.json
+200	https://eutils.ncbi.nlm.nih.gov/entrez/eutils/einfo.fcgi
+200	https://www.minsalud.gob.bo/
+206	https://www.agemed.gob.bo/

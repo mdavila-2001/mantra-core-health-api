@@ -214,6 +214,29 @@ export function parseMosugModifiers(text) {
 // Filas normalizadas
 // ---------------------------------------------------------------------------
 
+/**
+ * Agrega a la procedencia lo que depende de la descarga (fecha, SHA-256 y tipo del archivo, por `fileKey`) desde `omaha-meta`.
+ * No muta los datos versionados: devuelve filas nuevas.
+ */
+export function hydrateOmahaProvenance(rows, files) {
+  const fill = (o) => {
+    if (!o || typeof o !== 'object') return o;
+    const out = { ...o };
+    if (out.fileKey) {
+      const f = files[out.fileKey];
+      if (!f) throw new Error(`omaha-meta no tiene ${out.fileKey}`);
+      out.retrievedAt = f.retrievedAt;
+      out.sha256 = f.sha256;
+      if (f.contentType) out.contentType = f.contentType;
+      if (out.status) out.checkedAt = f.retrievedAt.slice(0, 10);
+    }
+    if (out.license) out.license = fill(out.license);
+    if (out.imageFileKey) out.imageSha256 = files[out.imageFileKey].sha256;
+    return out;
+  };
+  return rows.map((r) => ({ ...r, provenance: fill(r.provenance), ...(r.definitionSource ? { definitionSource: fill(r.definitionSource) } : {}) }));
+}
+
 const normName = (s) => slugify(s).replace(/-/g, '');
 
 /**
@@ -221,16 +244,20 @@ const normName = (s) => slugify(s).replace(/-/g, '');
  * @param {object} parsed  { problems, modifiers, interventions, faq, mosugProblems, mosugPages, mosugModifierDefs }
  * @param {object} meta    omaha.meta.json (`files`: url, sha256, retrievedAt por archivo)
  */
+export const OMAHA_APPROVAL_KEY = 'omaha-system';
+
 export function buildOmahaRows(parsed, meta) {
   const f = meta.files;
+  // El hash del corpus no depende de la fecha ni de los bytes de la descarga: cada procedencia lleva `fileKey` y el cargador agrega
+  // `retrievedAt`, `sha256` y `contentType` desde `omaha-meta` (`hydrateOmahaProvenance`). Una descarga fresca da las mismas filas.
   const license = {
-    status: 'public-domain-terms-reference-required',
-    summary: 'FAQ oficial, pregunta 1: los términos, definiciones y códigos del Omaha System están en el dominio público desde 1975; se usan sin permiso ni pago, pero «the terms and structure must be used as described in the 2005 book, and referenced (ie 2005 book or Website)». El resto del libro (guía del usuario) tiene copyright de Health Connections Press.',
+    status: 'public-domain-terms-pending-owner-decision',
+    loadStatus: 'pending-owner-decision',
+    summary: 'FAQ oficial, pregunta 1: los términos, definiciones y códigos del Omaha System están en el dominio público desde 1975; se usan sin permiso ni pago, pero «the terms and structure must be used as described in the 2005 book, and referenced (ie 2005 book or Website)». El resto del libro (guía del usuario) tiene copyright de Health Connections Press y «developers and companies who design and sell software based on the Omaha System […] should contact Health Connections Press». DECISIÓN DEL PROPIETARIO pendiente: confirmar con la editorial que cargar los términos en un producto comercial entra en el uso libre. Hasta entonces el cargador omite este corpus (`--owner-approved=omaha-system`).',
     question: parsed.faq.question,
     answer: parsed.faq.answer,
     url: f['site-faq'].url,
-    sha256: f['site-faq'].sha256,
-    checkedAt: f['site-faq'].retrievedAt.slice(0, 10),
+    fileKey: 'site-faq',
     evidence: 'primary (FAQ del sitio oficial, leído el día de la descarga)',
     citation: OMAHA_CITATION,
   };
@@ -239,9 +266,7 @@ export function buildOmahaRows(parsed, meta) {
     sourceId,
     version: OMAHA_VERSION,
     uri: f[fileKey].url,
-    retrievedAt: f[fileKey].retrievedAt,
-    sha256: f[fileKey].sha256,
-    contentType: f[fileKey].contentType,
+    fileKey,
     license,
     citation: OMAHA_CITATION,
     ...extra,
@@ -251,21 +276,19 @@ export function buildOmahaRows(parsed, meta) {
     sourceId,
     version: 'MOSUG 2010-10',
     uri: f['mosug-kbs-supplement'].url,
-    retrievedAt: f['mosug-kbs-supplement'].retrievedAt,
-    sha256: f['mosug-kbs-supplement'].sha256,
-    contentType: f['mosug-kbs-supplement'].contentType,
+    fileKey: 'mosug-kbs-supplement',
     license: {
       status: 'free-use-with-attribution',
-      summary: '«Copyright 2010 Minnesota Omaha System Users Group. May be used without permission. Please acknowledge authors when used.» (portada del PDF). Las definiciones y los signos/síntomas son términos del Omaha System (dominio público, FAQ oficial).',
+      summary: '«Copyright 2010 Minnesota Omaha System Users Group. May be used without permission. Please acknowledge authors when used.» (portada del PDF). Las definiciones y los signos/síntomas son términos del Omaha System (dominio público, FAQ oficial; ver la decisión pendiente del propietario en `omaha-system`).',
       url: f['mosug-kbs-supplement'].url,
+      fileKey: 'mosug-kbs-supplement',
       evidence: 'primary (texto de la página 3 del PDF)',
-      checkedAt: f['mosug-kbs-supplement'].retrievedAt.slice(0, 10),
     },
     citation: `Minnesota Omaha System Users Group (2010). Omaha System KBS Rating Supplement. ${f['mosug-kbs-supplement'].url}. Términos: ${OMAHA_CITATION}`,
   });
 
   const rows = [];
-  const add = (r) => rows.push({ codeSystem: OMAHA_CODE_SYSTEM, originalLanguage: 'en', nameEs: null, descriptionOriginal: null, parentCode: null, bindings: [], ...r });
+  const add = (r) => rows.push({ codeSystem: OMAHA_CODE_SYSTEM, originalLanguage: 'en', nameEs: null, descriptionOriginal: null, parentCode: null, bindings: [], ownerApproval: OMAHA_APPROVAL_KEY, ...r });
 
   // Dominios y problemas
   const problemOrder = [];
@@ -331,7 +354,7 @@ export function buildOmahaRows(parsed, meta) {
   });
 
   // PRSO
-  const prsoProv = (extra) => prov('site-prso-image', 'Problem Rating Scale for Outcomes', { transcribedFromImage: true, imageSha256: f['site-prso-image'].sha256, transcription: 'Transcripción visual de la imagen oficial (no hay texto máquina-legible); contrastada con las respuestas LOINC LA6495-1…LA6494-4', ...extra });
+  const prsoProv = (extra) => prov('site-prso-image', 'Problem Rating Scale for Outcomes', { transcribedFromImage: true, imageFileKey: 'site-prso-image', transcription: 'Transcripción visual de la imagen oficial (no hay texto máquina-legible); contrastada con las respuestas LOINC LA6495-1…LA6494-4', ...extra });
   PRSO.forEach((c, i) => {
     const cCode = `prso/${slugify(c.name)}`;
     add({ key: `omaha:${cCode}`, code: cCode, kind: 'prso-concept', nameOriginal: c.name, descriptionOriginal: c.definition, sourceOrder: i + 1, provenance: prsoProv({}) });

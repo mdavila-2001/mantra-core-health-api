@@ -1,0 +1,1290 @@
+format-version: 1.2
+data-version: releases/2026-03-19
+subsetdef: oncotree_slim ""
+idspace: dc http://purl.org/dc/elements/1.1/ 
+idspace: oboInOwl http://www.geneontology.org/formats/oboInOwl# 
+idspace: protege http://protege.stanford.edu/plugins/owl/protege# 
+idspace: terms http://purl.org/dc/terms/ 
+remark: NCI Thesaurus, a controlled vocabulary in support of NCI administrative and scientific activities. Produced by the Enterprise Vocabulary System (EVS), a project by the NCI Center for Biomedical Informatics and Information Technology. National Cancer Institute, National Institutes of Health, Bethesda, MD 20892, U.S.A.
+ontology: ncit
+property_value: owl:versionInfo "26.02d" xsd:string
+property_value: protege:defaultLanguage "en" xsd:string
+property_value: terms:description "The NCIt OBO Edition project aims to increase integration of the NCIt with OBO Library ontologies. NCIt is a reference terminology that includes broad coverage of the cancer domain, including cancer related diseases, findings and abnormalities." xsd:string
+property_value: terms:isVersionOf http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl
+property_value: terms:title "NCI Thesaurus OBO Edition" xsd:string
+
+[Typedef]
+id: NCIT:R124
+name: Chemical_Or_Drug_Has_Mechanism_Of_Action
+def: "A role used to imply the interaction or binding of an active ingredient of a drug/chemical agent at the molecular level with its target. When possible, the role value should reflect the direct alteration of function of a target molecule or complex. The domain and range for this role are 'Drug, Food, Chemical or Biomedical Material' and 'Biological Process', respectively." [] {NCIT:P378="NCI"}
+synonym: "Chemical_Or_Drug_Has_Mechanism_Of_Action" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+property_value: NCIT:NHC0 "R124" xsd:string
+property_value: NCIT:P106 "Conceptual Entity" xsd:string
+property_value: NCIT:P107 "Has Mechanism Of Action" xsd:string
+property_value: NCIT:P108 "Chemical_Or_Drug_Has_Mechanism_Of_Action" xsd:string
+domain: NCIT:C1908 ! Drug, Food, Chemical or Biomedical Material
+range: NCIT:C17828 ! Biological Process
+
+[Typedef]
+id: NCIT:R125
+name: Chemical_Or_Drug_Has_Physiologic_Effect
+def: "A role used to describe the primary detectable alterations of subcellular, cellular, tissue, or organ functions that directly result from alteration of function of a target biological molecule or complex caused by interaction of a therapeutic agent with a target molecule or complex. The domain and range for this role are 'Drug, Food, Chemical or Biomedical Material' and 'Biological Process', respectively." [] {NCIT:P378="NCI"}
+synonym: "Chemical_Or_Drug_Has_Physiologic_Effect" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+property_value: NCIT:NHC0 "R125" xsd:string
+property_value: NCIT:P106 "Conceptual Entity" xsd:string
+property_value: NCIT:P107 "Has Physiologic Effect" xsd:string
+property_value: NCIT:P108 "Chemical_Or_Drug_Has_Physiologic_Effect" xsd:string
+domain: NCIT:C1908 ! Drug, Food, Chemical or Biomedical Material
+range: NCIT:C17828 ! Biological Process
+
+[Typedef]
+id: NCIT:R27
+name: Conceptual_Part_Of
+def: "A role used to indicate that a conceptual entity is a sub-entity of another conceptual entity. Both the domain and the range for this role are 'Conceptual Entity'." [] {NCIT:P378="NCI"}
+synonym: "Conceptual_Part_Of" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+property_value: NCIT:NHC0 "R27" xsd:string
+property_value: NCIT:P106 "Conceptual Entity" xsd:string
+property_value: NCIT:P107 "Part Of" xsd:string
+property_value: NCIT:P108 "Conceptual_Part_Of" xsd:string
+domain: NCIT:C20181 ! Conceptual Entity
+range: NCIT:C20181 ! Conceptual Entity
+
+[Term]
+id: NCIT:C1908
+name: Drug, Food, Chemical or Biomedical Material
+def: "An organic or inorganic substance, element, isotope, food or other materials derived from microorganism, plant, or animal sources. They can be used for the prevention, diagnosis, treatment or research of disease states, for industrial purposes, or for the promotion or maintenance of organism viability or health." [] {NCIT:P378="NCI"}
+synonym: "Drug, Food, Chemical or Biomedical Material" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+disjoint_from: NCIT:C20047 ! Diagnostic or Prognostic Factor
+disjoint_from: NCIT:C20181 ! Conceptual Entity
+disjoint_from: NCIT:C20189 ! Property or Attribute
+disjoint_from: NCIT:C20633 ! Biochemical Pathway
+disjoint_from: NCIT:C22187 ! Experimental Organism Diagnosis
+disjoint_from: NCIT:C22188 ! Experimental Organism Anatomical Concept
+disjoint_from: NCIT:C26548 ! Gene Product
+disjoint_from: NCIT:C28428 ! Retired Concept
+disjoint_from: NCIT:C3910 ! Molecular Abnormality
+disjoint_from: NCIT:C43431 ! Activity
+disjoint_from: NCIT:C7057 ! Disease, Disorder or Finding
+disjoint_from: NCIT:C97325 ! Manufactured Object
+property_value: NCIT:NHC0 "C1908" xsd:string
+property_value: NCIT:P106 "Classification" xsd:string
+property_value: NCIT:P108 "Drug, Food, Chemical or Biomedical Material" xsd:string
+property_value: NCIT:P207 "C1880421" xsd:string
+property_value: NCIT:P366 "Drugs_and_Chemicals" xsd:string
+
+[Term]
+id: NCIT:C12218
+name: Chemotherapy Regimen or Agent Combination
+def: "A combination of multiple drugs used in standard or clinical trial treatments. The order, dosage or dosing interval of the individual ingredients may not be specified." [] {NCIT:P378="NCI"}
+synonym: "Chemotherapy Regimen or Agent Combination" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+synonym: "Combination Chemotherapy Regimen" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+disjoint_from: NCIT:C12219 ! Anatomic Structure, System, or Substance
+disjoint_from: NCIT:C12913 ! Abnormal Cell
+disjoint_from: NCIT:C14250 ! Organism
+disjoint_from: NCIT:C16612 ! Gene
+disjoint_from: NCIT:C17828 ! Biological Process
+disjoint_from: NCIT:C1908 ! Drug, Food, Chemical or Biomedical Material
+disjoint_from: NCIT:C20047 ! Diagnostic or Prognostic Factor
+disjoint_from: NCIT:C20181 ! Conceptual Entity
+disjoint_from: NCIT:C20189 ! Property or Attribute
+disjoint_from: NCIT:C20633 ! Biochemical Pathway
+disjoint_from: NCIT:C22187 ! Experimental Organism Diagnosis
+disjoint_from: NCIT:C22188 ! Experimental Organism Anatomical Concept
+disjoint_from: NCIT:C26548 ! Gene Product
+disjoint_from: NCIT:C28428 ! Retired Concept
+disjoint_from: NCIT:C3910 ! Molecular Abnormality
+disjoint_from: NCIT:C43431 ! Activity
+disjoint_from: NCIT:C7057 ! Disease, Disorder or Finding
+disjoint_from: NCIT:C97325 ! Manufactured Object
+property_value: NCIT:NHC0 "C12218" xsd:string
+property_value: NCIT:P106 "Therapeutic or Preventive Procedure" xsd:string
+property_value: NCIT:P108 "Chemotherapy Regimen or Agent Combination" xsd:string
+property_value: NCIT:P207 "C3665477" xsd:string
+property_value: NCIT:P366 "Chemotherapy_Regimen" xsd:string
+
+[Term]
+id: NCIT:C97325
+name: Manufactured Object
+def: "A physical object created by hand or machine." [] {NCIT:P378="NCI"}
+synonym: "Manufactured Object" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+property_value: NCIT:NHC0 "C97325" xsd:string
+property_value: NCIT:P106 "Manufactured Object" xsd:string
+property_value: NCIT:P108 "Manufactured Object" xsd:string
+property_value: NCIT:P207 "C3273359" xsd:string
+
+[Term]
+id: NCIT:C12219
+name: Anatomic Structure, System, or Substance
+def: "A human biological structure, fluid or other substance; excludes single molecular entities." [] {NCIT:P378="NCI"}
+subset: NCIT:C90259
+synonym: "Anatomic Structure, System, or Substance" EXACT [] {NCIT:P383="PT", NCIT:P384="NICHD"}
+synonym: "Anatomic Structure, System, or Substance" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+synonym: "Anatomic Structures and Systems" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+disjoint_from: NCIT:C12913 ! Abnormal Cell
+disjoint_from: NCIT:C14250 ! Organism
+disjoint_from: NCIT:C16612 ! Gene
+disjoint_from: NCIT:C17828 ! Biological Process
+disjoint_from: NCIT:C1908 ! Drug, Food, Chemical or Biomedical Material
+disjoint_from: NCIT:C20047 ! Diagnostic or Prognostic Factor
+disjoint_from: NCIT:C20181 ! Conceptual Entity
+disjoint_from: NCIT:C20189 ! Property or Attribute
+disjoint_from: NCIT:C20633 ! Biochemical Pathway
+disjoint_from: NCIT:C22187 ! Experimental Organism Diagnosis
+disjoint_from: NCIT:C22188 ! Experimental Organism Anatomical Concept
+disjoint_from: NCIT:C26548 ! Gene Product
+disjoint_from: NCIT:C28428 ! Retired Concept
+disjoint_from: NCIT:C3910 ! Molecular Abnormality
+disjoint_from: NCIT:C43431 ! Activity
+disjoint_from: NCIT:C7057 ! Disease, Disorder or Finding
+disjoint_from: NCIT:C97325 ! Manufactured Object
+property_value: NCIT:NHC0 "C12219" xsd:string
+property_value: NCIT:P106 "Classification" xsd:string
+property_value: NCIT:P107 "Anatomical Concepts" xsd:string
+property_value: NCIT:P108 "Anatomic Structure, System, or Substance" xsd:string
+property_value: NCIT:P207 "C1515976" xsd:string
+property_value: NCIT:P322 "NICHD" xsd:string
+property_value: NCIT:P366 "Anatomic_Structure_System_or_Substance" xsd:string
+
+[Term]
+id: NCIT:C14250
+name: Organism
+def: "A living entity." [] {NCIT:P378="NCI"}
+subset: NCIT:C159501
+subset: NCIT:C159503
+subset: NCIT:C90259
+synonym: "BiologicEntity" EXACT [] {NCIT:P383="PT", NCIT:P384="BRIDG 3.0.3"}
+synonym: "Organism" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+synonym: "Organism" EXACT [] {NCIT:P383="PT", NCIT:P384="NICHD"}
+synonym: "organism" EXACT [] {NCIT:P383="PT", NCIT:P385="CDR0000046250", NCIT:P384="NCI-GLOSS"}
+synonym: "Organismal" EXACT [] {NCIT:P383="AD", NCIT:P384="NCI"}
+synonym: "Organisms" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Taxon" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+disjoint_from: NCIT:C16612 ! Gene
+disjoint_from: NCIT:C17828 ! Biological Process
+disjoint_from: NCIT:C1908 ! Drug, Food, Chemical or Biomedical Material
+disjoint_from: NCIT:C20047 ! Diagnostic or Prognostic Factor
+disjoint_from: NCIT:C20181 ! Conceptual Entity
+disjoint_from: NCIT:C20189 ! Property or Attribute
+disjoint_from: NCIT:C20633 ! Biochemical Pathway
+disjoint_from: NCIT:C22187 ! Experimental Organism Diagnosis
+disjoint_from: NCIT:C22188 ! Experimental Organism Anatomical Concept
+disjoint_from: NCIT:C26548 ! Gene Product
+disjoint_from: NCIT:C28428 ! Retired Concept
+disjoint_from: NCIT:C3910 ! Molecular Abnormality
+disjoint_from: NCIT:C43431 ! Activity
+disjoint_from: NCIT:C7057 ! Disease, Disorder or Finding
+disjoint_from: NCIT:C97325 ! Manufactured Object
+property_value: NCIT:NHC0 "C14250" xsd:string
+property_value: NCIT:P106 "Organism" xsd:string
+property_value: NCIT:P108 "Organism" xsd:string
+property_value: NCIT:P207 "C0029235" xsd:string
+property_value: NCIT:P322 "BRIDG" xsd:string
+property_value: NCIT:P322 "NICHD" xsd:string
+property_value: NCIT:P325 "A living thing, such as an animal, a plant, a bacterium, or a fungus." xsd:string {NCIT:P378="NCI-GLOSS"}
+property_value: NCIT:P325 "Any individual living (or previously living) being. EXAMPLE(S): animal, human being" xsd:string {NCIT:P378="BRIDG 3.0.3"}
+property_value: NCIT:P366 "Organisms" xsd:string
+
+[Term]
+id: NCIT:C17828
+name: Biological Process
+def: "An activity occurring within an organism, between organisms or among organisms and the mechanisms underlying such events." [] {NCIT:P378="NCI"}
+synonym: "Biological Function" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Biological Process" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+disjoint_from: NCIT:C1908 ! Drug, Food, Chemical or Biomedical Material
+disjoint_from: NCIT:C20047 ! Diagnostic or Prognostic Factor
+disjoint_from: NCIT:C20181 ! Conceptual Entity
+disjoint_from: NCIT:C20189 ! Property or Attribute
+disjoint_from: NCIT:C20633 ! Biochemical Pathway
+disjoint_from: NCIT:C22187 ! Experimental Organism Diagnosis
+disjoint_from: NCIT:C22188 ! Experimental Organism Anatomical Concept
+disjoint_from: NCIT:C26548 ! Gene Product
+disjoint_from: NCIT:C28428 ! Retired Concept
+disjoint_from: NCIT:C3910 ! Molecular Abnormality
+disjoint_from: NCIT:C43431 ! Activity
+disjoint_from: NCIT:C7057 ! Disease, Disorder or Finding
+disjoint_from: NCIT:C97325 ! Manufactured Object
+property_value: NCIT:NHC0 "C17828" xsd:string
+property_value: NCIT:P106 "Biologic Function" xsd:string
+property_value: NCIT:P108 "Biological Process" xsd:string
+property_value: NCIT:P207 "C0031845" xsd:string
+property_value: NCIT:P366 "Biological_Process" xsd:string
+
+[Term]
+id: NCIT:C20633
+name: Biochemical Pathway
+def: "A series of biochemical reactions which occurs in a known sequence and can result in all or part of the initiation, progression or completion of a biological process or function." [] {NCIT:P378="NCI"}
+subset: NCIT:C159501
+subset: NCIT:C159503
+synonym: "Biochemical Pathway" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+synonym: "Metabolic Network" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "molecular pathway" EXACT [] {NCIT:P383="PT", NCIT:P385="CDR0000561605", NCIT:P384="NCI-GLOSS"}
+synonym: "Pathway" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Pathway" EXACT [] {NCIT:P383="PT", NCIT:P384="BRIDG 5.3"}
+synonym: "Pathways" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+disjoint_from: NCIT:C22187 ! Experimental Organism Diagnosis
+disjoint_from: NCIT:C22188 ! Experimental Organism Anatomical Concept
+disjoint_from: NCIT:C26548 ! Gene Product
+disjoint_from: NCIT:C28428 ! Retired Concept
+disjoint_from: NCIT:C3910 ! Molecular Abnormality
+disjoint_from: NCIT:C43431 ! Activity
+disjoint_from: NCIT:C7057 ! Disease, Disorder or Finding
+disjoint_from: NCIT:C97325 ! Manufactured Object
+property_value: NCIT:NHC0 "C20633" xsd:string
+property_value: NCIT:P106 "Functional Concept" xsd:string
+property_value: NCIT:P108 "Biochemical Pathway" xsd:string
+property_value: NCIT:P207 "C1706062" xsd:string
+property_value: NCIT:P322 "BRIDG" xsd:string
+property_value: NCIT:P325 "A series of actions among molecules in a cell that leads to a certain end point or cell function." xsd:string {NCIT:P378="NCI-GLOSS"}
+property_value: NCIT:P325 "A series of actions among molecules in or associated with a cell that leads to a certain product or a change in a cell. Such a pathway can trigger the assembly of new molecules, such as a fat or protein. Pathways can also turn genes on and off, or spur a cell to move. [Adapted from: http://www.genome.gov/27530687]  EXAMPLE(S):  Notch signaling pathway  OTHER NAME(S):  NOTE(S):" xsd:string {NCIT:P378="BRIDG 5.3"}
+property_value: NCIT:P366 "Biochemical_Pathway" xsd:string
+
+[Term]
+id: NCIT:C12913
+name: Abnormal Cell
+def: "An abnormal human cell type which can occur in either disease states or disease models." [] {NCIT:P378="NCI"}
+synonym: "Abnormal Cell" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+disjoint_from: NCIT:C14250 ! Organism
+disjoint_from: NCIT:C16612 ! Gene
+disjoint_from: NCIT:C17828 ! Biological Process
+disjoint_from: NCIT:C1908 ! Drug, Food, Chemical or Biomedical Material
+disjoint_from: NCIT:C20047 ! Diagnostic or Prognostic Factor
+disjoint_from: NCIT:C20181 ! Conceptual Entity
+disjoint_from: NCIT:C20189 ! Property or Attribute
+disjoint_from: NCIT:C20633 ! Biochemical Pathway
+disjoint_from: NCIT:C22187 ! Experimental Organism Diagnosis
+disjoint_from: NCIT:C22188 ! Experimental Organism Anatomical Concept
+disjoint_from: NCIT:C26548 ! Gene Product
+disjoint_from: NCIT:C28428 ! Retired Concept
+disjoint_from: NCIT:C3910 ! Molecular Abnormality
+disjoint_from: NCIT:C43431 ! Activity
+disjoint_from: NCIT:C7057 ! Disease, Disorder or Finding
+disjoint_from: NCIT:C97325 ! Manufactured Object
+property_value: NCIT:NHC0 "C12913" xsd:string
+property_value: NCIT:P106 "Cell" xsd:string
+property_value: NCIT:P108 "Abnormal Cell" xsd:string
+property_value: NCIT:P207 "C0333717" xsd:string
+property_value: NCIT:P366 "Abnormal_Cell" xsd:string
+
+[Term]
+id: NCIT:C16612
+name: Gene
+def: "A functional unit of heredity which occupies a specific position on a particular chromosome and serves as the template for a product that contributes to a phenotype or a biological function." [] {NCIT:P378="NCI"}
+subset: NCIT:C159501
+subset: NCIT:C159503
+synonym: "Gene" EXACT [] {NCIT:P383="PT", NCIT:P384="BRIDG 5.3"}
+synonym: "Gene" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+synonym: "Gene" EXACT [] {NCIT:P383="SY", NCIT:P384="caDSR"}
+synonym: "gene" EXACT [] {NCIT:P385="CDR0000045693", NCIT:P383="PT", NCIT:P384="NCI-GLOSS"}
+synonym: "Genes" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+disjoint_from: NCIT:C17828 ! Biological Process
+disjoint_from: NCIT:C1908 ! Drug, Food, Chemical or Biomedical Material
+disjoint_from: NCIT:C20047 ! Diagnostic or Prognostic Factor
+disjoint_from: NCIT:C20181 ! Conceptual Entity
+disjoint_from: NCIT:C20189 ! Property or Attribute
+disjoint_from: NCIT:C20633 ! Biochemical Pathway
+disjoint_from: NCIT:C22187 ! Experimental Organism Diagnosis
+disjoint_from: NCIT:C22188 ! Experimental Organism Anatomical Concept
+disjoint_from: NCIT:C26548 ! Gene Product
+disjoint_from: NCIT:C28428 ! Retired Concept
+disjoint_from: NCIT:C3910 ! Molecular Abnormality
+disjoint_from: NCIT:C43431 ! Activity
+disjoint_from: NCIT:C7057 ! Disease, Disorder or Finding
+disjoint_from: NCIT:C97325 ! Manufactured Object
+property_value: NCIT:NHC0 "C16612" xsd:string
+property_value: NCIT:P106 "Gene or Genome" xsd:string
+property_value: NCIT:P108 "Gene" xsd:string
+property_value: NCIT:P207 "C0017337" xsd:string
+property_value: NCIT:P322 "BRIDG" xsd:string
+property_value: NCIT:P325 "A functional unit of heredity that occupies a specific position (locus) on a particular chromosome, is capable of reproducing itself exactly at each cell division, and directs the formation of a protein or other product.  Comment Requested:  In interest of re-using existing standards, should the above definition of Gene be replaced by the following from the NLM -  The basic physical and functional unit of heredity. It is made up of DNA and act as instructions to make molecules called proteins.  [Source: http://ghr.nlm.nih.gov/handbook/basics/gene]   EXAMPLE(S): BRCA1 gene  OTHER NAME(S):  NOTE(S):" xsd:string {NCIT:P378="BRIDG 5.3"}
+property_value: NCIT:P325 "The functional and physical unit of heredity passed from parent to offspring. Genes are pieces of DNA, and most genes contain the information for making a specific protein." xsd:string {NCIT:P378="NCI-GLOSS"}
+property_value: NCIT:P366 "Gene" xsd:string
+property_value: NCIT:P98 "The gene as a functional unit consists of a discrete segment of a giant DNA molecule containing the purine (adenine and guanine) and pyrimidine (cytosine and thymine) bases in the ordered and correct sequence that encodes a specific functional product (i.e., a protein or RNA molecule)." xsd:string
+
+[Term]
+id: NCIT:C26548
+name: Gene Product
+def: "A protein, RNA or a complex that contains proteins and/or RNA." [] {NCIT:P378="NCI"}
+synonym: "Gene Product" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+synonym: "Genome Encoded Entity" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+disjoint_from: NCIT:C28428 ! Retired Concept
+disjoint_from: NCIT:C3910 ! Molecular Abnormality
+disjoint_from: NCIT:C43431 ! Activity
+disjoint_from: NCIT:C7057 ! Disease, Disorder or Finding
+disjoint_from: NCIT:C97325 ! Manufactured Object
+property_value: NCIT:NHC0 "C26548" xsd:string
+property_value: NCIT:P106 "Classification" xsd:string
+property_value: NCIT:P108 "Gene Product" xsd:string
+property_value: NCIT:P207 "C1704222" xsd:string
+property_value: NCIT:P366 "Gene_Product" xsd:string
+property_value: NCIT:P98 "In NCI Thesaurus: includes Proteins, Functional RNAs, Protein Complexes, and Riboprotein Complexes" xsd:string
+
+[Term]
+id: NCIT:C3910
+name: Molecular Abnormality
+def: "A molecular or cytogenetic abnormality which occurs in either human disease states or disease models." [] {NCIT:P378="NCI"}
+subset: NCIT:C173233
+subset: NCIT:C174018
+subset: NCIT:C174239
+subset: NCIT:C174252
+subset: NCIT:C177384
+subset: NCIT:C177401
+subset: NCIT:C178117
+subset: NCIT:C178125
+synonym: "Chromosomal, Gene, or Protein Abnormality" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Cytogenetic or Molecular Genetic Abnormality" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Genetic Abnormality" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Molecular Abnormality" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+synonym: "Molecular Abnormality" EXACT [] {NCIT:P383="SY", NCIT:P384="caDSR"}
+synonym: "Molecular Alteration" EXACT [] {NCIT:P383="SY", NCIT:P384="caDSR"}
+synonym: "MOLECULAR_ABNORMALITY" EXACT [] {NCIT:P386="AML", NCIT:P383="PT", NCIT:P384="PCDC"}
+synonym: "MOLECULAR_ABNORMALITY" EXACT [] {NCIT:P383="PT", NCIT:P386="ALL", NCIT:P384="PCDC"}
+synonym: "MOLECULAR_ABNORMALITY" EXACT [] {NCIT:P383="PT", NCIT:P386="EWS", NCIT:P384="PCDC"}
+synonym: "MOLECULAR_ABNORMALITY" EXACT [] {NCIT:P383="PT", NCIT:P386="GCT", NCIT:P384="PCDC"}
+disjoint_from: NCIT:C43431 ! Activity
+disjoint_from: NCIT:C7057 ! Disease, Disorder or Finding
+disjoint_from: NCIT:C97325 ! Manufactured Object
+property_value: NCIT:A23 NCIT:C25162
+property_value: NCIT:A26 NCIT:C116396
+property_value: NCIT:A26 NCIT:C122623
+property_value: NCIT:A26 NCIT:C122689
+property_value: NCIT:A26 NCIT:C128660
+property_value: NCIT:A26 NCIT:C131503
+property_value: NCIT:A26 NCIT:C131505
+property_value: NCIT:A26 NCIT:C132102
+property_value: NCIT:A26 NCIT:C13271
+property_value: NCIT:A26 NCIT:C146726
+property_value: NCIT:A26 NCIT:C157569
+property_value: NCIT:A26 NCIT:C167195
+property_value: NCIT:A26 NCIT:C168758
+property_value: NCIT:A26 NCIT:C168759
+property_value: NCIT:A26 NCIT:C168760
+property_value: NCIT:A26 NCIT:C168764
+property_value: NCIT:A26 NCIT:C168766
+property_value: NCIT:A26 NCIT:C168769
+property_value: NCIT:A26 NCIT:C168770
+property_value: NCIT:A26 NCIT:C168771
+property_value: NCIT:A26 NCIT:C168773
+property_value: NCIT:A26 NCIT:C168774
+property_value: NCIT:A26 NCIT:C173542
+property_value: NCIT:A26 NCIT:C173543
+property_value: NCIT:A26 NCIT:C175582
+property_value: NCIT:A26 NCIT:C175583
+property_value: NCIT:A26 NCIT:C175584
+property_value: NCIT:A26 NCIT:C17649
+property_value: NCIT:A26 NCIT:C17998
+property_value: NCIT:A26 NCIT:C27758
+property_value: NCIT:A26 NCIT:C27759
+property_value: NCIT:A26 NCIT:C36365
+property_value: NCIT:A26 NCIT:C36370
+property_value: NCIT:A26 NCIT:C36371
+property_value: NCIT:A26 NCIT:C36372
+property_value: NCIT:A26 NCIT:C36373
+property_value: NCIT:A26 NCIT:C36396
+property_value: NCIT:A26 NCIT:C36406
+property_value: NCIT:A26 NCIT:C36407
+property_value: NCIT:A26 NCIT:C36411
+property_value: NCIT:A26 NCIT:C36415
+property_value: NCIT:A26 NCIT:C36499
+property_value: NCIT:A26 NCIT:C36517
+property_value: NCIT:A26 NCIT:C36523
+property_value: NCIT:A26 NCIT:C36532
+property_value: NCIT:A26 NCIT:C36610
+property_value: NCIT:A26 NCIT:C36616
+property_value: NCIT:A26 NCIT:C38362
+property_value: NCIT:A26 NCIT:C38372
+property_value: NCIT:A26 NCIT:C39712
+property_value: NCIT:A26 NCIT:C41361
+property_value: NCIT:A26 NCIT:C41381
+property_value: NCIT:A26 NCIT:C43234
+property_value: NCIT:A26 NCIT:C67494
+property_value: NCIT:A26 NCIT:C67495
+property_value: NCIT:A26 NCIT:C82340
+property_value: NCIT:A26 NCIT:C82429
+property_value: NCIT:A26 NCIT:C82612
+property_value: NCIT:A29 NCIT:C118396
+property_value: NCIT:A29 NCIT:C120222
+property_value: NCIT:A29 NCIT:C120223
+property_value: NCIT:A29 NCIT:C128817
+property_value: NCIT:A29 NCIT:C139663
+property_value: NCIT:A29 NCIT:C139666
+property_value: NCIT:A29 NCIT:C139668
+property_value: NCIT:A29 NCIT:C139731
+property_value: NCIT:A29 NCIT:C153513
+property_value: NCIT:A29 NCIT:C158864
+property_value: NCIT:A29 NCIT:C165667
+property_value: NCIT:A29 NCIT:C165668
+property_value: NCIT:A29 NCIT:C168530
+property_value: NCIT:A29 NCIT:C174461
+property_value: NCIT:A29 NCIT:C174462
+property_value: NCIT:A29 NCIT:C174463
+property_value: NCIT:A29 NCIT:C174465
+property_value: NCIT:A29 NCIT:C174466
+property_value: NCIT:A29 NCIT:C174473
+property_value: NCIT:A29 NCIT:C174474
+property_value: NCIT:A29 NCIT:C174475
+property_value: NCIT:A29 NCIT:C174476
+property_value: NCIT:A29 NCIT:C174477
+property_value: NCIT:A29 NCIT:C174478
+property_value: NCIT:A29 NCIT:C174479
+property_value: NCIT:A29 NCIT:C174480
+property_value: NCIT:A29 NCIT:C174481
+property_value: NCIT:A29 NCIT:C174482
+property_value: NCIT:A29 NCIT:C174483
+property_value: NCIT:A29 NCIT:C174484
+property_value: NCIT:A29 NCIT:C174487
+property_value: NCIT:A29 NCIT:C174489
+property_value: NCIT:A29 NCIT:C174490
+property_value: NCIT:A29 NCIT:C174491
+property_value: NCIT:A29 NCIT:C174495
+property_value: NCIT:A29 NCIT:C17649
+property_value: NCIT:A29 NCIT:C17998
+property_value: NCIT:A29 NCIT:C27214
+property_value: NCIT:A29 NCIT:C36317
+property_value: NCIT:A29 NCIT:C36367
+property_value: NCIT:A29 NCIT:C36368
+property_value: NCIT:A29 NCIT:C36369
+property_value: NCIT:A29 NCIT:C36375
+property_value: NCIT:A29 NCIT:C36393
+property_value: NCIT:A29 NCIT:C36441
+property_value: NCIT:A29 NCIT:C36482
+property_value: NCIT:A29 NCIT:C36488
+property_value: NCIT:A29 NCIT:C36515
+property_value: NCIT:A29 NCIT:C36616
+property_value: NCIT:A29 NCIT:C37249
+property_value: NCIT:A29 NCIT:C43234
+property_value: NCIT:A29 NCIT:C99200
+property_value: NCIT:A29 NCIT:C99202
+property_value: NCIT:A29 NCIT:C99211
+property_value: NCIT:A29 NCIT:C99213
+property_value: NCIT:A29 NCIT:C99216
+property_value: NCIT:A29 NCIT:C99226
+property_value: NCIT:A29 NCIT:C99249
+property_value: NCIT:A29 NCIT:C99252
+property_value: NCIT:A29 NCIT:C99256
+property_value: NCIT:A29 NCIT:C99259
+property_value: NCIT:A29 NCIT:C99262
+property_value: NCIT:A29 NCIT:C99279
+property_value: NCIT:A29 NCIT:C99281
+property_value: NCIT:A29 NCIT:C99501
+property_value: NCIT:A34 NCIT:C176780
+property_value: NCIT:A34 NCIT:C176781
+property_value: NCIT:A34 NCIT:C176782
+property_value: NCIT:A34 NCIT:C176784
+property_value: NCIT:A34 NCIT:C176785
+property_value: NCIT:A34 NCIT:C176786
+property_value: NCIT:A34 NCIT:C176787
+property_value: NCIT:A34 NCIT:C17998
+property_value: NCIT:A34 NCIT:C43234
+property_value: NCIT:A34 NCIT:C45976
+property_value: NCIT:A34 NCIT:C45977
+property_value: NCIT:A36 NCIT:C117116
+property_value: NCIT:A36 NCIT:C124874
+property_value: NCIT:A36 NCIT:C128654
+property_value: NCIT:A36 NCIT:C13727
+property_value: NCIT:A36 NCIT:C167144
+property_value: NCIT:A36 NCIT:C36319
+property_value: NCIT:A36 NCIT:C36365
+property_value: NCIT:A36 NCIT:C36530
+property_value: NCIT:A36 NCIT:C37865
+property_value: NCIT:A36 NCIT:C81729
+property_value: NCIT:NHC0 "C3910" xsd:string
+property_value: NCIT:P106 "Cell or Molecular Dysfunction" xsd:string
+property_value: NCIT:P108 "Molecular Abnormality" xsd:string
+property_value: NCIT:P208 "CL448235" xsd:string
+property_value: NCIT:P322 "PCDC" xsd:string
+property_value: NCIT:P366 "Molecular_Abnormality" xsd:string
+
+[Term]
+id: NCIT:C43431
+name: Activity
+def: "An active process; excludes processes and mechanisms which fulfill biological functions." [] {NCIT:P378="NCI"}
+subset: NCIT:C105551
+subset: NCIT:C159501
+subset: NCIT:C159503
+synonym: "Activity" EXACT [] {NCIT:P383="SY", NCIT:P384="caDSR"}
+synonym: "Activity" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+synonym: "Activity" EXACT [] {NCIT:P383="PT", NCIT:P384="BRIDG 5.3"}
+synonym: "Activity" EXACT [] {NCIT:P383="PT", NCIT:P384="BRIDG 3.0.3"}
+synonym: "General activity" EXACT [] {NCIT:P383="SY", NCIT:P384="caDSR"}
+disjoint_from: NCIT:C7057 ! Disease, Disorder or Finding
+disjoint_from: NCIT:C97325 ! Manufactured Object
+property_value: NCIT:NHC0 "C43431" xsd:string
+property_value: NCIT:P106 "Activity" xsd:string
+property_value: NCIT:P108 "Activity" xsd:string
+property_value: NCIT:P207 "C0441655" xsd:string
+property_value: NCIT:P322 "BRIDG" xsd:string
+property_value: NCIT:P325 "Any action that can, in the context of a study or a post-marketing investigation, be defined, planned, scheduled or performed. EXAMPLE(S): surgical procedure, laboratory test, administration of a drug." xsd:string {NCIT:P378="BRIDG 3.0.3"}
+property_value: NCIT:P325 "Any action that can, in the context of a study, experiment, post-marketing investigation, or disease registry, be defined, planned, scheduled or performed.    EXAMPLE(S): Administrative activities such as subject registration or informed consent Clinical activities such as surgical procedure, laboratory test, administration of a drug   OTHER NAME(S):   NOTE(S):" xsd:string {NCIT:P378="BRIDG 5.3"}
+property_value: NCIT:P366 "Activity" xsd:string
+
+[Term]
+id: NCIT:C7057
+name: Disease, Disorder or Finding
+def: "A condition that is relevant to human neoplasms and non-neoplastic disorders.  This includes observations, test results, history and other concepts relevant to the characterization of human pathologic conditions." [] {NCIT:P378="NCI"}
+synonym: "Disease, Disorder or Finding" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+disjoint_from: NCIT:C97325 ! Manufactured Object
+property_value: NCIT:NHC0 "C7057" xsd:string
+property_value: NCIT:P106 "Conceptual Entity" xsd:string
+property_value: NCIT:P108 "Disease, Disorder or Finding" xsd:string
+property_value: NCIT:P207 "C1511989" xsd:string
+property_value: NCIT:P366 "Diseases_Disorders_and_Findings" xsd:string
+
+[Term]
+id: NCIT:C2991
+name: Disease or Disorder
+def: "Any abnormal condition of the body or mind that causes discomfort, dysfunction, or distress to the person affected or those in contact with the person. The term is often used broadly to include injuries, disabilities, syndromes, symptoms, deviant behaviors, and atypical variations of structure and function." [] {NCIT:P378="NCI"}
+subset: NCIT:C116977
+subset: NCIT:C118168
+subset: NCIT:C138188
+subset: NCIT:C138189
+subset: NCIT:C157711
+subset: NCIT:C165451
+subset: NCIT:C166373
+subset: NCIT:C173072
+subset: NCIT:C175324
+subset: NCIT:C177536
+subset: NCIT:C61410
+subset: NCIT:C67497
+subset: NCIT:C90259
+subset: NCIT:C99147
+synonym: "Condition" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "condition" EXACT [] {NCIT:P383="PT", NCIT:P385="CDR0000651193", NCIT:P384="NCI-GLOSS"}
+synonym: "Diagnosis" EXACT [] {NCIT:P384="CTDC", NCIT:P383="DN"}
+synonym: "Disease" EXACT [] {NCIT:P383="SY", NCIT:P384="NICHD"}
+synonym: "Disease" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "disease" EXACT [] {NCIT:P384="CTDC", NCIT:P383="PT"}
+synonym: "disease" EXACT [] {NCIT:P383="PT", NCIT:P384="CDISC-GLOSS"}
+synonym: "Disease or Disorder" EXACT [] {NCIT:P383="SY", NCIT:P384="caDSR"}
+synonym: "Disease or Disorder" EXACT [] {NCIT:P383="PT", NCIT:P384="NICHD"}
+synonym: "Disease or Disorder" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+synonym: "Disease or Disorder, Non-Neoplastic" EXACT [] {NCIT:P384="CTRP", NCIT:P383="PT"}
+synonym: "disease term" EXACT [] {NCIT:P383="SY", NCIT:P386="ICDC", NCIT:P384="ICDC"}
+synonym: "disease type" EXACT [] {NCIT:P383="SY", NCIT:P385="VAR", NCIT:P384="GDC"}
+synonym: "disease_term" EXACT [] {NCIT:P383="PT", NCIT:P386="ICDC", NCIT:P384="ICDC"}
+synonym: "disease_type" EXACT [] {NCIT:P383="PT", NCIT:P385="VAR", NCIT:P384="GDC"}
+synonym: "Diseases" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Diseases and Disorders" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Disorder" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "disorder" EXACT [] {NCIT:P385="CDR0000407758", NCIT:P383="PT", NCIT:P384="NCI-GLOSS"}
+synonym: "Disorders" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Other Disease" EXACT [] {NCIT:P384="CTRP", NCIT:P383="DN"}
+xref: IMDRF:E23
+is_a: NCIT:C7057 ! Disease, Disorder or Finding
+property_value: NCIT:A31 NCIT:C17998
+property_value: NCIT:A31 NCIT:C184783
+property_value: NCIT:A31 NCIT:C184784
+property_value: NCIT:A31 NCIT:C214799
+property_value: NCIT:A31 NCIT:C3055
+property_value: NCIT:A31 NCIT:C3059
+property_value: NCIT:A31 NCIT:C3161
+property_value: NCIT:A31 NCIT:C3172
+property_value: NCIT:A31 NCIT:C3208
+property_value: NCIT:A31 NCIT:C3230
+property_value: NCIT:A31 NCIT:C3247
+property_value: NCIT:A31 NCIT:C3262
+property_value: NCIT:A31 NCIT:C3286
+property_value: NCIT:A31 NCIT:C3411
+property_value: NCIT:A31 NCIT:C3422
+property_value: NCIT:A31 NCIT:C3468
+property_value: NCIT:A31 NCIT:C3708
+property_value: NCIT:A31 NCIT:C3709
+property_value: NCIT:A31 NCIT:C3723
+property_value: NCIT:A31 NCIT:C3743
+property_value: NCIT:A31 NCIT:C3784
+property_value: NCIT:A31 NCIT:C3786
+property_value: NCIT:A31 NCIT:C3787
+property_value: NCIT:A31 NCIT:C3792
+property_value: NCIT:A31 NCIT:C40141
+property_value: NCIT:A31 NCIT:C4197
+property_value: NCIT:A31 NCIT:C4198
+property_value: NCIT:A31 NCIT:C4248
+property_value: NCIT:A31 NCIT:C43234
+property_value: NCIT:A31 NCIT:C4345
+property_value: NCIT:A31 NCIT:C4463
+property_value: NCIT:A31 NCIT:C4665
+property_value: NCIT:A31 NCIT:C48660
+property_value: NCIT:A31 NCIT:C4972
+property_value: NCIT:A31 NCIT:C7056
+property_value: NCIT:A31 NCIT:C7387
+property_value: NCIT:A31 NCIT:C7539
+property_value: NCIT:A31 NCIT:C9295
+property_value: NCIT:A31 NCIT:C9343
+property_value: NCIT:A31 NCIT:C9357
+property_value: NCIT:A31 NCIT:C9360
+property_value: NCIT:NHC0 "C2991" xsd:string
+property_value: NCIT:P106 "Disease or Syndrome" xsd:string
+property_value: NCIT:P107 "Disease or Disorder" xsd:string
+property_value: NCIT:P108 "Disease or Disorder" xsd:string
+property_value: NCIT:P207 "C0012634" xsd:string
+property_value: NCIT:P322 "CDISC-GLOSS" xsd:string
+property_value: NCIT:P322 "CTDC" xsd:string
+property_value: NCIT:P322 "CTRP" xsd:string
+property_value: NCIT:P322 "GDC" xsd:string
+property_value: NCIT:P322 "ICDC" xsd:string
+property_value: NCIT:P322 "NICHD" xsd:string
+property_value: NCIT:P325 "Any abnormal condition of the body or mind that causes discomfort, dysfunction, or distress to the affected person. NOTE: The term is often used broadly to include injuries, disabilities, syndromes, symptoms, deviant behaviors, and atypical variations of structure and function. [After NCI Thesaurus] See also diagnosis." xsd:string {NCIT:P378="CDISC-GLOSS"}
+property_value: NCIT:P325 "In medicine, a health problem with certain characteristics or symptoms." xsd:string {NCIT:P378="NCI-GLOSS"}
+property_value: NCIT:P366 "Diseases_and_Disorders" xsd:string
+
+[Term]
+id: NCIT:C28428
+name: Retired Concept
+def: "Concept has been retired, and should not be used except to deal with old data." [] {NCIT:P378="NCI"}
+synonym: "All Retired Concepts" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "isRetired" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Retired Concept" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+synonym: "Retired Concepts" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+disjoint_from: NCIT:C3910 ! Molecular Abnormality
+disjoint_from: NCIT:C43431 ! Activity
+disjoint_from: NCIT:C7057 ! Disease, Disorder or Finding
+disjoint_from: NCIT:C97325 ! Manufactured Object
+property_value: NCIT:NHC0 "C28428" xsd:string
+property_value: NCIT:P106 "Conceptual Entity" xsd:string
+property_value: NCIT:P108 "Retired Concept" xsd:string
+property_value: NCIT:P366 "Retired_Concepts" xsd:string
+
+[Term]
+id: NCIT:C22187
+name: Experimental Organism Diagnosis
+def: "A condition or observation that is relevant to disease states, models of disease or characterization of those conditions in a non-human organism; this includes conditions or observations in organisms used in research settings." [] {NCIT:P378="NCI"}
+synonym: "Experimental Organism Diagnosis" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+synonym: "Non-Human or Experimental Organism Diagnosis" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+disjoint_from: NCIT:C22188 ! Experimental Organism Anatomical Concept
+disjoint_from: NCIT:C26548 ! Gene Product
+disjoint_from: NCIT:C28428 ! Retired Concept
+disjoint_from: NCIT:C3910 ! Molecular Abnormality
+disjoint_from: NCIT:C43431 ! Activity
+disjoint_from: NCIT:C7057 ! Disease, Disorder or Finding
+disjoint_from: NCIT:C97325 ! Manufactured Object
+property_value: NCIT:NHC0 "C22187" xsd:string
+property_value: NCIT:P106 "Conceptual Entity" xsd:string
+property_value: NCIT:P107 "Experimental Organism Diagnoses" xsd:string
+property_value: NCIT:P108 "Experimental Organism Diagnosis" xsd:string
+property_value: NCIT:P207 "C1517009" xsd:string
+property_value: NCIT:P366 "Experimental_Organism_Diagnoses" xsd:string
+property_value: NCIT:P92 "Mouse Model Model" xsd:string
+
+[Term]
+id: NCIT:C22188
+name: Experimental Organism Anatomical Concept
+def: "A biological structure, fluid or other substance that is present in a non-human organism; this includes anatomic entities found in organisms used in research settings. However, this grouping excludes single molecular entities." [] {NCIT:P378="NCI"}
+synonym: "Experimental Organism Anatomical Concept" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+synonym: "Non-Human or Experimental Organism Anatomical Concept" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+disjoint_from: NCIT:C26548 ! Gene Product
+disjoint_from: NCIT:C28428 ! Retired Concept
+disjoint_from: NCIT:C3910 ! Molecular Abnormality
+disjoint_from: NCIT:C43431 ! Activity
+disjoint_from: NCIT:C7057 ! Disease, Disorder or Finding
+disjoint_from: NCIT:C97325 ! Manufactured Object
+property_value: NCIT:NHC0 "C22188" xsd:string
+property_value: NCIT:P106 "Classification" xsd:string
+property_value: NCIT:P107 "Experimental Organism Anatomical Concepts" xsd:string
+property_value: NCIT:P108 "Experimental Organism Anatomical Concept" xsd:string
+property_value: NCIT:P207 "C1517008" xsd:string
+property_value: NCIT:P366 "Experimental_Organism_Anatomical_Concepts" xsd:string
+property_value: NCIT:P92 "Mouse Model Model" xsd:string
+
+[Term]
+id: NCIT:C1909
+name: Pharmacologic Substance
+def: "Any natural, endogenously-derived, synthetic or semi-synthetic compound with pharmacologic activity. A pharmacologic substance has one or more specific mechanism of action(s) through which it exerts one or more effect(s) on the human or animal body. They can be used to potentially prevent, diagnose, treat or relieve symptoms of a disease. Formulation specific agents and some combination agents are also classified as pharmacologic substances." [] {NCIT:P378="NCI"}
+subset: NCIT:C132298
+subset: NCIT:C157711
+subset: NCIT:C159501
+subset: NCIT:C159503
+subset: NCIT:C177536
+subset: NCIT:C183078
+subset: NCIT:C183082
+subset: NCIT:C183083
+subset: NCIT:C217022
+subset: NCIT:C217023
+subset: NCIT:C217284
+subset: NCIT:C61410
+subset: NCIT:C66830
+subset: NCIT:C67497
+subset: NCIT:C90259
+subset: NCIT:C96388
+subset: NCIT:C99078
+synonym: "Agent" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "DRUG" EXACT [] {NCIT:P383="PT", NCIT:P384="CDISC"}
+synonym: "Drug" EXACT [] {NCIT:P383="PT", NCIT:P384="BRIDG 5.3"}
+synonym: "Drug" EXACT [] {NCIT:P386="M11", NCIT:P384="ICH", NCIT:P383="PT", NCIT:P385="ICH M11-Intervention Type"}
+synonym: "Drug" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Drug" EXACT [] {NCIT:P383="PT", NCIT:P384="BRIDG 3.0.3"}
+is_a: NCIT:C1908 ! Drug, Food, Chemical or Biomedical Material
+property_value: NCIT:A31 NCIT:C100089
+property_value: NCIT:A31 NCIT:C100101
+property_value: NCIT:A31 NCIT:C1004
+property_value: NCIT:A31 NCIT:C1005
+property_value: NCIT:A31 NCIT:C1007
+property_value: NCIT:A31 NCIT:C1008
+property_value: NCIT:A31 NCIT:C1009
+property_value: NCIT:A31 NCIT:C1011
+
+[Term]
+id: NCIT:C307
+name: Biological Agent
+def: "Biotechnology-derived pharmaceutical agents made from living organisms or their products. Includes recombinant proteins, monoclonal antibodies, and nucleic acids." [] {NCIT:P378="NCI"}
+subset: NCIT:C118468
+subset: NCIT:C132298
+subset: NCIT:C159501
+subset: NCIT:C159503
+subset: NCIT:C217022
+subset: NCIT:C217023
+subset: NCIT:C217284
+subset: NCIT:C61410
+subset: NCIT:C66830
+subset: NCIT:C67497
+subset: NCIT:C90259
+subset: NCIT:C99078
+synonym: "BIOLOGIC" EXACT [] {NCIT:P383="PT", NCIT:P384="CDISC"}
+synonym: "Biologic" EXACT [] {NCIT:P383="PT", NCIT:P384="BRIDG 3.0.3"}
+synonym: "Biologic" EXACT [] {NCIT:P383="PT", NCIT:P384="BRIDG 5.3"}
+synonym: "Biologic" EXACT [] {NCIT:P386="M11", NCIT:P384="ICH", NCIT:P383="PT", NCIT:P385="ICH M11-Intervention Type"}
+synonym: "Biologic" EXACT [] {NCIT:P383="PT", NCIT:P384="NICHD"}
+synonym: "biologic agent" EXACT [] {NCIT:P385="CDR0000415238", NCIT:P383="PT", NCIT:P384="NCI-GLOSS"}
+synonym: "Biological Agent" EXACT [] {NCIT:P383="SY", NCIT:P384="NICHD"}
+synonym: "Biological Agent" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+synonym: "biological agent" EXACT [] {NCIT:P383="PT", NCIT:P385="CDR0000426406", NCIT:P384="NCI-GLOSS"}
+synonym: "Biological Drug" EXACT [] {NCIT:P383="SY", NCIT:P384="NICHD"}
+synonym: "biological drug" EXACT [] {NCIT:P383="PT", NCIT:P385="CDR0000426407", NCIT:P384="NCI-GLOSS"}
+synonym: "biological product" EXACT [] {NCIT:P383="PT", NCIT:P384="CDISC-GLOSS"}
+synonym: "Biological Products" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Biologicals" EXACT [] {NCIT:P383="SY", NCIT:P384="NICHD"}
+synonym: "Biologicals" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Biologics" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Biopharmaceuticals" EXACT [] {NCIT:P383="SY", NCIT:P384="NICHD"}
+synonym: "Biopharmaceuticals" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Immunologic, Immunochemical" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Immunologics" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+is_a: NCIT:C1909 ! Pharmacologic Substance
+property_value: NCIT:NHC0 "C307" xsd:string
+property_value: NCIT:P106 "Chemical Viewed Functionally" xsd:string
+property_value: NCIT:P108 "Biological Agent" xsd:string
+property_value: NCIT:P207 "C0005522" xsd:string
+property_value: NCIT:P322 "BRIDG" xsd:string
+property_value: NCIT:P322 "CDISC" xsd:string
+property_value: NCIT:P322 "CDISC-GLOSS" xsd:string
+property_value: NCIT:P322 "ICH" xsd:string
+property_value: NCIT:P322 "NICHD" xsd:string
+property_value: NCIT:P325 "A class of pharmaceutical agents made from living organisms or their products that includes recombinant proteins, antibodies, and nucleic acids." xsd:string {NCIT:P378="NICHD"}
+property_value: NCIT:P325 "A product of biological origin applicable to the prevention, treatment, or cure of a disease or condition, for example: virus, therapeutic serum, toxin, antitoxin, vaccine, blood, blood component or derivative, allergenic product, or analogous product." xsd:string {NCIT:P378="ICH"}
+property_value: NCIT:P325 "A product of biological origin applicable to the prevention, treatment, or cure of a disease or condition, for example: virus, therapeutic serum, toxin, antitoxin, vaccine, blood, blood component or derivative, allergenic product, or analogous product. (FDA 21 CFR 600.3)" xsd:string {NCIT:P378="CDISC"}
+property_value: NCIT:P325 "A product of biological origin applicable to the prevention, treatment, or cure of a disease or condition. Such products may include virus, therapeutic serum, toxin, antitoxin, vaccine, blood, blood component or derivative, allergenic product, protein, or analogous product. NOTE: Biological products may be produced through biotechnology in a living system, such as a microorganism, plant cell, or animal cell. Biological products are generally large, complex molecules and are often more difficult to characterize than small molecule drugs. [After 21 CFR 600.3; After FDA Biological Product Definitions] See also vaccine, cell therapy, gene therapy, pharmaceutical product, drug product, medicinal product." xsd:string {NCIT:P378="CDISC-GLOSS"}
+property_value: NCIT:P325 "A substance made from a living organism or thing it produces.  EXAMPLE(S): virus, therapeutic serum, toxin, antitoxin, vaccine, blood, blood component or derivative, allergenic product, analogous product  OTHER NAME(S):  NOTE(S):" xsd:string {NCIT:P378="BRIDG 5.3"}
+property_value: NCIT:P325 "A substance made from living organisms or things they produce. EXAMPLE(S): virus, therapeutic serum, toxin, antitoxin, vaccine, blood, blood component or derivative, allergenic product, analogous product" xsd:string {NCIT:P378="BRIDG 3.0.3"}
+property_value: NCIT:P325 "A substance that is made from a living organism or its products and is used in the prevention, diagnosis, or treatment of cancer and other diseases. Biological agents include antibodies, interleukins, and vaccines." xsd:string {NCIT:P378="NCI-GLOSS"}
+property_value: NCIT:P366 "Biological_Agent" xsd:string
+
+[Term]
+id: NCIT:C530
+name: Recombinant Growth Factor
+def: "Formulated therapeutic proteins that are either isolated from endogenous sources or manufactured in a laboratory.  Growth factors bind to specific receptors expressed by various cell types, thereby stimulating cell differentiation and/or proliferation. (NCI04)" [] {NCIT:P378="NCI"}
+subset: NCIT:C157711
+subset: NCIT:C177537
+synonym: "Growth Agents" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Growth factor" EXACT [] {NCIT:P383="PT", NCIT:P384="GDC"}
+synonym: "Recombinant Growth Factor" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+is_a: NCIT:C307 ! Biological Agent
+property_value: NCIT:A32 NCIT:C188388
+property_value: NCIT:NHC0 "C530" xsd:string
+property_value: NCIT:P106 "Chemical Viewed Functionally" xsd:string
+property_value: NCIT:P108 "Recombinant Growth Factor" xsd:string
+property_value: NCIT:P207 "C1515377" xsd:string
+property_value: NCIT:P322 "GDC" xsd:string
+property_value: NCIT:P366 "Therapeutic_Growth_Factor" xsd:string
+property_value: NCIT:P375 "Growth factor" xsd:string {NCIT:P393="Has Synonym", NCIT:P394="PT", NCIT:P395="drug_category", NCIT:P396="GDC"}
+
+[Term]
+id: NCIT:C1504
+name: Recombinant Epidermal Growth Factor
+def: "A recombinant therapeutic agent which is chemically identical to or similar to endogenous epidermal growth factor (EGF).  As a mitogen, EGF stimulates the proliferation of epidermal, epithelial, and embryonic cells.  This agent is also a strong chemoattractant for fibroblasts and epithelial cells and is an important factor mediating angiogenesis and wound healing.  EGF and EGF-like factors have been shown to promote regeneration of the epidermis and the generation of granulation tissues following severe burns and, when locally administered, may improve healing of injured corneal tissues. (NCI04)" [] {NCIT:P378="NCI"}
+synonym: "Recombinant Epidermal Growth Factor" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+is_a: NCIT:C530 ! Recombinant Growth Factor
+property_value: NCIT:NHC0 "C1504" xsd:string
+property_value: NCIT:P106 "Chemical Viewed Functionally" xsd:string
+property_value: NCIT:P108 "Recombinant Epidermal Growth Factor" xsd:string
+property_value: NCIT:P207 "C1515368" xsd:string
+property_value: NCIT:P210 "62229-50-9" xsd:string
+property_value: NCIT:P366 "Therapeutic_Epidermal_Growth_Factor" xsd:string
+
+[Term]
+id: NCIT:C1000
+name: Recombinant Amphiregulin
+def: "A recombinant form of amphiregulin, a member of the heparin-binding epidermal growth factor (EGF) family. Endogenous amphiregulin is an autocrine growth factor, and binds to the EGF receptor. Overexpressed in several cancer cell types, endogenous amphiregulin may contribute to tumor cell proliferation and metastasis. (NCI04)" [] {NCIT:P378="NCI"}
+subset: NCIT:C63923
+synonym: "AMPHIREGULIN" EXACT [] {NCIT:P385="7MGE0HPM2H", NCIT:P383="PT", NCIT:P386="UNII", NCIT:P384="FDA"}
+synonym: "AR" EXACT [] {NCIT:P383="AB", NCIT:P384="NCI"}
+synonym: "CRDGF" EXACT [] {NCIT:P383="AB", NCIT:P384="NCI"}
+synonym: "KAF" EXACT [] {NCIT:P383="AB", NCIT:P384="NCI"}
+synonym: "Recombinant Amphiregulin" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+is_a: NCIT:C1504 ! Recombinant Epidermal Growth Factor
+property_value: NCIT:NHC0 "C1000" xsd:string
+property_value: NCIT:P106 "Amino Acid, Peptide, or Protein" xsd:string
+property_value: NCIT:P106 "Pharmacologic Substance" xsd:string
+property_value: NCIT:P108 "Recombinant Amphiregulin" xsd:string
+property_value: NCIT:P207 "C1514768" xsd:string
+property_value: NCIT:P210 "117147-70-3" xsd:string
+property_value: NCIT:P319 "7MGE0HPM2H" xsd:string
+property_value: NCIT:P322 "FDA" xsd:string
+property_value: NCIT:P366 "Recombinant_Amphiregulin" xsd:string
+
+[Term]
+id: NCIT:C18611
+name: Metabolic Pathway
+def: "An elaboration of the known steps and interactions for the metabolism of a compound." [] {NCIT:P378="NCI"}
+synonym: "Metabolic Pathway" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+synonym: "Metabolic Pathways" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Metabolism" EXACT [] {NCIT:P383="PT", NCIT:P384="KEGG"}
+is_a: NCIT:C20633 ! Biochemical Pathway
+property_value: NCIT:NHC0 "C18611" xsd:string
+property_value: NCIT:P106 "Functional Concept" xsd:string
+property_value: NCIT:P108 "Metabolic Pathway" xsd:string
+property_value: NCIT:P207 "C1291081" xsd:string
+property_value: NCIT:P215 "map01100" xsd:string
+property_value: NCIT:P366 "Metabolic_Pathways" xsd:string
+
+[Term]
+id: NCIT:C26684
+name: Radiation-Induced Disorder
+def: "A non-neoplastic or neoplastic disorder which results from exposure to radiation. Examples of non-neoplastic disorders include dermatitis, enteritis, stomatitis, pneumonitis, and cerebritis. Examples of neoplastic disorders include myelodysplastic syndromes, leukemias, and sarcomas." [] {NCIT:P378="NCI"}
+subset: NCIT:C116977
+subset: NCIT:C118168
+synonym: "Radiation-Induced Disorder" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+synonym: "Radiation-Induced Disorder" EXACT [] {NCIT:P384="CTRP", NCIT:P383="DN"}
+is_a: NCIT:C2991 ! Disease or Disorder
+relationship: NCIT:R108 NCIT:C27962 ! Radiation Toxicity
+property_value: NCIT:NHC0 "C26684" xsd:string
+property_value: NCIT:P106 "Disease or Syndrome" xsd:string
+property_value: NCIT:P107 "Radiation-Induced Disorder" xsd:string
+property_value: NCIT:P108 "Radiation-Induced Disorder" xsd:string
+property_value: NCIT:P207 "C0000773" xsd:string
+property_value: NCIT:P322 "CTRP" xsd:string
+property_value: NCIT:P366 "Radiation-Induced_Abnormalities" xsd:string
+
+[Term]
+id: NCIT:C171256
+name: Non-Medical Object or Device
+def: "A manufactured object designed for non-medical use." [] {NCIT:P378="NCI"}
+synonym: "Non-Medical Object or Device" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+is_a: NCIT:C97325 ! Manufactured Object
+property_value: NCIT:NHC0 "C171256" xsd:string
+property_value: NCIT:P106 "Manufactured Object" xsd:string
+property_value: NCIT:P108 "Non-Medical Object or Device" xsd:string
+property_value: NCIT:P208 "CL1405559" xsd:string
+
+[Term]
+id: NCIT:C12680
+name: Body Region
+def: "Named areas of the body." [] {NCIT:P378="NCI"}
+synonym: "Anatomic Region" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Body Region" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+is_a: NCIT:C12219 ! Anatomic Structure, System, or Substance
+property_value: NCIT:NHC0 "C12680" xsd:string
+property_value: NCIT:P106 "Body Location or Region" xsd:string
+property_value: NCIT:P107 "Body Region" xsd:string
+property_value: NCIT:P108 "Body Region" xsd:string
+property_value: NCIT:P207 "C0005898" xsd:string
+property_value: NCIT:P366 "Body_Region" xsd:string
+
+[Term]
+id: NCIT:C20181
+name: Conceptual Entity
+def: "An organizational header for concepts representing mostly abstract entities." [] {NCIT:P378="NCI"}
+synonym: "Conceptual Entity" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+disjoint_from: NCIT:C20189 ! Property or Attribute
+disjoint_from: NCIT:C20633 ! Biochemical Pathway
+disjoint_from: NCIT:C22187 ! Experimental Organism Diagnosis
+disjoint_from: NCIT:C22188 ! Experimental Organism Anatomical Concept
+disjoint_from: NCIT:C26548 ! Gene Product
+disjoint_from: NCIT:C28428 ! Retired Concept
+disjoint_from: NCIT:C3910 ! Molecular Abnormality
+disjoint_from: NCIT:C43431 ! Activity
+disjoint_from: NCIT:C7057 ! Disease, Disorder or Finding
+disjoint_from: NCIT:C97325 ! Manufactured Object
+property_value: NCIT:NHC0 "C20181" xsd:string
+property_value: NCIT:P106 "Classification" xsd:string
+property_value: NCIT:P108 "Conceptual Entity" xsd:string
+property_value: NCIT:P207 "C1254372" xsd:string
+property_value: NCIT:P366 "Conceptual_Entities" xsd:string
+
+[Term]
+id: NCIT:C25190
+name: Person
+def: "A human being." [] {NCIT:P378="NCI"}
+subset: NCIT:C159501
+subset: NCIT:C159503
+subset: NCIT:C19752
+subset: NCIT:C77964
+subset: NCIT:C89506
+subset: NCIT:C90259
+synonym: "Individual" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Person" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+synonym: "Person" EXACT [] {NCIT:P383="PT", NCIT:P384="BRIDG 5.3"}
+synonym: "Person" EXACT [] {NCIT:P383="PT", NCIT:P384="BRIDG 3.0.3"}
+synonym: "Person" EXACT [] {NCIT:P383="PT", NCIT:P384="NICHD"}
+synonym: "Person" EXACT [] {NCIT:P383="SY", NCIT:P384="caDSR"}
+is_a: NCIT:C20181 ! Conceptual Entity
+property_value: NCIT:NHC0 "C25190" xsd:string
+property_value: NCIT:P106 "Human" xsd:string
+property_value: NCIT:P108 "Person" xsd:string
+property_value: NCIT:P207 "C0027361" xsd:string
+property_value: NCIT:P322 "BRIDG" xsd:string
+property_value: NCIT:P322 "NICHD" xsd:string
+property_value: NCIT:P325 "A human being." xsd:string {NCIT:P378="BRIDG 3.0.3"}
+property_value: NCIT:P325 "A human being.  EXAMPLE(S):  OTHER NAME(S):  NOTE(S):" xsd:string {NCIT:P378="BRIDG 5.3"}
+property_value: NCIT:P366 "Person" xsd:string
+
+[Term]
+id: NCIT:C198996
+name: Person by Relationship
+def: "A person described by their relationship with another person." [] {NCIT:P378="NCI"}
+synonym: "Person by Relationship" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+is_a: NCIT:C25190 ! Person
+property_value: NCIT:NHC0 "C198996" xsd:string
+property_value: NCIT:P106 "Human" xsd:string
+property_value: NCIT:P108 "Person by Relationship" xsd:string
+property_value: NCIT:P208 "CL1906418" xsd:string
+
+[Term]
+id: NCIT:C41256
+name: Family Member
+def: "Any of the individuals who are descended from a common progenitor, related by marriage or other legal tie, or by a feeling of closeness." [] {NCIT:P378="NCI"}
+subset: NCIT:C100130
+subset: NCIT:C61410
+subset: NCIT:C66830
+subset: NCIT:C78735
+synonym: "FAMILY MEMBER" EXACT [] {NCIT:P383="PT", NCIT:P384="CDISC"}
+synonym: "Family Member" EXACT [] {NCIT:P383="SY", NCIT:P384="caDSR"}
+synonym: "Family Member" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+synonym: "Family Member" EXACT [] {NCIT:P383="SY", NCIT:P384="CDISC"}
+is_a: NCIT:C198996 ! Person by Relationship
+property_value: NCIT:NHC0 "C41256" xsd:string
+property_value: NCIT:P106 "Human" xsd:string
+property_value: NCIT:P108 "Family Member" xsd:string
+property_value: NCIT:P207 "C0086282" xsd:string
+property_value: NCIT:P322 "CDISC" xsd:string
+property_value: NCIT:P325 "Any of the individuals who are descended from a common progenitor, related by marriage or other legal tie." xsd:string {NCIT:P378="CDISC"}
+property_value: NCIT:P366 "Family_Member" xsd:string
+
+[Term]
+id: NCIT:C21480
+name: Relative
+def: "A person related by blood or marriage." [] {NCIT:P378="NCI"}
+subset: NCIT:C100130
+subset: NCIT:C186314
+subset: NCIT:C186342
+subset: NCIT:C61410
+subset: NCIT:C66830
+synonym: "Relation" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "RELATIVE" EXACT [] {NCIT:P383="PT", NCIT:P384="PCDC", NCIT:P386="HL"}
+synonym: "RELATIVE" EXACT [] {NCIT:P383="PT", NCIT:P384="CDISC"}
+synonym: "Relative" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+is_a: NCIT:C41256 ! Family Member
+property_value: NCIT:A23 NCIT:C25162
+property_value: NCIT:A39 NCIT:C150887
+property_value: NCIT:A39 NCIT:C150888
+property_value: NCIT:A39 NCIT:C17649
+property_value: NCIT:A39 NCIT:C17998
+property_value: NCIT:A39 NCIT:C96570
+property_value: NCIT:A39 NCIT:C96572
+property_value: NCIT:A39 NCIT:C96580
+property_value: NCIT:A39 NCIT:C96586
+property_value: NCIT:NHC0 "C21480" xsd:string
+property_value: NCIT:P106 "Human" xsd:string
+property_value: NCIT:P108 "Relative" xsd:string
+property_value: NCIT:P207 "C0080103" xsd:string
+property_value: NCIT:P322 "CDISC" xsd:string
+property_value: NCIT:P322 "PCDC" xsd:string
+property_value: NCIT:P325 "Any individual related biologically or legally to another individual." xsd:string {NCIT:P378="CDISC"}
+property_value: NCIT:P366 "Relative" xsd:string
+
+[Term]
+id: NCIT:C71389
+name: Great Relative
+def: "When combined with another relation \"great\" indicates an additional generation of separation between relatives." [] {NCIT:P378="NCI"}
+synonym: "Great Relation" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Great Relative" EXACT [] {NCIT:P383="SY", NCIT:P384="caDSR"}
+synonym: "Great Relative" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+is_a: NCIT:C21480 ! Relative
+property_value: NCIT:NHC0 "C71389" xsd:string
+property_value: NCIT:P106 "Human" xsd:string
+property_value: NCIT:P108 "Great Relative" xsd:string
+property_value: NCIT:P207 "C2348895" xsd:string
+property_value: NCIT:P366 "Great_Relative" xsd:string
+
+[Term]
+id: NCIT:C166126
+name: Great Grandparent
+def: "A parent of one's grandparent." [] {NCIT:P378="NCI"}
+synonym: "Great Grandparent" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+synonym: "Great-Grandparent" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+is_a: NCIT:C71389 ! Great Relative
+property_value: NCIT:NHC0 "C166126" xsd:string
+property_value: NCIT:P106 "Human" xsd:string
+property_value: NCIT:P108 "Great Grandparent" xsd:string
+property_value: NCIT:P207 "C0337480" xsd:string
+
+[Term]
+id: NCIT:C71383
+name: Maternal Relative
+def: "A person related by lineage through the mother's side of the family." [] {NCIT:P378="NCI"}
+synonym: "Maternal" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Maternal Relative" EXACT [] {NCIT:P383="SY", NCIT:P384="caDSR"}
+synonym: "Maternal Relative" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+is_a: NCIT:C21480 ! Relative
+property_value: NCIT:NHC0 "C71383" xsd:string
+property_value: NCIT:P106 "Human" xsd:string
+property_value: NCIT:P108 "Maternal Relative" xsd:string
+property_value: NCIT:P207 "C2347083" xsd:string
+property_value: NCIT:P366 "Maternal_Relative" xsd:string
+
+[Term]
+id: NCIT:C166127
+name: Maternal Great Grandparent
+def: "A parent of one's maternal grandparent." [] {NCIT:P378="NCI"}
+subset: NCIT:C157711
+subset: NCIT:C177537
+synonym: "Maternal Great Grandparent" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+synonym: "Maternal Great Grandparent" EXACT [] {NCIT:P383="PT", NCIT:P384="GDC"}
+synonym: "Maternal Great-Grandparent" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+is_a: NCIT:C166126 ! Great Grandparent
+is_a: NCIT:C71383 ! Maternal Relative
+property_value: NCIT:A32 NCIT:C83393
+property_value: NCIT:NHC0 "C166127" xsd:string
+property_value: NCIT:P106 "Human" xsd:string
+property_value: NCIT:P108 "Maternal Great Grandparent" xsd:string
+property_value: NCIT:P207 "C3242755" xsd:string
+property_value: NCIT:P322 "GDC" xsd:string
+property_value: NCIT:P375 "Maternal Great Grandparent" xsd:string {NCIT:P393="Has Synonym", NCIT:P394="PT", NCIT:P395="relationship_type", NCIT:P396="GDC"}
+
+[Term]
+id: NCIT:C274
+name: Antineoplastic Agent
+def: "A substance that inhibits the maturation, growth or spread of tumor cells." [] {NCIT:P378="NCI"}
+subset: NCIT:C173234
+subset: NCIT:C174018
+subset: NCIT:C177384
+subset: NCIT:C177406
+subset: NCIT:C179531
+subset: NCIT:C186328
+subset: NCIT:C186342
+subset: NCIT:C186764
+subset: NCIT:C192234
+synonym: "Anti-Cancer Agents" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Anti-Tumor Agents" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Anti-Tumor Drugs" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "antineoplastic" EXACT [] {NCIT:P385="CDR0000044816", NCIT:P383="SY", NCIT:P384="NCI-GLOSS"}
+synonym: "Antineoplastic Agent" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+synonym: "Antineoplastic Drug" EXACT [] {NCIT:P383="PT", NCIT:P384="OORO", NCIT:P386="PC"}
+synonym: "Antineoplastic Drugs" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "ANTINEOPLASTIC_AGENT" EXACT [] {NCIT:P383="PT", NCIT:P384="PCDC", NCIT:P386="OS"}
+synonym: "ANTINEOPLASTIC_AGENT" EXACT [] {NCIT:P383="PT", NCIT:P386="GCT", NCIT:P384="PCDC"}
+synonym: "ANTINEOPLASTIC_AGENT" EXACT [] {NCIT:P383="PT", NCIT:P384="PCDC", NCIT:P386="HL"}
+synonym: "ANTINEOPLASTIC_AGENT" EXACT [] {NCIT:P386="AML", NCIT:P383="PT", NCIT:P384="PCDC"}
+synonym: "Antineoplastics" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Antiproliferative Agents" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Antiproliferative Drugs" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Cancer Drug" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "chemotherapeutic agent" EXACT [] {NCIT:P383="PT", NCIT:P385="CDR0000044009", NCIT:P384="NCI-GLOSS"}
+synonym: "Chemotherapeutic Agents, Neoplastic Disease" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Tumor-Specific Treatment Agents" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+is_a: NCIT:C1909 ! Pharmacologic Substance
+property_value: NCIT:A23 NCIT:C25162
+property_value: NCIT:A26 NCIT:C1005
+property_value: NCIT:A26 NCIT:C1094
+property_value: NCIT:A26 NCIT:C116722
+property_value: NCIT:A26 NCIT:C1336
+property_value: NCIT:A26 NCIT:C17649
+property_value: NCIT:A26 NCIT:C17998
+property_value: NCIT:A26 NCIT:C1806
+property_value: NCIT:A26 NCIT:C1819
+property_value: NCIT:A26 NCIT:C1851
+property_value: NCIT:A26 NCIT:C1872
+property_value: NCIT:A26 NCIT:C2213
+property_value: NCIT:A26 NCIT:C240
+property_value: NCIT:A26 NCIT:C26638
+property_value: NCIT:A26 NCIT:C321
+property_value: NCIT:A26 NCIT:C405
+property_value: NCIT:A26 NCIT:C408
+property_value: NCIT:A26 NCIT:C43234
+property_value: NCIT:A26 NCIT:C456
+property_value: NCIT:A26 NCIT:C491
+property_value: NCIT:A26 NCIT:C562
+property_value: NCIT:A26 NCIT:C61948
+property_value: NCIT:A26 NCIT:C62050
+property_value: NCIT:A26 NCIT:C62091
+property_value: NCIT:A26 NCIT:C633
+property_value: NCIT:A26 NCIT:C642
+property_value: NCIT:A26 NCIT:C67504
+property_value: NCIT:A26 NCIT:C68936
+property_value: NCIT:A26 NCIT:C875
+property_value: NCIT:A26 NCIT:C900
+property_value: NCIT:A34 NCIT:C1093
+property_value: NCIT:A34 NCIT:C1282
+property_value: NCIT:A34 NCIT:C1411
+property_value: NCIT:A34 NCIT:C313
+property_value: NCIT:A34 NCIT:C376
+property_value: NCIT:A34 NCIT:C405
+property_value: NCIT:A34 NCIT:C412
+property_value: NCIT:A34 NCIT:C488
+property_value: NCIT:A34 NCIT:C491
+property_value: NCIT:A34 NCIT:C564
+property_value: NCIT:A34 NCIT:C633
+property_value: NCIT:A34 NCIT:C66876
+property_value: NCIT:A34 NCIT:C930
+property_value: NCIT:A34 NCIT:C933
+property_value: NCIT:A38 NCIT:C1282
+property_value: NCIT:A38 NCIT:C1394
+property_value: NCIT:A38 NCIT:C1526
+property_value: NCIT:A38 NCIT:C1570
+property_value: NCIT:A38 NCIT:C1699
+property_value: NCIT:A38 NCIT:C20493
+property_value: NCIT:A38 NCIT:C376
+property_value: NCIT:A38 NCIT:C456
+property_value: NCIT:A38 NCIT:C491
+property_value: NCIT:A38 NCIT:C52200
+property_value: NCIT:A38 NCIT:C564
+property_value: NCIT:A38 NCIT:C61313
+property_value: NCIT:A38 NCIT:C642
+property_value: NCIT:A38 NCIT:C66876
+property_value: NCIT:A38 NCIT:C78204
+property_value: NCIT:A38 NCIT:C84520
+property_value: NCIT:A39 NCIT:C106432
+property_value: NCIT:A39 NCIT:C1093
+property_value: NCIT:A39 NCIT:C1094
+property_value: NCIT:A39 NCIT:C1275
+property_value: NCIT:A39 NCIT:C1282
+property_value: NCIT:A39 NCIT:C17649
+property_value: NCIT:A39 NCIT:C313
+property_value: NCIT:A39 NCIT:C321
+property_value: NCIT:A39 NCIT:C349
+property_value: NCIT:A39 NCIT:C376
+property_value: NCIT:A39 NCIT:C405
+property_value: NCIT:A39 NCIT:C408
+property_value: NCIT:A39 NCIT:C411
+property_value: NCIT:A39 NCIT:C422
+property_value: NCIT:A39 NCIT:C456
+property_value: NCIT:A39 NCIT:C491
+property_value: NCIT:A39 NCIT:C564
+property_value: NCIT:A39 NCIT:C62056
+property_value: NCIT:A39 NCIT:C62072
+property_value: NCIT:A39 NCIT:C633
+property_value: NCIT:A39 NCIT:C642
+property_value: NCIT:A39 NCIT:C66876
+property_value: NCIT:A39 NCIT:C66944
+property_value: NCIT:A39 NCIT:C68814
+property_value: NCIT:A39 NCIT:C73261
+property_value: NCIT:A39 NCIT:C770
+property_value: NCIT:A39 NCIT:C875
+property_value: NCIT:A39 NCIT:C930
+property_value: NCIT:A39 NCIT:C933
+property_value: NCIT:A42 NCIT:C1282
+property_value: NCIT:A42 NCIT:C1526
+property_value: NCIT:A42 NCIT:C17649
+property_value: NCIT:A42 NCIT:C422
+property_value: NCIT:A42 NCIT:C555
+property_value: NCIT:A42 NCIT:C62050
+property_value: NCIT:A42 NCIT:C647
+property_value: NCIT:A42 NCIT:C66937
+property_value: NCIT:A42 NCIT:C770
+property_value: NCIT:NHC0 "C274" xsd:string
+property_value: NCIT:P106 "Chemical Viewed Functionally" xsd:string
+property_value: NCIT:P108 "Antineoplastic Agent" xsd:string
+property_value: NCIT:P207 "C0003392" xsd:string
+property_value: NCIT:P322 "OORO" xsd:string
+property_value: NCIT:P322 "PCDC" xsd:string
+property_value: NCIT:P325 "A drug used to treat cancer." xsd:string {NCIT:P378="NCI-GLOSS"}
+property_value: NCIT:P325 "Antineoplastic agent used as part of a cycle of chemotherapy" xsd:string {NCIT:P378="OORO", NCIT:P381="PC"}
+property_value: NCIT:P366 "Antineoplastic_Agent" xsd:string
+property_value: NCIT:P368 "CHEBI:35610" xsd:string
+
+[Term]
+id: NCIT:C2122
+name: Cell Differentiating Agent
+def: "An agent that either induces or inhibits the differentiation or maturation of cells, specifically neoplastic cells, resulting in decreases in tumor growth and metastasis. (NCI04)" [] {NCIT:P378="NCI"}
+synonym: "Cell Differentiating Agent" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+is_a: NCIT:C274 ! Antineoplastic Agent
+property_value: NCIT:NHC0 "C2122" xsd:string
+property_value: NCIT:P106 "Chemical Viewed Functionally" xsd:string
+property_value: NCIT:P108 "Cell Differentiating Agent" xsd:string
+property_value: NCIT:P207 "C1516342" xsd:string
+property_value: NCIT:P366 "Cell_Differentiating_Agent" xsd:string
+
+[Term]
+id: NCIT:C1934
+name: Differentiation Inducer
+def: "An agent that induces the differentiation or maturation of cells, specifically neoplastic cells, resulting in decreases in tumor growth and metastasis. (NCI04)" [] {NCIT:P378="NCI"}
+synonym: "Differentiating Agents" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Differentiation Agents" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Differentiation Inducer" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+is_a: NCIT:C2122 ! Cell Differentiating Agent
+property_value: NCIT:NHC0 "C1934" xsd:string
+property_value: NCIT:P106 "Chemical Viewed Functionally" xsd:string
+property_value: NCIT:P108 "Differentiation Inducer" xsd:string
+property_value: NCIT:P207 "C1511939" xsd:string
+property_value: NCIT:P366 "Differentiation_Inducer" xsd:string
+
+[Term]
+id: NCIT:C1005
+name: Arsenic Trioxide
+def: "A small-molecule arsenic compound with antineoplastic activity.  The mechanism of action of arsenic trioxide is not completely understood. This agent causes damage to or degradation of the promyelocytic leukemia protein/retinoic acid receptor-alpha (PML/RARa) fusion protein; induces apoptosis in acute promyelocytic leukemia (APL) cells and in many other tumor cell types; promotes cell differentiation and suppresses cell proliferation in many different tumor cell types; and is pro-angiogenic. (NCI04)" [] {NCIT:P378="NCI"}
+subset: NCIT:C116977
+subset: NCIT:C116978
+subset: NCIT:C128784
+subset: NCIT:C157711
+subset: NCIT:C157712
+subset: NCIT:C173234
+subset: NCIT:C174019
+subset: NCIT:C176424
+subset: NCIT:C177537
+subset: NCIT:C201600
+subset: NCIT:C63923
+synonym: "Arsenic (III) Oxide" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Arsenic Sesquioxide" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "ARSENIC TRIOXIDE" EXACT [] {NCIT:P385="S7V92P67HO", NCIT:P383="PT", NCIT:P386="UNII", NCIT:P384="FDA"}
+synonym: "Arsenic Trioxide" EXACT [] {NCIT:P383="PT", NCIT:P384="NCI"}
+synonym: "Arsenic Trioxide" EXACT [] {NCIT:P386="AML", NCIT:P383="PT", NCIT:P384="PCDC"}
+synonym: "Arsenic Trioxide" EXACT [] {NCIT:P384="CTRP", NCIT:P383="DN"}
+synonym: "Arsenic trioxide" EXACT [] {NCIT:P385="44", NCIT:P383="PT", NCIT:P384="HemOnc"}
+synonym: "arsenic trioxide" EXACT [] {NCIT:P383="PT", NCIT:P385="CDR0000046018", NCIT:P384="NCI-GLOSS"}
+synonym: "Arsenous Acid" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Arsenous Acid Anhydride" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "Arsenous Oxide" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+synonym: "ATO" EXACT [] {NCIT:P383="AB", NCIT:P384="NCI"}
+synonym: "Trisenox" EXACT [] {NCIT:P384="NCI", NCIT:P383="BR"}
+synonym: "Trisenox" EXACT [] {NCIT:P383="PT", NCIT:P385="CDR0000523452", NCIT:P384="NCI-GLOSS"}
+synonym: "White Arsenic" EXACT [] {NCIT:P383="SY", NCIT:P384="NCI"}
+is_a: NCIT:C1934 ! Differentiation Inducer
+intersection_of: NCIT:C1934 ! Differentiation Inducer
+intersection_of: NCIT:R124 NCIT:C40551 ! Unknown Cellular or Molecular Mechanism
+intersection_of: NCIT:R125 NCIT:C17557 ! Apoptosis
+intersection_of: NCIT:R125 NCIT:C17932 ! Angiogenic Process
+intersection_of: NCIT:R125 NCIT:C40738 ! Positive Regulation of Cell Differentiation
+intersection_of: NCIT:R72 NCIT:C13258 ! Mitochondrion
+property_value: NCIT:A24 NCIT:C274
+property_value: NCIT:A32 NCIT:C1909
+property_value: NCIT:A7 NCIT:C53622
+property_value: NCIT:NHC0 "C1005" xsd:string
+property_value: NCIT:P106 "Inorganic Chemical" xsd:string
+property_value: NCIT:P106 "Pharmacologic Substance" xsd:string
+property_value: NCIT:P107 "Arsenic Trioxide" xsd:string
+property_value: NCIT:P108 "Arsenic Trioxide" xsd:string
+property_value: NCIT:P175 "706363" xsd:string
+property_value: NCIT:P207 "C0052416" xsd:string
+property_value: NCIT:P210 "1327-53-3" xsd:string
+property_value: NCIT:P302 "Myelodysplastic syndrome; multiple myeloma; chronic myeloid leukemia; acute myelocytic leukemia" xsd:string
+property_value: NCIT:P319 "S7V92P67HO" xsd:string
+property_value: NCIT:P322 "CTRP" xsd:string
+property_value: NCIT:P322 "FDA" xsd:string
+property_value: NCIT:P322 "GDC" xsd:string
+property_value: NCIT:P322 "HemOnc" xsd:string
+property_value: NCIT:P322 "PCDC" xsd:string
+property_value: NCIT:P325 "A drug used to treat acute promyelocytic leukemia (APL) that has not gotten better or that has come back after treatment with other anticancer drugs. It is also being studied in the treatment of other types of cancer." xsd:string {NCIT:P378="NCI-GLOSS"}
+property_value: NCIT:P329 "43067" xsd:string
+property_value: NCIT:P330 "43067" xsd:string
+property_value: NCIT:P350 "As2O3" xsd:string
+property_value: NCIT:P366 "Arsenic_Trioxide" xsd:string
+property_value: NCIT:P368 "CHEBI:30621" xsd:string
+property_value: NCIT:P375 "Arsenic Trioxide" xsd:string {NCIT:P393="Has Synonym", NCIT:P394="PT", NCIT:P395="therapeutic_agents", NCIT:P396="GDC"}
+property_value: NCIT:P399 "43067" xsd:string

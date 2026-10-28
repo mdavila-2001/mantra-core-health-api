@@ -21,7 +21,7 @@ import { join } from 'node:path';
 
 import { BUILD_DIR, nowIso, readNdjson, writeJson } from '../lib/glossary-es/common.mjs';
 import { SYSTEMS } from './lib/code-systems.mjs';
-import { measureHetionet, measureMonarchEdges } from './lib/measure.mjs';
+import { measureGencc, measureHetionet, measureMonarchEdges, measureOrphaCodes } from './lib/measure.mjs';
 import { addToSnapshot } from './lib/snapshot.mjs';
 import { MEASURE_FILES, NDJSON_DIR, SOURCES_DIR } from './lib/sources.mjs';
 
@@ -51,6 +51,11 @@ export const PASSES = [
   { measure: 'monarch-alliance' },
   { measure: 'monarch-cureid' },
   { cs: 'ncit-xref' }, // pasada 20: conceptos de NCIt que citan las demás fuentes, fuera de C2991 o retirados
+  { cs: 'medlineplus-genetics' }, // pasada 21: MedlinePlus Genetics (NLM, dominio público)
+  { cs: 'wikidata-disease' }, // pasada 22: Wikidata (CC0): con etiqueta en castellano o sin identificador del catálogo
+  { measure: 'gencc' }, // 23-25: tres fuentes independientes más, sólo medidas
+  { measure: 'orphadata-en-product6' },
+  { measure: 'orphadata-en-product9-prev' },
 ];
 const SYSTEM_PASSES = PASSES.filter((p) => p.cs && !p.citer).map((p) => p.cs);
 const DEDUP_EQUIVALENCES = new Set(['equivalent', null]);
@@ -263,6 +268,9 @@ async function main() {
   const measuredPath = (k) => join(SOURCES_DIR, MEASURE_FILES.find((f) => f.key === k).file);
   const measured = {
     hetionet: measureHetionet(measuredPath('hetionet'), bySystem.doid),
+    gencc: measureGencc(measuredPath('gencc')),
+    'orphadata-en-product6': measureOrphaCodes(measuredPath('orphadata-en-product6')),
+    'orphadata-en-product9-prev': measureOrphaCodes(measuredPath('orphadata-en-product9-prev')),
     ...Object.fromEntries(['monarch-clingen', 'monarch-clinvar', 'monarch-alliance', 'monarch-cureid'].map((k) => [k, measureMonarchEdges(measuredPath(k), bySystem.doid)])),
   };
   const coverage = computeCoverage(bySystem, citations, measured);

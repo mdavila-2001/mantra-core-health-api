@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<summaries xmlns="https://medlineplus.gov/download/ghr-summaries-20250602.xsd" xmlns:html="http://www.w3.org/1999/xhtml">
+<health-condition-summary id="20971">
+<name>15q24 microdeletion</name>
+<ghr-page>https://medlineplus.gov/genetics/condition/15q24-microdeletion</ghr-page>
+<text-list><text><text-role>description</text-role><html><html:p>15q24 microdeletion is a chromosomal change in which a small piece of chromosome 15 is deleted in each cell. The deletion occurs on the long (q) arm of the chromosome at a position designated q24.</html:p><html:p>15q24 microdeletion is associated with mild to moderate intellectual disability and delayed speech development. Other common signs and symptoms include short stature, weak muscle tone (hypotonia), and skeletal abnormalities including loose (lax) joints. Affected males may have genital abnormalities, which can include an unusually small penis (micropenis) and the opening of the urethra on the underside of the penis (hypospadias). Affected individuals also have distinctive facial features such as a high front hairline, broad eyebrows, widely set eyes (hypertelorism), outside corners of the eyes that point downward (downslanting palpebral fissures), a broad nasal bridge, a full lower lip, and a long, smooth space between the upper lip and nose (philtrum).</html:p></html></text></text-list>
+<inheritance-pattern-list>
+<inheritance-pattern>
+<code>n</code>
+<memo>Not inherited</memo>
+</inheritance-pattern>
+</inheritance-pattern-list>
+<related-gene-list>
+<related-chromosome>
+<name>15</name>
+<ghr-page>https://medlineplus.gov/genetics/chromosome/15</ghr-page>
+</related-chromosome>
+</related-gene-list>
+<synonym-list>
+<synonym>15q24 deletion</synonym>
+<synonym>15q24 microdeletion syndrome</synonym>
+<synonym>Interstitial deletion of chromosome 15q24</synonym>
+</synonym-list>
+<db-key-list>
+<db-key>
+<db>GTR</db>
+<key>C4310804</key>
+</db-key>
+<db-key>
+<db>MeSH</db>
+<key>D025063</key>
+</db-key>
+<db-key>
+<db>OMIM</db>
+<key>613406</key>
+</db-key>
+<db-key>
+<db>SNOMED CT</db>
+<key>699308002</key>
+</db-key>
+</db-key-list>
+<reviewed>2011-09</reviewed>
+<published>2020-09-08</published>
+</health-condition-summary>
+<health-condition-summary id="20362">
+<name>Alzheimer's disease</name>
+<ghr-page>https://medlineplus.gov/genetics/condition/alzheimers-disease</ghr-page>
+<text-list><text><text-role>description</text-role><html><html:p>Alzheimer's disease is a degenerative disease of the brain that causes dementia, which is a gradual loss of memory, judgment, and ability to function. This disorder usually appears in people older than age 65, but less common forms of the disease appear earlier in adulthood.</html:p><html:p>Memory loss is the most common sign of Alzheimer's disease. Forgetfulness may be subtle at first, but the loss of memory worsens over time until it interferes with most aspects of daily living. Even in familiar settings, a person with Alzheimer's disease may get lost or become confused. Routine tasks such as preparing meals, doing laundry, and performing other household chores can be challenging. Additionally, it may become difficult to recognize people and name objects. Affected people increasingly require help with dressing, eating, and personal care.</html:p><html:p>As the disorder progresses, some people with Alzheimer's disease experience personality and behavioral changes and have trouble interacting in a socially appropriate manner. Other common symptoms include agitation, restlessness, withdrawal, and loss of language skills. People with Alzheimer's disease usually require total care during the advanced stages of the disease.</html:p><html:p>Individuals with Alzheimer's disease usually survive 8 to 10 years after the appearance of symptoms, but the course of the disease can range from 1 to 25 years. Survival is usually shorter in individuals diagnosed after age 80 than in those diagnosed at a younger age. In Alzheimer's disease, death usually results from pneumonia, malnutrition, or general body wasting (inanition).</html:p><html:p>Alzheimer's disease can be classified as early-onset or late-onset. The signs and symptoms of the early-onset form appear between a person's thirties and mid-sixties, while the late-onset form appears during or after a person's mid-sixties. The early-onset form of Alzheimer's disease is much less common than the late-onset form, accounting for less than 10 percent of all cases of Alzheimer's disease.</html:p></html></text></text-list>
+<inheritance-pattern-list>
+<inheritance-pattern>
+<code>u</code>
+<memo>Pattern unknown</memo>
+</inheritance-pattern>
+<inheritance-pattern>
+<code>ad</code>
+<memo>Autosomal dominant+1 affected parent</memo>
+</inheritance-pattern>
+</inheritance-pattern-list>
+<related-gene-list>
+<related-gene>
+<gene-symbol>APP</gene-symbol>
+<ghr-page>https://medlineplus.gov/genetics/gene/app</ghr-page>
+</related-gene>
+<related-gene>
+<gene-symbol>APOE</gene-symbol>
+<ghr-page>https://medlineplus.gov/genetics/gene/apoe</ghr-page>
+</related-gene>
+<related-gene>
+<gene-symbol>PSEN1</gene-symbol>
+<ghr-page>https://medlineplus.gov/genetics/gene/psen1</ghr-page>
+</related-gene>
+<related-gene>
+<gene-symbol>PSEN2</gene-symbol>
+<ghr-page>https://medlineplus.gov/genetics/gene/psen2</ghr-page>
+</related-gene>
+</related-gene-list>
+<synonym-list>
+<synonym>AD</synonym>
+<synonym>Alzheimer dementia (AD)</synonym>
+<synonym>Alzheimer disease</synonym>
+<synonym>Alzheimer sclerosis</synonym>
+<synonym>Alzheimer syndrome</synonym>
+<synonym>Alzheimer-type dementia (ATD)</synonym>
+<synonym>DAT</synonym>
+<synonym>Familial Alzheimer disease (FAD)</synonym>
+<synonym>Presenile and senile dementia</synonym>
+<synonym>Primary senile degenerative dementia</synonym>
+<synonym>SDAT</synonym>
+</synonym-list>
+<db-key-list>
+<db-key>
+<db>GTR</db>
+<key>C0002395</key>
+</db-key>
+<db-key>
+<db>GTR</db>
+<key>C1843013</key>
+</db-key>
+<db-key>
+<db>GTR</db>
+<key>C1847200</key>
+</db-key>
+<db-key>
+<db>GTR</db>
+<key>C1863051</key>
+</db-key>
+<db-key>
+<db>ICD-10-CM</db>
+<key>G30</key>
+</db-key>
+<db-key>
+<db>ICD-10-CM</db>
+<key>G30.0</key>
+</db-key>
+<db-key>
+<db>ICD-10-CM</db>
+<key>G30.1</key>
+</db-key>
+<db-key>
+<db>ICD-10-CM</db>
+<key>G30.8</key>
+</db-key>
+<db-key>
+<db>ICD-10-CM</db>
+<key>G30.9</key>
+</db-key>
+<db-key>
+<db>MeSH</db>
+<key>D000544</key>
+</db-key>
+<db-key>
+<db>OMIM</db>
+<key>104300</key>
+</db-key>
+<db-key>
+<db>OMIM</db>
+<key>104310</key>
+</db-key>
+<db-key>
+<db>OMIM</db>
+<key>606889</key>
+</db-key>
+<db-key>
+<db>OMIM</db>
+<key>607822</key>
+</db-key>
+<db-key>
+<db>SNOMED CT</db>
+<key>10532003</key>
+</db-key>
+<db-key>
+<db>SNOMED CT</db>
+<key>26929004</key>
+</db-key>
+<db-key>
+<db>SNOMED CT</db>
+<key>416780008</key>
+</db-key>
+<db-key>
+<db>SNOMED CT</db>
+<key>416975007</key>
+</db-key>
+<db-key>
+<db>SNOMED CT</db>
+<key>65096006</key>
+</db-key>
+</db-key-list>
+<reviewed>2008-12</reviewed>
+<published>2024-10-02</published>
+</health-condition-summary>
+</summaries>

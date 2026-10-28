@@ -1,0 +1,36 @@
+=== Carga del glosario ES a terminology.* (APPLY explícito) ===
+{
+  "perLayer": {
+    "cie10es-procedimientos": 78948,
+    "wikidata-relaciones (fichas creadas)": 0
+  },
+  "orphanRelations": 0,
+  "valueSets": 9,
+  "summary": [
+    {
+      "codeSystem": "cie10es-procedimientos-2026",
+      "version": "2026",
+      "concepts": 78948,
+      "designations": 78948,
+      "properties": 868428,
+      "memberships": 160533,
+      "relationships": 0
+    }
+  ]
+}
+[load] {"codeSystem":"cie10es-procedimientos-2026","concepts":78948,"designations":78948,"properties":868428,"memberships":160533,"relationships":0}
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "result": [
+    {
+      "codeSystem": "cie10es-procedimientos-2026",
+      "concepts": 78948,
+      "designations": 78948,
+      "properties": 868428,
+      "memberships": 160533,
+      "relationships": 0
+    }
+  ],
+  "segundos": 40
+}

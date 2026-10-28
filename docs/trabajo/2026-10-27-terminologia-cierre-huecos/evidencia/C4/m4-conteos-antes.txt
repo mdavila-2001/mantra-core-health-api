@@ -1,0 +1,12 @@
+allergy-rxnorm-ingredients|21923
+allergy-hpo|19178
+allergy-ndfrt-drug-classes|12994
+allergy-off-additives|725
+allergy-cvx-vaccines|275
+allergy-doid|176
+allergy-chebi|86
+allergy-hl7-fhir|50
+allergy-oae|35
+allergy-off-allergens|26
+allergy-foodon|20
+allergy-mondo|15

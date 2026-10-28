@@ -8,14 +8,14 @@
 // (FONASA) con «Cirugía Plástica, Estética y Reconstructiva» (arancel SCZ) sería inventar una equivalencia que
 // ninguna fuente publica; eso lo decide el propietario del modelo. No inventa códigos.
 //
-// Escribe `data/model-proposal.json` y, con `--markdown`, la tabla.
-//   node tools/terminology-import/specialty-services/propose-model-specialties.mjs [--markdown]
+// Escribe `<BUILD_DIR>/model-proposal.json` (con `--write-repo-data`, `data/model-proposal.json`, que está versionado) y, con `--markdown`, la tabla.
+//   node tools/terminology-import/specialty-services/propose-model-specialties.mjs [--markdown] [--write-repo-data]
 // =============================================================================
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { META_PATH, REPO_DATA_DIR, readGzParts } from './lib/common.mjs';
+import { BUILD_DIR, META_PATH, REPO_DATA_DIR, ensureDir, readGzParts } from './lib/common.mjs';
 import { loadModelSpecialties } from './lib/rules.mjs';
 
 function readMeta() {
@@ -55,7 +55,10 @@ const proposal = {
   bySource,
   rows,
 };
-writeFileSync(join(REPO_DATA_DIR, 'model-proposal.json'), `${JSON.stringify(proposal, null, 2)}\n`);
+// Pisar `data/` (versionado) exige --write-repo-data; por defecto va a <BUILD_DIR>/model-proposal.json.
+const target = process.argv.includes('--write-repo-data') ? join(REPO_DATA_DIR, 'model-proposal.json') : join(ensureDir(BUILD_DIR), 'model-proposal.json');
+writeFileSync(target, `${JSON.stringify(proposal, null, 2)}\n`);
+console.error(`Propuesta escrita en ${target}`);
 console.log(JSON.stringify({ rows: rows.length, bySource }, null, 2));
 if (process.argv.includes('--markdown')) {
   console.log('\n| Fuente | Nombre en la fuente | Servicios sin especialidad del modelo | Motivo |\n|---|---|---:|---|');

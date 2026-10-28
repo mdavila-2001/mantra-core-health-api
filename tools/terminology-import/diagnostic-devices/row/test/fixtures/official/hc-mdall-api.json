@@ -1,0 +1,93 @@
+{
+ "active_license": [
+  {
+   "original_licence_no": 115490,
+   "licence_status": "I",
+   "appl_risk_class": 2,
+   "licence_name": "MEDICARE ANTIBACTERIAL ADHESIVE BANDAGES",
+   "first_licence_status_dt": "2026-05-28",
+   "last_refresh_dt": "2026-10-26",
+   "end_date": null,
+   "licence_type_cd": "D",
+   "company_id": 124971,
+   "licence_type_desc": "Single Device"
+  },
+  {
+   "original_licence_no": 111577,
+   "licence_status": "I",
+   "appl_risk_class": 2,
+   "licence_name": "6 MIL NITRILE GLOVES",
+   "first_licence_status_dt": "2024-07-24",
+   "last_refresh_dt": "2026-10-26",
+   "end_date": null,
+   "licence_type_cd": "F",
+   "company_id": 184839,
+   "licence_type_desc": "Device Family"
+  }
+ ],
+ "active_device": [
+  {
+   "original_licence_no": 115490,
+   "device_id": 1092645,
+   "first_licence_dt": "2026-05-28",
+   "end_date": null,
+   "trade_name": "MEDICARE ANTIBACTERIAL ADHESIVE BANDAGES"
+  },
+  {
+   "original_licence_no": 111577,
+   "device_id": 1085564,
+   "first_licence_dt": "2025-11-13",
+   "end_date": null,
+   "trade_name": "BLACK NITRILE GLOVES"
+  }
+ ],
+ "active_device_identifier": [
+  {
+   "original_licence_no": 115490,
+   "device_id": 1092645,
+   "first_licence_dt": "2026-05-28",
+   "end_date": null,
+   "device_identifier": "01-3128214"
+  },
+  {
+   "original_licence_no": 111577,
+   "device_id": 1085564,
+   "first_licence_dt": "2025-11-13",
+   "end_date": null,
+   "device_identifier": "INSBKNGV2-CS10-L-41"
+  },
+  {
+   "original_licence_no": 111577,
+   "device_id": 1085564,
+   "first_licence_dt": "2025-11-13",
+   "end_date": null,
+   "device_identifier": "INSBKNGV2-CS10-M-41"
+  }
+ ],
+ "company": [
+  {
+   "company_id": 124971,
+   "company_name": "DOLLARAMA L.P",
+   "addr_line_1": "5805 Royalmount Avenue",
+   "addr_line_2": "",
+   "addr_line_3": "",
+   "postal_code": "H4P 0A1",
+   "city": "Montreal",
+   "country_cd": "CA",
+   "region_cd": "QC",
+   "company_status": "A"
+  },
+  {
+   "company_id": 184839,
+   "company_name": "K2 HEALTH PRODUCTS LLC",
+   "addr_line_1": "5377 Kings Highway",
+   "addr_line_2": "",
+   "addr_line_3": "",
+   "postal_code": "11203",
+   "city": "Brooklyn",
+   "country_cd": "US",
+   "region_cd": "NY",
+   "company_status": "A"
+  }
+ ]
+}

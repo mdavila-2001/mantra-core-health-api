@@ -54,7 +54,6 @@ export function registryRows(namingSystems, pkg) {
         sourceId: `NamingSystem/${id}`,
         version: pkg.packageVersion,
         uri: ns.url,
-        retrievedAt: pkg.retrievedAt,
         package: `${pkg.packageName}@${pkg.packageVersion}`,
         tarballUrl: pkg.tarballUrl,
         integrity: pkg.integrity,

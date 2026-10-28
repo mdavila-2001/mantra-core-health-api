@@ -1,0 +1,53 @@
+[wikidata-relaciones] P780 (symptoms and signs): 4132 aristas
+[wikidata-relaciones] P2176 (drug or therapy used for treatment): 5543 aristas
+[wikidata-relaciones] P1995 (health specialty): 9529 aristas
+[wikidata-relaciones] P924 (possible treatment): 650 aristas
+[wikidata-relaciones] P923 (medical examination): 962 aristas
+[wikidata-relaciones] P927 (anatomical location): 1216 aristas
+[wikidata-relaciones] ítems con CIE-10 (identidades): 12572
+{
+  "source": "wikidata",
+  "retrievedAt": "2026-10-27T23:54:16.517Z",
+  "sparql": "https://query.wikidata.org/sparql",
+  "license": "CC0 1.0",
+  "aristas": 22032,
+  "identidades": 12572,
+  "porPropiedad": {
+    "P780": {
+      "label": "symptoms and signs",
+      "bindings": 12990,
+      "aristas": 4132
+    },
+    "P2176": {
+      "label": "drug or therapy used for treatment",
+      "bindings": 22498,
+      "aristas": 5543
+    },
+    "P1995": {
+      "label": "health specialty",
+      "bindings": 17443,
+      "aristas": 9529
+    },
+    "P924": {
+      "label": "possible treatment",
+      "bindings": 1871,
+      "aristas": 650
+    },
+    "P923": {
+      "label": "medical examination",
+      "bindings": 2636,
+      "aristas": 962
+    },
+    "P927": {
+      "label": "anatomical location",
+      "bindings": 2006,
+      "aristas": 1216
+    }
+  },
+  "regla": "Sólo aristas cuyo destino tiene etiqueta en castellano. La resolución contra el glosario es por código idéntico (CIE-10, ICD-10-CM, ATC, MeSH, Q-id de anatomía) y la hace corpus.mjs.",
+  "segundos": 78
+}
+
+real	1m17.729s
+user	0m2.720s
+sys	0m0.660s

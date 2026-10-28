@@ -12,7 +12,7 @@
 const qidOf = (uri) => String(uri ?? '').split('/').pop();
 
 /** Resultado JSON de SPARQL → filas del cruce (únicas por ítem+HPO, ordenadas). */
-export function wikidataHpoRows(json, resolveHp, { retrievedAt, license, queryUrl }) {
+export function wikidataHpoRows(json, resolveHp, { retrievedAt, license, queryUrl, sha256 = null, version = null }) {
   const seen = new Map();
   const stats = { bindings: 0, duplicateBindings: 0, malformed: 0, remapped: 0, unresolved: 0, mappingRelation: 0 };
   for (const b of json?.results?.bindings ?? []) {
@@ -44,8 +44,10 @@ export function wikidataHpoRows(json, resolveHp, { retrievedAt, license, queryUr
       mappingRelation: rel,
       labelEn: b.itemLabelEn?.value ?? null,
       labelEs: b.itemLabelEs?.value ?? null,
+      version,
       retrievedAt,
       license,
+      inputSha256: sha256,
       sourceUri: queryUrl,
     });
   }

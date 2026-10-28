@@ -31,3 +31,4 @@ Registros y filas **reales**, elegidos a mano. Lo único que se recortó (y cóm
 | `icd11_simpletab_es_2026-01.sample.txt` | CIE-11 MMS 2026-01 en castellano (OMS): las mismas 11 filas que `icd11_simpletab_2026-01.sample.txt` | Filas sin modificar | CC BY-ND 3.0 IGO — © Organización Mundial de la Salud |
 | `icd11_map_10To11_2026-01.sample.txt`, `icd11_map_10To11_multiple_2026-01.sample.txt`, `icd11_map_11To10_2026-01.sample.txt` | Tablas de correspondencia de la OMS, release 2026-01 | Filas sin modificar | CC BY-ND 3.0 IGO — © OMS |
 | `mplus_topics_2026-10-27.sample.xml` | MedlinePlus, `mplus_topics_2026-10-27.xml`: temas 2238 y 1743 (español) y 122 y 139 (inglés) | Bloques `<health-topic>` completos | Dominio público — MedlinePlus (NLM) |
+| `ghr_summaries_2026-10-27.sample.xml` | MedlinePlus Genetics, `ghr-summaries.xml`: 15q24 microdeletion y Alzheimer's disease | `<health-condition-summary>` completos | Dominio público — MedlinePlus (NLM) |

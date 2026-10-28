@@ -1,0 +1,126 @@
+=== Carga del glosario ES a terminology.* (APPLY explícito) ===
+{
+  "perLayer": {
+    "cie10es-diagnosticos": 102131,
+    "wikidata-relaciones (fichas creadas)": 2083
+  },
+  "orphanRelations": 0,
+  "valueSets": 27,
+  "summary": [
+    {
+      "codeSystem": "cie10es-diagnosticos-2026",
+      "version": "2026",
+      "concepts": 102131,
+      "designations": 102131,
+      "properties": 1132641,
+      "memberships": 304973,
+      "relationships": 217734
+    },
+    {
+      "codeSystem": "wikidata-sintoma",
+      "version": "2026-10-27",
+      "concepts": 330,
+      "designations": 330,
+      "properties": 3507,
+      "memberships": 932,
+      "relationships": 1086
+    },
+    {
+      "codeSystem": "wikidata-medicamento",
+      "version": "2026-10-27",
+      "concepts": 1169,
+      "designations": 1169,
+      "properties": 13863,
+      "memberships": 3250,
+      "relationships": 4441
+    },
+    {
+      "codeSystem": "wikidata-tratamiento",
+      "version": "2026-10-27",
+      "concepts": 349,
+      "designations": 349,
+      "properties": 3960,
+      "memberships": 1005,
+      "relationships": 758
+    },
+    {
+      "codeSystem": "wikidata-especialidad",
+      "version": "2026-10-27",
+      "concepts": 101,
+      "designations": 101,
+      "properties": 1164,
+      "memberships": 276,
+      "relationships": 5057
+    },
+    {
+      "codeSystem": "wikidata-prueba",
+      "version": "2026-10-27",
+      "concepts": 134,
+      "designations": 134,
+      "properties": 1392,
+      "memberships": 381,
+      "relationships": 830
+    }
+  ]
+}
+[load] {"codeSystem":"cie10es-diagnosticos-2026","concepts":102131,"designations":102131,"properties":1132641,"memberships":304973,"relationships":217734}
+[load] {"codeSystem":"wikidata-sintoma","concepts":330,"designations":330,"properties":3507,"memberships":932,"relationships":1086}
+[load] {"codeSystem":"wikidata-medicamento","concepts":1169,"designations":1169,"properties":13863,"memberships":3250,"relationships":4441}
+[load] {"codeSystem":"wikidata-tratamiento","concepts":349,"designations":349,"properties":3960,"memberships":1005,"relationships":758}
+[load] {"codeSystem":"wikidata-especialidad","concepts":101,"designations":101,"properties":1164,"memberships":276,"relationships":5057}
+[load] {"codeSystem":"wikidata-prueba","concepts":134,"designations":134,"properties":1392,"memberships":381,"relationships":830}
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "result": [
+    {
+      "codeSystem": "cie10es-diagnosticos-2026",
+      "concepts": 102131,
+      "designations": 102131,
+      "properties": 1132641,
+      "memberships": 304973,
+      "relationships": 217734
+    },
+    {
+      "codeSystem": "wikidata-sintoma",
+      "concepts": 330,
+      "designations": 330,
+      "properties": 3507,
+      "memberships": 932,
+      "relationships": 1086
+    },
+    {
+      "codeSystem": "wikidata-medicamento",
+      "concepts": 1169,
+      "designations": 1169,
+      "properties": 13863,
+      "memberships": 3250,
+      "relationships": 4441
+    },
+    {
+      "codeSystem": "wikidata-tratamiento",
+      "concepts": 349,
+      "designations": 349,
+      "properties": 3960,
+      "memberships": 1005,
+      "relationships": 758
+    },
+    {
+      "codeSystem": "wikidata-especialidad",
+      "concepts": 101,
+      "designations": 101,
+      "properties": 1164,
+      "memberships": 276,
+      "relationships": 5057
+    },
+    {
+      "codeSystem": "wikidata-prueba",
+      "concepts": 134,
+      "designations": 134,
+      "properties": 1392,
+      "memberships": 381,
+      "relationships": 830
+    }
+  ],
+  "segundos": 109
+}

@@ -1,0 +1,42 @@
+--- visibles por value set (como los cuenta total de searchGlossaryPage)
+           internal_code           | visibles 
+-----------------------------------+----------
+ glossary-all-terms                |    28617
+ glossary-category-anatomy         |     1905
+ glossary-category-diagnostic-test |      273
+ glossary-category-disease         |    10040
+ glossary-category-lab             |      162
+ glossary-category-other           |    12095
+ glossary-category-pharmacology    |     2828
+ glossary-category-procedure       |       36
+ glossary-category-signs-symptoms  |      821
+ glossary-category-specialty       |      103
+ glossary-category-treatment       |      354
+ glossary-tag-cardiovascular       |     1380
+ glossary-tag-congenital           |      723
+ glossary-tag-dermatologic         |      733
+ glossary-tag-digestive            |     1050
+ glossary-tag-endocrine            |      675
+ glossary-tag-ent                  |      204
+ glossary-tag-gyn-ob               |      972
+ glossary-tag-hematologic          |      281
+ glossary-tag-infectious           |     1581
+ glossary-tag-mental-health        |      718
+ glossary-tag-musculoskeletal      |     1393
+ glossary-tag-neurologic           |     1235
+ glossary-tag-oncologic            |    10759
+ glossary-tag-ophthalmologic       |      373
+ glossary-tag-pediatric            |      526
+ glossary-tag-renal                |      381
+ glossary-tag-respiratory          |      654
+ glossary-tag-trauma               |     3017
+ glossary-tag-urgency              |       81
+ glossary-tag-urologic             |      149
+(31 rows)
+
+--- términos con estado activo vs total cargado
+ activos | total 
+---------+-------
+   28617 | 28617
+(1 row)
+

@@ -44,6 +44,8 @@ export const RELATION_TYPE = {
 export function isDefaultLoaded(source, row, include = new Set()) {
   if (source.id === 'abbreviations-metainventory' && row.namespace !== 'clinical' && !include.has('abbreviations-literature')) return false;
   if (source.id === 'fma' && row.namespace !== 'fma-core' && !include.has('fma-full')) return false;
+  // Fuentes por niveles (ChEBI, NCIt, AbreMES-DB): la fila declara su nivel y `--include <id>` carga todos.
+  if (row.tier === 'opt-in') return include.has(source.id);
   return source.load === 'default' || include.has(source.id);
 }
 
@@ -76,8 +78,10 @@ export function conceptTuple(row, versionId) {
 
 export function designationTuples(row) {
   const cid = conceptId(row.key);
-  const out = [[md5uuid(`mantra:dictionaries:designation:preferred:${row.key}`), cid, CONCEPT.LANG_EN, CONCEPT.DESIG_PREFERRED, row.display, true]];
-  row.synonymsExact.forEach((s) => out.push([md5uuid(`mantra:dictionaries:designation:synonym:${row.key}:${s}`), cid, CONCEPT.LANG_EN, CONCEPT.DESIG_SYNONYM, s, false]));
+  // El idioma lo declara la fuente en `row.lang` (todas las OBO: en; AbreMES-DB: es).
+  const lang = row.lang === 'es' ? CONCEPT.LANG_ES : CONCEPT.LANG_EN;
+  const out = [[md5uuid(`mantra:dictionaries:designation:preferred:${row.key}`), cid, lang, CONCEPT.DESIG_PREFERRED, row.display, true]];
+  row.synonymsExact.forEach((s) => out.push([md5uuid(`mantra:dictionaries:designation:synonym:${row.key}:${s}`), cid, lang, CONCEPT.DESIG_SYNONYM, s, false]));
   // Nombres en castellano y latín sólo cuando la fuente DECLARA el idioma (FMA: axioma `language`).
   for (const [lang, values] of [['es', row.designationsEs], ['la', row.designationsLa]]) {
     for (const s of values ?? []) out.push([md5uuid(`mantra:dictionaries:designation:${lang}:${row.key}:${s}`), cid, lang === 'es' ? CONCEPT.LANG_ES : CONCEPT.LANG_LA, CONCEPT.DESIG_SYNONYM, s, false]);

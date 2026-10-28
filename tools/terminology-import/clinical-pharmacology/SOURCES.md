@@ -4,11 +4,23 @@ Monografías por principio activo (ATC nivel 5) con texto **literal** de fuentes
 archivo dice de dónde sale cada dato, bajo qué licencia y qué queda afuera. El registro de pasadas
 (protocolo de saturación) está en `docs/seed-research/clinical-pharmacology.md`.
 
-> **Estado al 2026-10-24.** El importador está completo y probado, pero **ninguna fuente de red se
-> descargó**: la política de red de la sesión que lo escribió devolvía 403 a todos los hosts de
-> abajo (ver «Hosts que hay que habilitar»). Las licencias marcadas «no reverificada» se
-> documentan con lo que se sabía y **deben confirmarse en la página citada antes de la primera
-> carga en un entorno con usuarios**.
+> **Estado al 2026-10-27.** La sesión del 2026-10-24 escribió el importador sin red (403 a todos los hosts).
+> El 2026-10-27 la salida a CIMA, RxNav, openFDA y EMA estaba abierta y se ejecutaron las pasadas reales;
+> los parsers se validaron contra respuestas y archivos reales y se corrigieron cuatro defectos que sólo
+> el dato real mostraba (ver «Hallazgos de la validación»). Conteos, fechas y sha256 de cada pasada:
+> `docs/seed-research/clinical-pharmacology.md`. Las licencias de CIMA, openFDA y EMA se releyeron ese día
+> en las páginas citadas.
+
+## Hallazgos de la validación contra datos reales (2026-10-27)
+
+| # | Defecto que sólo el dato real mostró | Corrección |
+|---|---|---|
+| 1 | `maestras?maestra=7` sin filtro responde **204** (vacío); con cualquier `codigo=` no vacío la API ignora el valor y devuelve las 7 358 filas; `nombre=` filtra por subcadena | `atcMasterUrl` usa `codigo=A`; `verify-atc-master.mjs` lo contrasta con búsquedas por `nombre` |
+| 2 | El endpoint de una sola sección (`…&seccion=4.6`) responde `text/plain`, no JSON: el respaldo habría abortado la pasada con `JSON.parse` | `fetchSection` guarda el texto (escapado) en la misma forma `[{seccion, titulo, contenido}]` |
+| 3 | La API entrega el texto **propio** de cada sección: muchas fichas dejan vacíos 4.2, 4.6 y 5.2 y escriben en 4.2.1, 4.6.1–4.6.3, 5.2.1–5.2.4 (y 4.4.1, 5.1.x…). El mapeo por número exacto perdía posología, embarazo y farmacocinética de esas fichas | `cimaSectionKey`: la subsección hereda la clave del ancestro mapeado; una fila por subsección con su número y título |
+| 4 | `openfda.unii` de una etiqueta lista el UNII de la **sal** (oxicodona clorhidrato `C1ENJ2TE6C`), RxNorm da al ingrediente (IN) el UNII de la **base** (`CD35PMG570`): el emparejamiento por conjunto exacto de UNII no habría encontrado casi ninguna combinación | El puente guarda los PIN (sales) del propio RxNorm de cada IN y sus UNII; la etiqueta se empareja si cada UNII suyo pertenece a un ingrediente del ATC y cada ingrediente tiene alguno |
+| 5 | Cada partición de openFDA descomprimida pesa 120–650 MB de JSON en una cadena: supera el máximo de V8 (~512 MiB) y las monografías finales también | Lector en flujo (`lib/openfda-stream.mjs`), armado, carga, cobertura y empaquetado en flujo |
+| 6 | Campos reales de las etiquetas que la lista documentada omitía (uso pediátrico/geriátrico, embarazo en etiquetas OTC, trabajo de parto, precauciones generales, abuso y dependencia) y títulos de tabla (`<caption>`) | Agregados al mapeo; `extractTables` conserva `caption` |
 
 ## Reglas que el código hace cumplir
 

@@ -150,3 +150,32 @@ export function measureMeshC(terms) {
   }
   return { missingHeads: missing.map(([id]) => id), items: [...seen].filter((id) => id.startsWith('D')).map((id) => ({ id: `MESH:${id}`, links: [{ cs: 'mesh', code: id }] })) };
 }
+
+/**
+ * GenCC (envíos gen-enfermedad): columna `disease_curie` (MONDO, OMIM, Orphanet; a veces MONDO:… ya normalizado).
+ * Un ítem por enfermedad distinta; se enlaza con el sistema del catálogo que corresponde al prefijo.
+ */
+export function measureGencc(path) {
+  const lines = readFileSync(path, 'utf8').split('\n');
+  const header = lines[0].replace(/"/g, '').split('\t');
+  const col = header.indexOf('disease_curie');
+  const ids = new Set();
+  for (const l of lines.slice(1)) {
+    const v = l.split('\t')[col]?.replace(/"/g, '').trim();
+    if (v) ids.add(v);
+  }
+  const link = (id) => {
+    const [p, c] = id.split(':');
+    if (p === 'MONDO') return { cs: 'mondo', code: id };
+    if (p === 'OMIM') return { cs: 'omim', code: c };
+    if (p === 'Orphanet' || p === 'ORPHA') return { cs: 'orphanet', code: c };
+    return null;
+  };
+  return [...ids].map((id) => ({ id, link: link(id) })).filter((x) => x.link).map((x) => ({ id: x.id, links: [x.link] }));
+}
+
+/** Productos de Orphadata que listan enfermedades (`<OrphaCode>`): un ítem por ORPHAcode, enlazado a `orphanet`. */
+export function measureOrphaCodes(path) {
+  const codes = new Set([...readFileSync(path, 'utf8').matchAll(/<OrphaCode>(\d+)<\/OrphaCode>/g)].map((m) => m[1]));
+  return [...codes].map((c) => ({ id: `ORPHA:${c}`, links: [{ cs: 'orphanet', code: c }] }));
+}

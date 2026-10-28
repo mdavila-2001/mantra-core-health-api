@@ -1,42 +1,70 @@
 // Reporte de cobertura del corpus de diccionarios: por fuente y por dominio,
-// con lo que se carga por defecto separado de lo opt-in. Puro.
+// con lo que se carga por defecto separado de lo opt-in. Incremental (una fila
+// por vez) para no tener todo el corpus en memoria a la vez: ChEBI + NCIt + PRO
+// + FMA juntos no caben en 2,5 GB.
 import { DOMAINS } from './sources.mjs';
 import { isDefaultLoaded } from './load-plan.mjs';
 
-export function coverageFor(layers, edges, { missing = [] } = {}) {
-  const perSource = layers.map((l) => {
-    const loaded = l.rows.filter((r) => isDefaultLoaded(l.source, r));
-    const relTypes = {};
-    for (const r of l.rows) for (const x of r.relations) relTypes[x.type] = (relTypes[x.type] ?? 0) + 1;
-    const xrefPrefixes = {};
-    for (const r of l.rows) for (const x of r.xrefs) { const p = x.id.split(':')[0]; xrefPrefixes[p] = (xrefPrefixes[p] ?? 0) + 1; }
-    return {
-      source: l.source.id,
-      codeSystem: l.source.codeSystem,
-      domain: l.source.domain,
-      load: l.source.load,
-      license: l.source.license,
-      productQuery: l.source.productQuery,
-      concepts: l.rows.length,
-      conceptsLoadedByDefault: loaded.length,
-      withDefinition: l.rows.filter((r) => r.definition).length,
-      exactSynonyms: l.rows.reduce((n, r) => n + r.synonymsExact.length, 0),
-      otherSynonyms: l.rows.reduce((n, r) => n + r.synonymsOther.length, 0),
-      relationsByType: relTypes,
-      relationsResolvedInCorpus: l.stats.relations?.resolved ?? 0,
-      relationsUnresolved: l.stats.relations?.unresolved ?? 0,
-      otherRelations: l.rows.reduce((n, r) => n + r.otherRelations.length, 0),
-      xrefs: l.rows.reduce((n, r) => n + r.xrefs.length, 0),
-      xrefPrefixesTop: Object.fromEntries(Object.entries(xrefPrefixes).sort((a, b) => b[1] - a[1]).slice(0, 12)),
-      stats: l.stats,
-    };
-  });
+/** Acumulador por fuente: `add(row)` por cada fila y `finish(stats)` al final. */
+export function layerCoverage(source) {
+  const acc = {
+    concepts: 0, loaded: 0, withDefinition: 0, exactSynonyms: 0, otherSynonyms: 0, otherRelations: 0, xrefs: 0,
+    relTypes: {}, xrefPrefixes: {}, rowDomains: {},
+  };
+  return {
+    add(r) {
+      acc.concepts++;
+      const byDefault = isDefaultLoaded(source, r);
+      if (byDefault) acc.loaded++;
+      if (r.definition) acc.withDefinition++;
+      acc.exactSynonyms += r.synonymsExact.length;
+      acc.otherSynonyms += r.synonymsOther.length;
+      acc.otherRelations += r.otherRelations.length;
+      acc.xrefs += r.xrefs.length;
+      for (const x of r.relations) acc.relTypes[x.type] = (acc.relTypes[x.type] ?? 0) + 1;
+      for (const x of r.xrefs) { const p = x.id.split(':')[0]; acc.xrefPrefixes[p] = (acc.xrefPrefixes[p] ?? 0) + 1; }
+      const d = (acc.rowDomains[r.domain] ??= { concepts: 0, conceptsLoadedByDefault: 0 });
+      d.concepts++;
+      if (byDefault) d.conceptsLoadedByDefault++;
+    },
+    finish(stats) {
+      return {
+        source: source.id,
+        codeSystem: source.codeSystem,
+        domain: source.domain,
+        ...(Object.keys(acc.rowDomains).some((d) => d !== source.domain) ? { rowDomains: acc.rowDomains } : {}),
+        load: source.load,
+        license: source.license,
+        productQuery: source.productQuery,
+        concepts: acc.concepts,
+        conceptsLoadedByDefault: acc.loaded,
+        withDefinition: acc.withDefinition,
+        exactSynonyms: acc.exactSynonyms,
+        otherSynonyms: acc.otherSynonyms,
+        relationsByType: acc.relTypes,
+        relationsResolvedInCorpus: stats.relations?.resolved ?? 0,
+        relationsUnresolved: stats.relations?.unresolved ?? 0,
+        otherRelations: acc.otherRelations,
+        xrefs: acc.xrefs,
+        xrefPrefixesTop: Object.fromEntries(Object.entries(acc.xrefPrefixes).sort((a, b) => b[1] - a[1]).slice(0, 12)),
+        stats,
+      };
+    },
+  };
+}
+
+/** Une los reportes por fuente en totales y dominios. */
+export function combineCoverage(perSource, edges, { missing = [] } = {}) {
   const perDomain = {};
   for (const s of perSource) {
-    const d = (perDomain[s.domain] ??= { name: DOMAINS[s.domain], concepts: 0, conceptsLoadedByDefault: 0, sources: [] });
-    d.concepts += s.concepts;
-    d.conceptsLoadedByDefault += s.conceptsLoadedByDefault;
-    d.sources.push(s.source);
+    // Una fuente con dominios por fila (ChEBI, NCIt, MeSH) reparte sus conceptos entre dominios.
+    const parts = s.rowDomains ?? { [s.domain]: { concepts: s.concepts, conceptsLoadedByDefault: s.conceptsLoadedByDefault } };
+    for (const [domain, n] of Object.entries(parts)) {
+      const d = (perDomain[domain] ??= { name: DOMAINS[domain], concepts: 0, conceptsLoadedByDefault: 0, sources: [] });
+      d.concepts += n.concepts;
+      d.conceptsLoadedByDefault += n.conceptsLoadedByDefault;
+      if (!d.sources.includes(s.source)) d.sources.push(s.source);
+    }
   }
   const sum = (k) => perSource.reduce((n, s) => n + s[k], 0);
   return {

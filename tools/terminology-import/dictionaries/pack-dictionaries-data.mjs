@@ -20,7 +20,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gunzipSync, gzipSync } from 'node:zlib';
 import { MANIFEST_PATH, NDJSON_DIR, REPORT_PATH } from './lib/paths.mjs';
-import { ABBREVIATION_SOURCE, FMA_SOURCE, HGNC_SOURCE, OBO_SOURCES, ORGANISM_SOURCES } from './lib/sources.mjs';
+import { ABBREVIATION_SOURCE, ABREMES_SOURCE, C7_OBO_SOURCES, EMDN_SOURCE, FMA_SOURCE, HGNC_SOURCE, MESH_SOURCE, OBO_SOURCES, ORGANISM_SOURCES } from './lib/sources.mjs';
 
 const DATA_DIR = join(dirname(fileURLToPath(import.meta.url)), 'data');
 const PART_BYTES = 45 * 1024 * 1024;
@@ -46,7 +46,7 @@ function pack() {
   }
   // Manifiesto de descargas (URL, SHA-256, fecha), sólo de los archivos que el registro usa hoy.
   const used = new Set();
-  for (const s of [...OBO_SOURCES, FMA_SOURCE, HGNC_SOURCE, ABBREVIATION_SOURCE]) for (const f of s.files) used.add(`${s.id}/${f.name}`);
+  for (const s of [...OBO_SOURCES, FMA_SOURCE, HGNC_SOURCE, ABBREVIATION_SOURCE, ...C7_OBO_SOURCES, MESH_SOURCE, EMDN_SOURCE, ABREMES_SOURCE]) for (const f of s.files) used.add(`${s.id}/${f.name}`);
   for (const f of Object.values(ORGANISM_SOURCES.files)) used.add(`${ORGANISM_SOURCES.id}/${f.name}`);
   const manifest = JSON.parse(readFileSync(MANIFEST_PATH, 'utf8'));
   const files = Object.fromEntries(Object.entries(manifest.files).filter(([k]) => used.has(k)));

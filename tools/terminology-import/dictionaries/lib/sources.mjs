@@ -45,6 +45,7 @@ export const DOMAINS = {
   exposures: 'Exposiciones ambientales',
   pharmacology: 'Farmacología general (clases, mecanismos y farmacocinética)',
   abbreviations: 'Abreviaturas clínicas',
+  devices: 'Dispositivos médicos',
 };
 
 /**
@@ -761,6 +762,8 @@ export const ORGANISM_SOURCES = {
     mondoEdit: { name: 'mondo-edit.obo', url: `${GH}/monarch-initiative/mondo/v2026-10-06/src/ontology/mondo-edit.obo`, version: 'mondo v2026-10-06', license: 'CC BY 4.0' },
     mondoTaxa: { name: 'ncbitaxon_import.obo', url: `${GH}/monarch-initiative/mondo/v2026-10-06/imports/ncbitaxon_import.obo`, version: 'mondo v2026-10-06', license: 'CC BY 4.0' },
     doidMerged: { name: 'doid-merged.json', url: `${GH}/DiseaseOntology/HumanDiseaseOntology/v2026-09-30/src/ontology/doid-merged.json`, version: 'doid v2026-09-30', license: 'CC0 1.0' },
+    // Completa las etiquetas de los taxones que Mondo/DOID declaran y sus módulos OBO no traen (carril C7, 2026-10-27).
+    taxdump: { name: 'taxdmp_2026-10-01.zip', url: 'https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump_archive/taxdmp_2026-10-01.zip', version: 'NCBI Taxonomy taxdmp 2026-10-01', license: 'Dominio público (NCBI)' },
   },
 };
 
@@ -786,7 +789,191 @@ export const ABBREVIATION_SOURCE = {
   licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
 };
 
-export const ALL_SOURCE_IDS = [...OBO_SOURCES.map((s) => s.id), FMA_SOURCE.id, HGNC_SOURCE.id, ORGANISM_SOURCES.id, ABBREVIATION_SOURCE.id];
+
+// -----------------------------------------------------------------------------
+// Carril C7 (2026-10-27): fuentes que el 2026-10-24 estaban bloqueadas por red
+// (ChEBI, PRO, NCIt, MeSH, EMDN, AbreMES-DB). Los archivos grandes se leen en
+// streaming (`stream: true`) y no se versiona el crudo, sólo el corpus.
+// -----------------------------------------------------------------------------
+
+/** Orígenes cuyas sinónimos/xrefs NO se cargan: KEGG, DrugBank, HMDB (no comercial) y ChEMBL (CC BY-SA) — ver SOURCES.md. */
+const RESTRICTED_ORIGIN = /^(kegg|drugbank|hmdb|chembl)/i;
+const CITATION = 'cita bibliográfica o de patente (no es un mapeo a otro vocabulario)';
+const NOT_LOADED_KEGG = 'KEGG: licencia restrictiva, se excluye por política del repo';
+
+export const CHEBI_SOURCE = {
+  id: 'chebi',
+  codeSystem: 'chebi',
+  domain: 'biochemistry',
+  name: 'ChEBI — Chemical Entities of Biological Interest',
+  owner: 'EMBL-EBI (ChEBI)',
+  officialUrl: 'https://www.ebi.ac.uk/chebi/',
+  canonicalUrl: 'http://purl.obolibrary.org/obo/chebi.owl',
+  termUri: (id) => `http://purl.obolibrary.org/obo/${id.replace(':', '_')}`,
+  version: 'release 256',
+  expectDataVersion: '256',
+  files: [{ name: 'chebi.obo', url: 'https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi.obo' }],
+  idPrefixes: ['CHEBI'],
+  stream: true,
+  // Se descartan los property_value de estructura (SMILES, InChI, WURCS): pesan más que el resto del término y se recuperan por el id de ChEBI.
+  keepProperty: (p) => ['chemrof:generalized_empirical_formula', 'chemrof:charge', 'chemrof:mass', 'chemrof:monoisotopic_mass', 'chemrof:inchi_key_string'].includes(p),
+  // Rama de roles (clases farmacológicas y de aplicación: «analgesic», «antineoplastic agent»…) → farmacología; el resto, bioquímica.
+  branches: [{ root: 'CHEBI:50906', domain: 'pharmacology', tier: 'default' }],
+  fallbackDomain: 'biochemistry',
+  // Estrellas de ChEBI (publicadas en `subsetdef`): 3 = anotada por el equipo de ChEBI; 1-2 = preliminar o de terceros → opt-in.
+  tierOf: (t) => (t.subsets.includes('3:STAR') ? 'default' : 'opt-in'),
+  dropSynonym: (syn) => (syn.xrefs ?? []).some((x) => RESTRICTED_ORIGIN.test(x)),
+  dropXrefPrefixes: {
+    'kegg.compound': NOT_LOADED_KEGG, 'kegg.drug': NOT_LOADED_KEGG, 'kegg.glycan': NOT_LOADED_KEGG, 'kegg.reaction': NOT_LOADED_KEGG, 'kegg.environ': NOT_LOADED_KEGG,
+    drugbank: 'DrugBank: licencia no comercial (CC BY-NC), se excluye por política del repo',
+    hmdb: 'HMDB: términos de uso no comerciales, se excluye por política del repo',
+    pubmed: CITATION, pmc: CITATION, patent: CITATION,
+  },
+  extraOf: (t) => {
+    const pv = (name) => t.propertyValues.find((p) => p.property === name)?.value ?? null;
+    return { formula: pv('chemrof:generalized_empirical_formula'), charge: pv('chemrof:charge'), mass: pv('chemrof:mass'), monoisotopicMass: pv('chemrof:monoisotopic_mass'), inchiKey: pv('chemrof:inchi_key_string'), chebiStars: t.subsets.filter((x) => /STAR$/.test(x)) };
+  },
+  load: 'default',
+  productQuery: 'Clases farmacológicas y de aplicación (roles de ChEBI: «analgésico», «antineoplásico») y sustancias bioquímicas/metabolitos con fórmula; rama de roles y entradas anotadas por ChEBI por defecto, el resto (preliminar o de terceros) opt-in.',
+  ...CC_BY_4,
+};
+
+export const PRO_SOURCE = {
+  id: 'pro',
+  codeSystem: 'protein-ontology',
+  domain: 'biochemistry',
+  name: 'PRO — Protein Ontology',
+  owner: 'Protein Ontology Consortium (PIR, Georgetown University / University of Delaware)',
+  officialUrl: 'https://proconsortium.org/',
+  canonicalUrl: 'http://purl.obolibrary.org/obo/pr.owl',
+  termUri: (id) => `http://purl.obolibrary.org/obo/${id.replace(':', '_')}`,
+  version: 'release 73.1',
+  expectDataVersion: '73.1',
+  files: [{ name: 'pro_reasoned.obo', url: 'https://proconsortium.org/download/current/pro_reasoned.obo' }],
+  idPrefixes: ['PR'],
+  humanOnly: true,
+  stream: true,
+  load: 'default',
+  productQuery: 'Proteínas humanas y familias de proteínas (isoformas, formas modificadas) citadas en informes genéticos o de laboratorio; sólo entradas humanas o sin taxón (PRO también trae ratón, levadura, etc.).',
+  ...CC_BY_4,
+};
+
+/** NCIt: nombres de propiedad verificados contra `Thesaurus.owl` 26.09d (rdfs:label de cada AnnotationProperty). */
+const NCIT_PROPERTY = { 'NCIT:P106': 'semanticTypes', 'NCIT:P310': 'conceptStatus', 'NCIT:P350': 'chemicalFormula', 'NCIT:P319': 'fdaUniiCode', 'NCIT:P210': 'casRegistry', 'NCIT:P325': 'altDefinitions', 'NCIT:P363': 'neoplasticStatus' };
+
+export const NCIT_SOURCE = {
+  id: 'ncit-general',
+  codeSystem: 'ncit-general',
+  domain: 'general-medicine',
+  // El nombre «NCI Thesaurus» está registrado: sólo la edición que publica NCI puede llamarse así (términos de uso de EVS).
+  name: 'NCIt OBO Edition — subconjunto fuera de «Disease or Disorder» (C2991)',
+  owner: 'National Cancer Institute — Enterprise Vocabulary Services (NCIt OBO Edition, ncit-obo-org)',
+  officialUrl: 'https://evs.nci.nih.gov/',
+  canonicalUrl: 'http://purl.obolibrary.org/obo/ncit.owl#non-disease',
+  termUri: (id) => `http://purl.obolibrary.org/obo/${id.replace(':', '_')}`,
+  version: 'v2026-03-19',
+  expectDataVersion: 'releases/2026-03-19',
+  files: [{ name: 'ncit.obo', url: 'https://github.com/ncit-obo-org/ncit-obo-edition/releases/download/v2026-03-19/ncit.obo' }],
+  idPrefixes: ['NCIT'],
+  stream: true,
+  codeOf: (id) => id.replace(/^NCIT:/, ''),
+  // Ramas raíz de NCIt (hijas de nadie) → dominio de este corpus. Las genéticas son opt-in (HGNC ya cubre los genes).
+  branches: [
+    { root: 'NCIT:C1908', domain: 'pharmacology', tier: 'default' }, // Drug, Food, Chemical or Biomedical Material
+    { root: 'NCIT:C12218', domain: 'pharmacology', tier: 'default' }, // Chemotherapy Regimen or Agent Combination
+    { root: 'NCIT:C97325', domain: 'devices', tier: 'default' }, // Manufactured Object
+    { root: 'NCIT:C12219', domain: 'anatomy', tier: 'default' }, // Anatomic Structure, System, or Substance
+    { root: 'NCIT:C14250', domain: 'microbiology', tier: 'default' }, // Organism
+    { root: 'NCIT:C17828', domain: 'physiology', tier: 'default' }, // Biological Process
+    { root: 'NCIT:C20633', domain: 'physiology', tier: 'default' }, // Biochemical Pathway
+    { root: 'NCIT:C12913', domain: 'histology', tier: 'default' }, // Abnormal Cell
+    { root: 'NCIT:C16612', domain: 'genetics', tier: 'opt-in' }, // Gene
+    { root: 'NCIT:C26548', domain: 'genetics', tier: 'opt-in' }, // Gene Product
+    { root: 'NCIT:C3910', domain: 'genetics', tier: 'opt-in' }, // Molecular Abnormality
+    { root: 'NCIT:C43431', domain: 'general-medicine', tier: 'default' }, // Activity (procedimientos, intervenciones)
+  ],
+  fallbackDomain: 'general-medicine',
+  fallbackTier: 'opt-in',
+  // C2991 Disease or Disorder lo carga la sesión de enfermedades (code system `ncit-disease`); C28428 Retired Concept;
+  // C22187/C22188 son conceptos de organismos experimentales (modelos animales), fuera del alcance humano.
+  excludeRoots: ['NCIT:C2991', 'NCIT:C28428', 'NCIT:C22187', 'NCIT:C22188'],
+  dropSynonym: (syn) => [].concat(syn.qualifiers?.['NCIT:P384'] ?? []).some((x) => /^kegg$/i.test(x)),
+  dropXrefPrefixes: {},
+  extraOf: (t) => {
+    const out = {};
+    for (const p of t.propertyValues) {
+      const k = NCIT_PROPERTY[p.property];
+      if (k) (out[k] ??= []).push(p.value);
+    }
+    return out;
+  },
+  keepProperty: (p) => Object.hasOwn(NCIT_PROPERTY, p),
+  load: 'default',
+  productQuery: 'Clases de fármacos, mecanismos y efectos fisiológicos (roles R124/R125), dispositivos médicos, anatomía, organismos, procesos y vías, procedimientos; las demás ramas (genes, entidades conceptuales, propiedades) quedan opt-in.',
+  license: 'CC BY 4.0 (términos de uso de NCI EVS); subconjunto de la NCIt OBO Edition, no es la edición oficial de NCI',
+  licenseUrl: 'https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/ThesaurusTermsofUse.htm',
+};
+
+export const MESH_SOURCE = {
+  id: 'mesh-subset',
+  codeSystem: 'mesh',
+  domain: 'pharmacology',
+  name: 'MeSH (NLM) — acciones farmacológicas (D27) y métodos epidemiológicos (E05.318)',
+  owner: 'U.S. National Library of Medicine',
+  officialUrl: 'https://www.nlm.nih.gov/mesh/',
+  canonicalUrl: 'http://id.nlm.nih.gov/mesh',
+  termUri: (id) => `http://id.nlm.nih.gov/mesh/${id}`,
+  version: '2026',
+  files: [{ name: 'desc2026.xml', url: 'https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.xml' }],
+  branches: [
+    { id: 'chemical-actions-and-uses', tree: 'D27', domain: 'pharmacology' },
+    { id: 'epidemiologic-methods', tree: 'E05.318', domain: 'public-health' },
+  ],
+  load: 'default',
+  productQuery: 'Clases farmacológicas («Analgesics, Non-Narcotic»), mecanismos moleculares y usos terapéuticos de MeSH; métodos epidemiológicos para salud pública. Comparte code system con el resto de MeSH.',
+  license: 'Uso libre de los datos de MeSH citando a NLM como fuente y la versión usada («NLM freely provides MeSH data»); no cubre las traducciones (MTMS)',
+  licenseUrl: 'https://www.nlm.nih.gov/databases/download/terms_and_conditions_mesh.html',
+};
+
+export const EMDN_SOURCE = {
+  id: 'emdn',
+  codeSystem: 'emdn',
+  domain: 'devices',
+  name: 'EMDN — Nomenclatura Europea de Productos Sanitarios (v2026, inglés)',
+  owner: 'European Commission — DG Santé (Reglamentos (UE) 2017/745 y 2017/746)',
+  officialUrl: 'https://webgate.ec.europa.eu/dyna2/emdn/',
+  canonicalUrl: 'https://webgate.ec.europa.eu/dyna2/emdn',
+  // No hay URI por término publicada: el término se cita por la planilla oficial y su código.
+  termUri: () => 'https://webgate.ec.europa.eu/dyna2/emdn/',
+  version: '2026',
+  files: [{ name: 'EMDN_v2026_EN.xlsx', url: 'https://webgate.ec.europa.eu/dyna2/emdn/build/EMDN v2026_EN..xlsx' }],
+  load: 'default',
+  productQuery: 'Clasificar un producto sanitario (aguja, catéter, prótesis…) con el código EMDN que exige EUDAMED para registrar el UDI-DI.',
+  license: 'Acceso libre y gratuito para todos (FAQ oficial del EMDN); el aviso legal de la Comisión licencia su contenido bajo CC BY 4.0 salvo indicación contraria (Decisión de reutilización de 12/12/2011)',
+  licenseUrl: 'https://commission.europa.eu/legal-notice_en',
+};
+
+export const ABREMES_SOURCE = {
+  id: 'abremes',
+  codeSystem: 'abremes-db',
+  domain: 'abbreviations',
+  name: 'AbreMES-DB — abreviaturas médicas en castellano (extracción automática)',
+  owner: 'Plan de Impulso de las Tecnologías del Lenguaje (Secretaría de Estado para el Avance Digital) / Barcelona Supercomputing Center — doi:10.5281/zenodo.2207130',
+  officialUrl: 'https://doi.org/10.5281/zenodo.2207130',
+  canonicalUrl: 'https://doi.org/10.5281/zenodo.2207130',
+  termUri: (id) => `https://doi.org/10.5281/zenodo.2207130#pair-${id}`,
+  version: 'zenodo 2207130 (2018-11-20)',
+  files: [{ name: 'AbreMES-DB.zip', url: 'https://zenodo.org/api/records/2207130/files/AbreMES-DB.zip/content', inner: 'AbreMES-DB/DB/pairs.tsv' }],
+  // Piso de la carga por defecto: pares vistos al menos 3 veces en las publicaciones analizadas (la fuente publica la frecuencia). Criterio editable.
+  defaultMinFrequency: 3,
+  load: 'default',
+  productQuery: 'Expandir una sigla de una nota o informe en castellano («EM» → «esclerosis múltiple»); la extracción es automática y trae ruido: los pares poco frecuentes quedan opt-in.',
+  license: 'CC BY 4.0 (el registro de Zenodo y el LICENCE del repositorio; el pedido original decía MIT)',
+  licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
+};
+
+export const C7_OBO_SOURCES = [CHEBI_SOURCE, PRO_SOURCE, NCIT_SOURCE];
+export const ALL_SOURCE_IDS = [...OBO_SOURCES.map((s) => s.id), FMA_SOURCE.id, HGNC_SOURCE.id, ORGANISM_SOURCES.id, ABBREVIATION_SOURCE.id, ...C7_OBO_SOURCES.map((s) => s.id), MESH_SOURCE.id, EMDN_SOURCE.id, ABREMES_SOURCE.id];
 
 /** Prefijo de un id OBO → code system de destino (para resolver aristas entre fuentes). */
 export const PREFIX_CODE_SYSTEM = {
@@ -832,4 +1019,24 @@ export const PREFIX_CODE_SYSTEM = {
   PATO: 'pato',
   NCBITaxon: 'ncbitaxon',
   HGNC: 'hgnc',
+  CHEBI: 'chebi',
+  PR: 'protein-ontology',
+  NCIT: 'ncit-general',
 };
+
+/**
+ * Prefijos cuyo código en el corpus NO lleva el prefijo del id OBO (NCIt usa
+ * `C1000`, como EVS y como la sesión de enfermedades). El id OBO original
+ * queda en `provenance.sourceTermId`.
+ */
+export const CODE_NORMALIZERS = {
+  NCIT: (id) => id.replace(/^NCIT:/, ''),
+};
+
+/** Clave `codeSystem|código` del corpus para un id con prefijo (xref o destino de relación), o null si el prefijo no es del corpus. */
+export function corpusKey(id) {
+  const prefix = String(id).split(':')[0];
+  const cs = PREFIX_CODE_SYSTEM[prefix];
+  if (!cs) return null;
+  return `${cs}|${CODE_NORMALIZERS[prefix] ? CODE_NORMALIZERS[prefix](id) : id}`;
+}

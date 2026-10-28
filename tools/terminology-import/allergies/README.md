@@ -54,6 +54,30 @@ uno. Reconstruir con `build-allergy-catalog.mjs` da el mismo SHA-256 del NDJSON
   internos de `src/common/seed/data/allergies/` con su código HL7 (según
   `fhir-allergy-enum-codes.json`). Sólo se cargan si la API ya los sembró.
 
+## Tanda 2 (2026-10-27): las fuentes que el 2026-10-24 daban 403
+
+Hoy responden allergen.org, UniProt, openFDA, DailyMed, GSRS, RxNav/RxClass, ChEBI (FTP de EMBL-EBI),
+EVS (NCIt), Cellar/EUR-Lex, GovInfo, CDC, Wikidata y MeSH. La tanda 2 los carga **encima** de la tanda 1 sin tocarla:
+los ids de los conceptos de la tanda 1 no cambian, y lo que ya estaba no se vuelve a emitir.
+
+| Etapa | Script | Red | Salida |
+|---|---|---|---|
+| 0 | `fetch-allergy-open-sources.mjs [--only k1,k2]` | sí | `allergy-sources/open/<fuente>/` + `manifest-open.json` (URL, versión, SHA-256, licencia y su evidencia) |
+| 0b | `fetch-allergy-wikidata.mjs` | sí (WDQS) | `allergy-sources/open/wikidata/` (consultas por identificador exacto) |
+| 1 | `build-allergy-open.mjs [--pack]` | no | `ndjson/allergy-catalog-open.ndjson` (conceptos nuevos y **parches**) + informe de pasadas 21–38; con `--pack`, `data/allergy-catalog-open.part-NN.ndjson.gz`, meta, manifiesto y `SHA256SUMS-open` |
+| 2 | `load-allergy-catalog.mjs` | base | carga la tanda 1 y la 2; `--base-only` carga sólo la 1 |
+
+- Un **parche** agrega designaciones (p. ej. el castellano de Wikidata), propiedades (p. ej. el estado oficial del CDC
+  para un CVX) o pertenencia a value sets a un concepto que ya existe. El cargador los inserta con ids
+  deterministas y `ON CONFLICT DO NOTHING`; no actualiza filas.
+- La tanda 2 de un code system es **otra `code_system_version`** del mismo code system (la de la tanda 1 conserva su id).
+- Los crudos no se versionan. Las etiquetas SPL de DailyMed (0,3–3 MB cada una, cientos) se reducen en la descarga
+  a la identificación de sus ingredientes (NDC de producto, rol, UNII, nombre) con el SHA-256 del XML original.
+- Cortesía: User-Agent identificable, ≤ 2 pedidos/s por host (allergen.org: uno cada 3,5 s por su `robots.txt`),
+  reintentos con backoff, caché en disco (reanudable).
+- Pruebas: `node --test "tools/terminology-import/allergies/test/*.test.mjs"` (la tanda 2 usa recortes reales en
+  `test/fixtures-open/`).
+
 ## Pruebas
 
 ```sh
