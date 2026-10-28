@@ -356,3 +356,25 @@ CREATE TABLE IF NOT EXISTS "scheduling"."appointment_payment_states" (
     "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_appointment_payment_states" PRIMARY KEY ("id")
 );
+
+CREATE TABLE IF NOT EXISTS "scheduling"."appointment_payment_receipts" (
+    "id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "appointment_booking_id" uuid NOT NULL,
+    "file_id" uuid NOT NULL,
+    "amount" numeric(12,2),
+    "paid_at" timestamptz,
+    "note" varchar(500),
+    "uploaded_by_user_id" uuid NOT NULL,
+    "uploaded_at" timestamptz NOT NULL,
+    "review_status_concept_id" uuid NOT NULL,
+    "reviewed_by_user_id" uuid,
+    "reviewed_at" timestamptz,
+    "rejection_reason" varchar(500),
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_appointment_payment_receipts" PRIMARY KEY ("id")
+);
