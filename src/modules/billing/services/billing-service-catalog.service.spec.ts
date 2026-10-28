@@ -29,8 +29,8 @@ const doctor = {
  * @returns Resultado de build.
  */
 function build() {
-  // Sin vinculaciones activas por defecto: sin `runWithTenant` de por medio,
-  // `attachDefaultSatisfactionSurvey` corta antes de pedir el tenant.
+  // Sin vinculaciones activas por defecto: el alta ya no consulta las del
+  // profesional (se retiró la encuesta automática FT-31).
   const tx = {
     flush: mockFn().mockResolvedValue(undefined),
     find: mockFn().mockResolvedValue([]),
@@ -52,12 +52,6 @@ function build() {
     // profesional tiene que pedirlo a propósito.
     isOwnOffice: mockFn().mockResolvedValue(false),
   };
-  const templatesRepo = {
-    createTemplate: mockFn(),
-    createVersion: mockFn(),
-    createQuestion: mockFn(),
-  };
-  const assignmentsRepo = { create: mockFn() };
   const attachableFiles = {
     assertUsableForAuthorizedContext: mockFn().mockResolvedValue({
       file: {
@@ -83,8 +77,6 @@ function build() {
     em as any,
     serviceCatalogRepo as any,
     practiceTenantLookup as any,
-    templatesRepo as any,
-    assignmentsRepo as any,
     attachableFiles as any,
     fileUpload as any,
     logger as any,
@@ -95,8 +87,6 @@ function build() {
     em,
     serviceCatalogRepo,
     practiceTenantLookup,
-    templatesRepo,
-    assignmentsRepo,
     attachableFiles,
     fileUpload,
     logger,
@@ -222,15 +212,6 @@ describe('BillingServiceCatalogService', () => {
         d.practiceTenantLookup.isOwnOffice.mockResolvedValue(true);
         d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
         d.serviceCatalogRepo.create.mockReturnValue(item);
-        // Todo servicio nuevo sale con su encuesta (FT-31): el doble de esa parte.
-        d.templatesRepo.createTemplate.mockReturnValue({
-          id: 'tpl-1',
-          statusConceptId: 'draft',
-        });
-        d.templatesRepo.createVersion.mockReturnValue({
-          id: 'ver-1',
-          publicationStatusConceptId: 'draft',
-        });
 
         await runWithTenant('tenant-1', () => d.service.create(dto, doctor));
 
@@ -263,28 +244,19 @@ describe('BillingServiceCatalogService', () => {
     });
 
     /**
-     * FT-31: ningún servicio médico nuevo debería quedar sin forma de medir
-     * la atención. Estos tres casos son la regla completa: quien da de alta
-     * es un profesional, quien da de alta es un admin puro con alguien a
-     * quien atribuirle la plantilla, y quien da de alta es un admin puro sin
-     * nadie —el único caso donde de verdad no hay encuesta.
+     * FT-31 creaba una «Satisfacción — <servicio>» con cada alta. Se retiró: la
+     * encuesta base del sistema (módulo `surveys`) la reemplaza y se emite sola
+     * al completarse cada atención, así que el alta de un servicio ya no toca
+     * `surveys`. Las encuestas que FT-31 ya creó no se borran.
      */
-    describe('encuesta de satisfacción por defecto', () => {
-      it('un profesional que da de alta su propio servicio queda como dueño de la encuesta', async () => {
+    describe('sin encuesta automática por servicio', () => {
+      it('un profesional que da de alta su propio servicio no crea ninguna encuesta', async () => {
         const d = build();
         d.practiceTenantLookup.isOwnOffice.mockResolvedValue(true);
         d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
         d.serviceCatalogRepo.create.mockReturnValue(item);
-        d.templatesRepo.createTemplate.mockReturnValue({
-          id: 'tpl-1',
-          statusConceptId: 'draft',
-        });
-        d.templatesRepo.createVersion.mockReturnValue({
-          id: 'ver-1',
-          publicationStatusConceptId: 'draft',
-        });
 
-        await runWithTenant('tenant-1', () =>
+        const res = await runWithTenant('tenant-1', () =>
           d.service.create(
             {
               practiceId: 'pr1',
@@ -296,70 +268,15 @@ describe('BillingServiceCatalogService', () => {
           ),
         );
 
-        expect(d.templatesRepo.createTemplate).toHaveBeenCalledWith(
-          d.tx,
-          expect.objectContaining({
-            ownerPractitionerId: doctor.practitionerProfileId,
-            title: expect.stringContaining('Consulta general'),
-          }),
-        );
-        expect(d.templatesRepo.createQuestion).toHaveBeenCalled();
-        expect(d.assignmentsRepo.create).toHaveBeenCalledWith(
-          d.tx,
-          expect.objectContaining({
-            surveyVersionId: 'ver-1',
-            targetTypeConceptId: expect.any(String),
-            targetId: item.id,
-            active: true,
-          }),
-        );
-        // Con perfil profesional propio, ni hace falta buscar a quién
-        // atribuírsela: no consulta las vinculaciones de la práctica.
+        expect(res).toEqual(item);
+        // Ni siquiera busca a quién atribuirle una plantilla.
         expect(d.tx.find).not.toHaveBeenCalled();
       });
 
-      it('un admin sin perfil se la atribuye al profesional activo más antiguo de la práctica', async () => {
+      it('un admin sin perfil crea el servicio sin consultar las vinculaciones de la práctica', async () => {
         const d = build();
         d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
         d.serviceCatalogRepo.create.mockReturnValue(item);
-        d.tx.find.mockResolvedValue([
-          {
-            practitionerProfileId: 'hp-nueva',
-            isPrimary: false,
-            createdAt: new Date('2026-02-01'),
-          },
-          {
-            practitionerProfileId: 'hp-vieja',
-            isPrimary: false,
-            createdAt: new Date('2026-01-01'),
-          },
-        ]);
-        d.templatesRepo.createTemplate.mockReturnValue({ id: 'tpl-1' });
-        d.templatesRepo.createVersion.mockReturnValue({ id: 'ver-1' });
-
-        await runWithTenant('tenant-1', () =>
-          d.service.create(
-            {
-              practiceId: 'pr1',
-              code: 'CONS-01',
-              name: 'Consulta general',
-              defaultPrice: '100.00',
-            },
-            actor,
-          ),
-        );
-
-        expect(d.templatesRepo.createTemplate).toHaveBeenCalledWith(
-          d.tx,
-          expect.objectContaining({ ownerPractitionerId: 'hp-vieja' }),
-        );
-      });
-
-      it('sin nadie a quien atribuirle la plantilla, el servicio se crea igual, sin encuesta', async () => {
-        const d = build();
-        d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
-        d.serviceCatalogRepo.create.mockReturnValue(item);
-        d.tx.find.mockResolvedValue([]);
 
         const res = await d.service.create(
           {
@@ -372,8 +289,8 @@ describe('BillingServiceCatalogService', () => {
         );
 
         expect(res).toEqual(item);
-        expect(d.templatesRepo.createTemplate).not.toHaveBeenCalled();
-        expect(d.logger.warn).toHaveBeenCalled();
+        expect(d.tx.find).not.toHaveBeenCalled();
+        expect(d.logger.warn).not.toHaveBeenCalled();
       });
     });
 
