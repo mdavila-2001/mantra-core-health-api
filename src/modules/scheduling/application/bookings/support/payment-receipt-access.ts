@@ -20,6 +20,7 @@ import {
 } from '../../ports/patient-representation.port';
 import { PAYMENT_RECEIPT_CONCEPT_STATUS } from '../../../domain/booking/payment-receipt';
 import { PaymentReceiptDto } from '../../../presentation/dto';
+import { operatesAnyAgenda } from '../../../domain/booking/agenda-actors';
 import {
   SchedulingBookingsRepository,
   SchedulingPaymentReceiptsRepository,
@@ -92,9 +93,15 @@ export class PaymentReceiptAccess {
     bookingId: string,
     actor: AuthenticatedUser,
   ): Promise<AppointmentBookings> {
-    return this.hideForbidden(bookingId, () =>
-      this.access.loadForOperation(tx, bookingId, actor),
-    );
+    return this.hideForbidden(bookingId, async () => {
+      const booking = await this.access.loadForOperation(tx, bookingId, actor);
+      // Quien opera cualquier agenda la opera **de su organización**: el
+      // mostrador de una clínica no revisa los pagos de otra.
+      if (operatesAnyAgenda(actor)) {
+        this.access.assertResourceInActiveTenant(booking.tenantId, actor);
+      }
+      return booking;
+    });
   }
 
   /**
