@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 
 /**
  * Mapea la entidad persistente asociada a `patient_primary_practitioners`: el
- * médico de cabecera que eligió un paciente, como un período (v4.2.64).
+ * médico de cabecera que eligió un paciente, como un período (v4.2.65).
  */
 @Entity({ schema: 'profiles', tableName: 'patient_primary_practitioners' })
 export class PatientPrimaryPractitioners {

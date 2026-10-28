@@ -21,7 +21,7 @@ import {
 } from '../dto/primary-practitioner.dto';
 
 /**
- * El médico de cabecera, de los dos lados (v4.2.64).
+ * El médico de cabecera, de los dos lados (v4.2.65).
  *
  * Todas las rutas son `me`: el paciente y el profesional salen de la sesión,
  * nunca de la URL, así que nadie puede elegir por otro ni leer la lista de

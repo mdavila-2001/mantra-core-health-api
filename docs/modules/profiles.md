@@ -178,7 +178,7 @@ source_identifier)`; marks the patient `linked`.
 - **Reverse merge (UC-05-09)** — only an `approved` event can be reversed (422),
   and only once (409); restores loser patient/person status.
 - **Related person (UC-05-10)** — a single active legal guardian per patient (409).
-- **Primary practitioner / médico de cabecera (v4.2.64)** — the patient picks,
+- **Primary practitioner / médico de cabecera (v4.2.65)** — the patient picks,
   by themselves, one practitioner (`patient_primary_practitioners`). Each pick is
   a period: changing closes the current row and opens another, removing closes
   it; nothing is deleted. One current pick per patient, enforced by

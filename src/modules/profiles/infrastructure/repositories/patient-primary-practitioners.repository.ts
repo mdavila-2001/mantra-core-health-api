@@ -20,7 +20,7 @@ export interface PrimaryPatientRow {
 }
 
 /**
- * Acceso a datos de `profiles.patient_primary_practitioners` (v4.2.64).
+ * Acceso a datos de `profiles.patient_primary_practitioners` (v4.2.65).
  *
  * «Vigente» es `valid_to` nulo. Que haya a lo sumo una vigente por paciente lo
  * garantiza `uq_patient_primary_practitioners_current` en la base, no este
