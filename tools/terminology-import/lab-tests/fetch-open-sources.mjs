@@ -69,6 +69,10 @@ async function main() {
   let last = 0;
   for (const [key, src] of Object.entries(SOURCES)) {
     if (src.obtain !== 'http' || (only.length && !only.includes(key))) continue;
+    if (src.shareAlike && !only.includes(key)) {
+      console.log(`[${key}] CC BY-SA (compartir igual): no se baja salvo que se nombre (decisión del propietario).`);
+      continue;
+    }
     const dir = ensureDir(join(ROOT, src.dir));
     manifest[key] ??= { files: {} };
     for (const f of src.files) {

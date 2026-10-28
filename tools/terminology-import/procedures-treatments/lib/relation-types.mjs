@@ -145,6 +145,15 @@ export const RELATION_TYPES = {
     label: 'Sitio de tratamiento por definición del código (eje 4 «Treatment Site» de ICD-10-PCS, radioterapia)',
   },
 
+  // --- ClinicalTrials.gov (procedimiento MeSH × condición MeSH del mismo estudio registrado) ---
+  'ctgov:studied-for': {
+    kind: 'procedure-disease',
+    sourcePredicate: 'ClinicalTrials.gov: intervención (MeSH derivado) y condición (MeSH derivado) del mismo estudio registrado',
+    assertion: 'investigational',
+    label:
+      'En estudio junto a la condición en ensayos registrados en ClinicalTrials.gov (no es una indicación; la fuente no dice que la intervención apunte a esa condición en particular)',
+  },
+
   'ncit:R180': {
     kind: 'procedure-disease',
     sourcePredicate: 'R180 Procedure_Has_Target_Disease',

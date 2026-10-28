@@ -41,6 +41,8 @@ import {
   readOboTerms,
 } from './lib/sources/obo-procedures.mjs';
 import { mondoMaps, readXrefs, uberonMaps } from './lib/sources/xrefs.mjs';
+import { ctgovAssertions } from './lib/sources/ctgov.mjs';
+import { meshProcedureRecords, readMeshDescriptors } from './lib/sources/mesh.mjs';
 import { parseCie10esProcedures, parseCodesFile, parseOrderFile, parsePcsTables, pcsCorpus } from './lib/sources/pcs.mjs';
 import { readXlsx, unzip } from '../lab-tests/lib/xlsx-min.mjs';
 
@@ -152,14 +154,39 @@ async function main() {
   );
   coverage.skipped['icd10pcs-cms-2027'] = pcs.stats;
 
+  // --- MeSH 2026 (árbol E) + ClinicalTrials.gov (procedimiento × condición, «en estudio») ----------
+  const meshGz = cacheDir('mesh-desc-2026', 'desc2026.gz');
+  const meshRead = await readMeshDescriptors(meshGz);
+  const meshMeta = sourceMeta('mesh-desc-2026', 'desc2026.gz', `MeSH 2026 (descriptores; DTD ${meshRead.dtd})`);
+  const mesh = meshProcedureRecords(meshRead.descriptors, meshMeta, 'https://id.nlm.nih.gov/mesh/');
+  coverage.skipped['mesh-desc-2026'] = { descriptorsTotal: meshRead.total, ...mesh.stats };
+  let ctgov = { assertions: [], stats: null };
+  let ctMeta = null;
+  if (existsSync(cacheDir('clinicaltrials-gov', 'studies.ndjson'))) {
+    const raw = readJson(cacheDir('clinicaltrials-gov', 'meta.json'));
+    ctMeta = {
+      source: 'clinicaltrials-gov',
+      version: `API ${raw.apiVersion}, dataTimestamp ${raw.dataTimestamp}`,
+      retrievedAt: raw.retrievedAt,
+      license: raw.license,
+      fileUrl: `${raw.files['studies.ndjson'].fileUrl}?filter.advanced=${encodeURIComponent(raw.query)}`,
+      sha256: raw.files['studies.ndjson'].sha256,
+      pin: raw.dataTimestamp,
+    };
+    const studies = readFileSync(cacheDir('clinicaltrials-gov', 'studies.ndjson'), 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l));
+    ctgov = ctgovAssertions(studies, new Set(mesh.procedures.map((p) => p.code)), ctMeta);
+    coverage.skipped['clinicaltrials-gov'] = { totalInQuery: raw.totalCount, scanned: raw.scanned, withBothMeshSets: raw.kept, ...ctgov.stats };
+  }
+
   const assertions = [
     ...poet.assertions,
     ...maxoSites,
     ...ncitOut.assertions,
     ...ohd.assertions,
     ...pcs.assertions,
+    ...ctgov.assertions,
   ];
-  const procedures = [...maxoProcs, ...ncitOut.procedures, ...ohd.procedures, ...pcs.procedures];
+  const procedures = [...maxoProcs, ...ncitOut.procedures, ...ohd.procedures, ...pcs.procedures, ...mesh.procedures];
 
   // --- Equivalencias publicadas (solo para los códigos que se usan) ----------------
   const wantedMondo = new Set(
@@ -221,6 +248,8 @@ async function main() {
     ['mondo', mondoMeta],
     ['uberon', uberonMeta],
     ['icd10pcs-cms-2027', pcsMeta],
+    ['mesh-desc-2026', meshMeta],
+    ...(ctMeta ? [['clinicaltrials-gov', ctMeta]] : []),
   ]) {
     coverage.sources[key] = {
       version: meta.version,

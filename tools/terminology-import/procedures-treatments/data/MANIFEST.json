@@ -3,38 +3,52 @@
   "files": [
     {
       "path": "out/procedures.part001.ndjson.gz",
-      "bytes": 4332465,
-      "uncompressedBytes": 47349950,
-      "sha256Uncompressed": "f5837be0152cd475963f4c69c1bbba0c9b4d4babb094bc04b1cc6899bc15ee90",
-      "rows": 30927
+      "bytes": 4601958,
+      "uncompressedBytes": 47351042,
+      "sha256Uncompressed": "254cabfba029329f9eca6ff496b5e75f57ce724bab92a429d660d5ee07c5132a",
+      "rows": 31040
     },
     {
       "path": "out/procedures.part002.ndjson.gz",
-      "bytes": 4327311,
-      "uncompressedBytes": 47350164,
-      "sha256Uncompressed": "645c81c086e43667ce9de2e352c54fa2f29c1772ff15ea1fc2e3a072a03046e9",
-      "rows": 30899
+      "bytes": 4615926,
+      "uncompressedBytes": 47350750,
+      "sha256Uncompressed": "fcf18755519b5131ea431641e7da327f12c7103425591e1ec5cbc982063a1977",
+      "rows": 31012
     },
     {
       "path": "out/procedures.part003.ndjson.gz",
-      "bytes": 2964539,
-      "uncompressedBytes": 32451451,
-      "sha256Uncompressed": "a5a1ca00daf5e45d5ecb777efe5183cc344870cdd7e125ae7b440679afebb424",
-      "rows": 21163
+      "bytes": 3406147,
+      "uncompressedBytes": 35043026,
+      "sha256Uncompressed": "bb7dd90f2a5d2585a6aaaabe049e1d0943e4cf09105851de7d7556fc3399d735",
+      "rows": 22938
     },
     {
       "path": "out/assertions.part001.ndjson.gz",
-      "bytes": 4778176,
-      "uncompressedBytes": 47477254,
-      "sha256Uncompressed": "685f8acff5ee7c84aed0a83a078eb697e658d496b288cd12c98ff376850d019b",
-      "rows": 41599
+      "bytes": 4786224,
+      "uncompressedBytes": 47451541,
+      "sha256Uncompressed": "2e90f479272accd17861996e6a11c4cba5a3b476a382e64304db42f7448b1e44",
+      "rows": 36466
     },
     {
       "path": "out/assertions.part002.ndjson.gz",
-      "bytes": 4406549,
-      "uncompressedBytes": 43733359,
-      "sha256Uncompressed": "68ee0f1036da5332ca89594f421f3ecb082c8e8885e6a540e57e2a4aedcac73a",
-      "rows": 38316
+      "bytes": 4797996,
+      "uncompressedBytes": 47450609,
+      "sha256Uncompressed": "a56e51880893bda6bf2d30ee5acffd531e84894428e8a6941e15c0cc551fb406",
+      "rows": 36456
+    },
+    {
+      "path": "out/assertions.part003.ndjson.gz",
+      "bytes": 4785365,
+      "uncompressedBytes": 47451136,
+      "sha256Uncompressed": "922b9ad9554134ac19020b26943e02adce5539b0b87eec292831a2cf58461231",
+      "rows": 36432
+    },
+    {
+      "path": "out/assertions.part004.ndjson.gz",
+      "bytes": 35203,
+      "uncompressedBytes": 342363,
+      "sha256Uncompressed": "773f160a10c8eb7158d8962e2a9f1ec66fe049a43cc1301351edddafc945e263",
+      "rows": 258
     },
     {
       "path": "out/maps.ndjson.gz",
@@ -45,9 +59,9 @@
     },
     {
       "path": "out/coverage.json.gz",
-      "bytes": 3122,
-      "uncompressedBytes": 11310,
-      "sha256Uncompressed": "f040f4383a9e129c69fa7395f1ef01caaf404295a58b7e6982377703047ca024"
+      "bytes": 4123,
+      "uncompressedBytes": 13908,
+      "sha256Uncompressed": "fa84bdc370c6f56adbf3f2fd4d7d51931db53803b904066e35cfc24c5566b24e"
     },
     {
       "path": "out/load-plan.dry-run.json.gz",
@@ -62,6 +76,14 @@
       "sha256Uncompressed": "8c091285d7e0817f326307d2bf2743dc47cd31ce7cded59b122f5607f3e36ba3",
       "source": "cie10es-procedimientos",
       "sha256Original": "8c091285d7e0817f326307d2bf2743dc47cd31ce7cded59b122f5607f3e36ba3"
+    },
+    {
+      "path": "raw/clinicaltrials-gov/studies.ndjson.gz",
+      "bytes": 2999805,
+      "uncompressedBytes": 18658777,
+      "sha256Uncompressed": "f313e9e41f679bff647603d807d2d8bcb5ada34e83e9ffc2b9f72a615917ad0e",
+      "source": "clinicaltrials-gov",
+      "sha256Original": "f313e9e41f679bff647603d807d2d8bcb5ada34e83e9ffc2b9f72a615917ad0e"
     },
     {
       "path": "raw/icd10pcs-cms-2027/tables.zip.gz",
@@ -104,22 +126,38 @@
       "sha256Original": "92e6dcfe79e4276fa561408f8eab8e7f656b69bd4e874e4ecba61ad3edc1b75e"
     },
     {
+      "path": "raw/mondo/mondo.obo.gz",
+      "bytes": 7603694,
+      "uncompressedBytes": 53320617,
+      "sha256Uncompressed": "2631e8e165d41def1a46749adb1ce0a336c8aba7f6bc0978729592cee8fed60b",
+      "source": "mondo",
+      "sha256Original": "2631e8e165d41def1a46749adb1ce0a336c8aba7f6bc0978729592cee8fed60b"
+    },
+    {
       "path": "raw/ohd/ohd.obo.gz",
       "bytes": 237180,
       "uncompressedBytes": 1511068,
       "sha256Uncompressed": "f8518e5b59e7f5e7d3018849d782f0ae121cfbbd8a1f25fecddcbfec484be51c",
       "source": "ohd",
       "sha256Original": "f8518e5b59e7f5e7d3018849d782f0ae121cfbbd8a1f25fecddcbfec484be51c"
+    },
+    {
+      "path": "raw/uberon/uberon.obo.gz",
+      "bytes": 3725199,
+      "uncompressedBytes": 22529133,
+      "sha256Uncompressed": "d4751a15d7551a8414caee2628c62bf68301d567caf54ccfa3eef383ae7cbb61",
+      "source": "uberon",
+      "sha256Original": "d4751a15d7551a8414caee2628c62bf68301d567caf54ccfa3eef383ae7cbb61"
     }
   ],
   "omittedRaw": [
     {
-      "source": "mondo",
-      "file": "mondo.obo",
-      "bytes": 53320617,
-      "sha256": "2631e8e165d41def1a46749adb1ce0a336c8aba7f6bc0978729592cee8fed60b",
-      "url": "https://github.com/monarch-initiative/mondo/releases/download/v2026-10-06/mondo.obo",
-      "reproduce": "node tools/terminology-import/procedures-treatments/fetch.mjs mondo"
+      "source": "mesh-desc-2026",
+      "file": "desc2026.gz",
+      "bytes": 16812612,
+      "sha256": "ccd4d0d33bebfd4c836a59e7dd0c635b1d4e20c4f5a6abc55e2eb0ba4c8716dd",
+      "url": "https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.gz",
+      "reproduce": "node tools/terminology-import/procedures-treatments/fetch.mjs mesh-desc-2026"
     },
     {
       "source": "ncit-obo",
@@ -128,14 +166,6 @@
       "sha256": "e90ebb7e55f49cf2c43f14bbf9edc8969f0c327897547086187ed877998d5d1a",
       "url": "https://github.com/NCI-Thesaurus/thesaurus-obo-edition/releases/download/v2024-05-07/ncit.obo",
       "reproduce": "node tools/terminology-import/procedures-treatments/fetch.mjs ncit-obo"
-    },
-    {
-      "source": "uberon",
-      "file": "uberon.obo",
-      "bytes": 22529133,
-      "sha256": "d4751a15d7551a8414caee2628c62bf68301d567caf54ccfa3eef383ae7cbb61",
-      "url": "https://github.com/obophenotype/uberon/releases/download/v2026-10-01/uberon.obo",
-      "reproduce": "node tools/terminology-import/procedures-treatments/fetch.mjs uberon"
     }
   ]
 }

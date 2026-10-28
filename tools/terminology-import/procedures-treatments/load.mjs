@@ -31,6 +31,7 @@ import {
 } from './lib/common.mjs';
 import {
   EVIDENCE_TABLE,
+  EXTRA_SOURCES,
   EVIDENCE_TIER_CODES,
   EVIDENCE_TIER_VERSION,
   OWNED_CODE_SYSTEMS,
@@ -398,6 +399,12 @@ async function main() {
         rels,
         ['uuid', 'uuid', 'uuid', 'uuid', null],
       );
+      for (const [code, def] of Object.entries(EXTRA_SOURCES))
+        await client.query(
+          `INSERT INTO terminology.terminology_sources (id, code, name, owner, official_url, license, state_concept_id, created_at, updated_at, row_version)
+           VALUES ($1::uuid, $2, $3, $4, $5, $6, $7::uuid, now(), now(), 1) ON CONFLICT DO NOTHING`,
+          [md5uuid(`mantra:procedures-treatments:source:${code}`), code, def.name, def.owner, def.officialUrl, def.license, stateId],
+        );
       const { rows: srcRows } = await client.query('SELECT code, id FROM terminology.terminology_sources');
       const srcByCode = new Map(srcRows.map((r) => [r.code, r.id]));
       if (!evidenceBlock) {

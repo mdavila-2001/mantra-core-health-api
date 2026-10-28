@@ -36,6 +36,7 @@ import {
 } from './lib/loinc.mjs';
 import { gunzipSync } from 'node:zlib';
 import { parsePamiOriginal } from './lib/pami-original.mjs';
+import { CUPS_CODE_SYSTEM, cupsLabRecords } from './lib/cups-co.mjs';
 import { RADLEX_CODE_SYSTEM, parseMapTo, parsePlaybookCsv, parseSubsets, radlexRecords } from './lib/radlex.mjs';
 import { DICOM_CODE_SYSTEM, DCM_SYSTEM_URI, dicomRecords, parseCid29, parseDcmDefinitions, parseStandardEdition } from './lib/dicom.mjs';
 import { GTR_CODE_SYSTEM, gtrRecords, parseConditionGene, parseMethodCategories, parseTestVersion } from './lib/gtr.mjs';
@@ -375,6 +376,33 @@ async function buildRadlex() {
   return { layer: 'radlex-playbook', records, stats };
 }
 
+// --- Capa CUPS Colombia (laboratorio del PBS) — CC BY-SA 4.0: SÓLO con --include-share-alike ---------
+async function buildCups() {
+  if (!args.includes('--include-share-alike')) return { layer: 'cups-co', missing: 'CC BY-SA 4.0 (compartir igual): no se construye sin --include-share-alike; decisión del propietario (ver SOURCES.md)' };
+  const lab = openFile('cups-co', 'pospopuli-laboratorio.json');
+  const meta = openFile('cups-co', 'pospopuli-laboratorio.meta.json');
+  if (!lab || !meta) return { layer: 'cups-co', missing: 'archivos de datos.gov.co no descargados: corré fetch-open-sources.mjs cups-co' };
+  const src = SOURCES['cups-co'];
+  const view = JSON.parse(readFileSync(meta.path, 'utf8'));
+  const version = `datos.gov.co s5f2-yivs, actualizado ${new Date(view.rowsUpdatedAt * 1000).toISOString().slice(0, 10)}`;
+  const { records, stats } = cupsLabRecords(JSON.parse(readFileSync(lab.path, 'utf8')), {
+    sourceName: `${src.name} — ${version}`,
+    sourceVersion: version,
+    sourceUrl: src.officialUrl,
+    sourceFile: lab.file,
+    sourceSha256: lab.sha256,
+    retrievedAt: lab.retrievedAt,
+    license: src.license,
+  });
+  await writeLayer('cups-co', records, {
+    source: { name: src.name, url: src.officialUrl },
+    codeSystems: [{ internalCode: CUPS_CODE_SYSTEM, name: src.name, canonicalUrl: 'https://www.datos.gov.co/d/s5f2-yivs', version, sourceKey: 'cups-co', records: records.length }],
+    files: { 'pospopuli-laboratorio.json': { file: lab.file, sha256: lab.sha256, url: lab.url }, 'pospopuli-laboratorio.meta.json': { file: meta.file, sha256: meta.sha256, url: meta.url } },
+    stats,
+  });
+  return { layer: 'cups-co', records, stats };
+}
+
 function coverage(results) {
   const byDomain = Object.fromEntries(Object.keys(DOMAINS).map((d) => [d, 0]));
   const byCategory = {};
@@ -418,7 +446,7 @@ function coverage(results) {
 }
 
 async function main() {
-  const results = [await buildLoinc(), await buildTho(), await buildUcum(), await buildGtr(), await buildDicom(), await buildRadlex()];
+  const results = [await buildLoinc(), await buildTho(), await buildUcum(), await buildGtr(), await buildDicom(), await buildRadlex(), await buildCups()];
   for (const key of Object.keys(TARIFF_LAYERS)) results.push(await buildTariff(key));
   for (const r of results) if (r.missing) console.log(`[build] ${r.layer}: SIN DATOS — ${r.missing}`);
   const cov = coverage(results);

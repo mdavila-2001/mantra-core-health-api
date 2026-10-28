@@ -181,6 +181,24 @@ export const SOURCES = {
       { name: 'dicionario-pda-049-tuss.ods', url: 'https://dadosabertos.ans.gov.br/FTP/PDA/terminologia_unificada_saude_suplementar_TUSS-049/dicionario-pda-049-tuss.ods' },
     ],
   },
+  // CC BY-SA 4.0 (compartir igual): se descarga y se prueba, pero NO entra en el build ni en la carga por omisión.
+  'cups-co': {
+    sourceCode: 'MINSALUD_POSPOPULI_CUPS',
+    name: 'CUPS Colombia — exámenes de laboratorio del Plan de Beneficios en Salud (POSpópuli, datos.gov.co)',
+    owner: 'Ministerio de Salud y Protección Social (MinSalud), Colombia',
+    officialUrl: 'https://www.datos.gov.co/d/s5f2-yivs',
+    license:
+      'Creative Commons Atribución-CompartirIgual 4.0 Internacional (CC BY-SA 4.0), según el metadato `licenseId` = CC_40_BY_SA del conjunto en datos.gov.co (leído el 2026-10-27). Atribución: Ministerio de Salud y Protección Social - MinSalud, Bogotá D.C. Compartir igual: cargarlo al catálogo es una decisión del propietario.',
+    obtain: 'http',
+    shareAlike: true,
+    dir: 'cups-co',
+    files: [
+      { name: 'pospopuli-laboratorio.json', url: 'https://www.datos.gov.co/resource/s5f2-yivs.json?$limit=50000&$order=:id' },
+      { name: 'pospopuli-laboratorio.meta.json', url: 'https://www.datos.gov.co/api/views/s5f2-yivs.json' },
+      { name: 'pospopuli-procedimientos-pbs.json', url: 'https://www.datos.gov.co/resource/9zcz-bjue.json?$limit=50000&$order=:id' },
+      { name: 'pospopuli-procedimientos-pbs.meta.json', url: 'https://www.datos.gov.co/api/views/9zcz-bjue.json' },
+    ],
+  },
 };
 
 /** Fuentes evaluadas que no se pudieron obtener o no se usan: van a la cobertura como hueco. */

@@ -1,0 +1,19 @@
+{
+  "source": "mesh-desc-2026",
+  "name": "MeSH 2026 — descriptores (desc2026.gz)",
+  "publisher": "U.S. National Library of Medicine (NLM)",
+  "license": "NLM provee MeSH sin cargo (https://www.nlm.nih.gov/databases/download/terms_and_conditions_mesh.html, revisado 2018-10-04). Quien republique o redistribuya los datos debe: reconocer a NLM como fuente de forma clara, no sugerir que NLM respalda sus productos, e identificar la versión de MeSH usada o avisar que no es la más reciente. Los archivos de traducción (MTMS) quedan fuera de esos términos y no se usan.",
+  "licenseUrl": "https://www.nlm.nih.gov/databases/download/terms_and_conditions_mesh.html",
+  "homepage": "https://www.nlm.nih.gov/mesh/meshhome.html",
+  "retrievedAt": "2026-10-27T23:51:45.503Z",
+  "lastModified": "Wed, 12 Aug 2026 18:33:47 GMT",
+  "files": {
+    "desc2026.gz": {
+      "url": "https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.gz",
+      "fileUrl": "https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.gz",
+      "sha256": "ccd4d0d33bebfd4c836a59e7dd0c635b1d4e20c4f5a6abc55e2eb0ba4c8716dd",
+      "bytes": 16812612,
+      "lastModified": "Wed, 12 Aug 2026 18:33:47 GMT"
+    }
+  }
+}

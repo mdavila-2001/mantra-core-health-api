@@ -1,0 +1,97 @@
+[
+ {
+  "codigolaboratorio": "1390",
+  "codigocups": "901001",
+  "descripcion": "ANTIBIOGRAMA (DISCO)",
+  "quees": "ATB. Análisis de sensibilidad a los antibióticos. Procedimiento de laboratorio que determina la efectividad del tratamiento con antibióticos contra microorganismos, como las bacterias, que pueden estar causando una infección y que han sido aislados en medios de cultivos. Se combinan colonias de microorganismos con diferentes antibióticos para observar la forma como cada antibiótico inhibe el crecimiento del microorganismo. Con este examen, se determina la efectividad de cada antibiótico contra el organismo particular.",
+  "coberturaplanbeneficiosupc": "Financiado con recursos de la Unidad de Pago por Capitación (UPC)",
+  "exclusionesplanbeneficiosupc": "Sin dato",
+  "rankingbusqueda": "9540",
+  "descripcion_min": "antibiograma (disco)",
+  "quees_min": "atb. análisis de sensibilidad a los antibióticos. procedimiento de laboratorio que determina la efectividad del tratamiento con antibióticos contra microorganismos, como las bacterias, que pueden estar causando una infección y que han sido aislados en medios de cultivos. se combinan colonias de microorganismos con diferentes antibióticos para observar la forma como cada antibiótico inhibe el crecimiento del microorganismo. con este examen, se determina la efectividad de cada antibiótico contra el organismo particular.",
+  "coberturaplanbeneficiosupc_1": "financiado con recursos de la unidad de pago por capitación (upc)"
+ },
+ {
+  "codigolaboratorio": "1391",
+  "codigocups": "901002",
+  "descripcion": "ANTIBIOGRAMA CONCENTRACIÓN MÍNIMA INHIBITORIA METODO AUTOMATIZADO",
+  "quees": "ATB. Análisis de sensibilidad a los antibióticos. Procedimiento de laboratorio que determina la efectividad del tratamiento con antibióticos contra microorganismos, como las bacterias, que pueden estar causando una infección y que han sido aislados en medios de cultivos. Se combinan colonias de microorganismos con diferentes antibióticos para observar la forma como cada antibiótico inhibe el crecimiento del microorganismo. Con este examen, se determina la efectividad de cada antibiótico contra el organismo particular.",
+  "coberturaplanbeneficiosupc": "Financiado con recursos de la Unidad de Pago por Capitación (UPC)",
+  "exclusionesplanbeneficiosupc": "Sin dato",
+  "rankingbusqueda": "10250",
+  "descripcion_min": "antibiograma concentración mínima inhibitoria metodo automatizado",
+  "quees_min": "atb. análisis de sensibilidad a los antibióticos. procedimiento de laboratorio que determina la efectividad del tratamiento con antibióticos contra microorganismos, como las bacterias, que pueden estar causando una infección y que han sido aislados en medios de cultivos. se combinan colonias de microorganismos con diferentes antibióticos para observar la forma como cada antibiótico inhibe el crecimiento del microorganismo. con este examen, se determina la efectividad de cada antibiótico contra el organismo particular.",
+  "coberturaplanbeneficiosupc_1": "financiado con recursos de la unidad de pago por capitación (upc)"
+ },
+ {
+  "codigolaboratorio": "1392",
+  "codigocups": "901003",
+  "descripcion": "ANTIBIOGRAMA CONCENTRACIÓN MÍNIMA INHIBITORIA METODO MANUAL",
+  "quees": "ATB. Análisis de sensibilidad a los antibióticos. Procedimiento de laboratorio que determina la efectividad del tratamiento con antibióticos contra microorganismos, como las bacterias, que pueden estar causando una infección y que han sido aislados en medios de cultivos. Se combinan colonias de microorganismos con diferentes antibióticos para observar la forma como cada antibiótico inhibe el crecimiento del microorganismo. Con este examen, se determina la efectividad de cada antibiótico contra el organismo particular.",
+  "coberturaplanbeneficiosupc": "Financiado con recursos de la Unidad de Pago por Capitación (UPC)",
+  "exclusionesplanbeneficiosupc": "Sin dato",
+  "rankingbusqueda": "9480",
+  "descripcion_min": "antibiograma concentración mínima inhibitoria metodo manual",
+  "quees_min": "atb. análisis de sensibilidad a los antibióticos. procedimiento de laboratorio que determina la efectividad del tratamiento con antibióticos contra microorganismos, como las bacterias, que pueden estar causando una infección y que han sido aislados en medios de cultivos. se combinan colonias de microorganismos con diferentes antibióticos para observar la forma como cada antibiótico inhibe el crecimiento del microorganismo. con este examen, se determina la efectividad de cada antibiótico contra el organismo particular.",
+  "coberturaplanbeneficiosupc_1": "financiado con recursos de la unidad de pago por capitación (upc)"
+ },
+ {
+  "codigolaboratorio": "1393",
+  "codigocups": "901004",
+  "descripcion": "HONGOS PRUEBAS DE SENSIBILIDAD",
+  "quees": "Procedimiento de laboratorio que determina la efectividad del tratamiento con antifúngicos contra microorganismos, como los hongos, que pueden estar causando una infección y que han sido aislados en medios de cultivos. Se combinan colonias de microorganismos con diferentes antibióticos para observar la forma como cada antibiótico inhibe el crecimiento del microorganismo. Con este examen, se determina la efectividad de cada antibiótico contra el organismo particular.",
+  "coberturaplanbeneficiosupc": "Financiado con recursos de la Unidad de Pago por Capitación (UPC)",
+  "exclusionesplanbeneficiosupc": "Sin dato",
+  "rankingbusqueda": "8360",
+  "descripcion_min": "hongos pruebas de sensibilidad",
+  "quees_min": "procedimiento de laboratorio que determina la efectividad del tratamiento con antifúngicos contra microorganismos, como los hongos, que pueden estar causando una infección y que han sido aislados en medios de cultivos. se combinan colonias de microorganismos con diferentes antibióticos para observar la forma como cada antibiótico inhibe el crecimiento del microorganismo. con este examen, se determina la efectividad de cada antibiótico contra el organismo particular.",
+  "coberturaplanbeneficiosupc_1": "financiado con recursos de la unidad de pago por capitación (upc)"
+ },
+ {
+  "codigolaboratorio": "1394",
+  "codigocups": "901005",
+  "descripcion": "LEVADURAS PRUEBA DE SENSIBILIDAD POR DILUCIÓN",
+  "quees": "Procedimiento de laboratorio, para evaluar la actividad de los antifúngicos frente a las levaduras causantes de infecciones.",
+  "coberturaplanbeneficiosupc": "Financiado con recursos de la Unidad de Pago por Capitación (UPC)",
+  "exclusionesplanbeneficiosupc": "Sin dato",
+  "rankingbusqueda": "3000",
+  "descripcion_min": "levaduras prueba de sensibilidad por dilución",
+  "quees_min": "procedimiento de laboratorio, para evaluar la actividad de los antifúngicos frente a las levaduras causantes de infecciones.",
+  "coberturaplanbeneficiosupc_1": "financiado con recursos de la unidad de pago por capitación (upc)"
+ },
+ {
+  "codigolaboratorio": "1395",
+  "codigocups": "901006",
+  "descripcion": "LEVADURAS PRUEBA DE SENSIBILIDAD POR E-TEST",
+  "quees": "Procedimiento de laboratorio, para evaluar la actividad de los antifúngicos utilizando la técnica E-TEST frente a las levaduras causantes de infecciones.",
+  "coberturaplanbeneficiosupc": "Financiado con recursos de la Unidad de Pago por Capitación (UPC)",
+  "exclusionesplanbeneficiosupc": "Sin dato",
+  "rankingbusqueda": "4140",
+  "descripcion_min": "levaduras prueba de sensibilidad por e-test",
+  "quees_min": "procedimiento de laboratorio, para evaluar la actividad de los antifúngicos utilizando la técnica e-test frente a las levaduras causantes de infecciones.",
+  "coberturaplanbeneficiosupc_1": "financiado con recursos de la unidad de pago por capitación (upc)"
+ },
+ {
+  "codigolaboratorio": "1448",
+  "codigocups": "901239",
+  "descripcion": "Trichomona CULTIVO",
+  "quees": "Procedimiento de laboratorio que utiliza medios de cultivo específicos para aislar el microorganismo del género Trichomona, el cual es causante de infecciones de transmisión sexual",
+  "coberturaplanbeneficiosupc": "No Financiado con recursos de la Unidad de Pago por Capitación (Se prescribe vía: MIPRES)",
+  "exclusionesplanbeneficiosupc": "Sin dato",
+  "rankingbusqueda": "6040",
+  "descripcion_min": "trichomona cultivo",
+  "quees_min": "procedimiento de laboratorio que utiliza medios de cultivo específicos para aislar el microorganismo del género trichomona, el cual es causante de infecciones de transmisión sexual",
+  "coberturaplanbeneficiosupc_1": "no financiado con recursos de la unidad de pago por capitación (se prescribe vía: mipres)"
+ },
+ {
+  "codigolaboratorio": "1535",
+  "codigocups": "902063",
+  "descripcion": "PROTROMBINA FRAGMENTOS 1.2",
+  "quees": "Procedimiento de laboratorio que permite cuantificar el fragmento 1+2  de la protrombina",
+  "coberturaplanbeneficiosupc": "Sin dato",
+  "exclusionesplanbeneficiosupc": "Sin dato",
+  "rankingbusqueda": "Sin dato",
+  "descripcion_min": "Sin dato",
+  "quees_min": "Sin dato"
+ }
+]

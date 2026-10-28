@@ -1,0 +1,2694 @@
+<?xml version="1.0"?>
+<!DOCTYPE DescriptorRecordSet SYSTEM "https://www.nlm.nih.gov/databases/dtd/nlmdescriptorrecordset_20260101.dtd">
+<DescriptorRecordSet LanguageCode = "eng">
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D000001</DescriptorUI>
+  <DescriptorName>
+   <String>Calcimycin</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2023</Year>
+   <Month>02</Month>
+   <Day>26</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1984</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <AllowableQualifiersList>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000008</QualifierUI>
+      <QualifierName>
+      <String>administration &amp; dosage</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>AD</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000009</QualifierUI>
+      <QualifierName>
+      <String>adverse effects</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>AE</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000031</QualifierUI>
+      <QualifierName>
+      <String>analogs &amp; derivatives</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>AA</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000032</QualifierUI>
+      <QualifierName>
+      <String>analysis</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>AN</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000037</QualifierUI>
+      <QualifierName>
+      <String>antagonists &amp; inhibitors</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>AI</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000096</QualifierUI>
+      <QualifierName>
+      <String>biosynthesis</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>BI</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000097</QualifierUI>
+      <QualifierName>
+      <String>blood</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>BL</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000134</QualifierUI>
+      <QualifierName>
+      <String>cerebrospinal fluid</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>CF</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000138</QualifierUI>
+      <QualifierName>
+      <String>chemical synthesis</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>CS</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000145</QualifierUI>
+      <QualifierName>
+      <String>classification</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>CL</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000191</QualifierUI>
+      <QualifierName>
+      <String>economics</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>EC</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000266</QualifierUI>
+      <QualifierName>
+      <String>history</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>HI</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000276</QualifierUI>
+      <QualifierName>
+      <String>immunology</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>IM</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000302</QualifierUI>
+      <QualifierName>
+      <String>isolation &amp; purification</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>IP</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000378</QualifierUI>
+      <QualifierName>
+      <String>metabolism</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>ME</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000493</QualifierUI>
+      <QualifierName>
+      <String>pharmacokinetics</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>PK</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000494</QualifierUI>
+      <QualifierName>
+      <String>pharmacology</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>PD</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000506</QualifierUI>
+      <QualifierName>
+      <String>poisoning</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>PO</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000528</QualifierUI>
+      <QualifierName>
+      <String>radiation effects</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>RE</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000592</QualifierUI>
+      <QualifierName>
+      <String>standards</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>ST</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000600</QualifierUI>
+      <QualifierName>
+      <String>supply &amp; distribution</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>SD</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000627</QualifierUI>
+      <QualifierName>
+      <String>therapeutic use</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>TU</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000633</QualifierUI>
+      <QualifierName>
+      <String>toxicity</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>TO</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000652</QualifierUI>
+      <QualifierName>
+      <String>urine</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>UR</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000737</QualifierUI>
+      <QualifierName>
+      <String>chemistry</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>CH</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000819</QualifierUI>
+      <QualifierName>
+      <String>agonists</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>AG</Abbreviation>
+   </AllowableQualifier>
+  </AllowableQualifiersList>
+  <HistoryNote>91(75); was A 23187 1975-90 (see under ANTIBIOTICS 1975-83)
+  </HistoryNote>
+  <OnlineNote>use CALCIMYCIN to search A 23187 1975-90
+  </OnlineNote>
+  <PublicMeSHNote>91; was A 23187 1975-90 (see under ANTIBIOTICS 1975-83)
+  </PublicMeSHNote>
+  <PreviousIndexingList>
+   <PreviousIndexing>Antibiotics (1973-1974)</PreviousIndexing>
+   <PreviousIndexing>Carboxylic Acids (1973-1974)</PreviousIndexing>
+  </PreviousIndexingList>
+    <PharmacologicalActionList>
+     <PharmacologicalAction>
+      <DescriptorReferredTo>
+       <DescriptorUI>D000900</DescriptorUI>
+        <DescriptorName>
+         <String>Anti-Bacterial Agents</String>
+        </DescriptorName>
+      </DescriptorReferredTo>
+     </PharmacologicalAction>
+     <PharmacologicalAction>
+      <DescriptorReferredTo>
+       <DescriptorUI>D061207</DescriptorUI>
+        <DescriptorName>
+         <String>Calcium Ionophores</String>
+        </DescriptorName>
+      </DescriptorReferredTo>
+     </PharmacologicalAction>
+    </PharmacologicalActionList>
+  <TreeNumberList>
+   <TreeNumber>D02.355.291.933.125</TreeNumber>
+   <TreeNumber>D02.540.576.625.125</TreeNumber>
+   <TreeNumber>D03.633.100.221.173</TreeNumber>
+   <TreeNumber>D04.345.241.654.125</TreeNumber>
+   <TreeNumber>D04.345.674.625.125</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0000001</ConceptUI>
+    <ConceptName>
+     <String>Calcimycin</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>37H9VM9WZL</RegistryNumber>
+    </RegistryNumberList>
+    <ScopeNote>An ionophorous, polyether antibiotic from Streptomyces chartreusensis. It binds and transports CALCIUM and other divalent cations across membranes and uncouples oxidative phosphorylation while inhibiting ATPase of rat liver mitochondria. The substance is used mostly as a biochemical tool to study the role of divalent cations in various biological systems.
+    </ScopeNote>
+    <RelatedRegistryNumberList>
+     <RelatedRegistryNumber>52665-69-7 (Calcimycin)</RelatedRegistryNumber>
+    </RelatedRegistryNumberList>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000001</Concept1UI>
+     <Concept2UI>M0353609</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T000002</TermUI>
+      <String>Calcimycin</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>FDA SRS (2014)</ThesaurusID>
+       <ThesaurusID>NLM (1975)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T001124965</TermUI>
+      <String>4-Benzoxazolecarboxylic acid, 5-(methylamino)-2-((3,9,11-trimethyl-8-(1-methyl-2-oxo-2-(1H-pyrrol-2-yl)ethyl)-1,7-dioxaspiro(5.5)undec-2-yl)methyl)-, (6S-(6alpha(2S*,3S*),8beta(R*),9beta,11alpha))-</String>
+      <DateCreated>
+       <Year>2022</Year>
+       <Month>09</Month>
+       <Day>22</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2024)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0353609</ConceptUI>
+    <ConceptName>
+     <String>A-23187</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000001</Concept1UI>
+     <Concept2UI>M0353609</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="LAB"  RecordPreferredTermYN="N">
+      <TermUI>T000001</TermUI>
+      <String>A-23187</String>
+      <DateCreated>
+       <Year>1990</Year>
+       <Month>03</Month>
+       <Day>08</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1991)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="LAB"  RecordPreferredTermYN="N">
+      <TermUI>T000001</TermUI>
+      <String>A 23187</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000003</TermUI>
+      <String>Antibiotic A23187</String>
+      <DateCreated>
+       <Year>1990</Year>
+       <Month>03</Month>
+       <Day>08</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1991)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000003</TermUI>
+      <String>A23187, Antibiotic</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="LAB"  RecordPreferredTermYN="N">
+      <TermUI>T000004</TermUI>
+      <String>A23187</String>
+      <DateCreated>
+       <Year>1974</Year>
+       <Month>11</Month>
+       <Day>11</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D000028</DescriptorUI>
+  <DescriptorName>
+   <String>Abortion, Induced</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2024</Year>
+   <Month>11</Month>
+   <Day>06</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1971</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <AllowableQualifiersList>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000009</QualifierUI>
+      <QualifierName>
+      <String>adverse effects</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>AE</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000145</QualifierUI>
+      <QualifierName>
+      <String>classification</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>CL</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000191</QualifierUI>
+      <QualifierName>
+      <String>economics</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>EC</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000193</QualifierUI>
+      <QualifierName>
+      <String>education</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>ED</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000266</QualifierUI>
+      <QualifierName>
+      <String>history</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>HI</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000295</QualifierUI>
+      <QualifierName>
+      <String>instrumentation</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>IS</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000331</QualifierUI>
+      <QualifierName>
+      <String>legislation &amp; jurisprudence</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>LJ</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000379</QualifierUI>
+      <QualifierName>
+      <String>methods</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>MT</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000401</QualifierUI>
+      <QualifierName>
+      <String>mortality</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>MO</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000451</QualifierUI>
+      <QualifierName>
+      <String>nursing</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>NU</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000523</QualifierUI>
+      <QualifierName>
+      <String>psychology</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>PX</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000534</QualifierUI>
+      <QualifierName>
+      <String>rehabilitation</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>RH</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000592</QualifierUI>
+      <QualifierName>
+      <String>standards</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>ST</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000639</QualifierUI>
+      <QualifierName>
+      <String>trends</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>TD</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000662</QualifierUI>
+      <QualifierName>
+      <String>veterinary</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>VE</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000706</QualifierUI>
+      <QualifierName>
+      <String>statistics &amp; numerical data</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>SN</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000941</QualifierUI>
+      <QualifierName>
+      <String>ethics</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>ES</Abbreviation>
+   </AllowableQualifier>
+  </AllowableQualifiersList>
+  <Annotation>for use of an abortifacient, coordinate with abortifacient agent with no qualifiers, not /adv eff unless text specifically discusses adverse effects; check the tags FEMALE &amp; PREGNANCY
+  </Annotation>
+  <HistoryNote>71; was see under ABORTION, CRIMINAL &amp; ABORTION, THERAPEUTIC 1963-70, was see under ABORTION, LEGAL 1964-70; EMBRYOTOMY was heading 1963-85
+  </HistoryNote>
+  <OnlineNote>use ABORTION, INDUCED to search EMBRYOTOMY 1966-85; search ABORTION, CRIMINAL &amp; ABORTION, LEGAL &amp; ABORTION, THERAPEUTIC 1966-70
+  </OnlineNote>
+  <PublicMeSHNote>71; was see under ABORTION, CRIMINAL &amp; ABORTION, THERAPEUTIC 1963-70, was see under ABORTION, LEGAL 1964-70; EMBRYOTOMY was heading 1963-85
+  </PublicMeSHNote>
+  <PreviousIndexingList>
+   <PreviousIndexing>Abortion, Criminal (1966-1970)</PreviousIndexing>
+   <PreviousIndexing>Abortion, Legal (1966-1970)</PreviousIndexing>
+   <PreviousIndexing>Abortion, Therapeutic (1966-1970)</PreviousIndexing>
+  </PreviousIndexingList>
+  <SeeRelatedList>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D037881</DescriptorUI>
+     <DescriptorName>
+      <String>Aborted Fetus</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+  </SeeRelatedList>
+  <TreeNumberList>
+   <TreeNumber>E04.520.050</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0000037</ConceptUI>
+    <ConceptName>
+     <String>Abortion, Induced</String>
+    </ConceptName>
+    <ScopeNote>Intentional removal of a fetus from the uterus by any of a number of techniques. (POPLINE, 1978)
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0000037</Concept1UI>
+     <Concept2UI>M0000034</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0000037</Concept1UI>
+     <Concept2UI>M0000035</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000037</Concept1UI>
+     <Concept2UI>M0000036</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000037</Concept1UI>
+     <Concept2UI>M0000038</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000037</Concept1UI>
+     <Concept2UI>M0000039</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0000037</Concept1UI>
+     <Concept2UI>M0000040</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000037</Concept1UI>
+     <Concept2UI>M0000041</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="BRD">
+     <Concept1UI>M0000037</Concept1UI>
+     <Concept2UI>M0000042</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0000037</Concept1UI>
+     <Concept2UI>M0000043</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000037</Concept1UI>
+     <Concept2UI>M0000044</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0000037</Concept1UI>
+     <Concept2UI>M0000045</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T000076</TermUI>
+      <String>Abortion, Induced</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <EntryVersion>ABORTION IND</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>BIOETHICS (1999)</ThesaurusID>
+       <ThesaurusID>POPLINE (1978)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T373837</TermUI>
+      <String>Abortion (Induced)</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>11</Month>
+       <Day>09</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2000)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T373837</TermUI>
+      <String>Abortions (Induced)</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000075</TermUI>
+      <String>Induced Abortion</String>
+      <DateCreated>
+       <Year>1981</Year>
+       <Month>08</Month>
+       <Day>26</Day>
+      </DateCreated>
+      <EntryVersion>IND ABORTION</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000075</TermUI>
+      <String>Abortions, Induced</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000075</TermUI>
+      <String>Induced Abortions</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0000035</ConceptUI>
+    <ConceptName>
+     <String>Abortion Rate</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0000037</Concept1UI>
+     <Concept2UI>M0000035</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000073</TermUI>
+      <String>Abortion Rate</String>
+      <DateCreated>
+       <Year>1978</Year>
+       <Month>12</Month>
+       <Day>18</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>POPLINE (1978)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000073</TermUI>
+      <String>Abortion Rates</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000073</TermUI>
+      <String>Rate, Abortion</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000073</TermUI>
+      <String>Rates, Abortion</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0000036</ConceptUI>
+    <ConceptName>
+     <String>Abortion, Drug-Induced</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000037</Concept1UI>
+     <Concept2UI>M0000036</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000074</TermUI>
+      <String>Abortion, Drug-Induced</String>
+      <DateCreated>
+       <Year>1978</Year>
+       <Month>12</Month>
+       <Day>18</Day>
+      </DateCreated>
+      <EntryVersion>ABORTION DRUG IND</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>POPLINE (1978)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000074</TermUI>
+      <String>Abortion, Drug Induced</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000074</TermUI>
+      <String>Abortions, Drug-Induced</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000074</TermUI>
+      <String>Drug-Induced Abortion</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000074</TermUI>
+      <String>Drug-Induced Abortions</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0000038</ConceptUI>
+    <ConceptName>
+     <String>Abortion, Rivanol</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000037</Concept1UI>
+     <Concept2UI>M0000038</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000077</TermUI>
+      <String>Abortion, Rivanol</String>
+      <DateCreated>
+       <Year>1979</Year>
+       <Month>09</Month>
+       <Day>27</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>POPLINE (1978)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000077</TermUI>
+      <String>Abortions, Rivanol</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000077</TermUI>
+      <String>Rivanol Abortion</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000077</TermUI>
+      <String>Rivanol Abortions</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0000039</ConceptUI>
+    <ConceptName>
+     <String>Abortion, Saline-Solution</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000037</Concept1UI>
+     <Concept2UI>M0000039</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000078</TermUI>
+      <String>Abortion, Saline-Solution</String>
+      <DateCreated>
+       <Year>1978</Year>
+       <Month>12</Month>
+       <Day>18</Day>
+      </DateCreated>
+      <EntryVersion>ABORTION SALINE SOL</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>POPLINE (1978)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000078</TermUI>
+      <String>Abortion, Saline Solution</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000078</TermUI>
+      <String>Abortions, Saline-Solution</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000078</TermUI>
+      <String>Saline-Solution Abortion</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000078</TermUI>
+      <String>Saline-Solution Abortions</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0000040</ConceptUI>
+    <ConceptName>
+     <String>Anti-Abortion Groups</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0000037</Concept1UI>
+     <Concept2UI>M0000040</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000079</TermUI>
+      <String>Anti-Abortion Groups</String>
+      <DateCreated>
+       <Year>1985</Year>
+       <Month>08</Month>
+       <Day>08</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>POPLINE (1986)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000079</TermUI>
+      <String>Anti-Abortion Group</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000079</TermUI>
+      <String>Anti Abortion Groups</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000079</TermUI>
+      <String>Group, Anti-Abortion</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000079</TermUI>
+      <String>Groups, Anti-Abortion</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0000041</ConceptUI>
+    <ConceptName>
+     <String>Embryotomy</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000037</Concept1UI>
+     <Concept2UI>M0000041</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000080</TermUI>
+      <String>Embryotomy</String>
+      <DateCreated>
+       <Year>1985</Year>
+       <Month>06</Month>
+       <Day>06</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000080</TermUI>
+      <String>Embryotomies</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0000042</ConceptUI>
+    <ConceptName>
+     <String>Fertility Control, Postconception</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="BRD">
+     <Concept1UI>M0000037</Concept1UI>
+     <Concept2UI>M0000042</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000081</TermUI>
+      <String>Fertility Control, Postconception</String>
+      <DateCreated>
+       <Year>1978</Year>
+       <Month>12</Month>
+       <Day>18</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>POPLINE (1978)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000081</TermUI>
+      <String>Postconception Fertility Control</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0000043</ConceptUI>
+    <ConceptName>
+     <String>Abortion Techniques</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0000037</Concept1UI>
+     <Concept2UI>M0000043</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000083</TermUI>
+      <String>Abortion Techniques</String>
+      <DateCreated>
+       <Year>1990</Year>
+       <Month>01</Month>
+       <Day>10</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1991)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000083</TermUI>
+      <String>Abortion Technique</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000083</TermUI>
+      <String>Technique, Abortion</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000083</TermUI>
+      <String>Techniques, Abortion</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000082</TermUI>
+      <String>Abortion Technics</String>
+      <DateCreated>
+       <Year>1978</Year>
+       <Month>12</Month>
+       <Day>18</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1979)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000082</TermUI>
+      <String>Abortion Technic</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000082</TermUI>
+      <String>Technic, Abortion</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000082</TermUI>
+      <String>Technics, Abortion</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0000044</ConceptUI>
+    <ConceptName>
+     <String>Abortion, Soap-Solution</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000037</Concept1UI>
+     <Concept2UI>M0000044</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000084</TermUI>
+      <String>Abortion, Soap-Solution</String>
+      <DateCreated>
+       <Year>1978</Year>
+       <Month>12</Month>
+       <Day>18</Day>
+      </DateCreated>
+      <EntryVersion>ABORTION SOAP SOL</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>POPLINE (1978)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000084</TermUI>
+      <String>Abortion, Soap Solution</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000084</TermUI>
+      <String>Abortions, Soap-Solution</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000084</TermUI>
+      <String>Soap-Solution Abortion</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000084</TermUI>
+      <String>Soap-Solution Abortions</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0000034</ConceptUI>
+    <ConceptName>
+     <String>Previous Abortion</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0000037</Concept1UI>
+     <Concept2UI>M0000034</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000072</TermUI>
+      <String>Previous Abortion</String>
+      <DateCreated>
+       <Year>1978</Year>
+       <Month>12</Month>
+       <Day>18</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>POPLINE (1978)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000072</TermUI>
+      <String>Abortion, Previous</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000072</TermUI>
+      <String>Abortions, Previous</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000072</TermUI>
+      <String>Previous Abortions</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000071</TermUI>
+      <String>Abortion History</String>
+      <DateCreated>
+       <Year>1978</Year>
+       <Month>12</Month>
+       <Day>18</Day>
+      </DateCreated>
+      <EntryVersion>ABORTION HIST</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>POPLINE (1978)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000071</TermUI>
+      <String>Abortion Histories</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000071</TermUI>
+      <String>Histories, Abortion</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000071</TermUI>
+      <String>History, Abortion</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0000045</ConceptUI>
+    <ConceptName>
+     <String>Abortion Failure</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0000037</Concept1UI>
+     <Concept2UI>M0000045</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000085</TermUI>
+      <String>Abortion Failure</String>
+      <DateCreated>
+       <Year>1995</Year>
+       <Month>03</Month>
+       <Day>22</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>POPLINE (1994)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000085</TermUI>
+      <String>Abortion Failures</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000085</TermUI>
+      <String>Failure, Abortion</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000085</TermUI>
+      <String>Failures, Abortion</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D001943</DescriptorUI>
+  <DescriptorName>
+   <String>Breast Neoplasms</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2018</Year>
+   <Month>06</Month>
+   <Day>14</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1966</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <AllowableQualifiersList>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000097</QualifierUI>
+      <QualifierName>
+      <String>blood</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>BL</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000098</QualifierUI>
+      <QualifierName>
+      <String>blood supply</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>BS</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000134</QualifierUI>
+      <QualifierName>
+      <String>cerebrospinal fluid</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>CF</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000139</QualifierUI>
+      <QualifierName>
+      <String>chemically induced</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>CI</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000145</QualifierUI>
+      <QualifierName>
+      <String>classification</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>CL</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000150</QualifierUI>
+      <QualifierName>
+      <String>complications</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>CO</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000151</QualifierUI>
+      <QualifierName>
+      <String>congenital</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>CN</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000175</QualifierUI>
+      <QualifierName>
+      <String>diagnosis</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>DI</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000178</QualifierUI>
+      <QualifierName>
+      <String>diet therapy</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>DH</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000188</QualifierUI>
+      <QualifierName>
+      <String>drug therapy</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>DT</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000191</QualifierUI>
+      <QualifierName>
+      <String>economics</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>EC</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000196</QualifierUI>
+      <QualifierName>
+      <String>embryology</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>EM</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000201</QualifierUI>
+      <QualifierName>
+      <String>enzymology</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>EN</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000208</QualifierUI>
+      <QualifierName>
+      <String>ethnology</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>EH</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000209</QualifierUI>
+      <QualifierName>
+      <String>etiology</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>ET</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000235</QualifierUI>
+      <QualifierName>
+      <String>genetics</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>GE</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000266</QualifierUI>
+      <QualifierName>
+      <String>history</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>HI</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000276</QualifierUI>
+      <QualifierName>
+      <String>immunology</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>IM</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000378</QualifierUI>
+      <QualifierName>
+      <String>metabolism</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>ME</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000382</QualifierUI>
+      <QualifierName>
+      <String>microbiology</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>MI</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000401</QualifierUI>
+      <QualifierName>
+      <String>mortality</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>MO</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000451</QualifierUI>
+      <QualifierName>
+      <String>nursing</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>NU</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000453</QualifierUI>
+      <QualifierName>
+      <String>epidemiology</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>EP</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000469</QualifierUI>
+      <QualifierName>
+      <String>parasitology</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>PS</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000473</QualifierUI>
+      <QualifierName>
+      <String>pathology</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>PA</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000503</QualifierUI>
+      <QualifierName>
+      <String>physiopathology</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>PP</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000517</QualifierUI>
+      <QualifierName>
+      <String>prevention &amp; control</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>PC</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000523</QualifierUI>
+      <QualifierName>
+      <String>psychology</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>PX</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000532</QualifierUI>
+      <QualifierName>
+      <String>radiotherapy</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>RT</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000534</QualifierUI>
+      <QualifierName>
+      <String>rehabilitation</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>RH</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000556</QualifierUI>
+      <QualifierName>
+      <String>secondary</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>SC</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000601</QualifierUI>
+      <QualifierName>
+      <String>surgery</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>SU</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000628</QualifierUI>
+      <QualifierName>
+      <String>therapy</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>TH</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000648</QualifierUI>
+      <QualifierName>
+      <String>ultrastructure</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>UL</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000652</QualifierUI>
+      <QualifierName>
+      <String>urine</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>UR</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000662</QualifierUI>
+      <QualifierName>
+      <String>veterinary</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>VE</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000737</QualifierUI>
+      <QualifierName>
+      <String>chemistry</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>CH</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000821</QualifierUI>
+      <QualifierName>
+      <String>virology</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>VI</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000000981</QualifierUI>
+      <QualifierName>
+      <String>diagnostic imaging</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>DG</Abbreviation>
+   </AllowableQualifier>
+  </AllowableQualifiersList>
+  <Annotation>human only; BREAST NEOPLASMS, MALE is also available; for animal, index MAMMARY NEOPLASMS, ANIMAL or MAMMARY NEOPLASMS, EXPERIMENTAL; coordinate IM with histological type of neoplasm (IM)
+  </Annotation>
+  <SeeRelatedList>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D000072656</DescriptorUI>
+     <DescriptorName>
+      <String>Breast Cancer Lymphedema</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+  </SeeRelatedList>
+  <TreeNumberList>
+   <TreeNumber>C04.588.180</TreeNumber>
+   <TreeNumber>C17.800.090.500</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0002910</ConceptUI>
+    <ConceptName>
+     <String>Breast Neoplasms</String>
+    </ConceptName>
+    <ScopeNote>Tumors or cancer of the human BREAST.
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0002910</Concept1UI>
+     <Concept2UI>M0002909</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0002910</Concept1UI>
+     <Concept2UI>M0445598</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0002910</Concept1UI>
+     <Concept2UI>M000637099</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0002910</Concept1UI>
+     <Concept2UI>M000641875</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T005543</TermUI>
+      <String>Breast Neoplasms</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <EntryVersion>BREAST NEOPL</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1966)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T005543</TermUI>
+      <String>Breast Neoplasm</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T005543</TermUI>
+      <String>Neoplasm, Breast</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T005542</TermUI>
+      <String>Neoplasms, Breast</String>
+      <DateCreated>
+       <Year>1991</Year>
+       <Month>06</Month>
+       <Day>17</Day>
+      </DateCreated>
+      <EntryVersion>NEOPL BREAST</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1992)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T592582</TermUI>
+      <String>Breast Tumors</String>
+      <DateCreated>
+       <Year>2004</Year>
+       <Month>06</Month>
+       <Day>22</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2005)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T592582</TermUI>
+      <String>Breast Tumor</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T592582</TermUI>
+      <String>Tumor, Breast</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T592583</TermUI>
+      <String>Tumors, Breast</String>
+      <DateCreated>
+       <Year>2004</Year>
+       <Month>06</Month>
+       <Day>22</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2005)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0002909</ConceptUI>
+    <ConceptName>
+     <String>Breast Cancer</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0002910</Concept1UI>
+     <Concept2UI>M0002909</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T005541</TermUI>
+      <String>Breast Cancer</String>
+      <DateCreated>
+       <Year>1978</Year>
+       <Month>12</Month>
+       <Day>19</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>BIOETHICS (1995)</ThesaurusID>
+       <ThesaurusID>GHR (2014)</ThesaurusID>
+       <ThesaurusID>NLM (1980)</ThesaurusID>
+       <ThesaurusID>OMIM (2013)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T005541</TermUI>
+      <String>Cancer, Breast</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T363032</TermUI>
+      <String>Cancer of Breast</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>11</Month>
+       <Day>03</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>GHR (2014)</ThesaurusID>
+       <ThesaurusID>NLM (2000)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T363033</TermUI>
+      <String>Cancer of the Breast</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>11</Month>
+       <Day>03</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2000)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T841046</TermUI>
+      <String>Malignant Neoplasm of Breast</String>
+      <DateCreated>
+       <Year>2013</Year>
+       <Month>04</Month>
+       <Day>18</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>GHR (2014)</ThesaurusID>
+       <ThesaurusID>NLM (2014)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T841046</TermUI>
+      <String>Breast Malignant Neoplasm</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T841046</TermUI>
+      <String>Breast Malignant Neoplasms</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T841047</TermUI>
+      <String>Malignant Tumor of Breast</String>
+      <DateCreated>
+       <Year>2013</Year>
+       <Month>04</Month>
+       <Day>18</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>GHR (2014)</ThesaurusID>
+       <ThesaurusID>NLM (2014)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T841047</TermUI>
+      <String>Breast Malignant Tumor</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T841047</TermUI>
+      <String>Breast Malignant Tumors</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T841048</TermUI>
+      <String>Mammary Cancer</String>
+      <DateCreated>
+       <Year>2013</Year>
+       <Month>04</Month>
+       <Day>18</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>GHR (2014)</ThesaurusID>
+       <ThesaurusID>NLM (2014)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T841048</TermUI>
+      <String>Cancer, Mammary</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T841048</TermUI>
+      <String>Cancers, Mammary</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T841048</TermUI>
+      <String>Mammary Cancers</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0445598</ConceptUI>
+    <ConceptName>
+     <String>Mammary Neoplasms, Human</String>
+    </ConceptName>
+    <ScopeNote>Tumor or cancer of the human MAMMARY GLAND.
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0002910</Concept1UI>
+     <Concept2UI>M0445598</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T532494</TermUI>
+      <String>Mammary Neoplasms, Human</String>
+      <DateCreated>
+       <Year>2003</Year>
+       <Month>02</Month>
+       <Day>11</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2004)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T532494</TermUI>
+      <String>Human Mammary Neoplasm</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T532494</TermUI>
+      <String>Human Mammary Neoplasms</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T532494</TermUI>
+      <String>Neoplasm, Human Mammary</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T532494</TermUI>
+      <String>Neoplasms, Human Mammary</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T532495</TermUI>
+      <String>Mammary Neoplasm, Human</String>
+      <DateCreated>
+       <Year>2003</Year>
+       <Month>02</Month>
+       <Day>11</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2004)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M000637099</ConceptUI>
+    <ConceptName>
+     <String>Breast Carcinoma</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0002910</Concept1UI>
+     <Concept2UI>M000637099</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000933263</TermUI>
+      <String>Breast Carcinoma</String>
+      <DateCreated>
+       <Year>2017</Year>
+       <Month>10</Month>
+       <Day>11</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>GHR (2014)</ThesaurusID>
+       <ThesaurusID>NLM (2014)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000933263</TermUI>
+      <String>Breast Carcinomas</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000933263</TermUI>
+      <String>Carcinoma, Breast</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000933263</TermUI>
+      <String>Carcinomas, Breast</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M000641875</ConceptUI>
+    <ConceptName>
+     <String>Mammary Carcinoma, Human</String>
+    </ConceptName>
+    <ScopeNote>Cancer of the human MAMMARY GLAND.
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0002910</Concept1UI>
+     <Concept2UI>M000641875</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000941376</TermUI>
+      <String>Mammary Carcinoma, Human</String>
+      <DateCreated>
+       <Year>2018</Year>
+       <Month>03</Month>
+       <Day>22</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2019)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000941376</TermUI>
+      <String>Carcinoma, Human Mammary</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000941376</TermUI>
+      <String>Carcinomas, Human Mammary</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000941376</TermUI>
+      <String>Human Mammary Carcinomas</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000941376</TermUI>
+      <String>Mammary Carcinomas, Human</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000941377</TermUI>
+      <String>Human Mammary Carcinoma</String>
+      <DateCreated>
+       <Year>2018</Year>
+       <Month>03</Month>
+       <Day>22</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2019)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D003732</DescriptorUI>
+  <DescriptorName>
+   <String>Dental Caries Activity Tests</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2015</Year>
+   <Month>06</Month>
+   <Day>30</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1972</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <AllowableQualifiersList>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000009</QualifierUI>
+      <QualifierName>
+      <String>adverse effects</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>AE</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000145</QualifierUI>
+      <QualifierName>
+      <String>classification</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>CL</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000191</QualifierUI>
+      <QualifierName>
+      <String>economics</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>EC</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000266</QualifierUI>
+      <QualifierName>
+      <String>history</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>HI</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000295</QualifierUI>
+      <QualifierName>
+      <String>instrumentation</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>IS</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000379</QualifierUI>
+      <QualifierName>
+      <String>methods</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>MT</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000401</QualifierUI>
+      <QualifierName>
+      <String>mortality</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>MO</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000451</QualifierUI>
+      <QualifierName>
+      <String>nursing</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>NU</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000523</QualifierUI>
+      <QualifierName>
+      <String>psychology</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>PX</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000592</QualifierUI>
+      <QualifierName>
+      <String>standards</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>ST</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000639</QualifierUI>
+      <QualifierName>
+      <String>trends</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>TD</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000662</QualifierUI>
+      <QualifierName>
+      <String>veterinary</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>VE</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000706</QualifierUI>
+      <QualifierName>
+      <String>statistics &amp; numerical data</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>SN</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000941</QualifierUI>
+      <QualifierName>
+      <String>ethics</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>ES</Abbreviation>
+   </AllowableQualifier>
+  </AllowableQualifiersList>
+  <HistoryNote>72(70)
+  </HistoryNote>
+  <PublicMeSHNote>72
+  </PublicMeSHNote>
+  <PreviousIndexingList>
+   <PreviousIndexing>Dental Caries Susceptibility (1966-1969)</PreviousIndexing>
+   <PreviousIndexing>Diagnosis, Oral (1966-1979)</PreviousIndexing>
+  </PreviousIndexingList>
+  <TreeNumberList>
+   <TreeNumber>E06.342.250</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0005856</ConceptUI>
+    <ConceptName>
+     <String>Dental Caries Activity Tests</String>
+    </ConceptName>
+    <ScopeNote>Diagnostic tests conducted in order to measure the increment of active DENTAL CARIES over a period of time.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T010952</TermUI>
+      <String>Dental Caries Activity Tests</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <EntryVersion>DENT CARIES ACTIVITY TESTS</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1970)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D004358</DescriptorUI>
+  <DescriptorName>
+   <String>Drug Therapy</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2013</Year>
+   <Month>07</Month>
+   <Day>08</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1966</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <AllowableQualifiersList>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000145</QualifierUI>
+      <QualifierName>
+      <String>classification</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>CL</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000191</QualifierUI>
+      <QualifierName>
+      <String>economics</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>EC</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000266</QualifierUI>
+      <QualifierName>
+      <String>history</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>HI</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000295</QualifierUI>
+      <QualifierName>
+      <String>instrumentation</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>IS</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000379</QualifierUI>
+      <QualifierName>
+      <String>methods</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>MT</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000401</QualifierUI>
+      <QualifierName>
+      <String>mortality</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>MO</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000451</QualifierUI>
+      <QualifierName>
+      <String>nursing</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>NU</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000523</QualifierUI>
+      <QualifierName>
+      <String>psychology</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>PX</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000592</QualifierUI>
+      <QualifierName>
+      <String>standards</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>ST</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000639</QualifierUI>
+      <QualifierName>
+      <String>trends</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>TD</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000662</QualifierUI>
+      <QualifierName>
+      <String>veterinary</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>VE</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000706</QualifierUI>
+      <QualifierName>
+      <String>statistics &amp; numerical data</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>SN</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000941</QualifierUI>
+      <QualifierName>
+      <String>ethics</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>ES</Abbreviation>
+   </AllowableQualifier>
+  </AllowableQualifiersList>
+  <Annotation>general only: prefer /drug ther with disease term: Manual 19.7+, 19.8.26; note entry term CHEMOTHERAPY: prefer specific chemical or chemical group, e.g., chemotherapy of lymphoma = LYMPHOMA /drug ther + ANTINEOPLASTIC AGENTS /ther use, not DRUG THERAPY
+  </Annotation>
+  <EntryCombinationList>
+   <EntryCombination>
+    <ECIN>
+     <DescriptorReferredTo>
+      <DescriptorUI>D004358</DescriptorUI>
+      <DescriptorName>
+       <String>Drug Therapy</String>
+      </DescriptorName>
+     </DescriptorReferredTo>
+     <QualifierReferredTo>
+      <QualifierUI>Q000009</QualifierUI>
+      <QualifierName>
+       <String>adverse effects</String>
+      </QualifierName>
+     </QualifierReferredTo>
+    </ECIN>
+    <ECOUT>
+     <DescriptorReferredTo>
+      <DescriptorUI>D064420</DescriptorUI>
+      <DescriptorName>
+       <String>Drug-Related Side Effects and Adverse Reactions</String>
+      </DescriptorName>
+     </DescriptorReferredTo>
+    </ECOUT>
+   </EntryCombination>
+  </EntryCombinationList>
+  <SeeRelatedList>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D008508</DescriptorUI>
+     <DescriptorName>
+      <String>Medication Errors</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D020228</DescriptorUI>
+     <DescriptorName>
+      <String>Pharmacologic Actions</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+  </SeeRelatedList>
+  <TreeNumberList>
+   <TreeNumber>E02.319</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0006850</ConceptUI>
+    <ConceptName>
+     <String>Drug Therapy</String>
+    </ConceptName>
+    <ScopeNote>The use of DRUGS to treat a DISEASE or its symptoms. One example is the use of ANTINEOPLASTIC AGENTS to treat CANCER.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T013309</TermUI>
+      <String>Drug Therapy</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <EntryVersion>DRUG THER</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1966)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T013307</TermUI>
+      <String>Chemotherapy</String>
+      <DateCreated>
+       <Year>1975</Year>
+       <Month>01</Month>
+       <Day>16</Day>
+      </DateCreated>
+      <EntryVersion>CHEMOTHER</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T013307</TermUI>
+      <String>Chemotherapies</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T013310</TermUI>
+      <String>Pharmacotherapy</String>
+      <DateCreated>
+       <Year>1974</Year>
+       <Month>03</Month>
+       <Day>29</Day>
+      </DateCreated>
+      <EntryVersion>PHARMACOTHER</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T013310</TermUI>
+      <String>Pharmacotherapies</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T013308</TermUI>
+      <String>Therapy, Drug</String>
+      <DateCreated>
+       <Year>1974</Year>
+       <Month>03</Month>
+       <Day>29</Day>
+      </DateCreated>
+      <EntryVersion>THER DRUG</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T013308</TermUI>
+      <String>Drug Therapies</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T013308</TermUI>
+      <String>Therapies, Drug</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D011878</DescriptorUI>
+  <DescriptorName>
+   <String>Radiotherapy</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2018</Year>
+   <Month>02</Month>
+   <Day>26</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1966</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <AllowableQualifiersList>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000009</QualifierUI>
+      <QualifierName>
+      <String>adverse effects</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>AE</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000145</QualifierUI>
+      <QualifierName>
+      <String>classification</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>CL</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000191</QualifierUI>
+      <QualifierName>
+      <String>economics</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>EC</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000266</QualifierUI>
+      <QualifierName>
+      <String>history</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>HI</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000295</QualifierUI>
+      <QualifierName>
+      <String>instrumentation</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>IS</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000379</QualifierUI>
+      <QualifierName>
+      <String>methods</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>MT</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000401</QualifierUI>
+      <QualifierName>
+      <String>mortality</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>MO</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000451</QualifierUI>
+      <QualifierName>
+      <String>nursing</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>NU</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000523</QualifierUI>
+      <QualifierName>
+      <String>psychology</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>PX</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000592</QualifierUI>
+      <QualifierName>
+      <String>standards</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>ST</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000639</QualifierUI>
+      <QualifierName>
+      <String>trends</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>TD</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000662</QualifierUI>
+      <QualifierName>
+      <String>veterinary</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>VE</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000706</QualifierUI>
+      <QualifierName>
+      <String>statistics &amp; numerical data</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>SN</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000941</QualifierUI>
+      <QualifierName>
+      <String>ethics</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>ES</Abbreviation>
+   </AllowableQualifier>
+  </AllowableQualifiersList>
+  <Annotation>general only: prefer /radiother with diseases; /adv eff: consider also RADIATION INJURIES or its specifics; many specific types of radiotherapy are available
+  </Annotation>
+  <TreeNumberList>
+   <TreeNumber>E02.815</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0018442</ConceptUI>
+    <ConceptName>
+     <String>Radiotherapy</String>
+    </ConceptName>
+    <ScopeNote>The use of IONIZING RADIATION to treat malignant NEOPLASMS and some benign conditions.
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0018442</Concept1UI>
+     <Concept2UI>M0018443</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T035076</TermUI>
+      <String>Radiotherapy</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <EntryVersion>RADIOTHER</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1966)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T035076</TermUI>
+      <String>Radiotherapies</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000895610</TermUI>
+      <String>Radiation Therapy</String>
+      <DateCreated>
+       <Year>2016</Year>
+       <Month>02</Month>
+       <Day>19</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2017)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000895610</TermUI>
+      <String>Radiation Therapies</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000895610</TermUI>
+      <String>Therapies, Radiation</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000895610</TermUI>
+      <String>Therapy, Radiation</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000939228</TermUI>
+      <String>Radiation Treatment</String>
+      <DateCreated>
+       <Year>2018</Year>
+       <Month>01</Month>
+       <Day>17</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2019)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000939228</TermUI>
+      <String>Radiation Treatments</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000939228</TermUI>
+      <String>Treatment, Radiation</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0018443</ConceptUI>
+    <ConceptName>
+     <String>Radiotherapy, Targeted</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0018442</Concept1UI>
+     <Concept2UI>M0018443</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T035077</TermUI>
+      <String>Radiotherapy, Targeted</String>
+      <DateCreated>
+       <Year>1992</Year>
+       <Month>12</Month>
+       <Day>21</Day>
+      </DateCreated>
+      <EntryVersion>RADIOTHER TARGETED</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1994)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T035077</TermUI>
+      <String>Radiotherapies, Targeted</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T035077</TermUI>
+      <String>Targeted Radiotherapies</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000895611</TermUI>
+      <String>Targeted Radiation Therapy</String>
+      <DateCreated>
+       <Year>2016</Year>
+       <Month>02</Month>
+       <Day>19</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2017)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000895611</TermUI>
+      <String>Radiation Therapies, Targeted</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000895611</TermUI>
+      <String>Targeted Radiation Therapies</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000895611</TermUI>
+      <String>Therapies, Targeted Radiation</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000895611</TermUI>
+      <String>Therapy, Targeted Radiation</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000895612</TermUI>
+      <String>Radiation Therapy, Targeted</String>
+      <DateCreated>
+       <Year>2016</Year>
+       <Month>02</Month>
+       <Day>19</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2017)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T035078</TermUI>
+      <String>Targeted Radiotherapy</String>
+      <DateCreated>
+       <Year>1992</Year>
+       <Month>12</Month>
+       <Day>21</Day>
+      </DateCreated>
+      <EntryVersion>TARGETED RADIOTHER</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1994)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+</DescriptorRecordSet>

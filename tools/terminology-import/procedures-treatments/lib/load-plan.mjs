@@ -93,6 +93,21 @@ export const OWNED_CODE_SYSTEMS = {
     },
     createIfAbsent: true,
   },
+  // MeSH: descriptores de procedimientos (árbol E). El lado «enfermedad» de las relaciones de ClinicalTrials.gov
+  // usa el code system `mesh` de `seed-diseases` (descriptores sin prefijo); acá sólo se crea el lado procedimiento.
+  'mesh-procedures': {
+    internalCode: 'mesh-procedures',
+    name: 'MeSH — descriptores de procedimientos (árbol E: diagnóstico, terapéutica, anestesia, cirugía, odontología)',
+    canonicalUrl: 'http://id.nlm.nih.gov/mesh/procedures',
+    source: {
+      code: 'NLM_MESH',
+      name: 'Medical Subject Headings (MeSH), National Library of Medicine',
+      owner: 'U.S. National Library of Medicine (NLM)',
+      officialUrl: 'https://www.nlm.nih.gov/mesh/meshhome.html',
+      license: 'NLM provee MeSH sin cargo; términos: https://www.nlm.nih.gov/databases/download/terms_and_conditions_mesh.html (reconocer a NLM como fuente, no sugerir su respaldo e identificar la versión usada).',
+    },
+    createIfAbsent: true,
+  },
   [RELATION_TYPE_SYSTEM]: {
     internalCode: RELATION_TYPE_SYSTEM,
     name: 'Tipos de relación de procedimientos (predicado literal de cada fuente)',
@@ -115,6 +130,17 @@ export const PROVENANCE_SOURCE_CODE = {
   'ncit-obo': 'NCI_EVS_NCIT',
   ohd: 'OBO_OHD',
   'icd10pcs-cms-2027': 'CMS_ICD10PCS',
+  'clinicaltrials-gov': 'NLM_CLINICALTRIALS_GOV',
+};
+
+/** Fuentes que sólo respaldan afirmaciones (no tienen code system propio en esta importación). */
+export const EXTRA_SOURCES = {
+  NLM_CLINICALTRIALS_GOV: {
+    name: 'ClinicalTrials.gov (registro de ensayos clínicos)',
+    owner: 'U.S. National Library of Medicine (NLM)',
+    officialUrl: 'https://clinicaltrials.gov/',
+    license: 'Dominio público (NLM). Términos de uso: https://clinicaltrials.gov/about-site/terms-conditions',
+  },
 };
 
 /** Sistemas cuyo extremo se resuelve en la versión que carga esta importación (no «la versión por defecto»). */
@@ -246,7 +272,7 @@ export function buildLoadPlan({ procedures, assertions }) {
         system: p.system,
         code: p.code,
         display: p.display,
-        definition: null,
+        definition: p.definition ?? null,
         properties: conceptProperties(p),
         designations: p.designations ?? [],
       })),

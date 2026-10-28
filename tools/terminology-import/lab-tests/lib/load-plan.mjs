@@ -71,6 +71,7 @@ export function valueSetDefinition(code, context = {}) {
     'lab-catalog-gtr-ncbi': ['Catálogo de análisis — NCBI GTR (pruebas genéticas)', 'Pruebas genéticas vigentes y públicas del Genetic Testing Registry de NCBI (una por laboratorio y prueba registrada).'],
     'lab-catalog-dicom-dcm': ['Catálogo de análisis — DICOM CID 29 (modalidades de adquisición)', 'Códigos DCM del Context Group CID 29 «Acquisition Modality» de DICOM PS3.16.'],
     'lab-catalog-radlex-playbook': ['Catálogo de análisis — RSNA RadLex Playbook (imagenología)', 'Órdenes y procedimientos de radiología del RadLex Playbook (RPID), con su estado publicado. Adaptación no respaldada por RSNA.'],
+    'lab-catalog-cups-co': ['Catálogo de análisis — CUPS Colombia, laboratorio del PBS (POSpópuli)', 'Exámenes de laboratorio del conjunto POSpópuli-Laboratorio de MinSalud (CC BY-SA 4.0).'],
     'lab-catalog-pami-nomenclador': ['Catálogo de análisis — Nomenclador PAMI (Argentina)', 'Prácticas diagnósticas del nomenclador de PAMI incluidas por prefijo (ver tariffs.mjs).'],
   };
   if (fixed[code]) return { name: fixed[code][0], description: fixed[code][1] };

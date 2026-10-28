@@ -1,0 +1,25 @@
+{
+  "source": "clinicaltrials-gov",
+  "name": "ClinicalTrials.gov API v2 (intervenciones no farmacológicas ↔ condición, solo «en estudio»)",
+  "publisher": "U.S. National Library of Medicine (NLM)",
+  "license": "Dominio público (NLM). Términos de uso de ClinicalTrials.gov: https://clinicaltrials.gov/about-site/terms-conditions",
+  "licenseUrl": "https://clinicaltrials.gov/about-site/terms-conditions",
+  "homepage": "https://clinicaltrials.gov/data-api/api",
+  "retrievedAt": "2026-10-27T23:51:16.931Z",
+  "finishedAt": "2026-10-27T23:57:19.588Z",
+  "apiVersion": "2.0.5",
+  "dataTimestamp": "2026-10-27T09:00:04",
+  "query": "AREA[InterventionType](PROCEDURE OR RADIATION OR BEHAVIORAL OR DIAGNOSTIC_TEST)",
+  "fields": "NCTId,OverallStatus,Phase,StartDate,LastUpdatePostDate,InterventionType,InterventionMesh,ConditionMesh",
+  "totalCount": 152647,
+  "scanned": 152647,
+  "kept": 50290,
+  "files": {
+    "studies.ndjson": {
+      "url": "https://clinicaltrials.gov/api/v2/studies",
+      "fileUrl": "https://clinicaltrials.gov/api/v2/studies",
+      "sha256": "f313e9e41f679bff647603d807d2d8bcb5ada34e83e9ffc2b9f72a615917ad0e",
+      "bytes": 18658777
+    }
+  }
+}

@@ -102,6 +102,16 @@ export const HTTP_SOURCES = {
         'https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/CIE10/2026/Procedimientos_Tabla_Referencia_CIE10ES_2026.xlsx',
     },
   },
+  'mesh-desc-2026': {
+    name: 'MeSH 2026 — descriptores (desc2026.gz)',
+    publisher: 'U.S. National Library of Medicine (NLM)',
+    license:
+      'NLM provee MeSH sin cargo (https://www.nlm.nih.gov/databases/download/terms_and_conditions_mesh.html, revisado 2018-10-04). Quien republique o redistribuya los datos debe: reconocer a NLM como fuente de forma clara, no sugerir que NLM respalda sus productos, e identificar la versión de MeSH usada o avisar que no es la más reciente. Los archivos de traducción (MTMS) quedan fuera de esos términos y no se usan.',
+    licenseUrl: 'https://www.nlm.nih.gov/databases/download/terms_and_conditions_mesh.html',
+    homepage: 'https://www.nlm.nih.gov/mesh/meshhome.html',
+    kind: 'http',
+    files: { 'desc2026.gz': 'https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.gz' },
+  },
 };
 
 /**

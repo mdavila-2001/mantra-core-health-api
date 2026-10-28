@@ -106,8 +106,11 @@ for (const key of readdirSync(cacheDir()).sort()) {
   writeJson(join(DATA, 'sources', `${key}.meta.json`), meta);
   for (const [file, info] of Object.entries(meta.files)) {
     const path = join(dir, file);
-    if (info.bytes <= RAW_LIMIT && existsSync(path)) {
-      writeGz(`raw/${key}/${file}.gz`, readFileSync(path), {
+    // El límite se mide sobre lo COMPRIMIDO (el NDJSON de ClinicalTrials.gov pesa 18 MB y comprime a ~2 MB;
+    // un .gz que ya viene comprimido, como desc2026.gz de MeSH, no se vuelve a comprimir y queda afuera).
+    const raw = existsSync(path) ? readFileSync(path) : null;
+    if (raw && gzipSync(raw, { level: 9 }).length <= RAW_LIMIT) {
+      writeGz(`raw/${key}/${file}.gz`, raw, {
         source: key,
         sha256Original: info.sha256,
       });
@@ -118,7 +121,7 @@ for (const key of readdirSync(cacheDir()).sort()) {
         bytes: info.bytes,
         sha256: info.sha256,
         url: info.url,
-        reproduce: `node tools/terminology-import/procedures-treatments/fetch.mjs ${key}`,
+        reproduce: key === 'clinicaltrials-gov' ? 'node tools/terminology-import/procedures-treatments/fetch-ctgov.mjs (la API cambia a diario: el corpus queda fijado por el dataTimestamp y el sha256 de meta.json)' : `node tools/terminology-import/procedures-treatments/fetch.mjs ${key}`,
       });
     }
   }
