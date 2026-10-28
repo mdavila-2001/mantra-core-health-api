@@ -20,5 +20,3 @@ CREATE TRIGGER trg_forbid_update BEFORE UPDATE ON "clinical_ext"."cds_rule_versi
 
 -- ═══ referrals ═══
 -- CHECK concreto declarado por el modelo (CHECK_SQL).
-ALTER TABLE "clinical_ext"."referrals" DROP CONSTRAINT IF EXISTS "ck_referrals_referral_type";
-ALTER TABLE "clinical_ext"."referrals" ADD CONSTRAINT "ck_referrals_referral_type" CHECK ("referral_type" IN ('CONSULTATION','TREATMENT','PROCEDURE','DIAGNOSTIC','THERAPY','HOSPITALIZATION','OTHER'));

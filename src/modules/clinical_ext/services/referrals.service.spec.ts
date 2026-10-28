@@ -16,6 +16,7 @@ import {
   ResourceNotFoundException,
 } from '../../../common';
 import { CEXT } from '../clinical_ext.concepts';
+import { SCHED } from '../../scheduling/domain/scheduling.concepts';
 import { ClinicalExtErrorReason } from '../clinical_ext.error-reasons';
 import { ACTIVE_TENANT, inTenant, thrown } from './clinical-ext-tenant.testing';
 import { Branches } from '../../directory/entities';
@@ -70,8 +71,17 @@ function build() {
     findOne: mockFn().mockResolvedValue(null),
     find: mockFn().mockResolvedValue([]),
   };
-  const em: any = { transactional: mockFn((cb: any) => cb(tx)) };
-  em.fork = mockFn(() => tx);
+  // `em` y `tx` comparten por defecto los mismos mocks de lectura: según el
+  // método, el servicio lee con `em.fork()` o dentro de la transacción, y cada
+  // test puede ajustar `d.tx.find` o sobrescribir `d.em.find`.
+  const em: any = {
+    transactional: mockFn((cb: any) => cb(tx)),
+    flush: tx.flush,
+    execute: tx.execute,
+    findOne: tx.findOne,
+    find: tx.find,
+  };
+  em.fork = mockFn(() => em);
   const referralsRepo = {
     findById: mockFn(),
     findByPatient: mockFn(() => Promise.resolve([])),
@@ -92,6 +102,30 @@ function build() {
     findById: mockFn(() => Promise.resolve({ profileId: 'hp-2' })),
   };
   const logger = { setContext: mockFn(), info: mockFn() };
+  const targetsRepo = {
+    searchPractitioners: mockFn(() => Promise.resolve([])),
+    searchOrganizations: mockFn(() => Promise.resolve([])),
+  };
+  const offeringsRepo = {
+    findOfferingOf: mockFn(() =>
+      Promise.resolve({ statusConceptId: SCHED.OFFERING_ACTIVE }),
+    ),
+    listOfferings: mockFn(() => Promise.resolve([])),
+    findCatalogItems: mockFn(() => Promise.resolve([])),
+  };
+  const serviceCatalogRepo = {
+    findById: mockFn(() => Promise.resolve(null)),
+    searchPage: mockFn(() => Promise.resolve([])),
+  };
+  const practicesRepo = {
+    findById: mockFn(() => Promise.resolve(null)),
+    findByTenant: mockFn(() => Promise.resolve([])),
+  };
+  const tenantsRepo = {
+    findById: mockFn(() => Promise.resolve(null)),
+    searchPage: mockFn(() => Promise.resolve([])),
+  };
+  const conceptsRepo = { findByIds: mockFn(() => Promise.resolve(new Map())) };
   const raw = new ReferralsService(
     em as any,
     referralsRepo,
@@ -102,6 +136,12 @@ function build() {
     notifier as any,
     practitionersRepo as any,
     logger as any,
+    targetsRepo as any,
+    offeringsRepo as any,
+    serviceCatalogRepo as any,
+    practicesRepo as any,
+    tenantsRepo as any,
+    conceptsRepo as any,
   );
   return {
     service: inTenant(raw),
@@ -113,6 +153,13 @@ function build() {
     encountersRepo,
     notifier,
     practitionersRepo,
+    targetsRepo,
+    offeringsRepo,
+    serviceCatalogRepo,
+    practicesRepo,
+    tenantsRepo,
+    conceptsRepo,
+    em,
   };
 }
 
@@ -127,7 +174,11 @@ describe('ReferralsService', () => {
         statusConceptId: CEXT.REFERRAL_REQUESTED,
         createdAt: new Date(),
       });
-      const res = await d.service.create({ patientProfileId: 'p1' }, actor);
+      // Derivar exige un destino (profesional, organización o servicio).
+      const res = await d.service.create(
+        { patientProfileId: 'p1', targetTenantId: 'ten-dest' },
+        actor,
+      );
       expect(res.statusConceptId).toBe(CEXT.REFERRAL_REQUESTED);
     });
 
@@ -205,7 +256,11 @@ describe('ReferralsService', () => {
         d.referralsRepo.create.mockReturnValue(created);
 
         await d.service.create(
-          { patientProfileId: 'p1', sourceEncounterId: 'e1' } as any,
+          {
+            patientProfileId: 'p1',
+            sourceEncounterId: 'e1',
+            targetTenantId: 'ten-dest',
+          } as any,
           doctor,
         );
 
@@ -278,7 +333,11 @@ describe('ReferralsService', () => {
         });
 
         await d.service.create(
-          { patientProfileId: 'p1', referringProfileId: 'falsificado' } as any,
+          {
+            patientProfileId: 'p1',
+            referringProfileId: 'falsificado',
+            targetTenantId: 'ten-dest',
+          } as any,
           doctor,
         );
 
@@ -297,7 +356,11 @@ describe('ReferralsService', () => {
         });
 
         await d.service.create(
-          { patientProfileId: 'p1', referringProfileId: 'falsificado' } as any,
+          {
+            patientProfileId: 'p1',
+            referringProfileId: 'falsificado',
+            targetTenantId: 'ten-dest',
+          } as any,
           actor,
         );
 
@@ -401,9 +464,16 @@ describe('ReferralsService', () => {
         'pp-own',
         50,
       );
-      // v4266: la respuesta es la proyección pública de cada fila.
-      expect(res).toHaveLength(1);
-      expect(res[0]).toMatchObject({ id: 'r1' });
+      expect(res).toEqual([
+        {
+          id: 'r1',
+          status: 'PENDING',
+          referralType: null,
+          targetServiceCatalogId: null,
+          targetDisplayName: null,
+          targetServiceName: null,
+        },
+      ]);
     });
   });
 
@@ -553,8 +623,16 @@ describe('ReferralsService', () => {
         'p1',
         actor,
       );
-      expect(res).toHaveLength(1);
-      expect(res[0]).toMatchObject({ id: 'r1' });
+      expect(res).toEqual([
+        {
+          id: 'r1',
+          status: 'PENDING',
+          referralType: null,
+          targetServiceCatalogId: null,
+          targetDisplayName: null,
+          targetServiceName: null,
+        },
+      ]);
     });
   });
 
@@ -573,7 +651,7 @@ describe('ReferralsService', () => {
       expect(d.referralsRepo.create).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
-          referralType: 'THERAPY',
+          referralTypeConceptId: CEXT.REFERRAL_TYPE_THERAPY,
           targetExternalName: 'Centro de Fisioterapia San Martín',
           requestedServiceText: 'Fisioterapia de rodilla, 10 sesiones',
           clinicalSummary: 'Gonartrosis grado II, dolor mecánico',
@@ -626,7 +704,10 @@ describe('ReferralsService', () => {
         statusConceptId: CEXT.REFERRAL_REQUESTED,
         createdAt: new Date(),
       });
-      const res = await d.service.create({ patientProfileId: 'p1' }, actor);
+      const res = await d.service.create(
+        { patientProfileId: 'p1', targetTenantId: 'ten-1' },
+        actor,
+      );
       expect(res.status).toBe('PENDING');
     });
 
@@ -907,6 +988,384 @@ describe('ReferralsService', () => {
         422,
         ClinicalExtErrorReason.REFERRAL_ALREADY_CLOSED,
       );
+    });
+  });
+
+  describe('derivación a servicio específico con tipo', () => {
+    const created = {
+      id: 'ref1',
+      patientProfileId: 'p1',
+      statusConceptId: CEXT.REFERRAL_REQUESTED,
+      createdAt: new Date(),
+    };
+    const activeService = {
+      id: 'svc-1',
+      practiceId: 'pr-1',
+      code: 'FISIO',
+      name: 'Fisioterapia',
+      isActive: true,
+      defaultPrice: '150.00',
+      currencyConceptId: 'cur-bob',
+    };
+
+    it('persiste el tipo pedido como concepto y el servicio destino', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(activeService);
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'pr-1',
+        tenantId: 'ten-dest',
+      });
+      d.referralsRepo.create.mockReturnValue(created);
+
+      await d.service.create(
+        {
+          patientProfileId: 'p1',
+          targetProfileId: 'hp-2',
+          targetServiceCatalogId: 'svc-1',
+          referralType: 'TREATMENT',
+        } as any,
+        doctor,
+      );
+
+      const data = d.referralsRepo.create.mock.calls[0][1];
+      expect(data.referralTypeConceptId).toBe(CEXT.REFERRAL_TYPE_TREATMENT);
+      expect(data.targetServiceCatalogId).toBe('svc-1');
+      // Sin targetTenantId, el tenant destino sale del servicio.
+      expect(data.targetTenantId).toBe('ten-dest');
+      expect(d.offeringsRepo.findOfferingOf).toHaveBeenCalledWith(
+        expect.anything(),
+        'hp-2',
+        'svc-1',
+      );
+    });
+
+    it('sin tipo, persiste CONSULTATION', async () => {
+      const d = build();
+      d.referralsRepo.create.mockReturnValue(created);
+      await d.service.create(
+        { patientProfileId: 'p1', targetTenantId: 'ten-dest' } as any,
+        actor,
+      );
+      expect(
+        d.referralsRepo.create.mock.calls[0][1].referralTypeConceptId,
+      ).toBe(CEXT.REFERRAL_TYPE_CONSULTATION);
+    });
+
+    it('sin ningún destino responde 422 y no crea nada', async () => {
+      const d = build();
+      const err = await thrown(
+        d.service.create(
+          { patientProfileId: 'p1', specialtyConceptId: 's1' } as any,
+          doctor,
+        ),
+      );
+      expect(err).toBeInstanceOf(PreconditionFailedException);
+      expect(err.getStatus()).toBe(422);
+      expect(d.referralsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('un servicio de OTRA organización que la destino responde 422', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(activeService);
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'pr-1',
+        tenantId: 'ten-otra',
+      });
+      const err = await thrown(
+        d.service.create(
+          {
+            patientProfileId: 'p1',
+            targetTenantId: 'ten-dest',
+            targetServiceCatalogId: 'svc-1',
+          } as any,
+          doctor,
+        ),
+      );
+      expect(err).toBeInstanceOf(PreconditionFailedException);
+      expect(d.referralsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('un servicio que el profesional destino no ofrece responde 422', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(activeService);
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'pr-1',
+        tenantId: 'ten-dest',
+      });
+      d.offeringsRepo.findOfferingOf.mockResolvedValue(null);
+      const err = await thrown(
+        d.service.create(
+          {
+            patientProfileId: 'p1',
+            targetProfileId: 'hp-2',
+            targetServiceCatalogId: 'svc-1',
+          } as any,
+          doctor,
+        ),
+      );
+      expect(err).toBeInstanceOf(PreconditionFailedException);
+      expect(d.referralsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('una oferta inactiva del profesional también responde 422', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(activeService);
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'pr-1',
+        tenantId: 'ten-dest',
+      });
+      d.offeringsRepo.findOfferingOf.mockResolvedValue({
+        statusConceptId: SCHED.OFFERING_INACTIVE,
+      });
+      await expect(
+        d.service.create(
+          {
+            patientProfileId: 'p1',
+            targetProfileId: 'hp-2',
+            targetServiceCatalogId: 'svc-1',
+          } as any,
+          doctor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('un servicio inexistente responde 404 y uno inactivo 422', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(null);
+      await expect(
+        d.service.create(
+          { patientProfileId: 'p1', targetServiceCatalogId: 'svc-x' } as any,
+          doctor,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+
+      d.serviceCatalogRepo.findById.mockResolvedValue({
+        ...activeService,
+        isActive: false,
+      });
+      await expect(
+        d.service.create(
+          { patientProfileId: 'p1', targetServiceCatalogId: 'svc-1' } as any,
+          doctor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.referralsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('el duplicado con servicio compara encuentro, servicio y tipo', async () => {
+      const d = build();
+      d.encountersRepo.findById.mockResolvedValue({
+        id: 'e1',
+        patientProfileId: 'p1',
+        tenantId: 't-1',
+      });
+      d.serviceCatalogRepo.findById.mockResolvedValue(activeService);
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'pr-1',
+        tenantId: 'ten-dest',
+      });
+      d.referralsRepo.findDuplicate.mockResolvedValue({ id: 'ref0' });
+      const err = await thrown(
+        d.service.create(
+          {
+            patientProfileId: 'p1',
+            sourceEncounterId: 'e1',
+            targetServiceCatalogId: 'svc-1',
+            referralType: 'PROCEDURE',
+          } as any,
+          doctor,
+        ),
+      );
+      expect(err).toBeInstanceOf(ConflictException);
+      expect(d.referralsRepo.findDuplicate).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          sourceEncounterId: 'e1',
+          targetServiceCatalogId: 'svc-1',
+          referralTypeConceptId: CEXT.REFERRAL_TYPE_PROCEDURE,
+          treatNullTypeAsSame: false,
+        }),
+      );
+    });
+
+    describe('searchTargets', () => {
+      it('menos de dos caracteres útiles responde 422 sin consultar', async () => {
+        const d = build();
+        await expect(
+          d.service.searchTargets({ q: ' a ' } as any),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(d.targetsRepo.searchPractitioners).not.toHaveBeenCalled();
+        expect(d.targetsRepo.searchOrganizations).not.toHaveBeenCalled();
+      });
+
+      it('ORGANIZATION busca tenants activos y devuelve la forma del contrato', async () => {
+        const d = build();
+        d.targetsRepo.searchOrganizations.mockResolvedValue([
+          {
+            tenantId: 'ten-1',
+            legalName: 'Clínica Norte S.R.L.',
+            tradeName: 'Clínica Norte',
+          },
+        ]);
+        const res = await d.service.searchTargets({
+          q: 'norte',
+          kind: 'ORGANIZATION',
+        });
+        expect(d.targetsRepo.searchOrganizations).toHaveBeenCalledWith(
+          expect.anything(),
+          'norte',
+          20,
+        );
+        expect(d.targetsRepo.searchPractitioners).not.toHaveBeenCalled();
+        expect(res).toEqual({
+          items: [
+            {
+              kind: 'ORGANIZATION',
+              id: 'ten-1',
+              displayName: 'Clínica Norte',
+              tenantId: 'ten-1',
+              subtitle: 'Clínica Norte S.R.L.',
+            },
+          ],
+        });
+      });
+
+      it('PRACTITIONER devuelve el perfil con su nombre, tenant y subtítulo', async () => {
+        const d = build();
+        d.targetsRepo.searchPractitioners.mockResolvedValue([
+          {
+            profileId: 'hp-2',
+            professionalTitle: 'Cardióloga',
+            tenantId: 'ten-1',
+            practiceName: 'Consultorio Sur',
+          },
+        ]);
+        d.em.find = mockFn((entity: any) =>
+          Promise.resolve(
+            entity.name === 'HealthPractitionerProfiles'
+              ? [{ profileId: 'hp-2' }]
+              : [{ id: 'hp-2', displayName: 'Ana Pérez' }],
+          ),
+        );
+        const res = await d.service.searchTargets({
+          q: 'ana',
+          kind: 'PRACTITIONER',
+        });
+        expect(d.targetsRepo.searchOrganizations).not.toHaveBeenCalled();
+        expect(res.items).toEqual([
+          {
+            kind: 'PRACTITIONER',
+            id: 'hp-2',
+            displayName: 'Ana Pérez',
+            tenantId: 'ten-1',
+            subtitle: 'Cardióloga · Consultorio Sur',
+          },
+        ]);
+      });
+    });
+
+    describe('listTargetServices', () => {
+      it('sin destino responde 422', async () => {
+        const d = build();
+        await expect(d.service.listTargetServices({})).rejects.toBeInstanceOf(
+          PreconditionFailedException,
+        );
+      });
+
+      it('de un profesional: sólo ofertas activas y servicios activos', async () => {
+        const d = build();
+        d.offeringsRepo.listOfferings.mockResolvedValue([
+          { serviceCatalogId: 'svc-1' },
+          { serviceCatalogId: 'svc-2' },
+        ]);
+        d.offeringsRepo.findCatalogItems.mockResolvedValue([
+          activeService,
+          { ...activeService, id: 'svc-2', name: 'Otro', isActive: false },
+        ]);
+        d.practicesRepo.findById.mockResolvedValue({
+          id: 'pr-1',
+          tenantId: 'ten-dest',
+          name: 'Consultorio Sur',
+        });
+        d.conceptsRepo.findByIds.mockResolvedValue(
+          new Map([['cur-bob', { code: 'BOB' }]]),
+        );
+        const res = await d.service.listTargetServices({
+          targetProfileId: 'hp-2',
+        });
+        expect(d.offeringsRepo.listOfferings).toHaveBeenCalledWith(
+          expect.anything(),
+          'hp-2',
+          { statusConceptId: SCHED.OFFERING_ACTIVE },
+        );
+        expect(res).toEqual({
+          items: [
+            {
+              id: 'svc-1',
+              code: 'FISIO',
+              name: 'Fisioterapia',
+              description: null,
+              price: 150,
+              currency: 'BOB',
+              tenantId: 'ten-dest',
+              practiceName: 'Consultorio Sur',
+            },
+          ],
+        });
+      });
+
+      it('de una organización: servicios activos de sus prácticas activas', async () => {
+        const d = build();
+        d.practicesRepo.findByTenant.mockResolvedValue([{ id: 'pr-1' }]);
+        d.serviceCatalogRepo.searchPage.mockResolvedValue([activeService]);
+        d.practicesRepo.findById.mockResolvedValue({
+          id: 'pr-1',
+          tenantId: 'ten-dest',
+          name: 'Clínica Norte',
+        });
+        const res = await d.service.listTargetServices({
+          targetTenantId: 'ten-dest',
+        });
+        expect(d.serviceCatalogRepo.searchPage).toHaveBeenCalledWith(
+          expect.anything(),
+          { practiceId: 'pr-1', isActive: true },
+          200,
+        );
+        expect(res.items.map((item) => item.id)).toEqual(['svc-1']);
+        expect(res.items[0].practiceName).toBe('Clínica Norte');
+        expect(res.items[0].currency).toBeNull();
+      });
+    });
+
+    it('los listados exponen tipo, servicio y nombres legibles', async () => {
+      const d = build();
+      d.referralsRepo.findByPatient.mockResolvedValue([
+        {
+          id: 'r1',
+          targetTenantId: 'ten-dest',
+          targetServiceCatalogId: 'svc-1',
+          referralTypeConceptId: CEXT.REFERRAL_TYPE_TREATMENT,
+        },
+      ]);
+      d.tenantsRepo.findById.mockResolvedValue({
+        id: 'ten-dest',
+        legalName: 'Clínica Norte S.R.L.',
+        tradeName: 'Clínica Norte',
+      });
+      d.offeringsRepo.findCatalogItems.mockResolvedValue([activeService]);
+      const res = await d.service.listByPatient('p1', actor);
+      expect(res).toEqual([
+        {
+          id: 'r1',
+          targetTenantId: 'ten-dest',
+          referralTypeConceptId: CEXT.REFERRAL_TYPE_TREATMENT,
+          status: 'PENDING',
+          referralType: 'TREATMENT',
+          targetServiceCatalogId: 'svc-1',
+          targetDisplayName: 'Clínica Norte',
+          targetServiceName: 'Fisioterapia',
+        },
+      ]);
     });
   });
 });

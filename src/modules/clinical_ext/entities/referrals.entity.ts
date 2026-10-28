@@ -1,6 +1,5 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { randomUUID } from 'node:crypto';
-import type { ReferralType } from '../referral.enums';
 
 /**
  * Mapea la entidad persistente asociada a `referrals`.
@@ -50,6 +49,27 @@ export class Referrals {
   specialtyConceptId?: string;
 
   /**
+   * Tipo de derivación (tratamiento, consulta, estudio, procedimiento,
+   * segunda opinión). Concepto `CEXT.REFERRAL_TYPE_*`.
+   */
+  @Property({
+    fieldName: 'referral_type_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  referralTypeConceptId?: string;
+
+  /**
+   * Servicio puntual del destino al que se deriva.
+   */
+  @Property({
+    fieldName: 'target_service_catalog_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → billing.service_catalog
+  targetServiceCatalogId?: string;
+
+  /**
    * Identificador asociado a service request.
    */
   @Property({ fieldName: 'service_request_id', type: 'uuid', nullable: true }) // FK → clinical.service_requests
@@ -94,16 +114,6 @@ export class Referrals {
     nullable: true,
   })
   respondedAt?: Date;
-
-  /**
-   * Tipo de derivación (v4266): atención, tratamiento, procedimiento, diagnóstico, terapia, internación u otro.
-   */
-  @Property({
-    fieldName: 'referral_type',
-    columnType: 'varchar(24)',
-    nullable: true,
-  })
-  referralType?: ReferralType;
 
   /**
    * Sede u organización médica destino (FK → directory.branches).
