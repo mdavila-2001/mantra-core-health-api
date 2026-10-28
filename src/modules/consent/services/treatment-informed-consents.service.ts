@@ -29,6 +29,7 @@ import {
   ServiceRequests,
 } from '../../clinical/entities';
 import { CarePlans } from '../../chart/entities';
+import { ProcedureCases } from '../../procedures_perioperative/entities';
 import { Referrals } from '../../clinical_ext/entities';
 import { ConsentEvidenceService } from './consent-evidence.service';
 import type {
@@ -46,7 +47,7 @@ import type {
 const DEFAULT_INFORMATION_LANGUAGE = 'es';
 
 /**
- * Entidad que respalda cada `targetType`: todas tienen `patientProfileId`, que
+ * Entidades que respaldan cada `targetType` (se prueban en orden): todas tienen `patientProfileId`, que
  * es lo que permite verificar que el objeto consentido es del mismo paciente.
  */
 /** Lo único que se lee del objeto consentido. */
@@ -59,13 +60,17 @@ interface ConsentTargetRow {
 
 const TARGET_ENTITIES: Record<
   InformedConsentTargetType,
-  EntityName<ConsentTargetRow>
+  readonly EntityName<ConsentTargetRow>[]
 > = {
-  MEDICATION_REQUEST: MedicationRequests,
-  SERVICE_REQUEST: ServiceRequests,
-  REFERRAL: Referrals,
-  PROCEDURE: Procedures,
-  CARE_PLAN: CarePlans,
+  MEDICATION_REQUEST: [MedicationRequests],
+  SERVICE_REQUEST: [ServiceRequests],
+  REFERRAL: [Referrals],
+  // Un procedimiento puede ser el registro clínico (`clinical.procedures`) o
+  // el caso quirúrgico (`procedures_perioperative.procedure_cases`, lo que el
+  // front lista en `/procedure-cases`): la cirugía es el caso clásico de
+  // consentimiento informado.
+  PROCEDURE: [Procedures, ProcedureCases],
+  CARE_PLAN: [CarePlans],
 };
 
 /** Roles que conservan el camino administrativo original de UC-07-08. */
@@ -575,9 +580,11 @@ export class TreatmentInformedConsentsService {
     targetId: string,
     patientProfileId: string,
   ): Promise<ConsentTargetRow> {
-    const target = await em.findOne(TARGET_ENTITIES[targetType], {
-      id: targetId,
-    });
+    let target: ConsentTargetRow | null = null;
+    for (const entity of TARGET_ENTITIES[targetType]) {
+      target = await em.findOne(entity, { id: targetId });
+      if (target) break;
+    }
     if (!target) {
       throw new ResourceNotFoundException(
         'El objeto consentido no existe',

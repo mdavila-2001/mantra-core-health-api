@@ -1,4 +1,4 @@
-$ eslint "src/modules/consent/**/*.ts" "src/modules/clinical_ext/**/*.ts" test/smoke/modules/clinical_ext.smoke.ts (tras la corrección)
+$ eslint "src/modules/consent/**/*.ts" "src/modules/clinical_ext/**/*.ts" (tras PROCEDURE → caso quirúrgico)
 EXIT 0
 
 $ yarn lint (repo completo): proceso matado por memoria (exit 129/137), sin salida de reglas

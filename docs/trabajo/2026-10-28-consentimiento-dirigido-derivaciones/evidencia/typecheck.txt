@@ -1,2 +1,2 @@
-$ yarn typecheck (tras la corrección de seguridad)
+$ yarn typecheck (tras PROCEDURE → caso quirúrgico)
 EXIT 0

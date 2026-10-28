@@ -1,2 +1,2 @@
-$ yarn build (tras la corrección de seguridad)
+$ yarn build (tras PROCEDURE → caso quirúrgico)
 EXIT 0
