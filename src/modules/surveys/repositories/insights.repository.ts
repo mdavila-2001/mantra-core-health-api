@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { SURVEYS } from '../surveys.concepts';
+import { MAX_COMMENTS } from '../insights.constants';
 
 /** Tramo de fecha en el que se agrupan los cuestionarios emitidos. */
 export type InsightsBucketUnit = 'day' | 'week' | 'month';
@@ -77,9 +78,6 @@ export interface InsightsCommentRow {
   day: string;
 }
 
-/** Tope de comentarios que se devuelven. */
-export const INSIGHTS_COMMENTS_LIMIT = 100;
-
 /** Tipos de recurso de agenda que representan a un profesional. */
 const PRACTITIONER_RESOURCE_TYPES = [
   'practitioner_profiles',
@@ -122,30 +120,6 @@ interface ScopeSql {
  */
 @Injectable()
 export class InsightsRepository {
-  /**
-   * Primera emisión dentro del alcance, para elegir la granularidad cuando el
-   * periodo no trae `from`.
-   *
-   * @param em - Contexto de persistencia.
-   * @param scope - Alcance del resumen.
-   * @returns El instante de la primera emisión, o `null` si no hay ninguna.
-   */
-  async findEarliestIssuedAt(
-    em: EntityManager,
-    scope: InsightsScope,
-  ): Promise<Date | null> {
-    const scoped = this.buildScope(scope, 'day');
-    const rows = await em
-      .getConnection()
-      .execute<{ first: Date | string | null }[]>(
-        `${scoped.sql} SELECT min(issued_at) AS "first" FROM scope`,
-        scoped.params,
-        'all',
-      );
-    const first = rows[0]?.first;
-    return first ? new Date(first) : null;
-  }
-
   /**
    * Emitidos y respondidos por tramo.
    *
@@ -275,12 +249,16 @@ export class InsightsRepository {
   }
 
   /**
-   * Los comentarios abiertos más recientes: texto y día, sin hora ni vínculo
+   * Una muestra de los comentarios abiertos: texto y día, sin hora ni vínculo
    * con la respuesta, el paciente o la atención.
+   *
+   * El orden es por un hash estable del id de la respuesta, **no cronológico**:
+   * una lista ordenada por fecha de envío permitiría correlacionar un comentario
+   * con la cita de una fecha conocida.
    *
    * @param em - Contexto de persistencia.
    * @param scope - Alcance del resumen.
-   * @returns Hasta {@link INSIGHTS_COMMENTS_LIMIT} comentarios, recientes primero.
+   * @returns Hasta {@link MAX_COMMENTS} comentarios, en orden de hash.
    */
   async listRecentComments(
     em: EntityManager,
@@ -302,9 +280,9 @@ export class InsightsRepository {
         WHERE q.answer_type_concept_id = ?
           AND a.value_text IS NOT NULL
           AND btrim(a.value_text) <> ''
-        ORDER BY r.submitted_at DESC
+        ORDER BY md5(a.id::text)
         LIMIT ?`,
-      [...scoped.params, SURVEYS.ANSWER_TYPE_TEXT, INSIGHTS_COMMENTS_LIMIT],
+      [...scoped.params, SURVEYS.ANSWER_TYPE_TEXT, MAX_COMMENTS],
       'all',
     );
   }

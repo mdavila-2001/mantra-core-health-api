@@ -1,11 +1,11 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import {
-  PreconditionFailedException,
-  requireTenantId,
-  type AuthenticatedUser,
-} from '../../../common';
+import { requireTenantId, type AuthenticatedUser } from '../../../common';
 import {
   InsightsRepository,
   type InsightsBucketUnit,
@@ -35,6 +35,13 @@ import {
   type SurveyDimension,
 } from '../survey-dimensions';
 
+import {
+  DATE_ONLY_PATTERN,
+  DEFAULT_RANGE_DAYS,
+  MAX_RANGE_DAYS,
+  MIN_COHORT,
+} from '../insights.constants';
+
 /** Milisegundos de un día. */
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
@@ -43,9 +50,6 @@ const DAILY_TREND_MAX_DAYS = 35;
 
 /** Hasta esta amplitud (días) la tendencia va por semana; más allá, por mes. */
 const WEEKLY_TREND_MAX_DAYS = 140;
-
-/** Una fecha sola, sin hora. */
-const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
 
 /** Una pregunta de una versión concreta, ya clasificada. */
 interface QuestionMeta {
@@ -155,29 +159,49 @@ export class SurveysInsightsService {
     };
     const em = this.em.fork();
 
-    const earliest = scope.from
-      ? scope.from
-      : await this.repo.findEarliestIssuedAt(em, scope);
-    if (!earliest) return this.emptyInsights();
-
-    const spanDays = Math.max(
-      0,
-      ((scope.toExclusive ?? new Date()).getTime() - earliest.getTime()) /
-        MS_PER_DAY,
-    );
+    const spanDays =
+      (scope.toExclusive!.getTime() - scope.from!.getTime()) / MS_PER_DAY;
     const granularity = this.granularityFor(spanDays);
     const unit = GRANULARITY_UNIT[granularity];
 
-    const [invitationRows, questionRows, valueRows, commentRows] =
-      await Promise.all([
-        this.repo.countInvitationsByBucket(em, scope, unit),
-        this.repo.countAnswersByQuestion(em, scope, unit),
-        this.repo.countAnswerValues(em, scope, unit),
-        this.repo.listRecentComments(em, scope),
-      ]);
-
+    const invitationRows = await this.repo.countInvitationsByBucket(
+      em,
+      scope,
+      unit,
+    );
     const issued = invitationRows.reduce((sum, row) => sum + row.issued, 0);
     const answered = invitationRows.reduce((sum, row) => sum + row.answered, 0);
+    const totals = {
+      issued,
+      answered,
+      responseRate: issued > 0 ? round(answered / issued, 4) : null,
+    };
+
+    // Cohorte mínima: con menos respondidas que MIN_COHORT cualquier promedio,
+    // distribución, alerta o comentario es de una o pocas personas, y filtrando
+    // por un día o un servicio poco usado se podría aislar a una. Sólo se
+    // devuelven los totales y no se consultan las respuestas.
+    if (answered < MIN_COHORT) {
+      this.logger.info(
+        {
+          operation: 'surveys.insights.read',
+          issued,
+          answered,
+          suppressed: true,
+        },
+        'Survey insights suppressed: cohort below minimum',
+      );
+      return {
+        totals,
+        privacy: { minCohort: MIN_COHORT, suppressed: true },
+      };
+    }
+
+    const [questionRows, valueRows, commentRows] = await Promise.all([
+      this.repo.countAnswersByQuestion(em, scope, unit),
+      this.repo.countAnswerValues(em, scope, unit),
+      this.repo.listRecentComments(em, scope),
+    ]);
 
     const groups = this.groupQuestions(questionRows);
     const valuesByQuestion = new Map<string, InsightsValueRow[]>();
@@ -206,17 +230,15 @@ export class SurveysInsightsService {
         operation: 'surveys.insights.read',
         issued,
         answered,
+        suppressed: false,
         questions: byQuestion.length,
       },
       'Survey insights computed',
     );
 
     return {
-      totals: {
-        issued,
-        answered,
-        responseRate: issued > 0 ? round(answered / issued, 4) : null,
-      },
+      totals,
+      privacy: { minCohort: MIN_COHORT, suppressed: false },
       nps: this.toNps(nps),
       byQuestion,
       trend: this.buildTrend(invitationRows, groups, valuesByQuestion),
@@ -229,36 +251,56 @@ export class SurveysInsightsService {
     };
   }
 
-  /** Periodo pedido → cotas del alcance (`toExclusive` es el primer instante fuera). */
+  /**
+   * Periodo pedido → cotas del alcance. Siempre devuelve ambas: `from` es el
+   * primer instante incluido y `toExclusive` el primero que ya no.
+   *
+   * Sólo fechas de día: una hora permitiría acotar el periodo a minutos y
+   * aislar una respuesta. Sin `to` vale hoy (UTC); sin `from`, 365 días antes
+   * de `to`.
+   */
   private resolvePeriod(
     query: InsightsQueryDto,
-  ): Pick<InsightsScope, 'from' | 'toExclusive'> {
-    const from = query.from ? new Date(query.from) : undefined;
-    let toExclusive: Date | undefined;
-    if (query.to) {
-      const to = new Date(query.to);
-      // Una fecha sola incluye todo ese día; una fecha con hora, hasta ese
-      // instante inclusive.
-      toExclusive = new Date(
-        to.getTime() + (DATE_ONLY.test(query.to) ? MS_PER_DAY : 1),
+  ): Required<Pick<InsightsScope, 'from' | 'toExclusive'>> {
+    const parse = (field: 'from' | 'to', value: string): Date => {
+      const date = new Date(`${value}T00:00:00.000Z`);
+      if (
+        !DATE_ONLY_PATTERN.test(value) ||
+        Number.isNaN(date.getTime()) ||
+        date.toISOString().slice(0, 10) !== value
+      ) {
+        throw new BadRequestException(
+          `${field} debe ser una fecha de día válida (YYYY-MM-DD), sin hora`,
+        );
+      }
+      return date;
+    };
+
+    const today = new Date();
+    const toDay = query.to
+      ? parse('to', query.to)
+      : new Date(
+          Date.UTC(
+            today.getUTCFullYear(),
+            today.getUTCMonth(),
+            today.getUTCDate(),
+          ),
+        );
+    const from = query.from
+      ? parse('from', query.from)
+      : new Date(toDay.getTime() - DEFAULT_RANGE_DAYS * MS_PER_DAY);
+    if (from > toDay) {
+      throw new BadRequestException(
+        'El inicio del periodo debe ser igual o anterior a su fin',
       );
     }
+    const toExclusive = new Date(toDay.getTime() + MS_PER_DAY);
     if (
-      (from && Number.isNaN(from.getTime())) ||
-      (toExclusive && Number.isNaN(toExclusive.getTime()))
+      (toExclusive.getTime() - from.getTime()) / MS_PER_DAY >
+      MAX_RANGE_DAYS
     ) {
-      throw new PreconditionFailedException(
-        'El periodo indicado no es válido',
-        {
-          from: query.from,
-          to: query.to,
-        },
-      );
-    }
-    if (from && toExclusive && from >= toExclusive) {
-      throw new PreconditionFailedException(
-        'El inicio del periodo debe ser anterior a su fin',
-        { from: query.from, to: query.to },
+      throw new BadRequestException(
+        `El periodo no puede superar ${MAX_RANGE_DAYS} días`,
       );
     }
     return { from, toExclusive };
@@ -269,19 +311,6 @@ export class SurveysInsightsService {
     if (spanDays <= DAILY_TREND_MAX_DAYS) return 'DAY';
     if (spanDays <= WEEKLY_TREND_MAX_DAYS) return 'WEEK';
     return 'MONTH';
-  }
-
-  /** Resumen de un periodo sin emisiones. */
-  private emptyInsights(): SurveyInsightsDto {
-    return {
-      totals: { issued: 0, answered: 0, responseRate: null },
-      nps: this.toNps({ promoters: 0, passives: 0, detractors: 0 }),
-      byQuestion: [],
-      trend: [],
-      trendGranularity: 'DAY',
-      safetyAlerts: { n: 0 },
-      comments: [],
-    };
   }
 
   /** Clasifica las filas de pregunta y las agrupa. */
@@ -425,12 +454,33 @@ export class SurveysInsightsService {
       ];
     }
 
+    // Una pregunta con menos de MIN_COHORT respuestas (típico de las opcionales
+    // del servicio) no se desglosa: su «promedio» o su «opción elegida» sería
+    // de una o dos personas. Se conserva `n` para que se vea por qué.
+    if (rep.answerType !== 'TEXT' && n < MIN_COHORT) {
+      dto.suppressed = true;
+      dto.distribution = [];
+      delete dto.average;
+      delete dto.optionCounts;
+      safetyAlerts = 0;
+    }
+
     return { dto, nps, safetyAlerts };
   }
 
   /** Cuenta de NPS → DTO con el valor en puntos. */
   private toNps(counts: NpsCounts): InsightsNpsDto {
     const n = counts.promoters + counts.passives + counts.detractors;
+    if (n > 0 && n < MIN_COHORT) {
+      return {
+        value: null,
+        promoters: 0,
+        passives: 0,
+        detractors: 0,
+        n,
+        suppressed: true,
+      };
+    }
     return {
       value:
         n > 0
@@ -444,8 +494,13 @@ export class SurveysInsightsService {
   }
 
   /**
-   * Tendencia: un punto por tramo con emisiones, con cuántos se respondieron y
-   * el promedio de satisfacción de lo respondido en ese tramo.
+   * Tendencia: cuántos cuestionarios se respondieron por tramo de emisión y el
+   * promedio de satisfacción de lo respondido.
+   *
+   * Un tramo con menos de MIN_COHORT respondidos se funde con el siguiente
+   * (y el último remanente, con el anterior): ningún punto muestra una respuesta
+   * suelta. El promedio de un punto sólo sale si lo sostienen al menos
+   * MIN_COHORT respuestas a la pregunta de satisfacción.
    */
   private buildTrend(
     invitationRows: Array<{
@@ -491,13 +546,50 @@ export class SurveysInsightsService {
       }
     }
 
-    return invitationRows.map((row) => {
+    interface Merged {
+      period: string;
+      answered: number;
+      total: number;
+      count: number;
+    }
+    const absorb = (into: Merged, row: Merged): void => {
+      into.answered += row.answered;
+      into.total += row.total;
+      into.count += row.count;
+    };
+    const merged: Merged[] = [];
+    let carry: Merged | null = null;
+    for (const row of invitationRows) {
       const acc = sums.get(row.bucket);
-      const point: InsightsTrendPointDto = {
+      const next: Merged = {
         period: row.bucket,
         answered: row.answered,
+        total: acc?.total ?? 0,
+        count: acc?.count ?? 0,
       };
-      if (acc && acc.count > 0) point.average = round(acc.total / acc.count, 2);
+      if (carry) {
+        absorb(carry, next);
+      } else {
+        carry = next;
+      }
+      if (carry.answered >= MIN_COHORT) {
+        merged.push(carry);
+        carry = null;
+      }
+    }
+    if (carry) {
+      const last = merged.at(-1);
+      if (last) absorb(last, carry);
+    }
+
+    return merged.map((row) => {
+      const point: InsightsTrendPointDto = {
+        period: row.period,
+        answered: row.answered,
+      };
+      if (row.count >= MIN_COHORT) {
+        point.average = round(row.total / row.count, 2);
+      }
       return point;
     });
   }
