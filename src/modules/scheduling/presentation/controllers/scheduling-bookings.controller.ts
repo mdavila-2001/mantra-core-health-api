@@ -356,6 +356,9 @@ export class SchedulingBookingsController {
   @Get(':id/payment-receipts/:receiptId/content')
   @Roles('PATIENT', 'PRACTITIONER', 'SCHEDULING_ADMIN', 'SCHEDULING_AGENT')
   @Header('Cache-Control', 'private, no-store')
+  // Un comprobante se mira, no se ejecuta: aunque el archivo trajera algo
+  // activo, el navegador lo abre sin scripts ni recursos.
+  @Header('Content-Security-Policy', "sandbox; default-src 'none'")
   @ApiOperation({
     summary: 'Descargar el archivo de un comprobante de pago',
     description: 'Mismos permisos que la lista de comprobantes.',

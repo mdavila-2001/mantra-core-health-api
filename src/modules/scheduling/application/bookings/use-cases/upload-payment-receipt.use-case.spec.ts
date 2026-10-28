@@ -57,6 +57,23 @@ describe('UploadPaymentReceiptUseCase · el paciente sube su comprobante', () =>
     expect(d.tx.persist).not.toHaveBeenCalled();
   });
 
+  it('un médico que además tiene el rol PATIENT no sube a la cita de otro paciente', async () => {
+    // Para quien no tiene forma de paciente, `BookingAccess` no le pregunta a
+    // la representación. Acá sí se pregunta siempre: si no, este actor
+    // subiría comprobantes a cualquier cita.
+    const d = buildReceipts();
+    const dual = {
+      ...practitioner,
+      roles: ['PATIENT', 'PRACTITIONER'],
+    };
+
+    await expect(
+      d.upload.execute(BOOKING, { fileId: FILE }, dual),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    expect(d.representation.representsPatient).toHaveBeenCalled();
+    expect(d.tx.persist).not.toHaveBeenCalled();
+  });
+
   it('una cita que no existe responde 404', async () => {
     const d = buildReceipts();
     d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(null);

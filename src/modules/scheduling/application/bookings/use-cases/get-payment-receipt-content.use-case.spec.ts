@@ -1,4 +1,7 @@
-import { ResourceNotFoundException } from '../../../../../common';
+import {
+  PreconditionFailedException,
+  ResourceNotFoundException,
+} from '../../../../../common';
 import { SchedulingBookingsController } from '../../../presentation/controllers/scheduling-bookings.controller';
 import {
   BOOKING,
@@ -57,6 +60,18 @@ describe('GetPaymentReceiptContentUseCase · el archivo de un comprobante', () =
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
   });
 
+  it('si la versión vigente dejó de ser de un tipo admitido, responde 422', async () => {
+    const d = buildReceipts();
+    d.files.download.mockResolvedValue({
+      buffer: Buffer.from('<script>'),
+      mimeType: 'text/html',
+    });
+
+    await expect(
+      d.content.execute(BOOKING, RECEIPT, practitioner),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+
   it('la respuesta HTTP lleva Cache-Control: private, no-store', () => {
     // El encabezado lo declara la ruta con `@Header`: se lee de los metadatos
     // del controlador, que es lo que Nest aplica al responder.
@@ -68,6 +83,10 @@ describe('GetPaymentReceiptContentUseCase · el archivo de un comprobante', () =
     expect(headers).toEqual(
       expect.arrayContaining([
         { name: 'Cache-Control', value: 'private, no-store' },
+        {
+          name: 'Content-Security-Policy',
+          value: "sandbox; default-src 'none'",
+        },
       ]),
     );
   });

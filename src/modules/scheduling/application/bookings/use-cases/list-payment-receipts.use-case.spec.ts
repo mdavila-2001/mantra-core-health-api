@@ -19,7 +19,7 @@ describe('ListPaymentReceiptsUseCase · quién ve los comprobantes de una cita',
     const res = await d.list.execute(BOOKING, patient);
 
     expect(res.map((r) => r.id)).toEqual([RECEIPT]);
-    expect(d.representation.assertMayActForPatient).toHaveBeenCalled();
+    expect(d.representation.representsPatient).toHaveBeenCalled();
   });
 
   it('un paciente con una cita ajena recibe 404', async () => {
@@ -38,7 +38,7 @@ describe('ListPaymentReceiptsUseCase · quién ve los comprobantes de una cita',
     const res = await d.list.execute(BOOKING, practitioner);
 
     expect(res).toHaveLength(1);
-    expect(d.representation.assertMayActForPatient).not.toHaveBeenCalled();
+    expect(d.catalogRepo.findResourceById).toHaveBeenCalled();
   });
 
   it('otro médico recibe 404, no 403', async () => {

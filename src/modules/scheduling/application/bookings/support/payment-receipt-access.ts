@@ -14,13 +14,16 @@ import {
   type PaymentReceiptFileInfo,
   type PaymentReceiptFilesPort,
 } from '../../ports/payment-receipt-files.port';
+import {
+  PATIENT_REPRESENTATION_PORT,
+  type PatientRepresentationPort,
+} from '../../ports/patient-representation.port';
 import { PAYMENT_RECEIPT_CONCEPT_STATUS } from '../../../domain/booking/payment-receipt';
 import { PaymentReceiptDto } from '../../../presentation/dto';
 import {
   SchedulingBookingsRepository,
   SchedulingPaymentReceiptsRepository,
 } from '../../../infrastructure/repositories';
-import { isPatientActor } from '../../../domain/booking/agenda-actors';
 
 /**
  * Quién llega a los comprobantes de una cita, y cómo se leen.
@@ -29,8 +32,16 @@ import { isPatientActor } from '../../../domain/booking/agenda-actors';
  *
  * Una cita ajena responde **404**, igual que una que no existe: decirle a
  * quien no tiene que verla «existe, pero no es tuya» ya es contarle algo. Las
- * comprobaciones de fondo son las de siempre —{@link BookingAccess}—, y acá
- * solo se traduce su `403`.
+ * comprobaciones de fondo son las de siempre —la representación del paciente y
+ * {@link BookingAccess}—, y acá solo se traduce su `403`.
+ *
+ * ## Por qué el lado del paciente pregunta siempre
+ *
+ * `BookingAccess.assertMayActForPatient` deja pasar sin preguntar a quien no
+ * tiene forma de paciente —un médico, el mostrador—, porque para ellos la
+ * regla es otra. Acá eso abriría un hueco: un médico que además tiene el rol
+ * `PATIENT` subiría comprobantes a citas ajenas. Por eso el lado del paciente
+ * le pregunta **siempre** a la representación, sea quien sea el actor.
  */
 @Injectable()
 export class PaymentReceiptAccess {
@@ -38,6 +49,8 @@ export class PaymentReceiptAccess {
     private readonly bookingsRepo: SchedulingBookingsRepository,
     private readonly receiptsRepo: SchedulingPaymentReceiptsRepository,
     private readonly access: BookingAccess,
+    @Inject(PATIENT_REPRESENTATION_PORT)
+    private readonly representation: PatientRepresentationPort,
     @Inject(PAYMENT_RECEIPT_FILES_PORT)
     private readonly files: PaymentReceiptFilesPort,
   ) {}
@@ -57,9 +70,15 @@ export class PaymentReceiptAccess {
       bookingId,
     );
     if (!booking) throw notFound(bookingId);
-    await this.hideForbidden(bookingId, () =>
-      this.access.assertMayActForPatient(booking.patientProfileId, actor, tx),
-    );
+    if (
+      !(await this.representation.representsPatient(
+        booking.patientProfileId,
+        actor,
+        tx,
+      ))
+    ) {
+      throw notFound(bookingId);
+    }
     return booking;
   }
 
@@ -79,17 +98,35 @@ export class PaymentReceiptAccess {
   }
 
   /**
-   * La cita para leer sus comprobantes: el paciente por su lado, el prestador
-   * por el suyo.
+   * La cita para leer sus comprobantes: el paciente que la tiene (o quien lo
+   * representa) o el prestador de esa agenda.
+   *
+   * Se pregunta primero por el paciente y, si no lo es, por la agenda: así una
+   * cuenta con los dos roles ve las citas que le tocan por cualquiera de los
+   * dos lados, y ninguna más.
+   *
+   * @throws ResourceNotFoundException si no existe o no le toca por ningún lado.
    */
-  loadForReading(
+  async loadForReading(
     em: EntityManager,
     bookingId: string,
     actor: AuthenticatedUser,
   ): Promise<AppointmentBookings> {
-    return isPatientActor(actor)
-      ? this.loadForPatient(em, bookingId, actor)
-      : this.loadForReviewer(em, bookingId, actor);
+    const booking = await this.bookingsRepo.findBookingByIdForUpdate(
+      em,
+      bookingId,
+    );
+    if (!booking) throw notFound(bookingId);
+    if (
+      await this.representation.representsPatient(
+        booking.patientProfileId,
+        actor,
+        em,
+      )
+    ) {
+      return booking;
+    }
+    return this.loadForReviewer(em, bookingId, actor);
   }
 
   /**

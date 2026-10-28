@@ -1,5 +1,4 @@
 import { jest } from '@jest/globals';
-import { ForbiddenException } from '@nestjs/common';
 import { CONCEPTS } from '../../../../common';
 import { SCHED } from '../../domain/scheduling.concepts';
 import { BookingAccess } from './support/booking-access';
@@ -127,9 +126,11 @@ export function buildReceipts() {
       ]),
     ),
   };
-  // Por omisión el paciente es el titular: la representación no objeta.
+  // Por omisión el paciente es el titular y nadie más lo representa.
   const representation = {
-    assertMayActForPatient: mockFn().mockResolvedValue(undefined),
+    representsPatient: mockFn(async (_profile: string, who: any) =>
+      Promise.resolve(who.id === patient.id),
+    ),
   };
   const files = {
     assertAttachable: mockFn().mockResolvedValue({
@@ -176,6 +177,7 @@ export function buildReceipts() {
     bookingsRepo as any,
     receiptsRepo as any,
     access,
+    representation as any,
     files as any,
   );
   const notifier = new BookingChangeNotifier(
@@ -234,8 +236,6 @@ export function buildReceipts() {
 }
 
 /** La representación del paciente que niega: la cita no es suya. */
-export function notTheirs(representation: { assertMayActForPatient: any }) {
-  representation.assertMayActForPatient.mockRejectedValue(
-    new ForbiddenException('No puede actuar por ese paciente'),
-  );
+export function notTheirs(representation: { representsPatient: any }) {
+  representation.representsPatient.mockResolvedValue(false);
 }

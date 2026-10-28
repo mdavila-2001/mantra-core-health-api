@@ -1,4 +1,7 @@
-import type { AuthenticatedUser } from '../../../../../common';
+import {
+  PreconditionFailedException,
+  type AuthenticatedUser,
+} from '../../../../../common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Inject, Injectable } from '@nestjs/common';
 import {
@@ -6,6 +9,7 @@ import {
   type PaymentReceiptFileContent,
   type PaymentReceiptFilesPort,
 } from '../../ports/payment-receipt-files.port';
+import { PAYMENT_RECEIPT_MIME_TYPES } from '../../../domain/booking/payment-receipt';
 import { PaymentReceiptAccess } from '../support/payment-receipt-access';
 
 /** Los bytes de un comprobante, para quien puede ver la cita. */
@@ -40,6 +44,15 @@ export class GetPaymentReceiptContentUseCase {
       );
       return receipt.fileId;
     });
-    return this.files.download(fileId);
+    const content = await this.files.download(fileId);
+    // El tipo se revisó al subirlo, pero lo que se sirve es la versión vigente
+    // de hoy: se vuelve a exigir antes de mandarle bytes a un navegador.
+    if (!PAYMENT_RECEIPT_MIME_TYPES.includes(content.mimeType)) {
+      throw new PreconditionFailedException(
+        'El archivo del comprobante ya no es de un formato que se pueda mostrar',
+        { bookingId, receiptId },
+      );
+    }
+    return content;
   }
 }
