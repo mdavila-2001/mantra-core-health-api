@@ -17,15 +17,21 @@ import { InsuranceCarriers, PractitionerInsurerRequests } from '../../entities';
  */
 @Injectable()
 export class PractitionerInsurerRequestsRepository {
-  /** La solicitud del par médico–aseguradora, si existe (hay una sola). */
-  findPair(
+  /**
+   * La solicitud viva (en `liveStatusConceptIds`) del par médico–aseguradora.
+   * Hay a lo sumo una: lo garantiza `uq_practitioner_insurer_requests_live_pair`.
+   * Las rechazadas o retiradas del mismo par son historia y no cuentan.
+   */
+  findLivePair(
     em: EntityManager,
     practitionerProfileId: string,
     insuranceCarrierId: string,
+    liveStatusConceptIds: readonly string[],
   ): Promise<PractitionerInsurerRequests | null> {
     return em.findOne(PractitionerInsurerRequests, {
       practitionerProfileId,
       insuranceCarrierId,
+      statusConceptId: { $in: [...liveStatusConceptIds] },
     });
   }
 

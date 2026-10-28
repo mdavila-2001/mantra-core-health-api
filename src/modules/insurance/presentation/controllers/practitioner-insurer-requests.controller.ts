@@ -73,7 +73,7 @@ export class PractitionerInsurerRequestsController {
   @ApiOperation({
     summary: 'Pedir trabajar con aseguradoras',
     description:
-      'Cada una queda PENDING hasta que la aseguradora la apruebe o la rechace. Lo ya pendiente o aprobado no se duplica; lo rechazado o retirado se reabre.',
+      'Cada una queda PENDING hasta que la aseguradora la apruebe o la rechace. Lo ya pendiente o aprobado no se duplica; tras un rechazo o un retiro se crea otra solicitud y la anterior queda en la historia.',
   })
   @ApiOkResponse({ type: PractitionerInsurerRequestPageDto })
   @ApiConflictResponse({
