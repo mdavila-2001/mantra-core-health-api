@@ -1,0 +1,18 @@
+== verbatim: filas de la base contra el archivo fuente
+usda-fdc-nutrient | 1008 | Energy
+ciqual-food | 1000 | Pastis (anise-flavoured spirit)
+cnf-food | 5 | Chinese dish, chow mein, chicken
+usda-fdc-foundation | 321358 | Hummus, commercial
+foodon | FOODON_00001057 | plant fruit food product
+usda-fdc-branded | 1105904 | WESSON Vegetable Oil 1 GAL
+usda-fdc-branded | 776874 | 776874
+-- fuente: food.csv Foundation
+"321358","foundation_food","Hummus, commercial","16","2019-04-01"
+"1105904","branded_food","WESSON Vegetable Oil 1 GAL","","2020-11-13","United States","","[{""min_value"":null,""uom"":n
+"776874","branded_food","","","2020-02-27","United States","","[{""min_value"":null,""uom"":null,""microbe_method"":null
+ <alim_code> 1000 </alim_code>
+ <alim_nom_fr> Pastis </alim_nom_fr>
+ <alim_nom_eng> Pastis (anise-flavoured spirit) </alim_nom_eng>
+ <alim_nom_sci missing=" " />
+{"table": "food.csv + branded_food.csv", "license": "CC0-1.0", "artifact": "fdc-branded", "sourceUrl": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_branded_food_csv_2026-04-30.zip", "retrievedAt": "2026-10-28T01:54:13.142Z", "sourceSha256": "26050a5d03197469813754743a21ee0fad4ccf22b6aac2a995846a987719fc49", "sourceVersion": "2026-04-30"}
+{"gtin_upc": "00027000612323", "brand_owner": "Richardson Oilseed Products (US) Limited", "data_source": "GDSN", "fdc_data_type": "branded_food", "modified_date": "2020-10-02", "available_date": "2020-11-13", "market_country": "United States", "publication_date": "2020-11-13"}

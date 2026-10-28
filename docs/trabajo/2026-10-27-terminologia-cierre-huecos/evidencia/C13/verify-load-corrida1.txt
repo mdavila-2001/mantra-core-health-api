@@ -1,0 +1,79 @@
+== conteos por fuente y code system ==
+       fuente       |         code_system          |       version       | conceptos 
+--------------------+------------------------------+---------------------+-----------
+ NUTRITION_CDNO     | cdno                         | 2026-06-10          |      1163
+ NUTRITION_CIQUAL   | ciqual-constituent           | 2025-11-03          |        74
+ NUTRITION_CIQUAL   | ciqual-food                  | 2025-11-03          |      3484
+ NUTRITION_CIQUAL   | ciqual-food-group            | 2025-11-03          |       161
+ NUTRITION_CIQUAL   | ciqual-source                | 2025-11-03          |      1977
+ NUTRITION_CNF      | cnf-food                     | 2026                |      5993
+ NUTRITION_CNF      | cnf-food-group               | 2026                |        23
+ NUTRITION_CNF      | cnf-food-source              | 2026                |        16
+ NUTRITION_CNF      | cnf-measure                  | 2026                |      1494
+ NUTRITION_CNF      | cnf-measure-type             | 2026                |         3
+ NUTRITION_CNF      | cnf-nutrient                 | 2026                |       173
+ NUTRITION_CNF      | cnf-nutrient-source          | 2026                |        21
+ NUTRITION_FOBI     | fobi                         | master@04f97ef9b556 |       626
+ NUTRITION_FOODON   | foodon                       | 2026-09-20          |     29255
+ NUTRITION_ONS      | ons                          | 2026-02-06          |       336
+ NUTRITION_USDA_FDC | usda-fdc-attribute-type      | 2026-04-30          |         5
+ NUTRITION_USDA_FDC | usda-fdc-branded             | 2026-04-30          |   1999950
+ NUTRITION_USDA_FDC | usda-fdc-branded-category    | 2026-04-30          |       448
+ NUTRITION_USDA_FDC | usda-fdc-fndds-derivation    | 2024-10-31          |        49
+ NUTRITION_USDA_FDC | usda-fdc-food-category       | 2026-04-30          |        28
+ NUTRITION_USDA_FDC | usda-fdc-foundation          | 2026-04-30          |       469
+ NUTRITION_USDA_FDC | usda-fdc-measure-unit        | 2026-04-30          |       123
+ NUTRITION_USDA_FDC | usda-fdc-nutrient            | 2026-04-30          |       477
+ NUTRITION_USDA_FDC | usda-fdc-nutrient-derivation | 2018-04             |        64
+ NUTRITION_USDA_FDC | usda-fdc-nutrient-source     | 2018-04             |        10
+ NUTRITION_USDA_FDC | usda-fdc-sr-legacy           | 2018-04             |      7793
+ NUTRITION_USDA_FDC | usda-fdc-survey              | 2024-10-31          |      5432
+ NUTRITION_USDA_FDC | usda-fdc-wweia-category      | 2024-10-31          |       172
+
+== totales de esta carga ==
+ conceptos | designaciones | propiedades | relaciones 
+-----------+---------------+-------------+------------
+   2059819 |       2079692 |     6351105 |    2048265
+
+== PROBLEMAS (cada fila debe ser 0) ==
+                     control                     | n 
+-------------------------------------------------+---
+ conceptos sin versión (huérfanos)               | 0
+ duplicados (versión, código)                    | 0
+ display nulo o vacío                            | 0
+ code nulo o vacío                               | 0
+ state_concept_id nulo                           | 0
+ sin propiedad nutrition_provenance              | 0
+ sin propiedad source_license                    | 0
+ sin designación                                 | 0
+ procedencia sin sha256 de 64 hex                | 0
+ procedencia sin licencia                        | 0
+ designaciones sin concepto                      | 0
+ propiedades sin concepto                        | 0
+ propiedades con value_json nulo                 | 0
+ relaciones con extremo ausente                  | 0
+ auto-relaciones                                 | 0
+ code systems NUTRITION sin versión por defecto  | 0
+ code systems con más de una versión por defecto | 0
+ lotes de importación huérfanos                  | 0
+
+== relaciones is-a por code system de origen ==
+    internal_code    | relaciones 
+---------------------+------------
+ cdno                |       1183
+ ciqual-food         |       3483
+ ciqual-food-group   |        150
+ cnf-food            |       5993
+ fobi                |        597
+ foodon              |      33616
+ ons                 |        229
+ usda-fdc-branded    |    1989320
+ usda-fdc-foundation |        469
+ usda-fdc-sr-legacy  |       7793
+ usda-fdc-survey     |       5432
+
+== lotes: leídos vs insertados (deben coincidir en la primera corrida) ==
+ lotes | leidos  | insertados 
+-------+---------+------------
+    28 | 2059819 |    2059819
+

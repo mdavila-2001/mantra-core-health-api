@@ -1,3 +1,58 @@
 === Carga de nutrición y alimentos a terminology.*  · corpus /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data ===
 Conectado a 127.0.0.1:55443/c13
 pasada 1: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-concepts.part-01.ndjson.gz
+pasada 1: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-concepts.part-02.ndjson.gz
+pasada 1: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-01.ndjson.gz
+pasada 1: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-02.ndjson.gz
+pasada 1: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-03.ndjson.gz
+pasada 1: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-04.ndjson.gz
+pasada 1: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-05.ndjson.gz
+pasada 1: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-06.ndjson.gz
+pasada 1: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-07.ndjson.gz
+pasada 1: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-08.ndjson.gz
+pasada 1: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-09.ndjson.gz
+pasada 1: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-10.ndjson.gz
+pasada 1: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-11.ndjson.gz
+pasada 1: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-12.ndjson.gz
+pasada 2: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-concepts.part-01.ndjson.gz
+pasada 2: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-concepts.part-02.ndjson.gz
+pasada 2: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-01.ndjson.gz
+pasada 2: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-02.ndjson.gz
+pasada 2: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-03.ndjson.gz
+pasada 2: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-04.ndjson.gz
+pasada 2: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-05.ndjson.gz
+pasada 2: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-06.ndjson.gz
+pasada 2: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-07.ndjson.gz
+pasada 2: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-08.ndjson.gz
+pasada 2: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-09.ndjson.gz
+pasada 2: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-10.ndjson.gz
+pasada 2: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-11.ndjson.gz
+pasada 2: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-branded.part-12.ndjson.gz
+
+=== LEÍDO DEL CORPUS ===
+{
+  "codeSystems": 28,
+  "concepts": 2059819,
+  "designations": 2079692,
+  "properties": 6351105,
+  "relationships": 2048265
+}
+
+=== FILAS NUEVAS (0 en la segunda corrida = idempotente) ===
+{
+  "structure": {
+    "sources": 7,
+    "codeSystems": 28,
+    "versions": 28
+  },
+  "concepts": 2059819,
+  "designations": 2079692,
+  "properties": 6351105,
+  "relationships": 2048265,
+  "importBatches": 28,
+  "segundos": 663
+}
+
+real	11m3.728s
+user	3m53.392s
+sys	0m12.110s

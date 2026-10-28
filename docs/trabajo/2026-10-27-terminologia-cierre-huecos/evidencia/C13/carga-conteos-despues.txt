@@ -1,0 +1,15 @@
+== conteos después (corrida 1 = corrida 2)
+terminology_sources|8
+code_systems|29
+code_system_versions|29
+catalog_import_batches|28
+concept_relationships|2048265
+catalog_concepts|2059828
+concept_designations|2079692
+concept_properties|6351105
+== tamaño en disco
+4375 MB
+concept_properties|2555 MB
+catalog_concepts|793 MB
+concept_designations|549 MB
+concept_relationships|469 MB

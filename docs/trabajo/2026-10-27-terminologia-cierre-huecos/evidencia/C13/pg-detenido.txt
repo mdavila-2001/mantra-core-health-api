@@ -1,0 +1,1 @@
+Postgres desechable detenido y /var/tmp/pg-c13 borrado (2026-10-28T02:47:27Z)
