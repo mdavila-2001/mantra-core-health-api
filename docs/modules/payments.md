@@ -141,4 +141,22 @@ integración con PostgreSQL, RLS, carreras e integración real con proveedor.
 ## Límites conocidos
 
 El callback verifica HMAC por conexión, pero no consume la configuración de endpoint, ventana de
-replay y CIDR modelada en DDL. Los flujos de payout no ejecutan un adaptador de proveedor.
+replay y CIDR modelada en DDL. Los flujos de payout no ejecutan un adaptador de proveedor.- **Importes exactos**: ningún cálculo monetario pasa por `Number`. `payment-money.ts` suma,
+  resta, compara, multiplica y saca porcentajes con `BigInt` sobre la cadena decimal; los
+  derivados (payout, conciliación, saldo de billetera) se redondean half-up a 2 decimales. Los
+  DTO acotan importes y tasas a 14 dígitos enteros y 6 decimales. `riskScore` no es dinero y
+  queda aparte.
+- **Checkout acotado al tenant**: la deuda se busca y bloquea por `{ id, tenantId activo,
+  gatewayConnectionId }` y la intención opcional debe ser del mismo tenant y conexión. Una deuda
+  o intención ajena responde 404 idéntico al de una inexistente (sin `details`). El `tenantId` del
+  cuerpo debe coincidir con el tenant activo (`PAYMENTS_TENANT_MISMATCH`).
+- **Secreto de webhook atado al tenant**: la referencia de `gateway_connections.webhook_secret_ref`
+  sólo vale si todas sus entradas son `env:WEBHOOK_SECRET_<UUID DEL TENANT SIN GUIONES, EN
+  MAYÚSCULAS>_<NOMBRE>` y la conexión es del tenant de la intención. Las conexiones existentes
+  deben renombrar sus variables.
+- **Callback y endpoint**: cuando la conexión de la transacción tiene endpoints en
+  `provider_callback_endpoints`, la ruta debe ser la de uno activo de esa conexión, la IP de
+  origen debe estar en `allowed_source_cidrs_json` (si lo declara) y, si declara
+  `replay_window_seconds`, el callback debe traer `timestamp` firmado dentro de la ventana (el
+  timestamp entra en los bytes firmados sólo si viene). Sin endpoints registrados para la
+  conexión no hay configuración que aplicar y se conserva el comportamiento anterior.

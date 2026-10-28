@@ -1,0 +1,8 @@
+$ yarn test (suite completa)
+EXIT 1
+FAIL modules/terminology/import/xlsx-parser.spec.ts
+FAIL src/modules/terminology/import/xlsx-parser.spec.ts
+Test Suites: 1 failed, 1 skipped, 873 passed, 874 of 875 total
+Tests:       1 failed, 1 skipped, 10797 passed, 10799 total
+
+Único fallo: xlsx-parser.spec.ts (terminology). Causa probable (no aislada): el entorno no alcanza cdn.sheetjs.com (403 del proxy) y se instaló xlsx@0.18.5 en vez de 0.20.3 sólo localmente para poder correr los gates; package.json/yarn.lock quedaron intactos. No toca código de este cambio.

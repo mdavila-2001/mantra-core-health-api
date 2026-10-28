@@ -5,23 +5,23 @@ bloqueo que cada operación necesita.
 
 ## Reparto
 
-| Repositorio | Tablas |
-| --- | --- |
-| `OutboxRepository` | `domain_events`, `outbox_messages`, `event_subscriptions`, `event_deliveries` |
-| `QueuesRepository` | `message_queues`, `queued_jobs`, `dead_letter_jobs` |
+| Repositorio               | Tablas                                                                                                         |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `OutboxRepository`        | `domain_events`, `outbox_messages`, `event_subscriptions`, `event_deliveries`                                  |
+| `QueuesRepository`        | `message_queues`, `queued_jobs`, `dead_letter_jobs`                                                            |
 | `NotificationsRepository` | canales, plantillas, preferencias, solicitudes, configuraciones de proveedor, entregas, acuses, bandeja in-app |
 
 ## Lecturas con bloqueo
 
-| Método | Modo | Por qué |
-| --- | --- | --- |
-| `claimPendingOutbox` | `FOR UPDATE SKIP LOCKED` | Varios relays se llevan lotes distintos en lugar de esperarse |
-| `claimReadyJobs` | `FOR UPDATE SKIP LOCKED` | Reparte la carga entre workers de cola |
-| `findEventDeliveryForUpdate` | `FOR UPDATE` | El acuse cambia el estado de la entrega |
-| `findJobForUpdate` | `FOR UPDATE` | Cerrar o fallar el job |
-| `findRequestForUpdate` | `FOR UPDATE` | Entregar y conciliar mueven el estado de la solicitud |
-| `findDeliveryByProviderRefForUpdate` | `FOR UPDATE` | El acuse del proveedor la actualiza |
-| `findInAppForUpdate` | `FOR UPDATE` | Marcar leída |
+| Método                               | Modo                     | Por qué                                                       |
+| ------------------------------------ | ------------------------ | ------------------------------------------------------------- |
+| `claimPendingOutbox`                 | `FOR UPDATE SKIP LOCKED` | Varios relays se llevan lotes distintos en lugar de esperarse |
+| `claimReadyJobs`                     | `FOR UPDATE SKIP LOCKED` | Reparte la carga entre workers de cola                        |
+| `findEventDeliveryForUpdate`         | `FOR UPDATE`             | El acuse cambia el estado de la entrega                       |
+| `findJobForUpdate`                   | `FOR UPDATE`             | Cerrar o fallar el job                                        |
+| `findRequestForUpdate`               | `FOR UPDATE`             | Entregar y conciliar mueven el estado de la solicitud         |
+| `findDeliveryByProviderRefForUpdate` | `FOR UPDATE`             | El acuse del proveedor la actualiza                           |
+| `findInAppForUpdate`                 | `FOR UPDATE`             | Marcar leída                                                  |
 
 `SKIP LOCKED` es la diferencia entre poder escalar añadiendo procesos y tener workers haciendo cola
 detrás del mismo lote.

@@ -1,4 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
+import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -24,7 +25,9 @@ import {
   SubmitResponseDto,
   SurveyResponseDto,
 } from '../dto';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
 import { ANSWER_TYPE_CODE_BY_ID, SURVEYS } from '../surveys.concepts';
+import { SurveysErrorReason } from '../surveys.error-reasons';
 import type {
   SurveyInvitations,
   SurveyQuestions,
@@ -42,6 +45,10 @@ import type { AnswerTypeCode } from '../surveys.concepts';
  * no tienen excepción: un paciente solo alcanza sus propias invitaciones, y una
  * respuesta solo la lee el profesional dueño del instrumento. No hay ninguna
  * lectura sin uno de esos dos filtros.
+ *
+ * El perfil de paciente es global (no lleva `tenant_id`), así que el autoservicio
+ * se acota además al tenant activo: un paciente con atenciones en dos
+ * organizaciones ve, en el contexto de una, solo los cuestionarios de esa.
  */
 @Injectable()
 export class SurveysResponsesService {
@@ -69,7 +76,11 @@ export class SurveysResponsesService {
     actor: AuthenticatedUser,
   ): Promise<PatientInvitationDto[]> {
     const patientProfileId = this.requirePatientProfile(actor);
-    const invitations = await this.listInvitationsOf(patientProfileId);
+    const tenantId = requireTenantId();
+    const invitations = await this.listInvitationsOf(
+      patientProfileId,
+      tenantId,
+    );
 
     const now = new Date();
     const result: PatientInvitationDto[] = [];
@@ -87,9 +98,12 @@ export class SurveysResponsesService {
     actor: AuthenticatedUser,
   ): Promise<PatientQuestionnaireDto> {
     const patientProfileId = this.requirePatientProfile(actor);
+    // Primero la invitación acotada a paciente y tenant: nada de plantilla ni
+    // preguntas se lee antes de saber que es del contexto activo.
     const invitation = await this.loadOwnInvitation(
       invitationId,
       patientProfileId,
+      requireTenantId(),
     );
     const template = await this.loadTemplateOfInvitation(invitation);
     if (!template) {
@@ -117,75 +131,94 @@ export class SurveysResponsesService {
     const patientProfileId = this.requirePatientProfile(actor);
     const tenantId = requireTenantId();
 
-    const outcome = await this.em.transactional(async (tx) => {
-      const invitation = await this.loadOwnInvitation(
-        invitationId,
-        patientProfileId,
-        tx,
-      );
-
-      if (invitation.statusConceptId === SURVEYS.INVITATION_ANSWERED) {
-        throw new ConflictException('Este cuestionario ya fue respondido', {
+    const outcome = await this.em
+      .transactional(async (tx) => {
+        const invitation = await this.loadOwnInvitation(
           invitationId,
-        });
-      }
-      const now = new Date();
-      if (now > invitation.expiresAt) {
-        // Se persiste el vencimiento en vez de solo rechazarlo: si no, la
-        // invitación seguiría figurando como pendiente en la lista del
-        // paciente para siempre. Por eso NO se lanza acá: `transactional`
-        // revierte ante cualquier excepción y el vencimiento se perdería. La
-        // transacción confirma y el rechazo sale después.
-        invitation.statusConceptId = SURVEYS.INVITATION_EXPIRED;
-        touch(invitation, actor.id);
-        await tx.flush();
-        return { expiredAt: invitation.expiresAt };
-      }
+          patientProfileId,
+          tenantId,
+          tx,
+          true,
+        );
 
-      const questions = await this.templatesRepo.listQuestions(
-        tx,
-        invitation.surveyVersionId,
-      );
-      const byId = new Map(questions.map((q) => [q.id, q]));
-      this.validateAnswers(dto.answers, questions, byId);
+        if (invitation.statusConceptId === SURVEYS.INVITATION_ANSWERED) {
+          throw new ConflictException(
+            'Este cuestionario ya fue respondido',
+            { invitationId },
+            SurveysErrorReason.RESPONSE_ALREADY_SUBMITTED,
+          );
+        }
+        const now = new Date();
+        if (now > invitation.expiresAt) {
+          // Se persiste el vencimiento en vez de solo rechazarlo: si no, la
+          // invitación seguiría figurando como pendiente en la lista del
+          // paciente para siempre. Por eso NO se lanza acá: `transactional`
+          // revierte ante cualquier excepción y el vencimiento se perdería. La
+          // transacción confirma y el rechazo sale después.
+          invitation.statusConceptId = SURVEYS.INVITATION_EXPIRED;
+          touch(invitation, actor.id);
+          await tx.flush();
+          return { expiredAt: invitation.expiresAt };
+        }
 
-      const response = this.responsesRepo.createResponse(tx, {
-        surveyInvitationId: invitation.id,
-        surveyVersionId: invitation.surveyVersionId,
-        tenantId,
-        patientProfileId,
-        submittedAt: now,
-        actorUserId: actor.id,
-      });
-      await tx.flush();
+        const questions = await this.templatesRepo.listQuestions(
+          tx,
+          invitation.surveyVersionId,
+        );
+        const byId = new Map(questions.map((q) => [q.id, q]));
+        this.validateAnswers(dto.answers, questions, byId);
 
-      for (const answer of dto.answers) {
-        const question = byId.get(answer.questionId)!;
-        this.responsesRepo.createAnswer(tx, {
-          surveyResponseId: response.id,
-          surveyQuestionId: question.id,
-          ...this.normalizeAnswerValue(answer, question),
+        const response = this.responsesRepo.createResponse(tx, {
+          surveyInvitationId: invitation.id,
+          surveyVersionId: invitation.surveyVersionId,
+          // El tenant de la respuesta es el de la invitación ya comprobada, no
+          // el que el cliente pueda sugerir.
+          tenantId: invitation.tenantId,
+          patientProfileId,
+          submittedAt: now,
           actorUserId: actor.id,
         });
-      }
+        await tx.flush();
 
-      invitation.statusConceptId = SURVEYS.INVITATION_ANSWERED;
-      invitation.answeredAt = now;
-      touch(invitation, actor.id);
+        for (const answer of dto.answers) {
+          const question = byId.get(answer.questionId)!;
+          this.responsesRepo.createAnswer(tx, {
+            surveyResponseId: response.id,
+            surveyQuestionId: question.id,
+            ...this.normalizeAnswerValue(answer, question),
+            actorUserId: actor.id,
+          });
+        }
 
-      await tx.flush();
+        invitation.statusConceptId = SURVEYS.INVITATION_ANSWERED;
+        invitation.answeredAt = now;
+        touch(invitation, actor.id);
 
-      this.logger.info(
-        {
-          operation: 'surveys.response.submit',
-          invitationId,
-          responseId: response.id,
-          answers: dto.answers.length,
-        },
-        'Survey response submitted',
-      );
-      return { id: response.id };
-    });
+        await tx.flush();
+
+        this.logger.info(
+          {
+            operation: 'surveys.response.submit',
+            invitationId,
+            responseId: response.id,
+            answers: dto.answers.length,
+          },
+          'Survey response submitted',
+        );
+        return { id: response.id };
+      })
+      .catch((error: unknown) => {
+        // Si el modelo respalda la unicidad (una respuesta por invitación, una
+        // por pregunta), la violación es un duplicado, no un error del servidor.
+        if (error instanceof UniqueConstraintViolationException) {
+          throw new ConflictException(
+            'La respuesta ya fue registrada para este cuestionario',
+            { invitationId },
+            SurveysErrorReason.ANSWER_DUPLICATE,
+          );
+        }
+        throw error;
+      });
 
     if ('expiredAt' in outcome) {
       throw new PreconditionFailedException(
@@ -282,29 +315,45 @@ export class SurveysResponsesService {
    * justamente el error que costó descubrir la primera vez.
    *
    * @param patientProfileId - Paciente de la sesión.
-   * @returns Sus invitaciones.
+   * @param tenantId - Tenant activo de la petición.
+   * @returns Sus invitaciones en ese tenant.
    */
   private async listInvitationsOf(
     patientProfileId: string,
+    tenantId: string,
   ): Promise<SurveyInvitations[]> {
-    return this.invitationsRepo.listByPatient(this.em, patientProfileId);
+    return this.invitationsRepo.listByPatient(
+      this.em,
+      patientProfileId,
+      tenantId,
+    );
   }
 
-  /** Carga la invitación comprobando que sea del paciente de la sesión. */
+  /**
+   * Carga la invitación comprobando paciente **y tenant activo**.
+   *
+   * Una invitación inexistente, de otra persona o de otro tenant responde igual:
+   * 404, mismo mensaje y mismo `reason`, sin `details`. Un 403, o un detalle que
+   * nombre el UUID, le confirmaría a alguien que la invitación existe y que esa
+   * persona tuvo una atención.
+   *
+   * @param lock - Bloquea la fila hasta el fin de la transacción (envío).
+   */
   private async loadOwnInvitation(
     invitationId: string,
     patientProfileId: string,
+    tenantId: string,
     em: EntityManager = this.em,
+    lock = false,
   ): Promise<SurveyInvitations> {
-    const invitation = await this.invitationsRepo.findById(em, invitationId);
-    // 404 y no 403: confirmarle a alguien que la invitación existe pero es de
-    // otra persona ya filtra que esa persona tuvo una atención.
-    if (!invitation || invitation.patientProfileId !== patientProfileId) {
-      throw new ResourceNotFoundException('Cuestionario no encontrado', {
-        invitationId,
-      });
-    }
-    return invitation;
+    const found = lock
+      ? await this.invitationsRepo.findByIdForUpdate(em, invitationId)
+      : await this.invitationsRepo.findById(em, invitationId);
+    const own = found?.patientProfileId === patientProfileId ? found : null;
+    return assertResourceInTenant(own, own?.tenantId, tenantId, {
+      message: 'Cuestionario no encontrado',
+      reason: SurveysErrorReason.INVITATION_OUT_OF_SCOPE,
+    });
   }
 
   /** Carga la plantilla comprobando organización y profesional dueño. */

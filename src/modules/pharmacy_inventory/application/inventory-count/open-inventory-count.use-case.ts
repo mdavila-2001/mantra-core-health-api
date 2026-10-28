@@ -1,14 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import {
-  ConflictException,
-  ResourceNotFoundException,
-  type AuthenticatedUser,
-} from '../../../../common';
+import { ConflictException, type AuthenticatedUser } from '../../../../common';
 import {
   CountSessionsRepository,
-  LocationsRepository,
   StockPositionsRepository,
 } from '../../infrastructure/repositories';
 import type {
@@ -16,6 +11,7 @@ import type {
   CreateCountSessionDto,
 } from '../../presentation/dto';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
+import { PharmacyInventoryScopePolicy } from '../scope/pharmacy-inventory-scope.policy';
 
 /** Abre una sesión y captura el stock esperado dentro de una transacción. */
 @Injectable()
@@ -23,8 +19,8 @@ export class OpenInventoryCountUseCase {
   constructor(
     private readonly em: EntityManager,
     private readonly countRepo: CountSessionsRepository,
-    private readonly locationsRepo: LocationsRepository,
     private readonly stockRepo: StockPositionsRepository,
+    private readonly scope: PharmacyInventoryScopePolicy,
     private readonly logger: PinoLogger,
   ) {}
 
@@ -42,14 +38,21 @@ export class OpenInventoryCountUseCase {
       'Opening count session',
     );
     return this.em.transactional(async (tx) => {
-      const location = await this.locationsRepo.findById(
+      // La sede de la ruta es de una farmacia del actor; la ubicación, de esa
+      // sede; y cada producto y lote contado, de esa farmacia.
+      const site = await this.scope.requireManagedSite(
         tx,
-        dto.inventoryLocationId,
+        pharmacySiteId,
+        actor,
       );
-      if (!location) {
-        throw new ResourceNotFoundException('Ubicación no encontrada', {
-          locationId: dto.inventoryLocationId,
-        });
+      await this.scope.requireLocation(tx, site, dto.inventoryLocationId);
+      for (const item of dto.items) {
+        await this.scope.requireProduct(tx, site, item.pharmacyProductId);
+        await this.scope.requireLot(
+          tx,
+          item.inventoryLotId,
+          item.pharmacyProductId,
+        );
       }
       const openCount = await this.countRepo.countOpenAtLocation(
         tx,

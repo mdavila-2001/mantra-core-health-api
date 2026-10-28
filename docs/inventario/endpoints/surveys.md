@@ -39,28 +39,28 @@
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SurveysAssignmentsController.createAssignment` — `src/modules/surveys/controllers/surveys-assignments.controller.ts:32`
+- **Implementación:** `SurveysAssignmentsController.createAssignment` — `src/modules/surveys/controllers/surveys-assignments.controller.ts:37`
 
 ### Qué es y para qué sirve (negocio)
 
 Asociar una encuesta a una consulta o servicio. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
-`POST /surveys/assignments` la atiende `SurveysAssignmentsController.createAssignment` (src/modules/surveys/controllers/surveys-assignments.controller.ts:32). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `SurveysCreateAssignmentDto` (3 campos, 3 obligatorios). Delega en `SurveysAssignmentsService.createAssignment`. Crea filas en surveys.survey_assignments. Lee surveys.survey_assignments, surveys.survey_templates, surveys.survey_versions.
+`POST /surveys/assignments` la atiende `SurveysAssignmentsController.createAssignment` (src/modules/surveys/controllers/surveys-assignments.controller.ts:37). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `SurveysCreateAssignmentDto` (3 campos, 3 obligatorios). Delega en `SurveysAssignmentsService.createAssignment`. Crea filas en surveys.survey_assignments. Lee surveys.survey_assignments, surveys.survey_templates, surveys.survey_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-assignments.controller.ts:32` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-assignments.controller.ts:37` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -68,8 +68,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `surveys.survey_assignments` | ESCRIBE | CREA | DIRECTA | SurveysAssignmentsController.createAssignment → SurveysAssignmentsService.createAssignment → AssignmentsRepository.create | `src/modules/surveys/repositories/assignments.repository.ts:119` |
 | `surveys.survey_assignments` | LEE | LEE | DIRECTA | SurveysAssignmentsController.createAssignment → SurveysAssignmentsService.createAssignment → AssignmentsRepository.findActiveDuplicate | `src/modules/surveys/repositories/assignments.repository.ts:63` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysAssignmentsController.createAssignment → SurveysAssignmentsService.createAssignment → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:112` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysAssignmentsController.createAssignment → SurveysAssignmentsService.createAssignment → TemplatesRepository.findVersionById | `src/modules/surveys/repositories/templates.repository.ts:162` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysAssignmentsController.createAssignment → SurveysAssignmentsService.createAssignment → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysAssignmentsController.createAssignment → SurveysAssignmentsService.createAssignment → TemplatesRepository.findVersionById | `src/modules/surveys/repositories/templates.repository.ts:197` |
 
 ### Cuerpo — DTO `SurveysCreateAssignmentDto` · `application/json`
 
@@ -115,9 +115,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya existe una asignación activa de esa versión a ese destino |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El modelo de agenda no lleva tipo de atención en la reserva: asigná la encuesta por servicio o por cita concreta; PreconditionFailedException: Solo se puede asignar una versión publicada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El modelo de agenda no lleva tipo de atención en la reserva: asigná la encuesta por servicio o por cita concreta |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/surveys.md).
@@ -139,40 +138,40 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SurveysAssignmentsController.issueInvitations` — `src/modules/surveys/controllers/surveys-assignments.controller.ts:45`
+- **Implementación:** `SurveysAssignmentsController.issueInvitations` — `src/modules/surveys/controllers/surveys-assignments.controller.ts:55`
 
 ### Qué es y para qué sirve (negocio)
 
 Emitir los cuestionarios de una atención completada. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
-`POST /surveys/invitations` la atiende `SurveysAssignmentsController.issueInvitations` (src/modules/surveys/controllers/surveys-assignments.controller.ts:45). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `IssueInvitationsDto` (1 campo, 1 obligatorio). Delega en `SurveysAssignmentsService.issueForBooking`. Crea filas en surveys.survey_invitations. Lee scheduling.appointment_bookings, scheduling.bookable_slots, surveys.survey_assignments, surveys.survey_invitations, surveys.survey_templates, surveys.survey_versions.
+`POST /surveys/invitations` la atiende `SurveysAssignmentsController.issueInvitations` (src/modules/surveys/controllers/surveys-assignments.controller.ts:55). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `IssueInvitationsDto` (1 campo, 1 obligatorio). Delega en `SurveysAssignmentsService.issueForBooking`. Crea filas en surveys.survey_invitations. Lee scheduling.appointment_bookings, scheduling.bookable_slots, surveys.survey_assignments, surveys.survey_invitations, surveys.survey_templates, surveys.survey_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-assignments.controller.ts:45` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-assignments.controller.ts:55` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking | `src/modules/surveys/services/surveys-assignments.service.ts:163` |
-| `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.resolveTargets | `src/modules/surveys/services/surveys-assignments.service.ts:267` |
+| `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking | `src/modules/surveys/services/surveys-assignments.service.ts:187` |
+| `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.resolveTargets | `src/modules/surveys/services/surveys-assignments.service.ts:311` |
 | `surveys.survey_assignments` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → AssignmentsRepository.listActiveByTargets | `src/modules/surveys/repositories/assignments.repository.ts:89` |
-| `surveys.survey_invitations` | ESCRIBE | CREA | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → InvitationsRepository.create | `src/modules/surveys/repositories/invitations.repository.ts:121` |
-| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → InvitationsRepository.listByBooking | `src/modules/surveys/repositories/invitations.repository.ts:92` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:112` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → TemplatesRepository.findVersionById | `src/modules/surveys/repositories/templates.repository.ts:162` |
+| `surveys.survey_invitations` | ESCRIBE | CREA | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → InvitationsRepository.create | `src/modules/surveys/repositories/invitations.repository.ts:150` |
+| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → InvitationsRepository.listByBooking | `src/modules/surveys/repositories/invitations.repository.ts:121` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → TemplatesRepository.findVersionById | `src/modules/surveys/repositories/templates.repository.ts:197` |
 
 ### Cuerpo — DTO `IssueInvitationsDto` · `application/json`
 
@@ -213,8 +212,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Reserva no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se emiten cuestionarios sobre una atención completada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/surveys.md).
@@ -242,7 +239,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Ver mis cuestionarios. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
@@ -254,16 +251,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/surveys/controllers/surveys-patient.controller.ts:42` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → SurveysResponsesService.listInvitationsOf → InvitationsRepository.listByPatient | `src/modules/surveys/repositories/invitations.repository.ts:71` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → SurveysResponsesService.loadTemplateOfInvitation → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:112` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → SurveysResponsesService.loadTemplateOfInvitation → TemplatesRepository.findVersionById | `src/modules/surveys/repositories/templates.repository.ts:162` |
+| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → SurveysResponsesService.listInvitationsOf → InvitationsRepository.listByPatient | `src/modules/surveys/repositories/invitations.repository.ts:100` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → SurveysResponsesService.loadTemplateOfInvitation → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → SurveysResponsesService.loadTemplateOfInvitation → TemplatesRepository.findVersionById | `src/modules/surveys/repositories/templates.repository.ts:197` |
 
 ### Cuerpo
 
@@ -316,7 +313,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Abrir un cuestionario para responderlo. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
@@ -328,18 +325,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/surveys/controllers/surveys-patient.controller.ts:51` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-patient.controller.ts:51` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → SurveysResponsesService.loadOwnInvitation → InvitationsRepository.findById | `src/modules/surveys/repositories/invitations.repository.ts:57` |
-| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:226` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → SurveysResponsesService.loadTemplateOfInvitation → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:112` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → SurveysResponsesService.loadTemplateOfInvitation → TemplatesRepository.findVersionById | `src/modules/surveys/repositories/templates.repository.ts:162` |
+| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → SurveysResponsesService.loadOwnInvitation → InvitationsRepository.findByIdForUpdate | `src/modules/surveys/repositories/invitations.repository.ts:76` |
+| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:261` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → SurveysResponsesService.loadTemplateOfInvitation → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → SurveysResponsesService.loadTemplateOfInvitation → TemplatesRepository.findVersionById | `src/modules/surveys/repositories/templates.repository.ts:197` |
 
 ### Parámetros
 
@@ -401,7 +398,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Responder el cuestionario. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
@@ -413,20 +410,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/surveys/controllers/surveys-patient.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-patient.controller.ts:61` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `surveys.survey_answers` | ESCRIBE | CREA | DIRECTA | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse → ResponsesRepository.createAnswer | `src/modules/surveys/repositories/responses.repository.ts:144` |
-| `surveys.survey_invitations` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse | `src/modules/surveys/services/surveys-responses.service.ts:139` |
-| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse → SurveysResponsesService.loadOwnInvitation → InvitationsRepository.findById | `src/modules/surveys/repositories/invitations.repository.ts:57` |
-| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:226` |
+| `surveys.survey_invitations` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse | `src/modules/surveys/services/surveys-responses.service.ts:158` |
+| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse → SurveysResponsesService.loadOwnInvitation → InvitationsRepository.findByIdForUpdate | `src/modules/surveys/repositories/invitations.repository.ts:76` |
+| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:261` |
 | `surveys.survey_responses` | ESCRIBE | CREA | DIRECTA | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse → ResponsesRepository.createResponse | `src/modules/surveys/repositories/responses.repository.ts:128` |
 
 ### Parámetros
@@ -492,8 +489,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Solo un paciente puede ver sus cuestionarios |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Cuestionario no encontrado |
-| 409 | `CONFLICT` | ConflictException: Este cuestionario ya fue respondido |
+| 409 | `CONFLICT` | ConflictException: La respuesta ya fue registrada para este cuestionario |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Hay más de una respuesta para la misma pregunta; PreconditionFailedException: La respuesta no corresponde a una pregunta de este cuestionario; PreconditionFailedException: Esta pregunta espera una respuesta de texto; PreconditionFailedException: Esta pregunta espera un valor numérico; PreconditionFailedException: El valor está fuera de la escala de la pregunta; PreconditionFailedException: Esta pregunta espera sí o no; PreconditionFailedException: Esta pregunta espera al menos una opción; PreconditionFailedException: Esta pregunta admite una sola opción; PreconditionFailedException: Se eligieron opciones que la pregunta no ofrece; PreconditionFailedException: Hay opciones repetidas en la respuesta; PreconditionFailedException: Tipo de pregunta desconocido; PreconditionFailedException: Faltan respuestas a preguntas obligatorias; PreconditionFailedException: El plazo para responder este cuestionario venció |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -516,34 +512,34 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SurveysTemplatesController.listTemplates` — `src/modules/surveys/controllers/surveys-templates.controller.ts:68`
+- **Implementación:** `SurveysTemplatesController.listTemplates` — `src/modules/surveys/controllers/surveys-templates.controller.ts:78`
 
 ### Qué es y para qué sirve (negocio)
 
 Listar mis encuestas. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
-`GET /surveys/templates` la atiende `SurveysTemplatesController.listTemplates` (src/modules/surveys/controllers/surveys-templates.controller.ts:68). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `SurveysTemplatesService.listTemplates`. Lee surveys.survey_questions, surveys.survey_templates, surveys.survey_versions.
+`GET /surveys/templates` la atiende `SurveysTemplatesController.listTemplates` (src/modules/surveys/controllers/surveys-templates.controller.ts:78). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `SurveysTemplatesService.listTemplates`. Lee surveys.survey_questions, surveys.survey_templates, surveys.survey_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:68` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:78` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.listTemplates → SurveysTemplatesService.listTemplates → TemplatesRepository.countQuestions | `src/modules/surveys/repositories/templates.repository.ts:241` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.listTemplates → SurveysTemplatesService.listTemplates → TemplatesRepository.listTemplatesByOwner | `src/modules/surveys/repositories/templates.repository.ts:128` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.listTemplates → SurveysTemplatesService.listTemplates → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:176` |
+| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.listTemplates → SurveysTemplatesService.listTemplates → TemplatesRepository.countQuestions | `src/modules/surveys/repositories/templates.repository.ts:276` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.listTemplates → SurveysTemplatesService.listTemplates → TemplatesRepository.listTemplatesByOwner | `src/modules/surveys/repositories/templates.repository.ts:163` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.listTemplates → SurveysTemplatesService.listTemplates → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:211` |
 
 ### Cuerpo
 
@@ -590,35 +586,35 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SurveysTemplatesController.createTemplate` — `src/modules/surveys/controllers/surveys-templates.controller.ts:57`
+- **Implementación:** `SurveysTemplatesController.createTemplate` — `src/modules/surveys/controllers/surveys-templates.controller.ts:62`
 
 ### Qué es y para qué sirve (negocio)
 
 Crear una encuesta para pacientes. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
-`POST /surveys/templates` la atiende `SurveysTemplatesController.createTemplate` (src/modules/surveys/controllers/surveys-templates.controller.ts:57). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `CreateTemplateDto` (4 campos, 1 obligatorio). Delega en `SurveysTemplatesService.createTemplate`. Crea filas en surveys.survey_templates, surveys.survey_versions.
+`POST /surveys/templates` la atiende `SurveysTemplatesController.createTemplate` (src/modules/surveys/controllers/surveys-templates.controller.ts:62). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `CreateTemplateDto` (4 campos, 1 obligatorio). Delega en `SurveysTemplatesService.createTemplate`. Crea filas en surveys.survey_templates, surveys.survey_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:57` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:62` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_templates` | ESCRIBE | CREA | DIRECTA | SurveysTemplatesController.createTemplate → SurveysTemplatesService.createTemplate → TemplatesRepository.createTemplate | `src/modules/surveys/repositories/templates.repository.ts:144` |
-| `surveys.survey_versions` | ESCRIBE | CREA | DIRECTA | SurveysTemplatesController.createTemplate → SurveysTemplatesService.createTemplate → TemplatesRepository.createVersion | `src/modules/surveys/repositories/templates.repository.ts:208` |
+| `surveys.survey_templates` | ESCRIBE | CREA | DIRECTA | SurveysTemplatesController.createTemplate → SurveysTemplatesService.createTemplate → TemplatesRepository.createTemplate | `src/modules/surveys/repositories/templates.repository.ts:179` |
+| `surveys.survey_versions` | ESCRIBE | CREA | DIRECTA | SurveysTemplatesController.createTemplate → SurveysTemplatesService.createTemplate → TemplatesRepository.createVersion | `src/modules/surveys/repositories/templates.repository.ts:243` |
 
 ### Cuerpo — DTO `CreateTemplateDto` · `application/json`
 
@@ -688,35 +684,35 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SurveysTemplatesController.getTemplate` — `src/modules/surveys/controllers/surveys-templates.controller.ts:77`
+- **Implementación:** `SurveysTemplatesController.getTemplate` — `src/modules/surveys/controllers/surveys-templates.controller.ts:87`
 
 ### Qué es y para qué sirve (negocio)
 
 Ver una encuesta y su cuestionario. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
-`GET /surveys/templates/{id}` la atiende `SurveysTemplatesController.getTemplate` (src/modules/surveys/controllers/surveys-templates.controller.ts:77). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `SurveysTemplatesService.getTemplate`. Lee surveys.survey_questions, surveys.survey_templates, surveys.survey_versions.
+`GET /surveys/templates/{id}` la atiende `SurveysTemplatesController.getTemplate` (src/modules/surveys/controllers/surveys-templates.controller.ts:87). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `SurveysTemplatesService.getTemplate`. Lee surveys.survey_questions, surveys.survey_templates, surveys.survey_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:77` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:87` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:87` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.getTemplate → SurveysTemplatesService.getTemplate → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:226` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.getTemplate → SurveysTemplatesService.getTemplate → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:112` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.getTemplate → SurveysTemplatesService.getTemplate → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:176` |
+| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.getTemplate → SurveysTemplatesService.getTemplate → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:261` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.getTemplate → SurveysTemplatesService.getTemplate → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.getTemplate → SurveysTemplatesService.getTemplate → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:211` |
 
 ### Parámetros
 
@@ -777,38 +773,38 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SurveysTemplatesController.updateTemplate` — `src/modules/surveys/controllers/surveys-templates.controller.ts:87`
+- **Implementación:** `SurveysTemplatesController.updateTemplate` — `src/modules/surveys/controllers/surveys-templates.controller.ts:97`
 
 ### Qué es y para qué sirve (negocio)
 
 Corregir título, consigna y plazo del borrador. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
-`PATCH /surveys/templates/{id}` la atiende `SurveysTemplatesController.updateTemplate` (src/modules/surveys/controllers/surveys-templates.controller.ts:87). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `UpdateTemplateDto` (3 campos, 0 obligatorios). Delega en `SurveysTemplatesService.updateTemplate`. Actualiza surveys.survey_templates, surveys.survey_versions. Lee surveys.survey_templates, surveys.survey_versions.
+`PATCH /surveys/templates/{id}` la atiende `SurveysTemplatesController.updateTemplate` (src/modules/surveys/controllers/surveys-templates.controller.ts:97). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `UpdateTemplateDto` (3 campos, 0 obligatorios). Delega en `SurveysTemplatesService.updateTemplate`. Actualiza surveys.survey_templates, surveys.survey_versions. Lee surveys.survey_templates, surveys.survey_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:87` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:87` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:97` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:97` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_templates` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.updateTemplate → SurveysTemplatesService.updateTemplate | `src/modules/surveys/services/surveys-templates.service.ts:246` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.updateTemplate → SurveysTemplatesService.updateTemplate → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:112` |
-| `surveys.survey_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.updateTemplate → SurveysTemplatesService.updateTemplate | `src/modules/surveys/services/surveys-templates.service.ts:254` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.updateTemplate → SurveysTemplatesService.updateTemplate → SurveysTemplatesService.loadDraftVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:176` |
+| `surveys.survey_templates` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.updateTemplate → SurveysTemplatesService.updateTemplate | `src/modules/surveys/services/surveys-templates.service.ts:267` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.updateTemplate → SurveysTemplatesService.updateTemplate → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
+| `surveys.survey_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.updateTemplate → SurveysTemplatesService.updateTemplate | `src/modules/surveys/services/surveys-templates.service.ts:275` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.updateTemplate → SurveysTemplatesService.updateTemplate → SurveysTemplatesService.loadDraftVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:211` |
 
 ### Parámetros
 
@@ -879,34 +875,34 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SurveysTemplatesController.deactivateTemplate` — `src/modules/surveys/controllers/surveys-templates.controller.ts:175`
+- **Implementación:** `SurveysTemplatesController.deactivateTemplate` — `src/modules/surveys/controllers/surveys-templates.controller.ts:219`
 
 ### Qué es y para qué sirve (negocio)
 
 Desactivar la encuesta. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
-`POST /surveys/templates/{id}/deactivate` la atiende `SurveysTemplatesController.deactivateTemplate` (src/modules/surveys/controllers/surveys-templates.controller.ts:175). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `SurveysTemplatesService.deactivateTemplate`. Actualiza surveys.survey_templates. Lee surveys.survey_templates.
+`POST /surveys/templates/{id}/deactivate` la atiende `SurveysTemplatesController.deactivateTemplate` (src/modules/surveys/controllers/surveys-templates.controller.ts:219). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `SurveysTemplatesService.deactivateTemplate`. Actualiza surveys.survey_templates. Lee surveys.survey_templates.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:175` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:175` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:219` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:219` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_templates` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.deactivateTemplate → SurveysTemplatesService.deactivateTemplate | `src/modules/surveys/services/surveys-templates.service.ts:482` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.deactivateTemplate → SurveysTemplatesService.deactivateTemplate → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:112` |
+| `surveys.survey_templates` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.deactivateTemplate → SurveysTemplatesService.deactivateTemplate | `src/modules/surveys/services/surveys-templates.service.ts:503` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.deactivateTemplate → SurveysTemplatesService.deactivateTemplate → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
 
 ### Parámetros
 
@@ -956,38 +952,38 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SurveysTemplatesController.addQuestion` — `src/modules/surveys/controllers/surveys-templates.controller.ts:99`
+- **Implementación:** `SurveysTemplatesController.addQuestion` — `src/modules/surveys/controllers/surveys-templates.controller.ts:114`
 
 ### Qué es y para qué sirve (negocio)
 
 Configurar una pregunta y su tipo de respuesta. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
-`POST /surveys/templates/{id}/questions` la atiende `SurveysTemplatesController.addQuestion` (src/modules/surveys/controllers/surveys-templates.controller.ts:99). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `AddQuestionDto` (6 campos, 2 obligatorios). Delega en `SurveysTemplatesService.addQuestion`. Crea filas en surveys.survey_questions. Lee surveys.survey_questions, surveys.survey_templates, surveys.survey_versions.
+`POST /surveys/templates/{id}/questions` la atiende `SurveysTemplatesController.addQuestion` (src/modules/surveys/controllers/surveys-templates.controller.ts:114). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `AddQuestionDto` (6 campos, 2 obligatorios). Delega en `SurveysTemplatesService.addQuestion`. Crea filas en surveys.survey_questions. Lee surveys.survey_questions, surveys.survey_templates, surveys.survey_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:99` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:99` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:114` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:114` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_questions` | ESCRIBE | CREA | DIRECTA | SurveysTemplatesController.addQuestion → SurveysTemplatesService.addQuestion → TemplatesRepository.createQuestion | `src/modules/surveys/repositories/templates.repository.ts:282` |
-| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.addQuestion → SurveysTemplatesService.addQuestion → TemplatesRepository.countQuestions | `src/modules/surveys/repositories/templates.repository.ts:241` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.addQuestion → SurveysTemplatesService.addQuestion → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:112` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.addQuestion → SurveysTemplatesService.addQuestion → SurveysTemplatesService.loadDraftVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:176` |
+| `surveys.survey_questions` | ESCRIBE | CREA | DIRECTA | SurveysTemplatesController.addQuestion → SurveysTemplatesService.addQuestion → TemplatesRepository.createQuestion | `src/modules/surveys/repositories/templates.repository.ts:317` |
+| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.addQuestion → SurveysTemplatesService.addQuestion → TemplatesRepository.countQuestions | `src/modules/surveys/repositories/templates.repository.ts:276` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.addQuestion → SurveysTemplatesService.addQuestion → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.addQuestion → SurveysTemplatesService.addQuestion → SurveysTemplatesService.loadDraftVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:211` |
 
 ### Parámetros
 
@@ -1077,36 +1073,36 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SurveysTemplatesController.deleteQuestion` — `src/modules/surveys/controllers/surveys-templates.controller.ts:139`
+- **Implementación:** `SurveysTemplatesController.deleteQuestion` — `src/modules/surveys/controllers/surveys-templates.controller.ts:169`
 
 ### Qué es y para qué sirve (negocio)
 
 Quitar una pregunta del borrador. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
-`DELETE /surveys/templates/{id}/questions/{questionId}` la atiende `SurveysTemplatesController.deleteQuestion` (src/modules/surveys/controllers/surveys-templates.controller.ts:139). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `SurveysTemplatesService.deleteQuestion`. Borra de surveys.survey_questions. Lee surveys.survey_questions, surveys.survey_templates, surveys.survey_versions.
+`DELETE /surveys/templates/{id}/questions/{questionId}` la atiende `SurveysTemplatesController.deleteQuestion` (src/modules/surveys/controllers/surveys-templates.controller.ts:169). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `SurveysTemplatesService.deleteQuestion`. Borra de surveys.survey_questions. Lee surveys.survey_questions, surveys.survey_templates, surveys.survey_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:139` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, questionId | `src/modules/surveys/controllers/surveys-templates.controller.ts:139` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:169` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, questionId | `src/modules/surveys/controllers/surveys-templates.controller.ts:169` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_questions` | BORRA | BORRA | POR_TIPO | SurveysTemplatesController.deleteQuestion → SurveysTemplatesService.deleteQuestion → TemplatesRepository.removeQuestion | `src/modules/surveys/repositories/templates.repository.ts:270` |
-| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.deleteQuestion → SurveysTemplatesService.deleteQuestion → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:226` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.deleteQuestion → SurveysTemplatesService.deleteQuestion → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:112` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.deleteQuestion → SurveysTemplatesService.deleteQuestion → SurveysTemplatesService.loadDraftVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:176` |
+| `surveys.survey_questions` | BORRA | BORRA | POR_TIPO | SurveysTemplatesController.deleteQuestion → SurveysTemplatesService.deleteQuestion → TemplatesRepository.removeQuestion | `src/modules/surveys/repositories/templates.repository.ts:305` |
+| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.deleteQuestion → SurveysTemplatesService.deleteQuestion → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:261` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.deleteQuestion → SurveysTemplatesService.deleteQuestion → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.deleteQuestion → SurveysTemplatesService.deleteQuestion → SurveysTemplatesService.loadDraftVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:211` |
 
 ### Parámetros
 
@@ -1156,38 +1152,38 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SurveysTemplatesController.updateQuestion` — `src/modules/surveys/controllers/surveys-templates.controller.ts:126`
+- **Implementación:** `SurveysTemplatesController.updateQuestion` — `src/modules/surveys/controllers/surveys-templates.controller.ts:151`
 
 ### Qué es y para qué sirve (negocio)
 
 Corregir una pregunta del borrador. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
-`PATCH /surveys/templates/{id}/questions/{questionId}` la atiende `SurveysTemplatesController.updateQuestion` (src/modules/surveys/controllers/surveys-templates.controller.ts:126). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `UpdateQuestionDto` (6 campos, 0 obligatorios). Delega en `SurveysTemplatesService.updateQuestion`. Actualiza surveys.survey_questions. Lee surveys.survey_questions, surveys.survey_templates, surveys.survey_versions.
+`PATCH /surveys/templates/{id}/questions/{questionId}` la atiende `SurveysTemplatesController.updateQuestion` (src/modules/surveys/controllers/surveys-templates.controller.ts:151). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `UpdateQuestionDto` (6 campos, 0 obligatorios). Delega en `SurveysTemplatesService.updateQuestion`. Actualiza surveys.survey_questions. Lee surveys.survey_questions, surveys.survey_templates, surveys.survey_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:126` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, questionId | `src/modules/surveys/controllers/surveys-templates.controller.ts:126` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:151` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, questionId | `src/modules/surveys/controllers/surveys-templates.controller.ts:151` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_questions` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.updateQuestion → SurveysTemplatesService.updateQuestion | `src/modules/surveys/services/surveys-templates.service.ts:308` |
-| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.updateQuestion → SurveysTemplatesService.updateQuestion → SurveysTemplatesService.loadDraftQuestion → TemplatesRepository.findQuestionById | `src/modules/surveys/repositories/templates.repository.ts:256` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.updateQuestion → SurveysTemplatesService.updateQuestion → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:112` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.updateQuestion → SurveysTemplatesService.updateQuestion → SurveysTemplatesService.loadDraftVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:176` |
+| `surveys.survey_questions` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.updateQuestion → SurveysTemplatesService.updateQuestion | `src/modules/surveys/services/surveys-templates.service.ts:329` |
+| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.updateQuestion → SurveysTemplatesService.updateQuestion → SurveysTemplatesService.loadDraftQuestion → TemplatesRepository.findQuestionById | `src/modules/surveys/repositories/templates.repository.ts:291` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.updateQuestion → SurveysTemplatesService.updateQuestion → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.updateQuestion → SurveysTemplatesService.updateQuestion → SurveysTemplatesService.loadDraftVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:211` |
 
 ### Parámetros
 
@@ -1268,37 +1264,37 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SurveysTemplatesController.reorderQuestions` — `src/modules/surveys/controllers/surveys-templates.controller.ts:114`
+- **Implementación:** `SurveysTemplatesController.reorderQuestions` — `src/modules/surveys/controllers/surveys-templates.controller.ts:134`
 
 ### Qué es y para qué sirve (negocio)
 
 Reordenar el cuestionario del borrador. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
-`PUT /surveys/templates/{id}/questions/order` la atiende `SurveysTemplatesController.reorderQuestions` (src/modules/surveys/controllers/surveys-templates.controller.ts:114). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `ReorderQuestionsDto` (1 campo, 1 obligatorio). Delega en `SurveysTemplatesService.reorderQuestions`. Lee surveys.survey_questions, surveys.survey_templates, surveys.survey_versions.
+`PUT /surveys/templates/{id}/questions/order` la atiende `SurveysTemplatesController.reorderQuestions` (src/modules/surveys/controllers/surveys-templates.controller.ts:134). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `ReorderQuestionsDto` (1 campo, 1 obligatorio). Delega en `SurveysTemplatesService.reorderQuestions`. Lee surveys.survey_questions, surveys.survey_templates, surveys.survey_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:114` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:114` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:134` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:134` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.reorderQuestions → SurveysTemplatesService.reorderQuestions → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:226` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.reorderQuestions → SurveysTemplatesService.reorderQuestions → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:112` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.reorderQuestions → SurveysTemplatesService.reorderQuestions → SurveysTemplatesService.loadDraftVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:176` |
+| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.reorderQuestions → SurveysTemplatesService.reorderQuestions → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:261` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.reorderQuestions → SurveysTemplatesService.reorderQuestions → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.reorderQuestions → SurveysTemplatesService.reorderQuestions → SurveysTemplatesService.loadDraftVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:211` |
 
 ### Parámetros
 
@@ -1371,38 +1367,38 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SurveysTemplatesController.listResponses` — `src/modules/surveys/controllers/surveys-templates.controller.ts:193`
+- **Implementación:** `SurveysTemplatesController.listResponses` — `src/modules/surveys/controllers/surveys-templates.controller.ts:242`
 
 ### Qué es y para qué sirve (negocio)
 
 Revisar las respuestas de los pacientes. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
-`GET /surveys/templates/{id}/responses` la atiende `SurveysTemplatesController.listResponses` (src/modules/surveys/controllers/surveys-templates.controller.ts:193). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `SurveysResponsesService.listTemplateResponses`. Lee surveys.survey_answers, surveys.survey_invitations, surveys.survey_questions, surveys.survey_responses, surveys.survey_templates, surveys.survey_versions.
+`GET /surveys/templates/{id}/responses` la atiende `SurveysTemplatesController.listResponses` (src/modules/surveys/controllers/surveys-templates.controller.ts:242). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `SurveysResponsesService.listTemplateResponses`. Lee surveys.survey_answers, surveys.survey_invitations, surveys.survey_questions, surveys.survey_responses, surveys.survey_templates, surveys.survey_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:193` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:193` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:242` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:242` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `surveys.survey_answers` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → ResponsesRepository.listAnswers | `src/modules/surveys/repositories/responses.repository.ts:114` |
-| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → InvitationsRepository.listByVersions | `src/modules/surveys/repositories/invitations.repository.ts:107` |
-| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:226` |
+| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → InvitationsRepository.listByVersions | `src/modules/surveys/repositories/invitations.repository.ts:136` |
+| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:261` |
 | `surveys.survey_responses` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → ResponsesRepository.listByInvitations | `src/modules/surveys/repositories/responses.repository.ts:95` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → SurveysResponsesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:112` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:176` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → SurveysResponsesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:211` |
 
 ### Parámetros
 
@@ -1461,35 +1457,35 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SurveysTemplatesController.createNextVersion` — `src/modules/surveys/controllers/surveys-templates.controller.ts:151`
+- **Implementación:** `SurveysTemplatesController.createNextVersion` — `src/modules/surveys/controllers/surveys-templates.controller.ts:186`
 
 ### Qué es y para qué sirve (negocio)
 
 Abrir una versión nueva del cuestionario. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
-`POST /surveys/templates/{id}/versions` la atiende `SurveysTemplatesController.createNextVersion` (src/modules/surveys/controllers/surveys-templates.controller.ts:151). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `SurveysTemplatesService.createNextVersion`. Crea filas en surveys.survey_versions. Lee surveys.survey_templates, surveys.survey_versions.
+`POST /surveys/templates/{id}/versions` la atiende `SurveysTemplatesController.createNextVersion` (src/modules/surveys/controllers/surveys-templates.controller.ts:186). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `SurveysTemplatesService.createNextVersion`. Crea filas en surveys.survey_versions. Lee surveys.survey_templates, surveys.survey_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:151` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:151` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:186` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:186` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.createNextVersion → SurveysTemplatesService.createNextVersion → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:112` |
-| `surveys.survey_versions` | ESCRIBE | CREA | DIRECTA | SurveysTemplatesController.createNextVersion → SurveysTemplatesService.createNextVersion → TemplatesRepository.createVersion | `src/modules/surveys/repositories/templates.repository.ts:208` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.createNextVersion → SurveysTemplatesService.createNextVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:176` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.createNextVersion → SurveysTemplatesService.createNextVersion → TemplatesRepository.lockTemplate | `src/modules/surveys/repositories/templates.repository.ts:126` |
+| `surveys.survey_versions` | ESCRIBE | CREA | DIRECTA | SurveysTemplatesController.createNextVersion → SurveysTemplatesService.createNextVersion → TemplatesRepository.createVersion | `src/modules/surveys/repositories/templates.repository.ts:243` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.createNextVersion → SurveysTemplatesService.createNextVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:211` |
 
 ### Parámetros
 
@@ -1517,8 +1513,8 @@ La operación no recibe cuerpo.
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Plantilla no encontrada; ResourceNotFoundException: La plantilla no tiene versiones |
-| 409 | `CONFLICT` | ConflictException: Ya hay una versión en borrador: termine de editarla o publíquela antes de abrir otra |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Plantilla no encontrada |
+| 409 | `CONFLICT` | ConflictException: Otra solicitud abrió la versión siguiente; vuelva a consultar la plantilla |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no tiene perfil profesional asociado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1541,39 +1537,39 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SurveysTemplatesController.publishVersion` — `src/modules/surveys/controllers/surveys-templates.controller.ts:162`
+- **Implementación:** `SurveysTemplatesController.publishVersion` — `src/modules/surveys/controllers/surveys-templates.controller.ts:202`
 
 ### Qué es y para qué sirve (negocio)
 
 Publicar la encuesta y configurar su vigencia. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
 
 ### Cómo se atiende (sistema)
 
-`POST /surveys/templates/{id}/versions/{versionNumber}/publish` la atiende `SurveysTemplatesController.publishVersion` (src/modules/surveys/controllers/surveys-templates.controller.ts:162). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `PublishVersionDto` (2 campos, 0 obligatorios). Delega en `SurveysTemplatesService.publishVersion`. Actualiza surveys.survey_templates, surveys.survey_versions. Lee surveys.survey_questions, surveys.survey_templates, surveys.survey_versions.
+`POST /surveys/templates/{id}/versions/{versionNumber}/publish` la atiende `SurveysTemplatesController.publishVersion` (src/modules/surveys/controllers/surveys-templates.controller.ts:202). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `PublishVersionDto` (2 campos, 0 obligatorios). Delega en `SurveysTemplatesService.publishVersion`. Actualiza surveys.survey_templates, surveys.survey_versions. Lee surveys.survey_questions, surveys.survey_templates, surveys.survey_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:162` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:162` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-templates.controller.ts:202` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/surveys/controllers/surveys-templates.controller.ts:202` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.publishVersion → SurveysTemplatesService.publishVersion → TemplatesRepository.countQuestions | `src/modules/surveys/repositories/templates.repository.ts:241` |
-| `surveys.survey_templates` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.publishVersion → SurveysTemplatesService.publishVersion | `src/modules/surveys/services/surveys-templates.service.ts:452` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.publishVersion → SurveysTemplatesService.publishVersion → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:112` |
-| `surveys.survey_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.publishVersion → SurveysTemplatesService.publishVersion | `src/modules/surveys/services/surveys-templates.service.ts:446` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.publishVersion → SurveysTemplatesService.publishVersion → TemplatesRepository.findVersionByNumber | `src/modules/surveys/repositories/templates.repository.ts:196` |
+| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.publishVersion → SurveysTemplatesService.publishVersion → TemplatesRepository.countQuestions | `src/modules/surveys/repositories/templates.repository.ts:276` |
+| `surveys.survey_templates` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.publishVersion → SurveysTemplatesService.publishVersion | `src/modules/surveys/services/surveys-templates.service.ts:473` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.publishVersion → SurveysTemplatesService.publishVersion → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
+| `surveys.survey_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.publishVersion → SurveysTemplatesService.publishVersion | `src/modules/surveys/services/surveys-templates.service.ts:467` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.publishVersion → SurveysTemplatesService.publishVersion → TemplatesRepository.findVersionByNumber | `src/modules/surveys/repositories/templates.repository.ts:231` |
 
 ### Parámetros
 

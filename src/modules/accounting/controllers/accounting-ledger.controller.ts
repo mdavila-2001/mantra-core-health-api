@@ -75,9 +75,10 @@ export class AccountingLedgerController {
   @ApiOperation({ summary: 'Plan de cuentas de una práctica' })
   chartOfAccounts(
     @Query('practiceId', ParseUUIDPipe) practiceId: string,
+    @CurrentUser() actor: AuthenticatedUser,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<ChartOfAccountsResponseDto> {
-    return this.ledgerReadService.chartOfAccounts(practiceId, limit);
+    return this.ledgerReadService.chartOfAccounts(practiceId, actor, limit);
   }
 
   /** UC-16-06: balance de sumas y saldos. */
@@ -90,8 +91,9 @@ export class AccountingLedgerController {
   })
   trialBalance(
     @Query() query: TrialBalanceQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<TrialBalanceResponseDto> {
-    return this.ledgerReadService.trialBalance(query);
+    return this.ledgerReadService.trialBalance(query, actor);
   }
 
   /** UC-16-01·L: el libro diario. */
@@ -100,8 +102,9 @@ export class AccountingLedgerController {
   @ApiOperation({ summary: 'Libro diario de una práctica' })
   listJournal(
     @Query() query: ListJournalQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ListJournalResponseDto> {
-    return this.ledgerReadService.listJournal(query);
+    return this.ledgerReadService.listJournal(query, actor);
   }
 
   /**
@@ -160,8 +163,9 @@ export class AccountingLedgerController {
   @ApiOperation({ summary: 'Un asiento con sus líneas' })
   getJournalTransaction(
     @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<JournalTransactionDetailDto> {
-    return this.ledgerReadService.getJournalTransaction(id);
+    return this.ledgerReadService.getJournalTransaction(id, actor);
   }
 
   /** Soporte: alta de cuenta del plan contable. */

@@ -4,20 +4,17 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import {
-  DiagnosticUnitSitesRepository,
-  DiagnosticEquipmentRepository,
-} from '../repositories';
+import { DiagnosticEquipmentRepository } from '../repositories';
 import {
   CreateEquipmentDto,
   EquipmentResponseDto,
   UpdateEquipmentDto,
 } from '../dto';
 import { DUNIT } from '../diagnostic_units.concepts';
+import { DiagnosticUnitScopeService } from './diagnostic-unit-scope.service';
 
 /**
  * Casos de uso de equipamiento y calibración del sitio (UC-23-09): registrar un
@@ -30,13 +27,13 @@ export class DiagnosticEquipmentService {
    * Inicializa la instancia y sus dependencias.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param sitesRepo - Valor de sites repo requerido por la operación.
+   * @param scope - Resolvedor de recursos acotados al tenant activo.
    * @param equipmentRepo - Valor de equipment repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
-    private readonly sitesRepo: DiagnosticUnitSitesRepository,
+    private readonly scope: DiagnosticUnitScopeService,
     private readonly equipmentRepo: DiagnosticEquipmentRepository,
     private readonly logger: PinoLogger,
   ) {
@@ -54,9 +51,7 @@ export class DiagnosticEquipmentService {
       'Registering equipment',
     );
     return this.em.transactional(async (tx) => {
-      const site = await this.sitesRepo.findById(tx, siteId);
-      if (!site)
-        throw new ResourceNotFoundException('Sitio no encontrado', { siteId });
+      const site = await this.scope.site(tx, siteId);
       if (site.statusConceptId !== DUNIT.SITE_ACTIVE) {
         throw new PreconditionFailedException('El sitio no está activo', {
           siteId,
@@ -117,12 +112,7 @@ export class DiagnosticEquipmentService {
       'Updating equipment',
     );
     return this.em.transactional(async (tx) => {
-      const equipment = await this.equipmentRepo.findById(tx, equipmentId);
-      if (!equipment) {
-        throw new ResourceNotFoundException('Equipo no encontrado', {
-          equipmentId,
-        });
-      }
+      const equipment = await this.scope.equipment(tx, equipmentId);
 
       if (dto.manufacturer !== undefined)
         equipment.manufacturer = dto.manufacturer;

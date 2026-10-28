@@ -13,6 +13,13 @@
 // formato antiguo; los dos se mapean, cada uno a su propia fila).
 // =============================================================================
 
+/**
+ * Audiencia de toda sección de este code system: personal clínico. El corte S3 del glosario prohíbe la
+ * posología para pacientes, y las secciones son texto de ficha técnica / etiqueta para profesionales.
+ * La API sólo entrega las filas con esta audiencia a los roles clínicos (`terminology/pharmacology-audience.ts`).
+ */
+export const AUDIENCE_PROFESSIONAL = 'professional';
+
 /** Claves de sección (identificadores en inglés) y su rótulo en castellano. */
 export const SECTION_KEYS = Object.freeze({
   boxed_warning: 'Advertencia en recuadro',

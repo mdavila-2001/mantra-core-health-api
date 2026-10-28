@@ -77,9 +77,57 @@ export const { seeds: CLINICAL_EXT_CONCEPT_SEEDS, ids: CEXT } =
     },
     REFERRAL_ACCEPTED: { code: 'REF_ACCEPTED', display: 'Referral accepted' },
     REFERRAL_REJECTED: { code: 'REF_REJECTED', display: 'Referral rejected' },
+    // v4266: cierre con contrarreferencia y anulación por quien deriva.
+    REFERRAL_COMPLETED: {
+      code: 'REF_COMPLETED',
+      display: 'Referral completed (counter-referral received)',
+    },
+    REFERRAL_CANCELLED: {
+      code: 'REF_CANCELLED',
+      display: 'Referral cancelled',
+    },
     REFERRAL_PRIORITY_ROUTINE: {
       code: 'REF_ROUTINE',
       display: 'Routine referral priority',
+    },
+    // Categoría de la campana cuando el médico recomienda a otro profesional.
+    NOTICE_REFERRAL_RECOMMENDED: {
+      code: 'REF_NOTICE_RECOMMENDED',
+      display: 'Referral recommended notice',
+    },
+    // Tipo de derivación: qué se le pide al destino (columna
+    // `referral_type_concept_id`). `CONSULTATION` es el valor por defecto.
+    REFERRAL_TYPE_TREATMENT: {
+      code: 'REF_TYPE_TREATMENT',
+      display: 'Referral for treatment',
+    },
+    REFERRAL_TYPE_CONSULTATION: {
+      code: 'REF_TYPE_CONSULTATION',
+      display: 'Referral for consultation',
+    },
+    REFERRAL_TYPE_DIAGNOSTIC_STUDY: {
+      code: 'REF_TYPE_DIAGNOSTIC_STUDY',
+      display: 'Referral for diagnostic study',
+    },
+    REFERRAL_TYPE_PROCEDURE: {
+      code: 'REF_TYPE_PROCEDURE',
+      display: 'Referral for procedure',
+    },
+    REFERRAL_TYPE_SECOND_OPINION: {
+      code: 'REF_TYPE_SECOND_OPINION',
+      display: 'Referral for second opinion',
+    },
+    REFERRAL_TYPE_THERAPY: {
+      code: 'REF_TYPE_THERAPY',
+      display: 'Referral for therapy',
+    },
+    REFERRAL_TYPE_HOSPITALIZATION: {
+      code: 'REF_TYPE_HOSPITALIZATION',
+      display: 'Referral for hospitalization',
+    },
+    REFERRAL_TYPE_OTHER: {
+      code: 'REF_TYPE_OTHER',
+      display: 'Referral of another type',
     },
 
     // --- care_gaps -----------------------------------------------------------

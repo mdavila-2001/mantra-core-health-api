@@ -13,6 +13,7 @@ import {
   publicSitesOf,
   type SitePublicRow,
 } from './public-search.repository';
+import { CONCEPTS } from '../../../common';
 import { PRAC } from '../../practice/practice.concepts';
 import { PROF } from '../../profiles/profiles.concepts';
 
@@ -39,6 +40,7 @@ function row(partial: Partial<SitePublicRow> = {}): SitePublicRow {
     practice_type_concept_id: PRAC.PRACTICE_TYPE_CLINIC,
     practice_admin_user_id: 'admin-clinica',
     lines: 'Av. Arce 2345',
+    district_text: null,
     city: 'La Paz',
     postal_code: null,
     latitude: '-16.5000000',
@@ -385,5 +387,55 @@ describe('PublicSearchRepository · unaccent (P-14)', () => {
       drop,
     );
     expect(d.execute).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('PublicSearchRepository · locationsByOwner', () => {
+  function build(rows: unknown[] = []) {
+    const execute = mockFn(async () => rows);
+    const em = { getConnection: mockFn(() => ({ execute })) };
+    return { repo: new PublicSearchRepository(), em, execute };
+  }
+
+  it('correcto: compone la calle con su distrito y conserva ciudad y punto', async () => {
+    const d = build([
+      {
+        owner_id: DOCTOR,
+        lines: 'Calle Warnes 45',
+        district_text: 'Equipetrol',
+        city: 'Santa Cruz de la Sierra',
+        latitude: '-17.7700000',
+        longitude: '-63.1900000',
+      },
+    ]);
+
+    const map = await d.repo.locationsByOwner(d.em as any, [DOCTOR]);
+
+    expect(map.get(DOCTOR)).toEqual({
+      address: 'Calle Warnes 45, Equipetrol',
+      city: 'Santa Cruz de la Sierra',
+      lat: -17.77,
+      lng: -63.19,
+    });
+  });
+
+  it('inválido: sólo publica direcciones de trabajo, nunca un domicilio', async () => {
+    const d = build();
+
+    await d.repo.locationsByOwner(d.em as any, [DOCTOR]);
+
+    const [sql, params] = d.execute.mock.calls[0];
+    expect(sql).toContain('AND use_concept_id = ?');
+    expect(params).toEqual([[DOCTOR], CONCEPTS.ADDR_USE_WORK]);
+    expect(params).not.toContain(CONCEPTS.ADDR_USE_HOME);
+  });
+
+  it('límite: sin sujetos no consulta', async () => {
+    const d = build();
+
+    const map = await d.repo.locationsByOwner(d.em as any, []);
+
+    expect(map.size).toBe(0);
+    expect(d.execute).not.toHaveBeenCalled();
   });
 });

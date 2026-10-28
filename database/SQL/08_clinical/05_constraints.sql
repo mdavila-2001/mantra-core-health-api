@@ -1,7 +1,8 @@
 -- SALUD v4.0.10 · schema clinical · constraints de integridad (módulo 33)
 -- Aplicar DESPUÉS de 04_indexes.sql y de SQL/_integrity/00_integrity_functions.sql.
--- Reglas textuales del modelo. Las UK/CHECK/EXCLUDE son SCAFFOLD (completar
--- columnas/expresión exactas contra la tabla): el modelo las declara en prosa.
+-- Reglas del módulo 33. Las UK/CHECK/EXCLUDE en prosa quedan como comentario:
+-- el modelo no declara su expresión SQL y no se inventa (temperatura-0).
+-- CHECK_SQL y EXCLUDE_SQL sí se materializan con la expresión del modelo.
 
 CREATE EXTENSION IF NOT EXISTS btree_gist;  -- requerido por EXCLUDE
 
@@ -12,8 +13,14 @@ ALTER TABLE "clinical"."service_requests" DROP CONSTRAINT IF EXISTS "ck_service_
 ALTER TABLE "clinical"."service_requests" ADD CONSTRAINT "ck_service_requests_override_reason_requires_previous_report" CHECK (("duplicate_override_reason" IS NULL OR "previous_diagnostic_report_id" IS NOT NULL));
 
 
+-- ═══ received_services ═══
+-- CHECK concreto declarado por el modelo (CHECK_SQL).
+ALTER TABLE "clinical"."received_services" DROP CONSTRAINT IF EXISTS "ck_received_services_has_source";
+ALTER TABLE "clinical"."received_services" ADD CONSTRAINT "ck_received_services_has_source" CHECK (("source_procedure_id" IS NOT NULL OR "source_immunization_id" IS NOT NULL OR "procedure_case_id" IS NOT NULL));
+
+
 -- ═══ appointments ═══
--- TODO EXCLUDE (practitioner/location time overlap): ALTER TABLE "clinical"."appointments" ADD CONSTRAINT "ex_appointments_..." EXCLUDE USING gist (... WITH =, tstzrange(...) WITH &&) [WHERE ...];
+--   EXCLUDE: practitioner/location time overlap  (en prosa; el módulo 33 no declara su expresión SQL; ver EXCLUDE_SQL abajo)
 -- EXCLUDE concreto declarado por el modelo (EXCLUDE_SQL).
 ALTER TABLE "clinical"."appointments" DROP CONSTRAINT IF EXISTS "ex_appointments_practitioner_time";
 ALTER TABLE "clinical"."appointments" ADD CONSTRAINT "ex_appointments_practitioner_time"

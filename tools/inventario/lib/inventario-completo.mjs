@@ -3,6 +3,7 @@
 import path from 'node:path';
 import { crearConstructorDeArboles } from './arbol.mjs';
 import { leerExcepciones } from './excepciones.mjs';
+import { rutaDelModelo } from './salida.mjs';
 import {
   construirProcesos,
   leerFlujosCriticos,
@@ -21,7 +22,7 @@ import { construirMapa } from './mapa.mjs';
  */
 export function construirInventarioCompleto({
   root = process.cwd(),
-  modelRoot = path.resolve(root, '..', 'mantra-core-health-model'),
+  modelRoot = rutaDelModelo(root),
   frontRoot = process.env.FRONT_ROOT
     ? path.resolve(process.env.FRONT_ROOT)
     : path.resolve(root, '..', 'mantra-core-health'),

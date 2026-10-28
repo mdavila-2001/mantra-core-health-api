@@ -19,6 +19,16 @@ export enum ProfilesErrorReason {
   ACCOUNT_WITHOUT_LINKED_PERSON = 'ACCOUNT_WITHOUT_LINKED_PERSON',
   /** No existe el perfil de paciente pedido (o la persona vinculada no lo tiene). */
   PATIENT_PROFILE_NOT_FOUND = 'PATIENT_PROFILE_NOT_FOUND',
+  /** La dirección pedida no existe, no está vigente o no es de quien la pide. */
+  PATIENT_ADDRESS_NOT_FOUND = 'PATIENT_ADDRESS_NOT_FOUND',
+  /** El domicilio no se borra desde la libreta: el alta lo exige y la ficha lo usa. */
+  PATIENT_HOME_ADDRESS_REQUIRED = 'PATIENT_HOME_ADDRESS_REQUIRED',
+  /** Se llegó al tope de direcciones guardadas. */
+  PATIENT_ADDRESS_BOOK_FULL = 'PATIENT_ADDRESS_BOOK_FULL',
+  /** El paciente se eligió a sí mismo como médico de cabecera. */
+  PRIMARY_PRACTITIONER_SELF = 'PRIMARY_PRACTITIONER_SELF',
+  /** El profesional declaró que no acepta pacientes nuevos. */
+  PRIMARY_PRACTITIONER_NOT_ACCEPTING_PATIENTS = 'PRIMARY_PRACTITIONER_NOT_ACCEPTING_PATIENTS',
   /** El padrón no se puede listar sin nombre, código o documento. */
   PATIENT_SEARCH_CRITERIA_REQUIRED = 'PATIENT_SEARCH_CRITERIA_REQUIRED',
   /** No existe la persona (`profiles.persons`) referenciada. */
@@ -59,6 +69,11 @@ export enum ProfilesErrorReason {
   ACCOUNT_WITHOUT_PRACTITIONER_PROFILE = 'ACCOUNT_WITHOUT_PRACTITIONER_PROFILE',
   /** No existe el perfil profesional pedido. */
   PRACTITIONER_PROFILE_NOT_FOUND = 'PRACTITIONER_PROFILE_NOT_FOUND',
+  /**
+   * El número del documento no se corrige desde el perfil porque la identidad
+   * de la persona ya está verificada contra él (P28).
+   */
+  NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY = 'NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY',
   /** El `practitioner_code` declarado ya pertenece a otro profesional. */
   PRACTITIONER_CODE_ALREADY_IN_USE = 'PRACTITIONER_CODE_ALREADY_IN_USE',
   /** Verificar una credencial exige declarar la fuente consultada. */

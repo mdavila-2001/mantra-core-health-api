@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 // Alias con tipado laxo: evita el 'never' que @jest/globals infiere para jest.fn() en ESM.
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { IamEmailVerificationService } from './iam-email-verification.service';
+import { MessagingEmailNoticeAdapter } from '../../infrastructure/adapters/messaging-email-notice.adapter';
 
 describe('IamEmailVerificationService', () => {
   const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
@@ -38,7 +39,7 @@ describe('IamEmailVerificationService', () => {
       credentialsRepo as never,
       usersRepo as never,
       emailVerificationsRepo as never,
-      notificationsService as never,
+      new MessagingEmailNoticeAdapter(notificationsService as never),
       logger as never,
     );
     return {

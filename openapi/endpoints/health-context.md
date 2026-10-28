@@ -116,6 +116,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AgentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AgentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AgentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AgentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AgentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -144,7 +145,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SOURCE_ADMIN, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | Ya existe un agente con ese código | Excepción explícita en src/modules/health_context/services/context-collection.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -214,8 +214,8 @@ Content-Type: application/json
 | `idempotencyKey` | Sí | `string` | longitud máxima 200 | Clave de idempotencia de la corrida | `valor-ejemplo` |
 | `trigger` | Sí | `string` | valores: `SCHEDULED`, `MANUAL` | Sin descripción específica en el contrato OpenAPI. | `SCHEDULED` |
 | `scheduleId` | No | `string` | formato `uuid` | Programación que la dispara | `00000000-0000-4000-8000-000000000001` |
-| `agentId` | No | `string` | formato `uuid` | Agente; por defecto, el de la programación | `00000000-0000-4000-8000-000000000001` |
-| `countryConceptId` | No | `string` | formato `uuid` | País; por defecto, el de la programación | `00000000-0000-4000-8000-000000000001` |
+| `agentId` | No | `string` | formato `uuid` | Agente. Con `scheduleId` sale de la programación y, si se envía, debe coincidir (422 HEALTH_CONTEXT_SCHEDULE_BINDING_MISMATCH) | `00000000-0000-4000-8000-000000000001` |
+| `countryConceptId` | No | `string` | formato `uuid` | País. Con `scheduleId` sale de la programación y, si se envía, debe coincidir (422 HEALTH_CONTEXT_SCHEDULE_BINDING_MISMATCH) | `00000000-0000-4000-8000-000000000001` |
 | `nextRunAt` | No | `string` | formato `date-time` | Próxima ejecución recalculada | `2026-07-31T12:00:00.000Z` |
 
 ### Payload completo de ejemplo
@@ -251,6 +251,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CollectionRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CollectionRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CollectionRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CollectionRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CollectionRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -281,8 +282,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, CONTEXT_CURATOR, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Programación no encontrada | Excepción explícita en src/modules/health_context/services/context-collection.service.ts |
 | 404 | `NOT_FOUND` | Agente no encontrado | Excepción explícita en src/modules/health_context/services/context-collection.service.ts |
+| 409 | `CONFLICT` | No se pudo resolver la corrida de esa clave de idempotencia | Excepción explícita en src/modules/health_context/services/context-collection.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La programación no está activa | Excepción explícita en src/modules/health_context/services/context-collection.service.ts |
+| 422 | `PRECONDITION_FAILED` | El agente y el país de la corrida deben coincidir con los de la programación | Excepción explícita en src/modules/health_context/services/context-collection.service.ts |
 | 422 | `PRECONDITION_FAILED` | La corrida necesita agente y país, o una programación de la que salgan | Excepción explícita en src/modules/health_context/services/context-collection.service.ts |
 | 422 | `PRECONDITION_FAILED` | El agente no está activo | Excepción explícita en src/modules/health_context/services/context-collection.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -387,6 +390,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FinishRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FinishRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FinishRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FinishRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FinishRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -541,6 +545,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ObservationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ObservationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ObservationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ObservationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ObservationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -574,6 +579,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La corrida ya no está en curso | Excepción explícita en src/modules/health_context/services/context-collection.service.ts |
 | 422 | `PRECONDITION_FAILED` | La fuente no está activa | Excepción explícita en src/modules/health_context/services/context-collection.service.ts |
+| 422 | `PRECONDITION_FAILED` | La fuente no es elegible para esta observación | Excepción explícita en src/modules/health_context/services/context-collection.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -679,6 +685,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ContextResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ContextResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ContextResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ContextResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ContextResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -707,7 +714,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CONTEXT_CURATOR, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | Ya existe ese contexto para el país y el dominio | Excepción explícita en src/modules/health_context/services/country-context.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -866,6 +872,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ContextVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ContextVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ContextVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ContextVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ContextVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -991,6 +998,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ResolvedContextResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ResolvedContextResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ResolvedContextResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ResolvedContextResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResolvedContextResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1151,6 +1159,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RunDueSchedulesResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RunDueSchedulesResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RunDueSchedulesResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RunDueSchedulesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RunDueSchedulesResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1303,6 +1312,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ScheduleResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ScheduleResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ScheduleResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ScheduleResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ScheduleResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1448,6 +1458,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SourceResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SourceResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SourceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SourceResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SourceResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1476,7 +1487,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SOURCE_ADMIN, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | Ya existe una fuente con ese código | Excepción explícita en src/modules/health_context/services/context-collection.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1562,6 +1572,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<PublishVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PublishVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PublishVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PublishVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublishVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1700,6 +1711,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<QualityReviewResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<QualityReviewResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<QualityReviewResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<QualityReviewResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `QualityReviewResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1834,6 +1846,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SupersedeVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SupersedeVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SupersedeVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SupersedeVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SupersedeVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 

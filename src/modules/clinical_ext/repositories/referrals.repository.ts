@@ -34,6 +34,14 @@ export interface CreateReferralData {
    */
   serviceRequestId?: string;
   /**
+   * Tipo de derivación (`CEXT.REFERRAL_TYPE_*`).
+   */
+  referralTypeConceptId?: string;
+  /**
+   * Servicio del catálogo del destino.
+   */
+  targetServiceCatalogId?: string;
+  /**
    * Identificador asociado a reason concept.
    */
   reasonConceptId?: string;
@@ -57,6 +65,24 @@ export interface CreateReferralData {
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
+  /** Sede destino. */
+  targetBranchId?: string;
+  /** Destino externo. */
+  targetExternalName?: string;
+  /** Contacto del destino externo. */
+  targetExternalContact?: string;
+  /** Servicio pedido. */
+  requestedServiceText?: string;
+  /** Servicio codificado. */
+  requestedServiceConceptId?: string;
+  /** Diagnóstico. */
+  diagnosisText?: string;
+  /** Resumen clínico. */
+  clinicalSummary?: string;
+  /** Tratamiento previo. */
+  treatmentGivenText?: string;
+  /** Consentimiento informado asociado. */
+  informedConsentId?: string;
 }
 
 /** Acceso a datos de `clinical_ext.referrals`. */
@@ -73,18 +99,45 @@ export class ReferralsRepository {
     return em.findOne(Referrals, { id });
   }
 
-  /** Detecta una referencia duplicada (mismo encuentro, destino y especialidad). */
+  /**
+   * Detecta una referencia duplicada.
+   *
+   * Mismo encuentro, mismo tipo y mismo destino: con servicio, el servicio (y
+   * el profesional, o su ausencia); sin servicio, el profesional y la
+   * especialidad, como antes. Las derivaciones anteriores al tipo (`null`)
+   * cuentan como consulta, que es el valor por defecto.
+   */
   findDuplicate(
     em: EntityManager,
-    sourceEncounterId: string,
-    targetProfileId: string,
-    specialtyConceptId: string,
+    criteria: {
+      sourceEncounterId: string;
+      referralTypeConceptId: string;
+      treatNullTypeAsSame: boolean;
+      targetProfileId?: string;
+      specialtyConceptId?: string;
+      targetServiceCatalogId?: string;
+    },
   ): Promise<Referrals | null> {
-    return em.findOne(Referrals, {
-      sourceEncounterId,
-      targetProfileId,
-      specialtyConceptId,
-    });
+    const where: Record<string, unknown> = {
+      sourceEncounterId: criteria.sourceEncounterId,
+    };
+    if (criteria.treatNullTypeAsSame) {
+      where.$or = [
+        { referralTypeConceptId: criteria.referralTypeConceptId },
+        { referralTypeConceptId: null },
+      ];
+    } else {
+      where.referralTypeConceptId = criteria.referralTypeConceptId;
+    }
+    if (criteria.targetServiceCatalogId) {
+      where.targetServiceCatalogId = criteria.targetServiceCatalogId;
+      where.targetProfileId = criteria.targetProfileId ?? null;
+    } else {
+      where.targetProfileId = criteria.targetProfileId;
+      where.specialtyConceptId = criteria.specialtyConceptId;
+      where.targetServiceCatalogId = null;
+    }
+    return em.findOne(Referrals, where);
   }
 
   /**
@@ -128,11 +181,22 @@ export class ReferralsRepository {
         targetTenantId: data.targetTenantId,
         specialtyConceptId: data.specialtyConceptId,
         serviceRequestId: data.serviceRequestId,
+        referralTypeConceptId: data.referralTypeConceptId,
+        targetServiceCatalogId: data.targetServiceCatalogId,
         reasonConceptId: data.reasonConceptId,
         reasonText: data.reasonText,
         priorityConceptId: data.priorityConceptId,
         statusConceptId: data.statusConceptId,
         validUntil: data.validUntil,
+        targetBranchId: data.targetBranchId,
+        targetExternalName: data.targetExternalName,
+        targetExternalContact: data.targetExternalContact,
+        requestedServiceText: data.requestedServiceText,
+        requestedServiceConceptId: data.requestedServiceConceptId,
+        diagnosisText: data.diagnosisText,
+        clinicalSummary: data.clinicalSummary,
+        treatmentGivenText: data.treatmentGivenText,
+        informedConsentId: data.informedConsentId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

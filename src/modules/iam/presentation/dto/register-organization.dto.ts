@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   IsArray,
   IsEmail,
   IsIn,
@@ -23,12 +24,12 @@ import {
 import {
   LEGAL_ENTITY_TYPE_CODES,
   type LegalEntityTypeCode,
-} from '../../../directory/legal-entity-types';
+} from '../../../../common/constants/legal-entity-types';
 import {
   BrokerProfileDto,
   DiagnosticUnitProfileDto,
   PayerProfileDto,
-} from '../../../directory/dto';
+} from '../../../../common/dto/tenant-type-profile.dto';
 
 /**
  * Los cinco documentos legales de afiliación en PDF (subtarea 1.2), ya
@@ -53,7 +54,7 @@ export class RegisterOrganizationLegalDocumentsDto {
   @ApiPropertyOptional({
     format: 'uuid',
     description:
-      'Escritura de constitución (fileId de POST /iam/auth/upload-registration-document). Obligatoria salvo para UNIPERSONAL, que no la tiene; el servicio responde 422 nombrando el documento faltante',
+      'Escritura de constitución (fileId de POST /iam/auth/upload-registration-document). Obligatoria salvo para UNIPERSONAL y PROFESIONAL_INDEPENDIENTE (personas naturales), que no la tienen; el servicio responde 422 nombrando el documento faltante',
   })
   @IsOptional()
   @IsUUID()
@@ -72,12 +73,14 @@ export class RegisterOrganizationLegalDocumentsDto {
   /**
    * Registro mercantil — la matrícula de comercio SEPREC en Bolivia (1.3).
    */
-  @ApiProperty({
+  @ApiPropertyOptional({
     format: 'uuid',
-    description: 'Registro mercantil (matrícula SEPREC en Bolivia)',
+    description:
+      'Registro mercantil (matrícula SEPREC en Bolivia). Obligatorio salvo para PROFESIONAL_INDEPENDIENTE, que ejerce con su NIT personal sin matrícula de comercio; el servicio responde 422 nombrando el documento faltante',
   })
+  @IsOptional()
   @IsUUID()
-  commerceRegistryFileId!: string;
+  commerceRegistryFileId?: string;
 
   /**
    * Licencia de funcionamiento municipal (1.4).
@@ -390,13 +393,25 @@ export class RegisterPharmacyBranchDto {
   @MaxLength(300)
   name!: string;
 
-  @ApiPropertyOptional({ description: 'Latitud', example: -17.769 })
-  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Latitud; va junto con longitude o no va',
+    example: -17.769,
+  })
+  @ValidateIf(
+    (dto: RegisterPharmacyBranchDto) =>
+      dto.latitude !== undefined || dto.longitude !== undefined,
+  )
   @IsLatitude()
   latitude?: number;
 
-  @ApiPropertyOptional({ description: 'Longitud', example: -63.196 })
-  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Longitud; va junto con latitude o no va',
+    example: -63.196,
+  })
+  @ValidateIf(
+    (dto: RegisterPharmacyBranchDto) =>
+      dto.latitude !== undefined || dto.longitude !== undefined,
+  )
   @IsLongitude()
   longitude?: number;
 
@@ -417,21 +432,49 @@ export class RegisterPharmacyBranchDto {
   locationUrl?: string;
 }
 
-/** Bloque propio de la farmacia en el alta pública (P50). */
+/**
+ * Bloque propio de la farmacia en el alta pública (P50).
+ *
+ * La casa central nace siempre —es la sede de la que cuelga la farmacia y la
+ * que queda enlazada en `pharmacies.primary_practice_site_id`—; `address` y el
+ * punto son opcionales para registrarse y **el punto es obligatorio para
+ * operar**: la plataforma no verifica una farmacia sin él.
+ */
 export class RegisterPharmacyBlockDto {
-  @ApiPropertyOptional({ description: 'Latitud de la casa central' })
+  @ApiPropertyOptional({
+    description: 'Dirección escrita de la casa central (dirección legal)',
+    maxLength: 500,
+    example: 'Av. Cristo Redentor 1234, Santa Cruz de la Sierra',
+  })
   @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  address?: string;
+
+  @ApiPropertyOptional({
+    description: 'Latitud de la casa central; va junto con longitude o no va',
+  })
+  @ValidateIf(
+    (dto: RegisterPharmacyBlockDto) =>
+      dto.latitude !== undefined || dto.longitude !== undefined,
+  )
   @IsLatitude()
   latitude?: number;
 
-  @ApiPropertyOptional({ description: 'Longitud de la casa central' })
-  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Longitud de la casa central; va junto con latitude o no va',
+  })
+  @ValidateIf(
+    (dto: RegisterPharmacyBlockDto) =>
+      dto.latitude !== undefined || dto.longitude !== undefined,
+  )
   @IsLongitude()
   longitude?: number;
 
-  @ApiPropertyOptional({ type: [RegisterPharmacyBranchDto] })
+  @ApiPropertyOptional({ type: [RegisterPharmacyBranchDto], maxItems: 50 })
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(50)
   @ValidateNested({ each: true })
   @Type(() => RegisterPharmacyBranchDto)
   branches?: RegisterPharmacyBranchDto[];
@@ -483,8 +526,8 @@ export class RegisterOrganizationDetailsDto {
     description:
       'Tipo de organización. Obligatorio: cada tipo exige sus propios datos. ' +
       'PAYER exige el bloque `payer` y BROKER el bloque `broker`. El resto ' +
-      '—PROVIDER, UNIVERSITY, PHARMACY, DIAGNOSTIC_CENTER y las cuatro ' +
-      'institucionales (HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER) y ' +
+      '—PROVIDER, UNIVERSITY, PHARMACY, DIAGNOSTIC_CENTER y las cinco ' +
+      'institucionales (HOSPITAL, CLINIC, MEDICAL_OFFICE, NURSING, HEALTH_OTHER) y ' +
       'HEALTH_BUSINESS— ' +
       'exigen país y ' +
       'jurisdicción, que es lo que determina bajo qué regulador operan.',
@@ -513,6 +556,27 @@ export class RegisterOrganizationDetailsDto {
   @IsOptional()
   @IsIn(LEGAL_ENTITY_TYPE_CODES)
   legalEntityType?: LegalEntityTypeCode;
+
+  /**
+   * Identificación tributaria de la organización (el NIT en Bolivia).
+   *
+   * El alta pública de farmacia la captura como dato propio (P50); antes sólo
+   * viajaba dentro del `code` del tenant y el DTO la rechazaba con 400
+   * (`forbidNonWhitelisted`). Se copia como `document_number` del documento
+   * `TAX_IDENTIFIER_DOC` cuando el alta trae los papeles; para una aseguradora
+   * sigue mandando `payer.regulatorIdentifier` si este campo no viene.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Identificación tributaria (NIT en Bolivia); se registra como número del documento tributario',
+    maxLength: 50,
+    example: '1023456029',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(50)
+  taxIdentifier?: string;
 
   /**
    * Documentos legales de afiliación en PDF (subtarea 1.2).
@@ -619,8 +683,15 @@ export class RegisterOrganizationDetailsDto {
   @MaxLength(100)
   timeZone?: string;
 
-  /** Sólo para `PHARMACY`: casa central y sucursales. */
-  @ApiPropertyOptional({ type: RegisterPharmacyBlockDto })
+  /**
+   * Sólo para `PHARMACY`: casa central y sucursales. Mandarlo con otro tipo
+   * es un 422 (`TenantTypeProfileService.assertProfileMatchesType`).
+   */
+  @ApiPropertyOptional({
+    type: RegisterPharmacyBlockDto,
+    description:
+      'Sólo para PHARMACY: dirección y punto de la casa central y sucursales',
+  })
   @IsOptional()
   @ValidateNested()
   @Type(() => RegisterPharmacyBlockDto)
@@ -809,6 +880,16 @@ export class RegisterOrganizationResponseDto {
     description: 'Id de la unidad diagnóstica creada (sólo DIAGNOSTIC_CENTER)',
   })
   diagnosticUnitId?: string;
+
+  /**
+   * Id de la farmacia creada (`pharmacy.pharmacies`). Sólo presente cuando
+   * `tenantType` es `PHARMACY` (P50).
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Id de la farmacia creada (sólo PHARMACY)',
+  })
+  pharmacyId?: string;
 
   /**
    * Cuántos documentos legales quedaron registrados, pendientes de

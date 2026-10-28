@@ -5,7 +5,7 @@
 - **Bloque:** Operaciones de Plataforma (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 - **Operaciones:** 24 (24 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 1 · MEDIO 23 · BAJO 0
-- **Tablas distintas que tocan:** 46
+- **Tablas distintas que tocan:** 47
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/system-ops.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -29,7 +29,7 @@
 | 15 | POST | `/admin/governance/remediation-actions/{id}/verify` | Verificar y cerrar una acción de remediación | MEDIO | 6 | SECURITY_ADMIN |
 | 16 | POST | `/admin/governance/residency-policies` | Definir una política de residencia de datos | MEDIO | 3 | SECURITY_ADMIN |
 | 17 | POST | `/admin/governance/retention-policies` | Definir una política de retención con base legal | MEDIO | 3 | SECURITY_ADMIN |
-| 18 | POST | `/admin/governance/tenant-residency-bindings` | Vincular un tenant a una política de residencia | MEDIO | 1 | SECURITY_ADMIN |
+| 18 | POST | `/admin/governance/tenant-residency-bindings` | Vincular un tenant a una política de residencia | MEDIO | 4 | SECURITY_ADMIN |
 | 19 | POST | `/admin/governance/workload-assessments` | Iniciar una evaluación de workload | MEDIO | 2 | SECURITY_ADMIN |
 | 20 | PUT | `/admin/governance/workload-assessments/{id}/control-results` | Registrar (UPSERT) resultados de control de una evaluación | MEDIO | 4 | SECURITY_ADMIN |
 | 21 | POST | `/admin/governance/write-policies` | Definir una política de escritura | MEDIO | 3 | SECURITY_ADMIN |
@@ -46,7 +46,7 @@
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `GovernanceCatalogController.createAnonymizationRule` — `src/modules/system_ops/controllers/governance-catalog.controller.ts:107`
+- **Implementación:** `GovernanceCatalogController.createAnonymizationRule` — `src/modules/system_ops/controllers/governance-catalog.controller.ts:137`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -56,18 +56,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/governance/anonymization-rules` la atiende `GovernanceCatalogController.createAnonymizationRule` (src/modules/system_ops/controllers/governance-catalog.controller.ts:107). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateAnonymizationRuleDto` (4 campos, 2 obligatorios). Delega en `GovernanceCatalogService.createAnonymizationRule`. Crea filas en system_ops.anonymization_rules, system_ops.governance_change_log. Lee system_ops.anonymization_rules.
+`POST /admin/governance/anonymization-rules` la atiende `GovernanceCatalogController.createAnonymizationRule` (src/modules/system_ops/controllers/governance-catalog.controller.ts:137). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateAnonymizationRuleDto` (4 campos, 2 obligatorios). Delega en `GovernanceCatalogService.createAnonymizationRule`. Crea filas en system_ops.anonymization_rules, system_ops.governance_change_log. Lee system_ops.anonymization_rules.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/governance-catalog.controller.ts:107` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/governance-catalog.controller.ts:137` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -146,7 +146,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AssessmentController.createFinding` — `src/modules/system_ops/controllers/assessment.controller.ts:88`
+- **Implementación:** `AssessmentController.createFinding` — `src/modules/system_ops/controllers/assessment.controller.ts:108`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -156,19 +156,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/governance/assessments/{id}/findings` la atiende `AssessmentController.createFinding` (src/modules/system_ops/controllers/assessment.controller.ts:88). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateFindingDto` (7 campos, 3 obligatorios). Delega en `AssessmentService.createFinding`. Crea filas en system_ops.assessment_findings. Lee system_ops.assessment_findings, system_ops.workload_assessments.
+`POST /admin/governance/assessments/{id}/findings` la atiende `AssessmentController.createFinding` (src/modules/system_ops/controllers/assessment.controller.ts:108). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateFindingDto` (7 campos, 3 obligatorios). Delega en `AssessmentService.createFinding`. Crea filas en system_ops.assessment_findings. Lee system_ops.assessment_findings, system_ops.workload_assessments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/assessment.controller.ts:88` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/assessment.controller.ts:88` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/assessment.controller.ts:108` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/assessment.controller.ts:108` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -260,7 +260,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AssessmentController.createRemediationPlan` — `src/modules/system_ops/controllers/assessment.controller.ts:101`
+- **Implementación:** `AssessmentController.createRemediationPlan` — `src/modules/system_ops/controllers/assessment.controller.ts:126`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -270,19 +270,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/governance/assessments/{id}/remediation-plans` la atiende `AssessmentController.createRemediationPlan` (src/modules/system_ops/controllers/assessment.controller.ts:101). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateRemediationPlanDto` (11 campos, 6 obligatorios). Delega en `AssessmentService.createRemediationPlan`. Crea filas en system_ops.remediation_actions, system_ops.remediation_plans. Lee system_ops.assessment_findings, system_ops.remediation_plans, system_ops.workload_assessments.
+`POST /admin/governance/assessments/{id}/remediation-plans` la atiende `AssessmentController.createRemediationPlan` (src/modules/system_ops/controllers/assessment.controller.ts:126). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateRemediationPlanDto` (11 campos, 6 obligatorios). Delega en `AssessmentService.createRemediationPlan`. Crea filas en system_ops.remediation_actions, system_ops.remediation_plans. Lee system_ops.assessment_findings, system_ops.remediation_plans, system_ops.workload_assessments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/assessment.controller.ts:101` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/assessment.controller.ts:101` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/assessment.controller.ts:126` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/assessment.controller.ts:126` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -393,7 +393,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ResidencyController.recordTransfer` — `src/modules/system_ops/controllers/residency.controller.ts:52`
+- **Implementación:** `ResidencyController.recordTransfer` — `src/modules/system_ops/controllers/residency.controller.ts:67`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -403,25 +403,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/governance/cross-border-transfers` la atiende `ResidencyController.recordTransfer` (src/modules/system_ops/controllers/residency.controller.ts:52). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateCrossBorderTransferDto` (7 campos, 6 obligatorios). Delega en `ResidencyService.recordTransfer`. Crea filas en system_ops.cross_border_transfer_events. Lee system_ops.cross_border_transfer_events.
+`POST /admin/governance/cross-border-transfers` la atiende `ResidencyController.recordTransfer` (src/modules/system_ops/controllers/residency.controller.ts:67). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateCrossBorderTransferDto` (7 campos, 6 obligatorios). Delega en `ResidencyService.recordTransfer`. Crea filas en system_ops.cross_border_transfer_events. Lee system_ops.cross_border_transfer_events.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/residency.controller.ts:52` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/residency.controller.ts:67` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `system_ops.cross_border_transfer_events` | ESCRIBE | CREA | DIRECTA | ResidencyController.recordTransfer → ResidencyService.recordTransfer → ResidencyRepository.createTransfer | `src/modules/system_ops/repositories/residency.repository.ts:218` |
-| `system_ops.cross_border_transfer_events` | LEE | LEE | DIRECTA | ResidencyController.recordTransfer → ResidencyService.recordTransfer → ResidencyRepository.findTransferByReference | `src/modules/system_ops/repositories/residency.repository.ts:171` |
+| `system_ops.cross_border_transfer_events` | ESCRIBE | CREA | DIRECTA | ResidencyController.recordTransfer → ResidencyService.recordTransfer → ResidencyRepository.createTransfer | `src/modules/system_ops/repositories/residency.repository.ts:263` |
+| `system_ops.cross_border_transfer_events` | LEE | LEE | DIRECTA | ResidencyController.recordTransfer → ResidencyService.recordTransfer → ResidencyRepository.findTransferByReference | `src/modules/system_ops/repositories/residency.repository.ts:216` |
 
 ### Cuerpo — DTO `CreateCrossBorderTransferDto` · `application/json`
 
@@ -500,7 +500,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `DraftController.createDraft` — `src/modules/system_ops/controllers/draft.controller.ts:28`
+- **Implementación:** `DraftController.createDraft` — `src/modules/system_ops/controllers/draft.controller.ts:33`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -510,18 +510,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/governance/drafts` la atiende `DraftController.createDraft` (src/modules/system_ops/controllers/draft.controller.ts:28). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateDraftDto` (7 campos, 3 obligatorios). Delega en `DraftService.createDraft`. Crea filas en system_ops.draft_records.
+`POST /admin/governance/drafts` la atiende `DraftController.createDraft` (src/modules/system_ops/controllers/draft.controller.ts:33). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateDraftDto` (7 campos, 3 obligatorios). Delega en `DraftService.createDraft`. Crea filas en system_ops.draft_records.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/draft.controller.ts:28` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/draft.controller.ts:33` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -604,7 +604,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `DraftController.publishDraft` — `src/modules/system_ops/controllers/draft.controller.ts:40`
+- **Implementación:** `DraftController.publishDraft` — `src/modules/system_ops/controllers/draft.controller.ts:50`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -614,19 +614,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/governance/drafts/{id}/publish` la atiende `DraftController.publishDraft` (src/modules/system_ops/controllers/draft.controller.ts:40). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PublishDraftDto` (1 campo, 1 obligatorio). Delega en `DraftService.publishDraft`. Crea filas en system_ops.record_revisions. Actualiza system_ops.draft_records. Lee system_ops.draft_records.
+`POST /admin/governance/drafts/{id}/publish` la atiende `DraftController.publishDraft` (src/modules/system_ops/controllers/draft.controller.ts:50). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PublishDraftDto` (1 campo, 1 obligatorio). Delega en `DraftService.publishDraft`. Crea filas en system_ops.record_revisions. Actualiza system_ops.draft_records. Lee system_ops.draft_records.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/draft.controller.ts:40` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/draft.controller.ts:40` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/draft.controller.ts:50` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/draft.controller.ts:50` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -705,7 +705,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `GovernanceCatalogController.catalogEntity` — `src/modules/system_ops/controllers/governance-catalog.controller.ts:43`
+- **Implementación:** `GovernanceCatalogController.catalogEntity` — `src/modules/system_ops/controllers/governance-catalog.controller.ts:48`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -715,18 +715,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/governance/entity-registry` la atiende `GovernanceCatalogController.catalogEntity` (src/modules/system_ops/controllers/governance-catalog.controller.ts:43). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CatalogEntityDto` (26 campos, 13 obligatorios). Delega en `GovernanceCatalogService.catalogEntity`. Crea filas en system_ops.data_classifications, system_ops.data_domains, system_ops.entity_registry, system_ops.field_registry, system_ops.governance_change_log. Lee system_ops.data_classifications, system_ops.data_domains.
+`POST /admin/governance/entity-registry` la atiende `GovernanceCatalogController.catalogEntity` (src/modules/system_ops/controllers/governance-catalog.controller.ts:48). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CatalogEntityDto` (26 campos, 13 obligatorios). Delega en `GovernanceCatalogService.catalogEntity`. Crea filas en system_ops.data_classifications, system_ops.data_domains, system_ops.entity_registry, system_ops.field_registry, system_ops.governance_change_log. Lee system_ops.data_classifications, system_ops.data_domains.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/governance-catalog.controller.ts:43` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/governance-catalog.controller.ts:48` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -878,7 +878,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `GovernanceCatalogController.applyRetention` — `src/modules/system_ops/controllers/governance-catalog.controller.ts:94`
+- **Implementación:** `GovernanceCatalogController.applyRetention` — `src/modules/system_ops/controllers/governance-catalog.controller.ts:119`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -888,19 +888,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`PATCH /admin/governance/entity-registry/{id}/retention` la atiende `GovernanceCatalogController.applyRetention` (src/modules/system_ops/controllers/governance-catalog.controller.ts:94). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ApplyRetentionPolicyDto` (2 campos, 2 obligatorios). Delega en `GovernanceCatalogService.applyRetention`. Crea filas en system_ops.governance_change_log. Actualiza system_ops.entity_registry. Lee system_ops.entity_registry, system_ops.retention_policies.
+`PATCH /admin/governance/entity-registry/{id}/retention` la atiende `GovernanceCatalogController.applyRetention` (src/modules/system_ops/controllers/governance-catalog.controller.ts:119). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ApplyRetentionPolicyDto` (2 campos, 2 obligatorios). Delega en `GovernanceCatalogService.applyRetention`. Crea filas en system_ops.governance_change_log. Actualiza system_ops.entity_registry. Lee system_ops.entity_registry, system_ops.retention_policies.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/governance-catalog.controller.ts:94` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/governance-catalog.controller.ts:94` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/governance-catalog.controller.ts:119` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/governance-catalog.controller.ts:119` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -982,7 +982,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `GovernanceCatalogController.applyWritePolicy` — `src/modules/system_ops/controllers/governance-catalog.controller.ts:69`
+- **Implementación:** `GovernanceCatalogController.applyWritePolicy` — `src/modules/system_ops/controllers/governance-catalog.controller.ts:84`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -992,19 +992,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`PATCH /admin/governance/entity-registry/{id}/write-policy` la atiende `GovernanceCatalogController.applyWritePolicy` (src/modules/system_ops/controllers/governance-catalog.controller.ts:69). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ApplyWritePolicyDto` (2 campos, 1 obligatorio). Delega en `GovernanceCatalogService.applyWritePolicy`. Crea filas en system_ops.governance_change_log. Actualiza system_ops.entity_registry. Lee system_ops.entity_registry, system_ops.write_policies.
+`PATCH /admin/governance/entity-registry/{id}/write-policy` la atiende `GovernanceCatalogController.applyWritePolicy` (src/modules/system_ops/controllers/governance-catalog.controller.ts:84). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ApplyWritePolicyDto` (2 campos, 1 obligatorio). Delega en `GovernanceCatalogService.applyWritePolicy`. Crea filas en system_ops.governance_change_log. Actualiza system_ops.entity_registry. Lee system_ops.entity_registry, system_ops.write_policies.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/governance-catalog.controller.ts:69` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/governance-catalog.controller.ts:69` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/governance-catalog.controller.ts:84` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/governance-catalog.controller.ts:84` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1085,7 +1085,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `GovernanceCatalogController.updateField` — `src/modules/system_ops/controllers/governance-catalog.controller.ts:119`
+- **Implementación:** `GovernanceCatalogController.updateField` — `src/modules/system_ops/controllers/governance-catalog.controller.ts:154`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1095,19 +1095,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`PATCH /admin/governance/field-registry/{id}` la atiende `GovernanceCatalogController.updateField` (src/modules/system_ops/controllers/governance-catalog.controller.ts:119). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UpdateFieldRegistryDto` (4 campos, 0 obligatorios). Delega en `GovernanceCatalogService.updateField`. Crea filas en system_ops.governance_change_log. Actualiza system_ops.field_registry. Lee system_ops.field_registry.
+`PATCH /admin/governance/field-registry/{id}` la atiende `GovernanceCatalogController.updateField` (src/modules/system_ops/controllers/governance-catalog.controller.ts:154). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UpdateFieldRegistryDto` (4 campos, 0 obligatorios). Delega en `GovernanceCatalogService.updateField`. Crea filas en system_ops.governance_change_log. Actualiza system_ops.field_registry. Lee system_ops.field_registry.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/governance-catalog.controller.ts:119` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/governance-catalog.controller.ts:119` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/governance-catalog.controller.ts:154` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/governance-catalog.controller.ts:154` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1189,7 +1189,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AssessmentController.updateFinding` — `src/modules/system_ops/controllers/assessment.controller.ts:127`
+- **Implementación:** `AssessmentController.updateFinding` — `src/modules/system_ops/controllers/assessment.controller.ts:162`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1199,19 +1199,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`PATCH /admin/governance/findings/{id}` la atiende `AssessmentController.updateFinding` (src/modules/system_ops/controllers/assessment.controller.ts:127). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UpdateFindingDto` (2 campos, 0 obligatorios). Delega en `AssessmentService.updateFinding`. Actualiza system_ops.assessment_findings. Lee system_ops.assessment_findings.
+`PATCH /admin/governance/findings/{id}` la atiende `AssessmentController.updateFinding` (src/modules/system_ops/controllers/assessment.controller.ts:162). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UpdateFindingDto` (2 campos, 0 obligatorios). Delega en `AssessmentService.updateFinding`. Actualiza system_ops.assessment_findings. Lee system_ops.assessment_findings.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/assessment.controller.ts:127` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/assessment.controller.ts:127` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/assessment.controller.ts:162` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/assessment.controller.ts:162` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1286,7 +1286,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `LegalHoldController.place` — `src/modules/system_ops/controllers/legal-hold.controller.ts:33`
+- **Implementación:** `LegalHoldController.place` — `src/modules/system_ops/controllers/legal-hold.controller.ts:38`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1296,18 +1296,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/governance/legal-holds` la atiende `LegalHoldController.place` (src/modules/system_ops/controllers/legal-hold.controller.ts:33). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateLegalHoldDto` (6 campos, 4 obligatorios). Delega en `LegalHoldService.place`. Crea filas en system_ops.governance_change_log, system_ops.legal_holds. Lee system_ops.legal_holds.
+`POST /admin/governance/legal-holds` la atiende `LegalHoldController.place` (src/modules/system_ops/controllers/legal-hold.controller.ts:38). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateLegalHoldDto` (6 campos, 4 obligatorios). Delega en `LegalHoldService.place`. Crea filas en system_ops.governance_change_log, system_ops.legal_holds. Lee system_ops.legal_holds.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/legal-hold.controller.ts:33` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/legal-hold.controller.ts:38` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1390,7 +1390,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `LegalHoldController.release` — `src/modules/system_ops/controllers/legal-hold.controller.ts:45`
+- **Implementación:** `LegalHoldController.release` — `src/modules/system_ops/controllers/legal-hold.controller.ts:55`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1400,19 +1400,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/governance/legal-holds/{id}/release` la atiende `LegalHoldController.release` (src/modules/system_ops/controllers/legal-hold.controller.ts:45). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ReleaseLegalHoldDto` (1 campo, 0 obligatorios). Delega en `LegalHoldService.release`. Crea filas en system_ops.governance_change_log. Actualiza system_ops.legal_holds. Lee system_ops.legal_holds.
+`POST /admin/governance/legal-holds/{id}/release` la atiende `LegalHoldController.release` (src/modules/system_ops/controllers/legal-hold.controller.ts:55). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ReleaseLegalHoldDto` (1 campo, 0 obligatorios). Delega en `LegalHoldService.release`. Crea filas en system_ops.governance_change_log. Actualiza system_ops.legal_holds. Lee system_ops.legal_holds.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/legal-hold.controller.ts:45` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/legal-hold.controller.ts:45` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/legal-hold.controller.ts:55` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/legal-hold.controller.ts:55` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1487,7 +1487,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AssessmentController.publishFramework` — `src/modules/system_ops/controllers/assessment.controller.ts:47`
+- **Implementación:** `AssessmentController.publishFramework` — `src/modules/system_ops/controllers/assessment.controller.ts:52`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1497,18 +1497,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/governance/operational-frameworks` la atiende `AssessmentController.publishFramework` (src/modules/system_ops/controllers/assessment.controller.ts:47). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateFrameworkDto` (13 campos, 7 obligatorios). Delega en `AssessmentService.publishFramework`. Crea filas en system_ops.operational_framework_controls, system_ops.operational_frameworks. Lee system_ops.operational_frameworks.
+`POST /admin/governance/operational-frameworks` la atiende `AssessmentController.publishFramework` (src/modules/system_ops/controllers/assessment.controller.ts:52). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateFrameworkDto` (13 campos, 7 obligatorios). Delega en `AssessmentService.publishFramework`. Crea filas en system_ops.operational_framework_controls, system_ops.operational_frameworks. Lee system_ops.operational_frameworks.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/assessment.controller.ts:47` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/assessment.controller.ts:52` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1618,7 +1618,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AssessmentController.verifyAction` — `src/modules/system_ops/controllers/assessment.controller.ts:114`
+- **Implementación:** `AssessmentController.verifyAction` — `src/modules/system_ops/controllers/assessment.controller.ts:144`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1628,19 +1628,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/governance/remediation-actions/{id}/verify` la atiende `AssessmentController.verifyAction` (src/modules/system_ops/controllers/assessment.controller.ts:114). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `VerifyRemediationActionDto` (1 campo, 1 obligatorio). Delega en `AssessmentService.verifyAction`. Actualiza system_ops.assessment_findings, system_ops.remediation_actions, system_ops.remediation_plans. Lee system_ops.assessment_findings, system_ops.remediation_actions, system_ops.remediation_plans.
+`POST /admin/governance/remediation-actions/{id}/verify` la atiende `AssessmentController.verifyAction` (src/modules/system_ops/controllers/assessment.controller.ts:144). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `VerifyRemediationActionDto` (1 campo, 1 obligatorio). Delega en `AssessmentService.verifyAction`. Actualiza system_ops.assessment_findings, system_ops.remediation_actions, system_ops.remediation_plans. Lee system_ops.assessment_findings, system_ops.remediation_actions, system_ops.remediation_plans.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/assessment.controller.ts:114` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/assessment.controller.ts:114` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/assessment.controller.ts:144` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/assessment.controller.ts:144` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1720,7 +1720,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ResidencyController.createResidencyPolicy` — `src/modules/system_ops/controllers/residency.controller.ts:28`
+- **Implementación:** `ResidencyController.createResidencyPolicy` — `src/modules/system_ops/controllers/residency.controller.ts:33`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1730,25 +1730,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/governance/residency-policies` la atiende `ResidencyController.createResidencyPolicy` (src/modules/system_ops/controllers/residency.controller.ts:28). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateResidencyPolicyDto` (10 campos, 4 obligatorios). Delega en `ResidencyService.createResidencyPolicy`. Crea filas en system_ops.data_residency_policies, system_ops.governance_change_log. Lee system_ops.data_residency_policies.
+`POST /admin/governance/residency-policies` la atiende `ResidencyController.createResidencyPolicy` (src/modules/system_ops/controllers/residency.controller.ts:33). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateResidencyPolicyDto` (10 campos, 4 obligatorios). Delega en `ResidencyService.createResidencyPolicy`. Crea filas en system_ops.data_residency_policies, system_ops.governance_change_log. Lee system_ops.data_residency_policies.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/residency.controller.ts:28` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/residency.controller.ts:33` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `system_ops.data_residency_policies` | ESCRIBE | CREA | DIRECTA | ResidencyController.createResidencyPolicy → ResidencyService.createResidencyPolicy → ResidencyRepository.createPolicy | `src/modules/system_ops/repositories/residency.repository.ts:105` |
-| `system_ops.data_residency_policies` | LEE | LEE | DIRECTA | ResidencyController.createResidencyPolicy → ResidencyService.createResidencyPolicy → ResidencyRepository.findPolicyByCode | `src/modules/system_ops/repositories/residency.repository.ts:27` |
+| `system_ops.data_residency_policies` | ESCRIBE | CREA | DIRECTA | ResidencyController.createResidencyPolicy → ResidencyService.createResidencyPolicy → ResidencyRepository.createPolicy | `src/modules/system_ops/repositories/residency.repository.ts:150` |
+| `system_ops.data_residency_policies` | LEE | LEE | DIRECTA | ResidencyController.createResidencyPolicy → ResidencyService.createResidencyPolicy → ResidencyRepository.findPolicyByCode | `src/modules/system_ops/repositories/residency.repository.ts:30` |
 | `system_ops.governance_change_log` | ESCRIBE | CREA | DIRECTA | ResidencyController.createResidencyPolicy → ResidencyService.createResidencyPolicy → GovernanceRepository.recordChange | `src/modules/system_ops/repositories/governance.repository.ts:584` |
 
 ### Cuerpo — DTO `CreateResidencyPolicyDto` · `application/json`
@@ -1832,7 +1832,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `GovernanceCatalogController.createRetentionPolicy` — `src/modules/system_ops/controllers/governance-catalog.controller.ts:82`
+- **Implementación:** `GovernanceCatalogController.createRetentionPolicy` — `src/modules/system_ops/controllers/governance-catalog.controller.ts:102`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1842,18 +1842,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/governance/retention-policies` la atiende `GovernanceCatalogController.createRetentionPolicy` (src/modules/system_ops/controllers/governance-catalog.controller.ts:82). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateRetentionPolicyDto` (6 campos, 2 obligatorios). Delega en `GovernanceCatalogService.createRetentionPolicy`. Crea filas en system_ops.governance_change_log, system_ops.retention_policies. Lee system_ops.retention_policies.
+`POST /admin/governance/retention-policies` la atiende `GovernanceCatalogController.createRetentionPolicy` (src/modules/system_ops/controllers/governance-catalog.controller.ts:102). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateRetentionPolicyDto` (6 campos, 2 obligatorios). Delega en `GovernanceCatalogService.createRetentionPolicy`. Crea filas en system_ops.governance_change_log, system_ops.retention_policies. Lee system_ops.retention_policies.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/governance-catalog.controller.ts:82` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/governance-catalog.controller.ts:102` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1936,7 +1936,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ResidencyController.createBinding` — `src/modules/system_ops/controllers/residency.controller.ts:40`
+- **Implementación:** `ResidencyController.createBinding` — `src/modules/system_ops/controllers/residency.controller.ts:50`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1946,24 +1946,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/governance/tenant-residency-bindings` la atiende `ResidencyController.createBinding` (src/modules/system_ops/controllers/residency.controller.ts:40). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateTenantResidencyBindingDto` (5 campos, 3 obligatorios). Delega en `ResidencyService.createBinding`. Crea filas en system_ops.tenant_residency_bindings.
+`POST /admin/governance/tenant-residency-bindings` la atiende `ResidencyController.createBinding` (src/modules/system_ops/controllers/residency.controller.ts:50). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateTenantResidencyBindingDto` (5 campos, 3 obligatorios). Delega en `ResidencyService.createBinding`. Crea filas en system_ops.tenant_residency_bindings. Lee directory.tenants, polyglot_storage.residency_policies, terminology.catalog_concepts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/residency.controller.ts:40` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/residency.controller.ts:50` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `system_ops.tenant_residency_bindings` | ESCRIBE | CREA | DIRECTA | ResidencyController.createBinding → ResidencyService.createBinding → ResidencyRepository.createBinding | `src/modules/system_ops/repositories/residency.repository.ts:153` |
+| `directory.tenants` | LEE | LEE | DIRECTA | ResidencyController.createBinding → ResidencyService.createBinding → ResidencyRepository.tenantExists | `src/modules/system_ops/repositories/residency.repository.ts:71` |
+| `polyglot_storage.residency_policies` | LEE | LEE | DIRECTA | ResidencyController.createBinding → ResidencyService.createBinding → ResidencyRepository.findBindingPolicyById | `src/modules/system_ops/repositories/residency.repository.ts:60` |
+| `system_ops.tenant_residency_bindings` | ESCRIBE | CREA | DIRECTA | ResidencyController.createBinding → ResidencyService.createBinding → ResidencyRepository.createBinding | `src/modules/system_ops/repositories/residency.repository.ts:198` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | ResidencyController.createBinding → ResidencyService.createBinding → ResidencyRepository.findConceptCodes | `src/modules/system_ops/repositories/residency.repository.ts:85` |
 
 ### Cuerpo — DTO `CreateTenantResidencyBindingDto` · `application/json`
 
@@ -2013,6 +2016,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: El tenant o la política de residencia no existen; ResourceNotFoundException: Una de las regiones indicadas no existe |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La política de residencia no está activa; PreconditionFailedException: Una de las regiones queda fuera de las que la política permite |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
@@ -2034,7 +2039,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AssessmentController.createAssessment` — `src/modules/system_ops/controllers/assessment.controller.ts:61`
+- **Implementación:** `AssessmentController.createAssessment` — `src/modules/system_ops/controllers/assessment.controller.ts:71`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2044,18 +2049,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/governance/workload-assessments` la atiende `AssessmentController.createAssessment` (src/modules/system_ops/controllers/assessment.controller.ts:61). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateWorkloadAssessmentDto` (8 campos, 5 obligatorios). Delega en `AssessmentService.createAssessment`. Crea filas en system_ops.workload_assessments. Lee system_ops.operational_frameworks.
+`POST /admin/governance/workload-assessments` la atiende `AssessmentController.createAssessment` (src/modules/system_ops/controllers/assessment.controller.ts:71). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateWorkloadAssessmentDto` (8 campos, 5 obligatorios). Delega en `AssessmentService.createAssessment`. Crea filas en system_ops.workload_assessments. Lee system_ops.operational_frameworks.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/assessment.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/assessment.controller.ts:71` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -2143,7 +2148,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AssessmentController.putControlResults` — `src/modules/system_ops/controllers/assessment.controller.ts:73`
+- **Implementación:** `AssessmentController.putControlResults` — `src/modules/system_ops/controllers/assessment.controller.ts:88`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2153,19 +2158,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`PUT /admin/governance/workload-assessments/{id}/control-results` la atiende `AssessmentController.putControlResults` (src/modules/system_ops/controllers/assessment.controller.ts:73). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PutControlResultsDto` (6 campos, 3 obligatorios). Delega en `AssessmentService.putControlResults`. Crea filas en system_ops.assessment_control_results. Actualiza system_ops.assessment_control_results. Lee system_ops.assessment_control_results, system_ops.workload_assessments.
+`PUT /admin/governance/workload-assessments/{id}/control-results` la atiende `AssessmentController.putControlResults` (src/modules/system_ops/controllers/assessment.controller.ts:88). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PutControlResultsDto` (6 campos, 3 obligatorios). Delega en `AssessmentService.putControlResults`. Crea filas en system_ops.assessment_control_results. Actualiza system_ops.assessment_control_results. Lee system_ops.assessment_control_results, system_ops.workload_assessments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/assessment.controller.ts:73` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/assessment.controller.ts:73` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/assessment.controller.ts:88` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/assessment.controller.ts:88` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -2260,7 +2265,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `GovernanceCatalogController.createWritePolicy` — `src/modules/system_ops/controllers/governance-catalog.controller.ts:57`
+- **Implementación:** `GovernanceCatalogController.createWritePolicy` — `src/modules/system_ops/controllers/governance-catalog.controller.ts:67`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2270,18 +2275,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/governance/write-policies` la atiende `GovernanceCatalogController.createWritePolicy` (src/modules/system_ops/controllers/governance-catalog.controller.ts:57). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateWritePolicyDto` (9 campos, 5 obligatorios). Delega en `GovernanceCatalogService.createWritePolicy`. Crea filas en system_ops.governance_change_log, system_ops.write_policies. Lee system_ops.write_policies.
+`POST /admin/governance/write-policies` la atiende `GovernanceCatalogController.createWritePolicy` (src/modules/system_ops/controllers/governance-catalog.controller.ts:67). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateWritePolicyDto` (9 campos, 5 obligatorios). Delega en `GovernanceCatalogService.createWritePolicy`. Crea filas en system_ops.governance_change_log, system_ops.write_policies. Lee system_ops.write_policies.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/governance-catalog.controller.ts:57` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/governance-catalog.controller.ts:67` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -2373,7 +2378,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `BackupController.createPolicy` — `src/modules/system_ops/controllers/backup.controller.ts:20`
+- **Implementación:** `BackupController.createPolicy` — `src/modules/system_ops/controllers/backup.controller.ts:25`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2383,18 +2388,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/ops/backup-policies` la atiende `BackupController.createPolicy` (src/modules/system_ops/controllers/backup.controller.ts:20). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateBackupPolicyDto` (9 campos, 5 obligatorios). Delega en `BackupService.createPolicy`. Crea filas en system_ops.backup_policies.
+`POST /admin/ops/backup-policies` la atiende `BackupController.createPolicy` (src/modules/system_ops/controllers/backup.controller.ts:25). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateBackupPolicyDto` (9 campos, 5 obligatorios). Delega en `BackupService.createPolicy`. Crea filas en system_ops.backup_policies.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/backup.controller.ts:20` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/backup.controller.ts:25` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -2484,7 +2489,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `RetentionExecutionController.run` — `src/modules/system_ops/controllers/retention-execution.controller.ts:23`
+- **Implementación:** `RetentionExecutionController.run` — `src/modules/system_ops/controllers/retention-execution.controller.ts:28`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2494,18 +2499,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/governance/retention-executions/run` la atiende `RetentionExecutionController.run` (src/modules/system_ops/controllers/retention-execution.controller.ts:23). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RunRetentionDto` (3 campos, 2 obligatorios). Delega en `RetentionExecutionService.run`. Crea filas en messaging.queued_jobs, system_ops.record_revisions, system_ops.retention_executions. Actualiza common.files, identity_assurance.identity_evidence_records, system_ops.retention_executions. Borra de common.file_derivatives, common.file_versions, common.files, identity_assurance.identity_evidence_records. Lee audio_assets.audio_assets, common.file_derivatives, common.file_versions, common.files, consent.consents, cross_store_consistency.deletion_targets, directory.tenant_memberships, directory.tenants y 20 más.
+`POST /internal/governance/retention-executions/run` la atiende `RetentionExecutionController.run` (src/modules/system_ops/controllers/retention-execution.controller.ts:28). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RunRetentionDto` (4 campos, 2 obligatorios). Delega en `RetentionExecutionService.run`. Crea filas en messaging.queued_jobs, system_ops.record_revisions, system_ops.retention_executions. Actualiza common.files, identity_assurance.identity_evidence_records, system_ops.retention_executions. Borra de common.file_derivatives, common.file_versions, common.files, identity_assurance.identity_evidence_records. Lee audio_assets.audio_assets, common.file_derivatives, common.file_versions, common.files, consent.consents, cross_store_consistency.deletion_targets, directory.tenant_memberships, directory.tenants y 20 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/retention-execution.controller.ts:23` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/retention-execution.controller.ts:28` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -2543,9 +2548,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | `system_ops.entity_registry` | LEE | LEE | DIRECTA | RetentionExecutionController.run → RetentionExecutionService.run → GovernanceRepository.findEntityById | `src/modules/system_ops/repositories/governance.repository.ts:175` |
 | `system_ops.field_registry` | LEE | LEE | DIRECTA | RetentionExecutionController.run → RetentionExecutionService.run → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityLifecycleConfigResolver.resolve → GovernanceRepository.findFieldById | `src/modules/system_ops/repositories/governance.repository.ts:259` |
 | `system_ops.legal_holds` | LEE | LEE | DIRECTA | RetentionExecutionController.run → RetentionExecutionService.run → RetentionExecutionRepository.countActiveHoldsForTarget | `src/modules/system_ops/repositories/retention-execution.repository.ts:104` |
-| `system_ops.record_revisions` | ESCRIBE | CREA | DIRECTA | RetentionExecutionController.run → RetentionExecutionService.run → RetentionExecutionRepository.createRevision | `src/modules/system_ops/repositories/retention-execution.repository.ts:88` |
+| `system_ops.record_revisions` | ESCRIBE | CREA | DIRECTA | RetentionExecutionController.run → RetentionExecutionService.run → RetentionExecutionService.sweepBatch → RetentionExecutionRepository.createRevision | `src/modules/system_ops/repositories/retention-execution.repository.ts:88` |
 | `system_ops.record_revisions` | LEE | LEE | DIRECTA | RetentionExecutionController.run → RetentionExecutionService.run → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceDispositionExecutor.execute | `src/modules/identity_assurance/services/identity-evidence-disposition.executor.ts:63` |
-| `system_ops.retention_executions` | ESCRIBE | ACTUALIZA | POR_TIPO | RetentionExecutionController.run → RetentionExecutionService.run | `src/modules/system_ops/services/retention-execution.service.ts:113` |
+| `system_ops.retention_executions` | ESCRIBE | ACTUALIZA | POR_TIPO | RetentionExecutionController.run → RetentionExecutionService.run | `src/modules/system_ops/services/retention-execution.service.ts:191` |
 | `system_ops.retention_executions` | ESCRIBE | CREA | DIRECTA | RetentionExecutionController.run → RetentionExecutionService.run → RetentionExecutionRepository.createExecution | `src/modules/system_ops/repositories/retention-execution.repository.ts:45` |
 | `system_ops.retention_policies` | LEE | LEE | DIRECTA | RetentionExecutionController.run → RetentionExecutionService.run → GovernanceRepository.findRetentionPolicyById | `src/modules/system_ops/repositories/governance.repository.ts:433` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | RetentionExecutionController.run → RetentionExecutionService.run → IdentityEvidenceLifecycleService.scan | `src/modules/identity_assurance/services/identity-evidence-lifecycle.service.ts:204` |
@@ -2557,6 +2562,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | `retentionPolicyId` | `string` | Sí | formato uuid | `@IsUUID()` | Política de retención ACTIVE a ejecutar | `src/modules/system_ops/dto/retention-execution.dto.ts:14` |
 | `entityRegistryId` | `string` | Sí | formato uuid | `@IsUUID()` | Entidad objetivo del registro (entity_registry.id) | `src/modules/system_ops/dto/retention-execution.dto.ts:24` |
 | `maxBatchSize` | `number` | No | mínimo 1 | `@IsOptional()` `@IsInt()` `@Min(1)` | Tamaño máximo de lote a barrer | `src/modules/system_ops/dto/retention-execution.dto.ts:33` |
+| `cursor` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Cursor devuelto por la corrida anterior (`nextCursor`); continúa tras esa fila | `src/modules/system_ops/dto/retention-execution.dto.ts:45` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2573,7 +2579,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 {
   "retentionPolicyId": "00000000-0000-4000-8000-000000000001",
   "entityRegistryId": "00000000-0000-4000-8000-000000000001",
-  "maxBatchSize": 1
+  "maxBatchSize": 1,
+  "cursor": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -2583,13 +2590,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/system_ops/dto/retention-execution.dto.ts:42` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Estado final (concept id) | `src/modules/system_ops/dto/retention-execution.dto.ts:48` |
-| `totalScanned` | `number` | Sí | — | — | Valor de total scanned mantenido por la instancia. | `src/modules/system_ops/dto/retention-execution.dto.ts:54` |
-| `totalDeleted` | `number` | Sí | — | — | Valor de total deleted mantenido por la instancia. | `src/modules/system_ops/dto/retention-execution.dto.ts:60` |
-| `totalAnonymized` | `number` | Sí | — | — | Valor de total anonymized mantenido por la instancia. | `src/modules/system_ops/dto/retention-execution.dto.ts:66` |
-| `totalArchived` | `number` | Sí | — | — | Valor de total archived mantenido por la instancia. | `src/modules/system_ops/dto/retention-execution.dto.ts:72` |
-| `blockedByLegalHold` | `boolean` | No | — | — | true si se detuvo por legal hold activo | `src/modules/system_ops/dto/retention-execution.dto.ts:80` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/system_ops/dto/retention-execution.dto.ts:54` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Estado final (concept id) | `src/modules/system_ops/dto/retention-execution.dto.ts:60` |
+| `totalScanned` | `number` | Sí | — | — | Valor de total scanned mantenido por la instancia. | `src/modules/system_ops/dto/retention-execution.dto.ts:66` |
+| `totalDeleted` | `number` | Sí | — | — | Valor de total deleted mantenido por la instancia. | `src/modules/system_ops/dto/retention-execution.dto.ts:72` |
+| `totalAnonymized` | `number` | Sí | — | — | Valor de total anonymized mantenido por la instancia. | `src/modules/system_ops/dto/retention-execution.dto.ts:78` |
+| `totalArchived` | `number` | Sí | — | — | Valor de total archived mantenido por la instancia. | `src/modules/system_ops/dto/retention-execution.dto.ts:84` |
+| `blockedByLegalHold` | `boolean` | No | — | — | true si se detuvo por legal hold activo | `src/modules/system_ops/dto/retention-execution.dto.ts:92` |
+| `totalHeld` | `number` | No | — | — | Filas vencidas conservadas por legal hold activo | `src/modules/system_ops/dto/retention-execution.dto.ts:100` |
+| `hasMore` | `boolean` | No | — | — | true si el lote se llenó y quedan filas vencidas sin examinar; repetir con `cursor` | `src/modules/system_ops/dto/retention-execution.dto.ts:109` |
+| `nextCursor` | `string` | No | formato uuid | — | Cursor para continuar el barrido cuando `hasMore` es true | `src/modules/system_ops/dto/retention-execution.dto.ts:118` |
 
 ### Respuestas posibles
 
@@ -2600,7 +2610,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Política de retención no encontrada; ResourceNotFoundException: Entidad objetivo no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La política de retención no está ACTIVE |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La política de retención no está ACTIVE; PreconditionFailedException: La entidad no tiene un ejecutor de retención registrado; PreconditionFailedException: La política de retención no declara plazo y disposición ejecutables |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: EXTERNAL_REFERENCE_UNKNOWN; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: PHYSICAL_METADATA_CONFLICT |
 
@@ -2623,7 +2633,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `RestoreTestController.recordRestoreTest` — `src/modules/system_ops/controllers/restore-test.controller.ts:23`
+- **Implementación:** `RestoreTestController.recordRestoreTest` — `src/modules/system_ops/controllers/restore-test.controller.ts:28`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2633,18 +2643,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/ops/restore-test-runs` la atiende `RestoreTestController.recordRestoreTest` (src/modules/system_ops/controllers/restore-test.controller.ts:23). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateRestoreTestRunDto` (8 campos, 2 obligatorios). Delega en `BackupService.recordRestoreTest`. Crea filas en system_ops.restore_test_runs. Lee system_ops.backup_policies.
+`POST /internal/ops/restore-test-runs` la atiende `RestoreTestController.recordRestoreTest` (src/modules/system_ops/controllers/restore-test.controller.ts:28). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateRestoreTestRunDto` (8 campos, 2 obligatorios). Delega en `BackupService.recordRestoreTest`. Crea filas en system_ops.restore_test_runs. Lee system_ops.backup_policies.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/restore-test.controller.ts:23` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/restore-test.controller.ts:28` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 

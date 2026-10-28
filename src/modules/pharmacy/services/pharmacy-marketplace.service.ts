@@ -182,8 +182,8 @@ export class PharmacyMarketplaceService {
     withDistance.sort((a, b) => {
       // Con stock primero: un precio más bajo en una farmacia que hoy no lo
       // tiene no es una mejor opción, es un viaje perdido.
-      if (a.oferta.availableQuantity > 0 !== b.oferta.availableQuantity > 0) {
-        return a.oferta.availableQuantity > 0 ? -1 : 1;
+      if (a.oferta.inStock !== b.oferta.inStock) {
+        return a.oferta.inStock ? -1 : 1;
       }
       if (
         a.distancia !== null &&
@@ -313,7 +313,7 @@ export class PharmacyMarketplaceService {
       presentation: presentation(offer),
       price: offer.price,
       currency: offer.currency,
-      inStock: offer.availableQuantity > 0,
+      inStock: offer.inStock,
       homeDelivery: offer.homeDelivery,
       pickup: offer.pickup,
       requiresPrescription: offer.requiresPrescription,

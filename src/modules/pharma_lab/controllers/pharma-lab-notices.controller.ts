@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ResourceNotFoundException,
   type AuthenticatedUser,
@@ -46,6 +47,11 @@ export class PharmaLabNoticesController {
   }
 
   /** Marca un aviso propio como leído. */
+  @Audited({
+    action: 'PHARMA_LAB_NOTICE_READ',
+    entity: 'pharma_lab_notice',
+    entityId: 'param:noticeId',
+  })
   @Post(':noticeId/read')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Marcar un aviso como leído' })

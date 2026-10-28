@@ -2,6 +2,7 @@ import { describe, it, expect, jest } from '@jest/globals';
 import * as argon2 from 'argon2';
 import { IamPasswordResetService } from './iam-password-reset.service';
 import { CONCEPTS, UnauthorizedException } from '../../../../common';
+import { MessagingEmailNoticeAdapter } from '../../infrastructure/adapters/messaging-email-notice.adapter';
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -59,7 +60,7 @@ function build() {
     refreshRepo,
     eventsRepo,
     tokenService,
-    notificationsService,
+    new MessagingEmailNoticeAdapter(notificationsService),
     logger,
   );
   return {

@@ -55,9 +55,15 @@ export class CreateSourceConnectionDto {
   /**
    * Identificador asociado a tenant.
    */
-  @ApiProperty({ format: 'uuid', description: 'Tenant propietario del origen' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    deprecated: true,
+    description:
+      'Obsoleto: el tenant se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; nunca es fuente de verdad.',
+  })
+  @IsOptional()
   @IsUUID()
-  tenantId!: string;
+  tenantId?: string;
 
   /**
    * Valor de source system code mantenido por la instancia.
@@ -153,7 +159,12 @@ export class OpenIngestionBatchDto {
   /**
    * Identificador asociado a tenant.
    */
-  @ApiPropertyOptional({ format: 'uuid' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    deprecated: true,
+    description:
+      'Obsoleto: el tenant se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; nunca es fuente de verdad.',
+  })
   @IsOptional()
   @IsUUID()
   tenantId?: string;
@@ -413,7 +424,12 @@ export class ProjectCanonicalResourceDto {
   /**
    * Identificador asociado a custodian tenant.
    */
-  @ApiPropertyOptional({ format: 'uuid' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    deprecated: true,
+    description:
+      'Obsoleto: el custodio se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; nunca es fuente de verdad.',
+  })
   @IsOptional()
   @IsUUID()
   custodianTenantId?: string;

@@ -16,7 +16,11 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  * @returns Resultado de build.
  */
 function build() {
-  const serviceCatalogService = { search: mockFn(), create: mockFn() };
+  const serviceCatalogService = {
+    search: mockFn(),
+    create: mockFn(),
+    getImageContent: mockFn(),
+  };
   const nomenclature = { listSpecialties: mockFn(), search: mockFn() };
   const procedureImport = {
     listMySpecialties: mockFn(),
@@ -130,5 +134,23 @@ describe('BillingServiceCatalogController', () => {
     await d.controller.listProcedureSpecialties();
 
     expect(d.nomenclature.listSpecialties).toHaveBeenCalledTimes(1);
+  });
+  it('sirve la imagen con no-store sin sniffing y sin pasar el actor al servicio', async () => {
+    const d = build();
+    d.serviceCatalogService.getImageContent.mockResolvedValue({
+      buffer: Buffer.from('png'),
+      mimeType: 'image/png',
+    });
+    const res = { setHeader: mockFn(), send: mockFn() };
+
+    await d.controller.getImage('s1', res as any);
+
+    expect(d.serviceCatalogService.getImageContent).toHaveBeenCalledWith('s1');
+    expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'image/png');
+    expect(res.setHeader).toHaveBeenCalledWith(
+      'X-Content-Type-Options',
+      'nosniff',
+    );
+    expect(res.send).toHaveBeenCalledWith(Buffer.from('png'));
   });
 });

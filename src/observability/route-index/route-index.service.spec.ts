@@ -4,7 +4,7 @@ import { MetadataScanner, type DiscoveryService } from '@nestjs/core';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { AdminCatalogController } from '../../modules/data_catalog/controllers/admin-catalog.controller';
-import { OpsConsoleController } from '../../modules/ops_console/ops-console.controller';
+import { OpsConsoleController } from '../../modules/ops_console/presentation/controllers/ops-console.controller';
 import { QaLabReadController } from '../../modules/qa_lab/controllers/qa-lab-read.controller';
 import { RouteIndexService, normalizeTemplate } from './route-index.service';
 

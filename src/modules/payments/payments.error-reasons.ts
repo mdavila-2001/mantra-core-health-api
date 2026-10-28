@@ -56,4 +56,15 @@ export enum PaymentsErrorReason {
   REFUND_EXCEEDS_CAPTURED_AMOUNT = 'REFUND_EXCEEDS_CAPTURED_AMOUNT',
   /** La transacción está liquidada; corresponde un reembolso en vez de una anulación. */
   CANCELLATION_TRANSACTION_ALREADY_SETTLED = 'CANCELLATION_TRANSACTION_ALREADY_SETTLED',
+
+  /** El reparto debe ser un importe estrictamente positivo. */
+  SPLIT_AMOUNT_NOT_POSITIVE = 'SPLIT_AMOUNT_NOT_POSITIVE',
+  /** El `tenantId` del cuerpo no coincide con el tenant activo de la petición. */
+  PAYMENTS_TENANT_MISMATCH = 'PAYMENTS_TENANT_MISMATCH',
+  /** El callback llegó por una ruta que no es un endpoint activo de la conexión de la transacción. */
+  GATEWAY_CALLBACK_ENDPOINT_NOT_ALLOWED = 'GATEWAY_CALLBACK_ENDPOINT_NOT_ALLOWED',
+  /** El callback no viene de una red permitida para el endpoint. */
+  GATEWAY_CALLBACK_SOURCE_NOT_ALLOWED = 'GATEWAY_CALLBACK_SOURCE_NOT_ALLOWED',
+  /** El callback no trae `timestamp` firmado o está fuera de la ventana de repetición del endpoint. */
+  GATEWAY_CALLBACK_OUTSIDE_REPLAY_WINDOW = 'GATEWAY_CALLBACK_OUTSIDE_REPLAY_WINDOW',
 }

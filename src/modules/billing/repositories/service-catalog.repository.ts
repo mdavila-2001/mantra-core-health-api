@@ -90,6 +90,21 @@ export class ServiceCatalogRepository {
   }
 
   /**
+   * Los ítems de un lote, para armar listas sin una consulta por fila.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Ítems pedidos; con la lista vacía no consulta.
+   * @returns Los ítems que existen.
+   */
+  findByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<ServiceCatalog[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(ServiceCatalog, { id: { $in: [...ids] } });
+  }
+
+  /**
    * Obtiene find by code.
    *
    * @param em - Contexto de persistencia o transacción activa.

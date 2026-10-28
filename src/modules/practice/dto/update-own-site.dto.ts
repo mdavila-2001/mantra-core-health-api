@@ -89,6 +89,25 @@ export class SetSiteBankQrDto {
   fileId!: string | null;
 }
 
+/**
+ * Cuerpo de `PUT /practitioners/me/sites/:siteId/logo`.
+ *
+ * El logo del consultorio, el que sale en el membrete de sus PDF. Mismo
+ * criterio que {@link SetSiteBankQrDto}: el archivo ya entró por
+ * `POST /common/files/upload` y acá viaja sólo su identificador.
+ */
+export class SetSiteLogoDto {
+  /** El archivo ya subido, o `null` para dejar la sede sin logo. */
+  @ApiProperty({
+    format: 'uuid',
+    nullable: true,
+    description: 'Imagen del logo ya subida, o null para quitarlo',
+  })
+  @ValidateIf((dto: SetSiteLogoDto) => dto.fileId !== null)
+  @IsUUID()
+  fileId!: string | null;
+}
+
 /** Teléfono del profesional en una sede vinculada; `null` lo elimina. */
 export class SetSiteContactPhoneDto {
   @ApiProperty({

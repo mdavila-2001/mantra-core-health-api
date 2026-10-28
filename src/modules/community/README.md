@@ -188,6 +188,20 @@ El módulo mapea **40 entidades** (`find src/modules/community -name '*.entity.t
 
 ## Reglas de negocio
 
+- Foros (`community.groups`): `visibility_concept_id` guarda el público autorizado
+  (ORG-FOR-002, DOC-SOC-015). `PUBLIC` es el público general y `PRIVATE`/`SECRET` el ingreso por
+  invitación o aprobación; `VERIFIED_DOCTORS` (profesional con sello de matrícula vigente),
+  `ORGANIZATION_STAFF` (membresía activa en la organización del foro) y `ATTENDED_PATIENTS`
+  (paciente con una atención terminada en esa organización) restringen el foro a su público. Se
+  decide en el servidor con la sesión: quien no pertenece al público recibe el mismo 404 que un id
+  inexistente en la ficha, el padrón, el muro, el alta y el directorio, y quien pertenece entra
+  activo (no hay cola de aprobación). Un foro de público autorizado sólo lo abre quien pertenece
+  a ese público. La plataforma (`SECURITY_ADMIN`, `SUPERADMIN`, `SYSTEM`) los alcanza para moderar.
+- Una aseguradora (organización activa de tipo `PAYER`, leída de `directory.tenants` y no del
+  claim `tenantTypes`) no crea foros ni inicia debates (ORG-FOR-001, DOC-SOC-010): `POST
+  /community/groups` y una publicación raíz en el muro responden 403
+  (`INSURER_CANNOT_CREATE_GROUP`, `INSURER_CANNOT_START_DEBATE`). Responder en un debate
+  existente no se restringe; la organización médica sí puede.
 - Toda FK `*_profile_id` referencia `community.public_profiles`; el bootstrap de
   perfil crea el nodo raíz obligatorio antes de cualquier acción social.
 - Reacción: una por actor/objeto; segundo `PUT` actualiza el tipo (idempotente).

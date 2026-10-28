@@ -17,6 +17,8 @@ import {
   DirectoryBranchesService,
   DirectoryMembershipsService,
   DirectoryReadService,
+  PharmacyOperatingRequirementsService,
+  TenantDocumentCompletionService,
 } from './services';
 import * as entities from './entities';
 import { AdminTenantsController, TenantsController } from './controllers';
@@ -69,6 +71,10 @@ import {
     AffiliationDocumentConceptsService,
     TenantAffiliationDocumentsService,
     TenantLegalRepresentativesService,
+    // P50: lo que una farmacia necesita para operar, y la puerta para
+    // completar los papeles que el alta pública dejó opcionales.
+    PharmacyOperatingRequirementsService,
+    TenantDocumentCompletionService,
     // Repositorios
     TenantsRepository,
     BranchesRepository,
@@ -106,6 +112,10 @@ import {
     // representante y las gerencias de la ficha de la farmacia con la misma
     // lectura que `GET /tenants/me`.
     DirectoryReadService,
+    // `PharmacyOperatingRequirementsService` lo necesita `identity_assurance`:
+    // un tenant verificado por una autoridad externa sólo se activa si cumple
+    // los mismos requisitos para operar que exige `POST /tenants/:id/verify`.
+    PharmacyOperatingRequirementsService,
   ],
 })
 export class DirectoryModule {}

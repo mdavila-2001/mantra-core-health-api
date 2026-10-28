@@ -3,6 +3,11 @@ import { BadRequestException } from '@nestjs/common';
 import { PharmacyReadController } from './pharmacy-read.controller';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+const ACTOR = {
+  id: 'user-1',
+  roles: ['PHARMACY_STAFF'],
+  tenantIds: ['t-1'],
+} as any;
 
 function build() {
   const readService = {
@@ -13,6 +18,7 @@ function build() {
     getSitePrices: mockFn().mockResolvedValue({}),
   };
   const staffReadService = {
+    listManagedProducts: mockFn().mockResolvedValue({ items: [] }),
     listLicenses: mockFn().mockResolvedValue({ items: [], count: 0 }),
     getContacts: mockFn().mockResolvedValue({
       legalRepresentative: null,
@@ -99,15 +105,47 @@ describe('PharmacyReadController', () => {
         limit: 10,
       });
     });
+
+    it('P34: openNow=true pide sólo las abiertas ahora', async () => {
+      const d = build();
+      await d.controller.listSites(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        'true',
+      );
+      expect(d.readService.listSites).toHaveBeenCalledWith({
+        search: undefined,
+        origin: undefined,
+        limit: 50,
+        openNow: true,
+      });
+    });
+
+    it('P34: openNow que no es true/false es un 400', () => {
+      const d = build();
+      expect(() =>
+        d.controller.listSites(
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          'si',
+        ),
+      ).toThrow(BadRequestException);
+    });
   });
 
   describe('searchProducts (carril A, H5)', () => {
     it('forwards pharmacyId to the service', async () => {
       const d = build();
       await d.controller.searchProducts(
+        ACTOR,
         undefined,
         undefined,
         'ph-1',
+        undefined,
         undefined,
       );
       expect(d.readService.searchProducts).toHaveBeenCalledWith(
@@ -119,7 +157,9 @@ describe('PharmacyReadController', () => {
     it('works without pharmacyId, same as before', async () => {
       const d = build();
       await d.controller.searchProducts(
+        ACTOR,
         'amox',
+        undefined,
         undefined,
         undefined,
         undefined,
@@ -128,6 +168,53 @@ describe('PharmacyReadController', () => {
         { search: 'amox', conceptId: undefined, pharmacyId: undefined },
         50,
       );
+    });
+
+    it('managed=true goes to the staff read, with the actor (P47)', async () => {
+      const d = build();
+      await d.controller.searchProducts(
+        ACTOR,
+        'amox',
+        undefined,
+        'ph-1',
+        'true',
+        20,
+      );
+      expect(d.staffReadService.listManagedProducts).toHaveBeenCalledWith(
+        'ph-1',
+        { search: 'amox', conceptId: undefined },
+        20,
+        ACTOR,
+      );
+      expect(d.readService.searchProducts).not.toHaveBeenCalled();
+    });
+
+    it('managed=true without pharmacyId is a 400', async () => {
+      const d = build();
+      expect(() =>
+        d.controller.searchProducts(
+          ACTOR,
+          undefined,
+          undefined,
+          undefined,
+          'true',
+          undefined,
+        ),
+      ).toThrow(BadRequestException);
+    });
+
+    it('managed other than true/false is a 400', async () => {
+      const d = build();
+      expect(() =>
+        d.controller.searchProducts(
+          ACTOR,
+          undefined,
+          undefined,
+          'ph-1',
+          'yes',
+          undefined,
+        ),
+      ).toThrow(BadRequestException);
     });
   });
 

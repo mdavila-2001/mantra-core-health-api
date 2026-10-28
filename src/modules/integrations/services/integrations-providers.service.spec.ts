@@ -14,7 +14,11 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
+import { IntegrationsErrorReason } from '../integrations.error-reasons';
+
+const TENANT = 'tenant-a';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -175,13 +179,26 @@ describe('IntegrationsProvidersService', () => {
         stateConceptId: INTEG.WEBHOOK_ACTIVE,
       });
 
-      const res = await d.service.createWebhookSubscription(
-        'p1',
-        { eventType: 'e', callbackUrl: 'https://x.io/cb' },
-        actor,
+      const res = await runWithTenant(TENANT, () =>
+        d.service.createWebhookSubscription(
+          'p1',
+          { eventType: 'e', callbackUrl: 'https://x.io/cb' },
+          actor,
+        ),
       );
       expect(res.updated).toBe(false);
       expect(res.id).toBe('w1');
+      // La suscripción pertenece al tenant del contexto, no a uno del cuerpo.
+      expect(d.webhooksRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: TENANT }),
+      );
+      expect(d.webhooksRepo.findByLogicalKey).toHaveBeenCalledWith(
+        d.tx,
+        'p1',
+        'e',
+        TENANT,
+      );
     });
 
     it('updates an existing subscription (upsert)', async () => {
@@ -199,14 +216,49 @@ describe('IntegrationsProvidersService', () => {
       };
       d.webhooksRepo.findByLogicalKey.mockResolvedValue(existing);
 
-      const res = await d.service.createWebhookSubscription(
-        'p1',
-        { eventType: 'e', callbackUrl: 'https://x.io/new' },
-        actor,
+      const res = await runWithTenant(TENANT, () =>
+        d.service.createWebhookSubscription(
+          'p1',
+          { eventType: 'e', callbackUrl: 'https://x.io/new' },
+          actor,
+        ),
       );
       expect(res.updated).toBe(true);
       expect(existing.callbackUrl).toBe('https://x.io/new');
       expect(existing.stateConceptId).toBe(INTEG.WEBHOOK_ACTIVE);
+      expect(d.webhooksRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('rechaza un tenantId del cuerpo distinto del activo, sin crear ni actualizar', async () => {
+      const d = build();
+      const attempt = runWithTenant(TENANT, () =>
+        d.service.createWebhookSubscription(
+          'p1',
+          {
+            tenantId: 'tenant-b',
+            eventType: 'e',
+            callbackUrl: 'https://x.io/cb',
+          },
+          actor,
+        ),
+      );
+      await expect(attempt).rejects.toBeInstanceOf(PreconditionFailedException);
+      await expect(attempt).rejects.toMatchObject({
+        reason: IntegrationsErrorReason.INTEGRATIONS_TENANT_MISMATCH,
+      });
+      expect(d.webhooksRepo.findByLogicalKey).not.toHaveBeenCalled();
+      expect(d.webhooksRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant activo no hay suscripción global implícita (TENANT_REQUIRED)', async () => {
+      const d = build();
+      await expect(
+        d.service.createWebhookSubscription(
+          'p1',
+          { eventType: 'e', callbackUrl: 'https://x.io/cb' },
+          actor,
+        ),
+      ).rejects.toMatchObject({ details: { reason: 'TENANT_REQUIRED' } });
       expect(d.webhooksRepo.create).not.toHaveBeenCalled();
     });
   });

@@ -28,6 +28,7 @@ import {
   PriorAuthorizationRequests,
 } from '../../entities';
 import { INS } from '../../domain/insurance.concepts';
+import { claimBelongsToPractices } from '../../domain/claim-scope';
 import {
   CreateClaimDto,
   CreatedClaimDto,
@@ -40,6 +41,7 @@ import {
 } from '../../presentation/dto';
 import { LinkedClaimOrderService } from './linked-claim-order.service';
 import { ClaimCoveragePolicy } from './claim-coverage-policy';
+import { ClaimCareRelationshipGate } from './claim-care-relationship-gate';
 import {
   LinkedClaimAccessService,
   assertLegacyClaimRoles,
@@ -71,6 +73,7 @@ export class ClaimsService {
     private readonly linkedOrders: LinkedClaimOrderService,
     private readonly linkedAccess: LinkedClaimAccessService,
     private readonly coveragePolicy: ClaimCoveragePolicy,
+    private readonly careGate: ClaimCareRelationshipGate,
   ) {
     this.logger.setContext(ClaimsService.name);
   }
@@ -84,7 +87,7 @@ export class ClaimsService {
         dto.inventoryReservationId || dto.serviceRequestId,
       );
       if (linked) await this.linkedAccess.assertAdministrator(tx, actor);
-      else assertLegacyClaimRoles(actor);
+      else await this.assertProviderClaimScope(tx, actor, dto);
       if (dto.inventoryReservationId && dto.serviceRequestId)
         throw new PreconditionFailedException(
           'Un reclamo sólo puede representar un pedido',
@@ -149,6 +152,16 @@ export class ClaimsService {
         );
         if (!coverage)
           throw new ResourceNotFoundException('Cobertura no encontrada');
+        // El paciente de la cobertura tiene que tener relación asistencial
+        // vigente con la organización que cobra (REQ-16-035). Va antes de
+        // cualquier comprobación que hable de la cobertura, y su fallo es el
+        // mismo 404 de «no existe».
+        await this.careGate.assertCareRelationship(
+          tx,
+          coverage,
+          requireTenantId(),
+          new Date(),
+        );
         const plan = await this.catalog.findPlanForCarrier(
           tx,
           coverage.insurancePlanId,
@@ -306,6 +319,73 @@ export class ClaimsService {
     };
   }
 
+  /**
+   * Política del alta legacy (sin pedido vinculado): `assertProviderClaimScope`.
+   *
+   * Además del rol, exige tenant activo y que la práctica facturadora que declara
+   * el cuerpo sea una práctica activa de ese tenant. Una práctica ajena y una
+   * inexistente responden igual (`claimAccessDenied`), como en el camino
+   * vinculado. El cuerpo ya no decide por sí solo quién factura.
+   *
+   * La cobertura y el plan se contrastan después contra la aseguradora indicada
+   * (`findPlanForCarrier`) y las líneas contra el plan (`ClaimCoveragePolicy`).
+   * Antes, `ClaimCareRelationshipGate` exige que el paciente de la cobertura
+   * tenga una relación asistencial vigente con el tenant que cobra.
+   *
+   * @param tx - Transacción activa.
+   * @param actor - Quien presenta el reclamo.
+   * @param dto - Reclamo solicitado.
+   * @throws ForbiddenException uniforme si el rol o la práctica no corresponden.
+   */
+  private async assertProviderClaimScope(
+    tx: EntityManager,
+    actor: AuthenticatedUser,
+    dto: Pick<CreateClaimDto, 'billingProviderEntityId'>,
+  ): Promise<void> {
+    assertLegacyClaimRoles(actor);
+    const tenantId = requireTenantId();
+    const practiceIds =
+      await this.practiceLookup.findActivePracticeIdsForTenant(tenantId);
+    const authorized = claimBelongsToPractices(
+      {
+        billingProviderTypeConceptId: INS.BILLING_PROVIDER_TYPE_PRACTICE,
+        billingProviderEntityId: dto.billingProviderEntityId,
+      },
+      practiceIds,
+    );
+    if (!authorized) throw claimAccessDenied();
+  }
+
+  /**
+   * Quién puede mutar un reclamo legacy ya presentado: el rol no basta. Tiene que
+   * actuar en nombre del prestador que lo presentó (una práctica activa del
+   * tenant) o de la aseguradora que lo recibe (la del tenant).
+   *
+   * @param tx - Transacción activa.
+   * @param actor - Quien muta el reclamo.
+   * @param claim - Reclamo cargado por UUID.
+   * @throws ForbiddenException si el rol o el tenant no son parte del reclamo.
+   */
+  private async assertLegacyClaimParty(
+    tx: EntityManager,
+    actor: AuthenticatedUser,
+    claim: Pick<
+      InsuranceClaims,
+      | 'billingProviderTypeConceptId'
+      | 'billingProviderEntityId'
+      | 'insuranceCarrierId'
+    >,
+  ): Promise<void> {
+    assertLegacyClaimRoles(actor);
+    const tenantId = requireTenantId();
+    const practiceIds =
+      await this.practiceLookup.findActivePracticeIdsForTenant(tenantId);
+    if (claimBelongsToPractices(claim, practiceIds)) return;
+    const carrier = await this.catalog.findCarrierByTenantId(tx, tenantId);
+    if (carrier && carrier.id === claim.insuranceCarrierId) return;
+    throw claimAccessDenied();
+  }
+
   private canonicalLines(
     dto: CreateClaimDto,
     snapshot: LinkedOrderSnapshot,
@@ -383,7 +463,9 @@ export class ClaimsService {
     const initial = await this.repo.findClaim(tx, claimId);
     if (!initial) throw claimAccessDenied();
     if (!initial.inventoryReservationId && !initial.serviceRequestId) {
-      await authorizeClaimResource(() => assertLegacyClaimRoles(actor));
+      await authorizeClaimResource(() =>
+        this.assertLegacyClaimParty(tx, actor, initial),
+      );
       return { claim: initial, snapshot: null, lines: null };
     }
     await authorizeClaimResource(() =>
@@ -640,6 +722,7 @@ export class ClaimsService {
         claimId,
         dto.claimAdjudicationVersionId,
         INS.DISPUTE_OPEN,
+        INS.DISPUTE_TYPE_APPEAL,
       );
       if (existing) {
         return {
@@ -712,11 +795,7 @@ export class ClaimsService {
     },
     practiceIds: readonly string[],
   ): boolean {
-    return (
-      claim.billingProviderTypeConceptId ===
-        INS.BILLING_PROVIDER_TYPE_PRACTICE &&
-      practiceIds.includes(claim.billingProviderEntityId)
-    );
+    return claimBelongsToPractices(claim, practiceIds);
   }
 
   /**

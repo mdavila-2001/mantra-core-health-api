@@ -4,10 +4,10 @@ Lógica de negocio. Cada método público resuelve un caso de uso en **una trans
 
 ## Servicios
 
-| Servicio | Casos de uso | Responsabilidad |
-| --- | --- | --- |
-| `ReportingDefinitionsService` | 01, 02, 03, 10, 12 | Fuentes, definiciones, versiones, tableros y deprecación |
-| `ReportingRunsService` | 04 … 09, 11 | Corridas, snapshots, programación, distribución y reintentos |
+| Servicio                      | Casos de uso       | Responsabilidad                                              |
+| ----------------------------- | ------------------ | ------------------------------------------------------------ |
+| `ReportingDefinitionsService` | 01, 02, 03, 10, 12 | Fuentes, definiciones, versiones, tableros y deprecación     |
+| `ReportingRunsService`        | 04 … 09, 11        | Corridas, snapshots, programación, distribución y reintentos |
 
 ## Reglas de negocio
 

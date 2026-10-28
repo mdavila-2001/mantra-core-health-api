@@ -3,7 +3,10 @@ import { defineConfig } from '@mikro-orm/postgresql';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import { loadOrmEnv, type OrmEnv } from './orm.env';
 import { createOrmLoggerFactory } from '../observability/orm.logger';
-import { warnIfRlsRoleFallbackIsUnsafe } from './rls-role-resolution';
+import {
+  resolveRuntimeCredentials,
+  warnIfRlsRoleFallbackIsUnsafe,
+} from './rls-role-resolution';
 import { HistoryMirrorSubscriber } from '../subscribers/history-mirror.subscriber';
 
 /**
@@ -47,8 +50,7 @@ export function buildOrmConfig(env: OrmEnv = loadOrmEnv()) {
     // aislamiento por tenant; el rol propietario (`DB_USER`) se reserva para
     // migraciones/DDL/seed. Requiere `ORM_SCHEMA_SYNC=off` (no puede alterar el
     // esquema al no ser propietario).
-    user: process.env.DB_APP_USER ?? env.connection.user,
-    password: process.env.DB_APP_PASSWORD ?? env.connection.password,
+    ...resolveRuntimeCredentials(env.connection),
     dbName: env.connection.name,
 
     // Descubrimiento de entidades. En producción se leen los .js compilados; en

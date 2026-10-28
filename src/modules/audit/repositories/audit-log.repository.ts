@@ -241,16 +241,37 @@ export class AuditLogRepository {
     return context.deviceId ?? undefined;
   }
 
-  /** Cadena ordenada (asc) de una partición para recomputar y cotejar (UC-10-06). */
+  /**
+   * Página de la cadena ordenada (asc) de una partición para recomputar y
+   * cotejar (UC-10-06). `after` es el cursor (último eslabón ya leído): la
+   * página siguiente arranca estrictamente después de él, de modo que una
+   * verificación completa recorre toda la partición con una misma definición
+   * de orden `(recorded_at, id)`.
+   */
   findChain(
     em: EntityManager,
     tenantId?: string,
     limit = 1000,
+    after?: Pick<AuditLog, 'id' | 'recordedAt'>,
   ): Promise<AuditLog[]> {
     return em.find(
       AuditLog,
-      { tenantId: tenantId ?? null },
-      { orderBy: { recordedAt: 'asc' }, limit },
+      {
+        tenantId: tenantId ?? null,
+        ...(after
+          ? {
+              $or: [
+                { recordedAt: { $gt: after.recordedAt } },
+                { recordedAt: after.recordedAt, id: { $gt: after.id } },
+              ],
+            }
+          : {}),
+      },
+      {
+        orderBy: { recordedAt: 'asc', id: 'asc' },
+        limit,
+        disableIdentityMap: true,
+      },
     );
   }
 }

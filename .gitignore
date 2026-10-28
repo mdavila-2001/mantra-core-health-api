@@ -62,6 +62,11 @@ tools/e2e/seed-manifest.json
 # contra cada target. Se regenera sola; versionarla prometería una cuenta que
 # en otra máquina, o contra otra base, no existe.
 tools/alovida/.faker-cache/
+# Farmacología clínica: el corpus por producto (`build-monographs --granularity product`,
+# ~2,2 GB) no se versiona (decisión del propietario, issue 824). El armado lo escribe
+# en `out/product/`, fuera del repo; esto cierra el paso por si alguien lo copia a `data/`.
+/tools/terminology-import/clinical-pharmacology/data/*product*
+/tools/terminology-import/clinical-pharmacology/out/
 
 # temp directory
 .temp

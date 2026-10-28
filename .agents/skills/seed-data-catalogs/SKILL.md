@@ -41,8 +41,8 @@ checksum_sha256: <hash del archivo crudo>
 ```
 
 3. **Prohibido** presentar como real un dato ficticio o inferido: universidades, aseguradoras,
-   especialidades, instituciones, direcciones. Si no hay fuente, el catálogo queda **vacío con
-   un TODO y la fuente pendiente**, no relleno de inventos.
+   especialidades, instituciones, direcciones. Si no hay fuente, el catálogo queda **vacío y se
+   abre un issue que pide la fuente**, no relleno de inventos.
 4. **Datos clínicos** (medicamentos, dosis, contraindicaciones, interacciones, relaciones
    título → especialidad): jamás se completan ni se "corrigen" por inferencia. Exigen dataset
    con evidencia y validación del responsable clínico. Ver `medication-prescription-safety`.

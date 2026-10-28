@@ -141,6 +141,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CarePlanResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CarePlanResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CarePlanResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CarePlanResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CarePlanResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -176,6 +177,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | Un plan de cuidados necesita un profesional autor. | Excepción explícita en src/modules/chart/services/chart-care-plans.service.ts |
 | 403 | `FORBIDDEN` | La sesión no tiene un perfil profesional con el que crear el plan. | Excepción explícita en src/modules/chart/services/chart-care-plans.service.ts |
 | 403 | `FORBIDDEN` | El autor del plan es el profesional de la sesión: no se crea en nombre de otro perfil. | Excepción explícita en src/modules/chart/services/chart-care-plans.service.ts |
+| 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/chart/services/chart-encounter-scope.service.ts |
+| 404 | `NOT_FOUND` | Diagnóstico no encontrado | Excepción explícita en src/modules/chart/services/chart-encounter-scope.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El encuentro ya está cerrado y sellado: no admite más escrituras. | Excepción explícita en src/modules/clinical/services/encounter-seal-guard.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -279,6 +282,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ActivityResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ActivityResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ActivityResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ActivityResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ActivityResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -437,6 +441,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DocumentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DocumentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DocumentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DocumentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DocumentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -478,6 +483,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | ${labels.subject} no le pertenece | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/chart/services/chart-encounter-scope.service.ts |
 | 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El encuentro ya está cerrado y sellado: no admite más escrituras. | Excepción explícita en src/modules/clinical/services/encounter-seal-guard.service.ts |
@@ -569,6 +575,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | El documento no existe, o el archivo no cuelga de ese documento | `Promise<void>` | No |
 | 429 | Consulta completada correctamente. | `Promise<void>` | No |
 | 500 | Consulta completada correctamente. | `Promise<void>` | No |
+| 504 | Consulta completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -673,6 +680,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | El encuentro no está cerrado | `Promise<void>` | No |
 | 429 | Consulta completada correctamente. | `Promise<void>` | No |
 | 500 | Consulta completada correctamente. | `Promise<void>` | No |
+| 504 | Consulta completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -768,6 +776,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MyChartDocumentListResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MyChartDocumentListResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MyChartDocumentListResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyChartDocumentListResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyChartDocumentListResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -904,6 +913,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | El documento no existe, no es del titular, no es visible, o el archivo no cuelga de él | `Promise<void>` | No |
 | 429 | Consulta completada correctamente. | `Promise<void>` | No |
 | 500 | Consulta completada correctamente. | `Promise<void>` | No |
+| 504 | Consulta completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -1006,6 +1016,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | El encuentro no está cerrado | `Promise<void>` | No |
 | 429 | Consulta completada correctamente. | `Promise<void>` | No |
 | 500 | Consulta completada correctamente. | `Promise<void>` | No |
+| 504 | Consulta completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -1100,6 +1111,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MyChartNoteListResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MyChartNoteListResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MyChartNoteListResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyChartNoteListResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyChartNoteListResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1110,6 +1122,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "id": "00000000-0000-4000-8000-000000000001",
       "encounterId": "00000000-0000-4000-8000-000000000001",
       "noteTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "entries": [
+        {
+          "label": "Presión arterial",
+          "value": "120/80"
+        }
+      ],
       "chiefComplaintText": "valor-ejemplo",
       "subjectiveText": "valor-ejemplo",
       "objectiveText": "valor-ejemplo",
@@ -1128,10 +1146,13 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<MyChartNoteItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","noteTypeConceptId":"00000000-0000-4000-8000-000000000001","chiefComplaintText":"valor-ejemplo","subjectiveText":"valor-ejemplo","objectiveText":"valor-ejemplo","assessmentText":"valor-ejemplo","planText":"valor-ejemplo","releasedAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items` | Sí | `array<MyChartNoteItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","noteTypeConceptId":"00000000-0000-4000-8000-000000000001","entries":[{"label":"Presión arterial","value":"120/80"}],"chiefComplaintText":"valor-ejemplo","subjectiveText":"valor-ejemplo","objectiveText":"valor-ejemplo","assessmentText":"valor-ejemplo","planText":"valor-ejemplo","releasedAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador de la nota (cabecera). | `00000000-0000-4000-8000-000000000001` |
 | `items[].encounterId` | No | `string` | formato `uuid` | Encuentro al que pertenece la nota. | `00000000-0000-4000-8000-000000000001` |
 | `items[].noteTypeConceptId` | No | `string` | formato `uuid` | Tipo de nota (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `items[].entries` | No | `array<ChartNoteEntryDto>` | Sin restricción adicional declarada | P39: filas campo/valor de la versión liberada. Ausente si no tiene. | `[{"label":"Presión arterial","value":"120/80"}]` |
+| `items[].entries[].label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Presión arterial` |
+| `items[].entries[].value` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `120/80` |
 | `items[].chiefComplaintText` | No | `string` | Sin restricción adicional declarada | Motivo de consulta de la versión liberada. | `valor-ejemplo` |
 | `items[].subjectiveText` | No | `string` | Sin restricción adicional declarada | Subjetivo (SOAP) de la versión liberada. | `valor-ejemplo` |
 | `items[].objectiveText` | No | `string` | Sin restricción adicional declarada | Objetivo (SOAP) de la versión liberada. | `valor-ejemplo` |
@@ -1238,6 +1259,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | La sesión no tiene perfil profesional, o pide las notas de otro profesional sin ser SUPERADMIN. | `Promise<ChartNotesListResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ChartNotesListResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ChartNotesListResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ChartNotesListResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChartNotesListResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1252,6 +1274,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "currentVersionId": "00000000-0000-4000-8000-000000000001",
       "versionNumber": 1,
       "authorProfileId": "00000000-0000-4000-8000-000000000001",
+      "entries": [
+        {
+          "label": "Presión arterial",
+          "value": "120/80"
+        }
+      ],
       "chiefComplaintText": "valor-ejemplo",
       "subjectiveText": "valor-ejemplo",
       "objectiveText": "valor-ejemplo",
@@ -1273,7 +1301,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<ChartNoteListItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"noteId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","noteTypeConceptId":"00000000-0000-4000-8000-000000000001","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","versionNumber":1,"authorProfileId":"00000000-0000-4000-8000-000000000001","chiefComplaintText":"valor-ejemplo","subjectiveText":"valor-ejemplo","objectiveText":"valor-ejemplo","assessmentText":"valor-ejemplo","planText":"valor-ejemplo","signedAt":"2026-07-31T12:00:00.000Z","releasedToPatient":true,"createdAt":"2026-07-31T12:00:00.000Z","patientProfileId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items` | Sí | `array<ChartNoteListItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"noteId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","noteTypeConceptId":"00000000-0000-4000-8000-000000000001","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","versionNumber":1,"authorProfileId":"00000000-0000-4000-8000-000000000001","entries":[{"label":"Presión arterial","value":"120/80"}],"chiefComplaintText":"valor-ejemplo","subjectiveText":"valor-ejemplo","objectiveText":"valor-ejemplo","assessmentText":"valor-ejemplo","planText":"valor-ejemplo","signedAt":"2026-07-31T12:00:00.000Z","releasedToPatient":true,"createdAt":"2026-07-31T12:00:00.000Z","patientProfileId":"00000000-0000-4000-8000-000000000001"}]` |
 | `items[].noteId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].encounterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].noteTypeConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -1281,6 +1309,9 @@ Campos de la respuesta:
 | `items[].currentVersionId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].versionNumber` | No | `number` | Sin restricción adicional declarada | Número de la versión vigente | `1` |
 | `items[].authorProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].entries` | No | `array<ChartNoteEntryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"label":"Presión arterial","value":"120/80"}]` |
+| `items[].entries[].label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Presión arterial` |
+| `items[].entries[].value` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `120/80` |
 | `items[].chiefComplaintText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].subjectiveText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].objectiveText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -1376,6 +1407,9 @@ Content-Type: application/json
 | `noteTypeConceptId` | No | `string` | formato `uuid` | Concept id del tipo de nota | `00000000-0000-4000-8000-000000000001` |
 | `confidentialityConceptId` | No | `string` | formato `uuid` | Concept id de confidencialidad | `00000000-0000-4000-8000-000000000001` |
 | `chiefComplaintText` | No | `string` | longitud máxima 1000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `entries` | No | `array<NoteEntryInputDto>` | máximo 40 elemento(s) | P39: filas campo/valor de la nota médica, en orden. Se guardan en la versión; omitirlas o mandar [] deja la versión sin filas | `[{"label":"Presión arterial","value":"120/80"}]` |
+| `entries[].label` | No | `string` | longitud mínima 1; longitud máxima 60 | Rótulo de la fila; se recorta. Único (sin distinguir mayúsculas ni tildes) dentro de la nota | `Presión arterial` |
+| `entries[].value` | No | `string` | longitud mínima 1; longitud máxima 500 | Valor de la fila; se recorta | `120/80` |
 | `subjectiveText` | No | `string` | Sin restricción adicional declarada | Bloque S (subjetivo) del SOAP | `valor-ejemplo` |
 | `objectiveText` | No | `string` | Sin restricción adicional declarada | Bloque O (objetivo) del SOAP | `valor-ejemplo` |
 | `assessmentText` | No | `string` | Sin restricción adicional declarada | Bloque A (evaluación) del SOAP | `valor-ejemplo` |
@@ -1398,6 +1432,12 @@ Content-Type: application/json
   "noteTypeConceptId": "00000000-0000-4000-8000-000000000001",
   "confidentialityConceptId": "00000000-0000-4000-8000-000000000001",
   "chiefComplaintText": "valor-ejemplo",
+  "entries": [
+    {
+      "label": "Presión arterial",
+      "value": "120/80"
+    }
+  ],
   "subjectiveText": "valor-ejemplo",
   "objectiveText": "valor-ejemplo",
   "assessmentText": "valor-ejemplo",
@@ -1418,6 +1458,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `NoteVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1453,7 +1494,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | Una nota clínica necesita un profesional autor. | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 403 | `FORBIDDEN` | La sesión no tiene un perfil profesional con el que escribir la nota. | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 403 | `FORBIDDEN` | El autor de la nota es el profesional de la sesión: no se escribe en nombre de otro perfil. | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
+| 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/chart/services/chart-encounter-scope.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El encuentro ya está cerrado y sellado: no admite más escrituras. | Excepción explícita en src/modules/chart/services/chart-encounter-scope.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1524,6 +1567,9 @@ Content-Type: application/json
 | `authorProfileId` | No | `string` | formato `uuid` | Perfil del clínico que enmienda. Se toma de la sesión; si viaja otro, 403 | `00000000-0000-4000-8000-000000000001` |
 | `amendmentReasonText` | Sí | `string` | longitud mínima 1; longitud máxima 2000 | Motivo textual de la enmienda (obligatorio) | `Texto descriptivo de ejemplo` |
 | `amendmentReasonConceptId` | No | `string` | formato `uuid` | Concept id del motivo de enmienda | `00000000-0000-4000-8000-000000000001` |
+| `entries` | No | `array<NoteEntryInputDto>` | máximo 40 elemento(s) | P39: filas campo/valor de la nota médica, en orden. Se guardan en la versión; omitirlas o mandar [] deja la versión sin filas | `[{"label":"Presión arterial","value":"120/80"}]` |
+| `entries[].label` | No | `string` | longitud mínima 1; longitud máxima 60 | Rótulo de la fila; se recorta. Único (sin distinguir mayúsculas ni tildes) dentro de la nota | `Presión arterial` |
+| `entries[].value` | No | `string` | longitud mínima 1; longitud máxima 500 | Valor de la fila; se recorta | `120/80` |
 | `subjectiveText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `objectiveText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `assessmentText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -1543,6 +1589,12 @@ Content-Type: application/json
   "authorProfileId": "00000000-0000-4000-8000-000000000001",
   "amendmentReasonText": "Texto descriptivo de ejemplo",
   "amendmentReasonConceptId": "00000000-0000-4000-8000-000000000001",
+  "entries": [
+    {
+      "label": "Presión arterial",
+      "value": "120/80"
+    }
+  ],
   "subjectiveText": "valor-ejemplo",
   "objectiveText": "valor-ejemplo",
   "assessmentText": "valor-ejemplo",
@@ -1564,6 +1616,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `NoteVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1670,6 +1723,9 @@ Content-Type: application/json
 |---|:---:|---|---|---|---|
 | `authorProfileId` | No | `string` | formato `uuid` | Perfil del clínico autor. Se toma de la sesión; si viaja otro, 403 | `00000000-0000-4000-8000-000000000001` |
 | `chiefComplaintText` | No | `string` | longitud máxima 1000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `entries` | No | `array<NoteEntryInputDto>` | máximo 40 elemento(s) | P39: filas campo/valor de la nota médica, en orden. Se guardan en la versión; omitirlas o mandar [] deja la versión sin filas | `[{"label":"Presión arterial","value":"120/80"}]` |
+| `entries[].label` | No | `string` | longitud mínima 1; longitud máxima 60 | Rótulo de la fila; se recorta. Único (sin distinguir mayúsculas ni tildes) dentro de la nota | `Presión arterial` |
+| `entries[].value` | No | `string` | longitud mínima 1; longitud máxima 500 | Valor de la fila; se recorta | `120/80` |
 | `subjectiveText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `objectiveText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `assessmentText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -1688,6 +1744,12 @@ Content-Type: application/json
 {
   "authorProfileId": "00000000-0000-4000-8000-000000000001",
   "chiefComplaintText": "valor-ejemplo",
+  "entries": [
+    {
+      "label": "Presión arterial",
+      "value": "120/80"
+    }
+  ],
   "subjectiveText": "valor-ejemplo",
   "objectiveText": "valor-ejemplo",
   "assessmentText": "valor-ejemplo",
@@ -1709,6 +1771,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `NoteVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1849,6 +1912,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `NoteVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1992,6 +2056,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `NoteVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2145,6 +2210,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ExamFindingsResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ExamFindingsResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ExamFindingsResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExamFindingsResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExamFindingsResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2272,6 +2338,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReleaseResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReleaseResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReleaseResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReleaseResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReleaseResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2404,6 +2471,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReleaseResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReleaseResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReleaseResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReleaseResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReleaseResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2520,6 +2588,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PatientChartResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PatientChartResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PatientChartResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PatientChartResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientChartResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2535,6 +2604,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "currentVersionId": "00000000-0000-4000-8000-000000000001",
       "versionNumber": 1,
       "authorProfileId": "00000000-0000-4000-8000-000000000001",
+      "entries": [
+        {
+          "label": "Presión arterial",
+          "value": "120/80"
+        }
+      ],
       "chiefComplaintText": "valor-ejemplo",
       "subjectiveText": "valor-ejemplo",
       "objectiveText": "valor-ejemplo",
@@ -2596,7 +2671,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
-| `notes` | Sí | `array<ChartNoteItemDto>` | Sin restricción adicional declarada | Valor de notes mantenido por la instancia. | `[{"noteId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","noteTypeConceptId":"00000000-0000-4000-8000-000000000001","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","versionNumber":1,"authorProfileId":"00000000-0000-4000-8000-000000000001","chiefComplaintText":"valor-ejemplo","subjectiveText":"valor-ejemplo","objectiveText":"valor-ejemplo","assessmentText":"valor-ejemplo","planText":"valor-ejemplo","signedAt":"2026-07-31T12:00:00.000Z","releasedToPatient":true,"createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `notes` | Sí | `array<ChartNoteItemDto>` | Sin restricción adicional declarada | Valor de notes mantenido por la instancia. | `[{"noteId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","noteTypeConceptId":"00000000-0000-4000-8000-000000000001","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","versionNumber":1,"authorProfileId":"00000000-0000-4000-8000-000000000001","entries":[{"label":"Presión arterial","value":"120/80"}],"chiefComplaintText":"valor-ejemplo","subjectiveText":"valor-ejemplo","objectiveText":"valor-ejemplo","assessmentText":"valor-ejemplo","planText":"valor-ejemplo","signedAt":"2026-07-31T12:00:00.000Z","releasedToPatient":true,"createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `notes[].noteId` | Sí | `string` | formato `uuid` | Identificador asociado a note. | `00000000-0000-4000-8000-000000000001` |
 | `notes[].encounterId` | No | `string` | formato `uuid` | Identificador asociado a encounter. | `00000000-0000-4000-8000-000000000001` |
 | `notes[].noteTypeConceptId` | No | `string` | formato `uuid` | Identificador asociado a note type concept. | `00000000-0000-4000-8000-000000000001` |
@@ -2604,6 +2679,9 @@ Campos de la respuesta:
 | `notes[].currentVersionId` | No | `string` | formato `uuid` | Identificador asociado a current version. | `00000000-0000-4000-8000-000000000001` |
 | `notes[].versionNumber` | No | `number` | Sin restricción adicional declarada | Número de la versión vigente | `1` |
 | `notes[].authorProfileId` | No | `string` | formato `uuid` | Identificador asociado a author profile. | `00000000-0000-4000-8000-000000000001` |
+| `notes[].entries` | No | `array<ChartNoteEntryDto>` | Sin restricción adicional declarada | P39: filas campo/valor de la versión vigente, en orden. Ausente cuando la versión no tiene filas (las notas SOAP de antes de C1). | `[{"label":"Presión arterial","value":"120/80"}]` |
+| `notes[].entries[].label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Presión arterial` |
+| `notes[].entries[].value` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `120/80` |
 | `notes[].chiefComplaintText` | No | `string` | Sin restricción adicional declarada | Valor de chief complaint text mantenido por la instancia. | `valor-ejemplo` |
 | `notes[].subjectiveText` | No | `string` | Sin restricción adicional declarada | Valor de subjective text mantenido por la instancia. | `valor-ejemplo` |
 | `notes[].objectiveText` | No | `string` | Sin restricción adicional declarada | Valor de objective text mantenido por la instancia. | `valor-ejemplo` |
@@ -2732,6 +2810,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChartTemplateResponseDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -2944,6 +3023,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChartTemplateResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3141,6 +3221,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChartTemplateResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3349,6 +3430,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AssignmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AssignmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AssignmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AssignmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AssignmentResponseDto`. Ejemplo completo derivado de ese DTO:
 

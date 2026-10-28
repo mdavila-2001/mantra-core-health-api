@@ -26,6 +26,11 @@ import {
 } from 'node:fs';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
+import {
+  HUERFANAS_DOCUMENTADAS,
+  cruceDominioDocumentado,
+  sinRolesAutorizado,
+} from './exenciones.mjs';
 
 const ROOT = process.cwd();
 const MODULES = join(ROOT, 'src', 'modules');
@@ -51,7 +56,7 @@ const moduleOf = (p) => p.match(/modules\/([^/]+)\//)?.[1] ?? '';
  * el triage 2026-07). Ver comentario equivalente en `guardrails.mjs`.
  */
 const AUTHN_NON_ROLE_ALLOWLIST =
-  /modules\/(telemetry|community|common)\/controllers\/|modules\/identity_assurance\/controllers\/identity-self-service\.controller\.ts/;
+  /modules\/(telemetry|community|common)\/controllers\/|modules\/identity_assurance\/controllers\/identity-self-service\.controller\.ts|modules\/audio_assets\/controllers\/audio-assets\.controller\.ts/;
 const GLOBAL_JWT_GUARD = (() => {
   try {
     const m = readFileSync(
@@ -94,17 +99,34 @@ const historyMirrorPresent = existsSync(
 const isMirroredHistory = (e) =>
   historyMirrorPresent && e.module === 'audit' && /History$/.test(e.cls);
 
+// Consumo por SQL crudo: hay módulos (data_catalog) que leen y escriben sus
+// tablas con `schema.tabla` en una cadena SQL y jamás nombran la clase de la
+// entidad. Sólo cuenta código: las líneas de comentario no son consumo.
+const sqlText = nonEntityText.map(({ text }) =>
+  text
+    .split(/\r?\n/)
+    .filter((l) => !/^\s*(\*|\/\/|\/\*)/.test(l))
+    .join('\n'),
+);
+const usedBySql = (tableKey) =>
+  sqlText.some(
+    (text) =>
+      text.includes(tableKey) &&
+      new RegExp(`(?<![\\w.])${tableKey.replace('.', '\\.')}\\b`).test(text),
+  );
+
 // Consumo DIRECTO: la clase de la entidad se referencia en código no-entidad
-// (repositorio/servicio/job/seed/etc.) o la cubre el mirror de historial.
+// (repositorio/servicio/job/seed/etc.), su tabla se nombra en SQL crudo o la
+// cubre el mirror de historial.
 const directlyConsumed = new Set();
 for (const e of entities) {
   if (isMirroredHistory(e)) {
     if (e.tableKey) directlyConsumed.add(e.tableKey);
     continue;
   }
-  const used = nonEntityText.some(({ text }) =>
-    new RegExp(`\\b${e.cls}\\b`).test(text),
-  );
+  const used =
+    nonEntityText.some(({ text }) => new RegExp(`\\b${e.cls}\\b`).test(text)) ||
+    (e.tableKey !== null && usedBySql(e.tableKey));
   if (used && e.tableKey) directlyConsumed.add(e.tableKey);
 }
 
@@ -196,7 +218,8 @@ for (const f of controllers) {
       ['Post', 'Put', 'Patch', 'Delete'].includes(verb) &&
       !roles &&
       !pub &&
-      !(GLOBAL_JWT_GUARD && AUTHN_NON_ROLE_ALLOWLIST.test(f))
+      !(GLOBAL_JWT_GUARD && AUTHN_NON_ROLE_ALLOWLIST.test(f)) &&
+      !(GLOBAL_JWT_GUARD && sinRolesAutorizado(rel(f), verb, m[2]))
     ) {
       orphanEndpoints.push({ file: rel(f), line: i + 1, verb, path: m[2] });
     }
@@ -205,20 +228,54 @@ for (const f of controllers) {
 }
 
 // --- 3. DIRECT_CROSS_DOMAIN_ACCESS: repo que importa entidades de otro módulo -
+// Cada arista se clasifica por lo que el repositorio hace con la entidad ajena:
+// los que sólo la LEEN pueden ser legítimos (join de proyección, dato de
+// referencia); los que la ESCRIBEN tienen que pasar por el contrato del otro
+// módulo (#839). La clasificación es textual —busca `create(Entidad`,
+// `nativeUpdate(Entidad`, `new Entidad`…— y por eso un «lee» no prueba que no
+// escriba por otra vía: ordena la revisión, no la cierra.
+const WRITE_CALL = (name) =>
+  new RegExp(
+    `(create|persist|remove|nativeDelete|nativeUpdate|upsert|insert|assign|persistAndFlush)\\w*\\(\\s*${name}\\b|new\\s+${name}\\b|getReference\\(${name}\\b`,
+  );
 const crossDomain = [];
 for (const f of allFiles.filter((f) => /\/repositories\//.test(f))) {
   const mod = moduleOf(f);
   const text = readFileSync(f, 'utf8');
-  for (const m of text.matchAll(/from '(\.\.\/)+modules\/([^/]+)\/entities/g)) {
-    if (m[2] !== mod)
-      crossDomain.push({ file: rel(f), from: mod, imports: m[2] });
-  }
-  // import relativo a ../../<otro_modulo>/entities
-  for (const m of text.matchAll(/from '\.\.\/\.\.\/([a-z_]+)\/entities/g)) {
-    if (m[1] !== mod && m[1] !== 'common')
-      crossDomain.push({ file: rel(f), from: mod, imports: m[1] });
+  for (const m of text.matchAll(
+    /import\s+(?:type\s+)?\{([^}]*)\}\s+from\s+'([^']*)'/g,
+  )) {
+    const target =
+      m[2].match(/^(?:\.\.\/)+modules\/([a-z_]+)\/entities/) ??
+      m[2].match(/^\.\.\/\.\.\/([a-z_]+)\/entities/);
+    if (!target || target[1] === mod || target[1] === 'common') continue;
+    const names = m[1]
+      .split(',')
+      .map((n) =>
+        n
+          .trim()
+          .replace(/^type\s+/, '')
+          .split(/\s+as\s+/)
+          .pop(),
+      )
+      .filter(Boolean);
+    const writes = names.filter((n) => WRITE_CALL(n).test(text));
+    const documented = names
+      .map((n) => cruceDominioDocumentado(rel(f), n))
+      .filter(Boolean);
+    crossDomain.push({
+      file: rel(f),
+      from: mod,
+      imports: target[1],
+      names,
+      writes,
+      why: documented.length === names.length ? documented[0] : undefined,
+    });
   }
 }
+const crossWrites = crossDomain.filter((c) => c.writes.length > 0 && !c.why);
+const crossDocumented = crossDomain.filter((c) => c.why);
+const crossReads = crossDomain.filter((c) => c.writes.length === 0 && !c.why);
 
 // --- Procedencia y denominadores (MCH-033) -----------------------------------
 const git = (...args) =>
@@ -293,8 +350,11 @@ p(
 p(
   '> Heurística estática: la entidad puede consumirse por catálogo ORM/migración; revisar antes de eliminar.',
 );
-for (const e of orphanTables.slice(0, 60))
+for (const e of orphanTables.slice(0, 60)) {
   p(`- \`${e.module}\` · ${e.cls} (${rel(e.file)})`);
+  const why = HUERFANAS_DOCUMENTADAS.get(e.cls);
+  if (why) p(`  - Por qué está: ${why}`);
+}
 if (orphanTables.length > 60) p(`- … +${orphanTables.length - 60} más`);
 p('');
 p(
@@ -305,14 +365,31 @@ for (const e of orphanEndpoints.slice(0, 60))
 if (orphanEndpoints.length > 60) p(`- … +${orphanEndpoints.length - 60} más`);
 p('');
 p(
-  `## DIRECT_CROSS_DOMAIN_ACCESS — repos que importan entidades de otro dominio (${crossDomain.length})`,
+  `## DIRECT_CROSS_DOMAIN_ACCESS — repos que importan entidades de otro dominio (${crossDomain.length} aristas en ${new Set(crossDomain.map((c) => c.file)).size} repositorios)`,
 );
-for (const c of crossDomain.slice(0, 60)) p(`- ${c.file} → \`${c.imports}\``);
-if (crossDomain.length > 60) p(`- … +${crossDomain.length - 60} más`);
+p(
+  `> Escriben la entidad ajena: ${crossWrites.length} · solo leen: ${crossReads.length} · documentadas: ${crossDocumented.length}. La clasificación es textual (ver el script): ordena la revisión, no la cierra.`,
+);
+const crossLine = (c) =>
+  `- ${c.file} → \`${c.imports}\` (${c.names.join(', ')})`;
+p('');
+p(`### Escriben la entidad de otro dominio (${crossWrites.length})`);
+p('> Tienen que pasar por el contrato del otro módulo.');
+for (const c of crossWrites)
+  p(`${crossLine(c)} — escribe ${c.writes.join(', ')}`);
+p('');
+p(`### Solo leen (${crossReads.length})`);
+for (const c of crossReads) p(crossLine(c));
+p('');
+p(`### Documentadas (${crossDocumented.length})`);
+for (const c of crossDocumented) {
+  p(crossLine(c));
+  p(`  - Por qué está: ${c.why}`);
+}
 
 const report = lines.join('\n') + '\n';
 writeFileSync(join(ROOT, 'docs/reports/ALOVIDA-COBERTURA.md'), report);
 console.log(report);
 console.log(
-  `\nResumen: entidades=${entities.length} orphan_table=${orphanTables.length} orphan_endpoint=${orphanEndpoints.length} cross_domain=${crossDomain.length}`,
+  `\nResumen: entidades=${entities.length} orphan_table=${orphanTables.length} orphan_endpoint=${orphanEndpoints.length} cross_domain=${crossDomain.length} (escriben=${crossWrites.length} leen=${crossReads.length} documentadas=${crossDocumented.length})`,
 );

@@ -20,12 +20,20 @@ export const SOURCES_DIR = process.env.SYMPTOMS_SOURCES_DIR ?? resolve(BUILD_DIR
 export const OUT_DIR = process.env.SYMPTOMS_OUT_DIR ?? resolve(BUILD_DIR, 'symptoms');
 /** Corpus normalizado comprimido y versionado en git (pack-data.mjs / unpack-data.mjs). */
 export const DATA_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'data');
+/**
+ * Cruce HPO ↔ Wikidata (P3841) versionado en git; lo escribe
+ * `fetch-hpo-wikidata-crosswalk.mjs` y lo lee `load-symptoms.mjs`. Va aparte de
+ * `data/` porque `pack-data.mjs` vacía esa carpeta antes de empaquetar.
+ */
+export const CROSSWALK_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'crosswalk');
+export const CROSSWALK_FILE = resolve(CROSSWALK_DIR, 'hpo-wikidata-p3841.ndjson.gz');
+export const CROSSWALK_MANIFEST = resolve(CROSSWALK_DIR, 'MANIFEST.json');
 
 const HPO_RELEASE = 'https://github.com/obophenotype/human-phenotype-ontology/releases/latest/download';
 const MONARCH = 'https://storage.googleapis.com/data-public-monarchinitiative';
 
-// Lo que DECLARA el archivo (hp.json: dcterms:license). El texto de esa página no
-// se pudo abrir desde el entorno de la corrida: ver SOURCES.md.
+// Lo que DECLARA el archivo (hp.json: dcterms:license). El texto vigente de esa
+// página, leído el 2026-10-24, está resumido en SOURCES.md (nota 1).
 export const HPO_LICENSE = 'HPO license — https://hpo.jax.org/app/license (declarada en hp.json, dcterms:license)';
 
 /**

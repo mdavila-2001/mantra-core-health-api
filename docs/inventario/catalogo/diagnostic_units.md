@@ -11,15 +11,15 @@
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
 | [diagnostic_equipment](#diagnostic_equipment) | Cataloga equipos diagnósticos vinculados a unidades o sedes para identificar recursos tecnológicos de prestación. | 15 | 6 | 9 | COINCIDE |
-| [diagnostic_price_schedules](#diagnostic_price_schedules) | Define esquemas temporales de precios para los servicios de unidades diagnósticas. | 17 | 11 | 6 | COINCIDE |
+| [diagnostic_price_schedules](#diagnostic_price_schedules) | Define esquemas temporales de precios para los servicios de unidades diagnósticas. | 17 | 11 | 7 | COINCIDE |
 | [diagnostic_study_components](#diagnostic_study_components) | Detalla componentes de estudios diagnósticos para representar pruebas o partes que integran una prestación. | 8 | 4 | 1 | COINCIDE |
 | [diagnostic_study_offerings](#diagnostic_study_offerings) | Cataloga estudios diagnósticos ofrecidos por una unidad para relacionar solicitudes clínicas con capacidad disponible. | 22 | 10 | 26 | COINCIDE |
 | [diagnostic_study_prices](#diagnostic_study_prices) | Asocia precios a estudios concretos para disponer de valores económicos aplicables a prestaciones diagnósticas. | 15 | 5 | 8 | COINCIDE |
 | [diagnostic_unit_accreditations](#diagnostic_unit_accreditations) | Conserva acreditaciones de unidades diagnósticas para documentar certificaciones y alcance reconocido de sus servicios. | 15 | 8 | 8 | COINCIDE |
 | [diagnostic_unit_practitioner_assignments](#diagnostic_unit_practitioner_assignments) | Vincula profesionales con unidades diagnósticas para documentar asignación y responsabilidad de prestación. | 16 | 9 | 3 | COINCIDE |
-| [diagnostic_unit_sites](#diagnostic_unit_sites) | Identifica sedes físicas de unidades diagnósticas para localizar dónde se reciben pacientes o se procesan estudios. | 13 | 6 | 15 | COINCIDE |
+| [diagnostic_unit_sites](#diagnostic_unit_sites) | Identifica sedes físicas de unidades diagnósticas para localizar dónde se reciben pacientes o se procesan estudios. | 13 | 6 | 20 | COINCIDE |
 | [diagnostic_unit_specialties](#diagnostic_unit_specialties) | Asocia especialidades con unidades diagnósticas para describir las áreas clínicas que pueden atender. | 12 | 5 | 6 | COINCIDE |
-| [diagnostic_units](#diagnostic_units) | Representa laboratorios, centros de imagen u otras unidades que realizan servicios diagnósticos para prestadores de salud. | 19 | 13 | 36 | COINCIDE |
+| [diagnostic_units](#diagnostic_units) | Representa laboratorios, centros de imagen u otras unidades que realizan servicios diagnósticos para prestadores de salud. | 19 | 13 | 43 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -228,7 +228,7 @@ Define esquemas temporales de precios para los servicios de unidades diagnóstic
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml: diagnostic_price_schedules`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
 - **Entidad del ORM:** `DiagnosticPriceSchedules` — `src/modules/diagnostic_units/entities/diagnostic_price_schedules.entity.ts`
-- **Resumen:** 17 columnas · 11 índices · 9 FK salientes · 1 entrantes · 6 operaciones
+- **Resumen:** 17 columnas · 11 índices · 9 FK salientes · 1 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -293,6 +293,7 @@ Define esquemas temporales de precios para los servicios de unidades diagnóstic
 | POST /diagnostic-units/{id}/price-schedules | LEE | DIRECTA |
 | GET /diagnostic-units/search | LEE | DIRECTA |
 | POST /price-schedules/{scheduleId}/study-prices | LEE | DIRECTA |
+| POST /study-prices/{priceId}/close | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -433,11 +434,11 @@ Cataloga estudios diagnósticos ofrecidos por una unidad para relacionar solicit
 |---|---|---|---|
 | `ix_diagnostic_study_offerings_diagnostic_unit_id` | no | diagnostic_unit_id | Soporta la clave foránea fk_diagnostic_study_offerings_diagnostic_unit_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «diagnostic_unit_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_diagnostic_study_offerings_diagnostic_unit_site_id` | no | diagnostic_unit_site_id | Soporta la clave foránea fk_diagnostic_study_offerings_diagnostic_unit_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_diagnostic_study_offerings_study_concept_id` | no | study_concept_id | Soporta la clave foránea fk_diagnostic_study_offerings_study_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «study_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_diagnostic_study_offerings_study_concept_id` | no | study_concept_id | Soporta la clave foránea fk_diagnostic_study_offerings_study_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «study_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_diagnostic_study_offerings_modality_concept_id` | no | modality_concept_id | Soporta la clave foránea fk_diagnostic_study_offerings_modality_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_diagnostic_study_offerings_body_site_concept_id` | no | body_site_concept_id | Soporta la clave foránea fk_diagnostic_study_offerings_body_site_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_diagnostic_study_offerings_specimen_type_concept_id` | no | specimen_type_concept_id | Soporta la clave foránea fk_diagnostic_study_offerings_specimen_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_diagnostic_study_offerings_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_diagnostic_study_offerings_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_diagnostic_study_offerings_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_diagnostic_study_offerings_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_diagnostic_study_offerings_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_diagnostic_study_offerings_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_diagnostic_study_offerings_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_diagnostic_study_offerings_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `gin_diagnostic_study_offerings_search` | no | (to_tsvector('simple', (coalesce(display_name, '') ¦¦ ' ' ¦¦ coalesce(description, '')))) | GIN para búsqueda textual gobernada _(DOCUMENTO)_ |
@@ -745,7 +746,7 @@ Identifica sedes físicas de unidades diagnósticas para localizar dónde se rec
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml: diagnostic_unit_sites`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
 - **Entidad del ORM:** `DiagnosticUnitSites` — `src/modules/diagnostic_units/entities/diagnostic_unit_sites.entity.ts`
-- **Resumen:** 13 columnas · 6 índices · 6 FK salientes · 6 entrantes · 15 operaciones
+- **Resumen:** 13 columnas · 6 índices · 6 FK salientes · 6 entrantes · 20 operaciones
 
 #### Columnas
 
@@ -797,6 +798,7 @@ Identifica sedes físicas de unidades diagnósticas para localizar dónde se rec
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| PATCH /diagnostic-equipment/{id} | LEE | DIRECTA |
 | PATCH /diagnostic-unit-sites/{siteId} | ACTUALIZA | POR_TIPO |
 | PATCH /diagnostic-unit-sites/{siteId} | LEE | DIRECTA |
 | POST /diagnostic-unit-sites/{siteId}/equipment | ACTUALIZA | POR_TIPO |
@@ -804,8 +806,12 @@ Identifica sedes físicas de unidades diagnósticas para localizar dónde se rec
 | GET /diagnostic-units | LEE | DIRECTA |
 | POST /diagnostic-units | CREA | DIRECTA |
 | GET /diagnostic-units/{id} | LEE | DIRECTA |
+| POST /diagnostic-units/{id}/accreditations | LEE | DIRECTA |
 | GET /diagnostic-units/{id}/administration | LEE | DIRECTA |
+| POST /diagnostic-units/{id}/practitioner-assignments | LEE | DIRECTA |
+| POST /diagnostic-units/{id}/price-schedules | LEE | DIRECTA |
 | POST /diagnostic-units/{id}/sites | CREA | DIRECTA |
+| POST /diagnostic-units/{id}/study-offerings | LEE | DIRECTA |
 | POST /diagnostic-units/{id}/verify-and-publish | LEE | DIRECTA |
 | GET /diagnostic-units/administration | LEE | DIRECTA |
 | GET /diagnostic-units/search | LEE | DIRECTA |
@@ -909,7 +915,7 @@ Representa laboratorios, centros de imagen u otras unidades que realizan servici
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml: diagnostic_units`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` · **DDL:** `SQL/23_diagnostic_units/02_tables.sql`
 - **Entidad del ORM:** `DiagnosticUnits` — `src/modules/diagnostic_units/entities/diagnostic_units.entity.ts`
-- **Resumen:** 19 columnas · 13 índices · 10 FK salientes · 10 entrantes · 36 operaciones
+- **Resumen:** 19 columnas · 13 índices · 10 FK salientes · 10 entrantes · 43 operaciones
 
 #### Columnas
 
@@ -988,6 +994,11 @@ Representa laboratorios, centros de imagen u otras unidades que realizan servici
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| PATCH /diagnostic-equipment/{id} | LEE | DIRECTA |
+| DELETE /diagnostic-study-offerings/{id} | LEE | DIRECTA |
+| POST /diagnostic-unit-accreditations/{id}/renew | LEE | DIRECTA |
+| PATCH /diagnostic-unit-sites/{siteId} | LEE | DIRECTA |
+| POST /diagnostic-unit-sites/{siteId}/equipment | LEE | DIRECTA |
 | GET /diagnostic-units | LEE | DIRECTA |
 | POST /diagnostic-units | CREA | DIRECTA |
 | POST /diagnostic-units | LEE | DIRECTA |
@@ -1004,6 +1015,8 @@ Representa laboratorios, centros de imagen u otras unidades que realizan servici
 | POST /diagnostic-units/{id}/verify-and-publish | LEE | DIRECTA |
 | GET /diagnostic-units/administration | LEE | DIRECTA |
 | GET /diagnostic-units/search | LEE | DIRECTA |
+| POST /price-schedules/{scheduleId}/study-prices | LEE | DIRECTA |
+| POST /study-prices/{priceId}/close | LEE | DIRECTA |
 | GET /diagnostic-results/me/orders | LEE | DIRECTA |
 | POST /admin/tenants | CREA | DIRECTA |
 | POST /tenants/{tenantId}/child-tenants | CREA | DIRECTA |

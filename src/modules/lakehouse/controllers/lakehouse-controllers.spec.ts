@@ -131,6 +131,7 @@ describe('ResearchController', () => {
       requestRelease: mockFn(async () => ({ id: ID })),
       approveRelease: mockFn(async () => ({ id: ID })),
       revokeRelease: mockFn(async () => ({ id: ID })),
+      listExpiredReleases: mockFn(async () => ({ releases: [] })),
     };
     return {
       controller: new ResearchController(releaseService as any),
@@ -176,5 +177,16 @@ describe('ResearchController', () => {
     await d.controller.revokeRelease(ID, dto, actor);
 
     expect(d.releaseService.revokeRelease).toHaveBeenCalledWith(ID, dto, actor);
+  });
+
+  it('delega el descubrimiento de vencidos con el actor y el límite (LAKE-01)', async () => {
+    const d = build();
+
+    await d.controller.listExpiredReleases(25, actor);
+
+    expect(d.releaseService.listExpiredReleases).toHaveBeenCalledWith(
+      actor,
+      25,
+    );
   });
 });

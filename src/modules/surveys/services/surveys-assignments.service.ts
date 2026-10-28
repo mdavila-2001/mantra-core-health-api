@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { LockMode, UniqueConstraintViolationException } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -20,6 +21,7 @@ import {
   IssueInvitationsDto,
 } from '../dto';
 import { SURVEYS, TARGET_TYPE_BY_CODE } from '../surveys.concepts';
+import { SurveysErrorReason } from '../surveys.error-reasons';
 import { AppointmentBookings } from '../../scheduling/entities/appointment_bookings.entity';
 import { BookableSlots } from '../../scheduling/entities/bookable_slots.entity';
 import { SCHED } from '../../scheduling/domain/scheduling.concepts';
@@ -77,72 +79,90 @@ export class SurveysAssignmentsService {
       );
     }
 
-    return this.em.transactional(async (tx) => {
-      const version = await this.templatesRepo.findVersionById(
-        tx,
-        dto.surveyVersionId,
-      );
-      if (!version) {
-        throw new ResourceNotFoundException('Versión no encontrada', {
-          surveyVersionId: dto.surveyVersionId,
-        });
-      }
-      if (version.publicationStatusConceptId !== SURVEYS.VERSION_PUBLISHED) {
-        throw new PreconditionFailedException(
-          'Solo se puede asignar una versión publicada',
-          { surveyVersionId: dto.surveyVersionId },
+    return this.em
+      .transactional(async (tx) => {
+        const version = await this.templatesRepo.findVersionById(
+          tx,
+          dto.surveyVersionId,
         );
-      }
+        if (!version) {
+          throw new ResourceNotFoundException('Versión no encontrada', {
+            surveyVersionId: dto.surveyVersionId,
+          });
+        }
+        if (version.publicationStatusConceptId !== SURVEYS.VERSION_PUBLISHED) {
+          throw new PreconditionFailedException(
+            'Solo se puede asignar una versión publicada',
+            { surveyVersionId: dto.surveyVersionId },
+          );
+        }
 
-      const template = await this.templatesRepo.findTemplateById(
-        tx,
-        version.surveyTemplateId,
-      );
-      if (!template || template.tenantId !== tenantId) {
-        throw new ResourceNotFoundException('Versión no encontrada', {
-          surveyVersionId: dto.surveyVersionId,
-        });
-      }
-      if (template.ownerPractitionerId !== actor.practitionerProfileId) {
-        throw new ResourceNotFoundException('Versión no encontrada', {
-          surveyVersionId: dto.surveyVersionId,
-        });
-      }
-
-      const targetTypeConceptId = TARGET_TYPE_BY_CODE[dto.targetType];
-      const duplicate = await this.assignmentsRepo.findActiveDuplicate(
-        tx,
-        dto.surveyVersionId,
-        targetTypeConceptId,
-        dto.targetId,
-      );
-      if (duplicate) {
-        throw new ConflictException(
-          'Ya existe una asignación activa de esa versión a ese destino',
-          { assignmentId: duplicate.id },
+        const template = await this.templatesRepo.findTemplateById(
+          tx,
+          version.surveyTemplateId,
         );
-      }
+        if (!template || template.tenantId !== tenantId) {
+          throw new ResourceNotFoundException('Versión no encontrada', {
+            surveyVersionId: dto.surveyVersionId,
+          });
+        }
+        if (template.ownerPractitionerId !== actor.practitionerProfileId) {
+          throw new ResourceNotFoundException('Versión no encontrada', {
+            surveyVersionId: dto.surveyVersionId,
+          });
+        }
 
-      const assignment = this.assignmentsRepo.create(tx, {
-        surveyVersionId: dto.surveyVersionId,
-        tenantId,
-        targetTypeConceptId,
-        targetId: dto.targetId,
-        active: true,
-        actorUserId: actor.id,
+        // La comprobación de duplicado y el alta no son atómicas por sí solas: se
+        // bloquea la versión para que dos altas simultáneas se serialicen y la
+        // segunda vea la asignación de la primera.
+        await this.templatesRepo.lockVersion(tx, dto.surveyVersionId);
+        const targetTypeConceptId = TARGET_TYPE_BY_CODE[dto.targetType];
+        const duplicate = await this.assignmentsRepo.findActiveDuplicate(
+          tx,
+          dto.surveyVersionId,
+          targetTypeConceptId,
+          dto.targetId,
+        );
+        if (duplicate) {
+          throw new ConflictException(
+            'Ya existe una asignación activa de esa versión a ese destino',
+            { assignmentId: duplicate.id },
+            SurveysErrorReason.ASSIGNMENT_ALREADY_ACTIVE,
+          );
+        }
+
+        const assignment = this.assignmentsRepo.create(tx, {
+          surveyVersionId: dto.surveyVersionId,
+          tenantId,
+          targetTypeConceptId,
+          targetId: dto.targetId,
+          active: true,
+          actorUserId: actor.id,
+        });
+        await tx.flush();
+
+        this.logger.info(
+          {
+            operation: 'surveys.assignment.create',
+            assignmentId: assignment.id,
+            targetType: dto.targetType,
+          },
+          'Survey assignment created',
+        );
+        return { id: assignment.id };
+      })
+      .catch((error: unknown) => {
+        // Si el modelo respalda la unicidad de la asignación activa, perder la
+        // carrera es el mismo conflicto que detectó la comprobación previa.
+        if (error instanceof UniqueConstraintViolationException) {
+          throw new ConflictException(
+            'Ya existe una asignación activa de esa versión a ese destino',
+            { surveyVersionId: dto.surveyVersionId },
+            SurveysErrorReason.ASSIGNMENT_ALREADY_ACTIVE,
+          );
+        }
+        throw error;
       });
-      await tx.flush();
-
-      this.logger.info(
-        {
-          operation: 'surveys.assignment.create',
-          assignmentId: assignment.id,
-          targetType: dto.targetType,
-        },
-        'Survey assignment created',
-      );
-      return { id: assignment.id };
-    });
   }
 
   /**
@@ -159,93 +179,117 @@ export class SurveysAssignmentsService {
   ): Promise<InvitationsIssuedDto> {
     const tenantId = requireTenantId();
 
-    return this.em.transactional(async (tx) => {
-      const booking = await tx.findOne(AppointmentBookings, {
-        id: dto.appointmentBookingId,
-      });
-      if (!booking || booking.tenantId !== tenantId) {
-        throw new ResourceNotFoundException('Reserva no encontrada', {
-          appointmentBookingId: dto.appointmentBookingId,
-        });
-      }
-      if (booking.statusConceptId !== SCHED.BOOKING_COMPLETED) {
-        throw new PreconditionFailedException(
-          'Solo se emiten cuestionarios sobre una atención completada',
-          { appointmentBookingId: booking.id },
+    return this.em
+      .transactional(async (tx) => {
+        // Se bloquea la reserva antes de mirar qué invitaciones tiene: dos
+        // emisiones simultáneas para la misma reserva se serializan y la segunda
+        // las ve ya emitidas (`alreadyIssued`) en lugar de duplicarlas.
+        const booking = await tx.findOne(
+          AppointmentBookings,
+          { id: dto.appointmentBookingId },
+          { lockMode: LockMode.PESSIMISTIC_WRITE },
         );
-      }
-
-      const targetIds = await this.resolveTargets(tx, booking);
-      const assignments = await this.assignmentsRepo.listActiveByTargets(
-        tx,
-        tenantId,
-        targetIds,
-      );
-
-      const existing = await this.invitationsRepo.listByBooking(tx, booking.id);
-      const alreadyByVersion = new Set(
-        existing.map((invitation) => invitation.surveyVersionId),
-      );
-
-      const now = new Date();
-      const ids: string[] = [];
-      let alreadyIssued = 0;
-
-      for (const assignment of assignments) {
-        if (alreadyByVersion.has(assignment.surveyVersionId)) {
-          alreadyIssued += 1;
-          continue;
+        if (!booking || booking.tenantId !== tenantId) {
+          throw new ResourceNotFoundException('Reserva no encontrada', {
+            appointmentBookingId: dto.appointmentBookingId,
+          });
+        }
+        if (booking.statusConceptId !== SCHED.BOOKING_COMPLETED) {
+          throw new PreconditionFailedException(
+            'Solo se emiten cuestionarios sobre una atención completada',
+            { appointmentBookingId: booking.id },
+          );
         }
 
-        const version = await this.templatesRepo.findVersionById(
+        const targetIds = await this.resolveTargets(tx, booking);
+        const assignments = await this.assignmentsRepo.listActiveByTargets(
           tx,
-          assignment.surveyVersionId,
-        );
-        if (!version) continue;
-        if (!this.isEffective(version.effectiveFrom, version.effectiveTo, now))
-          continue;
-
-        const template = await this.templatesRepo.findTemplateById(
-          tx,
-          version.surveyTemplateId,
-        );
-        // Una plantilla desactivada deja de repartirse; lo ya emitido sigue en
-        // pie, que es exactamente la diferencia entre desactivar y borrar.
-        if (!template || template.statusConceptId === SURVEYS.TEMPLATE_INACTIVE)
-          continue;
-
-        const invitation = this.invitationsRepo.create(tx, {
-          surveyVersionId: version.id,
-          surveyAssignmentId: assignment.id,
           tenantId,
-          patientProfileId: booking.patientProfileId,
-          appointmentBookingId: booking.id,
-          statusConceptId: SURVEYS.INVITATION_PENDING,
-          issuedAt: now,
-          // Se congela al emitir en vez de calcularse al leer: si mañana
-          // alguien acorta el plazo, la ventana ya prometida no se mueve.
-          expiresAt: new Date(
-            now.getTime() + version.responseWindowDays * MS_PER_DAY,
-          ),
-          actorUserId: actor.id,
-        });
-        alreadyByVersion.add(version.id);
-        ids.push(invitation.id);
-      }
+          targetIds,
+        );
 
-      await tx.flush();
+        const existing = await this.invitationsRepo.listByBooking(
+          tx,
+          booking.id,
+        );
+        const alreadyByVersion = new Set(
+          existing.map((invitation) => invitation.surveyVersionId),
+        );
 
-      this.logger.info(
-        {
-          operation: 'surveys.invitation.issue',
-          appointmentBookingId: booking.id,
-          issued: ids.length,
-          alreadyIssued,
-        },
-        'Survey invitations issued',
-      );
-      return { ids, alreadyIssued };
-    });
+        const now = new Date();
+        const ids: string[] = [];
+        let alreadyIssued = 0;
+
+        for (const assignment of assignments) {
+          if (alreadyByVersion.has(assignment.surveyVersionId)) {
+            alreadyIssued += 1;
+            continue;
+          }
+
+          const version = await this.templatesRepo.findVersionById(
+            tx,
+            assignment.surveyVersionId,
+          );
+          if (!version) continue;
+          if (
+            !this.isEffective(version.effectiveFrom, version.effectiveTo, now)
+          )
+            continue;
+
+          const template = await this.templatesRepo.findTemplateById(
+            tx,
+            version.surveyTemplateId,
+          );
+          // Una plantilla desactivada deja de repartirse; lo ya emitido sigue en
+          // pie, que es exactamente la diferencia entre desactivar y borrar.
+          if (
+            !template ||
+            template.statusConceptId === SURVEYS.TEMPLATE_INACTIVE
+          )
+            continue;
+
+          const invitation = this.invitationsRepo.create(tx, {
+            surveyVersionId: version.id,
+            surveyAssignmentId: assignment.id,
+            tenantId,
+            patientProfileId: booking.patientProfileId,
+            appointmentBookingId: booking.id,
+            statusConceptId: SURVEYS.INVITATION_PENDING,
+            issuedAt: now,
+            // Se congela al emitir en vez de calcularse al leer: si mañana
+            // alguien acorta el plazo, la ventana ya prometida no se mueve.
+            expiresAt: new Date(
+              now.getTime() + version.responseWindowDays * MS_PER_DAY,
+            ),
+            actorUserId: actor.id,
+          });
+          alreadyByVersion.add(version.id);
+          ids.push(invitation.id);
+        }
+
+        await tx.flush();
+
+        this.logger.info(
+          {
+            operation: 'surveys.invitation.issue',
+            appointmentBookingId: booking.id,
+            issued: ids.length,
+            alreadyIssued,
+          },
+          'Survey invitations issued',
+        );
+        return { ids, alreadyIssued };
+      })
+      .catch(async (error: unknown) => {
+        // Si el modelo respalda `(reserva, versión)`, perder la carrera no es
+        // un error: la invitación ya existe, y se responde como emisión previa.
+        if (!(error instanceof UniqueConstraintViolationException)) throw error;
+        const existing = await this.invitationsRepo.listByBooking(
+          this.em.fork(),
+          dto.appointmentBookingId,
+        );
+        return { ids: [], alreadyIssued: existing.length };
+      });
   }
 
   /**

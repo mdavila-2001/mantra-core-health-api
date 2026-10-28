@@ -228,6 +228,9 @@ CREATE TABLE IF NOT EXISTS "clinical"."service_requests" (
     "status_concept_id" uuid NOT NULL,
     "requester_profile_id" uuid,
     "performer_tenant_id" uuid,
+    "performer_selection_concept_id" uuid,
+    "performer_practitioner_profile_id" uuid,
+    "suggested_practice_site_id" uuid,
     "previous_diagnostic_report_id" uuid,
     "duplicate_override_reason" text,
     "form_instance_id" uuid,
@@ -257,6 +260,16 @@ CREATE TABLE IF NOT EXISTS "clinical"."diagnostic_reports" (
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_diagnostic_reports" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "clinical"."service_request_notes" (
+    "id" uuid NOT NULL,
+    "service_request_id" uuid NOT NULL,
+    "clinical_note_header_id" uuid NOT NULL,
+    "ordinal" integer NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    CONSTRAINT "pk_service_request_notes" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "clinical"."medication_requests" (
@@ -382,6 +395,33 @@ CREATE TABLE IF NOT EXISTS "clinical"."immunizations" (
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_immunizations" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "clinical"."received_services" (
+    "id" uuid NOT NULL,
+    "custodian_tenant_id" uuid NOT NULL,
+    "patient_profile_id" uuid NOT NULL,
+    "encounter_id" uuid,
+    "service_type_concept_id" uuid NOT NULL,
+    "service_concept_id" uuid NOT NULL,
+    "status_concept_id" uuid NOT NULL,
+    "source_procedure_id" uuid,
+    "source_immunization_id" uuid,
+    "procedure_case_id" uuid,
+    "service_catalog_id" uuid,
+    "invoice_line_id" uuid,
+    "insurance_claim_line_id" uuid,
+    "performer_profile_id" uuid,
+    "practice_site_id" uuid,
+    "performed_at" timestamptz NOT NULL,
+    "outcome_concept_id" uuid,
+    "result_text" text,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_received_services" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "clinical"."appointments" (
