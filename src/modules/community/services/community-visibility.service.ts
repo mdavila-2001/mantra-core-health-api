@@ -8,6 +8,8 @@ import {
   PublicProfilesRepository,
 } from '../repositories';
 import { COMM } from '../community.concepts';
+// Directo y no por el barrel: el barrel re-exporta servicios que importan éste.
+import { CommunityOrganizationStaffService } from './community-organization-staff.service';
 
 /** Roles de plataforma que leen cualquier perfil. */
 const PLATFORM_ROLES = ['SECURITY_ADMIN', 'SUPERADMIN', 'SYSTEM'];
@@ -46,11 +48,13 @@ export class CommunityVisibilityService {
    * @param profilesRepo - Perfiles públicos, de donde sale el titular.
    * @param followsRepo - Follows activos, que resuelven el nivel FOLLOWERS.
    * @param blocksRepo - Bloqueos entre perfiles.
+   * @param organizationStaff - Quién atiende la bandeja de una organización.
    */
   constructor(
     private readonly profilesRepo: PublicProfilesRepository,
     private readonly followsRepo: FollowsRepository,
     private readonly blocksRepo: BlocksRepository,
+    private readonly organizationStaff: CommunityOrganizationStaffService,
   ) {}
 
   /** `true` si el actor tiene un rol de plataforma. */
@@ -143,6 +147,51 @@ export class CommunityVisibilityService {
   ): Promise<void> {
     const profile = await this.profilesRepo.findById(em, profileId);
     if (this.isHolder(profile, actor)) return;
+    throw new ForbiddenException(
+      'No se puede escribir en el grafo social con un perfil ajeno',
+    );
+  }
+
+  /**
+   * {@link assertOwnProfile} para la **mensajería**: además del titular, pasa
+   * el personal que atiende la bandeja de una vitrina de organización
+   * (ver {@link CommunityOrganizationStaffService.canAttend}).
+   *
+   * Sólo la mensajería lo usa. Publicar, reseñar, seguir o bloquear como la
+   * organización siguen exigiendo la titularidad estricta.
+   *
+   * @throws ForbiddenException si el perfil no es suyo ni de una organización
+   *   cuya bandeja atiende.
+   */
+  async assertOwnMessagingProfile(
+    em: EntityManager,
+    profileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (this.isPlatform(actor)) return;
+    const profile = await this.profilesRepo.findById(em, profileId);
+    if (this.isHolder(profile, actor)) return;
+    if (await this.organizationStaff.canAttend(em, profile, actor)) return;
+    throw new ForbiddenException(
+      'Sólo el titular del perfil puede leer su contenido privado',
+    );
+  }
+
+  /**
+   * {@link assertActsAsProfile} para la **mensajería**: escribir en un hilo
+   * como el perfil. Sin atajo de plataforma; además del titular pasa el
+   * personal que atiende la bandeja de una vitrina de organización.
+   *
+   * @throws ForbiddenException si no puede escribir con ese perfil.
+   */
+  async assertActsAsMessagingProfile(
+    em: EntityManager,
+    profileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const profile = await this.profilesRepo.findById(em, profileId);
+    if (this.isHolder(profile, actor)) return;
+    if (await this.organizationStaff.canAttend(em, profile, actor)) return;
     throw new ForbiddenException(
       'No se puede escribir en el grafo social con un perfil ajeno',
     );

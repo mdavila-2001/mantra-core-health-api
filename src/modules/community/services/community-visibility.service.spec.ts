@@ -10,6 +10,8 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ForbiddenException } from '@nestjs/common';
 import { CommunityVisibilityService } from './community-visibility.service';
+import { CommunityOrganizationStaffService } from './community-organization-staff.service';
+import { DIR } from '../../directory/directory.concepts';
 import { COMM } from '../community.concepts';
 import { CONCEPTS } from '../../../common';
 
@@ -34,12 +36,17 @@ function build() {
     existsBetween: mockFn().mockResolvedValue(null),
     listBlockedPeers: mockFn().mockResolvedValue([]),
   };
+  const membershipsRepo = {
+    findActiveByUserTenant: mockFn().mockResolvedValue(null),
+    findByTenantAndStatus: mockFn().mockResolvedValue([]),
+  };
   const service = new CommunityVisibilityService(
     profilesRepo as any,
     followsRepo as any,
     blocksRepo as any,
+    new CommunityOrganizationStaffService(membershipsRepo as any),
   );
-  return { service, profilesRepo, followsRepo, blocksRepo };
+  return { service, profilesRepo, followsRepo, blocksRepo, membershipsRepo };
 }
 
 describe('CommunityVisibilityService', () => {
@@ -380,6 +387,126 @@ describe('CommunityVisibilityService', () => {
       const visible = await d.service.filterVisiblePosts(em, [], 'p-2');
       expect(visible).toEqual([]);
       expect(d.blocksRepo.listBlockedPeers).not.toHaveBeenCalled();
+    });
+  });
+  describe('bandeja de organización (mensajería)', () => {
+    const PHARMACY_TENANT = 'tenant-farmacia';
+    const pharmacyProfile = {
+      targetId: PHARMACY_TENANT,
+      targetTypeConceptId: COMM.PROFILE_TARGET_PHARMACY,
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+      createdByUserId: 'admin-que-verifico',
+    };
+    const staff = { id: 'staff-1', roles: ['USER', 'PHARMACY_STAFF'] } as any;
+
+    it('el personal con membresía activa lee y escribe como la farmacia', async () => {
+      const d = build();
+      d.profilesRepo.findById.mockResolvedValue(pharmacyProfile);
+      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue({
+        tenantRoleConceptId: DIR.ROLE_STAFF,
+      });
+
+      await expect(
+        d.service.assertOwnMessagingProfile(em, 'vitrina', staff),
+      ).resolves.toBeUndefined();
+      await expect(
+        d.service.assertActsAsMessagingProfile(em, 'vitrina', staff),
+      ).resolves.toBeUndefined();
+      // La membresía se consulta en la base contra el tenant de la vitrina,
+      // con el estado activo: no se confía en la foto del token.
+      expect(d.membershipsRepo.findActiveByUserTenant).toHaveBeenCalledWith(
+        em,
+        'staff-1',
+        PHARMACY_TENANT,
+        DIR.MEMBERSHIP_ACTIVE,
+      );
+    });
+
+    it('sin membresía activa, conocer el profileId no alcanza', async () => {
+      const d = build();
+      d.profilesRepo.findById.mockResolvedValue(pharmacyProfile);
+      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(null);
+
+      await expect(
+        d.service.assertOwnMessagingProfile(em, 'vitrina', staff),
+      ).rejects.toThrow(ForbiddenException);
+      await expect(
+        d.service.assertActsAsMessagingProfile(em, 'vitrina', staff),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('un miembro sin el rol runtime de farmacia no atiende una farmacia', async () => {
+      const d = build();
+      d.profilesRepo.findById.mockResolvedValue(pharmacyProfile);
+      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue({
+        tenantRoleConceptId: DIR.ROLE_STAFF,
+      });
+
+      await expect(
+        d.service.assertActsAsMessagingProfile(em, 'vitrina', patient),
+      ).rejects.toThrow(ForbiddenException);
+      expect(d.membershipsRepo.findActiveByUserTenant).not.toHaveBeenCalled();
+    });
+
+    it('el vínculo de profesional (PRACTITIONER) no atiende la bandeja', async () => {
+      const d = build();
+      d.profilesRepo.findById.mockResolvedValue({
+        ...pharmacyProfile,
+        targetTypeConceptId: COMM.PROFILE_TARGET_ORGANIZATION,
+      });
+      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue({
+        tenantRoleConceptId: DIR.ROLE_PRACTITIONER,
+      });
+
+      await expect(
+        d.service.assertActsAsMessagingProfile(em, 'vitrina', staff),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('una vitrina de organización inactiva no se atiende', async () => {
+      const d = build();
+      d.profilesRepo.findById.mockResolvedValue({
+        ...pharmacyProfile,
+        statusConceptId: CONCEPTS.STATE_PENDING,
+      });
+      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue({
+        tenantRoleConceptId: DIR.ROLE_OWNER,
+      });
+
+      await expect(
+        d.service.assertActsAsMessagingProfile(em, 'vitrina', staff),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('la membresía no sirve para el perfil de una persona', async () => {
+      const d = build();
+      d.profilesRepo.findById.mockResolvedValue({
+        targetId: PHARMACY_TENANT,
+        targetTypeConceptId: COMM.PROFILE_TARGET_USER,
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+      });
+      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue({
+        tenantRoleConceptId: DIR.ROLE_OWNER,
+      });
+
+      await expect(
+        d.service.assertActsAsMessagingProfile(em, 'perfil', staff),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('fuera de la mensajería, la membresía no permite actuar como la farmacia', async () => {
+      const d = build();
+      d.profilesRepo.findById.mockResolvedValue(pharmacyProfile);
+      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue({
+        tenantRoleConceptId: DIR.ROLE_OWNER,
+      });
+
+      await expect(
+        d.service.assertActsAsProfile(em, 'vitrina', staff),
+      ).rejects.toThrow(ForbiddenException);
+      await expect(
+        d.service.assertOwnProfile(em, 'vitrina', staff),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 });

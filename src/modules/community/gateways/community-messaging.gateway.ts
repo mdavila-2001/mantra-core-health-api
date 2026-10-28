@@ -195,7 +195,7 @@ export class CommunityMessagingGateway
 
     const em = this.em.fork();
     try {
-      await this.visibility.assertOwnProfile(em, body.profileId, user);
+      await this.visibility.assertOwnMessagingProfile(em, body.profileId, user);
     } catch {
       client.emit('error', { code: 'NOT_OWN_PROFILE', event: 'join:inbox' });
       return;
@@ -225,7 +225,7 @@ export class CommunityMessagingGateway
 
     const em = this.em.fork();
     try {
-      await this.visibility.assertOwnProfile(em, body.profileId, user);
+      await this.visibility.assertOwnMessagingProfile(em, body.profileId, user);
     } catch {
       client.emit('error', {
         code: 'NOT_OWN_PROFILE',
