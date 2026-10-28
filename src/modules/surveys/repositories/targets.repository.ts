@@ -34,6 +34,37 @@ export class TargetsRepository {
   }
 
   /**
+   * Reservas completadas del tenant sin ninguna invitación de encuesta (ni base
+   * ni del profesional): las emisiones que fallaron. Más recientes primero.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Organización.
+   * @param completedStatusConceptId - Estado «completada» de la reserva.
+   * @param limit - Tope de filas.
+   * @returns Los identificadores de las reservas.
+   */
+  async listCompletedBookingsWithoutInvitation(
+    em: EntityManager,
+    tenantId: string,
+    completedStatusConceptId: string,
+    limit: number,
+  ): Promise<string[]> {
+    const rows: { id: string }[] = await em.getConnection().execute(
+      `SELECT b.id
+         FROM scheduling.appointment_bookings b
+        WHERE b.tenant_id = ?
+          AND b.status_concept_id = ?
+          AND NOT EXISTS (
+            SELECT 1 FROM surveys.survey_invitations i
+             WHERE i.appointment_booking_id = b.id)
+        ORDER BY b.updated_at DESC
+        LIMIT ?`,
+      [tenantId, completedStatusConceptId, limit],
+    );
+    return rows.map((row) => row.id);
+  }
+
+  /**
    * La oferta de servicio que se reservó.
    *
    * @param em - Contexto de persistencia o transacción activa.
