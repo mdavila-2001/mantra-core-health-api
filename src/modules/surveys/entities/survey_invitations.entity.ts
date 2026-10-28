@@ -29,6 +29,18 @@ export class SurveyInvitations {
   surveyVersionId!: string;
 
   /**
+   * Versión del profesional que atendió, cuando la hay. La invitación se
+   * responde sobre la unión de `surveyVersionId` (la base del sistema, primero)
+   * y esta (después). Nulo en las invitaciones sin encuesta del profesional.
+   */
+  @Property({
+    fieldName: 'extension_survey_version_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → surveys.survey_versions
+  extensionSurveyVersionId?: string;
+
+  /**
    * Identificador asociado a survey assignment.
    */
   @Property({ fieldName: 'survey_assignment_id', type: 'uuid' }) // FK → surveys.survey_assignments
@@ -47,10 +59,32 @@ export class SurveyInvitations {
   patientProfileId!: string;
 
   /**
-   * La atención completada que habilita la invitación.
+   * La atención completada que habilita la invitación. Nulo cuando la
+   * invitación cuelga de otro sujeto (`subjectTypeConceptId` + `subjectId`).
    */
-  @Property({ fieldName: 'appointment_booking_id', type: 'uuid' }) // FK → scheduling.appointment_bookings
-  appointmentBookingId!: string;
+  @Property({
+    fieldName: 'appointment_booking_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → scheduling.appointment_bookings
+  appointmentBookingId?: string;
+
+  /**
+   * Tipo del sujeto alterno (incidente, autorización, reembolso...). Va junto
+   * con `subjectId`; la invitación necesita al menos un ancla.
+   */
+  @Property({
+    fieldName: 'subject_type_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  subjectTypeConceptId?: string;
+
+  /**
+   * Identificador del sujeto alterno, interpretado según `subjectTypeConceptId`.
+   */
+  @Property({ fieldName: 'subject_id', type: 'uuid', nullable: true })
+  subjectId?: string;
 
   /**
    * Identificador asociado a status concept.
