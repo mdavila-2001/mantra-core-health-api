@@ -11,10 +11,12 @@ import {
 import {
   CONCEPTS,
   ConflictException,
+  LOGO_IMAGE_MIME_TYPES,
   PreconditionFailedException,
   SEED,
   TokenService,
   UPLOAD_MIME_ALLOWLIST,
+  assertLogoImage,
   sniffMimeType,
   type AuthenticatedUser,
 } from '../../../../common';
@@ -547,6 +549,14 @@ export class IamPractitionerSelfRegistrationService {
       const photoFileId = uploadedPhotoId
         ? await this.claimProfilePhoto(tx, uploadedPhotoId, user.id)
         : undefined;
+
+      // 1.6) Logo del consultorio propio, si vino: una pre-carga anónima que
+      // pasa a ser de la cuenta nueva, igual que la foto. Se reclama antes de
+      // escribir la persona: un logo que no sirve aborta el alta entera (422)
+      // y no queda ni la persona ni la sede.
+      if (dto.ownSite?.logoFileId) {
+        await this.claimOwnSiteLogo(tx, dto.ownSite.logoFileId, user.id);
+      }
 
       // 2) Persona con sus datos demográficos. El código legible del DTO se
       // traduce aquí al concepto de terminología que persiste la columna.
@@ -1128,6 +1138,40 @@ export class IamPractitionerSelfRegistrationService {
       );
       return undefined;
     }
+  }
+
+  /**
+   * Reclama el logo del consultorio propio para la cuenta recién creada y
+   * comprueba que sirve como logo: png, jpeg o webp de categoría IMAGE,
+   * sensibilidad NORMAL y hasta 2 MB —las reglas del logo de una
+   * organización—. Va en la transacción del alta: si algo falla, el archivo
+   * vuelve a quedar sin dueño y no se crea nada.
+   *
+   * @param tx - Transacción del alta.
+   * @param fileId - Pre-carga anónima del logo.
+   * @param userId - Cuenta recién creada.
+   * @throws PreconditionFailedException (422) si el archivo no sirve como logo.
+   */
+  private async claimOwnSiteLogo(
+    tx: EntityManager,
+    fileId: string,
+    userId: string,
+  ): Promise<void> {
+    const { file, version } = await this.files.claimAnonymousUpload(
+      tx,
+      fileId,
+      { ownerUserId: userId, tenantId: SEED.tenantId },
+      {
+        allowedMimeTypes: LOGO_IMAGE_MIME_TYPES,
+        allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+        operation: 'iam.auth.register-practitioner.own-site-logo',
+      },
+      {
+        subject: 'El logo del consultorio',
+        notFound: 'El logo del consultorio no existe',
+      },
+    );
+    assertLogoImage(file, version);
   }
 
   /**

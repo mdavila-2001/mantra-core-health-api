@@ -169,6 +169,11 @@ export {
   sniffMimeType,
 } from './storage/upload-content-type';
 export type { SniffedMimeType } from './storage/upload-content-type';
+export {
+  LOGO_IMAGE_MIME_TYPES,
+  LOGO_MAX_BYTES,
+  assertLogoImage,
+} from './storage/logo-image';
 export { appSecurityEnvSchema } from './security/app-security.env';
 
 // Bypass de verificación DEV/TEST (corrección #12, contrato DEV_VERIFICATION_BYPASS.md)
