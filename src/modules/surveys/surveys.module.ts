@@ -5,12 +5,14 @@ import {
   SurveysTemplatesController,
   SurveysAssignmentsController,
   SurveysPatientController,
+  SurveysInsightsController,
 } from './controllers';
 import {
   SurveysTemplatesService,
   SurveysAssignmentsService,
   SurveysResponsesService,
   SurveysSystemTemplatesService,
+  SurveysInsightsService,
 } from './services';
 import {
   TemplatesRepository,
@@ -18,6 +20,7 @@ import {
   InvitationsRepository,
   ResponsesRepository,
   TargetsRepository,
+  InsightsRepository,
 } from './repositories';
 
 /**
@@ -40,6 +43,7 @@ import {
     SurveysTemplatesController,
     SurveysAssignmentsController,
     SurveysPatientController,
+    SurveysInsightsController,
   ],
   providers: [
     // Repositorios
@@ -48,11 +52,13 @@ import {
     InvitationsRepository,
     ResponsesRepository,
     TargetsRepository,
+    InsightsRepository,
     // Servicios
     SurveysTemplatesService,
     SurveysAssignmentsService,
     SurveysResponsesService,
     SurveysSystemTemplatesService,
+    SurveysInsightsService,
   ],
   // `scheduling` emite la invitación al completarse una reserva, detrás de su
   // puerto `BOOKING_COMPLETED_PORT`. Este módulo no importa `scheduling` (sólo
