@@ -5,6 +5,7 @@ import {
   CONCEPTS,
   PreconditionFailedException,
   ResourceNotFoundException,
+  roleAuthorizesInTenant,
   STICKER_PACK_FILE_IDS,
   touch,
   type AuthenticatedUser,
@@ -149,7 +150,7 @@ export class CommunityMessagingService {
     dto: CreateConversationDto,
     actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
-    if (!actor.roles.includes('SYSTEM')) {
+    if (!roleAuthorizesInTenant(actor, 'SYSTEM', undefined)) {
       throw new ForbiddenException('Canal reservado al sistema');
     }
     return this.createDirectConversation(dto, actor, false);

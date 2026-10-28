@@ -139,7 +139,7 @@ function build() {
   const pharmacyRepo = {
     findActiveSiteById: mockFn(async () => SITE),
     findVisibleById: mockFn(async () => PHARMACY),
-    findActiveProductsByIds: mockFn(async () => [PRODUCT]),
+    findSellableProductsByIds: mockFn(async () => [PRODUCT]),
     findCurrentPublicPriceLists: mockFn(async () => []),
     findCurrentPrices: mockFn(async () => []),
   };
@@ -289,7 +289,7 @@ describe('PharmacyOrdersService', () => {
     it('a line without stock stays SIN_STOCK and does NOT sink the order', async () => {
       const d = build();
       const products = [PRODUCT, { ...PRODUCT, id: 'prod-2' }];
-      d.pharmacyRepo.findActiveProductsByIds.mockResolvedValue(products);
+      d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue(products);
       // Solo prod-1 tiene posición; prod-2 no existe en el estante.
       d.inventoryReadRepo.findStockPositions.mockResolvedValue([position()]);
       d.stockRepo.findByKeyForUpdate.mockResolvedValue(position());

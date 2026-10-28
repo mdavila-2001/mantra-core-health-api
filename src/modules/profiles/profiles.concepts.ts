@@ -97,6 +97,49 @@ export const { seeds: PROFILES_CONCEPT_SEEDS, ids: PROF } =
       code: 'JURISDICTION_SEDES_SANTA_CRUZ',
       display: 'SEDES — Gobernación Autónoma Departamental de Santa Cruz',
     },
+    // Los otros ocho Servicios Departamentales de Salud: uno por departamento
+    // (CPE art. 269), con el mismo carácter que el de Santa Cruz —se suman a la
+    // nacional—. Completan la lista para quien ejerce fuera de Santa Cruz.
+    JURISDICTION_SEDES_LA_PAZ: {
+      code: 'JURISDICTION_SEDES_LA_PAZ',
+      display: 'SEDES — Gobierno Autónomo Departamental de La Paz',
+    },
+    JURISDICTION_SEDES_COCHABAMBA: {
+      code: 'JURISDICTION_SEDES_COCHABAMBA',
+      display: 'SEDES — Gobierno Autónomo Departamental de Cochabamba',
+    },
+    JURISDICTION_SEDES_ORURO: {
+      code: 'JURISDICTION_SEDES_ORURO',
+      display: 'SEDES — Gobierno Autónomo Departamental de Oruro',
+    },
+    JURISDICTION_SEDES_POTOSI: {
+      code: 'JURISDICTION_SEDES_POTOSI',
+      display: 'SEDES — Gobierno Autónomo Departamental de Potosí',
+    },
+    JURISDICTION_SEDES_CHUQUISACA: {
+      code: 'JURISDICTION_SEDES_CHUQUISACA',
+      display: 'SEDES — Gobierno Autónomo Departamental de Chuquisaca',
+    },
+    JURISDICTION_SEDES_TARIJA: {
+      code: 'JURISDICTION_SEDES_TARIJA',
+      display: 'SEDES — Gobierno Autónomo Departamental de Tarija',
+    },
+    JURISDICTION_SEDES_BENI: {
+      code: 'JURISDICTION_SEDES_BENI',
+      display: 'SEDES — Gobierno Autónomo Departamental del Beni',
+    },
+    JURISDICTION_SEDES_PANDO: {
+      code: 'JURISDICTION_SEDES_PANDO',
+      display: 'SEDES — Gobierno Autónomo Departamental de Pando',
+    },
+    // El registro en el colegio de la profesión (Colegio Médico, de
+    // Odontólogos…): la tercera habilitación del alta. No es territorial, pero
+    // vive en la misma tabla que las otras dos para que el perfil las muestre
+    // juntas; el nombre del colegio va en `regulatory_authority`.
+    JURISDICTION_PROFESSIONAL_COLLEGE: {
+      code: 'JURISDICTION_PROFESSIONAL_COLLEGE',
+      display: 'Professional college registration',
+    },
     AUTH_PENDING: { code: 'AUTH_PENDING', display: 'Authorization pending' },
     AUTH_ACTIVE: { code: 'AUTH_ACTIVE', display: 'Authorization active' },
     AUTH_EXPIRED: { code: 'AUTH_EXPIRED', display: 'Authorization expired' },
@@ -309,6 +352,131 @@ export const { seeds: PROFILES_CONCEPT_SEEDS, ids: PROF } =
     RELATIONSHIP_OTHER: {
       code: 'RELATIONSHIP_OTHER',
       display: 'Other relationship',
+    },
+    // Parentescos y vínculos que completan el catálogo para un hogar boliviano:
+    // la familia extendida (abuelos, tíos, primos, sobrinos), la política
+    // (suegros, yernos y nueras, cuñados), la reconstituida (padrastros,
+    // hijastros, medios hermanos), la adoptiva y la sustituta (Código Niña, Niño
+    // y Adolescente, Ley 548), el compadrazgo, y los vínculos no familiares a
+    // los que de verdad se llama en una emergencia (quien cuida, quien trabaja
+    // en el hogar, el apoderado con poder notarial). Ninguno sostiene por sí
+    // solo una representación: la lista de dependientes sigue siendo
+    // `DEPENDENT_RELATIONSHIP_CONCEPT_IDS`.
+    RELATIONSHIP_GRANDPARENT: {
+      code: 'RELATIONSHIP_GRANDPARENT',
+      display: 'Grandparent relationship',
+    },
+    RELATIONSHIP_GRANDCHILD: {
+      code: 'RELATIONSHIP_GRANDCHILD',
+      display: 'Grandchild relationship',
+    },
+    RELATIONSHIP_GREAT_GRANDPARENT: {
+      code: 'RELATIONSHIP_GREAT_GRANDPARENT',
+      display: 'Great-grandparent relationship',
+    },
+    RELATIONSHIP_GREAT_GRANDCHILD: {
+      code: 'RELATIONSHIP_GREAT_GRANDCHILD',
+      display: 'Great-grandchild relationship',
+    },
+    RELATIONSHIP_UNCLE_AUNT: {
+      code: 'RELATIONSHIP_UNCLE_AUNT',
+      display: 'Uncle or aunt relationship',
+    },
+    RELATIONSHIP_NEPHEW_NIECE: {
+      code: 'RELATIONSHIP_NEPHEW_NIECE',
+      display: 'Nephew or niece relationship',
+    },
+    RELATIONSHIP_COUSIN: {
+      code: 'RELATIONSHIP_COUSIN',
+      display: 'Cousin relationship',
+    },
+    RELATIONSHIP_HALF_SIBLING: {
+      code: 'RELATIONSHIP_HALF_SIBLING',
+      display: 'Half-sibling relationship',
+    },
+    RELATIONSHIP_STEPPARENT: {
+      code: 'RELATIONSHIP_STEPPARENT',
+      display: 'Stepparent relationship',
+    },
+    RELATIONSHIP_STEPCHILD: {
+      code: 'RELATIONSHIP_STEPCHILD',
+      display: 'Stepchild relationship',
+    },
+    RELATIONSHIP_STEPSIBLING: {
+      code: 'RELATIONSHIP_STEPSIBLING',
+      display: 'Stepsibling relationship',
+    },
+    RELATIONSHIP_PARENT_IN_LAW: {
+      code: 'RELATIONSHIP_PARENT_IN_LAW',
+      display: 'Parent-in-law relationship',
+    },
+    RELATIONSHIP_CHILD_IN_LAW: {
+      code: 'RELATIONSHIP_CHILD_IN_LAW',
+      display: 'Son- or daughter-in-law relationship',
+    },
+    RELATIONSHIP_SIBLING_IN_LAW: {
+      code: 'RELATIONSHIP_SIBLING_IN_LAW',
+      display: 'Sibling-in-law relationship',
+    },
+    RELATIONSHIP_ADOPTIVE_PARENT: {
+      code: 'RELATIONSHIP_ADOPTIVE_PARENT',
+      display: 'Adoptive parent relationship',
+    },
+    RELATIONSHIP_ADOPTED_CHILD: {
+      code: 'RELATIONSHIP_ADOPTED_CHILD',
+      display: 'Adopted child relationship',
+    },
+    RELATIONSHIP_FOSTER_PARENT: {
+      code: 'RELATIONSHIP_FOSTER_PARENT',
+      display: 'Foster parent (substitute family) relationship',
+    },
+    RELATIONSHIP_EX_SPOUSE: {
+      code: 'RELATIONSHIP_EX_SPOUSE',
+      display: 'Former spouse or partner relationship',
+    },
+    RELATIONSHIP_GODPARENT: {
+      code: 'RELATIONSHIP_GODPARENT',
+      display: 'Godparent relationship',
+    },
+    RELATIONSHIP_GODCHILD: {
+      code: 'RELATIONSHIP_GODCHILD',
+      display: 'Godchild relationship',
+    },
+    RELATIONSHIP_COMPADRE: {
+      code: 'RELATIONSHIP_COMPADRE',
+      display: 'Co-parent (compadre/comadre) relationship',
+    },
+    RELATIONSHIP_CAREGIVER: {
+      code: 'RELATIONSHIP_CAREGIVER',
+      display: 'Caregiver relationship',
+    },
+    RELATIONSHIP_DOMESTIC_WORKER: {
+      code: 'RELATIONSHIP_DOMESTIC_WORKER',
+      display: 'Household worker relationship',
+    },
+    RELATIONSHIP_ATTORNEY_IN_FACT: {
+      code: 'RELATIONSHIP_ATTORNEY_IN_FACT',
+      display: 'Attorney-in-fact (notarial power) relationship',
+    },
+    RELATIONSHIP_CARE_HOME_STAFF: {
+      code: 'RELATIONSHIP_CARE_HOME_STAFF',
+      display: 'Care home or shelter staff relationship',
+    },
+    RELATIONSHIP_NEIGHBOR: {
+      code: 'RELATIONSHIP_NEIGHBOR',
+      display: 'Neighbor relationship',
+    },
+    RELATIONSHIP_HOUSEMATE: {
+      code: 'RELATIONSHIP_HOUSEMATE',
+      display: 'Housemate relationship',
+    },
+    RELATIONSHIP_COWORKER: {
+      code: 'RELATIONSHIP_COWORKER',
+      display: 'Coworker relationship',
+    },
+    RELATIONSHIP_EMPLOYER: {
+      code: 'RELATIONSHIP_EMPLOYER',
+      display: 'Employer relationship',
     },
     RELATED_ACTIVE: {
       code: 'RELATED_ACTIVE',

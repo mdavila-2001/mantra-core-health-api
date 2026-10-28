@@ -15,7 +15,12 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ContextCollectionService, CountryContextService } from '../services';
 import {
   CreateAgentDto,
@@ -61,6 +66,11 @@ export class HealthContextController {
   ) {}
 
   /** UC-44-01. */
+  @Audited({
+    action: 'CONTEXT_AGENT_CREATED',
+    entity: 'context_agent',
+    entityId: 'result.id',
+  })
   @Post('agents')
   @Roles('SOURCE_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -73,6 +83,11 @@ export class HealthContextController {
   }
 
   /** UC-44-02. */
+  @Audited({
+    action: 'HEALTH_CONTEXT_SOURCE_CREATED',
+    entity: 'health_context_source',
+    entityId: 'result.id',
+  })
   @Post('sources')
   @Roles('SOURCE_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -88,6 +103,11 @@ export class HealthContextController {
   }
 
   /** UC-44-03. */
+  @Audited({
+    action: 'COUNTRY_CONTEXT_SCHEDULE_CREATED',
+    entity: 'country_context_schedule',
+    entityId: 'result.id',
+  })
   @Post('schedules')
   @Roles('CONTEXT_CURATOR', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -104,6 +124,10 @@ export class HealthContextController {
    * README sobre la resolución de la expresión cron, que hoy no evaluaba
    * ningún proceso. Lo llama el worker en bucle, no la UI.
    */
+  @Audited({
+    action: 'CONTEXT_DUE_SCHEDULES_RUN',
+    entity: 'country_context_schedule',
+  })
   @Post('internal/schedules/run-due')
   @Roles('SYSTEM')
   @HttpCode(HttpStatus.OK)
@@ -119,6 +143,11 @@ export class HealthContextController {
   }
 
   /** UC-44-04. */
+  @Audited({
+    action: 'COUNTRY_HEALTH_CONTEXT_CREATED',
+    entity: 'country_health_context',
+    entityId: 'result.id',
+  })
   @Post('contexts')
   @Roles('CONTEXT_CURATOR', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -134,6 +163,11 @@ export class HealthContextController {
   }
 
   /** UC-44-05. */
+  @Audited({
+    action: 'CONTEXT_COLLECTION_RUN_STARTED',
+    entity: 'context_collection_run',
+    entityId: 'result.id',
+  })
   @Post('collection-runs')
   @Roles('SYSTEM', 'CONTEXT_CURATOR', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -150,6 +184,11 @@ export class HealthContextController {
   }
 
   /** UC-44-06. */
+  @Audited({
+    action: 'CONTEXT_SOURCE_OBSERVATION_RECORDED',
+    entity: 'context_source_observation',
+    entityId: 'result.id',
+  })
   @Post('collection-runs/:id/observations')
   @Roles('SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -167,6 +206,11 @@ export class HealthContextController {
   }
 
   /** UC-44-07. */
+  @Audited({
+    action: 'COUNTRY_HEALTH_CONTEXT_VERSION_DRAFTED',
+    entity: 'country_health_context_version',
+    entityId: 'result.id',
+  })
   @Post('contexts/:id/versions')
   @Roles('SYSTEM', 'CONTEXT_CURATOR', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -183,6 +227,11 @@ export class HealthContextController {
   }
 
   /** UC-44-08. */
+  @Audited({
+    action: 'CONTEXT_QUALITY_REVIEW_RECORDED',
+    entity: 'context_quality_review',
+    entityId: 'result.id',
+  })
   @Post('versions/:id/quality-reviews')
   @Roles('QUALITY_REVIEWER', 'SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -199,6 +248,11 @@ export class HealthContextController {
   }
 
   /** UC-44-09. */
+  @Audited({
+    action: 'COUNTRY_HEALTH_CONTEXT_VERSION_PUBLISHED',
+    entity: 'country_health_context_version',
+    entityId: 'param:id',
+  })
   @Post('versions/:id/publish')
   @Roles('CONTEXT_CURATOR', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -214,6 +268,11 @@ export class HealthContextController {
   }
 
   /** UC-44-10. */
+  @Audited({
+    action: 'CONTEXT_COLLECTION_RUN_FINISHED',
+    entity: 'context_collection_run',
+    entityId: 'param:id',
+  })
   @Post('collection-runs/:id/finish')
   @Roles('SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -231,6 +290,11 @@ export class HealthContextController {
   }
 
   /** UC-44-11. */
+  @Audited({
+    action: 'COUNTRY_HEALTH_CONTEXT_VERSION_SUPERSEDED',
+    entity: 'country_health_context_version',
+    entityId: 'param:id',
+  })
   @Post('versions/:id/supersede')
   @Roles('CONTEXT_CURATOR', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)

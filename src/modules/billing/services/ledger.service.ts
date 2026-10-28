@@ -3,7 +3,6 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -15,6 +14,14 @@ import {
   PaymentsMadeRepository,
 } from '../repositories';
 import { PostToLedgerDto, PostingResultDto } from '../dto';
+import { PracticeTenantLookupService } from '../../practice/services';
+import { activeTenantId, assertDocumentInTenant } from '../billing-scope';
+
+/** "No existe" del documento a contabilizar; el ajeno responde idéntico. */
+const DOCUMENT_NOT_FOUND = {
+  message: 'Documento no encontrado',
+  reason: BillingErrorReason.LEDGER_DOCUMENT_NOT_FOUND,
+};
 
 /**
  * UC-17-06: contabiliza un documento (invoice/bill/payment) fijando su
@@ -41,6 +48,7 @@ export class LedgerService {
     private readonly billsRepo: BillsRepository,
     private readonly paymentsReceivedRepo: PaymentsReceivedRepository,
     private readonly paymentsMadeRepo: PaymentsMadeRepository,
+    private readonly practiceTenantLookup: PracticeTenantLookupService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(LedgerService.name);
@@ -69,18 +77,16 @@ export class LedgerService {
       },
       'Posting document to ledger',
     );
+    const tenantId = activeTenantId();
     return this.em.transactional(async (tx) => {
-      const doc = await this.loadDocument(tx, documentId, dto.documentType);
-      if (!doc) {
-        throw new ResourceNotFoundException(
-          'Documento no encontrado',
-          {
-            documentId,
-            documentType: dto.documentType,
-          },
-          BillingErrorReason.LEDGER_DOCUMENT_NOT_FOUND,
-        );
-      }
+      // El documento se acota al tenant por su práctica antes de mirar si ya
+      // está contabilizado: el 409 no puede delatar un documento ajeno.
+      const doc = await assertDocumentInTenant(
+        this.practiceTenantLookup,
+        await this.loadDocument(tx, documentId, dto.documentType),
+        tenantId,
+        DOCUMENT_NOT_FOUND,
+      );
       if (doc.transactionId) {
         throw new ConflictException(
           'El documento ya fue contabilizado',
@@ -130,6 +136,10 @@ export class LedgerService {
     id: string,
     type: PostToLedgerDto['documentType'],
   ): Promise<{
+    /**
+     * Práctica del documento, de la que se deriva su tenant.
+     */
+    practiceId: string;
     /**
      * Identificador asociado a transaction.
      */

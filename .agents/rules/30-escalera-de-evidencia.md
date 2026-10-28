@@ -1,7 +1,7 @@
 # 30 — Escalera de evidencia
 
 Prohíbe usar una palabra de finalización más fuerte que la evidencia disponible. Aplica a **toda**
-afirmación de estado: en el chat, en un commit, en un PR, en el `PLAN.md` y en el `REPORTE.md`.
+afirmación de estado: en el chat, en un commit, en un issue, en el plan y en la descripción del PR.
 
 Verificar es **observar el artefacto real ejecutándose**. Leer el diff no es verificar. Compilar
 no es verificar. "Debería funcionar" es FAIL.
@@ -38,7 +38,7 @@ de verdad, la consola y la red quedaron sin errores inesperados. Si el cambio es
 además prueba visual (regla 10, fase 6); sin ella se declara `VERIFIED_FUNCTIONAL_ONLY`.
 
 **6 `REGRESSION_VERIFIED`** — Único peldaño que habilita cerrar un hito como `HECHO`. Exige
-regresión del módulo en verde, los gates aplicables pasados y el `REPORTE.md` escrito (regla 40).
+regresión del módulo en verde, los gates aplicables pasados y el reporte escrito en el PR (regla 40).
 
 ## Reglas de la escalera
 
@@ -52,7 +52,7 @@ regresión del módulo en verde, los gates aplicables pasados y el `REPORTE.md` 
 5. **El peldaño se declara por área, no global.** Un trabajo puede tener backend en `TESTED` y
    frontend en `WRITTEN`; el peldaño del trabajo es **el más bajo** de sus áreas en alcance.
 6. **"Listo", "hecho" y "cerrado" solo existen en el peldaño 6.** Por debajo, nombrá el peldaño real.
-7. **Registrá el peldaño alcanzado** en el `REPORTE.md` junto con la evidencia que lo respalda.
+7. **Registrá el peldaño alcanzado** en la descripción del PR junto con la evidencia que lo respalda.
    Un peldaño afirmado sin evidencia pegada es inválido.
 
 ## Veredictos de una verificación

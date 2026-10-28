@@ -190,6 +190,41 @@ export class CanonicalResourcesRepository {
     });
   }
 
+  /**
+   * Si el paciente tiene al menos un recurso canónico bajo ese custodio: es la
+   * huella mínima que lo vincula al tenant cuando no hay clúster ni acceso.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param custodianTenantId - Tenant custodio (obligatorio: sin él no acota).
+   * @param patientProfileId - Perfil de paciente.
+   * @returns `true` si hay algún recurso del paciente bajo el custodio.
+   */
+  async existsResourceByPatient(
+    em: EntityManager,
+    custodianTenantId: string,
+    patientProfileId: string,
+  ): Promise<boolean> {
+    const count = await em.count(CanonicalHealthResources, {
+      custodianTenantId,
+      patientProfileId,
+    });
+    return count > 0;
+  }
+
+  /**
+   * Recursos por id, para verificar su custodio antes de enlazarlos.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Ids de recurso.
+   * @returns Los recursos encontrados.
+   */
+  findResourcesByIds(
+    em: EntityManager,
+    ids: string[],
+  ): Promise<CanonicalHealthResources[]> {
+    return em.find(CanonicalHealthResources, { id: { $in: ids } });
+  }
+
   // --- Versiones (UC-52-03, 07, 13) ---
 
   /** Versión inmutable: se inserta y nunca se reescribe. */

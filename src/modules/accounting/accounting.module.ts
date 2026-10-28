@@ -14,6 +14,7 @@ import {
   AccountingLiabilityController,
   AccountingExchangeRateController,
   AccountingPractitionerController,
+  AccountingPractitionerSimpleController,
   AccountingCockpitController,
 } from './controllers';
 import {
@@ -25,8 +26,10 @@ import {
   AssetService,
   LiabilityService,
   ExchangeRateService,
+  AccountingScopeService,
   PostingHelper,
   PractitionerAccountingService,
+  PractitionerSimpleAccountingService,
   AccountingReadService,
 } from './services';
 import {
@@ -39,6 +42,7 @@ import {
   LiabilityRepository,
   ExchangeRateRepository,
   AccountingControllingRepository,
+  PractitionerSimpleAccountingRepository,
 } from './repositories';
 
 /**
@@ -68,6 +72,7 @@ import {
     AccountingLiabilityController,
     AccountingExchangeRateController,
     AccountingPractitionerController,
+    AccountingPractitionerSimpleController,
     AccountingCockpitController,
   ],
   providers: [
@@ -81,7 +86,9 @@ import {
     LiabilityRepository,
     ExchangeRateRepository,
     AccountingControllingRepository,
+    PractitionerSimpleAccountingRepository,
     // Servicios
+    AccountingScopeService,
     PostingHelper,
     LedgerService,
     LedgerReadService,
@@ -92,6 +99,7 @@ import {
     LiabilityService,
     ExchangeRateService,
     PractitionerAccountingService,
+    PractitionerSimpleAccountingService,
     AccountingReadService,
   ],
 })

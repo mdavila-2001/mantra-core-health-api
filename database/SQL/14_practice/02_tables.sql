@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS "practice"."practice_sites" (
     "address_id" uuid,
     "managing_tenant_id" uuid,
     "bank_qr_file_id" uuid,
+    "logo_file_id" uuid,
     "status_concept_id" uuid NOT NULL,
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
@@ -90,6 +91,7 @@ CREATE TABLE IF NOT EXISTS "practice"."clinical_units" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
+    "responsible_user_id" uuid,
     CONSTRAINT "pk_clinical_units" PRIMARY KEY ("id")
 );
 
@@ -109,6 +111,8 @@ CREATE TABLE IF NOT EXISTS "practice"."care_spaces" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
+    "prep_minutes" integer,
+    "cleanup_minutes" integer,
     CONSTRAINT "pk_care_spaces" PRIMARY KEY ("id")
 );
 
@@ -122,6 +126,7 @@ CREATE TABLE IF NOT EXISTS "practice"."healthcare_services" (
     "referral_required" boolean,
     "appointment_required" boolean,
     "telehealth_available" boolean,
+    "service_catalog_id" uuid,
     "status_concept_id" uuid NOT NULL,
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,

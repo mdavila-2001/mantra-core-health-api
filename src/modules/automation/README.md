@@ -157,7 +157,19 @@ ha superado, o facturar de más al sumar.
 `record_automations` guarda `target_resource_type`, `field_mapping_json` y `dedupe_key_expr`
 precisamente para escribir en un destino que no se conoce al compilar. Como el identificador SQL no
 admite *bind*, esquema, tabla y columnas pasan por la lista blanca `^[a-z_][a-z0-9_]{0,62}$` antes de
-entrecomillarse.
+entrecomillarse. Además, el esquema de destino tiene que estar en una lista permitida
+(`crm`, `marketing`, `promotions`, `scheduling`, `surveys`, `education`, `tracking`): un destino
+clínico, de identidad o financiero se rechaza antes de ejecutar. Un destino, columna o mapeo inválido
+responde `400 VALIDATION_FAILED` con `reason` `AUTOMATION_RECORD_TARGET_INVALID` o
+`AUTOMATION_RECORD_MAPPING_EMPTY`, sin SQL ni identificadores en el mensaje.
+
+### El alcance de tenant
+
+Toda operación del módulo, salvo el barrido de calendario de `SYSTEM`, exige un tenant en el contexto
+y lo usa como único propietario: el `tenantId` del cuerpo se ignora. Workflow, disparador, agente,
+política, run y automatización de registro tienen que ser de ese tenant; el run de agente y la
+aprobación (que no tienen `tenant_id`) lo heredan de su agente y de su workflow run. Un recurso ajeno
+responde igual que uno inexistente: `404`, mismo mensaje y mismo `reason`, sin `details`.
 
 ### La gramática que el modelo no define
 

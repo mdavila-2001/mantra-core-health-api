@@ -1,10 +1,7 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { forbiddenWithReason } from '../errors/reasoned-http-exceptions';
+import { SystemErrorReason } from '../errors/system-error-reasons';
 import { ROLES_KEY } from './roles.decorator';
 import { IS_PUBLIC_KEY } from './public.decorator';
 import type {
@@ -81,11 +78,12 @@ export class RolesGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    const roles = request.user?.roles ?? [];
 
     // SUPERADMIN es un comodín deliberado: evita tener que enumerar cada rol en
     // cada endpoint administrativo y concentra el privilegio total en un rol.
-    if (roles.includes('SUPERADMIN')) {
+    // Sólo lo es el de plataforma: una asignación `SUPERADMIN` acotada a un
+    // tenant (`scopedRoles`) no es comodín fuera de él.
+    if (roleAuthorizesInTenant(request.user, 'SUPERADMIN', undefined)) {
       return true;
     }
 
@@ -94,7 +92,10 @@ export class RolesGuard implements CanActivate {
       roleAuthorizesInTenant(request.user, role, tenantId);
 
     if (!required.some(authorizes)) {
-      throw new ForbiddenException('Rol insuficiente para la operación');
+      throw forbiddenWithReason(
+        'Rol insuficiente para la operación',
+        SystemErrorReason.ROLE_INSUFFICIENT,
+      );
     }
     return true;
   }

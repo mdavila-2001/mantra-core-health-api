@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `geo`
 
-Referencia exhaustiva de 10 operación(es) del módulo `geo`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 11 operación(es) del módulo `geo`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `geo-geofences`, `geo-tracked-subjects`, `geo-tracking-sessions`, `geo-trips`
-- **Controladores:** `GeoGeofencesController`, `GeoTrackedSubjectsController`, `GeoTrackingSessionsController`, `GeoTripsController`
+- **Etiquetas OpenAPI:** `geo`, `geo-geofences`, `geo-tracked-subjects`, `geo-tracking-sessions`, `geo-trips`
+- **Controladores:** `GeoGeofencesController`, `GeoTrackedSubjectsController`, `GeoTrackingSessionsController`, `GeoTripsController`, `ReverseGeocodingController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -21,6 +21,7 @@ Referencia exhaustiva de 10 operación(es) del módulo `geo`, derivada del contr
 8. [POST /geo/tracking-sessions/{id}/close](#8-post-geo-tracking-sessions-id-close) — Cerrar una sesión de tracking
 9. [POST /geo/trips](#9-post-geo-trips) — Iniciar un viaje (trip)
 10. [POST /geo/trips/{id}/close](#10-post-geo-trips-id-close) — Cerrar un viaje con distancia/duración
+11. [POST /public/geo/reverse](#11-post-public-geo-reverse) — Nombre de la calle de un punto del mapa
 
 ---
 
@@ -111,6 +112,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<GeofenceEventResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<GeofenceEventResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<GeofenceEventResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<GeofenceEventResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GeofenceEventResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -145,8 +147,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Geofence no encontrado | Excepción explícita en src/modules/geo/services/geo-geofences.service.ts |
-| 404 | `NOT_FOUND` | Sujeto rastreado no encontrado | Excepción explícita en src/modules/geo/services/geo-geofences.service.ts |
 | 409 | `CONFLICT` | El sujeto ya está en ese estado respecto al geofence | Excepción explícita en src/modules/geo/services/geo-geofences.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El geofence no está activo | Excepción explícita en src/modules/geo/services/geo-geofences.service.ts |
@@ -200,7 +200,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "name": "Nombre de ejemplo",
   "shapeType": "CIRCLE"
 }
@@ -216,7 +215,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | Sí | `string` | formato `uuid` | Tenant propietario (RLS) | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Obsoleto: el tenant se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; el servidor nunca lo toma como fuente de verdad. | `00000000-0000-4000-8000-000000000001` |
 | `name` | Sí | `string` | longitud mínima 1; longitud máxima 200 | Nombre único del geofence dentro del tenant | `Nombre de ejemplo` |
 | `shapeType` | Sí | `string` | valores: `CIRCLE`, `POLYGON` | Forma del geofence | `CIRCLE` |
 | `radiusM` | No | `number` | mayor que 0 | Radio en metros (obligatorio si CIRCLE) | `1` |
@@ -258,6 +257,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<GeofenceResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<GeofenceResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<GeofenceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<GeofenceResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GeofenceResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -363,7 +363,7 @@ Content-Type: application/json
 | `subjectId` | Sí | `string` | formato `uuid` | Id del recurso rastreado (ambulancia/persona) | `00000000-0000-4000-8000-000000000001` |
 | `subjectType` | No | `string` | valores: `PERSON`, `VEHICLE` | Tipo de sujeto (discriminador polimórfico) | `PERSON` |
 | `deviceId` | No | `string` | formato `uuid` | Dispositivo GPS asociado | `00000000-0000-4000-8000-000000000001` |
-| `tenantId` | No | `string` | formato `uuid` | Tenant propietario (RLS) | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Obsoleto: el tenant se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; el servidor nunca lo toma como fuente de verdad. | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -396,6 +396,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TrackedSubjectResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TrackedSubjectResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TrackedSubjectResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TrackedSubjectResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TrackedSubjectResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -512,6 +513,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<LastPositionResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<LastPositionResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<LastPositionResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<LastPositionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LastPositionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -548,7 +550,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sujeto rastreado no encontrado | Excepción explícita en src/modules/geo/services/geo-tracked-subjects.service.ts |
 | 404 | `NOT_FOUND` | El sujeto no tiene posiciones registradas | Excepción explícita en src/modules/geo/services/geo-tracked-subjects.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -676,6 +677,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IngestPingsResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IngestPingsResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IngestPingsResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IngestPingsResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IngestPingsResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -700,7 +702,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sujeto rastreado no encontrado | Excepción explícita en src/modules/geo/services/geo-tracked-subjects.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El sujeto no está activo para rastreo | Excepción explícita en src/modules/geo/services/geo-tracked-subjects.service.ts |
 | 422 | `PRECONDITION_FAILED` | No hay una sesión de tracking abierta para el sujeto | Excepción explícita en src/modules/geo/services/geo-tracked-subjects.service.ts |
@@ -788,6 +789,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -812,7 +814,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sujeto rastreado no encontrado | Excepción explícita en src/modules/geo/services/geo-tracked-subjects.service.ts |
 | 422 | `PRECONDITION_FAILED` | El rastreo del sujeto ya está suspendido | Excepción explícita en src/modules/geo/services/geo-tracked-subjects.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -914,6 +915,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TrackingSessionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TrackingSessionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TrackingSessionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TrackingSessionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TrackingSessionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -946,7 +948,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sujeto rastreado no encontrado | Excepción explícita en src/modules/geo/services/geo-tracking-sessions.service.ts |
 | 409 | `CONFLICT` | El sujeto ya tiene una sesión de tracking abierta | Excepción explícita en src/modules/geo/services/geo-tracking-sessions.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El sujeto no está activo para rastreo | Excepción explícita en src/modules/geo/services/geo-tracking-sessions.service.ts |
@@ -1034,6 +1035,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<TrackingSessionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TrackingSessionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TrackingSessionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TrackingSessionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TrackingSessionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1066,7 +1068,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sesión de tracking no encontrada | Excepción explícita en src/modules/geo/services/geo-tracking-sessions.service.ts |
 | 422 | `PRECONDITION_FAILED` | La sesión no está abierta | Excepción explícita en src/modules/geo/services/geo-tracking-sessions.service.ts |
 | 422 | `PRECONDITION_FAILED` | La sesión tiene viajes en progreso | Excepción explícita en src/modules/geo/services/geo-tracking-sessions.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1167,6 +1168,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TripResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TripResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TripResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TripResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TripResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1203,7 +1205,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sesión de tracking no encontrada | Excepción explícita en src/modules/geo/services/geo-trips.service.ts |
 | 409 | `CONFLICT` | La sesión ya tiene un viaje en progreso | Excepción explícita en src/modules/geo/services/geo-trips.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La sesión de tracking no está abierta | Excepción explícita en src/modules/geo/services/geo-trips.service.ts |
@@ -1305,6 +1306,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TripResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TripResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TripResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TripResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TripResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1341,7 +1343,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Viaje no encontrado | Excepción explícita en src/modules/geo/services/geo-trips.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El viaje no está en progreso | Excepción explícita en src/modules/geo/services/geo-trips.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1356,6 +1357,147 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/geo/trips/{id}/close"
+}
+```
+
+---
+
+## 11. POST /public/geo/reverse
+
+- **Módulo:** `geo`
+- **Etiqueta OpenAPI:** `geo`
+- **Nombre:** Nombre de la calle de un punto del mapa
+- **Operation ID:** `ReverseGeocodingController_reverse`
+- **Autenticación:** Pública
+- **Implementación:** [ReverseGeocodingController.reverse](../../src/modules/geo/reverse-geocoding/reverse-geocoding.controller.ts)
+
+### Descripción de negocio
+
+Sin sesión. 503 si el proveedor no responde: el alta sigue con la calle a mano. Nunca inventa una dirección.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /public/geo/reverse` en `ReverseGeocodingController_reverse`. El controlador delega en `ReverseGeocodingService.reverse`. Valida el body como `ReverseGeocodingRequestDto` y consume `application/json`. El tipo de retorno estático es `Promise<ReverseGeocodingResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ReverseGeocodingRequestDto`; los campos opcionales se omiten.
+
+```http
+POST /public/geo/reverse HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+
+{
+  "latitude": 1,
+  "longitude": 1
+}
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle({ default: { limit: 20, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `latitude` | Sí | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `longitude` | Sí | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /public/geo/reverse HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+
+{
+  "latitude": 1,
+  "longitude": 1
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReverseGeocodingResponseDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<ReverseGeocodingResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ReverseGeocodingResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ReverseGeocodingResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ReverseGeocodingResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ReverseGeocodingResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ReverseGeocodingResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReverseGeocodingResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReverseGeocodingResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "found": true,
+  "line": "Calle Guapay 3861, Equipetrol",
+  "road": "valor-ejemplo",
+  "houseNumber": "valor-ejemplo",
+  "neighbourhood": "valor-ejemplo",
+  "city": "valor-ejemplo",
+  "countryCode": "BO",
+  "adminAreas": {
+    "level1": "Santa Cruz",
+    "level2": "Provincia Andrés Ibáñez",
+    "level3": "Santa Cruz de la Sierra",
+    "district": "Equipetrol"
+  },
+  "attribution": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `found` | Sí | `boolean` | Sin restricción adicional declarada | `false` si no se conoce ninguna calle en ese punto | `true` |
+| `line` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Calle Guapay 3861, Equipetrol` |
+| `road` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `houseNumber` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `neighbourhood` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `city` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `countryCode` | No | `string` | Sin restricción adicional declarada | País del punto, ISO 3166-1 alfa-2 en mayúsculas | `BO` |
+| `adminAreas` | No | `ReverseGeocodingAdminAreasDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"level1":"Santa Cruz","level2":"Provincia Andrés Ibáñez","level3":"Santa Cruz de la Sierra","district":"Equipetrol"}` |
+| `adminAreas.level1` | No | `string` | Sin restricción adicional declarada | Nivel 1: departamento, estado o región | `Santa Cruz` |
+| `adminAreas.level2` | No | `string` | Sin restricción adicional declarada | Nivel 2: provincia o condado | `Provincia Andrés Ibáñez` |
+| `adminAreas.level3` | No | `string` | Sin restricción adicional declarada | Nivel 3: municipio o ciudad | `Santa Cruz de la Sierra` |
+| `adminAreas.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona dentro del municipio | `Equipetrol` |
+| `attribution` | Sí | `string` | Sin restricción adicional declarada | Atribución que exige la licencia de los datos | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 20, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/public/geo/reverse"
 }
 ```
 

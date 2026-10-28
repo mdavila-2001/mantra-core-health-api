@@ -9,13 +9,21 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
-import { LedgerService } from './ledger.service';
 import { ACCT } from '../accounting.concepts';
 import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { AccountingErrorReason } from '../accounting.error-reasons';
+import { LedgerService } from './ledger.service';
+import {
+  TENANT_A,
+  TENANT_B,
+  buildScope,
+  expectScopeNotFound,
+  inTenant,
+} from './accounting-scope.testing';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -68,8 +76,10 @@ function build() {
   const fiscalRepo = {
     findPeriodById: mockFn().mockResolvedValue({
       id: 'fp1',
+      fiscalYearId: 'fy1',
       statusConceptId: ACCT.PERIOD_OPEN,
     }),
+    findYearById: mockFn().mockResolvedValue({ id: 'fy1', practiceId: 'p1' }),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const auditTrail = { record: mockFn().mockResolvedValue(undefined) };
@@ -79,16 +89,24 @@ function build() {
   const practiceTenantLookup = {
     findActivePracticeIdsForPractitioner: mockFn().mockResolvedValue([]),
   };
-  const service = new LedgerService(
-    em as any,
-    journalRepo,
-    accountsRepo as any,
-    fiscalRepo as any,
-    auditTrail as any,
-    practiceTenantLookup as any,
-    logger as any,
+  // La política de alcance real sobre los mismos dobles de asientos y periodos
+  // que ve el servicio; cuentas, centros y prácticas son de `p1` (tenant A).
+  const { scope, doubles } = buildScope({ journalRepo, fiscalRepo });
+  const service = inTenant(
+    new LedgerService(
+      em as any,
+      journalRepo as any,
+      accountsRepo as any,
+      auditTrail as any,
+      practiceTenantLookup as any,
+      scope,
+      logger as any,
+    ),
   );
   return {
+    scope,
+    doubles,
+    logger,
     service,
     tx,
     em,
@@ -152,6 +170,7 @@ describe('LedgerService', () => {
       const d = build();
       d.fiscalRepo.findPeriodById.mockResolvedValue({
         id: 'fp1',
+        fiscalYearId: 'fy1',
         statusConceptId: ACCT.PERIOD_LOCKED,
       });
       await expect(
@@ -176,6 +195,7 @@ describe('LedgerService', () => {
       const d = build();
       d.journalRepo.findTransactionById.mockResolvedValue({
         id: 't1',
+        practiceId: 'p1',
         statusConceptId: ACCT.TXN_DRAFT,
       });
       await expect(
@@ -187,6 +207,7 @@ describe('LedgerService', () => {
       const d = build();
       d.journalRepo.findTransactionById.mockResolvedValue({
         id: 't1',
+        practiceId: 'p1',
         statusConceptId: ACCT.TXN_POSTED,
       });
       d.journalRepo.findLink.mockResolvedValue({ id: 'link' });
@@ -260,6 +281,7 @@ describe('LedgerService', () => {
 
       const txn: any = {
         id: 't1',
+        practiceId: 'p1',
         transactionNumber: 'JT-1',
         statusConceptId: ACCT.TXN_DRAFT,
         // MCH-018: la auto-clasificación exige una regla aplicable; el camino
@@ -299,6 +321,7 @@ describe('LedgerService', () => {
       function draft(d: ReturnType<typeof build>, origin?: string) {
         const txn: any = {
           id: 't1',
+          practiceId: 'p1',
           transactionNumber: 'JT-1',
           statusConceptId: ACCT.TXN_DRAFT,
           sourceDocumentType: origin,
@@ -389,6 +412,7 @@ describe('LedgerService', () => {
       const d = build();
       d.journalRepo.findTransactionById.mockResolvedValue({
         id: 't1',
+        practiceId: 'p1',
         statusConceptId: ACCT.TXN_PENDING_REVIEW,
       });
       await expect(d.service.post('t1', {}, actor)).rejects.toBeInstanceOf(
@@ -400,6 +424,7 @@ describe('LedgerService', () => {
       const d = build();
       d.journalRepo.findTransactionById.mockResolvedValue({
         id: 't1',
+        practiceId: 'p1',
         statusConceptId: ACCT.TXN_APPROVED,
       });
       d.journalRepo.ledgerEntriesForTransaction.mockResolvedValue([
@@ -415,6 +440,7 @@ describe('LedgerService', () => {
       const d = build();
       d.journalRepo.findTransactionById.mockResolvedValue({
         id: 't1',
+        practiceId: 'p1',
         statusConceptId: ACCT.TXN_APPROVED,
         fiscalPeriodId: 'fp1',
       });
@@ -423,6 +449,7 @@ describe('LedgerService', () => {
       );
       d.fiscalRepo.findPeriodById.mockResolvedValue({
         id: 'fp1',
+        fiscalYearId: 'fy1',
         statusConceptId: ACCT.PERIOD_LOCKED,
       });
       await expect(d.service.post('t1', {}, actor)).rejects.toBeInstanceOf(
@@ -434,6 +461,7 @@ describe('LedgerService', () => {
       const d = build();
       d.journalRepo.findTransactionById.mockResolvedValue({
         id: 't1',
+        practiceId: 'p1',
         statusConceptId: ACCT.TXN_PENDING_REVIEW,
       });
       const noRole = { id: 'u2', roles: [] } as any;
@@ -526,7 +554,7 @@ describe('LedgerService', () => {
       d.journalRepo.findTransactionById.mockResolvedValue({
         id: 't1',
         statusConceptId: ACCT.TXN_DRAFT,
-        practiceId: 'other-practice',
+        practiceId: 'p2',
       });
       d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
         ['p1'],
@@ -540,7 +568,7 @@ describe('LedgerService', () => {
       const d = build();
       d.journalRepo.findTransactionById.mockResolvedValue({
         id: 't1',
-        practiceId: 'other-practice',
+        practiceId: 'p2',
       });
       d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
         ['p1'],
@@ -578,6 +606,407 @@ describe('LedgerService', () => {
         ruleId: 'r1',
         targetAccountId: 'acc9',
         priority: 10,
+      });
+    });
+  });
+
+  describe('alcance de tenant (ACC-01)', () => {
+    const lines = [
+      { accountId: 'acc-d', direction: 'DEBIT', amount: '100.00' },
+      { accountId: 'acc-c', direction: 'CREDIT', amount: '100.00' },
+    ];
+    const entry = {
+      practiceId: 'p1',
+      transactionDate: '2026-01-31',
+      lines,
+    } as any;
+
+    /** Ningún asiento, línea ni cuenta se escribe. */
+    function expectNothingWritten(d: ReturnType<typeof build>) {
+      expect(d.journalRepo.findByTransactionNumber).not.toHaveBeenCalled();
+      expect(d.journalRepo.createTransaction).not.toHaveBeenCalled();
+      expect(d.journalRepo.createLedgerEntry).not.toHaveBeenCalled();
+      expect(d.journalRepo.createAssignment).not.toHaveBeenCalled();
+      expect(d.auditTrail.record).not.toHaveBeenCalled();
+    }
+
+    /** Hace que esas cuentas sean del plan de la práctica `practiceId`. */
+    function accountsOf(
+      d: ReturnType<typeof build>,
+      owners: Record<string, string>,
+    ) {
+      d.doubles.accountsRepo.findByIds.mockImplementation(
+        async (_em: any, ids: string[]) =>
+          ids
+            .filter((id) => owners[id] !== undefined)
+            .map((id) => ({ id, practiceId: owners[id] })),
+      );
+    }
+
+    describe.each([
+      ['postJournal', 'postJournal'],
+      ['createDraft', 'createDraft'],
+    ] as const)('%s', (_label, method) => {
+      it('una práctica de otra organización responde como inexistente', async () => {
+        const foreign = build();
+        const absent = build();
+
+        const a = await expectScopeNotFound(
+          foreign.service[method]({ ...entry, practiceId: 'p-b' }, actor),
+          AccountingErrorReason.PRACTICE_NOT_FOUND,
+        );
+        const b = await expectScopeNotFound(
+          absent.service[method]({ ...entry, practiceId: 'no-existe' }, actor),
+          AccountingErrorReason.PRACTICE_NOT_FOUND,
+        );
+
+        expect(a.getResponse()).toEqual(b.getResponse());
+        expectNothingWritten(foreign);
+      });
+
+      it.each([
+        ['de otra organización', 'p-b'],
+        ['de otra práctica de la misma organización', 'p2'],
+      ])('una cuenta %s responde como inexistente', async (_c, owner) => {
+        const d = build();
+        accountsOf(d, { 'acc-d': 'p1', 'acc-c': owner });
+
+        await expectScopeNotFound(
+          d.service[method](entry, actor),
+          AccountingErrorReason.ACCOUNT_NOT_FOUND_IN_PRACTICE,
+        );
+        expectNothingWritten(d);
+      });
+
+      it('una cuenta inexistente responde exactamente igual que una ajena', async () => {
+        const foreign = build();
+        accountsOf(foreign, { 'acc-d': 'p1', 'acc-c': 'p-b' });
+        const absent = build();
+        accountsOf(absent, { 'acc-d': 'p1' });
+
+        const a = await expectScopeNotFound(
+          foreign.service[method](entry, actor),
+          AccountingErrorReason.ACCOUNT_NOT_FOUND_IN_PRACTICE,
+        );
+        const b = await expectScopeNotFound(
+          absent.service[method](entry, actor),
+          AccountingErrorReason.ACCOUNT_NOT_FOUND_IN_PRACTICE,
+        );
+        expect(a.getResponse()).toEqual(b.getResponse());
+      });
+
+      it.each([
+        ['otra organización', 'p-b'],
+        ['otra práctica de la misma organización', 'p2'],
+      ])('un periodo de %s responde como inexistente', async (_c, owner) => {
+        const d = build();
+        d.fiscalRepo.findYearById.mockResolvedValue({
+          id: 'fy1',
+          practiceId: owner,
+        });
+
+        await expectScopeNotFound(
+          d.service[method]({ ...entry, fiscalPeriodId: 'fp1' }, actor),
+          AccountingErrorReason.FISCAL_PERIOD_NOT_FOUND,
+        );
+        expectNothingWritten(d);
+      });
+
+      it('un centro de costo de otra práctica responde como inexistente', async () => {
+        const d = build();
+        d.doubles.controllingRepo.findCostCentersByIds.mockResolvedValue([
+          { id: 'cc1', practiceId: 'p2' },
+        ]);
+
+        await expectScopeNotFound(
+          d.service[method](
+            {
+              ...entry,
+              lines: [{ ...lines[0], costCenterId: 'cc1' }, lines[1]],
+            },
+            actor,
+          ),
+          AccountingErrorReason.COST_CENTER_NOT_FOUND,
+        );
+        expectNothingWritten(d);
+      });
+
+      it('un centro de beneficio de otra organización responde como inexistente', async () => {
+        const d = build();
+        d.doubles.controllingRepo.findProfitCentersByIds.mockResolvedValue([
+          { id: 'pc1', tenantId: TENANT_B },
+        ]);
+
+        await expectScopeNotFound(
+          d.service[method](
+            {
+              ...entry,
+              lines: [{ ...lines[0], profitCenterId: 'pc1' }, lines[1]],
+            },
+            actor,
+          ),
+          AccountingErrorReason.PROFIT_CENTER_NOT_FOUND,
+        );
+        expectNothingWritten(d);
+      });
+
+      it('con todo propio escribe, y las cuentas se contrastan contra la práctica del asiento', async () => {
+        const d = build();
+        accountsOf(d, { 'acc-d': 'p1', 'acc-c': 'p1' });
+
+        await d.service[method](entry, actor);
+
+        expect(d.doubles.accountsRepo.findByIds).toHaveBeenCalledWith(d.tx, [
+          'acc-d',
+          'acc-c',
+        ]);
+        expect(d.journalRepo.createLedgerEntry).toHaveBeenCalledTimes(2);
+      });
+
+      it('sin tenant en el contexto no escribe (412)', async () => {
+        const d = build();
+        const outside = new LedgerService(
+          d.em as any,
+          d.journalRepo as any,
+          {} as any,
+          d.auditTrail as any,
+          d.practiceTenantLookup as any,
+          d.scope,
+          d.logger as any,
+        );
+
+        await expect(outside[method](entry, actor)).rejects.toBeInstanceOf(
+          PreconditionFailedException,
+        );
+        expectNothingWritten(d);
+      });
+    });
+
+    describe('transiciones y adjuntos sobre un asiento ajeno', () => {
+      const foreignTxn = (extra: object = {}) => ({
+        id: 't1',
+        practiceId: 'p-b',
+        transactionNumber: 'JT-9',
+        statusConceptId: ACCT.TXN_DRAFT,
+        sourceDocumentType: 'INVOICE',
+        ...extra,
+      });
+
+      const commands: [
+        string,
+        string,
+        (d: ReturnType<typeof build>) => Promise<unknown>,
+      ][] = [
+        [
+          'classify',
+          ACCT.TXN_DRAFT,
+          (d) => d.service.classify('t1', {}, actor),
+        ],
+        [
+          'submitForReview',
+          ACCT.TXN_AUTO_CLASSIFIED,
+          (d) => d.service.submitForReview('t1', {}, actor),
+        ],
+        [
+          'approve',
+          ACCT.TXN_PENDING_REVIEW,
+          (d) => d.service.approve('t1', {}, actor),
+        ],
+        ['post', ACCT.TXN_APPROVED, (d) => d.service.post('t1', {}, actor)],
+        [
+          'reverseJournal',
+          ACCT.TXN_POSTED,
+          (d) => d.service.reverseJournal('t1', {}, actor),
+        ],
+        [
+          'attachFile',
+          ACCT.TXN_DRAFT,
+          (d) => d.service.attachFile('t1', { fileId: 'f1' } as any, actor),
+        ],
+      ];
+
+      it.each(commands)(
+        '%s: un asiento de otra organización responde como inexistente y no se toca',
+        async (_name, status, run) => {
+          const foreign = build();
+          const txn = foreignTxn({ statusConceptId: status });
+          foreign.journalRepo.findTransactionById.mockResolvedValue(txn);
+          const absent = build();
+          absent.journalRepo.findTransactionById.mockResolvedValue(null);
+
+          const a = await expectScopeNotFound(
+            run(foreign),
+            AccountingErrorReason.LEDGER_TRANSACTION_NOT_FOUND,
+          );
+          const b = await expectScopeNotFound(
+            run(absent),
+            AccountingErrorReason.LEDGER_TRANSACTION_NOT_FOUND,
+          );
+
+          expect(a.getResponse()).toEqual(b.getResponse());
+          expect(txn.statusConceptId).toBe(status);
+          expect(foreign.journalRepo.createTransaction).not.toHaveBeenCalled();
+          expect(foreign.journalRepo.createFile).not.toHaveBeenCalled();
+          expect(foreign.journalRepo.createLink).not.toHaveBeenCalled();
+          expect(foreign.auditTrail.record).not.toHaveBeenCalled();
+        },
+      );
+
+      it('un asiento ajeno ya reversado no delata su estado (404, no 409)', async () => {
+        const d = build();
+        d.journalRepo.findTransactionById.mockResolvedValue(
+          foreignTxn({ statusConceptId: ACCT.TXN_POSTED }),
+        );
+        d.journalRepo.findLink.mockResolvedValue({ id: 'link' });
+
+        await expectScopeNotFound(
+          d.service.reverseJournal('t1', {}, actor),
+          AccountingErrorReason.LEDGER_TRANSACTION_NOT_FOUND,
+        );
+      });
+
+      it('para un profesional, el asiento ajeno responde 404 antes del chequeo de vinculación (que nombraría la práctica)', async () => {
+        const d = build();
+        d.journalRepo.findTransactionById.mockResolvedValue(foreignTxn());
+        const practitioner = {
+          id: 'doc-1',
+          roles: ['PRACTITIONER'],
+          practitionerProfileId: 'hpp-1',
+        } as any;
+
+        await expectScopeNotFound(
+          d.service.classify('t1', {}, practitioner),
+          AccountingErrorReason.LEDGER_TRANSACTION_NOT_FOUND,
+        );
+        expect(
+          d.practiceTenantLookup.findActivePracticeIdsForPractitioner,
+        ).not.toHaveBeenCalled();
+      });
+
+      it.each(['p-b', 'p2'])(
+        'post: el periodo del cuerpo de la práctica %s no es del asiento y responde como inexistente',
+        async (owner) => {
+          const d = build();
+          const txn = {
+            id: 't1',
+            practiceId: 'p1',
+            statusConceptId: ACCT.TXN_APPROVED,
+          };
+          d.journalRepo.findTransactionById.mockResolvedValue(txn);
+          d.fiscalRepo.findYearById.mockResolvedValue({
+            id: 'fy1',
+            practiceId: owner,
+          });
+
+          await expectScopeNotFound(
+            d.service.post('t1', { fiscalPeriodId: 'fp-x' }, actor),
+            AccountingErrorReason.FISCAL_PERIOD_NOT_FOUND,
+          );
+          expect(txn.statusConceptId).toBe(ACCT.TXN_APPROVED);
+          expect((txn as any).fiscalPeriodId).toBeUndefined();
+        },
+      );
+
+      it('post: el periodo propio del cuerpo se enlaza al asiento', async () => {
+        const d = build();
+        const txn: any = {
+          id: 't1',
+          practiceId: 'p1',
+          statusConceptId: ACCT.TXN_APPROVED,
+        };
+        d.journalRepo.findTransactionById.mockResolvedValue(txn);
+        d.journalRepo.ledgerEntriesForTransaction.mockResolvedValue([
+          { directionConceptId: ACCT.DIRECTION_DEBIT, amount: '100.00' },
+          { directionConceptId: ACCT.DIRECTION_CREDIT, amount: '100.00' },
+        ]);
+
+        await d.service.post('t1', { fiscalPeriodId: 'fp1' }, actor);
+
+        expect(txn.fiscalPeriodId).toBe('fp1');
+        expect(txn.statusConceptId).toBe(ACCT.TXN_POSTED);
+      });
+
+      it('reverseJournal: el periodo del cuerpo de otra práctica responde como inexistente y no reversa', async () => {
+        const d = build();
+        const original = {
+          id: 't1',
+          practiceId: 'p1',
+          statusConceptId: ACCT.TXN_POSTED,
+        };
+        d.journalRepo.findTransactionById.mockResolvedValue(original);
+        d.fiscalRepo.findYearById.mockResolvedValue({
+          id: 'fy1',
+          practiceId: 'p-b',
+        });
+
+        await expectScopeNotFound(
+          d.service.reverseJournal('t1', { fiscalPeriodId: 'fp-x' }, actor),
+          AccountingErrorReason.FISCAL_PERIOD_NOT_FOUND,
+        );
+        expect(original.statusConceptId).toBe(ACCT.TXN_POSTED);
+        expect(d.journalRepo.createTransaction).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('createAccount', () => {
+      const dto = {
+        code: 'C',
+        name: 'N',
+        accountType: 'ASSET',
+        normalBalance: 'DEBIT',
+      } as any;
+
+      it('una práctica de otra organización responde como inexistente y no crea la cuenta', async () => {
+        const foreign = build();
+        const absent = build();
+
+        const a = await expectScopeNotFound(
+          foreign.service.createAccount({ ...dto, practiceId: 'p-b' }, actor),
+          AccountingErrorReason.PRACTICE_NOT_FOUND,
+        );
+        const b = await expectScopeNotFound(
+          absent.service.createAccount(
+            { ...dto, practiceId: 'no-existe' },
+            actor,
+          ),
+          AccountingErrorReason.PRACTICE_NOT_FOUND,
+        );
+
+        expect(a.getResponse()).toEqual(b.getResponse());
+        expect(foreign.accountsRepo.findByCode).not.toHaveBeenCalled();
+        expect(foreign.accountsRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('el 409 de código duplicado no se puede usar para sondear otra organización', async () => {
+        const d = build();
+        d.accountsRepo.findByCode.mockResolvedValue({ id: 'dup' });
+
+        await expectScopeNotFound(
+          d.service.createAccount({ ...dto, practiceId: 'p-b' }, actor),
+          AccountingErrorReason.PRACTICE_NOT_FOUND,
+        );
+      });
+    });
+
+    describe('determineAccounts', () => {
+      it('lee las reglas del tenant de la sesión, no del que diga el cuerpo', async () => {
+        const d = build();
+        d.accountsRepo.findActiveRule.mockResolvedValue({
+          id: 'r1',
+          targetAccountId: 'acc9',
+        });
+
+        await d.service.determineAccounts({
+          tenantId: TENANT_B,
+          postingScenarioConceptId: 's',
+        } as any);
+
+        expect(d.accountsRepo.findActiveRule).toHaveBeenCalledWith(
+          expect.anything(),
+          TENANT_A,
+          's',
+          ACCT.RULE_ACTIVE,
+        );
       });
     });
   });

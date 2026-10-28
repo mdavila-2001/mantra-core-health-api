@@ -13,6 +13,12 @@ import {
   ResourceNotFoundException,
 } from '../../../common';
 import { TELE } from '../telemetry.concepts';
+import { TelemetryErrorReason } from '../telemetry.error-reasons';
+import { createGlobalValidationPipe } from '../../../common';
+import {
+  CreateDisclosureAcceptanceDto,
+  CreateTrackingConsentDto,
+} from '../dto';
 
 const actor = { id: 'user-1', roles: ['USER'] } as any;
 
@@ -94,6 +100,33 @@ describe('TelemetryConsentService', () => {
       expect(d.acceptancesRepo.create).not.toHaveBeenCalled();
     });
 
+    it('registra la aceptación a nombre del actor aunque el cuerpo traiga el userId de otra persona', async () => {
+      const d = build();
+      d.disclosuresRepo.findById.mockResolvedValue({ id: 'v1' });
+      d.acceptancesRepo.findExisting.mockResolvedValue(null);
+      d.acceptancesRepo.create.mockReturnValue({
+        id: 'a1',
+        trackingDisclosureVersionId: 'v1',
+        userId: 'user-1',
+      });
+
+      await d.service.acceptDisclosure(
+        { trackingDisclosureVersionId: 'v1', userId: 'victima-2' } as any,
+        actor,
+      );
+
+      expect(d.acceptancesRepo.findExisting).toHaveBeenCalledWith(
+        expect.anything(),
+        'user-1',
+        'v1',
+        undefined,
+      );
+      expect(d.acceptancesRepo.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ userId: 'user-1' }),
+      );
+    });
+
     it('404 when the disclosure version is missing', async () => {
       const d = build();
       d.disclosuresRepo.findById.mockResolvedValue(null);
@@ -124,6 +157,31 @@ describe('TelemetryConsentService', () => {
         actor,
       );
       expect(res.decisionConceptId).toBe(TELE.DECISION_GRANTED);
+    });
+
+    it('otorga el consentimiento al actor aunque el cuerpo traiga el userId de otra persona', async () => {
+      const d = build();
+      d.purposesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        requiresConsent: true,
+      });
+      d.consentsRepo.create.mockReturnValue({
+        id: 'c1',
+        userId: 'user-1',
+        purposeDefinitionId: 'p1',
+        decisionConceptId: TELE.DECISION_GRANTED,
+      });
+
+      await d.service.grantConsent(
+        { purposeDefinitionId: 'p1', userId: 'victima-2' } as any,
+        actor,
+      );
+
+      expect(d.consentsRepo.create).toHaveBeenCalledTimes(1);
+      expect(d.consentsRepo.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ userId: 'user-1', actorUserId: 'user-1' }),
+      );
     });
 
     it('422 when the purpose does not require consent', async () => {
@@ -203,6 +261,60 @@ describe('TelemetryConsentService', () => {
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
+    it('el consentimiento de otra persona responde igual que uno inexistente y no escribe nada', async () => {
+      const ajeno = build();
+      ajeno.consentsRepo.findById.mockResolvedValue({
+        id: 'c-b',
+        userId: 'user-2',
+        purposeDefinitionId: 'p1',
+      });
+      const inexistente = build();
+      inexistente.consentsRepo.findById.mockResolvedValue(null);
+
+      const failure = async (d: ReturnType<typeof build>) => {
+        try {
+          await d.service.withdrawConsent('c-b', actor);
+        } catch (error) {
+          return error as ResourceNotFoundException;
+        }
+        throw new Error('debía rechazar');
+      };
+      const a = await failure(ajeno);
+      const b = await failure(inexistente);
+
+      expect(a).toBeInstanceOf(ResourceNotFoundException);
+      expect(a.getStatus()).toBe(404);
+      expect(a.reason).toBe(TelemetryErrorReason.CONSENT_NOT_OWNED);
+      expect(a.details).toBeUndefined();
+      expect(a.getResponse()).toEqual(b.getResponse());
+      expect(ajeno.consentsRepo.findLatest).not.toHaveBeenCalled();
+      expect(ajeno.consentsRepo.create).not.toHaveBeenCalled();
+      expect(ajeno.subjectsRepo.findActiveByConsent).not.toHaveBeenCalled();
+    });
+
+    it('el titular repite el retiro: 422 con TELEMETRY_CONSENT_NOT_ACTIVE', async () => {
+      const d = build();
+      d.consentsRepo.findById.mockResolvedValue({
+        id: 'c1',
+        userId: 'user-1',
+        purposeDefinitionId: 'p1',
+      });
+      d.consentsRepo.findLatest.mockResolvedValue({
+        id: 'c2',
+        decisionConceptId: TELE.DECISION_WITHDRAWN,
+      });
+
+      const error = await d.service
+        .withdrawConsent('c1', actor)
+        .catch((e: PreconditionFailedException) => e);
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect((error as PreconditionFailedException).reason).toBe(
+        TelemetryErrorReason.CONSENT_NOT_ACTIVE,
+      );
+      expect(d.consentsRepo.create).not.toHaveBeenCalled();
+    });
+
     it('422 when there is no active granted consent', async () => {
       const d = build();
       d.consentsRepo.findById.mockResolvedValue({
@@ -269,6 +381,38 @@ describe('TelemetryConsentService', () => {
         'user-1',
         'p1',
       );
+    });
+  });
+
+  describe('cuerpo de autoservicio (TEL-01)', () => {
+    const pipe = createGlobalValidationPipe();
+    const validate = (metatype: new () => object, body: object) =>
+      pipe.transform(body, { type: 'body', metatype });
+
+    it('el pipe global rechaza userId en el consentimiento', async () => {
+      await expect(
+        validate(CreateTrackingConsentDto, {
+          purposeDefinitionId: '3b6f7a52-2a2e-4a53-9f3b-0d5a1d3c9e11',
+          userId: '3b6f7a52-2a2e-4a53-9f3b-0d5a1d3c9e12',
+        }),
+      ).rejects.toMatchObject({ status: 400 });
+    });
+
+    it('el pipe global rechaza userId en la aceptación de disclosure', async () => {
+      await expect(
+        validate(CreateDisclosureAcceptanceDto, {
+          trackingDisclosureVersionId: '3b6f7a52-2a2e-4a53-9f3b-0d5a1d3c9e11',
+          userId: '3b6f7a52-2a2e-4a53-9f3b-0d5a1d3c9e12',
+        }),
+      ).rejects.toMatchObject({ status: 400 });
+    });
+
+    it('sin userId el cuerpo válido pasa', async () => {
+      await expect(
+        validate(CreateTrackingConsentDto, {
+          purposeDefinitionId: '3b6f7a52-2a2e-4a53-9f3b-0d5a1d3c9e11',
+        }),
+      ).resolves.toBeInstanceOf(CreateTrackingConsentDto);
     });
   });
 });

@@ -1,9 +1,6 @@
-import {
-  ArgumentMetadata,
-  BadRequestException,
-  Injectable,
-  PipeTransform,
-} from '@nestjs/common';
+import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
+import { badRequestWithReason } from '../errors/reasoned-http-exceptions';
+import { SystemErrorReason } from '../errors/system-error-reasons';
 
 /** Formato canónico de UUID; el mismo que valida `ParseUUIDPipe` de Nest. */
 const UUID_PATTERN =
@@ -42,7 +39,7 @@ export class ParseUuidListPipe implements PipeTransform<
    * @param value - Valor crudo del query param.
    * @param _metadata - Metadatos del argumento; no se usan.
    * @returns Lista de UUIDs, o `undefined` si el parámetro no vino.
-   * @throws BadRequestException si algún elemento no es UUID o se supera el tope.
+   * @throws BadRequestException (`INVALID_UUID_LIST`) si algún elemento no es UUID o se supera el tope.
    */
   transform(
     value: string | undefined,
@@ -56,21 +53,27 @@ export class ParseUuidListPipe implements PipeTransform<
       .filter((part) => part.length > 0);
 
     if (parts.length === 0) {
-      throw new BadRequestException(
+      throw badRequestWithReason(
         'ids no puede venir vacío: omita el parámetro para no filtrar por id',
+        SystemErrorReason.INVALID_UUID_LIST,
+        { parameter: 'ids' },
       );
     }
     if (parts.length > this.max) {
-      throw new BadRequestException(
+      throw badRequestWithReason(
         `ids admite como máximo ${this.max} identificadores por petición`,
+        SystemErrorReason.INVALID_UUID_LIST,
+        { parameter: 'ids', max: this.max },
       );
     }
     const invalid = parts.filter((part) => !UUID_PATTERN.test(part));
     if (invalid.length > 0) {
-      throw new BadRequestException(
-        `ids debe ser una lista de UUID separados por coma; no lo son: ${invalid
-          .slice(0, 5)
-          .join(', ')}`,
+      // No se devuelven los elementos inválidos: la lista entera es entrada
+      // del cliente y, repetida en el mensaje, termina en historiales y logs.
+      throw badRequestWithReason(
+        'ids debe ser una lista de UUID separados por coma',
+        SystemErrorReason.INVALID_UUID_LIST,
+        { parameter: 'ids', invalidCount: invalid.length },
       );
     }
     // Duplicados: el cliente suele armar la lista recorriendo una tabla, donde

@@ -78,7 +78,9 @@ import {
   SerialsRepository,
   SyncRepository,
   InventoryReadRepository,
+  InventoryScopeRepository,
 } from './infrastructure/repositories';
+import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inventory-scope.policy';
 
 /**
  * Módulo 25 — Pharmacy Inventory, Supply and Dispensing.
@@ -129,6 +131,8 @@ import {
     SerialsRepository,
     SyncRepository,
     InventoryReadRepository,
+    InventoryScopeRepository,
+    PharmacyInventoryScopePolicy,
     DirectoryTenantAdministrationAdapter,
     {
       provide: DIRECTORY_TENANT_ADMINISTRATION_PORT,

@@ -1,0 +1,344 @@
+{
+  "measuredAt": "2026-10-26T02:52:44.065Z",
+  "sources": {
+    "hpoa": {
+      "file": "phenotype.hpoa",
+      "url": "https://github.com/obophenotype/human-phenotype-ontology/releases/latest/download/phenotype.hpoa",
+      "bytes": 35816037,
+      "sha256": "e89aa39c8f97bf5a52c5d160f9250a603681d630ade8ec2679d84ac5aece1f72",
+      "retrievedAt": "2026-10-26T02:52:25.550Z",
+      "license": "HPO license (uso libre con cita, sin modificar términos) — https://hpo.jax.org/license"
+    },
+    "hpObo": {
+      "file": "hp.obo",
+      "url": "https://github.com/obophenotype/human-phenotype-ontology/releases/latest/download/hp.obo",
+      "bytes": 10863613,
+      "sha256": "93dace952fcb3ec4728818857f6ba76bc2d5312f4d83266519b8694b8e798f22",
+      "retrievedAt": "2026-10-26T02:52:26.356Z",
+      "license": "HPO license (uso libre con cita, sin modificar términos) — https://hpo.jax.org/license"
+    },
+    "babelon": {
+      "file": "hp-es.babelon.tsv",
+      "url": "https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/src/translations/hp-es.babelon.tsv",
+      "bytes": 2116349,
+      "sha256": "00972e33775a0340ad7b45620f0ff1d2794766c45beb937a165ee86e6f16ed9a",
+      "retrievedAt": "2026-10-26T02:52:27.135Z",
+      "license": "HPO license (uso libre con cita, sin modificar términos) — https://hpo.jax.org/license"
+    },
+    "orphaProduct4": {
+      "file": "en_product4.xml",
+      "url": "https://www.orphadata.com/data/xml/en_product4.xml",
+      "bytes": 47893357,
+      "sha256": "4f44e8a61201399911aa1ba44a293c0ccaa5ce11272c47d40862255cb72f6b32",
+      "retrievedAt": "2026-10-26T02:52:30.900Z",
+      "license": "CC BY 4.0"
+    },
+    "orphaAges": {
+      "file": "en_product9_ages.xml",
+      "url": "https://www.orphadata.com/data/xml/en_product9_ages.xml",
+      "bytes": 6948952,
+      "sha256": "38fef7e9e398addb147e57df7bb523e5ef072e03c0208ae81b37a2fd200af1ab",
+      "retrievedAt": "2026-10-26T02:52:31.273Z",
+      "license": "CC BY 4.0"
+    },
+    "orphaPrev": {
+      "file": "en_product9_prev.xml",
+      "url": "https://www.orphadata.com/data/xml/en_product9_prev.xml",
+      "bytes": 16178169,
+      "sha256": "6b492b3cc61e5a0327de12f59386a07a071760a938d0bbd8f525bc4a5f71b7f0",
+      "retrievedAt": "2026-10-26T02:52:31.733Z",
+      "license": "CC BY 4.0"
+    },
+    "orphaEs": {
+      "file": "es_product1.xml",
+      "url": "https://www.orphadata.com/data/xml/es_product1.xml",
+      "bytes": 55912900,
+      "sha256": "3eb547bb9aa0429bd8a05e55ea2c539a72b502a969325b1b5adeb601ab448ee0",
+      "retrievedAt": "2026-10-26T02:52:33.766Z",
+      "license": "CC BY 4.0"
+    },
+    "mondoObo": {
+      "file": "mondo.obo",
+      "url": "http://purl.obolibrary.org/obo/mondo.obo",
+      "bytes": 53320617,
+      "sha256": "2631e8e165d41def1a46749adb1ce0a336c8aba7f6bc0978729592cee8fed60b",
+      "retrievedAt": "2026-10-26T02:52:37.256Z",
+      "license": "CC BY 4.0"
+    },
+    "mondoSssom": {
+      "file": "mondo.sssom.tsv",
+      "url": "http://purl.obolibrary.org/obo/mondo/mappings/mondo.sssom.tsv",
+      "bytes": 13124886,
+      "sha256": "ec15afdb32fab3d3cb679d357e25ef4fb38b5e2c468ff4ac5456da10e2f6c80b",
+      "retrievedAt": "2026-10-26T02:52:38.896Z",
+      "license": "CC BY 4.0"
+    }
+  },
+  "versions": {
+    "hpoa": "2026-09-02",
+    "hpObo": "hp/releases/2026-09-01",
+    "mondo": "releases/2026-10-06",
+    "orphanetProduct4": "2026-06-23 07:57:18",
+    "orphanetProduct9Ages": "2026-06-23 07:57:51",
+    "orphanetProduct9Prev": "2026-06-23 07:57:58",
+    "orphanetProduct1Es": "2026-06-23 07:58:18"
+  },
+  "glossaryFilesRead": [
+    "cie10es-diagnosticos",
+    "cie10es-procedimientos",
+    "cima",
+    "inlasa-aranceles",
+    "medlineplus-es",
+    "medlineplus-es-pruebas",
+    "wikidata-anatomia",
+    "wikidata-relaciones"
+  ],
+  "hpo": {
+    "termsLive": 19894,
+    "termsLiveWithEs": 19345,
+    "babelonOfficialLabels": 19932,
+    "hpoaRowsAspectP": 268906,
+    "hpoaRowsAspectPByDatabase": {
+      "OMIM": 152141,
+      "DECIPHER": 294,
+      "ORPHA": 116471
+    },
+    "phenotypesUsed": 11570,
+    "phenotypesLoaded": 9432,
+    "phenotypesLoadedWithEs": 9417,
+    "evidenceRows": 151589,
+    "relations": 150901,
+    "relationsPositive": 147937,
+    "stats": {
+      "read": 286651,
+      "notPhenotypeAspect": 17745,
+      "skippedDatabase": 116471,
+      "diseaseUnresolved": 844,
+      "phenotypeUnresolved": 0,
+      "negated": 0,
+      "withFrequency": 99820,
+      "withRatio": 96237,
+      "frequencyProblems": {},
+      "onsetWithRange": 2724,
+      "onsetWithoutRange": 323,
+      "sexResolved": 0,
+      "sexUnresolved": 615,
+      "tierT2": 104467,
+      "tierT3": 47124,
+      "referenceCollisions": 6,
+      "exactDuplicates": 2,
+      "rows": 151589
+    },
+    "unresolvedDiseases": {
+      "no-mondo-group": 844
+    }
+  },
+  "orphanet": {
+    "associations": 116664,
+    "disorders": 4355,
+    "disordersWithEs": 4355,
+    "spanishNames": 11645,
+    "unresolvedDisease": 1006,
+    "unresolvedPhenotype": 157,
+    "associationsWithFrequency": 115501,
+    "relations": 115418,
+    "relationsAlsoInHpo": 18994,
+    "phenotypes": 8694,
+    "phenotypesWithEs": 8694,
+    "properties": {
+      "disordersWithOnset": 7032,
+      "disordersWithInheritance": 6872,
+      "disordersWithPrevalence": 6728
+    }
+  },
+  "mondo": {
+    "classesLive": 32134,
+    "equivalenceAxioms": 118366,
+    "sssomExactMatch": 107523,
+    "identity": {
+      "groups": 22464,
+      "created": 20456,
+      "reused": 1984,
+      "inReview": 24,
+      "codesMapped": 62116,
+      "equivalencesIgnored": 101717,
+      "conflicts": 21
+    },
+    "conflictsByKind": {
+      "group-spans-several-glossary-concepts": 18,
+      "glossary-concept-in-several-groups": 3
+    },
+    "groupsWithEs": 9735,
+    "isA": 46732,
+    "isAInGroups": 31687
+  },
+  "duplicates": {
+    "baseline": {
+      "totalConcepts": 186968,
+      "duplicateConcepts": 5295,
+      "duplicateRate": 0.02832035428522528,
+      "acrossCategoryDuplicates": 22,
+      "acrossCategoryRate": 0.00011766719438620513,
+      "examples": [
+        {
+          "label": "colera",
+          "concepts": 2,
+          "categories": [
+            "disease"
+          ]
+        },
+        {
+          "label": "fiebre tifoidea",
+          "concepts": 2,
+          "categories": [
+            "disease"
+          ]
+        },
+        {
+          "label": "criptosporidiosis",
+          "concepts": 2,
+          "categories": [
+            "disease"
+          ]
+        },
+        {
+          "label": "otras enteritis virales",
+          "concepts": 2,
+          "categories": [
+            "disease"
+          ]
+        },
+        {
+          "label": "otras tuberculosis del sistema nervioso",
+          "concepts": 2,
+          "categories": [
+            "disease"
+          ]
+        },
+        {
+          "label": "peste",
+          "concepts": 2,
+          "categories": [
+            "disease"
+          ]
+        },
+        {
+          "label": "otras formas de leptospirosis",
+          "concepts": 2,
+          "categories": [
+            "disease"
+          ]
+        },
+        {
+          "label": "enfermedad por arañazo de gato",
+          "concepts": 2,
+          "categories": [
+            "disease"
+          ]
+        },
+        {
+          "label": "otras formas de listeriosis",
+          "concepts": 2,
+          "categories": [
+            "disease"
+          ]
+        },
+        {
+          "label": "difteria",
+          "concepts": 2,
+          "categories": [
+            "disease"
+          ]
+        }
+      ]
+    },
+    "projected": {
+      "totalConcepts": 204136,
+      "duplicateConcepts": 6109,
+      "duplicateRate": 0.02992612767958616,
+      "acrossCategoryDuplicates": 741,
+      "acrossCategoryRate": 0.003629932985852569,
+      "examples": [
+        {
+          "label": "colera",
+          "concepts": 2,
+          "categories": [
+            "disease"
+          ]
+        },
+        {
+          "label": "fiebre tifoidea",
+          "concepts": 2,
+          "categories": [
+            "disease"
+          ]
+        },
+        {
+          "label": "osteomielitis por salmonella",
+          "concepts": 2,
+          "categories": [
+            "disease",
+            "signs-symptoms"
+          ]
+        },
+        {
+          "label": "criptosporidiosis",
+          "concepts": 2,
+          "categories": [
+            "disease"
+          ]
+        },
+        {
+          "label": "otras enteritis virales",
+          "concepts": 2,
+          "categories": [
+            "disease"
+          ]
+        },
+        {
+          "label": "otras tuberculosis del sistema nervioso",
+          "concepts": 2,
+          "categories": [
+            "disease"
+          ]
+        },
+        {
+          "label": "peste",
+          "concepts": 2,
+          "categories": [
+            "disease"
+          ]
+        },
+        {
+          "label": "otras formas de leptospirosis",
+          "concepts": 2,
+          "categories": [
+            "disease"
+          ]
+        },
+        {
+          "label": "enfermedad por arañazo de gato",
+          "concepts": 2,
+          "categories": [
+            "disease"
+          ]
+        },
+        {
+          "label": "otras formas de listeriosis",
+          "concepts": 2,
+          "categories": [
+            "disease"
+          ]
+        }
+      ]
+    },
+    "additionsWithEs": 17168
+  },
+  "projected": {
+    "symptomRelations": 247325,
+    "subclassRelations": 31687,
+    "total": 279012,
+    "target": 800000,
+    "belowTarget": true
+  }
+}

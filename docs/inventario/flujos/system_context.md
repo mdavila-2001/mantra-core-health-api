@@ -208,6 +208,7 @@ Definir un contexto de sistema con su versión inicial
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: Ya existe un contexto con ese código |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.PAYLOAD_TOO_LARGE} |
 
 ```mermaid
 flowchart TD
@@ -216,28 +217,34 @@ flowchart TD
   n1 --> n2
   n3["Llama a SystemContextsService.createContext"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a SystemContextsService.assertContextJsonSize"]:::llamada
   n3 --> n4
-  n5["Llama a SystemContextRepository.findContextByCode"]:::llamada
+  n5{"bytes › MAX_CONTEXT_JSON_BYTES"}:::decision
   n4 --> n5
-  n6[("LEE system_context.system_contexts")]:::efecto
-  n5 --> n6
-  n7{"duplicate"}:::decision
-  n6 --> n7
-  n8(["409 CONFLICT Ya existe un contexto con ese código"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a SystemContextRepository.createContext"]:::llamada
-  n7 -->|"no"| n9
-  n10[("CREA system_context.system_contexts")]:::efecto
+  n6(["500 INTERNAL {HttpStatus.PAYLOAD_TOO_LARGE}"]):::error
+  n5 -->|"sí"| n6
+  n7["Transacción: transactional(…)"]:::transaccion
+  n5 -->|"no"| n7
+  n8["Llama a SystemContextRepository.findContextByCode"]:::llamada
+  n7 --> n8
+  n9[("LEE system_context.system_contexts")]:::efecto
+  n8 --> n9
+  n10{"duplicate"}:::decision
   n9 --> n10
-  n11["Llama a SystemContextRepository.createContextVersion"]:::llamada
-  n10 --> n11
-  n12[("CREA system_context.system_context_versions")]:::efecto
-  n11 --> n12
-  n13[("ACTUALIZA system_context.system_contexts")]:::efecto
+  n11(["409 CONFLICT Ya existe un contexto con ese código"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a SystemContextRepository.createContext"]:::llamada
+  n10 -->|"no"| n12
+  n13[("CREA system_context.system_contexts")]:::efecto
   n12 --> n13
-  n14(("201 Responde con éxito")):::ok
+  n14["Llama a SystemContextRepository.createContextVersion"]:::llamada
   n13 --> n14
+  n15[("CREA system_context.system_context_versions")]:::efecto
+  n14 --> n15
+  n16[("ACTUALIZA system_context.system_contexts")]:::efecto
+  n15 --> n16
+  n17(("201 Responde con éxito")):::ok
+  n16 --> n17
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -274,7 +281,7 @@ flowchart TD
   n4 -->|"sí"| n5
   n6["Transacción: transactional(…)"]:::transaccion
   n4 -->|"no"| n6
-  n7["Llama a SystemContextRepository.findContextById"]:::llamada
+  n7["Llama a SystemContextRepository.findContextForUpdate"]:::llamada
   n6 --> n7
   n8[("LEE system_context.system_contexts")]:::efecto
   n7 --> n8
@@ -321,6 +328,7 @@ Refrescar el contexto y snapshotear su procedencia
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Contexto no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El contexto no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.PAYLOAD_TOO_LARGE}; DomainException: {HttpStatus.BAD_REQUEST} |
 
 ```mermaid
 flowchart TD
@@ -329,57 +337,69 @@ flowchart TD
   n1 --> n2
   n3["Llama a SystemContextsService.refreshContext"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a SystemContextsService.assertContextJsonSize"]:::llamada
   n3 --> n4
-  n5["Llama a SystemContextRepository.findRefreshRunByKey"]:::llamada
+  n5{"bytes › MAX_CONTEXT_JSON_BYTES"}:::decision
   n4 --> n5
-  n6[("LEE system_context.system_context_refresh_runs")]:::efecto
-  n5 --> n6
-  n7["Llama a SystemContextRepository.findContextForUpdate"]:::llamada
-  n6 --> n7
-  n8[("LEE system_context.system_contexts")]:::efecto
+  n6(["500 INTERNAL {HttpStatus.PAYLOAD_TOO_LARGE}"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a SystemContextsService.assertInputProvenance"]:::llamada
+  n5 -->|"no"| n7
+  n8{"incomplete ›= 0"}:::decision
   n7 --> n8
-  n9{"!context"}:::decision
-  n8 --> n9
-  n10(["404 NOT_FOUND Contexto no encontrado"]):::error
-  n9 -->|"sí"| n10
-  n11{"context.statusConceptId !== CONCEPTS.SYSCTX_ACTIVE"}:::decision
-  n9 -->|"no"| n11
-  n12(["422 PRECONDITION_FAILED El contexto no está activo"]):::error
-  n11 -->|"sí"| n12
-  n13["Llama a SystemContextRepository.createRefreshRun"]:::llamada
-  n11 -->|"no"| n13
-  n14[("CREA system_context.system_context_refresh_runs")]:::efecto
-  n13 --> n14
-  n15{"missingRequired"}:::decision
-  n14 --> n15
-  n16[("ACTUALIZA system_context.system_context_refresh_runs · ACTUALIZA system_context.system_context_refresh_runs ·…")]:::efecto
-  n15 -->|"sí"| n16
-  n17["Llama a SystemContextRepository.findLatestContextVersion"]:::llamada
+  n9(["500 INTERNAL {HttpStatus.BAD_REQUEST}"]):::error
+  n8 -->|"sí"| n9
+  n10["Transacción: transactional(…)"]:::transaccion
+  n8 -->|"no"| n10
+  n11["Llama a SystemContextRepository.findContextForUpdate"]:::llamada
+  n10 --> n11
+  n12[("LEE system_context.system_contexts")]:::efecto
+  n11 --> n12
+  n13{"!context"}:::decision
+  n12 --> n13
+  n14(["404 NOT_FOUND Contexto no encontrado"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a SystemContextRepository.findRefreshRunByKey"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE system_context.system_context_refresh_runs")]:::efecto
+  n15 --> n16
+  n17{"context.statusConceptId !== CONCEPTS.SYSCTX_ACTIVE"}:::decision
   n16 --> n17
-  n15 -->|"no"| n17
-  n18[("LEE system_context.system_context_versions")]:::efecto
-  n17 --> n18
-  n19{"latest?.contentHash === contentHash"}:::decision
-  n18 --> n19
-  n20[("ACTUALIZA system_context.system_context_refresh_runs · ACTUALIZA system_context.system_context_refresh_runs ·…")]:::efecto
-  n19 -->|"sí"| n20
-  n21["Llama a SystemContextRepository.createContextVersion"]:::llamada
+  n18(["422 PRECONDITION_FAILED El contexto no está activo"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a SystemContextRepository.createRefreshRun"]:::llamada
+  n17 -->|"no"| n19
+  n20[("CREA system_context.system_context_refresh_runs")]:::efecto
+  n19 --> n20
+  n21{"missingRequired"}:::decision
   n20 --> n21
-  n19 -->|"no"| n21
-  n22[("CREA system_context.system_context_versions")]:::efecto
-  n21 --> n22
-  n23["Repite: forEach(…)"]:::bucle
+  n22[("ACTUALIZA system_context.system_context_refresh_runs · ACTUALIZA system_context.system_context_refresh_runs ·…")]:::efecto
+  n21 -->|"sí"| n22
+  n23["Llama a SystemContextRepository.findLatestContextVersion"]:::llamada
   n22 --> n23
-  n24["Llama a SystemContextRepository.createContextInput"]:::llamada
-  n23 -->|"cada elemento"| n24
-  n25[("CREA system_context.system_context_inputs")]:::efecto
+  n21 -->|"no"| n23
+  n24[("LEE system_context.system_context_versions")]:::efecto
+  n23 --> n24
+  n25{"latest?.contentHash === contentHash"}:::decision
   n24 --> n25
   n26[("ACTUALIZA system_context.system_context_refresh_runs · ACTUALIZA system_context.system_context_refresh_runs ·…")]:::efecto
-  n25 --> n26
-  n23 -->|"al terminar"| n26
-  n27(("201 Responde con éxito")):::ok
+  n25 -->|"sí"| n26
+  n27["Llama a SystemContextRepository.createContextVersion"]:::llamada
   n26 --> n27
+  n25 -->|"no"| n27
+  n28[("CREA system_context.system_context_versions")]:::efecto
+  n27 --> n28
+  n29["Repite: forEach(…)"]:::bucle
+  n28 --> n29
+  n30["Llama a SystemContextRepository.createContextInput"]:::llamada
+  n29 -->|"cada elemento"| n30
+  n31[("CREA system_context.system_context_inputs")]:::efecto
+  n30 --> n31
+  n32[("ACTUALIZA system_context.system_context_refresh_runs · ACTUALIZA system_context.system_context_refresh_runs ·…")]:::efecto
+  n31 --> n32
+  n29 -->|"al terminar"| n32
+  n33(("201 Responde con éxito")):::ok
+  n32 --> n33
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

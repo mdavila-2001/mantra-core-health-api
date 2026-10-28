@@ -3,7 +3,6 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
-  ResourceNotFoundException,
   decodeKeysetCursor,
   encodeKeysetCursor,
   touch,
@@ -20,6 +19,7 @@ import {
   ListPermissionSetsResponseDto,
 } from '../dto';
 import { DELEGATE_TYPE_CONCEPT, STATUS } from './concept-maps';
+import { DelegationScopeService } from './delegation-scope.service';
 
 /** Tope de sets por página cuando el cliente no pide uno (CV-13). */
 const DEFAULT_SETS_PAGE_SIZE = 50;
@@ -37,12 +37,14 @@ export class PermissionSetsService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param setsRepo - Valor de sets repo requerido por la operación.
    * @param itemsRepo - Valor de items repo requerido por la operación.
+   * @param scope - Política común de tenant y alcance de la delegación.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly setsRepo: DelegatedPermissionSetsRepository,
     private readonly itemsRepo: DelegatedPermissionSetItemsRepository,
+    private readonly scope: DelegationScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PermissionSetsService.name);
@@ -98,28 +100,30 @@ export class PermissionSetsService {
     dto: CreatePermissionSetDto,
     actor: AuthenticatedUser,
   ): Promise<PermissionSetVersionDto> {
+    // El tenant sale del contexto verificado; el del cuerpo sólo se contrasta.
+    const tenantId = this.scope.resolveTenant(dto.tenantId);
     this.logger.info(
       {
         operation: 'delegated_access.permission_set.create',
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
       },
       'Publishing delegated permission set',
     );
     return this.em.transactional(async (tx) => {
-      const clash = await this.setsRepo.findByCode(tx, dto.tenantId, dto.code);
+      const clash = await this.setsRepo.findByCode(tx, tenantId, dto.code);
       if (clash) {
         throw new ConflictException(
           'Ya existe un set con ese código en el tenant',
           {
-            tenantId: dto.tenantId,
+            tenantId,
             code: dto.code,
           },
         );
       }
 
       const set = this.setsRepo.create(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         name: dto.name,
         delegateTypeConceptId:
@@ -171,12 +175,10 @@ export class PermissionSetsService {
       },
       'Publishing new permission set version',
     );
+    const tenantId = this.scope.resolveTenant();
     return this.em.transactional(async (tx) => {
-      const set = await this.setsRepo.findById(tx, id);
-      if (!set)
-        throw new ResourceNotFoundException('Set de permisos no encontrado', {
-          setId: id,
-        });
+      // Un set de otro tenant responde igual que uno inexistente.
+      const set = await this.scope.loadSetInTenant(tx, id, tenantId);
 
       set.versionNumber += 1;
       set.statusConceptId = STATUS.ACTIVE;

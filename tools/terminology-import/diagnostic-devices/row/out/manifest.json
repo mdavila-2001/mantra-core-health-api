@@ -1,31 +1,63 @@
 {
   "region": "row",
-  "generatedAt": "2026-10-24T04:19:46.367Z",
+  "generatedAt": "2026-10-24T18:30:58.088Z",
   "formatVersion": 1,
   "files": [
     {
       "path": "anvisa-produtos.ndjson.gz",
       "source": "anvisa-produtos",
-      "sourceVersion": "DT_ATUALIZACAO_DADO 2025-06-17T19:00:01 (espejo victoracioly/g.stec@8a4c6ca3)",
-      "rows": 93770,
-      "bytes": 9014019,
-      "sha256": "c4095b2b2b50f5e2a861d21d863e0f89db7b3cc5b8a06fc31f38e7957c89e053"
+      "sourceVersion": "TA_PRODUTO_SAUDE_SITE.csv Last-Modified 2026-10-13T19:09:34.000Z (DT_ATUALIZACAO_DADO 2026-10-12T19:00:00)",
+      "rows": 100681,
+      "bytes": 10196268,
+      "sha256": "dc8151661e13e473ebd71e2e84c5961fea37fc6fa65949e33978e8ac9b82ab9a"
     },
     {
-      "path": "anvisa-produtos-modelos.ndjson.gz",
+      "path": "anvisa-produtos-modelos-0001.ndjson.gz",
       "source": "anvisa-produtos-modelos",
-      "sourceVersion": "DT_ATUALIZACAO_DADO 2020-12-25T04:00:01 (espejo adnanioricce/DHsys@81800583)",
-      "rows": 1027762,
-      "bytes": 44748647,
-      "sha256": "59510f491dd710027c44a3a41c7fded94b07471d4baa9b13a106a57bc3ddc6e9"
+      "sourceVersion": "TA_PRODUTO_SAUDE_MODELO.csv Last-Modified 2025-12-29T09:12:24.000Z (DT_ATUALIZACAO_DADO 2025-12-29T04:00:01)",
+      "rows": 463042,
+      "bytes": 47162300,
+      "sha256": "dfa856129b7dbe218b7f6c7b8a9aa7ccb12d7ad08e650d110fdb3dc776ea962f"
+    },
+    {
+      "path": "anvisa-produtos-modelos-0002.ndjson.gz",
+      "source": "anvisa-produtos-modelos",
+      "sourceVersion": "TA_PRODUTO_SAUDE_MODELO.csv Last-Modified 2025-12-29T09:12:24.000Z (DT_ATUALIZACAO_DADO 2025-12-29T04:00:01)",
+      "rows": 715790,
+      "bytes": 47106503,
+      "sha256": "747e85c407a21f20d0145353db19cfdf1717aae08a5c2b897987745eadde4f73"
+    },
+    {
+      "path": "anvisa-produtos-modelos-0003.ndjson.gz",
+      "source": "anvisa-produtos-modelos",
+      "sourceVersion": "TA_PRODUTO_SAUDE_MODELO.csv Last-Modified 2025-12-29T09:12:24.000Z (DT_ATUALIZACAO_DADO 2025-12-29T04:00:01)",
+      "rows": 786563,
+      "bytes": 47093422,
+      "sha256": "02bbc0679b853f82314d7010425e92679ef25fa48c5a2e6f39ceb92bc073a30d"
+    },
+    {
+      "path": "anvisa-produtos-modelos-0004.ndjson.gz",
+      "source": "anvisa-produtos-modelos",
+      "sourceVersion": "TA_PRODUTO_SAUDE_MODELO.csv Last-Modified 2025-12-29T09:12:24.000Z (DT_ATUALIZACAO_DADO 2025-12-29T04:00:01)",
+      "rows": 737968,
+      "bytes": 47069859,
+      "sha256": "fda091e208ecb4fc76d1a601bd5a207058da68f6da5367db0943927baf07611c"
+    },
+    {
+      "path": "anvisa-produtos-modelos-0005.ndjson.gz",
+      "source": "anvisa-produtos-modelos",
+      "sourceVersion": "TA_PRODUTO_SAUDE_MODELO.csv Last-Modified 2025-12-29T09:12:24.000Z (DT_ATUALIZACAO_DADO 2025-12-29T04:00:01)",
+      "rows": 570726,
+      "bytes": 44976055,
+      "sha256": "33b90d10e6f4520cdf0402de26fc97c7dc1614894e496c1e571488999fd44177"
     },
     {
       "path": "pmda-approvals.ndjson.gz",
       "source": "pmda-approvals",
       "sourceVersion": "承認品目一覧・認証品目リスト hasta 2026-02-27 (espejo zoefcuk/pmda-medical-devices@d829883b)",
       "rows": 35298,
-      "bytes": 2696929,
-      "sha256": "7c77504106d2974f67c4173f24716b9ebbbde27d66c3d60ce290c97c433794b1"
+      "bytes": 3391120,
+      "sha256": "f719ceb4c47b589459dcd13cdb8690bbf9269ff772d773f22a42a25e1f14b70f"
     },
     {
       "path": "hc-mdall-0001.ndjson.gz",
@@ -52,29 +84,174 @@
       "sha256": "f6ae0b982f8bb1bac614136c7255242f40c4250f168f3ec6f5e63c9e55ac6e84"
     },
     {
-      "path": "cdsco-import-licences.ndjson.gz",
-      "source": "cdsco-import-licences",
-      "sourceVersion": "MD - Medical Devices, licencias emitidas hasta 2026-10-01 (espejo vishnuu-patil/india-meddevice-intelligence@62e88588)",
-      "rows": 25792,
-      "bytes": 7372002,
-      "sha256": "40ebea47f5563f8b35cdb30f652c24d31ed66dc9c549085a293256f0357a19d1"
+      "path": "cdsco-approved-devices.ndjson.gz",
+      "source": "cdsco-approved-devices",
+      "sourceVersion": "List of Approved Devices (cdscomdonline.gov.in), descargada 2026-10-24",
+      "rows": 180124,
+      "bytes": 30675627,
+      "sha256": "65d4e06755c06bd6f4c570562c4979b4b4f801fc105b1514699aa98c94ea85a9"
+    },
+    {
+      "path": "tfda-devices.ndjson.gz",
+      "source": "tfda-devices",
+      "sourceVersion": "醫療器材許可證資料集 (data.gov.tw 9576) modifiedDate 2026-10-15 15:22:40, 68_2.csv",
+      "rows": 93430,
+      "bytes": 20131134,
+      "sha256": "3435cbb24d3bca03d96b206234870e7461975241995adc9408e80c749ddd6945"
+    },
+    {
+      "path": "tfda-tudid.ndjson.gz",
+      "source": "tfda-tudid",
+      "sourceVersion": "醫療器材單一識別碼(TUDID)資料集 (data.gov.tw 151955) modifiedDate 2026-10-12 14:51:19, 197_2.csv",
+      "rows": 688258,
+      "bytes": 22298119,
+      "sha256": "86e9ee6af3951fb76222f5976760094ab2c062be2a29c4593fc4b62df66dd473"
+    },
+    {
+      "path": "invima-dispositivos.ndjson.gz",
+      "source": "invima-dispositivos",
+      "sourceVersion": "datos.gov.co y4qt-w6tk rowsUpdatedAt 2026-10-16T12:28:35.000Z",
+      "rows": 71434,
+      "bytes": 12923050,
+      "sha256": "3c143da6196bcb19cb562359a850ce0aad7d8d1723d7fe502a59c3a71f80e8a2"
+    },
+    {
+      "path": "who-pq-ivd.ndjson.gz",
+      "source": "who-pq-ivd",
+      "sourceVersion": "WHO list of prequalified IVDs, export 2026-10-24",
+      "rows": 435,
+      "bytes": 13731,
+      "sha256": "c2939c84dcc0a6b152dd64fc969e34c871e85c59e156ff0691a06028445781e9"
+    },
+    {
+      "path": "hsa-smdr.ndjson.gz",
+      "source": "hsa-smdr",
+      "sourceVersion": "Listing of Registered Medical Devices (data.gov.sg) lastUpdatedAt 2026-06-08T10:07:41+08:00, coverage to 2026-04-30T23:59:59+08:00",
+      "rows": 20857,
+      "bytes": 10828315,
+      "sha256": "0c280452b36425fecdd5560c439a4e21be3a5897e54aff8f6830a3aade4b85a3"
+    },
+    {
+      "path": "hsa-class-a-0001.ndjson.gz",
+      "source": "hsa-class-a",
+      "sourceVersion": "Class A Medical Devices (data.gov.sg) lastUpdatedAt 2026-06-08T10:52:14+08:00, coverage to 2026-04-30T23:59:59+08:00",
+      "rows": 1008047,
+      "bytes": 47103549,
+      "sha256": "351c7705894290b1ba13ef9b26b8a223649a7446a4a059b0eb3cc9c7ffa8e0c6"
+    },
+    {
+      "path": "hsa-class-a-0002.ndjson.gz",
+      "source": "hsa-class-a",
+      "sourceVersion": "Class A Medical Devices (data.gov.sg) lastUpdatedAt 2026-06-08T10:52:14+08:00, coverage to 2026-04-30T23:59:59+08:00",
+      "rows": 119478,
+      "bytes": 5265695,
+      "sha256": "af604185b4b9e7dd72744d110486768e55554ed9ce21b4bf110042f2fc68d3a1"
+    },
+    {
+      "path": "nmpa-udi-0001.ndjson.gz",
+      "source": "nmpa-udi",
+      "sourceVersion": "UDID_FULL_RELEASE_20261001",
+      "rows": 1001802,
+      "bytes": 47181804,
+      "sha256": "ee697835974d8ccef99866e82af58dfbdb9ff64cc4b4e112c448e8f9c16a115b"
+    },
+    {
+      "path": "nmpa-udi-0002.ndjson.gz",
+      "source": "nmpa-udi",
+      "sourceVersion": "UDID_FULL_RELEASE_20261001",
+      "rows": 1193399,
+      "bytes": 47179810,
+      "sha256": "5fd96eaeaa619c27667304d51f7eaaa1d3ebdf5ac3446711470911990f878bfc"
+    },
+    {
+      "path": "nmpa-udi-0003.ndjson.gz",
+      "source": "nmpa-udi",
+      "sourceVersion": "UDID_FULL_RELEASE_20261001",
+      "rows": 1152033,
+      "bytes": 47067290,
+      "sha256": "b87ca75236b89714a1e223c9ebcfe9715ad884a35bd458ef0c5f0ea5c0f3b0bc"
+    },
+    {
+      "path": "nmpa-udi-0004.ndjson.gz",
+      "source": "nmpa-udi",
+      "sourceVersion": "UDID_FULL_RELEASE_20261001",
+      "rows": 957356,
+      "bytes": 47085549,
+      "sha256": "cf12e08d2c4bd3ed469e7bd52e6117927dfb536b2523417cd753ea19fb81a6fc"
+    },
+    {
+      "path": "nmpa-udi-0005.ndjson.gz",
+      "source": "nmpa-udi",
+      "sourceVersion": "UDID_FULL_RELEASE_20261001",
+      "rows": 945551,
+      "bytes": 47113109,
+      "sha256": "d3642fa304f5075c7144aedd445c8ae405f93047039d71e359db500693a080fd"
+    },
+    {
+      "path": "nmpa-udi-0006.ndjson.gz",
+      "source": "nmpa-udi",
+      "sourceVersion": "UDID_FULL_RELEASE_20261001",
+      "rows": 966668,
+      "bytes": 47165056,
+      "sha256": "24a042996cc5a9d143808f4065d4e276b5b344d6e901e4afb97e92bed2cba418"
+    },
+    {
+      "path": "nmpa-udi-0007.ndjson.gz",
+      "source": "nmpa-udi",
+      "sourceVersion": "UDID_FULL_RELEASE_20261001",
+      "rows": 78185,
+      "bytes": 3741454,
+      "sha256": "4161834b3406f581dc5172ebca7a2e350cbe20e87753b0f635c27583e94734ad"
+    },
+    {
+      "path": "sahpra-covid-ivd.ndjson.gz",
+      "source": "sahpra-covid-ivd",
+      "sourceVersion": "SAHPRA authorised COVID-19 test kit lists (24/05/2023; serological 31/05/2022)",
+      "rows": 283,
+      "bytes": 14524,
+      "sha256": "044fcd840e1ac7ec04bbf64213cf2c053d05d67c47b0cbee9b3b319bd0b015f6"
+    }
+  ],
+  "nomenclatures": [
+    {
+      "path": "nomenclature-jmdn.json.gz",
+      "system": "jmdn",
+      "entries": 4496,
+      "sha256": "f482c8be924825f75425d22c0018f0514b0a68f27c2926164ffa46c92f406a5c"
     }
   ],
   "stats": {
     "anvisa-produtos": {
-      "inputLines": 108492,
-      "rows": 93770
+      "inputLines": 116008,
+      "rows": 100681,
+      "rowsWithPetitions": 86213,
+      "petitionFiles": {
+        "CICLO_ANALISE_PETICOES_PROD_SAUDE_IN_VITRO.CSV": {
+          "badLines": 0,
+          "sha256": "715e6e054e1ece89780ea72adf49205542b1ddffe7634e655eff86f067baf630"
+        },
+        "CICLO_ANALISE_PETICOES_PRODUTO_SAUDE(CORRELATOS).CSV": {
+          "badLines": 272,
+          "sha256": "8fd85da5482572019470484e0415b99e4ab79a376411ae03d6bfa27d94be27bc"
+        },
+        "CICLO_ANALISE_PETICOES_PRODUTO_SAUDE.CSV": {
+          "badLines": 124,
+          "sha256": "69099d265325d7f8aab377ae7e83d58b4f2ca5d92709e1ab3e60ddc7ff4eef21"
+        }
+      }
     },
     "anvisa-produtos-modelos": {
-      "inputFiles": 33,
-      "inputLines": 1242830,
-      "rows": 1027762
+      "inputLines": 3731281,
+      "rowsWithPetitions": 3100893,
+      "rows": 3274089
     },
     "pmda-approvals": {
       "inputRows": 36116,
       "rows": 35298,
       "duplicates": 815,
-      "withoutManufacturer": 3
+      "withoutManufacturer": 3,
+      "rowsWithJmdn": 33498,
+      "jmdnEntries": 4496
     },
     "hc-mdall": {
       "licences": 62087,
@@ -91,107 +268,194 @@
       "rows": 18917,
       "withoutManufacturer": 1
     },
-    "cdsco-import-licences": {
-      "sheetRows": 25794,
-      "rows": 25792,
+    "cdsco-approved-devices": {
+      "lists": {
+        "approved-md-import.json": 25963,
+        "approved-md-manufacturing.json": 81476,
+        "approved-ivd-import.json": 45772,
+        "approved-ivd-manufacturing.json": 28911
+      },
+      "rows": 180124,
+      "inputRecords": 182122,
+      "duplicates": 1998,
       "badLicence": 0,
+      "withoutManufacturer": 0
+    },
+    "tfda-devices": {
+      "inputLines": 104891,
+      "rows": 93430,
+      "licences": 93430,
+      "withoutManufacturer": 0
+    },
+    "tfda-tudid": {
+      "inputLines": 688299,
+      "rows": 688258,
+      "withoutLicence": 41,
+      "duplicates": 0
+    },
+    "invima-dispositivos": {
+      "inputLines": 433404,
+      "rows": 71434,
+      "groups": 71434,
+      "manufacturerFromHolder": 27869,
+      "withoutName": 0,
+      "pages": [
+        {
+          "name": "y4qt-w6tk-0001.csv",
+          "offset": 0,
+          "sha256": "dd0813bac308f8b47990b470fbd08188f0cd1a09aec6b40f8f70b7a000509a76"
+        },
+        {
+          "name": "y4qt-w6tk-0002.csv",
+          "offset": 50000,
+          "sha256": "2cc558b190317fb19a72bf9fd36871b58db5afa5b8cc59283291088b226a43be"
+        },
+        {
+          "name": "y4qt-w6tk-0003.csv",
+          "offset": 100000,
+          "sha256": "b767b141542fe145b77a985c0ee700aa3a5201518bf1b8a0ddf0be9e3c1db7e1"
+        },
+        {
+          "name": "y4qt-w6tk-0004.csv",
+          "offset": 150000,
+          "sha256": "9c5dfb567b17300038b14046acb2a3daacbce8f7ec3eb9656d3bc1fb7c2f3ea2"
+        },
+        {
+          "name": "y4qt-w6tk-0005.csv",
+          "offset": 200000,
+          "sha256": "edcb2e2010f5758d6d6ee9a49bf06b7c763e7186fda39f8fc689e3bc4d6fffb3"
+        },
+        {
+          "name": "y4qt-w6tk-0006.csv",
+          "offset": 250000,
+          "sha256": "17590972246bbd7005039a5249a3415dc149f0d97615443575a1495b5baaf2e3"
+        },
+        {
+          "name": "y4qt-w6tk-0007.csv",
+          "offset": 300000,
+          "sha256": "d09d7e97d9c8dc9e76af73351fc6149acee6e4d115744ed3ab35d848628ebd4e"
+        },
+        {
+          "name": "y4qt-w6tk-0008.csv",
+          "offset": 350000,
+          "sha256": "01a7d4f099d32774e49a54c210b6d46756849565a5cc90f7cfc80abddddf766f"
+        },
+        {
+          "name": "y4qt-w6tk-0009.csv",
+          "offset": 400000,
+          "sha256": "69f6b93060217e175d5c2da958284ece545f3bb7d38ddf527dc8d85fcaf5cdc0"
+        }
+      ]
+    },
+    "who-pq-ivd": {
+      "inputLines": 435,
+      "rows": 435,
+      "duplicates": 0
+    },
+    "hsa-smdr": {
+      "inputLines": 20860,
+      "rows": 20857,
+      "withoutRegistration": 3,
+      "withoutOwner": 0,
+      "duplicates": 0
+    },
+    "hsa-class-a": {
+      "inputLines": 1127580,
+      "rows": 1127525,
+      "withoutOwner": 54,
+      "duplicates": 0
+    },
+    "nmpa-udi": {
+      "xmlParts": 1259,
+      "declaredRecords": 6293777,
+      "inputDevices": 6295000,
+      "creationDate": "2026-10-01 00:30:05",
+      "rows": 6294994,
+      "withoutDi": 0,
+      "withoutRegistrant": 6,
+      "duplicates": 0
+    },
+    "sahpra-covid-ivd": {
+      "lists": {
+        "antigen-self-test": 10,
+        "antigen-professional": 85,
+        "molecular": 132,
+        "serological": 56
+      },
+      "rows": 283,
+      "duplicates": 0,
       "withoutManufacturer": 0
     }
   },
   "gaps": [
     {
-      "source": "anvisa-produtos",
-      "reason": "403 del proxy (dados.anvisa.gov.br); se usó un espejo de 2025-06-17",
-      "url": "https://dados.anvisa.gov.br/dados/"
-    },
-    {
       "source": "hc-mdall",
-      "reason": "403 del proxy (health-products.canada.ca); solo hay espejo de 2020-02-07",
-      "url": "https://health-products.canada.ca/mdall-limh/"
+      "reason": "503 en toda la API (health-products.canada.ca/api/medical-devices/…) al 2026-10-24; solo hay espejo de 2020-02-07",
+      "url": "https://health-products.canada.ca/api/documentation/mdall-documentation-en.html"
     },
     {
       "source": "tga-artg",
-      "reason": "403 del proxy (www.tga.gov.au); el ARTG completo no tiene espejo; solo hay DAEN parcial",
+      "reason": "www.tga.gov.au no responde desde la nube (conexión cortada) al 2026-10-24; el ARTG completo no tiene espejo; solo hay DAEN parcial",
       "url": "https://www.tga.gov.au/resources/artg"
     },
     {
-      "source": "nmpa-udi",
-      "reason": "403 del proxy (udi.nmpa.gov.cn)",
-      "url": "https://udi.nmpa.gov.cn/"
-    },
-    {
       "source": "mfds-devices",
-      "reason": "403 del proxy (www.data.go.kr, emedi.mfds.go.kr)",
-      "url": "https://www.data.go.kr/"
-    },
-    {
-      "source": "tfda-devices",
-      "reason": "403 del proxy (data.gov.tw, data.fda.gov.tw). Hay una copia en la release data-20261023 de github.com/masalu0105-gif/taiwan-laboratory-mcp (104 891 licencias), pero bajar assets de releases exige adjuntar el repo con credenciales y esa acción fue denegada en esta sesión",
-      "url": "https://data.gov.tw/dataset/9576"
-    },
-    {
-      "source": "cdsco-devices",
-      "reason": "403 del proxy (cdsco.gov.in, cdscomdonline.gov.in). Se cargaron las licencias de importación (espejo); faltan las licencias de fabricación nacional (MD-5/MD-9) y las de autoridades estatales",
-      "url": "https://cdsco.gov.in/"
-    },
-    {
-      "source": "hsa-smdr",
-      "reason": "403 del proxy (data.gov.sg)",
-      "url": "https://data.gov.sg/"
+      "reason": "emedi.mfds.go.kr, udiportal.mfds.go.kr y www.data.go.kr no responden desde la nube (conexión cortada) al 2026-10-24",
+      "url": "https://udiportal.mfds.go.kr/"
     },
     {
       "source": "amar-devices",
-      "reason": "403 del proxy (data.gov.il)",
+      "reason": "data.gov.il no publica un conjunto de AMAR; el registro solo se consulta en gov.il",
       "url": "https://data.gov.il/"
     },
     {
       "source": "sfda-mdma",
-      "reason": "403 del proxy (medicaldevice.sfda.gov.sa)",
+      "reason": "medicaldevice.sfda.gov.sa no responde desde la nube al 2026-10-24 (antes, 502)",
       "url": "https://medicaldevice.sfda.gov.sa/"
     },
     {
       "source": "thai-fda-devices",
-      "reason": "403 del proxy (open.fda.moph.go.th)",
+      "reason": "open.fda.moph.go.th no responde desde la nube al 2026-10-24 (antes, 502)",
       "url": "https://open.fda.moph.go.th/"
     },
     {
-      "source": "mda-medcast",
-      "reason": "403 del proxy (portal.mda.gov.my)",
-      "url": "https://portal.mda.gov.my/"
-    },
-    {
-      "source": "invima-dispositivos",
-      "reason": "403 del proxy (www.datos.gov.co)",
-      "url": "https://www.datos.gov.co/"
+      "source": "mda-mdar",
+      "reason": "MDA publica el registro como buscador (mdar.mda.gov.my, «carian», exige un texto de búsqueda); el listado trae nombre, número de registro, establecimiento local y vigencia, pero no fabricante ni marca, que están en una ficha por registro",
+      "url": "https://mdar.mda.gov.my/"
     },
     {
       "source": "cofepris-dispositivos",
-      "reason": "403 del proxy (datos.gob.mx)",
-      "url": "https://datos.gob.mx/"
+      "reason": "solo visor de consulta (registros.cofepris.gob.mx); datos.gob.mx no tiene conjuntos de dispositivos médicos (búsqueda CKAN, 0 resultados)",
+      "url": "https://registros.cofepris.gob.mx/"
     },
     {
       "source": "anmat-productos-medicos",
-      "reason": "403 del proxy (datos.gob.ar)",
+      "reason": "datos.gob.ar no tiene conjuntos de productos médicos de ANMAT (búsqueda CKAN «anmat»: solo vademécum y alimentos)",
       "url": "https://datos.gob.ar/"
     },
     {
       "source": "digemid-dispositivos",
-      "reason": "403 del proxy (www.datosabiertos.gob.pe)",
-      "url": "https://www.datosabiertos.gob.pe/"
+      "reason": "403 del propio servidor (www.digemid.minsa.gob.pe) al 2026-10-24",
+      "url": "https://www.digemid.minsa.gob.pe/"
+    },
+    {
+      "source": "isp-dispositivos",
+      "reason": "www.ispch.gob.cl no responde desde la nube al 2026-10-24",
+      "url": "https://www.ispch.gob.cl/"
     },
     {
       "source": "agemed-dispositivos",
-      "reason": "403 del proxy (www.agemed.gob.bo)",
+      "reason": "el portal de AGEMED solo publica circulares y comunicados en PDF; sin listado de dispositivos registrados",
       "url": "https://www.agemed.gob.bo/"
     },
     {
-      "source": "who-pq-ivd",
-      "reason": "403 del proxy (extranet.who.int)",
-      "url": "https://extranet.who.int/prequal/vitro-diagnostics/prequalified/in-vitro-diagnostics"
+      "source": "sahpra-devices",
+      "reason": "SAHPRA no publica un registro general de dispositivos descargable; solo las listas de kits de COVID-19 (cargadas) y licencias de establecimientos",
+      "url": "https://www.sahpra.org.za/medical-devices/"
     },
     {
       "source": "unicef-supply",
-      "reason": "403 del proxy (supply.unicef.org)",
+      "reason": "403 del propio servidor (supply.unicef.org → supplyhub.unicef.org) al 2026-10-24",
       "url": "https://supply.unicef.org/"
     }
   ]

@@ -150,7 +150,7 @@ function build() {
   const pharmacyRepo = {
     findActiveSiteById: mockFn(async () => SITE),
     findVisibleById: mockFn(async () => PHARMACY),
-    findActiveProductsByIds: mockFn(async () => [PRODUCT]),
+    findSellableProductsByIds: mockFn(async () => [PRODUCT]),
     findCurrentPublicPriceLists: mockFn(async () => []),
     findCurrentPrices: mockFn(async () => []),
   };

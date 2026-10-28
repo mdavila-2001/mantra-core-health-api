@@ -3,6 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 
 import {
   BOLIVIA_CARRIERS,
+  BOLIVIA_CURATED_CARRIERS,
   BOLIVIA_PUBLIC_INSURERS,
   carrierId,
   isPublicCarrierId,
@@ -71,6 +72,7 @@ export class InsuranceCatalogService {
   async listHealthCatalog(): Promise<CarrierCatalogResponseDto> {
     const ids = [
       ...BOLIVIA_CARRIERS.map((c) => carrierId(c.code)),
+      ...BOLIVIA_CURATED_CARRIERS.map((c) => carrierId(c.code)),
       ...BOLIVIA_PUBLIC_INSURERS.map((c) => carrierId(c.code)),
     ];
 

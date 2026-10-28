@@ -16,6 +16,7 @@ import {
 import type { Response } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   servedContentHeaders,
@@ -66,6 +67,11 @@ export class CommunityMessagingController {
   ) {}
 
   /** Bootstrap: crea una conversación con participantes. */
+  @Audited({
+    action: 'CONVERSATION_CREATED',
+    entity: 'conversation',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear una conversación con participantes' })
@@ -77,6 +83,11 @@ export class CommunityMessagingController {
   }
 
   /** UC-19-06. */
+  @Audited({
+    action: 'DIRECT_MESSAGE_SENT',
+    entity: 'direct_message',
+    entityId: 'result.id',
+  })
   @Post(':conversationId/messages')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Enviar un mensaje directo en la conversación' })
@@ -89,6 +100,11 @@ export class CommunityMessagingController {
   }
 
   /** F4.5 · Editar el texto de un mensaje propio. */
+  @Audited({
+    action: 'DIRECT_MESSAGE_EDITED',
+    entity: 'direct_message',
+    entityId: 'param:messageId',
+  })
   @Patch(':conversationId/messages/:messageId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Editar el texto de un mensaje propio' })
@@ -102,6 +118,11 @@ export class CommunityMessagingController {
   }
 
   /** F4.5 · Eliminar un mensaje propio (lógico: queda «Se eliminó este mensaje»). */
+  @Audited({
+    action: 'DIRECT_MESSAGE_DELETED',
+    entity: 'direct_message',
+    entityId: 'param:messageId',
+  })
   @Delete(':conversationId/messages/:messageId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Eliminar un mensaje propio' })
@@ -120,6 +141,11 @@ export class CommunityMessagingController {
   }
 
   /** UC-19-07. */
+  @Audited({
+    action: 'CONVERSATION_READ_MARKED',
+    entity: 'message_receipt',
+    entityId: 'param:conversationId',
+  })
   @Post(':conversationId/read')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Marcar mensajes como leídos (recibos)' })
@@ -132,6 +158,11 @@ export class CommunityMessagingController {
   }
 
   /** F4.4 · Favorita, fijada o archivada, de mi lado. */
+  @Audited({
+    action: 'CONVERSATION_PARTICIPANT_UPDATED',
+    entity: 'conversation_participant',
+    entityId: 'param:conversationId',
+  })
   @Patch(':conversationId/participant')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -146,6 +177,11 @@ export class CommunityMessagingController {
   }
 
   /** F4.6 · Fijar un mensaje en la barra superior del hilo. */
+  @Audited({
+    action: 'DIRECT_MESSAGE_PINNED',
+    entity: 'conversation',
+    entityId: 'param:conversationId',
+  })
   @Post(':conversationId/pin')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Fijar un mensaje de la conversación' })
@@ -158,6 +194,11 @@ export class CommunityMessagingController {
   }
 
   /** F4.6 · Soltar el mensaje fijado. */
+  @Audited({
+    action: 'DIRECT_MESSAGE_UNPINNED',
+    entity: 'conversation',
+    entityId: 'param:conversationId',
+  })
   @Delete(':conversationId/pin')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Soltar el mensaje fijado de la conversación' })
@@ -172,6 +213,10 @@ export class CommunityMessagingController {
   // --- Lecturas (UC-19-14, cara de lectura) ---
 
   /** Personas activas —pacientes y profesionales— con quienes iniciar un chat. */
+  @Audited({
+    action: 'CONVERSATION_CONTACTS_SEARCHED',
+    entity: 'conversation',
+  })
   @Post('contacts/search')
   @HttpCode(HttpStatus.OK)
   @Header('Cache-Control', 'private, no-store')

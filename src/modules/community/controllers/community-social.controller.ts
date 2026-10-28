@@ -16,6 +16,7 @@ import {
 import type { Response } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
@@ -84,6 +85,11 @@ export class CommunitySocialController {
   ) {}
 
   /** Bootstrap: crea el perfil público (nodo raíz social). */
+  @Audited({
+    action: 'PUBLIC_PROFILE_CREATED',
+    entity: 'public_profile',
+    entityId: 'result.id',
+  })
   @Post('public-profiles')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -118,6 +124,11 @@ export class CommunitySocialController {
    * Crea o actualiza la vitrina pública propia. Idempotente: la pantalla que la
    * edita no necesita saber si ya existía.
    */
+  @Audited({
+    action: 'PUBLIC_PROFILE_UPSERTED',
+    entity: 'public_profile',
+    entityId: 'result.id',
+  })
   @Put('profiles/me')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Crear o actualizar la vitrina pública propia' })
@@ -176,6 +187,11 @@ export class CommunitySocialController {
   }
 
   /** UC-19-01. */
+  @Audited({
+    action: 'SOCIAL_POST_PUBLISHED',
+    entity: 'social_post',
+    entityId: 'result.id',
+  })
   @Post('profiles/:profileId/posts')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Publicar un post con hashtags, media y menciones' })
@@ -188,6 +204,11 @@ export class CommunitySocialController {
   }
 
   /** UC-19-02. */
+  @Audited({
+    action: 'COMMENT_CREATED',
+    entity: 'comment',
+    entityId: 'result.id',
+  })
   @Post('comments')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Comentar (hilo anidado) con contadores' })
@@ -199,6 +220,10 @@ export class CommunitySocialController {
   }
 
   /** UC-19-03. */
+  @Audited({
+    action: 'REACTION_SET',
+    entity: 'reaction',
+  })
   @Put('reactions')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -212,6 +237,11 @@ export class CommunitySocialController {
   }
 
   /** UC-19-04. */
+  @Audited({
+    action: 'BOOKMARK_ADDED',
+    entity: 'bookmark',
+    entityId: 'result.id',
+  })
   @Post('bookmarks')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Guardar un bookmark en una colección' })
@@ -223,6 +253,11 @@ export class CommunitySocialController {
   }
 
   /** UC-19-05. */
+  @Audited({
+    action: 'SOCIAL_FOLLOW_CREATED',
+    entity: 'social_follow',
+    entityId: 'result.id',
+  })
   @Post('follows')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Seguir un objeto social' })
@@ -234,6 +269,11 @@ export class CommunitySocialController {
   }
 
   /** UC-19-14. */
+  @Audited({
+    action: 'USER_BLOCKED',
+    entity: 'user_block',
+    entityId: 'result.id',
+  })
   @Post('blocks')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Bloquear a un usuario' })
@@ -252,6 +292,10 @@ export class CommunitySocialController {
   // deshacer lo que acaba de hacer.
 
   /** UC-19-05, cara inversa. */
+  @Audited({
+    action: 'SOCIAL_FOLLOW_REMOVED',
+    entity: 'social_follow',
+  })
   @Delete('follows')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Dejar de seguir un objeto social' })
@@ -263,6 +307,10 @@ export class CommunitySocialController {
   }
 
   /** UC-19-04, cara inversa. */
+  @Audited({
+    action: 'BOOKMARK_REMOVED',
+    entity: 'bookmark',
+  })
   @Delete('bookmarks')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Quitar un marcador' })
@@ -274,6 +322,10 @@ export class CommunitySocialController {
   }
 
   /** UC-19-14, cara inversa. */
+  @Audited({
+    action: 'USER_UNBLOCKED',
+    entity: 'user_block',
+  })
   @Delete('blocks')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Levantar un bloqueo' })
@@ -333,6 +385,11 @@ export class CommunitySocialController {
    * que quien configura no tiene que saber si ya existía. Sólo el titular del
    * perfil — lo comprueba el servicio, que es donde hay base para comprobarlo.
    */
+  @Audited({
+    action: 'CHAT_AUTO_REPLY_UPSERTED',
+    entity: 'chat_auto_reply',
+    entityId: 'result.id',
+  })
   @Put('profiles/:profileId/auto-reply')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Configurar la respuesta automática del perfil' })

@@ -1,0 +1,5 @@
+device_name,description,notification_number,dealer_license_number,license_type,product_owner_name,dealer_name,device_identifier,udi_di,dm_di,sterile_nonsterile
+UniversalLine,-,MDES00000630013,ES0000063,Manufacturer Licence,Bionic Medizintechnik GmbH,JMS SINGAPORE PTE LTD,"Chair, examination / treatment",,,Non-Sterile
+BasicLine,-,MDES00000630011,ES0000063,Manufacturer Licence,Bionic Medizintechnik GmbH,JMS SINGAPORE PTE LTD,"Chair, examination / treatment",,,Non-Sterile
+295-296 MEDIASTINAL DISS FCP,-,MDES00011792979,ES0001179,Importer Licence,Integra Jarit,HUMEDICAL (S) PTE. LTD.,Reusable Surgical Instrument,,,Non-Sterile
+"Buck's Traction Sp-Convoluted, S",OT Table Accessory,MDES00011792979,ES0001179,Importer Licence,Mizuho OSI,HUMEDICAL (S) PTE. LTD.,371S,NA,NA,Non-Sterile

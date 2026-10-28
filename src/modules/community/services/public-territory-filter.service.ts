@@ -6,6 +6,7 @@ import {
   BO_DEPARTMENT_BY_INE_PREFIX,
   BO_DEPARTMENT_VALUE_SET,
   BO_MUNICIPALITY_VALUE_SET,
+  departmentSiglaOfMunicipalityCode,
 } from '../../../common/seed/bo-geography.catalog';
 import { CatalogConceptsRepository } from '../../terminology/repositories';
 import { ValueSetsRepository } from '../../terminology/repositories/value-sets.repository';
@@ -33,31 +34,6 @@ const DEPARTMENT_CODE_PREFIX = 'geo:bo:department:';
 
 /** Prefijo del código de concepto de un municipio por INE (`geo:bo:municipality:070101`). */
 const MUNICIPALITY_INE_CODE_PREFIX = 'geo:bo:municipality:';
-
-/**
- * La sigla del departamento del que cuelga un municipio, a partir de su código.
- *
- * Hay **dos** formas de código sembradas, según quién sembró la base:
- *
- * - `<SIGLA>-<NOMBRE>` (`SC-SANTA_CRUZ_DE_LA_SIERRA`), la del generador del
- *   modelo, que es la que describe `residence-address.ts`;
- * - `geo:bo:municipality:<INE>` (`geo:bo:municipality:070101`), la del catálogo
- *   estático `bo-geography.catalog.ts`, cuyos dos primeros dígitos son el
- *   departamento. Es la que tiene la base de desarrollo del compose.
- *
- * Se aceptan las dos porque aceptar una sola dejaría el filtro vacío, sin
- * avisar, en la base que use la otra.
- */
-export function departmentSiglaOfMunicipalityCode(
-  code: string,
-): string | undefined {
-  const sigla = code.match(/^([A-Z]{2})-/)?.[1];
-  if (sigla) return sigla;
-  const ine = code.startsWith(MUNICIPALITY_INE_CODE_PREFIX)
-    ? code.slice(MUNICIPALITY_INE_CODE_PREFIX.length).match(/^(\d{2})\d{4}$/)
-    : null;
-  return ine ? BO_DEPARTMENT_BY_INE_PREFIX.get(ine[1]) : undefined;
-}
 
 /** Los prefijos de código de los municipios de un departamento, en las dos formas. */
 function municipalityCodePrefixesOf(sigla: string): string[] {

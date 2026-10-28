@@ -346,6 +346,40 @@ export class ScheduleRuleDto {
   @IsOptional()
   @IsIn(RULE_BOOKING_MODES as readonly string[])
   bookingMode?: RuleBookingMode;
+
+  /**
+   * La franja atiende también por telemedicina (v4.2.61).
+   *
+   * **Ausente ≡ `false`**: por defecto la telemedicina está apagada. Al editar
+   * una plantilla las franjas se reemplazan enteras, así que una franja que ya
+   * la tenía activa tiene que volver a mandarla en `true`.
+   */
+  @ApiPropertyOptional({
+    description:
+      'La franja atiende también por telemedicina. Ausente ≡ false (sólo presencial)',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  telemedicineEnabled?: boolean;
+
+  /**
+   * Horario flexible de **esta** franja (v4.2.64): «el lunes doy turnos de 30,
+   * el martes atiendo a la hora que me pidan».
+   *
+   * **Ausente ≡ `false`** (turnos fijos). Una franja flexible no lleva
+   * `slotMinutes`, `capacityPerSlot` ni `gapMinutes`: el tiempo por paciente es
+   * el `slotMinutes` de la plantilla. Si la plantilla declara
+   * `flexibleHours: true`, todas sus franjas son flexibles, digan lo que digan.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Horario flexible de esta franja: sin turnos fijos, el paciente elige la hora. No admite slotMinutes, capacityPerSlot ni gapMinutes. Ausente ≡ false',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  flexibleHours?: boolean;
 }
 
 /**
@@ -417,6 +451,27 @@ export class CreateTemplateDto {
   @IsOptional()
   @IsISO8601()
   validTo?: string;
+
+  /**
+   * Horario flexible, sin turnos fijos (P36, propietario 18/09/2026).
+   *
+   * `true` ≡ la plantilla declara cuándo se atiende pero **no se corta en
+   * turnos**: `generate-slots` no materializa cupos de consulta para ella y el
+   * paciente pide la hora que quiera dentro de la franja con
+   * `POST /scheduling/resources/{id}/flexible-holds`. `slotMinutes` pasa a ser
+   * cuánto se reserva por paciente. Ausente ≡ turnos fijos, como siempre.
+   *
+   * No se cambia con `PATCH`: pasar una agenda viva de un modo al otro es
+   * retirar y volver a publicar.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Horario flexible: sin turnos fijos, el paciente elige la hora dentro de la franja. slotMinutes es lo que se reserva por paciente. Ausente ≡ false',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  flexibleHours?: boolean;
 }
 
 /**
@@ -520,6 +575,20 @@ export class TemplateRuleDto {
   /** Qué admite la franja. No se emite cuando no se declaró (≡ `CONSULTATIONS`). */
   @ApiProperty({ required: false, enum: RULE_BOOKING_MODES })
   bookingMode?: RuleBookingMode;
+
+  /**
+   * La franja atiende también por telemedicina. Se emite siempre: la columna
+   * es `NOT NULL DEFAULT false`, así que no hay «no declarado» que preservar.
+   */
+  @ApiProperty({ default: false })
+  telemedicineEnabled!: boolean;
+
+  /**
+   * La franja es de horario flexible. Se emite siempre, ya resuelto: `true`
+   * si lo declara la franja o si la plantilla entera es flexible.
+   */
+  @ApiProperty({ default: false })
+  flexibleHours!: boolean;
 }
 
 /**
@@ -562,6 +631,16 @@ export class TemplateDetailDto {
   /** Duración por defecto de la plantilla, si la declara. */
   @ApiProperty({ required: false })
   slotMinutes?: number;
+
+  /**
+   * Horario flexible (P36): sin turnos fijos, el paciente pide la hora dentro
+   * de la franja. Viaja siempre —`false` en toda plantilla de turnos fijos—
+   * para que la pantalla no tenga que adivinar qué significa su ausencia.
+   */
+  @ApiProperty({
+    description: 'true cuando el horario es flexible, sin turnos fijos',
+  })
+  flexibleHours!: boolean;
 
   /** Desde cuándo rige. */
   @ApiProperty({ required: false, format: 'date-time' })
@@ -669,6 +748,12 @@ export class TemplateResponseDto {
    */
   @ApiProperty({ description: 'Franjas creadas' })
   ruleCount!: number;
+
+  /** Horario flexible (P36), tal como quedó publicado. */
+  @ApiProperty({
+    description: 'true cuando el horario es flexible, sin turnos fijos',
+  })
+  flexibleHours!: boolean;
 
   /**
    * Identificador asociado a status concept.
@@ -816,6 +901,22 @@ export class CreateExceptionDto {
   @IsOptional()
   @IsBoolean()
   isAvailable?: boolean;
+
+  /**
+   * El profesional ya vio las citas que el bloqueo alcanza y confirmó.
+   *
+   * Sin esto, un rato con citas responde 422 con `affectedBookings` —la vista
+   * previa— y **no cancela nada**. Con `true`, cada cita se cancela con el
+   * motivo del bloqueo y se le avisa al paciente (24/10/2026).
+   */
+  @ApiPropertyOptional({
+    description:
+      'true: cancela las citas del rato y avisa a cada paciente. Ausente o false: si hay citas, responde 422 con la lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION) y no bloquea.',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  cancelAffectedBookings?: boolean;
 }
 
 /**
@@ -835,6 +936,13 @@ export class ExceptionResponseDto {
     description: 'Slots libres que quedaron bloqueados por la excepción',
   })
   blockedSlots!: number;
+
+  /** Citas canceladas (o rechazadas) por este bloqueo, con aviso al paciente. */
+  @ApiProperty({
+    description:
+      'Citas que el bloqueo canceló, con aviso a cada paciente. 0 si no había o no se confirmó.',
+  })
+  cancelledBookings!: number;
 }
 
 /**
@@ -914,6 +1022,67 @@ export class RetireTemplateResponseDto {
   /** `true` si hay más citas vivas que las listadas en `liveBookingIds`. */
   @ApiProperty()
   truncated!: boolean;
+
+  /**
+   * Citas canceladas por este retiro, con aviso al paciente. Sólo es mayor que
+   * 0 cuando se pidió `?affectedBookings=cancel` (24/10/2026).
+   */
+  @ApiProperty()
+  cancelledBookings!: number;
+}
+
+/** Qué hacer con las citas vivas al retirar: `DELETE /scheduling/templates/:id`. */
+export class RetireTemplateQueryDto {
+  /**
+   * `cancel`: cancela cada cita viva con el motivo «cambio de horario» y
+   * avisa al paciente. `keep` o ausente: las conserva (el contrato de siempre).
+   */
+  @ApiPropertyOptional({
+    enum: ['cancel', 'keep'],
+    description:
+      'cancel: cancela las citas vivas del horario y avisa a cada paciente. keep o ausente: las conserva, como siempre.',
+  })
+  @IsOptional()
+  @IsIn(['cancel', 'keep'])
+  affectedBookings?: 'cancel' | 'keep';
+}
+
+/** Una cita que un retiro o un bloqueo alcanza, como se la muestra al profesional. */
+export class AffectedBookingDto {
+  @ApiProperty({ format: 'uuid' })
+  bookingId!: string;
+
+  @ApiProperty({ format: 'date-time' })
+  startAt!: string;
+
+  @ApiProperty({ format: 'date-time' })
+  endAt!: string;
+
+  /** El nombre del paciente; `null` si no se pudo resolver. */
+  @ApiProperty({ type: String, nullable: true })
+  patientName!: string | null;
+
+  /** Solicitud sin responder: se rechaza en vez de cancelarse. */
+  @ApiProperty()
+  pending!: boolean;
+}
+
+/** Lo que responde `GET /scheduling/templates/:id/live-bookings`: la vista previa del retiro. */
+export class TemplateLiveBookingsResponseDto {
+  @ApiProperty({ format: 'uuid' })
+  templateId!: string;
+
+  /** Citas vivas en total: las cancelables y las de pacientes ya recibidos. */
+  @ApiProperty()
+  total!: number;
+
+  /** Las que un retiro con `affectedBookings=cancel` cancelaría (o rechazaría). */
+  @ApiProperty({ type: [AffectedBookingDto] })
+  bookings!: AffectedBookingDto[];
+
+  /** Pacientes ya recibidos: frenan el retiro con cancelación (422). */
+  @ApiProperty({ type: [AffectedBookingDto] })
+  present!: AffectedBookingDto[];
 }
 
 /** Un motivo de bloqueo tal como lo ofrece la pantalla. */
@@ -1125,6 +1294,19 @@ export class CloseSlotsDto {
   @ArrayNotEmpty()
   @IsUUID(undefined, { each: true })
   slotIds!: string[];
+
+  /**
+   * El profesional ya vio las citas de esos cupos y confirmó cancelarlas.
+   * Sin esto, un cupo con paciente responde 409 con `affectedBookings`.
+   */
+  @ApiPropertyOptional({
+    description:
+      'true: cancela las citas de esos cupos y avisa a cada paciente. Ausente o false: si hay citas, responde 409 con la lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION) y no cierra.',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  cancelAffectedBookings?: boolean;
 }
 
 /** Lo que responde cerrar cupos sueltos. */
@@ -1132,6 +1314,10 @@ export class CloseSlotsResponseDto {
   /** Cuántos cupos quedaron cerrados. */
   @ApiProperty()
   closedSlots!: number;
+
+  /** Citas canceladas (o rechazadas) al cerrar, con aviso al paciente. */
+  @ApiProperty()
+  cancelledBookings!: number;
 
   /**
    * La excepción que se creó para que regenerar no los devuelva.

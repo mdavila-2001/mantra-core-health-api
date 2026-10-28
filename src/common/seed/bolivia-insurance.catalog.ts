@@ -243,6 +243,22 @@ export const BOLIVIA_HEALTH_PLANS: readonly {
  * enumera con su dirección y su teléfono en Santa Cruz. El SUS no está en ese
  * listado —no es una caja con sede, es una política de cobertura universal— pero
  * el registro de procesos lo nombra explícitamente, así que se incluye.
+ *
+ * ## Ampliación (26/10/2026): todos los entes gestores
+ *
+ * El cliente pidió la lista completa. Se completó con los entes gestores de la
+ * seguridad social de corto plazo que enumera la norma —D.S. 3385 (2017), que
+ * los somete a fiscalización, y D.S. 3561 (2018), que crea la ASUSS para
+ * supervisarlos—: la Caja Bancaria Estatal de Salud, el Seguro Integral de
+ * Salud SINEC y los Seguros Sociales Universitarios **de cada universidad**,
+ * porque el afiliado de la UMSA y el de la UAGRM pertenecen a cajas distintas,
+ * con sus propias clínicas. `BO_PUB_SSU` (sin universidad) se conserva: es la
+ * opción de quien no sabe a cuál está afiliado, y su id ya puede estar guardado
+ * en una cobertura.
+ *
+ * Sólo entran SSU con creación documentada (decreto o caja en funcionamiento):
+ * La Paz, Cochabamba, Sucre, Oruro, Potosí, Tarija y Santa Cruz. Si existe el de
+ * otra universidad, se suma con su fuente; no se infiere uno por departamento.
  */
 export const BOLIVIA_PUBLIC_INSURERS: readonly {
   /** Código estable. */
@@ -292,7 +308,115 @@ export const BOLIVIA_PUBLIC_INSURERS: readonly {
     razonSocial: 'Sistema Único de Salud',
     sigla: 'SUS',
   },
+
+  // --- Ampliación (26/10/2026): el resto de los entes gestores (D.S. 3385) ---
+  {
+    code: 'BO_PUB_CBES',
+    razonSocial: 'Caja Bancaria Estatal de Salud',
+    sigla: 'CBES',
+  },
+  {
+    code: 'BO_PUB_SINEC',
+    razonSocial: 'Seguro Integral de Salud',
+    sigla: 'SINEC',
+  },
+  // Los Seguros Sociales Universitarios, uno por universidad. La sigla no es
+  // de mayúsculas a propósito: el rótulo del catálogo la omite y muestra el
+  // nombre completo, que es lo que distingue a uno de otro.
+  {
+    code: 'BO_PUB_SSU_LA_PAZ',
+    razonSocial: 'Seguro Social Universitario La Paz',
+    sigla: 'SSU La Paz',
+  },
+  {
+    code: 'BO_PUB_SSU_COCHABAMBA',
+    razonSocial: 'Seguro Social Universitario Cochabamba',
+    sigla: 'SSU Cochabamba',
+  },
+  {
+    code: 'BO_PUB_SSU_SUCRE',
+    razonSocial: 'Seguro Social Universitario Sucre',
+    sigla: 'SSU Sucre',
+  },
+  {
+    code: 'BO_PUB_SSU_ORURO',
+    razonSocial: 'Seguro Social Universitario Oruro',
+    sigla: 'SSU Oruro',
+  },
+  {
+    code: 'BO_PUB_SSU_POTOSI',
+    razonSocial: 'Seguro Social Universitario Potosí',
+    sigla: 'SSU Potosí',
+  },
+  {
+    code: 'BO_PUB_SSU_TARIJA',
+    razonSocial: 'Seguro Social Universitario Tarija',
+    sigla: 'SSU Tarija',
+  },
+  {
+    code: 'BO_PUB_SSU_SANTA_CRUZ',
+    razonSocial: 'Seguro Social Universitario Santa Cruz',
+    sigla: 'SSU Santa Cruz',
+  },
 ];
+
+/** Una aseguradora privada que el listado del stakeholder no trae. */
+export interface BoliviaCuratedCarrierSeed {
+  /**
+   * Código con la misma regla que `extract_datasets.py` (`BO_ASEG_` + sigla
+   * normalizada): si el stakeholder la agrega a su listado, el código coincide,
+   * el id determinista también, y la entrada curada cede su lugar a la del
+   * listado (ver {@link BOLIVIA_CURATED_CARRIERS}).
+   */
+  readonly code: string;
+  /** Nombre con el que está constituida. */
+  readonly razonSocial: string;
+  /** Cómo se la nombra en el giro comercial. */
+  readonly sigla: string;
+  /** `PERSONAS` (vende salud y vida) o `GENERALES` (bienes y fianzas). */
+  readonly ramo: 'PERSONAS' | 'GENERALES';
+  /** Si vende seguro de salud. */
+  readonly ofreceSalud: boolean;
+  /** De dónde sale que existe. */
+  readonly fuente: string;
+}
+
+/**
+ * Aseguradoras privadas reales que faltan en el listado del stakeholder.
+ *
+ * `insurance-carriers.dataset.json` es extracción de `LISTADO_DE_ASEGURADORAS_1.md`
+ * y se regenera con `extract_datasets.py`, así que no se edita a mano: lo que
+ * falta se suma acá, curado. El listado ya trae a todas las de personas que el
+ * registro de procesos nombra (Alianza Vida, BISA, Nacional Vida y Salud,
+ * Crediseguro, La Boliviana Ciacruz, Fortaleza, Univida, La Vitalicia, Santa
+ * Cruz Vida y Salud) y a las de generales (Illimani, Mercantil Santa Cruz,
+ * Credinform, Unibienes…); lo que faltaba es esto.
+ *
+ * Sin NIT ni dirección: no se publican en una fuente verificada y se dejan
+ * vacíos antes que inventados (la misma regla que los canales de contacto).
+ */
+const CURATED_CARRIERS: readonly BoliviaCuratedCarrierSeed[] = [
+  {
+    code: 'BO_ASEG_SEGUROS_PROVIDA_S_A',
+    razonSocial: 'Seguros Provida S.A.',
+    sigla: 'Seguros Provida',
+    ramo: 'PERSONAS',
+    ofreceSalud: true,
+    fuente:
+      'Aseguradora de personas con sede en La Paz (segurosprovida.com.bo); no figura en LISTADO_DE_ASEGURADORAS_1.md.',
+  },
+];
+
+/**
+ * Las curadas que el listado del stakeholder todavía no trae. Si una llega en
+ * una regeneración con el mismo código, sale de acá sola: el seed no la
+ * declara dos veces (lo que haría fallar `assertUniqueCodes`) y la fila, que
+ * tiene el mismo id, queda como estaba.
+ */
+export const BOLIVIA_CURATED_CARRIERS: readonly BoliviaCuratedCarrierSeed[] =
+  CURATED_CARRIERS.filter(
+    (curated) => !BOLIVIA_CARRIERS.some((c) => c.code === curated.code),
+  );
 
 /** Id determinista de la aseguradora, a partir de su código. */
 export const carrierId = (code: string): string =>
@@ -321,6 +445,8 @@ const SECTOR_BY_PLAN_ID: ReadonlyMap<string, InsuranceSector> = (() => {
     index.set(carrierPlanId(carrierCode, 'BASE'), sector);
   };
   for (const carrier of BOLIVIA_CARRIERS) register(carrier.code, 'private');
+  for (const carrier of BOLIVIA_CURATED_CARRIERS)
+    register(carrier.code, 'private');
   for (const insurer of BOLIVIA_PUBLIC_INSURERS)
     register(insurer.code, 'public');
   for (const plan of BOLIVIA_HEALTH_PLANS) {

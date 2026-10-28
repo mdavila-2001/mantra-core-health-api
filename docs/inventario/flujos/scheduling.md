@@ -3,12 +3,12 @@
 # Flujos del módulo `scheduling`
 
 - **Procesos:** 2 · **Máquinas de estado:** 1
-- **Operaciones:** 58 (52 con decisiones propias, 6 sin ellas)
+- **Operaciones:** 66 (60 con decisiones propias, 6 sin ellas)
 - Inventario de endpoints del módulo: [scheduling](../endpoints/scheduling.md)
 
 ## Proceso: Módulo 41 — Scheduling (agenda)
 
-- **Código:** `scheduling` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 58
+- **Código:** `scheduling` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 66
 - **Actores:** CLINICIAN · Cualquier sesión válida · PATIENT · PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT · SYSTEM · SYSTEM_WORKER
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/scheduling/README.md`
@@ -27,18 +27,23 @@ _Fuente: `src/modules/scheduling/README.md:3`_
 |  |  | GET /scheduling/slots | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | BAJO | 1 |
 | `ctrl:SchedulingBookingsController` | Operaciones de SchedulingBookingsController que el README no asigna a un caso de uso | GET /scheduling/bookings | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | BAJO | 18 |
 |  |  | GET /scheduling/bookings/{id} | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | BAJO | 10 |
-|  |  | POST /scheduling/bookings/{id}/accept | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 51 |
-|  |  | POST /scheduling/bookings/{id}/cancel | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | MEDIO | 43 |
+|  |  | POST /scheduling/bookings/{id}/accept | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 55 |
+|  |  | POST /scheduling/bookings/{id}/cancel | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | MEDIO | 47 |
 |  |  | POST /scheduling/bookings/{id}/check-in | SCHEDULING_ADMIN · SCHEDULING_AGENT | MEDIO | 5 |
-|  |  | POST /scheduling/bookings/{id}/complete | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 13 |
-|  |  | POST /scheduling/bookings/{id}/delay | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 32 |
+|  |  | POST /scheduling/bookings/{id}/complete | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 14 |
+|  |  | POST /scheduling/bookings/{id}/delay | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 34 |
+|  |  | GET /scheduling/bookings/{id}/payment-receipts | PATIENT · PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT | BAJO | 9 |
+|  |  | POST /scheduling/bookings/{id}/payment-receipts | PATIENT | MEDIO | 38 |
+|  |  | POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT | MEDIO | 36 |
+|  |  | GET /scheduling/bookings/{id}/payment-receipts/{receiptId}/content | PATIENT · PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT | BAJO | 8 |
+|  |  | POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT | MEDIO | 35 |
 |  |  | GET /scheduling/bookings/{id}/payment-state | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | BAJO | 3 |
-|  |  | PUT /scheduling/bookings/{id}/payment-state | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 9 |
-|  |  | POST /scheduling/bookings/{id}/propose-schedule | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 9 |
-|  |  | POST /scheduling/bookings/{id}/reject | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 41 |
+|  |  | PUT /scheduling/bookings/{id}/payment-state | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | BAJO | 2 |
+|  |  | POST /scheduling/bookings/{id}/propose-schedule | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 11 |
+|  |  | POST /scheduling/bookings/{id}/reject | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 35 |
 |  |  | POST /scheduling/bookings/{id}/reminders | SCHEDULING_ADMIN · SCHEDULING_AGENT | MEDIO | 3 |
 |  |  | POST /scheduling/bookings/{id}/request-info | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 6 |
-|  |  | POST /scheduling/bookings/{id}/reschedule | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | MEDIO | 38 |
+|  |  | POST /scheduling/bookings/{id}/reschedule | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | MEDIO | 42 |
 |  |  | POST /scheduling/bookings/{id}/start | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 8 |
 | `ctrl:SchedulingConfirmationController` | Operaciones de SchedulingConfirmationController que el README no asigna a un caso de uso | GET /scheduling/confirmation-rules | SCHEDULING_ADMIN | BAJO | 1 |
 |  |  | POST /scheduling/confirmation-rules | SCHEDULING_ADMIN | MEDIO | 1 |
@@ -46,34 +51,37 @@ _Fuente: `src/modules/scheduling/README.md:3`_
 |  |  | POST /scheduling/confirmation-rules/{id}/deactivate | SCHEDULING_ADMIN | MEDIO | 2 |
 |  |  | POST /scheduling/confirmation-rules/evaluate | SCHEDULING_ADMIN | BAJO | 1 |
 | `ctrl:SchedulingController` | Operaciones de SchedulingController que el README no asigna a un caso de uso | GET /scheduling/activity-types | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | BAJO | 0 |
-|  |  | POST /scheduling/appointments/direct | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 43 |
-|  |  | POST /scheduling/appointments/walk-in | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 24 |
+|  |  | POST /scheduling/appointments/direct | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 47 |
+|  |  | POST /scheduling/appointments/walk-in | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 26 |
 |  |  | POST /scheduling/booking-policies | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 2 |
 |  |  | GET /scheduling/exception-types | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | BAJO | 0 |
 |  |  | DELETE /scheduling/exceptions/{id} | SCHEDULING_ADMIN · PRACTITIONER | ALTO | 3 |
 |  |  | PATCH /scheduling/exceptions/{id} | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 5 |
 |  |  | POST /scheduling/holds/{holdToken}/confirm | SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT | MEDIO | 18 |
-|  |  | POST /scheduling/holds/{holdToken}/request | SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT | MEDIO | 42 |
+|  |  | POST /scheduling/holds/{holdToken}/request | SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT | MEDIO | 44 |
 |  |  | POST /scheduling/resources | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 4 |
-|  |  | POST /scheduling/resources/{id}/close-slots | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 5 |
-|  |  | POST /scheduling/resources/{id}/delay | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 31 |
+|  |  | POST /scheduling/resources/{id}/close-slots | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 32 |
+|  |  | POST /scheduling/resources/{id}/delay | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 33 |
 |  |  | GET /scheduling/resources/{id}/exceptions | SCHEDULING_ADMIN · PRACTITIONER · PATIENT | BAJO | 3 |
-|  |  | POST /scheduling/resources/{id}/exceptions | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 5 |
-|  |  | POST /scheduling/resources/{id}/shift-slots | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 30 |
+|  |  | POST /scheduling/resources/{id}/exceptions | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 32 |
+|  |  | POST /scheduling/resources/{id}/shift-slots | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 32 |
 |  |  | GET /scheduling/resources/{id}/slots | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | BAJO | 2 |
 |  |  | GET /scheduling/resources/{id}/templates | SCHEDULING_ADMIN · PRACTITIONER | BAJO | 3 |
 |  |  | POST /scheduling/resources/{id}/templates | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 5 |
 |  |  | GET /scheduling/resources/{resourceId}/waitlist | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | BAJO | 4 |
 |  |  | POST /scheduling/slots/{id}/holds | SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT | MEDIO | 9 |
-|  |  | DELETE /scheduling/templates/{id} | SCHEDULING_ADMIN · PRACTITIONER | ALTO | 8 |
+|  |  | DELETE /scheduling/templates/{id} | SCHEDULING_ADMIN · PRACTITIONER | ALTO | 35 |
 |  |  | PATCH /scheduling/templates/{id} | SCHEDULING_ADMIN · PRACTITIONER | ALTO | 6 |
 |  |  | POST /scheduling/templates/{id}/generate-slots | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 7 |
+|  |  | GET /scheduling/templates/{id}/live-bookings | SCHEDULING_ADMIN · PRACTITIONER | BAJO | 6 |
 |  |  | POST /scheduling/templates/{id}/reactivate | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 3 |
 |  |  | GET /scheduling/waitlist | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | BAJO | 7 |
 |  |  | POST /scheduling/waitlist | SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT | MEDIO | 4 |
-| `ctrl:SchedulingInternalController` | Operaciones de SchedulingInternalController que el README no asigna a un caso de uso | POST /scheduling/internal/dispatch-reminders | SYSTEM · SYSTEM_WORKER | MEDIO | 31 |
-|  |  | POST /scheduling/internal/expire-holds | SYSTEM · SYSTEM_WORKER | MEDIO | 8 |
-|  |  | POST /scheduling/internal/promote-waitlist/{slotId} | SYSTEM · SYSTEM_WORKER | MEDIO | 29 |
+| `ctrl:SchedulingFlexibleController` | Operaciones de SchedulingFlexibleController que el README no asigna a un caso de uso | GET /scheduling/resources/{id}/flexible-availability | PATIENT · PRACTITIONER · CLINICIAN · SCHEDULING_ADMIN · SCHEDULING_AGENT | BAJO | 9 |
+|  |  | POST /scheduling/resources/{id}/flexible-holds | PATIENT · SCHEDULING_ADMIN · SCHEDULING_AGENT | MEDIO | 17 |
+| `ctrl:SchedulingInternalController` | Operaciones de SchedulingInternalController que el README no asigna a un caso de uso | POST /scheduling/internal/dispatch-reminders | SYSTEM · SYSTEM_WORKER | MEDIO | 33 |
+|  |  | POST /scheduling/internal/expire-holds | SYSTEM · SYSTEM_WORKER | MEDIO | 10 |
+|  |  | POST /scheduling/internal/promote-waitlist/{slotId} | SYSTEM · SYSTEM_WORKER | MEDIO | 31 |
 |  |  | GET /scheduling/internal/waitlist-candidates | SYSTEM · SYSTEM_WORKER | BAJO | 2 |
 | `ctrl:SchedulingServiceOfferingsController` | Operaciones de SchedulingServiceOfferingsController que el README no asigna a un caso de uso | GET /scheduling/service-availability | PATIENT · PRACTITIONER · CLINICIAN · SCHEDULING_ADMIN · SCHEDULING_AGENT | BAJO | 10 |
 |  |  | GET /scheduling/service-offerings | PATIENT · PRACTITIONER · CLINICIAN · SCHEDULING_ADMIN · SCHEDULING_AGENT | BAJO | 2 |
@@ -89,7 +97,10 @@ flowchart LR
   a2(["SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT"]):::actor
   a25(["SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER"]):::actor
   a33(["SCHEDULING_ADMIN · SCHEDULING_AGENT"]):::actor
-  a55(["SCHEDULING_ADMIN"]):::actor
+  a40(["PATIENT · PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT"]):::actor
+  a45(["PATIENT"]):::actor
+  a48(["PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT"]):::actor
+  a71(["SCHEDULING_ADMIN"]):::actor
   t3[("common.addresses")]:::tabla
   t4[("practice.care_spaces")]:::tabla
   t5[("practice.practice_sites")]:::tabla
@@ -110,24 +121,32 @@ flowchart LR
   t29[("community.conversation_participants")]:::tabla
   t30[("community.conversations")]:::tabla
   t34[("scheduling.appointment_bookings")]:::tabla
-  t40[("scheduling.appointment_payment_states")]:::tabla
-  t48[("scheduling.appointment_reminders")]:::tabla
-  t56[("scheduling.booking_confirmation_rules")]:::tabla
+  t41[("common.files")]:::tabla
+  t42[("iam.users")]:::tabla
+  t55[("scheduling.appointment_payment_states")]:::tabla
+  t60[("iam.authentication_credentials")]:::tabla
+  t61[("iam.devices")]:::tabla
+  t64[("scheduling.appointment_reminders")]:::tabla
+  t72[("scheduling.booking_confirmation_rules")]:::tabla
   subgraph s0["ctrl:SchedulingAgendaController · Operaciones de SchedulingAgendaController que…"]
     o1["GET /scheduling/resources"]:::op
     o9["GET /scheduling/slots"]:::op
   end
   t18[("+12 tablas más")]
   t23[("+4 tablas más")]
-  t27[("+45 tablas más")]
-  t31[("+37 tablas más")]
-  t36[("+7 tablas más")]
-  t38[("+26 tablas más")]
-  t42[("+3 tablas más")]
-  t44[("+3 tablas más")]
-  t46[("+35 tablas más")]
-  t51[("+32 tablas más")]
-  t53[("+2 tablas más")]
+  t27[("+49 tablas más")]
+  t31[("+41 tablas más")]
+  t36[("+8 tablas más")]
+  t38[("+28 tablas más")]
+  t43[("+3 tablas más")]
+  t46[("+32 tablas más")]
+  t49[("+30 tablas más")]
+  t51[("+2 tablas más")]
+  t53[("+29 tablas más")]
+  t58[("+5 tablas más")]
+  t62[("+29 tablas más")]
+  t67[("+36 tablas más")]
+  t69[("+2 tablas más")]
   subgraph s1["ctrl:SchedulingBookingsController · Operaciones de SchedulingBookingsController…"]
     o11["GET /scheduling/bookings"]:::op
     o19["GET /scheduling/bookings/{id}"]:::op
@@ -136,21 +155,26 @@ flowchart LR
     o32["POST /scheduling/bookings/{id}/check-in"]:::op
     o35["POST /scheduling/bookings/{id}/complete"]:::op
     o37["POST /scheduling/bookings/{id}/delay"]:::op
-    o39["GET /scheduling/bookings/{id}/payment-state"]:::op
-    o41["PUT /scheduling/bookings/{id}/payment-state"]:::op
-    o43["POST /scheduling/bookings/{id}/propose-schedule"]:::op
-    o45["POST /scheduling/bookings/{id}/reject"]:::op
-    o47["POST /scheduling/bookings/{id}/reminders"]:::op
-    o49["POST /scheduling/bookings/{id}/request-info"]:::op
-    o50["POST /scheduling/bookings/{id}/reschedule"]:::op
-    o52["POST /scheduling/bookings/{id}/start"]:::op
+    o39["GET /scheduling/bookings/{id}/payment-receipts"]:::op
+    o44["POST /scheduling/bookings/{id}/payment-receipts"]:::op
+    o47["POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm"]:::op
+    o50["GET /scheduling/bookings/{id}/payment-receipts/{receiptId}/content"]:::op
+    o52["POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject"]:::op
+    o54["GET /scheduling/bookings/{id}/payment-state"]:::op
+    o56["PUT /scheduling/bookings/{id}/payment-state"]:::op
+    o57["POST /scheduling/bookings/{id}/propose-schedule"]:::op
+    o59["POST /scheduling/bookings/{id}/reject"]:::op
+    o63["POST /scheduling/bookings/{id}/reminders"]:::op
+    o65["POST /scheduling/bookings/{id}/request-info"]:::op
+    o66["POST /scheduling/bookings/{id}/reschedule"]:::op
+    o68["POST /scheduling/bookings/{id}/start"]:::op
   end
   subgraph s2["ctrl:SchedulingConfirmationController · Operaciones de SchedulingConfirmationCo…"]
-    o54["GET /scheduling/confirmation-rules"]:::op
-    o57["POST /scheduling/confirmation-rules"]:::op
-    o58["POST /scheduling/confirmation-rules/{id}/activate"]:::op
-    o59["POST /scheduling/confirmation-rules/{id}/deactivate"]:::op
-    o60["POST /scheduling/confirmation-rules/evaluate"]:::op
+    o70["GET /scheduling/confirmation-rules"]:::op
+    o73["POST /scheduling/confirmation-rules"]:::op
+    o74["POST /scheduling/confirmation-rules/{id}/activate"]:::op
+    o75["POST /scheduling/confirmation-rules/{id}/deactivate"]:::op
+    o76["POST /scheduling/confirmation-rules/evaluate"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -215,73 +239,108 @@ flowchart LR
   o37 -->|"LEE"| t29
   o37 -->|"CREA"| t30
   o37 -.-> t38
-  a25 --> o39
-  o39 -->|"LEE"| t34
-  o39 -->|"LEE"| t40
-  o39 -->|"LEE"| t8
-  a25 --> o41
-  o41 -->|"ACTUALIZA"| t12
-  o41 -->|"CREA"| t12
-  o41 -->|"LEE"| t12
-  o41 -->|"LEE"| t34
-  o41 -->|"ACTUALIZA"| t40
-  o41 -->|"CREA"| t40
-  o41 -.-> t42
-  a25 --> o43
-  o43 -->|"ACTUALIZA"| t12
-  o43 -->|"CREA"| t12
-  o43 -->|"LEE"| t12
-  o43 -->|"ACTUALIZA"| t34
-  o43 -->|"LEE"| t34
-  o43 -->|"ACTUALIZA"| t10
-  o43 -.-> t44
-  a25 --> o45
-  o45 -->|"ACTUALIZA"| t12
-  o45 -->|"CREA"| t12
-  o45 -->|"LEE"| t12
-  o45 -->|"CREA"| t29
-  o45 -->|"LEE"| t29
-  o45 -->|"CREA"| t30
-  o45 -.-> t46
-  a33 --> o47
-  o47 -->|"LEE"| t34
-  o47 -->|"CREA"| t48
-  o47 -->|"LEE"| t10
-  a25 --> o49
-  o49 -->|"ACTUALIZA"| t12
-  o49 -->|"CREA"| t12
-  o49 -->|"LEE"| t12
-  o49 -->|"ACTUALIZA"| t34
-  o49 -->|"LEE"| t34
-  o49 -->|"LEE"| t8
-  a2 --> o50
-  o50 -->|"ACTUALIZA"| t12
-  o50 -->|"CREA"| t12
-  o50 -->|"LEE"| t12
-  o50 -->|"CREA"| t29
-  o50 -->|"LEE"| t29
-  o50 -->|"CREA"| t30
+  a40 --> o39
+  o39 -->|"LEE"| t26
+  o39 -->|"LEE"| t41
+  o39 -->|"LEE"| t42
+  o39 -->|"LEE"| t20
+  o39 -->|"LEE"| t21
+  o39 -->|"LEE"| t22
+  o39 -.-> t43
+  a45 --> o44
+  o44 -->|"LEE"| t26
+  o44 -->|"LEE"| t41
+  o44 -->|"CREA"| t29
+  o44 -->|"LEE"| t29
+  o44 -->|"CREA"| t30
+  o44 -->|"LEE"| t30
+  o44 -.-> t46
+  a48 --> o47
+  o47 -->|"LEE"| t26
+  o47 -->|"LEE"| t41
+  o47 -->|"CREA"| t29
+  o47 -->|"LEE"| t29
+  o47 -->|"CREA"| t30
+  o47 -->|"LEE"| t30
+  o47 -.-> t49
+  a40 --> o50
+  o50 -->|"LEE"| t26
+  o50 -->|"LEE"| t41
+  o50 -->|"LEE"| t20
+  o50 -->|"LEE"| t21
+  o50 -->|"LEE"| t22
+  o50 -->|"LEE"| t34
   o50 -.-> t51
-  a25 --> o52
-  o52 -->|"ACTUALIZA"| t12
-  o52 -->|"CREA"| t12
-  o52 -->|"LEE"| t12
-  o52 -->|"ACTUALIZA"| t13
-  o52 -->|"LEE"| t13
-  o52 -->|"ACTUALIZA"| t34
+  a48 --> o52
+  o52 -->|"LEE"| t26
+  o52 -->|"LEE"| t41
+  o52 -->|"CREA"| t29
+  o52 -->|"LEE"| t29
+  o52 -->|"CREA"| t30
+  o52 -->|"LEE"| t30
   o52 -.-> t53
-  a55 --> o54
-  o54 -->|"LEE"| t56
-  a55 --> o57
-  o57 -->|"CREA"| t56
-  a55 --> o58
-  o58 -->|"ACTUALIZA"| t56
-  o58 -->|"LEE"| t56
-  a55 --> o59
-  o59 -->|"ACTUALIZA"| t56
-  o59 -->|"LEE"| t56
-  a55 --> o60
-  o60 -->|"LEE"| t56
+  a25 --> o54
+  o54 -->|"LEE"| t34
+  o54 -->|"LEE"| t55
+  o54 -->|"LEE"| t8
+  a25 --> o56
+  o56 -->|"LEE"| t34
+  o56 -->|"LEE"| t8
+  a25 --> o57
+  o57 -->|"ACTUALIZA"| t12
+  o57 -->|"CREA"| t12
+  o57 -->|"LEE"| t12
+  o57 -->|"ACTUALIZA"| t34
+  o57 -->|"LEE"| t34
+  o57 -->|"ACTUALIZA"| t10
+  o57 -.-> t58
+  a25 --> o59
+  o59 -->|"ACTUALIZA"| t12
+  o59 -->|"CREA"| t12
+  o59 -->|"LEE"| t12
+  o59 -->|"LEE"| t60
+  o59 -->|"ACTUALIZA"| t61
+  o59 -->|"LEE"| t61
+  o59 -.-> t62
+  a33 --> o63
+  o63 -->|"LEE"| t34
+  o63 -->|"CREA"| t64
+  o63 -->|"LEE"| t10
+  a25 --> o65
+  o65 -->|"ACTUALIZA"| t12
+  o65 -->|"CREA"| t12
+  o65 -->|"LEE"| t12
+  o65 -->|"ACTUALIZA"| t34
+  o65 -->|"LEE"| t34
+  o65 -->|"LEE"| t8
+  a2 --> o66
+  o66 -->|"ACTUALIZA"| t12
+  o66 -->|"CREA"| t12
+  o66 -->|"LEE"| t12
+  o66 -->|"CREA"| t29
+  o66 -->|"LEE"| t29
+  o66 -->|"CREA"| t30
+  o66 -.-> t67
+  a25 --> o68
+  o68 -->|"ACTUALIZA"| t12
+  o68 -->|"CREA"| t12
+  o68 -->|"LEE"| t12
+  o68 -->|"ACTUALIZA"| t13
+  o68 -->|"LEE"| t13
+  o68 -->|"ACTUALIZA"| t34
+  o68 -.-> t69
+  a71 --> o70
+  o70 -->|"LEE"| t72
+  a71 --> o73
+  o73 -->|"CREA"| t72
+  a71 --> o74
+  o74 -->|"ACTUALIZA"| t72
+  o74 -->|"LEE"| t72
+  a71 --> o75
+  o75 -->|"ACTUALIZA"| t72
+  o75 -->|"LEE"| t72
+  a71 --> o76
+  o76 -->|"LEE"| t72
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -295,8 +354,8 @@ flowchart LR
   a2(["SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER"]):::actor
   a12(["SCHEDULING_ADMIN · PRACTITIONER"]):::actor
   a21(["SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT"]):::actor
-  a40(["SCHEDULING_ADMIN · PRACTITIONER · PATIENT"]):::actor
-  a46(["SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT"]):::actor
+  a42(["SCHEDULING_ADMIN · PRACTITIONER · PATIENT"]):::actor
+  a50(["SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT"]):::actor
   t4[("audit.appointment_bookings_history")]:::tabla
   t5[("clinical.appointments")]:::tabla
   t6[("clinical.encounters")]:::tabla
@@ -314,23 +373,26 @@ flowchart LR
   t32[("practice.practice_sites")]:::tabla
   t33[("practice.practices")]:::tabla
   t34[("profiles.practitioner_affiliations")]:::tabla
-  t36[("scheduling.appointment_bookings")]:::tabla
-  t43[("community.public_profiles")]:::tabla
-  t48[("scheduling.schedule_rules")]:::tabla
-  t49[("scheduling.schedule_templates")]:::tabla
-  t52[("profiles.person_profiles")]:::tabla
-  t53[("scheduling.waitlist_entries")]:::tabla
-  t57[("scheduling.booking_reschedules")]:::tabla
-  t8[("+37 tablas más")]
-  t10[("+18 tablas más")]
+  t36[("iam.devices")]:::tabla
+  t37[("messaging.in_app_notifications")]:::tabla
+  t43[("scheduling.appointment_bookings")]:::tabla
+  t47[("community.public_profiles")]:::tabla
+  t52[("scheduling.schedule_rules")]:::tabla
+  t53[("scheduling.schedule_templates")]:::tabla
+  t56[("profiles.person_profiles")]:::tabla
+  t57[("scheduling.waitlist_entries")]:::tabla
+  t8[("+41 tablas más")]
+  t10[("+20 tablas más")]
   t27[("+12 tablas más")]
-  t30[("+36 tablas más")]
-  t38[("+25 tablas más")]
-  t44[("+24 tablas más")]
-  t55[("+3 tablas más")]
-  t58[("+2 tablas más")]
-  t61[("+1 tablas más")]
+  t30[("+38 tablas más")]
+  t38[("+26 tablas más")]
+  t40[("+27 tablas más")]
+  t45[("+26 tablas más")]
+  t48[("+26 tablas más")]
+  t59[("+3 tablas más")]
+  t61[("+29 tablas más")]
   t64[("+1 tablas más")]
+  t68[("+1 tablas más")]
   subgraph s0["ctrl:SchedulingController · Operaciones de SchedulingController que el README n…"]
     o1["GET /scheduling/activity-types"]:::op
     o3["POST /scheduling/appointments/direct"]:::op
@@ -343,21 +405,22 @@ flowchart LR
     o28["POST /scheduling/holds/{holdToken}/request"]:::op
     o31["POST /scheduling/resources"]:::op
     o35["POST /scheduling/resources/{id}/close-slots"]:::op
-    o37["POST /scheduling/resources/{id}/delay"]:::op
-    o39["GET /scheduling/resources/{id}/exceptions"]:::op
-    o41["POST /scheduling/resources/{id}/exceptions"]:::op
-    o42["POST /scheduling/resources/{id}/shift-slots"]:::op
-    o45["GET /scheduling/resources/{id}/slots"]:::op
-    o47["GET /scheduling/resources/{id}/templates"]:::op
-    o50["POST /scheduling/resources/{id}/templates"]:::op
-    o51["GET /scheduling/resources/{resourceId}/waitlist"]:::op
-    o54["POST /scheduling/slots/{id}/holds"]:::op
-    o56["DELETE /scheduling/templates/{id}"]:::op
-    o59["PATCH /scheduling/templates/{id}"]:::op
-    o60["POST /scheduling/templates/{id}/generate-slots"]:::op
-    o62["POST /scheduling/templates/{id}/reactivate"]:::op
-    o63["GET /scheduling/waitlist"]:::op
-    o65["POST /scheduling/waitlist"]:::op
+    o39["POST /scheduling/resources/{id}/delay"]:::op
+    o41["GET /scheduling/resources/{id}/exceptions"]:::op
+    o44["POST /scheduling/resources/{id}/exceptions"]:::op
+    o46["POST /scheduling/resources/{id}/shift-slots"]:::op
+    o49["GET /scheduling/resources/{id}/slots"]:::op
+    o51["GET /scheduling/resources/{id}/templates"]:::op
+    o54["POST /scheduling/resources/{id}/templates"]:::op
+    o55["GET /scheduling/resources/{resourceId}/waitlist"]:::op
+    o58["POST /scheduling/slots/{id}/holds"]:::op
+    o60["DELETE /scheduling/templates/{id}"]:::op
+    o62["PATCH /scheduling/templates/{id}"]:::op
+    o63["POST /scheduling/templates/{id}/generate-slots"]:::op
+    o65["GET /scheduling/templates/{id}/live-bookings"]:::op
+    o66["POST /scheduling/templates/{id}/reactivate"]:::op
+    o67["GET /scheduling/waitlist"]:::op
+    o69["POST /scheduling/waitlist"]:::op
   end
   a2 --> o1
   a2 --> o3
@@ -412,219 +475,253 @@ flowchart LR
   o31 -->|"LEE"| t34
   o31 -->|"CREA"| t17
   a12 --> o35
+  o35 -->|"ACTUALIZA"| t4
+  o35 -->|"CREA"| t4
+  o35 -->|"LEE"| t4
+  o35 -->|"ACTUALIZA"| t36
   o35 -->|"LEE"| t36
-  o35 -->|"CREA"| t16
-  o35 -->|"ACTUALIZA"| t19
-  o35 -->|"LEE"| t19
-  o35 -->|"LEE"| t17
-  a2 --> o37
-  o37 -->|"ACTUALIZA"| t4
-  o37 -->|"CREA"| t4
-  o37 -->|"LEE"| t4
-  o37 -->|"CREA"| t7
-  o37 -->|"LEE"| t7
-  o37 -->|"CREA"| t29
-  o37 -.-> t38
-  a40 --> o39
-  o39 -->|"LEE"| t36
-  o39 -->|"LEE"| t16
-  o39 -->|"LEE"| t17
-  a12 --> o41
-  o41 -->|"LEE"| t36
-  o41 -->|"CREA"| t16
-  o41 -->|"ACTUALIZA"| t19
-  o41 -->|"LEE"| t19
+  o35 -->|"CREA"| t37
+  o35 -.-> t38
+  a2 --> o39
+  o39 -->|"ACTUALIZA"| t4
+  o39 -->|"CREA"| t4
+  o39 -->|"LEE"| t4
+  o39 -->|"CREA"| t7
+  o39 -->|"LEE"| t7
+  o39 -->|"CREA"| t29
+  o39 -.-> t40
+  a42 --> o41
+  o41 -->|"LEE"| t43
+  o41 -->|"LEE"| t16
   o41 -->|"LEE"| t17
-  a12 --> o42
-  o42 -->|"CREA"| t7
-  o42 -->|"LEE"| t7
-  o42 -->|"CREA"| t29
-  o42 -->|"LEE"| t29
-  o42 -->|"ACTUALIZA"| t43
-  o42 -->|"CREA"| t43
-  o42 -.-> t44
-  a46 --> o45
-  o45 -->|"LEE"| t19
-  o45 -->|"LEE"| t17
-  a12 --> o47
-  o47 -->|"LEE"| t17
-  o47 -->|"LEE"| t48
-  o47 -->|"LEE"| t49
-  a12 --> o50
-  o50 -->|"LEE"| t17
-  o50 -->|"CREA"| t48
-  o50 -->|"LEE"| t48
-  o50 -->|"CREA"| t49
-  o50 -->|"LEE"| t49
-  a2 --> o51
-  o51 -->|"LEE"| t52
-  o51 -->|"LEE"| t26
+  a12 --> o44
+  o44 -->|"ACTUALIZA"| t4
+  o44 -->|"CREA"| t4
+  o44 -->|"LEE"| t4
+  o44 -->|"ACTUALIZA"| t36
+  o44 -->|"LEE"| t36
+  o44 -->|"CREA"| t37
+  o44 -.-> t45
+  a12 --> o46
+  o46 -->|"CREA"| t7
+  o46 -->|"LEE"| t7
+  o46 -->|"CREA"| t29
+  o46 -->|"LEE"| t29
+  o46 -->|"ACTUALIZA"| t47
+  o46 -->|"CREA"| t47
+  o46 -.-> t48
+  a50 --> o49
+  o49 -->|"LEE"| t19
+  o49 -->|"LEE"| t17
+  a12 --> o51
   o51 -->|"LEE"| t17
+  o51 -->|"LEE"| t52
   o51 -->|"LEE"| t53
-  a21 --> o54
-  o54 -->|"LEE"| t23
-  o54 -->|"LEE"| t24
-  o54 -->|"LEE"| t25
-  o54 -->|"LEE"| t36
-  o54 -->|"ACTUALIZA"| t19
-  o54 -->|"LEE"| t19
-  o54 -.-> t55
-  a12 --> o56
-  o56 -->|"LEE"| t36
-  o56 -->|"BORRA"| t19
-  o56 -->|"LEE"| t19
-  o56 -->|"LEE"| t57
-  o56 -->|"LEE"| t17
-  o56 -->|"ACTUALIZA"| t49
-  o56 -.-> t58
-  a12 --> o59
-  o59 -->|"LEE"| t17
-  o59 -->|"BORRA"| t48
-  o59 -->|"CREA"| t48
-  o59 -->|"LEE"| t48
-  o59 -->|"ACTUALIZA"| t49
-  o59 -->|"LEE"| t49
+  a12 --> o54
+  o54 -->|"LEE"| t17
+  o54 -->|"CREA"| t52
+  o54 -->|"LEE"| t52
+  o54 -->|"CREA"| t53
+  o54 -->|"LEE"| t53
+  a2 --> o55
+  o55 -->|"LEE"| t56
+  o55 -->|"LEE"| t26
+  o55 -->|"LEE"| t17
+  o55 -->|"LEE"| t57
+  a21 --> o58
+  o58 -->|"LEE"| t23
+  o58 -->|"LEE"| t24
+  o58 -->|"LEE"| t25
+  o58 -->|"LEE"| t43
+  o58 -->|"ACTUALIZA"| t19
+  o58 -->|"LEE"| t19
+  o58 -.-> t59
   a12 --> o60
+  o60 -->|"ACTUALIZA"| t4
+  o60 -->|"CREA"| t4
+  o60 -->|"LEE"| t4
+  o60 -->|"ACTUALIZA"| t36
   o60 -->|"LEE"| t36
-  o60 -->|"LEE"| t16
-  o60 -->|"CREA"| t19
-  o60 -->|"LEE"| t19
-  o60 -->|"LEE"| t17
-  o60 -->|"LEE"| t48
+  o60 -->|"CREA"| t37
   o60 -.-> t61
   a12 --> o62
   o62 -->|"LEE"| t17
-  o62 -->|"ACTUALIZA"| t49
-  o62 -->|"LEE"| t49
-  a46 --> o63
-  o63 -->|"LEE"| t23
-  o63 -->|"LEE"| t24
-  o63 -->|"LEE"| t25
-  o63 -->|"LEE"| t52
-  o63 -->|"LEE"| t26
+  o62 -->|"BORRA"| t52
+  o62 -->|"CREA"| t52
+  o62 -->|"LEE"| t52
+  o62 -->|"ACTUALIZA"| t53
+  o62 -->|"LEE"| t53
+  a12 --> o63
+  o63 -->|"LEE"| t43
+  o63 -->|"LEE"| t16
+  o63 -->|"CREA"| t19
+  o63 -->|"LEE"| t19
   o63 -->|"LEE"| t17
+  o63 -->|"LEE"| t52
   o63 -.-> t64
-  a21 --> o65
-  o65 -->|"LEE"| t23
-  o65 -->|"LEE"| t24
-  o65 -->|"LEE"| t25
-  o65 -->|"CREA"| t53
+  a12 --> o65
+  o65 -->|"LEE"| t56
+  o65 -->|"LEE"| t26
+  o65 -->|"LEE"| t43
+  o65 -->|"LEE"| t19
+  o65 -->|"LEE"| t17
+  o65 -->|"LEE"| t53
+  a12 --> o66
+  o66 -->|"LEE"| t17
+  o66 -->|"ACTUALIZA"| t53
+  o66 -->|"LEE"| t53
+  a50 --> o67
+  o67 -->|"LEE"| t23
+  o67 -->|"LEE"| t24
+  o67 -->|"LEE"| t25
+  o67 -->|"LEE"| t56
+  o67 -->|"LEE"| t26
+  o67 -->|"LEE"| t17
+  o67 -.-> t68
+  a21 --> o69
+  o69 -->|"LEE"| t23
+  o69 -->|"LEE"| t24
+  o69 -->|"LEE"| t25
+  o69 -->|"CREA"| t57
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 3 de 3 — etapas `ctrl:SchedulingInternalController`, `ctrl:SchedulingServiceOfferingsController`, `ctrl:TenantAgendaController`
+### Diagrama 3 de 3 — etapas `ctrl:SchedulingFlexibleController`, `ctrl:SchedulingInternalController`, `ctrl:SchedulingServiceOfferingsController`…
 
 ```mermaid
 flowchart LR
-  a2(["SYSTEM · SYSTEM_WORKER"]):::actor
-  a19(["PATIENT · PRACTITIONER · CLINICIAN · SCHEDULING_ADMIN · SCH…"]):::actor
-  a25(["PRACTITIONER · CLINICIAN · SCHEDULING_ADMIN"]):::actor
-  a29(["PATIENT · SCHEDULING_ADMIN · SCHEDULING_AGENT"]):::actor
-  a37(["Cualquier sesión válida"]):::actor
-  t3[("community.conversation_participants")]:::tabla
-  t4[("community.conversations")]:::tabla
-  t5[("community.public_profiles")]:::tabla
-  t8[("scheduling.appointment_bookings")]:::tabla
-  t9[("scheduling.availability_exceptions")]:::tabla
-  t10[("scheduling.bookable_slots")]:::tabla
-  t11[("scheduling.practitioner_service_offerings")]:::tabla
-  t12[("scheduling.schedulable_resources")]:::tabla
-  t17[("scheduling.waitlist_entries")]:::tabla
-  t20[("billing.service_catalog")]:::tabla
-  t21[("scheduling.booking_policies")]:::tabla
-  t26[("practice.practitioner_role_assignments")]:::tabla
-  t30[("practice.practice_sites")]:::tabla
-  t31[("practice.practices")]:::tabla
-  t32[("profiles.patient_portal_proxies")]:::tabla
-  t33[("profiles.patient_profiles")]:::tabla
-  t34[("profiles.person_account_links")]:::tabla
-  t38[("directory.tenant_memberships")]:::tabla
-  t39[("profiles.persons")]:::tabla
-  t6[("+25 tablas más")]
-  t13[("+2 tablas más")]
-  t15[("+23 tablas más")]
-  subgraph s0["ctrl:SchedulingInternalController · Operaciones de SchedulingInternalController…"]
-    o1["POST /scheduling/internal/dispatch-reminders"]:::op
-    o7["POST /scheduling/internal/expire-holds"]:::op
-    o14["POST /scheduling/internal/promote-waitlist/{slotId}"]:::op
-    o16["GET /scheduling/internal/waitlist-candidates"]:::op
+  a2(["PATIENT · PRACTITIONER · CLINICIAN · SCHEDULING_ADMIN · SCH…"]):::actor
+  a11(["PATIENT · SCHEDULING_ADMIN · SCHEDULING_AGENT"]):::actor
+  a20(["SYSTEM · SYSTEM_WORKER"]):::actor
+  a36(["PRACTITIONER · CLINICIAN · SCHEDULING_ADMIN"]):::actor
+  a42(["Cualquier sesión válida"]):::actor
+  t3[("scheduling.appointment_bookings")]:::tabla
+  t4[("scheduling.availability_exceptions")]:::tabla
+  t5[("scheduling.bookable_slots")]:::tabla
+  t6[("scheduling.booking_policies")]:::tabla
+  t7[("scheduling.practitioner_service_offerings")]:::tabla
+  t8[("scheduling.schedulable_resources")]:::tabla
+  t12[("practice.practice_sites")]:::tabla
+  t13[("practice.practices")]:::tabla
+  t14[("profiles.patient_portal_proxies")]:::tabla
+  t15[("profiles.patient_profiles")]:::tabla
+  t16[("profiles.person_account_links")]:::tabla
+  t17[("profiles.practitioner_affiliations")]:::tabla
+  t21[("community.conversation_participants")]:::tabla
+  t22[("community.conversations")]:::tabla
+  t23[("community.public_profiles")]:::tabla
+  t30[("scheduling.waitlist_entries")]:::tabla
+  t32[("billing.service_catalog")]:::tabla
+  t37[("practice.practitioner_role_assignments")]:::tabla
+  t43[("directory.tenant_memberships")]:::tabla
+  t44[("profiles.persons")]:::tabla
+  t9[("+3 tablas más")]
+  t18[("+11 tablas más")]
+  subgraph s0["ctrl:SchedulingFlexibleController · Operaciones de SchedulingFlexibleController…"]
+    o1["GET /scheduling/resources/{id}/flexible-availability"]:::op
+    o10["POST /scheduling/resources/{id}/flexible-holds"]:::op
   end
-  t22[("+4 tablas más")]
-  t35[("+13 tablas más")]
-  subgraph s1["ctrl:SchedulingServiceOfferingsController · Operaciones de SchedulingServiceOff…"]
-    o18["GET /scheduling/service-availability"]:::op
-    o23["GET /scheduling/service-offerings"]:::op
-    o24["POST /scheduling/service-offerings"]:::op
-    o27["PATCH /scheduling/service-offerings/{id}"]:::op
-    o28["POST /scheduling/service-offerings/{id}/holds"]:::op
+  t24[("+27 tablas más")]
+  t26[("+4 tablas más")]
+  t28[("+25 tablas más")]
+  subgraph s1["ctrl:SchedulingInternalController · Operaciones de SchedulingInternalController…"]
+    o19["POST /scheduling/internal/dispatch-reminders"]:::op
+    o25["POST /scheduling/internal/expire-holds"]:::op
+    o27["POST /scheduling/internal/promote-waitlist/{slotId}"]:::op
+    o29["GET /scheduling/internal/waitlist-candidates"]:::op
   end
-  subgraph s2["ctrl:TenantAgendaController · Operaciones de TenantAgendaController que el READ…"]
-    o36["GET /tenants/{tenantId}/agenda"]:::op
+  t33[("+4 tablas más")]
+  t40[("+13 tablas más")]
+  subgraph s2["ctrl:SchedulingServiceOfferingsController · Operaciones de SchedulingServiceOff…"]
+    o31["GET /scheduling/service-availability"]:::op
+    o34["GET /scheduling/service-offerings"]:::op
+    o35["POST /scheduling/service-offerings"]:::op
+    o38["PATCH /scheduling/service-offerings/{id}"]:::op
+    o39["POST /scheduling/service-offerings/{id}/holds"]:::op
+  end
+  subgraph s3["ctrl:TenantAgendaController · Operaciones de TenantAgendaController que el READ…"]
+    o41["GET /tenants/{tenantId}/agenda"]:::op
   end
   a2 --> o1
-  o1 -->|"CREA"| t3
   o1 -->|"LEE"| t3
-  o1 -->|"CREA"| t4
   o1 -->|"LEE"| t4
-  o1 -->|"ACTUALIZA"| t5
-  o1 -->|"CREA"| t5
-  o1 -.-> t6
-  a2 --> o7
-  o7 -->|"LEE"| t8
-  o7 -->|"LEE"| t9
-  o7 -->|"ACTUALIZA"| t10
-  o7 -->|"LEE"| t10
-  o7 -->|"LEE"| t11
-  o7 -->|"LEE"| t12
-  o7 -.-> t13
-  a2 --> o14
-  o14 -->|"CREA"| t3
-  o14 -->|"LEE"| t3
-  o14 -->|"CREA"| t4
-  o14 -->|"LEE"| t4
-  o14 -->|"ACTUALIZA"| t5
-  o14 -->|"CREA"| t5
-  o14 -.-> t15
-  a2 --> o16
-  o16 -->|"LEE"| t10
-  o16 -->|"LEE"| t17
-  a19 --> o18
-  o18 -->|"LEE"| t20
-  o18 -->|"LEE"| t8
-  o18 -->|"LEE"| t9
-  o18 -->|"LEE"| t10
-  o18 -->|"LEE"| t21
-  o18 -->|"LEE"| t11
-  o18 -.-> t22
-  a19 --> o23
-  o23 -->|"LEE"| t20
-  o23 -->|"LEE"| t11
-  a25 --> o24
-  o24 -->|"LEE"| t20
-  o24 -->|"LEE"| t26
-  o24 -->|"CREA"| t11
-  o24 -->|"LEE"| t11
-  a25 --> o27
-  o27 -->|"LEE"| t20
-  o27 -->|"ACTUALIZA"| t11
-  o27 -->|"LEE"| t11
-  a29 --> o28
-  o28 -->|"LEE"| t20
-  o28 -->|"LEE"| t30
-  o28 -->|"LEE"| t31
-  o28 -->|"LEE"| t32
-  o28 -->|"LEE"| t33
-  o28 -->|"LEE"| t34
-  o28 -.-> t35
-  a37 --> o36
-  o36 -->|"LEE"| t38
-  o36 -->|"LEE"| t39
-  o36 -->|"LEE"| t8
-  o36 -->|"LEE"| t10
-  o36 -->|"LEE"| t12
+  o1 -->|"LEE"| t5
+  o1 -->|"LEE"| t6
+  o1 -->|"LEE"| t7
+  o1 -->|"LEE"| t8
+  o1 -.-> t9
+  a11 --> o10
+  o10 -->|"LEE"| t12
+  o10 -->|"LEE"| t13
+  o10 -->|"LEE"| t14
+  o10 -->|"LEE"| t15
+  o10 -->|"LEE"| t16
+  o10 -->|"LEE"| t17
+  o10 -.-> t18
+  a20 --> o19
+  o19 -->|"CREA"| t21
+  o19 -->|"LEE"| t21
+  o19 -->|"CREA"| t22
+  o19 -->|"LEE"| t22
+  o19 -->|"ACTUALIZA"| t23
+  o19 -->|"CREA"| t23
+  o19 -.-> t24
+  a20 --> o25
+  o25 -->|"LEE"| t3
+  o25 -->|"LEE"| t4
+  o25 -->|"ACTUALIZA"| t5
+  o25 -->|"LEE"| t5
+  o25 -->|"LEE"| t7
+  o25 -->|"LEE"| t8
+  o25 -.-> t26
+  a20 --> o27
+  o27 -->|"CREA"| t21
+  o27 -->|"LEE"| t21
+  o27 -->|"CREA"| t22
+  o27 -->|"LEE"| t22
+  o27 -->|"ACTUALIZA"| t23
+  o27 -->|"CREA"| t23
+  o27 -.-> t28
+  a20 --> o29
+  o29 -->|"LEE"| t5
+  o29 -->|"LEE"| t30
+  a2 --> o31
+  o31 -->|"LEE"| t32
+  o31 -->|"LEE"| t3
+  o31 -->|"LEE"| t4
+  o31 -->|"LEE"| t5
+  o31 -->|"LEE"| t6
+  o31 -->|"LEE"| t7
+  o31 -.-> t33
+  a2 --> o34
+  o34 -->|"LEE"| t32
+  o34 -->|"LEE"| t7
+  a36 --> o35
+  o35 -->|"LEE"| t32
+  o35 -->|"LEE"| t37
+  o35 -->|"CREA"| t7
+  o35 -->|"LEE"| t7
+  a36 --> o38
+  o38 -->|"LEE"| t32
+  o38 -->|"ACTUALIZA"| t7
+  o38 -->|"LEE"| t7
+  a11 --> o39
+  o39 -->|"LEE"| t32
+  o39 -->|"LEE"| t12
+  o39 -->|"LEE"| t13
+  o39 -->|"LEE"| t14
+  o39 -->|"LEE"| t15
+  o39 -->|"LEE"| t16
+  o39 -.-> t40
+  a42 --> o41
+  o41 -->|"LEE"| t43
+  o41 -->|"LEE"| t44
+  o41 -->|"LEE"| t3
+  o41 -->|"LEE"| t5
+  o41 -->|"LEE"| t8
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -669,10 +766,10 @@ _Fuente: `docs/business/critical-workflows.md:51`_
 | `P1` | `POST /scheduling/slots/:id/holds` — toma un slot con `SELECT ... FOR UPDATE`, decrementa `remaining_capacity` (nunca baja de cero). | POST /scheduling/slots/{id}/holds | SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT | MEDIO | 9 |
 | `P2` | `POST /scheduling/holds/:holdToken/confirm` — dentro del TTL del hold (`hold_ttl_seconds`, 300s por defecto), confirma → `appointment_bookings` en estado `confirmed` + se programan recordatorios. | POST /scheduling/holds/{holdToken}/confirm | SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT | MEDIO | 18 |
 | `P3` | `POST /scheduling/bookings/:id/check-in` — el día de la cita, pasa a `checked_in`. | POST /scheduling/bookings/{id}/check-in | SCHEDULING_ADMIN · SCHEDULING_AGENT | MEDIO | 5 |
-| `A1` | **Reprogramar** (`POST /scheduling/bookings/:id/reschedule`): libera el cupo de origen, toma el de destino. | POST /scheduling/bookings/{id}/reschedule | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | MEDIO | 38 |
-| `A2` | **Cancelar** (`POST /scheduling/bookings/:id/cancel`): libera el cupo; cobra cargo por inasistencia solo si la política define `no_show_fee_amount` **y** se marca como no-show — una cancelación avisada nunca se cobra. | POST /scheduling/bookings/{id}/cancel | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | MEDIO | 43 |
-| `A3` | **Hold vencido**: `POST /scheduling/internal/expire-holds` (worker) recicla el cupo. Un hold vencido no se puede confirmar aunque el worker aún no haya corrido. | POST /scheduling/internal/expire-holds | SYSTEM · SYSTEM_WORKER | MEDIO | 8 |
-| `A4` | **Excepción de disponibilidad** (`POST /scheduling/resources/:id/exceptions`): bloquea slots libres solapados — **no cancela** citas ya confirmadas (decisión clínica explícita, no efecto colateral automático). | POST /scheduling/resources/{id}/exceptions | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 5 |
+| `A1` | **Reprogramar** (`POST /scheduling/bookings/:id/reschedule`): libera el cupo de origen, toma el de destino. | POST /scheduling/bookings/{id}/reschedule | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | MEDIO | 42 |
+| `A2` | **Cancelar** (`POST /scheduling/bookings/:id/cancel`): libera el cupo; cobra cargo por inasistencia solo si la política define `no_show_fee_amount` **y** se marca como no-show — una cancelación avisada nunca se cobra. | POST /scheduling/bookings/{id}/cancel | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | MEDIO | 47 |
+| `A3` | **Hold vencido**: `POST /scheduling/internal/expire-holds` (worker) recicla el cupo. Un hold vencido no se puede confirmar aunque el worker aún no haya corrido. | POST /scheduling/internal/expire-holds | SYSTEM · SYSTEM_WORKER | MEDIO | 10 |
+| `A4` | **Excepción de disponibilidad** (`POST /scheduling/resources/:id/exceptions`): bloquea slots libres solapados — **no cancela** citas ya confirmadas (decisión clínica explícita, no efecto colateral automático). | POST /scheduling/resources/{id}/exceptions | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 32 |
 | `A5` | **Lista de espera**: `POST /scheduling/waitlist` inscribe; el worker (`promote-waitlist`) marca candidatos cuando hay cupo, pero **no reserva por ellos** — el paciente confirma por el flujo normal. | POST /scheduling/waitlist | SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT | MEDIO | 4 |
 
 ### Diagrama — etapas `P1`, `P2`, `P3`…
@@ -698,7 +795,9 @@ flowchart LR
   t26[("scheduling.availability_exceptions")]:::tabla
   t27[("scheduling.practitioner_service_offerings")]:::tabla
   t28[("scheduling.schedulable_resources")]:::tabla
-  t33[("scheduling.waitlist_entries")]:::tabla
+  t32[("iam.devices")]:::tabla
+  t33[("messaging.in_app_notifications")]:::tabla
+  t36[("scheduling.waitlist_entries")]:::tabla
   t8[("+3 tablas más")]
   subgraph s0["P1 · `POST /scheduling/slots/:id/holds` — toma un slot con `SELECT ... FOR UPDA…"]
     o1["POST /scheduling/slots/{id}/holds"]:::op
@@ -710,23 +809,24 @@ flowchart LR
   subgraph s2["P3 · `POST /scheduling/bookings/:id/check-in` — el día de la cita, pasa a `chec…"]
     o14["POST /scheduling/bookings/{id}/check-in"]:::op
   end
-  t21[("+32 tablas más")]
+  t21[("+36 tablas más")]
   subgraph s3["A1 · **Reprogramar** (`POST /scheduling/bookings/:id/reschedule`): libera el cu…"]
     o17["POST /scheduling/bookings/{id}/reschedule"]:::op
   end
-  t23[("+37 tablas más")]
+  t23[("+41 tablas más")]
   subgraph s4["A2 · **Cancelar** (`POST /scheduling/bookings/:id/cancel`): libera el cupo; cob…"]
     o22["POST /scheduling/bookings/{id}/cancel"]:::op
   end
-  t29[("+2 tablas más")]
+  t29[("+4 tablas más")]
   subgraph s5["A3 · **Hold vencido**: `POST /scheduling/internal/expire-holds` (worker) recicl…"]
     o24["POST /scheduling/internal/expire-holds"]:::op
   end
+  t34[("+26 tablas más")]
   subgraph s6["A4 · **Excepción de disponibilidad** (`POST /scheduling/resources/:id/exception…"]
     o30["POST /scheduling/resources/{id}/exceptions"]:::op
   end
   subgraph s7["A5 · **Lista de espera**: `POST /scheduling/waitlist` inscribe; el worker (`pro…"]
-    o32["POST /scheduling/waitlist"]:::op
+    o35["POST /scheduling/waitlist"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -777,16 +877,18 @@ flowchart LR
   o24 -->|"LEE"| t28
   o24 -.-> t29
   a31 --> o30
-  o30 -->|"LEE"| t6
-  o30 -->|"CREA"| t26
-  o30 -->|"ACTUALIZA"| t7
-  o30 -->|"LEE"| t7
-  o30 -->|"LEE"| t28
-  a2 --> o32
-  o32 -->|"LEE"| t3
-  o32 -->|"LEE"| t4
-  o32 -->|"LEE"| t5
-  o32 -->|"CREA"| t33
+  o30 -->|"ACTUALIZA"| t16
+  o30 -->|"CREA"| t16
+  o30 -->|"LEE"| t16
+  o30 -->|"ACTUALIZA"| t32
+  o30 -->|"LEE"| t32
+  o30 -->|"CREA"| t33
+  o30 -.-> t34
+  a2 --> o35
+  o35 -->|"LEE"| t3
+  o35 -->|"LEE"| t4
+  o35 -->|"LEE"| t5
+  o35 -->|"CREA"| t36
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -802,19 +904,19 @@ Declarada en `src/modules/scheduling/domain/booking/booking-state-machine.ts:33`
 ```mermaid
 stateDiagram-v2
   [*] --> BOOKING_REQUESTED
-  BOOKING_REQUESTED --> BOOKING_PENDING_CONFIRMATION
-  BOOKING_REQUESTED --> BOOKING_CONFIRMED
-  BOOKING_REQUESTED --> BOOKING_CANCELLED
-  BOOKING_PENDING_CONFIRMATION --> BOOKING_CONFIRMED
-  BOOKING_PENDING_CONFIRMATION --> BOOKING_CANCELLED
-  BOOKING_CONFIRMED --> BOOKING_CHECKED_IN
-  BOOKING_CONFIRMED --> BOOKING_IN_PROGRESS
-  BOOKING_CONFIRMED --> BOOKING_CANCELLED
+  BOOKING_REQUESTED --> BOOKING_PENDING_CONFIRMATION : POST …/{id}/propose-schedule, POST …/{id}/request-info
+  BOOKING_REQUESTED --> BOOKING_CONFIRMED : POST …/{id}/accept
+  BOOKING_REQUESTED --> BOOKING_CANCELLED : POST …/{id}/cancel, POST …/{id}/reject, POST …/{id}/close-slots +2
+  BOOKING_PENDING_CONFIRMATION --> BOOKING_CONFIRMED : POST …/{id}/accept
+  BOOKING_PENDING_CONFIRMATION --> BOOKING_CANCELLED : POST …/{id}/cancel, POST …/{id}/reject, POST …/{id}/close-slots +2
+  BOOKING_CONFIRMED --> BOOKING_CHECKED_IN : POST …/{id}/check-in
+  BOOKING_CONFIRMED --> BOOKING_IN_PROGRESS : POST …/appointments/walk-in, POST …/{id}/start
+  BOOKING_CONFIRMED --> BOOKING_CANCELLED : POST …/{id}/cancel, POST …/{id}/reject, POST …/{id}/close-slots +2
   BOOKING_CONFIRMED --> BOOKING_NO_SHOW
-  BOOKING_CHECKED_IN --> BOOKING_IN_PROGRESS
-  BOOKING_CHECKED_IN --> BOOKING_CANCELLED
+  BOOKING_CHECKED_IN --> BOOKING_IN_PROGRESS : POST …/appointments/walk-in, POST …/{id}/start
+  BOOKING_CHECKED_IN --> BOOKING_CANCELLED : POST …/{id}/cancel, POST …/{id}/reject, POST …/{id}/close-slots +2
   BOOKING_CHECKED_IN --> BOOKING_NO_SHOW
-  BOOKING_IN_PROGRESS --> BOOKING_COMPLETED
+  BOOKING_IN_PROGRESS --> BOOKING_COMPLETED : POST …/{id}/complete
   BOOKING_CANCELLED --> [*]
   BOOKING_NO_SHOW --> [*]
   BOOKING_COMPLETED --> [*]
@@ -824,15 +926,18 @@ stateDiagram-v2
 
 | Operación | Estados de destino que nombra | A través de |
 |---|---|---|
-| POST /scheduling/appointments/walk-in | sin destino nombrado | BookingTransitionRecorder.assertTransition |
-| POST /scheduling/bookings/{id}/accept | sin destino nombrado | BookingTransitionRecorder.assertTransition |
-| POST /scheduling/bookings/{id}/cancel | sin destino nombrado | BookingTransitionRecorder.assertTransition |
-| POST /scheduling/bookings/{id}/check-in | sin destino nombrado | BookingTransitionRecorder.assertTransition |
-| POST /scheduling/bookings/{id}/complete | sin destino nombrado | BookingTransitionRecorder.assertTransition |
-| POST /scheduling/bookings/{id}/propose-schedule | sin destino nombrado | BookingTransitionRecorder.assertTransition |
-| POST /scheduling/bookings/{id}/reject | sin destino nombrado | BookingTransitionRecorder.assertTransition |
-| POST /scheduling/bookings/{id}/request-info | sin destino nombrado | BookingTransitionRecorder.assertTransition |
-| POST /scheduling/bookings/{id}/start | sin destino nombrado | BookingTransitionRecorder.assertTransition |
+| POST /scheduling/appointments/walk-in | BOOKING_IN_PROGRESS | StartAppointmentUseCase.executeInTransaction → BookingTransitionRecorder.assertTransition |
+| POST /scheduling/bookings/{id}/accept | BOOKING_CONFIRMED | AcceptBookingUseCase.execute → BookingTransitionRecorder.assertTransition |
+| POST /scheduling/bookings/{id}/cancel | BOOKING_CANCELLED | CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.assertTransition |
+| POST /scheduling/bookings/{id}/check-in | BOOKING_CHECKED_IN | CheckInBookingUseCase.execute → BookingTransitionRecorder.assertTransition |
+| POST /scheduling/bookings/{id}/complete | BOOKING_COMPLETED | CompleteAppointmentUseCase.execute → BookingTransitionRecorder.assertTransition |
+| POST /scheduling/bookings/{id}/propose-schedule | BOOKING_PENDING_CONFIRMATION | ProposeScheduleUseCase.execute → BookingTransitionRecorder.assertTransition |
+| POST /scheduling/bookings/{id}/reject | BOOKING_CANCELLED | CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.assertTransition |
+| POST /scheduling/bookings/{id}/request-info | BOOKING_PENDING_CONFIRMATION | RequestBookingInfoUseCase.execute → BookingTransitionRecorder.assertTransition |
+| POST /scheduling/bookings/{id}/start | BOOKING_IN_PROGRESS | StartAppointmentUseCase.execute → BookingTransitionRecorder.assertTransition |
+| POST /scheduling/resources/{id}/close-slots | BOOKING_CANCELLED | CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.assertTransition |
+| POST /scheduling/resources/{id}/exceptions | BOOKING_CANCELLED | CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.assertTransition |
+| DELETE /scheduling/templates/{id} | BOOKING_CANCELLED | CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.assertTransition |
 
 ## Árbol de decisión por operación
 
@@ -852,7 +957,7 @@ Asignar una cita puntual a un paciente (nace confirmada)
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La agenda indicada pertenece a otra organización.; ForbiddenException: Un profesional solo puede asignar citas en su propia agenda.; ForbiddenException: La reconsulta se agenda en su propia agenda, no en la de otro profesional. |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Recurso no encontrado; ResourceNotFoundException: La cita de la que sale esta reconsulta no existe; ResourceNotFoundException: Paciente no encontrado |
 | 409 | `CONFLICT` | ConflictException: Esta consulta ya tiene una reconsulta agendada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La reconsulta es para el paciente de la cita de origen; PreconditionFailedException: Una reconsulta se agenda para más adelante; PreconditionFailedException: Su vínculo con esta organización todavía está pendiente de aprobación, así que todavía no puede comprometer citas suyas. / Su vínculo con esta organización ya…; PreconditionFailedException: El profesional ya tiene {who} de {localTime( first.startAt, fir…} a {localTime( first.endAt, first…}{first.resourceName ? ` en «${…}. No puede estar en dos lug…; PreconditionFailedException: El paciente ya tiene una cita confirmada en ese rato{clash.resourceName ? ` en «${…}. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Ese horario no atiende por telemedicina. Habilítela en la franja de su horario de atención o elija otra modalidad.; PreconditionFailedException: La reconsulta es para el paciente de la cita de origen; PreconditionFailedException: Una reconsulta se agenda para más adelante; PreconditionFailedException: Su vínculo con esta organización todavía está pendiente de aprobación, así que todavía no puede comprometer citas suyas. / Su vínculo con esta organización ya…; PreconditionFailedException: El profesional ya tiene {who} de {localTime( first.startAt, fir…} a {localTime( first.endAt, first…}{first.resourceName ? ` en «${…}. No puede estar en dos lug…; PreconditionFailedException: El paciente ya tiene una cita confirmada en ese rato{clash.resourceName ? ` en «${…}. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -884,92 +989,101 @@ flowchart TD
   n11 -->|"no"| n13
   n14(["403 FORBIDDEN Un profesional solo puede asignar citas en su propia agenda."]):::error
   n13 -->|"sí"| n14
-  n15["Llama a CreateDirectAppointmentUseCase.validateFollowUp"]:::llamada
+  n15{"dto.channel === 'TELECONSULTA'"}:::decision
   n13 -->|"no"| n15
-  n16{"!isOwnAgenda"}:::decision
-  n15 --> n16
-  n17(["403 FORBIDDEN La reconsulta se agenda en su propia agenda, no en la de otro profesional."]):::error
-  n16 -->|"sí"| n17
-  n18{"!originBooking"}:::decision
-  n16 -->|"no"| n18
-  n19(["404 NOT_FOUND La cita de la que sale esta reconsulta no existe"]):::error
-  n18 -->|"sí"| n19
-  n20{"originBooking.patientProfileId !== dto.patientProfileId"}:::decision
-  n18 -->|"no"| n20
-  n21(["422 PRECONDITION_FAILED La reconsulta es para el paciente de la cita de origen"]):::error
+  n16["Llama a CreateDirectAppointmentUseCase.assertTelemedicineEnabled"]:::llamada
+  n15 -->|"sí"| n16
+  n17{"!startsInTelemedicineBand(startAt, bands, resource.timeZone ?? 'UTC')"}:::decision
+  n16 --> n17
+  n18(["422 PRECONDITION_FAILED Ese horario no atiende por telemedicina. Habilítela en la franja de su horario de ate…"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a CreateDirectAppointmentUseCase.validateFollowUp"]:::llamada
+  n17 -->|"no"| n19
+  n15 -->|"no"| n19
+  n20{"!isOwnAgenda"}:::decision
+  n19 --> n20
+  n21(["403 FORBIDDEN La reconsulta se agenda en su propia agenda, no en la de otro profesional."]):::error
   n20 -->|"sí"| n21
-  n22{"startAt.getTime() ‹= now.getTime()"}:::decision
+  n22{"!originBooking"}:::decision
   n20 -->|"no"| n22
-  n23(["422 PRECONDITION_FAILED Una reconsulta se agenda para más adelante"]):::error
+  n23(["404 NOT_FOUND La cita de la que sale esta reconsulta no existe"]):::error
   n22 -->|"sí"| n23
-  n24{"upcoming"}:::decision
+  n24{"originBooking.patientProfileId !== dto.patientProfileId"}:::decision
   n22 -->|"no"| n24
-  n25(["409 CONFLICT Esta consulta ya tiene una reconsulta agendada"]):::error
+  n25(["422 PRECONDITION_FAILED La reconsulta es para el paciente de la cita de origen"]):::error
   n24 -->|"sí"| n25
-  n26["Llama a BookingAccess.assertAffiliationCurrent"]:::llamada
+  n26{"startAt.getTime() ‹= now.getTime()"}:::decision
   n24 -->|"no"| n26
-  n27(["422 PRECONDITION_FAILED Su vínculo con esta organización todavía está pendiente de aprobación, así que todaví…"]):::error
-  n26 --> n27
-  n28["Llama a SchedulingBookingsRepository.findPatientNames"]:::llamada
-  n29[("LEE profiles.patient_profiles · LEE profiles.persons")]:::efecto
-  n28 --> n29
-  n30{"!names.has(dto.patientProfileId)"}:::decision
-  n29 --> n30
-  n31(["404 NOT_FOUND Paciente no encontrado"]):::error
-  n30 -->|"sí"| n31
-  n32{"PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)"}:::decision
-  n30 -->|"no"| n32
-  n33["Llama a SchedulingProfessionalTimeService.assertRangeFree"]:::llamada
-  n32 -->|"sí"| n33
-  n34(["422 PRECONDITION_FAILED El profesional ya tiene {who} de {localTime( first.startAt, fir…} a {localTime( first…"]):::error
+  n27(["422 PRECONDITION_FAILED Una reconsulta se agenda para más adelante"]):::error
+  n26 -->|"sí"| n27
+  n28{"upcoming"}:::decision
+  n26 -->|"no"| n28
+  n29(["409 CONFLICT Esta consulta ya tiene una reconsulta agendada"]):::error
+  n28 -->|"sí"| n29
+  n30["Llama a BookingAccess.assertAffiliationCurrent"]:::llamada
+  n28 -->|"no"| n30
+  n31(["422 PRECONDITION_FAILED Su vínculo con esta organización todavía está pendiente de aprobación, así que todaví…"]):::error
+  n30 --> n31
+  n32["Llama a SchedulingBookingsRepository.findPatientNames"]:::llamada
+  n33[("LEE profiles.patient_profiles · LEE profiles.persons")]:::efecto
+  n32 --> n33
+  n34{"!names.has(dto.patientProfileId)"}:::decision
   n33 --> n34
-  n35["Llama a SchedulingBookingsRepository.findPatientBookingsOverlapping"]:::llamada
-  n32 -->|"no"| n35
-  n36[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots · LEE scheduling.schedulable_resources")]:::efecto
-  n35 --> n36
-  n37{"alreadyCommitted.length › 0"}:::decision
-  n36 --> n37
-  n38(["422 PRECONDITION_FAILED El paciente ya tiene una cita confirmada en ese rato{clash.resourceName ? ` en «${…}."]):::error
-  n37 -->|"sí"| n38
-  n39{"PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)"}:::decision
-  n37 -->|"no"| n39
-  n40["Llama a SchedulingCatalogRepository.findOpenSlotsOfProfessionalInWindow"]:::llamada
-  n39 -->|"sí"| n40
-  n41[("LEE scheduling.schedulable_resources · LEE scheduling.bookable_slots")]:::efecto
+  n35(["404 NOT_FOUND Paciente no encontrado"]):::error
+  n34 -->|"sí"| n35
+  n36{"PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)"}:::decision
+  n34 -->|"no"| n36
+  n37["Llama a SchedulingProfessionalTimeService.assertRangeFree"]:::llamada
+  n36 -->|"sí"| n37
+  n38(["422 PRECONDITION_FAILED El profesional ya tiene {who} de {localTime( first.startAt, fir…} a {localTime( first…"]):::error
+  n37 --> n38
+  n39["Llama a SchedulingBookingsRepository.findPatientBookingsOverlapping"]:::llamada
+  n36 -->|"no"| n39
+  n40[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots · LEE scheduling.schedulable_resources")]:::efecto
+  n39 --> n40
+  n41{"alreadyCommitted.length › 0"}:::decision
   n40 --> n41
-  n42["Repite: por cada const free de freeOnes"]:::bucle
-  n41 --> n42
-  n43[("ACTUALIZA scheduling.bookable_slots")]:::efecto
-  n42 -->|"cada elemento"| n43
-  n44["Llama a SchedulingCatalogRepository.createSlot"]:::llamada
-  n43 --> n44
-  n42 -->|"al terminar"| n44
-  n39 -->|"no"| n44
-  n45[("CREA scheduling.bookable_slots")]:::efecto
+  n42(["422 PRECONDITION_FAILED El paciente ya tiene una cita confirmada en ese rato{clash.resourceName ? ` en «${…}."]):::error
+  n41 -->|"sí"| n42
+  n43{"PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)"}:::decision
+  n41 -->|"no"| n43
+  n44["Llama a SchedulingCatalogRepository.findOpenSlotsOfProfessionalInWindow"]:::llamada
+  n43 -->|"sí"| n44
+  n45[("LEE scheduling.schedulable_resources · LEE scheduling.bookable_slots")]:::efecto
   n44 --> n45
-  n46["Llama a SchedulingBookingsRepository.createBooking"]:::llamada
+  n46["Repite: por cada const free de freeOnes"]:::bucle
   n45 --> n46
-  n47[("CREA scheduling.appointment_bookings")]:::efecto
-  n46 --> n47
-  n48["Repite: por cada const offset de DEFAULT_REMINDER_OFFSETS"]:::bucle
+  n47[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n46 -->|"cada elemento"| n47
+  n48["Llama a SchedulingCatalogRepository.createSlot"]:::llamada
   n47 --> n48
-  n49["Llama a SchedulingBookingsRepository.createReminder"]:::llamada
-  n48 -->|"cada elemento"| n49
-  n50[("CREA scheduling.appointment_reminders")]:::efecto
+  n46 -->|"al terminar"| n48
+  n43 -->|"no"| n48
+  n49[("CREA scheduling.bookable_slots")]:::efecto
+  n48 --> n49
+  n50["Llama a SchedulingBookingsRepository.createBooking"]:::llamada
   n49 --> n50
-  n51["Llama a BookingChangeNotifier.notifyChange"]:::llamada
+  n51[("CREA scheduling.appointment_bookings")]:::efecto
   n50 --> n51
-  n48 -->|"al terminar"| n51
-  n52["Llama a SchedulingNoticeRepository.describeBooking"]:::llamada
+  n52["Repite: por cada const offset de DEFAULT_REMINDER_OFFSETS"]:::bucle
   n51 --> n52
-  n53[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots")]:::efecto
-  n52 --> n53
-  n54["Llama a SchedulingNoticeRepository.findResourceAccount"]:::llamada
+  n53["Llama a SchedulingBookingsRepository.createReminder"]:::llamada
+  n52 -->|"cada elemento"| n53
+  n54[("CREA scheduling.appointment_reminders")]:::efecto
   n53 --> n54
-  n55[("LEE scheduling.schedulable_resources")]:::efecto
+  n55["Llama a BookingChangeNotifier.notifyChange"]:::llamada
   n54 --> n55
-  n56(("201 Responde con éxito")):::ok
+  n52 -->|"al terminar"| n55
+  n56["Llama a SchedulingNoticeRepository.describeBooking"]:::llamada
   n55 --> n56
+  n57[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots")]:::efecto
+  n56 --> n57
+  n58["Llama a SchedulingNoticeRepository.findResourceAccount"]:::llamada
+  n57 --> n58
+  n59[("LEE scheduling.schedulable_resources")]:::efecto
+  n58 --> n59
+  n60(("201 Responde con éxito")):::ok
+  n59 --> n60
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -990,7 +1104,7 @@ Turno de mostrador atómico (walk-in)
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La agenda indicada pertenece a otra organización.; ForbiddenException: Un profesional solo puede asignar citas en su propia agenda.; ForbiddenException: La reconsulta se agenda en su propia agenda, no en la de otro profesional. |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Recurso no encontrado; ResourceNotFoundException: La cita de la que sale esta reconsulta no existe; ResourceNotFoundException: Paciente no encontrado |
 | 409 | `CONFLICT` | ConflictException: Esta consulta ya tiene una reconsulta agendada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La reconsulta es para el paciente de la cita de origen; PreconditionFailedException: Una reconsulta se agenda para más adelante; PreconditionFailedException: Su vínculo con esta organización todavía está pendiente de aprobación, así que todavía no puede comprometer citas suyas. / Su vínculo con esta organización ya…; PreconditionFailedException: El profesional ya tiene {who} de {localTime( first.startAt, fir…} a {localTime( first.endAt, first…}{first.resourceName ? ` en «${…}. No puede estar en dos lug…; PreconditionFailedException: El paciente ya tiene una cita confirmada en ese rato{clash.resourceName ? ` en «${…}.; PreconditionFailedException: Transición de estado de cita no permitida |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Ese horario no atiende por telemedicina. Habilítela en la franja de su horario de atención o elija otra modalidad.; PreconditionFailedException: La reconsulta es para el paciente de la cita de origen; PreconditionFailedException: Una reconsulta se agenda para más adelante; PreconditionFailedException: Su vínculo con esta organización todavía está pendiente de aprobación, así que todavía no puede comprometer citas suyas. / Su vínculo con esta organización ya…; PreconditionFailedException: El profesional ya tiene {who} de {localTime( first.startAt, fir…} a {localTime( first.endAt, first…}{first.resourceName ? ` en «${…}. No puede estar en dos lug…; PreconditionFailedException: El paciente ya tiene una cita confirmada en ese rato{clash.resourceName ? ` en «${…}.; PreconditionFailedException: Transición de estado de cita no permitida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1024,109 +1138,118 @@ flowchart TD
   n12 -->|"no"| n14
   n15(["403 FORBIDDEN Un profesional solo puede asignar citas en su propia agenda."]):::error
   n14 -->|"sí"| n15
-  n16["Llama a CreateDirectAppointmentUseCase.validateFollowUp"]:::llamada
+  n16{"dto.channel === 'TELECONSULTA'"}:::decision
   n14 -->|"no"| n16
-  n17{"!isOwnAgenda"}:::decision
-  n16 --> n17
-  n18(["403 FORBIDDEN La reconsulta se agenda en su propia agenda, no en la de otro profesional."]):::error
-  n17 -->|"sí"| n18
-  n19{"!originBooking"}:::decision
-  n17 -->|"no"| n19
-  n20(["404 NOT_FOUND La cita de la que sale esta reconsulta no existe"]):::error
-  n19 -->|"sí"| n20
-  n21{"originBooking.patientProfileId !== dto.patientProfileId"}:::decision
-  n19 -->|"no"| n21
-  n22(["422 PRECONDITION_FAILED La reconsulta es para el paciente de la cita de origen"]):::error
+  n17["Llama a CreateDirectAppointmentUseCase.assertTelemedicineEnabled"]:::llamada
+  n16 -->|"sí"| n17
+  n18{"!startsInTelemedicineBand(startAt, bands, resource.timeZone ?? 'UTC')"}:::decision
+  n17 --> n18
+  n19(["422 PRECONDITION_FAILED Ese horario no atiende por telemedicina. Habilítela en la franja de su horario de ate…"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a CreateDirectAppointmentUseCase.validateFollowUp"]:::llamada
+  n18 -->|"no"| n20
+  n16 -->|"no"| n20
+  n21{"!isOwnAgenda"}:::decision
+  n20 --> n21
+  n22(["403 FORBIDDEN La reconsulta se agenda en su propia agenda, no en la de otro profesional."]):::error
   n21 -->|"sí"| n22
-  n23{"startAt.getTime() ‹= now.getTime()"}:::decision
+  n23{"!originBooking"}:::decision
   n21 -->|"no"| n23
-  n24(["422 PRECONDITION_FAILED Una reconsulta se agenda para más adelante"]):::error
+  n24(["404 NOT_FOUND La cita de la que sale esta reconsulta no existe"]):::error
   n23 -->|"sí"| n24
-  n25{"upcoming"}:::decision
+  n25{"originBooking.patientProfileId !== dto.patientProfileId"}:::decision
   n23 -->|"no"| n25
-  n26(["409 CONFLICT Esta consulta ya tiene una reconsulta agendada"]):::error
+  n26(["422 PRECONDITION_FAILED La reconsulta es para el paciente de la cita de origen"]):::error
   n25 -->|"sí"| n26
-  n27["Llama a BookingAccess.assertAffiliationCurrent"]:::llamada
+  n27{"startAt.getTime() ‹= now.getTime()"}:::decision
   n25 -->|"no"| n27
-  n28(["422 PRECONDITION_FAILED Su vínculo con esta organización todavía está pendiente de aprobación, así que todaví…"]):::error
-  n27 --> n28
-  n29["Llama a SchedulingBookingsRepository.findPatientNames"]:::llamada
-  n30[("LEE profiles.patient_profiles · LEE profiles.persons")]:::efecto
-  n29 --> n30
-  n31{"!names.has(dto.patientProfileId)"}:::decision
-  n30 --> n31
-  n32(["404 NOT_FOUND Paciente no encontrado"]):::error
-  n31 -->|"sí"| n32
-  n33{"PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)"}:::decision
-  n31 -->|"no"| n33
-  n34["Llama a SchedulingProfessionalTimeService.assertRangeFree"]:::llamada
-  n33 -->|"sí"| n34
-  n35(["422 PRECONDITION_FAILED El profesional ya tiene {who} de {localTime( first.startAt, fir…} a {localTime( first…"]):::error
+  n28(["422 PRECONDITION_FAILED Una reconsulta se agenda para más adelante"]):::error
+  n27 -->|"sí"| n28
+  n29{"upcoming"}:::decision
+  n27 -->|"no"| n29
+  n30(["409 CONFLICT Esta consulta ya tiene una reconsulta agendada"]):::error
+  n29 -->|"sí"| n30
+  n31["Llama a BookingAccess.assertAffiliationCurrent"]:::llamada
+  n29 -->|"no"| n31
+  n32(["422 PRECONDITION_FAILED Su vínculo con esta organización todavía está pendiente de aprobación, así que todaví…"]):::error
+  n31 --> n32
+  n33["Llama a SchedulingBookingsRepository.findPatientNames"]:::llamada
+  n34[("LEE profiles.patient_profiles · LEE profiles.persons")]:::efecto
+  n33 --> n34
+  n35{"!names.has(dto.patientProfileId)"}:::decision
   n34 --> n35
-  n36["Llama a SchedulingBookingsRepository.findPatientBookingsOverlapping"]:::llamada
-  n33 -->|"no"| n36
-  n37[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots · LEE scheduling.schedulable_resources")]:::efecto
-  n36 --> n37
-  n38{"alreadyCommitted.length › 0"}:::decision
-  n37 --> n38
-  n39(["422 PRECONDITION_FAILED El paciente ya tiene una cita confirmada en ese rato{clash.resourceName ? ` en «${…}."]):::error
-  n38 -->|"sí"| n39
-  n40{"PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)"}:::decision
-  n38 -->|"no"| n40
-  n41["Llama a SchedulingCatalogRepository.findOpenSlotsOfProfessionalInWindow"]:::llamada
-  n40 -->|"sí"| n41
-  n42[("LEE scheduling.schedulable_resources · LEE scheduling.bookable_slots")]:::efecto
+  n36(["404 NOT_FOUND Paciente no encontrado"]):::error
+  n35 -->|"sí"| n36
+  n37{"PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)"}:::decision
+  n35 -->|"no"| n37
+  n38["Llama a SchedulingProfessionalTimeService.assertRangeFree"]:::llamada
+  n37 -->|"sí"| n38
+  n39(["422 PRECONDITION_FAILED El profesional ya tiene {who} de {localTime( first.startAt, fir…} a {localTime( first…"]):::error
+  n38 --> n39
+  n40["Llama a SchedulingBookingsRepository.findPatientBookingsOverlapping"]:::llamada
+  n37 -->|"no"| n40
+  n41[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots · LEE scheduling.schedulable_resources")]:::efecto
+  n40 --> n41
+  n42{"alreadyCommitted.length › 0"}:::decision
   n41 --> n42
-  n43["Repite: por cada const free de freeOnes"]:::bucle
-  n42 --> n43
-  n44[("ACTUALIZA scheduling.bookable_slots")]:::efecto
-  n43 -->|"cada elemento"| n44
-  n45["Llama a SchedulingCatalogRepository.createSlot"]:::llamada
-  n44 --> n45
-  n43 -->|"al terminar"| n45
-  n40 -->|"no"| n45
-  n46[("CREA scheduling.bookable_slots")]:::efecto
+  n43(["422 PRECONDITION_FAILED El paciente ya tiene una cita confirmada en ese rato{clash.resourceName ? ` en «${…}."]):::error
+  n42 -->|"sí"| n43
+  n44{"PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)"}:::decision
+  n42 -->|"no"| n44
+  n45["Llama a SchedulingCatalogRepository.findOpenSlotsOfProfessionalInWindow"]:::llamada
+  n44 -->|"sí"| n45
+  n46[("LEE scheduling.schedulable_resources · LEE scheduling.bookable_slots")]:::efecto
   n45 --> n46
-  n47["Llama a SchedulingBookingsRepository.createBooking"]:::llamada
+  n47["Repite: por cada const free de freeOnes"]:::bucle
   n46 --> n47
-  n48[("CREA scheduling.appointment_bookings")]:::efecto
-  n47 --> n48
-  n49["Repite: por cada const offset de DEFAULT_REMINDER_OFFSETS"]:::bucle
+  n48[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n47 -->|"cada elemento"| n48
+  n49["Llama a SchedulingCatalogRepository.createSlot"]:::llamada
   n48 --> n49
-  n50["Llama a SchedulingBookingsRepository.createReminder"]:::llamada
-  n49 -->|"cada elemento"| n50
-  n51[("CREA scheduling.appointment_reminders")]:::efecto
+  n47 -->|"al terminar"| n49
+  n44 -->|"no"| n49
+  n50[("CREA scheduling.bookable_slots")]:::efecto
+  n49 --> n50
+  n51["Llama a SchedulingBookingsRepository.createBooking"]:::llamada
   n50 --> n51
-  n52["Llama a ClinicalEncountersAdapter.open"]:::llamada
+  n52[("CREA scheduling.appointment_bookings")]:::efecto
   n51 --> n52
-  n49 -->|"al terminar"| n52
-  n53["Llama a EncountersRepository.create"]:::llamada
+  n53["Repite: por cada const offset de DEFAULT_REMINDER_OFFSETS"]:::bucle
   n52 --> n53
-  n54[("CREA clinical.encounters")]:::efecto
-  n53 --> n54
-  n55{"appointment.practitionerProfileId"}:::decision
+  n54["Llama a SchedulingBookingsRepository.createReminder"]:::llamada
+  n53 -->|"cada elemento"| n54
+  n55[("CREA scheduling.appointment_reminders")]:::efecto
   n54 --> n55
-  n56["Llama a ClinicalEncountersAdapter.addParticipant"]:::llamada
-  n55 -->|"sí"| n56
-  n57["Llama a EncountersRepository.createParticipant"]:::llamada
+  n56["Llama a ClinicalEncountersAdapter.open"]:::llamada
+  n55 --> n56
+  n53 -->|"al terminar"| n56
+  n57["Llama a EncountersRepository.create"]:::llamada
   n56 --> n57
-  n58[("CREA clinical.encounter_participants")]:::efecto
+  n58[("CREA clinical.encounters")]:::efecto
   n57 --> n58
-  n59["Llama a SchedulingBookingsService.startInTransaction"]:::llamada
+  n59{"appointment.practitionerProfileId"}:::decision
   n58 --> n59
-  n55 -->|"no"| n59
-  n60["Llama a StartAppointmentUseCase.executeInTransaction"]:::llamada
-  n59 --> n60
-  n61["Llama a BookingTransitionRecorder.assertTransition"]:::llamada
+  n60["Llama a ClinicalEncountersAdapter.addParticipant"]:::llamada
+  n59 -->|"sí"| n60
+  n61["Llama a EncountersRepository.createParticipant"]:::llamada
   n60 --> n61
-  n62{"!isValidBookingTransition(from, to)"}:::decision
+  n62[("CREA clinical.encounter_participants")]:::efecto
   n61 --> n62
-  n63(["422 PRECONDITION_FAILED Transición de estado de cita no permitida"]):::error
-  n62 -->|"sí"| n63
-  n64[("ACTUALIZA scheduling.appointment_bookings")]:::efecto
-  n62 -->|"no"| n64
-  n65(("201 Responde con éxito")):::ok
+  n63["Llama a SchedulingBookingsService.startInTransaction"]:::llamada
+  n62 --> n63
+  n59 -->|"no"| n63
+  n64["Llama a StartAppointmentUseCase.executeInTransaction"]:::llamada
+  n63 --> n64
+  n65["Llama a BookingTransitionRecorder.assertTransition"]:::llamada
   n64 --> n65
+  n66{"!isValidBookingTransition(from, to)"}:::decision
+  n65 --> n66
+  n67(["422 PRECONDITION_FAILED Transición de estado de cita no permitida"]):::error
+  n66 -->|"sí"| n67
+  n68[("ACTUALIZA scheduling.appointment_bookings")]:::efecto
+  n66 -->|"no"| n68
+  n69(("201 Responde con éxito")):::ok
+  n68 --> n69
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1195,7 +1318,7 @@ UC-41-15: lista citas por paciente, recurso y/o ventana
 |---|---|---|
 | 200 | — | Éxito |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta agenda es de otro profesional: solo se lista desde su propia cuenta.; ForbiddenException: Esta cuenta no tiene un perfil de paciente con citas que listar. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indique al menos patientProfileId o resourceId para listar citas; PreconditionFailedException: La ventana debe empezar antes de terminar |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1216,70 +1339,94 @@ flowchart TD
   n5 -->|"no"| n7
   n8(["422 PRECONDITION_FAILED La ventana debe empezar antes de terminar"]):::error
   n7 -->|"sí"| n8
-  n9["Llama a SchedulingBookingsRepository.findBookings"]:::llamada
+  n9{"filters.resourceId"}:::decision
   n7 -->|"no"| n9
-  n10[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots")]:::efecto
-  n9 --> n10
-  n11["Llama a AuditBookingHistoryAdapter.latestByBooking"]:::llamada
+  n10["Llama a SchedulingCatalogRepository.findResourceById"]:::llamada
+  n9 -->|"sí"| n10
+  n11[("LEE scheduling.schedulable_resources")]:::efecto
   n10 --> n11
-  n12[("LEE audit.appointment_bookings_history")]:::efecto
+  n12{"actor && !operatesAnyAgenda(actor)"}:::decision
   n11 --> n12
-  n13["Llama a AuditBookingHistoryAdapter.latestByBooking"]:::llamada
-  n12 --> n13
-  n14[("LEE audit.appointment_bookings_history")]:::efecto
-  n13 --> n14
-  n15["Llama a SchedulingBookingsRepository.latestRescheduleOrigins"]:::llamada
-  n14 --> n15
-  n16[("LEE scheduling.booking_reschedules · LEE scheduling.bookable_slots")]:::efecto
-  n15 --> n16
-  n17{"actor?.practitionerProfileId !== undefined"}:::decision
-  n16 --> n17
-  n18["Repite: por cada const id de ids"]:::bucle
+  n13{"actor.practitionerProfileId !== undefined"}:::decision
+  n12 -->|"sí"| n13
+  n14{"resource.resourceRefId !== actor.practitionerProfileId"}:::decision
+  n13 -->|"sí"| n14
+  n15(["403 FORBIDDEN Esta agenda es de otro profesional: solo se lista desde su propia cuenta."]):::error
+  n14 -->|"sí"| n15
+  n16{"!filters.patientProfileId"}:::decision
+  n13 -->|"no"| n16
+  n17{"patientProfileIds.length === 0"}:::decision
+  n16 -->|"sí"| n17
+  n18(["403 FORBIDDEN Esta cuenta no tiene un perfil de paciente con citas que listar."]):::error
   n17 -->|"sí"| n18
-  n19["Llama a SchedulingCatalogRepository.findResourceById"]:::llamada
-  n18 -->|"cada elemento"| n19
-  n20[("LEE scheduling.schedulable_resources")]:::efecto
+  n19["Llama a SchedulingBookingsRepository.findBookings"]:::llamada
+  n14 -->|"no"| n19
+  n17 -->|"no"| n19
+  n16 -->|"no"| n19
+  n12 -->|"no"| n19
+  n9 -->|"no"| n19
+  n20[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots")]:::efecto
   n19 --> n20
-  n21["Llama a ClinicalAppointmentsAdapter.findTypesByIds"]:::llamada
+  n21["Llama a AuditBookingHistoryAdapter.latestByBooking"]:::llamada
   n20 --> n21
-  n18 -->|"al terminar"| n21
-  n17 -->|"no"| n21
-  n22["Llama a AppointmentsRepository.findTypesByIds"]:::llamada
+  n22[("LEE audit.appointment_bookings_history")]:::efecto
   n21 --> n22
-  n23[("LEE clinical.appointments")]:::efecto
+  n23["Llama a AuditBookingHistoryAdapter.latestByBooking"]:::llamada
   n22 --> n23
-  n24["Llama a ClinicalAppointmentsAdapter.findLatestEncounterIds"]:::llamada
+  n24[("LEE audit.appointment_bookings_history")]:::efecto
   n23 --> n24
-  n25["Llama a EncountersRepository.findLatestIdsByAppointmentIds"]:::llamada
+  n25["Llama a SchedulingBookingsRepository.latestRescheduleOrigins"]:::llamada
   n24 --> n25
-  n26[("LEE clinical.encounters")]:::efecto
+  n26[("LEE scheduling.booking_reschedules · LEE scheduling.bookable_slots")]:::efecto
   n25 --> n26
-  n27["Llama a SchedulingBookingsRepository.findPatientNames"]:::llamada
+  n27{"actor?.practitionerProfileId !== undefined"}:::decision
   n26 --> n27
-  n28[("LEE profiles.patient_profiles · LEE profiles.persons")]:::efecto
-  n27 --> n28
-  n29["Llama a SchedulingBookingsRepository.findPaymentStatesForBookings"]:::llamada
-  n28 --> n29
-  n30[("LEE scheduling.appointment_payment_states")]:::efecto
+  n28["Repite: por cada const id de ids"]:::bucle
+  n27 -->|"sí"| n28
+  n29["Llama a SchedulingCatalogRepository.findResourceById"]:::llamada
+  n28 -->|"cada elemento"| n29
+  n30[("LEE scheduling.schedulable_resources")]:::efecto
   n29 --> n30
-  n31["Llama a InsuranceReadAdapter.findActiveCarriersByPatients"]:::llamada
+  n31["Llama a ClinicalAppointmentsAdapter.findTypesByIds"]:::llamada
   n30 --> n31
-  n32["Llama a CoverageRepository.findActiveCarriersByPatients"]:::llamada
+  n28 -->|"al terminar"| n31
+  n27 -->|"no"| n31
+  n32["Llama a AppointmentsRepository.findTypesByIds"]:::llamada
   n31 --> n32
-  n33[("LEE insurance.patient_coverages · LEE insurance.insurance_plans · LEE insurance.insurance_products · LEE insu…")]:::efecto
+  n33[("LEE clinical.appointments")]:::efecto
   n32 --> n33
-  n34["Llama a BookingItemAssembler.followUpLinks"]:::llamada
+  n34["Llama a ClinicalAppointmentsAdapter.findLatestEncounterIds"]:::llamada
   n33 --> n34
-  n35["Llama a SchedulingBookingsRepository.findBookingsWithSlotsByIds"]:::llamada
+  n35["Llama a EncountersRepository.findLatestIdsByAppointmentIds"]:::llamada
   n34 --> n35
-  n36[("LEE scheduling.appointment_bookings")]:::efecto
+  n36[("LEE clinical.encounters")]:::efecto
   n35 --> n36
-  n37["Llama a SchedulingBookingsRepository.findFollowUpsOf"]:::llamada
+  n37["Llama a SchedulingBookingsRepository.findPatientNames"]:::llamada
   n36 --> n37
-  n38[("LEE scheduling.appointment_bookings")]:::efecto
+  n38[("LEE profiles.patient_profiles · LEE profiles.persons")]:::efecto
   n37 --> n38
-  n39(("200 Responde con éxito")):::ok
+  n39["Llama a SchedulingBookingsRepository.findPaymentStatesForBookings"]:::llamada
   n38 --> n39
+  n40[("LEE scheduling.appointment_payment_states")]:::efecto
+  n39 --> n40
+  n41["Llama a InsuranceReadAdapter.findActiveCarriersByPatients"]:::llamada
+  n40 --> n41
+  n42["Llama a CoverageRepository.findActiveCarriersByPatients"]:::llamada
+  n41 --> n42
+  n43[("LEE insurance.patient_coverages · LEE insurance.insurance_plans · LEE insurance.insurance_products · LEE insu…")]:::efecto
+  n42 --> n43
+  n44["Llama a BookingItemAssembler.followUpLinks"]:::llamada
+  n43 --> n44
+  n45["Llama a SchedulingBookingsRepository.findBookingsWithSlotsByIds"]:::llamada
+  n44 --> n45
+  n46[("LEE scheduling.appointment_bookings")]:::efecto
+  n45 --> n46
+  n47["Llama a SchedulingBookingsRepository.findFollowUpsOf"]:::llamada
+  n46 --> n47
+  n48[("LEE scheduling.appointment_bookings")]:::efecto
+  n47 --> n48
+  n49(("200 Responde con éxito")):::ok
+  n48 --> n49
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1514,7 +1661,7 @@ flowchart TD
   n56 --> n57
   n58[("ACTUALIZA scheduling.bookable_slots")]:::efecto
   n57 -->|"sí"| n58
-  n59{"ownSlot.practitionerServiceOfferingId"}:::decision
+  n59{"await this.serviceSlots.isOneOffOnDemand(tx, ownSlot)"}:::decision
   n58 --> n59
   n60["Llama a ServiceSlotLifecycle.discardOneOffSlot"]:::llamada
   n59 -->|"sí"| n60
@@ -1576,7 +1723,7 @@ flowchart TD
   n2 --> n3
   n4["Llama a CancelBookingUseCase.execute"]:::llamada
   n3 --> n4
-  n5["Transacción: transactional(…)"]:::transaccion
+  n5["Llama a CancelBookingUseCase.cancelInTransaction"]:::llamada
   n4 --> n5
   n6["Llama a SchedulingBookingsRepository.findBookingByIdForUpdate"]:::llamada
   n5 --> n6
@@ -1617,53 +1764,37 @@ flowchart TD
   n22 --> n23
   n24[("ACTUALIZA scheduling.appointment_bookings")]:::efecto
   n23 --> n24
-  n25["Llama a BookingTransitionRecorder.recordTransition"]:::llamada
+  n25{"slot"}:::decision
   n24 --> n25
-  n26["Llama a AuditBookingHistoryAdapter.append"]:::llamada
-  n25 --> n26
-  n27[("LEE audit.appointment_bookings_history · ACTUALIZA audit.appointment_bookings_history · CREA audit.appointmen…")]:::efecto
+  n26[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n25 -->|"sí"| n26
+  n27{"slot.scheduleTemplateId === undefined || slot.scheduleTemplateId === null || // P36: el turno de un horario f…"}:::decision
   n26 --> n27
-  n28{"slot"}:::decision
-  n27 --> n28
+  n28["Llama a ServiceSlotLifecycle.discardOneOffSlot"]:::llamada
+  n27 -->|"sí"| n28
   n29[("ACTUALIZA scheduling.bookable_slots")]:::efecto
-  n28 -->|"sí"| n29
-  n30{"slot.scheduleTemplateId === undefined || slot.scheduleTemplateId === null"}:::decision
-  n29 --> n30
-  n31["Llama a ServiceSlotLifecycle.discardOneOffSlot"]:::llamada
+  n28 --> n29
+  n30{"slot.statusConceptId !== CONCEPTS.SLOT_BLOCKED"}:::decision
+  n27 -->|"no"| n30
+  n31[("ACTUALIZA scheduling.bookable_slots")]:::efecto
   n30 -->|"sí"| n31
-  n32[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n32["Llama a CancelBookingUseCase.promoteWaitlistFor"]:::llamada
+  n29 --> n32
   n31 --> n32
-  n33{"slot.statusConceptId !== CONCEPTS.SLOT_BLOCKED"}:::decision
-  n30 -->|"no"| n33
-  n34[("ACTUALIZA scheduling.bookable_slots")]:::efecto
-  n33 -->|"sí"| n34
-  n35["Llama a BookingChangeNotifier.notifyChange"]:::llamada
-  n32 --> n35
+  n30 -->|"no"| n32
+  n25 -->|"no"| n32
+  n33["Intenta"]:::intento
+  n32 --> n33
+  n34["Llama a SchedulingWaitlistService.promoteWaitlist"]:::llamada
+  n33 --> n34
+  n35["Transacción: transaction(…)"]:::transaccion
   n34 --> n35
-  n33 -->|"no"| n35
-  n28 -->|"no"| n35
-  n36["Llama a SchedulingNoticeRepository.describeBooking"]:::llamada
+  n36{"!slot"}:::decision
   n35 --> n36
-  n37[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots")]:::efecto
-  n36 --> n37
-  n38["Llama a SchedulingNoticeRepository.findResourceAccount"]:::llamada
-  n37 --> n38
-  n39[("LEE scheduling.schedulable_resources")]:::efecto
-  n38 --> n39
-  n40["Llama a CancelBookingUseCase.promoteWaitlistFor"]:::llamada
-  n39 --> n40
-  n41["Intenta"]:::intento
-  n40 --> n41
-  n42["Llama a SchedulingWaitlistService.promoteWaitlist"]:::llamada
-  n41 --> n42
-  n43["Transacción: transaction(…)"]:::transaccion
-  n42 --> n43
-  n44{"!slot"}:::decision
-  n43 --> n44
-  n45(["404 NOT_FOUND Slot no encontrado"]):::error
-  n44 -->|"sí"| n45
-  n46(("200 Responde con éxito")):::ok
-  n44 -->|"no"| n46
+  n37(["404 NOT_FOUND Slot no encontrado"]):::error
+  n36 -->|"sí"| n37
+  n38(("200 Responde con éxito")):::ok
+  n36 -->|"no"| n38
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1895,7 +2026,474 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. GET /scheduling/bookings/{id}/payment-state
+#### 11. GET /scheduling/bookings/{id}/payment-receipts
+
+Listar los comprobantes de pago de una cita
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a SchedulingPaymentReceiptsService.list"]:::llamada
+  n2 --> n3
+  n4["Llama a ListPaymentReceiptsUseCase.execute"]:::llamada
+  n3 --> n4
+  n5["Transacción: transactional(…)"]:::transaccion
+  n4 --> n5
+  n6["Llama a PaymentReceiptAccess.loadForReading"]:::llamada
+  n5 --> n6
+  n7["Llama a SchedulingBookingsRepository.findBookingByIdForUpdate"]:::llamada
+  n6 --> n7
+  n8[("LEE scheduling.appointment_bookings")]:::efecto
+  n7 --> n8
+  n9{"!booking"}:::decision
+  n8 --> n9
+  n10(["↩ (relanza el error capturado)"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a SchedulingPaymentReceiptsRepository.findForBooking"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE scheduling.appointment_payment_receipts")]:::efecto
+  n11 --> n12
+  n13["Llama a PaymentReceiptAccess.project"]:::llamada
+  n12 --> n13
+  n14["Llama a CommonPaymentReceiptFilesAdapter.describe"]:::llamada
+  n13 --> n14
+  n15[("LEE common.files · LEE common.file_versions")]:::efecto
+  n14 --> n15
+  n16["Llama a SchedulingPaymentReceiptsRepository.findUserDisplayNames"]:::llamada
+  n15 --> n16
+  n17[("LEE iam.users")]:::efecto
+  n16 --> n17
+  n18(("200 Responde con éxito")):::ok
+  n17 --> n18
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 12. POST /scheduling/bookings/{id}/payment-receipts
+
+Subir el comprobante de pago de una cita
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {labels.subject} no le pertenece |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {labels.notFound} |
+| 409 | `CONFLICT` | ConflictException: La cita ya está pagada: no hace falta otro comprobante. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una cita cancelada o rechazada no lleva pago: no hay comprobante que subir.; PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: El comprobante supera los 5 MB; PreconditionFailedException: El comprobante no es un archivo suyo que se pueda adjuntar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a SchedulingPaymentReceiptsService.upload"]:::llamada
+  n2 --> n3
+  n4["Llama a UploadPaymentReceiptUseCase.execute"]:::llamada
+  n3 --> n4
+  n5["Transacción: transactional(…)"]:::transaccion
+  n4 --> n5
+  n6["Llama a PaymentReceiptAccess.loadForPatient"]:::llamada
+  n5 --> n6
+  n7["Llama a SchedulingBookingsRepository.findBookingByIdForUpdate"]:::llamada
+  n6 --> n7
+  n8[("LEE scheduling.appointment_bookings")]:::efecto
+  n7 --> n8
+  n9{"!booking"}:::decision
+  n8 --> n9
+  n10(["↩ (relanza el error capturado)"]):::error
+  n9 -->|"sí"| n10
+  n11{"!(await this.representation.representsPatient( booking.patientProfileId, actor, tx, ))"}:::decision
+  n9 -->|"no"| n11
+  n12(["↩ (relanza el error capturado)"]):::error
+  n11 -->|"sí"| n12
+  n13{"STATES_WITHOUT_PAYMENT.includes(booking.statusConceptId)"}:::decision
+  n11 -->|"no"| n13
+  n14(["422 PRECONDITION_FAILED Una cita cancelada o rechazada no lleva pago: no hay comprobante que subir."]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a SchedulingBookingsRepository.findPaymentStateForUpdate"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE scheduling.appointment_payment_states")]:::efecto
+  n15 --> n16
+  n17{"payment?.statusConceptId === SCHED.PAYMENT_PAID"}:::decision
+  n16 --> n17
+  n18(["409 CONFLICT La cita ya está pagada: no hace falta otro comprobante."]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a CommonPaymentReceiptFilesAdapter.assertAttachable"]:::llamada
+  n17 -->|"no"| n19
+  n20["Intenta"]:::intento
+  n19 --> n20
+  n21["Llama a AttachableFileService.assertUsableBy"]:::llamada
+  n20 --> n21
+  n22{"!file"}:::decision
+  n21 --> n22
+  n23(["404 NOT_FOUND {labels.notFound}"]):::error
+  n22 -->|"sí"| n23
+  n24{"file.createdByUserId !== actor.id && !enAllowlist"}:::decision
+  n22 -->|"no"| n24
+  n25(["403 FORBIDDEN {labels.subject} no le pertenece"]):::error
+  n24 -->|"sí"| n25
+  n26{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
+  n24 -->|"no"| n26
+  n27(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
+  n26 -->|"sí"| n27
+  n28{"!file.currentVersionId"}:::decision
+  n26 -->|"no"| n28
+  n29(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n28 -->|"sí"| n29
+  n30{"Number(version.sizeBytes) › PAYMENT_RECEIPT_MAX_BYTES"}:::decision
+  n28 -->|"no"| n30
+  n31(["422 PRECONDITION_FAILED El comprobante supera los 5 MB"]):::error
+  n30 -->|"sí"| n31
+  n32{"error instanceof ResourceNotFoundException || error instanceof ForbiddenException"}:::decision
+  n20 -->|"si falla"| n32
+  n33(["422 PRECONDITION_FAILED El comprobante no es un archivo suyo que se pueda adjuntar"]):::error
+  n32 -->|"sí"| n33
+  n34(["↩ (relanza el error capturado)"]):::error
+  n32 -->|"no"| n34
+  n35[("CREA scheduling.appointment_payment_receipts · GUARDA scheduling.appointment_payment_receipts")]:::efecto
+  n30 -->|"no"| n35
+  n36["Llama a PaymentReceiptAccess.project"]:::llamada
+  n35 --> n36
+  n37["Llama a CommonPaymentReceiptFilesAdapter.describe"]:::llamada
+  n36 --> n37
+  n38[("LEE common.files · LEE common.file_versions")]:::efecto
+  n37 --> n38
+  n39["Llama a SchedulingPaymentReceiptsRepository.findUserDisplayNames"]:::llamada
+  n38 --> n39
+  n40[("LEE iam.users")]:::efecto
+  n39 --> n40
+  n41["Llama a BookingChangeNotifier.notifyReceiptUploaded"]:::llamada
+  n40 --> n41
+  n42["Transacción: safely(…)"]:::transaccion
+  n41 --> n42
+  n43["Llama a SchedulingNoticeRepository.describeBooking"]:::llamada
+  n42 --> n43
+  n44[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots")]:::efecto
+  n43 --> n44
+  n45["Llama a SchedulingNoticeRepository.findResourceAccount"]:::llamada
+  n44 --> n45
+  n46[("LEE scheduling.schedulable_resources")]:::efecto
+  n45 --> n46
+  n47["Llama a SchedulingNoticeRepository.findDisplayNameForProfile"]:::llamada
+  n46 --> n47
+  n48[("LEE profiles.persons")]:::efecto
+  n47 --> n48
+  n49(("201 Responde con éxito")):::ok
+  n48 --> n49
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 13. POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm
+
+Confirmar un comprobante de pago
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella.; ForbiddenException: La agenda indicada pertenece a otra organización. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada; ResourceNotFoundException: Comprobante no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ese comprobante ya se rechazó: no se puede confirmar. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a SchedulingPaymentReceiptsService.confirm"]:::llamada
+  n2 --> n3
+  n4["Llama a ConfirmPaymentReceiptUseCase.execute"]:::llamada
+  n3 --> n4
+  n5["Transacción: transactional(…)"]:::transaccion
+  n4 --> n5
+  n6["Llama a PaymentReceiptAccess.loadForReviewer"]:::llamada
+  n5 --> n6
+  n7["Transacción: hideForbidden(…)"]:::transaccion
+  n6 --> n7
+  n8["Llama a BookingAccess.loadForOperation"]:::llamada
+  n7 --> n8
+  n9{"!booking"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Cita no encontrada"]):::error
+  n9 -->|"sí"| n10
+  n11{"!isOwnAgenda"}:::decision
+  n9 -->|"no"| n11
+  n12(["403 FORBIDDEN Esta cita es de otra agenda: solo la opera quien atiende en ella."]):::error
+  n11 -->|"sí"| n12
+  n13{"operatesAnyAgenda(actor)"}:::decision
+  n11 -->|"no"| n13
+  n14["Llama a BookingAccess.assertResourceInActiveTenant"]:::llamada
+  n13 -->|"sí"| n14
+  n15{"!withinScope"}:::decision
+  n14 --> n15
+  n16(["403 FORBIDDEN La agenda indicada pertenece a otra organización."]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a PaymentReceiptAccess.receiptOf"]:::llamada
+  n15 -->|"no"| n17
+  n13 -->|"no"| n17
+  n18["Llama a SchedulingPaymentReceiptsRepository.findOfBookingForUpdate"]:::llamada
+  n17 --> n18
+  n19[("LEE scheduling.appointment_payment_receipts")]:::efecto
+  n18 --> n19
+  n20["Llama a SchedulingPaymentReceiptsRepository.findOfBooking"]:::llamada
+  n19 --> n20
+  n21[("LEE scheduling.appointment_payment_receipts")]:::efecto
+  n20 --> n21
+  n22{"!receipt"}:::decision
+  n21 --> n22
+  n23(["404 NOT_FOUND Comprobante no encontrado"]):::error
+  n22 -->|"sí"| n23
+  n24{"receipt.reviewStatusConceptId === SCHED.RECEIPT_REJECTED"}:::decision
+  n22 -->|"no"| n24
+  n25(["409 CONFLICT Ese comprobante ya se rechazó: no se puede confirmar."]):::error
+  n24 -->|"sí"| n25
+  n26{"receipt.reviewStatusConceptId === SCHED.RECEIPT_CONFIRMED"}:::decision
+  n24 -->|"no"| n26
+  n27["Llama a SchedulingBookingsRepository.findPaymentState"]:::llamada
+  n26 -->|"sí"| n27
+  n28[("LEE scheduling.appointment_payment_states")]:::efecto
+  n27 --> n28
+  n29["Llama a PaymentReceiptAccess.project"]:::llamada
+  n28 --> n29
+  n30["Llama a CommonPaymentReceiptFilesAdapter.describe"]:::llamada
+  n29 --> n30
+  n31[("LEE common.files · LEE common.file_versions")]:::efecto
+  n30 --> n31
+  n32["Llama a SchedulingPaymentReceiptsRepository.findUserDisplayNames"]:::llamada
+  n31 --> n32
+  n33[("LEE iam.users")]:::efecto
+  n32 --> n33
+  n34{"STATES_WITHOUT_PAYMENT.includes(booking.statusConceptId)"}:::decision
+  n33 --> n34
+  n26 -->|"no"| n34
+  n35(["422 PRECONDITION_FAILED Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar."]):::error
+  n34 -->|"sí"| n35
+  n36[("ACTUALIZA scheduling.appointment_payment_receipts · ACTUALIZA scheduling.appointment_payment_receipts · ACTUA…")]:::efecto
+  n34 -->|"no"| n36
+  n37["Llama a PaymentReceiptAccess.project"]:::llamada
+  n36 --> n37
+  n38["Llama a CommonPaymentReceiptFilesAdapter.describe"]:::llamada
+  n37 --> n38
+  n39[("LEE common.files · LEE common.file_versions")]:::efecto
+  n38 --> n39
+  n40["Llama a SchedulingPaymentReceiptsRepository.findUserDisplayNames"]:::llamada
+  n39 --> n40
+  n41[("LEE iam.users")]:::efecto
+  n40 --> n41
+  n42{"changed"}:::decision
+  n41 --> n42
+  n43["Llama a BookingChangeNotifier.notifyReceiptReviewed"]:::llamada
+  n42 -->|"sí"| n43
+  n44["Transacción: safely(…)"]:::transaccion
+  n43 --> n44
+  n45["Llama a SchedulingNoticeRepository.describeBooking"]:::llamada
+  n44 --> n45
+  n46[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots")]:::efecto
+  n45 --> n46
+  n47(("200 Responde con éxito")):::ok
+  n46 --> n47
+  n42 -->|"no"| n47
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 14. GET /scheduling/bookings/{id}/payment-receipts/{receiptId}/content
+
+Descargar el archivo de un comprobante de pago
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Comprobante no encontrado; ResourceNotFoundException: Archivo no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El archivo del comprobante ya no es de un formato que se pueda mostrar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a SchedulingPaymentReceiptsService.content"]:::llamada
+  n2 --> n3
+  n4["Llama a GetPaymentReceiptContentUseCase.execute"]:::llamada
+  n3 --> n4
+  n5["Transacción: transactional(…)"]:::transaccion
+  n4 --> n5
+  n6["Llama a PaymentReceiptAccess.loadForReading"]:::llamada
+  n5 --> n6
+  n7["Llama a SchedulingBookingsRepository.findBookingByIdForUpdate"]:::llamada
+  n6 --> n7
+  n8[("LEE scheduling.appointment_bookings")]:::efecto
+  n7 --> n8
+  n9{"!booking"}:::decision
+  n8 --> n9
+  n10(["↩ (relanza el error capturado)"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PaymentReceiptAccess.receiptOf"]:::llamada
+  n9 -->|"no"| n11
+  n12["Llama a SchedulingPaymentReceiptsRepository.findOfBookingForUpdate"]:::llamada
+  n11 --> n12
+  n13[("LEE scheduling.appointment_payment_receipts")]:::efecto
+  n12 --> n13
+  n14["Llama a SchedulingPaymentReceiptsRepository.findOfBooking"]:::llamada
+  n13 --> n14
+  n15[("LEE scheduling.appointment_payment_receipts")]:::efecto
+  n14 --> n15
+  n16{"!receipt"}:::decision
+  n15 --> n16
+  n17(["404 NOT_FOUND Comprobante no encontrado"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a CommonPaymentReceiptFilesAdapter.download"]:::llamada
+  n16 -->|"no"| n18
+  n19["Llama a FileUploadService.downloadForAuthorizedContext"]:::llamada
+  n18 --> n19
+  n20{"!file"}:::decision
+  n19 --> n20
+  n21(["404 NOT_FOUND Archivo no encontrado"]):::error
+  n20 -->|"sí"| n21
+  n22{"!PAYMENT_RECEIPT_MIME_TYPES.includes(content.mimeType)"}:::decision
+  n20 -->|"no"| n22
+  n23(["422 PRECONDITION_FAILED El archivo del comprobante ya no es de un formato que se pueda mostrar"]):::error
+  n22 -->|"sí"| n23
+  n24(("200 Responde con éxito")):::ok
+  n22 -->|"no"| n24
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 15. POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject
+
+Rechazar un comprobante de pago
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella.; ForbiddenException: La agenda indicada pertenece a otra organización. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada; ResourceNotFoundException: Comprobante no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ese comprobante ya se confirmó: no se puede rechazar. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a SchedulingPaymentReceiptsService.reject"]:::llamada
+  n2 --> n3
+  n4["Llama a RejectPaymentReceiptUseCase.execute"]:::llamada
+  n3 --> n4
+  n5["Transacción: transactional(…)"]:::transaccion
+  n4 --> n5
+  n6["Llama a PaymentReceiptAccess.loadForReviewer"]:::llamada
+  n5 --> n6
+  n7["Transacción: hideForbidden(…)"]:::transaccion
+  n6 --> n7
+  n8["Llama a BookingAccess.loadForOperation"]:::llamada
+  n7 --> n8
+  n9{"!booking"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Cita no encontrada"]):::error
+  n9 -->|"sí"| n10
+  n11{"!isOwnAgenda"}:::decision
+  n9 -->|"no"| n11
+  n12(["403 FORBIDDEN Esta cita es de otra agenda: solo la opera quien atiende en ella."]):::error
+  n11 -->|"sí"| n12
+  n13{"operatesAnyAgenda(actor)"}:::decision
+  n11 -->|"no"| n13
+  n14["Llama a BookingAccess.assertResourceInActiveTenant"]:::llamada
+  n13 -->|"sí"| n14
+  n15{"!withinScope"}:::decision
+  n14 --> n15
+  n16(["403 FORBIDDEN La agenda indicada pertenece a otra organización."]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a PaymentReceiptAccess.receiptOf"]:::llamada
+  n15 -->|"no"| n17
+  n13 -->|"no"| n17
+  n18["Llama a SchedulingPaymentReceiptsRepository.findOfBookingForUpdate"]:::llamada
+  n17 --> n18
+  n19[("LEE scheduling.appointment_payment_receipts")]:::efecto
+  n18 --> n19
+  n20["Llama a SchedulingPaymentReceiptsRepository.findOfBooking"]:::llamada
+  n19 --> n20
+  n21[("LEE scheduling.appointment_payment_receipts")]:::efecto
+  n20 --> n21
+  n22{"!receipt"}:::decision
+  n21 --> n22
+  n23(["404 NOT_FOUND Comprobante no encontrado"]):::error
+  n22 -->|"sí"| n23
+  n24{"row.reviewStatusConceptId === SCHED.RECEIPT_CONFIRMED"}:::decision
+  n22 -->|"no"| n24
+  n25(["409 CONFLICT Ese comprobante ya se confirmó: no se puede rechazar."]):::error
+  n24 -->|"sí"| n25
+  n26[("ACTUALIZA scheduling.appointment_payment_receipts · ACTUALIZA scheduling.appointment_payment_receipts · ACTUA…")]:::efecto
+  n24 -->|"no"| n26
+  n27["Llama a PaymentReceiptAccess.project"]:::llamada
+  n26 --> n27
+  n28["Llama a CommonPaymentReceiptFilesAdapter.describe"]:::llamada
+  n27 --> n28
+  n29[("LEE common.files · LEE common.file_versions")]:::efecto
+  n28 --> n29
+  n30["Llama a SchedulingPaymentReceiptsRepository.findUserDisplayNames"]:::llamada
+  n29 --> n30
+  n31[("LEE iam.users")]:::efecto
+  n30 --> n31
+  n32["Llama a BookingChangeNotifier.notifyReceiptReviewed"]:::llamada
+  n31 --> n32
+  n33["Transacción: safely(…)"]:::transaccion
+  n32 --> n33
+  n34["Llama a SchedulingNoticeRepository.describeBooking"]:::llamada
+  n33 --> n34
+  n35[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots")]:::efecto
+  n34 --> n35
+  n36(("200 Responde con éxito")):::ok
+  n35 --> n36
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 16. GET /scheduling/bookings/{id}/payment-state
 
 Leer el estado de pago de una cita
 
@@ -1917,30 +2515,32 @@ flowchart TD
   n2 --> n3
   n4["Llama a GetPaymentStateUseCase.execute"]:::llamada
   n3 --> n4
-  n5["Llama a BookingAccess.loadForOperation"]:::llamada
+  n5["Transacción: transactional(…)"]:::transaccion
   n4 --> n5
-  n6["Llama a SchedulingBookingsRepository.findBookingByIdForUpdate"]:::llamada
+  n6["Llama a BookingAccess.loadForOperation"]:::llamada
   n5 --> n6
-  n7[("LEE scheduling.appointment_bookings")]:::efecto
+  n7["Llama a SchedulingBookingsRepository.findBookingByIdForUpdate"]:::llamada
   n6 --> n7
-  n8{"!booking"}:::decision
+  n8[("LEE scheduling.appointment_bookings")]:::efecto
   n7 --> n8
-  n9(["404 NOT_FOUND Cita no encontrada"]):::error
-  n8 -->|"sí"| n9
-  n10["Llama a SchedulingCatalogRepository.findResourceById"]:::llamada
-  n8 -->|"no"| n10
-  n11[("LEE scheduling.schedulable_resources")]:::efecto
-  n10 --> n11
-  n12{"!isOwnAgenda"}:::decision
+  n9{"!booking"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Cita no encontrada"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a SchedulingCatalogRepository.findResourceById"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE scheduling.schedulable_resources")]:::efecto
   n11 --> n12
-  n13(["403 FORBIDDEN Esta cita es de otra agenda: solo la opera quien atiende en ella."]):::error
-  n12 -->|"sí"| n13
-  n14["Llama a SchedulingBookingsRepository.findPaymentState"]:::llamada
-  n12 -->|"no"| n14
-  n15[("LEE scheduling.appointment_payment_states")]:::efecto
-  n14 --> n15
-  n16(("200 Responde con éxito")):::ok
+  n13{"!isOwnAgenda"}:::decision
+  n12 --> n13
+  n14(["403 FORBIDDEN Esta cita es de otra agenda: solo la opera quien atiende en ella."]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a SchedulingBookingsRepository.findPaymentState"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE scheduling.appointment_payment_states")]:::efecto
   n15 --> n16
+  n17(("200 Responde con éxito")):::ok
+  n16 --> n17
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1949,7 +2549,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. PUT /scheduling/bookings/{id}/payment-state
+#### 17. PUT /scheduling/bookings/{id}/payment-state
 
 Marcar el estado de pago de una cita
 
@@ -1962,7 +2562,6 @@ Marcar el estado de pago de una cita
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
 
 ```mermaid
 flowchart TD
@@ -1997,29 +2596,8 @@ flowchart TD
   n13 -->|"no"| n15
   n16(["422 PRECONDITION_FAILED Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar."]):::error
   n15 -->|"sí"| n16
-  n17["Llama a SchedulingBookingsRepository.findPaymentStateForUpdate"]:::llamada
+  n17(("200 Responde con éxito")):::ok
   n15 -->|"no"| n17
-  n18[("LEE scheduling.appointment_payment_states")]:::efecto
-  n17 --> n18
-  n19{"existing"}:::decision
-  n18 --> n19
-  n20[("ACTUALIZA scheduling.appointment_payment_states · ACTUALIZA scheduling.appointment_payment_states · ACTUALIZA…")]:::efecto
-  n19 -->|"sí"| n20
-  n21[("CREA scheduling.appointment_payment_states · GUARDA scheduling.appointment_payment_states")]:::efecto
-  n19 -->|"no"| n21
-  n22["Llama a AuditBookingHistoryAdapter.append"]:::llamada
-  n20 --> n22
-  n21 --> n22
-  n23["Llama a HistoryRepository.append"]:::llamada
-  n22 --> n23
-  n24{"!binding"}:::decision
-  n23 --> n24
-  n25(["500 INTERNAL Entidad de historial no registrada: {entity}"]):::error
-  n24 -->|"sí"| n25
-  n26[("LEE audit.appointment_bookings_history · ACTUALIZA audit.appointment_bookings_history · CREA audit.appointmen…")]:::efecto
-  n24 -->|"no"| n26
-  n27(("200 Responde con éxito")):::ok
-  n26 --> n27
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2028,7 +2606,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /scheduling/bookings/{id}/propose-schedule
+#### 18. POST /scheduling/bookings/{id}/propose-schedule
 
 Proponer otro horario para la solicitud
 
@@ -2040,7 +2618,7 @@ Proponer otro horario para la solicitud
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella. |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada; ResourceNotFoundException: Cupo propuesto no encontrado |
 | 409 | `CONFLICT` | ConflictException: El cupo propuesto no tiene lugar |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo se opera así sobre una solicitud pendiente; PreconditionFailedException: Todavía no se puede {action} un servicio: cancele la reserva y pida otro horario.; PreconditionFailedException: El horario propuesto es el que ya tiene la solicitud; PreconditionFailedException: Transición de estado de cita no permitida |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo se opera así sobre una solicitud pendiente; PreconditionFailedException: Todavía no se puede {action} un servicio: cancele la reserva y pida otro horario.; PreconditionFailedException: Todavía no se puede {action} un turno de horario flexible: cancele la reserva y pida otra hora.; PreconditionFailedException: El horario propuesto es el que ya tiene la solicitud; PreconditionFailedException: Transición de estado de cita no permitida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -2088,68 +2666,72 @@ flowchart TD
   n20 --> n21
   n22(["422 PRECONDITION_FAILED Todavía no se puede {action} un servicio: cancele la reserva y pida otro horario."]):::error
   n21 -->|"sí"| n22
-  n23{"dto.proposedSlotId === originId"}:::decision
+  n23{"slot && (await this.isFlexible(tx, slot))"}:::decision
   n21 -->|"no"| n23
-  n24(["422 PRECONDITION_FAILED El horario propuesto es el que ya tiene la solicitud"]):::error
+  n24(["422 PRECONDITION_FAILED Todavía no se puede {action} un turno de horario flexible: cancele la reserva y pida…"]):::error
   n23 -->|"sí"| n24
-  n25["Llama a SchedulingBookingsRepository.findSlotForUpdate"]:::llamada
+  n25{"dto.proposedSlotId === originId"}:::decision
   n23 -->|"no"| n25
-  n26[("LEE scheduling.bookable_slots")]:::efecto
-  n25 --> n26
-  n27{"!target"}:::decision
-  n26 --> n27
-  n28(["404 NOT_FOUND Cupo propuesto no encontrado"]):::error
-  n27 -->|"sí"| n28
-  n29{"target.remainingCapacity ‹= 0"}:::decision
-  n27 -->|"no"| n29
-  n30(["409 CONFLICT El cupo propuesto no tiene lugar"]):::error
+  n26(["422 PRECONDITION_FAILED El horario propuesto es el que ya tiene la solicitud"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a SchedulingBookingsRepository.findSlotForUpdate"]:::llamada
+  n25 -->|"no"| n27
+  n28[("LEE scheduling.bookable_slots")]:::efecto
+  n27 --> n28
+  n29{"!target"}:::decision
+  n28 --> n29
+  n30(["404 NOT_FOUND Cupo propuesto no encontrado"]):::error
   n29 -->|"sí"| n30
-  n31["Llama a SchedulingBookingsRepository.findSlotForUpdate"]:::llamada
+  n31{"target.remainingCapacity ‹= 0"}:::decision
   n29 -->|"no"| n31
-  n32[("LEE scheduling.bookable_slots")]:::efecto
-  n31 --> n32
-  n33{"originBooking"}:::decision
-  n32 --> n33
-  n34[("ACTUALIZA scheduling.bookable_slots")]:::efecto
-  n33 -->|"sí"| n34
-  n35{"originBooking.statusConceptId !== CONCEPTS.SLOT_BLOCKED"}:::decision
+  n32(["409 CONFLICT El cupo propuesto no tiene lugar"]):::error
+  n31 -->|"sí"| n32
+  n33["Llama a SchedulingBookingsRepository.findSlotForUpdate"]:::llamada
+  n31 -->|"no"| n33
+  n34[("LEE scheduling.bookable_slots")]:::efecto
+  n33 --> n34
+  n35{"originBooking"}:::decision
   n34 --> n35
   n36[("ACTUALIZA scheduling.bookable_slots")]:::efecto
   n35 -->|"sí"| n36
-  n37[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n37{"originBooking.statusConceptId !== CONCEPTS.SLOT_BLOCKED"}:::decision
   n36 --> n37
-  n35 -->|"no"| n37
-  n33 -->|"no"| n37
-  n38{"target.remainingCapacity === 0"}:::decision
-  n37 --> n38
+  n38[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n37 -->|"sí"| n38
   n39[("ACTUALIZA scheduling.bookable_slots")]:::efecto
-  n38 -->|"sí"| n39
-  n40[("ACTUALIZA scheduling.appointment_bookings")]:::efecto
+  n38 --> n39
+  n37 -->|"no"| n39
+  n35 -->|"no"| n39
+  n40{"target.remainingCapacity === 0"}:::decision
   n39 --> n40
-  n38 -->|"no"| n40
-  n41{"fromState !== SCHED.BOOKING_PENDING_CONFIRMATION"}:::decision
-  n40 --> n41
-  n42["Llama a BookingTransitionRecorder.assertTransition"]:::llamada
-  n41 -->|"sí"| n42
-  n43{"!isValidBookingTransition(from, to)"}:::decision
+  n41[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n40 -->|"sí"| n41
+  n42[("ACTUALIZA scheduling.appointment_bookings")]:::efecto
+  n41 --> n42
+  n40 -->|"no"| n42
+  n43{"fromState !== SCHED.BOOKING_PENDING_CONFIRMATION"}:::decision
   n42 --> n43
-  n44(["422 PRECONDITION_FAILED Transición de estado de cita no permitida"]):::error
+  n44["Llama a BookingTransitionRecorder.assertTransition"]:::llamada
   n43 -->|"sí"| n44
-  n45[("ACTUALIZA scheduling.appointment_bookings")]:::efecto
-  n43 -->|"no"| n45
-  n46["Llama a SchedulingBookingsRepository.recordReschedule"]:::llamada
-  n45 --> n46
-  n41 -->|"no"| n46
-  n47[("CREA scheduling.booking_reschedules")]:::efecto
-  n46 --> n47
-  n48["Llama a BookingTransitionRecorder.recordTransition"]:::llamada
+  n45{"!isValidBookingTransition(from, to)"}:::decision
+  n44 --> n45
+  n46(["422 PRECONDITION_FAILED Transición de estado de cita no permitida"]):::error
+  n45 -->|"sí"| n46
+  n47[("ACTUALIZA scheduling.appointment_bookings")]:::efecto
+  n45 -->|"no"| n47
+  n48["Llama a SchedulingBookingsRepository.recordReschedule"]:::llamada
   n47 --> n48
-  n49["Llama a AuditBookingHistoryAdapter.append"]:::llamada
+  n43 -->|"no"| n48
+  n49[("CREA scheduling.booking_reschedules")]:::efecto
   n48 --> n49
-  n50[("LEE audit.appointment_bookings_history · ACTUALIZA audit.appointment_bookings_history · CREA audit.appointmen…")]:::efecto
+  n50["Llama a BookingTransitionRecorder.recordTransition"]:::llamada
   n49 --> n50
-  n51(("200 Responde con éxito")):::ok
+  n51["Llama a AuditBookingHistoryAdapter.append"]:::llamada
   n50 --> n51
+  n52[("LEE audit.appointment_bookings_history · ACTUALIZA audit.appointment_bookings_history · CREA audit.appointmen…")]:::efecto
+  n51 --> n52
+  n53(("200 Responde con éxito")):::ok
+  n52 --> n53
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2158,7 +2740,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. POST /scheduling/bookings/{id}/reject
+#### 19. POST /scheduling/bookings/{id}/reject
 
 Rechazar la solicitud de cita
 
@@ -2170,7 +2752,7 @@ Rechazar la solicitud de cita
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada |
 | 409 | `CONFLICT` | ConflictException: La cita ya está cancelada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Transición de estado de cita no permitida; PreconditionFailedException: Puede cancelar hasta {Math.round(windowMinutes / 60)} horas antes del turno. Si ya no puede asistir, comuníquese con el consultorio. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Puede cancelar hasta {Math.round(windowMinutes / 60)} horas antes del turno. Si ya no puede asistir, comuníquese con el consultorio. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -2184,66 +2766,37 @@ flowchart TD
   n3 --> n4
   n5["Llama a CancelBookingUseCase.execute"]:::llamada
   n4 --> n5
-  n6["Transacción: transactional(…)"]:::transaccion
+  n6["Llama a CancelBookingUseCase.cancelInTransaction"]:::llamada
   n5 --> n6
-  n7["Llama a SchedulingBookingsRepository.findBookingByIdForUpdate"]:::llamada
+  n7{"!booking"}:::decision
   n6 --> n7
-  n8[("LEE scheduling.appointment_bookings")]:::efecto
-  n7 --> n8
-  n9{"!booking"}:::decision
-  n8 --> n9
-  n10(["404 NOT_FOUND Cita no encontrada"]):::error
+  n8(["404 NOT_FOUND Cita no encontrada"]):::error
+  n7 -->|"sí"| n8
+  n9{"booking.statusConceptId === CONCEPTS.BOOKING_CANCELLED"}:::decision
+  n7 -->|"no"| n9
+  n10(["409 CONFLICT La cita ya está cancelada"]):::error
   n9 -->|"sí"| n10
-  n11{"booking.statusConceptId === CONCEPTS.BOOKING_CANCELLED"}:::decision
+  n11{"blocksHolderCancellation(isHolderPatient, withinWindow, isNoShow)"}:::decision
   n9 -->|"no"| n11
-  n12(["409 CONFLICT La cita ya está cancelada"]):::error
+  n12(["422 PRECONDITION_FAILED Puede cancelar hasta {Math.round(windowMinutes / 60)} horas antes del turno. Si ya no…"]):::error
   n11 -->|"sí"| n12
-  n13["Llama a BookingTransitionRecorder.assertTransition"]:::llamada
+  n13[("ACTUALIZA scheduling.appointment_bookings")]:::efecto
   n11 -->|"no"| n13
-  n14{"!isValidBookingTransition(from, to)"}:::decision
+  n14{"slot"}:::decision
   n13 --> n14
-  n15(["422 PRECONDITION_FAILED Transición de estado de cita no permitida"]):::error
+  n15[("ACTUALIZA scheduling.bookable_slots")]:::efecto
   n14 -->|"sí"| n15
-  n16{"feeSource === undefined && !snapshot && booking.bookingPolicyId"}:::decision
-  n14 -->|"no"| n16
-  n17["Llama a SchedulingCatalogRepository.findPolicyById"]:::llamada
-  n16 -->|"sí"| n17
-  n18[("LEE scheduling.booking_policies")]:::efecto
-  n17 --> n18
-  n19["Llama a SchedulingBookingsRepository.findSlotForUpdate"]:::llamada
+  n16{"slot.scheduleTemplateId === undefined || slot.scheduleTemplateId === null || // P36: el turno de un horario f…"}:::decision
+  n15 --> n16
+  n17{"slot.statusConceptId !== CONCEPTS.SLOT_BLOCKED"}:::decision
+  n16 -->|"no"| n17
+  n18[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n17 -->|"sí"| n18
+  n19(("200 Responde con éxito")):::ok
+  n16 -->|"sí"| n19
   n18 --> n19
-  n16 -->|"no"| n19
-  n20[("LEE scheduling.bookable_slots")]:::efecto
-  n19 --> n20
-  n21{"blocksHolderCancellation(isHolderPatient, withinWindow, isNoShow)"}:::decision
-  n20 --> n21
-  n22(["422 PRECONDITION_FAILED Puede cancelar hasta {Math.round(windowMinutes / 60)} horas antes del turno. Si ya no…"]):::error
-  n21 -->|"sí"| n22
-  n23["Llama a SchedulingBookingsRepository.createCancellation"]:::llamada
-  n21 -->|"no"| n23
-  n24[("CREA scheduling.booking_cancellations")]:::efecto
-  n23 --> n24
-  n25[("ACTUALIZA scheduling.appointment_bookings")]:::efecto
-  n24 --> n25
-  n26{"slot"}:::decision
-  n25 --> n26
-  n27[("ACTUALIZA scheduling.bookable_slots")]:::efecto
-  n26 -->|"sí"| n27
-  n28{"slot.scheduleTemplateId === undefined || slot.scheduleTemplateId === null"}:::decision
-  n27 --> n28
-  n29["Llama a ServiceSlotLifecycle.discardOneOffSlot"]:::llamada
-  n28 -->|"sí"| n29
-  n30[("ACTUALIZA scheduling.bookable_slots")]:::efecto
-  n29 --> n30
-  n31{"slot.statusConceptId !== CONCEPTS.SLOT_BLOCKED"}:::decision
-  n28 -->|"no"| n31
-  n32[("ACTUALIZA scheduling.bookable_slots")]:::efecto
-  n31 -->|"sí"| n32
-  n33(("200 Responde con éxito")):::ok
-  n30 --> n33
-  n32 --> n33
-  n31 -->|"no"| n33
-  n26 -->|"no"| n33
+  n17 -->|"no"| n19
+  n14 -->|"no"| n19
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2252,7 +2805,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. POST /scheduling/bookings/{id}/reminders
+#### 20. POST /scheduling/bookings/{id}/reminders
 
 Programar recordatorios para la cita
 
@@ -2323,7 +2876,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. POST /scheduling/bookings/{id}/request-info
+#### 21. POST /scheduling/bookings/{id}/request-info
 
 Pedir documentación u orden médica antes de aceptar
 
@@ -2399,7 +2952,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. POST /scheduling/bookings/{id}/reschedule
+#### 22. POST /scheduling/bookings/{id}/reschedule
 
 Reprogramar la cita a otro slot
 
@@ -2411,7 +2964,7 @@ Reprogramar la cita a otro slot
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada; ResourceNotFoundException: Slot destino no encontrado |
 | 409 | `CONFLICT` | ConflictException: El slot destino no tiene cupos |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se reprograma una cita vigente; PreconditionFailedException: Todavía no se puede {action} un servicio: cancele la reserva y pida otro horario.; PreconditionFailedException: El slot destino es el mismo que el actual; PreconditionFailedException: El paciente ya tiene una cita confirmada a esa hora{clash.resourceName ? ` en «${…}.; PreconditionFailedException: El profesional ya tiene {who} de {localTime( first.startAt, fir…} a {localTime( first.endAt, first…}{first.resourceName ? ` en «${…}. No puede estar en dos lug… |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se reprograma una cita vigente; PreconditionFailedException: Todavía no se puede {action} un servicio: cancele la reserva y pida otro horario.; PreconditionFailedException: Todavía no se puede {action} un turno de horario flexible: cancele la reserva y pida otra hora.; PreconditionFailedException: El slot destino es el mismo que el actual; PreconditionFailedException: El paciente ya tiene una cita confirmada a esa hora{clash.resourceName ? ` en «${…}.; PreconditionFailedException: El profesional ya tiene {who} de {localTime( first.startAt, fir…} a {localTime( first.endAt, first…}{first.resourceName ? ` en «${…}. No puede estar en dos lug… |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
 
@@ -2448,99 +3001,103 @@ flowchart TD
   n14 --> n15
   n16(["422 PRECONDITION_FAILED Todavía no se puede {action} un servicio: cancele la reserva y pida otro horario."]):::error
   n15 -->|"sí"| n16
-  n17{"fromSlotId === dto.toSlotId"}:::decision
+  n17{"slot && (await this.isFlexible(tx, slot))"}:::decision
   n15 -->|"no"| n17
-  n18(["422 PRECONDITION_FAILED El slot destino es el mismo que el actual"]):::error
+  n18(["422 PRECONDITION_FAILED Todavía no se puede {action} un turno de horario flexible: cancele la reserva y pida…"]):::error
   n17 -->|"sí"| n18
-  n19["Llama a SchedulingBookingsRepository.findSlotForUpdate"]:::llamada
+  n19{"fromSlotId === dto.toSlotId"}:::decision
   n17 -->|"no"| n19
-  n20[("LEE scheduling.bookable_slots")]:::efecto
-  n19 --> n20
-  n21{"!target"}:::decision
-  n20 --> n21
-  n22(["404 NOT_FOUND Slot destino no encontrado"]):::error
-  n21 -->|"sí"| n22
-  n23{"target.remainingCapacity ‹= 0"}:::decision
-  n21 -->|"no"| n23
-  n24(["409 CONFLICT El slot destino no tiene cupos"]):::error
+  n20(["422 PRECONDITION_FAILED El slot destino es el mismo que el actual"]):::error
+  n19 -->|"sí"| n20
+  n21["Llama a SchedulingBookingsRepository.findSlotForUpdate"]:::llamada
+  n19 -->|"no"| n21
+  n22[("LEE scheduling.bookable_slots")]:::efecto
+  n21 --> n22
+  n23{"!target"}:::decision
+  n22 --> n23
+  n24(["404 NOT_FOUND Slot destino no encontrado"]):::error
   n23 -->|"sí"| n24
-  n25["Llama a SchedulingBookingsRepository.findPatientBookingsOverlapping"]:::llamada
+  n25{"target.remainingCapacity ‹= 0"}:::decision
   n23 -->|"no"| n25
-  n26[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots · LEE scheduling.schedulable_resources")]:::efecto
-  n25 --> n26
-  n27{"patientClash.length › 0"}:::decision
-  n26 --> n27
-  n28(["422 PRECONDITION_FAILED El paciente ya tiene una cita confirmada a esa hora{clash.resourceName ? ` en «${…}."]):::error
-  n27 -->|"sí"| n28
-  n29["Llama a SchedulingCatalogRepository.findResourceById"]:::llamada
-  n27 -->|"no"| n29
-  n30[("LEE scheduling.schedulable_resources")]:::efecto
-  n29 --> n30
-  n31{"targetResource && PRACTITIONER_PROFILE_TABLES.includes(targetResource.resourceRefType)"}:::decision
-  n30 --> n31
-  n32["Llama a SchedulingProfessionalTimeService.assertRangeFree"]:::llamada
-  n31 -->|"sí"| n32
-  n33{"first.kind === 'ocupado'"}:::decision
+  n26(["409 CONFLICT El slot destino no tiene cupos"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a SchedulingBookingsRepository.findPatientBookingsOverlapping"]:::llamada
+  n25 -->|"no"| n27
+  n28[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots · LEE scheduling.schedulable_resources")]:::efecto
+  n27 --> n28
+  n29{"patientClash.length › 0"}:::decision
+  n28 --> n29
+  n30(["422 PRECONDITION_FAILED El paciente ya tiene una cita confirmada a esa hora{clash.resourceName ? ` en «${…}."]):::error
+  n29 -->|"sí"| n30
+  n31["Llama a SchedulingCatalogRepository.findResourceById"]:::llamada
+  n29 -->|"no"| n31
+  n32[("LEE scheduling.schedulable_resources")]:::efecto
+  n31 --> n32
+  n33{"targetResource && PRACTITIONER_PROFILE_TABLES.includes(targetResource.resourceRefType)"}:::decision
   n32 --> n33
-  n34{"first.patientProfileId"}:::decision
-  n33 -->|"no"| n34
-  n35["Llama a SchedulingBookingsRepository.findPatientNames"]:::llamada
-  n34 -->|"sí"| n35
-  n36[("LEE profiles.patient_profiles · LEE profiles.persons")]:::efecto
-  n35 --> n36
-  n37(["422 PRECONDITION_FAILED El profesional ya tiene {who} de {localTime( first.startAt, fir…} a {localTime( first…"]):::error
-  n33 -->|"sí"| n37
-  n36 --> n37
-  n34 -->|"no"| n37
-  n38["Llama a SchedulingBookingsRepository.findSlotForUpdate"]:::llamada
-  n31 -->|"no"| n38
-  n39[("LEE scheduling.bookable_slots")]:::efecto
+  n34["Llama a SchedulingProfessionalTimeService.assertRangeFree"]:::llamada
+  n33 -->|"sí"| n34
+  n35{"first.kind === 'ocupado'"}:::decision
+  n34 --> n35
+  n36{"first.patientProfileId"}:::decision
+  n35 -->|"no"| n36
+  n37["Llama a SchedulingBookingsRepository.findPatientNames"]:::llamada
+  n36 -->|"sí"| n37
+  n38[("LEE profiles.patient_profiles · LEE profiles.persons")]:::efecto
+  n37 --> n38
+  n39(["422 PRECONDITION_FAILED El profesional ya tiene {who} de {localTime( first.startAt, fir…} a {localTime( first…"]):::error
+  n35 -->|"sí"| n39
   n38 --> n39
-  n40{"origin"}:::decision
-  n39 --> n40
-  n41[("ACTUALIZA scheduling.bookable_slots")]:::efecto
-  n40 -->|"sí"| n41
-  n42{"origin.statusConceptId !== CONCEPTS.SLOT_BLOCKED"}:::decision
+  n36 -->|"no"| n39
+  n40["Llama a SchedulingBookingsRepository.findSlotForUpdate"]:::llamada
+  n33 -->|"no"| n40
+  n41[("LEE scheduling.bookable_slots")]:::efecto
+  n40 --> n41
+  n42{"origin"}:::decision
   n41 --> n42
   n43[("ACTUALIZA scheduling.bookable_slots")]:::efecto
   n42 -->|"sí"| n43
-  n44[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n44{"origin.statusConceptId !== CONCEPTS.SLOT_BLOCKED"}:::decision
   n43 --> n44
-  n42 -->|"no"| n44
-  n40 -->|"no"| n44
-  n45{"target.remainingCapacity === 0"}:::decision
-  n44 --> n45
+  n45[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n44 -->|"sí"| n45
   n46[("ACTUALIZA scheduling.bookable_slots")]:::efecto
-  n45 -->|"sí"| n46
-  n47[("ACTUALIZA scheduling.appointment_bookings · ACTUALIZA scheduling.appointment_bookings")]:::efecto
+  n45 --> n46
+  n44 -->|"no"| n46
+  n42 -->|"no"| n46
+  n47{"target.remainingCapacity === 0"}:::decision
   n46 --> n47
-  n45 -->|"no"| n47
-  n48["Llama a SchedulingBookingsRepository.recordReschedule"]:::llamada
-  n47 --> n48
-  n49[("CREA scheduling.booking_reschedules")]:::efecto
+  n48[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n47 -->|"sí"| n48
+  n49[("ACTUALIZA scheduling.appointment_bookings · ACTUALIZA scheduling.appointment_bookings")]:::efecto
   n48 --> n49
-  n50["Llama a AuditBookingHistoryAdapter.append"]:::llamada
+  n47 -->|"no"| n49
+  n50["Llama a SchedulingBookingsRepository.recordReschedule"]:::llamada
   n49 --> n50
-  n51["Llama a HistoryRepository.append"]:::llamada
+  n51[("CREA scheduling.booking_reschedules")]:::efecto
   n50 --> n51
-  n52{"!binding"}:::decision
+  n52["Llama a AuditBookingHistoryAdapter.append"]:::llamada
   n51 --> n52
-  n53(["500 INTERNAL Entidad de historial no registrada: {entity}"]):::error
-  n52 -->|"sí"| n53
-  n54[("LEE audit.appointment_bookings_history · ACTUALIZA audit.appointment_bookings_history · CREA audit.appointmen…")]:::efecto
-  n52 -->|"no"| n54
-  n55["Llama a BookingChangeNotifier.notifyChange"]:::llamada
-  n54 --> n55
-  n56["Llama a SchedulingNoticeRepository.describeBooking"]:::llamada
-  n55 --> n56
-  n57[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots")]:::efecto
+  n53["Llama a HistoryRepository.append"]:::llamada
+  n52 --> n53
+  n54{"!binding"}:::decision
+  n53 --> n54
+  n55(["500 INTERNAL Entidad de historial no registrada: {entity}"]):::error
+  n54 -->|"sí"| n55
+  n56[("LEE audit.appointment_bookings_history · ACTUALIZA audit.appointment_bookings_history · CREA audit.appointmen…")]:::efecto
+  n54 -->|"no"| n56
+  n57["Llama a BookingChangeNotifier.notifyChange"]:::llamada
   n56 --> n57
-  n58["Llama a SchedulingNoticeRepository.findResourceAccount"]:::llamada
+  n58["Llama a SchedulingNoticeRepository.describeBooking"]:::llamada
   n57 --> n58
-  n59[("LEE scheduling.schedulable_resources")]:::efecto
+  n59[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots")]:::efecto
   n58 --> n59
-  n60(("200 Responde con éxito")):::ok
+  n60["Llama a SchedulingNoticeRepository.findResourceAccount"]:::llamada
   n59 --> n60
+  n61[("LEE scheduling.schedulable_resources")]:::efecto
+  n60 --> n61
+  n62(("200 Responde con éxito")):::ok
+  n61 --> n62
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2549,7 +3106,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. POST /scheduling/bookings/{id}/start
+#### 23. POST /scheduling/bookings/{id}/start
 
 Iniciar la atención
 
@@ -2622,7 +3179,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. POST /scheduling/confirmation-rules/{id}/activate
+#### 24. POST /scheduling/confirmation-rules/{id}/activate
 
 Reactivar una regla desactivada
 
@@ -2666,7 +3223,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. POST /scheduling/confirmation-rules/{id}/deactivate
+#### 25. POST /scheduling/confirmation-rules/{id}/deactivate
 
 Desactivar una regla (sin borrado duro)
 
@@ -2710,7 +3267,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. DELETE /scheduling/exceptions/{id}
+#### 26. DELETE /scheduling/exceptions/{id}
 
 Eliminar una excepción de disponibilidad
 
@@ -2775,7 +3332,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. PATCH /scheduling/exceptions/{id}
+#### 27. PATCH /scheduling/exceptions/{id}
 
 Editar una excepción de disponibilidad
 
@@ -2879,7 +3436,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. POST /scheduling/holds/{holdToken}/confirm
+#### 28. POST /scheduling/holds/{holdToken}/confirm
 
 Confirmar la cita a partir de la reserva temporal
 
@@ -2981,7 +3538,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. POST /scheduling/holds/{holdToken}/request
+#### 29. POST /scheduling/holds/{holdToken}/request
 
 Solicitar la cita a partir de la reserva temporal
 
@@ -3100,7 +3657,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. POST /scheduling/internal/dispatch-reminders
+#### 30. POST /scheduling/internal/dispatch-reminders
 
 Despachar los recordatorios cuya hora ya llegó
 
@@ -3183,7 +3740,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. POST /scheduling/internal/expire-holds
+#### 31. POST /scheduling/internal/expire-holds
 
 Liberar las reservas temporales vencidas
 
@@ -3220,7 +3777,7 @@ flowchart TD
   n10 --> n11
   n12[("ACTUALIZA scheduling.bookable_slots")]:::efecto
   n11 --> n12
-  n13{"slot.practitionerServiceOfferingId"}:::decision
+  n13{"await this.serviceSlots.isOneOffOnDemand(tx, slot)"}:::decision
   n12 --> n13
   n14["Llama a ServiceSlotLifecycle.discardOneOffSlot"]:::llamada
   n13 -->|"sí"| n14
@@ -3243,7 +3800,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. POST /scheduling/internal/promote-waitlist/{slotId}
+#### 32. POST /scheduling/internal/promote-waitlist/{slotId}
 
 Promover candidatos de la lista de espera a un slot con cupo
 
@@ -3332,7 +3889,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. GET /scheduling/resources
+#### 33. GET /scheduling/resources
 
 Listar los recursos agendables de un tenant
 
@@ -3382,7 +3939,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 29. POST /scheduling/resources
+#### 34. POST /scheduling/resources
 
 Dar de alta un recurso agendable
 
@@ -3435,7 +3992,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 30. POST /scheduling/resources/{id}/close-slots
+#### 35. POST /scheduling/resources/{id}/close-slots
 
 Cerrar cupos sueltos, dejando el bloqueo que impide regenerarlos
 
@@ -3444,10 +4001,10 @@ Cerrar cupos sueltos, dejando el bloqueo que impide regenerarlos
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta agenda es de otro profesional: solo la administra quien atiende en ella. |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Recurso no encontrado; ResourceNotFoundException: Ninguno de esos cupos es de esta agenda |
-| 409 | `CONFLICT` | ConflictException: Esos ratos tienen pacientes citados: cancele cada cita antes de cerrarlos |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Eligió «Otro» como motivo: escriba cuál es |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta agenda es de otro profesional: solo la administra quien atiende en ella.; ForbiddenException: Esta agenda es de otra organización: no puede ver ni cancelar sus citas. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Recurso no encontrado; ResourceNotFoundException: Ninguno de esos cupos es de esta agenda; ResourceNotFoundException: Cita no encontrada |
+| 409 | `CONFLICT` | ConflictException: Esos ratos tienen pacientes citados: confirme para cancelar cada cita y avisar a cada persona; ConflictException: La cita ya está cancelada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Eligió «Otro» como motivo: escriba cuál es; PreconditionFailedException: Hay un paciente ya recibido en ese rato. Atiéndalo o cancele su cita desde la agenda antes de bloquear.; PreconditionFailedException: Puede cancelar hasta {Math.round(windowMinutes / 60)} horas antes del turno. Si ya no puede asistir, comuníquese con el consultorio. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -3487,25 +4044,81 @@ flowchart TD
   n16 --> n17
   n18(["404 NOT_FOUND Ninguno de esos cupos es de esta agenda"]):::error
   n17 -->|"sí"| n18
-  n19["Llama a SchedulingCatalogRepository.findBookingsOfSlots"]:::llamada
+  n19["Llama a BlockedBookingsCanceller.describe"]:::llamada
   n17 -->|"no"| n19
-  n20[("LEE scheduling.appointment_bookings")]:::efecto
+  n20["Llama a SchedulingCatalogRepository.findBookingsOfSlots"]:::llamada
   n19 --> n20
-  n21{"withPatient.length › 0"}:::decision
+  n21[("LEE scheduling.appointment_bookings")]:::efecto
   n20 --> n21
-  n22(["409 CONFLICT Esos ratos tienen pacientes citados: cancele cada cita antes de cerrarlos"]):::error
-  n21 -->|"sí"| n22
-  n23["Repite: por cada const slot de slots"]:::bucle
-  n21 -->|"no"| n23
-  n24[("ACTUALIZA scheduling.bookable_slots")]:::efecto
-  n23 -->|"cada elemento"| n24
-  n25["Llama a SchedulingCatalogRepository.createException"]:::llamada
+  n22["Llama a SchedulingCatalogRepository.findBookingsOfSlots"]:::llamada
+  n21 --> n22
+  n23[("LEE scheduling.appointment_bookings")]:::efecto
+  n22 --> n23
+  n24["Llama a SchedulingNoticeRepository.findDisplayNameForProfile"]:::llamada
+  n23 --> n24
+  n25[("LEE profiles.persons")]:::efecto
   n24 --> n25
-  n23 -->|"al terminar"| n25
-  n26[("CREA scheduling.availability_exceptions")]:::efecto
+  n26["Llama a CatalogAccess.assertMayReadAgendaBookings"]:::llamada
   n25 --> n26
-  n27(("200 Responde con éxito")):::ok
+  n27{"!actor.tenantIds?.includes(resource.tenantId)"}:::decision
   n26 --> n27
+  n28(["403 FORBIDDEN Esta agenda es de otra organización: no puede ver ni cancelar sus citas."]):::error
+  n27 -->|"sí"| n28
+  n29["Llama a BlockedBookingsCanceller.assertNobodyPresent"]:::llamada
+  n27 -->|"no"| n29
+  n30(["422 PRECONDITION_FAILED Hay un paciente ya recibido en ese rato. Atiéndalo o cancele su cita desde la agenda…"]):::error
+  n29 --> n30
+  n31{"affected.cancellable.length › 0 && dto.cancelAffectedBookings !== true"}:::decision
+  n32(["409 CONFLICT Esos ratos tienen pacientes citados: confirme para cancelar cada cita y avisar a cada persona"]):::error
+  n31 -->|"sí"| n32
+  n33{"affected.cancellable.length › 0"}:::decision
+  n31 -->|"no"| n33
+  n34["Llama a BlockedBookingsCanceller.cancelAll"]:::llamada
+  n33 -->|"sí"| n34
+  n35["Repite: por cada const booking de affected"]:::bucle
+  n34 --> n35
+  n36["Llama a CancelBookingUseCase.cancelInTransaction"]:::llamada
+  n35 -->|"cada elemento"| n36
+  n37{"!booking"}:::decision
+  n36 --> n37
+  n38(["404 NOT_FOUND Cita no encontrada"]):::error
+  n37 -->|"sí"| n38
+  n39{"booking.statusConceptId === CONCEPTS.BOOKING_CANCELLED"}:::decision
+  n37 -->|"no"| n39
+  n40(["409 CONFLICT La cita ya está cancelada"]):::error
+  n39 -->|"sí"| n40
+  n41{"blocksHolderCancellation(isHolderPatient, withinWindow, isNoShow)"}:::decision
+  n39 -->|"no"| n41
+  n42(["422 PRECONDITION_FAILED Puede cancelar hasta {Math.round(windowMinutes / 60)} horas antes del turno. Si ya no…"]):::error
+  n41 -->|"sí"| n42
+  n43[("ACTUALIZA scheduling.appointment_bookings")]:::efecto
+  n41 -->|"no"| n43
+  n44{"slot"}:::decision
+  n43 --> n44
+  n45[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n44 -->|"sí"| n45
+  n46{"slot.scheduleTemplateId === undefined || slot.scheduleTemplateId === null || // P36: el turno de un horario f…"}:::decision
+  n45 --> n46
+  n47{"slot.statusConceptId !== CONCEPTS.SLOT_BLOCKED"}:::decision
+  n46 -->|"no"| n47
+  n48[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n47 -->|"sí"| n48
+  n49["Repite: por cada const slot de slots"]:::bucle
+  n46 -->|"sí"| n49
+  n48 --> n49
+  n47 -->|"no"| n49
+  n44 -->|"no"| n49
+  n35 -->|"al terminar"| n49
+  n33 -->|"no"| n49
+  n50[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n49 -->|"cada elemento"| n50
+  n51["Llama a SchedulingCatalogRepository.createException"]:::llamada
+  n50 --> n51
+  n49 -->|"al terminar"| n51
+  n52[("CREA scheduling.availability_exceptions")]:::efecto
+  n51 --> n52
+  n53(("200 Responde con éxito")):::ok
+  n52 --> n53
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -3514,7 +4127,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 31. POST /scheduling/resources/{id}/delay
+#### 36. POST /scheduling/resources/{id}/delay
 
 Informar una demora que alcanza a toda la agenda del recurso
 
@@ -3606,7 +4219,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 32. GET /scheduling/resources/{id}/exceptions
+#### 37. GET /scheduling/resources/{id}/exceptions
 
 Listar las excepciones de disponibilidad de un recurso
 
@@ -3617,7 +4230,7 @@ Listar las excepciones de disponibilidad de un recurso
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta agenda es de otro profesional: solo la administra quien atiende en ella.; ForbiddenException: No puede ver los bloqueos de esta agenda |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Recurso no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana debe empezar antes de terminar |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana no es una fecha válida; PreconditionFailedException: La ventana debe empezar antes de terminar |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -3629,45 +4242,49 @@ flowchart TD
   n2 --> n3
   n4["Llama a ListExceptionsUseCase.execute"]:::llamada
   n3 --> n4
-  n5{"!(from ‹ to)"}:::decision
+  n5{"Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())"}:::decision
   n4 --> n5
-  n6(["422 PRECONDITION_FAILED La ventana debe empezar antes de terminar"]):::error
+  n6(["422 PRECONDITION_FAILED La ventana no es una fecha válida"]):::error
   n5 -->|"sí"| n6
-  n7["Llama a SchedulingCatalogRepository.findResourceById"]:::llamada
+  n7{"!(from ‹ to)"}:::decision
   n5 -->|"no"| n7
-  n8[("LEE scheduling.schedulable_resources")]:::efecto
-  n7 --> n8
-  n9{"!resource"}:::decision
-  n8 --> n9
-  n10(["404 NOT_FOUND Recurso no encontrado"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a CatalogAccess.mayAdministerResource"]:::llamada
-  n9 -->|"no"| n11
-  n12["Intenta"]:::intento
-  n11 --> n12
-  n13["Llama a CatalogAccess.assertActorResource"]:::llamada
-  n12 --> n13
-  n14{"!isOwnAgenda"}:::decision
+  n8(["422 PRECONDITION_FAILED La ventana debe empezar antes de terminar"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a SchedulingCatalogRepository.findResourceById"]:::llamada
+  n7 -->|"no"| n9
+  n10[("LEE scheduling.schedulable_resources")]:::efecto
+  n9 --> n10
+  n11{"!resource"}:::decision
+  n10 --> n11
+  n12(["404 NOT_FOUND Recurso no encontrado"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a CatalogAccess.mayAdministerResource"]:::llamada
+  n11 -->|"no"| n13
+  n14["Intenta"]:::intento
   n13 --> n14
-  n15(["403 FORBIDDEN Esta agenda es de otro profesional: solo la administra quien atiende en ella."]):::error
-  n14 -->|"sí"| n15
-  n16{"!mayRead && actor.patientProfileId !== undefined"}:::decision
-  n14 -->|"no"| n16
-  n17["Llama a SchedulingCatalogRepository.patientHasBookingWithResource"]:::llamada
+  n15["Llama a CatalogAccess.assertActorResource"]:::llamada
+  n14 --> n15
+  n16{"!isOwnAgenda"}:::decision
+  n15 --> n16
+  n17(["403 FORBIDDEN Esta agenda es de otro profesional: solo la administra quien atiende en ella."]):::error
   n16 -->|"sí"| n17
-  n18[("LEE scheduling.appointment_bookings")]:::efecto
-  n17 --> n18
-  n19{"!mayRead"}:::decision
-  n18 --> n19
-  n16 -->|"no"| n19
-  n20(["403 FORBIDDEN No puede ver los bloqueos de esta agenda"]):::error
-  n19 -->|"sí"| n20
-  n21["Llama a SchedulingCatalogRepository.findExceptionsByResourceInRange"]:::llamada
-  n19 -->|"no"| n21
-  n22[("LEE scheduling.availability_exceptions")]:::efecto
-  n21 --> n22
-  n23(("200 Responde con éxito")):::ok
-  n22 --> n23
+  n18{"!mayRead && actor.patientProfileId !== undefined"}:::decision
+  n16 -->|"no"| n18
+  n19["Llama a SchedulingCatalogRepository.patientHasBookingWithResource"]:::llamada
+  n18 -->|"sí"| n19
+  n20[("LEE scheduling.appointment_bookings")]:::efecto
+  n19 --> n20
+  n21{"!mayRead"}:::decision
+  n20 --> n21
+  n18 -->|"no"| n21
+  n22(["403 FORBIDDEN No puede ver los bloqueos de esta agenda"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a SchedulingCatalogRepository.findExceptionsByResourceInRange"]:::llamada
+  n21 -->|"no"| n23
+  n24[("LEE scheduling.availability_exceptions")]:::efecto
+  n23 --> n24
+  n25(("200 Responde con éxito")):::ok
+  n24 --> n25
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -3676,7 +4293,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 33. POST /scheduling/resources/{id}/exceptions
+#### 38. POST /scheduling/resources/{id}/exceptions
 
 Registrar una excepción de disponibilidad
 
@@ -3685,9 +4302,9 @@ Registrar una excepción de disponibilidad
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta agenda es de otro profesional: solo la administra quien atiende en ella.; ForbiddenException: Esta agenda es de otra organización: no puede ver ni cancelar sus citas. |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Recurso no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Eligió «Otro» como motivo: escriba cuál es; PreconditionFailedException: La excepción debe empezar antes de terminar; PreconditionFailedException: Tiene una cita confirmada en ese rato{first.resourceName ? ` en «${…}. Reprográmela primero o elija otro horario. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Eligió «Otro» como motivo: escriba cuál es; PreconditionFailedException: La excepción debe empezar antes de terminar; PreconditionFailedException: Hay un paciente ya recibido en ese rato. Atiéndalo o cancele su cita desde la agenda antes de bloquear.; PreconditionFailedException: Tiene una cita confirmada en ese rato{first.resourceName ? ` en «${…}. Reprográmela primero o elija otro horario.; PreconditionFailedException: Ese rato tiene {n} {n === 1 ? 'cita' : 'citas'} con paciente. Confirme para cancelarlas y avisar a cada persona. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -3717,40 +4334,58 @@ flowchart TD
   n11 --> n12
   n13(["404 NOT_FOUND Recurso no encontrado"]):::error
   n12 -->|"sí"| n13
-  n14{"!isAvailable && PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)"}:::decision
+  n14["Llama a CatalogAccess.assertActorResource"]:::llamada
   n12 -->|"no"| n14
-  n15["Llama a SchedulingProfessionalTimeService.confirmedBookings"]:::llamada
-  n14 -->|"sí"| n15
-  n16["Llama a SchedulingBookingsRepository.findProfessionalCommitmentsOverlapping"]:::llamada
-  n15 --> n16
-  n17[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots · LEE scheduling.schedulable_resources")]:::efecto
-  n16 --> n17
-  n18{"confirmed.length › 0"}:::decision
-  n17 --> n18
-  n19(["422 PRECONDITION_FAILED Tiene una cita confirmada en ese rato{first.resourceName ? ` en «${…}. Reprográmela p…"]):::error
-  n18 -->|"sí"| n19
-  n20["Llama a SchedulingCatalogRepository.createException"]:::llamada
-  n18 -->|"no"| n20
-  n14 -->|"no"| n20
-  n21[("CREA scheduling.availability_exceptions")]:::efecto
+  n15{"!isOwnAgenda"}:::decision
+  n14 --> n15
+  n16(["403 FORBIDDEN Esta agenda es de otro profesional: solo la administra quien atiende en ella."]):::error
+  n15 -->|"sí"| n16
+  n17{"!isAvailable && PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)"}:::decision
+  n15 -->|"no"| n17
+  n18["Llama a CreateExceptionUseCase.cancelBookingsOfBlock"]:::llamada
+  n17 -->|"sí"| n18
+  n19["Llama a SchedulingCatalogRepository.findSlotsOverlappingForUpdate"]:::llamada
+  n18 --> n19
+  n20[("LEE scheduling.bookable_slots")]:::efecto
+  n19 --> n20
+  n21["Llama a CatalogAccess.assertMayReadAgendaBookings"]:::llamada
   n20 --> n21
-  n22{"!isAvailable"}:::decision
+  n22{"!actor.tenantIds?.includes(resource.tenantId)"}:::decision
   n21 --> n22
-  n23["Llama a SchedulingCatalogRepository.findOpenSlotsInWindow"]:::llamada
+  n23(["403 FORBIDDEN Esta agenda es de otra organización: no puede ver ni cancelar sus citas."]):::error
   n22 -->|"sí"| n23
-  n24[("LEE scheduling.bookable_slots")]:::efecto
-  n23 --> n24
-  n25["Repite: por cada const slot de overlapping"]:::bucle
+  n24["Llama a BlockedBookingsCanceller.assertNobodyPresent"]:::llamada
+  n22 -->|"no"| n24
+  n25(["422 PRECONDITION_FAILED Hay un paciente ya recibido en ese rato. Atiéndalo o cancele su cita desde la agenda…"]):::error
   n24 --> n25
-  n26{"slot.statusConceptId === CONCEPTS.SLOT_OPEN && untouched"}:::decision
-  n25 -->|"cada elemento"| n26
-  n27[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n26{"elsewhere.length › 0"}:::decision
+  n27(["422 PRECONDITION_FAILED Tiene una cita confirmada en ese rato{first.resourceName ? ` en «${…}. Reprográmela p…"]):::error
   n26 -->|"sí"| n27
-  n28(("201 Responde con éxito")):::ok
-  n27 --> n28
+  n28["Llama a BlockedBookingsCanceller.assertConfirmed"]:::llamada
   n26 -->|"no"| n28
-  n25 -->|"al terminar"| n28
-  n22 -->|"no"| n28
+  n29(["422 PRECONDITION_FAILED Ese rato tiene {n} {n === 1 ? 'cita' : 'citas'} con paciente. Confirme para cancelarl…"]):::error
+  n28 --> n29
+  n30["Llama a SchedulingCatalogRepository.createException"]:::llamada
+  n17 -->|"no"| n30
+  n31[("CREA scheduling.availability_exceptions")]:::efecto
+  n30 --> n31
+  n32{"!isAvailable"}:::decision
+  n31 --> n32
+  n33["Llama a SchedulingCatalogRepository.findOpenSlotsInWindow"]:::llamada
+  n32 -->|"sí"| n33
+  n34[("LEE scheduling.bookable_slots")]:::efecto
+  n33 --> n34
+  n35["Repite: por cada const slot de overlapping"]:::bucle
+  n34 --> n35
+  n36{"slot.statusConceptId === CONCEPTS.SLOT_OPEN && untouched"}:::decision
+  n35 -->|"cada elemento"| n36
+  n37[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n36 -->|"sí"| n37
+  n38(("201 Responde con éxito")):::ok
+  n37 --> n38
+  n36 -->|"no"| n38
+  n35 -->|"al terminar"| n38
+  n32 -->|"no"| n38
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -3759,7 +4394,229 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 34. POST /scheduling/resources/{id}/shift-slots
+#### 39. GET /scheduling/resources/{id}/flexible-availability
+
+Horas que se pueden pedir en un horario flexible
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La agenda indicada pertenece a otra organización. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Agenda no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana debe empezar antes de terminar.; PreconditionFailedException: Se pueden mirar hasta {MAX_QUERY_DAYS} días de una vez. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · parámetros de consulta (400)…"}}:::acceso
+  n1 --> n2
+  n3["Llama a SchedulingFlexibleBookingService.availability"]:::llamada
+  n2 --> n3
+  n4{"!(to.getTime() › from.getTime())"}:::decision
+  n3 --> n4
+  n5(["422 PRECONDITION_FAILED La ventana debe empezar antes de terminar."]):::error
+  n4 -->|"sí"| n5
+  n6{"to.getTime() - from.getTime() › MAX_QUERY_DAYS * MS_PER_DAY"}:::decision
+  n4 -->|"no"| n6
+  n7(["422 PRECONDITION_FAILED Se pueden mirar hasta {MAX_QUERY_DAYS} días de una vez."]):::error
+  n6 -->|"sí"| n7
+  n8["Transacción: transactional(…)"]:::transaccion
+  n6 -->|"no"| n8
+  n9["Llama a SchedulingFlexibleBookingService.practitionerSite"]:::llamada
+  n8 --> n9
+  n10["Llama a SchedulingCatalogRepository.findResourceById"]:::llamada
+  n9 --> n10
+  n11[("LEE scheduling.schedulable_resources")]:::efecto
+  n10 --> n11
+  n12{"site === null || !PRACTITIONER_PROFILE_TABLES.includes(site.resourceRefType)"}:::decision
+  n11 --> n12
+  n13(["404 NOT_FOUND Agenda no encontrada"]):::error
+  n12 -->|"sí"| n13
+  n14{"!this.siteInScope(site, actor)"}:::decision
+  n12 -->|"no"| n14
+  n15(["403 FORBIDDEN La agenda indicada pertenece a otra organización."]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a SchedulingFlexibleBookingService.offersOf"]:::llamada
+  n14 -->|"no"| n16
+  n17["Llama a SchedulingCatalogRepository.findFlexibleTemplatesOfResource"]:::llamada
+  n16 --> n17
+  n18[("LEE scheduling.schedule_templates · LEE scheduling.schedule_rules")]:::efecto
+  n17 --> n18
+  n19["Repite: por cada const { template, rules } de templates"]:::bucle
+  n18 --> n19
+  n20["Llama a SchedulingCatalogRepository.findPolicyById"]:::llamada
+  n19 -->|"cada elemento"| n20
+  n21[("LEE scheduling.booking_policies")]:::efecto
+  n20 --> n21
+  n22["Llama a SchedulingServiceAgendaService.practitionerBusyTime"]:::llamada
+  n21 --> n22
+  n19 -->|"al terminar"| n22
+  n23["Llama a SchedulingOfferingsRepository.findLiveHoldsOfProfessional"]:::llamada
+  n22 --> n23
+  n24[("LEE scheduling.slot_holds · LEE scheduling.bookable_slots · LEE scheduling.schedulable_resources")]:::efecto
+  n23 --> n24
+  n25["Llama a SchedulingOfferingsRepository.findLiveServiceSlotsOfProfessional"]:::llamada
+  n24 --> n25
+  n26[("LEE scheduling.bookable_slots · LEE scheduling.schedulable_resources · LEE scheduling.practitioner_service_of…")]:::efecto
+  n25 --> n26
+  n27["Llama a SchedulingOfferingsRepository.findLiveFlexibleSlotsOfProfessional"]:::llamada
+  n26 --> n27
+  n28[("LEE scheduling.bookable_slots · LEE scheduling.schedulable_resources · LEE scheduling.schedule_templates · LE…")]:::efecto
+  n27 --> n28
+  n29(("200 Responde con éxito")):::ok
+  n28 --> n29
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 40. POST /scheduling/resources/{id}/flexible-holds
+
+Retener una hora de un horario flexible
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No cuenta con autorización de tutoría sobre el paciente indicado; ForbiddenException: La agenda indicada pertenece a otra organización. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Agenda no encontrada |
+| 409 | `CONFLICT` | ConflictException: Esa hora ya no está disponible. Elija otra.; ConflictException: El paciente alcanzó el máximo de citas activas |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La hora pedida tiene que caer en un minuto entero.; PreconditionFailedException: Ese horario ya pasó.; PreconditionFailedException: Su vínculo con esta organización todavía está pendiente de aprobación. / Su vínculo con esta organización ya no está vigente.; PreconditionFailedException: Esa hora no está dentro del horario que atiende este profesional.; PreconditionFailedException: Esa cita empieza demasiado pronto: hay que pedirla con al menos {notice} minutos de anticipación.; PreconditionFailedException: Sólo se puede pedir con hasta {advance} días de anticipación. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a SchedulingFlexibleBookingService.placeHold"]:::llamada
+  n2 --> n3
+  n4{"dto.patientProfileId !== undefined && this.isPatientActor(actor)"}:::decision
+  n3 --> n4
+  n5["Llama a ProfilesPatientRepresentationAdapter.assertMayActForPatient"]:::llamada
+  n4 -->|"sí"| n5
+  n6["Llama a PatientRepresentationService.assertMayActForPatient"]:::llamada
+  n5 --> n6
+  n7(["403 FORBIDDEN No cuenta con autorización de tutoría sobre el paciente indicado"]):::error
+  n6 --> n7
+  n8{"!isWholeMinute(startAt)"}:::decision
+  n4 -->|"no"| n8
+  n9(["422 PRECONDITION_FAILED La hora pedida tiene que caer en un minuto entero."]):::error
+  n8 -->|"sí"| n9
+  n10["Transacción: transactional(…)"]:::transaccion
+  n8 -->|"no"| n10
+  n11["Llama a SchedulingFlexibleBookingService.practitionerSite"]:::llamada
+  n10 --> n11
+  n12["Llama a SchedulingCatalogRepository.findResourceById"]:::llamada
+  n11 --> n12
+  n13[("LEE scheduling.schedulable_resources")]:::efecto
+  n12 --> n13
+  n14{"site === null || !PRACTITIONER_PROFILE_TABLES.includes(site.resourceRefType)"}:::decision
+  n13 --> n14
+  n15(["404 NOT_FOUND Agenda no encontrada"]):::error
+  n14 -->|"sí"| n15
+  n16{"!this.siteInScope(site, actor)"}:::decision
+  n14 -->|"no"| n16
+  n17(["403 FORBIDDEN La agenda indicada pertenece a otra organización."]):::error
+  n16 -->|"sí"| n17
+  n18{"startAt.getTime() ‹= now.getTime()"}:::decision
+  n16 -->|"no"| n18
+  n19(["422 PRECONDITION_FAILED Ese horario ya pasó."]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a SchedulingFlexibleBookingService.assertAffiliationCurrent"]:::llamada
+  n18 -->|"no"| n20
+  n21["Llama a PractitionerAffiliationGateService.evaluate"]:::llamada
+  n20 --> n21
+  n22["Llama a ProfilesAffiliationsAdapter.findOfPractitioner"]:::llamada
+  n21 --> n22
+  n23[("LEE profiles.practitioner_affiliations")]:::efecto
+  n22 --> n23
+  n24["Llama a ProfilesAffiliationsAdapter.tenantsOfSites"]:::llamada
+  n23 --> n24
+  n25[("LEE practice.practice_sites · LEE practice.practices")]:::efecto
+  n24 --> n25
+  n26(["422 PRECONDITION_FAILED Su vínculo con esta organización todavía está pendiente de aprobación. / Su vínculo c…"]):::error
+  n25 --> n26
+  n27["Llama a SchedulingFlexibleBookingService.offersOf"]:::llamada
+  n28["Llama a SchedulingCatalogRepository.findFlexibleTemplatesOfResource"]:::llamada
+  n27 --> n28
+  n29[("LEE scheduling.schedule_templates · LEE scheduling.schedule_rules")]:::efecto
+  n28 --> n29
+  n30["Repite: por cada const { template, rules } de templates"]:::bucle
+  n29 --> n30
+  n31["Llama a SchedulingCatalogRepository.findPolicyById"]:::llamada
+  n30 -->|"cada elemento"| n31
+  n32[("LEE scheduling.booking_policies")]:::efecto
+  n31 --> n32
+  n33{"inBand.length === 0"}:::decision
+  n32 --> n33
+  n30 -->|"al terminar"| n33
+  n34(["422 PRECONDITION_FAILED Esa hora no está dentro del horario que atiende este profesional."]):::error
+  n33 -->|"sí"| n34
+  n35["Llama a SchedulingServiceAgendaService.practitionerBusyTime"]:::llamada
+  n33 -->|"no"| n35
+  n36["Llama a SchedulingOfferingsRepository.findLiveHoldsOfProfessional"]:::llamada
+  n35 --> n36
+  n37[("LEE scheduling.slot_holds · LEE scheduling.bookable_slots · LEE scheduling.schedulable_resources")]:::efecto
+  n36 --> n37
+  n38["Llama a SchedulingOfferingsRepository.findLiveServiceSlotsOfProfessional"]:::llamada
+  n37 --> n38
+  n39[("LEE scheduling.bookable_slots · LEE scheduling.schedulable_resources · LEE scheduling.practitioner_service_of…")]:::efecto
+  n38 --> n39
+  n40["Llama a SchedulingOfferingsRepository.findLiveFlexibleSlotsOfProfessional"]:::llamada
+  n39 --> n40
+  n41[("LEE scheduling.bookable_slots · LEE scheduling.schedulable_resources · LEE scheduling.schedule_templates · LE…")]:::efecto
+  n40 --> n41
+  n42{"offer === undefined"}:::decision
+  n41 --> n42
+  n43(["409 CONFLICT Esa hora ya no está disponible. Elija otra."]):::error
+  n42 -->|"sí"| n43
+  n44["Llama a SchedulingFlexibleBookingService.assertPolicy"]:::llamada
+  n42 -->|"no"| n44
+  n45{"startAt.getTime() ‹ now.getTime() + notice * MS_PER_MINUTE"}:::decision
+  n44 --> n45
+  n46(["422 PRECONDITION_FAILED Esa cita empieza demasiado pronto: hay que pedirla con al menos {notice} minutos de a…"]):::error
+  n45 -->|"sí"| n46
+  n47{"advance !== undefined && startAt.getTime() › now.getTime() + advance * MS_PER_DAY"}:::decision
+  n45 -->|"no"| n47
+  n48(["422 PRECONDITION_FAILED Sólo se puede pedir con hasta {advance} días de anticipación."]):::error
+  n47 -->|"sí"| n48
+  n49["Llama a SchedulingFlexibleBookingService.assertPatientBelowCap"]:::llamada
+  n47 -->|"no"| n49
+  n50["Llama a SchedulingBookingsRepository.countActiveBookingsForPatient"]:::llamada
+  n49 --> n50
+  n51[("LEE scheduling.appointment_bookings")]:::efecto
+  n50 --> n51
+  n52{"active ›= policy.maxActivePerPatient"}:::decision
+  n51 --> n52
+  n53(["409 CONFLICT El paciente alcanzó el máximo de citas activas"]):::error
+  n52 -->|"sí"| n53
+  n54["Llama a SchedulingCatalogRepository.createSlot"]:::llamada
+  n52 -->|"no"| n54
+  n55[("CREA scheduling.bookable_slots")]:::efecto
+  n54 --> n55
+  n56["Llama a SchedulingBookingsRepository.createHold"]:::llamada
+  n55 --> n56
+  n57[("CREA scheduling.slot_holds")]:::efecto
+  n56 --> n57
+  n58(("201 Responde con éxito")):::ok
+  n57 --> n58
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 41. POST /scheduling/resources/{id}/shift-slots
 
 Correr los cupos de una agenda N minutos
 
@@ -3849,7 +4706,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 35. GET /scheduling/resources/{id}/slots
+#### 42. GET /scheduling/resources/{id}/slots
 
 UC-41-14: agenda publicada del recurso en una ventana
 
@@ -3902,7 +4759,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 36. GET /scheduling/resources/{id}/templates
+#### 43. GET /scheduling/resources/{id}/templates
 
 Listar las plantillas de agenda de un recurso
 
@@ -3956,7 +4813,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 37. POST /scheduling/resources/{id}/templates
+#### 44. POST /scheduling/resources/{id}/templates
 
 Publicar una plantilla de agenda con sus franjas
 
@@ -4046,7 +4903,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 38. GET /scheduling/resources/{resourceId}/waitlist
+#### 45. GET /scheduling/resources/{resourceId}/waitlist
 
 Listar quiénes esperan turno en una agenda
 
@@ -4094,7 +4951,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 39. GET /scheduling/service-availability
+#### 46. GET /scheduling/service-availability
 
 Horarios donde cabe un servicio
 
@@ -4182,8 +5039,12 @@ flowchart TD
   n34 --> n35
   n36[("LEE scheduling.bookable_slots · LEE scheduling.schedulable_resources · LEE scheduling.practitioner_service_of…")]:::efecto
   n35 --> n36
-  n37(("200 Responde con éxito")):::ok
+  n37["Llama a SchedulingOfferingsRepository.findLiveFlexibleSlotsOfProfessional"]:::llamada
   n36 --> n37
+  n38[("LEE scheduling.bookable_slots · LEE scheduling.schedulable_resources · LEE scheduling.schedule_templates · LE…")]:::efecto
+  n37 --> n38
+  n39(("200 Responde con éxito")):::ok
+  n38 --> n39
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4192,7 +5053,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 40. GET /scheduling/service-offerings
+#### 47. GET /scheduling/service-offerings
 
 Los servicios que ofrece un profesional
 
@@ -4235,7 +5096,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 41. POST /scheduling/service-offerings
+#### 48. POST /scheduling/service-offerings
 
 Declarar cómo ofrezco un servicio
 
@@ -4312,7 +5173,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 42. PATCH /scheduling/service-offerings/{id}
+#### 49. PATCH /scheduling/service-offerings/{id}
 
 Editar o apagar la oferta de un servicio
 
@@ -4391,7 +5252,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 43. POST /scheduling/service-offerings/{id}/holds
+#### 50. POST /scheduling/service-offerings/{id}/holds
 
 Retener el turno de un servicio
 
@@ -4508,45 +5369,49 @@ flowchart TD
   n48 --> n49
   n50[("LEE scheduling.bookable_slots · LEE scheduling.schedulable_resources · LEE scheduling.practitioner_service_of…")]:::efecto
   n49 --> n50
-  n51{"availableGroup === undefined"}:::decision
+  n51["Llama a SchedulingOfferingsRepository.findLiveFlexibleSlotsOfProfessional"]:::llamada
   n50 --> n51
-  n52(["409 CONFLICT Ese horario ya no está disponible para este servicio. Elija otro."]):::error
-  n51 -->|"sí"| n52
-  n53["Llama a SchedulingServiceBookingService.assertPolicy"]:::llamada
-  n51 -->|"no"| n53
-  n54{"startAt.getTime() ‹ now.getTime() + group.minNoticeMinutes * MS_PER_MINUTE"}:::decision
-  n53 --> n54
-  n55(["422 PRECONDITION_FAILED Esa cita empieza demasiado pronto: hay que pedirla con al menos {group.minNoticeMinut…"]):::error
-  n54 -->|"sí"| n55
-  n56{"group.maxAdvanceDays !== undefined && startAt.getTime() › now.getTime() + group.maxAdvanceDays * MS_PER_DAY"}:::decision
-  n54 -->|"no"| n56
-  n57(["422 PRECONDITION_FAILED Sólo se puede pedir con hasta {group.maxAdvanceDays} días de anticipación."]):::error
+  n52[("LEE scheduling.bookable_slots · LEE scheduling.schedulable_resources · LEE scheduling.schedule_templates · LE…")]:::efecto
+  n51 --> n52
+  n53{"availableGroup === undefined"}:::decision
+  n52 --> n53
+  n54(["409 CONFLICT Ese horario ya no está disponible para este servicio. Elija otro."]):::error
+  n53 -->|"sí"| n54
+  n55["Llama a SchedulingServiceBookingService.assertPolicy"]:::llamada
+  n53 -->|"no"| n55
+  n56{"startAt.getTime() ‹ now.getTime() + group.minNoticeMinutes * MS_PER_MINUTE"}:::decision
+  n55 --> n56
+  n57(["422 PRECONDITION_FAILED Esa cita empieza demasiado pronto: hay que pedirla con al menos {group.minNoticeMinut…"]):::error
   n56 -->|"sí"| n57
-  n58["Llama a SchedulingOfferingsRepository.findCatalogItem"]:::llamada
+  n58{"group.maxAdvanceDays !== undefined && startAt.getTime() › now.getTime() + group.maxAdvanceDays * MS_PER_DAY"}:::decision
   n56 -->|"no"| n58
-  n59[("LEE billing.service_catalog")]:::efecto
-  n58 --> n59
-  n60["Llama a SchedulingServiceAgendaService.retract"]:::llamada
-  n59 --> n60
-  n61["Llama a SchedulingCatalogRepository.findOpenSlotsOfProfessionalInWindow"]:::llamada
+  n59(["422 PRECONDITION_FAILED Sólo se puede pedir con hasta {group.maxAdvanceDays} días de anticipación."]):::error
+  n58 -->|"sí"| n59
+  n60["Llama a SchedulingOfferingsRepository.findCatalogItem"]:::llamada
+  n58 -->|"no"| n60
+  n61[("LEE billing.service_catalog")]:::efecto
   n60 --> n61
-  n62[("LEE scheduling.schedulable_resources · LEE scheduling.bookable_slots")]:::efecto
+  n62["Llama a SchedulingServiceAgendaService.retract"]:::llamada
   n61 --> n62
-  n63["Repite: por cada const free de freeOnes"]:::bucle
+  n63["Llama a SchedulingCatalogRepository.findOpenSlotsOfProfessionalInWindow"]:::llamada
   n62 --> n63
-  n64[("ACTUALIZA scheduling.bookable_slots")]:::efecto
-  n63 -->|"cada elemento"| n64
-  n65["Llama a SchedulingCatalogRepository.createSlot"]:::llamada
+  n64[("LEE scheduling.schedulable_resources · LEE scheduling.bookable_slots")]:::efecto
+  n63 --> n64
+  n65["Repite: por cada const free de freeOnes"]:::bucle
   n64 --> n65
-  n63 -->|"al terminar"| n65
-  n66[("CREA scheduling.bookable_slots")]:::efecto
-  n65 --> n66
-  n67["Llama a SchedulingBookingsRepository.createHold"]:::llamada
+  n66[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n65 -->|"cada elemento"| n66
+  n67["Llama a SchedulingCatalogRepository.createSlot"]:::llamada
   n66 --> n67
-  n68[("CREA scheduling.slot_holds")]:::efecto
+  n65 -->|"al terminar"| n67
+  n68[("CREA scheduling.bookable_slots")]:::efecto
   n67 --> n68
-  n69(("201 Responde con éxito")):::ok
+  n69["Llama a SchedulingBookingsRepository.createHold"]:::llamada
   n68 --> n69
+  n70[("CREA scheduling.slot_holds")]:::efecto
+  n69 --> n70
+  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4555,7 +5420,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 44. GET /scheduling/slots
+#### 51. GET /scheduling/slots
 
 Consultar los cupos de una ventana
 
@@ -4599,7 +5464,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 45. POST /scheduling/slots/{id}/holds
+#### 52. POST /scheduling/slots/{id}/holds
 
 Reservar temporalmente un cupo del slot
 
@@ -4691,7 +5556,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 46. DELETE /scheduling/templates/{id}
+#### 53. DELETE /scheduling/templates/{id}
 
 Retirar una plantilla de agenda y soltar sus cupos libres
 
@@ -4700,8 +5565,10 @@ Retirar una plantilla de agenda y soltar sus cupos libres
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta agenda es de otro profesional: solo la administra quien atiende en ella. |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Plantilla no encontrada; ResourceNotFoundException: Recurso de la plantilla no encontrado |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta agenda es de otro profesional: solo la administra quien atiende en ella.; ForbiddenException: Esta agenda es de otra organización: no puede ver ni cancelar sus citas. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Plantilla no encontrada; ResourceNotFoundException: Recurso de la plantilla no encontrado; ResourceNotFoundException: Cita no encontrada |
+| 409 | `CONFLICT` | ConflictException: La cita ya está cancelada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Hay un paciente ya recibido en ese rato. Atiéndalo o cancele su cita desde la agenda antes de bloquear.; PreconditionFailedException: Puede cancelar hasta {Math.round(windowMinutes / 60)} horas antes del turno. Si ya no puede asistir, comuníquese con el consultorio. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -4737,33 +5604,110 @@ flowchart TD
   n14 --> n15
   n16(["403 FORBIDDEN Esta agenda es de otro profesional: solo la administra quien atiende en ella."]):::error
   n15 -->|"sí"| n16
-  n17["Llama a SchedulingCatalogRepository.findBookingsOfTemplate"]:::llamada
+  n17{"options.cancelAffectedBookings"}:::decision
   n15 -->|"no"| n17
-  n18[("LEE scheduling.bookable_slots · LEE scheduling.appointment_bookings · LEE scheduling.appointment_bookings · L…")]:::efecto
-  n17 --> n18
-  n19["Llama a SchedulingCatalogRepository.retireTemplate"]:::llamada
+  n18["Llama a CatalogAccess.assertMayReadAgendaBookings"]:::llamada
+  n17 -->|"sí"| n18
+  n19{"!actor.tenantIds?.includes(resource.tenantId)"}:::decision
   n18 --> n19
-  n20[("LEE scheduling.bookable_slots")]:::efecto
-  n19 --> n20
-  n21{"slots.length › 0"}:::decision
-  n20 --> n21
-  n22[("LEE scheduling.appointment_bookings · LEE scheduling.booking_reschedules")]:::efecto
-  n21 -->|"sí"| n22
-  n23{"freeOnes.length › 0"}:::decision
+  n20(["403 FORBIDDEN Esta agenda es de otra organización: no puede ver ni cancelar sus citas."]):::error
+  n19 -->|"sí"| n20
+  n21["Llama a SchedulingCatalogRepository.findSlotsOfTemplateForUpdate"]:::llamada
+  n19 -->|"no"| n21
+  n22[("LEE scheduling.bookable_slots")]:::efecto
+  n21 --> n22
+  n23["Llama a BlockedBookingsCanceller.describe"]:::llamada
   n22 --> n23
-  n24[("BORRA scheduling.slot_holds · BORRA scheduling.bookable_slots")]:::efecto
-  n23 -->|"sí"| n24
-  n25[("LEE scheduling.schedule_templates")]:::efecto
+  n24["Llama a SchedulingCatalogRepository.findBookingsOfSlots"]:::llamada
+  n23 --> n24
+  n25[("LEE scheduling.appointment_bookings")]:::efecto
   n24 --> n25
-  n23 -->|"no"| n25
-  n21 -->|"no"| n25
-  n26{"template"}:::decision
+  n26["Llama a SchedulingCatalogRepository.findBookingsOfSlots"]:::llamada
   n25 --> n26
-  n27[("ACTUALIZA scheduling.schedule_templates")]:::efecto
-  n26 -->|"sí"| n27
-  n28(("200 Responde con éxito")):::ok
+  n27[("LEE scheduling.appointment_bookings")]:::efecto
+  n26 --> n27
+  n28["Llama a SchedulingNoticeRepository.findDisplayNameForProfile"]:::llamada
   n27 --> n28
-  n26 -->|"no"| n28
+  n29[("LEE profiles.persons")]:::efecto
+  n28 --> n29
+  n30["Llama a BlockedBookingsCanceller.assertNobodyPresent"]:::llamada
+  n29 --> n30
+  n31(["422 PRECONDITION_FAILED Hay un paciente ya recibido en ese rato. Atiéndalo o cancele su cita desde la agenda…"]):::error
+  n30 --> n31
+  n32{"affected.cancellable.length › 0"}:::decision
+  n33["Llama a BlockedBookingsCanceller.cancelAll"]:::llamada
+  n32 -->|"sí"| n33
+  n34["Repite: por cada const booking de affected"]:::bucle
+  n33 --> n34
+  n35["Llama a CancelBookingUseCase.cancelInTransaction"]:::llamada
+  n34 -->|"cada elemento"| n35
+  n36{"!booking"}:::decision
+  n35 --> n36
+  n37(["404 NOT_FOUND Cita no encontrada"]):::error
+  n36 -->|"sí"| n37
+  n38{"booking.statusConceptId === CONCEPTS.BOOKING_CANCELLED"}:::decision
+  n36 -->|"no"| n38
+  n39(["409 CONFLICT La cita ya está cancelada"]):::error
+  n38 -->|"sí"| n39
+  n40{"blocksHolderCancellation(isHolderPatient, withinWindow, isNoShow)"}:::decision
+  n38 -->|"no"| n40
+  n41(["422 PRECONDITION_FAILED Puede cancelar hasta {Math.round(windowMinutes / 60)} horas antes del turno. Si ya no…"]):::error
+  n40 -->|"sí"| n41
+  n42[("ACTUALIZA scheduling.appointment_bookings")]:::efecto
+  n40 -->|"no"| n42
+  n43{"slot"}:::decision
+  n42 --> n43
+  n44[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n43 -->|"sí"| n44
+  n45{"slot.scheduleTemplateId === undefined || slot.scheduleTemplateId === null || // P36: el turno de un horario f…"}:::decision
+  n44 --> n45
+  n46{"slot.statusConceptId !== CONCEPTS.SLOT_BLOCKED"}:::decision
+  n45 -->|"no"| n46
+  n47[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n46 -->|"sí"| n47
+  n48["Llama a SchedulingCatalogRepository.findBookingsOfTemplate"]:::llamada
+  n45 -->|"sí"| n48
+  n47 --> n48
+  n46 -->|"no"| n48
+  n43 -->|"no"| n48
+  n34 -->|"al terminar"| n48
+  n32 -->|"no"| n48
+  n17 -->|"no"| n48
+  n49[("LEE scheduling.bookable_slots · LEE scheduling.appointment_bookings · LEE scheduling.appointment_bookings · L…")]:::efecto
+  n48 --> n49
+  n50["Llama a SchedulingCatalogRepository.retireTemplate"]:::llamada
+  n49 --> n50
+  n51["Llama a SchedulingCatalogRepository.findSlotsOfTemplateForUpdate"]:::llamada
+  n50 --> n51
+  n52[("LEE scheduling.bookable_slots")]:::efecto
+  n51 --> n52
+  n53{"slots.length › 0"}:::decision
+  n52 --> n53
+  n54[("LEE scheduling.appointment_bookings · LEE scheduling.booking_reschedules")]:::efecto
+  n53 -->|"sí"| n54
+  n55["Repite: por cada const slot de slots"]:::bucle
+  n54 --> n55
+  n56{"untouchable.has(slot.id) && slot.statusConceptId !== keptSlotStatusConceptId"}:::decision
+  n55 -->|"cada elemento"| n56
+  n57[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n56 -->|"sí"| n57
+  n58{"freeOnes.length › 0"}:::decision
+  n57 --> n58
+  n56 -->|"no"| n58
+  n55 -->|"al terminar"| n58
+  n59[("BORRA scheduling.slot_holds · BORRA scheduling.bookable_slots")]:::efecto
+  n58 -->|"sí"| n59
+  n60[("LEE scheduling.schedule_templates")]:::efecto
+  n59 --> n60
+  n58 -->|"no"| n60
+  n53 -->|"no"| n60
+  n61{"template"}:::decision
+  n60 --> n61
+  n62[("ACTUALIZA scheduling.schedule_templates")]:::efecto
+  n61 -->|"sí"| n62
+  n63(("200 Responde con éxito")):::ok
+  n62 --> n63
+  n61 -->|"no"| n63
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4772,7 +5716,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 47. PATCH /scheduling/templates/{id}
+#### 54. PATCH /scheduling/templates/{id}
 
 Editar una plantilla de agenda ya publicada
 
@@ -4883,7 +5827,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 48. POST /scheduling/templates/{id}/generate-slots
+#### 55. POST /scheduling/templates/{id}/generate-slots
 
 Materializar los slots de la plantilla en una ventana
 
@@ -4970,7 +5914,85 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 49. POST /scheduling/templates/{id}/reactivate
+#### 56. GET /scheduling/templates/{id}/live-bookings
+
+Listar las citas vivas de una plantilla antes de retirarla
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta agenda es de otro profesional: solo la administra quien atiende en ella.; ForbiddenException: Esta agenda es de otra organización: no puede ver ni cancelar sus citas. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Plantilla no encontrada; ResourceNotFoundException: Recurso de la plantilla no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a SchedulingCatalogService.listTemplateLiveBookings"]:::llamada
+  n2 --> n3
+  n4["Llama a ListTemplateLiveBookingsUseCase.execute"]:::llamada
+  n3 --> n4
+  n5["Llama a SchedulingCatalogRepository.findTemplateById"]:::llamada
+  n4 --> n5
+  n6[("LEE scheduling.schedule_templates")]:::efecto
+  n5 --> n6
+  n7{"!template"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a SchedulingCatalogRepository.findResourceById"]:::llamada
+  n7 -->|"no"| n9
+  n10[("LEE scheduling.schedulable_resources")]:::efecto
+  n9 --> n10
+  n11{"!resource"}:::decision
+  n10 --> n11
+  n12(["404 NOT_FOUND Recurso de la plantilla no encontrado"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a CatalogAccess.assertActorResource"]:::llamada
+  n11 -->|"no"| n13
+  n14{"!isOwnAgenda"}:::decision
+  n13 --> n14
+  n15(["403 FORBIDDEN Esta agenda es de otro profesional: solo la administra quien atiende en ella."]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a CatalogAccess.assertMayReadAgendaBookings"]:::llamada
+  n14 -->|"no"| n16
+  n17{"!actor.tenantIds?.includes(resource.tenantId)"}:::decision
+  n16 --> n17
+  n18(["403 FORBIDDEN Esta agenda es de otra organización: no puede ver ni cancelar sus citas."]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a SchedulingCatalogRepository.findSlotsOfTemplate"]:::llamada
+  n17 -->|"no"| n19
+  n20[("LEE scheduling.bookable_slots")]:::efecto
+  n19 --> n20
+  n21["Llama a BlockedBookingsCanceller.describe"]:::llamada
+  n20 --> n21
+  n22["Llama a SchedulingCatalogRepository.findBookingsOfSlots"]:::llamada
+  n21 --> n22
+  n23[("LEE scheduling.appointment_bookings")]:::efecto
+  n22 --> n23
+  n24["Llama a SchedulingCatalogRepository.findBookingsOfSlots"]:::llamada
+  n23 --> n24
+  n25[("LEE scheduling.appointment_bookings")]:::efecto
+  n24 --> n25
+  n26["Llama a SchedulingNoticeRepository.findDisplayNameForProfile"]:::llamada
+  n25 --> n26
+  n27[("LEE profiles.persons")]:::efecto
+  n26 --> n27
+  n28(("200 Responde con éxito")):::ok
+  n27 --> n28
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 57. POST /scheduling/templates/{id}/reactivate
 
 Reactivar un horario retirado
 
@@ -5035,7 +6057,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 50. GET /scheduling/waitlist
+#### 58. GET /scheduling/waitlist
 
 Listar las entradas de lista de espera de un paciente
 
@@ -5080,7 +6102,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 51. POST /scheduling/waitlist
+#### 59. POST /scheduling/waitlist
 
 Inscribir a un paciente en la lista de espera
 
@@ -5122,7 +6144,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 52. GET /tenants/{tenantId}/agenda
+#### 60. GET /tenants/{tenantId}/agenda
 
 La agenda de la organización
 
