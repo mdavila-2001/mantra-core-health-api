@@ -1,0 +1,117 @@
+=== Catálogo de análisis → terminology.* (APPLY) ===
+{
+  "layers": [
+    "hl7-tho (479) ← data/lab-tests-hl7-tho.ndjson.gz",
+    "ucum (888) ← data/lab-tests-ucum.ndjson.gz",
+    "fonasa-mle (648) ← data/lab-tests-fonasa-mle.ndjson.gz",
+    "sigtap-sus (1108) ← data/lab-tests-sigtap-sus.ndjson.gz",
+    "tuss-ans (2211) ← data/lab-tests-tuss-ans.ndjson.gz",
+    "icd10pcs-cms (4397) ← data/lab-tests-icd10pcs-cms.ndjson.gz",
+    "pami-nomenclador (3034) ← data/lab-tests-pami-nomenclador.ndjson.gz",
+    "gtr-ncbi (63914) ← data/lab-tests-gtr-ncbi.part01.ndjson.gz, lab-tests-gtr-ncbi.part02.ndjson.gz, lab-tests-gtr-ncbi.part03.ndjson.gz, lab-tests-gtr-ncbi.part04.ndjson.gz, lab-tests-gtr-ncbi.part05.ndjson.gz, lab-tests-gtr-ncbi.part06.ndjson.gz",
+    "dicom-dcm (51) ← data/lab-tests-dicom-dcm.ndjson.gz",
+    "radlex-playbook (4772) ← data/lab-tests-radlex-playbook.ndjson.gz"
+  ],
+  "sources": 10,
+  "codeSystems": [
+    {
+      "internalCode": "hl7-v2-0487",
+      "version": "3.0.0",
+      "concepts": 315
+    },
+    {
+      "internalCode": "hl7-v2-0371",
+      "version": "3.0.0",
+      "concepts": 57
+    },
+    {
+      "internalCode": "hl7-v2-0488",
+      "version": "3.0.0",
+      "concepts": 42
+    },
+    {
+      "internalCode": "hl7-v2-0493",
+      "version": "3.0.0",
+      "concepts": 10
+    },
+    {
+      "internalCode": "hl7-v2-0074",
+      "version": "3.0.0",
+      "concepts": 45
+    },
+    {
+      "internalCode": "hl7-observation-category",
+      "version": "2.0.0",
+      "concepts": 10
+    },
+    {
+      "internalCode": "ucum",
+      "version": "ucum-lhc-8.0.1",
+      "concepts": 888
+    },
+    {
+      "internalCode": "fonasa-mle",
+      "version": "2026",
+      "concepts": 648
+    },
+    {
+      "internalCode": "sigtap-sus",
+      "version": "2026.08",
+      "concepts": 1108
+    },
+    {
+      "internalCode": "tuss-ans",
+      "version": "2026.06.26",
+      "concepts": 2211
+    },
+    {
+      "internalCode": "icd10pcs-cms",
+      "version": "ICD-10-PCS FY2026",
+      "concepts": 4397
+    },
+    {
+      "internalCode": "pami-nomenclador",
+      "version": "2022-08-03",
+      "concepts": 3034
+    },
+    {
+      "internalCode": "gtr-ncbi",
+      "version": "GTR 2026-10-22",
+      "concepts": 63914
+    },
+    {
+      "internalCode": "dicom-dcm",
+      "version": "PS3.16 2026d; CID 29 20231115",
+      "concepts": 51
+    },
+    {
+      "internalCode": "radlex-playbook",
+      "version": "RadLex Playbook (descarga 2026-10-27)",
+      "concepts": 4772
+    }
+  ],
+  "concepts": 81502,
+  "properties": 2091449,
+  "designations": 3682,
+  "relationships": 0,
+  "valueSets": 167,
+  "valueSetMembers": 334668
+}
+
+=== Filas NUEVAS (0 en la segunda corrida = idempotente; `batches` es el registro de auditoría) ===
+{
+  "result": {
+    "sources": 0,
+    "codeSystems": 0,
+    "versions": 0,
+    "concepts": 0,
+    "properties": 0,
+    "designations": 0,
+    "relationships": 0,
+    "valueSets": 0,
+    "valueSetVersions": 0,
+    "valueSetMembers": 0,
+    "batches": 15
+  },
+  "segundos": 70
+}

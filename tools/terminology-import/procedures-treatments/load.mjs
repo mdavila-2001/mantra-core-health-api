@@ -26,7 +26,7 @@ import {
   md5uuid,
   nowIso,
   outDir,
-  readNdjson,
+  readCorpus,
   writeJson,
 } from './lib/common.mjs';
 import {
@@ -194,10 +194,10 @@ async function resolveConcepts(client, refs, pinned = new Map()) {
 
 async function main() {
   const t0 = Date.now();
-  const procedures = readNdjson(outDir('procedures.ndjson'));
-  const assertions = readNdjson(outDir('assertions.ndjson'));
+  const procedures = readCorpus('procedures');
+  const assertions = readCorpus('assertions');
   if (!procedures.length)
-    throw new Error(`No hay corpus en ${outDir()}: corra build.mjs primero.`);
+    throw new Error(`No hay corpus ni en ${outDir()} ni en data/out/: corra build.mjs o snapshot.mjs primero.`);
   const plan = buildLoadPlan({ procedures, assertions });
   const versions = Object.fromEntries(
     Object.keys(OWNED_CODE_SYSTEMS).map((cs) => [

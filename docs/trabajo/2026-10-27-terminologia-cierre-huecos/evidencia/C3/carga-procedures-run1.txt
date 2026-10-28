@@ -1,0 +1,43 @@
+=== Carga de procedimientos a terminology.* (APPLY explícito) ===
+{
+  "concepts": 85012,
+  "conceptsBySystem": {
+    "icd10pcs-cms": 79256,
+    "maxo": 1576,
+    "icd10pcs-site": 1745,
+    "mesh-procedures": 2001,
+    "ohd": 81,
+    "ncit": 331,
+    "procedure-relationship-types": 22
+  },
+  "properties": 1237894,
+  "designations": 78869,
+  "relationships": 109569,
+  "provenanceRows": 109612,
+  "versions": {
+    "maxo": "2026-01-15 (git 59b5d75a454f)",
+    "ohd": "releases/2026-10-01 (git 9cbaa1a17270)",
+    "ncit": "24.04e (releases/2024-05-07)",
+    "icd10pcs-cms": "ICD-10-PCS FY2027",
+    "icd10pcs-site": "ICD-10-PCS FY2027",
+    "mesh-procedures": "MeSH 2026 (descriptores; DTD 20260101)",
+    "procedure-relationship-types": "1"
+  }
+}
+[load] RELACIONES NO CARGADAS: terminology.concept_relationship_evidence no existe o le faltan columnas (id, concept_relationship_id, terminology_source_id, code_system_version_id, evidence_tier_concept_id, source_reference, citation_text, citation_locator, valid_from): aplicar el patch 2026-10-25_v4250 del repo del modelo. / terminology.concept_relationship_assertions no existe o le faltan columnas (concept_relationship_id, source_id, source_record_id, source_version, source_uri, source_predicate, assertion_kind, evidence_json, retrieved_at): concept_relationships no puede guardar fuente ni evidencia y la consigna prohíbe cargar relaciones sin su procedencia. Ver «Propuesta para el repo del modelo» en docs/seed-research/procedures-treatments.md.
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "concepts": 85012,
+    "properties": 1237894,
+    "relationships": 0,
+    "provenance": 0,
+    "designations": 78869,
+    "unresolvedEndpoints": 0,
+    "unresolvedByObjectSystem": {},
+    "resolvedViaPublishedSiteMap": 0,
+    "relationshipsBlocked": "terminology.concept_relationship_evidence no existe o le faltan columnas (id, concept_relationship_id, terminology_source_id, code_system_version_id, evidence_tier_concept_id, source_reference, citation_text, citation_locator, valid_from): aplicar el patch 2026-10-25_v4250 del repo del modelo. / terminology.concept_relationship_assertions no existe o le faltan columnas (concept_relationship_id, source_id, source_record_id, source_version, source_uri, source_predicate, assertion_kind, evidence_json, retrieved_at): concept_relationships no puede guardar fuente ni evidencia y la consigna prohíbe cargar relaciones sin su procedencia. Ver «Propuesta para el repo del modelo» en docs/seed-research/procedures-treatments.md."
+  },
+  "segundos": 57
+}

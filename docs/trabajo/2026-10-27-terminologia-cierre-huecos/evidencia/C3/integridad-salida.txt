@@ -1,0 +1,73 @@
+== conceptos por code system (versión)
+        internal_code         |                version                 | concepts 
+------------------------------+----------------------------------------+----------
+ dicom-dcm                    | PS3.16 2026d; CID 29 20231115          |       51
+ fonasa-mle                   | 2026                                   |      648
+ gtr-ncbi                     | GTR 2026-10-22                         |    63914
+ hl7-observation-category     | 2.0.0                                  |       10
+ hl7-v2-0074                  | 3.0.0                                  |       45
+ hl7-v2-0371                  | 3.0.0                                  |       57
+ hl7-v2-0487                  | 3.0.0                                  |      315
+ hl7-v2-0488                  | 3.0.0                                  |       42
+ hl7-v2-0493                  | 3.0.0                                  |       10
+ icd10pcs-cms                 | ICD-10-PCS FY2026                      |     4397
+ icd10pcs-cms                 | ICD-10-PCS FY2027                      |    79256
+ icd10pcs-site                | ICD-10-PCS FY2027                      |     1745
+ mantra-core-internal         | 1                                      |        6
+ maxo                         | 2026-01-15 (git 59b5d75a454f)          |     1576
+ mesh-procedures              | MeSH 2026 (descriptores; DTD 20260101) |     2001
+ ncit                         | 24.04e (releases/2024-05-07)           |      331
+ ohd                          | releases/2026-10-01 (git 9cbaa1a17270) |       81
+ pami-nomenclador             | 2022-08-03                             |     3034
+ procedure-relationship-types | 1                                      |       22
+ radlex-playbook              | RadLex Playbook (descarga 2026-10-27)  |     4772
+ sigtap-sus                   | 2026.08                                |     1108
+ tuss-ans                     | 2026.06.26                             |     2211
+ ucum                         | ucum-lhc-8.0.1                         |      888
+(23 rows)
+
+== (code system, code) presentes en 2 versiones: hallazgo, no error de modelo (ver REPORTE-C3 §Decisiones)
+ internal_code |  code   | count 
+---------------+---------+-------
+ icd10pcs-cms  | 4A0002Z |     2
+ icd10pcs-cms  | 4A0004Z |     2
+ icd10pcs-cms  | 4A000BZ |     2
+ icd10pcs-cms  | 4A0034Z |     2
+ icd10pcs-cms  | 4A003BD |     2
+ icd10pcs-cms  | 4A003KD |     2
+ icd10pcs-cms  | 4A003RD |     2
+ icd10pcs-cms  | 4A0074Z |     2
+ icd10pcs-cms  | 4A007BD |     2
+ icd10pcs-cms  | 4A007KD |     2
+(10 rows)
+
+== duplicados por (versión, code) (esperado 0)
+ count 
+-------
+     0
+(1 row)
+
+== conceptos con code o display nulo/vacío (esperado 0)
+ count 
+-------
+     0
+(1 row)
+
+== huérfanos: propiedades sin concepto, designaciones sin concepto, miembros sin concepto/version (esperado 0)
+ props_huerfanas | desig_huerfanas | miembros_huerfanos | miembros_sin_version | conceptos_sin_version 
+-----------------+-----------------+--------------------+----------------------+-----------------------
+               0 |               0 |                  0 |                    0 |                     0
+(1 row)
+
+== propiedades con valor nulo (esperado 0)
+ count 
+-------
+     0
+(1 row)
+
+== icd10pcs-cms: códigos de FY2026 (lab-tests) que existen en FY2027 (procedures) con el mismo display
+ mismo_display | distinto_display | total 
+---------------+------------------+-------
+          4397 |                0 |  4397
+(1 row)
+

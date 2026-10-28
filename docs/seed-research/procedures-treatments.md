@@ -160,3 +160,42 @@ con sus claves exportadas a TSV.
 4. Relaciones en la base: el modelo no tiene dónde guardar su procedencia (propuesta arriba).
 5. NCIt: la edición OBO trae solo 438 roles de procedimiento y ninguno R180 (`Procedure_Has_Target_Disease`);
    la edición oficial (bloqueada) puede traer más.
+
+## Cierre de huecos — 2026-10-28 (carril C3)
+
+Las secciones «Hosts bloqueados», «Cobertura» y «Huecos» de arriba son las de 2026-10-24. Hoy `www.cms.gov`,
+`clinicaltrials.gov`, `nlmpubs.nlm.nih.gov`, `evs.nci.nih.gov`, `www.sanidad.gob.es` y `www.minsalud.gov.co` responden 200
+(re-sondeo en `docs/trabajo/2026-10-27-terminologia-cierre-huecos/evidencia/C3/sondeo-2026-10-28.tsv`).
+
+| Hueco | Qué se cargó | Licencia |
+|---|---|---|
+| Procedimiento → sitio por ICD-10-PCS | ICD-10-PCS **FY2027** oficial: **79 256** códigos, 1 745 sitios, 79 169 afirmaciones por el eje del propio código | dominio público (CMS) |
+| Nombres en castellano de ICD-10-PCS | **78 869** designaciones oficiales de CIE-10-ES Procedimientos 2026 (verbatim; 387 códigos sin equivalente publicado) | aviso legal de Sanidad: reutilización citando fuente |
+| MeSH (procedimientos) | **2 001** descriptores del árbol E con nota de alcance verbatim | términos de NLM |
+| Procedimiento → enfermedad común (en estudio) | ClinicalTrials.gov: **29 697** pares procedimiento × condición de 50 290 estudios, clase `investigational`, con estado y fase | dominio público (NLM) |
+| ICHI, ICD-11 | Sin cargar: CC BY-ND y sin descarga abierta ni cuenta | decisión del propietario |
+| CUPS | No es de este dominio: la carga `specialty-services` (CUPS 2025, Res. 2706); la capa CC BY-SA de datos.gov.co queda en `lab-tests` sin cargar | — |
+| NCIt oficial (todos los roles) | Sin normalizar (hay acceso a EVS); hoy sólo los 438 roles de la edición OBO | CC BY 4.0 |
+
+**Antes / después.** Procedimientos 1 988 → **84 990** (MAxO 1 576, NCIt 331, OHD 81, ICD-10-PCS 79 256,
+sitios 1 745, MeSH 2 001); afirmaciones 746 → **109 612** (109 569 relaciones únicas en el plan); designaciones 0 → 78 869.
+
+**Carga medida** (Postgres 16 desechable, mismo procedimiento que en `lab-tests.md`): 85 012 conceptos (84 990 + 22 tipos
+de relación), 1 237 894 propiedades, 78 869 designaciones; **2.ª corrida: 0 filas nuevas**. Integridad: 0 huérfanos,
+0 duplicados por (versión, código), 0 nulos. **Relaciones: no cargadas.** El cargador las bloquea porque faltan en la
+base las tablas `concept_relationship_evidence` / `concept_relationship_assertions`; el parche
+`2026-10-25_v4250_terminology_relationship_evidence.sql` del repo del modelo no existe en esta máquina
+(`/home/user/mantra-core-health-model` ausente) y el brief prohíbe DDL en este repo. Las 109 569 relaciones quedan listas
+en `data/out/assertions.part*.ndjson.gz`; la carga con relaciones se probó el 2026-10-27 con extremos simulados (commit
+`d371977`), no en esta pasada.
+
+**Cargador desde `data/`.** `load.mjs` ahora lee, si no hay build local, las partes versionadas y verifica su SHA-256
+contra `data/MANIFEST.json` (antes exigía un build fuera del repo).
+
+**Reproducibilidad.** Con las fuentes re-descargadas hoy (los `meta.json` y el `studies.ndjson` de ClinicalTrials
+fijados a los versionados porque la API cambia a diario), `build.mjs` da el mismo SHA-256 que lo versionado:
+`procedures` f1aeaebd…, `assertions` 64bb14c0…, `maps` 0e2eb33a….
+
+**Superposición con `lab-tests`.** El code system `icd10pcs-cms` queda con dos versiones (FY2026 de `lab-tests`, 4 397
+códigos, y FY2027 de aquí): ver `lab-tests.md`. Propuesta para el modelo: relacionar versión y concepto de forma que
+un código existente no se recargue como concepto nuevo al cambiar de versión.

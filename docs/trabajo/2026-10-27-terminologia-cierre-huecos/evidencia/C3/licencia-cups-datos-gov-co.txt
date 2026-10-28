@@ -1,0 +1,7 @@
+# datos.gov.co: licencia declarada por el portal y conteos (2026-10-28, curl a /api/views y SODA $select=count(*))
+s5f2-yivs | POSPOPULI-LABORATORIO | licenseId: CC_40_BY_SA | license: Creative Commons Attribution | Share Alike 4.0 International | atribucion: Ministerio de Salud y Protección Social - MinSalud, Bogotá D.C.
+[{"count":"1339"}]
+
+9zcz-bjue | Procedimiento del PBS | licenseId: CC_40_BY_SA | license: Creative Commons Attribution | Share Alike 4.0 International | atribucion: Ministerio de Salud y Protección Social - MinSalud, Bogotá D.C.
+[{"count":"8114"}]
+

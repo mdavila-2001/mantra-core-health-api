@@ -170,3 +170,40 @@ Todo entró en las tablas existentes. Mejoras posibles en el modelo:
 - La ruta LOINC (designaciones ES, relaciones part-of con orden, value sets de clase/panel/pedible) se
   cargó en otra base desechable con los CSV sintéticos de las pruebas. Segunda corrida: 0 nuevas.
 - `node --test "tools/terminology-import/test/*.test.mjs"`: 46/46 (12 de este catálogo).
+
+## Cierre de huecos — 2026-10-28 (carril C3)
+
+La sección «Huecos» de arriba es la de 2026-10-24 (red bloqueada) y queda como historia. Estado de hoy,
+re-sondeado (`docs/trabajo/2026-10-27-terminologia-cierre-huecos/evidencia/C3/sondeo-2026-10-28.tsv`).
+
+| Hueco | Estado hoy | Qué se cargó |
+|---|---|---|
+| NCBI GTR (genética) | `ftp.ncbi.nlm.nih.gov` 200 | **63 914** pruebas vigentes y públicas (condición MedGen/MIM, gen, método, laboratorio), dominio público |
+| DICOM CID 29 | `dicom.nema.org` 200 | **51** modalidades DCM, definición verbatim del Annex D; licencia «free to download and use» sin texto de redistribución: capa aislada, a confirmar |
+| RSNA RadLex Playbook | `playbook.radlex.org` 200 | **4 772** RPID con atributos, subconjuntos y mapeos a LOINC/RadLex que publica la planilla; RadLex License 2.1 (copia en `data/licenses/`) |
+| Cotejo TUSS y PAMI | `dadosabertos.ans.gov.br` 200; `datos.pami.org.ar` 200 (`datos.gob.ar` 502) | Hecho: TUSS byte a byte igual (5 966 filas); PAMI mismos 4 739 códigos, licencia CC-BY-4.0 |
+| Cotejo FONASA / SIGTAP | `fonasa.cl` 403; SIGTAP: el portal informa descargas indisponibles, `ftp2.datasus.gov.br` 503 | Sin cotejo; siguen desde la redistribución npm |
+| CUPS Colombia | `datos.gov.co` 200 | **No cargada**: el portal declara CC BY-SA 4.0 (CompartirIgual) sin precedente en el repo. Parser y prueba listos (1 339 de laboratorio, 8 114 de procedimientos); se activa con `--include-share-alike` tras decisión del propietario |
+| México | `datos.gob.mx` 403; DGIS 200 por http sin catálogo descargable | Nada obtenible |
+| SUS Bolivia | `minsalud.gob.bo` sin respuesta | Nada obtenible |
+| LOINC completo | `loinc.org` 403; exige cuenta (no se crea) | Sigue siendo el hueco principal. **Novedad:** `clinicaltables.nlm.nih.gov` responde 200 (el subconjunto público de `import-loinc.mjs`, p. ej. 25 169 códigos con prefijo «1»): el importador genérico puede correr; no se corrió en este carril |
+
+**Antes / después (este importador).** 12 765 → **81 502** conceptos (11 398 prestaciones de aranceles e ICD-10-PCS
+FY2026 + 1 367 de descripción + 63 914 GTR + 51 DICOM + 4 772 RadLex); 221 139 → **2 091 449** propiedades;
+3 682 designaciones; 119 → **167** value sets; 36 139 → **334 668** membresías.
+
+**Carga medida** (Postgres 16 desechable, DDL de `00_shared` + `03_terminology`, 6 conceptos internos sembrados con
+`procedures-treatments/test/disposable-db/seed-internal.mjs`): 1.ª corrida 81 502 conceptos en 112 s; **2.ª corrida: 0
+filas nuevas** (sólo los 15 lotes de auditoría). Integridad: 0 huérfanos, 0 duplicados por (versión, código), 0 nulos.
+
+**Reproducibilidad.** Reconstruido desde las fuentes re-descargadas: 8 de 10 capas dan el mismo SHA-256 que lo
+versionado (HL7, UCUM, FONASA, SIGTAP, TUSS, ICD-10-PCS FY2026, GTR, DICOM). PAMI y RadLex difieren sólo en
+`provenance.retrievedAt` (y el SHA compuesto de entrada de RadLex, porque la API de RSNA regenera el `.xlsx` con bytes
+distintos en cada pedido); su contenido es idéntico fila por fila.
+
+**Hallazgo: ICD-10-PCS duplicado entre versiones.** `procedures-treatments` carga el FY2027 oficial completo
+(79 256) y esta capa trae 4 397 códigos del FY2026 (npm) en el mismo code system `icd10pcs-cms`: los 4 397 existen en
+FY2027 con el mismo texto, pero son otros conceptos (otros ids) y los value sets de dominio apuntan a los de FY2026.
+No hay duplicados por (versión, código), pero sí 4 397 códigos presentes en dos versiones. Propuesta (decisión del
+propietario): retirar la capa FY2026 y que los value sets de dominio apunten a los conceptos FY2027 (que además
+tienen el castellano oficial de CIE-10-ES).

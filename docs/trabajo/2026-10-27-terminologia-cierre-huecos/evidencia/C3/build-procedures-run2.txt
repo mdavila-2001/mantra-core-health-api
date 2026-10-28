@@ -1,0 +1,194 @@
+{
+  "procedures": {
+    "total": 84990,
+    "bySystem": {
+      "maxo": 1576,
+      "ncit": 331,
+      "ohd": 81,
+      "icd10pcs-cms": 79256,
+      "icd10pcs-site": 1745,
+      "mesh-procedures": 2001
+    },
+    "byCategory": {
+      "maxo:therapeutic-or-other": 430,
+      "maxo:diagnostic": 841,
+      "maxo:surgical": 292,
+      "maxo:avoidance": 13,
+      "ncit:ncit-procedure": 331,
+      "ohd:dental": 81,
+      "icd10pcs-cms:pcs-section-0": 68493,
+      "icd10pcs-cms:pcs-section-1": 305,
+      "icd10pcs-cms:pcs-section-2": 861,
+      "icd10pcs-cms:pcs-section-3": 1277,
+      "icd10pcs-cms:pcs-section-4": 423,
+      "icd10pcs-cms:pcs-section-5": 64,
+      "icd10pcs-cms:pcs-section-6": 47,
+      "icd10pcs-cms:pcs-section-7": 100,
+      "icd10pcs-cms:pcs-section-8": 90,
+      "icd10pcs-cms:pcs-section-9": 90,
+      "icd10pcs-cms:pcs-section-B": 2982,
+      "icd10pcs-cms:pcs-section-C": 463,
+      "icd10pcs-cms:pcs-section-D": 2057,
+      "icd10pcs-cms:pcs-section-F": 1411,
+      "icd10pcs-cms:pcs-section-G": 28,
+      "icd10pcs-cms:pcs-section-H": 59,
+      "icd10pcs-cms:pcs-section-X": 506,
+      "icd10pcs-site:pcs-site": 1745,
+      "mesh-procedures:mesh-E04": 398,
+      "mesh-procedures:mesh-E06": 161,
+      "mesh-procedures:mesh-E01": 784,
+      "mesh-procedures:mesh-E02": 616,
+      "mesh-procedures:mesh-E03": 42
+    }
+  },
+  "assertions": {
+    "total": 109612,
+    "byKind": {
+      "procedure-disease": 29990,
+      "procedure-site": 79622
+    },
+    "byType": {
+      "maxo-poet:TREATS": 266,
+      "maxo-poet:PREVENTS": 25,
+      "maxo-poet:NO_OBSERVED_BENEFIT": 2,
+      "maxo:RO:0002233": 15,
+      "ncit:R171": 75,
+      "ncit:R163": 112,
+      "ncit:R167": 102,
+      "ncit:R169": 127,
+      "ncit:R166": 6,
+      "ncit:R168": 9,
+      "ncit:R170": 6,
+      "ncit:R165": 1,
+      "icd10pcs:axis4-body-part": 72749,
+      "icd10pcs:axis4-body-region": 1141,
+      "icd10pcs:axis4-body-system-region": 2688,
+      "icd10pcs:axis4-body-system": 534,
+      "icd10pcs:axis4-treatment-site": 2057,
+      "ctgov:studied-for": 29697
+    },
+    "bySource": {
+      "maxo-annotations": 293,
+      "maxo": 15,
+      "ncit-obo": 438,
+      "icd10pcs-cms-2027": 79169,
+      "clinicaltrials-gov": 29697
+    },
+    "uniqueRelationships": 109569,
+    "uniqueRelationshipsByKind": {
+      "procedure-disease": 29947,
+      "procedure-site": 79622
+    },
+    "proceduresWithDisease": 1296,
+    "proceduresWithSite": 79515
+  },
+  "diseases": {
+    "linked": 3193,
+    "bySystem": {
+      "mondo": 167,
+      "mesh": 3026
+    },
+    "withIcd10Equivalent": 18,
+    "withMeshEquivalent": 89,
+    "withOrphanetEquivalent": 111,
+    "withoutAnyEquivalent": 3028
+  },
+  "sites": {
+    "linked": 1936,
+    "bySystem": {
+      "uberon": 15,
+      "ncit": 176,
+      "icd10pcs-site": 1745
+    },
+    "ncitSitesWithUberonXref": 171,
+    "ncitSitesWithUniqueUberonXref": 171,
+    "siteAssertionsWithUberonAlternate": 424,
+    "siteAssertionsAmbiguousUberon": 0,
+    "uberonSitesWithFmaXref": 12
+  },
+  "maps": 1145,
+  "skipped": {
+    "maxo-annotations": {
+      "rowsRead": 438,
+      "pharmacological": 145,
+      "unknownMaxo": 0,
+      "obsoleteMaxo": 0,
+      "unknownRelation": 0,
+      "unknownDisease": 0
+    },
+    "ncit-obo": {
+      "rolesRead": 438,
+      "notProcedure": 0,
+      "obsolete": 0
+    },
+    "icd10pcs-cms-2027": {
+      "codes": 79256,
+      "withShortTitle": 79256,
+      "invalidFlag": 0,
+      "withSpanish": 78869,
+      "siteAssertions": 79169,
+      "skippedQualifierAxis": 87,
+      "byAxisTitle": {
+        "Body Part": 72749,
+        "Body Region": 1141,
+        "Body System / Region": 2688,
+        "Body System": 534,
+        "Treatment Site": 2057
+      },
+      "siteCodeLevels": {
+        "1": 1663,
+        "2": 74,
+        "3": 8
+      },
+      "sites": 1745,
+      "version": "ICD-10-PCS FY2027",
+      "tables": 918
+    },
+    "mesh-desc-2026": {
+      "descriptorsTotal": 31110,
+      "descriptorsInTreeE": 3141,
+      "included": 2001,
+      "excludedByTree": 1140,
+      "byRoot": {
+        "E04": 582,
+        "E06": 203,
+        "E01": 784,
+        "E02": 640,
+        "E03": 47
+      }
+    },
+    "clinicaltrials-gov": {
+      "totalInQuery": 152647,
+      "scanned": 152647,
+      "withBothMeshSets": 50290,
+      "studiesRead": 50290,
+      "studiesWithProcedureMesh": 28630,
+      "interventionMeshesDropped": 61927,
+      "pairs": 29697,
+      "studyPairs": 76423,
+      "byStatus": {
+        "COMPLETED": 37897,
+        "RECRUITING": 10221,
+        "WITHDRAWN": 2897,
+        "UNKNOWN": 11020,
+        "NOT_YET_RECRUITING": 2691,
+        "TERMINATED": 5978,
+        "ACTIVE_NOT_RECRUITING": 4681,
+        "SUSPENDED": 327,
+        "ENROLLING_BY_INVITATION": 641,
+        "NO_LONGER_AVAILABLE": 66,
+        "APPROVED_FOR_MARKETING": 2,
+        "AVAILABLE": 2
+      },
+      "byPhase": {
+        "NA": 29488,
+        "sin fase": 15481,
+        "PHASE3": 5669,
+        "PHASE4": 1622,
+        "PHASE1": 8786,
+        "PHASE2": 18837,
+        "EARLY_PHASE1": 740
+      }
+    }
+  }
+}

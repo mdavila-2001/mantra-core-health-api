@@ -16,6 +16,7 @@ import {
 import { dirname, join, resolve } from 'node:path';
 import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
+import { gunzipSync } from 'node:zlib';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 
@@ -163,3 +164,24 @@ export function fromCurie(curie) {
 
 /** Clave de deduplicación: siempre por código, nunca por nombre. */
 export const conceptKey = (ref) => `${ref.system}|${ref.code}`;
+
+/**
+ * Lee un corpus normalizado (`procedures`, `assertions`, `maps`): del build local si existe
+ * (`out/<nombre>.ndjson`); si no, de las partes versionadas `data/out/<nombre>.partNNN.ndjson.gz`,
+ * verificando el SHA-256 sin comprimir de cada parte contra `data/MANIFEST.json`.
+ */
+export function readCorpus(name) {
+  const local = outDir(`${name}.ndjson`);
+  if (existsSync(local)) return readNdjson(local);
+  const dataDir = join(HERE, '..', 'data');
+  const manifest = JSON.parse(readFileSync(join(dataDir, 'MANIFEST.json'), 'utf8'));
+  const parts = manifest.files.filter((f) => new RegExp(`^out/${name}(\\.part\\d+)?\\.ndjson\\.gz$`).test(f.path));
+  const rows = [];
+  for (const f of parts) {
+    const buf = gunzipSync(readFileSync(join(dataDir, f.path)));
+    const got = createHash('sha256').update(buf).digest('hex');
+    if (got !== f.sha256Uncompressed) throw new Error(`${f.path}: SHA-256 ${got} != MANIFEST ${f.sha256Uncompressed}`);
+    for (const l of buf.toString('utf8').split('\n')) if (l) rows.push(JSON.parse(l));
+  }
+  return rows;
+}

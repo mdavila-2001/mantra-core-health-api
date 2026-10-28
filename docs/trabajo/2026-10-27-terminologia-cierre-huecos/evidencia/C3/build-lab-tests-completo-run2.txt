@@ -1,0 +1,59 @@
+(node:10586) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[build] lab-tests-hl7-tho: 479 registros
+[build] lab-tests-ucum: 888 registros
+[build] lab-tests-gtr-ncbi: 63914 registros
+[build] lab-tests-dicom-dcm: 51 registros
+[build] lab-tests-radlex-playbook: 4772 registros
+[build] lab-tests-fonasa-mle: 648 registros
+[build] lab-tests-sigtap-sus: 1108 registros
+[build] lab-tests-tuss-ans: 2211 registros
+[build] lab-tests-icd10pcs-cms: 4397 registros
+[build] lab-tests-pami-nomenclador: 3034 registros
+[build] loinc: SIN DATOS — no hay Loinc.csv bajo /tmp/claude-0/-home-user-mantra-core-health-api/abfc3765-fecd-5e44-a7be-1fc725dff984/scratchpad/build-C3/lab-tests-sources/loinc (exige cuenta en loinc.org; ver SOURCES.md)
+[build] cups-co: SIN DATOS — CC BY-SA 4.0 (compartir igual): no se construye sin --include-share-alike; decisión del propietario (ver SOURCES.md)
+{
+  "totals": {
+    "loinc": 0,
+    "hl7-tho": 479,
+    "ucum": 888,
+    "gtr-ncbi": 63914,
+    "dicom-dcm": 51,
+    "radlex-playbook": 4772,
+    "cups-co": 0,
+    "fonasa-mle": 648,
+    "sigtap-sus": 1108,
+    "tuss-ans": 2211,
+    "icd10pcs-cms": 4397,
+    "pami-nomenclador": 3034
+  },
+  "byDomain": {
+    "laboratory": 5084,
+    "imaging": 9283,
+    "pathology": 112,
+    "genetics": 64103,
+    "functional": 1291
+  },
+  "bySource": {
+    "hl7-tho": 595,
+    "ucum": 772,
+    "gtr-ncbi": 63914,
+    "dicom-dcm": 51,
+    "radlex-playbook": 4772,
+    "fonasa-mle": 648,
+    "sigtap-sus": 1108,
+    "tuss-ans": 2211,
+    "icd10pcs-cms": 4397,
+    "pami-nomenclador": 3034
+  },
+  "missingLayers": [
+    {
+      "layer": "loinc",
+      "reason": "no hay Loinc.csv bajo /tmp/claude-0/-home-user-mantra-core-health-api/abfc3765-fecd-5e44-a7be-1fc725dff984/scratchpad/build-C3/lab-tests-sources/loinc (exige cuenta en loinc.org; ver SOURCES.md)"
+    },
+    {
+      "layer": "cups-co",
+      "reason": "CC BY-SA 4.0 (compartir igual): no se construye sin --include-share-alike; decisión del propietario (ver SOURCES.md)"
+    }
+  ]
+}

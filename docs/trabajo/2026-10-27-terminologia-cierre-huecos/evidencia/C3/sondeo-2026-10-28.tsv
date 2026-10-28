@@ -1,0 +1,25 @@
+# re-sondeo 2026-10-28 (carril C3, curl -I, timeout 20 s); 000 = sin respuesta
+200	https://www.datos.gov.co/
+403	https://www.datos.gob.mx/
+403	https://datos.gob.mx/busca/api/3/action/package_list
+200	https://www.gob.mx/salud
+200	http://www.dgis.salud.gob.mx/
+000	https://www.dgis.salud.gob.mx/
+301	http://www.minsalud.gob.bo/
+000	https://www.minsalud.gob.bo/
+200	http://inlasa.gob.bo/
+000	https://www.inlasa.gob.bo/
+200	http://sigtap.datasus.gov.br/tabela-unificada/app/sec/inicio.jsp
+000	https://sigtap.datasus.gov.br/
+503	http://ftp2.datasus.gov.br/pub/sistemas/tup/downloads/
+200	https://www.minsalud.gov.co/
+000	https://www.sispro.gov.co/
+200	https://dadosabertos.ans.gov.br/
+502	https://datos.gob.ar/
+403	https://www.fonasa.gob.cl/
+403	https://loinc.org/
+200	https://clinicaltables.nlm.nih.gov/api/loinc_items/v3/search?terms=glucose&maxList=1
+200	https://www.cms.gov/
+301	https://dicom.nema.org/
+302	https://playbook.radlex.org/
+200	https://ftp.ncbi.nlm.nih.gov/pub/GTR/data/

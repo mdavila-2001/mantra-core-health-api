@@ -1,0 +1,9 @@
+(node:8054) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[build] lab-tests-gtr-ncbi: 63914 registros
+[build] lab-tests-dicom-dcm: 51 registros
+ERROR FATAL en build-lab-tests: Error: radlex-playbook/map-to-table-playbook-dev.xlsx: el SHA-256 del archivo (36d35326b98b75330f2ea879c8d913046eb0dca1ab148499a625d47890919064) no coincide con el manifiesto (51baea47de23e5bbfbbe0ba239fa61496e3c129808ac50bdee923da718d011a4)
+    at openFile (file:///home/user/mantra-core-health-api/tools/terminology-import/lab-tests/build-lab-tests.mjs:280:34)
+    at buildRadlex (file:///home/user/mantra-core-health-api/tools/terminology-import/lab-tests/build-lab-tests.mjs:353:14)
+    at main (file:///home/user/mantra-core-health-api/tools/terminology-import/lab-tests/build-lab-tests.mjs:449:121)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)

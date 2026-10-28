@@ -20,6 +20,10 @@ determinista: re-correr `snapshot.mjs` sobre el mismo corpus no genera cambios e
 | `ohd` | OHD project — Oral Health and Disease Ontology (OBO Foundry) | `releases/2026-10-01` (git `9cbaa1a17270`) | `raw.githubusercontent.com/oral-health-and-disease-ontologies/ohd-ontology/9cbaa1a1…/ohd.obo` | `f8518e5b…` | CC BY 4.0 | 81 procedimientos odontológicos (descendientes de `OHD:0000002` «dental procedure»); 0 relaciones (pasada 2) |
 | `mondo` | Monarch Initiative — Mondo Disease Ontology | `releases/2026-10-06` | `github.com/monarch-initiative/mondo/releases/download/v2026-10-06/mondo.obo` | `2631e8e1…` | CC BY 4.0 | Equivalencias `MONDO:equivalentTo` de las 167 enfermedades enlazadas (ICD-10-CM, MeSH, Orphanet, OMIM, NCIt, DOID, ICD-11 Foundation) |
 | `uberon` | Uberon consortium (OBO Foundry) | `releases/2026-10-01` | `github.com/obophenotype/uberon/releases/download/v2026-10-01/uberon.obo` | `d4751a15…` | CC BY 3.0 | Xrefs Uberon → NCIt (sitio NCIt expresado en Uberon, solo uno a uno) y Uberon → FMA/MeSH |
+| `icd10pcs-cms-2027` | CMS (EE. UU.) | ICD-10-PCS FY2027 (Last-Modified 2026-06-05) | `cms.gov/files/zip/2027-icd-10-pcs-code-tables-index.zip` (+ `codes`, `order`) | `db77f8b9…` (tables) | Obra del gobierno federal de EE. UU.: dominio público | 79 256 códigos con título corto y largo; 1 745 sitios por el eje del propio código (Body Part, Body System, Treatment Site…) = 79 169 afirmaciones procedimiento → sitio |
+| `cie10es-procedimientos` | Ministerio de Sanidad (España) | CIE-10-ES Procedimientos 2026 (Last-Modified 2025-12-16) | `sanidad.gob.es/…/CIE10/2026/Procedimientos_Tabla_Referencia_CIE10ES_2026.xlsx` | `8c091285…` | Aviso legal: reutilización (también comercial) citando fuente y fecha, sin desnaturalizar el contenido | 78 869 designaciones oficiales en castellano de ICD-10-PCS (verbatim) |
+| `mesh-desc-2026` | NLM (EE. UU.) | MeSH 2026, DTD 20260101 | `nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.gz` | `ccd4d0d3…` | Términos de NLM: sin cargo; reconocer a NLM, no sugerir respaldo, identificar la versión | 2 001 descriptores de procedimiento del árbol E (E01, E02 sin E02.319, E03, E04, E06) con nota de alcance verbatim |
+| `clinicaltrials-gov` | NLM (EE. UU.) | API 2.0.5, dataTimestamp 2026-10-27T09:00:04 | `clinicaltrials.gov/api/v2/studies` (consulta y campos en el meta) | `f313e9e4…` (studies.ndjson) | Dominio público (NLM) | 152 647 estudios leídos, 50 290 con MeSH de intervención y de condición; 29 697 pares «en estudio» (clase `investigational`, no es indicación) |
 
 Atribución: «Oral Health and Disease Ontology (OHD), CC BY 4.0»; «Contains data from the Medical Action Ontology (MAxO) and MAxO annotations, Monarch Initiative,
 CC BY 4.0»; «NCI Thesaurus, National Cancer Institute (OBO Edition), CC BY 4.0» — la edición OBO es un
@@ -46,24 +50,17 @@ derivado y no se presenta como la edición oficial de NCI; «Mondo Disease Ontol
 | HPO `releases/2026-09-01` | 0 relaciones hacia MAxO o procedimientos. Pasada 4. |
 | Relaciones propias de MONDO | 7 `therapeutic uses` (fármaco → CHEBI) y 3 `NCIT:R163` ya presentes por NCIt. Pasada 4. |
 
-## Fuentes bloqueadas por la red del entorno (huecos)
+## Huecos y estado de red (re-sondeo 2026-10-28)
 
-La política de red de esta sesión responde **403 al CONNECT** para estos hosts (sondeo en
-`cache/_network.json`, `fetch.mjs --probe`). Para cerrarlos hay que permitir el host en la
-configuración de red del entorno y correr `fetch.mjs` + un normalizador nuevo para la fuente.
+Cerrados desde la pasada anterior (hoy responden 200): ICD-10-PCS (`www.cms.gov`), ClinicalTrials.gov, MeSH
+(`nlmpubs.nlm.nih.gov`), CIE-10-ES (`www.sanidad.gob.es`), `evs.nci.nih.gov`, `www.minsalud.gov.co`.
 
-| Fuente | Host(s) | Licencia | Qué aportaría |
+| Fuente | Estado hoy | Licencia | Qué falta |
 |---|---|---|---|
-| ClinicalTrials.gov API v2 | `clinicaltrials.gov` | Dominio público (NLM) | Intervenciones `PROCEDURE`/`BEHAVIORAL`/`DEVICE`/`RADIATION`/`DIETARY_SUPPLEMENT` ↔ condición con MeSH, **solo «en estudio»** |
-| ICD-10-PCS (tablas oficiales) | `www.cms.gov` | Dominio público (CMS) | Procedimiento → parte del cuerpo por el eje Body Part del propio código |
-| WHO ICHI | `icd.who.int`, `icdcdn.who.int` | CC BY-ND 3.0 IGO | Procedimiento → Target (sitio/función) por eje del código |
-| ICD-11 MMS | `id.who.int` (+ credenciales: no se crean cuentas) | CC BY-ND 3.0 IGO | Post-coordinación y relaciones |
-| CUPS Colombia | `www.minsalud.gov.co`, `web.sispro.gov.co` | Acto administrativo público | Catálogo de procedimientos (lo carga `seed-specialty-services`) |
-| MeSH | `nlmpubs.nlm.nih.gov`, `id.nlm.nih.gov` | Términos NLM | Árbol E; une intervenciones de ensayos con procedimientos |
-| NCI Thesaurus oficial | `evs.nci.nih.gov` | CC BY 4.0 | Todos los roles (la edición OBO trae solo 438 de procedimiento) |
-| PubMed / Europe PMC | `eutils.ncbi.nlm.nih.gov`, `www.ebi.ac.uk` | Metadatos | Detección de huecos |
-| Wikidata | `query.wikidata.org` | CC0 | P924 «tratamiento posible» (colaborativa, no oficial) |
-| NICE IPG | `www.nice.org.uk` | Términos NICE | Procedimiento ↔ indicación citada |
-| Cochrane | `www.cochranelibrary.com` | Metadatos | Intervención ↔ condición de revisiones |
-| Ministerio de Salud de Bolivia (NNAC) | `www.minsalud.gob.bo` | Por verificar | Guías nacionales citadas |
-| CIE-10-ES Procedimientos | `www.sanidad.gob.es` | Aviso legal, reutilización con cita | Nombres oficiales en castellano de ICD-10-PCS |
+| WHO ICHI | `icd.who.int` 302, `icdcdn.who.int` 400: sin descarga abierta | CC BY-ND 3.0 IGO (ND: no se redistribuyen derivados) | decisión del propietario + acceso |
+| ICD-11 MMS | `id.who.int` 404; API con cuenta (no se crean) | CC BY-ND 3.0 IGO | cuenta + decisión |
+| CUPS Colombia | `datos.gov.co` 200; lo carga `specialty-services` (CUPS 2025) y `lab-tests` (capa CC BY-SA, gated) | acto administrativo / CC BY-SA 4.0 | decisión del propietario sobre CC BY-SA |
+| NCIt oficial (todos los roles) | `evs.nci.nih.gov` 200; no se normalizó (la edición OBO trae 438 roles de procedimiento) | CC BY 4.0 | normalizador contra el archivo real (C1 ya baja NCIt EVS) |
+| Wikidata P924, NICE IPG, Cochrane, PubMed | no usados (colaborativa / términos propios / metadatos) | variadas | curaduría |
+| Ministerio de Salud de Bolivia (NNAC) | `minsalud.gob.bo` sin respuesta | por verificar | acceso |
+| SNOMED CT, CPT, CDT | licencia | — | no se cargan |

@@ -1,0 +1,10 @@
+lab-tests-dicom-dcm          84e9c29a92336f17     51 | versionado 84e9c29a92336f17 51 IGUAL
+lab-tests-fonasa-mle         1e5df212c836debb    648 | versionado 1e5df212c836debb 648 IGUAL
+lab-tests-gtr-ncbi           2dd8458d67490159  63914 | versionado 2dd8458d67490159 63914 IGUAL
+lab-tests-hl7-tho            5de7f408dd229c0c    479 | versionado 5de7f408dd229c0c 479 IGUAL
+lab-tests-icd10pcs-cms       47b51694efb397a7   4397 | versionado 47b51694efb397a7 4397 IGUAL
+lab-tests-pami-nomenclador   286b251f7da233de   3034 | versionado b7c6d753ec567798 3034 DIFIERE
+lab-tests-radlex-playbook    15cd8858c754d8bc   4772 | versionado 7b6d8902079e474b 4772 DIFIERE
+lab-tests-sigtap-sus         8f301cfdf24cfb4b   1108 | versionado 8f301cfdf24cfb4b 1108 IGUAL
+lab-tests-tuss-ans           3627fc8b076bfd19   2211 | versionado 3627fc8b076bfd19 2211 IGUAL
+lab-tests-ucum               c1e047a0e4192edb    888 | versionado c1e047a0e4192edb 888 IGUAL

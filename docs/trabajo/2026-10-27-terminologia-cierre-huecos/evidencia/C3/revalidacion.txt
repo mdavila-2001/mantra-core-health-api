@@ -1,0 +1,19 @@
+## lab-tests
+# tests 45
+# pass 45
+# fail 0
+# skipped 0
+## procedures-treatments
+# tests 28
+# pass 28
+# fail 0
+# skipped 0
+## gzip -t
+gzip -t OK: 35 archivos
+## SHA256SUMS
+     30 OK
+     32 OK
+## tamaños
+23M	lab-tests/data
+54M	procedures-treatments/data
+0
