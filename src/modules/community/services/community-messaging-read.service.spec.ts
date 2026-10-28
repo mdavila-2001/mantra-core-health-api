@@ -435,7 +435,9 @@ describe('CommunityMessagingReadService', () => {
 
     it('exige ser el titular del perfil', async () => {
       const d = build();
-      d.visibility.assertOwnMessagingProfile.mockRejectedValue(new Error('prohibido'));
+      d.visibility.assertOwnMessagingProfile.mockRejectedValue(
+        new Error('prohibido'),
+      );
       await expect(
         d.service.listConversations('p-ajeno', actor, { limit: 20 }),
       ).rejects.toThrow('prohibido');

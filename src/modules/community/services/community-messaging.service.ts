@@ -158,7 +158,11 @@ export class CommunityMessagingService {
       // camino para iniciar es el canal de sistema de un hecho que ya los une
       // (un pedido), que llega con `requirePublicRecipient = false`.
       if (requirePublicRecipient) {
-        await this.visibility.assertActsAsProfile(tx, initiatorProfileId, actor);
+        await this.visibility.assertActsAsProfile(
+          tx,
+          initiatorProfileId,
+          actor,
+        );
       } else {
         await this.visibility.assertActsAsMessagingProfile(
           tx,
@@ -722,7 +726,11 @@ export class CommunityMessagingService {
     actor: AuthenticatedUser,
   ): Promise<ParticipantPreferencesDto> {
     return this.em.transactional(async (tx) => {
-      await this.visibility.assertActsAsMessagingProfile(tx, dto.profileId, actor);
+      await this.visibility.assertActsAsMessagingProfile(
+        tx,
+        dto.profileId,
+        actor,
+      );
       const participant = await this.activeOrNotFoundParticipant(
         tx,
         conversationId,
@@ -764,7 +772,11 @@ export class CommunityMessagingService {
     actor: AuthenticatedUser,
   ): Promise<DirectMessageDto> {
     const result = await this.em.transactional(async (tx) => {
-      await this.visibility.assertActsAsMessagingProfile(tx, dto.senderProfileId, actor);
+      await this.visibility.assertActsAsMessagingProfile(
+        tx,
+        dto.senderProfileId,
+        actor,
+      );
       await this.activeOrNotFoundParticipant(
         tx,
         conversationId,
@@ -871,7 +883,11 @@ export class CommunityMessagingService {
     actor: AuthenticatedUser,
   ): Promise<PinnedMessageResponseDto> {
     const recipients = await this.em.transactional(async (tx) => {
-      await this.visibility.assertActsAsMessagingProfile(tx, dto.profileId, actor);
+      await this.visibility.assertActsAsMessagingProfile(
+        tx,
+        dto.profileId,
+        actor,
+      );
       await this.activeOrNotFoundParticipant(tx, conversationId, dto.profileId);
       const conversation = await this.conversationsRepo.findConversationById(
         tx,

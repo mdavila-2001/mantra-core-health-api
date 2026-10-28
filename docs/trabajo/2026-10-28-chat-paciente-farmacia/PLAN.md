@@ -15,28 +15,28 @@
 ## H1 — Bandeja de organización
 **CA:** Dado un miembro activo de la farmacia, cuando usa `profileId=<vitrina>` en la mensajería, entonces opera; un no miembro recibe 403/404 como hoy.
 **DoD:** jest de `community-visibility`, `community-messaging`, `community-messaging-read`, gateway y notificaciones en verde.
-**Estado:** TODO
+**Estado:** HECHO (TESTED, sin Postgres)
 
 | ID | Microtarea | CA (binario) | DoD | Estado |
 |---|---|---|---|---|
-| H1.S1.M1 | Regla `actúa como organización` (membresía activa + rol) en visibilidad | no miembro → false | jest visibility | TODO |
-| H1.S1.M2 | Mensajería usa la regla de mensajería en escritura | staff envía como farmacia | jest messaging | TODO |
-| H1.S1.M3 | Lectura, adjuntos y presencia usan la regla | staff lista/lee | jest messaging-read | TODO |
-| H1.S1.M4 | Gateway `join:*` usa la regla | staff se une a la sala | jest gateway | TODO |
-| H1.S1.M5 | Destinatario PHARMACY/ORGANIZATION activo, público y verificado | sin 422 | jest messaging | TODO |
-| H1.S1.M6 | Notificación de mensaje a vitrina de organización va a los miembros | no a `created_by_user_id` | jest notifications | TODO |
+| H1.S1.M1 | Regla `actúa como organización` (membresía activa + rol) en visibilidad | no miembro → false | jest visibility | HECHO |
+| H1.S1.M2 | Mensajería usa la regla de mensajería en escritura | staff envía como farmacia | jest messaging | HECHO |
+| H1.S1.M3 | Lectura, adjuntos y presencia usan la regla | staff lista/lee | jest messaging-read | HECHO |
+| H1.S1.M4 | Gateway `join:*` usa la regla | staff se une a la sala | jest gateway | HECHO |
+| H1.S1.M5 | Destinatario PHARMACY/ORGANIZATION activo, público y verificado | sin 422 | jest messaging | HECHO |
+| H1.S1.M6 | Notificación de mensaje a vitrina de organización va a los miembros | no a `created_by_user_id` | jest notifications | HECHO |
 
 ## H2 — Vitrina en los pedidos del titular
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
-| H2.S1.M1 | `pharmacyPublicProfileId`/`pharmacyPublicSlug` en vista `owner` (null si no hay vitrina activa) y ausentes en vista staff | ver CA | jest pharmacy-orders | TODO |
+| H2.S1.M1 | `pharmacyPublicProfileId`/`pharmacyPublicSlug` en vista `owner` (null si no hay vitrina activa) y ausentes en vista staff | ver CA | jest pharmacy-orders | HECHO |
 
 ## H3 — `POST pharmacy/orders/:id/conversation`
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
-| H3.S1.M1 | Puerto `PharmacyOrderChatPort` + adaptador a community | compila | tsc | TODO |
-| H3.S1.M2 | Caso de uso: titular o staff del tenant; idempotente; `{conversationId, pharmacyProfileId}` | tercero → 404 | jest pharmacy-orders | TODO |
-| H3.S1.M3 | Servicio community de chat de pedido por canal de sistema, sin crear vitrina del paciente | sin perfil → 422 tipificado | jest community | TODO |
+| H3.S1.M1 | Puerto `PharmacyOrderChatPort` + adaptador a community | compila | tsc | HECHO |
+| H3.S1.M2 | Caso de uso: titular o staff del tenant; idempotente; `{conversationId, pharmacyProfileId}` | tercero → 404 | jest pharmacy-orders | HECHO |
+| H3.S1.M3 | Servicio community de chat de pedido por canal de sistema, sin crear vitrina del paciente | sin perfil → 422 tipificado | jest community | HECHO |
 
 ## Gates
 - `tsc --noEmit`, eslint de los archivos tocados, jest dirigido. Int-specs: no se ejecutan (sin Postgres).
