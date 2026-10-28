@@ -65,6 +65,10 @@ import {
   type OwnSiteProvisioningPort,
 } from '../ports/own-site.port';
 import {
+  WORKPLACE_REQUESTS_PORT,
+  type WorkplaceRequestsPort,
+} from '../ports/workplace-requests.port';
+import {
   PROFILE_REGISTRATION_PORT,
   type ProfileRegistrationPort,
 } from '../ports/profile-registration.port';
@@ -283,6 +287,7 @@ export class IamPractitionerSelfRegistrationService {
    * @param tracing - Trazado del span de negocio.
    * @param ownSiteProvisioning - Alta del consultorio propio declarado en `ownSite` (P20).
    * @param files - Subida anónima y reclamo de archivos (foto, firma, sello, títulos).
+   * @param workplaces - Instituciones y aseguradoras con las que dice trabajar.
    */
   constructor(
     private readonly em: EntityManager,
@@ -309,6 +314,8 @@ export class IamPractitionerSelfRegistrationService {
     private readonly ownSiteProvisioning: OwnSiteProvisioningPort,
     @Inject(REGISTRATION_FILES_PORT)
     private readonly files: RegistrationFilesPort,
+    @Inject(WORKPLACE_REQUESTS_PORT)
+    private readonly workplaces: WorkplaceRequestsPort,
   ) {
     this.logger.setContext(IamPractitionerSelfRegistrationService.name);
   }
@@ -983,6 +990,19 @@ export class IamPractitionerSelfRegistrationService {
           )
         : null;
 
+      // 7c) Dónde dice trabajar: instituciones de la plataforma y aseguradoras
+      // (propietario, 2026-10-28). Cada una nace PENDIENTE de que la otra parte
+      // la confirme —ése es su sello oficial—; ninguna se da por cierta acá.
+      // Va en la misma transacción por lo mismo que el consultorio: un slug o
+      // una aseguradora que ya no existen deshacen el alta con un 422 que dice
+      // cuál, en vez de dejar la cuenta con la mitad de lo que eligió.
+      const workplaces = await this.workplaces.request(tx, {
+        practitionerProfileId: practitioner.profileId,
+        institutionSlugs: dto.institutionSlugs ?? [],
+        insurerCarrierIds: dto.insurerCarrierIds ?? [],
+        actorUserId: assisted?.actor.id ?? user.id,
+      });
+
       // 8) Verificación del correo. No condiciona el acceso.
       const { raw, hash } = this.tokenService.issueRefreshToken();
       this.emailVerificationsRepo.create(tx, {
@@ -1069,6 +1089,7 @@ export class IamPractitionerSelfRegistrationService {
         ownSite: ownSite
           ? { practiceId: ownSite.practiceId, siteId: ownSite.siteId }
           : null,
+        workplaces,
       };
     });
 
@@ -1076,6 +1097,13 @@ export class IamPractitionerSelfRegistrationService {
     // cuenta ya creada no debe deshacerse — el profesional puede entrar igual.
     span.setAttribute(APP_ATTR.ENTITY_ID, created.practitionerProfileId);
     span.addEvent('registration.persisted');
+
+    // El aviso a cada organización que recibió un pedido, también FUERA: un
+    // aviso de un pedido que se deshizo con el alta sería falso. Nunca lanza.
+    await this.workplaces.notify(
+      created.practitionerProfileId,
+      created.workplaces.affiliations,
+    );
 
     const emailVerificationSent = await this.sendVerificationEmail(
       created.userId,
@@ -1126,6 +1154,12 @@ export class IamPractitionerSelfRegistrationService {
             ownPracticeId: created.ownSite.practiceId,
             ownSiteId: created.ownSite.siteId,
           }
+        : {}),
+      ...(created.workplaces.affiliations.length > 0
+        ? { affiliationIds: created.workplaces.affiliations.map((a) => a.id) }
+        : {}),
+      ...(created.workplaces.insurerRequestIds.length > 0
+        ? { insurerRequestIds: [...created.workplaces.insurerRequestIds] }
         : {}),
     };
   }

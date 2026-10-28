@@ -26,6 +26,7 @@ import {
   ProfilesPractitionersController,
   TenantPractitionerRequestsController,
 } from './presentation/controllers';
+import { RegistrationAffiliationsService } from './application/services/registration-affiliations.service';
 import {
   DependentLinkRequestsService,
   ProfilesAffiliationsService,
@@ -121,6 +122,7 @@ import { CLINICAL_PATIENT_HISTORY_PORT } from './application/ports/clinical-pati
     AdministrativeAreaCatalogService,
     HealthFacilityCatalogService,
     ProfilesAffiliationsService,
+    RegistrationAffiliationsService,
     LinkableOrganizationsService,
     // El emisor de avisos del vínculo entra por su puerto: el servicio que
     // decide no sabe que existe un canal in-app, y eso es lo que deja probar la
@@ -200,6 +202,9 @@ import { CLINICAL_PATIENT_HISTORY_PORT } from './application/ports/clinical-pati
   // repositorios y no el servicio porque `registerPatient` de este módulo es
   // admin-only y abre su propia transacción.
   exports: [
+    // Los vínculos con instituciones que el profesional elige en su alta: los
+    // pide `iam` dentro de la transacción del registro.
+    RegistrationAffiliationsService,
     // `DirectoryNetworksSeedService` (H3) carga los consultorios de las redes
     // con el mismo caso de uso que el alta administrativa de una afiliación.
     ProfilesPractitionersService,
