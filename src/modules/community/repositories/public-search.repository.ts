@@ -768,6 +768,11 @@ export class PublicSearchRepository {
    * Se descartan las direcciones cuya vigencia ya venció y se queda la más
    * reciente por sujeto: un profesional que se mudó aparece donde atiende hoy.
    *
+   * **Sólo direcciones de trabajo.** Lo que sale de acá se publica (calle,
+   * distrito y punto), y un sujeto `USER` puede tener su domicilio en
+   * `common.addresses` con su propio id: sin este filtro el buscador público
+   * mostraba dónde vive alguien en vez de dónde atiende.
+   *
    * @param em - Contexto de persistencia o transacción activa.
    * @param ownerIds - Sujetos de los perfiles del lote (`target_id`).
    * @returns Mapa `ownerId → { city, lat, lng }`; sin dirección, no aparece.
@@ -792,9 +797,10 @@ export class PublicSearchRepository {
       `SELECT DISTINCT ON (owner_id) owner_id, lines, district_text, city, latitude, longitude
            FROM common.addresses
           WHERE owner_id IN (?)
+            AND use_concept_id = ?
             AND (valid_to IS NULL OR valid_to >= CURRENT_DATE)
           ORDER BY owner_id, valid_from DESC NULLS LAST, updated_at DESC`,
-      [ownerIds],
+      [ownerIds, CONCEPTS.ADDR_USE_WORK],
       'all',
     );
 
