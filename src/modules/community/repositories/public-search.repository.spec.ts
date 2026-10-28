@@ -39,6 +39,7 @@ function row(partial: Partial<SitePublicRow> = {}): SitePublicRow {
     practice_type_concept_id: PRAC.PRACTICE_TYPE_CLINIC,
     practice_admin_user_id: 'admin-clinica',
     lines: 'Av. Arce 2345',
+    district_text: null,
     city: 'La Paz',
     postal_code: null,
     latitude: '-16.5000000',

@@ -5,6 +5,8 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { OwnSiteProvisioningService } from './own-site-provisioning.service';
 import { PRAC } from '../practice.concepts';
 import { CONCEPTS } from '../../../common';
+import { boProvinceConceptId } from '../../../common/seed/admin-divisions.catalog';
+import { boMunicipalityConceptId } from '../../../common/seed/bo-geography.catalog';
 
 const OWNER = {
   tenantId: 'tenant-1',
@@ -195,6 +197,55 @@ describe('OwnSiteProvisioningService', () => {
         expect.objectContaining({ addressId: 'addr-1' }),
       );
       expect(res.addressId).toBe('addr-1');
+    });
+
+    it('ADR-0028: guarda el distrito aparte y deduce la provincia del municipio', async () => {
+      const d = build();
+
+      await d.service.provision(
+        d.tx as any,
+        OWNER,
+        {
+          name: 'Mi consultorio',
+          address: {
+            lines: ['Calle Warnes 45'],
+            district: '  Equipetrol ',
+            municipalityConceptId: boMunicipalityConceptId('070101'),
+          },
+        } as any,
+        OWNER.userId,
+      );
+
+      expect(d.addressesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          lines: 'Calle Warnes 45',
+          districtText: 'Equipetrol',
+          administrativeArea2ConceptId: boProvinceConceptId('0701'),
+        }),
+      );
+    });
+
+    it('ADR-0028: sin municipio no hay provincia, y un distrito en blanco no se guarda', async () => {
+      const d = build();
+
+      await d.service.provision(
+        d.tx as any,
+        OWNER,
+        {
+          name: 'Mi consultorio',
+          address: { lines: ['X'], district: '  ' },
+        } as any,
+        OWNER.userId,
+      );
+
+      expect(d.addressesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          districtText: undefined,
+          administrativeArea2ConceptId: undefined,
+        }),
+      );
     });
 
     it('persists no lines when address.lines is empty or blank', async () => {

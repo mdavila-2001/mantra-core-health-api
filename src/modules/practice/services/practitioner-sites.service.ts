@@ -13,6 +13,7 @@ import {
 // (P32-b) desde acá, que es donde vive el caso de uso de «mudé mi consultorio».
 import { Addresses } from '../../common/entities';
 import { AddressesRepository } from '../../common/repositories';
+import { adminDivisionLineage } from '../../../common/seed/admin-divisions.catalog';
 // Mismo patrón que `clinical_ext` con `ProfileOwnershipService`: se importa la
 // clase puntual, no `ProfilesModule`, para no cerrar un ciclo entre módulos.
 import { ProfileOwnershipService } from '../../profiles/application/services/profile-ownership.service';
@@ -674,6 +675,11 @@ export class PractitionerSitesService {
       city: address.city,
       municipalityConceptId: address.municipalityConceptId,
       administrativeAreaConceptId: address.administrativeAreaConceptId,
+      // ADR-0028: provincia deducida del municipio y distrito aparte.
+      administrativeArea2ConceptId: address.municipalityConceptId
+        ? adminDivisionLineage(address.municipalityConceptId)?.level2ConceptId
+        : undefined,
+      districtText: address.district?.trim() || undefined,
       countryConceptId: CONCEPTS.COUNTRY_BO,
       useConceptId: CONCEPTS.ADDR_USE_WORK,
       typeConceptId: CONCEPTS.ADDR_TYPE_POSTAL,
@@ -721,7 +727,14 @@ function unique(ids: readonly string[]): string[] {
  * no como una cadena de comas.
  */
 function addressText(address: Addresses): string | null {
-  const parts = [address.lines, address.city, address.postalCode]
+  // El distrito va aparte de las líneas desde ADR-0028; se repone acá para
+  // que el texto de la sede siga diciendo la zona, como cuando venía pegado.
+  const parts = [
+    address.lines,
+    address.districtText,
+    address.city,
+    address.postalCode,
+  ]
     .map((part) => part?.trim())
     .filter((part): part is string => Boolean(part));
   return parts.length === 0 ? null : parts.join(', ');
@@ -737,9 +750,10 @@ function addressText(address: Addresses): string | null {
  */
 function ownSiteAddressText(address: {
   lines: string[];
+  district?: string;
   city?: string;
 }): string | null {
-  const parts = [address.lines.join('\n'), address.city]
+  const parts = [address.lines.join('\n'), address.district, address.city]
     .map((part) => part?.trim())
     .filter((part): part is string => Boolean(part));
   return parts.length === 0 ? null : parts.join(', ');
