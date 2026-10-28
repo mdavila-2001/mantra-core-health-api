@@ -78,6 +78,35 @@ por dominio propio.
 | `GET /surveys/me/invitations` | autenticado con perfil de paciente | Mis cuestionarios |
 | `GET /surveys/me/invitations/:id` | autenticado con perfil de paciente | Abre el cuestionario a responder |
 | `POST /surveys/me/invitations/:id/responses` | autenticado con perfil de paciente | Responde |
+| `GET /surveys/insights` | `PRACTITIONER` `CLINICIAN` | Resumen agregado de las encuestas del profesional (ver abajo) |
+
+### Resumen del profesional (`GET /surveys/insights`) y su privacidad
+
+Devuelve, en agregado, `totals` (emitidos, respondidos, tasa), `nps`, `byQuestion`
+(promedio y distribución por pregunta o dimensión, con `n`), `trend`,
+`safetyAlerts` y `comments`, más `privacy: { minCohort, suppressed }`. Alcance: el
+tenant activo y el profesional de la sesión; sus plantillas y las de sistema
+(sin dueño profesional) emitidas por sus atenciones. Nunca incluye
+`patient_profile_id`, `appointment_booking_id` ni la hora de un envío. La
+dimensión de una pregunta de la encuesta base se deriva de su enunciado
+(`survey-dimensions.ts`), no de una columna.
+
+Reglas que evitan identificar a un paciente (`insights.constants.ts`):
+
+- **Cohorte mínima de 5.** Con menos de 5 respondidas en el alcance filtrado sólo
+  salen `totals` y `privacy.suppressed = true`. Una pregunta con menos de 5
+  respuestas, el NPS con menos de 5 y los puntos de tendencia con menos de 5
+  respondidos se suprimen o se funden con el siguiente; lo suprimido no alimenta
+  ningún total (NPS, alertas, tendencia).
+- **Periodo en meses calendario.** `from` es el primer día de un mes, `to` el
+  último día de un mes, hasta 12 meses; cualquier hora o día suelto responde 400.
+- **Comentarios** sólo si hay al menos 5 en el alcance, con el mes (no el día ni
+  la hora), máximo 20, en un orden estable por hash y no cronológico.
+
+Límite conocido: sin ruido añadido, comparar resúmenes de ventanas casi iguales
+o del mismo periodo con y sin `serviceId` puede acotar el aporte de pocas
+respuestas. La cohorte mínima y las ventanas por mes lo reducen; no lo eliminan.
+Es un riesgo residual aceptado.
 
 ## Entidades (schema `surveys`)
 

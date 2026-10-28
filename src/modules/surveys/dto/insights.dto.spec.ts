@@ -14,7 +14,7 @@ describe('InsightsQueryDto', () => {
     expect(
       await errorsOf({
         from: '2026-10-01',
-        to: '2026-10-28',
+        to: '2026-10-31',
         serviceId: '0b6f6d8e-4c6e-4a0e-9d52-0f7b1b2c3d4e',
       }),
     ).toEqual([]);
@@ -22,6 +22,7 @@ describe('InsightsQueryDto', () => {
 
   it.each([
     ['from', '2026-10-01T10:00:00Z'],
+    ['from', '2026-10-15'],
     ['from', '2026-10-01T00:00:00'],
     ['to', '2026-10-28T12:00:00.000Z'],
     ['to', '28/10/2026'],

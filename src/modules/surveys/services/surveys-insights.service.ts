@@ -37,9 +37,9 @@ import {
 
 import {
   DATE_ONLY_PATTERN,
-  DEFAULT_RANGE_DAYS,
-  MAX_RANGE_DAYS,
+  MAX_RANGE_MONTHS,
   MIN_COHORT,
+  MONTH_START_PATTERN,
 } from '../insights.constants';
 
 /** Milisegundos de un día. */
@@ -211,8 +211,12 @@ export class SurveysInsightsService {
       valuesByQuestion.set(row.questionId, list);
     }
 
+    // NPS, alertas y tendencia salen SÓLO de las preguntas no suprimidas: si un
+    // grupo con pocas respuestas alimentara un total, restando ese total de
+    // otros se recuperaría lo que se quiso ocultar.
     const byQuestion: InsightsQuestionDto[] = [];
     const nps = { promoters: 0, passives: 0, detractors: 0 };
+    let npsSuppressed = false;
     let safetyAlerts = 0;
     for (const group of groups) {
       const summary = this.summarizeGroup(group, valuesByQuestion);
@@ -222,9 +226,9 @@ export class SurveysInsightsService {
         nps.passives += summary.nps.passives;
         nps.detractors += summary.nps.detractors;
       }
+      npsSuppressed = npsSuppressed || summary.npsSuppressed;
       safetyAlerts += summary.safetyAlerts;
     }
-
     this.logger.info(
       {
         operation: 'surveys.insights.read',
@@ -239,15 +243,17 @@ export class SurveysInsightsService {
     return {
       totals,
       privacy: { minCohort: MIN_COHORT, suppressed: false },
-      nps: this.toNps(nps),
+      nps: this.toNps(nps, npsSuppressed),
       byQuestion,
       trend: this.buildTrend(invitationRows, groups, valuesByQuestion),
       trendGranularity: granularity,
       safetyAlerts: { n: safetyAlerts },
-      comments: commentRows.map((row) => ({
-        text: row.text,
-        submittedAt: row.day,
-      })),
+      // Con menos de MIN_COHORT comentarios en el alcance, cada uno es de una
+      // persona casi identificable: no se devuelve ninguno.
+      comments:
+        commentRows.length >= MIN_COHORT
+          ? commentRows.map((row) => ({ text: row.text, month: row.month }))
+          : [],
     };
   }
 
@@ -255,9 +261,11 @@ export class SurveysInsightsService {
    * Periodo pedido → cotas del alcance. Siempre devuelve ambas: `from` es el
    * primer instante incluido y `toExclusive` el primero que ya no.
    *
-   * Sólo fechas de día: una hora permitiría acotar el periodo a minutos y
-   * aislar una respuesta. Sin `to` vale hoy (UTC); sin `from`, 365 días antes
-   * de `to`.
+   * El periodo son meses calendario enteros (`from` = primer día de un mes,
+   * `to` = último día de un mes, hasta 12 meses): ventanas de días arbitrarios
+   * permitirían comparar dos resúmenes casi iguales y aislar una respuesta. Sin
+   * `to` vale el fin del mes en curso (UTC); sin `from`, 12 meses terminando en
+   * el mes de `to`.
    */
   private resolvePeriod(
     query: InsightsQueryDto,
@@ -275,35 +283,51 @@ export class SurveysInsightsService {
       }
       return date;
     };
+    const monthIndex = (d: Date): number =>
+      d.getUTCFullYear() * 12 + d.getUTCMonth();
+    const monthStart = (index: number): Date =>
+      new Date(Date.UTC(Math.floor(index / 12), index % 12, 1));
 
-    const today = new Date();
-    const toDay = query.to
-      ? parse('to', query.to)
-      : new Date(
-          Date.UTC(
-            today.getUTCFullYear(),
-            today.getUTCMonth(),
-            today.getUTCDate(),
-          ),
+    let toDay: Date;
+    if (query.to) {
+      toDay = parse('to', query.to);
+      const nextDay = new Date(toDay.getTime() + MS_PER_DAY);
+      if (nextDay.getUTCDate() !== 1) {
+        throw new BadRequestException(
+          'to debe ser el último día de un mes (por ejemplo 2026-10-31)',
         );
-    const from = query.from
-      ? parse('from', query.from)
-      : new Date(toDay.getTime() - DEFAULT_RANGE_DAYS * MS_PER_DAY);
+      }
+    } else {
+      const now = new Date();
+      toDay = new Date(monthStart(monthIndex(now) + 1).getTime() - MS_PER_DAY);
+    }
+
+    let from: Date;
+    if (query.from) {
+      from = parse('from', query.from);
+      if (!MONTH_START_PATTERN.test(query.from)) {
+        throw new BadRequestException(
+          'from debe ser el primer día de un mes (por ejemplo 2026-10-01)',
+        );
+      }
+    } else {
+      from = monthStart(monthIndex(toDay) - (MAX_RANGE_MONTHS - 1));
+    }
+
     if (from > toDay) {
       throw new BadRequestException(
-        'El inicio del periodo debe ser igual o anterior a su fin',
+        'El inicio del periodo debe ser anterior o igual a su fin',
       );
     }
-    const toExclusive = new Date(toDay.getTime() + MS_PER_DAY);
-    if (
-      (toExclusive.getTime() - from.getTime()) / MS_PER_DAY >
-      MAX_RANGE_DAYS
-    ) {
+    if (monthIndex(toDay) - monthIndex(from) + 1 > MAX_RANGE_MONTHS) {
       throw new BadRequestException(
-        `El periodo no puede superar ${MAX_RANGE_DAYS} días`,
+        `El periodo no puede superar ${MAX_RANGE_MONTHS} meses`,
       );
     }
-    return { from, toExclusive };
+    return {
+      from,
+      toExclusive: new Date(toDay.getTime() + MS_PER_DAY),
+    };
   }
 
   /** Granularidad de la tendencia según la amplitud del periodo. */
@@ -372,6 +396,8 @@ export class SurveysInsightsService {
     nps?: NpsCounts;
     /** Alertas de seguridad de este grupo. */
     safetyAlerts: number;
+    /** Si es la pregunta de recomendación y quedó suprimida. */
+    npsSuppressed: boolean;
   } {
     const rep = group.representative;
     const n = group.members.reduce((sum, m) => sum + m.n, 0);
@@ -463,21 +489,30 @@ export class SurveysInsightsService {
       delete dto.average;
       delete dto.optionCounts;
       safetyAlerts = 0;
+      const wasNps = nps !== undefined;
+      nps = undefined;
+      return { dto, nps, safetyAlerts, npsSuppressed: wasNps };
     }
 
-    return { dto, nps, safetyAlerts };
+    return { dto, nps, safetyAlerts, npsSuppressed: false };
   }
 
-  /** Cuenta de NPS → DTO con el valor en puntos. */
-  private toNps(counts: NpsCounts): InsightsNpsDto {
+  /**
+   * Cuenta de NPS → DTO con el valor en puntos. Con la pregunta suprimida, o con
+   * menos de MIN_COHORT respuestas, no hay valor ni conteos.
+   */
+  private toNps(
+    counts: NpsCounts,
+    questionSuppressed: boolean,
+  ): InsightsNpsDto {
     const n = counts.promoters + counts.passives + counts.detractors;
-    if (n > 0 && n < MIN_COHORT) {
+    if (questionSuppressed || (n > 0 && n < MIN_COHORT)) {
       return {
         value: null,
         promoters: 0,
         passives: 0,
         detractors: 0,
-        n,
+        n: 0,
         suppressed: true,
       };
     }
@@ -518,8 +553,10 @@ export class SurveysInsightsService {
     const scaleGroups = groups.filter(
       (g) => g.representative.answerType === 'SCALE',
     );
+    // Sólo grupos no suprimidos: un promedio de una pregunta con pocas
+    // respuestas no puede reaparecer en la tendencia.
     const withAnswers = (g: QuestionGroup): boolean =>
-      g.members.some((m) => m.n > 0);
+      g.members.reduce((sum, m) => sum + m.n, 0) >= MIN_COHORT;
     let source = scaleGroups.filter(
       (g) =>
         g.representative.dimension === 'satisfaccion_global' && withAnswers(g),
