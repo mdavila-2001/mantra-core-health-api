@@ -12,6 +12,8 @@ export interface AddressBookRow {
   readonly lines?: string | null;
   readonly city?: string | null;
   readonly municipalityConceptId?: string | null;
+  readonly administrativeArea2ConceptId?: string | null;
+  readonly districtText?: string | null;
   readonly latitude?: string | null;
   readonly longitude?: string | null;
   readonly isPreferred: boolean;
@@ -23,6 +25,8 @@ export interface NewSavedAddress {
   readonly label: string;
   readonly municipalityConceptId: string;
   readonly lines?: string;
+  /** Distrito o zona, como texto (ADR-0028). */
+  readonly district?: string;
   readonly latitude?: number;
   readonly longitude?: number;
   readonly isPreferred: boolean;
@@ -62,6 +66,7 @@ export interface PatientAddressBookPort {
       useConceptId: string;
       municipalityConceptId?: string;
       lines?: string;
+      district?: string;
       latitude?: number | null;
       longitude?: number | null;
       actorUserId: string;

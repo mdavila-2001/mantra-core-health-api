@@ -852,6 +852,7 @@ export class IamPractitionerSelfRegistrationService {
         personId: person.id,
         municipalityConceptId: dto.residenceMunicipalityConceptId,
         lines: dto.homeAddressLines,
+        district: dto.homeDistrict,
         latitude: dto.homeLatitude,
         longitude: dto.homeLongitude,
         actorUserId: user.id,
