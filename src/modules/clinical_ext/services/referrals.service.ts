@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
-  CONCEPTS,
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
@@ -551,24 +550,25 @@ export class ReferralsService {
     });
   }
 
-  /** Organizaciones activas candidatas. */
+  /** Organizaciones activas y listables candidatas. */
   private async searchOrganizationTargets(
     em: EntityManager,
     q: string,
   ): Promise<ReferralTargetDto[]> {
-    const tenants = await this.tenantsRepo.searchPage(
+    const rows = await this.targetsRepo.searchOrganizations(
       em,
-      { query: q, statusConceptId: CONCEPTS.TENANT_ACTIVE },
+      q,
       REFERRAL_TARGETS_LIMIT,
     );
-    return tenants.map((tenant) => {
-      const displayName = tenantName(tenant);
+    return rows.map((row) => {
+      const trade = row.tradeName?.trim();
+      const displayName = trade ? trade : row.legalName;
       return {
         kind: 'ORGANIZATION' as const,
-        id: tenant.id,
+        id: row.tenantId,
         displayName,
-        tenantId: tenant.id,
-        subtitle: tenant.legalName !== displayName ? tenant.legalName : null,
+        tenantId: row.tenantId,
+        subtitle: row.legalName !== displayName ? row.legalName : null,
       };
     });
   }

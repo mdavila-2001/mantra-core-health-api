@@ -98,6 +98,14 @@ describe('ReferralsController', () => {
     expect(index('target-services')).toBeLessThan(firstParam);
   });
 
+  it('las búsquedas de destino tienen techo de tasa (60/min, como el directorio)', () => {
+    const proto = ReferralsController.prototype as any;
+    for (const handler of [proto.searchTargets, proto.listTargetServices]) {
+      expect(Reflect.getMetadata('THROTTLER:LIMITdefault', handler)).toBe(60);
+      expect(Reflect.getMetadata('THROTTLER:TTLdefault', handler)).toBe(60_000);
+    }
+  });
+
   describe('validación del contrato', () => {
     const errorsOf = async (cls: any, plain: object) =>
       (await validate(plainToInstance(cls, plain))).map((e) => e.property);

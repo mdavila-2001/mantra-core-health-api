@@ -68,6 +68,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn() };
   const targetsRepo = {
     searchPractitioners: mockFn(() => Promise.resolve([])),
+    searchOrganizations: mockFn(() => Promise.resolve([])),
   };
   const offeringsRepo = {
     findOfferingOf: mockFn(() =>
@@ -790,15 +791,14 @@ describe('ReferralsService', () => {
           d.service.searchTargets({ q: ' a ' } as any),
         ).rejects.toBeInstanceOf(PreconditionFailedException);
         expect(d.targetsRepo.searchPractitioners).not.toHaveBeenCalled();
-        expect(d.tenantsRepo.searchPage).not.toHaveBeenCalled();
+        expect(d.targetsRepo.searchOrganizations).not.toHaveBeenCalled();
       });
 
       it('ORGANIZATION busca tenants activos y devuelve la forma del contrato', async () => {
         const d = build();
-        d.tenantsRepo.searchPage.mockResolvedValue([
+        d.targetsRepo.searchOrganizations.mockResolvedValue([
           {
-            id: 'ten-1',
-            code: 'CLI-1',
+            tenantId: 'ten-1',
             legalName: 'Clínica Norte S.R.L.',
             tradeName: 'Clínica Norte',
           },
@@ -807,9 +807,9 @@ describe('ReferralsService', () => {
           q: 'norte',
           kind: 'ORGANIZATION',
         });
-        expect(d.tenantsRepo.searchPage).toHaveBeenCalledWith(
+        expect(d.targetsRepo.searchOrganizations).toHaveBeenCalledWith(
           expect.anything(),
-          expect.objectContaining({ query: 'norte' }),
+          'norte',
           20,
         );
         expect(d.targetsRepo.searchPractitioners).not.toHaveBeenCalled();
@@ -847,7 +847,7 @@ describe('ReferralsService', () => {
           q: 'ana',
           kind: 'PRACTITIONER',
         });
-        expect(d.tenantsRepo.searchPage).not.toHaveBeenCalled();
+        expect(d.targetsRepo.searchOrganizations).not.toHaveBeenCalled();
         expect(res.items).toEqual([
           {
             kind: 'PRACTITIONER',
