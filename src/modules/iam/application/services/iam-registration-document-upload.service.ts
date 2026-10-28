@@ -6,7 +6,11 @@ import {
   type RegistrationUploadedFile,
 } from '../ports/registration-files.port';
 import { RegistrationDocumentUploadResponseDto } from '../../presentation/dto';
-import { PreconditionFailedException } from '../../../../common';
+import {
+  LOGO_IMAGE_MIME_TYPES,
+  LOGO_MAX_BYTES,
+  PreconditionFailedException,
+} from '../../../../common';
 
 /** Único formato admitido por esta vía: el registro de procesos pide PDF. */
 const REGISTRATION_DOCUMENT_ALLOWED_MIME_TYPES = ['application/pdf'] as const;
@@ -79,6 +83,38 @@ export class IamRegistrationDocumentUploadService {
       sensitivity: 'PHI',
       allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
       operation: 'iam.auth.upload-registration-signature-image',
+    });
+    return {
+      fileId: uploaded.id,
+      originalName: file?.originalname ?? uploaded.originalName ?? '',
+      sizeBytes: uploaded.sizeBytes,
+      mimeType: uploaded.mimeType,
+    };
+  }
+
+  /**
+   * Precarga del logo del consultorio propio que declara el alta del médico
+   * (`ownSite.logoFileId`); la cuenta todavía no existe.
+   *
+   * A diferencia de la firma, el logo es NORMAL: sale en el membrete de sus
+   * PDF. Mismas reglas que el logo de una organización (png, jpeg o webp y
+   * hasta 2 MB); el alta lo vuelve a comprobar al reclamarlo.
+   *
+   * @param file - Contenido recibido por multipart.
+   * @returns El `fileId` a reenviar en `ownSite.logoFileId`.
+   * @throws PreconditionFailedException si supera 2 MB o no es una imagen admitida.
+   */
+  async uploadOwnSiteLogo(
+    file: RegistrationUploadedFile | undefined,
+  ): Promise<RegistrationDocumentUploadResponseDto> {
+    if (file && file.buffer.byteLength > LOGO_MAX_BYTES) {
+      throw new PreconditionFailedException('El logo supera los 2 MB');
+    }
+    const uploaded = await this.files.uploadAnonymous(file, {
+      category: 'IMAGE',
+      sensitivity: 'NORMAL',
+      allowedMimeTypes: LOGO_IMAGE_MIME_TYPES,
+      operation: 'iam.auth.upload-registration-logo',
     });
     return {
       fileId: uploaded.id,

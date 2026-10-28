@@ -1758,6 +1758,89 @@ describe('IamPractitionerSelfRegistrationService', () => {
       expect(d.notificationsService.createRequest).not.toHaveBeenCalled();
     });
 
+    it('con logo: lo reclama en la transacción del alta, como imagen, antes de la persona', async () => {
+      const d = build();
+      d.attachableFileService.claimAnonymousUpload.mockResolvedValue({
+        file: { sensitivityConceptId: CONCEPTS.SENSITIVITY_NORMAL },
+        version: { sizeBytes: String(1024 * 1024) },
+      });
+      const conLogo = {
+        name: 'Consultorio Rojas',
+        logoFileId: 'file-logo',
+      } as never;
+
+      await d.service.registerPractitioner({ ...dto, ownSite: conLogo });
+
+      expect(d.attachableFileService.claimAnonymousUpload).toHaveBeenCalledWith(
+        d.tx,
+        'file-logo',
+        { ownerUserId: 'user-1', tenantId: SEED.tenantId },
+        expect.objectContaining({
+          allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+          allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+        }),
+        expect.anything(),
+      );
+      const claimOrder = d.attachableFileService.claimAnonymousUpload.mock
+        .invocationCallOrder as number[];
+      expect(claimOrder[claimOrder.length - 1]).toBeLessThan(
+        d.personsRepo.create.mock.invocationCallOrder[0],
+      );
+      expect(d.ownSiteProvisioning.provision).toHaveBeenCalledWith(
+        d.tx,
+        expect.anything(),
+        conLogo,
+        'user-1',
+      );
+    });
+
+    it.each([
+      ['PHI', { sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI }, '1024'],
+      [
+        'de 3 MB',
+        { sensitivityConceptId: CONCEPTS.SENSITIVITY_NORMAL },
+        String(3 * 1024 * 1024),
+      ],
+    ])(
+      'con un logo %s: 422, sin sede, y nada después del punto de fallo',
+      async (_label, file, sizeBytes) => {
+        const d = build();
+        d.attachableFileService.claimAnonymousUpload.mockResolvedValue({
+          file,
+          version: { sizeBytes },
+        });
+
+        await expect(
+          d.service.registerPractitioner({
+            ...dto,
+            ownSite: { name: 'Consultorio Rojas', logoFileId: 'file-logo' },
+          } as never),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+        // La transacción se aborta en el reclamo: ni la persona, ni la sede,
+        // ni nada de lo que viene después llega a escribirse.
+        expect(d.personsRepo.create).not.toHaveBeenCalled();
+        expect(d.ownSiteProvisioning.provision).not.toHaveBeenCalled();
+        expect(d.emailVerificationsRepo.create).not.toHaveBeenCalled();
+        expect(d.eventsRepo.record).not.toHaveBeenCalled();
+      },
+    );
+
+    it('si el reclamo del logo falla, el error sale del alta y no se provisiona', async () => {
+      const d = build();
+      d.attachableFileService.claimAnonymousUpload.mockRejectedValue(
+        new PreconditionFailedException('no corresponde'),
+      );
+
+      await expect(
+        d.service.registerPractitioner({
+          ...dto,
+          ownSite: { name: 'Consultorio Rojas', logoFileId: 'file-logo' },
+        } as never),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.ownSiteProvisioning.provision).not.toHaveBeenCalled();
+    });
+
     it('en el alta asistida, el autor de las filas es el administrador (C-18)', async () => {
       const d = build();
       const admin = { id: 'admin-1' } as never;

@@ -180,6 +180,38 @@ export class IamAuthController {
     return this.registrationDocumentUploadService.uploadSignatureImage(file);
   }
 
+  /** Precarga del logo del consultorio propio: máximo 2 MB, imagen NORMAL. */
+  @NotAudited(
+    'Archivo anónimo previo al alta (common.files vía uploadAnonymous); se vincula al usuario al registrarse.',
+  )
+  @Post('upload-registration-logo')
+  @Public()
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 2 * 1024 * 1024, files: 1 },
+    }),
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['file'],
+      properties: { file: { type: 'string', format: 'binary' } },
+    },
+  })
+  @ApiOperation({
+    summary: 'Pre-cargar el logo del consultorio propio para el registro',
+    description:
+      'png, jpeg o webp de hasta 2 MB. El `fileId` se reenvía en `ownSite.logoFileId` del alta, que lo reclama en su misma transacción.',
+  })
+  uploadRegistrationLogo(
+    @UploadedFile() file: RegistrationUploadedFile | undefined,
+  ): Promise<RegistrationDocumentUploadResponseDto> {
+    return this.registrationDocumentUploadService.uploadOwnSiteLogo(file);
+  }
+
   /**
    * Pre-carga pública de un PDF para un registro que todavía no tiene sesión:
    * documento legal de organización o respaldo de credencial profesional.

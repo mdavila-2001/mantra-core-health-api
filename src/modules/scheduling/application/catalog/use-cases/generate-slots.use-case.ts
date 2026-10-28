@@ -129,6 +129,10 @@ export class GenerateSlotsUseCase {
         // al retener, con la duración de cada servicio, y una grilla fija encima
         // ofrecería horarios que la agenda de servicios no respeta.
         if (rule.bookingModeConceptId === SCHED.RULE_MODE_SERVICES) continue;
+        // Franja de horario flexible (v4.2.64): igual que una plantilla toda
+        // flexible, no tiene grilla —sus cupos nacen al retener—. Las franjas
+        // fijas de la misma plantilla se generan como siempre.
+        if (rule.flexibleHours === true) continue;
         const slotMinutes =
           rule.slotMinutes ?? template.slotMinutes ?? DEFAULT_SLOT_MINUTES;
         const capacity = rule.capacityPerSlot ?? DEFAULT_SLOT_CAPACITY;
