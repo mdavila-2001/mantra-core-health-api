@@ -1,0 +1,201 @@
+=== Catálogo de enfermedades → terminology.*  ===
+Leyendo la instantánea versionada /home/user/mantra-core-health-api/tools/terminology-import/diseases/data
+┌─────────┬────────────────────────┬──────────────────────┬──────────┬──────────────┬────────────┬───────────────┬───────┬────────────────────────┐
+│ (index) │ codeSystem             │ version              │ concepts │ designations │ properties │ relationships │ maps  │ externalMapsCandidates │
+├─────────┼────────────────────────┼──────────────────────┼──────────┼──────────────┼────────────┼───────────────┼───────┼────────────────────────┤
+│ 0       │ 'decipher'             │ 'xref-keys'          │ 61       │ 0            │ 122        │ 0             │ 0     │ 0                      │
+│ 1       │ 'doid'                 │ '2026-09-30'         │ 14854    │ 37793        │ 50308      │ 17479         │ 24996 │ 7400                   │
+│ 2       │ 'efo-disease'          │ '3.95.0'             │ 1159     │ 2670         │ 3799       │ 192           │ 1339  │ 4                      │
+│ 3       │ 'icd10-who'            │ 'xref-keys'          │ 12640    │ 0            │ 27413      │ 0             │ 11639 │ 0                      │
+│ 4       │ 'icd11-foundation'     │ 'xref-keys'          │ 4631     │ 0            │ 9262       │ 0             │ 0     │ 0                      │
+│ 5       │ 'icd11-mms'            │ '2026-01'            │ 37052    │ 37052        │ 74739      │ 37024         │ 19068 │ 0                      │
+│ 6       │ 'medlineplus-genetics' │ '2026-10-27'         │ 1305     │ 7656         │ 6479       │ 0             │ 6550  │ 4176                   │
+│ 7       │ 'mesh'                 │ '2026'               │ 12490    │ 42487        │ 82121      │ 7963          │ 13675 │ 834                    │
+│ 8       │ 'mondo'                │ '2026-10-06'         │ 27695    │ 111790       │ 123821     │ 36104         │ 78285 │ 4410                   │
+│ 9       │ 'nando'                │ '1.0.0 (2023-11-27)' │ 2777     │ 4746         │ 13051      │ 2774          │ 2341  │ 0                      │
+│ 10      │ 'ncit-disease'         │ '26.09d'             │ 22854    │ 69987        │ 89553      │ 38089         │ 13608 │ 0                      │
+│ 11      │ 'ncit-xref'            │ '26.09d'             │ 645      │ 1633         │ 3025       │ 0             │ 564   │ 0                      │
+│ 12      │ 'omim'                 │ 'xref-keys'          │ 10892    │ 0            │ 21784      │ 0             │ 0     │ 0                      │
+│ 13      │ 'oncotree'             │ '2025-10-03'         │ 898      │ 898          │ 3624       │ 897           │ 1360  │ 0                      │
+│ 14      │ 'orphanet'             │ '2026-06-23'         │ 11645    │ 52894        │ 50226      │ 19711         │ 45767 │ 0                      │
+│ 15      │ 'umls'                 │ 'xref-keys'          │ 32693    │ 0            │ 65386      │ 0             │ 0     │ 0                      │
+└─────────┴────────────────────────┴──────────────────────┴──────────┴──────────────┴────────────┴───────────────┴───────┴────────────────────────┘
+Totales: {
+  concepts: 194291,
+  designations: 369606,
+  properties: 624713,
+  relationships: 160233,
+  maps: 219192,
+  externalMapsCandidates: 16824
+}
+[concepts] decipher +0
+[concepts] doid +0
+[concepts] efo-disease +0
+[concepts] icd10-who +0
+[concepts] icd11-foundation +0
+[concepts] icd11-mms +0
+[concepts] medlineplus-genetics +0
+[concepts] mesh +0
+[concepts] mondo +0
+[concepts] nando +0
+[concepts] ncit-disease +0
+[concepts] ncit-xref +0
+[concepts] omim +0
+[concepts] oncotree +0
+[concepts] orphanet +0
+[concepts] umls +0
+[load] decipher {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] doid {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] efo-disease {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] icd10-who {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] icd11-foundation {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] icd11-mms {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] medlineplus-genetics {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] mesh {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] mondo {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] nando {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] ncit-disease {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] ncit-xref {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] omim {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] oncotree {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] orphanet {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] umls {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "decipher": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "doid": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "efo-disease": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "icd10-who": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "icd11-foundation": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "icd11-mms": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "medlineplus-genetics": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "mesh": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "mondo": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "nando": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "ncit-disease": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "ncit-xref": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "omim": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "oncotree": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "orphanet": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "umls": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    }
+  },
+  "segundos": 54
+}
+
+real	0m54.380s
+user	0m25.211s
+sys	0m2.266s

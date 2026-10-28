@@ -4,6 +4,10 @@
 # Uso (Postgres 16 local, p. ej. initdb en /var/tmp):
 #   DB_HOST=/var/tmp/pg-diseases DB_PORT=5499 DB_USER=mantra DB_NAME=diseases_test sh tools/terminology-import/diseases/test/disposable-db/fresh-db.sh
 set -e
+# Guard: esto hace `drop database`. Sólo contra un Postgres local y una base cuyo nombre termina en `_test`
+# (nunca contra la del stack real, aunque las variables de entorno apunten ahí).
+case "$DB_HOST" in 127.0.0.1|localhost|/*) ;; *) echo "fresh-db.sh: DB_HOST=$DB_HOST no es local; me niego." >&2; exit 2 ;; esac
+case "$DB_NAME" in *_test) ;; *) echo "fresh-db.sh: DB_NAME=$DB_NAME no termina en _test; me niego." >&2; exit 2 ;; esac
 ROOT=$(cd "$(dirname "$0")/../../../../.." && pwd)
 Q="psql -q -h $DB_HOST -p $DB_PORT -U $DB_USER"
 $Q -d postgres -c "drop database if exists $DB_NAME" -c "create database $DB_NAME"

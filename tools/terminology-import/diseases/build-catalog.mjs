@@ -28,11 +28,17 @@ import { resolveXrefs } from './lib/resolve.mjs';
 import { SNAPSHOT_DIR, writeSnapshot } from './lib/snapshot.mjs';
 import { GARD, NDJSON_DIR, SOURCES_DIR } from './lib/sources.mjs';
 
+// Fuentes cuya licencia NO está verificada por texto (o que el propietario dejó sin aprobar): se construyen sólo con
+// el flag explícito, nunca por defecto (ver SOURCES.md, «Condicionadas»).
+const WITH_GARD = process.argv.includes('--with-gard');
+const WITH_ICD11_ES = process.argv.includes('--with-icd11-es');
+
 function loadManifest() {
   const path = join(SOURCES_DIR, 'manifest.json');
   if (!existsSync(path)) throw new Error(`Falta ${path}. Corré primero fetch-sources.mjs.`);
   const byKey = Object.fromEntries(JSON.parse(readFileSync(path, 'utf8')).sources.map((s) => [s.key, s]));
-  // GARD lo baja `fetch-gard.mjs` (≈ 6 300 pedidos) y deja su propio manifiesto.
+  // GARD lo baja `fetch-gard.mjs` (≈ 6 300 pedidos) y deja su propio manifiesto. Sólo con `--with-gard`.
+  if (!WITH_GARD) return byKey;
   const gardManifest = join(GARD.dir, 'manifest.json');
   if (!existsSync(gardManifest)) throw new Error(`Falta ${gardManifest}. Corré primero fetch-gard.mjs.`);
   const g = JSON.parse(readFileSync(gardManifest, 'utf8'));
@@ -89,25 +95,28 @@ async function main() {
   const icd11 = buildIcd11Mms(
     {
       tabulation: join(m['icd11-mms'].unzippedTo, 'SimpleTabulation-ICD-11-MMS-en.txt'),
-      tabulationEs: join(m['icd11-mms-es'].unzippedTo, 'SimpleTabulation-ICD-11-MMS-es.txt'),
+      tabulationEs: WITH_ICD11_ES ? join(m['icd11-mms-es'].unzippedTo, 'SimpleTabulation-ICD-11-MMS-es.txt') : null,
       map11To10: mapping('11To10MapToOneCategory.txt'),
     },
     m['icd11-mms'],
   );
   console.log(`[icd11-mms] ${icd11.records.length} (tabulación ${icd11.tabulationVersion}; ES ${icd11.tabulationEsVersion} ${JSON.stringify(icd11.spanish)}; 11→10 ${icd11.map11To10Version})`);
-  if (icd11.spanish.missingInSpanishFile || icd11.spanish.titleEnDiffersFromEnglishFile) throw new Error(`CIE-11: el archivo en castellano no calza con el inglés: ${JSON.stringify(icd11.spanish)}`);
+  if (icd11.spanish && (icd11.spanish.missingInSpanishFile || icd11.spanish.titleEnDiffersFromEnglishFile)) throw new Error(`CIE-11: el archivo en castellano no calza con el inglés: ${JSON.stringify(icd11.spanish)}`);
   const efo = await buildEfo(m.efo, m.efo);
   console.log(`[efo-disease] ${efo.records.length}`);
 
   // Fuentes de la pasada del 2026-10-27 que no dependen de qué citen las demás.
-  const gardDir = join(GARD.dir, 'singles');
-  const singles = new Map(readdirSync(gardDir).map((f) => [f.replace(/\.json$/, ''), JSON.parse(readFileSync(join(gardDir, f), 'utf8'))]));
-  const gard = buildGard(
-    { csv: parseGardCsv(m['gard-list'].path), trimmed: JSON.parse(readFileSync(m['gard-trimmed'].path, 'utf8')), singles },
-    m['gard-list'],
-    GARD.version,
-  );
-  console.log(`[gard] ${gard.records.length} (${JSON.stringify(gard.counts)})`);
+  let gard = { records: [], counts: {}, version: null };
+  if (WITH_GARD) {
+    const gardDir = join(GARD.dir, 'singles');
+    const singles = new Map(readdirSync(gardDir).map((f) => [f.replace(/\.json$/, ''), JSON.parse(readFileSync(join(gardDir, f), 'utf8'))]));
+    gard = buildGard(
+      { csv: parseGardCsv(m['gard-list'].path), trimmed: JSON.parse(readFileSync(m['gard-trimmed'].path, 'utf8')), singles },
+      m['gard-list'],
+      GARD.version,
+    );
+  }
+  console.log(`[gard] ${gard.records.length} (${WITH_GARD ? JSON.stringify(gard.counts) : 'omitido: licencia sin verificar, ver SOURCES.md'})`);
   const ghr = buildMedlineplusGenetics(parseGhrConditions(m['medlineplus-genetics'].path), m['medlineplus-genetics'], '2026-10-27');
   console.log(`[medlineplus-genetics] ${ghr.records.length}`);
   const nando = buildNando(readFileSync(m.nando.path, 'utf8'), m.nando);
@@ -188,7 +197,7 @@ async function main() {
     'icd11-mms': fileOf('icd11-mms', 'icd11-mms-es', 'icd11-mapping'),
     'efo-disease': fileOf('efo'),
     mesh: [...fileOf('mesh-desc', 'mesh-supp', 'medlineplus-topics'), ...keyFiles.filter((k) => ['mondo', 'orphanet-es-product1', 'doid', 'hpo-annotations'].includes(k.key))],
-    gard: fileOf('gard-list', 'gard-trimmed', 'gard-singles'),
+    ...(WITH_GARD ? { gard: fileOf('gard-list', 'gard-trimmed', 'gard-singles') } : {}),
     'medlineplus-genetics': fileOf('medlineplus-genetics'),
     nando: fileOf('nando'),
     oncotree: fileOf('oncotree'),
@@ -223,7 +232,7 @@ async function main() {
   // Instantánea versionada en git (gzip, partes < 45 MB): ver lib/snapshot.mjs.
   // El manifiesto de fuentes va sin las rutas locales de esta máquina.
   const sourcesManifest = JSON.parse(readFileSync(join(SOURCES_DIR, 'manifest.json'), 'utf8'));
-  sourcesManifest.sources = [...sourcesManifest.sources, ...['gard-list', 'gard-trimmed', 'gard-singles'].map((k) => m[k])].map(({ path: _path, unzippedTo: _unzipped, ...rest }) => rest);
+  sourcesManifest.sources = [...sourcesManifest.sources, ...(WITH_GARD ? ['gard-list', 'gard-trimmed', 'gard-singles'] : []).map((k) => m[k])].map(({ path: _path, unzippedTo: _unzipped, ...rest }) => rest);
   writeJson(join(BUILD_DIR, 'diseases-sources-manifest.json'), sourcesManifest, true);
   const snapshot = writeSnapshot(
     byCs,

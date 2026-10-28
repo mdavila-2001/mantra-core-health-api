@@ -286,3 +286,33 @@ test('MedlinePlus Genetics: condición con sinónimos, descripción en texto pla
   const alz = by.get([...by.keys()].find((k) => /alzheimer/i.test(k)));
   assert.ok(alz.xrefs.some((x) => x.cs === 'icd10cm' && x.external === true), 'ICD-10-CM: mapeo condicional al concepto de import-icd10cm');
 });
+
+// --- Instantánea versionada: SHA256SUMS y lectura verificada ---------------------------------------
+
+test('snapshot: SHA256SUMS en formato `sha256sum -c`, gzip determinista y lectura que verifica cada parte', async () => {
+  const { mkdtempSync, readFileSync: rf, rmSync, writeFileSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { createHash } = await import('node:crypto');
+  const { readSnapshot, writeSnapshot } = await import('../lib/snapshot.mjs');
+  const rows = new Map([['mondo', [{ cs: 'mondo', code: 'MONDO:1' }, { cs: 'mondo', code: 'MONDO:2' }]]]);
+  const d1 = mkdtempSync(join(tmpdir(), 'snap1-'));
+  const d2 = mkdtempSync(join(tmpdir(), 'snap2-'));
+  try {
+    writeSnapshot(rows, {}, { mondo: 'x' }, d1);
+    writeSnapshot(rows, {}, { mondo: 'x' }, d2);
+    const part = 'mondo.part-01.ndjson.gz';
+    assert.deepEqual(rf(join(d1, part)), rf(join(d2, part)), 'mismo contenido, mismos bytes');
+    const sums = rf(join(d1, 'SHA256SUMS'), 'utf8').trim().split('\n');
+    assert.deepEqual(sums.map((l) => l.split('  ')[1]), ['MANIFEST.json', part]);
+    for (const l of sums) {
+      const [h, f] = l.split('  ');
+      assert.equal(createHash('sha256').update(rf(join(d1, f))).digest('hex'), h);
+    }
+    assert.equal(readSnapshot(null, d1).byCs.get('mondo').length, 2);
+    writeFileSync(join(d1, part), Buffer.from('corrupto'));
+    assert.throws(() => readSnapshot(null, d1), /SHA-256 distinto|incorrect header|unknown compression/);
+  } finally {
+    rmSync(d1, { recursive: true, force: true });
+    rmSync(d2, { recursive: true, force: true });
+  }
+});

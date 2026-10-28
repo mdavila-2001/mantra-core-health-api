@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-10-24T05:27:33.297Z",
+  "generatedAt": "2026-10-28T00:25:14.266Z",
   "versions": {
     "mondo": "2026-10-06",
     "orphanet": "2026-06-23",
     "doid": "2026-09-30",
-    "ncit-disease": "26.02d",
+    "ncit-disease": "26.09d",
+    "ncit-xref": "26.09d",
     "icd11-mms": "2026-01",
     "efo-disease": "3.95.0",
+    "mesh": "2026",
+    "gard": null,
+    "medlineplus-genetics": "2026-10-27",
+    "nando": "1.0.0 (2023-11-27)",
+    "oncotree": "2025-10-03",
     "keys": "xref-keys"
   },
   "excluded": {
@@ -14,12 +20,18 @@
       "nonHumanOrCharacteristic": 8360
     },
     "ncit-disease": {
-      "outsideDiseaseOrDisorder": 187531
+      "outsideDiseaseOrDisorder": 190670,
+      "citedNotInNcit": 0
     },
     "efo-disease": {
       "notDiseaseOrImported": 93486
+    },
+    "mesh": {
+      "animalOnly": 23,
+      "outsideDiseaseTrees": 25905
     }
   },
+  "icd11Spanish": null,
   "bySystem": {
     "mondo": {
       "concepts": 27695,
@@ -29,7 +41,7 @@
       "designations": 111790,
       "designationsEs": 0,
       "isA": 36104,
-      "maps": 77343
+      "maps": 80490
     },
     "orphanet": {
       "concepts": 11645,
@@ -49,17 +61,27 @@
       "designations": 37793,
       "designationsEs": 0,
       "isA": 17479,
-      "maps": 28366
+      "maps": 28696
     },
     "ncit-disease": {
-      "concepts": 22379,
-      "active": 22379,
-      "deprecated": 0,
-      "withDefinition": 22376,
-      "designations": 69326,
+      "concepts": 22854,
+      "active": 22599,
+      "deprecated": 255,
+      "withDefinition": 22851,
+      "designations": 69987,
       "designationsEs": 0,
-      "isA": 37305,
-      "maps": 13981
+      "isA": 38089,
+      "maps": 13608
+    },
+    "ncit-xref": {
+      "concepts": 645,
+      "active": 528,
+      "deprecated": 117,
+      "withDefinition": 556,
+      "designations": 1633,
+      "designationsEs": 0,
+      "isA": 0,
+      "maps": 564
     },
     "icd11-mms": {
       "concepts": 37052,
@@ -69,7 +91,7 @@
       "designations": 37052,
       "designationsEs": 0,
       "isA": 37024,
-      "maps": 19024
+      "maps": 19068
     },
     "efo-disease": {
       "concepts": 1159,
@@ -79,7 +101,47 @@
       "designations": 2670,
       "designationsEs": 0,
       "isA": 192,
-      "maps": 1244
+      "maps": 1341
+    },
+    "mesh": {
+      "concepts": 12490,
+      "active": 12490,
+      "deprecated": 0,
+      "withDefinition": 7199,
+      "designations": 42487,
+      "designationsEs": 0,
+      "isA": 7963,
+      "maps": 14509
+    },
+    "medlineplus-genetics": {
+      "concepts": 1305,
+      "active": 1305,
+      "deprecated": 0,
+      "withDefinition": 1305,
+      "designations": 7656,
+      "designationsEs": 0,
+      "isA": 0,
+      "maps": 8638
+    },
+    "nando": {
+      "concepts": 2777,
+      "active": 2768,
+      "deprecated": 9,
+      "withDefinition": 0,
+      "designations": 4746,
+      "designationsEs": 0,
+      "isA": 2774,
+      "maps": 2341
+    },
+    "oncotree": {
+      "concepts": 898,
+      "active": 898,
+      "deprecated": 0,
+      "withDefinition": 0,
+      "designations": 898,
+      "designationsEs": 0,
+      "isA": 897,
+      "maps": 1360
     },
     "icd10-who": {
       "concepts": 12640,
@@ -89,21 +151,11 @@
       "designations": 0,
       "designationsEs": 0,
       "isA": 0,
-      "maps": 11649
-    },
-    "mesh": {
-      "concepts": 9320,
-      "active": 9320,
-      "deprecated": 0,
-      "withDefinition": 0,
-      "designations": 0,
-      "designationsEs": 0,
-      "isA": 0,
-      "maps": 0
+      "maps": 11639
     },
     "umls": {
-      "concepts": 32589,
-      "active": 32589,
+      "concepts": 32693,
+      "active": 32693,
       "deprecated": 0,
       "withDefinition": 0,
       "designations": 0,
@@ -122,8 +174,8 @@
       "maps": 0
     },
     "omim": {
-      "concepts": 10871,
-      "active": 10871,
+      "concepts": 10892,
+      "active": 10892,
       "deprecated": 0,
       "withDefinition": 0,
       "designations": 0,
@@ -145,16 +197,17 @@
   "unresolvedXrefs": {
     "mondo→orphanet": 27,
     "mondo→efo-disease": 2376,
-    "mondo→ncit-disease": 254,
+    "mondo→gard": 15947,
+    "mondo→oncotree": 9,
+    "orphanet→gard": 3825,
     "orphanet→icd11-mms": 9,
-    "doid→ncit-disease": 330,
+    "doid→gard": 2214,
     "doid→efo-disease": 105,
     "doid→orphanet": 8,
-    "efo-disease→ncit-disease": 93,
+    "efo-disease→gard": 2,
     "efo-disease→efo-disease": 1,
     "efo-disease→orphanet": 9,
-    "efo-disease→doid": 13,
-    "icd10-who→icd11-mms": 24
+    "efo-disease→doid": 13
   },
   "citations": {
     "hpo-annotations": {
@@ -171,14 +224,15 @@
     },
     "hpo-common-diseases": {
       "cited": 3647,
-      "existing": 2600,
-      "keys": 1046,
+      "existing": 3646,
+      "keys": 0,
       "unresolved": 1
     },
     "who-icd10-to-icd11": {
       "cited": 12597,
-      "postcoordinatedTargetsSkipped": 826
+      "postcoordinatedTargets": 861,
+      "withMultipleCategoryTargets": 1272
     }
   },
-  "seconds": 62
+  "seconds": 58
 }

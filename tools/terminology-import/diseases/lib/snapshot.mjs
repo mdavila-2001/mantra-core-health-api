@@ -28,6 +28,15 @@ const RAW_PART_LIMIT = 200 * 1024 * 1024;
 
 const sha256 = (buf) => createHash('sha256').update(buf).digest('hex');
 
+/** `SHA256SUMS` (formato `sha256sum -c`) de todo lo que hay en la instantánea, menos él mismo. */
+export function writeSha256Sums(dir = SNAPSHOT_DIR) {
+  const lines = readdirSync(dir)
+    .filter((f) => f !== 'SHA256SUMS')
+    .sort()
+    .map((f) => `${sha256(readFileSync(join(dir, f)))}  ${f}`);
+  writeFileSync(join(dir, 'SHA256SUMS'), `${lines.join('\n')}\n`);
+}
+
 /** Escribe `<cs>.part-NN.ndjson.gz` por sistema, más los JSON auxiliares, y `MANIFEST.json`. */
 export function writeSnapshot(byCs, extraFiles = {}, versions = {}, dir = SNAPSHOT_DIR) {
   ensureDir(dir);
@@ -71,6 +80,7 @@ export function writeSnapshot(byCs, extraFiles = {}, versions = {}, dir = SNAPSH
     files.push({ file: f.file, bytes: buf.length, sha256: sha256(buf) });
   }
   writeFileSync(manifestPath, `${JSON.stringify({ generatedAt: nowIso(), versions, files }, null, 2)}\n`);
+  writeSha256Sums(dir);
   return files;
 }
 
@@ -83,6 +93,7 @@ export function addToSnapshot(name, src, dir = SNAPSHOT_DIR) {
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
   manifest.files = [...manifest.files.filter((f) => f.file !== name), { file: name, bytes: buf.length, sha256: sha256(buf) }];
   writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  writeSha256Sums(dir);
 }
 
 /** Lee la instantánea: Map<cs, registros[]>, verificando el SHA-256 de cada parte. */

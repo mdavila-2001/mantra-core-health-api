@@ -1,12 +1,18 @@
 {
-  "generatedAt": "2026-10-24T05:27:38.695Z",
+  "generatedAt": "2026-10-28T00:25:20.477Z",
   "versions": {
     "mondo": "2026-10-06",
     "orphanet": "2026-06-23",
     "doid": "2026-09-30",
-    "ncit-disease": "26.02d",
+    "ncit-disease": "26.09d",
+    "ncit-xref": "26.09d",
     "icd11-mms": "2026-01",
     "efo-disease": "3.95.0",
+    "mesh": "2026",
+    "gard": null,
+    "medlineplus-genetics": "2026-10-27",
+    "nando": "1.0.0 (2023-11-27)",
+    "oncotree": "2025-10-03",
     "keys": "xref-keys"
   },
   "files": [
@@ -21,22 +27,22 @@
       "file": "doid.part-01.ndjson.gz",
       "codeSystem": "doid",
       "records": 14854,
-      "bytes": 1647788,
-      "sha256": "481371b62eaa93d74cd368ce749a7f9023070e1c0caa36519806deeb46efe06f"
+      "bytes": 1667320,
+      "sha256": "18f989980647a02b3921268f2438b4adb38b905e9594d35d68bf4ed6aa22e639"
     },
     {
       "file": "efo-disease.part-01.ndjson.gz",
       "codeSystem": "efo-disease",
       "records": 1159,
-      "bytes": 166796,
-      "sha256": "2635d81144da6c5f40f9db3967f537ac63fb75c8cb4b157eef2fac3791b6d9fc"
+      "bytes": 166186,
+      "sha256": "e3b17a857b0fc4808df358b2debbafbed4f45024b47eb80a891975c59799a905"
     },
     {
       "file": "icd10-who.part-01.ndjson.gz",
       "codeSystem": "icd10-who",
       "records": 12640,
-      "bytes": 199079,
-      "sha256": "58a81b465feaa581bdbfc588d933ce1ecbc9e7d68d6b3a89a87fe4720beba9cd"
+      "bytes": 228123,
+      "sha256": "6f0bc1a33855efae7ed195ad5ffab263d30f493bcd249d967ae32512ffd83b67"
     },
     {
       "file": "icd11-foundation.part-01.ndjson.gz",
@@ -49,80 +55,108 @@
       "file": "icd11-mms.part-01.ndjson.gz",
       "codeSystem": "icd11-mms",
       "records": 37052,
-      "bytes": 1657876,
-      "sha256": "2b849368f863d385be226dfd63ad25d4cdf42b785713d7221e428321a8f65516"
+      "bytes": 1657886,
+      "sha256": "f45d8a3affe8b9391eb2ffe6567927840ea5064f2ba5d5336c9fc0011e182a2c"
+    },
+    {
+      "file": "medlineplus-genetics.part-01.ndjson.gz",
+      "codeSystem": "medlineplus-genetics",
+      "records": 1305,
+      "bytes": 921759,
+      "sha256": "7c302866608448f6c3146bb407452f5fac643af7730e8a94436e63a5d523ff2d"
     },
     {
       "file": "mesh.part-01.ndjson.gz",
       "codeSystem": "mesh",
-      "records": 9320,
-      "bytes": 157693,
-      "sha256": "a2b2e33c3c24f341e21be36750e30dbacdb39d3033d1edd54b11fe45e7721827"
+      "records": 12490,
+      "bytes": 2189467,
+      "sha256": "02bbd985f9d37f9bf0c281567c1ac8bde093987ea32245ec2b09612603edc7cd"
     },
     {
       "file": "mondo.part-01.ndjson.gz",
       "codeSystem": "mondo",
       "records": 27695,
-      "bytes": 4211345,
-      "sha256": "f7c7f7f18d2f7e9d6f8e624f9feaafe761541c0504a04b75a59c9fdd5e0a3275"
+      "bytes": 4348347,
+      "sha256": "14db5d6d1b0cca796e5eb4aec40ee4e6a7001bea57cf74947c9408d40355a58d"
+    },
+    {
+      "file": "nando.part-01.ndjson.gz",
+      "codeSystem": "nando",
+      "records": 2777,
+      "bytes": 528830,
+      "sha256": "fb8fd880398dcf5370922db3bfcb5d2747efd3137a2d0a442e120270cb344696"
     },
     {
       "file": "ncit-disease.part-01.ndjson.gz",
       "codeSystem": "ncit-disease",
-      "records": 22379,
-      "bytes": 2227717,
-      "sha256": "592920e725f13b0d39d4941c4a9a8c2f679b313f282077b9a1c212dc36922c7d"
+      "records": 22854,
+      "bytes": 2411506,
+      "sha256": "96703637c26b165d3dfa0c898e5b1d44f581487dbd522a81b6eea17f86255514"
+    },
+    {
+      "file": "ncit-xref.part-01.ndjson.gz",
+      "codeSystem": "ncit-xref",
+      "records": 645,
+      "bytes": 68362,
+      "sha256": "96506b0846df49a010c5f66a0eb8b8593ea32c70bf53c5fd47cd0b31d3f14c04"
     },
     {
       "file": "omim.part-01.ndjson.gz",
       "codeSystem": "omim",
-      "records": 10871,
-      "bytes": 163050,
-      "sha256": "efc99d2eb6b02238e0e4240373071dd06d0869d351e2b31f659837824a014c4f"
+      "records": 10892,
+      "bytes": 167346,
+      "sha256": "fdc36ce2bbed067a3f3b329c3f4b15b31dad3ec96a601abfae31629ec890501a"
+    },
+    {
+      "file": "oncotree.part-01.ndjson.gz",
+      "codeSystem": "oncotree",
+      "records": 898,
+      "bytes": 33102,
+      "sha256": "2c2e54ce824897660fc121d513d83e5f08313c49fb437a13f62de239341cf7f8"
     },
     {
       "file": "orphanet.part-01.ndjson.gz",
       "codeSystem": "orphanet",
       "records": 11645,
-      "bytes": 2818768,
-      "sha256": "c37ca0419770bc5453d84ca8a7706373cb8d033def0f904c62eb601cf5fb68ab"
+      "bytes": 2856721,
+      "sha256": "54696b3c4ec3249dd4516afbab73c07e74765c4736589a9216a9de2d9791ca3b"
     },
     {
       "file": "umls.part-01.ndjson.gz",
       "codeSystem": "umls",
-      "records": 32589,
-      "bytes": 564875,
-      "sha256": "6cc07e42e939064e83e96f86c8c5ecc1afa356c3693b1d505017b543443f9fb8"
+      "records": 32693,
+      "bytes": 573367,
+      "sha256": "e963737066a5aaaf158c4eb4fcf1fe39fc7968ea9a34539607d2be1b7244c544"
     },
     {
       "file": "_systems.json",
-      "bytes": 18287,
-      "sha256": "7f539d4d027eda6374bac25f6280ad4793245a98aa95dea5858063f1ebfb88bd"
+      "bytes": 18710,
+      "sha256": "3f87222d32577baa89a43ec2668bb169777af0ca4800f3921aff1c4eb222daa7"
     },
     {
       "file": "diseases-build-stats.json",
-      "bytes": 3979,
-      "sha256": "89f91f05ed3fed730204315183149432a771c168f9d80d69a54da492b903810a"
+      "bytes": 5194,
+      "sha256": "d13d875c6477b76c890857c7c1de7a5d3c7ca87f1ade73e30dafaa53460c6d53"
     },
     {
       "file": "diseases-citations.json",
       "bytes": 541065,
-      "sha256": "d2271678a9088ce5440ba79e5812e21d1033ab2f075cb2c52ebc1e049076ac93"
+      "sha256": "a7562b7afad4b4b8a45ce4a4cabf8ff47cba535fd1bb6996ad10628021ef6e0b"
     },
     {
       "file": "sources-manifest.json",
-      "bytes": 35628,
-      "sha256": "2cd86aaca5016106929ec04ff0db80db217f69ce12c222edb08aae2921558065"
+      "bytes": 47701,
+      "sha256": "c0b002ff75b29d6e668de549dee98dc4fd1c7bceb08751f641c7fa3f4f6d0c62"
     },
     {
       "file": "diseases-coverage.json",
-      "bytes": 19936,
-      "sha256": "8181575c918d91949471be24aa9ef6ec551472af64e9543a69bc9b289bccdc40"
+      "bytes": 24636,
+      "sha256": "a0f9274576d30560a70fb597a36b48bbbd9a8f7c958f5e50ec30f141319c5df1"
     },
     {
       "file": "diseases-coverage.md",
-      "bytes": 11297,
-      "sha256": "2eb7325f5d5843a87cbce066706d97d1d1b0c51b87e98ea3c15bc5b0d9e949ec"
+      "bytes": 13494,
+      "sha256": "164e85b4ba2b0d5043ead2b493807efa0ff1c6eec6aa22e23dc9445438ea842b"
     }
   ]
 }

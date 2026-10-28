@@ -1,0 +1,91 @@
+Pager usage is off.
+== conceptos por code system (versión) y nulos
+    internal_code     | conceptos | display_vacio | code_vacio | con_definicion | sin_estado 
+----------------------+-----------+---------------+------------+----------------+------------
+ decipher             |        61 |             0 |          0 |              0 |          0
+ doid                 |     14854 |             0 |          0 |          10684 |          0
+ efo-disease          |      1159 |             0 |          0 |           1133 |          0
+ icd10-who            |     12640 |             0 |          0 |              0 |          0
+ icd11-foundation     |      4631 |             0 |          0 |              0 |          0
+ icd11-mms            |     37052 |             0 |          0 |              0 |          0
+ medlineplus-genetics |      1305 |             0 |          0 |           1305 |          0
+ mesh                 |     12490 |             0 |          0 |           7199 |          0
+ mondo                |     27695 |             0 |          0 |          16927 |          0
+ nando                |      2777 |             0 |          0 |              0 |          0
+ ncit-disease         |     22854 |             0 |          0 |          22851 |          0
+ ncit-xref            |       645 |             0 |          0 |            556 |          0
+ omim                 |     10892 |             0 |          0 |              0 |          0
+ oncotree             |       898 |             0 |          0 |              0 |          0
+ orphanet             |     11645 |             0 |          0 |           6898 |          0
+ umls                 |     32693 |             0 |          0 |              0 |          0
+(16 rows)
+
+== duplicados por (code_system, version, code): esperado 0
+ count 
+-------
+     0
+(1 row)
+
+== duplicados por (code_system, code) entre versiones: esperado 0
+ count 
+-------
+     0
+(1 row)
+
+== huérfanos: designaciones/propiedades/relaciones/mapas sin concepto: esperado 0
+ designaciones | propiedades | relaciones | mapas 
+---------------+-------------+------------+-------
+             0 |           0 |          0 |     0
+(1 row)
+
+== replaced_by huérfano: esperado 0
+ count 
+-------
+     0
+(1 row)
+
+== designaciones: vacías, sin idioma, conceptos sin designación preferida (excluye sistemas de claves)
+ vacias | sin_idioma 
+--------+------------
+      0 |          0
+(1 row)
+
+ internal_code | sin_preferida 
+---------------+---------------
+ mesh          |           763
+ nando         |             2
+(2 rows)
+
+== procedencia por fila: conceptos con propiedad disease_provenance, por sistema (los de claves no la llevan)
+    internal_code     | conceptos | con_procedencia 
+----------------------+-----------+-----------------
+ decipher             |        61 |              61
+ doid                 |     14854 |           14854
+ efo-disease          |      1159 |            1159
+ icd10-who            |     12640 |           12640
+ icd11-foundation     |      4631 |            4631
+ icd11-mms            |     37052 |           37052
+ medlineplus-genetics |      1305 |            1305
+ mesh                 |     12490 |           12490
+ mondo                |     27695 |           27695
+ nando                |      2777 |            2777
+ ncit-disease         |     22854 |           22854
+ ncit-xref            |       645 |             645
+ omim                 |     10892 |           10892
+ oncotree             |       898 |             898
+ orphanet             |     11645 |           11645
+ umls                 |     32693 |           32693
+(16 rows)
+
+== self-loops en is-a: esperado 0
+ count 
+-------
+     0
+(1 row)
+
+== totales de tablas
+ conceptos | designaciones | propiedades | relaciones | mapas  | lotes 
+-----------+---------------+-------------+------------+--------+-------
+    194303 |        369606 |      624713 |     160233 | 219192 |    32
+(1 row)
+

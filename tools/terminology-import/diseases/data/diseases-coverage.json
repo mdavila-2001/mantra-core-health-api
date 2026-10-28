@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-24T05:29:21.046Z",
+  "generatedAt": "2026-10-28T00:30:05.436Z",
   "passes": [
     {
       "pass": 1,
@@ -8,7 +8,7 @@
       "version": "2026-10-06",
       "items": 23774,
       "newConcepts": 23774,
-      "newEntities": 20495
+      "newEntities": 14026
     },
     {
       "pass": 2,
@@ -16,8 +16,8 @@
       "kind": "ontología",
       "version": "2026-06-23",
       "items": 9757,
-      "newConcepts": 1534,
-      "newEntities": 1533
+      "newConcepts": 1529,
+      "newEntities": 1528
     },
     {
       "pass": 3,
@@ -25,17 +25,17 @@
       "kind": "ontología",
       "version": "2026-09-30",
       "items": 12335,
-      "newConcepts": 277,
-      "newEntities": 277
+      "newConcepts": 268,
+      "newEntities": 268
     },
     {
       "pass": 4,
       "source": "ncit-disease",
       "kind": "ontología",
-      "version": "26.02d",
-      "items": 22379,
-      "newConcepts": 14511,
-      "newEntities": 14511
+      "version": "26.09d",
+      "items": 22599,
+      "newConcepts": 14880,
+      "newEntities": 14879
     },
     {
       "pass": 5,
@@ -43,35 +43,35 @@
       "kind": "ontología",
       "version": "2026-01",
       "items": 37052,
-      "newConcepts": 29257,
-      "newEntities": 23811,
+      "newConcepts": 29232,
+      "newEntities": 23770,
       "newByChapter": {
         "10": 82,
-        "11": 291,
+        "11": 290,
         "12": 161,
-        "13": 343,
-        "14": 379,
+        "13": 340,
+        "14": 377,
         "15": 291,
         "16": 311,
         "17": 71,
         "18": 498,
         "19": 533,
-        "20": 287,
-        "21": 1040,
+        "20": 286,
+        "21": 1033,
         "22": 1922,
         "23": 986,
         "24": 897,
         "25": 15,
         "26": 1246,
         "01": 434,
-        "02": 424,
-        "03": 112,
-        "04": 59,
+        "02": 419,
+        "03": 111,
+        "04": 54,
         "05": 188,
         "06": 437,
         "07": 22,
-        "08": 281,
-        "09": 232,
+        "08": 282,
+        "09": 231,
         "V": 159,
         "X": 17556
       }
@@ -82,8 +82,8 @@
       "kind": "ontología",
       "version": "3.95.0",
       "items": 1159,
-      "newConcepts": 495,
-      "newEntities": 495
+      "newConcepts": 487,
+      "newEntities": 487
     },
     {
       "pass": 7,
@@ -91,14 +91,14 @@
       "kind": "claves citadas",
       "version": null,
       "items": 12880,
-      "newConcepts": 67,
-      "newEntities": 67
+      "newConcepts": 66,
+      "newEntities": 66
     },
     {
       "pass": 8,
       "source": "nando",
-      "kind": "medida (no se carga)",
-      "version": null,
+      "kind": "ontología",
+      "version": "1.0.0 (2023-11-27)",
       "items": 2768,
       "newConcepts": 685,
       "newEntities": 685
@@ -115,11 +115,11 @@
     {
       "pass": 10,
       "source": "oncotree",
-      "kind": "medida (no se carga)",
-      "version": null,
-      "items": 865,
-      "newConcepts": 189,
-      "newEntities": 189
+      "kind": "ontología",
+      "version": "2025-10-03",
+      "items": 898,
+      "newConcepts": 195,
+      "newEntities": 195
     },
     {
       "pass": 11,
@@ -136,26 +136,26 @@
       "kind": "claves citadas",
       "version": null,
       "items": 12597,
-      "newConcepts": 886,
-      "newEntities": 886
+      "newConcepts": 903,
+      "newEntities": 903
     },
     {
       "pass": 13,
-      "source": "mesh-c",
-      "kind": "medida (no se carga)",
-      "version": null,
-      "items": 5067,
-      "newConcepts": 1562,
-      "newEntities": 1562
+      "source": "mesh",
+      "kind": "ontología",
+      "version": "2026",
+      "items": 12490,
+      "newConcepts": 1312,
+      "newEntities": 1293
     },
     {
       "pass": 14,
       "source": "gard",
-      "kind": "medida (no se carga)",
+      "kind": "ontología",
       "version": null,
-      "items": 6109,
-      "newConcepts": 2598,
-      "newEntities": 2598
+      "items": 0,
+      "newConcepts": 0,
+      "newEntities": 0
     },
     {
       "pass": 15,
@@ -163,8 +163,8 @@
       "kind": "claves citadas",
       "version": null,
       "items": 3647,
-      "newConcepts": 394,
-      "newEntities": 394
+      "newConcepts": 1,
+      "newEntities": 1
     },
     {
       "pass": 16,
@@ -199,6 +199,60 @@
       "kind": "medida (no se carga)",
       "version": null,
       "items": 25,
+      "newConcepts": 0,
+      "newEntities": 0
+    },
+    {
+      "pass": 20,
+      "source": "ncit-xref",
+      "kind": "ontología",
+      "version": "26.09d",
+      "items": 528,
+      "newConcepts": 4,
+      "newEntities": 4
+    },
+    {
+      "pass": 21,
+      "source": "medlineplus-genetics",
+      "kind": "ontología",
+      "version": "2026-10-27",
+      "items": 1305,
+      "newConcepts": 0,
+      "newEntities": 0
+    },
+    {
+      "pass": 22,
+      "source": "wikidata-disease",
+      "kind": "ontología",
+      "version": null,
+      "items": 0,
+      "newConcepts": 0,
+      "newEntities": 0
+    },
+    {
+      "pass": 23,
+      "source": "gencc",
+      "kind": "medida (no se carga)",
+      "version": null,
+      "items": 8142,
+      "newConcepts": 2,
+      "newEntities": 2
+    },
+    {
+      "pass": 24,
+      "source": "orphadata-en-product6",
+      "kind": "medida (no se carga)",
+      "version": null,
+      "items": 4245,
+      "newConcepts": 0,
+      "newEntities": 0
+    },
+    {
+      "pass": 25,
+      "source": "orphadata-en-product9-prev",
+      "kind": "medida (no se carga)",
+      "version": null,
+      "items": 6728,
       "newConcepts": 0,
       "newEntities": 0
     }
@@ -258,13 +312,22 @@
       "withDefinition": 0,
       "withSpanishDefinition": 0
     },
-    "mesh": {
-      "name": "MeSH (NLM) — descriptores citados por MONDO, Orphanet y DOID",
-      "keyOnly": true,
-      "concepts": 9320,
-      "active": 9320,
+    "medlineplus-genetics": {
+      "name": "MedlinePlus Genetics (NLM) — condiciones genéticas",
+      "keyOnly": false,
+      "concepts": 1305,
+      "active": 1305,
       "withSpanishName": 0,
-      "withDefinition": 0,
+      "withDefinition": 1305,
+      "withSpanishDefinition": 0
+    },
+    "mesh": {
+      "name": "MeSH 2026 (NLM) — descriptores de enfermedad (árbol C y F03), enfermedades raras (SCR) y los citados por otras fuentes",
+      "keyOnly": false,
+      "concepts": 12490,
+      "active": 12490,
+      "withSpanishName": 0,
+      "withDefinition": 7199,
       "withSpanishDefinition": 0
     },
     "mondo": {
@@ -276,20 +339,47 @@
       "withDefinition": 16927,
       "withSpanishDefinition": 0
     },
-    "ncit-disease": {
-      "name": "Subconjunto C2991 «Disease or Disorder» de la NCIt OBO Edition",
+    "nando": {
+      "name": "NANDO — Nanbyo Disease Ontology (enfermedades intratables de Japón)",
       "keyOnly": false,
-      "concepts": 22379,
-      "active": 22379,
+      "concepts": 2777,
+      "active": 2768,
       "withSpanishName": 0,
-      "withDefinition": 22376,
+      "withDefinition": 0,
+      "withSpanishDefinition": 0
+    },
+    "ncit-disease": {
+      "name": "Subconjunto C2991 «Disease or Disorder» del NCI Thesaurus (NCI EVS 26.09d, archivo plano oficial)",
+      "keyOnly": false,
+      "concepts": 22854,
+      "active": 22599,
+      "withSpanishName": 0,
+      "withDefinition": 22851,
+      "withSpanishDefinition": 0
+    },
+    "ncit-xref": {
+      "name": "NCI Thesaurus (NCI EVS 26.09d) — conceptos que citan otras fuentes de enfermedades y que están fuera de C2991, o retirados",
+      "keyOnly": false,
+      "concepts": 645,
+      "active": 528,
+      "withSpanishName": 0,
+      "withDefinition": 556,
       "withSpanishDefinition": 0
     },
     "omim": {
       "name": "OMIM — claves de fenotipo citadas por MONDO, Orphanet y DOID",
       "keyOnly": true,
-      "concepts": 10871,
-      "active": 10871,
+      "concepts": 10892,
+      "active": 10892,
+      "withSpanishName": 0,
+      "withDefinition": 0,
+      "withSpanishDefinition": 0
+    },
+    "oncotree": {
+      "name": "OncoTree — tipos tumorales (Memorial Sloan Kettering Cancer Center)",
+      "keyOnly": false,
+      "concepts": 898,
+      "active": 898,
       "withSpanishName": 0,
       "withDefinition": 0,
       "withSpanishDefinition": 0
@@ -306,8 +396,8 @@
     "umls": {
       "name": "UMLS (NLM) — CUI citados por MONDO, Orphanet, DOID y NCIt",
       "keyOnly": true,
-      "concepts": 32589,
-      "active": 32589,
+      "concepts": 32693,
+      "active": 32693,
       "withSpanishName": 0,
       "withDefinition": 0,
       "withSpanishDefinition": 0
@@ -325,19 +415,19 @@
         "chapter": 1,
         "block": 42,
         "category": 1247,
-        "linkedToMondo": 862
+        "linkedToMondo": 867
       },
       "03 Diseases of the blood or blood-forming organs": {
         "chapter": 1,
         "block": 13,
         "category": 262,
-        "linkedToMondo": 160
+        "linkedToMondo": 161
       },
       "04 Diseases of the immune system": {
         "chapter": 1,
         "block": 6,
         "category": 257,
-        "linkedToMondo": 202
+        "linkedToMondo": 206
       },
       "05 Endocrine, nutritional or metabolic diseases": {
         "chapter": 1,
@@ -361,13 +451,13 @@
         "chapter": 1,
         "block": 28,
         "category": 842,
-        "linkedToMondo": 581
+        "linkedToMondo": 580
       },
       "09 Diseases of the visual system": {
         "chapter": 1,
         "block": 25,
         "category": 703,
-        "linkedToMondo": 488
+        "linkedToMondo": 489
       },
       "10 Diseases of the ear or mastoid process": {
         "chapter": 1,
@@ -379,7 +469,7 @@
         "chapter": 1,
         "block": 24,
         "category": 583,
-        "linkedToMondo": 306
+        "linkedToMondo": 307
       },
       "12 Diseases of the respiratory system": {
         "chapter": 1,
@@ -391,13 +481,13 @@
         "chapter": 1,
         "block": 26,
         "category": 970,
-        "linkedToMondo": 647
+        "linkedToMondo": 650
       },
       "14 Diseases of the skin": {
         "chapter": 1,
         "block": 77,
         "category": 785,
-        "linkedToMondo": 469
+        "linkedToMondo": 471
       },
       "15 Diseases of the musculoskeletal system or connective tissue": {
         "chapter": 1,
@@ -433,13 +523,13 @@
         "chapter": 1,
         "block": 30,
         "category": 1323,
-        "linkedToMondo": 1049
+        "linkedToMondo": 1050
       },
       "21 Symptoms, signs or clinical findings, not elsewhere classified": {
         "chapter": 1,
         "block": 47,
         "category": 1241,
-        "linkedToMondo": 249
+        "linkedToMondo": 256
       },
       "22 Injury, poisoning or certain other consequences of external causes": {
         "chapter": 1,
@@ -521,6 +611,33 @@
       "Orphanet classification of rare allergic disease": 14,
       "Orphanet classification of rare disorder without a determined diagnosis": 1
     },
+    "mesh": {
+      "C23": 966,
+      "C26": 267,
+      "C04": 703,
+      "C16": 759,
+      "C18": 354,
+      "C12": 418,
+      "C01": 786,
+      "C22": 113,
+      "C07": 224,
+      "C08": 254,
+      "C09": 131,
+      "C17": 410,
+      "C06": 325,
+      "C05": 381,
+      "C10": 925,
+      "C20": 260,
+      "C25": 116,
+      "C19": 171,
+      "C14": 471,
+      "C11": 271,
+      "F03": 235,
+      "C15": 307,
+      "C24": 25,
+      "C21": 5,
+      "SCR (enfermedad rara)": 6545
+    },
     "mondo": {
       "MONDO:0002022 disorder of orbital region": 1584,
       "MONDO:0002051 integumentary system disorder": 1710,
@@ -556,17 +673,17 @@
     },
     "ncit-disease": {
       "C26684 Radiation-Induced Disorder": 27,
-      "C27551 Disorder by Site": 18908,
-      "C28193 Syndrome": 1257,
-      "C2893 Psychiatric Disorder": 262,
+      "C27551 Disorder by Site": 19347,
+      "C28193 Syndrome": 1261,
+      "C2893 Psychiatric Disorder": 260,
       "C3101 Genetic Disorder": 370,
-      "C3262 Neoplasm": 15356,
-      "C3340 Polyp": 110,
+      "C3262 Neoplasm": 15428,
+      "C3340 Polyp": 111,
       "C35470 Behavioral Disorder": 62,
-      "C4873 Rare Disorder": 1348,
-      "C53529 Non-Neoplastic Disorder": 5418,
-      "C8278 Cancer-Related Condition": 629,
-      "C89328 Pediatric Disorder": 1066
+      "C4873 Rare Disorder": 1350,
+      "C53529 Non-Neoplastic Disorder": 5440,
+      "C8278 Cancer-Related Condition": 544,
+      "C89328 Pediatric Disorder": 1069
     }
   },
   "crosses": {
@@ -574,7 +691,7 @@
       "sin equivalencia declarada": 4100
     },
     "doid → ncit-disease": {
-      "sin equivalencia declarada": 4750
+      "sin equivalencia declarada": 4745
     },
     "doid → umls": {
       "sin equivalencia declarada": 7218
@@ -588,6 +705,12 @@
     "doid → omim": {
       "sin equivalencia declarada": 6236
     },
+    "doid → ncit-xref": {
+      "sin equivalencia declarada": 335
+    },
+    "efo-disease → ncit-xref": {
+      "sin equivalencia declarada": 95
+    },
     "efo-disease → omim": {
       "sin equivalencia declarada": 165
     },
@@ -598,13 +721,16 @@
       "sin equivalencia declarada": 300
     },
     "efo-disease → ncit-disease": {
-      "sin equivalencia declarada": 223
+      "sin equivalencia declarada": 221
     },
     "efo-disease → icd10-who": {
       "sin equivalencia declarada": 177
     },
     "efo-disease → orphanet": {
       "sin equivalencia declarada": 152
+    },
+    "efo-disease → oncotree": {
+      "sin equivalencia declarada": 4
     },
     "efo-disease → umls": {
       "sin equivalencia declarada": 82
@@ -613,13 +739,25 @@
       "sin equivalencia declarada": 17
     },
     "icd10-who → icd11-mms": {
-      "sin equivalencia declarada": 11649
+      "sin equivalencia declarada": 11639
     },
     "icd11-mms → icd11-foundation": {
       "equivalent": 2193
     },
     "icd11-mms → icd10-who": {
-      "sin equivalencia declarada": 16831
+      "sin equivalencia declarada": 16875
+    },
+    "medlineplus-genetics → umls": {
+      "sin equivalencia declarada": 2181
+    },
+    "medlineplus-genetics → mesh": {
+      "sin equivalencia declarada": 1438
+    },
+    "medlineplus-genetics → omim": {
+      "sin equivalencia declarada": 2931
+    },
+    "mesh → mesh": {
+      "sin equivalencia declarada": 13675
     },
     "mondo → doid": {
       "equivalent": 11960,
@@ -632,7 +770,7 @@
       "narrower": 1
     },
     "mondo → ncit-disease": {
-      "equivalent": 7106,
+      "equivalent": 7096,
       "sin equivalencia declarada": 4,
       "narrower": 2,
       "wider": 2,
@@ -654,8 +792,19 @@
       "equivalent": 9759,
       "sin equivalencia declarada": 708
     },
+    "mondo → nando": {
+      "sin equivalencia declarada": 2345
+    },
+    "mondo → ncit-xref": {
+      "equivalent": 143,
+      "sin equivalencia declarada": 121
+    },
     "mondo → icd10-who": {
       "equivalent": 209
+    },
+    "mondo → oncotree": {
+      "equivalent": 543,
+      "sin equivalencia declarada": 5
     },
     "mondo → efo-disease": {
       "equivalent": 9
@@ -664,8 +813,23 @@
       "sin equivalencia declarada": 1,
       "equivalent": 60
     },
+    "nando → mondo": {
+      "inexact": 2341
+    },
     "ncit-disease → umls": {
-      "sin equivalencia declarada": 13981
+      "sin equivalencia declarada": 13608
+    },
+    "ncit-xref → umls": {
+      "sin equivalencia declarada": 564
+    },
+    "oncotree → ncit-xref": {
+      "sin equivalencia declarada": 42
+    },
+    "oncotree → umls": {
+      "sin equivalencia declarada": 693
+    },
+    "oncotree → ncit-disease": {
+      "sin equivalencia declarada": 625
     },
     "orphanet → icd10-who": {
       "wider": 7034,
@@ -697,29 +861,64 @@
   "vsMondo": {
     "orphanet": {
       "active": 9757,
-      "linkedToMondo": 8223,
+      "linkedToMondo": 8228,
       "pct": 84.3
     },
     "doid": {
       "active": 12335,
-      "linkedToMondo": 12055,
-      "pct": 97.7
+      "linkedToMondo": 12065,
+      "pct": 97.8
     },
     "ncit-disease": {
-      "active": 22379,
-      "linkedToMondo": 7849,
-      "pct": 35.1
+      "active": 22599,
+      "linkedToMondo": 7707,
+      "pct": 34.1
     },
     "icd11-mms": {
       "active": 37052,
-      "linkedToMondo": 7723,
-      "pct": 20.8
+      "linkedToMondo": 7747,
+      "pct": 20.9
     },
     "efo-disease": {
       "active": 1159,
-      "linkedToMondo": 443,
-      "pct": 38.2
+      "linkedToMondo": 461,
+      "pct": 39.8
+    },
+    "nando": {
+      "active": 2768,
+      "linkedToMondo": 2083,
+      "pct": 75.3
+    },
+    "oncotree": {
+      "active": 898,
+      "linkedToMondo": 631,
+      "pct": 70.3
+    },
+    "mesh": {
+      "active": 12490,
+      "linkedToMondo": 11029,
+      "pct": 88.3
+    },
+    "gard": {
+      "active": 0,
+      "linkedToMondo": 0,
+      "pct": null
+    },
+    "ncit-xref": {
+      "active": 528,
+      "linkedToMondo": 449,
+      "pct": 85
+    },
+    "medlineplus-genetics": {
+      "active": 1305,
+      "linkedToMondo": 1304,
+      "pct": 99.9
+    },
+    "wikidata-disease": {
+      "active": 0,
+      "linkedToMondo": 0,
+      "pct": null
     }
   },
-  "mondoWithEquivalentInAnotherSystem": 17923
+  "mondoWithEquivalentInAnotherSystem": 19636
 }
