@@ -2,9 +2,9 @@
 
 # Inventario de flujos
 
-**74 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 72 de módulo), **12 máquinas de estado** y **1613 árboles de decisión**.
+**74 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 72 de módulo), **12 máquinas de estado** y **1621 árboles de decisión**.
 
-- Operaciones con decisiones propias: 1456 · sin ellas: 157
+- Operaciones con decisiones propias: 1465 · sin ellas: 156
 - Operaciones sin proceso asignado: 0
 - Procesos por agrupación: AGRUPACION_POR_CONTROLADOR 32 · CASO_DE_USO_README 15 · MIXTO 25 · CURADO_EN_DOCUMENTO 2
 
@@ -23,10 +23,10 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 | `billing` | 1 | 36 | 0 | [billing.md](billing.md) |
 | `chart` | 1 | 23 | 0 | [chart.md](chart.md) |
 | `clinical` | 1 | 42 | 1 | [clinical.md](clinical.md) |
-| `clinical_ext` | 1 | 29 | 0 | [clinical_ext.md](clinical_ext.md) |
+| `clinical_ext` | 1 | 32 | 0 | [clinical_ext.md](clinical_ext.md) |
 | `common` | 1 | 19 | 0 | [common.md](common.md) |
 | `community` | 1 | 102 | 0 | [community.md](community.md) |
-| `consent` | 2 | 22 | 0 | [consent.md](consent.md) |
+| `consent` | 2 | 27 | 0 | [consent.md](consent.md) |
 | `content_packs` | 1 | 2 | 0 | [content_packs.md](content_packs.md) |
 | `crm` | 1 | 16 | 0 | [crm.md](crm.md) |
 | `cross_store_consistency` | 1 | 16 | 0 | [cross_store_consistency.md](cross_store_consistency.md) |

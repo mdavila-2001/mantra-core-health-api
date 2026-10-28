@@ -1432,8 +1432,6 @@ Content-Type: application/json
 |---:|---|---|---|
 | 200 | Operación completada correctamente. | `Promise<ReverseGeocodingResponseDto>` | Sí |
 | 400 | Operación completada correctamente. | `Promise<ReverseGeocodingResponseDto>` | No |
-| 401 | Operación completada correctamente. | `Promise<ReverseGeocodingResponseDto>` | No |
-| 403 | Operación completada correctamente. | `Promise<ReverseGeocodingResponseDto>` | No |
 | 409 | Operación completada correctamente. | `Promise<ReverseGeocodingResponseDto>` | No |
 | 413 | Operación completada correctamente. | `Promise<ReverseGeocodingResponseDto>` | No |
 | 422 | Operación completada correctamente. | `Promise<ReverseGeocodingResponseDto>` | No |

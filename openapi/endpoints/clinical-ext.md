@@ -2798,28 +2798,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 ```json
 [
   {
-    "id": "00000000-0000-4000-8000-000000000001",
-    "patientProfileId": "00000000-0000-4000-8000-000000000001",
-    "sourceEncounterId": "00000000-0000-4000-8000-000000000001",
-    "referringProfileId": "00000000-0000-4000-8000-000000000001",
-    "targetProfileId": "00000000-0000-4000-8000-000000000001",
-    "targetTenantId": "00000000-0000-4000-8000-000000000001",
-    "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
-    "serviceRequestId": "00000000-0000-4000-8000-000000000001",
-    "reasonConceptId": "00000000-0000-4000-8000-000000000001",
-    "reasonText": "Texto descriptivo de ejemplo",
-    "priorityConceptId": "00000000-0000-4000-8000-000000000001",
-    "statusConceptId": "00000000-0000-4000-8000-000000000001",
-    "validUntil": "2026-07-31",
-    "respondedAt": "2026-07-31T12:00:00.000Z",
-    "createdAt": "2026-07-31T12:00:00.000Z",
-    "updatedAt": "2026-07-31T12:00:00.000Z",
     "createdByUserId": "00000000-0000-4000-8000-000000000001",
     "updatedByUserId": "00000000-0000-4000-8000-000000000001",
     "rowVersion": 1,
-    "referralTypeConceptId": "00000000-0000-4000-8000-000000000001",
-    "referralType": {},
-    "targetServiceCatalogId": "00000000-0000-4000-8000-000000000001",
     "targetDisplayName": "Nombre de ejemplo",
     "targetServiceName": "Nombre de ejemplo"
   }
@@ -2982,6 +2963,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 404 | `NOT_FOUND` | Sede destino no encontrada | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 404 | `NOT_FOUND` | Servicio no encontrado | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
@@ -2991,7 +2973,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | El proveedor configurado para el canal no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | Ya existe una referencia equivalente | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La derivación necesita un destino: profesional, organización o servicio. | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 422 | `PRECONDITION_FAILED` | La derivación necesita un destino: profesional, organización, servicio, sede o destino externo. | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 422 | `PRECONDITION_FAILED` | Ese servicio está inactivo en el catálogo. | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 422 | `PRECONDITION_FAILED` | El servicio no pertenece a la organización destino. | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 422 | `PRECONDITION_FAILED` | El profesional destino no ofrece ese servicio. | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
@@ -3036,7 +3018,7 @@ Responder / aceptar una referencia inter-tenant. Requiere JWT y los roles o alca
 
 ### Descripción del sistema
 
-NestJS resuelve `PATCH /referrals/{id}/respond` en `ReferralsController_respond`. El controlador delega en `ReferralsService.respond`. Valida el body como `RespondReferralDto` y consume `application/json`. El tipo de retorno estático es `Promise<StatusResultDto>`.
+NestJS resuelve `PATCH /referrals/{id}/respond` en `ReferralsController_respond`. El controlador delega en `ReferralsService.respond`. Valida el body como `RespondReferralDto` y consume `application/json`. El tipo de retorno estático es `Promise<RespondReferralResultDto>`.
 
 ### Parámetros
 
@@ -3091,19 +3073,19 @@ Content-Type: application/json
 
 | HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
 |---:|---|---|---|
-| 200 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
-| 400 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
-| 401 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
-| 403 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
-| 404 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
-| 409 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
-| 413 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
-| 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
-| 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
-| 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
-| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 200 | Operación completada correctamente. | `Promise<RespondReferralResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<RespondReferralResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<RespondReferralResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<RespondReferralResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<RespondReferralResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<RespondReferralResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<RespondReferralResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<RespondReferralResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<RespondReferralResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<RespondReferralResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RespondReferralResultDto>` | No |
 
-Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RespondReferralResultDto`. Ejemplo completo derivado de ese DTO:
 
 ```json
 {
@@ -3115,7 +3097,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `ok` | Sí | `boolean` | Sin restricción adicional declarada | true si la operación se aplicó | `true` |
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Siempre `true` cuando la operación se aplicó. | `true` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -3215,28 +3197,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 ```json
 [
   {
-    "id": "00000000-0000-4000-8000-000000000001",
-    "patientProfileId": "00000000-0000-4000-8000-000000000001",
-    "sourceEncounterId": "00000000-0000-4000-8000-000000000001",
-    "referringProfileId": "00000000-0000-4000-8000-000000000001",
-    "targetProfileId": "00000000-0000-4000-8000-000000000001",
-    "targetTenantId": "00000000-0000-4000-8000-000000000001",
-    "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
-    "serviceRequestId": "00000000-0000-4000-8000-000000000001",
-    "reasonConceptId": "00000000-0000-4000-8000-000000000001",
-    "reasonText": "Texto descriptivo de ejemplo",
-    "priorityConceptId": "00000000-0000-4000-8000-000000000001",
-    "statusConceptId": "00000000-0000-4000-8000-000000000001",
-    "validUntil": "2026-07-31",
-    "respondedAt": "2026-07-31T12:00:00.000Z",
-    "createdAt": "2026-07-31T12:00:00.000Z",
-    "updatedAt": "2026-07-31T12:00:00.000Z",
     "createdByUserId": "00000000-0000-4000-8000-000000000001",
     "updatedByUserId": "00000000-0000-4000-8000-000000000001",
     "rowVersion": 1,
-    "referralTypeConceptId": "00000000-0000-4000-8000-000000000001",
-    "referralType": {},
-    "targetServiceCatalogId": "00000000-0000-4000-8000-000000000001",
     "targetDisplayName": "Nombre de ejemplo",
     "targetServiceName": "Nombre de ejemplo"
   }

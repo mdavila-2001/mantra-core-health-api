@@ -3,9 +3,9 @@
 # Endpoints del módulo `consent`
 
 - **Bloque:** Identidad y Seguridad (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
-- **Operaciones:** 22 (22 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 0 · MEDIO 16 · BAJO 6
-- **Tablas distintas que tocan:** 40
+- **Operaciones:** 27 (22 en el contrato, 5 sólo en el código)
+- **Riesgo:** ALTO 0 · MEDIO 19 · BAJO 8
+- **Tablas distintas que tocan:** 41
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/consent.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -17,7 +17,7 @@
 | 3 | PATCH | `/consent/consents/{id}/provisions` | Actualizar provisiones granulares (data class / actor / acción) | MEDIO | 5 | SECURITY_ADMIN |
 | 4 | POST | `/consent/consents/{id}/withdraw` | Revocar/retirar consentimiento y disparar re-evaluación de accesos | MEDIO | 7 | SECURITY_ADMIN |
 | 5 | GET | `/consent/encounters/{encounterId}/informed-consent` | Consentimientos informados registrados en el encuentro | BAJO | 20 | CLINICIAN, PRACTITIONER |
-| 6 | POST | `/consent/encounters/{encounterId}/informed-consent` | Registrar el consentimiento informado del encuentro | MEDIO | 19 | CLINICIAN, PRACTITIONER |
+| 6 | POST | `/consent/encounters/{encounterId}/informed-consent` | Registrar el consentimiento informado del encuentro | MEDIO | 21 | CLINICIAN, PRACTITIONER |
 | 7 | POST | `/consent/hipaa-authorizations` | Otorgar autorización HIPAA de divulgación | MEDIO | 5 | SECURITY_ADMIN |
 | 8 | POST | `/consent/hipaa-authorizations/{id}/revoke` | Revocar autorización HIPAA | MEDIO | 2 | SECURITY_ADMIN |
 | 9 | POST | `/consent/internal/expiration-sweep` | Expirar consentimientos y autorizaciones vencidas (barrido) | MEDIO | 7 | SYSTEM, SECURITY_ADMIN |
@@ -33,7 +33,12 @@
 | 19 | GET | `/consent/practitioner-access-requests/mine` | Mis solicitudes de vínculo pendientes de decisión | BAJO | 4 | PATIENT |
 | 20 | POST | `/consent/privacy-restrictions` | Aplicar restricción de privacidad que afecta RLS clínico | MEDIO | 3 | SECURITY_ADMIN |
 | 21 | POST | `/consent/processing-legal-bases` | Establecer/versionar base legal de procesamiento | MEDIO | 3 | SECURITY_ADMIN |
-| 22 | POST | `/consent/treatment-informed-consents` | Capturar consentimiento informado de tratamiento | MEDIO | 2 | SECURITY_ADMIN |
+| 22 | GET | `/consent/treatment-informed-consents` | v4266: consentimientos de un paciente, opcionalmente por objeto. | BAJO | 20 | CLINICIAN, PRACTITIONER |
+| 23 | POST | `/consent/treatment-informed-consents` | Capturar consentimiento informado de tratamiento | MEDIO | 21 | SECURITY_ADMIN, CLINICIAN, PRACTITIONER |
+| 24 | GET | `/consent/treatment-informed-consents/{id}` | v4266: un consentimiento por id. | BAJO | 20 | CLINICIAN, PRACTITIONER |
+| 25 | POST | `/consent/treatment-informed-consents/{id}/evidence` | Enmienda 1: evidencia (firma, documento) del consentimiento, registrada con el servicio de evidencia existente (`consent.consent_evidence`). | MEDIO | 18 | CLINICIAN, PRACTITIONER |
+| 26 | PATCH | `/consent/treatment-informed-consents/{id}/post-emergency-information` | Enmienda 1: cierre de la excepción EMERGENCY. | MEDIO | 19 | CLINICIAN, PRACTITIONER |
+| 27 | PATCH | `/consent/treatment-informed-consents/{id}/withdraw` | v4266: revocación (409 si ya estaba revocado). | MEDIO | 22 | CLINICIAN, PRACTITIONER |
 
 ---
 
@@ -71,7 +76,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `consent.consent_evidence` | ESCRIBE | CREA | DIRECTA | ConsentEvidenceController.record → ConsentEvidenceService.record → ConsentEvidenceRepository.create | `src/modules/consent/repositories/consent-evidence.repository.ts:60` |
+| `consent.consent_evidence` | ESCRIBE | CREA | DIRECTA | ConsentEvidenceController.record → ConsentEvidenceService.record → ConsentEvidenceRepository.create | `src/modules/consent/repositories/consent-evidence.repository.ts:82` |
 
 ### Cuerpo — DTO `CreateConsentEvidenceDto` · `application/json`
 
@@ -116,9 +121,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/consent/dto/responses.dto.ts:201` |
-| `subjectId` | `string` | Sí | formato uuid | — | Identificador asociado a subject. | `src/modules/consent/dto/responses.dto.ts:207` |
-| `recordedAt` | `string` | Sí | formato date-time | — | Valor de recorded at mantenido por la instancia. | `src/modules/consent/dto/responses.dto.ts:213` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/consent/dto/responses.dto.ts:494` |
+| `subjectId` | `string` | Sí | formato uuid | — | Identificador asociado a subject. | `src/modules/consent/dto/responses.dto.ts:500` |
+| `recordedAt` | `string` | Sí | formato date-time | — | Valor de recorded at mantenido por la instancia. | `src/modules/consent/dto/responses.dto.ts:506` |
 
 ### Respuestas posibles
 
@@ -256,11 +261,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/consent/dto/responses.dto.ts:9` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/consent/dto/responses.dto.ts:15` |
-| `status` | `string` | Sí | formato uuid | — | Estado (concept id) | `src/modules/consent/dto/responses.dto.ts:21` |
-| `processingPurposeId` | `string` | Sí | formato uuid | — | Identificador asociado a processing purpose. | `src/modules/consent/dto/responses.dto.ts:27` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:33` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/consent/dto/responses.dto.ts:20` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/consent/dto/responses.dto.ts:26` |
+| `status` | `string` | Sí | formato uuid | — | Estado (concept id) | `src/modules/consent/dto/responses.dto.ts:32` |
+| `processingPurposeId` | `string` | Sí | formato uuid | — | Identificador asociado a processing purpose. | `src/modules/consent/dto/responses.dto.ts:38` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:44` |
 
 ### Respuestas posibles
 
@@ -391,7 +396,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/consent/dto/responses.dto.ts:222` |
+| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/consent/dto/responses.dto.ts:515` |
 
 ### Respuestas posibles
 
@@ -491,7 +496,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/consent/dto/responses.dto.ts:222` |
+| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/consent/dto/responses.dto.ts:515` |
 
 ### Respuestas posibles
 
@@ -633,7 +638,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /consent/encounters/{encounterId}/informed-consent` la atiende `EncounterInformedConsentsController.register` (src/modules/consent/controllers/encounter-informed-consents.controller.ts:42). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `RegisterEncounterInformedConsentDto` (5 campos, 1 obligatorio). Delega en `EncounterInformedConsentsService.register`. Crea filas en consent.consent_events, consent.treatment_informed_consents. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 9 más.
+`POST /consent/encounters/{encounterId}/informed-consent` la atiende `EncounterInformedConsentsController.register` (src/modules/consent/controllers/encounter-informed-consents.controller.ts:42). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `RegisterEncounterInformedConsentDto` (5 campos, 1 obligatorio). Delega en `EncounterInformedConsentsService.register`. Crea filas en consent.consent_events, consent.treatment_informed_consents. Actualiza clinical_ext.referrals. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 10 más.
 
 ### Requerimientos
 
@@ -662,9 +667,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.roles` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
 | `authz.user_permission_grants` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `clinical_ext.referrals` | ESCRIBE | ACTUALIZA | POR_TIPO | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → TreatmentInformedConsentsService.sign → TreatmentInformedConsentsService.linkReferral | `src/modules/consent/services/treatment-informed-consents.service.ts:634` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
 | `consent.consent_events` | ESCRIBE | CREA | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → TreatmentInformedConsentsService.sign → ConsentEventsRepository.record | `src/modules/consent/repositories/consent-events.repository.ts:55` |
-| `consent.treatment_informed_consents` | ESCRIBE | CREA | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → TreatmentInformedConsentsService.sign → TreatmentInformedConsentsRepository.create | `src/modules/consent/repositories/treatment-informed-consents.repository.ts:82` |
+| `consent.treatment_informed_consents` | ESCRIBE | CREA | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → TreatmentInformedConsentsService.sign → TreatmentInformedConsentsRepository.create | `src/modules/consent/repositories/treatment-informed-consents.repository.ts:182` |
+| `consent.treatment_informed_consents` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → TreatmentInformedConsentsService.sign → TreatmentInformedConsentsService.linkReferral → TreatmentInformedConsentsRepository.findById | `src/modules/consent/repositories/treatment-informed-consents.repository.ts:143` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
@@ -681,11 +688,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `decision` | `string` | Sí | valores: ACCEPTED, DECLINED | `@IsIn(['ACCEPTED', 'DECLINED'])` | Decisión del paciente | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:37` |
-| `procedureCodeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Código de procedimiento (concept id) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:48` |
-| `informationVersion` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Versión del material informativo vigente | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:59` |
-| `interpreterUserId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Intérprete presente (user id) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:70` |
-| `witnessUserId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Testigo (user id) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:78` |
+| `decision` | `string` | Sí | valores: ACCEPTED, DECLINED | `@IsIn(['ACCEPTED', 'DECLINED'])` | Decisión del paciente | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:64` |
+| `procedureCodeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Código de procedimiento (concept id) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:75` |
+| `informationVersion` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Versión del material informativo vigente | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:86` |
+| `interpreterUserId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Intérprete presente (user id) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:97` |
+| `witnessUserId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Testigo (user id) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:105` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -713,11 +720,55 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/consent/dto/responses.dto.ts:168` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/consent/dto/responses.dto.ts:174` |
-| `status` | `string` | Sí | formato uuid | — | Estado (concept id) | `src/modules/consent/dto/responses.dto.ts:180` |
-| `decision` | `string` | Sí | formato uuid | — | Decisión (concept id) | `src/modules/consent/dto/responses.dto.ts:186` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:192` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/consent/dto/responses.dto.ts:212` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/consent/dto/responses.dto.ts:218` |
+| `tenantId` | `string` | No | formato uuid | — | Tenant propietario. | `src/modules/consent/dto/responses.dto.ts:224` |
+| `encounterId` | `string` | No | formato uuid | — | Encuentro en el que se registró. | `src/modules/consent/dto/responses.dto.ts:230` |
+| `status` | `string` | Sí | valores: ACTIVE, WITHDRAWN | — | Estado legible: `ACTIVE` mientras no se revoque, `WITHDRAWN` después. | `src/modules/consent/dto/responses.dto.ts:236` |
+| `decision` | `string` | Sí | valores: ACCEPTED, DECLINED | — | Decisión del paciente. | `src/modules/consent/dto/responses.dto.ts:242` |
+| `statusConceptId` | `string` | No | formato uuid | — | Estado (concept id). | `src/modules/consent/dto/responses.dto.ts:248` |
+| `decisionConceptId` | `string` | No | formato uuid | — | Decisión (concept id). | `src/modules/consent/dto/responses.dto.ts:254` |
+| `procedureCodeConceptId` | `string` | No | formato uuid | — | Código de procedimiento (concept id). | `src/modules/consent/dto/responses.dto.ts:260` |
+| `informationVersion` | `string` | No | — | — | Versión del material informativo. | `src/modules/consent/dto/responses.dto.ts:266` |
+| `interpreterUserId` | `string` | No | formato uuid | — | Intérprete presente. | `src/modules/consent/dto/responses.dto.ts:272` |
+| `witnessUserId` | `string` | No | formato uuid | — | Testigo. | `src/modules/consent/dto/responses.dto.ts:278` |
+| `targetType` | `object` | No | — | — | A qué se consiente. | `src/modules/consent/dto/responses.dto.ts:284` |
+| `targetId` | `string` | No | formato uuid | — | Objeto consentido. | `src/modules/consent/dto/responses.dto.ts:290` |
+| `targetLabel` | `string` | No | — | — | Instantánea legible de lo consentido. | `src/modules/consent/dto/responses.dto.ts:296` |
+| `diagnosisText` | `string` | No | — | — | Diagnóstico que lo motiva. | `src/modules/consent/dto/responses.dto.ts:302` |
+| `purposeText` | `string` | No | — | — | Naturaleza y objetivo. | `src/modules/consent/dto/responses.dto.ts:308` |
+| `benefitsText` | `string` | No | — | — | Beneficios esperados. | `src/modules/consent/dto/responses.dto.ts:314` |
+| `risksText` | `string` | No | — | — | Riesgos frecuentes y graves. | `src/modules/consent/dto/responses.dto.ts:320` |
+| `personalizedRisksText` | `string` | No | — | — | Riesgos personalizados. | `src/modules/consent/dto/responses.dto.ts:326` |
+| `alternativesText` | `string` | No | — | — | Alternativas. | `src/modules/consent/dto/responses.dto.ts:332` |
+| `refusalConsequencesText` | `string` | No | — | — | Consecuencias de no aceptar. | `src/modules/consent/dto/responses.dto.ts:338` |
+| `patientQuestionsText` | `string` | No | — | — | Preguntas y respuestas. | `src/modules/consent/dto/responses.dto.ts:344` |
+| `grantedBy` | `object` | No | — | — | Quién otorga. | `src/modules/consent/dto/responses.dto.ts:350` |
+| `representativeName` | `string` | No | — | — | Nombre del representante. | `src/modules/consent/dto/responses.dto.ts:356` |
+| `representativeDocument` | `string` | No | — | — | Documento del representante. | `src/modules/consent/dto/responses.dto.ts:362` |
+| `representativeRelationship` | `string` | No | — | — | Parentesco o calidad del representante. | `src/modules/consent/dto/responses.dto.ts:368` |
+| `incapacityReason` | `string` | No | — | — | Por qué no consiente el titular. | `src/modules/consent/dto/responses.dto.ts:374` |
+| `informedByProfileId` | `string` | No | formato uuid | — | Profesional que informa. | `src/modules/consent/dto/responses.dto.ts:380` |
+| `channel` | `object` | No | — | — | Canal. | `src/modules/consent/dto/responses.dto.ts:386` |
+| `exceptionType` | `object` | No | — | — | Excepción legal. | `src/modules/consent/dto/responses.dto.ts:392` |
+| `exceptionJustification` | `string` | No | — | — | Justificación de la excepción. | `src/modules/consent/dto/responses.dto.ts:398` |
+| `withdrawalReason` | `string` | No | — | — | Motivo de la revocación. | `src/modules/consent/dto/responses.dto.ts:404` |
+| `witnessName` | `string` | No | — | — | Testigo externo. | `src/modules/consent/dto/responses.dto.ts:410` |
+| `witnessDocument` | `string` | No | — | — | Documento del testigo externo. | `src/modules/consent/dto/responses.dto.ts:416` |
+| `informationLanguage` | `string` | No | — | — | Idioma de la información. | `src/modules/consent/dto/responses.dto.ts:422` |
+| `assentObtained` | `boolean` | No | — | — | Asentimiento obtenido. | `src/modules/consent/dto/responses.dto.ts:428` |
+| `assentNotes` | `string` | No | — | — | Notas del asentimiento. | `src/modules/consent/dto/responses.dto.ts:434` |
+| `revocationRightInformed` | `boolean` | No | — | — | Se informó el derecho a revocar. | `src/modules/consent/dto/responses.dto.ts:440` |
+| `postEmergencyInformedAt` | `string` | No | formato date-time | — | Cuándo se informó a posteriori tras la emergencia. | `src/modules/consent/dto/responses.dto.ts:446` |
+| `evidence` | `array<TreatmentConsentEvidenceItemDto>` | Sí | — | — | Evidencia registrada en `consent.consent_evidence` para este consentimiento. | `src/modules/consent/dto/responses.dto.ts:452` |
+| `evidence[].id` | `string` | Sí | formato uuid | — | Identificador de la evidencia. | `src/modules/consent/dto/responses.dto.ts:179` |
+| `evidence[].evidenceTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de evidencia (concept id). | `src/modules/consent/dto/responses.dto.ts:185` |
+| `evidence[].capturedChannelConceptId` | `string` | No | formato uuid | — | Canal de captura (concept id). | `src/modules/consent/dto/responses.dto.ts:191` |
+| `evidence[].recordedAt` | `string` | Sí | formato date-time | — | Cuándo se registró. | `src/modules/consent/dto/responses.dto.ts:197` |
+| `signatureStatus` | `string` | Sí | valores: SIGNED, PENDING | — | `SIGNED` si hay evidencia de firma o documento; `PENDING` si no. | `src/modules/consent/dto/responses.dto.ts:458` |
+| `signedAt` | `string` | No | formato date-time | — | Cuándo se firmó. | `src/modules/consent/dto/responses.dto.ts:464` |
+| `withdrawnAt` | `string` | No | formato date-time | — | Cuándo se revocó. | `src/modules/consent/dto/responses.dto.ts:470` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:476` |
 
 ### Respuestas posibles
 
@@ -727,7 +778,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado; ResourceNotFoundException: El objeto consentido no existe |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/consent.md).
@@ -828,10 +879,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/consent/dto/responses.dto.ts:42` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/consent/dto/responses.dto.ts:48` |
-| `status` | `string` | Sí | formato uuid | — | Estado (concept id) | `src/modules/consent/dto/responses.dto.ts:54` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:60` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/consent/dto/responses.dto.ts:53` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/consent/dto/responses.dto.ts:59` |
+| `status` | `string` | Sí | formato uuid | — | Estado (concept id) | `src/modules/consent/dto/responses.dto.ts:65` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:71` |
 
 ### Respuestas posibles
 
@@ -909,7 +960,7 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/consent/dto/responses.dto.ts:222` |
+| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/consent/dto/responses.dto.ts:515` |
 
 ### Respuestas posibles
 
@@ -983,9 +1034,9 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `expiredConsents` | `number` | Sí | — | — | Consentimientos expirados | `src/modules/consent/dto/responses.dto.ts:231` |
-| `expiredAuthorizations` | `number` | Sí | — | — | Autorizaciones HIPAA expiradas | `src/modules/consent/dto/responses.dto.ts:237` |
-| `expiredRestrictions` | `number` | Sí | — | — | Restricciones de privacidad expiradas | `src/modules/consent/dto/responses.dto.ts:243` |
+| `expiredConsents` | `number` | Sí | — | — | Consentimientos expirados | `src/modules/consent/dto/responses.dto.ts:524` |
+| `expiredAuthorizations` | `number` | Sí | — | — | Autorizaciones HIPAA expiradas | `src/modules/consent/dto/responses.dto.ts:530` |
+| `expiredRestrictions` | `number` | Sí | — | — | Restricciones de privacidad expiradas | `src/modules/consent/dto/responses.dto.ts:536` |
 
 ### Respuestas posibles
 
@@ -1167,7 +1218,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/consent/dto/responses.dto.ts:222` |
+| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/consent/dto/responses.dto.ts:515` |
 
 ### Respuestas posibles
 
@@ -1503,11 +1554,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/consent/dto/responses.dto.ts:69` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/consent/dto/responses.dto.ts:75` |
-| `status` | `string` | Sí | formato uuid | — | Estado (concept id) | `src/modules/consent/dto/responses.dto.ts:81` |
-| `restrictionId` | `string` | Sí | admite null | — | Restricción de privacidad creada (si aplica) | `src/modules/consent/dto/responses.dto.ts:90` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:96` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/consent/dto/responses.dto.ts:80` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/consent/dto/responses.dto.ts:86` |
+| `status` | `string` | Sí | formato uuid | — | Estado (concept id) | `src/modules/consent/dto/responses.dto.ts:92` |
+| `restrictionId` | `string` | Sí | admite null | — | Restricción de privacidad creada (si aplica) | `src/modules/consent/dto/responses.dto.ts:101` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:107` |
 
 ### Respuestas posibles
 
@@ -1610,7 +1661,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/consent/dto/responses.dto.ts:222` |
+| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/consent/dto/responses.dto.ts:515` |
 
 ### Respuestas posibles
 
@@ -2055,10 +2106,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/consent/dto/responses.dto.ts:105` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/consent/dto/responses.dto.ts:111` |
-| `status` | `string` | Sí | formato uuid | — | Estado (concept id) | `src/modules/consent/dto/responses.dto.ts:117` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:123` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/consent/dto/responses.dto.ts:116` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/consent/dto/responses.dto.ts:122` |
+| `status` | `string` | Sí | formato uuid | — | Estado (concept id) | `src/modules/consent/dto/responses.dto.ts:128` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:134` |
 
 ### Respuestas posibles
 
@@ -2162,11 +2213,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/consent/dto/responses.dto.ts:132` |
-| `processingPurposeId` | `string` | Sí | formato uuid | — | Identificador asociado a processing purpose. | `src/modules/consent/dto/responses.dto.ts:138` |
-| `status` | `string` | Sí | formato uuid | — | Estado (concept id) | `src/modules/consent/dto/responses.dto.ts:144` |
-| `supersededId` | `string` | Sí | admite null | — | Versión anterior cerrada (si la había) | `src/modules/consent/dto/responses.dto.ts:153` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:159` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/consent/dto/responses.dto.ts:143` |
+| `processingPurposeId` | `string` | Sí | formato uuid | — | Identificador asociado a processing purpose. | `src/modules/consent/dto/responses.dto.ts:149` |
+| `status` | `string` | Sí | formato uuid | — | Estado (concept id) | `src/modules/consent/dto/responses.dto.ts:155` |
+| `supersededId` | `string` | Sí | admite null | — | Versión anterior cerrada (si la había) | `src/modules/consent/dto/responses.dto.ts:164` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:170` |
 
 ### Respuestas posibles
 
@@ -2190,14 +2241,153 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 22. POST /consent/treatment-informed-consents
+## 22. GET /consent/treatment-informed-consents
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** v4266: consentimientos de un paciente, opcionalmente por objeto.
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `TreatmentInformedConsentsController.list` — `src/modules/consent/controllers/treatment-informed-consents.controller.ts:73`
+
+### Qué es y para qué sirve (negocio)
+
+v4266: consentimientos de un paciente, opcionalmente por objeto. Dentro del módulo (descripción del modelo, en inglés): «Separates legal authority for processing from patient consent, HIPAA-style authorizations, treatment informed consent, privacy restrictions and objections.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_07_consent.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`GET /consent/treatment-informed-consents` la atiende `TreatmentInformedConsentsController.list` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:73). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `TreatmentInformedConsentsService.list`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 12 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:73` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.access_policies` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `consent.consent_evidence` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ConsentEvidenceRepository.findBySubjects | `src/modules/consent/repositories/consent-evidence.repository.ts:67` |
+| `consent.treatment_informed_consents` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → TreatmentInformedConsentsRepository.findByPatient | `src/modules/consent/repositories/treatment-informed-consents.repository.ts:160` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.list → TreatmentInformedConsentsService.list → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `—` | query | sin dato | `ListTreatmentInformedConsentsQueryDto` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<TreatmentInformedConsentListDto>` · DTO `TreatmentInformedConsentListDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<TreatmentInformedConsentResponseDto>` | Sí | — | — | Consentimientos, del más reciente al más antiguo. | `src/modules/consent/dto/responses.dto.ts:485` |
+| `items[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/consent/dto/responses.dto.ts:212` |
+| `items[].patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/consent/dto/responses.dto.ts:218` |
+| `items[].tenantId` | `string` | No | formato uuid | — | Tenant propietario. | `src/modules/consent/dto/responses.dto.ts:224` |
+| `items[].encounterId` | `string` | No | formato uuid | — | Encuentro en el que se registró. | `src/modules/consent/dto/responses.dto.ts:230` |
+| `items[].status` | `string` | Sí | valores: ACTIVE, WITHDRAWN | — | Estado legible: `ACTIVE` mientras no se revoque, `WITHDRAWN` después. | `src/modules/consent/dto/responses.dto.ts:236` |
+| `items[].decision` | `string` | Sí | valores: ACCEPTED, DECLINED | — | Decisión del paciente. | `src/modules/consent/dto/responses.dto.ts:242` |
+| `items[].statusConceptId` | `string` | No | formato uuid | — | Estado (concept id). | `src/modules/consent/dto/responses.dto.ts:248` |
+| `items[].decisionConceptId` | `string` | No | formato uuid | — | Decisión (concept id). | `src/modules/consent/dto/responses.dto.ts:254` |
+| `items[].procedureCodeConceptId` | `string` | No | formato uuid | — | Código de procedimiento (concept id). | `src/modules/consent/dto/responses.dto.ts:260` |
+| `items[].informationVersion` | `string` | No | — | — | Versión del material informativo. | `src/modules/consent/dto/responses.dto.ts:266` |
+| `items[].interpreterUserId` | `string` | No | formato uuid | — | Intérprete presente. | `src/modules/consent/dto/responses.dto.ts:272` |
+| `items[].witnessUserId` | `string` | No | formato uuid | — | Testigo. | `src/modules/consent/dto/responses.dto.ts:278` |
+| `items[].targetType` | `object` | No | — | — | A qué se consiente. | `src/modules/consent/dto/responses.dto.ts:284` |
+| `items[].targetId` | `string` | No | formato uuid | — | Objeto consentido. | `src/modules/consent/dto/responses.dto.ts:290` |
+| `items[].targetLabel` | `string` | No | — | — | Instantánea legible de lo consentido. | `src/modules/consent/dto/responses.dto.ts:296` |
+| `items[].diagnosisText` | `string` | No | — | — | Diagnóstico que lo motiva. | `src/modules/consent/dto/responses.dto.ts:302` |
+| `items[].purposeText` | `string` | No | — | — | Naturaleza y objetivo. | `src/modules/consent/dto/responses.dto.ts:308` |
+| `items[].benefitsText` | `string` | No | — | — | Beneficios esperados. | `src/modules/consent/dto/responses.dto.ts:314` |
+| `items[].risksText` | `string` | No | — | — | Riesgos frecuentes y graves. | `src/modules/consent/dto/responses.dto.ts:320` |
+| `items[].personalizedRisksText` | `string` | No | — | — | Riesgos personalizados. | `src/modules/consent/dto/responses.dto.ts:326` |
+| `items[].alternativesText` | `string` | No | — | — | Alternativas. | `src/modules/consent/dto/responses.dto.ts:332` |
+| `items[].refusalConsequencesText` | `string` | No | — | — | Consecuencias de no aceptar. | `src/modules/consent/dto/responses.dto.ts:338` |
+| `items[].patientQuestionsText` | `string` | No | — | — | Preguntas y respuestas. | `src/modules/consent/dto/responses.dto.ts:344` |
+| `items[].grantedBy` | `object` | No | — | — | Quién otorga. | `src/modules/consent/dto/responses.dto.ts:350` |
+| `items[].representativeName` | `string` | No | — | — | Nombre del representante. | `src/modules/consent/dto/responses.dto.ts:356` |
+| `items[].representativeDocument` | `string` | No | — | — | Documento del representante. | `src/modules/consent/dto/responses.dto.ts:362` |
+| `items[].representativeRelationship` | `string` | No | — | — | Parentesco o calidad del representante. | `src/modules/consent/dto/responses.dto.ts:368` |
+| `items[].incapacityReason` | `string` | No | — | — | Por qué no consiente el titular. | `src/modules/consent/dto/responses.dto.ts:374` |
+| `items[].informedByProfileId` | `string` | No | formato uuid | — | Profesional que informa. | `src/modules/consent/dto/responses.dto.ts:380` |
+| `items[].channel` | `object` | No | — | — | Canal. | `src/modules/consent/dto/responses.dto.ts:386` |
+| `items[].exceptionType` | `object` | No | — | — | Excepción legal. | `src/modules/consent/dto/responses.dto.ts:392` |
+| `items[].exceptionJustification` | `string` | No | — | — | Justificación de la excepción. | `src/modules/consent/dto/responses.dto.ts:398` |
+| `items[].withdrawalReason` | `string` | No | — | — | Motivo de la revocación. | `src/modules/consent/dto/responses.dto.ts:404` |
+| `items[].witnessName` | `string` | No | — | — | Testigo externo. | `src/modules/consent/dto/responses.dto.ts:410` |
+| `items[].witnessDocument` | `string` | No | — | — | Documento del testigo externo. | `src/modules/consent/dto/responses.dto.ts:416` |
+| `items[].informationLanguage` | `string` | No | — | — | Idioma de la información. | `src/modules/consent/dto/responses.dto.ts:422` |
+| `items[].assentObtained` | `boolean` | No | — | — | Asentimiento obtenido. | `src/modules/consent/dto/responses.dto.ts:428` |
+| `items[].assentNotes` | `string` | No | — | — | Notas del asentimiento. | `src/modules/consent/dto/responses.dto.ts:434` |
+| `items[].revocationRightInformed` | `boolean` | No | — | — | Se informó el derecho a revocar. | `src/modules/consent/dto/responses.dto.ts:440` |
+| `items[].postEmergencyInformedAt` | `string` | No | formato date-time | — | Cuándo se informó a posteriori tras la emergencia. | `src/modules/consent/dto/responses.dto.ts:446` |
+| `items[].evidence` | `array<TreatmentConsentEvidenceItemDto>` | Sí | — | — | Evidencia registrada en `consent.consent_evidence` para este consentimiento. | `src/modules/consent/dto/responses.dto.ts:452` |
+| `items[].evidence[].id` | `string` | Sí | formato uuid | — | Identificador de la evidencia. | `src/modules/consent/dto/responses.dto.ts:179` |
+| `items[].evidence[].evidenceTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de evidencia (concept id). | `src/modules/consent/dto/responses.dto.ts:185` |
+| `items[].evidence[].capturedChannelConceptId` | `string` | No | formato uuid | — | Canal de captura (concept id). | `src/modules/consent/dto/responses.dto.ts:191` |
+| `items[].evidence[].recordedAt` | `string` | Sí | formato date-time | — | Cuándo se registró. | `src/modules/consent/dto/responses.dto.ts:197` |
+| `items[].signatureStatus` | `string` | Sí | valores: SIGNED, PENDING | — | `SIGNED` si hay evidencia de firma o documento; `PENDING` si no. | `src/modules/consent/dto/responses.dto.ts:458` |
+| `items[].signedAt` | `string` | No | formato date-time | — | Cuándo se firmó. | `src/modules/consent/dto/responses.dto.ts:464` |
+| `items[].withdrawnAt` | `string` | No | formato date-time | — | Cuándo se revocó. | `src/modules/consent/dto/responses.dto.ts:470` |
+| `items[].createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:476` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/consent.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) — etapa `ctrl:TreatmentInformedConsentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 23. POST /consent/treatment-informed-consents
 
 - **Origen:** CONTRATO
 - **Nombre:** Capturar consentimiento informado de tratamiento
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TreatmentInformedConsentsController.sign` — `src/modules/consent/controllers/treatment-informed-consents.controller.ts:30`
+- **Implementación:** `TreatmentInformedConsentsController.sign` — `src/modules/consent/controllers/treatment-informed-consents.controller.ts:56`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2207,14 +2397,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 
 ### Cómo se atiende (sistema)
 
-`POST /consent/treatment-informed-consents` la atiende `TreatmentInformedConsentsController.sign` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:30). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateTreatmentInformedConsentDto` (8 campos, 3 obligatorios). Delega en `TreatmentInformedConsentsService.sign`. Crea filas en consent.consent_events, consent.treatment_informed_consents.
+`POST /consent/treatment-informed-consents` la atiende `TreatmentInformedConsentsController.sign` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:56). Exige sesión con alguno de los roles SECURITY_ADMIN, CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateTreatmentInformedConsentDto` (8 campos, 3 obligatorios). Delega en `TreatmentInformedConsentsService.create`. Crea filas en consent.consent_events, consent.treatment_informed_consents. Actualiza clinical_ext.referrals. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 10 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:30` |
+| ROL | Alguno de: SECURITY_ADMIN, CLINICIAN, PRACTITIONER | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:56` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
@@ -2224,21 +2414,40 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `consent.consent_events` | ESCRIBE | CREA | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.sign → ConsentEventsRepository.record | `src/modules/consent/repositories/consent-events.repository.ts:55` |
-| `consent.treatment_informed_consents` | ESCRIBE | CREA | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.sign → TreatmentInformedConsentsRepository.create | `src/modules/consent/repositories/treatment-informed-consents.repository.ts:82` |
+| `authz.access_policies` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `clinical_ext.referrals` | ESCRIBE | ACTUALIZA | POR_TIPO | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → TreatmentInformedConsentsService.sign → TreatmentInformedConsentsService.linkReferral | `src/modules/consent/services/treatment-informed-consents.service.ts:634` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
+| `consent.consent_events` | ESCRIBE | CREA | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → TreatmentInformedConsentsService.sign → ConsentEventsRepository.record | `src/modules/consent/repositories/consent-events.repository.ts:55` |
+| `consent.treatment_informed_consents` | ESCRIBE | CREA | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → TreatmentInformedConsentsService.sign → TreatmentInformedConsentsRepository.create | `src/modules/consent/repositories/treatment-informed-consents.repository.ts:182` |
+| `consent.treatment_informed_consents` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → TreatmentInformedConsentsService.sign → TreatmentInformedConsentsService.linkReferral → TreatmentInformedConsentsRepository.findById | `src/modules/consent/repositories/treatment-informed-consents.repository.ts:143` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.sign → TreatmentInformedConsentsService.create → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
 
 ### Cuerpo — DTO `CreateTreatmentInformedConsentDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `patientProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Paciente titular (patient profile id) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:17` |
-| `encounterId` | `string` | Sí | formato uuid | `@IsUUID()` | Encuentro clínico abierto (encounter id) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:27` |
-| `decision` | `string` | Sí | valores: ACCEPTED, DECLINED | `@IsIn(['ACCEPTED', 'DECLINED'])` | Decisión del paciente | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:37` |
-| `procedureCodeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Código de procedimiento (concept id) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:48` |
-| `informationVersion` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Versión del material informativo vigente | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:59` |
-| `interpreterUserId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Intérprete presente (user id) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:70` |
-| `witnessUserId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Testigo (user id) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:78` |
-| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant propietario | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:86` |
+| `patientProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Paciente titular (patient profile id) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:44` |
+| `encounterId` | `string` | Sí | formato uuid | `@IsUUID()` | Encuentro clínico abierto (encounter id) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:54` |
+| `decision` | `string` | Sí | valores: ACCEPTED, DECLINED | `@IsIn(['ACCEPTED', 'DECLINED'])` | Decisión del paciente | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:64` |
+| `procedureCodeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Código de procedimiento (concept id) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:75` |
+| `informationVersion` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Versión del material informativo vigente | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:86` |
+| `interpreterUserId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Intérprete presente (user id) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:97` |
+| `witnessUserId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Testigo (user id) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:105` |
+| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant propietario | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:113` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2271,11 +2480,55 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/consent/dto/responses.dto.ts:168` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/consent/dto/responses.dto.ts:174` |
-| `status` | `string` | Sí | formato uuid | — | Estado (concept id) | `src/modules/consent/dto/responses.dto.ts:180` |
-| `decision` | `string` | Sí | formato uuid | — | Decisión (concept id) | `src/modules/consent/dto/responses.dto.ts:186` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:192` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/consent/dto/responses.dto.ts:212` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/consent/dto/responses.dto.ts:218` |
+| `tenantId` | `string` | No | formato uuid | — | Tenant propietario. | `src/modules/consent/dto/responses.dto.ts:224` |
+| `encounterId` | `string` | No | formato uuid | — | Encuentro en el que se registró. | `src/modules/consent/dto/responses.dto.ts:230` |
+| `status` | `string` | Sí | valores: ACTIVE, WITHDRAWN | — | Estado legible: `ACTIVE` mientras no se revoque, `WITHDRAWN` después. | `src/modules/consent/dto/responses.dto.ts:236` |
+| `decision` | `string` | Sí | valores: ACCEPTED, DECLINED | — | Decisión del paciente. | `src/modules/consent/dto/responses.dto.ts:242` |
+| `statusConceptId` | `string` | No | formato uuid | — | Estado (concept id). | `src/modules/consent/dto/responses.dto.ts:248` |
+| `decisionConceptId` | `string` | No | formato uuid | — | Decisión (concept id). | `src/modules/consent/dto/responses.dto.ts:254` |
+| `procedureCodeConceptId` | `string` | No | formato uuid | — | Código de procedimiento (concept id). | `src/modules/consent/dto/responses.dto.ts:260` |
+| `informationVersion` | `string` | No | — | — | Versión del material informativo. | `src/modules/consent/dto/responses.dto.ts:266` |
+| `interpreterUserId` | `string` | No | formato uuid | — | Intérprete presente. | `src/modules/consent/dto/responses.dto.ts:272` |
+| `witnessUserId` | `string` | No | formato uuid | — | Testigo. | `src/modules/consent/dto/responses.dto.ts:278` |
+| `targetType` | `object` | No | — | — | A qué se consiente. | `src/modules/consent/dto/responses.dto.ts:284` |
+| `targetId` | `string` | No | formato uuid | — | Objeto consentido. | `src/modules/consent/dto/responses.dto.ts:290` |
+| `targetLabel` | `string` | No | — | — | Instantánea legible de lo consentido. | `src/modules/consent/dto/responses.dto.ts:296` |
+| `diagnosisText` | `string` | No | — | — | Diagnóstico que lo motiva. | `src/modules/consent/dto/responses.dto.ts:302` |
+| `purposeText` | `string` | No | — | — | Naturaleza y objetivo. | `src/modules/consent/dto/responses.dto.ts:308` |
+| `benefitsText` | `string` | No | — | — | Beneficios esperados. | `src/modules/consent/dto/responses.dto.ts:314` |
+| `risksText` | `string` | No | — | — | Riesgos frecuentes y graves. | `src/modules/consent/dto/responses.dto.ts:320` |
+| `personalizedRisksText` | `string` | No | — | — | Riesgos personalizados. | `src/modules/consent/dto/responses.dto.ts:326` |
+| `alternativesText` | `string` | No | — | — | Alternativas. | `src/modules/consent/dto/responses.dto.ts:332` |
+| `refusalConsequencesText` | `string` | No | — | — | Consecuencias de no aceptar. | `src/modules/consent/dto/responses.dto.ts:338` |
+| `patientQuestionsText` | `string` | No | — | — | Preguntas y respuestas. | `src/modules/consent/dto/responses.dto.ts:344` |
+| `grantedBy` | `object` | No | — | — | Quién otorga. | `src/modules/consent/dto/responses.dto.ts:350` |
+| `representativeName` | `string` | No | — | — | Nombre del representante. | `src/modules/consent/dto/responses.dto.ts:356` |
+| `representativeDocument` | `string` | No | — | — | Documento del representante. | `src/modules/consent/dto/responses.dto.ts:362` |
+| `representativeRelationship` | `string` | No | — | — | Parentesco o calidad del representante. | `src/modules/consent/dto/responses.dto.ts:368` |
+| `incapacityReason` | `string` | No | — | — | Por qué no consiente el titular. | `src/modules/consent/dto/responses.dto.ts:374` |
+| `informedByProfileId` | `string` | No | formato uuid | — | Profesional que informa. | `src/modules/consent/dto/responses.dto.ts:380` |
+| `channel` | `object` | No | — | — | Canal. | `src/modules/consent/dto/responses.dto.ts:386` |
+| `exceptionType` | `object` | No | — | — | Excepción legal. | `src/modules/consent/dto/responses.dto.ts:392` |
+| `exceptionJustification` | `string` | No | — | — | Justificación de la excepción. | `src/modules/consent/dto/responses.dto.ts:398` |
+| `withdrawalReason` | `string` | No | — | — | Motivo de la revocación. | `src/modules/consent/dto/responses.dto.ts:404` |
+| `witnessName` | `string` | No | — | — | Testigo externo. | `src/modules/consent/dto/responses.dto.ts:410` |
+| `witnessDocument` | `string` | No | — | — | Documento del testigo externo. | `src/modules/consent/dto/responses.dto.ts:416` |
+| `informationLanguage` | `string` | No | — | — | Idioma de la información. | `src/modules/consent/dto/responses.dto.ts:422` |
+| `assentObtained` | `boolean` | No | — | — | Asentimiento obtenido. | `src/modules/consent/dto/responses.dto.ts:428` |
+| `assentNotes` | `string` | No | — | — | Notas del asentimiento. | `src/modules/consent/dto/responses.dto.ts:434` |
+| `revocationRightInformed` | `boolean` | No | — | — | Se informó el derecho a revocar. | `src/modules/consent/dto/responses.dto.ts:440` |
+| `postEmergencyInformedAt` | `string` | No | formato date-time | — | Cuándo se informó a posteriori tras la emergencia. | `src/modules/consent/dto/responses.dto.ts:446` |
+| `evidence` | `array<TreatmentConsentEvidenceItemDto>` | Sí | — | — | Evidencia registrada en `consent.consent_evidence` para este consentimiento. | `src/modules/consent/dto/responses.dto.ts:452` |
+| `evidence[].id` | `string` | Sí | formato uuid | — | Identificador de la evidencia. | `src/modules/consent/dto/responses.dto.ts:179` |
+| `evidence[].evidenceTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de evidencia (concept id). | `src/modules/consent/dto/responses.dto.ts:185` |
+| `evidence[].capturedChannelConceptId` | `string` | No | formato uuid | — | Canal de captura (concept id). | `src/modules/consent/dto/responses.dto.ts:191` |
+| `evidence[].recordedAt` | `string` | Sí | formato date-time | — | Cuándo se registró. | `src/modules/consent/dto/responses.dto.ts:197` |
+| `signatureStatus` | `string` | Sí | valores: SIGNED, PENDING | — | `SIGNED` si hay evidencia de firma o documento; `PENDING` si no. | `src/modules/consent/dto/responses.dto.ts:458` |
+| `signedAt` | `string` | No | formato date-time | — | Cuándo se firmó. | `src/modules/consent/dto/responses.dto.ts:464` |
+| `withdrawnAt` | `string` | No | formato date-time | — | Cuándo se revocó. | `src/modules/consent/dto/responses.dto.ts:470` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:476` |
 
 ### Respuestas posibles
 
@@ -2284,7 +2537,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: El objeto consentido no existe; ResourceNotFoundException: Encuentro no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/consent.md).
@@ -2296,6 +2550,567 @@ _Ninguna prueba existente menciona esta operación._
 ### Flujos
 
 - Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) — etapa `UC-07-08`
+
+---
+
+## 24. GET /consent/treatment-informed-consents/{id}
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** v4266: un consentimiento por id.
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `TreatmentInformedConsentsController.get` — `src/modules/consent/controllers/treatment-informed-consents.controller.ts:85`
+
+### Qué es y para qué sirve (negocio)
+
+v4266: un consentimiento por id. Dentro del módulo (descripción del modelo, en inglés): «Separates legal authority for processing from patient consent, HIPAA-style authorizations, treatment informed consent, privacy restrictions and objections.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_07_consent.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`GET /consent/treatment-informed-consents/{id}` la atiende `TreatmentInformedConsentsController.get` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:85). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `TreatmentInformedConsentsService.get`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 12 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:85` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:85` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.access_policies` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `consent.consent_evidence` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ConsentEvidenceRepository.findBySubjects | `src/modules/consent/repositories/consent-evidence.repository.ts:67` |
+| `consent.treatment_informed_consents` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → TreatmentInformedConsentsService.findOrFail → TreatmentInformedConsentsRepository.findById | `src/modules/consent/repositories/treatment-informed-consents.repository.ts:143` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.get → TreatmentInformedConsentsService.get → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<TreatmentInformedConsentResponseDto>` · DTO `TreatmentInformedConsentResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/consent/dto/responses.dto.ts:212` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/consent/dto/responses.dto.ts:218` |
+| `tenantId` | `string` | No | formato uuid | — | Tenant propietario. | `src/modules/consent/dto/responses.dto.ts:224` |
+| `encounterId` | `string` | No | formato uuid | — | Encuentro en el que se registró. | `src/modules/consent/dto/responses.dto.ts:230` |
+| `status` | `string` | Sí | valores: ACTIVE, WITHDRAWN | — | Estado legible: `ACTIVE` mientras no se revoque, `WITHDRAWN` después. | `src/modules/consent/dto/responses.dto.ts:236` |
+| `decision` | `string` | Sí | valores: ACCEPTED, DECLINED | — | Decisión del paciente. | `src/modules/consent/dto/responses.dto.ts:242` |
+| `statusConceptId` | `string` | No | formato uuid | — | Estado (concept id). | `src/modules/consent/dto/responses.dto.ts:248` |
+| `decisionConceptId` | `string` | No | formato uuid | — | Decisión (concept id). | `src/modules/consent/dto/responses.dto.ts:254` |
+| `procedureCodeConceptId` | `string` | No | formato uuid | — | Código de procedimiento (concept id). | `src/modules/consent/dto/responses.dto.ts:260` |
+| `informationVersion` | `string` | No | — | — | Versión del material informativo. | `src/modules/consent/dto/responses.dto.ts:266` |
+| `interpreterUserId` | `string` | No | formato uuid | — | Intérprete presente. | `src/modules/consent/dto/responses.dto.ts:272` |
+| `witnessUserId` | `string` | No | formato uuid | — | Testigo. | `src/modules/consent/dto/responses.dto.ts:278` |
+| `targetType` | `object` | No | — | — | A qué se consiente. | `src/modules/consent/dto/responses.dto.ts:284` |
+| `targetId` | `string` | No | formato uuid | — | Objeto consentido. | `src/modules/consent/dto/responses.dto.ts:290` |
+| `targetLabel` | `string` | No | — | — | Instantánea legible de lo consentido. | `src/modules/consent/dto/responses.dto.ts:296` |
+| `diagnosisText` | `string` | No | — | — | Diagnóstico que lo motiva. | `src/modules/consent/dto/responses.dto.ts:302` |
+| `purposeText` | `string` | No | — | — | Naturaleza y objetivo. | `src/modules/consent/dto/responses.dto.ts:308` |
+| `benefitsText` | `string` | No | — | — | Beneficios esperados. | `src/modules/consent/dto/responses.dto.ts:314` |
+| `risksText` | `string` | No | — | — | Riesgos frecuentes y graves. | `src/modules/consent/dto/responses.dto.ts:320` |
+| `personalizedRisksText` | `string` | No | — | — | Riesgos personalizados. | `src/modules/consent/dto/responses.dto.ts:326` |
+| `alternativesText` | `string` | No | — | — | Alternativas. | `src/modules/consent/dto/responses.dto.ts:332` |
+| `refusalConsequencesText` | `string` | No | — | — | Consecuencias de no aceptar. | `src/modules/consent/dto/responses.dto.ts:338` |
+| `patientQuestionsText` | `string` | No | — | — | Preguntas y respuestas. | `src/modules/consent/dto/responses.dto.ts:344` |
+| `grantedBy` | `object` | No | — | — | Quién otorga. | `src/modules/consent/dto/responses.dto.ts:350` |
+| `representativeName` | `string` | No | — | — | Nombre del representante. | `src/modules/consent/dto/responses.dto.ts:356` |
+| `representativeDocument` | `string` | No | — | — | Documento del representante. | `src/modules/consent/dto/responses.dto.ts:362` |
+| `representativeRelationship` | `string` | No | — | — | Parentesco o calidad del representante. | `src/modules/consent/dto/responses.dto.ts:368` |
+| `incapacityReason` | `string` | No | — | — | Por qué no consiente el titular. | `src/modules/consent/dto/responses.dto.ts:374` |
+| `informedByProfileId` | `string` | No | formato uuid | — | Profesional que informa. | `src/modules/consent/dto/responses.dto.ts:380` |
+| `channel` | `object` | No | — | — | Canal. | `src/modules/consent/dto/responses.dto.ts:386` |
+| `exceptionType` | `object` | No | — | — | Excepción legal. | `src/modules/consent/dto/responses.dto.ts:392` |
+| `exceptionJustification` | `string` | No | — | — | Justificación de la excepción. | `src/modules/consent/dto/responses.dto.ts:398` |
+| `withdrawalReason` | `string` | No | — | — | Motivo de la revocación. | `src/modules/consent/dto/responses.dto.ts:404` |
+| `witnessName` | `string` | No | — | — | Testigo externo. | `src/modules/consent/dto/responses.dto.ts:410` |
+| `witnessDocument` | `string` | No | — | — | Documento del testigo externo. | `src/modules/consent/dto/responses.dto.ts:416` |
+| `informationLanguage` | `string` | No | — | — | Idioma de la información. | `src/modules/consent/dto/responses.dto.ts:422` |
+| `assentObtained` | `boolean` | No | — | — | Asentimiento obtenido. | `src/modules/consent/dto/responses.dto.ts:428` |
+| `assentNotes` | `string` | No | — | — | Notas del asentimiento. | `src/modules/consent/dto/responses.dto.ts:434` |
+| `revocationRightInformed` | `boolean` | No | — | — | Se informó el derecho a revocar. | `src/modules/consent/dto/responses.dto.ts:440` |
+| `postEmergencyInformedAt` | `string` | No | formato date-time | — | Cuándo se informó a posteriori tras la emergencia. | `src/modules/consent/dto/responses.dto.ts:446` |
+| `evidence` | `array<TreatmentConsentEvidenceItemDto>` | Sí | — | — | Evidencia registrada en `consent.consent_evidence` para este consentimiento. | `src/modules/consent/dto/responses.dto.ts:452` |
+| `evidence[].id` | `string` | Sí | formato uuid | — | Identificador de la evidencia. | `src/modules/consent/dto/responses.dto.ts:179` |
+| `evidence[].evidenceTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de evidencia (concept id). | `src/modules/consent/dto/responses.dto.ts:185` |
+| `evidence[].capturedChannelConceptId` | `string` | No | formato uuid | — | Canal de captura (concept id). | `src/modules/consent/dto/responses.dto.ts:191` |
+| `evidence[].recordedAt` | `string` | Sí | formato date-time | — | Cuándo se registró. | `src/modules/consent/dto/responses.dto.ts:197` |
+| `signatureStatus` | `string` | Sí | valores: SIGNED, PENDING | — | `SIGNED` si hay evidencia de firma o documento; `PENDING` si no. | `src/modules/consent/dto/responses.dto.ts:458` |
+| `signedAt` | `string` | No | formato date-time | — | Cuándo se firmó. | `src/modules/consent/dto/responses.dto.ts:464` |
+| `withdrawnAt` | `string` | No | formato date-time | — | Cuándo se revocó. | `src/modules/consent/dto/responses.dto.ts:470` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:476` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento informado no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/consent.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) — etapa `ctrl:TreatmentInformedConsentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 25. POST /consent/treatment-informed-consents/{id}/evidence
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** Enmienda 1: evidencia (firma, documento) del consentimiento, registrada con el servicio de evidencia existente (`consent.consent_evidence`).
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `TreatmentInformedConsentsController.recordEvidence` — `src/modules/consent/controllers/treatment-informed-consents.controller.ts:143`
+
+### Qué es y para qué sirve (negocio)
+
+Enmienda 1: evidencia (firma, documento) del consentimiento, registrada con el servicio de evidencia existente (`consent.consent_evidence`). Dentro del módulo (descripción del modelo, en inglés): «Separates legal authority for processing from patient consent, HIPAA-style authorizations, treatment informed consent, privacy restrictions and objections.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_07_consent.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`POST /consent/treatment-informed-consents/{id}/evidence` la atiende `TreatmentInformedConsentsController.recordEvidence` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:143). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `RecordTreatmentConsentEvidenceDto` (0 campos, 0 obligatorios). Delega en `TreatmentInformedConsentsService.recordEvidence`. Crea filas en consent.consent_evidence. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 9 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.access_policies` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `consent.consent_evidence` | ESCRIBE | CREA | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ConsentEvidenceService.record → ConsentEvidenceRepository.create | `src/modules/consent/repositories/consent-evidence.repository.ts:82` |
+| `consent.treatment_informed_consents` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → TreatmentInformedConsentsService.findOrFail → TreatmentInformedConsentsRepository.findById | `src/modules/consent/repositories/treatment-informed-consents.repository.ts:143` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.recordEvidence → TreatmentInformedConsentsService.recordEvidence → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `RecordTreatmentConsentEvidenceDto`
+
+_El DTO no declara campos documentables, o no se pudo leer._
+
+### Respuesta — `Promise<ConsentEvidenceResponseDto>` · DTO `ConsentEvidenceResponseDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/consent/dto/responses.dto.ts:494` |
+| `subjectId` | `string` | Sí | formato uuid | — | Identificador asociado a subject. | `src/modules/consent/dto/responses.dto.ts:500` |
+| `recordedAt` | `string` | Sí | formato date-time | — | Valor de recorded at mantenido por la instancia. | `src/modules/consent/dto/responses.dto.ts:506` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento informado no encontrado |
+| 409 | `CONFLICT` | ConflictException: El consentimiento está revocado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/consent.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) — etapa `ctrl:TreatmentInformedConsentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 26. PATCH /consent/treatment-informed-consents/{id}/post-emergency-information
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** Enmienda 1: cierre de la excepción EMERGENCY.
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `TreatmentInformedConsentsController.postEmergencyInformation` — `src/modules/consent/controllers/treatment-informed-consents.controller.ts:120`
+
+### Qué es y para qué sirve (negocio)
+
+Enmienda 1: cierre de la excepción EMERGENCY. Dentro del módulo (descripción del modelo, en inglés): «Separates legal authority for processing from patient consent, HIPAA-style authorizations, treatment informed consent, privacy restrictions and objections.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_07_consent.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`PATCH /consent/treatment-informed-consents/{id}/post-emergency-information` la atiende `TreatmentInformedConsentsController.postEmergencyInformation` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:120). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `PostEmergencyInformationDto` (1 campo, 1 obligatorio). Delega en `TreatmentInformedConsentsService.recordPostEmergencyInformation`. Actualiza consent.treatment_informed_consents. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 10 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:120` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:120` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.access_policies` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `consent.consent_evidence` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ConsentEvidenceRepository.findBySubjects | `src/modules/consent/repositories/consent-evidence.repository.ts:67` |
+| `consent.treatment_informed_consents` | ESCRIBE | ACTUALIZA | POR_TIPO | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation | `src/modules/consent/services/treatment-informed-consents.service.ts:456` |
+| `consent.treatment_informed_consents` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → TreatmentInformedConsentsService.findOrFail → TreatmentInformedConsentsRepository.findById | `src/modules/consent/repositories/treatment-informed-consents.repository.ts:143` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.postEmergencyInformation → TreatmentInformedConsentsService.recordPostEmergencyInformation → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `PostEmergencyInformationDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `informedAt` | `string` | Sí | formato date-time | `@IsISO8601()` | Cuándo se informó al paciente (o a su representante). | `src/modules/consent/dto/treatment-informed-consent-actions.dto.ts:66` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "informedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "informedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<TreatmentInformedConsentResponseDto>` · DTO `TreatmentInformedConsentResponseDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/consent/dto/responses.dto.ts:212` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/consent/dto/responses.dto.ts:218` |
+| `tenantId` | `string` | No | formato uuid | — | Tenant propietario. | `src/modules/consent/dto/responses.dto.ts:224` |
+| `encounterId` | `string` | No | formato uuid | — | Encuentro en el que se registró. | `src/modules/consent/dto/responses.dto.ts:230` |
+| `status` | `string` | Sí | valores: ACTIVE, WITHDRAWN | — | Estado legible: `ACTIVE` mientras no se revoque, `WITHDRAWN` después. | `src/modules/consent/dto/responses.dto.ts:236` |
+| `decision` | `string` | Sí | valores: ACCEPTED, DECLINED | — | Decisión del paciente. | `src/modules/consent/dto/responses.dto.ts:242` |
+| `statusConceptId` | `string` | No | formato uuid | — | Estado (concept id). | `src/modules/consent/dto/responses.dto.ts:248` |
+| `decisionConceptId` | `string` | No | formato uuid | — | Decisión (concept id). | `src/modules/consent/dto/responses.dto.ts:254` |
+| `procedureCodeConceptId` | `string` | No | formato uuid | — | Código de procedimiento (concept id). | `src/modules/consent/dto/responses.dto.ts:260` |
+| `informationVersion` | `string` | No | — | — | Versión del material informativo. | `src/modules/consent/dto/responses.dto.ts:266` |
+| `interpreterUserId` | `string` | No | formato uuid | — | Intérprete presente. | `src/modules/consent/dto/responses.dto.ts:272` |
+| `witnessUserId` | `string` | No | formato uuid | — | Testigo. | `src/modules/consent/dto/responses.dto.ts:278` |
+| `targetType` | `object` | No | — | — | A qué se consiente. | `src/modules/consent/dto/responses.dto.ts:284` |
+| `targetId` | `string` | No | formato uuid | — | Objeto consentido. | `src/modules/consent/dto/responses.dto.ts:290` |
+| `targetLabel` | `string` | No | — | — | Instantánea legible de lo consentido. | `src/modules/consent/dto/responses.dto.ts:296` |
+| `diagnosisText` | `string` | No | — | — | Diagnóstico que lo motiva. | `src/modules/consent/dto/responses.dto.ts:302` |
+| `purposeText` | `string` | No | — | — | Naturaleza y objetivo. | `src/modules/consent/dto/responses.dto.ts:308` |
+| `benefitsText` | `string` | No | — | — | Beneficios esperados. | `src/modules/consent/dto/responses.dto.ts:314` |
+| `risksText` | `string` | No | — | — | Riesgos frecuentes y graves. | `src/modules/consent/dto/responses.dto.ts:320` |
+| `personalizedRisksText` | `string` | No | — | — | Riesgos personalizados. | `src/modules/consent/dto/responses.dto.ts:326` |
+| `alternativesText` | `string` | No | — | — | Alternativas. | `src/modules/consent/dto/responses.dto.ts:332` |
+| `refusalConsequencesText` | `string` | No | — | — | Consecuencias de no aceptar. | `src/modules/consent/dto/responses.dto.ts:338` |
+| `patientQuestionsText` | `string` | No | — | — | Preguntas y respuestas. | `src/modules/consent/dto/responses.dto.ts:344` |
+| `grantedBy` | `object` | No | — | — | Quién otorga. | `src/modules/consent/dto/responses.dto.ts:350` |
+| `representativeName` | `string` | No | — | — | Nombre del representante. | `src/modules/consent/dto/responses.dto.ts:356` |
+| `representativeDocument` | `string` | No | — | — | Documento del representante. | `src/modules/consent/dto/responses.dto.ts:362` |
+| `representativeRelationship` | `string` | No | — | — | Parentesco o calidad del representante. | `src/modules/consent/dto/responses.dto.ts:368` |
+| `incapacityReason` | `string` | No | — | — | Por qué no consiente el titular. | `src/modules/consent/dto/responses.dto.ts:374` |
+| `informedByProfileId` | `string` | No | formato uuid | — | Profesional que informa. | `src/modules/consent/dto/responses.dto.ts:380` |
+| `channel` | `object` | No | — | — | Canal. | `src/modules/consent/dto/responses.dto.ts:386` |
+| `exceptionType` | `object` | No | — | — | Excepción legal. | `src/modules/consent/dto/responses.dto.ts:392` |
+| `exceptionJustification` | `string` | No | — | — | Justificación de la excepción. | `src/modules/consent/dto/responses.dto.ts:398` |
+| `withdrawalReason` | `string` | No | — | — | Motivo de la revocación. | `src/modules/consent/dto/responses.dto.ts:404` |
+| `witnessName` | `string` | No | — | — | Testigo externo. | `src/modules/consent/dto/responses.dto.ts:410` |
+| `witnessDocument` | `string` | No | — | — | Documento del testigo externo. | `src/modules/consent/dto/responses.dto.ts:416` |
+| `informationLanguage` | `string` | No | — | — | Idioma de la información. | `src/modules/consent/dto/responses.dto.ts:422` |
+| `assentObtained` | `boolean` | No | — | — | Asentimiento obtenido. | `src/modules/consent/dto/responses.dto.ts:428` |
+| `assentNotes` | `string` | No | — | — | Notas del asentimiento. | `src/modules/consent/dto/responses.dto.ts:434` |
+| `revocationRightInformed` | `boolean` | No | — | — | Se informó el derecho a revocar. | `src/modules/consent/dto/responses.dto.ts:440` |
+| `postEmergencyInformedAt` | `string` | No | formato date-time | — | Cuándo se informó a posteriori tras la emergencia. | `src/modules/consent/dto/responses.dto.ts:446` |
+| `evidence` | `array<TreatmentConsentEvidenceItemDto>` | Sí | — | — | Evidencia registrada en `consent.consent_evidence` para este consentimiento. | `src/modules/consent/dto/responses.dto.ts:452` |
+| `evidence[].id` | `string` | Sí | formato uuid | — | Identificador de la evidencia. | `src/modules/consent/dto/responses.dto.ts:179` |
+| `evidence[].evidenceTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de evidencia (concept id). | `src/modules/consent/dto/responses.dto.ts:185` |
+| `evidence[].capturedChannelConceptId` | `string` | No | formato uuid | — | Canal de captura (concept id). | `src/modules/consent/dto/responses.dto.ts:191` |
+| `evidence[].recordedAt` | `string` | Sí | formato date-time | — | Cuándo se registró. | `src/modules/consent/dto/responses.dto.ts:197` |
+| `signatureStatus` | `string` | Sí | valores: SIGNED, PENDING | — | `SIGNED` si hay evidencia de firma o documento; `PENDING` si no. | `src/modules/consent/dto/responses.dto.ts:458` |
+| `signedAt` | `string` | No | formato date-time | — | Cuándo se firmó. | `src/modules/consent/dto/responses.dto.ts:464` |
+| `withdrawnAt` | `string` | No | formato date-time | — | Cuándo se revocó. | `src/modules/consent/dto/responses.dto.ts:470` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:476` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento informado no encontrado |
+| 409 | `CONFLICT` | ConflictException: La información posterior a la emergencia ya estaba registrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La información posterior sólo aplica a la excepción de emergencia |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/consent.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) — etapa `ctrl:TreatmentInformedConsentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 27. PATCH /consent/treatment-informed-consents/{id}/withdraw
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** v4266: revocación (409 si ya estaba revocado).
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `TreatmentInformedConsentsController.withdraw` — `src/modules/consent/controllers/treatment-informed-consents.controller.ts:100`
+
+### Qué es y para qué sirve (negocio)
+
+v4266: revocación (409 si ya estaba revocado). Dentro del módulo (descripción del modelo, en inglés): «Separates legal authority for processing from patient consent, HIPAA-style authorizations, treatment informed consent, privacy restrictions and objections.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_07_consent.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`PATCH /consent/treatment-informed-consents/{id}/withdraw` la atiende `TreatmentInformedConsentsController.withdraw` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:100). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `WithdrawTreatmentInformedConsentDto` (1 campo, 1 obligatorio). Delega en `TreatmentInformedConsentsService.withdraw`. Crea filas en consent.consent_events. Actualiza clinical_ext.referrals, consent.treatment_informed_consents. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 11 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:100` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:100` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.access_policies` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `clinical_ext.referrals` | ESCRIBE | ACTUALIZA | POR_TIPO | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw | `src/modules/consent/services/treatment-informed-consents.service.ts:386` |
+| `clinical_ext.referrals` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw | `src/modules/consent/services/treatment-informed-consents.service.ts:384` |
+| `consent.consent_events` | ESCRIBE | CREA | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ConsentEventsRepository.record | `src/modules/consent/repositories/consent-events.repository.ts:55` |
+| `consent.consent_evidence` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ConsentEvidenceRepository.findBySubjects | `src/modules/consent/repositories/consent-evidence.repository.ts:67` |
+| `consent.treatment_informed_consents` | ESCRIBE | ACTUALIZA | POR_TIPO | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw | `src/modules/consent/services/treatment-informed-consents.service.ts:378` |
+| `consent.treatment_informed_consents` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → TreatmentInformedConsentsService.findOrFail → TreatmentInformedConsentsRepository.findById | `src/modules/consent/repositories/treatment-informed-consents.repository.ts:143` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | TreatmentInformedConsentsController.withdraw → TreatmentInformedConsentsService.withdraw → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `WithdrawTreatmentInformedConsentDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `reason` | `string` | Sí | longitud mínima 1; longitud máxima 4000 | `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Motivo de la revocación | `src/modules/consent/dto/treatment-informed-consent-actions.dto.ts:52` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<TreatmentInformedConsentResponseDto>` · DTO `TreatmentInformedConsentResponseDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/consent/dto/responses.dto.ts:212` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/consent/dto/responses.dto.ts:218` |
+| `tenantId` | `string` | No | formato uuid | — | Tenant propietario. | `src/modules/consent/dto/responses.dto.ts:224` |
+| `encounterId` | `string` | No | formato uuid | — | Encuentro en el que se registró. | `src/modules/consent/dto/responses.dto.ts:230` |
+| `status` | `string` | Sí | valores: ACTIVE, WITHDRAWN | — | Estado legible: `ACTIVE` mientras no se revoque, `WITHDRAWN` después. | `src/modules/consent/dto/responses.dto.ts:236` |
+| `decision` | `string` | Sí | valores: ACCEPTED, DECLINED | — | Decisión del paciente. | `src/modules/consent/dto/responses.dto.ts:242` |
+| `statusConceptId` | `string` | No | formato uuid | — | Estado (concept id). | `src/modules/consent/dto/responses.dto.ts:248` |
+| `decisionConceptId` | `string` | No | formato uuid | — | Decisión (concept id). | `src/modules/consent/dto/responses.dto.ts:254` |
+| `procedureCodeConceptId` | `string` | No | formato uuid | — | Código de procedimiento (concept id). | `src/modules/consent/dto/responses.dto.ts:260` |
+| `informationVersion` | `string` | No | — | — | Versión del material informativo. | `src/modules/consent/dto/responses.dto.ts:266` |
+| `interpreterUserId` | `string` | No | formato uuid | — | Intérprete presente. | `src/modules/consent/dto/responses.dto.ts:272` |
+| `witnessUserId` | `string` | No | formato uuid | — | Testigo. | `src/modules/consent/dto/responses.dto.ts:278` |
+| `targetType` | `object` | No | — | — | A qué se consiente. | `src/modules/consent/dto/responses.dto.ts:284` |
+| `targetId` | `string` | No | formato uuid | — | Objeto consentido. | `src/modules/consent/dto/responses.dto.ts:290` |
+| `targetLabel` | `string` | No | — | — | Instantánea legible de lo consentido. | `src/modules/consent/dto/responses.dto.ts:296` |
+| `diagnosisText` | `string` | No | — | — | Diagnóstico que lo motiva. | `src/modules/consent/dto/responses.dto.ts:302` |
+| `purposeText` | `string` | No | — | — | Naturaleza y objetivo. | `src/modules/consent/dto/responses.dto.ts:308` |
+| `benefitsText` | `string` | No | — | — | Beneficios esperados. | `src/modules/consent/dto/responses.dto.ts:314` |
+| `risksText` | `string` | No | — | — | Riesgos frecuentes y graves. | `src/modules/consent/dto/responses.dto.ts:320` |
+| `personalizedRisksText` | `string` | No | — | — | Riesgos personalizados. | `src/modules/consent/dto/responses.dto.ts:326` |
+| `alternativesText` | `string` | No | — | — | Alternativas. | `src/modules/consent/dto/responses.dto.ts:332` |
+| `refusalConsequencesText` | `string` | No | — | — | Consecuencias de no aceptar. | `src/modules/consent/dto/responses.dto.ts:338` |
+| `patientQuestionsText` | `string` | No | — | — | Preguntas y respuestas. | `src/modules/consent/dto/responses.dto.ts:344` |
+| `grantedBy` | `object` | No | — | — | Quién otorga. | `src/modules/consent/dto/responses.dto.ts:350` |
+| `representativeName` | `string` | No | — | — | Nombre del representante. | `src/modules/consent/dto/responses.dto.ts:356` |
+| `representativeDocument` | `string` | No | — | — | Documento del representante. | `src/modules/consent/dto/responses.dto.ts:362` |
+| `representativeRelationship` | `string` | No | — | — | Parentesco o calidad del representante. | `src/modules/consent/dto/responses.dto.ts:368` |
+| `incapacityReason` | `string` | No | — | — | Por qué no consiente el titular. | `src/modules/consent/dto/responses.dto.ts:374` |
+| `informedByProfileId` | `string` | No | formato uuid | — | Profesional que informa. | `src/modules/consent/dto/responses.dto.ts:380` |
+| `channel` | `object` | No | — | — | Canal. | `src/modules/consent/dto/responses.dto.ts:386` |
+| `exceptionType` | `object` | No | — | — | Excepción legal. | `src/modules/consent/dto/responses.dto.ts:392` |
+| `exceptionJustification` | `string` | No | — | — | Justificación de la excepción. | `src/modules/consent/dto/responses.dto.ts:398` |
+| `withdrawalReason` | `string` | No | — | — | Motivo de la revocación. | `src/modules/consent/dto/responses.dto.ts:404` |
+| `witnessName` | `string` | No | — | — | Testigo externo. | `src/modules/consent/dto/responses.dto.ts:410` |
+| `witnessDocument` | `string` | No | — | — | Documento del testigo externo. | `src/modules/consent/dto/responses.dto.ts:416` |
+| `informationLanguage` | `string` | No | — | — | Idioma de la información. | `src/modules/consent/dto/responses.dto.ts:422` |
+| `assentObtained` | `boolean` | No | — | — | Asentimiento obtenido. | `src/modules/consent/dto/responses.dto.ts:428` |
+| `assentNotes` | `string` | No | — | — | Notas del asentimiento. | `src/modules/consent/dto/responses.dto.ts:434` |
+| `revocationRightInformed` | `boolean` | No | — | — | Se informó el derecho a revocar. | `src/modules/consent/dto/responses.dto.ts:440` |
+| `postEmergencyInformedAt` | `string` | No | formato date-time | — | Cuándo se informó a posteriori tras la emergencia. | `src/modules/consent/dto/responses.dto.ts:446` |
+| `evidence` | `array<TreatmentConsentEvidenceItemDto>` | Sí | — | — | Evidencia registrada en `consent.consent_evidence` para este consentimiento. | `src/modules/consent/dto/responses.dto.ts:452` |
+| `evidence[].id` | `string` | Sí | formato uuid | — | Identificador de la evidencia. | `src/modules/consent/dto/responses.dto.ts:179` |
+| `evidence[].evidenceTypeConceptId` | `string` | Sí | formato uuid | — | Tipo de evidencia (concept id). | `src/modules/consent/dto/responses.dto.ts:185` |
+| `evidence[].capturedChannelConceptId` | `string` | No | formato uuid | — | Canal de captura (concept id). | `src/modules/consent/dto/responses.dto.ts:191` |
+| `evidence[].recordedAt` | `string` | Sí | formato date-time | — | Cuándo se registró. | `src/modules/consent/dto/responses.dto.ts:197` |
+| `signatureStatus` | `string` | Sí | valores: SIGNED, PENDING | — | `SIGNED` si hay evidencia de firma o documento; `PENDING` si no. | `src/modules/consent/dto/responses.dto.ts:458` |
+| `signedAt` | `string` | No | formato date-time | — | Cuándo se firmó. | `src/modules/consent/dto/responses.dto.ts:464` |
+| `withdrawnAt` | `string` | No | formato date-time | — | Cuándo se revocó. | `src/modules/consent/dto/responses.dto.ts:470` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:476` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento informado no encontrado |
+| 409 | `CONFLICT` | ConflictException: El consentimiento ya estaba revocado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/consent.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) — etapa `ctrl:TreatmentInformedConsentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

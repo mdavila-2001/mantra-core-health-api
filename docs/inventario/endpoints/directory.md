@@ -37,7 +37,7 @@
 | 23 | PATCH | `/tenants/{tenantId}/memberships/{membershipId}/role` | Cambiar rol / scope de la membresía | ALTO | 2 | sesión (sin roles) |
 | 24 | POST | `/tenants/{tenantId}/memberships/{membershipId}/transfer` | Transferir la membresía entre branches | ALTO | 6 | sesión (sin roles) |
 | 25 | GET | `/tenants/{tenantId}/pharmacy-readiness` | Requisitos pendientes para que la farmacia opere | BAJO | 11 | sesión (sin roles) |
-| 26 | GET | `/tenants/me` | Las organizaciones del actor, con su rol en cada una | BAJO | 12 | sesión (sin roles) |
+| 26 | GET | `/tenants/me` | Las organizaciones del actor, con su rol en cada una | BAJO | 13 | sesión (sin roles) |
 
 ---
 
@@ -828,14 +828,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `legalName` | `string` | No | longitud mínima 1; longitud máxima 300 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(300)` | — | `src/modules/directory/dto/my-organizations.dto.ts:301` |
-| `tradeName` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | — | `src/modules/directory/dto/my-organizations.dto.ts:310` |
-| `timeZone` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/directory/dto/my-organizations.dto.ts:321` |
-| `currencyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/directory/dto/my-organizations.dto.ts:329` |
-| `payer` | `UpdatePayerProfileDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => UpdatePayerProfileDto)` | — | `src/modules/directory/dto/my-organizations.dto.ts:339` |
-| `payer.sigla` | `string` | No | longitud máxima 20 | `@IsOptional()` `@IsString()` `@MaxLength(20)` | — | `src/modules/directory/dto/my-organizations.dto.ts:251` |
-| `payer.address` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | — | `src/modules/directory/dto/my-organizations.dto.ts:260` |
-| `payer.regulatorIdentifier` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/directory/dto/my-organizations.dto.ts:269` |
+| `legalName` | `string` | No | longitud mínima 1; longitud máxima 300 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(300)` | — | `src/modules/directory/dto/my-organizations.dto.ts:366` |
+| `tradeName` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | — | `src/modules/directory/dto/my-organizations.dto.ts:375` |
+| `timeZone` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/directory/dto/my-organizations.dto.ts:386` |
+| `currencyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/directory/dto/my-organizations.dto.ts:394` |
+| `payer` | `UpdatePayerProfileDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => UpdatePayerProfileDto)` | — | `src/modules/directory/dto/my-organizations.dto.ts:404` |
+| `payer.sigla` | `string` | No | longitud máxima 20 | `@IsOptional()` `@IsString()` `@MaxLength(20)` | — | `src/modules/directory/dto/my-organizations.dto.ts:316` |
+| `payer.address` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | — | `src/modules/directory/dto/my-organizations.dto.ts:325` |
+| `payer.regulatorIdentifier` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/directory/dto/my-organizations.dto.ts:334` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2822,7 +2822,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /tenants/me` la atiende `TenantsController.listMyTenants` (src/modules/directory/controllers/tenants.controller.ts:110). Exige sesión; el controlador no declara roles. Delega en `DirectoryReadService.listMyTenants`. Lee common.addresses, common.contact_points, common.identifiers, directory.tenant_legal_representatives, directory.tenant_memberships, directory.tenants, insurance.insurance_carriers, profiles.persons y 4 más.
+`GET /tenants/me` la atiende `TenantsController.listMyTenants` (src/modules/directory/controllers/tenants.controller.ts:110). Exige sesión; el controlador no declara roles. Delega en `DirectoryReadService.listMyTenants`. Lee common.addresses, common.contact_points, common.identifiers, directory.tenant_affiliation_documents, directory.tenant_legal_representatives, directory.tenant_memberships, directory.tenants, insurance.insurance_carriers y 5 más.
 
 ### Requerimientos
 
@@ -2840,6 +2840,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `common.addresses` | LEE | LEE | DIRECTA | TenantsController.listMyTenants → DirectoryReadService.listMyTenants → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | LEE | LEE | DIRECTA | TenantsController.listMyTenants → DirectoryReadService.listMyTenants → DirectoryReadService.loadRepresentation → ContactPointsRepository.findAllCurrentByOwners | `src/modules/common/repositories/contact-points.repository.ts:96` |
 | `common.identifiers` | LEE | LEE | DIRECTA | TenantsController.listMyTenants → DirectoryReadService.listMyTenants → DirectoryReadService.loadRepresentation → IdentifiersRepository.findByIds | `src/modules/common/repositories/identifiers.repository.ts:104` |
+| `directory.tenant_affiliation_documents` | LEE | LEE | DIRECTA | TenantsController.listMyTenants → DirectoryReadService.listMyTenants → DirectoryReadService.loadLegalDocuments → DirectoryTenantLegalRepository.listAffiliationDocsByTenant | `src/modules/directory/repositories/directory-tenant-legal.repository.ts:92` |
 | `directory.tenant_legal_representatives` | LEE | LEE | DIRECTA | TenantsController.listMyTenants → DirectoryReadService.listMyTenants → DirectoryReadService.loadRepresentation → DirectoryTenantLegalRepository.listLegalRepsByTenant | `src/modules/directory/repositories/directory-tenant-legal.repository.ts:84` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantsController.listMyTenants → DirectoryReadService.listMyTenants → TenantMembershipsRepository.findActiveByUser | `src/modules/directory/repositories/tenant-memberships.repository.ts:99` |
 | `directory.tenants` | LEE | LEE | DIRECTA | TenantsController.listMyTenants → DirectoryReadService.listMyTenants → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:71` |
@@ -2858,18 +2859,18 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<MyOrganizationDto>` | Sí | — | — | Sus organizaciones, de la más recientemente creada a la más antigua. | `src/modules/directory/dto/my-organizations.dto.ts:235` |
-| `items[].myRoleConceptId` | `string` | Sí | formato uuid | — | Concepto del rol de la membresía activa (owner/admin/staff) | `src/modules/directory/dto/my-organizations.dto.ts:161` |
-| `items[].canAdminister` | `boolean` | Sí | — | — | Verdadero para owner y admin de la organización | `src/modules/directory/dto/my-organizations.dto.ts:169` |
-| `items[].isVerified` | `boolean` | Sí | — | — | Verdadero cuando la plataforma verificó la organización | `src/modules/directory/dto/my-organizations.dto.ts:183` |
-| `items[].payer` | `PayerOrganizationProfileDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => PayerOrganizationProfileDto)` | Datos propios de la aseguradora. Presente sólo si el tenant es `PAYER`. | `src/modules/directory/dto/my-organizations.dto.ts:192` |
+| `items` | `array<MyOrganizationDto>` | Sí | — | — | Sus organizaciones, de la más recientemente creada a la más antigua. | `src/modules/directory/dto/my-organizations.dto.ts:300` |
+| `items[].myRoleConceptId` | `string` | Sí | formato uuid | — | Concepto del rol de la membresía activa (owner/admin/staff) | `src/modules/directory/dto/my-organizations.dto.ts:203` |
+| `items[].canAdminister` | `boolean` | Sí | — | — | Verdadero para owner y admin de la organización | `src/modules/directory/dto/my-organizations.dto.ts:211` |
+| `items[].isVerified` | `boolean` | Sí | — | — | Verdadero cuando la plataforma verificó la organización | `src/modules/directory/dto/my-organizations.dto.ts:225` |
+| `items[].payer` | `PayerOrganizationProfileDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => PayerOrganizationProfileDto)` | Datos propios de la aseguradora. Presente sólo si el tenant es `PAYER`. | `src/modules/directory/dto/my-organizations.dto.ts:234` |
 | `items[].payer.carrierCode` | `string` | No | — | — | Código de la aseguradora | `src/modules/directory/dto/my-organizations.dto.ts:25` |
 | `items[].payer.regulatorIdentifier` | `string` | No | — | — | Identificador ante el regulador de seguros | `src/modules/directory/dto/my-organizations.dto.ts:31` |
 | `items[].payer.sigla` | `string` | No | — | — | Sigla de la aseguradora | `src/modules/directory/dto/my-organizations.dto.ts:37` |
 | `items[].payer.address` | `string` | No | — | — | Dirección de la aseguradora | `src/modules/directory/dto/my-organizations.dto.ts:43` |
 | `items[].payer.latitude` | `number` | No | — | — | Latitud de la casa matriz (-90 a 90) | `src/modules/directory/dto/my-organizations.dto.ts:53` |
 | `items[].payer.longitude` | `number` | No | — | — | Longitud de la casa matriz (-180 a 180) | `src/modules/directory/dto/my-organizations.dto.ts:59` |
-| `items[].legalRepresentative` | `OrganizationContactPersonDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => OrganizationContactPersonDto)` | Quién representa legalmente a la organización (subtarea 1.4). Va al nivel de la organización y no dentro de `payer` porque no es un dato de aseguradora: el registro de procesos pide el mismo bloque para farmacia, laboratorio e imagenología. | `src/modules/directory/dto/my-organizations.dto.ts:205` |
+| `items[].legalRepresentative` | `OrganizationContactPersonDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => OrganizationContactPersonDto)` | Quién representa legalmente a la organización (subtarea 1.4). Va al nivel de la organización y no dentro de `payer` porque no es un dato de aseguradora: el registro de procesos pide el mismo bloque para farmacia, laboratorio e imagenología. | `src/modules/directory/dto/my-organizations.dto.ts:247` |
 | `items[].legalRepresentative.role` | `string` | No | — | — | Rol canónico del contacto dentro de la organización | `src/modules/directory/dto/my-organizations.dto.ts:83` |
 | `items[].legalRepresentative.fullName` | `string` | No | — | — | Nombre completo del contacto | `src/modules/directory/dto/my-organizations.dto.ts:93` |
 | `items[].legalRepresentative.name` | `string` | No | — | — | Nombre de pila, si se declaró en partes | `src/modules/directory/dto/my-organizations.dto.ts:105` |
@@ -2879,7 +2880,7 @@ La operación no recibe cuerpo.
 | `items[].legalRepresentative.email` | `string` | No | formato email | — | Correo de contacto | `src/modules/directory/dto/my-organizations.dto.ts:125` |
 | `items[].legalRepresentative.phone` | `string` | No | — | — | Celular o teléfono de contacto | `src/modules/directory/dto/my-organizations.dto.ts:131` |
 | `items[].legalRepresentative.idNumber` | `string` | No | — | — | Documento de identidad declarado | `src/modules/directory/dto/my-organizations.dto.ts:137` |
-| `items[].executives` | `array<OrganizationContactPersonDto>` | No | — | `@IsOptional()` `@ValidateNested({ each: true })` `@Type(() => OrganizationContactPersonDto)` | Las gerencias de contacto declaradas, en orden canónico (general, comercial, marketing). | `src/modules/directory/dto/my-organizations.dto.ts:215` |
+| `items[].executives` | `array<OrganizationContactPersonDto>` | No | — | `@IsOptional()` `@ValidateNested({ each: true })` `@Type(() => OrganizationContactPersonDto)` | Las gerencias de contacto declaradas, en orden canónico (general, comercial, marketing). | `src/modules/directory/dto/my-organizations.dto.ts:257` |
 | `items[].executives[].role` | `string` | No | — | — | Rol canónico del contacto dentro de la organización | `src/modules/directory/dto/my-organizations.dto.ts:83` |
 | `items[].executives[].fullName` | `string` | No | — | — | Nombre completo del contacto | `src/modules/directory/dto/my-organizations.dto.ts:93` |
 | `items[].executives[].name` | `string` | No | — | — | Nombre de pila, si se declaró en partes | `src/modules/directory/dto/my-organizations.dto.ts:105` |
@@ -2889,6 +2890,23 @@ La operación no recibe cuerpo.
 | `items[].executives[].email` | `string` | No | formato email | — | Correo de contacto | `src/modules/directory/dto/my-organizations.dto.ts:125` |
 | `items[].executives[].phone` | `string` | No | — | — | Celular o teléfono de contacto | `src/modules/directory/dto/my-organizations.dto.ts:131` |
 | `items[].executives[].idNumber` | `string` | No | — | — | Documento de identidad declarado | `src/modules/directory/dto/my-organizations.dto.ts:137` |
+| `items[].legalEntityType` | `string` | No | — | — | Código de la forma societaria (`SRL`, `SA`, `US_LLC`…), si es una del diccionario | `src/modules/directory/dto/my-organizations.dto.ts:264` |
+| `items[].taxIdentifier` | `string` | No | — | — | Número de identificación tributaria declarado con el documento del NIT | `src/modules/directory/dto/my-organizations.dto.ts:270` |
+| `items[].legalDocuments` | `array<OrganizationLegalDocumentDto>` | No | — | `@IsOptional()` `@ValidateNested({ each: true })` `@Type(() => OrganizationLegalDocumentDto)` | Los documentos legales presentados, uno por rol; ausente si no hay ninguno | `src/modules/directory/dto/my-organizations.dto.ts:280` |
+| `items[].legalDocuments[].id` | `string` | No | formato uuid | — | Identificador del documento. | sin fuente |
+| `items[].legalDocuments[].siteId` | `string` | No | formato uuid; admite null | — | Sede a la que corresponde, si está acotado a una. | sin fuente |
+| `items[].legalDocuments[].type` | `PracticeConceptDto` | No | — | — | Tipo de acreditación o documento. | sin fuente |
+| `items[].legalDocuments[].type.code` | `string` | No | — | — | Código estable del concepto. | `src/modules/practice/dto/organization-console.dto.ts:12` |
+| `items[].legalDocuments[].type.display` | `string` | No | — | — | Etiqueta legible. | `src/modules/practice/dto/organization-console.dto.ts:15` |
+| `items[].legalDocuments[].number` | `string` | No | admite null | — | Número o matrícula del documento. | sin fuente |
+| `items[].legalDocuments[].issuerName` | `string` | No | admite null | — | Entidad emisora, tal como se registró. | sin fuente |
+| `items[].legalDocuments[].evidenceFileId` | `string` | No | formato uuid; admite null | — | Archivo de respaldo, si se adjuntó. | sin fuente |
+| `items[].legalDocuments[].validFrom` | `string` | No | formato date; admite null | — | Inicio de vigencia. | sin fuente |
+| `items[].legalDocuments[].validTo` | `string` | No | formato date; admite null | — | Fin de vigencia. | `src/modules/directory/dto/my-organizations.dto.ts:192` |
+| `items[].legalDocuments[].daysToExpiry` | `number` | No | admite null | — | Días que faltan para el vencimiento; negativo si ya venció. Se calcula en el servidor a propósito: la alerta por vencimiento que pide la especificación tiene que dar el mismo resultado en toda pantalla y en todo informe, y el reloj del navegador no es una base confiable para eso. `null` cuando el documento no declara vencimiento. | sin fuente |
+| `items[].legalDocuments[].verificationStatus` | `PracticeConceptDto` | No | — | — | Estado de verificación del documento. | `src/modules/directory/dto/my-organizations.dto.ts:178` |
+| `items[].legalDocuments[].verificationStatus.code` | `string` | No | — | — | Código estable del concepto. | `src/modules/practice/dto/organization-console.dto.ts:12` |
+| `items[].legalDocuments[].verificationStatus.display` | `string` | No | — | — | Etiqueta legible. | `src/modules/practice/dto/organization-console.dto.ts:15` |
 
 ### Respuestas posibles
 

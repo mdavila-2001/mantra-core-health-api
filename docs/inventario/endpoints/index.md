@@ -2,11 +2,11 @@
 
 # Inventario de endpoints
 
-Se inventarían **1613 operaciones HTTP** en **72 módulos**: 1602 publicadas en el contrato OpenAPI y 11 que existen sólo en el código.
+Se inventarían **1621 operaciones HTTP** en **72 módulos**: 1602 publicadas en el contrato OpenAPI y 19 que existen sólo en el código.
 
-- Con al menos una tabla identificada: 1551
-- Riesgo ALTO 199 · MEDIO 893 · BAJO 521
-- Mencionadas por al menos una prueba: 932
+- Con al menos una tabla identificada: 1559
+- Riesgo ALTO 199 · MEDIO 898 · BAJO 524
+- Mencionadas por al menos una prueba: 935
 
 Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [README del inventario](../README.md).
 
@@ -23,10 +23,10 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `billing` | 36 | 5 | [billing.md](billing.md) |
 | `chart` | 23 | 3 | [chart.md](chart.md) |
 | `clinical` | 42 | 1 | [clinical.md](clinical.md) |
-| `clinical_ext` | 29 | 2 | [clinical_ext.md](clinical_ext.md) |
+| `clinical_ext` | 32 | 2 | [clinical_ext.md](clinical_ext.md) |
 | `common` | 19 | 6 | [common.md](common.md) |
 | `community` | 102 | 29 | [community.md](community.md) |
-| `consent` | 22 | 0 | [consent.md](consent.md) |
+| `consent` | 27 | 0 | [consent.md](consent.md) |
 | `content_packs` | 2 | 1 | [content_packs.md](content_packs.md) |
 | `crm` | 16 | 0 | [crm.md](crm.md) |
 | `cross_store_consistency` | 16 | 0 | [cross_store_consistency.md](cross_store_consistency.md) |

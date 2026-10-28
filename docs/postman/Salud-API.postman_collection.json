@@ -81153,7 +81153,7 @@
                     "reverse"
                   ]
                 },
-                "description": "Sin sesión. 503 si el proveedor no responde: el alta sigue con la calle a mano. Nunca inventa una dirección.\n\n`POST /public/geo/reverse`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `ReverseGeocodingController_reverse`",
+                "description": "Sin sesión. 503 si el proveedor no responde: el alta sigue con la calle a mano. Nunca inventa una dirección.\n\n`POST /public/geo/reverse`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500, 504\n\noperationId: `ReverseGeocodingController_reverse`",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"latitude\": -90,\n  \"longitude\": -180\n}",

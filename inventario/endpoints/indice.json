@@ -1,20 +1,20 @@
 {
   "resumen": {
-    "total": 1613,
+    "total": 1621,
     "porOrigen": {
       "CONTRATO": 1602,
-      "CONTRATO_AUSENTE": 11
+      "CONTRATO_AUSENTE": 19
     },
     "porRiesgo": {
-      "BAJO": 521,
-      "MEDIO": 893,
+      "BAJO": 524,
+      "MEDIO": 898,
       "ALTO": 199
     },
-    "conTablas": 1551,
+    "conTablas": 1559,
     "sinTablasSinDeterminar": 1,
     "sinExplicacionDeNegocio": 0,
-    "conPruebas": 932,
-    "conRequerimientos": 1613
+    "conPruebas": 935,
+    "conRequerimientos": 1621
   },
   "endpoints": [
     {
@@ -5340,7 +5340,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 21,
+      "tablas": 22,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -5359,7 +5359,64 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 37,
+      "tablas": 38,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ReferralsController_get",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/referrals/{id}",
+      "modulo": "clinical_ext",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "v4266: una derivación por id. Declarada después de `me` para que esa ruta no caiga acá. La lee quien puede leer la historia o el destino.",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "CLINICIAN",
+        "PRACTITIONER"
+      ],
+      "tablas": 21,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ReferralsController_cancel",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "PATCH",
+      "ruta": "/referrals/{id}/cancel",
+      "modulo": "clinical_ext",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "v4266: anula una derivación pendiente o aceptada.",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "CLINICIAN",
+        "PRACTITIONER"
+      ],
+      "tablas": 20,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "ReferralsController_counterReferral",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "PATCH",
+      "ruta": "/referrals/{id}/counter-referral",
+      "modulo": "clinical_ext",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "v4266: contrarreferencia del destino; cierra la derivación.",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "CLINICIAN",
+        "PRACTITIONER"
+      ],
+      "tablas": 20,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -5378,7 +5435,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 2,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -5398,7 +5455,7 @@
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 5,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -7603,7 +7660,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 19,
+      "tablas": 21,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -7881,6 +7938,25 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "TreatmentInformedConsentsController_list",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/consent/treatment-informed-consents",
+      "modulo": "consent",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "v4266: consentimientos de un paciente, opcionalmente por objeto.",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "CLINICIAN",
+        "PRACTITIONER"
+      ],
+      "tablas": 20,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "TreatmentInformedConsentsController_sign",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -7891,9 +7967,87 @@
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN"
+        "SECURITY_ADMIN",
+        "CLINICIAN",
+        "PRACTITIONER"
       ],
-      "tablas": 2,
+      "tablas": 21,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "TreatmentInformedConsentsController_get",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/consent/treatment-informed-consents/{id}",
+      "modulo": "consent",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "v4266: un consentimiento por id.",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "CLINICIAN",
+        "PRACTITIONER"
+      ],
+      "tablas": 20,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "TreatmentInformedConsentsController_recordEvidence",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "POST",
+      "ruta": "/consent/treatment-informed-consents/{id}/evidence",
+      "modulo": "consent",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Enmienda 1: evidencia (firma, documento) del consentimiento, registrada con el servicio de evidencia existente (`consent.consent_evidence`).",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "CLINICIAN",
+        "PRACTITIONER"
+      ],
+      "tablas": 18,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "TreatmentInformedConsentsController_postEmergencyInformation",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "PATCH",
+      "ruta": "/consent/treatment-informed-consents/{id}/post-emergency-information",
+      "modulo": "consent",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Enmienda 1: cierre de la excepción EMERGENCY.",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "CLINICIAN",
+        "PRACTITIONER"
+      ],
+      "tablas": 19,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "TreatmentInformedConsentsController_withdraw",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "PATCH",
+      "ruta": "/consent/treatment-informed-consents/{id}/withdraw",
+      "modulo": "consent",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "v4266: revocación (409 si ya estaba revocado).",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "CLINICIAN",
+        "PRACTITIONER"
+      ],
+      "tablas": 22,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -10983,7 +11137,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 12,
+      "tablas": 13,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"

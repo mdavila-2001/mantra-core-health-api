@@ -3713,6 +3713,28 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
           "phone": "+59170000000",
           "idNumber": "valor-ejemplo"
         }
+      ],
+      "legalEntityType": "SRL",
+      "taxIdentifier": "valor-ejemplo",
+      "legalDocuments": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "siteId": "00000000-0000-4000-8000-000000000001",
+          "type": {
+            "code": "CODIGO_EJEMPLO",
+            "display": "valor-ejemplo"
+          },
+          "number": "valor-ejemplo",
+          "issuerName": "Nombre de ejemplo",
+          "evidenceFileId": "00000000-0000-4000-8000-000000000001",
+          "validFrom": "2026-07-31",
+          "validTo": "2026-07-31",
+          "daysToExpiry": 1,
+          "verificationStatus": {
+            "code": "CODIGO_EJEMPLO",
+            "display": "valor-ejemplo"
+          }
+        }
       ]
     }
   ]
@@ -3723,7 +3745,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<MyOrganizationDto>` | Sin restricción adicional declarada | Sus organizaciones, de la más recientemente creada a la más antigua. | `[{"myRoleConceptId":"00000000-0000-4000-8000-000000000001","canAdminister":true,"isVerified":true,"payer":{"carrierCode":"CODIGO_EJEMPLO","regulatorIdentifier":"valor-ejemplo","sigla":"valor-ejemplo","address":"valor-ejemplo","latitude":1,"longitude":1},"legalRepresentative":{"role":"MARKETING_MANAGER","fullName":"Nombre de ejemplo","name":"Nombre de ejemplo","middleName":"Nombre de ejemplo","lastName":"Nombre de ejemplo","motherLastName":"Nombre de ejemplo","email":"usuario@example.com","phone":"+59170000000","idNumber":"valor-ejemplo"},"executives":[{"role":"MARKETING_MANAGER","fullName":"Nombre de ejemplo","name":"Nombre de ejemplo","middleName":"Nombre de ejemplo","lastName":"Nombre de ejemplo","motherLastName":"Nombre de ejemplo","email":"usuario@example.com","phone":"+59170000000","idNumber":"valor-ejemplo"}]}]` |
+| `items` | Sí | `array<MyOrganizationDto>` | Sin restricción adicional declarada | Sus organizaciones, de la más recientemente creada a la más antigua. | `[{"myRoleConceptId":"00000000-0000-4000-8000-000000000001","canAdminister":true,"isVerified":true,"payer":{"carrierCode":"CODIGO_EJEMPLO","regulatorIdentifier":"valor-ejemplo","sigla":"valor-ejemplo","address":"valor-ejemplo","latitude":1,"longitude":1},"legalRepresentative":{"role":"MARKETING_MANAGER","fullName":"Nombre de ejemplo","name":"Nombre de ejemplo","middleName":"Nombre de ejemplo","lastName":"Nombre de ejemplo","motherLastName":"Nombre de ejemplo","email":"usuario@example.com","phone":"+59170000000","idNumber":"valor-ejemplo"},"executives":[{"role":"MARKETING_MANAGER","fullName":"Nombre de ejemplo","name":"Nombre de ejemplo","middleName":"Nombre de ejemplo","lastName":"Nombre de ejemplo","motherLastName":"Nombre de ejemplo","email":"usuario@example.com","phone":"+59170000000","idNumber":"valor-ejemplo"}],"legalEntityType":"SRL","taxIdentifier":"valor-ejemplo","legalDocuments":[{"id":"00000000-0000-4000-8000-000000000001","siteId":"00000000-0000-4000-8000-000000000001","type":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"number":"valor-ejemplo","issuerName":"Nombre de ejemplo","evidenceFileId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31","validTo":"2026-07-31","daysToExpiry":1,"verificationStatus":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]}]` |
 | `items[].myRoleConceptId` | Sí | `string` | formato `uuid` | Concepto del rol de la membresía activa (owner/admin/staff) | `00000000-0000-4000-8000-000000000001` |
 | `items[].canAdminister` | Sí | `boolean` | Sin restricción adicional declarada | Verdadero para owner y admin de la organización | `true` |
 | `items[].isVerified` | Sí | `boolean` | Sin restricción adicional declarada | Verdadero cuando la plataforma verificó la organización | `true` |
@@ -3754,6 +3776,23 @@ Campos de la respuesta:
 | `items[].executives[].email` | No | `string` | formato `email` | Correo de contacto | `usuario@example.com` |
 | `items[].executives[].phone` | No | `string` | Sin restricción adicional declarada | Celular o teléfono de contacto | `+59170000000` |
 | `items[].executives[].idNumber` | No | `string` | Sin restricción adicional declarada | Documento de identidad declarado | `valor-ejemplo` |
+| `items[].legalEntityType` | No | `string` | Sin restricción adicional declarada | Código de la forma societaria (`SRL`, `SA`, `US_LLC`…), si es una del diccionario | `SRL` |
+| `items[].taxIdentifier` | No | `string` | Sin restricción adicional declarada | Número de identificación tributaria declarado con el documento del NIT | `valor-ejemplo` |
+| `items[].legalDocuments` | No | `array<OrganizationLegalDocumentDto>` | Sin restricción adicional declarada | Los documentos legales presentados, uno por rol; ausente si no hay ninguno | `[{"id":"00000000-0000-4000-8000-000000000001","siteId":"00000000-0000-4000-8000-000000000001","type":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"number":"valor-ejemplo","issuerName":"Nombre de ejemplo","evidenceFileId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31","validTo":"2026-07-31","daysToExpiry":1,"verificationStatus":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
+| `items[].legalDocuments[].id` | No | `string` | formato `uuid` | Identificador del documento. | `00000000-0000-4000-8000-000000000001` |
+| `items[].legalDocuments[].siteId` | No | `string` | formato `uuid`; admite null | Sede a la que corresponde, si está acotado a una. | `00000000-0000-4000-8000-000000000001` |
+| `items[].legalDocuments[].type` | No | `PracticeConceptDto` | Sin restricción adicional declarada | Tipo de acreditación o documento. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `items[].legalDocuments[].type.code` | No | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `items[].legalDocuments[].type.display` | No | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `items[].legalDocuments[].number` | No | `string` | admite null | Número o matrícula del documento. | `valor-ejemplo` |
+| `items[].legalDocuments[].issuerName` | No | `string` | admite null | Entidad emisora, tal como se registró. | `Nombre de ejemplo` |
+| `items[].legalDocuments[].evidenceFileId` | No | `string` | formato `uuid`; admite null | Archivo de respaldo, si se adjuntó. | `00000000-0000-4000-8000-000000000001` |
+| `items[].legalDocuments[].validFrom` | No | `string` | formato `date`; admite null | Inicio de vigencia. | `2026-07-31` |
+| `items[].legalDocuments[].validTo` | No | `string` | formato `date`; admite null | Fin de vigencia. | `2026-07-31` |
+| `items[].legalDocuments[].daysToExpiry` | No | `number` | admite null | Días que faltan para el vencimiento; negativo si ya venció. Se calcula en el servidor a propósito: la alerta por vencimiento que pide la especificación tiene que dar el mismo resultado en toda pantalla y en todo informe, y el reloj del navegador no es una base confiable para eso. `null` cuando el documento no declara vencimiento. | `1` |
+| `items[].legalDocuments[].verificationStatus` | No | `PracticeConceptDto` | Sin restricción adicional declarada | Estado de verificación del documento. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `items[].legalDocuments[].verificationStatus.code` | No | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `items[].legalDocuments[].verificationStatus.display` | No | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 

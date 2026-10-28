@@ -48,7 +48,7 @@ _Fuente: `src/modules/directory/README.md:3`_
 |  |  | PATCH /tenants/{tenantId}/memberships/{membershipId}/role | Cualquier sesión válida | ALTO | 2 |
 |  |  | POST /tenants/{tenantId}/memberships/{membershipId}/transfer | Cualquier sesión válida | ALTO | 6 |
 |  |  | GET /tenants/{tenantId}/pharmacy-readiness | Cualquier sesión válida | BAJO | 11 |
-|  |  | GET /tenants/me | Cualquier sesión válida | BAJO | 12 |
+|  |  | GET /tenants/me | Cualquier sesión válida | BAJO | 13 |
 
 ### Diagrama — etapas `ctrl:AdminTenantsController`, `ctrl:OrganizationLogoController`, `ctrl:TenantsController`
 
@@ -94,7 +94,7 @@ flowchart LR
   t38[("+8 tablas más")]
   t41[("+5 tablas más")]
   t51[("+5 tablas más")]
-  t55[("+6 tablas más")]
+  t55[("+7 tablas más")]
   subgraph s2["ctrl:TenantsController · Operaciones de TenantsController que el README no asig…"]
     o27["GET /tenants/{tenantId}"]:::op
     o28["PATCH /tenants/{tenantId}"]:::op
@@ -254,9 +254,9 @@ flowchart LR
   o52 -->|"LEE"| t6
   o52 -->|"LEE"| t53
   o52 -->|"LEE"| t54
+  o52 -->|"LEE"| t18
   o52 -->|"LEE"| t31
   o52 -->|"LEE"| t11
-  o52 -->|"LEE"| t3
   o52 -.-> t55
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
@@ -2500,9 +2500,23 @@ flowchart TD
   n25 --> n26
   n27[("LEE common.contact_points")]:::efecto
   n26 --> n27
-  n28(("200 Responde con éxito")):::ok
+  n28["Llama a DirectoryReadService.loadLegalDocuments"]:::llamada
   n27 --> n28
-  n6 -->|"al terminar"| n28
+  n29["Llama a DirectoryTenantLegalRepository.listAffiliationDocsByTenant"]:::llamada
+  n28 --> n29
+  n30[("LEE directory.tenant_affiliation_documents")]:::efecto
+  n29 --> n30
+  n31["Llama a AffiliationDocumentConceptsService.resolve"]:::llamada
+  n30 --> n31
+  n32{"!this.cache"}:::decision
+  n31 --> n32
+  n33["Transacción: catch(…)"]:::transaccion
+  n32 -->|"sí"| n33
+  n34(["↩ (relanza el error capturado)"]):::error
+  n33 --> n34
+  n35(("200 Responde con éxito")):::ok
+  n32 -->|"no"| n35
+  n6 -->|"al terminar"| n35
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

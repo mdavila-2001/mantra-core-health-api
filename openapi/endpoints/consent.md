@@ -848,8 +848,55 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "patientProfileId": "00000000-0000-4000-8000-000000000001",
-  "status": "00000000-0000-4000-8000-000000000001",
-  "decision": "00000000-0000-4000-8000-000000000001",
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "encounterId": "00000000-0000-4000-8000-000000000001",
+  "status": "ACTIVE",
+  "decision": "ACCEPTED",
+  "statusConceptId": "00000000-0000-4000-8000-000000000001",
+  "decisionConceptId": "00000000-0000-4000-8000-000000000001",
+  "procedureCodeConceptId": "00000000-0000-4000-8000-000000000001",
+  "informationVersion": "valor-ejemplo",
+  "interpreterUserId": "00000000-0000-4000-8000-000000000001",
+  "witnessUserId": "00000000-0000-4000-8000-000000000001",
+  "targetType": {},
+  "targetId": "00000000-0000-4000-8000-000000000001",
+  "targetLabel": "valor-ejemplo",
+  "diagnosisText": "valor-ejemplo",
+  "purposeText": "valor-ejemplo",
+  "benefitsText": "valor-ejemplo",
+  "risksText": "valor-ejemplo",
+  "personalizedRisksText": "valor-ejemplo",
+  "alternativesText": "valor-ejemplo",
+  "refusalConsequencesText": "valor-ejemplo",
+  "patientQuestionsText": "valor-ejemplo",
+  "grantedBy": {},
+  "representativeName": "Nombre de ejemplo",
+  "representativeDocument": "valor-ejemplo",
+  "representativeRelationship": "valor-ejemplo",
+  "incapacityReason": "Texto descriptivo de ejemplo",
+  "informedByProfileId": "00000000-0000-4000-8000-000000000001",
+  "channel": {},
+  "exceptionType": {},
+  "exceptionJustification": "valor-ejemplo",
+  "withdrawalReason": "Texto descriptivo de ejemplo",
+  "witnessName": "Nombre de ejemplo",
+  "witnessDocument": "valor-ejemplo",
+  "informationLanguage": "es-BO",
+  "assentObtained": true,
+  "assentNotes": "Texto descriptivo de ejemplo",
+  "revocationRightInformed": true,
+  "postEmergencyInformedAt": "2026-07-31T12:00:00.000Z",
+  "evidence": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "evidenceTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "capturedChannelConceptId": "00000000-0000-4000-8000-000000000001",
+      "recordedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "signatureStatus": "SIGNED",
+  "signedAt": "2026-07-31T12:00:00.000Z",
+  "withdrawnAt": "2026-07-31T12:00:00.000Z",
   "createdAt": "2026-07-31T12:00:00.000Z"
 }
 ```
@@ -860,8 +907,52 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
-| `status` | Sí | `string` | formato `uuid` | Estado (concept id) | `00000000-0000-4000-8000-000000000001` |
-| `decision` | Sí | `string` | formato `uuid` | Decisión (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Tenant propietario. | `00000000-0000-4000-8000-000000000001` |
+| `encounterId` | No | `string` | formato `uuid` | Encuentro en el que se registró. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | valores: `ACTIVE`, `WITHDRAWN` | Estado legible: `ACTIVE` mientras no se revoque, `WITHDRAWN` después. | `ACTIVE` |
+| `decision` | Sí | `string` | valores: `ACCEPTED`, `DECLINED` | Decisión del paciente. | `ACCEPTED` |
+| `statusConceptId` | No | `string` | formato `uuid` | Estado (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `decisionConceptId` | No | `string` | formato `uuid` | Decisión (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `procedureCodeConceptId` | No | `string` | formato `uuid` | Código de procedimiento (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `informationVersion` | No | `string` | Sin restricción adicional declarada | Versión del material informativo. | `valor-ejemplo` |
+| `interpreterUserId` | No | `string` | formato `uuid` | Intérprete presente. | `00000000-0000-4000-8000-000000000001` |
+| `witnessUserId` | No | `string` | formato `uuid` | Testigo. | `00000000-0000-4000-8000-000000000001` |
+| `targetType` | No | `object` | Sin restricción adicional declarada | A qué se consiente. | `{}` |
+| `targetId` | No | `string` | formato `uuid` | Objeto consentido. | `00000000-0000-4000-8000-000000000001` |
+| `targetLabel` | No | `string` | Sin restricción adicional declarada | Instantánea legible de lo consentido. | `valor-ejemplo` |
+| `diagnosisText` | No | `string` | Sin restricción adicional declarada | Diagnóstico que lo motiva. | `valor-ejemplo` |
+| `purposeText` | No | `string` | Sin restricción adicional declarada | Naturaleza y objetivo. | `valor-ejemplo` |
+| `benefitsText` | No | `string` | Sin restricción adicional declarada | Beneficios esperados. | `valor-ejemplo` |
+| `risksText` | No | `string` | Sin restricción adicional declarada | Riesgos frecuentes y graves. | `valor-ejemplo` |
+| `personalizedRisksText` | No | `string` | Sin restricción adicional declarada | Riesgos personalizados. | `valor-ejemplo` |
+| `alternativesText` | No | `string` | Sin restricción adicional declarada | Alternativas. | `valor-ejemplo` |
+| `refusalConsequencesText` | No | `string` | Sin restricción adicional declarada | Consecuencias de no aceptar. | `valor-ejemplo` |
+| `patientQuestionsText` | No | `string` | Sin restricción adicional declarada | Preguntas y respuestas. | `valor-ejemplo` |
+| `grantedBy` | No | `object` | Sin restricción adicional declarada | Quién otorga. | `{}` |
+| `representativeName` | No | `string` | Sin restricción adicional declarada | Nombre del representante. | `Nombre de ejemplo` |
+| `representativeDocument` | No | `string` | Sin restricción adicional declarada | Documento del representante. | `valor-ejemplo` |
+| `representativeRelationship` | No | `string` | Sin restricción adicional declarada | Parentesco o calidad del representante. | `valor-ejemplo` |
+| `incapacityReason` | No | `string` | Sin restricción adicional declarada | Por qué no consiente el titular. | `Texto descriptivo de ejemplo` |
+| `informedByProfileId` | No | `string` | formato `uuid` | Profesional que informa. | `00000000-0000-4000-8000-000000000001` |
+| `channel` | No | `object` | Sin restricción adicional declarada | Canal. | `{}` |
+| `exceptionType` | No | `object` | Sin restricción adicional declarada | Excepción legal. | `{}` |
+| `exceptionJustification` | No | `string` | Sin restricción adicional declarada | Justificación de la excepción. | `valor-ejemplo` |
+| `withdrawalReason` | No | `string` | Sin restricción adicional declarada | Motivo de la revocación. | `Texto descriptivo de ejemplo` |
+| `witnessName` | No | `string` | Sin restricción adicional declarada | Testigo externo. | `Nombre de ejemplo` |
+| `witnessDocument` | No | `string` | Sin restricción adicional declarada | Documento del testigo externo. | `valor-ejemplo` |
+| `informationLanguage` | No | `string` | Sin restricción adicional declarada | Idioma de la información. | `es-BO` |
+| `assentObtained` | No | `boolean` | Sin restricción adicional declarada | Asentimiento obtenido. | `true` |
+| `assentNotes` | No | `string` | Sin restricción adicional declarada | Notas del asentimiento. | `Texto descriptivo de ejemplo` |
+| `revocationRightInformed` | No | `boolean` | Sin restricción adicional declarada | Se informó el derecho a revocar. | `true` |
+| `postEmergencyInformedAt` | No | `string` | formato `date-time` | Cuándo se informó a posteriori tras la emergencia. | `2026-07-31T12:00:00.000Z` |
+| `evidence` | Sí | `array<TreatmentConsentEvidenceItemDto>` | Sin restricción adicional declarada | Evidencia registrada en `consent.consent_evidence` para este consentimiento. | `[{"id":"00000000-0000-4000-8000-000000000001","evidenceTypeConceptId":"00000000-0000-4000-8000-000000000001","capturedChannelConceptId":"00000000-0000-4000-8000-000000000001","recordedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `evidence[].id` | Sí | `string` | formato `uuid` | Identificador de la evidencia. | `00000000-0000-4000-8000-000000000001` |
+| `evidence[].evidenceTypeConceptId` | Sí | `string` | formato `uuid` | Tipo de evidencia (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `evidence[].capturedChannelConceptId` | No | `string` | formato `uuid` | Canal de captura (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `evidence[].recordedAt` | Sí | `string` | formato `date-time` | Cuándo se registró. | `2026-07-31T12:00:00.000Z` |
+| `signatureStatus` | Sí | `string` | valores: `SIGNED`, `PENDING` | `SIGNED` si hay evidencia de firma o documento; `PENDING` si no. | `SIGNED` |
+| `signedAt` | No | `string` | formato `date-time` | Cuándo se firmó. | `2026-07-31T12:00:00.000Z` |
+| `withdrawnAt` | No | `string` | formato `date-time` | Cuándo se revocó. | `2026-07-31T12:00:00.000Z` |
 | `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -875,6 +966,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/consent/services/encounter-informed-consents.service.ts |
+| 404 | `NOT_FOUND` | El objeto consentido no existe | Excepción explícita en src/modules/consent/services/treatment-informed-consents.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2873,7 +2965,7 @@ Capturar consentimiento informado de tratamiento. Requiere JWT y los roles o alc
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /consent/treatment-informed-consents` en `TreatmentInformedConsentsController_sign`. El controlador delega en `TreatmentInformedConsentsService.sign`. Valida el body como `CreateTreatmentInformedConsentDto` y consume `application/json`. El tipo de retorno estático es `Promise<TreatmentInformedConsentResponseDto>`.
+NestJS resuelve `POST /consent/treatment-informed-consents` en `TreatmentInformedConsentsController_sign`. El controlador delega en `TreatmentInformedConsentsService.create`. Valida el body como `CreateTreatmentInformedConsentDto` y consume `application/json`. El tipo de retorno estático es `Promise<TreatmentInformedConsentResponseDto>`.
 
 ### Parámetros
 
@@ -2899,7 +2991,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `CLINICIAN`, `PRACTITIONER`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -2958,8 +3050,55 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "patientProfileId": "00000000-0000-4000-8000-000000000001",
-  "status": "00000000-0000-4000-8000-000000000001",
-  "decision": "00000000-0000-4000-8000-000000000001",
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "encounterId": "00000000-0000-4000-8000-000000000001",
+  "status": "ACTIVE",
+  "decision": "ACCEPTED",
+  "statusConceptId": "00000000-0000-4000-8000-000000000001",
+  "decisionConceptId": "00000000-0000-4000-8000-000000000001",
+  "procedureCodeConceptId": "00000000-0000-4000-8000-000000000001",
+  "informationVersion": "valor-ejemplo",
+  "interpreterUserId": "00000000-0000-4000-8000-000000000001",
+  "witnessUserId": "00000000-0000-4000-8000-000000000001",
+  "targetType": {},
+  "targetId": "00000000-0000-4000-8000-000000000001",
+  "targetLabel": "valor-ejemplo",
+  "diagnosisText": "valor-ejemplo",
+  "purposeText": "valor-ejemplo",
+  "benefitsText": "valor-ejemplo",
+  "risksText": "valor-ejemplo",
+  "personalizedRisksText": "valor-ejemplo",
+  "alternativesText": "valor-ejemplo",
+  "refusalConsequencesText": "valor-ejemplo",
+  "patientQuestionsText": "valor-ejemplo",
+  "grantedBy": {},
+  "representativeName": "Nombre de ejemplo",
+  "representativeDocument": "valor-ejemplo",
+  "representativeRelationship": "valor-ejemplo",
+  "incapacityReason": "Texto descriptivo de ejemplo",
+  "informedByProfileId": "00000000-0000-4000-8000-000000000001",
+  "channel": {},
+  "exceptionType": {},
+  "exceptionJustification": "valor-ejemplo",
+  "withdrawalReason": "Texto descriptivo de ejemplo",
+  "witnessName": "Nombre de ejemplo",
+  "witnessDocument": "valor-ejemplo",
+  "informationLanguage": "es-BO",
+  "assentObtained": true,
+  "assentNotes": "Texto descriptivo de ejemplo",
+  "revocationRightInformed": true,
+  "postEmergencyInformedAt": "2026-07-31T12:00:00.000Z",
+  "evidence": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "evidenceTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "capturedChannelConceptId": "00000000-0000-4000-8000-000000000001",
+      "recordedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "signatureStatus": "SIGNED",
+  "signedAt": "2026-07-31T12:00:00.000Z",
+  "withdrawnAt": "2026-07-31T12:00:00.000Z",
   "createdAt": "2026-07-31T12:00:00.000Z"
 }
 ```
@@ -2970,8 +3109,52 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
-| `status` | Sí | `string` | formato `uuid` | Estado (concept id) | `00000000-0000-4000-8000-000000000001` |
-| `decision` | Sí | `string` | formato `uuid` | Decisión (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Tenant propietario. | `00000000-0000-4000-8000-000000000001` |
+| `encounterId` | No | `string` | formato `uuid` | Encuentro en el que se registró. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | valores: `ACTIVE`, `WITHDRAWN` | Estado legible: `ACTIVE` mientras no se revoque, `WITHDRAWN` después. | `ACTIVE` |
+| `decision` | Sí | `string` | valores: `ACCEPTED`, `DECLINED` | Decisión del paciente. | `ACCEPTED` |
+| `statusConceptId` | No | `string` | formato `uuid` | Estado (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `decisionConceptId` | No | `string` | formato `uuid` | Decisión (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `procedureCodeConceptId` | No | `string` | formato `uuid` | Código de procedimiento (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `informationVersion` | No | `string` | Sin restricción adicional declarada | Versión del material informativo. | `valor-ejemplo` |
+| `interpreterUserId` | No | `string` | formato `uuid` | Intérprete presente. | `00000000-0000-4000-8000-000000000001` |
+| `witnessUserId` | No | `string` | formato `uuid` | Testigo. | `00000000-0000-4000-8000-000000000001` |
+| `targetType` | No | `object` | Sin restricción adicional declarada | A qué se consiente. | `{}` |
+| `targetId` | No | `string` | formato `uuid` | Objeto consentido. | `00000000-0000-4000-8000-000000000001` |
+| `targetLabel` | No | `string` | Sin restricción adicional declarada | Instantánea legible de lo consentido. | `valor-ejemplo` |
+| `diagnosisText` | No | `string` | Sin restricción adicional declarada | Diagnóstico que lo motiva. | `valor-ejemplo` |
+| `purposeText` | No | `string` | Sin restricción adicional declarada | Naturaleza y objetivo. | `valor-ejemplo` |
+| `benefitsText` | No | `string` | Sin restricción adicional declarada | Beneficios esperados. | `valor-ejemplo` |
+| `risksText` | No | `string` | Sin restricción adicional declarada | Riesgos frecuentes y graves. | `valor-ejemplo` |
+| `personalizedRisksText` | No | `string` | Sin restricción adicional declarada | Riesgos personalizados. | `valor-ejemplo` |
+| `alternativesText` | No | `string` | Sin restricción adicional declarada | Alternativas. | `valor-ejemplo` |
+| `refusalConsequencesText` | No | `string` | Sin restricción adicional declarada | Consecuencias de no aceptar. | `valor-ejemplo` |
+| `patientQuestionsText` | No | `string` | Sin restricción adicional declarada | Preguntas y respuestas. | `valor-ejemplo` |
+| `grantedBy` | No | `object` | Sin restricción adicional declarada | Quién otorga. | `{}` |
+| `representativeName` | No | `string` | Sin restricción adicional declarada | Nombre del representante. | `Nombre de ejemplo` |
+| `representativeDocument` | No | `string` | Sin restricción adicional declarada | Documento del representante. | `valor-ejemplo` |
+| `representativeRelationship` | No | `string` | Sin restricción adicional declarada | Parentesco o calidad del representante. | `valor-ejemplo` |
+| `incapacityReason` | No | `string` | Sin restricción adicional declarada | Por qué no consiente el titular. | `Texto descriptivo de ejemplo` |
+| `informedByProfileId` | No | `string` | formato `uuid` | Profesional que informa. | `00000000-0000-4000-8000-000000000001` |
+| `channel` | No | `object` | Sin restricción adicional declarada | Canal. | `{}` |
+| `exceptionType` | No | `object` | Sin restricción adicional declarada | Excepción legal. | `{}` |
+| `exceptionJustification` | No | `string` | Sin restricción adicional declarada | Justificación de la excepción. | `valor-ejemplo` |
+| `withdrawalReason` | No | `string` | Sin restricción adicional declarada | Motivo de la revocación. | `Texto descriptivo de ejemplo` |
+| `witnessName` | No | `string` | Sin restricción adicional declarada | Testigo externo. | `Nombre de ejemplo` |
+| `witnessDocument` | No | `string` | Sin restricción adicional declarada | Documento del testigo externo. | `valor-ejemplo` |
+| `informationLanguage` | No | `string` | Sin restricción adicional declarada | Idioma de la información. | `es-BO` |
+| `assentObtained` | No | `boolean` | Sin restricción adicional declarada | Asentimiento obtenido. | `true` |
+| `assentNotes` | No | `string` | Sin restricción adicional declarada | Notas del asentimiento. | `Texto descriptivo de ejemplo` |
+| `revocationRightInformed` | No | `boolean` | Sin restricción adicional declarada | Se informó el derecho a revocar. | `true` |
+| `postEmergencyInformedAt` | No | `string` | formato `date-time` | Cuándo se informó a posteriori tras la emergencia. | `2026-07-31T12:00:00.000Z` |
+| `evidence` | Sí | `array<TreatmentConsentEvidenceItemDto>` | Sin restricción adicional declarada | Evidencia registrada en `consent.consent_evidence` para este consentimiento. | `[{"id":"00000000-0000-4000-8000-000000000001","evidenceTypeConceptId":"00000000-0000-4000-8000-000000000001","capturedChannelConceptId":"00000000-0000-4000-8000-000000000001","recordedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `evidence[].id` | Sí | `string` | formato `uuid` | Identificador de la evidencia. | `00000000-0000-4000-8000-000000000001` |
+| `evidence[].evidenceTypeConceptId` | Sí | `string` | formato `uuid` | Tipo de evidencia (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `evidence[].capturedChannelConceptId` | No | `string` | formato `uuid` | Canal de captura (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `evidence[].recordedAt` | Sí | `string` | formato `date-time` | Cuándo se registró. | `2026-07-31T12:00:00.000Z` |
+| `signatureStatus` | Sí | `string` | valores: `SIGNED`, `PENDING` | `SIGNED` si hay evidencia de firma o documento; `PENDING` si no. | `SIGNED` |
+| `signedAt` | No | `string` | formato `date-time` | Cuándo se firmó. | `2026-07-31T12:00:00.000Z` |
+| `withdrawnAt` | No | `string` | formato `date-time` | Cuándo se revocó. | `2026-07-31T12:00:00.000Z` |
 | `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -2982,7 +3165,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/consent/services/treatment-informed-consents.service.ts |
+| 404 | `NOT_FOUND` | El objeto consentido no existe | Excepción explícita en src/modules/consent/services/treatment-informed-consents.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |

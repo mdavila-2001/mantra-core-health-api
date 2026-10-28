@@ -2,7 +2,7 @@
 
 # Mapa de operaciones
 
-1613 operaciones: ruta, proceso, módulo, riesgo, autorización, quién la llama y señales. Equivale a la vista `/flows` de AtlasAdminPortal.
+1621 operaciones: ruta, proceso, módulo, riesgo, autorización, quién la llama y señales. Equivale a la vista `/flows` de AtlasAdminPortal.
 
 «Quién la llama» sale del inventario de clientes del frontend (`docs/reports/generated/api-inventory.md`). Una operación sin cliente puede ser interna, móvil o deuda: la columna informa, no concluye.
 
@@ -301,6 +301,9 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | DELETE `/prescription-favorites/{id}` | `clinical_ext` — coordinación y soporte clínico (ctrl:PrescriptionFavoritesController) | clinical_ext | ALTO | Sesión sin roles | PrescriptionFavoritesClient | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · CON_DECISIONES |
 | GET `/referrals` | `clinical_ext` — coordinación y soporte clínico (ctrl:ReferralsController) | clinical_ext | BAJO | CLINICIAN · PRACTITIONER | — | SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/referrals` | `clinical_ext` — coordinación y soporte clínico (ctrl:ReferralsController) | clinical_ext | MEDIO | CLINICIAN · PRACTITIONER | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| GET `/referrals/{id}` | `clinical_ext` — coordinación y soporte clínico (ctrl:ReferralsController) | clinical_ext | BAJO | CLINICIAN · PRACTITIONER | — | CONTRATO_AUSENTE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| PATCH `/referrals/{id}/cancel` | `clinical_ext` — coordinación y soporte clínico (ctrl:ReferralsController) | clinical_ext | MEDIO | CLINICIAN · PRACTITIONER | — | CONTRATO_AUSENTE · ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| PATCH `/referrals/{id}/counter-referral` | `clinical_ext` — coordinación y soporte clínico (ctrl:ReferralsController) | clinical_ext | MEDIO | CLINICIAN · PRACTITIONER | — | CONTRATO_AUSENTE · ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | PATCH `/referrals/{id}/respond` | `clinical_ext` — coordinación y soporte clínico (ctrl:ReferralsController) | clinical_ext | MEDIO | CLINICIAN · PRACTITIONER | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/referrals/me` | `clinical_ext` — coordinación y soporte clínico (ctrl:ReferralsController) | clinical_ext | BAJO | CLINICIAN · PRACTITIONER · PATIENT | — | SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT |
 | GET `/referrals/target-services` | `clinical_ext` — coordinación y soporte clínico (ctrl:ReferralsController) | clinical_ext | BAJO | CLINICIAN · PRACTITIONER | — | CONTRATO_AUSENTE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
@@ -450,7 +453,12 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | GET `/consent/practitioner-access-requests/mine` | Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) (ctrl:PractitionerAccessRequestsController) | consent | BAJO | PATIENT | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/consent/privacy-restrictions` | Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) (UC-07-07) | consent | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/consent/processing-legal-bases` | Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) (UC-07-06) | consent | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
-| POST `/consent/treatment-informed-consents` | Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) (UC-07-08) | consent | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
+| GET `/consent/treatment-informed-consents` | Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) (ctrl:TreatmentInformedConsentsController) | consent | BAJO | CLINICIAN · PRACTITIONER | — | CONTRATO_AUSENTE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| POST `/consent/treatment-informed-consents` | Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) (UC-07-08) | consent | MEDIO | SECURITY_ADMIN · CLINICIAN · PRACTITIONER | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| GET `/consent/treatment-informed-consents/{id}` | Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) (ctrl:TreatmentInformedConsentsController) | consent | BAJO | CLINICIAN · PRACTITIONER | — | CONTRATO_AUSENTE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| POST `/consent/treatment-informed-consents/{id}/evidence` | Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) (ctrl:TreatmentInformedConsentsController) | consent | MEDIO | CLINICIAN · PRACTITIONER | — | CONTRATO_AUSENTE · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| PATCH `/consent/treatment-informed-consents/{id}/post-emergency-information` | Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) (ctrl:TreatmentInformedConsentsController) | consent | MEDIO | CLINICIAN · PRACTITIONER | — | CONTRATO_AUSENTE · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| PATCH `/consent/treatment-informed-consents/{id}/withdraw` | Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) (ctrl:TreatmentInformedConsentsController) | consent | MEDIO | CLINICIAN · PRACTITIONER | — | CONTRATO_AUSENTE · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/admin/content-packs` | Módulo Content Packs — Contenido curado aplicable a demanda (ctrl:ContentPacksController) | content_packs | BAJO | SUPERADMIN | ContentPacksClient | SIN_TABLAS · SIN_PRUEBAS |
 | POST `/admin/content-packs/{code}/apply` | Módulo Content Packs — Contenido curado aplicable a demanda (ctrl:ContentPacksController) | content_packs | ALTO | SUPERADMIN | ContentPacksClient | ESCRIBE · SIN_PRUEBAS · CON_DECISIONES |
 | POST `/crm/accounts` | CRM (ctrl:CrmController) | crm | MEDIO | CRM_ADMIN · CRM_AGENT | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
