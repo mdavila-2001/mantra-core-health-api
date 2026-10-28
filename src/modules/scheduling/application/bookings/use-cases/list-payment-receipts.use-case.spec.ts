@@ -1,8 +1,12 @@
-import { ResourceNotFoundException } from '../../../../../common';
+import {
+  ResourceNotFoundException,
+  runWithTenant,
+} from '../../../../../common';
 import { SCHED } from '../../../domain/scheduling.concepts';
 import {
   BOOKING,
   RECEIPT,
+  TENANT,
   buildReceipts,
   notTheirs,
   otherPractitioner,
@@ -48,6 +52,37 @@ describe('ListPaymentReceiptsUseCase · quién ve los comprobantes de una cita',
       d.list.execute(BOOKING, otherPractitioner),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
     expect(d.receiptsRepo.findForBooking).not.toHaveBeenCalled();
+  });
+
+  it('el mostrador de otra organización recibe 404', async () => {
+    const d = buildReceipts();
+    const desk = {
+      id: 'desk-user',
+      roles: ['SCHEDULING_AGENT'],
+      tenantIds: ['00000000-0000-0000-0000-000000000099'],
+    } as any;
+
+    await expect(
+      runWithTenant('00000000-0000-0000-0000-000000000099', () =>
+        d.list.execute(BOOKING, desk),
+      ),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    expect(d.receiptsRepo.findForBooking).not.toHaveBeenCalled();
+  });
+
+  it('el mostrador de la organización de la cita sí los ve', async () => {
+    const d = buildReceipts();
+    const desk = {
+      id: 'desk-user',
+      roles: ['SCHEDULING_AGENT'],
+      tenantIds: [TENANT],
+    } as any;
+
+    const res = await runWithTenant(TENANT, () =>
+      d.list.execute(BOOKING, desk),
+    );
+
+    expect(res).toEqual([]);
   });
 
   it('vienen del más reciente al más viejo, tal como los ordena el repositorio', async () => {
