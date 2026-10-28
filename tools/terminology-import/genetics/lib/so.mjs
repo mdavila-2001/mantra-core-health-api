@@ -22,7 +22,7 @@ export async function soRows(path, prov) {
   for (const t of [...live.values()].sort((a, b) => (a.id < b.id ? -1 : 1))) {
     const exact = t.synonyms.filter((s) => s.scope === 'EXACT').map((s) => s.text);
     const row = {
-      codeSystem: 'so',
+      codeSystem: 'sequence-ontology',
       code: t.id,
       display: t.name,
       designations: designationList(t.name, exact),

@@ -1,0 +1,27 @@
+##### ClinVar's source for functional assay terms is the Experimental Factors Ontology, which includes terms from other ontologies like the Ontology for Biomedical Investigations (OBI).
+
+##### Not all terms from EFO are used by ClinVar for assay type. Contact us at clinvar@ncbi.nlm.nih.gov to discuss allowing a new EFO term in ClinVar or adding new term to EFO to support ClinVar submissions.
+
+#### EFO terms that ClinVar uses for assay type are listed below.
+
+EFO term	EFO ID
+DNA binding assay	EFO:0022951
+RNAseq	EFO:0008896
+RT-PCR	OBI:0000552
+Western blotting	EFO:0022945
+animal model	EFO:0022953
+cellular survival assay	EFO:0022952
+enzyme assay	EFO:0022947
+flow cytometry assay	OBI_0000916
+fluorescence microscopy	FBbi:00000246
+immunocytochemistry	OBI_0002174
+immunofluorescence assay	EFO:0022944
+immunohistochemistry	EFO:0022943
+in vitro motility assay	EFO:0022946
+minigene splicing assay	EFO:0022942
+patch clamp	EFO:0022948
+promoter activity assay	EFO:0022950
+protein binding measurement	EFO:0010742
+single-cell RNA sequencing	EFO:0008913
+subcellular protein localization assay	EFO:0022949
+two electrode voltage clamp assay	OBI:0002183

@@ -1,0 +1,7 @@
+#DiseaseName	SourceName	ConceptID	SourceID	DiseaseMIM	LastModified	Category
+1-2 finger cutaneous syndactyly	Human Phenotype Ontology	C4023732	HP:0010704		08 Sep 2024	Finding
+Glucocorticoid deficiency with achalasia	NCBI curation	C0271742		231550	16 Feb 2016	Disease
+Otitis media, susceptibility to	MONDO	C1833692	MONDO:0008162	166760	16 Feb 2016	Disease
+See cases	NCBI curation				16 Feb 2016	phenotype instruction
+Acid alpha-glucosidase, allele 2		C4016979			16 Feb 2016	Named protein variant
+(3r,5r)-fluvastatin response					08 Jul 2022	Pharmacological response

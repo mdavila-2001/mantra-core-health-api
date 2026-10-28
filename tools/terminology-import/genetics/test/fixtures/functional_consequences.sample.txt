@@ -1,0 +1,10 @@
+##### ClinVar's sources for functional consequence terms include Sequence Ontology (SO) and Functional Epilepsy Nomenclature for Ion Channels (FENICS).
+##### SO terms are generally applicable to all variants. However, not all terms from SO are used by ClinVar for functional consequence. Contact us at clinvar@ncbi.nlm.nih.gov to discuss allowing a new SO term in ClinVar or adding new term to SO to support ClinVar submissions.
+##### FENICS terms are specifically for electrophysiology experiments on ion channels in the context of neurological disorders, in particular epilepsy.
+Term	ID	Source
+abolished transcription	SO:0002391	Sequence Ontology
+absent gene product	SO:0002317	Sequence Ontology
+absent protein	SO:0002395	Sequence Ontology
+activated cryptic splice donor	SO:0001571	Sequence Ontology
+Abnormal ion selectivity	FENICS-0080	Functional Epilepsy Nomenclature for Ion Channels
+Absence of abnormal gating pore current	FENICS-0076	Functional Epilepsy Nomenclature for Ion Channels

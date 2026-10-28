@@ -1,0 +1,98 @@
+format-version: 1.2
+data-version: 2026-08-07
+date: 08:07:2026 18:22
+saved-by: Evan Christensen
+subsetdef: Alliance_of_Genome_Resources "Alliance of Genome Resources Gene Biotype Slim"
+subsetdef: biosapiens "biosapiens protein feature ontology"
+subsetdef: DBVAR "database of genomic structural variation"
+subsetdef: SOFA "SO feature annotation"
+synonymtypedef: aa1 "amino acid 1 letter code"
+synonymtypedef: aa3 "amino acid 3 letter code"
+synonymtypedef: AAMOD "amino acid modification"
+synonymtypedef: AGR "Alliance of Genome Resources"
+synonymtypedef: BS "biosapiens"
+synonymtypedef: dbsnp "dbsnp variant terms"
+synonymtypedef: dbvar "DBVAR"
+synonymtypedef: ebi_variants "ensembl variant terms"
+synonymtypedef: RNAMOD "RNA modification" EXACT
+synonymtypedef: VAR "variant annotation term"
+default-namespace: sequence
+ontology: so
+property_value: IAO:0000700 SO:0000110
+property_value: IAO:0000700 SO:0000400
+property_value: IAO:0000700 SO:0001060
+property_value: IAO:0000700 SO:0001260
+
+[Term]
+id: SO:0000000
+name: Sequence_Ontology
+subset: SOFA
+is_obsolete: true
+
+[Term]
+id: SO:0000001
+name: region
+def: "A sequence_feature with an extent greater than zero. A nucleotide region is composed of bases and a polypeptide region is composed of amino acids." [SO:ke]
+subset: SOFA
+synonym: "sequence" EXACT []
+is_a: SO:0000110 ! sequence_feature
+
+[Term]
+id: SO:0001059
+name: sequence_alteration
+alt_id: SO:1000004
+alt_id: SO:1000007
+def: "A sequence_alteration is a sequence_feature whose extent is the deviation from another sequence." [SO:ke]
+comment: Merged with partially characterized change in nucleotide sequence.
+subset: SOFA
+synonym: "INSDC_feature:misc_feature" BROAD []
+synonym: "INSDC_feature:variation" EXACT []
+synonym: "INSDC_note:sequence_alteration" EXACT []
+synonym: "partially characterised change in DNA sequence" NARROW []
+synonym: "partially_characterised_change_in_DNA_sequence" NARROW []
+synonym: "sequence alteration" EXACT []
+synonym: "sequence variation" RELATED []
+synonym: "uncharacterised_change_in_nucleotide_sequence" NARROW []
+is_a: SO:0002072 ! sequence_comparison
+
+[Term]
+id: SO:0001060
+name: sequence_variant
+def: "A sequence_variant is a non exact copy of a sequence_feature or genome exhibiting one or more sequence_alteration." [SO:ke]
+synonym: "ANNOVAR:unknown" RELATED VAR [http://www.openbioinformatics.org/annovar/annovar_download.html]
+synonym: "Jannovar:sequence_variant" EXACT VAR [http://doc-openbio.readthedocs.org/projects/jannovar/en/master/var_effects.html]
+synonym: "sequence variant" EXACT []
+synonym: "VAAST:sequence_variant" EXACT VAR []
+
+[Term]
+id: SO:0001410
+name: experimental_feature
+def: "A region which is the result of some arbitrary experimental procedure. The procedure may be carried out with biological material or inside a computer." [SO:cb]
+subset: SOFA
+synonym: "analysis feature" RELATED []
+synonym: "experimental output artefact" EXACT []
+synonym: "experimental_output_artefact" EXACT []
+is_a: SO:0000001 ! region
+
+[Term]
+id: SO:0001483
+name: SNV
+def: "SNVs are single nucleotide positions in genomic DNA at which different sequence alternatives exist." [SO:bm]
+subset: SOFA
+synonym: "single nucleotide variant" EXACT []
+is_a: SO:1000002 ! substitution
+created_by: kareneilbeck
+creation_date: 2009-10-08T11:37:49Z
+
+[Term]
+id: SO:0000000
+name: Sequence_Ontology
+subset: SOFA
+is_obsolete: true
+
+[Typedef]
+id: adjacent_to
+name: adjacent_to
+def: "A geometric operator, specified in Egenhofer 1989. Two features meet if they share a junction on the sequence. X adjacent_to Y iff X and Y share a boundary but do not overlap." [PMID:20226267, SO:ke]
+subset: SOFA
+

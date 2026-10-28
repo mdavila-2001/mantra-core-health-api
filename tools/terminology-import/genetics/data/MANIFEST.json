@@ -1,0 +1,215 @@
+{
+  "generatedFrom": "build-genetics-corpus.mjs",
+  "files": [
+    {
+      "name": "clingen-terms.ndjson",
+      "rows": 103,
+      "bytes": 129159,
+      "sha256": "a24f041bbcca186aa1b23295b5eb52e20b76206f8201e12141e9fdd1da0fa16f",
+      "parts": [
+        {
+          "file": "clingen-terms.ndjson.gz",
+          "rows": 103,
+          "gzBytes": 5212,
+          "gzSha256": "cd2a4f7f35780048734fa260b1526b2ec38818595b21669f43b1e99ba5199ed7"
+        }
+      ]
+    },
+    {
+      "name": "clinvar-functional.ndjson",
+      "rows": 56,
+      "bytes": 96076,
+      "sha256": "3c974ff9ec3a1f537add3b063a49d36e1cf62443f976a1ba795094ea9a39e144",
+      "parts": [
+        {
+          "file": "clinvar-functional.ndjson.gz",
+          "rows": 56,
+          "gzBytes": 3115,
+          "gzSha256": "c607fdf96ebf408a71f33efe13359059100043d7f29c09414653e55b524f127d"
+        }
+      ]
+    },
+    {
+      "name": "clinvar-terms.ndjson",
+      "rows": 349,
+      "bytes": 710317,
+      "sha256": "1d40c2cfd84e3431790e2e0e4529808eebb58b2987dd1a86693e6bb18a1384e9",
+      "parts": [
+        {
+          "file": "clinvar-terms.ndjson.gz",
+          "rows": 349,
+          "gzBytes": 15735,
+          "gzSha256": "effc1e25dc80f9ecaac8e7c5bcd9fb45e59f727f0ffd0954f7c6f2e494df8f88"
+        }
+      ]
+    },
+    {
+      "name": "coverage.json",
+      "rows": null,
+      "bytes": 5029,
+      "sha256": "4875e7687d626d22c17877733d61a3ea97d5c4fbda6410a200b34d3ebd880079",
+      "parts": [
+        {
+          "file": "coverage.json.gz",
+          "rows": null,
+          "gzBytes": 1811,
+          "gzSha256": "70f76da2fbea053fea666645b02964ac465ee245153b4cf7adc4b3096945afee"
+        }
+      ]
+    },
+    {
+      "name": "ga4gh-vrs.ndjson",
+      "rows": 48,
+      "bytes": 42237,
+      "sha256": "75445d16ada63cbcd80845fd85d77a3863530ea09414ee20b8d957273769192a",
+      "parts": [
+        {
+          "file": "ga4gh-vrs.ndjson.gz",
+          "rows": 48,
+          "gzBytes": 3308,
+          "gzSha256": "14099fcc6c286097af1d8b17bef79727cee0836b307799630020e949485f33c5"
+        }
+      ]
+    },
+    {
+      "name": "hgnc-gene-group.ndjson",
+      "rows": 2572,
+      "bytes": 3462133,
+      "sha256": "84e868dfb3161c0b4be29927cf79d8ebcd2fe6921c5dd9a54e42ed9c33a3dbf3",
+      "parts": [
+        {
+          "file": "hgnc-gene-group.ndjson.gz",
+          "rows": 2572,
+          "gzBytes": 422602,
+          "gzSha256": "b62cba11b92bdb16f958a5d0bc56478c8c67ab3e13f7bb73e6e31cc449780478"
+        }
+      ]
+    },
+    {
+      "name": "hgnc.ndjson",
+      "rows": 45289,
+      "bytes": 84522140,
+      "sha256": "d21b5a76140403a98fdb974ae0ef69c6180d9a53ef0bb6f78e33fd906b386971",
+      "parts": [
+        {
+          "file": "hgnc.ndjson.gz",
+          "rows": 45289,
+          "gzBytes": 6522801,
+          "gzSha256": "130cf84c5a6ede3c60074a24f37ad3e444f868818347d30307b8ea17d5ac1847"
+        }
+      ]
+    },
+    {
+      "name": "hgvs-syntax.ndjson",
+      "rows": 43,
+      "bytes": 51048,
+      "sha256": "0c0e56c480a4e8e3d5f744e7a0136adb61ed985eae27b15501d6a40667beda03",
+      "parts": [
+        {
+          "file": "hgvs-syntax.ndjson.gz",
+          "rows": 43,
+          "gzBytes": 4283,
+          "gzSha256": "93a19894f77367df0f5b40d6c11a6ffde93d200014b5f1f31ea46161a173c998"
+        }
+      ]
+    },
+    {
+      "name": "medgen.ndjson",
+      "rows": 101277,
+      "bytes": 403467603,
+      "sha256": "f68a774d0b998d935bcbbaaa93ecf9b548014eafbcbdf8842fe97e88eac772f9",
+      "parts": [
+        {
+          "file": "medgen.part01.ndjson.gz",
+          "rows": 20979,
+          "gzBytes": 6141115,
+          "gzSha256": "b72adee1664c9ecdeab4742cc4e17ed0a63cd3efd3ded080a46f275fec4d203d"
+        },
+        {
+          "file": "medgen.part02.ndjson.gz",
+          "rows": 24840,
+          "gzBytes": 4752061,
+          "gzSha256": "80efba7a105fc24ebdc7ba752a46e4bf58aac02953732ea6cf987cfead3bcaff"
+        },
+        {
+          "file": "medgen.part03.ndjson.gz",
+          "rows": 27112,
+          "gzBytes": 4334752,
+          "gzSha256": "36ee6c831d954b5af6fffba2aeb8c9c1ced8cbfec47b85b24c15377473f43f62"
+        },
+        {
+          "file": "medgen.part04.ndjson.gz",
+          "rows": 28070,
+          "gzBytes": 4222279,
+          "gzSha256": "9e219cb81593d8e5bbf20411c9dc7f92f9af92d07bc7c0f3d091d33d1dd648d9"
+        },
+        {
+          "file": "medgen.part05.ndjson.gz",
+          "rows": 276,
+          "gzBytes": 39409,
+          "gzSha256": "999d9bba38f53f2ad883e411ff9a3c7a36a32dbf5a7a7ea7c7c172d5b8309199"
+        }
+      ]
+    },
+    {
+      "name": "ncbi-gene-hs.ndjson",
+      "rows": 194025,
+      "bytes": 390653579,
+      "sha256": "4114a49429adc93fb46e2f23ced6cde51cfb5713b78c15d6731d6803b3e16e91",
+      "parts": [
+        {
+          "file": "ncbi-gene-hs.part01.ndjson.gz",
+          "rows": 41607,
+          "gzBytes": 5639967,
+          "gzSha256": "ca8124658a00de9534a38c91c84452fced81909d306841ac6226d406bb46c428"
+        },
+        {
+          "file": "ncbi-gene-hs.part02.ndjson.gz",
+          "rows": 52337,
+          "gzBytes": 2459481,
+          "gzSha256": "450e811086087554cd06278226af9d4994306ef6a13ce6291fa05b6a17ccb3ad"
+        },
+        {
+          "file": "ncbi-gene-hs.part03.ndjson.gz",
+          "rows": 53015,
+          "gzBytes": 2188092,
+          "gzSha256": "120f5f99242aa0cf72a0edd3003b12eefd5531c93e38f157cc55a75d7f0e35f4"
+        },
+        {
+          "file": "ncbi-gene-hs.part04.ndjson.gz",
+          "rows": 47066,
+          "gzBytes": 1470891,
+          "gzSha256": "c3e3843a80ed638d5b8d3f5acf4818f24130f9e8eb3ee783ba3c5bf886f605bb"
+        }
+      ]
+    },
+    {
+      "name": "sequence-ontology.ndjson",
+      "rows": 2409,
+      "bytes": 2737260,
+      "sha256": "3af447d9a263b235f2a1fd1319766642cbb47fb90c76c51a88f249a35f8f2abe",
+      "parts": [
+        {
+          "file": "sequence-ontology.ndjson.gz",
+          "rows": 2409,
+          "gzBytes": 240581,
+          "gzSha256": "f84c2842a4c2b3f02d00c0d3f9877070e7bb09e9151ac2001878f40abe731061"
+        }
+      ]
+    },
+    {
+      "name": "sources-manifest.json",
+      "rows": null,
+      "bytes": 32188,
+      "sha256": "1b0aa6814d9da9a9e25845f20b4ae9df7b6564c9826b5ad669f02a5a63b7e929",
+      "parts": [
+        {
+          "file": "sources-manifest.json.gz",
+          "rows": null,
+          "gzBytes": 5547,
+          "gzSha256": "a75adfe680c18cff9dd7df74d134b78fa5073feaf37bd51540031335709ee2fe"
+        }
+      ]
+    }
+  ]
+}

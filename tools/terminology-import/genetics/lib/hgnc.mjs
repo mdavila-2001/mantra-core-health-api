@@ -53,7 +53,7 @@ export const XREF_COLUMNS = {
 };
 
 /** Una fila de hgnc_complete_set.txt (objeto por columna) → fila del corpus. */
-export function hgncRow(o, prov) {
+export function hgncRow(o, prov, retired = []) {
   const groupNames = pipeList(o.gene_group);
   const groupIds = pipeList(o.gene_group_id);
   if (groupNames.length !== groupIds.length) throw new Error(`${o.hgnc_id}: gene_group y gene_group_id no tienen la misma cantidad de valores`);
@@ -88,6 +88,7 @@ export function hgncRow(o, prov) {
       prop('pubmed_ids', 'json', pipeList(o.pubmed_id)),
       prop('lsdb', 'json', lsdb),
       prop('mane_select', 'json', pipeList(o.mane_select)),
+      prop('retired_ids', 'json', retired),
     ]),
     parents: [],
     maps: o.entrez_id ? [{ system: 'ncbi-gene-hs', code: o.entrez_id, context: `entrez_id declarado por HGNC ${o.hgnc_id} (hgnc_complete_set.txt)` }] : [],
@@ -96,10 +97,44 @@ export function hgncRow(o, prov) {
   return withProvenance(row, prov, { source: 'hgnc', sourceUrl: `https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/${o.hgnc_id}` });
 }
 
-export async function hgncRows(path, prov) {
+export async function hgncRows(path, prov, retiredByTarget = new Map()) {
   const rows = [];
-  const { header } = await readDelimited(path, (f, _n, h) => rows.push(hgncRow(rowObject(h, f), prov)));
+  const { header } = await readDelimited(path, (f, _n, h) => {
+    const o = rowObject(h, f);
+    rows.push(hgncRow(o, prov, retiredByTarget.get(o.hgnc_id) ?? []));
+  });
   return { rows, header };
+}
+
+const WITHDRAWN_COLUMNS = ['HGNC_ID', 'STATUS', 'WITHDRAWN_SYMBOL', 'MERGED_INTO_REPORT(S) (i.e HGNC_ID|SYMBOL|STATUS)'];
+
+/**
+ * withdrawn.txt: entradas retiradas. «Entry Withdrawn» no tiene reemplazo; «Merged/Split» apunta a una o más
+ * entradas `HGNC:n|SÍMBOLO|ESTADO` (separadas por «, »). Devuelve, por entrada de destino, los ids retirados
+ * que hoy son ella (sólo destinos «Approved»; el resto se cuenta).
+ */
+export async function readWithdrawn(path) {
+  const byTarget = new Map();
+  const stats = { rows: 0, byStatus: {}, mergedIntoApproved: 0, mergedIntoNotApproved: 0 };
+  const { header } = await readDelimited(path, (f) => {
+    stats.rows++;
+    const [id, status, symbol, into] = f;
+    stats.byStatus[status] = (stats.byStatus[status] ?? 0) + 1;
+    if (status !== 'Merged/Split') return;
+    for (const t of into.split(', ')) {
+      const [target, targetSymbol, targetStatus] = t.split('|');
+      if (targetStatus !== 'Approved') {
+        stats.mergedIntoNotApproved++;
+        continue;
+      }
+      stats.mergedIntoApproved++;
+      if (!byTarget.has(target)) byTarget.set(target, []);
+      byTarget.get(target).push({ hgnc_id: id, withdrawn_symbol: symbol, status, target_symbol: targetSymbol });
+    }
+  }, { quote: null });
+  if (header.join('\t') !== WITHDRAWN_COLUMNS.join('\t')) throw new Error(`${path}: columnas inesperadas: ${header.join('\t')}`);
+  for (const list of byTarget.values()) list.sort((a, b) => (a.hgnc_id < b.hgnc_id ? -1 : a.hgnc_id > b.hgnc_id ? 1 : 0));
+  return { byTarget, stats };
 }
 
 /** Grupos de genes → filas. `members` cuenta genes por grupo. */

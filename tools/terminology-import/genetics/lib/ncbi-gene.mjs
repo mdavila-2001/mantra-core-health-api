@@ -21,7 +21,7 @@ export function splitDbXref(x) {
   return i < 0 ? { db: x, id: '' } : { db: x.slice(0, i), id: x.slice(i + 1) };
 }
 
-export function ncbiGeneRow(o, prov) {
+export function ncbiGeneRow(o, prov, conditionLinks = []) {
   const xrefs = pipeList(nullIf(o.dbXrefs)).map(splitDbXref);
   const synonyms = pipeList(nullIf(o.Synonyms));
   const other = pipeList(nullIf(o.Other_designations));
@@ -51,6 +51,7 @@ export function ncbiGeneRow(o, prov) {
       prop('modification_date', 'string', o.Modification_date),
       prop('feature_type', 'string', nullIf(o.Feature_type)),
       prop('xrefs', 'json', xrefs.map((x) => `${x.db}:${x.id}`)),
+      prop('medgen_condition_links', 'json', conditionLinks),
     ]),
     parents: [],
     maps,
@@ -59,9 +60,9 @@ export function ncbiGeneRow(o, prov) {
   return withProvenance(row, prov, { source: 'ncbi-gene-hs', sourceUrl: `https://www.ncbi.nlm.nih.gov/gene/${o.GeneID}` });
 }
 
-export async function ncbiGeneRows(path, prov) {
+export async function ncbiGeneRows(path, prov, conditionsByGene = new Map()) {
   const rows = [];
-  const { header } = await readDelimited(path, (f, _n, h) => rows.push(ncbiGeneRow(rowObject(h, f), prov)), { quote: null, stripHash: true });
+  const { header } = await readDelimited(path, (f, _n, h) => { const o = rowObject(h, f); rows.push(ncbiGeneRow(o, prov, conditionsByGene.get(o.GeneID) ?? [])); }, { quote: null, stripHash: true });
   if (header.join() !== EXPECTED.join()) throw new Error(`gene_info: columnas inesperadas: ${header.join()}`);
   return { rows, header };
 }

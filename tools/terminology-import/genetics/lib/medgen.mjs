@@ -6,10 +6,14 @@
 // MedGen y códigos en otras fuentes).
 //
 // QUÉ SE CARGA Y QUÉ NO (licencias, ver SOURCES.md):
-//   Nombres:  sólo átomos de fuentes abiertas — GTR (NCBI), HPO, MONDO, NCI
+//   Nombres:  sólo átomos de fuentes abiertas — GTR (NCBI), MONDO, NCI
 //             Thesaurus, MeSH, Orphanet (ORDO). Un CUI cuyos únicos nombres
-//             vienen de SNOMED CT, OMIM o GeneReviews NO se carga (se cuenta).
-//   Defs:     NCI, HPO, MONDO, ORDO/Orphanet, MeSH, MedlinePlus (Genetics).
+//             vienen de SNOMED CT, OMIM, GeneReviews o HPO NO se carga (se cuenta).
+//             HPO queda FUERA de los textos (nombres y definiciones) porque su
+//             aviso legal habla de «personal, noncommercial use» y el
+//             propietario no lo resolvió (symptoms/lib/approvals.mjs): sólo se
+//             conserva su identificador como xref.
+//   Defs:     NCI, MONDO, ORDO/Orphanet, MeSH, MedlinePlus (Genetics).
 //   Xrefs:    sólo identificadores (HPO, MONDO, Orphanet, MeSH, NCI, número
 //             MIM y serie fenotípica PS, GARD, UID de MedGen). Se EXCLUYEN los
 //             ids de SNOMED CT y las variantes alélicas de OMIM (un id por
@@ -18,27 +22,29 @@
 //   MedGen publica en MGCONSO/MedGenIDMappings.
 // =============================================================================
 
+import { readDelimited } from './delimited.mjs';
 import { readRrf } from './rrf.mjs';
 import { cleanProps, designationList, prop, uniq, withProvenance } from './rows.mjs';
 
 /** SAB (MGCONSO) cuyos NOMBRES se cargan, y a qué licencia remiten. */
-export const OPEN_NAME_SABS = ['MONDO', 'HPO', 'NCI', 'ORDO', 'MSH', 'GTR'];
+export const OPEN_NAME_SABS = ['MONDO', 'NCI', 'ORDO', 'MSH', 'GTR'];
 /** SAB (MGDEF) cuyas DEFINICIONES se cargan. */
-export const OPEN_DEF_SABS = ['NCI', 'HPO', 'MONDO', 'ORDO', 'ORPHANET', 'MSH', 'MedlinePlus Genetics', 'MEDLINEPLUS'];
+export const OPEN_DEF_SABS = ['NCI', 'MONDO', 'ORDO', 'ORPHANET', 'MSH', 'MedlinePlus Genetics', 'MEDLINEPLUS'];
 /** Orden de preferencia para elegir el nombre a mostrar si MedGen no coincide con ningún átomo abierto. */
-const DISPLAY_PRIORITY = ['MONDO', 'HPO', 'NCI', 'ORDO', 'MSH', 'GTR'];
+const DISPLAY_PRIORITY = ['MONDO', 'NCI', 'ORDO', 'MSH', 'GTR'];
+/** SAB de MGREL cuyas relaciones se cargan (fuentes abiertas; HPO queda fuera igual que sus nombres, OMIM por licencia). */
+export const OPEN_REL_SABS = ['NCI', 'MSH', 'ORDO', 'GTR', 'MONDO'];
 const PREFERRED_TTY = new Set(['PT', 'MH', 'NM', 'PCE']);
 
 /** Licencia de cada componente cuyo texto o código entra en un concepto. */
 export const COMPONENT_LICENSES = {
-  MONDO: 'CC BY 4.0 (Mondo, Monarch Initiative)',
-  HPO: 'HPO license (https://hpo.jax.org/app/license): reconocer al HPO Consortium, indicar fecha/versión y no alterar el contenido',
-  NCI: 'CC BY 4.0 según los términos de uso de NCI EVS (NCI Thesaurus)',
-  ORDO: 'CC BY 4.0 (Orphanet, © INSERM)',
-  ORPHANET: 'CC BY 4.0 (Orphanet, © INSERM)',
-  MSH: 'MeSH: uso libre con atribución a NLM e indicación de versión (https://www.nlm.nih.gov/databases/download/terms_and_conditions_mesh.html)',
-  GTR: 'Dominio público de NCBI/NLM (Genetic Testing Registry)',
-  MedlinePlus: 'MedlinePlus Genetics / Health Topics (NLM): dominio público, se pide atribución',
+  MONDO: 'CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/) — Mondo Disease Ontology, Monarch Initiative',
+  NCI: 'CC BY 4.0 según los términos de uso de NCI EVS (https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/ThesaurusTermsofUse.htm, leídos el 2026-10-28: «The NCI Thesaurus™ is released under the Creative Commons Attribution 4.0 International license (CC BY 4.0)»). «NCI Thesaurus» es marca registrada: sólo la edición publicada por NCI puede llevar ese nombre; acá hay nombres y definiciones de NCI recibidos vía MedGen, no la edición oficial',
+  ORDO: 'CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/legalcode) — Orphanet (c) INSERM',
+  ORPHANET: 'CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/legalcode) — Orphanet (c) INSERM',
+  MSH: 'MeSH (https://www.nlm.nih.gov/databases/download/terms_and_conditions_mesh.html, leída el 2026-10-28): «NLM freely provides MeSH data»; quien redistribuye acepta reconocer a NLM de forma clara, no insinuar su aval y mantener la versión vigente o dejar claro que no lo está (la versión de cada fila figura en source_version)',
+  GTR: 'Genetic Testing Registry (NCBI/NLM): mismas condiciones que el resto de NCBI (aviso «Molecular Data Usage» en source_license)',
+  MedlinePlus: 'MedlinePlus Genetics (NLM): los resúmenes de genética figuran como contenido sin copyright en https://medlineplus.gov/about/using/usingcontent/; se pide atribución: «Fuente: MedlinePlus, National Library of Medicine»',
 };
 
 /** Fuente de MedGenIDMappings → sistema de xref y qué hacer con ella. */
@@ -71,13 +77,14 @@ const crToLf = (s) => s.replace(/\r\n?/g, '\n');
  * Lee los cuatro archivos y arma las filas. Devuelve además estadísticas y los
  * CUI descartados (sin ningún nombre de fuente abierta).
  */
-export async function medgenRows({ mgconso, mgsty, mgdef, idmappings }, prov) {
+export async function medgenRows({ mgconso, mgsty, mgdef, idmappings, mgrel = null, merged = null, cuiHistory = null, clinvarHistory = null, clinvarCategories = new Map() }, prov) {
   const stats = { atoms: 0, atomsSuppressed: 0, atomsByExcludedSab: {}, cuis: 0, cuisWithOpenName: 0, cuisWithoutOpenName: 0, displayRule: { 'pref_name coincide con un átomo abierto': 0, 'prioridad de fuente abierta': 0, 'primer átomo abierto': 0 }, defsKept: 0, defsDropped: {}, mappingKept: {}, mappingExcluded: {} };
   const open = new Set(OPEN_NAME_SABS);
 
   /** @type {Map<string, {atoms: any[], seen: Set<string>}>} */
   const byCui = new Map();
   const allCuis = new Set();
+  const withHpoName = new Set(); // CUI con átomo HPO vigente: si el propietario aprueba HPO, entran sus nombres.
   await readRrf(mgconso, (o) => {
     stats.atoms++;
     allCuis.add(o.CUI);
@@ -86,6 +93,7 @@ export async function medgenRows({ mgconso, mgsty, mgdef, idmappings }, prov) {
       return;
     }
     if (!open.has(o.SAB)) {
+      if (o.SAB === 'HPO') withHpoName.add(o.CUI);
       stats.atomsByExcludedSab[o.SAB] = (stats.atomsByExcludedSab[o.SAB] ?? 0) + 1;
       return;
     }
@@ -127,6 +135,70 @@ export async function medgenRows({ mgconso, mgsty, mgdef, idmappings }, prov) {
     if (!defs.has(o.CUI)) defs.set(o.CUI, []);
     defs.get(o.CUI).push({ source: o.source, text: crToLf(o.DEF) });
   });
+
+  // Jerarquía y roles de MGREL. Fila `CUI1 CHD CUI2` = CUI2 es hijo de CUI1 (README de MedGen: «CHD: has a child
+  // relationship»; comprobado con MeSH: Abdominal Neoplasms CHD Peritoneal Neoplasms). Las filas PAR son el espejo.
+  const hierarchy = new Map(); // hijo → [{ parent, sab, rela }]
+  const roles = new Map(); // CUI1 → [{ rela, cui, sab }]
+  stats.rel = { rows: 0, kept: {}, parNoMirror: {}, skippedSabs: {} };
+  if (mgrel) {
+    const openRel = new Set(OPEN_REL_SABS);
+    const chdKeys = new Set();
+    const parRows = [];
+    await readRrf(mgrel, (o) => {
+      stats.rel.rows++;
+      if (o.SUPPRESS !== 'N') return;
+      if (!openRel.has(o.SAB)) {
+        stats.rel.skippedSabs[o.SAB] = (stats.rel.skippedSabs[o.SAB] ?? 0) + 1;
+        return;
+      }
+      if (o.REL === 'CHD') {
+        chdKeys.add(`${o.CUI1}>${o.CUI2}>${o.SAB}`);
+        if (!hierarchy.has(o.CUI2)) hierarchy.set(o.CUI2, []);
+        hierarchy.get(o.CUI2).push({ parent: o.CUI1, sab: o.SAB, rela: o.RELA === '' ? null : o.RELA });
+        stats.rel.kept[`${o.SAB} CHD`] = (stats.rel.kept[`${o.SAB} CHD`] ?? 0) + 1;
+      } else if (o.REL === 'PAR') parRows.push(o);
+      else if (o.REL === 'RO' && o.RELA !== '') {
+        if (!roles.has(o.CUI1)) roles.set(o.CUI1, []);
+        roles.get(o.CUI1).push({ rela: o.RELA, cui: o.CUI2, sab: o.SAB });
+        stats.rel.kept[`${o.SAB} RO`] = (stats.rel.kept[`${o.SAB} RO`] ?? 0) + 1;
+      } else stats.rel.skippedSabs[`${o.SAB} ${o.REL}`] = (stats.rel.skippedSabs[`${o.SAB} ${o.REL}`] ?? 0) + 1;
+    });
+    // PAR es el espejo de CHD: se verifica, no se carga.
+    for (const o of parRows) if (!chdKeys.has(`${o.CUI2}>${o.CUI1}>${o.SAB}`)) stats.rel.parNoMirror[o.SAB] = (stats.rel.parNoMirror[o.SAB] ?? 0) + 1;
+  }
+  // CUI retirados que hoy son otro CUI: MERGED.RRF (fusiones) y MedGen_CUI_history.txt (reemplazos, con fecha).
+  const retired = new Map(); // CUI vigente → [{ cui, kind, date }]
+  const addRetired = (current, cui, kind, date) => {
+    if (!retired.has(current)) retired.set(current, []);
+    retired.get(current).push({ cui, kind, date });
+  };
+  stats.retired = { merged: 0, history: 0, clinvarHistory: 0, clinvarNoLongerReported: 0 };
+  if (merged) {
+    await readRrf(merged, (o) => {
+      stats.retired.merged++;
+      addRetired(o.toCUI, o.CUI, 'MERGED.RRF', null);
+    });
+  }
+  if (cuiHistory) {
+    // Cada línea termina en «|» (también el encabezado `#Previous_CUI<TAB>Current_CUI<TAB>Date_Of_Action|`).
+    const { header } = await readDelimited(cuiHistory, (f) => {
+      stats.retired.history++;
+      addRetired(f[1], f[0], 'MedGen_CUI_history.txt', f[2].replace(/\|$/, ''));
+    }, { quote: null, stripHash: true });
+    if (header.join('\t') !== 'Previous_CUI\tCurrent_CUI\tDate_Of_Action|') throw new Error(`${cuiHistory}: columnas inesperadas: ${header.join('\t')}`);
+  }
+  if (clinvarHistory) {
+    // `Previous ConceptID<TAB>Current ConceptID<TAB>Date Of Action`; el vigente puede ser «No longer reported» (sin reemplazo).
+    const { header } = await readDelimited(clinvarHistory, (f) => {
+      stats.retired.clinvarHistory++;
+      if (f[1] === 'No longer reported') stats.retired.clinvarNoLongerReported++;
+      else addRetired(f[1], f[0], 'ConceptID_history.txt (ClinVar)', f[2]);
+    }, { quote: null });
+    if (header.join('\t') !== 'Previous ConceptID\tCurrent ConceptID\tDate Of Action') throw new Error(`${clinvarHistory}: columnas inesperadas: ${header.join('\t')}`);
+  }
+  const byText = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+  const uniqBy = (list, key) => [...new Map(list.map((x) => [key(x), x])).values()];
 
   const rows = [];
   const dropped = [];
@@ -184,6 +256,12 @@ export async function medgenRows({ mgconso, mgsty, mgdef, idmappings }, prov) {
       for (const system of t.systems) maps.push({ system, code, context: `código ${x.label} publicado por MedGen para ${cui} (${x.label === 'NCI' ? 'MGCONSO' : 'MedGenIDMappings'})` });
     }
 
+    const hier = uniqBy(hierarchy.get(cui) ?? [], (h) => `${h.sab}|${h.parent}|${h.rela}`).sort((a, b) => byText(`${a.sab}|${a.parent}`, `${b.sab}|${b.parent}`));
+    const role = uniqBy(roles.get(cui) ?? [], (r) => `${r.sab}|${r.rela}|${r.cui}`).sort((a, b) => byText(`${a.sab}|${a.rela}|${a.cui}`, `${b.sab}|${b.rela}|${b.cui}`));
+    // Sólo NCI declara `isa` explícito: eso va como is-a. El resto de CHD (MeSH, Orphanet, GTR) es jerarquía de la fuente, sin afirmar is-a.
+    // Dos códigos de NCI pueden compartir CUI (69 filas `isa` con CUI1 = CUI2): a nivel de concepto sería su propio padre, así que no es una arista is-a
+    // (queda en source_hierarchy_parents con su fuente).
+    const isaParents = uniq(hier.filter((h) => h.sab === 'NCI' && h.rela === 'isa' && h.parent !== cui).map((h) => h.parent)).sort(byText);
     const defList = defs.get(cui) ?? [];
     const usedComponents = uniq([...atoms.map((a) => a.sab), ...defList.map((d) => d.source)]).map((s) => (s === 'MedlinePlus Genetics' || s === 'MEDLINEPLUS' ? 'MedlinePlus' : s));
     const medgenUid = (mappings.get(cui) ?? []).find((m) => m.label === 'MEDGEN_UID')?.code ?? null;
@@ -202,13 +280,18 @@ export async function medgenRows({ mgconso, mgsty, mgdef, idmappings }, prov) {
         prop('source_definitions', 'json', defList),
         prop('designation_sources', 'json', designationSources),
         prop('xrefs', 'json', xrefs.map((x) => `${x.label}:${x.code}`)),
+        prop('retired_cuis', 'json', retired.has(cui) ? uniqBy(retired.get(cui), (x) => `${x.kind}|${x.cui}|${x.date}`).sort((a, b) => byText(`${a.cui}|${a.kind}|${a.date}`, `${b.cui}|${b.kind}|${b.date}`)) : null),
+        prop('clinvar_condition_categories', 'json', clinvarCategories.get(cui) ?? null),
+        prop('source_hierarchy_parents', 'json', hier),
+        prop('source_roles', 'json', role),
         prop('component_licenses', 'json', Object.fromEntries(usedComponents.sort().map((s) => [s, COMPONENT_LICENSES[s]]))),
       ]),
-      parents: [],
+      parents: isaParents,
       maps,
       relations: [],
     };
     rows.push(withProvenance(row, prov, { source: 'medgen', sourceUrl: `https://www.ncbi.nlm.nih.gov/medgen/${medgenUid ?? cui}` }));
   }
+  stats.cuisDroppedWithHpoName = dropped.filter((c) => withHpoName.has(c)).length;
   return { rows, dropped, stats };
 }

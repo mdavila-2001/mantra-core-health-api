@@ -1,0 +1,6 @@
+#GeneID	AssociatedGenes	RelatedGenes	ConceptID	DiseaseName	SourceName	SourceID	DiseaseMIM	LastUpdated
+144568	A2ML1		C1833692	Otitis media, susceptibility to	MONDO	MONDO:0008162	166760	Feb 16 2016
+53947	A4GALT		C3549485	Blood group, P1PK system	NCBI curation		111400	Mar 10 2022
+8086	AAAS		C0271742	Glucocorticoid deficiency with achalasia	NCBI curation		231550	Feb 16 2016
+79719	AAGAB		CN031225	Palmoplantar keratoderma, punctate type 1A	MONDO	MONDO:0007858	148600	May 21 2021
+79719		AAGAB	C1835662	Punctate palmoplantar keratoderma type 1	MONDO	MONDO:0019332		21 May 2021

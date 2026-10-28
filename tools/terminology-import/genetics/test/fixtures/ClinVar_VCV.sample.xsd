@@ -1,0 +1,25 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" version="2.6; February 26, 2026"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:simpleType name="typeGeneVariant">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="variant within gene"/>
+            <xs:enumeration value="gene overlapped by variant"/>
+            <xs:enumeration value="variant near gene, upstream"/>
+            <xs:enumeration value="variant near gene, downstream"/>
+            <xs:enumeration value="asserted, but not computed"/>
+            <xs:enumeration value="within multiple genes by overlap"/>
+            <xs:enumeration value="within single gene"/>
+            <!-- those are here for back-compatibility and should be removed in the future once clinvar_public.xml is updated -->
+            <xs:enumeration value="genes overlapped by variant"/>
+            <xs:enumeration value="near gene, downstream"/>
+            <xs:enumeration value="near gene, upstream"/>
+        </xs:restriction>
+    </xs:simpleType>
+<xs:simpleType name="typeSeverity">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="mild"/>
+            <xs:enumeration value="moderate"/>
+            <xs:enumeration value="severe"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>
