@@ -37,3 +37,15 @@ Ver comandos de arriba (salida literal recortada en el reporte del agente).
 ## Decisiones y ambigüedades
 - Roles que atienden: membresía ACTIVA OWNER/ADMIN/STAFF (no PRACTITIONER) + `PHARMACY_STAFF` para vitrinas PHARMACY. Confirmar con producto/seguridad.
 - El personal no inicia hilos en frío por `POST /community/conversations` ni busca contactos como la farmacia; sólo por el pedido.
+
+## Ronda 2 — arreglos de la revisión independiente (sobre a01c082f)
+| # | Arreglo | Test |
+|---|---|---|
+| 1 | Vitrina **de tenant**: `created_by_user_id` ya no da titularidad. Escrituras sociales (publicar, reseñar, responder, seguir, bloquear) = membresía activa OWNER/ADMIN; mensajería = `canAttend` (OWNER/ADMIN/STAFF, + `PHARMACY_STAFF` en farmacias), siempre `ORGANIZATION_STAFF` (revocable en el gateway). Se conserva `subjects(actor) ∋ target_id`. Una vitrina de tenant no abre hilos en frío por `POST /community/conversations` (403). | visibility, organization-staff, messaging |
+| 2 | `pg_advisory_xact_lock(hashtextextended('menor:mayor', 0))` dentro de la transacción antes de `findDirectBetween`, en ambos canales. | messaging (orden lock→find, clave simétrica, canal sistema) |
+| 3 | `isTenantBacked` (existe `directory.tenants` con id = `target_id`). Vitrinas organización no-tenant (SupportAdmin, unidad diagnóstica) vuelven a la regla anterior: vínculo de cuenta / `created_by` para titularidad y avisos; como destinatario siguen sin admitirse (igual que antes del cambio). | notifications, visibility, organization-staff |
+| 4 | `if (!client.connected) return` antes de `join` y de registrar la concesión; `recheckStaffGrants` corta si desconectado. | gateway |
+| 5 | El temporizador llama `runStaffRecheck`: try/catch + `logger.warn` + flag `staffRecheckRunning` anti-solape. | gateway (fake timers) |
+| 6 | `servedContentHeaders`: try/catch que omite `filename*` ante `URIError` (lib ES2023, sin `toWellFormed` tipado). | served-content-headers |
+
+Resultados: jest (community, pharmacy_inventory, scheduling, diagnostic_units, common/storage) `Tests: 1773 passed, 1773 total`, 2 suites de módulo sin cargar por `xlsx` (entorno). `tsc --noEmit`: 15 errores, todos xlsx. eslint de los 12 archivos tocados: exit 0. Int-spec sigue sin ejecutar.
