@@ -110,6 +110,7 @@ export class PersonRecordsAdapter implements PersonRecordsPort {
       personId: data.personId,
       municipalityConceptId: data.municipalityConceptId,
       lines: data.lines,
+      district: data.district,
       latitude: data.latitude,
       longitude: data.longitude,
       actorUserId: data.actorUserId,

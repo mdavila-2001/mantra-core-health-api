@@ -102936,6 +102936,11 @@
             "maxLength": 500,
             "description": "Calle y número del domicilio particular"
           },
+          "homeDistrict": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Distrito o zona del domicilio particular"
+          },
           "homeLatitude": {
             "type": "number",
             "minimum": -90,
@@ -103416,6 +103421,11 @@
             "maxLength": 500,
             "description": "Calle y número del domicilio"
           },
+          "homeDistrict": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Distrito o zona del domicilio"
+          },
           "homeLatitude": {
             "type": "number",
             "minimum": -90,
@@ -103435,6 +103445,11 @@
             "type": "string",
             "maxLength": 500,
             "description": "Calle y número del lugar de trabajo"
+          },
+          "workDistrict": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Distrito o zona del lugar de trabajo"
           },
           "workLatitude": {
             "type": "number",
@@ -104297,6 +104312,11 @@
             "maxLength": 500,
             "description": "Calle y número del domicilio particular"
           },
+          "homeDistrict": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Distrito o zona del domicilio particular"
+          },
           "homeLatitude": {
             "type": "number",
             "minimum": -90,
@@ -104634,6 +104654,15 @@
             "type": "string",
             "format": "uuid",
             "description": "Municipio (VS_BO_MUNICIPALITY)"
+          },
+          "administrativeArea2ConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio"
+          },
+          "district": {
+            "type": "string",
+            "description": "Distrito o zona, tal como lo dio el mapa"
           },
           "latitude": {
             "type": "number",
@@ -105087,6 +105116,16 @@
             "type": "string",
             "maxLength": 300,
             "description": "Dirección de trabajo. Vacío para quitarla."
+          },
+          "homeDistrict": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Distrito o zona del domicilio. Vacío para quitarlo."
+          },
+          "workDistrict": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Distrito o zona del trabajo. Vacío para quitarlo."
           },
           "issuerAdministrativeAreaConceptId": {
             "type": "string",
@@ -105655,6 +105694,15 @@
             "format": "uuid",
             "description": "Municipio (VS_BO_MUNICIPALITY)"
           },
+          "administrativeArea2ConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio"
+          },
+          "district": {
+            "type": "string",
+            "description": "Distrito o zona, tal como lo dio el mapa"
+          },
           "latitude": {
             "type": "number"
           },
@@ -105690,6 +105738,10 @@
           "lines": {
             "type": "string",
             "maxLength": 300
+          },
+          "district": {
+            "type": "string",
+            "maxLength": 200
           },
           "latitude": {
             "type": "number",
@@ -105728,6 +105780,11 @@
             "type": "string",
             "maxLength": 300,
             "description": "Vacío para quitarla"
+          },
+          "district": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Vacío para quitarlo"
           },
           "latitude": {
             "type": "number",

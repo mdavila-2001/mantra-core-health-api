@@ -1,9 +1,9 @@
 # ADR-0028: Direcciones multipaís — país, tres niveles administrativos y distrito para cualquier país
 
 ## Estado
-Propuesto (2026-10-27). Lo de la **etapa 1** ya está en código (mdavila-2001/mantra-core-health-api#1027,
-mdavila-2001/mantra-core-health#1501). La **etapa 2** cambia el modelo de datos: entra por el pipeline de
-[ADR-0021](ADR-0021-fuente-unica-de-ddl.md) (`.puml` → `SQL/` → base → ORM) y no se aplica sin aprobar este ADR.
+Aceptado (2026-10-27). Etapa 1 en mdavila-2001/mantra-core-health-api#1030 y
+mdavila-2001/mantra-core-health#1506. Etapa 2 implementada como se describe en
+«Implementación» (modelo v4.2.63).
 
 ## Contexto
 
@@ -41,7 +41,7 @@ Lo que había hasta este ADR estaba atado a Bolivia en cuatro lugares:
 4. **El aviso dice la verdad del negocio**: «Por el momento sólo operamos en Bolivia». La calle y el distrito
    igual se muestran, porque el dato existe para cualquier país.
 
-### Etapa 2 — modelo (propuesta, pendiente de aprobación)
+### Etapa 2 — modelo
 
 5. **Un catálogo jerárquico de divisiones administrativas para todos los países**, en lugar de un value set por
    país y nivel:
@@ -76,3 +76,33 @@ Lo que había hasta este ADR estaba atado a Bolivia en cuatro lugares:
   cuando el proveedor cambia un nombre.
 - **Mantener el recuadro de Bolivia**: confunde con Bolivia puntos de Perú, Chile, Argentina, Paraguay y Brasil
   que caen adentro.
+
+## Implementación de la etapa 2
+
+- **Modelo (v4.2.63)**: `common.addresses.administrative_area_2_concept_id`
+  (FK a `terminology.catalog_concepts`, índice propio) y `district_text`. Declaradas
+  en `diagram_02_common.puml` y en la bóveda (`SALUD/FK/FK common.addresses.
+  administrative_area_2_concept_id.md`); `gen_ddl.py` las emite, y el patch
+  idempotente `SQL/patches/2026-10-27_v4263_addresses_nivel2_y_distrito.sql` las
+  agrega a una base viva.
+- **Catálogo**: el árbol no necesitó tablas nuevas. `VS_ADMIN_DIVISION` es un
+  conjunto de valores de terminología cuyos conceptos llevan tres propiedades
+  iguales para todo país: `geo:country`, `geo:level` y `geo:parent`. Lo declara
+  `src/common/seed/admin-divisions.catalog.ts` y lo siembra
+  `AdminDivisionsSeedService`, inmediatamente después de la geografía de Bolivia.
+  Bolivia aporta 9 departamentos y 340 municipios —los **mismos conceptos** de
+  `VS_BO_DEPARTMENT` y `VS_BO_MUNICIPALITY`, que siguen intactos— y 112 provincias
+  nuevas, derivadas del código INE `DDPP` de los municipios. Sumar un país es
+  sumar su entrada a `ADMIN_DIVISIONS_BY_COUNTRY`.
+- **Fuente de un país nuevo**: la decisión 7 sigue en pie (ISO 3166-2 y
+  geoBoundaries, con procedencia). Bolivia no la necesitó: su árbol ya estaba en
+  el catálogo del INE que la API siembra.
+- **Escritura**: el servidor **deduce** la provincia del municipio
+  (`adminDivisionLineage`), igual que ya deducía el departamento; no la recibe del
+  cliente. El distrito llega como texto (`homeDistrict` y `workDistrict` en el alta
+  y el perfil del paciente, `homeDistrict` en el alta del profesional, `district`
+  en la libreta de direcciones) y se guarda en `district_text`, sin pegarse a
+  `lines`. Las lecturas de dirección devuelven `administrativeArea2ConceptId` y
+  `district`.
+- **Lo que no cambió**: la dirección del consultorio propio del profesional vive en
+  otra tabla y sigue llevando el distrito dentro de la línea de dirección.

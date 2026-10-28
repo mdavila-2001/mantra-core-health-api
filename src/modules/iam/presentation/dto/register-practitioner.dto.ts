@@ -461,6 +461,19 @@ export class RegisterPractitionerDto {
   homeAddressLines?: string;
 
   /**
+   * Distrito o zona del domicilio, tal como lo da el mapa (ADR-0028). Va en
+   * `common.addresses.district_text`. Mismo campo que en `RegisterPatientDto`.
+   */
+  @ApiPropertyOptional({
+    maxLength: 200,
+    description: 'Distrito o zona del domicilio particular',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  homeDistrict?: string;
+
+  /**
    * Latitud del domicilio personal.
    *
    * El par de coordenadas es **ambos o ninguno**: el `ValidateIf` mira las dos
