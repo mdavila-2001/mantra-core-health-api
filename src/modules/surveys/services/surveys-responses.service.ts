@@ -311,7 +311,6 @@ export class SurveysResponsesService {
     ];
     if (invitations.length === 0) return [];
 
-    const invitationById = new Map(invitations.map((i) => [i.id, i]));
     const responses = await this.responsesRepo.listByInvitations(
       this.em,
       invitations.map((i) => i.id),
@@ -336,10 +335,9 @@ export class SurveysResponsesService {
       .map((response) => ({
         id: response.id,
         invitationId: response.surveyInvitationId,
-        appointmentBookingId:
-          invitationById.get(response.surveyInvitationId)
-            ?.appointmentBookingId ?? '',
-        submittedAt: response.submittedAt,
+        // Sólo el día, no la hora: la hora exacta se cruzaría con la agenda del
+        // profesional (cuándo cerró cada consulta) para saber quién respondió.
+        submittedAt: startOfUtcDay(response.submittedAt),
         answers: answers
           .filter(
             (a) =>
@@ -700,12 +698,12 @@ export class SurveysResponsesService {
       status: this.invitationStatus(invitation, now),
       issuedAt: invitation.issuedAt,
       expiresAt: invitation.expiresAt,
+      answeredAt: invitation.answeredAt,
+      appointmentBookingId: invitation.appointmentBookingId ?? '',
       kind: card.kind,
       serviceName: card.serviceName,
       practitionerDisplayName: card.practitionerDisplayName,
       attendedAt: card.attendedAt,
-      answeredAt: invitation.answeredAt,
-      appointmentBookingId: invitation.appointmentBookingId ?? '',
     };
   }
 
@@ -785,4 +783,11 @@ export class SurveysResponsesService {
       valueChoices: answer.valueChoices,
     };
   }
+}
+
+/** Medianoche UTC del día de `value`: la resolución más fina que se le da al profesional. */
+function startOfUtcDay(value: Date): Date {
+  return new Date(
+    Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()),
+  );
 }

@@ -399,8 +399,12 @@ export class AnswerDto {
  * **Sin `patientProfileId` a propósito** (FT-29): la encuesta de satisfacción
  * es anónima para el profesional por diseño del negocio — puede leer lo que
  * respondió cada paciente, pero no quién lo respondió. Devolver acá el
- * identificador, aunque no sea el nombre, deshace esa anonimidad: alcanza con
- * cruzarlo contra `appointmentBookingId` para identificar al paciente.
+ * identificador, aunque no sea el nombre, deshace esa anonimidad.
+ *
+ * **Tampoco lleva `appointmentBookingId`** y `submittedAt` sale redondeado al
+ * día (medianoche UTC): la reserva se cruza con la agenda del profesional para
+ * saber qué paciente es, y la hora exacta de envío, con la hora en que cerró
+ * cada consulta.
  */
 export class SurveyResponseDto {
   /**
@@ -416,15 +420,13 @@ export class SurveyResponseDto {
   invitationId!: string;
 
   /**
-   * Identificador asociado a appointment booking.
+   * Día del envío, a medianoche UTC. Sin la hora, a propósito.
    */
-  @ApiProperty({ format: 'uuid' })
-  appointmentBookingId!: string;
-
-  /**
-   * Valor de submitted at mantenido por la instancia.
-   */
-  @ApiProperty({ format: 'date-time' })
+  @ApiProperty({
+    format: 'date-time',
+    description:
+      'Día en que se envió la respuesta, redondeado a la medianoche UTC (sin hora, para preservar el anonimato)',
+  })
   submittedAt!: Date;
 
   /**

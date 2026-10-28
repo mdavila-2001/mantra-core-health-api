@@ -631,7 +631,7 @@ describe('SurveysResponsesService', () => {
           id: 'res-1',
           surveyInvitationId: 'inv-1',
           patientProfileId: PATIENT,
-          submittedAt: new Date(),
+          submittedAt: new Date('2026-10-14T17:42:31.250Z'),
         },
       ]);
       d.responsesRepo.listAnswers.mockResolvedValue([
@@ -648,7 +648,10 @@ describe('SurveysResponsesService', () => {
       );
 
       expect(res).toHaveLength(1);
-      expect(res[0].appointmentBookingId).toBe('bkg-1');
+      expect(res[0].submittedAt.toISOString()).toBe('2026-10-14T00:00:00.000Z');
+      // Anónima para el profesional: la reserva no cruza al DTO (se cruzaría
+      // con su agenda para saber quién es) y el envío sale por día.
+      expect(res[0]).not.toHaveProperty('appointmentBookingId');
       expect(res[0].answers[0]).toEqual(
         expect.objectContaining({
           questionText: '¿Cómo fue la atención?',
@@ -877,9 +880,6 @@ describe('SurveysResponsesService · invitación única: base del sistema + exte
       expect(res.questions.map((q) => q.position)).toEqual([1, 2, 3, 4]);
     });
 
-    it('las del médico son opcionales aunque su versión las guarde obligatorias; las del sistema conservan su obligatoriedad', async () => {
-      const d = build();
-      merged(d);
     it('la invitación abierta lleva el mismo contexto que la tarjeta de la lista', async () => {
       const d = build();
       merged(d);
@@ -911,6 +911,9 @@ describe('SurveysResponsesService · invitación única: base del sistema + exte
       expect(d.invitationsRepo.listCardContext).toHaveBeenCalledTimes(1);
     });
 
+    it('las del médico son opcionales aunque su versión las guarde obligatorias; las del sistema conservan su obligatoriedad', async () => {
+      const d = build();
+      merged(d);
 
       const res = await d.service.getMyQuestionnaire('inv-1', patientActor);
 
