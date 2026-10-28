@@ -11,6 +11,7 @@ import {
   SchedulingCatalogRepository,
 } from '../../../infrastructure/repositories';
 import { SchedulingServiceAgendaService } from '../../service-offerings/scheduling-service-agenda.service';
+import { startsInFlexibleBand } from '../../../domain/catalog/flexible-band';
 
 /**
  * Qué pasa con el cupo de un servicio o de una cita puntual cuando su reserva
@@ -113,24 +114,46 @@ export class ServiceSlotLifecycle {
     tx: EntityManager,
     slot: Pick<
       BookableSlots,
-      'practitionerServiceOfferingId' | 'scheduleTemplateId'
+      'practitionerServiceOfferingId' | 'scheduleTemplateId' | 'startAt'
     >,
   ): Promise<boolean> {
     if (slot.practitionerServiceOfferingId) return true;
     return this.isFlexible(tx, slot);
   }
 
-  /** ¿El cupo es de una plantilla de horario flexible (P36)? */
+  /**
+   * ¿El cupo es de horario flexible (P36)?
+   *
+   * Lo es si su plantilla entera es flexible, o si cae en una franja flexible
+   * de una plantilla de turnos fijos (v4.2.64). El cupo no guarda de qué
+   * franja salió, así que la franja se ubica por día y hora en la zona de la
+   * sede ({@link startsInFlexibleBand}).
+   */
   async isFlexible(
     tx: EntityManager,
-    slot: Pick<BookableSlots, 'scheduleTemplateId'>,
+    slot: Pick<BookableSlots, 'scheduleTemplateId' | 'startAt'>,
   ): Promise<boolean> {
     if (!slot.scheduleTemplateId) return false;
     const template = await this.catalogRepo.findTemplateById(
       tx,
       slot.scheduleTemplateId,
     );
-    return template?.flexibleHours === true;
+    if (!template) return false;
+    if (template.flexibleHours === true) return true;
+    const rules = await this.catalogRepo.findRulesByTemplates(tx, [
+      template.id,
+    ]);
+    if (!rules.some((rule) => rule.flexibleHours === true)) return false;
+    const resource = await this.catalogRepo.findResourceById(
+      tx,
+      template.resourceId,
+    );
+    return startsInFlexibleBand(
+      slot.startAt,
+      false,
+      rules,
+      resource?.timeZone ?? 'UTC',
+    );
   }
 
   /**
