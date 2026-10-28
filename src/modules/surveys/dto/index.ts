@@ -8,6 +8,19 @@ export { CreateAssignmentDto } from './create-assignment.dto';
 export { IssueInvitationsDto } from './issue-invitations.dto';
 export { SubmitResponseDto, AnswerInputDto } from './submit-response.dto';
 export {
+  InsightsQueryDto,
+  InsightsTotalsDto,
+  InsightsNpsDto,
+  InsightsScaleBucketDto,
+  InsightsOptionCountDto,
+  InsightsQuestionDto,
+  InsightsTrendPointDto,
+  InsightsSafetyAlertsDto,
+  InsightsCommentDto,
+  SurveyInsightsDto,
+} from './insights.dto';
+export type { InsightsTrendGranularity } from './insights.dto';
+export {
   IdResponseDto,
   OkResultDto,
   TemplateCreatedDto,
