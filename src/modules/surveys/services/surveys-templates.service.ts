@@ -10,7 +10,11 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { TemplatesRepository } from '../repositories';
+import {
+  AssignmentsRepository,
+  TargetsRepository,
+  TemplatesRepository,
+} from '../repositories';
 import { DEFAULT_RESPONSE_WINDOW_DAYS } from '../surveys.constants';
 import { SurveysErrorReason } from '../surveys.error-reasons';
 import { assertNotSystemTemplate } from '../surveys.system-guard';
@@ -22,6 +26,7 @@ import {
   ReorderQuestionsDto,
   TemplateCreatedDto,
   TemplateDetailDto,
+  TemplateAssignmentDto,
   TemplateSummaryDto,
   OkResultDto,
   UpdateQuestionDto,
@@ -32,6 +37,7 @@ import {
   ANSWER_TYPE_CODE_BY_ID,
   ANSWER_TYPES_REQUIRING_OPTIONS,
   SURVEYS,
+  TARGET_TYPE_CODE_BY_ID,
   type AnswerTypeCode,
 } from '../surveys.concepts';
 import type {
@@ -79,11 +85,15 @@ export class SurveysTemplatesService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param templatesRepo - Acceso a plantillas, versiones y preguntas.
    * @param logger - Registro estructurado del módulo.
+   * @param assignmentsRepo - Acceso a asignaciones (a qué está asociada cada plantilla).
+   * @param targetsRepo - Nombres de los servicios a los que se asocia.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly templatesRepo: TemplatesRepository,
     private readonly logger: PinoLogger,
+    private readonly assignmentsRepo: AssignmentsRepository,
+    private readonly targetsRepo: TargetsRepository,
   ) {
     this.logger.setContext(SurveysTemplatesService.name);
   }
@@ -579,7 +589,60 @@ export class SurveysTemplatesService {
       effectiveFrom: version.effectiveFrom,
       effectiveTo: version.effectiveTo,
       questions: questions.map((q) => this.toQuestionDto(q)),
+      assignments: await this.listAssignments(template.id),
     };
+  }
+
+  /**
+   * A qué está asociada la encuesta: sus asignaciones ACTIVAS, de cualquiera de
+   * sus versiones (una versión nueva no hereda las del borrador anterior, así
+   * que la encuesta puede seguir repartiéndose por una asignación de la versión
+   * vieja). Si una misma cosa figura en dos versiones se informa la más alta,
+   * que es la que se reparte. El servicio lleva su nombre del catálogo, para que
+   * el cliente no tenga que resolver el identificador.
+   */
+  private async listAssignments(
+    templateId: string,
+  ): Promise<TemplateAssignmentDto[]> {
+    const versions = await this.templatesRepo.listVersions(this.em, templateId);
+    const numberOf = new Map(versions.map((v) => [v.id, v.versionNumber]));
+    const active = await this.assignmentsRepo.listActiveByVersions(
+      this.em,
+      versions.map((v) => v.id),
+    );
+
+    const byTarget = new Map<string, (typeof active)[number]>();
+    for (const assignment of active) {
+      const key = `${assignment.targetTypeConceptId}:${assignment.targetId}`;
+      const kept = byTarget.get(key);
+      if (
+        !kept ||
+        (numberOf.get(assignment.surveyVersionId) ?? 0) >
+          (numberOf.get(kept.surveyVersionId) ?? 0)
+      ) {
+        byTarget.set(key, assignment);
+      }
+    }
+
+    const picked = [...byTarget.values()].filter(
+      (a) => TARGET_TYPE_CODE_BY_ID[a.targetTypeConceptId] !== undefined,
+    );
+    const names = await this.targetsRepo.findServiceNames(
+      this.em,
+      picked
+        .filter((a) => a.targetTypeConceptId === SURVEYS.TARGET_SERVICE)
+        .map((a) => a.targetId),
+    );
+    return picked.map((a) => ({
+      id: a.id,
+      targetType: TARGET_TYPE_CODE_BY_ID[a.targetTypeConceptId],
+      targetId: a.targetId,
+      targetName:
+        a.targetTypeConceptId === SURVEYS.TARGET_SERVICE
+          ? (names.get(a.targetId) ?? null)
+          : null,
+      active: a.active,
+    }));
   }
 
   /**

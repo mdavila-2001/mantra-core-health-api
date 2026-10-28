@@ -112,6 +112,22 @@ export class TargetsRepository {
   }
 
   /**
+   * Los nombres de varios servicios del catálogo, por id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - `billing.service_catalog.id`.
+   * @returns Mapa id → nombre; los inexistentes no figuran.
+   */
+  async findServiceNames(
+    em: EntityManager,
+    ids: string[],
+  ): Promise<Map<string, string>> {
+    if (ids.length === 0) return new Map();
+    const services = await em.find(ServiceCatalog, { id: { $in: ids } });
+    return new Map(services.map((service) => [service.id, service.name]));
+  }
+
+  /**
    * La organización (tenant) a la que pertenece una práctica.
    *
    * @param em - Contexto de persistencia o transacción activa.

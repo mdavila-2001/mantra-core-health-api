@@ -28,6 +28,7 @@ export {
   QuestionDto,
   TemplateSummaryDto,
   TemplateDetailDto,
+  TemplateAssignmentDto,
   InvitationsIssuedDto,
   PatientInvitationDto,
   PatientQuestionnaireDto,

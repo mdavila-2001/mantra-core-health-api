@@ -1,8 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   ANSWER_TYPE_CODES,
+  TARGET_TYPE_CODES,
   type AnswerTypeCode,
   type QuestionSource,
+  type TargetTypeCode,
 } from '../surveys.concepts';
 
 /** Respuesta genérica con el id del recurso creado. */
@@ -154,6 +156,35 @@ export class TemplateSummaryDto {
   questionCount!: number;
 }
 
+/** A qué está asociada una encuesta del profesional (asignación activa). */
+export class TemplateAssignmentDto {
+  /** Identificador de la asignación. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** Qué se evalúa. */
+  @ApiProperty({ enum: TARGET_TYPE_CODES })
+  targetType!: TargetTypeCode;
+
+  /**
+   * La reserva (`APPOINTMENT`), el servicio del catálogo, `billing.service_catalog.id`
+   * (`SERVICE`), o el tipo de atención «consulta» (`CARE_TYPE`).
+   */
+  @ApiProperty({ format: 'uuid' })
+  targetId!: string;
+
+  /**
+   * Nombre del servicio del catálogo cuando `targetType` es `SERVICE`; ausente
+   * en el resto.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  targetName?: string | null;
+
+  /** Siempre `true`: sólo se informan las activas. */
+  @ApiProperty()
+  active!: boolean;
+}
+
 /** Detalle de una plantilla con el cuestionario de su última versión. */
 export class TemplateDetailDto extends TemplateSummaryDto {
   /**
@@ -185,6 +216,14 @@ export class TemplateDetailDto extends TemplateSummaryDto {
    */
   @ApiProperty({ type: [QuestionDto] })
   questions!: QuestionDto[];
+
+  /**
+   * Asociaciones activas de la encuesta, de cualquiera de sus versiones. Si una
+   * misma cosa está asociada a dos versiones se informa la más alta, que es la
+   * que se reparte. Sólo en plantillas del profesional.
+   */
+  @ApiPropertyOptional({ type: [TemplateAssignmentDto] })
+  assignments?: TemplateAssignmentDto[];
 }
 
 /** Resultado de emitir invitaciones para una reserva completada. */
