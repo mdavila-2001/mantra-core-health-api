@@ -570,7 +570,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "issuedAt": "2026-07-31T12:00:00.000Z",
     "expiresAt": "2026-07-31T12:00:00.000Z",
     "answeredAt": "2026-07-31T12:00:00.000Z",
-    "appointmentBookingId": "00000000-0000-4000-8000-000000000001"
+    "appointmentBookingId": "00000000-0000-4000-8000-000000000001",
+    "kind": "CONSULTATION",
+    "serviceName": "Nombre de ejemplo",
+    "practitionerDisplayName": "Nombre de ejemplo",
+    "attendedAt": "2026-07-31T12:00:00.000Z"
   }
 ]
 ```
@@ -2175,7 +2179,6 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   {
     "id": "00000000-0000-4000-8000-000000000001",
     "invitationId": "00000000-0000-4000-8000-000000000001",
-    "appointmentBookingId": "00000000-0000-4000-8000-000000000001",
     "submittedAt": "2026-07-31T12:00:00.000Z",
     "answers": [
       {
