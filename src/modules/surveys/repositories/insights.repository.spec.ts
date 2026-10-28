@@ -36,10 +36,6 @@ describe('InsightsRepository', () => {
     [string, (b: ReturnType<typeof build>) => Promise<unknown>]
   > = [
     [
-      'findEarliestIssuedAt',
-      ({ repo, em }) => repo.findEarliestIssuedAt(em, scope),
-    ],
-    [
       'countInvitationsByBucket',
       ({ repo, em }) => repo.countInvitationsByBucket(em, scope, 'week'),
     ],
@@ -97,7 +93,7 @@ describe('InsightsRepository', () => {
     },
   );
 
-  it('los comentarios salen con el día, nunca con la hora, y con tope', async () => {
+  it('los comentarios salen con el día, nunca con la hora, con tope de 20 y sin orden cronológico', async () => {
     const b = build([{ text: 'hola', day: '2026-10-09' }]);
     const result = await b.repo.listRecentComments(b.em, scope);
     const [sql, params] = b.execute.mock.calls[0] as [string, unknown[]];
@@ -106,7 +102,10 @@ describe('InsightsRepository', () => {
       "to_char(r.submitted_at AT TIME ZONE 'UTC', 'YYYY-MM-DD')",
     );
     expect(sql).toMatch(/LIMIT \?/);
-    expect(params.at(-1)).toBe(100);
+    expect(params.at(-1)).toBe(20);
+    // Orden estable por hash, no cronológico: no se puede correlacionar con una cita.
+    expect(sql).toContain('ORDER BY md5(a.id::text)');
+    expect(sql).not.toMatch(/ORDER BY[^\n]*submitted_at/);
     expect(params).toContain(SURVEYS.ANSWER_TYPE_TEXT);
     expect(result).toEqual([{ text: 'hola', day: '2026-10-09' }]);
   });

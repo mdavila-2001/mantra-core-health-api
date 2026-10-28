@@ -17,6 +17,7 @@ export {
   InsightsTrendPointDto,
   InsightsSafetyAlertsDto,
   InsightsCommentDto,
+  InsightsPrivacyDto,
   SurveyInsightsDto,
 } from './insights.dto';
 export type { InsightsTrendGranularity } from './insights.dto';

@@ -1,8 +1,10 @@
 import { jest } from '@jest/globals';
-import { ForbiddenException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import type { SurveyInsightsDto } from '../dto/insights.dto';
+import { MIN_COHORT } from '../insights.constants';
 import { SurveysInsightsService } from './surveys-insights.service';
 import { ANSWER_TYPE_BY_CODE } from '../surveys.concepts';
-import { PreconditionFailedException, runWithTenant } from '../../../common';
+import { runWithTenant } from '../../../common';
 
 /**
  * Ejecuta la operación mock fn.
@@ -44,6 +46,19 @@ const SAFETY_OPTIONS = [
   'Sí, pero no deseo que me contacten',
 ];
 
+/** Comprueba que el resumen no quedó suprimido y devuelve todos sus campos. */
+function full(result: SurveyInsightsDto): Required<SurveyInsightsDto> {
+  expect(result.privacy).toEqual({ minCohort: MIN_COHORT, suppressed: false });
+  return result as Required<SurveyInsightsDto>;
+}
+
+/** Tramo de invitaciones: `answered` respondidas de `issued`. */
+const bucketRow = (bucket: string, issued: number, answered: number) => ({
+  bucket,
+  issued,
+  answered,
+});
+
 /** Fila de pregunta del repositorio. */
 function questionRow(overrides: Record<string, unknown>) {
   return {
@@ -80,7 +95,6 @@ function valueRow(overrides: Record<string, unknown>) {
  */
 function build() {
   const repo = {
-    findEarliestIssuedAt: mockFn().mockResolvedValue(new Date('2026-10-01')),
     countInvitationsByBucket: mockFn().mockResolvedValue([]),
     countAnswersByQuestion: mockFn().mockResolvedValue([]),
     countAnswerValues: mockFn().mockResolvedValue([]),
@@ -188,7 +202,6 @@ describe('SurveysInsightsService', () => {
       run({}, { id: 'u', roles: ['PRACTITIONER'] }),
     ).rejects.toBeInstanceOf(ForbiddenException);
     expect(repo.countInvitationsByBucket).not.toHaveBeenCalled();
-    expect(repo.findEarliestIssuedAt).not.toHaveBeenCalled();
   });
 
   it('sin tenant activo no hay resumen', async () => {
@@ -196,29 +209,174 @@ describe('SurveysInsightsService', () => {
     await expect(service.getInsights({}, doctor)).rejects.toThrow();
   });
 
-  it('sin emisiones devuelve el resumen vacío con la forma completa', async () => {
-    const { repo, run } = build();
-    repo.findEarliestIssuedAt.mockResolvedValue(null);
-
-    const result = await run({});
-
-    expect(result).toEqual({
-      totals: { issued: 0, answered: 0, responseRate: null },
-      nps: { value: null, promoters: 0, passives: 0, detractors: 0, n: 0 },
-      byQuestion: [],
-      trend: [],
-      trendGranularity: 'DAY',
-      safetyAlerts: { n: 0 },
-      comments: [],
+  describe('cohorte mínima', () => {
+    it('MIN_COHORT vale 5', () => {
+      expect(MIN_COHORT).toBe(5);
     });
-    expect(repo.countInvitationsByBucket).not.toHaveBeenCalled();
+
+    it('sin emisiones: sólo totales y privacy.suppressed, sin consultar respuestas', async () => {
+      const { repo, run } = build();
+
+      const result = await run({});
+
+      expect(result).toEqual({
+        totals: { issued: 0, answered: 0, responseRate: null },
+        privacy: { minCohort: 5, suppressed: true },
+      });
+      expect(repo.countAnswersByQuestion).not.toHaveBeenCalled();
+      expect(repo.countAnswerValues).not.toHaveBeenCalled();
+      expect(repo.listRecentComments).not.toHaveBeenCalled();
+    });
+
+    it('con 4 respondidas se suprime todo menos los totales', async () => {
+      const { repo, run } = build();
+      seedBaseScenario(repo);
+      repo.countInvitationsByBucket.mockResolvedValue([
+        bucketRow('2026-10-01', 6, 4),
+      ]);
+
+      const result = await run({ from: '2026-10-01', to: '2026-10-28' });
+
+      expect(result).toEqual({
+        totals: { issued: 6, answered: 4, responseRate: 0.6667 },
+        privacy: { minCohort: 5, suppressed: true },
+      });
+      // No se pidieron las respuestas ni los comentarios: nada para filtrar mal.
+      expect(repo.countAnswersByQuestion).not.toHaveBeenCalled();
+      expect(repo.countAnswerValues).not.toHaveBeenCalled();
+      expect(repo.listRecentComments).not.toHaveBeenCalled();
+      expect(JSON.stringify(result)).not.toMatch(
+        /Muy amable|byQuestion|nps|trend|comments|safetyAlerts/,
+      );
+    });
+
+    it('con 5 respondidas ya se muestra el resumen', async () => {
+      const { repo, run } = build();
+      seedBaseScenario(repo);
+      repo.countInvitationsByBucket.mockResolvedValue([
+        bucketRow('2026-10-01', 5, 5),
+      ]);
+
+      const result = await run({ from: '2026-10-01', to: '2026-10-28' });
+
+      const r = full(result);
+      expect(r.totals).toEqual({ issued: 5, answered: 5, responseRate: 1 });
+      expect(r.byQuestion.length).toBeGreaterThan(0);
+      expect(r.comments).toHaveLength(2);
+    });
+
+    it('un filtro de un solo día con una respuesta no devuelve nada de esa respuesta', async () => {
+      const { repo, run } = build();
+      seedBaseScenario(repo);
+      repo.countInvitationsByBucket.mockResolvedValue([
+        bucketRow('2026-10-10', 1, 1),
+      ]);
+
+      const result = await run({
+        from: '2026-10-10',
+        to: '2026-10-10',
+        serviceId: 'svc-1',
+      });
+
+      expect(result).toEqual({
+        totals: { issued: 1, answered: 1, responseRate: 1 },
+        privacy: { minCohort: 5, suppressed: true },
+      });
+      expect(repo.listRecentComments).not.toHaveBeenCalled();
+      const scope = repo.countInvitationsByBucket.mock.calls[0][1];
+      expect(scope.from).toEqual(new Date('2026-10-10T00:00:00.000Z'));
+      expect(scope.toExclusive).toEqual(new Date('2026-10-11T00:00:00.000Z'));
+    });
+
+    it('una pregunta con menos de 5 respuestas dentro de un alcance suficiente no se desglosa', async () => {
+      const { repo, run } = build();
+      seedBaseScenario(repo);
+      // La de acceso sólo la contestaron 3 (era opcional).
+      const rows = await repo.countAnswersByQuestion();
+      repo.countAnswersByQuestion.mockResolvedValue(
+        rows.map((row: any) =>
+          row.questionId === 'q-access' ? { ...row, n: 3 } : row,
+        ),
+      );
+
+      const r = full(await run({ from: '2026-10-01', to: '2026-10-28' }));
+
+      const access = r.byQuestion.find(
+        (q) => q.dimension === 'esfuerzo_acceso',
+      )!;
+      expect(access).toEqual({
+        questionId: 'q-access',
+        text: T.access,
+        dimension: 'esfuerzo_acceso',
+        answerType: 'SCALE',
+        n: 3,
+        suppressed: true,
+        distribution: [],
+      });
+      // Las demás siguen completas.
+      expect(
+        r.byQuestion.find((q) => q.dimension === 'satisfaccion_global')!
+          .average,
+      ).toBeDefined();
+    });
+
+    it('si la pregunta de seguridad queda bajo el mínimo, tampoco se cuentan alertas', async () => {
+      const { repo, run } = build();
+      seedBaseScenario(repo);
+      const rows = await repo.countAnswersByQuestion();
+      repo.countAnswersByQuestion.mockResolvedValue(
+        rows.map((row: any) =>
+          row.questionId === 'q-safety' ? { ...row, n: 2 } : row,
+        ),
+      );
+
+      const r = full(await run({ from: '2026-10-01', to: '2026-10-28' }));
+
+      expect(r.safetyAlerts).toEqual({ n: 0 });
+      const safety = r.byQuestion.find(
+        (q) => q.dimension === 'seguridad_percibida',
+      )!;
+      expect(safety.optionCounts).toBeUndefined();
+      expect(safety.suppressed).toBe(true);
+    });
+
+    it('un NPS con menos de 5 respuestas no se calcula', async () => {
+      const { repo, run } = build();
+      seedBaseScenario(repo);
+      const rows = await repo.countAnswersByQuestion();
+      repo.countAnswersByQuestion.mockResolvedValue(
+        rows.map((row: any) =>
+          row.questionId === 'q-nps' ? { ...row, n: 3 } : row,
+        ),
+      );
+      const values = await repo.countAnswerValues();
+      repo.countAnswerValues.mockResolvedValue(
+        values
+          .filter((v: any) => v.questionId !== 'q-nps')
+          .concat([
+            valueRow({ questionId: 'q-nps', valueNumber: 10, count: 2 }),
+            valueRow({ questionId: 'q-nps', valueNumber: 2, count: 1 }),
+          ]),
+      );
+
+      const r = full(await run({ from: '2026-10-01', to: '2026-10-28' }));
+
+      expect(r.nps).toEqual({
+        value: null,
+        promoters: 0,
+        passives: 0,
+        detractors: 0,
+        n: 3,
+        suppressed: true,
+      });
+    });
   });
 
   it('calcula totales, NPS, promedio, distribución, alertas, tendencia y comentarios', async () => {
     const { repo, run } = build();
     seedBaseScenario(repo);
 
-    const result = await run({ from: '2026-10-01', to: '2026-10-28' });
+    const result = full(await run({ from: '2026-10-01', to: '2026-10-28' }));
 
     expect(result.totals).toEqual({
       issued: 10,
@@ -235,8 +393,7 @@ describe('SurveysInsightsService', () => {
     });
     expect(result.safetyAlerts).toEqual({ n: 1 });
 
-    const dims = result.byQuestion.map((q) => q.dimension);
-    expect(dims).toEqual([
+    expect(result.byQuestion.map((q) => q.dimension)).toEqual([
       'esfuerzo_acceso',
       'seguridad_percibida',
       'satisfaccion_global',
@@ -255,6 +412,7 @@ describe('SurveysInsightsService', () => {
       { value: 5, count: 2 },
     ]);
     expect(access.optionCounts).toBeUndefined();
+    expect(access.suppressed).toBeUndefined();
 
     const safety = result.byQuestion[1];
     expect(safety.optionCounts).toEqual([
@@ -269,8 +427,7 @@ describe('SurveysInsightsService', () => {
     expect(nps.distribution).toHaveLength(11);
     expect(nps.average).toBe(7.67);
 
-    const open = result.byQuestion[4];
-    expect(open).toEqual({
+    expect(result.byQuestion[4]).toEqual({
       questionId: 'q-open',
       text: T.open,
       dimension: 'comentario_abierto',
@@ -279,10 +436,9 @@ describe('SurveysInsightsService', () => {
       distribution: [],
     });
 
-    // Satisfacción global por tramo de emisión.
+    // Tramos de 4 y 2 respondidos: ninguno llega a 5, se funden en uno solo.
     expect(result.trend).toEqual([
-      { period: '2026-10-01', answered: 4, average: 4 },
-      { period: '2026-10-08', answered: 2, average: 3 },
+      { period: '2026-10-01', answered: 6, average: 3.67 },
     ]);
     expect(result.comments).toEqual([
       { text: 'Muy amable', submittedAt: '2026-10-09' },
@@ -290,97 +446,174 @@ describe('SurveysInsightsService', () => {
     ]);
   });
 
+  describe('tendencia', () => {
+    const scenario = (
+      repo: ReturnType<typeof build>['repo'],
+      buckets: Array<[string, number]>,
+      globalByBucket: Record<string, number[]>,
+    ) => {
+      repo.countInvitationsByBucket.mockResolvedValue(
+        buckets.map(([b, n]) => bucketRow(b, n, n)),
+      );
+      repo.countAnswersByQuestion.mockResolvedValue([
+        questionRow({ questionId: 'q-g', text: T.global, n: 20 }),
+      ]);
+      repo.countAnswerValues.mockResolvedValue(
+        Object.entries(globalByBucket).flatMap(([bucket, values]) =>
+          values.map((v) =>
+            valueRow({ questionId: 'q-g', bucket, valueNumber: v, count: 1 }),
+          ),
+        ),
+      );
+    };
+
+    it('un tramo con 5 o más respondidos queda solo; los chicos se funden con el siguiente', async () => {
+      const { repo, run } = build();
+      scenario(
+        repo,
+        [
+          ['2026-10-01', 2],
+          ['2026-10-02', 3], // 2 + 3 = 5 → primer punto
+          ['2026-10-03', 6], // 6 → segundo punto
+          ['2026-10-04', 1], // remanente → se absorbe en el anterior
+        ],
+        {
+          '2026-10-01': [5, 5],
+          '2026-10-02': [4, 4, 4],
+          '2026-10-03': [1, 1, 1, 1, 1, 1],
+          '2026-10-04': [5],
+        },
+      );
+
+      const r = full(await run({ from: '2026-10-01', to: '2026-10-28' }));
+
+      expect(r.trend).toEqual([
+        { period: '2026-10-01', answered: 5, average: 4.4 },
+        { period: '2026-10-03', answered: 7, average: 1.57 },
+      ]);
+      for (const point of r.trend) {
+        expect(point.answered).toBeGreaterThanOrEqual(MIN_COHORT);
+      }
+    });
+
+    it('un punto cuyo promedio lo sostienen menos de 5 respuestas no muestra promedio', async () => {
+      const { repo, run } = build();
+      scenario(repo, [['2026-10-01', 6]], { '2026-10-01': [5, 4, 3] });
+
+      const r = full(await run({ from: '2026-10-01', to: '2026-10-28' }));
+
+      expect(r.trend).toEqual([{ period: '2026-10-01', answered: 6 }]);
+    });
+
+    it('cae al promedio de las escalas 1-5 si no hay pregunta de satisfacción global', async () => {
+      const { repo, run } = build();
+      repo.countInvitationsByBucket.mockResolvedValue([
+        bucketRow('2026-10-01', 5, 5),
+      ]);
+      repo.countAnswersByQuestion.mockResolvedValue([
+        questionRow({ questionId: 'q-own', text: 'Mi pregunta', n: 5 }),
+      ]);
+      repo.countAnswerValues.mockResolvedValue([
+        valueRow({ questionId: 'q-own', valueNumber: 5, count: 3 }),
+        valueRow({ questionId: 'q-own', valueNumber: 4, count: 2 }),
+      ]);
+
+      const r = full(await run({ from: '2026-10-01', to: '2026-10-28' }));
+
+      expect(r.trend).toEqual([
+        { period: '2026-10-01', answered: 5, average: 4.6 },
+      ]);
+    });
+  });
+
   it('agrupa por dimensión las preguntas de versiones distintas y muestra la más reciente', async () => {
     const { repo, run } = build();
     repo.countInvitationsByBucket.mockResolvedValue([
-      { bucket: '2026-10-01', issued: 4, answered: 4 },
+      bucketRow('2026-10-01', 8, 8),
     ]);
     repo.countAnswersByQuestion.mockResolvedValue([
-      // La misma pregunta de consulta en la v1 y la v2 de la plantilla de sistema.
       questionRow({
         questionId: 'q-v1',
         text: T.global,
         createdAtEpoch: 100,
-        n: 3,
+        n: 6,
       }),
       questionRow({
         questionId: 'q-v2',
         text: T.global,
         createdAtEpoch: 200,
-        n: 1,
+        n: 2,
       }),
     ]);
     repo.countAnswerValues.mockResolvedValue([
-      valueRow({ questionId: 'q-v1', valueNumber: 5, count: 3 }),
-      valueRow({ questionId: 'q-v2', valueNumber: 1, count: 1 }),
+      valueRow({ questionId: 'q-v1', valueNumber: 5, count: 6 }),
+      valueRow({ questionId: 'q-v2', valueNumber: 1, count: 2 }),
     ]);
 
-    const result = await run({ from: '2026-10-01' });
+    const r = full(await run({ from: '2026-10-01' }));
 
-    expect(result.byQuestion).toHaveLength(1);
-    expect(result.byQuestion[0].questionId).toBe('q-v2');
-    expect(result.byQuestion[0].n).toBe(4);
-    expect(result.byQuestion[0].average).toBe(4);
+    expect(r.byQuestion).toHaveLength(1);
+    expect(r.byQuestion[0].questionId).toBe('q-v2');
+    expect(r.byQuestion[0].n).toBe(8);
+    expect(r.byQuestion[0].average).toBe(4);
   });
 
   it('el texto de consulta y de servicio de una misma dimensión se juntan', async () => {
     const { repo, run } = build();
     repo.countInvitationsByBucket.mockResolvedValue([
-      { bucket: '2026-10-01', issued: 2, answered: 2 },
+      bucketRow('2026-10-01', 6, 6),
     ]);
     repo.countAnswersByQuestion.mockResolvedValue([
       questionRow({
         questionId: 'q-c',
         text: T.global,
         createdAtEpoch: 100,
-        n: 1,
+        n: 3,
       }),
       questionRow({
         questionId: 'q-s',
         text: 'En general, ¿cómo calificaría su experiencia con este servicio? (1 = Muy mala, 5 = Excelente)',
         createdAtEpoch: 300,
-        n: 1,
+        n: 3,
       }),
     ]);
     repo.countAnswerValues.mockResolvedValue([
-      valueRow({ questionId: 'q-c', valueNumber: 4, count: 1 }),
-      valueRow({ questionId: 'q-s', valueNumber: 2, count: 1 }),
+      valueRow({ questionId: 'q-c', valueNumber: 4, count: 3 }),
+      valueRow({ questionId: 'q-s', valueNumber: 2, count: 3 }),
     ]);
 
-    const result = await run({ from: '2026-10-01' });
+    const r = full(await run({ from: '2026-10-01' }));
 
-    expect(result.byQuestion).toHaveLength(1);
-    expect(result.byQuestion[0].dimension).toBe('satisfaccion_global');
-    expect(result.byQuestion[0].n).toBe(2);
-    expect(result.byQuestion[0].average).toBe(3);
+    expect(r.byQuestion).toHaveLength(1);
+    expect(r.byQuestion[0].dimension).toBe('satisfaccion_global');
+    expect(r.byQuestion[0].n).toBe(6);
+    expect(r.byQuestion[0].average).toBe(3);
   });
 
   it('las preguntas propias se agrupan por texto, sin dimensión, y no tocan el NPS', async () => {
     const { repo, run } = build();
     repo.countInvitationsByBucket.mockResolvedValue([
-      { bucket: '2026-10-01', issued: 3, answered: 3 },
+      bucketRow('2026-10-01', 12, 12),
     ]);
     repo.countAnswersByQuestion.mockResolvedValue([
       questionRow({
         questionId: 'q-a1',
         text: '¿Le  gustó la sala?',
-        scaleMin: 1,
-        scaleMax: 5,
         createdAtEpoch: 10,
-        n: 2,
+        n: 3,
       }),
       questionRow({
         questionId: 'q-a2',
         text: '¿le gustó la sala? (1 = Nada, 5 = Mucho)',
         createdAtEpoch: 20,
-        n: 1,
+        n: 3,
       }),
       questionRow({
         questionId: 'q-dolor',
         text: 'Nivel de dolor',
         scaleMin: 0,
         scaleMax: 10,
-        n: 2,
+        n: 6,
       }),
       questionRow({
         questionId: 'q-bool',
@@ -388,38 +621,37 @@ describe('SurveysInsightsService', () => {
         answerTypeId: ANSWER_TYPE_BY_CODE.BOOLEAN,
         scaleMin: null,
         scaleMax: null,
-        n: 3,
+        n: 6,
       }),
     ]);
     repo.countAnswerValues.mockResolvedValue([
-      valueRow({ questionId: 'q-a1', valueNumber: 4, count: 2 }),
-      valueRow({ questionId: 'q-a2', valueNumber: 1, count: 1 }),
-      valueRow({ questionId: 'q-dolor', valueNumber: 10, count: 2 }),
-      valueRow({ questionId: 'q-bool', valueBoolean: true, count: 2 }),
-      valueRow({ questionId: 'q-bool', valueBoolean: false, count: 1 }),
+      valueRow({ questionId: 'q-a1', valueNumber: 4, count: 3 }),
+      valueRow({ questionId: 'q-a2', valueNumber: 1, count: 3 }),
+      valueRow({ questionId: 'q-dolor', valueNumber: 10, count: 6 }),
+      valueRow({ questionId: 'q-bool', valueBoolean: true, count: 4 }),
+      valueRow({ questionId: 'q-bool', valueBoolean: false, count: 2 }),
     ]);
 
-    const result = await run({ from: '2026-10-01' });
+    const r = full(await run({ from: '2026-10-01' }));
 
-    const sala = result.byQuestion.find((q) => q.questionId === 'q-a2');
-    expect(sala).toMatchObject({ dimension: null, n: 3, average: 3 });
-    expect(
-      result.byQuestion.filter((q) => q.text.includes('sala')),
-    ).toHaveLength(1);
+    const sala = r.byQuestion.find((q) => q.questionId === 'q-a2');
+    expect(sala).toMatchObject({ dimension: null, n: 6, average: 2.5 });
+    expect(r.byQuestion.filter((q) => q.text.includes('sala'))).toHaveLength(1);
     // «Nivel de dolor» es 0-10 pero no habla de recomendar: no es NPS.
-    expect(result.nps.n).toBe(0);
-    expect(result.nps.value).toBeNull();
-    const bool = result.byQuestion.find((q) => q.questionId === 'q-bool');
-    expect(bool?.optionCounts).toEqual([
-      { option: 'Sí', count: 2 },
-      { option: 'No', count: 1 },
+    expect(r.nps.n).toBe(0);
+    expect(r.nps.value).toBeNull();
+    expect(
+      r.byQuestion.find((q) => q.questionId === 'q-bool')?.optionCounts,
+    ).toEqual([
+      { option: 'Sí', count: 4 },
+      { option: 'No', count: 2 },
     ]);
   });
 
   it('una pregunta propia 0-10 que pide recomendar cuenta como NPS (plantillas del médico)', async () => {
     const { repo, run } = build();
     repo.countInvitationsByBucket.mockResolvedValue([
-      { bucket: '2026-10-01', issued: 2, answered: 2 },
+      bucketRow('2026-10-01', 6, 6),
     ]);
     repo.countAnswersByQuestion.mockResolvedValue([
       questionRow({
@@ -427,61 +659,23 @@ describe('SurveysInsightsService', () => {
         text: '¿Me recomendaría con un amigo?',
         scaleMin: 0,
         scaleMax: 10,
-        n: 2,
+        n: 6,
       }),
     ]);
     repo.countAnswerValues.mockResolvedValue([
-      valueRow({ questionId: 'q-rec', valueNumber: 10, count: 1 }),
-      valueRow({ questionId: 'q-rec', valueNumber: 0, count: 1 }),
+      valueRow({ questionId: 'q-rec', valueNumber: 10, count: 3 }),
+      valueRow({ questionId: 'q-rec', valueNumber: 0, count: 3 }),
     ]);
 
-    const result = await run({ from: '2026-10-01' });
+    const r = full(await run({ from: '2026-10-01' }));
 
-    expect(result.nps).toEqual({
+    expect(r.nps).toEqual({
       value: 0,
-      promoters: 1,
+      promoters: 3,
       passives: 0,
-      detractors: 1,
-      n: 2,
+      detractors: 3,
+      n: 6,
     });
-  });
-
-  it('muestra las preguntas sin respuestas con n = 0 y sin promedio', async () => {
-    const { repo, run } = build();
-    repo.countInvitationsByBucket.mockResolvedValue([
-      { bucket: '2026-10-01', issued: 1, answered: 0 },
-    ]);
-    repo.countAnswersByQuestion.mockResolvedValue([
-      questionRow({ questionId: 'q-global', text: T.global, n: 0 }),
-    ]);
-
-    const result = await run({ from: '2026-10-01' });
-
-    expect(result.totals).toEqual({ issued: 1, answered: 0, responseRate: 0 });
-    expect(result.byQuestion[0].n).toBe(0);
-    expect(result.byQuestion[0].average).toBeUndefined();
-    expect(result.byQuestion[0].distribution).toHaveLength(5);
-    expect(result.trend).toEqual([{ period: '2026-10-01', answered: 0 }]);
-  });
-
-  it('la tendencia cae al promedio de las escalas 1-5 si no hay pregunta de satisfacción global', async () => {
-    const { repo, run } = build();
-    repo.countInvitationsByBucket.mockResolvedValue([
-      { bucket: '2026-10-01', issued: 2, answered: 2 },
-    ]);
-    repo.countAnswersByQuestion.mockResolvedValue([
-      questionRow({ questionId: 'q-own', text: 'Mi pregunta', n: 2 }),
-    ]);
-    repo.countAnswerValues.mockResolvedValue([
-      valueRow({ questionId: 'q-own', valueNumber: 5, count: 1 }),
-      valueRow({ questionId: 'q-own', valueNumber: 4, count: 1 }),
-    ]);
-
-    const result = await run({ from: '2026-10-01' });
-
-    expect(result.trend).toEqual([
-      { period: '2026-10-01', answered: 2, average: 4.5 },
-    ]);
   });
 
   describe('alcance: profesional, tenant y filtros', () => {
@@ -513,11 +707,11 @@ describe('SurveysInsightsService', () => {
       };
       repo.countInvitationsByBucket.mockImplementation(
         async (_em: unknown, scope: any) => [
-          {
-            bucket: '2026-10-01',
-            issued: issuedByDoctor[scope.practitionerProfileId],
-            answered: 0,
-          },
+          bucketRow(
+            '2026-10-01',
+            issuedByDoctor[scope.practitionerProfileId],
+            0,
+          ),
         ],
       );
 
@@ -537,39 +731,60 @@ describe('SurveysInsightsService', () => {
     it('usa el tenant de la petición: en otro tenant el alcance cambia', async () => {
       const { service, repo } = build();
       await runWithTenant('ten-2', () => service.getInsights({}, doctor));
-      expect(repo.findEarliestIssuedAt.mock.calls[0][1].tenantId).toBe('ten-2');
+      expect(repo.countInvitationsByBucket.mock.calls[0][1].tenantId).toBe(
+        'ten-2',
+      );
     });
   });
 
-  describe('periodo y granularidad', () => {
-    it('una fecha `to` sola incluye todo ese día', async () => {
+  describe('periodo: sólo fechas de día', () => {
+    it('`to` incluye todo ese día: la cota superior es la medianoche siguiente', async () => {
       const { repo, run } = build();
       await run({ from: '2026-10-01', to: '2026-10-28' });
       const scope = repo.countInvitationsByBucket.mock.calls[0][1];
-      expect(scope.from).toEqual(new Date('2026-10-01'));
+      expect(scope.from).toEqual(new Date('2026-10-01T00:00:00.000Z'));
       expect(scope.toExclusive).toEqual(new Date('2026-10-29T00:00:00.000Z'));
     });
 
-    it('un `to` con hora es inclusivo hasta ese instante', async () => {
+    it('sin `from` vale 365 días antes de `to`; sin `to`, hoy', async () => {
       const { repo, run } = build();
-      await run({ from: '2026-10-01', to: '2026-10-28T12:00:00.000Z' });
+      await run({ to: '2026-10-28' });
       const scope = repo.countInvitationsByBucket.mock.calls[0][1];
-      expect(scope.toExclusive).toEqual(new Date('2026-10-28T12:00:00.001Z'));
+      expect(scope.from).toEqual(new Date('2025-10-28T00:00:00.000Z'));
+
+      await run({});
+      const open = repo.countInvitationsByBucket.mock.calls[1][1];
+      const today = new Date().toISOString().slice(0, 10);
+      expect(
+        open.toExclusive.getTime() - Date.parse(`${today}T00:00:00Z`),
+      ).toBe(24 * 60 * 60 * 1000);
     });
 
-    it('rechaza un periodo invertido con 412', async () => {
+    it.each([
+      ['from con hora', { from: '2026-10-01T10:00:00Z' }],
+      ['from con hora y offset', { from: '2026-10-01T10:00:00-04:00' }],
+      ['to con hora', { to: '2026-10-28T12:00:00.000Z' }],
+      ['to como instante', { to: '2026-10-28T00:00:00Z' }],
+      ['fecha imposible', { from: '2026-13-45' }],
+      ['día inexistente', { to: '2026-02-30' }],
+      ['formato libre', { from: '1/10/2026' }],
+      ['from posterior a to', { from: '2026-10-28', to: '2026-10-01' }],
+      ['más de 366 días', { from: '2025-10-01', to: '2026-10-28' }],
+    ])('rechaza con 400: %s', async (_name, query) => {
       const { repo, run } = build();
-      await expect(
-        run({ from: '2026-10-28', to: '2026-10-01' }),
-      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      await expect(run(query)).rejects.toBeInstanceOf(BadRequestException);
       expect(repo.countInvitationsByBucket).not.toHaveBeenCalled();
     });
 
-    it('rechaza una fecha imposible con 412', async () => {
+    it('acepta el mismo día en ambos extremos y el máximo de 366 días', async () => {
       const { run } = build();
-      await expect(run({ from: '2026-13-45' })).rejects.toBeInstanceOf(
-        PreconditionFailedException,
-      );
+      await expect(
+        run({ from: '2026-10-10', to: '2026-10-10' }),
+      ).resolves.toBeDefined();
+      // 2025-10-28 → 2026-10-28 son 366 días con ambos extremos.
+      await expect(
+        run({ from: '2025-10-28', to: '2026-10-28' }),
+      ).resolves.toBeDefined();
     });
 
     it.each([
@@ -578,23 +793,12 @@ describe('SurveysInsightsService', () => {
       ['2025-11-01', '2026-10-28', 'MONTH', 'month'],
     ])('periodo %s → %s: tendencia %s', async (from, to, granularity, unit) => {
       const { repo, run } = build();
-      const result = await run({ from, to });
+      seedBaseScenario(repo);
+      const result = full(await run({ from, to }));
       expect(result.trendGranularity).toBe(granularity);
       expect(repo.countInvitationsByBucket.mock.calls[0][2]).toBe(unit);
       expect(repo.countAnswersByQuestion.mock.calls[0][2]).toBe(unit);
       expect(repo.countAnswerValues.mock.calls[0][2]).toBe(unit);
-      // Con `from` explícito no hace falta buscar la primera emisión.
-      expect(repo.findEarliestIssuedAt).not.toHaveBeenCalled();
-    });
-
-    it('sin `from` la granularidad sale de la primera emisión', async () => {
-      const { repo, run } = build();
-      repo.findEarliestIssuedAt.mockResolvedValue(
-        new Date(Date.now() - 400 * 24 * 60 * 60 * 1000),
-      );
-      const result = await run({});
-      expect(result.trendGranularity).toBe('MONTH');
-      expect(repo.findEarliestIssuedAt).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -621,7 +825,7 @@ describe('SurveysInsightsService', () => {
         );
       }
 
-      const result = await run({ from: '2026-10-01' });
+      const result = full(await run({ from: '2026-10-01' }));
       const json = JSON.stringify(result);
 
       expect(json).not.toMatch(/SECRET/);

@@ -1,5 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsISO8601, IsOptional, IsUUID } from 'class-validator';
+import { IsOptional, IsUUID, Matches } from 'class-validator';
+import {
+  DATE_ONLY_PATTERN,
+  MAX_RANGE_DAYS,
+  MIN_COHORT,
+} from '../insights.constants';
 import { ANSWER_TYPE_CODES, type AnswerTypeCode } from '../surveys.concepts';
 
 /** Granularidad de los puntos de la tendencia. */
@@ -7,30 +12,24 @@ export type InsightsTrendGranularity = 'DAY' | 'WEEK' | 'MONTH';
 
 /** Parámetros de `GET /surveys/insights`. Todos opcionales. */
 export class InsightsQueryDto {
-  /**
-   * Inicio del periodo (inclusive). Una fecha sola (`2026-10-01`) vale desde las
-   * 00:00 UTC de ese día.
-   */
+  /** Primer día del periodo (inclusive), `YYYY-MM-DD`. */
   @ApiPropertyOptional({
-    description:
-      'Inicio del periodo, inclusive (ISO 8601). Se filtra por la fecha de emisión del cuestionario. Sin valor: desde la primera emisión.',
+    description: `Primer día del periodo, inclusive. Sólo fecha de día (YYYY-MM-DD, UTC); con hora se rechaza con 400. Se filtra por la fecha de emisión del cuestionario. Sin valor: 365 días antes de \`to\`.`,
     example: '2026-08-01',
+    format: 'date',
   })
   @IsOptional()
-  @IsISO8601()
+  @Matches(DATE_ONLY_PATTERN, { message: 'from debe ser una fecha YYYY-MM-DD' })
   from?: string;
 
-  /**
-   * Fin del periodo (inclusive). Una fecha sola (`2026-10-31`) incluye ese día
-   * completo.
-   */
+  /** Último día del periodo (inclusive), `YYYY-MM-DD`. */
   @ApiPropertyOptional({
-    description:
-      'Fin del periodo, inclusive (ISO 8601). Una fecha sola incluye todo ese día (UTC). Sin valor: hasta ahora.',
+    description: `Último día del periodo, inclusive. Sólo fecha de día (YYYY-MM-DD, UTC). Debe ser igual o posterior a \`from\`; el periodo no puede pasar de ${MAX_RANGE_DAYS} días. Sin valor: hoy (UTC).`,
     example: '2026-10-28',
+    format: 'date',
   })
   @IsOptional()
-  @IsISO8601()
+  @Matches(DATE_ONLY_PATTERN, { message: 'to debe ser una fecha YYYY-MM-DD' })
   to?: string;
 
   /**
@@ -92,6 +91,15 @@ export class InsightsNpsDto {
   /** Respuestas que sostienen el cálculo. */
   @ApiProperty()
   n!: number;
+
+  /**
+   * `true` si hay respuestas pero menos de {@link MIN_COHORT}: `value` y los
+   * conteos se omiten (0 / `null`) para no exponer respuestas sueltas.
+   */
+  @ApiPropertyOptional({
+    description: `true si hay menos de ${MIN_COHORT} respuestas: no se calcula`,
+  })
+  suppressed?: boolean;
 }
 
 /** Cuántas respuestas tuvo un valor de una escala. */
@@ -141,8 +149,17 @@ export class InsightsQuestionDto {
   @ApiProperty()
   n!: number;
 
-  /** Promedio. Sólo en preguntas SCALE con al menos una respuesta. */
-  @ApiPropertyOptional({ description: 'Sólo SCALE con n > 0' })
+  /**
+   * `true` si la pregunta tiene menos de {@link MIN_COHORT} respuestas: se
+   * omiten `average`, `distribution` (vacía) y `optionCounts`; `n` se conserva.
+   */
+  @ApiPropertyOptional({
+    description: `true si n < ${MIN_COHORT}: sin promedio, distribución ni opciones`,
+  })
+  suppressed?: boolean;
+
+  /** Promedio. Sólo en preguntas SCALE con respuestas suficientes. */
+  @ApiPropertyOptional({ description: 'Sólo SCALE no suprimida' })
   average?: number;
 
   /**
@@ -162,7 +179,11 @@ export class InsightsQuestionDto {
 
 /** Un punto de la tendencia. */
 export class InsightsTrendPointDto {
-  /** Primer día del tramo (`YYYY-MM-DD`, UTC). */
+  /**
+   * Primer día del tramo (`YYYY-MM-DD`, UTC). Los tramos con menos de
+   * {@link MIN_COHORT} respondidos se funden con el siguiente: ningún punto
+   * muestra una respuesta suelta.
+   */
   @ApiProperty({ example: '2026-10-05' })
   period!: string;
 
@@ -171,9 +192,9 @@ export class InsightsTrendPointDto {
   answered!: number;
 
   /**
-   * Promedio de satisfacción del tramo. Sale de la pregunta de satisfacción
-   * global; si el resumen no tiene ninguna, del promedio de las preguntas de
-   * escala 1-5.
+   * Promedio de satisfacción del tramo, sólo si lo sostienen al menos
+   * {@link MIN_COHORT} respuestas. Sale de la pregunta de satisfacción global;
+   * si el resumen no tiene ninguna, del promedio de las preguntas de escala 1-5.
    */
   @ApiPropertyOptional()
   average?: number;
@@ -197,38 +218,61 @@ export class InsightsCommentDto {
   submittedAt!: string;
 }
 
+/** Aviso de privacidad del resumen. */
+export class InsightsPrivacyDto {
+  /** Respondidas necesarias para mostrar cálculos. */
+  @ApiProperty({ example: MIN_COHORT })
+  minCohort!: number;
+
+  /**
+   * `true` si el alcance filtrado tiene menos respondidas que `minCohort`: sólo
+   * vienen `totals` y `privacy`; el resto de los campos no se envía.
+   */
+  @ApiProperty()
+  suppressed!: boolean;
+}
+
 /**
  * Resumen general de cómo le va al profesional, en agregado.
  *
  * **No contiene nada que identifique al paciente ni a la atención**: ni
  * `patient_profile_id`, ni `appointment_booking_id`, ni la hora de los envíos.
+ * Con menos de {@link MIN_COHORT} respuestas en el alcance filtrado sólo
+ * devuelve `totals` y `privacy.suppressed = true`.
  */
 export class SurveyInsightsDto {
-  /** Emitidos, respondidos y tasa. */
+  /** Emitidos, respondidos y tasa. Siempre presente. */
   @ApiProperty({ type: InsightsTotalsDto })
   totals!: InsightsTotalsDto;
 
-  /** NPS de la pregunta de recomendación. */
-  @ApiProperty({ type: InsightsNpsDto })
-  nps!: InsightsNpsDto;
+  /** Umbral de privacidad aplicado. Siempre presente. */
+  @ApiProperty({ type: InsightsPrivacyDto })
+  privacy!: InsightsPrivacyDto;
 
-  /** Una entrada por pregunta (o dimensión), con su `n`. */
-  @ApiProperty({ type: [InsightsQuestionDto] })
-  byQuestion!: InsightsQuestionDto[];
+  /** NPS de la pregunta de recomendación. Ausente si `privacy.suppressed`. */
+  @ApiPropertyOptional({ type: InsightsNpsDto })
+  nps?: InsightsNpsDto;
 
-  /** Tendencia por tramos de fecha de emisión. */
-  @ApiProperty({ type: [InsightsTrendPointDto] })
-  trend!: InsightsTrendPointDto[];
+  /** Una entrada por pregunta (o dimensión), con su `n`. Ausente si suprimido. */
+  @ApiPropertyOptional({ type: [InsightsQuestionDto] })
+  byQuestion?: InsightsQuestionDto[];
 
-  /** Granularidad de `trend`, según la amplitud del periodo. */
-  @ApiProperty({ enum: ['DAY', 'WEEK', 'MONTH'] })
-  trendGranularity!: InsightsTrendGranularity;
+  /** Tendencia por tramos de fecha de emisión. Ausente si suprimido. */
+  @ApiPropertyOptional({ type: [InsightsTrendPointDto] })
+  trend?: InsightsTrendPointDto[];
 
-  /** Alertas de seguridad. */
-  @ApiProperty({ type: InsightsSafetyAlertsDto })
-  safetyAlerts!: InsightsSafetyAlertsDto;
+  /** Granularidad de `trend`, según la amplitud del periodo. Ausente si suprimido. */
+  @ApiPropertyOptional({ enum: ['DAY', 'WEEK', 'MONTH'] })
+  trendGranularity?: InsightsTrendGranularity;
 
-  /** Comentarios abiertos, los más recientes primero (tope 100). */
-  @ApiProperty({ type: [InsightsCommentDto] })
-  comments!: InsightsCommentDto[];
+  /** Alertas de seguridad. Ausente si suprimido. */
+  @ApiPropertyOptional({ type: InsightsSafetyAlertsDto })
+  safetyAlerts?: InsightsSafetyAlertsDto;
+
+  /**
+   * Comentarios abiertos (tope 20), en un orden estable que no es
+   * cronológico. Ausente si suprimido.
+   */
+  @ApiPropertyOptional({ type: [InsightsCommentDto] })
+  comments?: InsightsCommentDto[];
 }

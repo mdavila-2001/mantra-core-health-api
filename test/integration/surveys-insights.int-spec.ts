@@ -1,7 +1,9 @@
 import 'dotenv/config';
 import { randomUUID } from 'node:crypto';
 import { MikroORM, EntityManager, defineConfig } from '@mikro-orm/postgresql';
+import { BadRequestException } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
+import type { SurveyInsightsDto } from '../../src/modules/surveys/dto/insights.dto';
 import { runWithTenant } from '../../src/common';
 import { InsightsRepository } from '../../src/modules/surveys/repositories/insights.repository';
 import { SurveysInsightsService } from '../../src/modules/surveys/services/surveys-insights.service';
@@ -335,8 +337,39 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
         { key: 'access', number: 5 },
         { key: 'global', number: 5 },
         { key: 'nps', number: 10 },
+        { key: 'safety', choices: [SAFETY_OPTIONS[0]] },
         { key: 'open', text: 'Muy amable, gracias' },
       ]);
+      // Propias, respondidas (dias 6 y 7): hacen falta 5 respondidas para que
+      // el resumen se muestre.
+      await makeInvitation(
+        tx,
+        own,
+        tenant,
+        await makeBooking(tx, tenant, d1),
+        6,
+        [
+          { key: 'own', number: 3 },
+          { key: 'access', number: 4 },
+          { key: 'global', number: 5 },
+          { key: 'nps', number: 9 },
+          { key: 'safety', choices: [SAFETY_OPTIONS[0]] },
+        ],
+      );
+      await makeInvitation(
+        tx,
+        own,
+        tenant,
+        await makeBooking(tx, tenant, d1),
+        7,
+        [
+          { key: 'own', number: 5 },
+          { key: 'access', number: 3 },
+          { key: 'global', number: 4 },
+          { key: 'nps', number: 10 },
+          { key: 'safety', choices: [SAFETY_OPTIONS[0]] },
+        ],
+      );
       // Propia, pendiente (dia 4).
       await makeInvitation(
         tx,
@@ -395,6 +428,20 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
         { key: 'safety', choices: [SAFETY_OPTIONS[1]] },
         { key: 'open', text: 'SISTEMA-DE-OTRO-MEDICO' },
       ]);
+      // Con tres más, D2 también supera la cohorte mínima.
+      for (let day = 7; day <= 9; day += 1) {
+        await makeInvitation(
+          tx,
+          other,
+          tenant,
+          await makeBooking(tx, tenant, d2),
+          day,
+          [
+            { key: 'global', number: 2 },
+            { key: 'open', text: `OTRO-MEDICO-${day}` },
+          ],
+        );
+      }
 
       // --- Otro tenant, mismo profesional D1: tampoco ------------------------
       const foreign = await makeTemplate(tx, otherTenant, d1, baseQuestions);
@@ -423,6 +470,10 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
     practitionerProfileId: practitioner,
     tenantId,
   });
+  const full = (result: SurveyInsightsDto): Required<SurveyInsightsDto> => {
+    expect(result.privacy.suppressed).toBe(false);
+    return result as Required<SurveyInsightsDto>;
+  };
   const insights = (
     query: Record<string, string>,
     practitioner = d1,
@@ -433,83 +484,138 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
     );
 
   it('suma las plantillas propias y las de sistema emitidas por las atenciones del médico', async () => {
-    const result = await insights({ from: '2026-10-01', to: '2026-10-28' });
+    const result = full(
+      await insights({ from: '2026-10-01', to: '2026-10-28' }),
+    );
 
-    // propias: dia 3 (resp), dia 4 (pend), dia 20 (resp, vía asignación de servicio)
-    // sistema: dia 10 (resp), dia 12 (resp)
+    // propias: dias 3, 6, 7 (resp), 4 (pend), 20 (resp, por asignación de servicio)
+    // sistema: dias 10 y 12 (resp)  → 7 emitidos, 6 respondidos
     expect(result.totals).toEqual({
-      issued: 5,
-      answered: 4,
-      responseRate: 0.8,
+      issued: 7,
+      answered: 6,
+      responseRate: 0.8571,
     });
+    expect(result.privacy).toEqual({ minCohort: 5, suppressed: false });
 
-    // NPS: 10 (promotor), 3 (detractor), 8 (pasivo)
+    // NPS: 10, 3, 8, 9, 10 → 3 promotores, 1 pasivo, 1 detractor
     expect(result.nps).toEqual({
-      value: 0,
-      promoters: 1,
+      value: 40,
+      promoters: 3,
       passives: 1,
       detractors: 1,
-      n: 3,
+      n: 5,
     });
     expect(result.safetyAlerts).toEqual({ n: 1 });
 
     const global = result.byQuestion.find(
       (q) => q.dimension === 'satisfaccion_global',
     )!;
-    // 5 (propia dia 3), 3 y 4 (sistema), 1 (propia dia 20) → n=4, promedio 3.25
-    expect(global.n).toBe(4);
-    expect(global.average).toBe(3.25);
+    // 5, 5, 4, 3, 4, 1 → n=6, promedio 3.67
+    expect(global.n).toBe(6);
+    expect(global.average).toBe(3.67);
     expect(global.distribution).toEqual([
       { value: 1, count: 1 },
       { value: 2, count: 0 },
       { value: 3, count: 1 },
-      { value: 4, count: 1 },
-      { value: 5, count: 1 },
+      { value: 4, count: 2 },
+      { value: 5, count: 2 },
     ]);
 
     // La misma dimensión de la plantilla propia y de la de sistema es UNA fila.
-    expect(
-      result.byQuestion.filter((q) => q.dimension === 'esfuerzo_acceso'),
-    ).toHaveLength(1);
-    const access = result.byQuestion.find(
+    const access = result.byQuestion.filter(
       (q) => q.dimension === 'esfuerzo_acceso',
-    )!;
-    expect(access.n).toBe(3);
-    expect(access.average).toBeCloseTo(3.67, 2);
+    );
+    expect(access).toHaveLength(1);
+    expect(access[0].n).toBe(5);
+    expect(access[0].average).toBe(3.6);
 
+    // Pregunta propia con 3 respuestas (< 5): se cuenta pero no se desglosa.
     const own = result.byQuestion.find((q) => q.text === T.own)!;
-    expect(own).toMatchObject({ dimension: null, n: 1, average: 4 });
+    expect(own).toMatchObject({ dimension: null, n: 3, suppressed: true });
+    expect(own.average).toBeUndefined();
 
     const safety = result.byQuestion.find(
       (q) => q.dimension === 'seguridad_percibida',
     )!;
-    expect(safety.n).toBe(2);
+    expect(safety.n).toBe(5);
     expect(safety.optionCounts).toEqual([
-      { option: SAFETY_OPTIONS[0], count: 1 },
+      { option: SAFETY_OPTIONS[0], count: 4 },
       { option: SAFETY_OPTIONS[1], count: 1 },
       { option: SAFETY_OPTIONS[2], count: 0 },
     ]);
 
-    // Comentarios: sólo texto y día; los más recientes primero; ninguno ajeno.
-    expect(result.comments).toEqual([
+    // Comentarios: sólo texto y día, ninguno ajeno, sin orden cronológico forzado.
+    expect(
+      [...result.comments].sort((a, b) => a.text.localeCompare(b.text)),
+    ).toEqual([
       { text: 'Esperé demasiado', submittedAt: '2026-10-11' },
       { text: 'Muy amable, gracias', submittedAt: '2026-10-04' },
     ]);
   });
 
+  it('suprime todo con menos de 5 respondidas: un día, un servicio o una respuesta suelta', async () => {
+    // Un solo día con una sola respuesta (la del dia 10, de la encuesta de sistema).
+    const oneDay = await insights({ from: '2026-10-10', to: '2026-10-10' });
+    expect(oneDay).toEqual({
+      totals: { issued: 1, answered: 1, responseRate: 1 },
+      privacy: { minCohort: 5, suppressed: true },
+    });
+    expect(JSON.stringify(oneDay)).not.toContain('Esperé demasiado');
+
+    // Del 1 al 10 hay 4 respondidas (dias 3, 6, 7 y 10): no alcanza.
+    const four = await insights({ from: '2026-10-01', to: '2026-10-10' });
+    expect(four.totals).toMatchObject({ issued: 5, answered: 4 });
+    expect(four.privacy.suppressed).toBe(true);
+    expect(four.byQuestion).toBeUndefined();
+    expect(four.comments).toBeUndefined();
+  });
+
+  it('muestra el resumen justo al llegar a 5 respondidas', async () => {
+    // dias 3, 6, 7, 10 y 12 → 5 respondidas (el 4 pendiente cuenta como emitido).
+    const five = await insights({ from: '2026-10-01', to: '2026-10-12' });
+    expect(five.totals).toEqual({
+      issued: 6,
+      answered: 5,
+      responseRate: 0.8333,
+    });
+    expect(five.privacy.suppressed).toBe(false);
+    expect(five.byQuestion!.length).toBeGreaterThan(0);
+
+    // Sin el dia 12 son 4: se suprime.
+    const four = await insights({ from: '2026-10-01', to: '2026-10-11' });
+    expect(four.totals.answered).toBe(4);
+    expect(four.privacy.suppressed).toBe(true);
+  });
+
+  it('rechaza con 400 un periodo con hora, invertido o de más de 366 días', async () => {
+    for (const query of [
+      { from: '2026-10-01T10:00:00Z' },
+      { to: '2026-10-28T23:59:59Z' },
+      { from: '2026-10-28', to: '2026-10-01' },
+      { from: '2025-01-01', to: '2026-10-28' },
+    ]) {
+      await expect(insights(query)).rejects.toBeInstanceOf(BadRequestException);
+    }
+  });
+
   it('aísla por médico: D2 no ve nada de D1 y D1 no ve nada de D2', async () => {
     const mine = await insights({ from: '2026-10-01', to: '2026-10-28' }, d1);
-    const theirs = await insights({ from: '2026-10-01', to: '2026-10-28' }, d2);
+    const theirs = full(
+      await insights({ from: '2026-10-01', to: '2026-10-28' }, d2),
+    );
 
-    // D2: su plantilla (dia 5) + la de sistema emitida por su atención (dia 6).
-    expect(theirs.totals).toEqual({ issued: 2, answered: 2, responseRate: 1 });
-    expect(theirs.safetyAlerts).toEqual({ n: 1 });
+    // D2: su plantilla (dia 5 y 7..9) + la de sistema emitida por su atención (dia 6).
+    expect(theirs.totals).toEqual({ issued: 5, answered: 5, responseRate: 1 });
     const theirTexts = theirs.comments.map((c) => c.text).sort();
     expect(theirTexts).toEqual([
       'COMENTARIO-DE-OTRO-MEDICO',
+      'OTRO-MEDICO-7',
+      'OTRO-MEDICO-8',
+      'OTRO-MEDICO-9',
       'SISTEMA-DE-OTRO-MEDICO',
     ]);
     expect(JSON.stringify(mine)).not.toMatch(/OTRO-MEDICO|OTRO-TENANT/);
+    expect(JSON.stringify(theirs)).not.toMatch(/Muy amable|Esperé demasiado/);
   });
 
   it('aísla por tenant: el mismo médico en otro tenant sólo ve lo de ese tenant', async () => {
@@ -518,10 +624,11 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
       d1,
       otherTenant,
     );
-    expect(result.totals).toEqual({ issued: 1, answered: 1, responseRate: 1 });
-    expect(result.comments.map((c) => c.text)).toEqual([
-      'COMENTARIO-DE-OTRO-TENANT',
-    ]);
+    // Una sola respuesta de ese tenant: se cuenta, pero no se desglosa.
+    expect(result).toEqual({
+      totals: { issued: 1, answered: 1, responseRate: 1 },
+      privacy: { minCohort: 5, suppressed: true },
+    });
     // Un tenant sin nada de este médico: vacío.
     const nothing = await insights({}, d1, randomUUID());
     expect(nothing.totals).toEqual({
@@ -529,15 +636,7 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
       answered: 0,
       responseRate: null,
     });
-  });
-
-  it('filtra por periodo de emisión (inclusive en ambos extremos)', async () => {
-    const early = await insights({ from: '2026-10-01', to: '2026-10-04' });
-    expect(early.totals).toEqual({ issued: 2, answered: 1, responseRate: 0.5 });
-    const late = await insights({ from: '2026-10-11' });
-    expect(late.totals.issued).toBe(2); // dia 12 (sistema) + dia 20 (propia)
-    const none = await insights({ from: '2026-11-01' });
-    expect(none.totals.issued).toBe(0);
+    expect(nothing.privacy.suppressed).toBe(true);
   });
 
   it('filtra por servicio: por la oferta de la reserva y por la asignación de servicio', async () => {
@@ -552,6 +651,7 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
       answered: 1,
       responseRate: 1,
     });
+    expect(byOffering.privacy.suppressed).toBe(true);
 
     const byAssignment = await insights({
       from: '2026-10-01',
@@ -567,38 +667,43 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
 
     const unknown = await insights({
       from: '2026-10-01',
+      to: '2026-10-28',
       serviceId: randomUUID(),
     });
     expect(unknown.totals.issued).toBe(0);
   });
 
-  it('la tendencia agrupa por tramo y trae el promedio de satisfacción', async () => {
-    const result = await insights({ from: '2026-10-01', to: '2026-10-28' });
+  it('la tendencia agrupa por tramo y funde los tramos con menos de 5 respondidos', async () => {
+    const result = full(
+      await insights({ from: '2026-10-01', to: '2026-10-28' }),
+    );
     expect(result.trendGranularity).toBe('DAY');
+    // Por día: 3(1) 4(0) 6(1) 7(1) 10(1) 12(1) 20(1). Se funden hasta sumar 5
+    // (dias 3..12) y el remanente (dia 20) se suma al punto anterior.
     expect(result.trend).toEqual([
-      { period: '2026-10-03', answered: 1, average: 5 },
-      { period: '2026-10-04', answered: 0 },
-      { period: '2026-10-10', answered: 1, average: 3 },
-      { period: '2026-10-12', answered: 1, average: 4 },
-      { period: '2026-10-20', answered: 1, average: 1 },
+      { period: '2026-10-03', answered: 6, average: 3.67 },
     ]);
 
-    const weekly = await insights({ from: '2026-08-01', to: '2026-10-28' });
+    const weekly = full(
+      await insights({ from: '2026-08-01', to: '2026-10-28' }),
+    );
     expect(weekly.trendGranularity).toBe('WEEK');
-    // semana ISO que empieza el lunes: 2026-10-05 → días 5..11
-    expect(weekly.trend.map((p) => p.period)).toEqual([
-      '2026-09-28',
-      '2026-10-05',
-      '2026-10-12',
-      '2026-10-19',
-    ]);
-    const monthly = await insights({ from: '2025-10-01', to: '2026-10-28' });
+    for (const point of weekly.trend) {
+      expect(point.answered).toBeGreaterThanOrEqual(5);
+    }
+    // Semana ISO que empieza el lunes: el dia 3 (sábado) cae en la del 28/9.
+    expect(weekly.trend[0].period).toBe('2026-09-28');
+
+    const monthly = full(
+      await insights({ from: '2025-11-01', to: '2026-10-28' }),
+    );
     expect(monthly.trendGranularity).toBe('MONTH');
     expect(monthly.trend.map((p) => p.period)).toEqual(['2026-10-01']);
   });
 
   it('no devuelve nada que identifique al paciente o a la atención, ni la hora', async () => {
     const result = await insights({ from: '2026-10-01', to: '2026-10-28' });
+    expect(result.privacy.suppressed).toBe(false);
     const json = JSON.stringify(result);
     const rows = (await em.getConnection().execute(
       `select patient_profile_id::text as id from surveys.survey_invitations where tenant_id = ?
@@ -650,7 +755,7 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
     const result = await insights({ from: '2026-10-01', to: '2026-10-28' });
     expect(queries).toBe(small);
     expect(small).toBe(4);
-    expect(result.totals.issued).toBe(9);
+    expect(result.totals.issued).toBe(11);
     expect(ownTemplateId).toBeDefined();
     expect(sysAssignmentId).toBeDefined();
   });
