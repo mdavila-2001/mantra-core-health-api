@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { SURVEYS } from '../surveys.concepts';
+import type { SystemSurveyKind } from '../surveys.base-definitions';
 import { MAX_COMMENTS } from '../insights.constants';
 
 /** Tramo de fecha en el que se agrupan los cuestionarios emitidos. */
@@ -48,6 +49,11 @@ export interface InsightsQuestionRow {
   position: number;
   /** Alta de la pregunta, en segundos desde la época. */
   createdAtEpoch: number;
+  /**
+   * Tipo de encuesta base si la pregunta es de una plantilla de sistema; ausente
+   * (o `null`) si es del profesional.
+   */
+  systemKind?: SystemSurveyKind | null;
   /** Tramo de la invitación. */
   bucket: string;
   /** Respuestas dadas a la pregunta en ese tramo (0 si ninguna). */
@@ -97,9 +103,17 @@ interface ScopeSql {
  *
  * 1. son de una plantilla cuyo dueño es el profesional
  *    (`owner_practitioner_id`); o
- * 2. son de una plantilla **sin dueño profesional** (la encuesta base del
- *    sistema) y la atención que las originó fue del profesional: la reserva
- *    cae en un cupo de un recurso de agenda cuyo `resource_ref_id` es él.
+ * 2. son de la **encuesta base del sistema** de este tenant (dueño tipado
+ *    `SYSTEM_BASE_CONSULTATION` / `SYSTEM_BASE_SERVICE` con `owner_id` = el
+ *    tenant, tal como la escribe `ensureSystemTemplate`) y la atención que las
+ *    originó fue del profesional: la reserva cae en un cupo de un recurso de
+ *    agenda cuyo `resource_ref_id` es él. Una plantilla de otra organización,
+ *    o sin dueño profesional pero que no es la base, no cuenta.
+ *
+ * Una invitación puede llevar además la encuesta del profesional detrás de la
+ * base (`extension_survey_version_id`): sus preguntas y respuestas cuentan en el
+ * resumen del médico dueño de esa extensión, junto con las de la base. Si la
+ * extensión no es de él, sus preguntas no entran.
  *
  * El filtro por periodo es sobre la fecha de **emisión**: el cuestionario
  * pertenece al periodo en que se atendió al paciente, y así la tasa de
@@ -175,17 +189,29 @@ export class InsightsRepository {
               q.options AS "options",
               q.position AS "position",
               extract(epoch FROM q.created_at)::float8 AS "createdAtEpoch",
+              CASE WHEN qt.owner_id = qt.tenant_id
+                    AND qt.owner_type_concept_id = ? THEN 'CONSULTATION'
+                   WHEN qt.owner_id = qt.tenant_id
+                    AND qt.owner_type_concept_id = ? THEN 'SERVICE' END
+                AS "systemKind",
               sc.bucket AS "bucket",
               count(a.id)::int AS "n"
          FROM scope sc
          JOIN surveys.survey_questions q
-           ON q.survey_version_id = sc.survey_version_id
+           ON q.survey_version_id IN (sc.survey_version_id, sc.extension_version_id)
+         JOIN surveys.survey_versions qv ON qv.id = q.survey_version_id
+         JOIN surveys.survey_templates qt ON qt.id = qv.survey_template_id
          LEFT JOIN surveys.survey_responses r
            ON r.survey_invitation_id = sc.invitation_id
          LEFT JOIN surveys.survey_answers a
            ON a.survey_response_id = r.id AND a.survey_question_id = q.id
-        GROUP BY q.id, sc.bucket`,
-      scoped.params,
+        GROUP BY q.id, sc.bucket, qt.owner_type_concept_id, qt.owner_id,
+                 qt.tenant_id`,
+      [
+        ...scoped.params,
+        SURVEYS.SYSTEM_BASE_CONSULTATION,
+        SURVEYS.SYSTEM_BASE_SERVICE,
+      ],
       'all',
     );
     return rows.map((row) => ({
@@ -229,7 +255,7 @@ export class InsightsRepository {
            ON a.survey_response_id = r.id
          JOIN surveys.survey_questions q
            ON q.id = a.survey_question_id
-          AND q.survey_version_id = sc.survey_version_id
+          AND q.survey_version_id IN (sc.survey_version_id, sc.extension_version_id)
          LEFT JOIN LATERAL jsonb_array_elements_text(
               CASE WHEN jsonb_typeof(a.value_choices) = 'array'
                    THEN a.value_choices END
@@ -273,7 +299,7 @@ export class InsightsRepository {
            ON a.survey_response_id = r.id
          JOIN surveys.survey_questions q
            ON q.id = a.survey_question_id
-          AND q.survey_version_id = sc.survey_version_id
+          AND q.survey_version_id IN (sc.survey_version_id, sc.extension_version_id)
         WHERE q.answer_type_concept_id = ?
           AND a.value_text IS NOT NULL
           AND btrim(a.value_text) <> ''
@@ -292,6 +318,7 @@ export class InsightsRepository {
    */
   private buildScope(scope: InsightsScope, unit: InsightsBucketUnit): ScopeSql {
     const params: unknown[] = [
+      scope.practitionerProfileId,
       SURVEYS.INVITATION_ANSWERED,
       scope.tenantId,
       scope.tenantId,
@@ -306,7 +333,12 @@ export class InsightsRepository {
       params.push(scope.toExclusive);
     }
 
-    params.push(scope.practitionerProfileId, scope.practitionerProfileId);
+    params.push(
+      scope.practitionerProfileId,
+      SURVEYS.SYSTEM_BASE_CONSULTATION,
+      SURVEYS.SYSTEM_BASE_SERVICE,
+      scope.practitionerProfileId,
+    );
     const resourceTypes = PRACTITIONER_RESOURCE_TYPES.map(() => '?').join(', ');
     params.push(...PRACTITIONER_RESOURCE_TYPES);
 
@@ -336,6 +368,9 @@ export class InsightsRepository {
       WITH scope AS (
         SELECT i.id AS invitation_id,
                i.survey_version_id,
+               CASE WHEN et.owner_practitioner_id = ?
+                     AND et.tenant_id = i.tenant_id
+                    THEN ev.id END AS extension_version_id,
                i.issued_at,
                (i.status_concept_id = ?) AS answered,
                to_char(
@@ -344,12 +379,17 @@ export class InsightsRepository {
           FROM surveys.survey_invitations i
           JOIN surveys.survey_versions v ON v.id = i.survey_version_id
           JOIN surveys.survey_templates t ON t.id = v.survey_template_id
+          LEFT JOIN surveys.survey_versions ev
+            ON ev.id = i.extension_survey_version_id
+          LEFT JOIN surveys.survey_templates et
+            ON et.id = ev.survey_template_id
          WHERE i.tenant_id = ?
            AND t.tenant_id = ?${filters}
            AND (
              t.owner_practitioner_id = ?
              OR (
-               t.owner_practitioner_id IS NULL
+               t.owner_type_concept_id IN (?, ?)
+               AND t.owner_id = i.tenant_id
                AND EXISTS (
                  SELECT 1
                    FROM scheduling.appointment_bookings b

@@ -11,6 +11,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { TemplatesRepository } from '../repositories';
+import { DEFAULT_RESPONSE_WINDOW_DAYS } from '../surveys.constants';
 import { SurveysErrorReason } from '../surveys.error-reasons';
 import { assertNotSystemTemplate } from '../surveys.system-guard';
 import {
@@ -50,9 +51,6 @@ interface QuestionShape {
   /** Máximo de la escala. */
   scaleMax?: number;
 }
-
-/** Plazo por defecto, en días, para responder una encuesta. */
-const DEFAULT_RESPONSE_WINDOW_DAYS = 30;
 
 /** Estado de plantilla expuesto por el contrato → concept id que lo respalda. */
 const TEMPLATE_STATUS_CODE_BY_ID: Readonly<

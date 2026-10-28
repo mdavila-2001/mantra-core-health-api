@@ -26,6 +26,8 @@ import {
 } from '../../src/modules/surveys/services';
 import { systemSurveyIds } from '../../src/modules/surveys/services/surveys-system-templates.service';
 import { SURVEYS } from '../../src/modules/surveys/surveys.concepts';
+import { InsightsRepository } from '../../src/modules/surveys/repositories/insights.repository';
+import { SurveysInsightsService } from '../../src/modules/surveys/services/surveys-insights.service';
 import { SCHED } from '../../src/modules/scheduling/domain/scheduling.concepts';
 import { runWithTenant, type AuthenticatedUser } from '../../src/common';
 
@@ -147,6 +149,8 @@ describeIfDb(
     async function insertBooking(opts: {
       offering?: boolean;
       status?: string;
+      resource?: string;
+      patient?: string;
     }): Promise<string> {
       const slot = randomUUID();
       const booking = randomUUID();
@@ -154,7 +158,7 @@ describeIfDb(
         `INSERT INTO scheduling.bookable_slots (id, resource_id, start_at, end_at, capacity,
          remaining_capacity, status_concept_id, created_at, updated_at)
        VALUES ($1, $2, now(), now() + interval '30 minutes', 1, 0, $3, now(), now())`,
-        [slot, ids.resource, ANY],
+        [slot, opts.resource ?? ids.resource, ANY],
       );
       await sql(
         `INSERT INTO scheduling.appointment_bookings (id, tenant_id, patient_profile_id, bookable_slot_id,
@@ -164,9 +168,9 @@ describeIfDb(
         [
           booking,
           TENANT,
-          PATIENT,
+          opts.patient ?? PATIENT,
           slot,
-          ids.resource,
+          opts.resource ?? ids.resource,
           ANY,
           opts.status ?? SCHED.BOOKING_COMPLETED,
           opts.offering ? ids.offering : null,
@@ -734,6 +738,172 @@ describeIfDb(
             ),
           ),
         ).rejects.toMatchObject({ status: 403 });
+      });
+    });
+
+    describe('resumen del médico (insights) con la invitación única', () => {
+      const DOC3 = randomUUID();
+      const resource3 = randomUUID();
+      const doc3Actor = {
+        id: randomUUID(),
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: DOC3,
+      } as AuthenticatedUser;
+      const now = new Date();
+      const from = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-01`;
+      const to = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0),
+      )
+        .toISOString()
+        .slice(0, 10);
+      const insights = (actor: AuthenticatedUser) =>
+        inTenant(() =>
+          new SurveysInsightsService(
+            orm.em.fork(),
+            new InsightsRepository(),
+            silent,
+          ).getInsights({ from, to }, actor),
+        );
+      const extQuestionText = '¿Le gustó el consultorio de Doc3?';
+      let doctorBefore: Awaited<ReturnType<typeof insights>>;
+
+      /** El paciente responde todo lo respondible de una invitación. */
+      async function answerAll(invitationId: string, patient: string) {
+        const patientOf = {
+          id: randomUUID(),
+          roles: ['PATIENT'],
+          patientProfileId: patient,
+        } as AuthenticatedUser;
+        const questionnaire = await inTenant(() =>
+          services().responses.getMyQuestionnaire(invitationId, patientOf),
+        );
+        const answers = questionnaire.questions
+          .filter((q) => q.answerType !== 'TEXT')
+          .map((q) =>
+            q.answerType === 'SCALE'
+              ? { questionId: q.id, valueNumber: q.scaleMax }
+              : { questionId: q.id, valueChoices: [q.options![0]] },
+          );
+        await inTenant(() =>
+          services().responses.submitResponse(
+            invitationId,
+            { answers },
+            patientOf,
+          ),
+        );
+      }
+
+      it('antes: el resumen de otro médico (DOCTOR) de la misma organización', async () => {
+        doctorBefore = await insights(doctorActor);
+        expect(doctorBefore.totals.issued).toBeGreaterThan(0);
+      });
+
+      it('las preguntas y respuestas de la base Y de la extensión cuentan en el médico que atendió', async () => {
+        await sql(
+          `INSERT INTO scheduling.schedulable_resources (id, tenant_id, resource_type_concept_id,
+             resource_ref_type, resource_ref_id, name, state_concept_id, created_at, updated_at)
+           VALUES ($1, $2, $3, 'practitioner_profiles', $4, 'Consultorio 3', $3, now(), now())`,
+          [resource3, TENANT, ANY, DOC3],
+        );
+        const tpl = await inTenant(() =>
+          services().templates.createTemplate({ title: 'Doc3' }, doc3Actor),
+        );
+        await inTenant(() =>
+          services().templates.addQuestion(
+            tpl.id,
+            { questionText: extQuestionText, answerType: 'SCALE' },
+            doc3Actor,
+          ),
+        );
+        await inTenant(() =>
+          services().templates.publishVersion(tpl.id, 1, {}, doc3Actor),
+        );
+        await inTenant(() =>
+          services().assignments.createAssignment(
+            { surveyVersionId: tpl.versionId, targetType: 'CARE_TYPE' },
+            doc3Actor,
+          ),
+        );
+
+        for (let i = 0; i < 5; i += 1) {
+          const patient = randomUUID();
+          const booking = await insertBooking({ resource: resource3, patient });
+          await inTenant(() =>
+            services().assignments.issueForBooking(
+              { appointmentBookingId: booking },
+              doc3Actor,
+            ),
+          );
+          const [invitation] = await invitationsOf(booking);
+          expect(invitation.extension_survey_version_id).toBe(tpl.versionId);
+          await answerAll(invitation.id, patient);
+        }
+
+        const summary = await insights(doc3Actor);
+        expect(summary.totals).toMatchObject({ issued: 5, answered: 5 });
+        expect(summary.privacy.suppressed).toBe(false);
+        const byText = new Map(summary.byQuestion!.map((q) => [q.text, q]));
+        // La de la extensión cuenta...
+        expect(byText.get(extQuestionText)?.n).toBe(5);
+        // ... y las de la base también (una por dimensión, cada una con sus 5).
+        expect(
+          summary.byQuestion!.find((q) => q.dimension === 'esfuerzo_acceso')?.n,
+        ).toBe(5);
+        expect(
+          summary.byQuestion!.find((q) => q.dimension === 'recomendacion_nps')
+            ?.n,
+        ).toBe(5);
+        expect(summary.nps?.n).toBe(5);
+      });
+
+      it('nunca cuentan en el resumen de otro médico', async () => {
+        const after = await insights(doctorActor);
+        expect(after.totals).toEqual(doctorBefore.totals);
+        expect(
+          (after.byQuestion ?? []).some((q) => q.text === extQuestionText),
+        ).toBe(false);
+        const stranger = await insights({
+          id: randomUUID(),
+          roles: ['PRACTITIONER'],
+          practitionerProfileId: randomUUID(),
+        } as AuthenticatedUser);
+        expect(stranger.totals).toMatchObject({ issued: 0, answered: 0 });
+      });
+
+      it('una plantilla sin dueño profesional que NO es la base del sistema no cuenta', async () => {
+        const booking = await insertBooking({ resource: resource3 });
+        const template = randomUUID();
+        const version = randomUUID();
+        await sql(
+          `INSERT INTO surveys.survey_templates (id, tenant_id, owner_type_concept_id, owner_id,
+             title, status_concept_id, created_at, updated_at)
+           VALUES ($1, $2, $3, $4, 'De otra organización', $5, now(), now())`,
+          [template, TENANT, ANY, randomUUID(), SURVEYS.TEMPLATE_ACTIVE],
+        );
+        await sql(
+          `INSERT INTO surveys.survey_versions (id, survey_template_id, version_number,
+             publication_status_concept_id, response_window_days, created_at, updated_at)
+           VALUES ($1, $2, 1, $3, 30, now(), now())`,
+          [version, template, SURVEYS.VERSION_PUBLISHED],
+        );
+        await sql(
+          `INSERT INTO surveys.survey_invitations (id, survey_version_id, survey_assignment_id,
+             tenant_id, patient_profile_id, appointment_booking_id, status_concept_id, issued_at,
+             expires_at, created_at, updated_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, now(), now(), now(), now())`,
+          [
+            randomUUID(),
+            version,
+            systemSurveyIds(TENANT, 'CONSULTATION').assignmentId,
+            TENANT,
+            PATIENT,
+            booking,
+            SURVEYS.INVITATION_PENDING,
+          ],
+        );
+
+        const summary = await insights(doc3Actor);
+        expect(summary.totals.issued).toBe(5);
       });
     });
 

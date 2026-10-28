@@ -28,22 +28,24 @@ import {
   type AnswerTypeCode,
 } from '../surveys.concepts';
 import {
+  NPS_DIMENSION,
+  SAFETY_DIMENSION,
+  SATISFACTION_DIMENSION,
   SURVEY_DIMENSIONS,
   dimensionOfQuestionText,
+  dimensionOfSystemQuestion,
   isSafetyAlertOption,
   normalizeSurveyText,
   type SurveyDimension,
 } from '../survey-dimensions';
 
+import { MS_PER_DAY } from '../surveys.constants';
 import {
   DATE_ONLY_PATTERN,
   MAX_RANGE_MONTHS,
   MIN_COHORT,
   MONTH_START_PATTERN,
 } from '../insights.constants';
-
-/** Milisegundos de un día. */
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 /** Hasta esta amplitud (días) la tendencia va por día. */
 const DAILY_TREND_MAX_DAYS = 35;
@@ -358,7 +360,11 @@ export class SurveysInsightsService {
         options: Array.isArray(row.options) ? row.options : [],
         position: row.position,
         createdAtEpoch: row.createdAtEpoch,
-        dimension: dimensionOfQuestionText(row.text),
+        // Una pregunta de la encuesta base toma su dimensión de la definición
+        // en código; una del profesional, del enunciado si copia uno base.
+        dimension: row.systemKind
+          ? dimensionOfSystemQuestion(row.systemKind, row.position, row.text)
+          : dimensionOfQuestionText(row.text),
         n: row.n,
       });
     }
@@ -462,7 +468,7 @@ export class SurveysInsightsService {
       dto.optionCounts = [...counts].map(
         ([option, count]): InsightsOptionCountDto => ({ option, count }),
       );
-      if (rep.dimension === 'seguridad_percibida') {
+      if (rep.dimension === SAFETY_DIMENSION) {
         safetyAlerts = dto.optionCounts
           .filter((entry) => isSafetyAlertOption(entry.option))
           .reduce((sum, entry) => sum + entry.count, 0);
@@ -559,7 +565,7 @@ export class SurveysInsightsService {
       g.members.reduce((sum, m) => sum + m.n, 0) >= MIN_COHORT;
     let source = scaleGroups.filter(
       (g) =>
-        g.representative.dimension === 'satisfaccion_global' && withAnswers(g),
+        g.representative.dimension === SATISFACTION_DIMENSION && withAnswers(g),
     );
     if (source.length === 0) {
       source = scaleGroups.filter(
@@ -651,7 +657,7 @@ const GRANULARITY_UNIT: Readonly<
 function isNpsQuestion(q: QuestionMeta): boolean {
   if (q.answerType !== 'SCALE' || q.scaleMin !== 0 || q.scaleMax !== 10)
     return false;
-  if (q.dimension) return q.dimension === 'recomendacion_nps';
+  if (q.dimension) return q.dimension === NPS_DIMENSION;
   return normalizeSurveyText(q.text).includes('recomend');
 }
 

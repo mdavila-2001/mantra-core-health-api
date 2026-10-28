@@ -26,6 +26,7 @@ import {
   SURVEYS,
   TARGET_TYPE_BY_CODE,
 } from '../surveys.concepts';
+import { MS_PER_DAY } from '../surveys.constants';
 import { SurveysErrorReason } from '../surveys.error-reasons';
 import { assertNotSystemTemplate } from '../surveys.system-guard';
 import type { SystemSurveyKind } from '../surveys.base-definitions';
@@ -43,9 +44,6 @@ import type {
   SurveyTemplates,
   SurveyVersions,
 } from '../entities';
-
-/** Milisegundos de un día, para derivar la ventana de respuesta. */
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 /**
  * Qué tan específico es el destino de una asignación: cuanto menor, más

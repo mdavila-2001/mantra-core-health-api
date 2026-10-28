@@ -67,9 +67,22 @@ describe('InsightsRepository', () => {
       );
       expect(sql).toContain('i.tenant_id = ?');
       expect(sql).toContain('t.tenant_id = ?');
-      // El profesional, por plantilla propia o por la agenda de la atención.
-      expect(params.filter((p) => p === 'hp-1')).toHaveLength(2);
+      // El profesional: por plantilla propia, por la agenda de la atención o por
+      // ser el dueño de la extensión que viaja detrás de la base.
+      expect(params.filter((p) => p === 'hp-1')).toHaveLength(3);
       expect(sql).toContain('t.owner_practitioner_id = ?');
+      expect(sql).toContain('et.owner_practitioner_id = ?');
+      // «Plantilla de sistema» es el dueño tipado de la base con owner_id = tenant,
+      // no cualquier plantilla sin dueño profesional.
+      expect(sql).not.toContain('owner_practitioner_id IS NULL');
+      expect(sql).toContain('t.owner_type_concept_id IN (?, ?)');
+      expect(sql).toContain('t.owner_id = i.tenant_id');
+      expect(params).toEqual(
+        expect.arrayContaining([
+          SURVEYS.SYSTEM_BASE_CONSULTATION,
+          SURVEYS.SYSTEM_BASE_SERVICE,
+        ]),
+      );
       expect(sql).toContain('r.resource_ref_id = ?');
       // La reserva y el recurso también se acotan al tenant.
       expect(sql).toContain('b.tenant_id = i.tenant_id');
