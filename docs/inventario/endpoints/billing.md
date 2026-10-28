@@ -3726,6 +3726,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/patient-spending-http.int-spec.ts:122` |
 | CONTROLADOR | `src/modules/billing/controllers/patient-spending.controller.spec.ts:30` |
 
 ### Flujos

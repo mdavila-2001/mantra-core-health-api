@@ -3,13 +3,13 @@
 # Flujos del módulo `billing`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 35 (33 con decisiones propias, 2 sin ellas)
+- **Operaciones:** 36 (34 con decisiones propias, 2 sin ellas)
 - Inventario de endpoints del módulo: [billing](../endpoints/billing.md)
 
 ## Proceso: Módulo Billing (17)
 
-- **Código:** `billing` · **Agrupación:** MIXTO · **Operaciones:** 35
-- **Actores:** CLINICIAN · Cualquier sesión válida · PRACTITIONER · SECURITY_ADMIN · SYSTEM
+- **Código:** `billing` · **Agrupación:** MIXTO · **Operaciones:** 36
+- **Actores:** CLINICIAN · Cualquier sesión válida · PATIENT · PRACTITIONER · SECURITY_ADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/billing/README.md`
 
@@ -58,6 +58,7 @@ _Fuente: `src/modules/billing/README.md:3`_
 |  |  | GET /billing/simulated/my-invoices/{invoiceId} | Cualquier sesión válida | BAJO | 4 |
 |  |  | GET /billing/simulated/outbox | Cualquier sesión válida | BAJO | 3 |
 |  |  | GET /billing/simulated/status | Cualquier sesión válida | BAJO | 2 |
+| `ctrl:PatientSpendingController` | Operaciones de PatientSpendingController que el README no asigna a un caso de uso | GET /patient-spending/me | PATIENT | BAJO | 10 |
 
 ### Diagrama 1 de 2 — etapas `UC-17-01`, `UC-17-02`, `UC-17-03`…
 
@@ -217,13 +218,14 @@ flowchart LR
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 2 de 2 — etapas `ctrl:BillingServiceCatalogController`, `ctrl:BillingSimulatedController`
+### Diagrama 2 de 2 — etapas `ctrl:BillingServiceCatalogController`, `ctrl:BillingSimulatedController`, `ctrl:PatientSpendingController`
 
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
   a5(["SECURITY_ADMIN · PRACTITIONER · CLINICIAN"]):::actor
   a12(["PRACTITIONER · CLINICIAN · SECURITY_ADMIN"]):::actor
+  a49(["PATIENT"]):::actor
   t3[("billing.service_catalog")]:::tabla
   t6[("common.file_versions")]:::tabla
   t7[("common.files")]:::tabla
@@ -240,6 +242,10 @@ flowchart LR
   t42[("clinical.encounters")]:::tabla
   t43[("profiles.persons")]:::tabla
   t46[("billing.siat_simulated_outbox")]:::tabla
+  t50[("diagnostic_units.diagnostic_study_offerings")]:::tabla
+  t51[("directory.tenants")]:::tabla
+  t52[("insurance.insurance_claim_lines")]:::tabla
+  t53[("insurance.insurance_claims")]:::tabla
   t10[("+6 tablas más")]
   subgraph s0["ctrl:BillingServiceCatalogController · Operaciones de BillingServiceCatalogCont…"]
     o1["GET /billing/service-catalog"]:::op
@@ -271,6 +277,10 @@ flowchart LR
     o44["GET /billing/simulated/my-invoices/{invoiceId}"]:::op
     o45["GET /billing/simulated/outbox"]:::op
     o47["GET /billing/simulated/status"]:::op
+  end
+  t54[("+4 tablas más")]
+  subgraph s2["ctrl:PatientSpendingController · Operaciones de PatientSpendingController que e…"]
+    o48["GET /patient-spending/me"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -379,6 +389,14 @@ flowchart LR
   a2 --> o47
   o47 -->|"LEE"| t42
   o47 -->|"LEE"| t8
+  a49 --> o48
+  o48 -->|"LEE"| t20
+  o48 -->|"LEE"| t21
+  o48 -->|"LEE"| t50
+  o48 -->|"LEE"| t51
+  o48 -->|"LEE"| t52
+  o48 -->|"LEE"| t53
+  o48 -.-> t54
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -2726,6 +2744,44 @@ flowchart TD
   n11 -->|"no"| n13
   n14(("200 Responde con éxito")):::ok
   n13 --> n14
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 34. GET /patient-spending/me
+
+Mis gastos de salud
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene perfil de paciente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · parámetros de consulta (400)…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PatientSpendingService.listMine"]:::llamada
+  n2 --> n3
+  n4{"!patientProfileId"}:::decision
+  n3 --> n4
+  n5(["422 PRECONDITION_FAILED La cuenta no tiene perfil de paciente"]):::error
+  n4 -->|"sí"| n5
+  n6["Llama a PatientSpendingRepository.findForPatient"]:::llamada
+  n4 -->|"no"| n6
+  n7[("LEE billing.invoices · LEE terminology.catalog_concepts · LEE procedures_perioperative.procedure_charge_items…")]:::efecto
+  n6 --> n7
+  n8(("200 Responde con éxito")):::ok
+  n7 --> n8
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

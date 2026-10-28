@@ -27,8 +27,8 @@ _Fuente: `src/modules/scheduling/README.md:3`_
 |  |  | GET /scheduling/slots | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | BAJO | 1 |
 | `ctrl:SchedulingBookingsController` | Operaciones de SchedulingBookingsController que el README no asigna a un caso de uso | GET /scheduling/bookings | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | BAJO | 18 |
 |  |  | GET /scheduling/bookings/{id} | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | BAJO | 10 |
-|  |  | POST /scheduling/bookings/{id}/accept | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 54 |
-|  |  | POST /scheduling/bookings/{id}/cancel | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | MEDIO | 46 |
+|  |  | POST /scheduling/bookings/{id}/accept | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 55 |
+|  |  | POST /scheduling/bookings/{id}/cancel | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | MEDIO | 47 |
 |  |  | POST /scheduling/bookings/{id}/check-in | SCHEDULING_ADMIN · SCHEDULING_AGENT | MEDIO | 5 |
 |  |  | POST /scheduling/bookings/{id}/complete | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 14 |
 |  |  | POST /scheduling/bookings/{id}/delay | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 34 |
@@ -39,11 +39,11 @@ _Fuente: `src/modules/scheduling/README.md:3`_
 |  |  | POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT | MEDIO | 35 |
 |  |  | GET /scheduling/bookings/{id}/payment-state | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | BAJO | 3 |
 |  |  | PUT /scheduling/bookings/{id}/payment-state | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | BAJO | 2 |
-|  |  | POST /scheduling/bookings/{id}/propose-schedule | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 10 |
-|  |  | POST /scheduling/bookings/{id}/reject | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 34 |
+|  |  | POST /scheduling/bookings/{id}/propose-schedule | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 11 |
+|  |  | POST /scheduling/bookings/{id}/reject | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 35 |
 |  |  | POST /scheduling/bookings/{id}/reminders | SCHEDULING_ADMIN · SCHEDULING_AGENT | MEDIO | 3 |
 |  |  | POST /scheduling/bookings/{id}/request-info | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 6 |
-|  |  | POST /scheduling/bookings/{id}/reschedule | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | MEDIO | 41 |
+|  |  | POST /scheduling/bookings/{id}/reschedule | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | MEDIO | 42 |
 |  |  | POST /scheduling/bookings/{id}/start | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 8 |
 | `ctrl:SchedulingConfirmationController` | Operaciones de SchedulingConfirmationController que el README no asigna a un caso de uso | GET /scheduling/confirmation-rules | SCHEDULING_ADMIN | BAJO | 1 |
 |  |  | POST /scheduling/confirmation-rules | SCHEDULING_ADMIN | MEDIO | 1 |
@@ -60,17 +60,17 @@ _Fuente: `src/modules/scheduling/README.md:3`_
 |  |  | POST /scheduling/holds/{holdToken}/confirm | SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT | MEDIO | 18 |
 |  |  | POST /scheduling/holds/{holdToken}/request | SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT | MEDIO | 44 |
 |  |  | POST /scheduling/resources | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 4 |
-|  |  | POST /scheduling/resources/{id}/close-slots | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 31 |
+|  |  | POST /scheduling/resources/{id}/close-slots | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 32 |
 |  |  | POST /scheduling/resources/{id}/delay | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 33 |
 |  |  | GET /scheduling/resources/{id}/exceptions | SCHEDULING_ADMIN · PRACTITIONER · PATIENT | BAJO | 3 |
-|  |  | POST /scheduling/resources/{id}/exceptions | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 31 |
+|  |  | POST /scheduling/resources/{id}/exceptions | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 32 |
 |  |  | POST /scheduling/resources/{id}/shift-slots | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 32 |
 |  |  | GET /scheduling/resources/{id}/slots | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | BAJO | 2 |
 |  |  | GET /scheduling/resources/{id}/templates | SCHEDULING_ADMIN · PRACTITIONER | BAJO | 3 |
 |  |  | POST /scheduling/resources/{id}/templates | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 5 |
 |  |  | GET /scheduling/resources/{resourceId}/waitlist | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | BAJO | 4 |
 |  |  | POST /scheduling/slots/{id}/holds | SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT | MEDIO | 9 |
-|  |  | DELETE /scheduling/templates/{id} | SCHEDULING_ADMIN · PRACTITIONER | ALTO | 34 |
+|  |  | DELETE /scheduling/templates/{id} | SCHEDULING_ADMIN · PRACTITIONER | ALTO | 35 |
 |  |  | PATCH /scheduling/templates/{id} | SCHEDULING_ADMIN · PRACTITIONER | ALTO | 6 |
 |  |  | POST /scheduling/templates/{id}/generate-slots | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 7 |
 |  |  | GET /scheduling/templates/{id}/live-bookings | SCHEDULING_ADMIN · PRACTITIONER | BAJO | 6 |
@@ -80,7 +80,7 @@ _Fuente: `src/modules/scheduling/README.md:3`_
 | `ctrl:SchedulingFlexibleController` | Operaciones de SchedulingFlexibleController que el README no asigna a un caso de uso | GET /scheduling/resources/{id}/flexible-availability | PATIENT · PRACTITIONER · CLINICIAN · SCHEDULING_ADMIN · SCHEDULING_AGENT | BAJO | 9 |
 |  |  | POST /scheduling/resources/{id}/flexible-holds | PATIENT · SCHEDULING_ADMIN · SCHEDULING_AGENT | MEDIO | 17 |
 | `ctrl:SchedulingInternalController` | Operaciones de SchedulingInternalController que el README no asigna a un caso de uso | POST /scheduling/internal/dispatch-reminders | SYSTEM · SYSTEM_WORKER | MEDIO | 33 |
-|  |  | POST /scheduling/internal/expire-holds | SYSTEM · SYSTEM_WORKER | MEDIO | 9 |
+|  |  | POST /scheduling/internal/expire-holds | SYSTEM · SYSTEM_WORKER | MEDIO | 10 |
 |  |  | POST /scheduling/internal/promote-waitlist/{slotId} | SYSTEM · SYSTEM_WORKER | MEDIO | 31 |
 |  |  | GET /scheduling/internal/waitlist-candidates | SYSTEM · SYSTEM_WORKER | BAJO | 2 |
 | `ctrl:SchedulingServiceOfferingsController` | Operaciones de SchedulingServiceOfferingsController que el README no asigna a un caso de uso | GET /scheduling/service-availability | PATIENT · PRACTITIONER · CLINICIAN · SCHEDULING_ADMIN · SCHEDULING_AGENT | BAJO | 10 |
@@ -134,8 +134,8 @@ flowchart LR
   end
   t18[("+12 tablas más")]
   t23[("+4 tablas más")]
-  t27[("+48 tablas más")]
-  t31[("+40 tablas más")]
+  t27[("+49 tablas más")]
+  t31[("+41 tablas más")]
   t36[("+8 tablas más")]
   t38[("+28 tablas más")]
   t43[("+3 tablas más")]
@@ -143,9 +143,9 @@ flowchart LR
   t49[("+30 tablas más")]
   t51[("+2 tablas más")]
   t53[("+29 tablas más")]
-  t58[("+4 tablas más")]
-  t62[("+28 tablas más")]
-  t67[("+35 tablas más")]
+  t58[("+5 tablas más")]
+  t62[("+29 tablas más")]
+  t67[("+36 tablas más")]
   t69[("+2 tablas más")]
   subgraph s1["ctrl:SchedulingBookingsController · Operaciones de SchedulingBookingsController…"]
     o11["GET /scheduling/bookings"]:::op
@@ -385,12 +385,12 @@ flowchart LR
   t10[("+20 tablas más")]
   t27[("+12 tablas más")]
   t30[("+38 tablas más")]
-  t38[("+25 tablas más")]
+  t38[("+26 tablas más")]
   t40[("+27 tablas más")]
-  t45[("+25 tablas más")]
+  t45[("+26 tablas más")]
   t48[("+26 tablas más")]
   t59[("+3 tablas más")]
-  t61[("+28 tablas más")]
+  t61[("+29 tablas más")]
   t64[("+1 tablas más")]
   t68[("+1 tablas más")]
   subgraph s0["ctrl:SchedulingController · Operaciones de SchedulingController que el README n…"]
@@ -625,7 +625,7 @@ flowchart LR
     o10["POST /scheduling/resources/{id}/flexible-holds"]:::op
   end
   t24[("+27 tablas más")]
-  t26[("+3 tablas más")]
+  t26[("+4 tablas más")]
   t28[("+25 tablas más")]
   subgraph s1["ctrl:SchedulingInternalController · Operaciones de SchedulingInternalController…"]
     o19["POST /scheduling/internal/dispatch-reminders"]:::op
@@ -766,10 +766,10 @@ _Fuente: `docs/business/critical-workflows.md:51`_
 | `P1` | `POST /scheduling/slots/:id/holds` — toma un slot con `SELECT ... FOR UPDATE`, decrementa `remaining_capacity` (nunca baja de cero). | POST /scheduling/slots/{id}/holds | SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT | MEDIO | 9 |
 | `P2` | `POST /scheduling/holds/:holdToken/confirm` — dentro del TTL del hold (`hold_ttl_seconds`, 300s por defecto), confirma → `appointment_bookings` en estado `confirmed` + se programan recordatorios. | POST /scheduling/holds/{holdToken}/confirm | SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT | MEDIO | 18 |
 | `P3` | `POST /scheduling/bookings/:id/check-in` — el día de la cita, pasa a `checked_in`. | POST /scheduling/bookings/{id}/check-in | SCHEDULING_ADMIN · SCHEDULING_AGENT | MEDIO | 5 |
-| `A1` | **Reprogramar** (`POST /scheduling/bookings/:id/reschedule`): libera el cupo de origen, toma el de destino. | POST /scheduling/bookings/{id}/reschedule | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | MEDIO | 41 |
-| `A2` | **Cancelar** (`POST /scheduling/bookings/:id/cancel`): libera el cupo; cobra cargo por inasistencia solo si la política define `no_show_fee_amount` **y** se marca como no-show — una cancelación avisada nunca se cobra. | POST /scheduling/bookings/{id}/cancel | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | MEDIO | 46 |
-| `A3` | **Hold vencido**: `POST /scheduling/internal/expire-holds` (worker) recicla el cupo. Un hold vencido no se puede confirmar aunque el worker aún no haya corrido. | POST /scheduling/internal/expire-holds | SYSTEM · SYSTEM_WORKER | MEDIO | 9 |
-| `A4` | **Excepción de disponibilidad** (`POST /scheduling/resources/:id/exceptions`): bloquea slots libres solapados — **no cancela** citas ya confirmadas (decisión clínica explícita, no efecto colateral automático). | POST /scheduling/resources/{id}/exceptions | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 31 |
+| `A1` | **Reprogramar** (`POST /scheduling/bookings/:id/reschedule`): libera el cupo de origen, toma el de destino. | POST /scheduling/bookings/{id}/reschedule | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | MEDIO | 42 |
+| `A2` | **Cancelar** (`POST /scheduling/bookings/:id/cancel`): libera el cupo; cobra cargo por inasistencia solo si la política define `no_show_fee_amount` **y** se marca como no-show — una cancelación avisada nunca se cobra. | POST /scheduling/bookings/{id}/cancel | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | MEDIO | 47 |
+| `A3` | **Hold vencido**: `POST /scheduling/internal/expire-holds` (worker) recicla el cupo. Un hold vencido no se puede confirmar aunque el worker aún no haya corrido. | POST /scheduling/internal/expire-holds | SYSTEM · SYSTEM_WORKER | MEDIO | 10 |
+| `A4` | **Excepción de disponibilidad** (`POST /scheduling/resources/:id/exceptions`): bloquea slots libres solapados — **no cancela** citas ya confirmadas (decisión clínica explícita, no efecto colateral automático). | POST /scheduling/resources/{id}/exceptions | SCHEDULING_ADMIN · PRACTITIONER | MEDIO | 32 |
 | `A5` | **Lista de espera**: `POST /scheduling/waitlist` inscribe; el worker (`promote-waitlist`) marca candidatos cuando hay cupo, pero **no reserva por ellos** — el paciente confirma por el flujo normal. | POST /scheduling/waitlist | SCHEDULING_ADMIN · SCHEDULING_AGENT · PATIENT | MEDIO | 4 |
 
 ### Diagrama — etapas `P1`, `P2`, `P3`…
@@ -809,19 +809,19 @@ flowchart LR
   subgraph s2["P3 · `POST /scheduling/bookings/:id/check-in` — el día de la cita, pasa a `chec…"]
     o14["POST /scheduling/bookings/{id}/check-in"]:::op
   end
-  t21[("+35 tablas más")]
+  t21[("+36 tablas más")]
   subgraph s3["A1 · **Reprogramar** (`POST /scheduling/bookings/:id/reschedule`): libera el cu…"]
     o17["POST /scheduling/bookings/{id}/reschedule"]:::op
   end
-  t23[("+40 tablas más")]
+  t23[("+41 tablas más")]
   subgraph s4["A2 · **Cancelar** (`POST /scheduling/bookings/:id/cancel`): libera el cupo; cob…"]
     o22["POST /scheduling/bookings/{id}/cancel"]:::op
   end
-  t29[("+3 tablas más")]
+  t29[("+4 tablas más")]
   subgraph s5["A3 · **Hold vencido**: `POST /scheduling/internal/expire-holds` (worker) recicl…"]
     o24["POST /scheduling/internal/expire-holds"]:::op
   end
-  t34[("+25 tablas más")]
+  t34[("+26 tablas más")]
   subgraph s6["A4 · **Excepción de disponibilidad** (`POST /scheduling/resources/:id/exception…"]
     o30["POST /scheduling/resources/{id}/exceptions"]:::op
   end
@@ -2214,7 +2214,7 @@ Confirmar un comprobante de pago
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella. |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella.; ForbiddenException: La agenda indicada pertenece a otra organización. |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada; ResourceNotFoundException: Comprobante no encontrado |
 | 409 | `CONFLICT` | ConflictException: Ese comprobante ya se rechazó: no se puede confirmar. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar. |
@@ -2233,28 +2233,29 @@ flowchart TD
   n4 --> n5
   n6["Llama a PaymentReceiptAccess.loadForReviewer"]:::llamada
   n5 --> n6
-  n7["Llama a PaymentReceiptAccess.hideForbidden"]:::llamada
+  n7["Transacción: hideForbidden(…)"]:::transaccion
   n6 --> n7
-  n8["Intenta"]:::intento
+  n8["Llama a BookingAccess.loadForOperation"]:::llamada
   n7 --> n8
-  n9{"error instanceof ForbiddenException"}:::decision
-  n8 -->|"si falla"| n9
-  n10(["↩ (relanza el error capturado)"]):::error
+  n9{"!booking"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Cita no encontrada"]):::error
   n9 -->|"sí"| n10
-  n11(["↩ (relanza el error capturado)"]):::error
+  n11{"!isOwnAgenda"}:::decision
   n9 -->|"no"| n11
-  n12["Llama a BookingAccess.loadForOperation"]:::llamada
-  n8 --> n12
-  n13{"!booking"}:::decision
-  n12 --> n13
-  n14(["404 NOT_FOUND Cita no encontrada"]):::error
+  n12(["403 FORBIDDEN Esta cita es de otra agenda: solo la opera quien atiende en ella."]):::error
+  n11 -->|"sí"| n12
+  n13{"operatesAnyAgenda(actor)"}:::decision
+  n11 -->|"no"| n13
+  n14["Llama a BookingAccess.assertResourceInActiveTenant"]:::llamada
   n13 -->|"sí"| n14
-  n15{"!isOwnAgenda"}:::decision
-  n13 -->|"no"| n15
-  n16(["403 FORBIDDEN Esta cita es de otra agenda: solo la opera quien atiende en ella."]):::error
+  n15{"!withinScope"}:::decision
+  n14 --> n15
+  n16(["403 FORBIDDEN La agenda indicada pertenece a otra organización."]):::error
   n15 -->|"sí"| n16
   n17["Llama a PaymentReceiptAccess.receiptOf"]:::llamada
   n15 -->|"no"| n17
+  n13 -->|"no"| n17
   n18["Llama a SchedulingPaymentReceiptsRepository.findOfBookingForUpdate"]:::llamada
   n17 --> n18
   n19[("LEE scheduling.appointment_payment_receipts")]:::efecto
@@ -2405,7 +2406,7 @@ Rechazar un comprobante de pago
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella. |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella.; ForbiddenException: La agenda indicada pertenece a otra organización. |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada; ResourceNotFoundException: Comprobante no encontrado |
 | 409 | `CONFLICT` | ConflictException: Ese comprobante ya se confirmó: no se puede rechazar. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -2423,28 +2424,29 @@ flowchart TD
   n4 --> n5
   n6["Llama a PaymentReceiptAccess.loadForReviewer"]:::llamada
   n5 --> n6
-  n7["Llama a PaymentReceiptAccess.hideForbidden"]:::llamada
+  n7["Transacción: hideForbidden(…)"]:::transaccion
   n6 --> n7
-  n8["Intenta"]:::intento
+  n8["Llama a BookingAccess.loadForOperation"]:::llamada
   n7 --> n8
-  n9{"error instanceof ForbiddenException"}:::decision
-  n8 -->|"si falla"| n9
-  n10(["↩ (relanza el error capturado)"]):::error
+  n9{"!booking"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Cita no encontrada"]):::error
   n9 -->|"sí"| n10
-  n11(["↩ (relanza el error capturado)"]):::error
+  n11{"!isOwnAgenda"}:::decision
   n9 -->|"no"| n11
-  n12["Llama a BookingAccess.loadForOperation"]:::llamada
-  n8 --> n12
-  n13{"!booking"}:::decision
-  n12 --> n13
-  n14(["404 NOT_FOUND Cita no encontrada"]):::error
+  n12(["403 FORBIDDEN Esta cita es de otra agenda: solo la opera quien atiende en ella."]):::error
+  n11 -->|"sí"| n12
+  n13{"operatesAnyAgenda(actor)"}:::decision
+  n11 -->|"no"| n13
+  n14["Llama a BookingAccess.assertResourceInActiveTenant"]:::llamada
   n13 -->|"sí"| n14
-  n15{"!isOwnAgenda"}:::decision
-  n13 -->|"no"| n15
-  n16(["403 FORBIDDEN Esta cita es de otra agenda: solo la opera quien atiende en ella."]):::error
+  n15{"!withinScope"}:::decision
+  n14 --> n15
+  n16(["403 FORBIDDEN La agenda indicada pertenece a otra organización."]):::error
   n15 -->|"sí"| n16
   n17["Llama a PaymentReceiptAccess.receiptOf"]:::llamada
   n15 -->|"no"| n17
+  n13 -->|"no"| n17
   n18["Llama a SchedulingPaymentReceiptsRepository.findOfBookingForUpdate"]:::llamada
   n17 --> n18
   n19[("LEE scheduling.appointment_payment_receipts")]:::efecto
@@ -2513,30 +2515,32 @@ flowchart TD
   n2 --> n3
   n4["Llama a GetPaymentStateUseCase.execute"]:::llamada
   n3 --> n4
-  n5["Llama a BookingAccess.loadForOperation"]:::llamada
+  n5["Transacción: transactional(…)"]:::transaccion
   n4 --> n5
-  n6["Llama a SchedulingBookingsRepository.findBookingByIdForUpdate"]:::llamada
+  n6["Llama a BookingAccess.loadForOperation"]:::llamada
   n5 --> n6
-  n7[("LEE scheduling.appointment_bookings")]:::efecto
+  n7["Llama a SchedulingBookingsRepository.findBookingByIdForUpdate"]:::llamada
   n6 --> n7
-  n8{"!booking"}:::decision
+  n8[("LEE scheduling.appointment_bookings")]:::efecto
   n7 --> n8
-  n9(["404 NOT_FOUND Cita no encontrada"]):::error
-  n8 -->|"sí"| n9
-  n10["Llama a SchedulingCatalogRepository.findResourceById"]:::llamada
-  n8 -->|"no"| n10
-  n11[("LEE scheduling.schedulable_resources")]:::efecto
-  n10 --> n11
-  n12{"!isOwnAgenda"}:::decision
+  n9{"!booking"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Cita no encontrada"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a SchedulingCatalogRepository.findResourceById"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE scheduling.schedulable_resources")]:::efecto
   n11 --> n12
-  n13(["403 FORBIDDEN Esta cita es de otra agenda: solo la opera quien atiende en ella."]):::error
-  n12 -->|"sí"| n13
-  n14["Llama a SchedulingBookingsRepository.findPaymentState"]:::llamada
-  n12 -->|"no"| n14
-  n15[("LEE scheduling.appointment_payment_states")]:::efecto
-  n14 --> n15
-  n16(("200 Responde con éxito")):::ok
+  n13{"!isOwnAgenda"}:::decision
+  n12 --> n13
+  n14(["403 FORBIDDEN Esta cita es de otra agenda: solo la opera quien atiende en ella."]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a SchedulingBookingsRepository.findPaymentState"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE scheduling.appointment_payment_states")]:::efecto
   n15 --> n16
+  n17(("200 Responde con éxito")):::ok
+  n16 --> n17
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

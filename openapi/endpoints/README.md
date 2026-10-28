@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1598 de 1598 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **73 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1612 de 1612 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **73 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -55,10 +55,10 @@ Esta referencia documenta **1598 de 1598 operaciones HTTP** registradas en `open
 | [billing](billing.md) | 36 | `billing-operations`, `billing-payables`, `billing-receivables`, `billing-service-catalog`, `billing-simulated`, `patient-spending` | 6 |
 | [chart](chart.md) | 23 | `chart-care-plans`, `chart-documents`, `chart-encounters`, `chart-me`, `chart-notes`, `chart-read`, `chart-templates` | 7 |
 | [clinical](clinical.md) | 42 | `clinical-encounters`, `clinical-me`, `clinical-observations`, `clinical-orders`, `clinical-prescription-expiry`, `clinical-prescription-policies`, `clinical-prescriptions`, `clinical-prescriptions-public`, `clinical-read`, `clinical-records` | 11 |
-| [clinical_ext](clinical-ext.md) | 27 | `clinical-ext-alerts`, `clinical-ext-care-gaps`, `clinical-ext-care-teams`, `clinical-ext-cds`, `clinical-ext-order-sets`, `clinical-ext-prescription-favorites`, `clinical-ext-referrals`, `clinical-ext-virtual-encounters` | 8 |
+| [clinical_ext](clinical-ext.md) | 32 | `clinical-ext-alerts`, `clinical-ext-care-gaps`, `clinical-ext-care-teams`, `clinical-ext-cds`, `clinical-ext-order-sets`, `clinical-ext-prescription-favorites`, `clinical-ext-referrals`, `clinical-ext-virtual-encounters` | 8 |
 | [common](common.md) | 19 | `common/addresses`, `common/contact-points`, `common/files`, `common/identifiers`, `internal/files`, `internal/storage-lifecycle` | 6 |
 | [community](community.md) | 98 | `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-ratings`, `community-reviews`, `community-social`, `community-timeline` | 14 |
-| [consent](consent.md) | 22 | `consent-consents`, `consent-evidence`, `consent-hipaa-authorizations`, `consent-internal`, `consent-me`, `consent-patient-objections`, `consent-practitioner-access`, `consent-privacy-restrictions`, `consent-processing-legal-bases`, `consent-treatment-informed-consents` | 11 |
+| [consent](consent.md) | 27 | `consent-consents`, `consent-evidence`, `consent-hipaa-authorizations`, `consent-internal`, `consent-me`, `consent-patient-objections`, `consent-practitioner-access`, `consent-privacy-restrictions`, `consent-processing-legal-bases`, `consent-treatment-informed-consents` | 11 |
 | [content_packs](content-packs.md) | 2 | `content-packs` | 1 |
 | [crm](crm.md) | 16 | `crm` | 1 |
 | [cross_store_consistency](cross-store-consistency.md) | 16 | `cross_store_consistency` | 2 |
@@ -97,7 +97,7 @@ Esta referencia documenta **1598 de 1598 operaciones HTTP** registradas en `open
 | [polyglot_storage](polyglot-storage.md) | 15 | `polyglot-finops`, `polyglot-governance`, `polyglot-ops` | 3 |
 | [practice](practice.md) | 37 | `practice` | 9 |
 | [procedures_perioperative](procedures-perioperative.md) | 32 | `dental-procedures`, `procedure-cases` | 2 |
-| [profiles](profiles.md) | 63 | `profiles-affiliations`, `profiles-patients`, `profiles-practitioners` | 6 |
+| [profiles](profiles.md) | 67 | `profiles-affiliations`, `profiles-patients`, `profiles-practitioners`, `profiles-primary-practitioner` | 7 |
 | [promotions](promotions.md) | 19 | `loyalty`, `promotions` | 2 |
 | [public](public.md) | 4 | `public-catalog` | 1 |
 | [qa_execution](qa-execution.md) | 9 | `qa-execution`, `qa-execution-internal` | 2 |
@@ -124,4 +124,4 @@ Esta referencia documenta **1598 de 1598 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1598 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1612 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

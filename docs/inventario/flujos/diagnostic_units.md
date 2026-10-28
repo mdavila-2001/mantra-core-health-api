@@ -28,7 +28,7 @@ _Fuente: `src/modules/diagnostic_units/README.md:3`_
 | `UC-23-01` | Alta de unidad con sitios (1..N) y acreditaciones (0..N) | POST /diagnostic-units | SECURITY_ADMIN | MEDIO | 4 |
 | `UC-23-02` | Actualizar sitio | PATCH /diagnostic-unit-sites/{siteId} | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /diagnostic-units/{id}/sites | SECURITY_ADMIN | MEDIO | 2 |
-| `UC-23-03` | Verificar y publicar perfil público | POST /diagnostic-units/{id}/verify-and-publish | SECURITY_ADMIN | MEDIO | 8 |
+| `UC-23-03` | Verificar y publicar perfil público | POST /diagnostic-units/{id}/verify-and-publish | SECURITY_ADMIN | MEDIO | 9 |
 | `UC-23-04` | Declarar especialidades (upsert + soft-close) | PUT /diagnostic-units/{id}/specialties | SECURITY_ADMIN | MEDIO | 4 |
 | `UC-23-05` | Publicar oferta con componentes (panel) | POST /diagnostic-units/{id}/study-offerings | SECURITY_ADMIN | MEDIO | 5 |
 | `UC-23-06` | Crear cronograma de precios | POST /diagnostic-units/{id}/price-schedules | SECURITY_ADMIN | MEDIO | 4 |
@@ -76,7 +76,7 @@ flowchart LR
     o16["PATCH /diagnostic-unit-sites/{siteId}"]:::op
     o17["POST /diagnostic-units/{id}/sites"]:::op
   end
-  t21[("+2 tablas más")]
+  t21[("+3 tablas más")]
   subgraph s3["UC-23-03 · Verificar y publicar perfil público"]
     o18["POST /diagnostic-units/{id}/verify-and-publish"]:::op
   end
@@ -1200,7 +1200,7 @@ Verificar la unidad y publicar su perfil público
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La unidad no está activa; PreconditionFailedException: La unidad no tiene ningún sitio activo para publicar |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La unidad no está activa; PreconditionFailedException: La unidad no tiene ningún sitio activo para publicar; PreconditionFailedException: El laboratorio no se publica hasta que la plataforma verifique a su organización con la matrícula del SEPREC, la licencia de funcionamiento y el certificado del SEDES |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1232,41 +1232,46 @@ flowchart TD
   n12 --> n13
   n14(["422 PRECONDITION_FAILED La unidad no tiene ningún sitio activo para publicar"]):::error
   n13 -->|"sí"| n14
-  n15[("ACTUALIZA diagnostic_units.diagnostic_units")]:::efecto
+  n15["Llama a DiagnosticUnitsService.assertLaboratoryMayOperate"]:::llamada
   n13 -->|"no"| n15
-  n16{"!unit.publicProfileId"}:::decision
+  n16[("LEE directory.tenants")]:::efecto
   n15 --> n16
-  n17["Llama a PublicProfileProjectionService.projectOrganization"]:::llamada
-  n16 -->|"sí"| n17
-  n18["Llama a PublicProfilesRepository.findByTarget"]:::llamada
-  n17 --> n18
-  n19[("LEE community.public_profiles")]:::efecto
+  n17(["422 PRECONDITION_FAILED El laboratorio no se publica hasta que la plataforma verifique a su organización con…"]):::error
+  n16 --> n17
+  n18[("ACTUALIZA diagnostic_units.diagnostic_units")]:::efecto
+  n19{"!unit.publicProfileId"}:::decision
   n18 --> n19
-  n20{"existing"}:::decision
-  n19 --> n20
-  n21{"existing.visibilityConceptId == null && existing.statusConceptId === CONCEPTS.STATE_PENDING"}:::decision
-  n20 -->|"sí"| n21
-  n22[("ACTUALIZA community.public_profiles · ACTUALIZA community.public_profiles · ACTUALIZA community.public_profil…")]:::efecto
-  n21 -->|"sí"| n22
-  n23["Llama a PublicProfilesRepository.create"]:::llamada
+  n20["Llama a PublicProfileProjectionService.projectOrganization"]:::llamada
+  n19 -->|"sí"| n20
+  n21["Llama a PublicProfilesRepository.findByTarget"]:::llamada
+  n20 --> n21
+  n22[("LEE community.public_profiles")]:::efecto
+  n21 --> n22
+  n23{"existing"}:::decision
   n22 --> n23
-  n21 -->|"no"| n23
-  n20 -->|"no"| n23
-  n24[("CREA community.public_profiles")]:::efecto
-  n23 --> n24
-  n25[("ACTUALIZA diagnostic_units.diagnostic_units")]:::efecto
-  n24 --> n25
-  n26["Llama a DiagnosticUnitSpecialtiesRepository.verifyOpenForUnit"]:::llamada
+  n24{"existing.visibilityConceptId == null && existing.statusConceptId === CONCEPTS.STATE_PENDING"}:::decision
+  n23 -->|"sí"| n24
+  n25[("ACTUALIZA community.public_profiles · ACTUALIZA community.public_profiles · ACTUALIZA community.public_profil…")]:::efecto
+  n24 -->|"sí"| n25
+  n26["Llama a PublicProfilesRepository.create"]:::llamada
   n25 --> n26
-  n16 -->|"no"| n26
-  n27[("ACTUALIZA diagnostic_units.diagnostic_unit_specialties")]:::efecto
+  n24 -->|"no"| n26
+  n23 -->|"no"| n26
+  n27[("CREA community.public_profiles")]:::efecto
   n26 --> n27
-  n28["Llama a DiagnosticUnitAccreditationsRepository.verifyOpenForUnit"]:::llamada
+  n28[("ACTUALIZA diagnostic_units.diagnostic_units")]:::efecto
   n27 --> n28
-  n29[("ACTUALIZA diagnostic_units.diagnostic_unit_accreditations")]:::efecto
+  n29["Llama a DiagnosticUnitSpecialtiesRepository.verifyOpenForUnit"]:::llamada
   n28 --> n29
-  n30(("200 Responde con éxito")):::ok
+  n19 -->|"no"| n29
+  n30[("ACTUALIZA diagnostic_units.diagnostic_unit_specialties")]:::efecto
   n29 --> n30
+  n31["Llama a DiagnosticUnitAccreditationsRepository.verifyOpenForUnit"]:::llamada
+  n30 --> n31
+  n32[("ACTUALIZA diagnostic_units.diagnostic_unit_accreditations")]:::efecto
+  n31 --> n32
+  n33(("200 Responde con éxito")):::ok
+  n32 --> n33
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

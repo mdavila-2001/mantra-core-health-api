@@ -3,12 +3,12 @@
 # Flujos del módulo `practice`
 
 - **Procesos:** 1 · **Máquinas de estado:** 1
-- **Operaciones:** 36 (33 con decisiones propias, 3 sin ellas)
+- **Operaciones:** 37 (35 con decisiones propias, 2 sin ellas)
 - Inventario de endpoints del módulo: [practice](../endpoints/practice.md)
 
 ## Proceso: Módulo Practice (14)
 
-- **Código:** `practice` · **Agrupación:** MIXTO · **Operaciones:** 36
+- **Código:** `practice` · **Agrupación:** MIXTO · **Operaciones:** 37
 - **Actores:** ACCOUNTING_APPROVER · ANESTHESIOLOGIST · CLINICIAN · Cualquier sesión válida · PATIENT · PERIOP_ADMIN · PERIOP_NURSE · PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT · SECURITY_ADMIN · SURGEON · SURGERY_SCHEDULER
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/practice/README.md`
@@ -37,23 +37,24 @@ _Fuente: `src/modules/practice/README.md:3`_
 | `UC-14-12` | Desmantelar sitio en cascada | DELETE /practices/{practiceId}/sites/{siteId} | SECURITY_ADMIN | MEDIO | 10 |
 | `ctrl:OrganizationPracticesController` | Operaciones de OrganizationPracticesController que el README no asigna a un caso de uso | POST /tenants/{tenantId}/practices | Cualquier sesión válida | ALTO | 7 |
 | `ctrl:PracticeInvitationsController` | Operaciones de PracticeInvitationsController que el README no asigna a un caso de uso | POST /practices/{practiceId}/role-assignments/invitations | Cualquier sesión válida | ALTO | 7 |
-| `ctrl:PracticesController` | Operaciones de PracticesController que el README no asigna a un caso de uso | GET /practices | SECURITY_ADMIN · SURGERY_SCHEDULER · PERIOP_ADMIN · SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SCHEDULING_ADMIN · PRACTITIONER · CLINICIAN · ACCOUNTING_APPROVER | BAJO | 2 |
+| `ctrl:PracticesController` | Operaciones de PracticesController que el README no asigna a un caso de uso | GET /practices | Cualquier sesión válida | BAJO | 3 |
 |  |  | POST /practices | SECURITY_ADMIN | MEDIO | 2 |
 |  |  | GET /practices/{practiceId}/healthcare-services | Cualquier sesión válida | BAJO | 6 |
 |  |  | PATCH /practices/{practiceId}/healthcare-services/{id} | Cualquier sesión válida | ALTO | 7 |
 |  |  | GET /practices/{practiceId}/organization | SECURITY_ADMIN · PERIOP_ADMIN · SURGERY_SCHEDULER · SCHEDULING_ADMIN · PRACTITIONER · CLINICIAN · ACCOUNTING_APPROVER | BAJO | 9 |
 |  |  | GET /practices/{practiceId}/role-assignments | Cualquier sesión válida | BAJO | 3 |
 |  |  | POST /practices/{practiceId}/role-assignments/self-request | PRACTITIONER | MEDIO | 5 |
-|  |  | GET /practices/{practiceId}/sites | SECURITY_ADMIN · SURGERY_SCHEDULER · PERIOP_ADMIN · SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SCHEDULING_ADMIN | BAJO | 2 |
+|  |  | GET /practices/{practiceId}/sites | Cualquier sesión válida | BAJO | 3 |
 | `ctrl:PractitionerInvitationsController` | Operaciones de PractitionerInvitationsController que el README no asigna a un caso de uso | POST /practitioners/me/role-assignments/{roleId}/accept | PRACTITIONER | MEDIO | 2 |
 |  |  | POST /practitioners/me/role-assignments/{roleId}/decline | PRACTITIONER | MEDIO | 2 |
 | `ctrl:PractitionerSitesController` | Operaciones de PractitionerSitesController que el README no asigna a un caso de uso | GET /practitioners/{profileId}/sites | SECURITY_ADMIN · SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · CLINICIAN · PATIENT | BAJO | 5 |
 |  |  | GET /practitioners/me/role-assignments | PRACTITIONER | BAJO | 3 |
-|  |  | POST /practitioners/me/sites | PRACTITIONER · CLINICIAN | MEDIO | 8 |
+|  |  | POST /practitioners/me/sites | PRACTITIONER · CLINICIAN | MEDIO | 10 |
 |  |  | DELETE /practitioners/me/sites/{siteId} | PRACTITIONER · CLINICIAN | MEDIO | 4 |
 |  |  | PATCH /practitioners/me/sites/{siteId} | PRACTITIONER · CLINICIAN | MEDIO | 9 |
 |  |  | PUT /practitioners/me/sites/{siteId}/bank-qr | PRACTITIONER · CLINICIAN | BAJO | 6 |
 |  |  | PUT /practitioners/me/sites/{siteId}/contact-phone | PRACTITIONER · CLINICIAN | MEDIO | 7 |
+|  |  | PUT /practitioners/me/sites/{siteId}/logo | PRACTITIONER · CLINICIAN | MEDIO | 9 |
 | `ctrl:RoleAssignmentsController` | Operaciones de RoleAssignmentsController que el README no asigna a un caso de uso | POST /role-assignments/{roleId}/approve | Cualquier sesión válida | BAJO | 3 |
 |  |  | POST /role-assignments/{roleId}/end | SECURITY_ADMIN | BAJO | 3 |
 |  |  | POST /role-assignments/{roleId}/reject | Cualquier sesión válida | BAJO | 3 |
@@ -203,181 +204,194 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  a2(["SECURITY_ADMIN · SURGERY_SCHEDULER · PERIOP_ADMIN · SURGEON…"]):::actor
-  a6(["SECURITY_ADMIN"]):::actor
-  a9(["Cualquier sesión válida"]):::actor
-  a17(["SECURITY_ADMIN · PERIOP_ADMIN · SURGERY_SCHEDULER · SCHEDUL…"]):::actor
-  a26(["PRACTITIONER"]):::actor
-  a28(["SECURITY_ADMIN · SURGERY_SCHEDULER · PERIOP_ADMIN · SURGEON…"]):::actor
-  a32(["SECURITY_ADMIN · SCHEDULING_ADMIN · SCHEDULING_AGENT · PRAC…"]):::actor
-  a38(["PRACTITIONER · CLINICIAN"]):::actor
-  t3[("practice.practices")]:::tabla
-  t4[("practice.practitioner_role_assignments")]:::tabla
-  t7[("billing.service_catalog")]:::tabla
-  t10[("directory.tenant_memberships")]:::tabla
-  t11[("practice.healthcare_services")]:::tabla
-  t12[("terminology.catalog_concepts")]:::tabla
-  t13[("terminology.concept_properties")]:::tabla
-  t18[("practice.care_spaces")]:::tabla
-  t19[("practice.clinical_units")]:::tabla
-  t20[("practice.inventory_items")]:::tabla
-  t21[("practice.practice_accreditations")]:::tabla
-  t22[("practice.practice_sites")]:::tabla
-  t33[("common.addresses")]:::tabla
-  t34[("profiles.person_account_links")]:::tabla
-  t36[("community.public_profiles")]:::tabla
+  a2(["Cualquier sesión válida"]):::actor
+  a7(["SECURITY_ADMIN"]):::actor
+  a16(["SECURITY_ADMIN · PERIOP_ADMIN · SURGERY_SCHEDULER · SCHEDUL…"]):::actor
+  a25(["PRACTITIONER"]):::actor
+  a30(["SECURITY_ADMIN · SCHEDULING_ADMIN · SCHEDULING_AGENT · PRAC…"]):::actor
+  a36(["PRACTITIONER · CLINICIAN"]):::actor
+  a54(["SECURITY_ADMIN · SURGERY_SCHEDULER · PERIOP_ADMIN · SURGEON…"]):::actor
+  t3[("directory.tenant_memberships")]:::tabla
+  t4[("practice.practices")]:::tabla
+  t5[("practice.practitioner_role_assignments")]:::tabla
+  t8[("billing.service_catalog")]:::tabla
+  t10[("practice.healthcare_services")]:::tabla
+  t11[("terminology.catalog_concepts")]:::tabla
+  t12[("terminology.concept_properties")]:::tabla
+  t17[("practice.care_spaces")]:::tabla
+  t18[("practice.clinical_units")]:::tabla
+  t19[("practice.inventory_items")]:::tabla
+  t20[("practice.practice_accreditations")]:::tabla
+  t21[("practice.practice_sites")]:::tabla
+  t31[("common.addresses")]:::tabla
+  t32[("profiles.person_account_links")]:::tabla
+  t34[("community.public_profiles")]:::tabla
+  t37[("common.file_versions")]:::tabla
+  t38[("common.files")]:::tabla
   t41[("profiles.health_practitioner_profiles")]:::tabla
-  t15[("+1 tablas más")]
-  t23[("+3 tablas más")]
+  t14[("+1 tablas más")]
+  t22[("+3 tablas más")]
   subgraph s0["ctrl:PracticesController · Operaciones de PracticesController que el README no…"]
     o1["GET /practices"]:::op
-    o5["POST /practices"]:::op
-    o8["GET /practices/{practiceId}/healthcare-services"]:::op
-    o14["PATCH /practices/{practiceId}/healthcare-services/{id}"]:::op
-    o16["GET /practices/{practiceId}/organization"]:::op
-    o24["GET /practices/{practiceId}/role-assignments"]:::op
-    o25["POST /practices/{practiceId}/role-assignments/self-request"]:::op
-    o27["GET /practices/{practiceId}/sites"]:::op
+    o6["POST /practices"]:::op
+    o9["GET /practices/{practiceId}/healthcare-services"]:::op
+    o13["PATCH /practices/{practiceId}/healthcare-services/{id}"]:::op
+    o15["GET /practices/{practiceId}/organization"]:::op
+    o23["GET /practices/{practiceId}/role-assignments"]:::op
+    o24["POST /practices/{practiceId}/role-assignments/self-request"]:::op
+    o26["GET /practices/{practiceId}/sites"]:::op
   end
   subgraph s1["ctrl:PractitionerInvitationsController · Operaciones de PractitionerInvitations…"]
-    o29["POST /practitioners/me/role-assignments/{roleId}/accept"]:::op
-    o30["POST /practitioners/me/role-assignments/{roleId}/decline"]:::op
+    o27["POST /practitioners/me/role-assignments/{roleId}/accept"]:::op
+    o28["POST /practitioners/me/role-assignments/{roleId}/decline"]:::op
   end
-  t39[("+2 tablas más")]
+  t39[("+4 tablas más")]
   t43[("+3 tablas más")]
   t46[("+1 tablas más")]
+  t48[("+3 tablas más")]
   subgraph s2["ctrl:PractitionerSitesController · Operaciones de PractitionerSitesController q…"]
-    o31["GET /practitioners/{profileId}/sites"]:::op
-    o35["GET /practitioners/me/role-assignments"]:::op
-    o37["POST /practitioners/me/sites"]:::op
+    o29["GET /practitioners/{profileId}/sites"]:::op
+    o33["GET /practitioners/me/role-assignments"]:::op
+    o35["POST /practitioners/me/sites"]:::op
     o40["DELETE /practitioners/me/sites/{siteId}"]:::op
     o42["PATCH /practitioners/me/sites/{siteId}"]:::op
     o44["PUT /practitioners/me/sites/{siteId}/bank-qr"]:::op
     o45["PUT /practitioners/me/sites/{siteId}/contact-phone"]:::op
+    o47["PUT /practitioners/me/sites/{siteId}/logo"]:::op
   end
   subgraph s3["ctrl:RoleAssignmentsController · Operaciones de RoleAssignmentsController que e…"]
-    o47["POST /role-assignments/{roleId}/approve"]:::op
-    o48["POST /role-assignments/{roleId}/end"]:::op
-    o49["POST /role-assignments/{roleId}/reject"]:::op
-    o50["POST /role-assignments/{roleId}/suspend"]:::op
+    o49["POST /role-assignments/{roleId}/approve"]:::op
+    o50["POST /role-assignments/{roleId}/end"]:::op
+    o51["POST /role-assignments/{roleId}/reject"]:::op
+    o52["POST /role-assignments/{roleId}/suspend"]:::op
   end
   subgraph s4["ctrl:SitesController · Operaciones de SitesController que el README no asigna a…"]
-    o51["GET /sites/{siteId}/care-spaces"]:::op
+    o53["GET /sites/{siteId}/care-spaces"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
   o1 -->|"LEE"| t4
-  a6 --> o5
-  o5 -->|"CREA"| t7
-  o5 -->|"CREA"| t3
-  a9 --> o8
-  o8 -->|"LEE"| t7
-  o8 -->|"LEE"| t10
-  o8 -->|"LEE"| t11
-  o8 -->|"LEE"| t3
-  o8 -->|"LEE"| t12
-  o8 -->|"LEE"| t13
-  a9 --> o14
-  o14 -->|"LEE"| t7
-  o14 -->|"LEE"| t10
-  o14 -->|"ACTUALIZA"| t11
-  o14 -->|"LEE"| t11
-  o14 -->|"LEE"| t3
-  o14 -->|"LEE"| t12
-  o14 -.-> t15
-  a17 --> o16
-  o16 -->|"LEE"| t18
-  o16 -->|"LEE"| t19
-  o16 -->|"LEE"| t11
-  o16 -->|"LEE"| t20
-  o16 -->|"LEE"| t21
-  o16 -->|"LEE"| t22
-  o16 -.-> t23
-  a9 --> o24
+  o1 -->|"LEE"| t5
+  a7 --> o6
+  o6 -->|"CREA"| t8
+  o6 -->|"CREA"| t4
+  a2 --> o9
+  o9 -->|"LEE"| t8
+  o9 -->|"LEE"| t3
+  o9 -->|"LEE"| t10
+  o9 -->|"LEE"| t4
+  o9 -->|"LEE"| t11
+  o9 -->|"LEE"| t12
+  a2 --> o13
+  o13 -->|"LEE"| t8
+  o13 -->|"LEE"| t3
+  o13 -->|"ACTUALIZA"| t10
+  o13 -->|"LEE"| t10
+  o13 -->|"LEE"| t4
+  o13 -->|"LEE"| t11
+  o13 -.-> t14
+  a16 --> o15
+  o15 -->|"LEE"| t17
+  o15 -->|"LEE"| t18
+  o15 -->|"LEE"| t10
+  o15 -->|"LEE"| t19
+  o15 -->|"LEE"| t20
+  o15 -->|"LEE"| t21
+  o15 -.-> t22
+  a2 --> o23
+  o23 -->|"LEE"| t3
+  o23 -->|"LEE"| t4
+  o23 -->|"LEE"| t5
+  a25 --> o24
   o24 -->|"LEE"| t10
-  o24 -->|"LEE"| t3
+  o24 -->|"LEE"| t21
   o24 -->|"LEE"| t4
-  a26 --> o25
-  o25 -->|"LEE"| t11
-  o25 -->|"LEE"| t22
-  o25 -->|"LEE"| t3
-  o25 -->|"CREA"| t4
-  o25 -->|"LEE"| t4
-  a28 --> o27
-  o27 -->|"LEE"| t22
-  o27 -->|"LEE"| t3
-  a26 --> o29
-  o29 -->|"ACTUALIZA"| t4
+  o24 -->|"CREA"| t5
+  o24 -->|"LEE"| t5
+  a2 --> o26
+  o26 -->|"LEE"| t3
+  o26 -->|"LEE"| t21
+  o26 -->|"LEE"| t4
+  a25 --> o27
+  o27 -->|"ACTUALIZA"| t5
+  o27 -->|"LEE"| t5
+  a25 --> o28
+  o28 -->|"ACTUALIZA"| t5
+  o28 -->|"LEE"| t5
+  a30 --> o29
+  o29 -->|"LEE"| t31
+  o29 -->|"LEE"| t21
   o29 -->|"LEE"| t4
-  a26 --> o30
-  o30 -->|"ACTUALIZA"| t4
-  o30 -->|"LEE"| t4
-  a32 --> o31
-  o31 -->|"LEE"| t33
-  o31 -->|"LEE"| t22
-  o31 -->|"LEE"| t3
-  o31 -->|"LEE"| t4
-  o31 -->|"LEE"| t34
-  a26 --> o35
-  o35 -->|"LEE"| t36
-  o35 -->|"LEE"| t3
-  o35 -->|"LEE"| t4
-  a38 --> o37
-  o37 -->|"CREA"| t33
-  o37 -->|"CREA"| t22
-  o37 -->|"LEE"| t22
-  o37 -->|"CREA"| t3
-  o37 -->|"LEE"| t3
-  o37 -->|"CREA"| t4
-  o37 -.-> t39
-  a38 --> o40
-  o40 -->|"ACTUALIZA"| t4
-  o40 -->|"LEE"| t4
+  o29 -->|"LEE"| t5
+  o29 -->|"LEE"| t32
+  a25 --> o33
+  o33 -->|"LEE"| t34
+  o33 -->|"LEE"| t4
+  o33 -->|"LEE"| t5
+  a36 --> o35
+  o35 -->|"CREA"| t31
+  o35 -->|"LEE"| t37
+  o35 -->|"LEE"| t38
+  o35 -->|"CREA"| t21
+  o35 -->|"LEE"| t21
+  o35 -->|"CREA"| t4
+  o35 -.-> t39
+  a36 --> o40
+  o40 -->|"ACTUALIZA"| t5
+  o40 -->|"LEE"| t5
   o40 -->|"LEE"| t41
-  o40 -->|"LEE"| t34
-  a38 --> o42
-  o42 -->|"ACTUALIZA"| t33
-  o42 -->|"CREA"| t33
-  o42 -->|"LEE"| t33
-  o42 -->|"ACTUALIZA"| t22
-  o42 -->|"LEE"| t22
-  o42 -->|"LEE"| t3
+  o40 -->|"LEE"| t32
+  a36 --> o42
+  o42 -->|"ACTUALIZA"| t31
+  o42 -->|"CREA"| t31
+  o42 -->|"LEE"| t31
+  o42 -->|"ACTUALIZA"| t21
+  o42 -->|"LEE"| t21
+  o42 -->|"LEE"| t4
   o42 -.-> t43
-  a38 --> o44
-  o44 -->|"LEE"| t33
-  o44 -->|"LEE"| t22
-  o44 -->|"LEE"| t3
+  a36 --> o44
+  o44 -->|"LEE"| t31
+  o44 -->|"LEE"| t21
   o44 -->|"LEE"| t4
+  o44 -->|"LEE"| t5
   o44 -->|"LEE"| t41
-  o44 -->|"LEE"| t34
-  a38 --> o45
-  o45 -->|"LEE"| t33
-  o45 -->|"LEE"| t22
-  o45 -->|"LEE"| t3
-  o45 -->|"ACTUALIZA"| t4
+  o44 -->|"LEE"| t32
+  a36 --> o45
+  o45 -->|"LEE"| t31
+  o45 -->|"LEE"| t21
   o45 -->|"LEE"| t4
+  o45 -->|"ACTUALIZA"| t5
+  o45 -->|"LEE"| t5
   o45 -->|"LEE"| t41
   o45 -.-> t46
-  a9 --> o47
-  o47 -->|"LEE"| t10
-  o47 -->|"LEE"| t3
+  a36 --> o47
+  o47 -->|"LEE"| t31
+  o47 -->|"LEE"| t37
+  o47 -->|"LEE"| t38
+  o47 -->|"ACTUALIZA"| t21
+  o47 -->|"LEE"| t21
   o47 -->|"LEE"| t4
-  a6 --> o48
-  o48 -->|"LEE"| t10
-  o48 -->|"LEE"| t3
-  o48 -->|"LEE"| t4
-  a9 --> o49
-  o49 -->|"LEE"| t10
+  o47 -.-> t48
+  a2 --> o49
   o49 -->|"LEE"| t3
   o49 -->|"LEE"| t4
-  a6 --> o50
-  o50 -->|"LEE"| t10
+  o49 -->|"LEE"| t5
+  a7 --> o50
   o50 -->|"LEE"| t3
   o50 -->|"LEE"| t4
-  a28 --> o51
-  o51 -->|"LEE"| t18
-  o51 -->|"LEE"| t22
+  o50 -->|"LEE"| t5
+  a2 --> o51
   o51 -->|"LEE"| t3
+  o51 -->|"LEE"| t4
+  o51 -->|"LEE"| t5
+  a7 --> o52
+  o52 -->|"LEE"| t3
+  o52 -->|"LEE"| t4
+  o52 -->|"LEE"| t5
+  a54 --> o53
+  o53 -->|"LEE"| t17
+  o53 -->|"LEE"| t21
+  o53 -->|"LEE"| t4
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -525,7 +539,53 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 3. POST /practices/{practiceId}/accreditations
+#### 3. GET /practices
+
+Listar las prácticas activas del tenant
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PracticeSitesService.listPractices"]:::llamada
+  n2 --> n3
+  n4["Llama a PracticeSitesService.assertCanReadPractices"]:::llamada
+  n3 --> n4
+  n5{"!byRole && !administers"}:::decision
+  n4 --> n5
+  n6(["↩ (relanza el error capturado)"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a PracticesRepository.findByTenant"]:::llamada
+  n5 -->|"no"| n7
+  n8[("LEE practice.practices")]:::efecto
+  n7 --> n8
+  n9["Llama a PracticeAccessService.allowedPracticeIds"]:::llamada
+  n8 --> n9
+  n10["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
+  n9 --> n10
+  n11["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
+  n10 --> n11
+  n12[("LEE practice.practitioner_role_assignments")]:::efecto
+  n11 --> n12
+  n13(("200 Responde con éxito")):::ok
+  n12 --> n13
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 4. POST /practices/{practiceId}/accreditations
 
 Registrar una acreditación con evidencia
 
@@ -572,7 +632,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. GET /practices/{practiceId}/healthcare-services
+#### 5. GET /practices/{practiceId}/healthcare-services
 
 Listar los procedimientos que ofrecen las sedes de la práctica
 
@@ -630,7 +690,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /practices/{practiceId}/healthcare-services
+#### 6. POST /practices/{practiceId}/healthcare-services
 
 Publicar un procedimiento del nomenclador en una sede
 
@@ -730,7 +790,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. PATCH /practices/{practiceId}/healthcare-services/{id}
+#### 7. PATCH /practices/{practiceId}/healthcare-services/{id}
 
 Actualizar el precio o el estado de un procedimiento de la sede
 
@@ -806,7 +866,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. GET /practices/{practiceId}/organization
+#### 8. GET /practices/{practiceId}/organization
 
 Consola de organización médica: estructura, plantilla y legajo
 
@@ -876,7 +936,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. GET /practices/{practiceId}/role-assignments
+#### 9. GET /practices/{practiceId}/role-assignments
 
 Listar las vinculaciones profesional-organización de la práctica
 
@@ -922,7 +982,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /practices/{practiceId}/role-assignments
+#### 10. POST /practices/{practiceId}/role-assignments
 
 Asignar un rol de profesional a sitio/unidad/servicio
 
@@ -999,7 +1059,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /practices/{practiceId}/role-assignments/invitations
+#### 11. POST /practices/{practiceId}/role-assignments/invitations
 
 Invitar a un profesional a procedimientos de una sede
 
@@ -1088,7 +1148,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /practices/{practiceId}/role-assignments/self-request
+#### 12. POST /practices/{practiceId}/role-assignments/self-request
 
 Solicitar la propia vinculación a una organización
 
@@ -1174,7 +1234,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. PUT /practices/{practiceId}/settings/{settingKey}
+#### 13. PUT /practices/{practiceId}/settings/{settingKey}
 
 Configurar un ajuste de práctica (upsert)
 
@@ -1218,7 +1278,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. GET /practices/{practiceId}/sites
+#### 14. GET /practices/{practiceId}/sites
 
 Listar las sedes de una práctica
 
@@ -1238,20 +1298,26 @@ flowchart TD
   n1 --> n2
   n3["Llama a PracticeSitesService.listSites"]:::llamada
   n2 --> n3
-  n4["Llama a PracticesRepository.findById"]:::llamada
+  n4["Llama a PracticeSitesService.assertCanReadPractices"]:::llamada
   n3 --> n4
-  n5[("LEE practice.practices")]:::efecto
+  n5{"!byRole && !administers"}:::decision
   n4 --> n5
-  n6{"!practice || practice.tenantId !== tenantId"}:::decision
-  n5 --> n6
-  n7(["404 NOT_FOUND Práctica no encontrada"]):::error
-  n6 -->|"sí"| n7
-  n8["Llama a PracticeSitesRepository.findByPractice"]:::llamada
-  n6 -->|"no"| n8
-  n9[("LEE practice.practice_sites")]:::efecto
+  n6(["↩ (relanza el error capturado)"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a PracticesRepository.findById"]:::llamada
+  n5 -->|"no"| n7
+  n8[("LEE practice.practices")]:::efecto
+  n7 --> n8
+  n9{"!practice || practice.tenantId !== tenantId"}:::decision
   n8 --> n9
-  n10(("200 Responde con éxito")):::ok
-  n9 --> n10
+  n10(["404 NOT_FOUND Práctica no encontrada"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PracticeSitesRepository.findByPractice"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE practice.practice_sites")]:::efecto
+  n11 --> n12
+  n13(("200 Responde con éxito")):::ok
+  n12 --> n13
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1260,7 +1326,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. POST /practices/{practiceId}/sites
+#### 15. POST /practices/{practiceId}/sites
 
 Dar de alta un sitio de práctica
 
@@ -1309,7 +1375,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. DELETE /practices/{practiceId}/sites/{siteId}
+#### 16. DELETE /practices/{practiceId}/sites/{siteId}
 
 Desmantelar un sitio en cascada (soft-delete)
 
@@ -1392,7 +1458,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. GET /practitioners/{profileId}/sites
+#### 17. GET /practitioners/{profileId}/sites
 
 Consultorios donde atiende el profesional
 
@@ -1446,7 +1512,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. GET /practitioners/me/role-assignments
+#### 18. GET /practitioners/me/role-assignments
 
 Mis vinculaciones con organizaciones
 
@@ -1489,7 +1555,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. POST /practitioners/me/role-assignments/{roleId}/accept
+#### 19. POST /practitioners/me/role-assignments/{roleId}/accept
 
 Aceptar una invitación de un centro
 
@@ -1547,7 +1613,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. POST /practitioners/me/role-assignments/{roleId}/decline
+#### 20. POST /practitioners/me/role-assignments/{roleId}/decline
 
 Declinar una invitación de un centro
 
@@ -1605,7 +1671,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. POST /practitioners/me/sites
+#### 21. POST /practitioners/me/sites
 
 Registrar un consultorio propio
 
@@ -1614,7 +1680,9 @@ Registrar un consultorio propio
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado; ForbiddenException: {labels.subject} no le pertenece |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {labels.notFound} |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso; PreconditionFailedException: El logo no es un archivo suyo que se pueda usar; PreconditionFailedException: El logo debe ser una imagen |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1643,41 +1711,102 @@ flowchart TD
   n12(["403 FORBIDDEN Esta cuenta no tiene un perfil profesional asociado"]):::error
   n11 --> n12
   n9 -->|"no"| n12
-  n13["Llama a OwnSiteProvisioningService.provision"]:::llamada
-  n14["Llama a PracticesRepository.findOwnOffice"]:::llamada
-  n13 --> n14
-  n15[("LEE practice.practices")]:::efecto
+  n13{"dto.logoFileId"}:::decision
+  n14["Llama a PractitionerSitesService.assertUsableLogo"]:::llamada
+  n13 -->|"sí"| n14
+  n15["Intenta"]:::intento
   n14 --> n15
-  n16{"!practice"}:::decision
+  n16["Llama a AttachableFileService.assertUsableBy"]:::llamada
   n15 --> n16
-  n17["Llama a PracticesRepository.create"]:::llamada
-  n16 -->|"sí"| n17
-  n18[("CREA practice.practices")]:::efecto
+  n17["Llama a FilesRepository.findById"]:::llamada
+  n16 --> n17
+  n18[("LEE common.files")]:::efecto
   n17 --> n18
-  n19{"dto.address"}:::decision
+  n19{"!file"}:::decision
   n18 --> n19
-  n16 -->|"no"| n19
-  n20["Llama a AddressesRepository.create"]:::llamada
+  n20(["404 NOT_FOUND {labels.notFound}"]):::error
   n19 -->|"sí"| n20
-  n21[("CREA common.addresses")]:::efecto
-  n20 --> n21
-  n22["Llama a OwnSiteProvisioningService.uniqueSiteCode"]:::llamada
-  n21 --> n22
-  n19 -->|"no"| n22
-  n23["Llama a PracticeSitesRepository.findByPracticeAndCode"]:::llamada
-  n22 --> n23
-  n24[("LEE practice.practice_sites")]:::efecto
-  n23 --> n24
-  n25["Llama a PracticeSitesRepository.create"]:::llamada
-  n24 --> n25
-  n26[("CREA practice.practice_sites")]:::efecto
-  n25 --> n26
-  n27["Llama a PractitionerRoleAssignmentsRepository.create"]:::llamada
-  n26 --> n27
-  n28[("CREA practice.practitioner_role_assignments")]:::efecto
+  n21{"file.createdByUserId !== actor.id && !enAllowlist"}:::decision
+  n19 -->|"no"| n21
+  n22(["403 FORBIDDEN {labels.subject} no le pertenece"]):::error
+  n21 -->|"sí"| n22
+  n23{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
+  n21 -->|"no"| n23
+  n24(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
+  n23 -->|"sí"| n24
+  n25{"!file.currentVersionId"}:::decision
+  n23 -->|"no"| n25
+  n26(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a AttachableFileService.assertVersionUsable"]:::llamada
+  n25 -->|"no"| n27
+  n28{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
   n27 --> n28
-  n29(("201 Responde con éxito")):::ok
-  n28 --> n29
+  n29(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
+  n28 -->|"sí"| n29
+  n30{"!file.currentVersionId"}:::decision
+  n28 -->|"no"| n30
+  n31(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n30 -->|"sí"| n31
+  n32{"!version"}:::decision
+  n30 -->|"no"| n32
+  n33(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n32 -->|"sí"| n33
+  n34{"version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED"}:::decision
+  n32 -->|"no"| n34
+  n35(["422 PRECONDITION_FAILED {labels.subject} resultó infectado"]):::error
+  n34 -->|"sí"| n35
+  n36{"accepted && !accepted.includes(version.mimeType ?? '')"}:::decision
+  n34 -->|"no"| n36
+  n37(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
+  n36 -->|"sí"| n37
+  n38{"err instanceof ForbiddenException || err instanceof ResourceNotFoundException"}:::decision
+  n15 -->|"si falla"| n38
+  n39(["422 PRECONDITION_FAILED El logo no es un archivo suyo que se pueda usar"]):::error
+  n38 -->|"sí"| n39
+  n40(["↩ (relanza el error capturado)"]):::error
+  n38 -->|"no"| n40
+  n41{"usable.file.categoryConceptId !== CONCEPTS.FILE_CATEGORY_IMAGE"}:::decision
+  n36 -->|"no"| n41
+  n42(["422 PRECONDITION_FAILED El logo debe ser una imagen"]):::error
+  n41 -->|"sí"| n42
+  n43["Llama a OwnSiteProvisioningService.provision"]:::llamada
+  n41 -->|"no"| n43
+  n13 -->|"no"| n43
+  n44["Llama a PracticesRepository.findOwnOffice"]:::llamada
+  n43 --> n44
+  n45[("LEE practice.practices")]:::efecto
+  n44 --> n45
+  n46{"!practice"}:::decision
+  n45 --> n46
+  n47["Llama a PracticesRepository.create"]:::llamada
+  n46 -->|"sí"| n47
+  n48[("CREA practice.practices")]:::efecto
+  n47 --> n48
+  n49{"dto.address"}:::decision
+  n48 --> n49
+  n46 -->|"no"| n49
+  n50["Llama a AddressesRepository.create"]:::llamada
+  n49 -->|"sí"| n50
+  n51[("CREA common.addresses")]:::efecto
+  n50 --> n51
+  n52["Llama a OwnSiteProvisioningService.uniqueSiteCode"]:::llamada
+  n51 --> n52
+  n49 -->|"no"| n52
+  n53["Llama a PracticeSitesRepository.findByPracticeAndCode"]:::llamada
+  n52 --> n53
+  n54[("LEE practice.practice_sites")]:::efecto
+  n53 --> n54
+  n55["Llama a PracticeSitesRepository.create"]:::llamada
+  n54 --> n55
+  n56[("CREA practice.practice_sites")]:::efecto
+  n55 --> n56
+  n57["Llama a PractitionerRoleAssignmentsRepository.create"]:::llamada
+  n56 --> n57
+  n58[("CREA practice.practitioner_role_assignments")]:::efecto
+  n57 --> n58
+  n59(("201 Responde con éxito")):::ok
+  n58 --> n59
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1686,7 +1815,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. DELETE /practitioners/me/sites/{siteId}
+#### 22. DELETE /practitioners/me/sites/{siteId}
 
 Retirar un consultorio propio
 
@@ -1744,7 +1873,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. PATCH /practitioners/me/sites/{siteId}
+#### 23. PATCH /practitioners/me/sites/{siteId}
 
 Corregir un consultorio propio
 
@@ -1853,7 +1982,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. PUT /practitioners/me/sites/{siteId}/bank-qr
+#### 24. PUT /practitioners/me/sites/{siteId}/bank-qr
 
 Fijar o quitar el QR bancario de una sede
 
@@ -1923,7 +2052,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. PUT /practitioners/me/sites/{siteId}/contact-phone
+#### 25. PUT /practitioners/me/sites/{siteId}/contact-phone
 
 Guardar o quitar mi teléfono en una sede
 
@@ -1999,7 +2128,143 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. POST /role-assignments/{roleId}/approve
+#### 26. PUT /practitioners/me/sites/{siteId}/logo
+
+Fijar o quitar el logo del consultorio propio
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {labels.subject} no le pertenece; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Esa sede no es un consultorio propio suyo; ResourceNotFoundException: {labels.notFound} |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso; PreconditionFailedException: El logo no es un archivo suyo que se pueda usar; PreconditionFailedException: El logo debe ser una imagen |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerSitesService.setSiteLogo"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PractitionerSitesService.requireOwnSite"]:::llamada
+  n4 --> n5
+  n6["Llama a PracticeSitesRepository.findById"]:::llamada
+  n5 --> n6
+  n7[("LEE practice.practice_sites")]:::efecto
+  n6 --> n7
+  n8["Llama a PractitionerSitesService.isOwnPractice"]:::llamada
+  n7 --> n8
+  n9["Llama a PracticesRepository.findOwnOffice"]:::llamada
+  n8 --> n9
+  n10[("LEE practice.practices")]:::efecto
+  n9 --> n10
+  n11{"!site || !isOwn"}:::decision
+  n10 --> n11
+  n12(["404 NOT_FOUND Esa sede no es un consultorio propio suyo"]):::error
+  n11 -->|"sí"| n12
+  n13{"fileId !== null"}:::decision
+  n11 -->|"no"| n13
+  n14["Llama a PractitionerSitesService.assertUsableLogo"]:::llamada
+  n13 -->|"sí"| n14
+  n15["Intenta"]:::intento
+  n14 --> n15
+  n16["Llama a AttachableFileService.assertUsableBy"]:::llamada
+  n15 --> n16
+  n17["Llama a FilesRepository.findById"]:::llamada
+  n16 --> n17
+  n18[("LEE common.files")]:::efecto
+  n17 --> n18
+  n19{"!file"}:::decision
+  n18 --> n19
+  n20(["404 NOT_FOUND {labels.notFound}"]):::error
+  n19 -->|"sí"| n20
+  n21{"file.createdByUserId !== actor.id && !enAllowlist"}:::decision
+  n19 -->|"no"| n21
+  n22(["403 FORBIDDEN {labels.subject} no le pertenece"]):::error
+  n21 -->|"sí"| n22
+  n23{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
+  n21 -->|"no"| n23
+  n24(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
+  n23 -->|"sí"| n24
+  n25{"!file.currentVersionId"}:::decision
+  n23 -->|"no"| n25
+  n26(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a AttachableFileService.assertVersionUsable"]:::llamada
+  n25 -->|"no"| n27
+  n28{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
+  n27 --> n28
+  n29(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
+  n28 -->|"sí"| n29
+  n30{"!file.currentVersionId"}:::decision
+  n28 -->|"no"| n30
+  n31(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n30 -->|"sí"| n31
+  n32{"!version"}:::decision
+  n30 -->|"no"| n32
+  n33(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n32 -->|"sí"| n33
+  n34{"version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED"}:::decision
+  n32 -->|"no"| n34
+  n35(["422 PRECONDITION_FAILED {labels.subject} resultó infectado"]):::error
+  n34 -->|"sí"| n35
+  n36{"accepted && !accepted.includes(version.mimeType ?? '')"}:::decision
+  n34 -->|"no"| n36
+  n37(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
+  n36 -->|"sí"| n37
+  n38{"err instanceof ForbiddenException || err instanceof ResourceNotFoundException"}:::decision
+  n15 -->|"si falla"| n38
+  n39(["422 PRECONDITION_FAILED El logo no es un archivo suyo que se pueda usar"]):::error
+  n38 -->|"sí"| n39
+  n40(["↩ (relanza el error capturado)"]):::error
+  n38 -->|"no"| n40
+  n41{"usable.file.categoryConceptId !== CONCEPTS.FILE_CATEGORY_IMAGE"}:::decision
+  n36 -->|"no"| n41
+  n42(["422 PRECONDITION_FAILED El logo debe ser una imagen"]):::error
+  n41 -->|"sí"| n42
+  n43[("ACTUALIZA practice.practice_sites")]:::efecto
+  n41 -->|"no"| n43
+  n13 -->|"no"| n43
+  n44["Llama a ProfileOwnershipService.requireOwnPractitionerProfileId"]:::llamada
+  n43 --> n44
+  n45["Llama a ProfileOwnershipService.personOf"]:::llamada
+  n44 --> n45
+  n46["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n45 --> n46
+  n47[("LEE profiles.person_account_links")]:::efecto
+  n46 --> n47
+  n48{"personId"}:::decision
+  n47 --> n48
+  n49["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n48 -->|"sí"| n49
+  n50[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n49 --> n50
+  n51(["403 FORBIDDEN Esta cuenta no tiene un perfil profesional asociado"]):::error
+  n50 --> n51
+  n48 -->|"no"| n51
+  n52["Llama a PractitionerRoleAssignmentsRepository.findCurrentBySite"]:::llamada
+  n53[("LEE practice.practitioner_role_assignments")]:::efecto
+  n52 --> n53
+  n54["Llama a PractitionerSitesService.projectSite"]:::llamada
+  n53 --> n54
+  n55[("LEE common.addresses")]:::efecto
+  n54 --> n55
+  n56(("200 Responde con éxito")):::ok
+  n55 --> n56
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 27. POST /role-assignments/{roleId}/approve
 
 Aprobar una vinculación pendiente
 
@@ -2067,7 +2332,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. POST /role-assignments/{roleId}/end
+#### 28. POST /role-assignments/{roleId}/end
 
 Finalizar una vinculación
 
@@ -2135,7 +2400,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. POST /role-assignments/{roleId}/reject
+#### 29. POST /role-assignments/{roleId}/reject
 
 Rechazar una vinculación pendiente
 
@@ -2203,7 +2468,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. POST /role-assignments/{roleId}/support-assignments
+#### 30. POST /role-assignments/{roleId}/support-assignments
 
 Adjuntar personal de apoyo a un rol de profesional
 
@@ -2257,7 +2522,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 29. POST /role-assignments/{roleId}/suspend
+#### 31. POST /role-assignments/{roleId}/suspend
 
 Suspender una vinculación activa
 
@@ -2325,7 +2590,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 30. GET /sites/{siteId}/care-spaces
+#### 32. GET /sites/{siteId}/care-spaces
 
 Listar los espacios de atención de la sede
 
@@ -2375,7 +2640,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 31. POST /sites/{siteId}/care-spaces
+#### 33. POST /sites/{siteId}/care-spaces
 
 Crear un espacio de atención bajo una unidad/sitio
 
@@ -2446,7 +2711,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 32. POST /sites/{siteId}/clinical-units
+#### 34. POST /sites/{siteId}/clinical-units
 
 Crear una unidad clínica jerárquica
 
@@ -2506,7 +2771,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 33. POST /tenants/{tenantId}/practices
+#### 35. POST /tenants/{tenantId}/practices
 
 Crear la práctica y la primera sede de una organización
 
@@ -2585,6 +2850,5 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
-| GET /practices | 200, 401, 403, 429 | 2 |
 | POST /practices | 201, 400, 401, 403, 429 | 2 |
 | POST /practices/{practiceId}/inventory-items | 201, 400, 401, 403, 429 | 1 |
