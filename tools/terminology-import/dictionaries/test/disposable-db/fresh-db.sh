@@ -4,6 +4,10 @@
 # internos que usa el cargador. Mismo patrón que diseases/test/disposable-db.
 #   DB_HOST=<dir del socket> DB_PORT=55407 DB_USER=mantra DB_NAME=dict_test sh tools/terminology-import/dictionaries/test/disposable-db/fresh-db.sh
 set -e
+# Guard: esto hace `drop database`. Sólo contra un Postgres local y una base cuyo nombre termina en `_test`
+# (nunca contra la del stack real, aunque las variables de entorno apunten ahí).
+case "$DB_HOST" in 127.0.0.1|localhost|/*) ;; *) echo "fresh-db.sh: DB_HOST=$DB_HOST no es local; me niego." >&2; exit 2 ;; esac
+case "$DB_NAME" in *_test) ;; *) echo "fresh-db.sh: DB_NAME=$DB_NAME no termina en _test; me niego." >&2; exit 2 ;; esac
 ROOT=$(cd "$(dirname "$0")/../../../../.." && pwd)
 Q="psql -q -h $DB_HOST -p $DB_PORT -U $DB_USER"
 $Q -d postgres -c "drop database if exists $DB_NAME" -c "create database $DB_NAME"
