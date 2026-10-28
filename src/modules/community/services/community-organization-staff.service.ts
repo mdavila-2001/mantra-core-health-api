@@ -160,10 +160,7 @@ export class CommunityOrganizationStaffService {
   ): Promise<boolean> {
     if (!profile || !this.isOrganizationProfile(profile)) return false;
     if (profile.statusConceptId !== CONCEPTS.STATE_ACTIVE) return false;
-    if (
-      profile.targetTypeConceptId === COMM.PROFILE_TARGET_PHARMACY &&
-      !(actor.roles ?? []).includes(PHARMACY_STAFF_ROLE)
-    ) {
+    if (!this.mayAttendTargetType(actor, profile.targetTypeConceptId)) {
       return false;
     }
     const membership = await this.membershipsRepo.findActiveByUserTenant(
@@ -175,6 +172,57 @@ export class CommunityOrganizationStaffService {
     return Boolean(
       membership && INBOX_TENANT_ROLES.has(membership.tenantRoleConceptId),
     );
+  }
+
+  /**
+   * La mitad de {@link canAttend} que depende sólo del tipo de vitrina y de la
+   * sesión: es de organización y, si es de farmacia, el actor trae el rol de
+   * runtime `PHARMACY_STAFF`.
+   *
+   * @param actor - La sesión.
+   * @param targetTypeConceptId - Tipo de sujeto de la vitrina.
+   */
+  mayAttendTargetType(
+    actor: AuthenticatedUser,
+    targetTypeConceptId: string,
+  ): boolean {
+    if (!ORGANIZATION_PROFILE_TARGET_TYPES.includes(targetTypeConceptId)) {
+      return false;
+    }
+    return (
+      targetTypeConceptId !== COMM.PROFILE_TARGET_PHARMACY ||
+      (actor.roles ?? []).includes(PHARMACY_STAFF_ROLE)
+    );
+  }
+
+  /**
+   * La otra mitad de {@link canAttend}, al revés: los tenants en los que el
+   * actor tiene una membresía **activa en la base** con un rol que atiende la
+   * bandeja (OWNER, ADMIN o STAFF). Una sola consulta, por la persona.
+   *
+   * Es lo que deja preguntar «¿qué vitrinas puedo atender?» sin conocerlas de
+   * antemano: la vitrina de un tenant tiene `target_id` = el tenant, así que
+   * estos ids son exactamente los `target_id` a buscar.
+   *
+   * @param em - Contexto de persistencia.
+   * @param actor - La sesión.
+   */
+  async attendableTenantIds(
+    em: EntityManager,
+    actor: AuthenticatedUser,
+  ): Promise<string[]> {
+    const memberships = await this.membershipsRepo.findActiveByUser(
+      em,
+      actor.id,
+      DIR.MEMBERSHIP_ACTIVE,
+    );
+    return [
+      ...new Set(
+        memberships
+          .filter((m) => INBOX_TENANT_ROLES.has(m.tenantRoleConceptId))
+          .map((m) => m.tenantId),
+      ),
+    ];
   }
 
   /**

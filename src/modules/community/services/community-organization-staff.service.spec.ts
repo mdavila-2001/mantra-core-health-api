@@ -11,6 +11,7 @@ function build(tenantRows: number) {
   const membershipsRepo = {
     findActiveByUserTenant: mockFn(async () => null),
     findByTenantAndStatus: mockFn(async () => []),
+    findActiveByUser: mockFn(async () => []),
   };
   const service = new CommunityOrganizationStaffService(membershipsRepo as any);
   return { em, membershipsRepo, service };
@@ -84,6 +85,46 @@ describe('CommunityOrganizationStaffService', () => {
         d.em,
         'u',
         'tenant-1',
+        DIR.MEMBERSHIP_ACTIVE,
+      );
+    });
+  });
+
+  describe('mayAttendTargetType', () => {
+    it.each([
+      [COMM.PROFILE_TARGET_PHARMACY, ['PHARMACY_STAFF'], true],
+      [COMM.PROFILE_TARGET_PHARMACY, ['USER'], false],
+      [COMM.PROFILE_TARGET_ORGANIZATION, ['USER'], true],
+      [COMM.PROFILE_TARGET_USER, ['PHARMACY_STAFF'], false],
+    ])('tipo %s con roles %j → %s', (type, roles, expected) => {
+      const d = build(1);
+      expect(
+        d.service.mayAttendTargetType({ id: 'u', roles } as any, type),
+      ).toBe(expected);
+    });
+  });
+
+  describe('attendableTenantIds', () => {
+    it('una consulta por la persona; OWNER/ADMIN/STAFF, sin repetir tenants', async () => {
+      const d = build(1);
+      d.membershipsRepo.findActiveByUser.mockResolvedValue([
+        { tenantId: 't-1', tenantRoleConceptId: DIR.ROLE_STAFF },
+        { tenantId: 't-1', tenantRoleConceptId: DIR.ROLE_ADMIN },
+        { tenantId: 't-2', tenantRoleConceptId: DIR.ROLE_OWNER },
+        { tenantId: 't-3', tenantRoleConceptId: DIR.ROLE_PRACTITIONER },
+      ]);
+      await expect(
+        d.service.attendableTenantIds(
+          d.em as any,
+          {
+            id: 'u',
+            roles: [],
+          } as any,
+        ),
+      ).resolves.toEqual(['t-1', 't-2']);
+      expect(d.membershipsRepo.findActiveByUser).toHaveBeenCalledWith(
+        d.em,
+        'u',
         DIR.MEMBERSHIP_ACTIVE,
       );
     });
