@@ -497,32 +497,34 @@ flowchart TD
   n8 -->|"sí"| n9
   n10["Llama a AuthzClinicalScopeService.assertPatientInTenant"]:::llamada
   n8 -->|"no"| n10
-  n11["Llama a AuthzClinicalScopeRepository.patientExists"]:::llamada
+  n11["Llama a AuthzClinicalScopeService.isPatientInTenant"]:::llamada
   n10 --> n11
-  n12[("LEE profiles.patient_profiles")]:::efecto
+  n12["Llama a AuthzClinicalScopeRepository.patientExists"]:::llamada
   n11 --> n12
-  n13["Llama a AuthzClinicalScopeRepository.patientHasFootprintInTenant"]:::llamada
+  n13[("LEE profiles.patient_profiles")]:::efecto
   n12 --> n13
-  n14[("LEE profiles.person_account_links · LEE scheduling.appointment_bookings · LEE directory.tenant_memberships")]:::efecto
+  n14["Llama a AuthzClinicalScopeRepository.patientHasFootprintInTenant"]:::llamada
   n13 --> n14
-  n15{"!linked"}:::decision
+  n15[("LEE profiles.person_account_links · LEE scheduling.appointment_bookings · LEE directory.tenant_memberships")]:::efecto
   n14 --> n15
-  n16(["↩ (relanza el error capturado)"]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a CareRelationshipsRepository.findActiveInTenant"]:::llamada
-  n15 -->|"no"| n17
-  n18[("LEE authz.care_relationships")]:::efecto
-  n17 --> n18
-  n19{"existing"}:::decision
+  n16{"!(await this.isPatientInTenant(tx, patientProfileId, tenantId))"}:::decision
+  n15 --> n16
+  n17(["↩ (relanza el error capturado)"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a CareRelationshipsRepository.findActiveInTenant"]:::llamada
+  n16 -->|"no"| n18
+  n19[("LEE authz.care_relationships")]:::efecto
   n18 --> n19
-  n20(["409 CONFLICT Ya existe una relación asistencial activa para ese practicante"]):::error
-  n19 -->|"sí"| n20
-  n21["Llama a CareRelationshipsRepository.create"]:::llamada
-  n19 -->|"no"| n21
-  n22[("CREA authz.care_relationships")]:::efecto
-  n21 --> n22
-  n23(("201 Responde con éxito")):::ok
+  n20{"existing"}:::decision
+  n19 --> n20
+  n21(["409 CONFLICT Ya existe una relación asistencial activa para ese practicante"]):::error
+  n20 -->|"sí"| n21
+  n22["Llama a CareRelationshipsRepository.create"]:::llamada
+  n20 -->|"no"| n22
+  n23[("CREA authz.care_relationships")]:::efecto
   n22 --> n23
+  n24(("201 Responde con éxito")):::ok
+  n23 --> n24
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -747,75 +749,46 @@ flowchart TD
   n27 --> n28
   n29[("CREA audit.audit_log")]:::efecto
   n28 --> n29
-  n30["Llama a AuthzCareRelationshipsService.resolvePatientUserId"]:::llamada
+  n30["Llama a AuthzCareRelationshipsService.notifyRequest"]:::llamada
   n29 --> n30
-  n31["Llama a PersonAccountLinksRepository.findActiveByPerson"]:::llamada
+  n31["Llama a AuthzCareRelationshipsService.resolvePatientUserId"]:::llamada
   n30 --> n31
-  n32[("LEE profiles.person_account_links")]:::efecto
+  n32["Llama a PersonAccountLinksRepository.findActiveByPerson"]:::llamada
   n31 --> n32
-  n33{"recipientUserId"}:::decision
+  n33[("LEE profiles.person_account_links")]:::efecto
   n32 --> n33
-  n34["Llama a NotificationsService.emitInApp"]:::llamada
-  n33 -->|"sí"| n34
-  n35["Intenta"]:::intento
-  n34 --> n35
-  n36["Llama a NotificationsService.writeInApp"]:::llamada
+  n34{"recipientUserId"}:::decision
+  n33 --> n34
+  n35["Llama a NotificationsService.emitInApp"]:::llamada
+  n34 -->|"sí"| n35
+  n36["Intenta"]:::intento
   n35 --> n36
-  n37["Llama a NotificationsRepository.findActiveChannelByType"]:::llamada
+  n37["Llama a NotificationsService.writeInApp"]:::llamada
   n36 --> n37
-  n38[("LEE messaging.message_channels")]:::efecto
+  n38{"!channel"}:::decision
   n37 --> n38
-  n39{"!channel"}:::decision
-  n38 --> n39
-  n40(["422 PRECONDITION_FAILED No hay canal in-app activo: falta correr el seed de mensajería"]):::error
-  n39 -->|"sí"| n40
-  n41{"input.destination"}:::decision
-  n39 -->|"no"| n41
-  n42["Llama a NotificationsRepository.findUnreadInAppForResource"]:::llamada
-  n41 -->|"sí"| n42
-  n43[("LEE messaging.in_app_notifications")]:::efecto
-  n42 --> n43
-  n44["Llama a NotificationsRepository.createNotificationRequest"]:::llamada
-  n43 --> n44
-  n41 -->|"no"| n44
-  n45[("CREA messaging.notification_requests")]:::efecto
-  n44 --> n45
-  n46["Llama a NotificationsRepository.findChannelConfigs"]:::llamada
+  n39(["422 PRECONDITION_FAILED No hay canal in-app activo: falta correr el seed de mensajería"]):::error
+  n38 -->|"sí"| n39
+  n40{"!config"}:::decision
+  n38 -->|"no"| n40
+  n41(["422 PRECONDITION_FAILED El canal in-app no tiene configuración de proveedor activa"]):::error
+  n40 -->|"sí"| n41
+  n42{"!provider"}:::decision
+  n40 -->|"no"| n42
+  n43(["404 NOT_FOUND El proveedor configurado para el canal in-app no existe"]):::error
+  n42 -->|"sí"| n43
+  n44{"!result.suppressed && result.inAppNotificationId && result.availableAt && new Date(result.availableAt).getTim…"}:::decision
+  n42 -->|"no"| n44
+  n45["Llama a WebPushService.pushToUser"]:::llamada
+  n44 -->|"sí"| n45
+  n46["Intenta"]:::intento
   n45 --> n46
-  n47[("LEE messaging.provider_channel_configs")]:::efecto
+  n47[("LEE iam.devices")]:::efecto
   n46 --> n47
-  n48{"!config"}:::decision
+  n48(("201 Responde con éxito")):::ok
   n47 --> n48
-  n49(["422 PRECONDITION_FAILED El canal in-app no tiene configuración de proveedor activa"]):::error
-  n48 -->|"sí"| n49
-  n50["Llama a NotificationsRepository.findProviderById"]:::llamada
-  n48 -->|"no"| n50
-  n51[("LEE messaging.messaging_providers")]:::efecto
-  n50 --> n51
-  n52{"!provider"}:::decision
-  n51 --> n52
-  n53(["404 NOT_FOUND El proveedor configurado para el canal in-app no existe"]):::error
-  n52 -->|"sí"| n53
-  n54["Llama a NotificationsRepository.createDelivery"]:::llamada
-  n52 -->|"no"| n54
-  n55[("CREA messaging.notification_deliveries")]:::efecto
-  n54 --> n55
-  n56["Llama a NotificationsRepository.createInAppNotification"]:::llamada
-  n55 --> n56
-  n57[("CREA messaging.in_app_notifications")]:::efecto
-  n56 --> n57
-  n58{"!result.suppressed && result.inAppNotificationId && result.availableAt && new Date(result.availableAt).getTim…"}:::decision
-  n57 --> n58
-  n59["Llama a WebPushService.pushToUser"]:::llamada
-  n58 -->|"sí"| n59
-  n60["Intenta"]:::intento
-  n59 --> n60
-  n61[("LEE iam.devices")]:::efecto
-  n60 --> n61
-  n62(("201 Responde con éxito")):::ok
-  n61 --> n62
-  n58 -->|"no"| n62
-  n33 -->|"no"| n62
+  n44 -->|"no"| n48
+  n34 -->|"no"| n48
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1063,32 +1036,34 @@ flowchart TD
   n8 -->|"sí"| n9
   n10["Llama a AuthzClinicalScopeService.assertPatientInTenant"]:::llamada
   n8 -->|"no"| n10
-  n11["Llama a AuthzClinicalScopeRepository.patientExists"]:::llamada
+  n11["Llama a AuthzClinicalScopeService.isPatientInTenant"]:::llamada
   n10 --> n11
-  n12[("LEE profiles.patient_profiles")]:::efecto
+  n12["Llama a AuthzClinicalScopeRepository.patientExists"]:::llamada
   n11 --> n12
-  n13["Llama a AuthzClinicalScopeRepository.patientHasFootprintInTenant"]:::llamada
+  n13[("LEE profiles.patient_profiles")]:::efecto
   n12 --> n13
-  n14[("LEE profiles.person_account_links · LEE scheduling.appointment_bookings · LEE directory.tenant_memberships")]:::efecto
+  n14["Llama a AuthzClinicalScopeRepository.patientHasFootprintInTenant"]:::llamada
   n13 --> n14
-  n15{"!linked"}:::decision
+  n15[("LEE profiles.person_account_links · LEE scheduling.appointment_bookings · LEE directory.tenant_memberships")]:::efecto
   n14 --> n15
-  n16(["↩ (relanza el error capturado)"]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a PatientLegalRepresentationsRepository.findActiveInTenant"]:::llamada
-  n15 -->|"no"| n17
-  n18[("LEE authz.patient_legal_representations")]:::efecto
-  n17 --> n18
-  n19{"existing"}:::decision
+  n16{"!(await this.isPatientInTenant(tx, patientProfileId, tenantId))"}:::decision
+  n15 --> n16
+  n17(["↩ (relanza el error capturado)"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a PatientLegalRepresentationsRepository.findActiveInTenant"]:::llamada
+  n16 -->|"no"| n18
+  n19[("LEE authz.patient_legal_representations")]:::efecto
   n18 --> n19
-  n20(["409 CONFLICT Ya existe una representación legal activa para ese usuario"]):::error
-  n19 -->|"sí"| n20
-  n21["Llama a PatientLegalRepresentationsRepository.create"]:::llamada
-  n19 -->|"no"| n21
-  n22[("CREA authz.patient_legal_representations")]:::efecto
-  n21 --> n22
-  n23(("201 Responde con éxito")):::ok
+  n20{"existing"}:::decision
+  n19 --> n20
+  n21(["409 CONFLICT Ya existe una representación legal activa para ese usuario"]):::error
+  n20 -->|"sí"| n21
+  n22["Llama a PatientLegalRepresentationsRepository.create"]:::llamada
+  n20 -->|"no"| n22
+  n23[("CREA authz.patient_legal_representations")]:::efecto
   n22 --> n23
+  n24(("201 Responde con éxito")):::ok
+  n23 --> n24
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1389,77 +1364,79 @@ flowchart TD
   n6 -->|"sí"| n7
   n8["Llama a AuthzClinicalScopeService.assertPatientInTenant"]:::llamada
   n6 -->|"no"| n8
-  n9["Llama a AuthzClinicalScopeRepository.patientExists"]:::llamada
+  n9["Llama a AuthzClinicalScopeService.isPatientInTenant"]:::llamada
   n8 --> n9
-  n10[("LEE profiles.patient_profiles")]:::efecto
+  n10["Llama a AuthzClinicalScopeRepository.patientExists"]:::llamada
   n9 --> n10
-  n11["Llama a AuthzClinicalScopeRepository.patientHasFootprintInTenant"]:::llamada
+  n11[("LEE profiles.patient_profiles")]:::efecto
   n10 --> n11
-  n12[("LEE profiles.person_account_links · LEE scheduling.appointment_bookings · LEE directory.tenant_memberships")]:::efecto
+  n12["Llama a AuthzClinicalScopeRepository.patientHasFootprintInTenant"]:::llamada
   n11 --> n12
-  n13{"!linked"}:::decision
+  n13[("LEE profiles.person_account_links · LEE scheduling.appointment_bookings · LEE directory.tenant_memberships")]:::efecto
   n12 --> n13
-  n14(["↩ (relanza el error capturado)"]):::error
-  n13 -->|"sí"| n14
-  n15{"dto.encounterId"}:::decision
-  n13 -->|"no"| n15
-  n16["Llama a AuthzClinicalScopeService.assertEncounterOfPatient"]:::llamada
-  n15 -->|"sí"| n16
-  n17["Llama a AuthzClinicalScopeRepository.encounterScope"]:::llamada
-  n16 --> n17
-  n18[("LEE clinical.encounters")]:::efecto
+  n14{"!(await this.isPatientInTenant(tx, patientProfileId, tenantId))"}:::decision
+  n13 --> n14
+  n15(["↩ (relanza el error capturado)"]):::error
+  n14 -->|"sí"| n15
+  n16{"dto.encounterId"}:::decision
+  n14 -->|"no"| n16
+  n17["Llama a AuthzClinicalScopeService.assertEncounterOfPatient"]:::llamada
+  n16 -->|"sí"| n17
+  n18["Llama a AuthzClinicalScopeRepository.encounterScope"]:::llamada
   n17 --> n18
-  n19["Llama a ClinicalAccessGrantsRepository.create"]:::llamada
+  n19[("LEE clinical.encounters")]:::efecto
   n18 --> n19
-  n15 -->|"no"| n19
-  n20[("CREA authz.clinical_access_grants")]:::efecto
+  n20["Llama a ClinicalAccessGrantsRepository.create"]:::llamada
   n19 --> n20
-  n21["Llama a BreakGlassSessionsRepository.create"]:::llamada
+  n16 -->|"no"| n20
+  n21[("CREA authz.clinical_access_grants")]:::efecto
   n20 --> n21
-  n22[("CREA authz.break_glass_sessions")]:::efecto
+  n22["Llama a BreakGlassSessionsRepository.create"]:::llamada
   n21 --> n22
-  n23["Llama a DataAccessLogRepository.record"]:::llamada
+  n23[("CREA authz.break_glass_sessions")]:::efecto
   n22 --> n23
-  n24[("CREA audit.data_access_log")]:::efecto
+  n24["Llama a DataAccessLogRepository.record"]:::llamada
   n23 --> n24
-  n25["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n25[("CREA audit.data_access_log")]:::efecto
   n24 --> n25
-  n26["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n26["Llama a OutboxService.publishDomainEvent"]:::llamada
   n25 --> n26
-  n27["Transacción: startActiveSpan(…)"]:::transaccion
+  n27["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
   n26 --> n27
-  n28["Intenta"]:::intento
+  n28["Transacción: startActiveSpan(…)"]:::transaccion
   n27 --> n28
-  n29(["↩ (relanza el error capturado)"]):::error
-  n28 -->|"si falla"| n29
-  n30["Llama a OutboxService.persistDomainEvent"]:::llamada
-  n28 --> n30
-  n31["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
-  n30 --> n31
-  n32[("LEE messaging.outbox_messages")]:::efecto
+  n29["Intenta"]:::intento
+  n28 --> n29
+  n30(["↩ (relanza el error capturado)"]):::error
+  n29 -->|"si falla"| n30
+  n31["Llama a OutboxService.persistDomainEvent"]:::llamada
+  n29 --> n31
+  n32["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
   n31 --> n32
-  n33["Llama a OutboxRepository.createDomainEvent"]:::llamada
+  n33[("LEE messaging.outbox_messages")]:::efecto
   n32 --> n33
-  n34[("CREA messaging.domain_events")]:::efecto
+  n34["Llama a OutboxRepository.createDomainEvent"]:::llamada
   n33 --> n34
-  n35["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n35[("CREA messaging.domain_events")]:::efecto
   n34 --> n35
-  n36[("CREA messaging.outbox_messages")]:::efecto
+  n36["Llama a OutboxRepository.createOutboxMessage"]:::llamada
   n35 --> n36
-  n37>"Evento authz.break_glass.activated"]:::evento
+  n37[("CREA messaging.outbox_messages")]:::efecto
   n36 --> n37
-  n38["Llama a AuditTrailService.record"]:::llamada
+  n38>"Evento authz.break_glass.activated"]:::evento
   n37 --> n38
-  n39["Llama a AuditLogRepository.append"]:::llamada
+  n39["Llama a AuditTrailService.record"]:::llamada
   n38 --> n39
-  n40["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n40["Llama a AuditLogRepository.append"]:::llamada
   n39 --> n40
-  n41[("LEE audit.audit_log")]:::efecto
+  n41["Llama a AuditLogRepository.findChainTip"]:::llamada
   n40 --> n41
-  n42[("CREA audit.audit_log")]:::efecto
+  n42[("LEE audit.audit_log")]:::efecto
   n41 --> n42
-  n43(("201 Responde con éxito")):::ok
+  n43[("CREA audit.audit_log")]:::efecto
   n42 --> n43
+  n44(("201 Responde con éxito")):::ok
+  n43 --> n44
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1508,60 +1485,62 @@ flowchart TD
   n10 -->|"sí"| n11
   n12["Llama a AuthzClinicalScopeService.assertPatientInTenant"]:::llamada
   n10 -->|"no"| n12
-  n13["Llama a AuthzClinicalScopeRepository.patientExists"]:::llamada
+  n13["Llama a AuthzClinicalScopeService.isPatientInTenant"]:::llamada
   n12 --> n13
-  n14[("LEE profiles.patient_profiles")]:::efecto
+  n14["Llama a AuthzClinicalScopeRepository.patientExists"]:::llamada
   n13 --> n14
-  n15["Llama a AuthzClinicalScopeRepository.patientHasFootprintInTenant"]:::llamada
+  n15[("LEE profiles.patient_profiles")]:::efecto
   n14 --> n15
-  n16[("LEE profiles.person_account_links · LEE scheduling.appointment_bookings · LEE directory.tenant_memberships")]:::efecto
+  n16["Llama a AuthzClinicalScopeRepository.patientHasFootprintInTenant"]:::llamada
   n15 --> n16
-  n17{"!linked"}:::decision
+  n17[("LEE profiles.person_account_links · LEE scheduling.appointment_bookings · LEE directory.tenant_memberships")]:::efecto
   n16 --> n17
-  n18(["↩ (relanza el error capturado)"]):::error
-  n17 -->|"sí"| n18
-  n19{"dto.encounterId"}:::decision
-  n17 -->|"no"| n19
-  n20["Llama a AuthzClinicalScopeService.assertEncounterOfPatient"]:::llamada
-  n19 -->|"sí"| n20
-  n21["Llama a AuthzClinicalScopeRepository.encounterScope"]:::llamada
-  n20 --> n21
-  n22[("LEE clinical.encounters")]:::efecto
+  n18{"!(await this.isPatientInTenant(tx, patientProfileId, tenantId))"}:::decision
+  n17 --> n18
+  n19(["↩ (relanza el error capturado)"]):::error
+  n18 -->|"sí"| n19
+  n20{"dto.encounterId"}:::decision
+  n18 -->|"no"| n20
+  n21["Llama a AuthzClinicalScopeService.assertEncounterOfPatient"]:::llamada
+  n20 -->|"sí"| n21
+  n22["Llama a AuthzClinicalScopeRepository.encounterScope"]:::llamada
   n21 --> n22
-  n23{"dto.consentId"}:::decision
+  n23[("LEE clinical.encounters")]:::efecto
   n22 --> n23
-  n19 -->|"no"| n23
-  n24["Llama a AuthzClinicalScopeService.assertConsentOfPatient"]:::llamada
-  n23 -->|"sí"| n24
-  n25["Llama a AuthzClinicalScopeRepository.consentScope"]:::llamada
-  n24 --> n25
-  n26[("LEE consent.consents")]:::efecto
+  n24{"dto.consentId"}:::decision
+  n23 --> n24
+  n20 -->|"no"| n24
+  n25["Llama a AuthzClinicalScopeService.assertConsentOfPatient"]:::llamada
+  n24 -->|"sí"| n25
+  n26["Llama a AuthzClinicalScopeRepository.consentScope"]:::llamada
   n25 --> n26
-  n27["Llama a ClinicalAccessGrantsRepository.findActiveInTenant"]:::llamada
+  n27[("LEE consent.consents")]:::efecto
   n26 --> n27
-  n23 -->|"no"| n27
-  n28[("LEE authz.clinical_access_grants")]:::efecto
+  n28["Llama a ClinicalAccessGrantsRepository.findActiveInTenant"]:::llamada
   n27 --> n28
-  n29{"existing"}:::decision
+  n24 -->|"no"| n28
+  n29[("LEE authz.clinical_access_grants")]:::efecto
   n28 --> n29
-  n30(["409 CONFLICT Ya existe un acceso clínico activo para ese usuario"]):::error
-  n29 -->|"sí"| n30
-  n31["Llama a ClinicalAccessGrantsRepository.create"]:::llamada
-  n29 -->|"no"| n31
-  n32[("CREA authz.clinical_access_grants")]:::efecto
-  n31 --> n32
-  n33["Llama a AuditTrailService.record"]:::llamada
+  n30{"existing"}:::decision
+  n29 --> n30
+  n31(["409 CONFLICT Ya existe un acceso clínico activo para ese usuario"]):::error
+  n30 -->|"sí"| n31
+  n32["Llama a ClinicalAccessGrantsRepository.create"]:::llamada
+  n30 -->|"no"| n32
+  n33[("CREA authz.clinical_access_grants")]:::efecto
   n32 --> n33
-  n34["Llama a AuditLogRepository.append"]:::llamada
+  n34["Llama a AuditTrailService.record"]:::llamada
   n33 --> n34
-  n35["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n35["Llama a AuditLogRepository.append"]:::llamada
   n34 --> n35
-  n36[("LEE audit.audit_log")]:::efecto
+  n36["Llama a AuditLogRepository.findChainTip"]:::llamada
   n35 --> n36
-  n37[("CREA audit.audit_log")]:::efecto
+  n37[("LEE audit.audit_log")]:::efecto
   n36 --> n37
-  n38(("201 Responde con éxito")):::ok
+  n38[("CREA audit.audit_log")]:::efecto
   n37 --> n38
+  n39(("201 Responde con éxito")):::ok
+  n38 --> n39
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

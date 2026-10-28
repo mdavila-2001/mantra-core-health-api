@@ -18,8 +18,8 @@
 | [dunning_items](#dunning_items) | Detalla cuentas o documentos tratados en una ejecución de cobranza para seguir acciones por saldo. | 12 | 9 | 2 | COINCIDE |
 | [dunning_runs](#dunning_runs) | Registra ejecuciones de gestión de cobranza para seguir procesos de notificación de saldos vencidos. | 9 | 7 | 6 | COINCIDE |
 | [financial_kpi_snapshots](#financial_kpi_snapshots) | Preserva snapshots de indicadores financieros para analizar evolución económica de servicios y organizaciones de salud. | 9 | 4 | 2 | COINCIDE |
-| [invoice_lines](#invoice_lines) | Detalla servicios, cantidades y montos que componen una factura para explicar su total y vínculo con la prestación. | 19 | 9 | 16 | DIVERGE |
-| [invoices](#invoices) | Representa facturas emitidas por servicios de salud para administrar cuentas por cobrar y comprobantes del paciente o pagador. | 25 | 14 | 29 | COINCIDE |
+| [invoice_lines](#invoice_lines) | Detalla servicios, cantidades y montos que componen una factura para explicar su total y vínculo con la prestación. | 19 | 9 | 17 | DIVERGE |
+| [invoices](#invoices) | Representa facturas emitidas por servicios de salud para administrar cuentas por cobrar y comprobantes del paciente o pagador. | 25 | 14 | 30 | COINCIDE |
 | [patient_statements](#patient_statements) | Consolida movimientos y saldos comunicables al paciente para informarle cargos, pagos y obligaciones pendientes. | 15 | 5 | 3 | COINCIDE |
 | [payable_payment_allocations](#payable_payment_allocations) | Distribuye pagos efectuados entre facturas de proveedores para mantener conciliación de cuentas por pagar. | 11 | 7 | 1 | COINCIDE |
 | [payments_made](#payments_made) | Registra pagos realizados a proveedores para mantener trazabilidad de egresos institucionales. | 17 | 11 | 4 | COINCIDE |
@@ -28,7 +28,7 @@
 | [quotations](#quotations) | Representa cotizaciones de prestaciones ligadas a una práctica y a una persona paciente, para informar y acordar costos antes de la atención. | 20 | 9 | 3 | COINCIDE |
 | [receivable_payment_allocations](#receivable_payment_allocations) | Asocia pagos recibidos con saldos y facturas por cobrar para explicar cómo se cancelaron obligaciones. | 11 | 7 | 10 | COINCIDE |
 | [reimbursements](#reimbursements) | Conserva reembolsos vinculados a pacientes, prestadores o transacciones de servicios de salud. | 11 | 5 | 2 | COINCIDE |
-| [service_catalog](#service_catalog) | Define prestaciones médicas y servicios facturables para mantener un catálogo común entre atención y cobro. | 17 | 8 | 38 | DIVERGE |
+| [service_catalog](#service_catalog) | Define prestaciones médicas y servicios facturables para mantener un catálogo común entre atención y cobro. | 17 | 8 | 44 | DIVERGE |
 | [tax_codes](#tax_codes) | Cataloga códigos tributarios usados para calcular impuestos en documentos financieros del sistema médico. | 14 | 6 | 0 | COINCIDE |
 | [tax_periods](#tax_periods) | Define períodos tributarios para agrupar obligaciones y reportes fiscales de la organización sanitaria. | 13 | 4 | 0 | COINCIDE |
 | [vendors](#vendors) | Cataloga proveedores a quienes la organización sanitaria compra bienes o servicios. | 14 | 6 | 2 | COINCIDE |
@@ -877,7 +877,7 @@ Detalla servicios, cantidades y montos que componen una factura para explicar su
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_17_billing.puml: invoice_lines`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
 - **Entidad del ORM:** `InvoiceLines` — `src/modules/billing/entities/invoice_lines.entity.ts`
-- **Resumen:** 19 columnas · 9 índices · 8 FK salientes · 1 entrantes · 16 operaciones
+- **Resumen:** 19 columnas · 9 índices · 8 FK salientes · 1 entrantes · 17 operaciones
 
 #### Columnas
 
@@ -948,6 +948,7 @@ Detalla servicios, cantidades y montos que componen una factura para explicar su
 | POST /billing/simulated/invoices/{invoiceId}/annulment | LEE | POR_SQL |
 | POST /billing/simulated/invoices/{invoiceId}/annulment-reversal | LEE | POR_SQL |
 | POST /billing/simulated/invoices/{invoiceId}/email | LEE | POR_SQL |
+| GET /patient-spending/me | LEE | POR_SQL |
 | GET /clinical/patients/{patientProfileId}/received-services | LEE | DIRECTA |
 | POST /insurance-claims/{id}/patient-invoice | CREA | DIRECTA |
 | POST /insurance-claims/{id}/patient-invoice | LEE | DIRECTA |
@@ -975,7 +976,7 @@ Representa facturas emitidas por servicios de salud para administrar cuentas por
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_17_billing.puml: invoices`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
 - **Entidad del ORM:** `Invoices` — `src/modules/billing/entities/invoices.entity.ts`
-- **Resumen:** 25 columnas · 14 índices · 12 FK salientes · 13 entrantes · 29 operaciones
+- **Resumen:** 25 columnas · 14 índices · 12 FK salientes · 13 entrantes · 30 operaciones
 
 #### Columnas
 
@@ -1093,6 +1094,7 @@ Representa facturas emitidas por servicios de salud para administrar cuentas por
 | POST /billing/simulated/invoices/{invoiceId}/annulment | LEE | POR_SQL |
 | POST /billing/simulated/invoices/{invoiceId}/annulment-reversal | LEE | POR_SQL |
 | POST /billing/simulated/invoices/{invoiceId}/email | LEE | POR_SQL |
+| GET /patient-spending/me | LEE | POR_SQL |
 | GET /clinical/patients/{patientProfileId}/received-services | LEE | DIRECTA |
 | POST /insurance-claims/{id}/patient-invoice | CREA | DIRECTA |
 
@@ -1766,7 +1768,7 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_17_billing.puml: service_catalog`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
 - **Entidad del ORM:** `ServiceCatalog` — `src/modules/billing/entities/service_catalog.entity.ts`
-- **Resumen:** 17 columnas · 8 índices · 8 FK salientes · 4 entrantes · 38 operaciones
+- **Resumen:** 17 columnas · 8 índices · 8 FK salientes · 4 entrantes · 44 operaciones
 
 #### Columnas
 
@@ -1839,6 +1841,10 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 | POST /billing/simulated/invoices/{invoiceId}/annulment-reversal | LEE | POR_SQL |
 | POST /billing/simulated/invoices/{invoiceId}/email | LEE | POR_SQL |
 | POST /clinical/service-requests | LEE | DIRECTA |
+| GET /referrals | LEE | DIRECTA |
+| POST /referrals | LEE | DIRECTA |
+| GET /referrals/me | LEE | DIRECTA |
+| GET /referrals/target-services | LEE | DIRECTA |
 | GET /medical-centers/search | LEE | DIRECTA |
 | GET /medical-centers/search/for-my-orders | LEE | DIRECTA |
 | GET /medical-groups | LEE | DIRECTA |
@@ -1862,6 +1868,8 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 | POST /scheduling/service-offerings | LEE | DIRECTA |
 | PATCH /scheduling/service-offerings/{id} | LEE | DIRECTA |
 | POST /scheduling/service-offerings/{id}/holds | LEE | DIRECTA |
+| POST /surveys/assignments | LEE | DIRECTA |
+| GET /surveys/templates/{id} | LEE | DIRECTA |
 
 #### Gobierno
 

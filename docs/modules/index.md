@@ -8,14 +8,14 @@
 | Módulo | Controllers | Services | Repositories | Entidades | DTO |
 |---|---:|---:|---:|---:|---:|
 | [`insurance`](insurance.md) | 19 | 28 | 14 | 31 | 23 |
-| [`community`](community.md) | 14 | 34 | 19 | 41 | 33 |
+| [`community`](community.md) | 14 | 35 | 19 | 41 | 34 |
 | [`pharma_lab`](pharma_lab.md) | 12 | 13 | 10 | 31 | 11 |
 | [`clinical`](clinical.md) | 11 | 21 | 18 | 25 | 18 |
-| [`consent`](consent.md) | 11 | 12 | 10 | 10 | 16 |
+| [`consent`](consent.md) | 11 | 12 | 10 | 10 | 17 |
 | [`accounting`](accounting.md) | 10 | 12 | 10 | 45 | 13 |
 | [`authz`](authz.md) | 9 | 12 | 16 | 15 | 21 |
 | [`practice`](practice.md) | 9 | 15 | 12 | 11 | 21 |
-| [`clinical_ext`](clinical_ext.md) | 8 | 9 | 12 | 13 | 9 |
+| [`clinical_ext`](clinical_ext.md) | 8 | 9 | 13 | 13 | 9 |
 | [`identity_assurance`](identity_assurance.md) | 8 | 12 | 10 | 11 | 17 |
 | [`scheduling`](scheduling.md) | 8 | 16 | 8 | 19 | 9 |
 | [`system_ops`](system_ops.md) | 8 | 8 | 8 | 30 | 10 |
@@ -36,6 +36,7 @@
 | [`integrations`](integrations.md) | 4 | 5 | 9 | 10 | 9 |
 | [`messaging`](messaging.md) | 4 | 4 | 4 | 22 | 3 |
 | [`organization_extensions`](organization_extensions.md) | 4 | 4 | 6 | 6 | 8 |
+| [`surveys`](surveys.md) | 4 | 5 | 6 | 7 | 11 |
 | [`data_catalog`](data_catalog.md) | 3 | 7 | 3 | 13 | 4 |
 | [`directory`](directory.md) | 3 | 12 | 5 | 7 | 21 |
 | [`payments`](payments.md) | 3 | 5 | 6 | 53 | 4 |
@@ -43,7 +44,6 @@
 | [`polyglot_storage`](polyglot_storage.md) | 3 | 3 | 4 | 20 | 1 |
 | [`qa_lab`](qa_lab.md) | 3 | 4 | 2 | 13 | 1 |
 | [`read_models`](read_models.md) | 3 | 5 | 8 | 13 | 5 |
-| [`surveys`](surveys.md) | 3 | 3 | 4 | 7 | 10 |
 | [`workflow`](workflow.md) | 3 | 3 | 3 | 8 | 1 |
 | [`audio_assets`](audio_assets.md) | 2 | 4 | 2 | 4 | 1 |
 | [`automation`](automation.md) | 2 | 4 | 4 | 16 | 1 |
@@ -78,4 +78,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **294** | **477** | **440** | **1281** | **544** |
+| **Total** | **295** | **480** | **443** | **1281** | **547** |

@@ -13,13 +13,13 @@
 | [inventory_count_lines](#inventory_count_lines) | Conserva cantidades contadas por producto, lote o ubicación durante una sesión de inventario. | 11 | 6 | 3 | COINCIDE |
 | [inventory_count_sessions](#inventory_count_sessions) | Registra conteos físicos de inventario para comparar existencias observadas con saldos del sistema. | 15 | 8 | 4 | COINCIDE |
 | [inventory_ledger_entries](#inventory_ledger_entries) | Mantiene el libro de movimientos de inventario para explicar cómo cambian las existencias farmacéuticas. | 23 | 16 | 36 | COINCIDE |
-| [inventory_locations](#inventory_locations) | Define ubicaciones de almacenamiento farmacéutico donde se controlan lotes y existencias. | 14 | 7 | 18 | COINCIDE |
+| [inventory_locations](#inventory_locations) | Define ubicaciones de almacenamiento farmacéutico donde se controlan lotes y existencias. | 14 | 7 | 15 | COINCIDE |
 | [inventory_lots](#inventory_lots) | Registra lotes de productos para rastrear vencimientos, origen y movimientos de inventario farmacéutico. | 15 | 6 | 10 | COINCIDE |
 | [inventory_recall_holds](#inventory_recall_holds) | Bloquea inventario afectado por alertas o retiros para evitar que productos comprometidos sigan disponibles. | 14 | 7 | 3 | COINCIDE |
 | [inventory_reservation_lines](#inventory_reservation_lines) | Desglosa productos y cantidades comprometidos en una reserva de inventario. | 16 | 8 | 34 | COINCIDE |
 | [inventory_reservations](#inventory_reservations) | Aparta existencias para procesos que requieren disponibilidad comprometida antes de su consumo o despacho. | 22 | 14 | 39 | COINCIDE |
 | [inventory_serials](#inventory_serials) | Conserva números de serie de unidades controladas para habilitar trazabilidad individual de productos. | 11 | 5 | 0 | COINCIDE |
-| [inventory_stock_positions](#inventory_stock_positions) | Representa saldos de existencias por producto y ubicación para consultar disponibilidad farmacéutica. | 11 | 3 | 43 | COINCIDE |
+| [inventory_stock_positions](#inventory_stock_positions) | Representa saldos de existencias por producto y ubicación para consultar disponibilidad farmacéutica. | 11 | 3 | 40 | COINCIDE |
 | [medication_dispensation_lines](#medication_dispensation_lines) | Detalla medicamentos y cantidades entregados dentro de cada dispensación vinculada al paciente o prescripción. | 12 | 6 | 5 | COINCIDE |
 | [medication_dispensations](#medication_dispensations) | Representa dispensaciones de medicamentos a pacientes para documentar el acto de entrega farmacéutica. | 17 | 13 | 6 | COINCIDE |
 | [pharmacy_goods_receipt_lines](#pharmacy_goods_receipt_lines) | Detalla lotes, productos y cantidades recibidos para actualizar y auditar existencias farmacéuticas. | 14 | 8 | 2 | COINCIDE |
@@ -563,7 +563,7 @@ Define ubicaciones de almacenamiento farmacéutico donde se controlan lotes y ex
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml: inventory_locations`
 - **Dominio:** Farmacia · **Diagrama:** `Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml` · **DDL:** `SQL/25_pharmacy_inventory/02_tables.sql`
 - **Entidad del ORM:** `InventoryLocations` — `src/modules/pharmacy_inventory/entities/inventory_locations.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 7 FK salientes · 7 entrantes · 18 operaciones
+- **Resumen:** 14 columnas · 7 índices · 7 FK salientes · 7 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -619,8 +619,6 @@ Define ubicaciones de almacenamiento farmacéutico donde se controlan lotes y ex
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| GET /public/medications | LEE | POR_SQL |
-| GET /public/medications/{conceptId}/availability | LEE | POR_SQL |
 | GET /pharmacy-inventory/availability | LEE | DIRECTA |
 | GET /pharmacy-inventory/sites/{siteId}/stock | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/dispensations | LEE | DIRECTA |
@@ -636,7 +634,6 @@ Define ubicaciones de almacenamiento farmacéutico donde se controlan lotes y ex
 | POST /pharmacy/orders/{id}/accept-substitutions | LEE | DIRECTA |
 | POST /pharmacy/recall-holds | LEE | DIRECTA |
 | POST /pharmacy/recall-holds/{id}/release | LEE | DIRECTA |
-| GET /public/profiles/f/{slug}/products | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -1151,7 +1148,7 @@ Representa saldos de existencias por producto y ubicación para consultar dispon
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml: inventory_stock_positions`
 - **Dominio:** Farmacia · **Diagrama:** `Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml` · **DDL:** `SQL/25_pharmacy_inventory/02_tables.sql`
 - **Entidad del ORM:** `InventoryStockPositions` — `src/modules/pharmacy_inventory/entities/inventory_stock_positions.entity.ts`
-- **Resumen:** 11 columnas · 3 índices · 3 FK salientes · 0 entrantes · 43 operaciones
+- **Resumen:** 11 columnas · 3 índices · 3 FK salientes · 0 entrantes · 40 operaciones
 
 #### Columnas
 
@@ -1189,8 +1186,6 @@ Representa saldos de existencias por producto y ubicación para consultar dispon
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| GET /public/medications | LEE | POR_SQL |
-| GET /public/medications/{conceptId}/availability | LEE | POR_SQL |
 | POST /internal/reservations/expire | ACTUALIZA | POR_TIPO |
 | POST /internal/reservations/expire | LEE | DIRECTA |
 | GET /pharmacy-inventory/availability | LEE | DIRECTA |
@@ -1231,7 +1226,6 @@ Representa saldos de existencias por producto y ubicación para consultar dispon
 | POST /pharmacy/recall-holds | LEE | DIRECTA |
 | POST /pharmacy/recall-holds/{id}/release | ACTUALIZA | POR_TIPO |
 | POST /pharmacy/recall-holds/{id}/release | LEE | DIRECTA |
-| GET /public/profiles/f/{slug}/products | LEE | POR_SQL |
 
 #### Gobierno
 

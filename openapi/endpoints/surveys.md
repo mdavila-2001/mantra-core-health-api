@@ -2,32 +2,33 @@
 
 # Endpoints del módulo `surveys`
 
-Referencia exhaustiva de 17 operación(es) del módulo `surveys`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 18 operación(es) del módulo `surveys`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `surveys-assignments`, `surveys-patient`, `surveys-templates`
-- **Controladores:** `SurveysAssignmentsController`, `SurveysPatientController`, `SurveysTemplatesController`
+- **Etiquetas OpenAPI:** `surveys-assignments`, `surveys-insights`, `surveys-patient`, `surveys-templates`
+- **Controladores:** `SurveysAssignmentsController`, `SurveysInsightsController`, `SurveysPatientController`, `SurveysTemplatesController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
 1. [POST /surveys/assignments](#1-post-surveys-assignments) — Asociar una encuesta a una consulta o servicio
-2. [POST /surveys/invitations](#2-post-surveys-invitations) — Emitir los cuestionarios de una atención completada
-3. [GET /surveys/me/invitations](#3-get-surveys-me-invitations) — Ver mis cuestionarios
-4. [GET /surveys/me/invitations/{id}](#4-get-surveys-me-invitations-id) — Abrir un cuestionario para responderlo
-5. [POST /surveys/me/invitations/{id}/responses](#5-post-surveys-me-invitations-id-responses) — Responder el cuestionario
-6. [GET /surveys/templates](#6-get-surveys-templates) — Listar mis encuestas
-7. [POST /surveys/templates](#7-post-surveys-templates) — Crear una encuesta para pacientes
-8. [GET /surveys/templates/{id}](#8-get-surveys-templates-id) — Ver una encuesta y su cuestionario
-9. [PATCH /surveys/templates/{id}](#9-patch-surveys-templates-id) — Corregir título, consigna y plazo del borrador
-10. [POST /surveys/templates/{id}/deactivate](#10-post-surveys-templates-id-deactivate) — Desactivar la encuesta
-11. [POST /surveys/templates/{id}/questions](#11-post-surveys-templates-id-questions) — Configurar una pregunta y su tipo de respuesta
-12. [DELETE /surveys/templates/{id}/questions/{questionId}](#12-delete-surveys-templates-id-questions-questionid) — Quitar una pregunta del borrador
-13. [PATCH /surveys/templates/{id}/questions/{questionId}](#13-patch-surveys-templates-id-questions-questionid) — Corregir una pregunta del borrador
-14. [PUT /surveys/templates/{id}/questions/order](#14-put-surveys-templates-id-questions-order) — Reordenar el cuestionario del borrador
-15. [GET /surveys/templates/{id}/responses](#15-get-surveys-templates-id-responses) — Revisar las respuestas de los pacientes
-16. [POST /surveys/templates/{id}/versions](#16-post-surveys-templates-id-versions) — Abrir una versión nueva del cuestionario
-17. [POST /surveys/templates/{id}/versions/{versionNumber}/publish](#17-post-surveys-templates-id-versions-versionnumber-publish) — Publicar la encuesta y configurar su vigencia
+2. [GET /surveys/insights](#2-get-surveys-insights) — Resumen general de mis encuestas (agregado, sin pacientes)
+3. [POST /surveys/invitations](#3-post-surveys-invitations) — Emitir los cuestionarios de una atención completada
+4. [GET /surveys/me/invitations](#4-get-surveys-me-invitations) — Ver mis cuestionarios
+5. [GET /surveys/me/invitations/{id}](#5-get-surveys-me-invitations-id) — Abrir un cuestionario para responderlo
+6. [POST /surveys/me/invitations/{id}/responses](#6-post-surveys-me-invitations-id-responses) — Responder el cuestionario
+7. [GET /surveys/templates](#7-get-surveys-templates) — Listar mis encuestas
+8. [POST /surveys/templates](#8-post-surveys-templates) — Crear una encuesta para pacientes
+9. [GET /surveys/templates/{id}](#9-get-surveys-templates-id) — Ver una encuesta y su cuestionario
+10. [PATCH /surveys/templates/{id}](#10-patch-surveys-templates-id) — Corregir título, consigna y plazo del borrador
+11. [POST /surveys/templates/{id}/deactivate](#11-post-surveys-templates-id-deactivate) — Desactivar la encuesta
+12. [POST /surveys/templates/{id}/questions](#12-post-surveys-templates-id-questions) — Configurar una pregunta y su tipo de respuesta
+13. [DELETE /surveys/templates/{id}/questions/{questionId}](#13-delete-surveys-templates-id-questions-questionid) — Quitar una pregunta del borrador
+14. [PATCH /surveys/templates/{id}/questions/{questionId}](#14-patch-surveys-templates-id-questions-questionid) — Corregir una pregunta del borrador
+15. [PUT /surveys/templates/{id}/questions/order](#15-put-surveys-templates-id-questions-order) — Reordenar el cuestionario del borrador
+16. [GET /surveys/templates/{id}/responses](#16-get-surveys-templates-id-responses) — Revisar las respuestas de los pacientes
+17. [POST /surveys/templates/{id}/versions](#17-post-surveys-templates-id-versions) — Abrir una versión nueva del cuestionario
+18. [POST /surveys/templates/{id}/versions/{versionNumber}/publish](#18-post-surveys-templates-id-versions-versionnumber-publish) — Publicar la encuesta y configurar su vigencia
 
 ---
 
@@ -66,8 +67,7 @@ Content-Type: application/json
 
 {
   "surveyVersionId": "00000000-0000-4000-8000-000000000001",
-  "targetType": "APPOINTMENT",
-  "targetId": "00000000-0000-4000-8000-000000000001"
+  "targetType": "APPOINTMENT"
 }
 ```
 
@@ -82,8 +82,8 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `surveyVersionId` | Sí | `string` | formato `uuid` | Versión publicada que se reparte | `00000000-0000-4000-8000-000000000001` |
-| `targetType` | Sí | `string` | valores: `APPOINTMENT`, `SERVICE`, `CARE_TYPE` | Qué se evalúa: la reserva, el servicio o el tipo de atención | `APPOINTMENT` |
-| `targetId` | Sí | `string` | formato `uuid` | Identificador de la cosa evaluada, según `targetType` | `00000000-0000-4000-8000-000000000001` |
+| `targetType` | Sí | `string` | valores: `APPOINTMENT`, `SERVICE`, `CARE_TYPE` | Qué se evalúa: la reserva, el servicio o el tipo de atención. `CARE_TYPE` sólo admite «todas mis consultas» | `APPOINTMENT` |
+| `targetId` | No | `string` | formato `uuid` | Identificador de la cosa evaluada, según `targetType`: la reserva (`APPOINTMENT`) o el servicio del catálogo, `billing.service_catalog.id` (`SERVICE`). Con `CARE_TYPE` se puede omitir: es «todas mis consultas» (`a0038828-6e68-55c5-aa59-d4c747035db6`), el único tipo de atención admitido. | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -143,8 +143,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Versión no encontrada | Excepción explícita en src/modules/surveys/services/surveys-assignments.service.ts |
 | 409 | `CONFLICT` | Ya existe una asignación activa de esa versión a ese destino | Excepción explícita en src/modules/surveys/services/surveys-assignments.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El modelo de agenda no lleva tipo de atención en la reserva: asigná la encuesta por servicio o por cita concreta | Excepción explícita en src/modules/surveys/services/surveys-assignments.service.ts |
 | 422 | `PRECONDITION_FAILED` | Solo se puede asignar una versión publicada | Excepción explícita en src/modules/surveys/services/surveys-assignments.service.ts |
+| 422 | `PRECONDITION_FAILED` | El único tipo de atención que se puede asociar es «consulta»: asigne la encuesta por servicio, por cita concreta o a todas sus consultas | Excepción explícita en src/modules/surveys/services/surveys-assignments.service.ts |
+| 422 | `PRECONDITION_FAILED` | Usted no ofrece ese servicio: declárelo en sus servicios antes de asociarle una encuesta | Excepción explícita en src/modules/surveys/services/surveys-assignments.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -162,7 +163,212 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /surveys/invitations
+## 2. GET /surveys/insights
+
+- **Módulo:** `surveys`
+- **Etiqueta OpenAPI:** `surveys-insights`
+- **Nombre:** Resumen general de mis encuestas (agregado, sin pacientes)
+- **Operation ID:** `SurveysInsightsController_getInsights`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SurveysInsightsController.getInsights](../../src/modules/surveys/controllers/surveys-insights.controller.ts)
+
+### Descripción de negocio
+
+Totales, tasa de respuesta, NPS, promedio y distribución por pregunta, tendencia, alertas de seguridad y comentarios abiertos (texto y día). Incluye las encuestas propias y las de sistema emitidas por las atenciones del profesional.
+
+Contexto declarado en el controlador: El resumen del profesional de la sesión.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /surveys/insights` en `SurveysInsightsController_getInsights`. El controlador delega en `SurveysInsightsService.getInsights`. No recibe body. El tipo de retorno estático es `Promise<SurveyInsightsDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `from` | query | No | `string` | formato `date` | Primer día de un mes (YYYY-MM-01, UTC). Cualquier otro día, o una hora, se rechaza con 400. Se filtra por la fecha de emisión del cuestionario. Sin valor: 11 meses antes del mes de `to` (ventana de 12 meses). | `2026-08-01` |
+| `to` | query | No | `string` | formato `date` | Último día de un mes (p. ej. 2026-10-31, UTC). Cualquier otro día, o una hora, se rechaza con 400. No puede ser anterior a `from` y el periodo no puede pasar de 12 meses. Sin valor: el último día del mes en curso. | `2026-10-31` |
+| `serviceId` | query | No | `string` | formato `uuid` | Acota el resumen a los cuestionarios emitidos por atenciones de este servicio del catálogo. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /surveys/insights HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /surveys/insights?from=2026-08-01&to=2026-10-31&serviceId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SurveyInsightsDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SurveyInsightsDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SurveyInsightsDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SurveyInsightsDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SurveyInsightsDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SurveyInsightsDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SurveyInsightsDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SurveyInsightsDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "totals": {
+    "issued": 1,
+    "answered": 1,
+    "responseRate": 1
+  },
+  "privacy": {
+    "minCohort": 1,
+    "suppressed": true
+  },
+  "nps": {
+    "value": 1,
+    "promoters": 1,
+    "passives": 1,
+    "detractors": 1,
+    "n": 1,
+    "suppressed": true
+  },
+  "byQuestion": [
+    {
+      "questionId": "00000000-0000-4000-8000-000000000001",
+      "text": "valor-ejemplo",
+      "dimension": "valor-ejemplo",
+      "answerType": "TEXT",
+      "n": 1,
+      "suppressed": true,
+      "average": 1,
+      "distribution": [
+        {
+          "value": 1,
+          "count": 1
+        }
+      ],
+      "optionCounts": [
+        {
+          "option": "valor-ejemplo",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "trend": [
+    {
+      "period": "2026-10-05",
+      "answered": 1,
+      "average": 1
+    }
+  ],
+  "trendGranularity": "DAY",
+  "safetyAlerts": {
+    "n": 1
+  },
+  "comments": [
+    {
+      "text": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `totals` | Sí | `InsightsTotalsDto` | Sin restricción adicional declarada | Emitidos, respondidos y tasa. Siempre presente. | `{"issued":1,"answered":1,"responseRate":1}` |
+| `totals.issued` | Sí | `number` | Sin restricción adicional declarada | Cuestionarios emitidos en el periodo | `1` |
+| `totals.answered` | Sí | `number` | Sin restricción adicional declarada | De los emitidos, cuántos fueron respondidos | `1` |
+| `totals.responseRate` | Sí | `number` | admite null | Tasa de respuesta como fracción entre 0 y 1 (0.62 = 62 %). `null` si no se emitió ninguno. | `1` |
+| `privacy` | Sí | `InsightsPrivacyDto` | Sin restricción adicional declarada | Umbral de privacidad aplicado. Siempre presente. | `{"minCohort":1,"suppressed":true}` |
+| `privacy.minCohort` | Sí | `number` | Sin restricción adicional declarada | Respondidas necesarias para mostrar cálculos. | `1` |
+| `privacy.suppressed` | Sí | `boolean` | Sin restricción adicional declarada | `true` si el alcance filtrado tiene menos respondidas que `minCohort`: sólo vienen `totals` y `privacy`; el resto de los campos no se envía. | `true` |
+| `nps` | No | `InsightsNpsDto` | Sin restricción adicional declarada | NPS de la pregunta de recomendación. Ausente si `privacy.suppressed`. | `{"value":1,"promoters":1,"passives":1,"detractors":1,"n":1,"suppressed":true}` |
+| `nps.value` | No | `number` | admite null | %(9-10) − %(0-6), de −100 a 100 con un decimal. `null` si nadie respondió la pregunta. | `1` |
+| `nps.promoters` | No | `number` | Sin restricción adicional declarada | Respuestas 9-10. | `1` |
+| `nps.passives` | No | `number` | Sin restricción adicional declarada | Respuestas 7-8. | `1` |
+| `nps.detractors` | No | `number` | Sin restricción adicional declarada | Respuestas 0-6. | `1` |
+| `nps.n` | No | `number` | Sin restricción adicional declarada | Respuestas que sostienen el cálculo. | `1` |
+| `nps.suppressed` | No | `boolean` | Sin restricción adicional declarada | true si hay menos de ${MIN_COHORT} respuestas: no se calcula | `true` |
+| `byQuestion` | No | `array<InsightsQuestionDto>` | Sin restricción adicional declarada | Una entrada por pregunta (o dimensión), con su `n`. Ausente si suprimido. | `[{"questionId":"00000000-0000-4000-8000-000000000001","text":"valor-ejemplo","dimension":"valor-ejemplo","answerType":"TEXT","n":1,"suppressed":true,"average":1,"distribution":[{"value":1,"count":1}],"optionCounts":[{"option":"valor-ejemplo","count":1}]}]` |
+| `byQuestion[].questionId` | No | `string` | formato `uuid` | Una pregunta representativa del grupo (la más reciente). No es estable entre versiones: sirve de clave de lista, no para consultar una pregunta. | `00000000-0000-4000-8000-000000000001` |
+| `byQuestion[].text` | No | `string` | Sin restricción adicional declarada | Enunciado de la pregunta representativa. | `valor-ejemplo` |
+| `byQuestion[].dimension` | No | `string` | admite null | Dimensión de la encuesta base, o `null` si es una pregunta propia. | `valor-ejemplo` |
+| `byQuestion[].answerType` | No | `string` | valores: `TEXT`, `SCALE`, `BOOLEAN`, `SINGLE_CHOICE`, `MULTIPLE_CHOICE` | Tipo de respuesta. | `TEXT` |
+| `byQuestion[].n` | No | `number` | Sin restricción adicional declarada | Respuestas contadas. Siempre presente; 0 si nadie respondió. | `1` |
+| `byQuestion[].suppressed` | No | `boolean` | Sin restricción adicional declarada | true si n < ${MIN_COHORT}: sin promedio, distribución ni opciones | `true` |
+| `byQuestion[].average` | No | `number` | Sin restricción adicional declarada | Sólo SCALE no suprimida | `1` |
+| `byQuestion[].distribution` | No | `array<InsightsScaleBucketDto>` | Sin restricción adicional declarada | Distribución por valor, de `scaleMin` a `scaleMax` con ceros incluidos. Vacía en las preguntas que no son SCALE. | `[{"value":1,"count":1}]` |
+| `byQuestion[].distribution[].value` | No | `number` | Sin restricción adicional declarada | Valor de la escala. | `1` |
+| `byQuestion[].distribution[].count` | No | `number` | Sin restricción adicional declarada | Respuestas con ese valor. | `1` |
+| `byQuestion[].optionCounts` | No | `array<InsightsOptionCountDto>` | Sin restricción adicional declarada | Veces que se eligió cada opción. Sólo SINGLE_CHOICE, MULTIPLE_CHOICE y BOOLEAN (`Sí` / `No`). | `[{"option":"valor-ejemplo","count":1}]` |
+| `byQuestion[].optionCounts[].option` | No | `string` | Sin restricción adicional declarada | Texto de la opción. | `valor-ejemplo` |
+| `byQuestion[].optionCounts[].count` | No | `number` | Sin restricción adicional declarada | Veces elegida. | `1` |
+| `trend` | No | `array<InsightsTrendPointDto>` | Sin restricción adicional declarada | Tendencia por tramos de fecha de emisión. Ausente si suprimido. | `[{"period":"2026-10-05","answered":1,"average":1}]` |
+| `trend[].period` | No | `string` | Sin restricción adicional declarada | Primer día del tramo (`YYYY-MM-DD`, UTC). Los tramos con menos de respondidos se funden con el siguiente: ningún punto muestra una respuesta suelta. | `2026-10-05` |
+| `trend[].answered` | No | `number` | Sin restricción adicional declarada | Cuestionarios respondidos, de los emitidos en ese tramo. | `1` |
+| `trend[].average` | No | `number` | Sin restricción adicional declarada | Promedio de satisfacción del tramo, sólo si lo sostienen al menos respuestas. Sale de la pregunta de satisfacción global; si el resumen no tiene ninguna, del promedio de las preguntas de escala 1-5. | `1` |
+| `trendGranularity` | No | `string` | valores: `DAY`, `WEEK`, `MONTH` | Granularidad de `trend`, según la amplitud del periodo. Ausente si suprimido. | `DAY` |
+| `safetyAlerts` | No | `InsightsSafetyAlertsDto` | Sin restricción adicional declarada | Alertas de seguridad. Ausente si suprimido. | `{"n":1}` |
+| `safetyAlerts.n` | No | `number` | Sin restricción adicional declarada | Respuestas «Sí, y deseo que ALOVIDA me contacte…». | `1` |
+| `comments` | No | `array<InsightsCommentDto>` | Sin restricción adicional declarada | Comentarios abiertos (tope 20) en un orden estable que no es cronológico. Vacío si en el alcance hay menos de . Ausente si suprimido. | `[{"text":"valor-ejemplo"}]` |
+| `comments[].text` | No | `string` | Sin restricción adicional declarada | Texto del comentario. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | ${field} debe ser una fecha de día válida (YYYY-MM-DD), sin hora | Excepción explícita en src/modules/surveys/services/surveys-insights.service.ts |
+| 400 | `VALIDATION_FAILED` | to debe ser el último día de un mes (por ejemplo 2026-10-31) | Excepción explícita en src/modules/surveys/services/surveys-insights.service.ts |
+| 400 | `VALIDATION_FAILED` | from debe ser el primer día de un mes (por ejemplo 2026-10-01) | Excepción explícita en src/modules/surveys/services/surveys-insights.service.ts |
+| 400 | `VALIDATION_FAILED` | El inicio del periodo debe ser anterior o igual a su fin | Excepción explícita en src/modules/surveys/services/surveys-insights.service.ts |
+| 400 | `VALIDATION_FAILED` | El periodo no puede superar ${MAX_RANGE_MONTHS} meses | Excepción explícita en src/modules/surveys/services/surveys-insights.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Solo un profesional puede ver el resumen de sus encuestas | Excepción explícita en src/modules/surveys/services/surveys-insights.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/surveys/insights"
+}
+```
+
+---
+
+## 3. POST /surveys/invitations
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-assignments`
@@ -289,7 +495,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. GET /surveys/me/invitations
+## 4. GET /surveys/me/invitations
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-patient`
@@ -399,7 +605,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. GET /surveys/me/invitations/{id}
+## 5. GET /surveys/me/invitations/{id}
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-patient`
@@ -477,6 +683,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "questionText": "valor-ejemplo",
       "answerType": "TEXT",
       "required": true,
+      "source": "SYSTEM",
       "options": [
         "valor-ejemplo"
       ],
@@ -491,12 +698,13 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `questions` | Sí | `array<QuestionDto>` | Sin restricción adicional declarada | Valor de questions mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","position":1,"questionText":"valor-ejemplo","answerType":"TEXT","required":true,"options":["valor-ejemplo"],"scaleMin":1,"scaleMax":1}]` |
+| `questions` | Sí | `array<QuestionDto>` | Sin restricción adicional declarada | Valor de questions mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","position":1,"questionText":"valor-ejemplo","answerType":"TEXT","required":true,"source":"SYSTEM","options":["valor-ejemplo"],"scaleMin":1,"scaleMax":1}]` |
 | `questions[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `questions[].position` | Sí | `number` | Sin restricción adicional declarada | Posición dentro del cuestionario | `1` |
 | `questions[].questionText` | Sí | `string` | Sin restricción adicional declarada | Enunciado | `valor-ejemplo` |
 | `questions[].answerType` | Sí | `string` | valores: `TEXT`, `SCALE`, `BOOLEAN`, `SINGLE_CHOICE`, `MULTIPLE_CHOICE` | Valor de answer type mantenido por la instancia. | `TEXT` |
 | `questions[].required` | Sí | `boolean` | Sin restricción adicional declarada | Si es obligatoria | `true` |
+| `questions[].source` | No | `string` | valores: `SYSTEM`, `PRACTITIONER` | SYSTEM: pregunta base de ALOVIDA. PRACTITIONER: pregunta de la encuesta del profesional (siempre opcional). Sólo la informa la lectura del paciente. | `SYSTEM` |
 | `questions[].options` | No | `array<string>` | Sin restricción adicional declarada | Opciones de elección | `["valor-ejemplo"]` |
 | `questions[].scaleMin` | No | `number` | Sin restricción adicional declarada | Mínimo de la escala | `1` |
 | `questions[].scaleMax` | No | `number` | Sin restricción adicional declarada | Máximo de la escala | `1` |
@@ -529,7 +737,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /surveys/me/invitations/{id}/responses
+## 6. POST /surveys/me/invitations/{id}/responses
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-patient`
@@ -688,7 +896,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. GET /surveys/templates
+## 7. GET /surveys/templates
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -798,7 +1006,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /surveys/templates
+## 8. POST /surveys/templates
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -930,7 +1138,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. GET /surveys/templates/{id}
+## 9. GET /surveys/templates/{id}
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1013,11 +1221,21 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "questionText": "valor-ejemplo",
       "answerType": "TEXT",
       "required": true,
+      "source": "SYSTEM",
       "options": [
         "valor-ejemplo"
       ],
       "scaleMin": 1,
       "scaleMax": 1
+    }
+  ],
+  "assignments": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "targetType": "APPOINTMENT",
+      "targetId": "00000000-0000-4000-8000-000000000001",
+      "targetName": "Nombre de ejemplo",
+      "active": true
     }
   ]
 }
@@ -1031,15 +1249,22 @@ Campos de la respuesta:
 | `responseWindowDays` | Sí | `number` | Sin restricción adicional declarada | Días de plazo para responder | `1` |
 | `effectiveFrom` | No | `string` | formato `date-time` | Valor de effective from mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
 | `effectiveTo` | No | `string` | formato `date-time` | Valor de effective to mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
-| `questions` | Sí | `array<QuestionDto>` | Sin restricción adicional declarada | Valor de questions mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","position":1,"questionText":"valor-ejemplo","answerType":"TEXT","required":true,"options":["valor-ejemplo"],"scaleMin":1,"scaleMax":1}]` |
+| `questions` | Sí | `array<QuestionDto>` | Sin restricción adicional declarada | Valor de questions mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","position":1,"questionText":"valor-ejemplo","answerType":"TEXT","required":true,"source":"SYSTEM","options":["valor-ejemplo"],"scaleMin":1,"scaleMax":1}]` |
 | `questions[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `questions[].position` | Sí | `number` | Sin restricción adicional declarada | Posición dentro del cuestionario | `1` |
 | `questions[].questionText` | Sí | `string` | Sin restricción adicional declarada | Enunciado | `valor-ejemplo` |
 | `questions[].answerType` | Sí | `string` | valores: `TEXT`, `SCALE`, `BOOLEAN`, `SINGLE_CHOICE`, `MULTIPLE_CHOICE` | Valor de answer type mantenido por la instancia. | `TEXT` |
 | `questions[].required` | Sí | `boolean` | Sin restricción adicional declarada | Si es obligatoria | `true` |
+| `questions[].source` | No | `string` | valores: `SYSTEM`, `PRACTITIONER` | SYSTEM: pregunta base de ALOVIDA. PRACTITIONER: pregunta de la encuesta del profesional (siempre opcional). Sólo la informa la lectura del paciente. | `SYSTEM` |
 | `questions[].options` | No | `array<string>` | Sin restricción adicional declarada | Opciones de elección | `["valor-ejemplo"]` |
 | `questions[].scaleMin` | No | `number` | Sin restricción adicional declarada | Mínimo de la escala | `1` |
 | `questions[].scaleMax` | No | `number` | Sin restricción adicional declarada | Máximo de la escala | `1` |
+| `assignments` | No | `array<TemplateAssignmentDto>` | Sin restricción adicional declarada | Asociaciones activas de la encuesta, de cualquiera de sus versiones. Si una misma cosa está asociada a dos versiones se informa la más alta, que es la que se reparte. Sólo en plantillas del profesional. | `[{"id":"00000000-0000-4000-8000-000000000001","targetType":"APPOINTMENT","targetId":"00000000-0000-4000-8000-000000000001","targetName":"Nombre de ejemplo","active":true}]` |
+| `assignments[].id` | No | `string` | formato `uuid` | Identificador de la asignación. | `00000000-0000-4000-8000-000000000001` |
+| `assignments[].targetType` | No | `string` | valores: `APPOINTMENT`, `SERVICE`, `CARE_TYPE` | Qué se evalúa. | `APPOINTMENT` |
+| `assignments[].targetId` | No | `string` | formato `uuid` | La reserva (`APPOINTMENT`), el servicio del catálogo, `billing.service_catalog.id` (`SERVICE`), o el tipo de atención «consulta» (`CARE_TYPE`). | `00000000-0000-4000-8000-000000000001` |
+| `assignments[].targetName` | No | `string` | admite null | Nombre del servicio del catálogo cuando `targetType` es `SERVICE`; ausente en el resto. | `Nombre de ejemplo` |
+| `assignments[].active` | No | `boolean` | Sin restricción adicional declarada | Siempre `true`: sólo se informan las activas. | `true` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1070,7 +1295,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. PATCH /surveys/templates/{id}
+## 10. PATCH /surveys/templates/{id}
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1201,7 +1426,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /surveys/templates/{id}/deactivate
+## 11. POST /surveys/templates/{id}/deactivate
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1314,7 +1539,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /surveys/templates/{id}/questions
+## 12. POST /surveys/templates/{id}/questions
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1368,7 +1593,7 @@ Content-Type: application/json
 |---|:---:|---|---|---|---|
 | `questionText` | Sí | `string` | longitud mínima 1; longitud máxima 500 | Enunciado de la pregunta | `valor-ejemplo` |
 | `answerType` | Sí | `string` | valores: `TEXT`, `SCALE`, `BOOLEAN`, `SINGLE_CHOICE`, `MULTIPLE_CHOICE` | Tipo de respuesta esperado | `TEXT` |
-| `required` | No | `boolean` | Sin restricción adicional declarada | Si responderla es obligatorio para poder enviar | `false` |
+| `required` | No | `boolean` | Sin restricción adicional declarada | Se ignora: las preguntas del profesional son siempre opcionales (`required` queda en false) | `false` |
 | `options` | No | `array<string>` | longitud máxima 200; mínimo 2 elemento(s); máximo 20 elemento(s) | Opciones. Obligatorias en SINGLE_CHOICE / MULTIPLE_CHOICE, prohibidas en el resto. | `["valor-ejemplo","valor-ejemplo"]` |
 | `scaleMin` | No | `number` | mínimo 0; máximo 100 | Mínimo de la escala. Solo para SCALE. | `1` |
 | `scaleMax` | No | `number` | mínimo 1; máximo 100 | Máximo de la escala. Solo para SCALE. | `5` |
@@ -1421,6 +1646,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "questionText": "valor-ejemplo",
   "answerType": "TEXT",
   "required": true,
+  "source": "SYSTEM",
   "options": [
     "valor-ejemplo"
   ],
@@ -1438,6 +1664,7 @@ Campos de la respuesta:
 | `questionText` | Sí | `string` | Sin restricción adicional declarada | Enunciado | `valor-ejemplo` |
 | `answerType` | Sí | `string` | valores: `TEXT`, `SCALE`, `BOOLEAN`, `SINGLE_CHOICE`, `MULTIPLE_CHOICE` | Valor de answer type mantenido por la instancia. | `TEXT` |
 | `required` | Sí | `boolean` | Sin restricción adicional declarada | Si es obligatoria | `true` |
+| `source` | No | `string` | valores: `SYSTEM`, `PRACTITIONER` | SYSTEM: pregunta base de ALOVIDA. PRACTITIONER: pregunta de la encuesta del profesional (siempre opcional). Sólo la informa la lectura del paciente. | `SYSTEM` |
 | `options` | No | `array<string>` | Sin restricción adicional declarada | Opciones de elección | `["valor-ejemplo"]` |
 | `scaleMin` | No | `number` | Sin restricción adicional declarada | Mínimo de la escala | `1` |
 | `scaleMax` | No | `number` | Sin restricción adicional declarada | Máximo de la escala | `1` |
@@ -1477,7 +1704,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. DELETE /surveys/templates/{id}/questions/{questionId}
+## 13. DELETE /surveys/templates/{id}/questions/{questionId}
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1593,7 +1820,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. PATCH /surveys/templates/{id}/questions/{questionId}
+## 14. PATCH /surveys/templates/{id}/questions/{questionId}
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1645,7 +1872,7 @@ Content-Type: application/json
 |---|:---:|---|---|---|---|
 | `questionText` | No | `string` | longitud mínima 1; longitud máxima 500 | Enunciado de la pregunta | `valor-ejemplo` |
 | `answerType` | No | `string` | valores: `TEXT`, `SCALE`, `BOOLEAN`, `SINGLE_CHOICE`, `MULTIPLE_CHOICE` | Tipo de respuesta esperado | `TEXT` |
-| `required` | No | `boolean` | Sin restricción adicional declarada | Si responderla es obligatorio | `true` |
+| `required` | No | `boolean` | Sin restricción adicional declarada | Se ignora: las preguntas del profesional son siempre opcionales (`required` queda en false) | `true` |
 | `options` | No | `array<string>` | longitud máxima 200; mínimo 2 elemento(s); máximo 20 elemento(s) | Opciones, enteras. Reemplazan a las anteriores. | `["valor-ejemplo","valor-ejemplo"]` |
 | `scaleMin` | No | `number` | mínimo 0; máximo 100 | Mínimo de la escala. Solo para SCALE. | `1` |
 | `scaleMax` | No | `number` | mínimo 1; máximo 100 | Máximo de la escala. Solo para SCALE. | `1` |
@@ -1739,7 +1966,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. PUT /surveys/templates/{id}/questions/order
+## 15. PUT /surveys/templates/{id}/questions/order
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1873,7 +2100,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /surveys/templates/{id}/responses
+## 16. GET /surveys/templates/{id}/responses
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1998,7 +2225,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /surveys/templates/{id}/versions
+## 17. POST /surveys/templates/{id}/versions
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -2117,7 +2344,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /surveys/templates/{id}/versions/{versionNumber}/publish
+## 18. POST /surveys/templates/{id}/versions/{versionNumber}/publish
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`

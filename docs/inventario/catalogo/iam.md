@@ -14,16 +14,16 @@
 | [account_lockouts](#account_lockouts) | Registra bloqueos de cuentas para aplicar controles ante intentos de acceso fallidos o riesgos de seguridad. | 16 | 3 | 4 | COINCIDE |
 | [api_key_scopes](#api_key_scopes) | Delimita permisos y ámbitos de claves API para restringir integraciones a operaciones autorizadas. | 7 | 2 | 0 | COINCIDE |
 | [api_keys](#api_keys) | Administra credenciales de integración por API para autenticar sistemas que intercambian datos con la plataforma médica. | 21 | 5 | 0 | COINCIDE |
-| [authentication_credentials](#authentication_credentials) | Almacena referencias y estados de credenciales usados para autenticar usuarios sin mezclar identidad personal y acceso. | 16 | 7 | 45 | COINCIDE |
-| [devices](#devices) | Identifica dispositivos asociados a usuarios para gestionar sesiones y controles de acceso. | 13 | 5 | 94 | COINCIDE |
-| [email_verifications](#email_verifications) | Registra verificaciones de correo asociadas a cuentas para confirmar canales de identidad y comunicación. | 12 | 2 | 24 | COINCIDE |
+| [authentication_credentials](#authentication_credentials) | Almacena referencias y estados de credenciales usados para autenticar usuarios sin mezclar identidad personal y acceso. | 16 | 7 | 49 | COINCIDE |
+| [devices](#devices) | Identifica dispositivos asociados a usuarios para gestionar sesiones y controles de acceso. | 13 | 5 | 102 | COINCIDE |
+| [email_verifications](#email_verifications) | Registra verificaciones de correo asociadas a cuentas para confirmar canales de identidad y comunicación. | 12 | 2 | 27 | COINCIDE |
 | [mfa_factors](#mfa_factors) | Registra factores de autenticación adicional para reforzar la protección de cuentas que acceden a datos médicos. | 12 | 5 | 5 | COINCIDE |
 | [password_resets](#password_resets) | Gestiona solicitudes de restablecimiento de credenciales para recuperar acceso de forma controlada. | 13 | 2 | 4 | COINCIDE |
 | [refresh_tokens](#refresh_tokens) | Gestiona tokens de renovación de sesión para mantener autenticación continua con trazabilidad y revocación. | 11 | 7 | 15 | COINCIDE |
 | [security_events](#security_events) | Conserva eventos de seguridad de identidad para investigar autenticaciones y cambios relevantes de cuenta. | 8 | 5 | 25 | COINCIDE |
-| [sessions](#sessions) | Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario y dispositivo. | 13 | 7 | 131 | COINCIDE |
+| [sessions](#sessions) | Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario y dispositivo. | 13 | 7 | 132 | COINCIDE |
 | [user_global_roles](#user_global_roles) | Asocia roles de alcance global a usuarios para resolver privilegios transversales de la plataforma. | 9 | 5 | 15 | COINCIDE |
-| [users](#users) | Representa cuentas de usuario autenticadas que operan en la plataforma médica. | 21 | 8 | 54 | COINCIDE |
+| [users](#users) | Representa cuentas de usuario autenticadas que operan en la plataforma médica. | 21 | 8 | 59 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -502,7 +502,7 @@ Almacena referencias y estados de credenciales usados para autenticar usuarios s
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: authentication_credentials`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `AuthenticationCredentials` — `src/modules/iam/entities/authentication_credentials.entity.ts`
-- **Resumen:** 16 columnas · 7 índices · 6 FK salientes · 0 entrantes · 45 operaciones
+- **Resumen:** 16 columnas · 7 índices · 6 FK salientes · 0 entrantes · 49 operaciones
 
 #### Columnas
 
@@ -588,6 +588,7 @@ Almacena referencias y estados de credenciales usados para autenticar usuarios s
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /iam/users/assisted-registration | CREA | DIRECTA |
 | POST /iam/users/assisted-registration | LEE | DIRECTA |
+| POST /iam/users/search | LEE | DIRECTA |
 | POST /identity/me/identity-verification | LEE | DIRECTA |
 | POST /identity/me/practitioner/identity-verification | LEE | DIRECTA |
 | POST /identity/me/practitioner/license-verification | LEE | DIRECTA |
@@ -596,6 +597,9 @@ Almacena referencias y estados de credenciales usados para autenticar usuarios s
 | POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/cancel | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/reject | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
 | POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
@@ -627,7 +631,7 @@ Identifica dispositivos asociados a usuarios para gestionar sesiones y controles
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: devices`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `Devices` — `src/modules/iam/entities/devices.entity.ts`
-- **Resumen:** 13 columnas · 5 índices · 4 FK salientes · 13 entrantes · 94 operaciones
+- **Resumen:** 13 columnas · 5 índices · 4 FK salientes · 13 entrantes · 102 operaciones
 
 #### Columnas
 
@@ -693,6 +697,8 @@ Identifica dispositivos asociados a usuarios para gestionar sesiones y controles
 | POST /authz/care-relationships/request | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | ACTUALIZA | POR_TIPO |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
+| POST /clinical/encounters/check-in | ACTUALIZA | POR_TIPO |
+| POST /clinical/encounters/check-in | LEE | DIRECTA |
 | POST /clinical/internal/prescription-expiry-notices | ACTUALIZA | POR_TIPO |
 | POST /clinical/internal/prescription-expiry-notices | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/issue | ACTUALIZA | POR_TIPO |
@@ -762,6 +768,12 @@ Identifica dispositivos asociados a usuarios para gestionar sesiones y controles
 | POST /scheduling/bookings/{id}/cancel | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/delay | ACTUALIZA | POR_TIPO |
 | POST /scheduling/bookings/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts | ACTUALIZA | POR_TIPO |
+| POST /scheduling/bookings/{id}/payment-receipts | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | ACTUALIZA | POR_TIPO |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | ACTUALIZA | POR_TIPO |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/reject | ACTUALIZA | POR_TIPO |
 | POST /scheduling/bookings/{id}/reject | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/reschedule | ACTUALIZA | POR_TIPO |
@@ -807,7 +819,7 @@ Registra verificaciones de correo asociadas a cuentas para confirmar canales de 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: email_verifications`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `EmailVerifications` — `src/modules/iam/entities/email_verifications.entity.ts`
-- **Resumen:** 12 columnas · 2 índices · 4 FK salientes · 0 entrantes · 24 operaciones
+- **Resumen:** 12 columnas · 2 índices · 4 FK salientes · 0 entrantes · 27 operaciones
 
 #### Columnas
 
@@ -869,6 +881,9 @@ Registra verificaciones de correo asociadas a cuentas para confirmar canales de 
 | POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/cancel | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/reject | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
 | POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
@@ -1224,7 +1239,7 @@ Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: sessions`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `Sessions` — `src/modules/iam/entities/sessions.entity.ts`
-- **Resumen:** 13 columnas · 7 índices · 5 FK salientes · 5 entrantes · 131 operaciones
+- **Resumen:** 13 columnas · 7 índices · 5 FK salientes · 5 entrantes · 132 operaciones
 
 #### Columnas
 
@@ -1307,6 +1322,7 @@ Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario
 | POST /clinical/conditions | LEE | POR_SQL |
 | POST /clinical/conditions/{id}/change-status | LEE | POR_SQL |
 | POST /clinical/conditions/{id}/verification | LEE | POR_SQL |
+| POST /clinical/encounters/check-in | LEE | POR_SQL |
 | POST /clinical/medication-requests/{id}/invalidate | LEE | POR_SQL |
 | POST /clinical/medication-requests/{id}/issue | LEE | POR_SQL |
 | POST /clinical/medication-requests/{id}/renew | LEE | POR_SQL |
@@ -1515,7 +1531,7 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: users`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `Users` — `src/modules/iam/entities/users.entity.ts`
-- **Resumen:** 21 columnas · 8 índices · 8 FK salientes · 1928 entrantes · 54 operaciones
+- **Resumen:** 21 columnas · 8 índices · 8 FK salientes · 1928 entrantes · 59 operaciones
 
 #### Columnas
 
@@ -3535,6 +3551,7 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | GET /iam/users/{id}/sessions | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | POST /iam/users/assisted-registration | CREA | DIRECTA |
+| POST /iam/users/search | LEE | DIRECTA |
 | GET /insurance/my-claims | LEE | DIRECTA |
 | POST /insurance/patients/conversation | LEE | POR_SQL |
 | POST /insurance/patients/search | LEE | POR_SQL |
@@ -3549,6 +3566,10 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/cancel | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/delay | LEE | DIRECTA |
+| GET /scheduling/bookings/{id}/payment-receipts | LEE | POR_SQL |
+| POST /scheduling/bookings/{id}/payment-receipts | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
 | POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
 | POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
