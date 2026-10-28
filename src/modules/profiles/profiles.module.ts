@@ -37,6 +37,7 @@ import {
   PersonProfilesRepository,
   PatientProfilesRepository,
   PersonAccountLinksRepository,
+  PatientPrimaryPractitionersRepository,
   HealthPractitionerProfilesRepository,
   JurisdictionAuthorizationsRepository,
   ProfessionalCredentialsRepository,
@@ -72,6 +73,8 @@ import { PATIENT_ADDRESS_BOOK_PORT } from './application/ports/patient-address-b
 import { PatientAddressBookAdapter } from './infrastructure/adapters/patient-address-book.adapter';
 import { PatientAddressBookService } from './application/services/patient-address-book.service';
 import { PatientAddressBookController } from './presentation/controllers/patient-address-book.controller';
+import { PrimaryPractitionerService } from './application/services/primary-practitioner.service';
+import { PrimaryPractitionerController } from './presentation/controllers/primary-practitioner.controller';
 import { PersonRecordsAdapter } from './infrastructure/adapters/person-records.adapter';
 import { PATIENT_COVERAGES_PORT } from './application/ports/patient-coverages.port';
 import { PatientCoveragesAdapter } from './infrastructure/adapters/patient-coverages.adapter';
@@ -104,6 +107,7 @@ import { CLINICAL_PATIENT_HISTORY_PORT } from './application/ports/clinical-pati
     PractitionerSignatureAssetsController,
     ProfilesPatientsController,
     PatientAddressBookController,
+    PrimaryPractitionerController,
     ProfilesDependentRequestsController,
     ProfilesPractitionersController,
     TenantPractitionerRequestsController,
@@ -158,6 +162,7 @@ import { CLINICAL_PATIENT_HISTORY_PORT } from './application/ports/clinical-pati
     },
     PatientAddressBookService,
     PatientAddressBookAdapter,
+    PrimaryPractitionerService,
     {
       provide: PATIENT_ADDRESS_BOOK_PORT,
       useExisting: PatientAddressBookAdapter,
@@ -190,6 +195,7 @@ import { CLINICAL_PATIENT_HISTORY_PORT } from './application/ports/clinical-pati
     PatientMergeEventsRepository,
     RelatedPersonsRepository,
     PatientPortalProxiesRepository,
+    PatientPrimaryPractitionersRepository,
     // Servicios
     ProfilesPatientsService,
     ProfilesPractitionersService,

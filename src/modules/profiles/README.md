@@ -40,6 +40,10 @@ Importa (`profiles.module.ts`): `AuthzModule`, `CommonModule`, `TerminologyModul
 | `DELETE /profiles/patients/me/photo` | sesión | `profiles-patients` |
 | `GET /profiles/patients/me/dependents` | sesión | `profiles-patients` |
 | `POST /profiles/patients/me/dependents` | sesión | `profiles-patients` |
+| `GET /profiles/patients/me/primary-practitioner` | sesión | `primary-practitioner` |
+| `PUT /profiles/patients/me/primary-practitioner` | sesión | `primary-practitioner` |
+| `DELETE /profiles/patients/me/primary-practitioner` | sesión | `primary-practitioner` |
+| `GET /profiles/practitioners/me/primary-patients` | sesión | `primary-practitioner` |
 | `GET /profiles/patients` | SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER | `profiles-patients` |
 | `POST /profiles/patients/search` | SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER | `profiles-patients` |
 | `GET /profiles/patients/merge-events` | SECURITY_ADMIN | `profiles-patients` |
@@ -118,7 +122,8 @@ UC-05-xx más las adiciones P5/H4 documentadas. No es la lista completa: faltan,
 `jurisdiction_authorizations`, `professional_credentials`,
 `practitioner_specialties`, `practitioner_languages`, `patient_identity_links`,
 `patient_merge_events` (append-only: `recorded_at` + `recorded_by`, no
-`row_version`), `related_persons`, `patient_portal_proxies`.
+`row_version`), `related_persons`, `patient_portal_proxies`,
+`patient_primary_practitioners`.
 
 El módulo mapea **19 entidades** (`find src/modules/profiles -name '*.entity.ts' | wc -l`); las 6 no listadas arriba son `administrator_profiles`, `emergency_staff_profiles`, `insurance_representative_profiles`, `provider_operator_profiles`, `secretary_profiles` (perfiles por rol) y `practitioner_affiliations`.
 
@@ -158,6 +163,16 @@ source_identifier)`; marks the patient `linked`.
 - **Reverse merge (UC-05-09)** — only an `approved` event can be reversed (422),
   and only once (409); restores loser patient/person status.
 - **Related person (UC-05-10)** — a single active legal guardian per patient (409).
+- **Primary practitioner / médico de cabecera (v4.2.64)** — the patient picks,
+  by themselves, one practitioner (`patient_primary_practitioners`). Each pick is
+  a period: changing closes the current row and opens another, removing closes
+  it; nothing is deleted. One current pick per patient, enforced by
+  `uq_patient_primary_practitioners_current` (a race answers 409). Picking the
+  current one again is a no-op. Rejected: oneself (422), an unknown practitioner
+  (404), one with `accepts_new_patients=false` (422 — it turns true when the
+  platform verifies the license). The practitioner lists who picked them (name,
+  patient code, since — `PRIMARY_PATIENT_LIST` in `data_access_log`). The pick
+  grants **no** clinical access.
 - **Decease (UC-05-12)** — set `deceased`/`inactive`, revoke active account links
   and portal proxies; optional PII anonymization. Reject a second decease (409).
 - **Dependent requests (Hito 4 §C)** — a request is a `patient_portal_proxies` row
