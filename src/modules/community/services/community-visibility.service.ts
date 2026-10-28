@@ -15,6 +15,14 @@ import { CommunityOrganizationStaffService } from './community-organization-staf
 export type MessagingProfileAccess =
   'PLATFORM' | 'HOLDER' | 'ORGANIZATION_STAFF';
 
+/** Lo que hace falta de un perfil para decidir su titularidad. */
+type HolderProfile = {
+  targetId: string;
+  targetTypeConceptId: string;
+  statusConceptId: string;
+  createdByUserId?: string | null;
+};
+
 /** Roles de plataforma que leen cualquier perfil. */
 const PLATFORM_ROLES = ['SECURITY_ADMIN', 'SUPERADMIN', 'SYSTEM'];
 
@@ -40,9 +48,9 @@ const PLATFORM_ROLES = ['SECURITY_ADMIN', 'SUPERADMIN', 'SYSTEM'];
  * (`target_type_concept_id` + `target_id`), así que el titular se reconoce por
  * los sujetos que el token ya declara —el usuario (`sub`) y su perfil
  * profesional (`hpid`)— o por `created_by_user_id = actor` (los que alguien creó
- * para sí). Un perfil de organización que creó otro administrador no lo reconoce
- * como propio: hasta que el modelo declare el vínculo formal, ese caso pasa por
- * rol de plataforma en las lecturas y **no pasa** en las escrituras.
+ * para sí). La vitrina de un **tenant** (farmacia, clínica) es la excepción:
+ * su titularidad es una membresía activa OWNER/ADMIN, no quien la creó (ver
+ * `isHolder`), y su bandeja la atiende además el STAFF (sólo mensajería).
  */
 @Injectable()
 export class CommunityVisibilityService {
@@ -93,16 +101,34 @@ export class CommunityVisibilityService {
       : [actor.id];
   }
 
-  /** `true` si el perfil es de alguno de los sujetos que la sesión representa. */
-  private isHolder(
-    profile: { targetId: string; createdByUserId?: string | null } | null,
+  /**
+   * `true` si el perfil es de alguno de los sujetos que la sesión representa.
+   *
+   * ## La vitrina de un tenant no es de quien la creó
+   *
+   * `created_by_user_id = actor` reconoce los perfiles que alguien creó para
+   * sí. Pero la vitrina de una organización (farmacia, clínica) la crea el
+   * administrador de plataforma que verificó el tenant, o quien subió su logo,
+   * que puede haber dejado la organización. Con esa cláusula los dos firmaban
+   * como la farmacia para siempre. Para una vitrina **de tenant**
+   * ({@link CommunityOrganizationStaffService.isTenantBacked}) la titularidad
+   * es una membresía activa OWNER o ADMIN; `created_by_user_id` no cuenta.
+   *
+   * Las vitrinas de tipo organización que no son de un tenant (SupportAdmin,
+   * con `target_id` = la cuenta del sistema; una unidad diagnóstica) siguen la
+   * regla de siempre.
+   */
+  private async isHolder(
+    em: EntityManager,
+    profile: HolderProfile | null,
     actor: AuthenticatedUser,
-  ): boolean {
+  ): Promise<boolean> {
     if (!profile) return false;
-    return (
-      this.subjects(actor).includes(profile.targetId) ||
-      profile.createdByUserId === actor.id
-    );
+    if (this.subjects(actor).includes(profile.targetId)) return true;
+    if (await this.organizationStaff.isTenantBacked(em, profile)) {
+      return this.organizationStaff.canAdminister(em, profile, actor);
+    }
+    return profile.createdByUserId === actor.id;
   }
 
   /**
@@ -120,7 +146,7 @@ export class CommunityVisibilityService {
   ): Promise<void> {
     if (this.isPlatform(actor)) return;
     const profile = await this.profilesRepo.findById(em, profileId);
-    if (this.isHolder(profile, actor)) return;
+    if (await this.isHolder(em, profile, actor)) return;
     throw new ForbiddenException(
       'Sólo el titular del perfil puede leer su contenido privado',
     );
@@ -150,7 +176,7 @@ export class CommunityVisibilityService {
     actor: AuthenticatedUser,
   ): Promise<void> {
     const profile = await this.profilesRepo.findById(em, profileId);
-    if (this.isHolder(profile, actor)) return;
+    if (await this.isHolder(em, profile, actor)) return;
     throw new ForbiddenException(
       'No se puede escribir en el grafo social con un perfil ajeno',
     );
@@ -162,7 +188,8 @@ export class CommunityVisibilityService {
    * (ver {@link CommunityOrganizationStaffService.canAttend}).
    *
    * Sólo la mensajería lo usa. Publicar, reseñar, seguir o bloquear como la
-   * organización siguen exigiendo la titularidad estricta.
+   * organización exigen la titularidad estricta, que para una vitrina de
+   * tenant es membresía OWNER/ADMIN: el STAFF atiende el chat, no firma el muro.
    *
    * @returns Por qué pasa. `ORGANIZATION_STAFF` es un acceso **revocable**
    *   (depende de una membresía): quien lo conserve en el tiempo —el gateway,
@@ -177,9 +204,8 @@ export class CommunityVisibilityService {
   ): Promise<MessagingProfileAccess> {
     if (this.isPlatform(actor)) return 'PLATFORM';
     const profile = await this.profilesRepo.findById(em, profileId);
-    if (this.isHolder(profile, actor)) return 'HOLDER';
-    if (await this.organizationStaff.canAttend(em, profile, actor))
-      return 'ORGANIZATION_STAFF';
+    const access = await this.messagingAccess(em, profile, actor);
+    if (access) return access;
     throw new ForbiddenException(
       'Sólo el titular del perfil puede leer su contenido privado',
     );
@@ -198,11 +224,33 @@ export class CommunityVisibilityService {
     actor: AuthenticatedUser,
   ): Promise<void> {
     const profile = await this.profilesRepo.findById(em, profileId);
-    if (this.isHolder(profile, actor)) return;
-    if (await this.organizationStaff.canAttend(em, profile, actor)) return;
+    if (await this.messagingAccess(em, profile, actor)) return;
     throw new ForbiddenException(
       'No se puede escribir en el grafo social con un perfil ajeno',
     );
+  }
+
+  /**
+   * Por qué el actor puede usar ese perfil en la mensajería, o `null`.
+   *
+   * La vitrina de un tenant se decide **sólo** por membresía
+   * ({@link CommunityOrganizationStaffService.canAttend}) y es siempre un
+   * acceso revocable (`ORGANIZATION_STAFF`), también para OWNER y ADMIN: el
+   * gateway lo vuelve a validar mientras el socket viva.
+   */
+  private async messagingAccess(
+    em: EntityManager,
+    profile: HolderProfile | null,
+    actor: AuthenticatedUser,
+  ): Promise<'HOLDER' | 'ORGANIZATION_STAFF' | null> {
+    if (!profile) return null;
+    if (this.subjects(actor).includes(profile.targetId)) return 'HOLDER';
+    if (await this.organizationStaff.isTenantBacked(em, profile)) {
+      return (await this.organizationStaff.canAttend(em, profile, actor))
+        ? 'ORGANIZATION_STAFF'
+        : null;
+    }
+    return profile.createdByUserId === actor.id ? 'HOLDER' : null;
   }
 
   /**

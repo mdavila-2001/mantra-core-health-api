@@ -54,6 +54,16 @@ import type { DirectMessages } from '../entities';
  */
 export const EDIT_WINDOW_MS = 5 * 60_000;
 
+/**
+ * Clave del lock de «conversación directa entre estos dos», independiente del
+ * orden: `menor:mayor`.
+ */
+export function directPairLockKey(profileA: string, profileB: string): string {
+  return profileA < profileB
+    ? `${profileA}:${profileB}`
+    : `${profileB}:${profileA}`;
+}
+
 /** Destinatarios que son personas: los encarna su propia cuenta. */
 const PERSON_RECIPIENT_TYPES: readonly string[] = [
   COMM.PROFILE_TARGET_USER,
@@ -162,6 +172,18 @@ export class CommunityMessagingService {
           initiatorProfileId,
           actor,
         );
+        // OWNER/ADMIN son titulares de la vitrina de su tenant (publican como
+        // ella), pero una organización no abre hilos en frío con personas: su
+        // camino es el canal de sistema de un hecho que ya los une.
+        const initiator = await this.profilesRepo.findById(
+          tx,
+          initiatorProfileId,
+        );
+        if (await this.organizationStaff.isTenantBacked(tx, initiator)) {
+          throw new ForbiddenException(
+            'Una organización no inicia conversaciones por este canal',
+          );
+        }
       } else {
         await this.visibility.assertActsAsMessagingProfile(
           tx,
@@ -221,6 +243,14 @@ export class CommunityMessagingService {
           {},
         );
       }
+
+      // Serializa «buscar o crear» por par de perfiles. Sin esto, dos
+      // aperturas simultáneas (el paciente y el mostrador sobre el mismo
+      // pedido) no ven la conversación de la otra y crean dos hilos. El lock
+      // es de transacción: se suelta solo al confirmar o revertir.
+      await tx.execute('select pg_advisory_xact_lock(hashtextextended(?, 0))', [
+        directPairLockKey(profileA, profileB),
+      ]);
 
       const existing = await this.conversationsRepo.findDirectBetween(
         tx,
