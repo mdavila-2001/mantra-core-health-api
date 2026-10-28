@@ -1,5 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ANSWER_TYPE_CODES, type AnswerTypeCode } from '../surveys.concepts';
+import {
+  ANSWER_TYPE_CODES,
+  type AnswerTypeCode,
+  type QuestionSource,
+} from '../surveys.concepts';
 
 /** Respuesta genérica con el id del recurso creado. */
 export class IdResponseDto {
@@ -71,6 +75,17 @@ export class QuestionDto {
    */
   @ApiProperty({ description: 'Si es obligatoria' })
   required!: boolean;
+
+  /**
+   * Quién escribió la pregunta. Sólo lo informa la lectura del paciente
+   * (`GET /surveys/me/invitations/:id`), donde las del sistema van primero.
+   */
+  @ApiPropertyOptional({
+    enum: ['SYSTEM', 'PRACTITIONER'],
+    description:
+      'SYSTEM: pregunta base de ALOVIDA. PRACTITIONER: pregunta de la encuesta del profesional (siempre opcional). Sólo la informa la lectura del paciente.',
+  })
+  source?: QuestionSource;
 
   /**
    * Valor de options mantenido por la instancia.

@@ -6,6 +6,10 @@ import { createdBy } from '../../../common';
 /** Alta de una asignación de encuesta a la cosa evaluada. */
 export interface CreateAssignmentData {
   /**
+   * Identificador fijo (asignación de la encuesta base del sistema).
+   */
+  id?: string;
+  /**
    * Identificador asociado a survey version.
    */
   surveyVersionId: string;

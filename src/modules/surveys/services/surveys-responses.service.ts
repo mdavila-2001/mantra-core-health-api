@@ -563,7 +563,7 @@ export class SurveysResponsesService {
       issuedAt: invitation.issuedAt,
       expiresAt: invitation.expiresAt,
       answeredAt: invitation.answeredAt,
-      appointmentBookingId: invitation.appointmentBookingId,
+      appointmentBookingId: invitation.appointmentBookingId ?? '',
     };
   }
 

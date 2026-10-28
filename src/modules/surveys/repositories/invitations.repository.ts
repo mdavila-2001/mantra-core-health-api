@@ -7,9 +7,14 @@ import { createdBy } from '../../../common';
 /** Alta de una invitación a responder. */
 export interface CreateInvitationData {
   /**
-   * Identificador asociado a survey version.
+   * Identificador asociado a survey version: la base del sistema, o la del
+   * profesional en una invitación suelta.
    */
   surveyVersionId: string;
+  /**
+   * Versión del profesional que viaja detrás de la base, si la hay.
+   */
+  extensionSurveyVersionId?: string;
   /**
    * Identificador asociado a survey assignment.
    */
@@ -135,6 +140,24 @@ export class InvitationsRepository {
     if (surveyVersionIds.length === 0) return Promise.resolve([]);
     return em.find(SurveyInvitations, {
       surveyVersionId: { $in: surveyVersionIds },
+    });
+  }
+
+  /**
+   * Lista las invitaciones que llevan alguna de estas versiones como extensión
+   * del profesional (detrás de la base del sistema).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param surveyVersionIds - Identificadores de versión del profesional.
+   * @returns Resultado conforme al contrato `Promise<SurveyInvitations[]>`.
+   */
+  listByExtensionVersions(
+    em: EntityManager,
+    surveyVersionIds: string[],
+  ): Promise<SurveyInvitations[]> {
+    if (surveyVersionIds.length === 0) return Promise.resolve([]);
+    return em.find(SurveyInvitations, {
+      extensionSurveyVersionId: { $in: surveyVersionIds },
     });
   }
 
