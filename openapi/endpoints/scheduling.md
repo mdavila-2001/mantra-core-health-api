@@ -6935,11 +6935,21 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
           "questionText": "valor-ejemplo",
           "answerType": "TEXT",
           "required": true,
+          "source": "SYSTEM",
           "options": [
             "valor-ejemplo"
           ],
           "scaleMin": 1,
           "scaleMax": 1
+        }
+      ],
+      "assignments": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "targetType": "APPOINTMENT",
+          "targetId": "00000000-0000-4000-8000-000000000001",
+          "targetName": "Nombre de ejemplo",
+          "active": true
         }
       ]
     }
@@ -6952,20 +6962,27 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<TemplateDetailDto>` | Sin restricción adicional declarada | Las plantillas publicadas, de la más reciente a la más vieja. | `[{"latestVersionId":"00000000-0000-4000-8000-000000000001","responseWindowDays":1,"effectiveFrom":"2026-07-31T12:00:00.000Z","effectiveTo":"2026-07-31T12:00:00.000Z","questions":[{"id":"00000000-0000-4000-8000-000000000001","position":1,"questionText":"valor-ejemplo","answerType":"TEXT","required":true,"options":["valor-ejemplo"],"scaleMin":1,"scaleMax":1}]}]` |
+| `items` | Sí | `array<TemplateDetailDto>` | Sin restricción adicional declarada | Las plantillas publicadas, de la más reciente a la más vieja. | `[{"latestVersionId":"00000000-0000-4000-8000-000000000001","responseWindowDays":1,"effectiveFrom":"2026-07-31T12:00:00.000Z","effectiveTo":"2026-07-31T12:00:00.000Z","questions":[{"id":"00000000-0000-4000-8000-000000000001","position":1,"questionText":"valor-ejemplo","answerType":"TEXT","required":true,"source":"SYSTEM","options":["valor-ejemplo"],"scaleMin":1,"scaleMax":1}],"assignments":[{"id":"00000000-0000-4000-8000-000000000001","targetType":"APPOINTMENT","targetId":"00000000-0000-4000-8000-000000000001","targetName":"Nombre de ejemplo","active":true}]}]` |
 | `items[].latestVersionId` | Sí | `string` | formato `uuid` | Última versión | `00000000-0000-4000-8000-000000000001` |
 | `items[].responseWindowDays` | Sí | `number` | Sin restricción adicional declarada | Días de plazo para responder | `1` |
 | `items[].effectiveFrom` | No | `string` | formato `date-time` | Valor de effective from mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
 | `items[].effectiveTo` | No | `string` | formato `date-time` | Valor de effective to mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
-| `items[].questions` | Sí | `array<QuestionDto>` | Sin restricción adicional declarada | Valor de questions mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","position":1,"questionText":"valor-ejemplo","answerType":"TEXT","required":true,"options":["valor-ejemplo"],"scaleMin":1,"scaleMax":1}]` |
+| `items[].questions` | Sí | `array<QuestionDto>` | Sin restricción adicional declarada | Valor de questions mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","position":1,"questionText":"valor-ejemplo","answerType":"TEXT","required":true,"source":"SYSTEM","options":["valor-ejemplo"],"scaleMin":1,"scaleMax":1}]` |
 | `items[].questions[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `items[].questions[].position` | Sí | `number` | Sin restricción adicional declarada | Posición dentro del cuestionario | `1` |
 | `items[].questions[].questionText` | Sí | `string` | Sin restricción adicional declarada | Enunciado | `valor-ejemplo` |
 | `items[].questions[].answerType` | Sí | `string` | valores: `TEXT`, `SCALE`, `BOOLEAN`, `SINGLE_CHOICE`, `MULTIPLE_CHOICE` | Valor de answer type mantenido por la instancia. | `TEXT` |
 | `items[].questions[].required` | Sí | `boolean` | Sin restricción adicional declarada | Si es obligatoria | `true` |
+| `items[].questions[].source` | No | `string` | valores: `SYSTEM`, `PRACTITIONER` | SYSTEM: pregunta base de ALOVIDA. PRACTITIONER: pregunta de la encuesta del profesional (siempre opcional). Sólo la informa la lectura del paciente. | `SYSTEM` |
 | `items[].questions[].options` | No | `array<string>` | Sin restricción adicional declarada | Opciones de elección | `["valor-ejemplo"]` |
 | `items[].questions[].scaleMin` | No | `number` | Sin restricción adicional declarada | Mínimo de la escala | `1` |
 | `items[].questions[].scaleMax` | No | `number` | Sin restricción adicional declarada | Máximo de la escala | `1` |
+| `items[].assignments` | No | `array<TemplateAssignmentDto>` | Sin restricción adicional declarada | Asociaciones activas de la encuesta, de cualquiera de sus versiones. Si una misma cosa está asociada a dos versiones se informa la más alta, que es la que se reparte. Sólo en plantillas del profesional. | `[{"id":"00000000-0000-4000-8000-000000000001","targetType":"APPOINTMENT","targetId":"00000000-0000-4000-8000-000000000001","targetName":"Nombre de ejemplo","active":true}]` |
+| `items[].assignments[].id` | No | `string` | formato `uuid` | Identificador de la asignación. | `00000000-0000-4000-8000-000000000001` |
+| `items[].assignments[].targetType` | No | `string` | valores: `APPOINTMENT`, `SERVICE`, `CARE_TYPE` | Qué se evalúa. | `APPOINTMENT` |
+| `items[].assignments[].targetId` | No | `string` | formato `uuid` | La reserva (`APPOINTMENT`), el servicio del catálogo, `billing.service_catalog.id` (`SERVICE`), o el tipo de atención «consulta» (`CARE_TYPE`). | `00000000-0000-4000-8000-000000000001` |
+| `items[].assignments[].targetName` | No | `string` | admite null | Nombre del servicio del catálogo cuando `targetType` es `SERVICE`; ausente en el resto. | `Nombre de ejemplo` |
+| `items[].assignments[].active` | No | `boolean` | Sin restricción adicional declarada | Siempre `true`: sólo se informan las activas. | `true` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cuántas son. | `1` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.

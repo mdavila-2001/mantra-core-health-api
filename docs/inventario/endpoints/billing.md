@@ -5,7 +5,7 @@
 - **Bloque:** Financiero y ERP (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 - **Operaciones:** 36 (36 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 5 · MEDIO 13 · BAJO 18
-- **Tablas distintas que tocan:** 41
+- **Tablas distintas que tocan:** 37
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/billing.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -29,7 +29,7 @@
 | 15 | POST | `/billing/reconciliation:clear` | Conciliar pagos vía documento de compensación | BAJO | 2 | SECURITY_ADMIN |
 | 16 | POST | `/billing/reimbursements:link` | Vincular reembolso de reclamo de seguro a la factura | MEDIO | 4 | SECURITY_ADMIN |
 | 17 | GET | `/billing/service-catalog` | Listar el catálogo de servicios de la práctica | BAJO | 1 | sesión (sin roles) |
-| 18 | POST | `/billing/service-catalog` | Dar de alta un servicio en el catálogo maestro | MEDIO | 12 | SECURITY_ADMIN, PRACTITIONER, CLINICIAN |
+| 18 | POST | `/billing/service-catalog` | Dar de alta un servicio en el catálogo maestro | MEDIO | 5 | SECURITY_ADMIN, PRACTITIONER, CLINICIAN |
 | 19 | PATCH | `/billing/service-catalog/{id}` | Corregir un servicio del catálogo de mi práctica | MEDIO | 4 | PRACTITIONER, CLINICIAN, SECURITY_ADMIN |
 | 20 | GET | `/billing/service-catalog/{id}/image` | Descargar la imagen de un servicio que el actor puede ver | BAJO | 4 | sesión (sin roles) |
 | 21 | GET | `/billing/service-catalog/procedure-specialties` | Listar las especialidades del nomenclador de procedimientos | BAJO | 1 | sesión (sin roles) |
@@ -2023,7 +2023,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /billing/service-catalog` la atiende `BillingServiceCatalogController.create` (src/modules/billing/controllers/billing-service-catalog.controller.ts:155). Exige sesión con alguno de los roles SECURITY_ADMIN, PRACTITIONER, CLINICIAN. Valida el cuerpo como `CreateServiceCatalogItemDto` (11 campos, 4 obligatorios). Delega en `BillingServiceCatalogService.create`. Crea filas en billing.service_catalog, surveys.survey_assignments, surveys.survey_questions, surveys.survey_templates, surveys.survey_versions. Actualiza surveys.survey_templates, surveys.survey_versions. Lee billing.service_catalog, common.file_versions, common.files, practice.practices, practice.practitioner_role_assignments.
+`POST /billing/service-catalog` la atiende `BillingServiceCatalogController.create` (src/modules/billing/controllers/billing-service-catalog.controller.ts:155). Exige sesión con alguno de los roles SECURITY_ADMIN, PRACTITIONER, CLINICIAN. Valida el cuerpo como `CreateServiceCatalogItemDto` (11 campos, 4 obligatorios). Delega en `BillingServiceCatalogService.create`. Crea filas en billing.service_catalog. Lee billing.service_catalog, common.file_versions, common.files, practice.practices.
 
 ### Requerimientos
 
@@ -2045,13 +2045,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `common.file_versions` | LEE | LEE | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.assertImageUsable → AttachableFileService.assertUsableBy → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
 | `common.files` | LEE | LEE | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.assertImageUsable → AttachableFileService.assertUsableBy → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
 | `practice.practices` | LEE | LEE | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.assertRegistrationCanRegister → PracticeTenantLookupService.isOwnOffice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
-| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.attachDefaultSatisfactionSurvey → BillingServiceCatalogService.findDefaultSurveyOwner | `src/modules/billing/services/billing-service-catalog.service.ts:481` |
-| `surveys.survey_assignments` | ESCRIBE | CREA | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.attachDefaultSatisfactionSurvey → AssignmentsRepository.create | `src/modules/surveys/repositories/assignments.repository.ts:119` |
-| `surveys.survey_questions` | ESCRIBE | CREA | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.attachDefaultSatisfactionSurvey → TemplatesRepository.createQuestion | `src/modules/surveys/repositories/templates.repository.ts:317` |
-| `surveys.survey_templates` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.attachDefaultSatisfactionSurvey | `src/modules/billing/services/billing-service-catalog.service.ts:459` |
-| `surveys.survey_templates` | ESCRIBE | CREA | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.attachDefaultSatisfactionSurvey → TemplatesRepository.createTemplate | `src/modules/surveys/repositories/templates.repository.ts:179` |
-| `surveys.survey_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.attachDefaultSatisfactionSurvey | `src/modules/billing/services/billing-service-catalog.service.ts:455` |
-| `surveys.survey_versions` | ESCRIBE | CREA | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.attachDefaultSatisfactionSurvey → TemplatesRepository.createVersion | `src/modules/surveys/repositories/templates.repository.ts:243` |
 
 ### Cuerpo — DTO `CreateServiceCatalogItemDto` · `application/json`
 
@@ -2181,7 +2174,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.service_catalog` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingServiceCatalogController.update → BillingServiceCatalogService.update | `src/modules/billing/services/billing-service-catalog.service.ts:530` |
+| `billing.service_catalog` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingServiceCatalogController.update → BillingServiceCatalogService.update | `src/modules/billing/services/billing-service-catalog.service.ts:396` |
 | `billing.service_catalog` | LEE | LEE | DIRECTA | BillingServiceCatalogController.update → BillingServiceCatalogService.update → ServiceCatalogRepository.findById | `src/modules/billing/repositories/service-catalog.repository.ts:89` |
 | `practice.practices` | LEE | LEE | DIRECTA | BillingServiceCatalogController.update → BillingServiceCatalogService.update → BillingServiceCatalogService.assertCanEdit → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | BillingServiceCatalogController.update → BillingServiceCatalogService.update → BillingServiceCatalogService.assertCanEdit → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
@@ -3726,6 +3719,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/patient-spending-http.int-spec.ts:122` |
 | CONTROLADOR | `src/modules/billing/controllers/patient-spending.controller.spec.ts:30` |
 
 ### Flujos

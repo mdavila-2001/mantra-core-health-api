@@ -721,7 +721,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_context.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/lab-reception-inbox.int-spec.ts:217` |
-| INTEGRACION | `test/integration/laboratory-registration.int-spec.ts:48` |
+| INTEGRACION | `test/integration/laboratory-registration.int-spec.ts:56` |
 | CONTROLADOR | `src/modules/system_context/controllers/system-context.controller.spec.ts:196` |
 
 ### Flujos

@@ -725,8 +725,8 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 | INTEGRACION | `test/integration/br14-encuentros-seguridad-clinica.int-spec.ts:108` |
 | INTEGRACION | `test/integration/clinical-c14-c23-notas-e-internacion.int-spec.ts:116` |
 | INTEGRACION | `test/integration/clinical-prescriptions-pdf.int-spec.ts:123` |
-| INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:580` |
-| INTEGRACION | `test/integration/glossary.int-spec.ts:77` |
+| INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:589` |
+| INTEGRACION | `test/integration/glossary.int-spec.ts:86` |
 | CONTROLADOR | `src/modules/terminology/controllers/terminology-concepts.controller.spec.ts:194` |
 
 ### Flujos
@@ -853,7 +853,7 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/glossary.int-spec.ts:224` |
+| INTEGRACION | `test/integration/glossary.int-spec.ts:234` |
 
 ### Flujos
 
@@ -1275,7 +1275,7 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/glossary.int-spec.ts:384` |
+| INTEGRACION | `test/integration/glossary.int-spec.ts:399` |
 | CONTROLADOR | `src/modules/terminology/controllers/terminology-concepts.controller.spec.ts:132` |
 
 ### Flujos
@@ -1895,7 +1895,7 @@ El árbol de decisión completo está en [flujos](../flujos/terminology.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/glossary.int-spec.ts:61` |
+| INTEGRACION | `test/integration/glossary.int-spec.ts:70` |
 | INTEGRACION | `test/integration/organization-legal-entity-type.int-spec.ts:113` |
 | INTEGRACION | `test/integration/patient-own-profile.int-spec.ts:475` |
 | INTEGRACION | `test/integration/terminology.int-spec.ts:182` |

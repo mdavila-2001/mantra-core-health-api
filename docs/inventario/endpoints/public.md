@@ -5,16 +5,16 @@
 - **Bloque:** —
 - **Operaciones:** 4 (4 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 0 · MEDIO 0 · BAJO 4
-- **Tablas distintas que tocan:** 14
+- **Tablas distintas que tocan:** 12
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/public.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | POST | `/public/profiles/f/{slug}/branch-availability` | Disponibilidad de una receta en las sucursales de una farmacia | BAJO | 12 | pública |
+| 1 | POST | `/public/profiles/f/{slug}/branch-availability` | Disponibilidad de una receta en las sucursales de una farmacia | BAJO | 10 | pública |
 | 2 | GET | `/public/profiles/f/{slug}/branches` | Sucursales de una farmacia, desde su ficha pública | BAJO | 6 | pública |
-| 3 | GET | `/public/profiles/f/{slug}/products` | Productos que ofrece una farmacia, desde su ficha pública | BAJO | 9 | pública |
+| 3 | GET | `/public/profiles/f/{slug}/products` | Productos que ofrece una farmacia, desde su ficha pública | BAJO | 6 | pública |
 | 4 | GET | `/public/profiles/o/{slug}/services` | Servicios que ofrece una organización, desde su ficha pública | BAJO | 4 | pública |
 
 ---
@@ -36,7 +36,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /public/profiles/f/{slug}/branch-availability` la atiende `PublicCatalogController.pharmacyBranchAvailability` (src/modules/public/presentation/controllers/public-catalog.controller.ts:102). Es una ruta pública: no exige token. Valida el cuerpo como `PublicPrescriptionAvailabilityDto` (3 campos, 1 obligatorio). Delega en `PublicPharmacyBranchesService.availability`. Lee common.addresses, community.public_profiles, directory.branches, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_price_lists, pharmacy.pharmacy_product_prices y 4 más.
+`POST /public/profiles/f/{slug}/branch-availability` la atiende `PublicCatalogController.pharmacyBranchAvailability` (src/modules/public/presentation/controllers/public-catalog.controller.ts:102). Es una ruta pública: no exige token. Valida el cuerpo como `PublicPrescriptionAvailabilityDto` (3 campos, 1 obligatorio). Delega en `PublicPharmacyBranchesService.availability`. Lee common.addresses, community.public_profiles, directory.branches, pharmacy.pharmacies, pharmacy.pharmacy_price_lists, pharmacy.pharmacy_product_prices, pharmacy.pharmacy_products, pharmacy.pharmacy_sites y 2 más.
 
 ### Requerimientos
 
@@ -52,17 +52,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `common.addresses` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranchAvailability → PublicPharmacyBranchesService.availability → PublicPharmacyBranchesService.loadBranchesWithTenant → PublicPharmacyBranchesRepository.findPublicSites | `src/modules/public/infrastructure/repositories/public-pharmacy-branches.repository.ts:52` |
-| `community.public_profiles` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranchAvailability → PublicPharmacyBranchesService.availability → PublicPharmacyBranchesService.loadBranchesWithTenant → PublicCatalogRepository.findVisibleProfileBySlug | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:79` |
+| `community.public_profiles` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranchAvailability → PublicPharmacyBranchesService.availability → PublicPharmacyBranchesService.loadBranchesWithTenant → PublicCatalogRepository.findVisibleProfileBySlug | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:77` |
 | `directory.branches` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranchAvailability → PublicPharmacyBranchesService.availability → PublicPharmacyBranchesService.loadBranchesWithTenant → PublicPharmacyBranchesRepository.findPublicSites | `src/modules/public/infrastructure/repositories/public-pharmacy-branches.repository.ts:52` |
-| `pharmacy_inventory.inventory_locations` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranchAvailability → PublicPharmacyBranchesService.availability → PublicPharmacyBranchesRepository.findInStockMatches | `src/modules/public/infrastructure/repositories/public-pharmacy-branches.repository.ts:119` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranchAvailability → PublicPharmacyBranchesService.availability → PublicPharmacyBranchesRepository.findInStockMatches | `src/modules/public/infrastructure/repositories/public-pharmacy-branches.repository.ts:119` |
-| `pharmacy.pharmacies` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranchAvailability → PublicPharmacyBranchesService.availability → PublicPharmacyBranchesRepository.findInStockMatches | `src/modules/public/infrastructure/repositories/public-pharmacy-branches.repository.ts:119` |
-| `pharmacy.pharmacy_price_lists` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranchAvailability → PublicPharmacyBranchesService.availability → PublicPharmacyBranchesRepository.findInStockMatches | `src/modules/public/infrastructure/repositories/public-pharmacy-branches.repository.ts:119` |
-| `pharmacy.pharmacy_product_prices` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranchAvailability → PublicPharmacyBranchesService.availability → PublicPharmacyBranchesRepository.findInStockMatches | `src/modules/public/infrastructure/repositories/public-pharmacy-branches.repository.ts:119` |
-| `pharmacy.pharmacy_products` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranchAvailability → PublicPharmacyBranchesService.availability → PublicPharmacyBranchesRepository.findInStockMatches | `src/modules/public/infrastructure/repositories/public-pharmacy-branches.repository.ts:119` |
+| `pharmacy.pharmacies` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranchAvailability → PublicPharmacyBranchesService.availability → PublicPharmacyBranchesRepository.findInStockMatches | `src/modules/public/infrastructure/repositories/public-pharmacy-branches.repository.ts:122` |
+| `pharmacy.pharmacy_price_lists` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranchAvailability → PublicPharmacyBranchesService.availability → PublicPharmacyBranchesRepository.findInStockMatches | `src/modules/public/infrastructure/repositories/public-pharmacy-branches.repository.ts:122` |
+| `pharmacy.pharmacy_product_prices` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranchAvailability → PublicPharmacyBranchesService.availability → PublicPharmacyBranchesRepository.findInStockMatches | `src/modules/public/infrastructure/repositories/public-pharmacy-branches.repository.ts:122` |
+| `pharmacy.pharmacy_products` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranchAvailability → PublicPharmacyBranchesService.availability → PublicPharmacyBranchesRepository.findInStockMatches | `src/modules/public/infrastructure/repositories/public-pharmacy-branches.repository.ts:122` |
 | `pharmacy.pharmacy_sites` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranchAvailability → PublicPharmacyBranchesService.availability → PublicPharmacyBranchesService.loadBranchesWithTenant → PublicPharmacyBranchesRepository.findPublicSites | `src/modules/public/infrastructure/repositories/public-pharmacy-branches.repository.ts:52` |
 | `practice.practice_sites` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranchAvailability → PublicPharmacyBranchesService.availability → PublicPharmacyBranchesService.loadBranchesWithTenant → PublicPharmacyBranchesRepository.findPublicSites | `src/modules/public/infrastructure/repositories/public-pharmacy-branches.repository.ts:52` |
-| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranchAvailability → PublicPharmacyBranchesService.availability → PublicPharmacyBranchesRepository.findInStockMatches | `src/modules/public/infrastructure/repositories/public-pharmacy-branches.repository.ts:119` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranchAvailability → PublicPharmacyBranchesService.availability → PublicPharmacyBranchesRepository.findInStockMatches | `src/modules/public/infrastructure/repositories/public-pharmacy-branches.repository.ts:122` |
 
 ### Parámetros
 
@@ -193,7 +191,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `common.addresses` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranches → PublicPharmacyBranchesService.branches → PublicPharmacyBranchesService.loadBranchesWithTenant → PublicPharmacyBranchesRepository.findPublicSites | `src/modules/public/infrastructure/repositories/public-pharmacy-branches.repository.ts:52` |
-| `community.public_profiles` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranches → PublicPharmacyBranchesService.branches → PublicPharmacyBranchesService.loadBranchesWithTenant → PublicCatalogRepository.findVisibleProfileBySlug | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:79` |
+| `community.public_profiles` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranches → PublicPharmacyBranchesService.branches → PublicPharmacyBranchesService.loadBranchesWithTenant → PublicCatalogRepository.findVisibleProfileBySlug | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:77` |
 | `directory.branches` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranches → PublicPharmacyBranchesService.branches → PublicPharmacyBranchesService.loadBranchesWithTenant → PublicPharmacyBranchesRepository.findPublicSites | `src/modules/public/infrastructure/repositories/public-pharmacy-branches.repository.ts:52` |
 | `pharmacy.pharmacies` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranches → PublicPharmacyBranchesService.branches → PublicPharmacyBranchesService.loadBranchesWithTenant → PublicPharmacyBranchesRepository.findPublicSites | `src/modules/public/infrastructure/repositories/public-pharmacy-branches.repository.ts:52` |
 | `pharmacy.pharmacy_sites` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyBranches → PublicPharmacyBranchesService.branches → PublicPharmacyBranchesService.loadBranchesWithTenant → PublicPharmacyBranchesRepository.findPublicSites | `src/modules/public/infrastructure/repositories/public-pharmacy-branches.repository.ts:52` |
@@ -271,7 +269,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /public/profiles/f/{slug}/products` la atiende `PublicCatalogController.pharmacyProducts` (src/modules/public/presentation/controllers/public-catalog.controller.ts:62). Es una ruta pública: no exige token. Delega en `PublicCatalogService.pharmacyProducts`. Lee community.public_profiles, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_price_lists, pharmacy.pharmacy_product_prices, pharmacy.pharmacy_products, pharmacy.pharmacy_sites y 1 más.
+`GET /public/profiles/f/{slug}/products` la atiende `PublicCatalogController.pharmacyProducts` (src/modules/public/presentation/controllers/public-catalog.controller.ts:62). Es una ruta pública: no exige token. Delega en `PublicCatalogService.pharmacyProducts`. Lee community.public_profiles, pharmacy.pharmacies, pharmacy.pharmacy_price_lists, pharmacy.pharmacy_product_prices, pharmacy.pharmacy_products, terminology.catalog_concepts.
 
 ### Requerimientos
 
@@ -284,15 +282,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.public_profiles` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyProducts → PublicCatalogService.pharmacyProducts → PublicCatalogService.typeProfile → PublicCatalogRepository.findVisibleProfileBySlug | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:79` |
-| `pharmacy_inventory.inventory_locations` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyProducts → PublicCatalogService.pharmacyProducts → PublicCatalogRepository.findPharmacyProducts | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:161` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyProducts → PublicCatalogService.pharmacyProducts → PublicCatalogRepository.findPharmacyProducts | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:161` |
-| `pharmacy.pharmacies` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyProducts → PublicCatalogService.pharmacyProducts → PublicCatalogRepository.findPharmacyProducts | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:161` |
-| `pharmacy.pharmacy_price_lists` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyProducts → PublicCatalogService.pharmacyProducts → PublicCatalogRepository.findPharmacyProducts | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:161` |
-| `pharmacy.pharmacy_product_prices` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyProducts → PublicCatalogService.pharmacyProducts → PublicCatalogRepository.findPharmacyProducts | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:161` |
-| `pharmacy.pharmacy_products` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyProducts → PublicCatalogService.pharmacyProducts → PublicCatalogRepository.findPharmacyProducts | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:161` |
-| `pharmacy.pharmacy_sites` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyProducts → PublicCatalogService.pharmacyProducts → PublicCatalogRepository.findPharmacyProducts | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:161` |
-| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyProducts → PublicCatalogService.pharmacyProducts → PublicCatalogRepository.findPharmacyProducts | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:161` |
+| `community.public_profiles` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyProducts → PublicCatalogService.pharmacyProducts → PublicCatalogService.typeProfile → PublicCatalogRepository.findVisibleProfileBySlug | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:77` |
+| `pharmacy.pharmacies` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyProducts → PublicCatalogService.pharmacyProducts → PublicCatalogRepository.findPharmacyProducts | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:160` |
+| `pharmacy.pharmacy_price_lists` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyProducts → PublicCatalogService.pharmacyProducts → PublicCatalogRepository.findPharmacyProducts | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:160` |
+| `pharmacy.pharmacy_product_prices` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyProducts → PublicCatalogService.pharmacyProducts → PublicCatalogRepository.findPharmacyProducts | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:160` |
+| `pharmacy.pharmacy_products` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyProducts → PublicCatalogService.pharmacyProducts → PublicCatalogRepository.findPharmacyProducts | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:160` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | PublicCatalogController.pharmacyProducts → PublicCatalogService.pharmacyProducts → PublicCatalogRepository.findPharmacyProducts | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:160` |
 
 ### Parámetros
 
@@ -375,10 +370,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.service_catalog` | LEE | LEE | POR_SQL | PublicCatalogController.organizationServices → PublicCatalogService.organizationServices → PublicCatalogRepository.findOfferedServices | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:110` |
-| `community.public_profiles` | LEE | LEE | POR_SQL | PublicCatalogController.organizationServices → PublicCatalogService.organizationServices → PublicCatalogService.typeProfile → PublicCatalogRepository.findVisibleProfileBySlug | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:79` |
-| `practice.practices` | LEE | LEE | POR_SQL | PublicCatalogController.organizationServices → PublicCatalogService.organizationServices → PublicCatalogRepository.findOfferedServices | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:110` |
-| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | PublicCatalogController.organizationServices → PublicCatalogService.organizationServices → PublicCatalogRepository.findOfferedServices | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:110` |
+| `billing.service_catalog` | LEE | LEE | POR_SQL | PublicCatalogController.organizationServices → PublicCatalogService.organizationServices → PublicCatalogRepository.findOfferedServices | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:108` |
+| `community.public_profiles` | LEE | LEE | POR_SQL | PublicCatalogController.organizationServices → PublicCatalogService.organizationServices → PublicCatalogService.typeProfile → PublicCatalogRepository.findVisibleProfileBySlug | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:77` |
+| `practice.practices` | LEE | LEE | POR_SQL | PublicCatalogController.organizationServices → PublicCatalogService.organizationServices → PublicCatalogRepository.findOfferedServices | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:108` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | PublicCatalogController.organizationServices → PublicCatalogService.organizationServices → PublicCatalogRepository.findOfferedServices | `src/modules/public/infrastructure/repositories/public-catalog.repository.ts:108` |
 
 ### Parámetros
 

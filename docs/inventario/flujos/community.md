@@ -3,12 +3,12 @@
 # Flujos del módulo `community`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 102 (90 con decisiones propias, 12 sin ellas)
+- **Operaciones:** 103 (91 con decisiones propias, 12 sin ellas)
 - Inventario de endpoints del módulo: [community](../endpoints/community.md)
 
 ## Proceso: Módulo Community (19)
 
-- **Código:** `community` · **Agrupación:** MIXTO · **Operaciones:** 102
+- **Código:** `community` · **Agrupación:** MIXTO · **Operaciones:** 103
 - **Actores:** Cualquier sesión válida · PATIENT · Público (sin sesión) · SEARCH_ADMIN · SECURITY_ADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/community/README.md`
@@ -124,7 +124,8 @@ _Fuente: `src/modules/community/README.md:3`_
 |  |  | PUT /community/ratings | Cualquier sesión válida | ALTO | 9 |
 |  |  | GET /community/ratings/mine | Cualquier sesión válida | BAJO | 2 |
 |  |  | GET /community/ratings/summary | Cualquier sesión válida | BAJO | 2 |
-| `ctrl:PatientReviewsController` | Operaciones de PatientReviewsController que el README no asigna a un caso de uso | POST /patients/me/reviews | PATIENT | MEDIO | 6 |
+| `ctrl:PatientReviewsController` | Operaciones de PatientReviewsController que el README no asigna a un caso de uso | GET /patients/me/reviewable-care | PATIENT | BAJO | 4 |
+|  |  | POST /patients/me/reviews | PATIENT | MEDIO | 6 |
 
 ### Diagrama 1 de 5 — etapas `UC-19-01`, `UC-19-02`, `UC-19-03`…
 
@@ -1008,8 +1009,9 @@ flowchart LR
   t6[("clinical.encounter_participants")]:::tabla
   t7[("clinical.encounters")]:::tabla
   t13[("community.public_profiles")]:::tabla
-  t14[("community.review_dimension_scores")]:::tabla
-  t15[("community.service_reviews")]:::tabla
+  t14[("community.service_reviews")]:::tabla
+  t15[("scheduling.appointment_bookings")]:::tabla
+  t17[("community.review_dimension_scores")]:::tabla
   t8[("+3 tablas más")]
   subgraph s0["ctrl:PartyRatingsController · Operaciones de PartyRatingsController que el READ…"]
     o1["GET /community/ratings"]:::op
@@ -1018,7 +1020,8 @@ flowchart LR
     o10["GET /community/ratings/summary"]:::op
   end
   subgraph s1["ctrl:PatientReviewsController · Operaciones de PatientReviewsController que el…"]
-    o11["POST /patients/me/reviews"]:::op
+    o11["GET /patients/me/reviewable-care"]:::op
+    o16["POST /patients/me/reviews"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -1038,12 +1041,17 @@ flowchart LR
   o10 -->|"LEE"| t3
   o10 -->|"LEE"| t4
   a12 --> o11
-  o11 -->|"LEE"| t6
   o11 -->|"LEE"| t7
   o11 -->|"LEE"| t13
-  o11 -->|"CREA"| t14
-  o11 -->|"CREA"| t15
+  o11 -->|"LEE"| t14
   o11 -->|"LEE"| t15
+  a12 --> o16
+  o16 -->|"LEE"| t6
+  o16 -->|"LEE"| t7
+  o16 -->|"LEE"| t13
+  o16 -->|"CREA"| t17
+  o16 -->|"CREA"| t14
+  o16 -->|"LEE"| t14
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -5097,24 +5105,34 @@ flowchart TD
   n6 -->|"sí"| n7
   n8["Llama a CommunityReviewsReadService.projectPage"]:::llamada
   n6 -->|"no"| n8
-  n9["Llama a ReviewsRepository.listByTargetPage"]:::llamada
+  n9["Llama a CommunityReviewsReadService.resolveCursor"]:::llamada
   n8 --> n9
-  n10[("LEE community.service_reviews")]:::efecto
+  n10["Llama a ReviewsRepository.findById"]:::llamada
   n9 --> n10
-  n11["Llama a ReviewsRepository.listDimensionScores"]:::llamada
+  n11[("LEE community.service_reviews")]:::efecto
   n10 --> n11
-  n12[("LEE community.review_dimension_scores")]:::efecto
+  n12{"!anchor || anchor.targetPublicProfileId !== profileId"}:::decision
   n11 --> n12
-  n13["Llama a ReviewsRepository.listResponses"]:::llamada
-  n12 --> n13
-  n14[("LEE community.review_responses")]:::efecto
-  n13 --> n14
-  n15["Llama a ReviewsRepository.displayNamesByPerson"]:::llamada
+  n13(["↩ (relanza el error capturado)"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a ReviewsRepository.listByTargetPage"]:::llamada
+  n12 -->|"no"| n14
+  n15[("LEE community.service_reviews")]:::efecto
   n14 --> n15
-  n16[("LEE profiles.persons")]:::efecto
+  n16["Llama a ReviewsRepository.listDimensionScores"]:::llamada
   n15 --> n16
-  n17(("200 Responde con éxito")):::ok
+  n17[("LEE community.review_dimension_scores")]:::efecto
   n16 --> n17
+  n18["Llama a ReviewsRepository.listResponses"]:::llamada
+  n17 --> n18
+  n19[("LEE community.review_responses")]:::efecto
+  n18 --> n19
+  n20["Llama a ReviewsRepository.displayNamesByPerson"]:::llamada
+  n19 --> n20
+  n21[("LEE profiles.persons")]:::efecto
+  n20 --> n21
+  n22(("200 Responde con éxito")):::ok
+  n21 --> n22
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -6758,7 +6776,63 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 75. POST /patients/me/reviews
+#### 75. GET /patients/me/reviewable-care
+
+Consultar si una atención recibida se puede calificar
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo un paciente puede consultar sus atenciones |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Atención no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a CommunityReviewableCareService.getReviewableCare"]:::llamada
+  n2 --> n3
+  n4{"!patientProfileId"}:::decision
+  n3 --> n4
+  n5(["403 FORBIDDEN Sólo un paciente puede consultar sus atenciones"]):::error
+  n4 -->|"sí"| n5
+  n6[("LEE scheduling.appointment_bookings")]:::efecto
+  n4 -->|"no"| n6
+  n7{"!booking || booking.patientProfileId !== patientProfileId || booking.tenantId !== tenantId"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Atención no encontrada"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a EncountersRepository.findLatestIdsByAppointmentIds"]:::llamada
+  n7 -->|"no"| n9
+  n10[("LEE clinical.encounters")]:::efecto
+  n9 --> n10
+  n11["Llama a EncountersRepository.findById"]:::llamada
+  n10 --> n11
+  n12[("LEE clinical.encounters")]:::efecto
+  n11 --> n12
+  n13["Llama a PublicProfilesRepository.findByTarget"]:::llamada
+  n12 --> n13
+  n14[("LEE community.public_profiles")]:::efecto
+  n13 --> n14
+  n15["Llama a ReviewsRepository.findByReviewerEncounter"]:::llamada
+  n14 --> n15
+  n16[("LEE community.service_reviews")]:::efecto
+  n15 --> n16
+  n17(("200 Responde con éxito")):::ok
+  n16 --> n17
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 76. POST /patients/me/reviews
 
 Calificar una atención recibida
 
@@ -6867,7 +6941,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 76. GET /public/comments/{commentId}/replies
+#### 77. GET /public/comments/{commentId}/replies
 
 Respuestas de un comentario público
 
@@ -6924,7 +6998,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 77. GET /public/media/{id}
+#### 78. GET /public/media/{id}
 
 Servir una imagen pública (avatar, portada o post)
 
@@ -7051,7 +7125,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 78. GET /public/nearby
+#### 79. GET /public/nearby
 
 Prestadores cercanos, en línea recta
 
@@ -7164,7 +7238,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 79. GET /public/posts/{postId}/comments
+#### 80. GET /public/posts/{postId}/comments
 
 Comentarios raíz de una publicación pública
 
@@ -7213,7 +7287,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 80. GET /public/posts/{postId}/reactions
+#### 81. GET /public/posts/{postId}/reactions
 
 Quiénes reaccionaron a una publicación pública
 
@@ -7256,7 +7330,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 81. GET /public/profiles/{prefijo}/{slug}
+#### 82. GET /public/profiles/{prefijo}/{slug}
 
 Ficha pública por prefijo de vertical
 
@@ -7334,7 +7408,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 82. GET /public/profiles/{prefijo}/{slug}/reviews
+#### 83. GET /public/profiles/{prefijo}/{slug}/reviews
 
 Opiniones publicadas de una ficha pública
 
@@ -7367,28 +7441,38 @@ flowchart TD
   n8 -->|"sí"| n9
   n10["Llama a CommunityReviewsReadService.projectPage"]:::llamada
   n8 -->|"no"| n10
-  n11["Llama a ReviewsRepository.listByTargetPage"]:::llamada
+  n11["Llama a CommunityReviewsReadService.resolveCursor"]:::llamada
   n10 --> n11
-  n12[("LEE community.service_reviews")]:::efecto
+  n12["Llama a ReviewsRepository.findById"]:::llamada
   n11 --> n12
-  n13["Llama a ReviewsRepository.listDimensionScores"]:::llamada
+  n13[("LEE community.service_reviews")]:::efecto
   n12 --> n13
-  n14[("LEE community.review_dimension_scores")]:::efecto
+  n14{"!anchor || anchor.targetPublicProfileId !== profileId"}:::decision
   n13 --> n14
-  n15["Llama a ReviewsRepository.listResponses"]:::llamada
-  n14 --> n15
-  n16[("LEE community.review_responses")]:::efecto
-  n15 --> n16
-  n17["Llama a ReviewsRepository.displayNamesByPerson"]:::llamada
+  n15(["↩ (relanza el error capturado)"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a ReviewsRepository.listByTargetPage"]:::llamada
+  n14 -->|"no"| n16
+  n17[("LEE community.service_reviews")]:::efecto
   n16 --> n17
-  n18[("LEE profiles.persons")]:::efecto
+  n18["Llama a ReviewsRepository.listDimensionScores"]:::llamada
   n17 --> n18
-  n19["Llama a PublicSearchRepository.ratingsByProfile"]:::llamada
+  n19[("LEE community.review_dimension_scores")]:::efecto
   n18 --> n19
-  n20[("LEE community.service_reviews")]:::efecto
+  n20["Llama a ReviewsRepository.listResponses"]:::llamada
   n19 --> n20
-  n21(("200 Responde con éxito")):::ok
+  n21[("LEE community.review_responses")]:::efecto
   n20 --> n21
+  n22["Llama a ReviewsRepository.displayNamesByPerson"]:::llamada
+  n21 --> n22
+  n23[("LEE profiles.persons")]:::efecto
+  n22 --> n23
+  n24["Llama a PublicSearchRepository.ratingsByProfile"]:::llamada
+  n23 --> n24
+  n25[("LEE community.service_reviews")]:::efecto
+  n24 --> n25
+  n26(("200 Responde con éxito")):::ok
+  n25 --> n26
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -7397,7 +7481,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 83. GET /public/search
+#### 84. GET /public/search
 
 Buscador público unificado
 
@@ -7569,7 +7653,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 84. GET /public/search/diagnostic-units
+#### 85. GET /public/search/diagnostic-units
 
 Laboratorios y centros de diagnóstico
 
@@ -7741,7 +7825,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 85. GET /public/search/insurers
+#### 86. GET /public/search/insurers
 
 Aseguradoras en el directorio público
 
@@ -7913,7 +7997,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 86. GET /public/search/medications
+#### 87. GET /public/search/medications
 
 Medicamentos ofertados públicamente
 
@@ -8085,7 +8169,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 87. GET /public/search/organizations
+#### 88. GET /public/search/organizations
 
 Organizaciones en el directorio público
 
@@ -8257,7 +8341,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 88. GET /public/search/pharmacies
+#### 89. GET /public/search/pharmacies
 
 Farmacias en el directorio público
 
@@ -8429,7 +8513,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 89. GET /public/search/practitioners
+#### 90. GET /public/search/practitioners
 
 Profesionales en el directorio público
 
@@ -8601,7 +8685,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 90. GET /s/{slug}
+#### 91. GET /s/{slug}
 
 Ficha pública de una aseguradora
 

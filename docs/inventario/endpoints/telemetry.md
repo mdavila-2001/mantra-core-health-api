@@ -196,7 +196,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryOnboardingAnalyticsController.getFunnelReport` — `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:42`
+- **Implementación:** `TelemetryOnboardingAnalyticsController.getFunnelReport` — `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:138`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -206,14 +206,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/analytics/onboarding/funnel` la atiende `TelemetryOnboardingAnalyticsController.getFunnelReport` (src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:42). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryOnboardingAnalyticsService.getFunnelReport`. No toca tablas relacionales: Calcula el embudo sobre los eventos de alta que el proceso acumula en memoria (`events`); no consulta la base de datos..
+`GET /admin/analytics/onboarding/funnel` la atiende `TelemetryOnboardingAnalyticsController.getFunnelReport` (src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:138). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryOnboardingAnalyticsService.getFunnelReport`. No toca tablas relacionales: Calcula el embudo sobre los eventos de alta que el proceso acumula en memoria (`events`); no consulta la base de datos..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:42` |
+| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:138` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
@@ -244,7 +244,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.spec.ts:30` |
+| CONTROLADOR | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.spec.ts:34` |
 
 ### Flujos
 
@@ -259,7 +259,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryOnboardingAnalyticsController.getHeatmapReport` — `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:56`
+- **Implementación:** `TelemetryOnboardingAnalyticsController.getHeatmapReport` — `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:152`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -269,14 +269,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/analytics/onboarding/heatmap` la atiende `TelemetryOnboardingAnalyticsController.getHeatmapReport` (src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:56). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryOnboardingAnalyticsService.getHeatmapReport`. No toca tablas relacionales: Calcula el mapa de calor sobre los eventos de alta que el proceso acumula en memoria (`events`); no consulta la base de datos..
+`GET /admin/analytics/onboarding/heatmap` la atiende `TelemetryOnboardingAnalyticsController.getHeatmapReport` (src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:152). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryOnboardingAnalyticsService.getHeatmapReport`. No toca tablas relacionales: Calcula el mapa de calor sobre los eventos de alta que el proceso acumula en memoria (`events`); no consulta la base de datos..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:56` |
+| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:152` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_QUERY | metric (obligatorio) | `contrato (parameters)` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
@@ -315,7 +315,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.spec.ts:39` |
+| CONTROLADOR | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.spec.ts:43` |
 
 ### Flujos
 
@@ -1718,7 +1718,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryOnboardingAnalyticsController.recordEvents` — `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:27`
+- **Implementación:** `TelemetryOnboardingAnalyticsController.recordEvents` — `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:123`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1728,13 +1728,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /telemetry/onboarding-events` la atiende `TelemetryOnboardingAnalyticsController.recordEvents` (src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:27). Es una ruta pública: no exige token. Valida el cuerpo como `IngestOnboardingEventsDto` (0 campos, 0 obligatorios). Delega en `TelemetryOnboardingAnalyticsService.recordEvents`. No toca tablas relacionales: Los eventos del embudo de alta se acumulan sólo en la memoria del proceso (`events`); no hay fila en Postgres..
+`POST /telemetry/onboarding-events` la atiende `TelemetryOnboardingAnalyticsController.recordEvents` (src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:123). Es una ruta pública: no exige token. Valida el cuerpo como `IngestOnboardingEventsDto` (11 campos, 6 obligatorios). Delega en `TelemetryOnboardingAnalyticsService.recordEvents`. No toca tablas relacionales: Los eventos del embudo de alta se acumulan sólo en la memoria del proceso (`events`); no hay fila en Postgres..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
-| AUTENTICACION | Ruta pública: no exige token | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:27` |
+| AUTENTICACION | Ruta pública: no exige token | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:123` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
@@ -1745,13 +1745,58 @@ No toca tablas relacionales: Los eventos del embudo de alta se acumulan sólo en
 
 ### Cuerpo — DTO `IngestOnboardingEventsDto` · `application/json`
 
-_El DTO no declara campos documentables, o no se pudo leer._
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `events` | `array<OnboardingEventDto>` | Sí | máximo 200 elemento(s) | `@IsArray()` `@ArrayMaxSize(200)` `@ValidateNested({ each: true })` `@Type(() => OnboardingEventDto)` | — | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:115` |
+| `events[].eventType` | `string` | Sí | valores: start, step_view, field_interaction, field_error, abandon, complete | `@IsIn(ONBOARDING_EVENT_TYPES)` | — | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:57` |
+| `events[].formType` | `string` | Sí | longitud máxima 40 | `@IsString()` `@MaxLength(40)` | — | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:62` |
+| `events[].draftId` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | — | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:67` |
+| `events[].stepIndex` | `number` | Sí | mínimo 0; máximo 100 | `@IsInt()` `@Min(0)` `@Max(100)` | — | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:73` |
+| `events[].stepKey` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:79` |
+| `events[].fieldKey` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:85` |
+| `events[].interactionType` | `string` | No | valores: focus, blur, change, error | `@IsOptional()` `@IsIn(ONBOARDING_INTERACTION_TYPES)` | — | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:90` |
+| `events[].errorCategory` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:96` |
+| `events[].durationMs` | `number` | No | mínimo 0 | `@IsOptional()` `@IsInt()` `@Min(0)` | — | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:102` |
+| `events[].timestamp` | `string` | Sí | — | `@IsISO8601()` | — | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:106` |
 
 **Payload mínimo** (sólo los obligatorios):
 
 ```json
-{}
+{
+  "events": [
+    {
+      "eventType": "start",
+      "formType": "valor-ejemplo",
+      "draftId": "00000000-0000-4000-8000-000000000001",
+      "stepIndex": 1,
+      "timestamp": "valor-ejemplo"
+    }
+  ]
+}
 ```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "events": [
+    {
+      "eventType": "start",
+      "formType": "valor-ejemplo",
+      "draftId": "00000000-0000-4000-8000-000000000001",
+      "stepIndex": 1,
+      "stepKey": "valor-ejemplo",
+      "fieldKey": "valor-ejemplo",
+      "interactionType": "focus",
+      "errorCategory": "valor-ejemplo",
+      "durationMs": 1,
+      "timestamp": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+</details>
 
 ### Respuesta — `{ ok: boolean }` · HTTP `HttpStatus.OK`
 
@@ -1772,7 +1817,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.spec.ts:14` |
+| CONTROLADOR | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.spec.ts:18` |
 
 ### Flujos
 
