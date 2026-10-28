@@ -166,6 +166,14 @@ export const TARGET_TYPE_BY_CODE: Record<TargetTypeCode, string> = {
   CARE_TYPE: SURVEYS.TARGET_CARE_TYPE,
 };
 
+/** Inverso de `TARGET_TYPE_BY_CODE`: concept id → código del contrato. */
+export const TARGET_TYPE_CODE_BY_ID: Readonly<Record<string, TargetTypeCode>> =
+  Object.freeze({
+    [SURVEYS.TARGET_APPOINTMENT]: 'APPOINTMENT',
+    [SURVEYS.TARGET_SERVICE]: 'SERVICE',
+    [SURVEYS.TARGET_CARE_TYPE]: 'CARE_TYPE',
+  });
+
 /** Códigos de destino admitidos en el contrato HTTP. */
 export type TargetTypeCode = 'APPOINTMENT' | 'SERVICE' | 'CARE_TYPE';
 

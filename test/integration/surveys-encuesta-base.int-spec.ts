@@ -113,7 +113,13 @@ describeIfDb(
       );
       return {
         system,
-        templates: new SurveysTemplatesService(em, templatesRepo, silent),
+        templates: new SurveysTemplatesService(
+          em,
+          templatesRepo,
+          silent,
+          assignmentsRepo,
+          targetsRepo,
+        ),
         assignments: new SurveysAssignmentsService(
           em,
           assignmentsRepo,
@@ -532,6 +538,24 @@ describeIfDb(
         expect(targets.map((t) => t.target_id).sort()).toEqual(
           [ids.catalog, SURVEYS.CARE_TYPE_CONSULTATION].sort(),
         );
+
+        // El detalle de la plantilla dice a qué está asociada, con el nombre del servicio.
+        const detail = await inTenant(() =>
+          services().templates.getTemplate(template.id, doctorActor),
+        );
+        const byType = new Map(
+          detail.assignments!.map((a) => [a.targetType, a]),
+        );
+        expect(byType.get('SERVICE')).toMatchObject({
+          targetId: ids.catalog,
+          targetName: 'LAB-01',
+          active: true,
+        });
+        expect(byType.get('CARE_TYPE')).toMatchObject({
+          targetId: SURVEYS.CARE_TYPE_CONSULTATION,
+          targetName: null,
+        });
+        expect(detail.assignments).toHaveLength(2);
       });
 
       it('rechaza destinos que no existen, son de otra organización o no ofrece', async () => {

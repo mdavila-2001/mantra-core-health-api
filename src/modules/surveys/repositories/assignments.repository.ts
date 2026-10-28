@@ -98,6 +98,26 @@ export class AssignmentsRepository {
   }
 
   /**
+   * Lista las asignaciones ACTIVAS de las versiones indicadas, de la más antigua
+   * a la más reciente.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param surveyVersionIds - Identificadores de versión.
+   * @returns Resultado conforme al contrato `Promise<SurveyAssignments[]>`.
+   */
+  listActiveByVersions(
+    em: EntityManager,
+    surveyVersionIds: string[],
+  ): Promise<SurveyAssignments[]> {
+    if (surveyVersionIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      SurveyAssignments,
+      { surveyVersionId: { $in: surveyVersionIds }, active: true },
+      { orderBy: { createdAt: 'asc' } },
+    );
+  }
+
+  /**
    * Lista las asignaciones de una versión.
    *
    * @param em - Contexto de persistencia o transacción activa.

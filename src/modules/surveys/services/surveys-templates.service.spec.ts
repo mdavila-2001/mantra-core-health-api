@@ -51,14 +51,23 @@ function build() {
     findQuestionById: mockFn(),
     removeQuestion: mockFn(),
     lockTemplate: mockFn().mockResolvedValue(undefined),
+    listVersions: mockFn().mockResolvedValue([]),
+  };
+  const assignmentsRepo = {
+    listActiveByVersions: mockFn().mockResolvedValue([]),
+  };
+  const targetsRepo = {
+    findServiceNames: mockFn().mockResolvedValue(new Map()),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new SurveysTemplatesService(
     em as any,
     templatesRepo as any,
     logger as any,
+    assignmentsRepo as any,
+    targetsRepo as any,
   );
-  return { service, tx, templatesRepo };
+  return { service, tx, templatesRepo, assignmentsRepo, targetsRepo };
 }
 
 /** Plantilla del profesional dueño, en el tenant de la prueba. */
@@ -945,5 +954,149 @@ describe('SurveysTemplatesService · la encuesta base es del sistema y las pregu
         withTenant(() => d.service.getTemplate('tpl-1', actor)),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
+  });
+});
+
+describe('SurveysTemplatesService · a qué está asociada la encuesta (getTemplate.assignments)', () => {
+  /** Una asignación activa de una versión de `tpl-1`. */
+  const assignment = (
+    id: string,
+    surveyVersionId: string,
+    type: string,
+    targetId: string,
+  ) => ({
+    id,
+    surveyVersionId,
+    targetTypeConceptId: type,
+    targetId,
+    active: true,
+  });
+
+  /** Plantilla con versiones 1 y 2 y la última versión cargada. */
+  function ready() {
+    const d = build();
+    d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
+    d.templatesRepo.findLatestVersion.mockResolvedValue(
+      draft({
+        id: 'ver-2',
+        versionNumber: 2,
+        publicationStatusConceptId: SURVEYS.VERSION_PUBLISHED,
+      }),
+    );
+    d.templatesRepo.listVersions.mockResolvedValue([
+      draft({ id: 'ver-1', versionNumber: 1 }),
+      draft({ id: 'ver-2', versionNumber: 2 }),
+    ]);
+    return d;
+  }
+
+  it('el id de «todas mis consultas» es el que el front envía', () => {
+    expect(SURVEYS.CARE_TYPE_CONSULTATION).toBe(
+      'a0038828-6e68-55c5-aa59-d4c747035db6',
+    );
+  });
+
+  it('informa las asignaciones activas con el nombre del servicio sólo en SERVICE', async () => {
+    const d = ready();
+    d.assignmentsRepo.listActiveByVersions.mockResolvedValue([
+      assignment('a-svc', 'ver-2', SURVEYS.TARGET_SERVICE, 'cat-1'),
+      assignment(
+        'a-care',
+        'ver-2',
+        SURVEYS.TARGET_CARE_TYPE,
+        SURVEYS.CARE_TYPE_CONSULTATION,
+      ),
+      assignment('a-appt', 'ver-2', SURVEYS.TARGET_APPOINTMENT, 'bkg-1'),
+    ]);
+    d.targetsRepo.findServiceNames.mockResolvedValue(
+      new Map([['cat-1', 'Laboratorio']]),
+    );
+
+    const res = await withTenant(() => d.service.getTemplate('tpl-1', actor));
+
+    expect(res.assignments).toEqual([
+      {
+        id: 'a-svc',
+        targetType: 'SERVICE',
+        targetId: 'cat-1',
+        targetName: 'Laboratorio',
+        active: true,
+      },
+      {
+        id: 'a-care',
+        targetType: 'CARE_TYPE',
+        targetId: SURVEYS.CARE_TYPE_CONSULTATION,
+        targetName: null,
+        active: true,
+      },
+      {
+        id: 'a-appt',
+        targetType: 'APPOINTMENT',
+        targetId: 'bkg-1',
+        targetName: null,
+        active: true,
+      },
+    ]);
+    expect(d.targetsRepo.findServiceNames).toHaveBeenCalledWith(
+      expect.anything(),
+      ['cat-1'],
+    );
+  });
+
+  it('busca las de todas las versiones de la plantilla, y sólo las activas', async () => {
+    const d = ready();
+
+    await withTenant(() => d.service.getTemplate('tpl-1', actor));
+
+    expect(d.assignmentsRepo.listActiveByVersions).toHaveBeenCalledWith(
+      expect.anything(),
+      ['ver-1', 'ver-2'],
+    );
+  });
+
+  it('la misma cosa asociada a dos versiones se informa una vez, con la versión más alta', async () => {
+    const d = ready();
+    d.assignmentsRepo.listActiveByVersions.mockResolvedValue([
+      assignment('a-v1', 'ver-1', SURVEYS.TARGET_SERVICE, 'cat-1'),
+      assignment('a-v2', 'ver-2', SURVEYS.TARGET_SERVICE, 'cat-1'),
+    ]);
+
+    const res = await withTenant(() => d.service.getTemplate('tpl-1', actor));
+
+    expect(res.assignments?.map((a) => a.id)).toEqual(['a-v2']);
+  });
+
+  it('una plantilla sin asociaciones devuelve una lista vacía', async () => {
+    const d = ready();
+
+    const res = await withTenant(() => d.service.getTemplate('tpl-1', actor));
+
+    expect(res.assignments).toEqual([]);
+  });
+
+  it('un servicio que ya no está en el catálogo sale con targetName nulo', async () => {
+    const d = ready();
+    d.assignmentsRepo.listActiveByVersions.mockResolvedValue([
+      assignment('a-svc', 'ver-2', SURVEYS.TARGET_SERVICE, 'cat-borrado'),
+    ]);
+
+    const res = await withTenant(() => d.service.getTemplate('tpl-1', actor));
+
+    expect(res.assignments?.[0].targetName).toBeNull();
+  });
+
+  it('la plantilla de sistema no se lee (404): nunca expone asignaciones', async () => {
+    const d = ready();
+    d.templatesRepo.findTemplateById.mockResolvedValue(
+      ownedTemplate({
+        ownerPractitionerId: undefined,
+        ownerTypeConceptId: SURVEYS.SYSTEM_BASE_CONSULTATION,
+      }),
+    );
+
+    await expect(
+      withTenant(() => d.service.getTemplate('tpl-1', actor)),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    expect(d.assignmentsRepo.listActiveByVersions).not.toHaveBeenCalled();
   });
 });
