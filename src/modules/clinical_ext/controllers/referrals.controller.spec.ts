@@ -20,6 +20,7 @@ function build() {
     create: mockFn(),
     respond: mockFn(),
     listMine: mockFn(),
+    listByPatient: mockFn(),
     get: mockFn(),
     counterReferral: mockFn(),
     cancel: mockFn(),
@@ -41,6 +42,12 @@ describe('ReferralsController', () => {
     const dto = { decision: 'ACCEPT' };
     await d.controller.respond('ref1', dto as any, actor);
     expect(d.referralsService.respond).toHaveBeenCalledWith('ref1', dto, actor);
+  });
+
+  it('delegates listByPatient with the actor (authz en el servicio)', async () => {
+    const d = build();
+    await d.controller.listByPatient('p1', actor);
+    expect(d.referralsService.listByPatient).toHaveBeenCalledWith('p1', actor);
   });
 
   it('delegates get, counter-referral and cancel (v4263)', async () => {

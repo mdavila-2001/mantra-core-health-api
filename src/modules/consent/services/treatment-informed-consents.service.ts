@@ -199,8 +199,9 @@ export class TreatmentInformedConsentsService {
     );
     this.assertContentRules(dto);
     return this.em.transactional(async (tx) => {
+      let target: ConsentTargetRow | null = null;
       if (dto.targetType && dto.targetId) {
-        await this.assertTargetOfPatient(
+        target = await this.assertTargetOfPatient(
           tx,
           dto.targetType,
           dto.targetId,
@@ -251,6 +252,13 @@ export class TreatmentInformedConsentsService {
         revocationRightInformed: dto.revocationRightInformed,
         actorUserId: actor.id,
       });
+      if (
+        dto.targetType === 'REFERRAL' &&
+        dto.decision !== 'DECLINED' &&
+        target
+      ) {
+        await this.linkReferral(tx, target as Referrals, consent.id, actor);
+      }
       await tx.flush();
 
       this.eventsRepo.record(tx, {
@@ -366,6 +374,13 @@ export class TreatmentInformedConsentsService {
       row.withdrawalReason = dto.reason;
       row.statusConceptId = CONS.TREATMENT_WITHDRAWN;
       touch(row, actor.id, now);
+      // Una derivación no puede seguir mostrándose como consentida con un
+      // consentimiento revocado: se desvincula en la misma transacción.
+      const linked = await tx.find(Referrals, { informedConsentId: row.id });
+      for (const referral of linked) {
+        referral.informedConsentId = undefined;
+        touch(referral, actor.id, now);
+      }
       await tx.flush();
 
       this.eventsRepo.record(tx, {
@@ -559,7 +574,7 @@ export class TreatmentInformedConsentsService {
     targetType: InformedConsentTargetType,
     targetId: string,
     patientProfileId: string,
-  ): Promise<void> {
+  ): Promise<ConsentTargetRow> {
     const target = await em.findOne(TARGET_ENTITIES[targetType], {
       id: targetId,
     });
@@ -577,6 +592,40 @@ export class TreatmentInformedConsentsService {
         ['targetId'],
       );
     }
+    return target;
+  }
+
+  /**
+   * Vincula la derivación consentida con este consentimiento aceptado
+   * (`referrals.informed_consent_id`). Sólo pisa un vínculo vacío o uno que
+   * ya no vale (revocado o no aceptado); uno vigente se respeta.
+   *
+   * @param em - Transacción en curso.
+   * @param referral - Derivación objeto del consentimiento.
+   * @param consentId - Consentimiento recién creado.
+   * @param actor - Quien registra.
+   */
+  private async linkReferral(
+    em: EntityManager,
+    referral: Referrals,
+    consentId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (referral.informedConsentId) {
+      const current = await this.treatmentRepo.findById(
+        em,
+        referral.informedConsentId,
+      );
+      if (
+        current &&
+        !current.withdrawnAt &&
+        current.decisionConceptId === CONS.DECISION_ACCEPTED
+      ) {
+        return;
+      }
+    }
+    referral.informedConsentId = consentId;
+    touch(referral, actor.id);
   }
 
   /**

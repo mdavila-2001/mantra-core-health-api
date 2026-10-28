@@ -16,8 +16,6 @@ import {
   PersonAccountLinksRepository,
 } from '../../profiles/infrastructure/repositories';
 import type { Referrals } from '../entities';
-import { TreatmentInformedConsents } from '../../consent/entities';
-import { CONS } from '../../consent/consent.concepts';
 import { Branches, Tenants } from '../../directory/entities';
 import { ClinicalReadService } from '../../clinical/services';
 import {
@@ -115,6 +113,20 @@ export class ReferralsService {
       'Creating referral',
     );
     assertTypedReferralRules(dto);
+    if (dto.informedConsentId) {
+      // El vínculo derivación ↔ consentimiento nace del consentimiento
+      // (`targetType='REFERRAL'`, `targetId=<derivación>`), que lo escribe en
+      // `informed_consent_id` al aceptarse. Un consentimiento que apunte a
+      // ESTA derivación no puede existir antes de crearla, y aceptar cualquier
+      // otro id permitiría colgarle a la derivación un consentimiento dado
+      // para otra cosa.
+      throw invalid(
+        ReferralErrorReason.REFERRAL_CONSENT_LINK_NOT_ALLOWED,
+        'El consentimiento se vincula registrándolo con targetType=REFERRAL sobre la derivación',
+        ['informedConsentId'],
+      );
+    }
+    await this.clinicalRead.assertCanWriteHistory(dto.patientProfileId, actor);
     return this.em.transactional(async (tx) => {
       if (
         dto.sourceEncounterId &&
@@ -143,13 +155,6 @@ export class ReferralsService {
           );
         }
       }
-      if (dto.informedConsentId) {
-        await this.assertUsableConsent(
-          tx,
-          dto.informedConsentId,
-          dto.patientProfileId,
-        );
-      }
 
       const referral = this.referralsRepo.create(tx, {
         patientProfileId: dto.patientProfileId,
@@ -173,7 +178,6 @@ export class ReferralsService {
         diagnosisText: dto.diagnosisText,
         clinicalSummary: dto.clinicalSummary,
         treatmentGivenText: dto.treatmentGivenText,
-        informedConsentId: dto.informedConsentId,
         actorUserId: actor.id,
       });
       await tx.flush();
@@ -205,6 +209,17 @@ export class ReferralsService {
     }
     return this.em.transactional(async (tx) => {
       const referral = await this.findOrFail(tx, referralId);
+      // Responder es del destino: la respuesta trae el resumen clínico, el
+      // diagnóstico y el tratamiento previo, y decidir por otro no corresponde.
+      if (!(await this.isDestination(tx, referral, actor))) {
+        throw new DomainException(
+          HttpStatus.FORBIDDEN,
+          ErrorCode.FORBIDDEN,
+          'Sólo el destino de la derivación puede responderla',
+          { referralId },
+          ReferralErrorReason.REFERRAL_RESPOND_FORBIDDEN,
+        );
+      }
       if (referral.statusConceptId !== CEXT.REFERRAL_REQUESTED) {
         throw new PreconditionFailedException(
           'La referencia no está en estado solicitado',
@@ -354,14 +369,21 @@ export class ReferralsService {
    * La cara de lectura que faltaba: se escribían y no había forma de verlas, así
    * que el expediente no podía mostrarlas.
    *
+   * Exige poder leer la historia del paciente: la respuesta lleva resumen
+   * clínico, diagnóstico y tratamiento previo.
+   *
    * @param patientProfileId - Paciente.
+   * @param actor - Usuario autenticado.
    * @param limit - Tope de filas.
    * @returns Los registros, del más reciente al más antiguo.
+   * @throws ForbiddenException si no puede leer la historia.
    */
   async listByPatient(
     patientProfileId: string,
+    actor: AuthenticatedUser,
     limit = 50,
   ): Promise<ReferralResponseDto[]> {
+    await this.clinicalRead.assertCanReadHistory(patientProfileId, actor);
     const em = this.em.fork();
     const rows = await this.referralsRepo.findByPatient(
       em,
@@ -399,52 +421,6 @@ export class ReferralsService {
     );
     const names = await this.resolveNames(em, rows);
     return rows.map((row) => toReferralResponse(row, names));
-  }
-
-  /**
-   * El consentimiento asociado existe, es del mismo paciente, fue aceptado y
-   * no está revocado.
-   *
-   * @param em - Contexto de persistencia.
-   * @param consentId - Consentimiento.
-   * @param patientProfileId - Paciente de la derivación.
-   */
-  private async assertUsableConsent(
-    em: EntityManager,
-    consentId: string,
-    patientProfileId: string,
-  ): Promise<void> {
-    const consent = await em.findOne(TreatmentInformedConsents, {
-      id: consentId,
-    });
-    if (!consent) {
-      throw new ResourceNotFoundException(
-        'Consentimiento informado no encontrado',
-        { informedConsentId: consentId },
-        ReferralErrorReason.REFERRAL_CONSENT_NOT_FOUND,
-      );
-    }
-    if (consent.patientProfileId !== patientProfileId) {
-      throw invalid(
-        ReferralErrorReason.REFERRAL_CONSENT_PATIENT_MISMATCH,
-        'El consentimiento es de otro paciente',
-        ['informedConsentId'],
-      );
-    }
-    if (consent.withdrawnAt) {
-      throw new PreconditionFailedException(
-        'El consentimiento está revocado',
-        { informedConsentId: consentId },
-        ReferralErrorReason.REFERRAL_CONSENT_WITHDRAWN,
-      );
-    }
-    if (consent.decisionConceptId !== CONS.DECISION_ACCEPTED) {
-      throw new PreconditionFailedException(
-        'El consentimiento no fue aceptado',
-        { informedConsentId: consentId },
-        ReferralErrorReason.REFERRAL_CONSENT_NOT_ACCEPTED,
-      );
-    }
   }
 
   /**

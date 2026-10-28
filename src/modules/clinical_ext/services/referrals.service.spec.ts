@@ -15,12 +15,16 @@ import {
 } from '../../../common';
 import { CEXT } from '../clinical_ext.concepts';
 import { ReferralErrorReason } from '../clinical_ext.error-reasons';
-import { CONS } from '../../consent/consent.concepts';
-import { TreatmentInformedConsents } from '../../consent/entities';
 import { Branches } from '../../directory/entities';
 import { ForbiddenException } from '@nestjs/common';
 
 const actor = { id: 'md-1', roles: ['USER'] } as any;
+/** Profesional destino de las derivaciones de `respond`. */
+const destActor = {
+  id: 'md-9',
+  roles: ['CLINICIAN'],
+  practitionerProfileId: 'hp-9',
+} as any;
 
 /** Derivación tipada mínima válida (v4263). */
 const typed = {
@@ -128,6 +132,7 @@ describe('ReferralsService', () => {
       const d = build();
       const referral = {
         id: 'ref1',
+        targetProfileId: 'hp-9',
         statusConceptId: CEXT.REFERRAL_REQUESTED,
         updatedAt: new Date(),
       };
@@ -135,7 +140,7 @@ describe('ReferralsService', () => {
       const res = await d.service.respond(
         'ref1',
         { decision: 'ACCEPT' } as any,
-        actor,
+        destActor,
       );
       expect(res).toMatchObject({ ok: true, id: 'ref1', status: 'ACCEPTED' });
       expect(referral.statusConceptId).toBe(CEXT.REFERRAL_ACCEPTED);
@@ -157,11 +162,99 @@ describe('ReferralsService', () => {
       const d = build();
       d.referralsRepo.findById.mockResolvedValue({
         id: 'ref1',
+        targetProfileId: 'hp-9',
         statusConceptId: CEXT.REFERRAL_ACCEPTED,
       });
       await expect(
-        d.service.respond('ref1', { decision: 'ACCEPT' } as any, actor),
+        d.service.respond('ref1', { decision: 'ACCEPT' } as any, destActor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('403 when the actor is not the destination (no clinical fields leak)', async () => {
+      const d = build();
+      const referral: any = {
+        id: 'ref1',
+        patientProfileId: 'p1',
+        targetProfileId: 'hp-9',
+        targetTenantId: 'ten-dest',
+        clinicalSummary: 'dato clínico',
+        statusConceptId: CEXT.REFERRAL_REQUESTED,
+      };
+      d.referralsRepo.findById.mockResolvedValue(referral);
+      await expectReason(
+        d.service.respond(
+          'ref1',
+          { decision: 'ACCEPT' } as any,
+          {
+            id: 'u1',
+            roles: ['CLINICIAN'],
+            practitionerProfileId: 'hp-1',
+            tenantIds: ['ten-other'],
+          } as any,
+        ),
+        403,
+        ReferralErrorReason.REFERRAL_RESPOND_FORBIDDEN,
+      );
+      expect(referral.statusConceptId).toBe(CEXT.REFERRAL_REQUESTED);
+    });
+
+    it('a member of the destination tenant may respond', async () => {
+      const d = build();
+      d.referralsRepo.findById.mockResolvedValue({
+        id: 'ref1',
+        targetTenantId: 'ten-dest',
+        statusConceptId: CEXT.REFERRAL_REQUESTED,
+      });
+      const res = await d.service.respond(
+        'ref1',
+        { decision: 'ACCEPT' } as any,
+        { id: 'u2', roles: ['CLINICIAN'], tenantIds: ['ten-dest'] } as any,
+      );
+      expect(res.status).toBe('ACCEPTED');
+    });
+
+    it('an external-only referral cannot be responded inside the platform', async () => {
+      const d = build();
+      d.referralsRepo.findById.mockResolvedValue({
+        id: 'ref1',
+        targetExternalName: 'Dr. Externo',
+        statusConceptId: CEXT.REFERRAL_REQUESTED,
+      });
+      await expectReason(
+        d.service.respond('ref1', { decision: 'ACCEPT' } as any, destActor),
+        403,
+        ReferralErrorReason.REFERRAL_RESPOND_FORBIDDEN,
+      );
+    });
+  });
+
+  describe('listByPatient', () => {
+    it('checks read access to the history before querying', async () => {
+      const d = build();
+      d.referralsRepo.findByPatient.mockResolvedValue([
+        {
+          id: 'r1',
+          patientProfileId: 'p1',
+          statusConceptId: CEXT.REFERRAL_REQUESTED,
+        },
+      ]);
+      const res = await d.service.listByPatient('p1', actor);
+      expect(d.clinicalRead.assertCanReadHistory).toHaveBeenCalledWith(
+        'p1',
+        actor,
+      );
+      expect(res[0]).toMatchObject({ id: 'r1', status: 'PENDING' });
+    });
+
+    it('does not query when access is denied', async () => {
+      const d = build();
+      d.clinicalRead.assertCanReadHistory.mockRejectedValue(
+        new ForbiddenException(),
+      );
+      await expect(d.service.listByPatient('p1', actor)).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
+      expect(d.referralsRepo.findByPatient).not.toHaveBeenCalled();
     });
   });
 
@@ -285,74 +378,30 @@ describe('ReferralsService', () => {
       expect(d.tx.findOne).toHaveBeenCalledWith(Branches, { id: 'br-x' });
     });
 
-    describe('informedConsentId', () => {
-      const consent = (over: Record<string, unknown> = {}) => ({
-        id: 'c1',
-        patientProfileId: 'p1',
-        decisionConceptId: CONS.DECISION_ACCEPTED,
-        ...over,
-      });
+    it('rejects informedConsentId: the link is written by the consent', async () => {
+      const d = build();
+      await expectReason(
+        d.service.create({ ...typed, informedConsentId: 'c1' } as any, actor),
+        400,
+        ReferralErrorReason.REFERRAL_CONSENT_LINK_NOT_ALLOWED,
+      );
+      expect(d.clinicalRead.assertCanWriteHistory).not.toHaveBeenCalled();
+      expect(d.referralsRepo.create).not.toHaveBeenCalled();
+    });
 
-      it('accepts an ACCEPTED, active consent of the same patient', async () => {
-        const d = build();
-        d.tx.findOne.mockResolvedValue(consent());
-        d.referralsRepo.create.mockImplementation((_tx: any, data: any) => ({
-          id: 'ref1',
-          createdAt: new Date(),
-          ...data,
-        }));
-        const res = await d.service.create(
-          { ...typed, informedConsentId: 'c1' } as any,
-          actor,
-        );
-        expect(d.tx.findOne).toHaveBeenCalledWith(TreatmentInformedConsents, {
-          id: 'c1',
-        });
-        expect(res.informedConsentId).toBe('c1');
-      });
-
-      it('404 when the consent does not exist', async () => {
-        const d = build();
-        d.tx.findOne.mockResolvedValue(null);
-        await expectReason(
-          d.service.create({ ...typed, informedConsentId: 'c1' } as any, actor),
-          404,
-          ReferralErrorReason.REFERRAL_CONSENT_NOT_FOUND,
-        );
-      });
-
-      it('400 when the consent is of another patient', async () => {
-        const d = build();
-        d.tx.findOne.mockResolvedValue(consent({ patientProfileId: 'p2' }));
-        await expectReason(
-          d.service.create({ ...typed, informedConsentId: 'c1' } as any, actor),
-          400,
-          ReferralErrorReason.REFERRAL_CONSENT_PATIENT_MISMATCH,
-        );
-        expect(d.referralsRepo.create).not.toHaveBeenCalled();
-      });
-
-      it('422 when the consent was declined', async () => {
-        const d = build();
-        d.tx.findOne.mockResolvedValue(
-          consent({ decisionConceptId: CONS.DECISION_DECLINED }),
-        );
-        await expectReason(
-          d.service.create({ ...typed, informedConsentId: 'c1' } as any, actor),
-          422,
-          ReferralErrorReason.REFERRAL_CONSENT_NOT_ACCEPTED,
-        );
-      });
-
-      it('422 when the consent was withdrawn', async () => {
-        const d = build();
-        d.tx.findOne.mockResolvedValue(consent({ withdrawnAt: new Date() }));
-        await expectReason(
-          d.service.create({ ...typed, informedConsentId: 'c1' } as any, actor),
-          422,
-          ReferralErrorReason.REFERRAL_CONSENT_WITHDRAWN,
-        );
-      });
+    it('requires write access to the patient history', async () => {
+      const d = build();
+      d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
+        new ForbiddenException(),
+      );
+      await expect(
+        d.service.create(typed as any, actor),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
+        'p1',
+        actor,
+      );
+      expect(d.referralsRepo.create).not.toHaveBeenCalled();
     });
   });
 
@@ -371,13 +420,14 @@ describe('ReferralsService', () => {
       const d = build();
       const referral: any = {
         id: 'ref1',
+        targetProfileId: 'hp-9',
         statusConceptId: CEXT.REFERRAL_REQUESTED,
       };
       d.referralsRepo.findById.mockResolvedValue(referral);
       const res = await d.service.respond(
         'ref1',
         { decision: 'REJECT', rejectReason: 'Sin cupo este mes' },
-        actor,
+        destActor,
       );
       expect(referral.rejectReason).toBe('Sin cupo este mes');
       expect(res).toMatchObject({

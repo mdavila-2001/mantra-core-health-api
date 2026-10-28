@@ -12,14 +12,6 @@ export enum ReferralErrorReason {
   REFERRAL_SERVICE_INFORMATION_INCOMPLETE = 'REFERRAL_SERVICE_INFORMATION_INCOMPLETE',
   /** La sede destino no existe. */
   REFERRAL_TARGET_BRANCH_NOT_FOUND = 'REFERRAL_TARGET_BRANCH_NOT_FOUND',
-  /** El consentimiento indicado no existe. */
-  REFERRAL_CONSENT_NOT_FOUND = 'REFERRAL_CONSENT_NOT_FOUND',
-  /** El consentimiento indicado es de otro paciente. */
-  REFERRAL_CONSENT_PATIENT_MISMATCH = 'REFERRAL_CONSENT_PATIENT_MISMATCH',
-  /** El consentimiento indicado no fue aceptado. */
-  REFERRAL_CONSENT_NOT_ACCEPTED = 'REFERRAL_CONSENT_NOT_ACCEPTED',
-  /** El consentimiento indicado está revocado. */
-  REFERRAL_CONSENT_WITHDRAWN = 'REFERRAL_CONSENT_WITHDRAWN',
   /** La derivación no existe. */
   REFERRAL_NOT_FOUND = 'REFERRAL_NOT_FOUND',
   /** La derivación no está pendiente de respuesta. */
@@ -32,4 +24,11 @@ export enum ReferralErrorReason {
   REFERRAL_COUNTER_REFERRAL_NOT_ALLOWED = 'REFERRAL_COUNTER_REFERRAL_NOT_ALLOWED',
   /** La derivación ya está cerrada (rechazada, completada o anulada). */
   REFERRAL_ALREADY_CLOSED = 'REFERRAL_ALREADY_CLOSED',
+  /**
+   * `informedConsentId` no se acepta al crear: el vínculo lo escribe el
+   * consentimiento registrado con `targetType='REFERRAL'` sobre la derivación.
+   */
+  REFERRAL_CONSENT_LINK_NOT_ALLOWED = 'REFERRAL_CONSENT_LINK_NOT_ALLOWED',
+  /** Sólo el destino de la derivación la acepta o la rechaza. */
+  REFERRAL_RESPOND_FORBIDDEN = 'REFERRAL_RESPOND_FORBIDDEN',
 }
