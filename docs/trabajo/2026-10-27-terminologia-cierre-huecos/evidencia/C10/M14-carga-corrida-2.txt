@@ -1,0 +1,43 @@
+=== Taxonomía de equipos de diagnóstico → terminology.*  ===
+Nomenclaturas NO cargadas (política de licencia/idioma):
+┌─────────┬──────────────────────────┬───────┬────────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ (index) │ system                   │ nodes │ kind       │ reason                                                                                                           │
+├─────────┼──────────────────────────┼───────┼────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 0       │ 'gmdn'                   │ 7815  │ 'licensed' │ 'GMDN Agency: nomenclatura licenciada (membresía); no se carga ni se cruza.'                                     │
+│ 1       │ 'cnd'                    │ 1684  │ 'owner'    │ 'Nomenclatura sin política de carga ni licencia leída.'                                                          │
+│ 2       │ 'br:anvisa-nome-tecnico' │ 3035  │ 'owner'    │ 'Nombres en portugués y `concepts.ts` solo define idiomas es/en/la (no hay LANG_PT); licencia del conjunto ANVI' │
+│ 3       │ 'in:cdsco-device-name'   │ 11371 │ 'owner'    │ 'Licencia de CDSCO no verificada (su «Copyright Policy» no se pudo leer); los datos vienen de un espejo de GitH' │
+│ 4       │ 'co:invima-grupo'        │ 4     │ 'owner'    │ 'Nomenclatura sin política de carga ni licencia leída.'                                                          │
+│ 5       │ 'jmdn'                   │ 2092  │ 'owner'    │ 'Nombres en japonés y `concepts.ts` no define LANG_JA; licencia del sitio PMDA verificada (PDL 1.0, https://www' │
+│ 6       │ 'tw:tfda-classification' │ 1364  │ 'owner'    │ 'Nomenclatura sin política de carga ni licencia leída.'                                                          │
+│ 7       │ 'gmdn-pt'                │ 1743  │ 'licensed' │ 'GMDN Agency: nomenclatura licenciada (membresía); no se carga ni se cruza.'                                     │
+└─────────┴──────────────────────────┴───────┴────────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+mapeos publicados omitidos por tener un extremo no cargable: 39420
+┌─────────┬────────────────────┬──────────────────────────────────────────────────────────────────────┬──────────┬──────────────┬────────────┬───────────────┐
+│ (index) │ system             │ version                                                              │ concepts │ designations │ properties │ relationships │
+├─────────┼────────────────────┼──────────────────────────────────────────────────────────────────────┼──────────┼──────────────┼────────────┼───────────────┤
+│ 0       │ 'emdn'             │ 'content-sha256:bdfaf7bd02e27001'                                    │ 8527     │ 8516         │ 25581      │ 8504          │
+│ 1       │ 'fda-product-code' │ 'git:ej86/fda-ai-medical-device-analytics@8840a03632ff (2026-08-28)' │ 7091     │ 7098         │ 21270      │ 0             │
+└─────────┴────────────────────┴──────────────────────────────────────────────────────────────────────┴──────────┴──────────────┴────────────┴───────────────┘
+mapeos publicados: 0; miembros del value set diagnostic-equipment-types: 5645
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "emdn": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0
+    },
+    "fda-product-code": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0
+    },
+    "maps": 0,
+    "valueSetMembers": 0
+  },
+  "segundos": 4
+}

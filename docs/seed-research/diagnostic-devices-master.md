@@ -277,6 +277,22 @@ detiene con dos pasadas seguidas en 0.
 - **Descartadas**: ninguna.
 - **Nota**: el PR #696 se mergeó con las pasadas 1 a 5. Las pasadas 6 y siguientes van en un PR nuevo, desde `dev` actualizado, en la rama `justin/seed-dx-devices-master-p6`: el force push sobre la rama original fue denegado.
 
+### Pasada 8 (2026-10-28, carril C10 de «cierre de huecos»)
+
+Hueco → estado hoy → qué se cargó.
+
+| Hueco | Estado hoy (re-sondeo 2026-10-28, `evidencia/C10/M1-sondeo-2026-10-28.tsv`) | Resultado |
+|---|---|---|
+| Regiones `us`/`eu`/`row` con `out/` nuevos | Los tres manifiestos y sus 35 archivos verifican SHA-256; `node --test`: us 24/24, eu 36/36, row 19/19, master 24/24 | `master` consolida 5 776 518 filas válidas (us 1 098 516, eu 166 483, row 4 509 995) |
+| EMDN oficial | 200; Excel v2026, 8 516 términos, CC BY 4.0 (aviso legal de la Comisión) | taxonomía EMDN oficial en vez de las copias de git de la V2 (8 455) |
+| Taxonomía | 33 616 → **44 726 nodos**, 218 → **39 420 cruces** (todos código de producto ↔ GMDN) | `out/taxonomy-*` regenerados, reproducibles (2 corridas, mismo SHA-256) |
+| Catálogo fabricante → modelo | **No entra en 2 500 MB** con estas regiones (OOM a los 9 min 27 s) | `out/` de catálogo sigue siendo el de 2026-10-24; propuesta: procesar por fuente y volcar `keep` a disco, o autorización explícita de más heap |
+| Carga a `terminology.*` | Postgres 16 desechable (puerto 55440) | `emdn` 8 527 conceptos y `fda-product-code` 7 091; 5 645 miembros del value set; 2.ª corrida = 0 filas nuevas; 0 huérfanos, duplicados ni nulos |
+| GMDN | Licenciado (GMDN Agency) | No se carga ningún nodo `gmdn`/`gmdn-pt` ni los 39 420 cruces que lo tocan (antes se cargaban) |
+| ANVISA, JMDN, CDSCO, CND, TFDA, INVIMA | Idiomas sin concepto (pt, ja, it, zh) o licencia no verificada (ANVISA, CDSCO); PMDA verificada: PDL 1.0 | No se cargan; decisión del propietario (ver `evidencia/C10/REPORTE-C10.md`) |
+
+Conteos antes/después en `terminology.*` de la base desechable: 0 → 15 618 conceptos de equipos de diagnóstico (el cargador anterior habría insertado además GMDN y las cuatro nomenclaturas nacionales con idioma `en` erróneo).
+
 ## Propuesta para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)
 
 Un esquema nuevo `device_catalog` (módulo propio, después de 03 `terminology`
@@ -312,4 +328,4 @@ identificadores por modelo y la FK opcional `device_model_id` en
 
 - `device_identifiers.issuing_agency` admite también JAN y GTIN (no solo UDI-DI).
 - `device_manufacturer_identifiers.scheme` incluye `jp-corporate-number`, `hc-company` y `cnpj`.
-- Las nomenclaturas nacionales (`jmdn`, `br:anvisa-nome-tecnico`, `gmdn-pt`, `in:cdsco-device-name`) no piden tablas nuevas: `load-taxonomy.mjs` ya las carga como `code_systems` en `terminology`.
+- Las nomenclaturas nacionales (`jmdn`, `br:anvisa-nome-tecnico`, `in:cdsco-device-name`, `cnd`) no piden tablas nuevas, pero **hoy `load-taxonomy.mjs` no las carga** (pasada 8): faltan conceptos de idioma `pt`, `ja` e `it` en `concepts.ts` y la licencia de ANVISA/CDSCO no está verificada. `gmdn` y `gmdn-pt` no se cargan por licencia.

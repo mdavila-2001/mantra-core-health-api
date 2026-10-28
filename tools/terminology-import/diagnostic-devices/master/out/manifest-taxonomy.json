@@ -1,0 +1,189 @@
+{
+  "region": "master",
+  "mode": "taxonomy-only",
+  "formatVersion": 1,
+  "regions": [
+    {
+      "region": "us",
+      "status": "consolidated",
+      "ref": null,
+      "commit": null,
+      "commitDate": null,
+      "dir": "us/out",
+      "alternatives": [],
+      "manifestGeneratedAt": "2026-10-24T15:13:05.362Z",
+      "rowsRead": 1098516,
+      "gaps": []
+    },
+    {
+      "region": "eu",
+      "status": "consolidated",
+      "ref": null,
+      "commit": null,
+      "commitDate": null,
+      "dir": "eu/out",
+      "alternatives": [],
+      "manifestGeneratedAt": "2026-10-27T23:44:50Z",
+      "rowsRead": 166483,
+      "gaps": [
+        {
+          "source": "eudamed-udi",
+          "reason": "recorrido de /udi INCOMPLETO: 550 páginas de ~5 650 (reanudable con fetch-eudamed.mjs); las filas exportadas son un subconjunto",
+          "url": "https://api.datalake.sante.service.ec.europa.eu/eudamed/udi"
+        },
+        {
+          "source": "mhra-pard",
+          "reason": "licencia: PARD clasifica por términos GMDN y su aviso (FAQ «What is GMDN?», leído 2026-10-27) exige licencia de la GMDN Agency para extraer ese contenido con fines de categorización alternativa, mapeo o entrenamiento de IA; no hay descarga masiva",
+          "url": "https://pard.mhra.gov.uk/"
+        },
+        {
+          "source": "swissmedic-swissdamed",
+          "reason": "términos: las condiciones de Swissmedic prohíben la extracción automatizada sin autorización expresa (leídas el 2026-10-24; hoy el host responde 200 pero swissdamed no publica archivo abierto ni condiciones de reutilización verificables); sin autorización escrita no se descarga",
+          "url": "https://swissdamed.ch/"
+        },
+        {
+          "source": "eudamed-certificates",
+          "reason": "la API interna del portal (basicUdiData) no tiene términos de reutilización leídos; el Data Lake oficial no expone certificados ni organismo notificado",
+          "url": "https://ec.europa.eu/tools/eudamed/"
+        },
+        {
+          "source": "it-salute-bdrdm-fuera-de-W",
+          "reason": "curaduría: la BD/RDM trae 2,4 millones de registros; solo la categoría CND W está titulada como diagnóstico in vitro. Los tipos de diagnóstico dentro de Z11/Z12/C/G/Q… exigen decisión tipo por tipo contra la CND (propietario)",
+          "url": "https://www.dati.salute.gov.it/it/dataset/dispositivi-medici/"
+        },
+        {
+          "source": "ec-nando",
+          "reason": "no es un registro de equipos (organismos notificados); sin descarga masiva",
+          "url": "https://webgate.ec.europa.eu/single-market-compliance-space/notified-bodies"
+        },
+        {
+          "source": "de-bfarm",
+          "reason": "sin descarga pública de registros de equipos (remite a EUDAMED); re-sondeado 2026-10-27: el host responde, sin archivo",
+          "url": "https://www.bfarm.de/EN/Medical-devices/_node.html"
+        },
+        {
+          "source": "es-aemps-ccps",
+          "reason": "consulta pública sin descarga masiva; re-sondeado 2026-10-27: el host responde, sin archivo",
+          "url": "https://www.aemps.gob.es/"
+        },
+        {
+          "source": "fr-ansm",
+          "reason": "sin registro nacional descargable (remite a EUDAMED); re-sondeado 2026-10-27",
+          "url": "https://ansm.sante.fr/"
+        }
+      ]
+    },
+    {
+      "region": "row",
+      "status": "consolidated",
+      "ref": null,
+      "commit": null,
+      "commitDate": null,
+      "dir": "row/out",
+      "alternatives": [],
+      "manifestGeneratedAt": "2026-10-28T00:00:17.983Z",
+      "rowsRead": 4509995,
+      "gaps": [
+        {
+          "source": "tga-artg",
+          "reason": "403 del proxy (www.tga.gov.au); el ARTG completo no tiene espejo; solo hay DAEN parcial",
+          "url": "https://www.tga.gov.au/resources/artg"
+        },
+        {
+          "source": "nmpa-udi",
+          "reason": "403 del proxy (udi.nmpa.gov.cn)",
+          "url": "https://udi.nmpa.gov.cn/"
+        },
+        {
+          "source": "mfds-devices",
+          "reason": "403 del proxy (www.data.go.kr, emedi.mfds.go.kr)",
+          "url": "https://www.data.go.kr/"
+        },
+        {
+          "source": "tfda-devices",
+          "reason": "403 del proxy (data.gov.tw, data.fda.gov.tw). Hay una copia en la release data-20261023 de github.com/masalu0105-gif/taiwan-laboratory-mcp (104 891 licencias), pero bajar assets de releases exige adjuntar el repo con credenciales y esa acción fue denegada en esta sesión",
+          "url": "https://data.gov.tw/dataset/9576"
+        },
+        {
+          "source": "cdsco-devices",
+          "reason": "403 del proxy (cdsco.gov.in, cdscomdonline.gov.in). Se cargaron las licencias de importación (espejo); faltan las licencias de fabricación nacional (MD-5/MD-9) y las de autoridades estatales",
+          "url": "https://cdsco.gov.in/"
+        },
+        {
+          "source": "hsa-smdr",
+          "reason": "403 del proxy (data.gov.sg)",
+          "url": "https://data.gov.sg/"
+        },
+        {
+          "source": "amar-devices",
+          "reason": "403 del proxy (data.gov.il)",
+          "url": "https://data.gov.il/"
+        },
+        {
+          "source": "sfda-mdma",
+          "reason": "403 del proxy (medicaldevice.sfda.gov.sa)",
+          "url": "https://medicaldevice.sfda.gov.sa/"
+        },
+        {
+          "source": "thai-fda-devices",
+          "reason": "403 del proxy (open.fda.moph.go.th)",
+          "url": "https://open.fda.moph.go.th/"
+        },
+        {
+          "source": "mda-medcast",
+          "reason": "403 del proxy (portal.mda.gov.my)",
+          "url": "https://portal.mda.gov.my/"
+        },
+        {
+          "source": "invima-dispositivos",
+          "reason": "403 del proxy (www.datos.gov.co)",
+          "url": "https://www.datos.gov.co/"
+        },
+        {
+          "source": "cofepris-dispositivos",
+          "reason": "403 del proxy (datos.gob.mx)",
+          "url": "https://datos.gob.mx/"
+        },
+        {
+          "source": "anmat-productos-medicos",
+          "reason": "403 del proxy (datos.gob.ar)",
+          "url": "https://datos.gob.ar/"
+        },
+        {
+          "source": "digemid-dispositivos",
+          "reason": "403 del proxy (www.datosabiertos.gob.pe)",
+          "url": "https://www.datosabiertos.gob.pe/"
+        },
+        {
+          "source": "agemed-dispositivos",
+          "reason": "403 del proxy (www.agemed.gob.bo)",
+          "url": "https://www.agemed.gob.bo/"
+        },
+        {
+          "source": "who-pq-ivd",
+          "reason": "403 del proxy (extranet.who.int)",
+          "url": "https://extranet.who.int/prequal/vitro-diagnostics/prequalified/in-vitro-diagnostics"
+        },
+        {
+          "source": "unicef-supply",
+          "reason": "403 del proxy (supply.unicef.org)",
+          "url": "https://supply.unicef.org/"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "taxonomy-nodes.ndjson.gz",
+      "rows": 44726,
+      "bytes": 3310892,
+      "sha256": "f7ae03252a315472cc9c51ea805aea8fc13f26112796c1346c18b2e7df196537"
+    },
+    {
+      "path": "taxonomy-crosswalks.ndjson.gz",
+      "rows": 39420,
+      "bytes": 878695,
+      "sha256": "cb12f3809e869b50d5086b9f8426f4c472e4f0bc7f18acc9ed3f4b2c5364390d"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+Output format is aligned.
+             k             |  internal_code   | count 
+---------------------------+------------------+-------
+ conceptos por code system | fda-product-code |  7091
+ conceptos por code system | emdn             |  8527
+(2 rows)
+
+               k                | count 
+--------------------------------+-------
+ duplicados (code system, code) |     0
+(1 row)
+
+             k              | count 
+----------------------------+-------
+ conceptos sin code/display |     0
+(1 row)
+
+            k             | count 
+--------------------------+-------
+ designaciones huérfanas |     0
+(1 row)
+
+           k            | count 
+------------------------+-------
+ propiedades huérfanas |     0
+(1 row)
+
+           k           | count 
+-----------------------+-------
+ relaciones huérfanas |     0
+(1 row)
+
+               k               | count 
+-------------------------------+-------
+ miembros value set huérfanos |     0
+(1 row)
+
+                      k                      | count 
+---------------------------------------------+-------
+ sin procedencia (dx_device_type_provenance) |     0
+(1 row)
+
+                        k                         | count 
+--------------------------------------------------+-------
+ code systems GMDN/pt/ja/in cargados (debe ser 0) |     0
+(1 row)
+
+                         k                          | count 
+----------------------------------------------------+-------
+ concept_maps (debe ser 0: todo cruce era con GMDN) |     0
+(1 row)
+
+           k           | count 
+-----------------------+-------
+ lotes de importación |     2
+(1 row)
+
+          k           |            code            |                                            left                                            
+----------------------+----------------------------+--------------------------------------------------------------------------------------------
+ fuentes con licencia | EC_EMDN                    | CC BY 4.0: «content owned by the EU on this website is licensed under CC BY 4.0» (https:
+ fuentes con licencia | FDA_PRODUCT_CLASSIFICATION | Datos del Gobierno de EE. UU., dominio público (17 U.S.C. § 105); openFDA los publica ba
+(2 rows)
+

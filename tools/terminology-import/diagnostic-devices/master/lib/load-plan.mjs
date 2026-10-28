@@ -45,7 +45,7 @@ export const SYSTEMS = {
     officialUrl:
       'https://www.fda.gov/medical-devices/classify-your-medical-device/product-code-classification-database',
     license:
-      'Datos del Gobierno de EE. UU., dominio público (17 U.S.C. § 105).',
+      'Datos del Gobierno de EE. UU., dominio público (17 U.S.C. § 105); openFDA los publica bajo CC0 1.0 (https://open.fda.gov/license/, leído 2026-10-28).',
   },
   emdn: {
     sourceCode: 'EC_EMDN',
@@ -53,7 +53,7 @@ export const SYSTEMS = {
     name: 'European Medical Device Nomenclature (EMDN)',
     officialUrl: 'https://webgate.ec.europa.eu/dyna2/emdn/',
     license:
-      'Nomenclatura pública y descargable sin costo (Comisión Europea, MDR/IVDR art. 26).',
+      'CC BY 4.0: «content owned by the EU on this website is licensed under CC BY 4.0» (https://commission.europa.eu/legal-notice_en, leído 2026-10-28); requiere atribución e indicar cambios.',
   },
   gmdn: {
     sourceCode: 'GMDN_VIA_GUDID',
@@ -91,6 +91,53 @@ export const VALUE_SET = {
 export const valueSetId = md5uuid(
   `mantra:dx-devices:value-set:${VALUE_SET.code}`,
 );
+
+/**
+ * Política de carga por nomenclatura (decidida con las licencias leídas el
+ * 2026-10-28; ver SOURCES.md §3). Solo se carga lo que figura `loadable: true`.
+ * Lo demás queda en `out/` y se informa en cada corrida con su motivo.
+ *   kind 'licensed'   licencia que no permite reproducir: no se carga.
+ *   kind 'owner'      falta una decisión o un prerrequisito del propietario;
+ *                     se carga recién cuando alguien cambie esta tabla con su OK.
+ */
+export const LOAD_POLICY = {
+  'fda-product-code': { loadable: true, language: 'en' },
+  emdn: { loadable: true, language: 'en' },
+  gmdn: {
+    loadable: false,
+    kind: 'licensed',
+    reason: 'GMDN Agency: nomenclatura licenciada (membresía); no se carga ni se cruza.',
+  },
+  'gmdn-pt': {
+    loadable: false,
+    kind: 'licensed',
+    reason: 'GMDN Agency: nomenclatura licenciada (membresía); no se carga ni se cruza.',
+  },
+  'br:anvisa-nome-tecnico': {
+    loadable: false,
+    kind: 'owner',
+    reason:
+      'Nombres en portugués y `concepts.ts` solo define idiomas es/en/la (no hay LANG_PT); licencia del conjunto ANVISA no verificable (dados.gov.br exige token; decreto 8.777/2016 pide licencia abierta sin nombrarla).',
+  },
+  jmdn: {
+    loadable: false,
+    kind: 'owner',
+    reason:
+      'Nombres en japonés y `concepts.ts` no define LANG_JA; licencia del sitio PMDA verificada (PDL 1.0, https://www.pmda.go.jp/english/0013.html, 2026-10-28), pero los datos vienen de un espejo de GitHub porque el host oficial dio 416.',
+  },
+  'in:cdsco-device-name': {
+    loadable: false,
+    kind: 'owner',
+    reason:
+      'Licencia de CDSCO no verificada (su «Copyright Policy» no se pudo leer); los datos vienen de un espejo de GitHub.',
+  },
+};
+export const loadPolicy = (system) =>
+  LOAD_POLICY[system] ?? {
+    loadable: false,
+    kind: 'owner',
+    reason: 'Nomenclatura sin política de carga ni licencia leída.',
+  };
 
 /** Definición de una nomenclatura nacional sin entrada en `SYSTEMS`. */
 export function systemDef(system) {
@@ -248,7 +295,15 @@ export function planMaps(crosswalks, nodesByKey) {
 }
 
 /** Plan completo: un plan por nomenclatura, mapeos y value set. */
-export function planTaxonomy({ nodes, crosswalks }) {
+export function planTaxonomy({ nodes: allNodes, crosswalks: allCrosswalks }) {
+  const nodes = allNodes.filter((n) => loadPolicy(n.system).loadable);
+  const skipped = new Map();
+  for (const n of allNodes)
+    if (!loadPolicy(n.system).loadable)
+      skipped.set(n.system, (skipped.get(n.system) ?? 0) + 1);
+  const ok = new Set(nodes.map((n) => n.key));
+  // Un mapeo con un extremo no cargable no se carga: sería un cruce hacia un concepto ausente.
+  const crosswalks = allCrosswalks.filter((c) => ok.has(c.from) && ok.has(c.to));
   const bySystem = new Map();
   for (const n of nodes) {
     if (!bySystem.has(n.system)) bySystem.set(n.system, []);
@@ -284,6 +339,12 @@ export function planTaxonomy({ nodes, crosswalks }) {
       null,
     ]);
   return {
+    skipped: [...skipped.entries()].map(([system, count]) => ({
+      system,
+      count,
+      ...loadPolicy(system),
+    })),
+    skippedCrosswalks: allCrosswalks.length - crosswalks.length,
     systems,
     maps,
     valueSet: {

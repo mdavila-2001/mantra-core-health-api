@@ -64,15 +64,32 @@ como entrada (`groupLinks`). OpenCorporates no se usó: su API exige clave y sus
 licencian con ODbL (atribución y share-alike), lo que habría que acordar antes
 de mezclarlos con el catálogo.
 
+### Política de carga a `terminology.*` (licencias leídas el 2026-10-28)
+
+`load-taxonomy.mjs` solo carga lo que figura `loadable: true` en `LOAD_POLICY` (`lib/load-plan.mjs`); el resto queda en `out/` y cada corrida lo lista con su motivo.
+
+| Nomenclatura | Nodos | Se carga | Licencia leída y motivo |
+|---|---:|---|---|
+| `fda-product-code` | 7 091 | sí | Dominio público; openFDA lo publica bajo CC0 1.0 (<https://open.fda.gov/license/>). Versión cargada: la copia `ej86` de `foiclass` (2026-08-28), no el export oficial de openFDA (7 096 códigos en `us/out/fda-product-codes.json`): pendiente de cambiar. |
+| `emdn` | 8 527 | sí | CC BY 4.0 («content owned by the EU on this website is licensed under CC BY 4.0», <https://commission.europa.eu/legal-notice_en>): exige atribución e indicar cambios. Excel oficial v2026 (8 516 términos) + 11 códigos que traen los registros y no están en la v2026 (sin nombre). |
+| `gmdn`, `gmdn-pt` | 7 815 + 1 743 | **no** | GMDN Agency: nomenclatura licenciada. Tampoco se cargan los 39 420 cruces código de producto ↔ GMDN (todos tienen un extremo GMDN). |
+| `br:anvisa-nome-tecnico` | 2 785 | no (decisión del propietario) | Nombres en portugués y `concepts.ts` solo define `LANG_ES/EN/LA`. Licencia del conjunto no verificable: el CKAN de dados.gov.br responde 401 sin token y el decreto 8.777/2016 exige «licença aberta» sin nombrarla. |
+| `jmdn` | 2 092 | no (decisión del propietario) | PMDA: licencia verificada, PDL 1.0 con cita de fuente y aviso de edición (<https://www.pmda.go.jp/english/0013.html>). Falta `LANG_JA` y los datos vienen de un espejo (el host oficial dio 416). |
+| `in:cdsco-device-name` | 11 371 | no (decisión del propietario) | Licencia de CDSCO no verificada («Copyright Policy» no legible); datos de un espejo de GitHub. |
+| `cnd` (Italia) | 1 684 | no (sin política) | Nombres en italiano (sin `LANG_IT`); la ficha de BD/RDM dice Italian Open Data License v2.0 pero el texto no se leyó. |
+| `tw:tfda-classification`, `co:invima-grupo` | 1 364 + 4 | no (sin política) | Licencia de datos.gov.tw y datos.gov.co no leída; nombres en chino. |
+
+Licencias del resto de fuentes (todas leídas hoy): **openFDA** CC0 1.0; **Health Canada MDALL** Open Government Licence – Canada (`ca-ogl-lgo` en la ficha de open.canada.ca, actualizada 2025-12-20); **EUDAMED Data Lake** acceso abierto, CC BY 4.0 de la Comisión; **EMDN** CC BY 4.0. Los catálogos de fabricantes, marcas y modelos no se cargan (no hay tablas en el modelo, ADR-0021).
+
 ## 4. Huecos (lo que no se pudo obtener y por qué)
 
 | Qué | Dónde | Motivo |
 |---|---|---|
-| `foiclass.zip` oficial, openFDA (`api.fda.gov`, `download.open.fda.gov`), AccessGUDID (`accessgudid.nlm.nih.gov`) | FDA / NLM | 403 del proxy de salida del entorno (CONNECT rechazado); WebFetch tampoco resuelve DNS. Se usó la copia fijada de §1. |
-| Archivo EMDN oficial (y versiones posteriores a la 2) | `webgate.ec.europa.eu/dyna2/emdn/` | 403 del proxy. Se usó la V2 de dos copias en git (§1); no se encontró copia de una versión posterior. |
-| EUDAMED (actores, SRN) | `ec.europa.eu/tools/eudamed` | 403 del proxy (lo cubre `eu/`). |
-| GLEIF, Wikidata, OpenCorporates | `api.gleif.org`, `query.wikidata.org`, `api.opencorporates.com` | 403 del proxy (GLEIF, Wikidata); OpenCorporates sin clave y con licencia ODbL a acordar. Sin grupos/filiales publicados en esta pasada. |
-| Dataset del proyecto de mapeo GMDN↔EMDN (Zenodo 13890613) y mapeos GMDN↔EMDN en git (`lisadonlon/GMDNEMDN`, `Kilanopi/GMDNtoEMDN`, `cl-tud/riskman-device-code-validation-scripts`) | `zenodo.org`, GitHub | Zenodo: 403 del proxy. Los de GitHub son mapeos automáticos por similitud de texto, no publicados por una autoridad: no se usan. |
+| `foiclass.zip` oficial, AccessGUDID | FDA / NLM | **Re-sondeado 2026-10-28**: `api.fda.gov` y `download.open.fda.gov` responden 200/206 (ya los usa `us/`); `accessgudid.nlm.nih.gov/download_files` da 404. El `foiclass` de `master/` sigue siendo la copia fijada de §1 (pendiente cambiarla por el export oficial). |
+| Archivo EMDN oficial | `webgate.ec.europa.eu/dyna2/emdn/` | **Resuelto 2026-10-28**: responde y `eu/` bajó el Excel v2026 (8 516 términos); `build.mjs --eu-dir` lo usa en lugar de las copias en git (§1, que quedan como respaldo sin `--eu-dir`). |
+| EUDAMED (actores, SRN) | `ec.europa.eu/tools/eudamed` | **Resuelto**: Data Lake abierto (50 657 actores en `eu/out/actors`). `/udi` recorrido a medias (550 de ~5 650 páginas): lo cubre `eu/`. |
+| GLEIF, Wikidata, OpenCorporates | `api.gleif.org`, `query.wikidata.org`, `api.opencorporates.com` | Re-sondeado 2026-10-28: GLEIF API 200 (golden copy 403); Wikidata SPARQL 400 a la consulta de prueba (responde); sin usar todavía en `master/`. OpenCorporates sin clave y con licencia ODbL a acordar. |
+| Dataset del proyecto de mapeo GMDN↔EMDN (Zenodo 13890613) y mapeos GMDN↔EMDN en git (`lisadonlon/GMDNEMDN`, `Kilanopi/GMDNtoEMDN`, `cl-tud/riskman-device-code-validation-scripts`) | `zenodo.org`, GitHub | Zenodo responde hoy (200) pero el mapeo toca GMDN (licenciado): no se usa. Los de GitHub son mapeos automáticos por similitud de texto, no publicados por una autoridad: no se usan. |
 | Lista compilada de 12 275 términos GMDN (`lisadonlon/GMDNEMDN/exports/gmdn-from-gudid`) | GitHub | Es la nomenclatura GMDN compilada y su autor la retiró «for licensing compliance»: no se usa. |
 | PCD de la FDA más nuevo (`bjoleary/fdadata`, 2026-10-20, `.rda`) | GitHub | No hay lector de `.rda` en el entorno; lo usa `us/` (7 119 product codes en su `fda-product-codes.json`). |
 | Listados de expositores y socios (RSNA, MEDICA, CMEF, WHX, ADLM, ECR, ITEM, KIMES, Hospitalar, Expo MED, FIME; AdvaMed, MedTech Europe, BVMed, VDGH, SPECTARIS, SNITEM, ABHI, Swiss Medtech, JIRA, JACRI, JAIMA, JMOIA, MTJAPAN, ABIMED, CBDL, MTAA, …) | sitios de cada organización | Sin acceso directo (DNS/403). Lo que hay viene de resultados de búsqueda que citan la URL: `data/industry-directories.json`, marcado `method: web-search-snippets`. KMDIA, CAMDI, Fenin, Medtech Canada, MDMA y AiMeD no publican un listado que se haya encontrado (MDMA: solo con inicio de sesión; WHX Dubai: con la entrada de visitante). No se revisaron `robots.txt` ni términos de cada sitio porque no se pudo acceder. |
@@ -85,3 +102,7 @@ correr `typecheck`, `lint` y los tests se usó yarn 4.14.1 desde
 `registry.npmjs.org` (`COREPACK_NPM_REGISTRY`) y, solo en la instalación local,
 `xlsx@0.18.5` de npm en lugar del tarball de SheetJS; `package.json` y
 `yarn.lock` quedaron sin cambios.
+
+## 6. Reconstrucción parcial del 2026-10-28
+
+`out/taxonomy-nodes` (44 726 nodos) y `out/taxonomy-crosswalks` (39 420) se regeneraron con `build.mjs --taxonomy-only --us-dir … --eu-dir … --row-dir …` sobre 5 776 518 filas válidas de las tres regiones (dos corridas, mismo SHA-256: `f7ae0325…` nodos, `cb12f380…` cruces). `manufacturers`, `models-*`, `review-*` e `industry-*` siguen siendo los del 2026-10-24: el catálogo completo, con las regiones actuales, agota el heap a 2 500 MB (`FATAL … heap out of memory` tras 9 min 27 s en la pasada B/C, donde `keep` retiene las filas de diagnóstico). `manifest.json → partialRebuild` lo declara.

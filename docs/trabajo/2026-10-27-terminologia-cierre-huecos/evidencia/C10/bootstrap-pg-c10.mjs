@@ -1,12 +1,12 @@
-// Bootstrap de la base DESECHABLE del carril C10 (Postgres 16 propio, puerto 55410; no es el stack real).
+// Bootstrap de la base DESECHABLE del carril C10 (Postgres 16 propio, puerto 55440; no es el stack real).
 // Reproduce lo mínimo que siembra la API al arrancar y que `load-taxonomy.mjs` exige como
 // prerrequisito (assertPrerequisites): los conceptos internos de estado, idioma, tipo de
 // designación y relación is-a. Los ids salen de las MISMAS funciones del importador.
-import pg from '../../../../../tools/terminology-import/diagnostic-devices/node_modules/pg/lib/index.js';
+import pg from '../../../../../node_modules/pg/lib/index.js'; // pg de la raíz del repo (no hay node_modules propio en diagnostic-devices)
 import { INTERNAL } from '../../../../../tools/terminology-import/diagnostic-devices/master/lib/load-plan.mjs';
 import { md5uuid } from '../../../../../tools/terminology-import/lib/glossary-es/load-plan.mjs';
 
-const c = new pg.Client({ host: '127.0.0.1', port: 55410, user: 'postgres', database: 'c10' });
+const c = new pg.Client({ host: '127.0.0.1', port: 55440, user: 'postgres', database: 'c10' });
 await c.connect();
 const src = md5uuid('c10:bootstrap:source'), cs = md5uuid('c10:bootstrap:cs'), csv = md5uuid('c10:bootstrap:csv');
 await c.query(`INSERT INTO terminology.terminology_sources (id,code,name,created_at,updated_at,row_version) VALUES ($1,'MANTRA_CORE_BOOTSTRAP','bootstrap C10 (desechable)',now(),now(),1) ON CONFLICT DO NOTHING`, [src]);

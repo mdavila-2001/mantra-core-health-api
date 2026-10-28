@@ -225,15 +225,15 @@
   "files": [
     {
       "path": "taxonomy-nodes.ndjson.gz",
-      "rows": 33616,
-      "bytes": 1831970,
-      "sha256": "a09b114ce4f4f70cc69e0928491251186a06ab20320b6b2360a96260ab45d9ee"
+      "rows": 44726,
+      "bytes": 3310892,
+      "sha256": "f7ae03252a315472cc9c51ea805aea8fc13f26112796c1346c18b2e7df196537"
     },
     {
       "path": "taxonomy-crosswalks.ndjson.gz",
-      "rows": 218,
-      "bytes": 6118,
-      "sha256": "693b9ff457457334ef14ebae655365ca92ca59fb5cff315ef6151a4c134691e7"
+      "rows": 39420,
+      "bytes": 878695,
+      "sha256": "cb12f3809e869b50d5086b9f8426f4c472e4f0bc7f18acc9ed3f4b2c5364390d"
     },
     {
       "path": "manufacturers.ndjson.gz",
@@ -271,5 +271,14 @@
       "bytes": 9751,
       "sha256": "8c920886375e3460d9401d980956fe0ca504cb073543d3f69d0eb88c938e3525"
     }
-  ]
+  ],
+  "partialRebuild": {
+    "mode": "taxonomy-only",
+    "rebuiltAt": "2026-10-28",
+    "files": [
+      "taxonomy-nodes.ndjson.gz",
+      "taxonomy-crosswalks.ndjson.gz"
+    ],
+    "note": "taxonomy-* regenerados con us/eu/row del 2026-10-28 (5 776 518 filas válidas, EMDN oficial v2026). manufacturers/models/review/industry-* siguen siendo los del 2026-10-24: el catálogo completo no entra en --max-old-space-size=2500 con las regiones actuales (OOM, ver evidencia/C10)."
+  }
 }

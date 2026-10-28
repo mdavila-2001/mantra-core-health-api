@@ -16,6 +16,7 @@
 //   git fetch origin
 //   node --max-old-space-size=8000 tools/terminology-import/diagnostic-devices/master/build.mjs
 //   … --us-dir <carpeta> | --eu-dir <carpeta> | --row-dir <carpeta>   (en vez de git)
+//   … --out <carpeta>                                                (no pisa out/ versionado)
 //   … --skip-regions                                                 (solo fuentes propias)
 // =============================================================================
 
@@ -63,11 +64,16 @@ import { loadIndustryDirectories, matchIndustry } from './lib/industry.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, '../../../..');
-const OUT = join(HERE, 'out');
 const args = process.argv.slice(2);
 const argValue = (name) =>
   args.includes(name) ? args[args.indexOf(name) + 1] : null;
+// `--out <carpeta>`: escribe fuera de `out/` versionado (pruebas de reproducibilidad).
+const OUT = argValue('--out') ? resolve(argValue('--out')) : join(HERE, 'out');
 const SKIP_REGIONS = args.includes('--skip-regions');
+// `--taxonomy-only`: solo taxonomía y mapeos (pasada A en streaming). Con las
+// regiones de 2026-10-28 (5,7 M de filas) el catálogo fabricante→modelo no entra
+// en el tope de 2 500 MB; la taxonomía no lo necesita. No escribe modelos ni fabricantes.
+const TAXONOMY_ONLY = args.includes('--taxonomy-only');
 
 const retrievedAtOfCache = () => {
   try {
@@ -391,6 +397,7 @@ for await (const row of validRows((row, region, errors, dup) => {
 })) {
   validCount++;
   taxonomy.addFromRow(row);
+  if (TAXONOMY_ONLY) continue;
   const k = `${mentionIdOf(row)}\u0000${row.source}`;
   const l = lightById.get(k);
   if (l) l._weight++;
@@ -421,6 +428,22 @@ for (const r of regionStatus)
       `región ${r.region}: ${r.rowsRead} filas desde ${r.ref ?? r.dir} (${r.files.filter((f) => !f.ok).length} archivos con sha256 distinto, descartados)`,
     );
 const propagated = taxonomy.propagateByCrosswalk();
+if (TAXONOMY_ONLY) {
+  mkdirSync(OUT, { recursive: true });
+  const t = taxonomy.toJSON();
+  const tfiles = [
+    ...writeNdjsonGzSharded(OUT, 'taxonomy-nodes', t.nodes),
+    ...writeNdjsonGzSharded(OUT, 'taxonomy-crosswalks', t.crosswalks),
+  ];
+  writeFileSync(
+    join(OUT, 'manifest-taxonomy.json'),
+    `${JSON.stringify({ region: 'master', mode: 'taxonomy-only', formatVersion: 1, regions: regionStatus.map(({ files: _f, ...r }) => r), files: tfiles }, null, 2)}\n`,
+  );
+  console.log(
+    `taxonomía: ${t.nodes.length} nodos, ${t.crosswalks.length} mapeos; filas válidas ${validCount}; nodos heredados por mapeo ${propagated}`,
+  );
+  process.exit(0);
+}
 const resolution = resolveManufacturers([...lightById.values(), ...actorRows], {
   trackRows: false,
 });

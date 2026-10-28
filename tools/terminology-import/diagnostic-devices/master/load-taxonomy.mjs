@@ -34,6 +34,15 @@ const DB_CONFIG = {
   database: process.env.DB_NAME ?? 'mantra_redesa_health',
 };
 
+if (
+  !DRY_RUN &&
+  !process.env.DB_NAME &&
+  !process.argv.includes('--default-db')
+)
+  throw new Error(
+    'Sin DB_NAME: este cargador apuntaría por defecto a 5433/mantra_redesa_health. Defina DB_HOST/DB_PORT/DB_USER/DB_NAME explícitos (o --default-db si de verdad es esa base).',
+  );
+
 async function readAll(base) {
   const out = [];
   for (const f of listOutFiles(OUT).filter(
@@ -159,6 +168,16 @@ async function main() {
   if (!nodes.length)
     throw new Error(`Sin nodos en ${OUT}: corra antes build.mjs`);
   const plan = planTaxonomy({ nodes, crosswalks });
+  console.log('Nomenclaturas NO cargadas (política de licencia/idioma):');
+  console.table(
+    plan.skipped.map((x) => ({
+      system: x.system,
+      nodes: x.count,
+      kind: x.kind,
+      reason: x.reason.slice(0, 110),
+    })),
+  );
+  console.log(`mapeos publicados omitidos por tener un extremo no cargable: ${plan.skippedCrosswalks}`);
   console.table(
     plan.systems.map((p) => ({
       system: p.system,
@@ -242,6 +261,8 @@ async function main() {
         ['uuid', 'uuid', 'uuid', 'uuid', 'int'],
       );
       const { sourceId, versionId } = ctx.get(p.system);
+      // Un lote solo se registra si esta corrida insertó algo: la 2.ª corrida no deja filas.
+      if (Object.values(r).reduce((x, y) => x + y, 0) === 0) continue;
       await client.query(
         `INSERT INTO terminology.catalog_import_batches (id, source_id, code_system_version_id, started_at, finished_at, total_read, total_inserted, total_errors, checksum, recorded_at)
          VALUES ($1::uuid, $2::uuid, $3::uuid, $4, now(), $5, $6, 0, $7, now())`,
