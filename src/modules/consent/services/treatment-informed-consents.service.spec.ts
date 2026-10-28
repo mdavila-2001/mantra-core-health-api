@@ -17,6 +17,7 @@ import {
   ServiceRequests,
 } from '../../clinical/entities';
 import { CarePlans } from '../../chart/entities';
+import { ProcedureCases } from '../../procedures_perioperative/entities';
 import { Referrals } from '../../clinical_ext/entities';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
@@ -175,6 +176,73 @@ describe('TreatmentInformedConsentsService', () => {
         actor,
       );
       expect(d.tx.findOne).toHaveBeenCalledWith(entity, { id: 'x1' });
+    });
+
+    describe('PROCEDURE acepta procedimiento clínico o caso quirúrgico', () => {
+      const surgical = {
+        ...directed,
+        targetType: 'PROCEDURE',
+        targetId: 'case1',
+      };
+
+      it('accepts a surgical case (procedures_perioperative.procedure_cases) of the same patient', async () => {
+        const d = build();
+        d.tx.findOne.mockImplementation((entity: any) =>
+          Promise.resolve(
+            entity === ProcedureCases
+              ? { id: 'case1', patientProfileId: 'p1' }
+              : null,
+          ),
+        );
+        const res = await d.service.sign(surgical as any, actor);
+        expect(d.tx.findOne).toHaveBeenCalledWith(Procedures, { id: 'case1' });
+        expect(d.tx.findOne).toHaveBeenCalledWith(ProcedureCases, {
+          id: 'case1',
+        });
+        expect(res.targetId).toBe('case1');
+      });
+
+      it('400 when the surgical case belongs to another patient', async () => {
+        const d = build();
+        d.tx.findOne.mockImplementation((entity: any) =>
+          Promise.resolve(
+            entity === ProcedureCases
+              ? { id: 'case1', patientProfileId: 'p2' }
+              : null,
+          ),
+        );
+        await expectReason(
+          d.service.sign(surgical as any, actor),
+          400,
+          ConsentErrorReason.INFORMED_CONSENT_TARGET_PATIENT_MISMATCH,
+        );
+        expect(d.treatmentRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('404 when the id is neither a procedure nor a surgical case', async () => {
+        const d = build();
+        d.tx.findOne.mockResolvedValue(null);
+        await expectReason(
+          d.service.sign(surgical as any, actor),
+          404,
+          ConsentErrorReason.INFORMED_CONSENT_TARGET_NOT_FOUND,
+        );
+      });
+
+      it('a clinical procedure is found first and the surgical table is not queried', async () => {
+        const d = build();
+        d.tx.findOne.mockImplementation((entity: any) =>
+          Promise.resolve(
+            entity === Procedures
+              ? { id: 'case1', patientProfileId: 'p1' }
+              : null,
+          ),
+        );
+        await d.service.sign(surgical as any, actor);
+        expect(d.tx.findOne).not.toHaveBeenCalledWith(ProcedureCases, {
+          id: 'case1',
+        });
+      });
     });
 
     it('rejects targetType without targetId', async () => {

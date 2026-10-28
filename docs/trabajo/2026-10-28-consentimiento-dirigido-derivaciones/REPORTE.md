@@ -23,7 +23,7 @@
 ## Evidencia
 | Gate | Resultado | Archivo |
 |---|---|---|
-| Jest `src/modules/consent` + `src/modules/clinical_ext` (tras la corrección) | 28 suites, 211 tests, verde | [evidencia/jest-consent-clinical_ext.txt](evidencia/jest-consent-clinical_ext.txt) |
+| Jest `src/modules/consent` + `src/modules/clinical_ext` (tras el ajuste de PROCEDURE) | 28 suites, 215 tests, verde | [evidencia/jest-consent-clinical_ext.txt](evidencia/jest-consent-clinical_ext.txt) |
 | Jest completo (corrida previa a la corrección) | 10797 ok, 1 falla ajena (xlsx, ver archivo) | [evidencia/jest-full-resumen.txt](evidencia/jest-full-resumen.txt) |
 | `yarn typecheck` | exit 0 | [evidencia/typecheck.txt](evidencia/typecheck.txt) |
 | `yarn build` | exit 0 | [evidencia/build.txt](evidencia/build.txt) |
@@ -47,6 +47,16 @@ La respuesta de derivaciones ahora lleva datos clínicos, así que la política 
   consentimiento visible en vez de depender de que cada cliente interprete una marca.
 - Smoke `test/smoke/modules/clinical_ext.smoke.ts`: el caso REJECT de 404 ahora envía `rejectReason`
   (sin él el contrato devuelve 400). Los smoke no se corrieron (requieren la API levantada).
+
+## Ajuste: `targetType='PROCEDURE'` acepta el caso quirúrgico
+El front registra el consentimiento de una cirugía con el id del caso quirúrgico. La tabla
+`procedures.surgical_cases` **no existe** en el modelo ni en la API: el caso quirúrgico es
+`procedures_perioperative.procedure_cases` (entidad `ProcedureCases`, columna `patient_profile_id`,
+expuesto en `/procedure-cases`). La verificación de `PROCEDURE` busca primero en `clinical.procedures`
+y, si no está, en `procedures_perioperative.procedure_cases`; en los dos casos exige el mismo paciente
+(400 `INFORMED_CONSENT_TARGET_PATIENT_MISMATCH`) y, si no está en ninguna, 404
+`INFORMED_CONSENT_TARGET_NOT_FOUND`. `target_id` sigue siendo polimórfico y sin FK, así que el esquema
+no cambia.
 
 ## Pendientes y anotaciones (fuera de alcance)
 - `inventario/` y `schema-descriptions.generated.ts` ya estaban desactualizados antes del cambio; regenerar
