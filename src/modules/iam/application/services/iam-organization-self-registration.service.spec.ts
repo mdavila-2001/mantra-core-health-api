@@ -667,6 +667,64 @@ describe('IamOrganizationSelfRegistrationService', () => {
       expect(d.usersRepo.create).not.toHaveBeenCalled();
     });
 
+    it('un PROFESIONAL_INDEPENDIENTE sin constitución ni matrícula se registra con los tres restantes', async () => {
+      const d = build();
+      const { commerceRegistryFileId, ...withoutCommerce } =
+        withoutConstitution;
+      void commerceRegistryFileId;
+
+      await d.service.registerOrganization({
+        ...dto,
+        organization: {
+          ...dto.organization,
+          legalEntityType: 'PROFESIONAL_INDEPENDIENTE',
+          legalDocuments: withoutCommerce,
+        },
+      } as never);
+
+      expect(
+        d.affiliationDocuments.attachRegistrationDocuments,
+      ).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          documents: {
+            CONSTITUTION_DOC: undefined,
+            TAX_IDENTIFIER_DOC: 'file-tax',
+            COMMERCE_REGISTRY_DOC: undefined,
+            OPERATING_LICENSE_DOC: 'file-license',
+            HEALTH_AUTHORITY_CERT_DOC: 'file-sedes',
+          },
+        }),
+      );
+    });
+
+    it.each(['UNIPERSONAL', 'SRL'])(
+      'una %s sin matrícula de comercio responde 422 nombrándola y no crea ninguna cuenta',
+      async (legalEntityType) => {
+        const d = build();
+        const { commerceRegistryFileId, ...withoutCommerce } =
+          withoutConstitution;
+        void commerceRegistryFileId;
+
+        const intento = d.service.registerOrganization({
+          ...dto,
+          organization: {
+            ...dto.organization,
+            legalEntityType,
+            legalDocuments: {
+              ...withoutCommerce,
+              constitutionFileId: 'file-constitution',
+            },
+          },
+        } as never);
+
+        await expect(intento).rejects.toThrow(PreconditionFailedException);
+        await expect(intento).rejects.toThrow(/matrícula de comercio/);
+        expect(d.usersRepo.create).not.toHaveBeenCalled();
+        expect(d.tenantsRepo.create).not.toHaveBeenCalled();
+      },
+    );
+
     it('la aseguradora sin tipo societario sigue exigiendo la constitución', async () => {
       const d = build();
 

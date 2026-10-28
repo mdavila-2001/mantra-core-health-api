@@ -126,8 +126,9 @@ export class TenantAffiliationDocumentsService {
     const createdIds: string[] = [];
     for (const role of REGISTRATION_DOCUMENT_ROLES) {
       const fileId = input.documents[role];
-      // Sólo la constitución puede faltar, y sólo si el llamador ya validó que
-      // el tipo societario no la exige (UNIPERSONAL).
+      // Sólo la constitución y la matrícula pueden faltar, y sólo si el
+      // llamador ya validó que el tipo societario no las exige (personas
+      // naturales: UNIPERSONAL, PROFESIONAL_INDEPENDIENTE).
       if (fileId === undefined) continue;
       const created = await this.attachOne(tx, role, fileId, {
         tenantId: input.tenantId,
