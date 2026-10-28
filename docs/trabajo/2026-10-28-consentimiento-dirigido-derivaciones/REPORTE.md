@@ -1,12 +1,12 @@
 # Reporte — Consentimiento informado dirigido y derivaciones a servicios específicos (API)
 
-- Fecha: 2026-10-28 · Plan: [PLAN.md](PLAN.md) · Modelo: `mantra-core-health-model` d6d0bbc (v4.2.63)
+- Fecha: 2026-10-28 · Plan: [PLAN.md](PLAN.md) · Modelo: `mantra-core-health-model` d6d0bbc (v4.2.66)
 - Peldaño alcanzado: **TESTED** (unitarios dirigidos en verde, typecheck y build con salida 0).
   **No VERIFIED**: no hubo Postgres ni infraestructura en la sesión; el patch y los endpoints no se
   ejercitaron contra una base real.
 
 ## Qué cambió
-- `database/SQL/patches/2026-10-28_v4263_*.sql`: copia idéntica del patch del modelo.
+- `database/SQL/patches/2026-10-28_v4266_*.sql`: copia idéntica del patch del modelo.
 - `database/SQL/07_consent/*` y `database/SQL/18_clinical_ext/*`: espejo de esos dos módulos desde el
   modelo (incluye `05_constraints.sql` nuevos y, por ser espejo de archivo completo, el desfase previo de
   18: `cds_rule_versions`, `uq_virtual_encounters_encounter_id`, `uq_care_gaps_open_logical_key`,
@@ -23,7 +23,7 @@
 ## Evidencia
 | Gate | Resultado | Archivo |
 |---|---|---|
-| Jest `src/modules/consent` + `src/modules/clinical_ext` (tras el ajuste de PROCEDURE) | 28 suites, 215 tests, verde | [evidencia/jest-consent-clinical_ext.txt](evidencia/jest-consent-clinical_ext.txt) |
+| Jest `src/modules/consent` + `src/modules/clinical_ext` + `src/common/seed` (tras el merge con dev) | 68 suites, 679 tests, verde | [evidencia/jest-consent-clinical_ext.txt](evidencia/jest-consent-clinical_ext.txt) |
 | Jest completo (corrida previa a la corrección) | 10797 ok, 1 falla ajena (xlsx, ver archivo) | [evidencia/jest-full-resumen.txt](evidencia/jest-full-resumen.txt) |
 | `yarn typecheck` | exit 0 | [evidencia/typecheck.txt](evidencia/typecheck.txt) |
 | `yarn build` | exit 0 | [evidencia/build.txt](evidencia/build.txt) |
@@ -57,6 +57,38 @@ y, si no está, en `procedures_perioperative.procedure_cases`; en los dos casos 
 (400 `INFORMED_CONSENT_TARGET_PATIENT_MISMATCH`) y, si no está en ninguna, 404
 `INFORMED_CONSENT_TARGET_NOT_FOUND`. `target_id` sigue siendo polimórfico y sin FK, así que el esquema
 no cambia.
+
+## Merge con `origin/dev` (64f87907)
+La rama nacía de dbc45483, que no está en dev. Se integró con `git merge origin/dev` (sin rebase ni
+force-push). Criterio: conservar lo de dev y sumar lo nuestro.
+- **Versión del patch: v4263 → v4266.** dev ya trae `2026-10-27_v4263_addresses_nivel2_y_distrito.sql`
+  y `v4264_comprobantes_logo_flexible.sql`; en ramas del modelo además están tomadas v4264
+  (`patient_primary_practitioners`) y v4265 (`referrals_tipo_y_servicio`). El patch quedó como
+  `2026-10-28_v4266_informed_consent_targets_and_referral_services.sql` (sólo cambia la primera línea
+  del encabezado). **El modelo tiene que renombrarse igual.** Las referencias «v4263» del código y de
+  este trabajo pasaron a «v4266».
+- **DDL 07_consent / 18_clinical_ext / apply_all.sql:** el espejo de dev era idéntico al modelo `dev`;
+  se tomó la rama del modelo (dev + este cambio), así que conserva todo lo de dev.
+- **`referrals.service.ts`:** base de dev (quien deriva sale del token, destino debe ser un
+  profesional real, encuentro del paciente y de la organización del actor, lock de clave lógica, reason
+  `REFERRAL_ALREADY_EXISTS`, aviso a la paciente tras el commit, `listByPatient` con lectura de
+  historia) más lo nuestro. `isDestination` es el de dev (tenant activo de `X-Tenant-Id`, profesional
+  destino) extendido a la sede destino; quien no es destino recibe **404 `REFERRAL_NOT_FOUND`** (criterio
+  de dev) tanto en `respond` como en `counter-referral`, en lugar del 403 que habíamos puesto.
+- **Error reasons:** `ReferralErrorReason` se fundió en el `ClinicalExtErrorReason` de dev; los de
+  consentimiento se sumaron al `ConsentErrorReason` de dev. Salieron `REFERRAL_RESPOND_FORBIDDEN` y
+  `REFERRAL_COUNTER_REFERRAL_FORBIDDEN`.
+- **Specs:** se tomó el spec de dev y se sumaron los nuestros; los de dev cambiados sólo donde el
+  contrato v4266 lo exige (`respond` devuelve `{ ok, ...derivación }`, REJECT con `rejectReason`, listas
+  como proyección).
+
+## Rama `claude/focused-euler-wgax45-test` (sobre `origin/test` 9bdf321c)
+Cherry-pick de los 4 commits (b19cc52d, 415f1fe4, 97d5bb55, 8e9ce8a1) resolviendo cada conflicto con
+el contenido final de la rama de dev (91e164df), más un commit de adaptación que deja los 45 archivos
+del cambio idénticos a 91e164df. `origin/test` ya trae, en esos archivos, exactamente lo mismo que dev
+(referrals de CE-01, `ClinicalExtErrorReason`, `ConsentErrorReason`, DDL 07/18), así que no hubo que
+quitar nada del cambio. Única adaptación: `database/SQL/apply_all.sql` parte del de test (que no
+incluye `24_pharmacy/05_constraints.sql`, ajeno a este trabajo) y sólo suma `07_consent/05_constraints.sql`.
 
 ## Pendientes y anotaciones (fuera de alcance)
 - `inventario/` y `schema-descriptions.generated.ts` ya estaban desactualizados antes del cambio; regenerar

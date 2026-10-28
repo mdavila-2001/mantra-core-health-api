@@ -1,2 +1,2 @@
-$ yarn build (tras PROCEDURE → caso quirúrgico)
+$ yarn build (merge con origin/dev)
 EXIT 0

@@ -101,7 +101,7 @@ function invalid(
 /**
  * UC-07-08: consentimiento informado de tratamiento.
  *
- * v4263 lo vuelve **dirigido**: puede apuntar a una receta, una orden de
+ * v4266 lo vuelve **dirigido**: puede apuntar a una receta, una orden de
  * estudio, una derivación, un procedimiento o un plan de cuidados, con los
  * elementos de información que exige la norma, quién otorga y bajo qué
  * excepción legal. Se puede listar por paciente/objeto, leer y revocar; la

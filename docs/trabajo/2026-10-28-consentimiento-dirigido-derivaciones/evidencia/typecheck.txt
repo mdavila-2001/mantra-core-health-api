@@ -1,2 +1,2 @@
-$ yarn typecheck (tras PROCEDURE → caso quirúrgico)
+$ yarn typecheck (merge con origin/dev)
 EXIT 0

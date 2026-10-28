@@ -97,7 +97,7 @@ describe('Consent controllers (thin delegation)', () => {
     expect(service.create).toHaveBeenCalledWith(dto, actor);
   });
 
-  it('TreatmentInformedConsentsController delegates list/get/withdraw/post-emergency/evidence (v4263)', async () => {
+  it('TreatmentInformedConsentsController delegates list/get/withdraw/post-emergency/evidence (v4266)', async () => {
     const service = {
       list: mockFn(),
       get: mockFn(),

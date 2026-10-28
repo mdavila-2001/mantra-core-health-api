@@ -1,4 +1,4 @@
--- 2026-10-28 · v4263 · Consentimiento informado dirigido y derivación a servicios específicos.
+-- 2026-10-28 · v4266 · Consentimiento informado dirigido y derivación a servicios específicos.
 --
 -- consent.treatment_informed_consents deja de estar atado sólo a encounter_id +
 -- procedure_code_concept_id: se DIRIGE a un objeto clínico (target_type/target_id/target_label:

@@ -145,7 +145,7 @@ describe('TreatmentInformedConsentsService', () => {
     );
   });
 
-  describe('reglas del consentimiento dirigido (v4263 + enmienda 1)', () => {
+  describe('reglas del consentimiento dirigido (v4266 + enmienda 1)', () => {
     it('persists a directed consent when the target is of the same patient', async () => {
       const d = build();
       d.tx.findOne.mockResolvedValue({ id: 'ref1', patientProfileId: 'p1' });

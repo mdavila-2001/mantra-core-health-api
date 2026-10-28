@@ -69,7 +69,7 @@ export const { seeds: CONSENT_CONCEPT_SEEDS, ids: CONS } = defineModuleConcepts(
       code: 'TREATMENT_CONSENT_SIGNED',
       display: 'Treatment consent signed',
     },
-    // v4263: revocación del consentimiento informado de tratamiento.
+    // v4266: revocación del consentimiento informado de tratamiento.
     TREATMENT_WITHDRAWN: {
       code: 'TREATMENT_CONSENT_WITHDRAWN',
       display: 'Treatment consent withdrawn',

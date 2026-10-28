@@ -200,7 +200,7 @@ export class TreatmentConsentEvidenceItemDto {
 /**
  * Respuesta de un consentimiento informado de tratamiento.
  *
- * v4263: `status` y `decision` pasan a ser legibles (`ACTIVE`/`WITHDRAWN`,
+ * v4266: `status` y `decision` pasan a ser legibles (`ACTIVE`/`WITHDRAWN`,
  * `ACCEPTED`/`DECLINED`); los concept ids siguen en `statusConceptId` y
  * `decisionConceptId`.
  */
@@ -476,7 +476,7 @@ export class TreatmentInformedConsentResponseDto {
   createdAt!: Date;
 }
 
-/** Lista de consentimientos informados de tratamiento (v4263). */
+/** Lista de consentimientos informados de tratamiento (v4266). */
 export class TreatmentInformedConsentListDto {
   /**
    * Consentimientos, del más reciente al más antiguo.

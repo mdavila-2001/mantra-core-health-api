@@ -33,7 +33,7 @@ import {
 /**
  * Endpoints sobre `/consent/treatment-informed-consents`.
  *
- * v4263: consentimiento **dirigido** (receta, orden, derivación, procedimiento,
+ * v4266: consentimiento **dirigido** (receta, orden, derivación, procedimiento,
  * plan de cuidados), con lectura, revocación, evidencia de firma y cierre de
  * la excepción de emergencia. `SECURITY_ADMIN` conserva su camino de alta; el
  * profesional entra con el paciente y el tenant del encuentro y la
@@ -69,7 +69,7 @@ export class TreatmentInformedConsentsController {
     return this.treatmentService.create(dto, actor);
   }
 
-  /** v4263: consentimientos de un paciente, opcionalmente por objeto. */
+  /** v4266: consentimientos de un paciente, opcionalmente por objeto. */
   @Get()
   @Roles('CLINICIAN', 'PRACTITIONER')
   @AccessLogged({ resourceType: 'TREATMENT_INFORMED_CONSENTS' })
@@ -81,7 +81,7 @@ export class TreatmentInformedConsentsController {
     return this.treatmentService.list(query, actor);
   }
 
-  /** v4263: un consentimiento por id. */
+  /** v4266: un consentimiento por id. */
   @Get(':id')
   @Roles('CLINICIAN', 'PRACTITIONER')
   @AccessLogged({
@@ -96,7 +96,7 @@ export class TreatmentInformedConsentsController {
     return this.treatmentService.get(id, actor);
   }
 
-  /** v4263: revocación (409 si ya estaba revocado). */
+  /** v4266: revocación (409 si ya estaba revocado). */
   @Audited({
     action: 'TREATMENT_INFORMED_CONSENT_WITHDRAWN',
     entity: 'treatment_informed_consent',

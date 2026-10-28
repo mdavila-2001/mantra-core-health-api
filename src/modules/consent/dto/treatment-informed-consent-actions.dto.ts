@@ -14,7 +14,7 @@ import {
 } from '../informed-consent.enums';
 import { CreateConsentEvidenceDto } from './create-consent-evidence.dto';
 
-/** Query de `GET /consent/treatment-informed-consents` (v4263). */
+/** Query de `GET /consent/treatment-informed-consents` (v4266). */
 export class ListTreatmentInformedConsentsQueryDto {
   /**
    * Paciente titular: obligatorio, la autorización se decide sobre su historia.
@@ -40,7 +40,7 @@ export class ListTreatmentInformedConsentsQueryDto {
   targetId?: string;
 }
 
-/** Cuerpo de `PATCH /consent/treatment-informed-consents/{id}/withdraw` (v4263). */
+/** Cuerpo de `PATCH /consent/treatment-informed-consents/{id}/withdraw` (v4266). */
 export class WithdrawTreatmentInformedConsentDto {
   /**
    * Motivo de la revocación, tal como lo expresa el paciente o su representante.

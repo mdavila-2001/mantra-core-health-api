@@ -10,7 +10,7 @@
 - Kill-test: `POST /referrals` con `informedConsentId` de otro paciente devuelve 201.
 
 ## Alcance
-- IN: patch `database/SQL/patches/2026-10-28_v4263_*.sql`; espejo DDL en
+- IN: patch `database/SQL/patches/2026-10-28_v4266_*.sql`; espejo DDL en
   `database/SQL/07_consent` y `database/SQL/18_clinical_ext`; entidades, DTOs, repositorios,
   servicios, controladores y specs de `consent` (consentimiento de tratamiento) y
   `clinical_ext` (derivaciones).
@@ -27,7 +27,7 @@
     por encuentro (CL-77). `SECURITY_ADMIN` conserva su comportamiento.
 
 ## H1 — Esquema
-**CA:** Dado el patch v4263, cuando se aplica dos veces, entonces no falla y deja las columnas
+**CA:** Dado el patch v4266, cuando se aplica dos veces, entonces no falla y deja las columnas
 nullable de §1. **DoD:** revisión del SQL (sin Postgres en la sesión: no se ejecutó). **Estado:** HECHO
 
 | ID | Microtarea | CA | DoD | Estado |
