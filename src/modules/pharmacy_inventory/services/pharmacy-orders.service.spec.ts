@@ -1048,7 +1048,11 @@ describe('PharmacyOrdersService', () => {
       // En lote: una sola consulta para todas las farmacias de la página.
       expect(d.orderChat.findPharmacyShowcases).toHaveBeenCalledTimes(1);
       expect(d.orderChat.findPharmacyShowcases).toHaveBeenCalledWith(d.fork, [
-        { pharmacyId: 'ph-1', tenantId: 'tenant-a', publicProfileId: 'vitrina-1' },
+        {
+          pharmacyId: 'ph-1',
+          tenantId: 'tenant-a',
+          publicProfileId: 'vitrina-1',
+        },
         { pharmacyId: 'ph-2', tenantId: 'tenant-b', publicProfileId: null },
       ]);
       const byId = new Map(res.items.map((item) => [item.id, item]));

@@ -408,7 +408,7 @@ describe('CommunityVisibilityService', () => {
 
       await expect(
         d.service.assertOwnMessagingProfile(em, 'vitrina', staff),
-      ).resolves.toBeUndefined();
+      ).resolves.toBe('ORGANIZATION_STAFF');
       await expect(
         d.service.assertActsAsMessagingProfile(em, 'vitrina', staff),
       ).resolves.toBeUndefined();

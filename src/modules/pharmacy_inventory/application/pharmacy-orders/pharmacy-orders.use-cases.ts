@@ -2521,22 +2521,22 @@ export class PharmacyOrdersUseCases {
       const showcase = showcaseByPharmacy?.get(pharmacy.id);
       const dto = toOrderDto(
         order,
-          pharmacy,
-          site,
-          linesByOrder.get(order.id) ?? [],
-          substitutionsByOrder.get(order.id) ?? [],
-          productById,
-          conceptById,
-          order.patientProfileId
-            ? (personNames.get(order.patientProfileId) ?? null)
+        pharmacy,
+        site,
+        linesByOrder.get(order.id) ?? [],
+        substitutionsByOrder.get(order.id) ?? [],
+        productById,
+        conceptById,
+        order.patientProfileId
+          ? (personNames.get(order.patientProfileId) ?? null)
+          : null,
+        viewer,
+        {
+          prescriber: prescriberOf(order),
+          deliveryAddressText: deliveryAddress
+            ? addressText(deliveryAddress)
             : null,
-          viewer,
-          {
-            prescriber: prescriberOf(order),
-            deliveryAddressText: deliveryAddress
-              ? addressText(deliveryAddress)
-              : null,
-          },
+        },
       );
       items.push(
         showcaseByPharmacy

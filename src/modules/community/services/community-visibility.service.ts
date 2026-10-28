@@ -13,9 +13,7 @@ import { CommunityOrganizationStaffService } from './community-organization-staf
 
 /** Por qué un actor puede leer la mensajería de un perfil. */
 export type MessagingProfileAccess =
-  | 'PLATFORM'
-  | 'HOLDER'
-  | 'ORGANIZATION_STAFF';
+  'PLATFORM' | 'HOLDER' | 'ORGANIZATION_STAFF';
 
 /** Roles de plataforma que leen cualquier perfil. */
 const PLATFORM_ROLES = ['SECURITY_ADMIN', 'SUPERADMIN', 'SYSTEM'];

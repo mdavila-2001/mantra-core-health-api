@@ -353,11 +353,7 @@ describe('CommunityMessagingService', () => {
 
   it.each([
     ['con tenant no verificado o suspendido', {}, false],
-    [
-      'privada',
-      { visibilityConceptId: COMM.PROFILE_VISIBILITY_PRIVATE },
-      true,
-    ],
+    ['privada', { visibilityConceptId: COMM.PROFILE_VISIBILITY_PRIVATE }, true],
     ['pendiente', { statusConceptId: CONCEPTS.STATE_PENDING }, true],
     [
       'de un tipo que no es persona ni organización',
