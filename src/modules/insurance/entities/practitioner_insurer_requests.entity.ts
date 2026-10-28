@@ -18,8 +18,9 @@ import { randomUUID } from 'node:crypto';
  * a la compañía y no a una red, y puede nacer el día del alta, cuando el médico
  * todavía no tiene ningún rol en ninguna práctica.
  *
- * Una sola fila por médico y aseguradora (`uq_practitioner_insurer_requests_pair`):
- * volver a pedir después de un rechazo o un retiro reabre la misma fila.
+ * Una sola fila VIVA —pendiente o aprobada— por médico y aseguradora
+ * (`uq_practitioner_insurer_requests_live_pair`, único parcial). Volver a pedir
+ * después de un rechazo o un retiro crea otra fila: la anterior es historia.
  */
 @Entity({ schema: 'insurance', tableName: 'practitioner_insurer_requests' })
 export class PractitionerInsurerRequests {

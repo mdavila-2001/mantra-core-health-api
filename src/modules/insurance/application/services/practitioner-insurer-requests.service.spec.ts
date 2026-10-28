@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import { UniqueConstraintViolationException } from '@mikro-orm/postgresql';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -48,21 +49,23 @@ function build(options: { rows?: Row[]; carriers?: any[] } = {}) {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = {
     fork: () => tx,
-    transactional: (fn: (t: unknown) => unknown) => fn(tx),
+    transactional: mockFn((fn: (t: unknown) => unknown) => fn(tx)),
   };
   let seq = 0;
   const repo = {
     findCarriers: mockFn((_: unknown, ids: string[]) =>
       Promise.resolve(carriers.filter((c) => ids.includes(c.id))),
     ),
-    findPair: mockFn((_: unknown, profile: string, carrier: string) =>
-      Promise.resolve(
-        rows.find(
-          (r) =>
-            r.practitionerProfileId === profile &&
-            r.insuranceCarrierId === carrier,
-        ) ?? null,
-      ),
+    findLivePair: mockFn(
+      (_: unknown, profile: string, carrier: string, live: string[]) =>
+        Promise.resolve(
+          rows.find(
+            (r) =>
+              r.practitionerProfileId === profile &&
+              r.insuranceCarrierId === carrier &&
+              live.includes(r.statusConceptId),
+          ) ?? null,
+        ),
     ),
     create: mockFn((_: unknown, data: any) => {
       const row: Row = {
@@ -124,7 +127,7 @@ function build(options: { rows?: Row[]; carriers?: any[] } = {}) {
     insurerContext as never,
     logger as never,
   );
-  return { service, repo, rows, tx, insurerContext };
+  return { service, repo, rows, tx, em, insurerContext };
 }
 
 function row(over: Partial<Row>): Row {
@@ -175,7 +178,7 @@ describe('PractitionerInsurerRequestsService', () => {
       expect(d.repo.create).not.toHaveBeenCalled();
     });
 
-    it('no toca lo pendiente o aprobado, y reabre lo rechazado sin el motivo anterior', async () => {
+    it('no toca lo pendiente o aprobado; tras un rechazo crea otra y la rechazada queda como historia', async () => {
       const aprobada = row({
         id: 'req-a',
         statusConceptId: INS.PRACTITIONER_REQUEST_APPROVED,
@@ -197,11 +200,23 @@ describe('PractitionerInsurerRequestsService', () => {
       });
 
       expect(result.alreadyLive).toEqual([aprobada]);
-      expect(result.requested).toEqual([rechazada]);
-      expect(rechazada.statusConceptId).toBe(INS.PRACTITIONER_REQUEST_PENDING);
-      expect(rechazada.decisionReasonText).toBeUndefined();
-      expect(rechazada.decidedAt).toBeUndefined();
-      expect(d.repo.create).not.toHaveBeenCalled();
+      expect(result.requested).toHaveLength(1);
+      expect(result.requested[0]).toMatchObject({
+        insuranceCarrierId: CARRIER_B,
+        statusConceptId: INS.PRACTITIONER_REQUEST_PENDING,
+      });
+      expect(result.requested[0]).not.toBe(rechazada);
+      // La rechazada sigue intacta: el médico conserva el motivo.
+      expect(rechazada).toMatchObject({
+        statusConceptId: INS.PRACTITIONER_REQUEST_REJECTED,
+        decisionReasonText: 'Sin convenio',
+      });
+      expect(d.repo.findLivePair).toHaveBeenCalledWith(
+        d.tx,
+        PROFILE,
+        CARRIER_B,
+        [INS.PRACTITIONER_REQUEST_PENDING, INS.PRACTITIONER_REQUEST_APPROVED],
+      );
     });
 
     it('no hace nada si no se eligió ninguna aseguradora', async () => {
@@ -260,16 +275,28 @@ describe('PractitionerInsurerRequestsService', () => {
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
-    it('retira una pendiente propia', async () => {
+    it('retira una pendiente propia y anota cuándo y quién', async () => {
       const pendiente = row({ id: 'r1' });
       const d = build({ rows: [pendiente] });
 
       const dto = await d.service.withdrawOwn('r1', doctor);
 
       expect(dto.status).toBe('WITHDRAWN');
+      expect(dto.decidedAt).toBeInstanceOf(Date);
       expect(pendiente.statusConceptId).toBe(
         INS.PRACTITIONER_REQUEST_WITHDRAWN,
       );
+      expect(pendiente.decidedByUserId).toBe('u-doc');
+    });
+
+    it('dos envíos simultáneos del mismo par: el perdedor recibe 409, no 500', async () => {
+      const d = build();
+      d.em.transactional.mockRejectedValueOnce(
+        new UniqueConstraintViolationException(new Error('duplicate key')),
+      );
+      await expect(
+        d.service.requestOwn([CARRIER_A], doctor),
+      ).rejects.toBeInstanceOf(ConflictException);
     });
 
     it('no retira una aprobada', async () => {

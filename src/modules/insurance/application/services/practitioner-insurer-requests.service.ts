@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/postgresql';
+import {
+  EntityManager,
+  UniqueConstraintViolationException,
+} from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
@@ -99,11 +102,12 @@ export class PractitionerInsurerRequestsService {
    *
    * Lo usan el alta del profesional —en su misma transacción— y
    * `POST /practitioners/me/insurer-requests`. Es idempotente por par: lo
-   * pendiente o aprobado no se toca, lo rechazado o retirado se reabre.
+   * pendiente o aprobado no se toca; tras un rechazo o un retiro se crea otra
+   * solicitud y la anterior queda como historia.
    *
    * @param tx - Transacción en curso.
    * @param input - Quién pide, a quiénes y quién escribe la fila.
-   * @returns Lo creado o reabierto, y lo que ya estaba vivo.
+   * @returns Lo creado y lo que ya estaba vivo.
    * @throws PreconditionFailedException si alguna aseguradora no existe o no está activa.
    */
   async requestWithin(
@@ -134,27 +138,18 @@ export class PractitionerInsurerRequestsService {
     const requested: PractitionerInsurerRequests[] = [];
     const alreadyLive: PractitionerInsurerRequests[] = [];
     for (const carrierId of carrierIds) {
-      const existing = await this.requests.findPair(
+      const live = await this.requests.findLivePair(
         tx,
         input.practitionerProfileId,
         carrierId,
+        LIVE_STATES,
       );
-      if (existing && LIVE_STATES.includes(existing.statusConceptId)) {
-        alreadyLive.push(existing);
+      if (live) {
+        alreadyLive.push(live);
         continue;
       }
-      if (existing) {
-        // Reabrir y no crear otra: el índice único es por par, y una segunda
-        // fila borraría la historia de por qué la primera se rechazó.
-        existing.statusConceptId = INS.PRACTITIONER_REQUEST_PENDING;
-        existing.decisionReasonText = undefined;
-        existing.decidedAt = undefined;
-        existing.decidedByUserId = undefined;
-        existing.createdAt = new Date();
-        touch(existing, input.actorUserId);
-        requested.push(existing);
-        continue;
-      }
+      // Fila nueva aunque el par ya tenga una rechazada o retirada: ésa queda
+      // como historia y el médico sigue leyendo por qué se rechazó.
       requested.push(
         this.requests.create(tx, {
           practitionerProfileId: input.practitionerProfileId,
@@ -190,13 +185,25 @@ export class PractitionerInsurerRequestsService {
     actor: AuthenticatedUser,
   ): Promise<PractitionerInsurerRequestPageDto> {
     const profileId = this.requirePractitioner(actor);
-    const result = await this.em.transactional((tx) =>
-      this.requestWithin(tx, {
-        practitionerProfileId: profileId,
-        carrierIds,
-        actorUserId: actor.id,
-      }),
-    );
+    let result: InsurerRequestBatchResult;
+    try {
+      result = await this.em.transactional((tx) =>
+        this.requestWithin(tx, {
+          practitionerProfileId: profileId,
+          carrierIds,
+          actorUserId: actor.id,
+        }),
+      );
+    } catch (error) {
+      // Dos envíos simultáneos del mismo par: el índice único parcial deja
+      // pasar uno solo. El otro no es un 500, es «ya lo pidió».
+      if (error instanceof UniqueConstraintViolationException) {
+        throw new ConflictException('Ya pidió trabajar con esas aseguradoras', {
+          carrierIds: [...new Set(carrierIds)],
+        });
+      }
+      throw error;
+    }
     if (result.requested.length === 0) {
       throw new ConflictException('Ya pidió trabajar con esas aseguradoras', {
         carrierIds: result.alreadyLive.map((r) => r.insuranceCarrierId),
@@ -251,7 +258,11 @@ export class PractitionerInsurerRequestsService {
           { id },
         );
       }
+      // `decided_at` es cuándo dejó de estar pendiente, también por retiro: la
+      // conversación del médico lo muestra como un mensaje con su hora.
       row.statusConceptId = INS.PRACTITIONER_REQUEST_WITHDRAWN;
+      row.decidedAt = new Date();
+      row.decidedByUserId = actor.id;
       touch(row, actor.id);
       await tx.flush();
       const carriers = await this.carrierMap(tx, [row.insuranceCarrierId]);
