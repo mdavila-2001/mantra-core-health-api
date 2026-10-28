@@ -296,7 +296,7 @@ export class BillingServiceCatalogService {
       });
       await tx.flush();
 
-      await this.attachDefaultSatisfactionSurvey(tx, item, actor);
+      await this.attachDefaultSatisfactionSurveys(tx, [item], actor);
 
       this.logger.info(
         {
@@ -357,8 +357,12 @@ export class BillingServiceCatalogService {
    *
    * Falla con 404 y no con 403 por el mismo motivo que `update`: el id de una
    * práctica ajena responde igual que uno inventado.
+   *
+   * Es público porque la importación en lote desde el arancel
+   * (`ProcedureImportService`) exige **exactamente** el mismo alcance que el alta
+   * individual: una sola regla, no dos copias que se desalineen.
    */
-  private async assertRegistrationCanRegister(
+  async assertRegistrationCanRegister(
     actor: AuthenticatedUser,
     practiceId: string,
   ): Promise<void> {
@@ -397,82 +401,113 @@ export class BillingServiceCatalogService {
    * servicio se crea igual y queda sin encuesta — no hay a quién atribuírsela.
    * No hay retro-alta cuando se una el primero: es la misma limitación que ya
    * acepta el resto del catálogo con datos que faltan.
+   *
+   * **En lote.** Recibe todos los servicios recién creados y escribe cada etapa
+   * (plantillas, versiones, preguntas, asignaciones) con un solo `flush`: la
+   * importación del arancel crea cientos de servicios de una vez y un viaje por
+   * fila no escala. Con un servicio, la secuencia de escrituras es idéntica a la
+   * del alta individual.
    */
-  private async attachDefaultSatisfactionSurvey(
+  async attachDefaultSatisfactionSurveys(
     tx: EntityManager,
-    item: ServiceCatalog,
+    items: readonly ServiceCatalog[],
     actor: AuthenticatedUser,
   ): Promise<void> {
-    const ownerPractitionerId =
-      actor.practitionerProfileId ??
-      (await this.findDefaultSurveyOwner(tx, item.practiceId));
-    if (!ownerPractitionerId) {
-      this.logger.warn(
-        {
-          operation: 'billing.service-catalog.create',
-          serviceCatalogId: item.id,
-          practiceId: item.practiceId,
-        },
-        'Sin profesional activo en la práctica: el servicio queda sin encuesta de satisfacción automática',
-      );
-      return;
+    if (items.length === 0) return;
+
+    // El dueño se resuelve una vez por práctica, no por servicio.
+    const ownerByPractice = new Map<string, string | null>();
+    const withOwner: { item: ServiceCatalog; ownerPractitionerId: string }[] =
+      [];
+    for (const item of items) {
+      let owner = ownerByPractice.get(item.practiceId);
+      if (owner === undefined) {
+        owner =
+          actor.practitionerProfileId ??
+          (await this.findDefaultSurveyOwner(tx, item.practiceId));
+        ownerByPractice.set(item.practiceId, owner);
+      }
+      if (owner) {
+        withOwner.push({ item, ownerPractitionerId: owner });
+      } else {
+        this.logger.warn(
+          {
+            operation: 'billing.service-catalog.create',
+            serviceCatalogId: item.id,
+            practiceId: item.practiceId,
+          },
+          'Sin profesional activo en la práctica: el servicio queda sin encuesta de satisfacción automática',
+        );
+      }
     }
+    if (withOwner.length === 0) return;
 
     const tenantId = requireTenantId();
-    const template = this.templatesRepo.createTemplate(tx, {
-      tenantId,
-      ownerPractitionerId,
-      title: `Satisfacción — ${item.name}`,
-      statusConceptId: SURVEYS.TEMPLATE_DRAFT,
-      actorUserId: actor.id,
-    });
+    const templates = withOwner.map(({ item, ownerPractitionerId }) =>
+      this.templatesRepo.createTemplate(tx, {
+        tenantId,
+        ownerPractitionerId,
+        title: `Satisfacción — ${item.name}`,
+        statusConceptId: SURVEYS.TEMPLATE_DRAFT,
+        actorUserId: actor.id,
+      }),
+    );
     await tx.flush();
 
-    const version = this.templatesRepo.createVersion(tx, {
-      surveyTemplateId: template.id,
-      versionNumber: 1,
-      publicationStatusConceptId: SURVEYS.VERSION_DRAFT,
-      responseWindowDays: DEFAULT_SURVEY_RESPONSE_WINDOW_DAYS,
-      actorUserId: actor.id,
-    });
+    const versions = templates.map((template) =>
+      this.templatesRepo.createVersion(tx, {
+        surveyTemplateId: template.id,
+        versionNumber: 1,
+        publicationStatusConceptId: SURVEYS.VERSION_DRAFT,
+        responseWindowDays: DEFAULT_SURVEY_RESPONSE_WINDOW_DAYS,
+        actorUserId: actor.id,
+      }),
+    );
     await tx.flush();
 
-    this.templatesRepo.createQuestion(tx, {
-      surveyVersionId: version.id,
-      position: 1,
-      questionText: '¿Qué tan satisfecho quedó con la atención?',
-      answerTypeConceptId: SURVEYS.ANSWER_TYPE_SCALE,
-      required: true,
-      scaleMin: 1,
-      scaleMax: 5,
-      actorUserId: actor.id,
-    });
+    for (const version of versions) {
+      this.templatesRepo.createQuestion(tx, {
+        surveyVersionId: version.id,
+        position: 1,
+        questionText: '¿Qué tan satisfecho quedó con la atención?',
+        answerTypeConceptId: SURVEYS.ANSWER_TYPE_SCALE,
+        required: true,
+        scaleMin: 1,
+        scaleMax: 5,
+        actorUserId: actor.id,
+      });
+    }
     await tx.flush();
 
     // Publicar acá mismo, no dejarla en borrador: un servicio nuevo sin
     // encuesta *utilizable* deja el requisito a medias — nadie la publicaría
     // por su cuenta si ni siquiera sabe que se creó sola.
-    version.publicationStatusConceptId = SURVEYS.VERSION_PUBLISHED;
-    version.effectiveFrom = new Date();
-    version.publishedAt = new Date();
-    touch(version, actor.id);
-    template.statusConceptId = SURVEYS.TEMPLATE_ACTIVE;
-    touch(template, actor.id);
+    const now = new Date();
+    withOwner.forEach(({ item }, index) => {
+      const version = versions[index];
+      const template = templates[index];
+      version.publicationStatusConceptId = SURVEYS.VERSION_PUBLISHED;
+      version.effectiveFrom = now;
+      version.publishedAt = now;
+      touch(version, actor.id);
+      template.statusConceptId = SURVEYS.TEMPLATE_ACTIVE;
+      touch(template, actor.id);
 
-    this.assignmentsRepo.create(tx, {
-      surveyVersionId: version.id,
-      tenantId,
-      targetTypeConceptId: SURVEYS.TARGET_SERVICE,
-      targetId: item.id,
-      active: true,
-      actorUserId: actor.id,
+      this.assignmentsRepo.create(tx, {
+        surveyVersionId: version.id,
+        tenantId,
+        targetTypeConceptId: SURVEYS.TARGET_SERVICE,
+        targetId: item.id,
+        active: true,
+        actorUserId: actor.id,
+      });
     });
     await tx.flush();
   }
 
   /**
    * El profesional activo más antiguo de la práctica, o el marcado principal
-   * si hay varios — ver la nota de {@link attachDefaultSatisfactionSurvey}.
+   * si hay varios — ver la nota de {@link attachDefaultSatisfactionSurveys}.
    */
   private async findDefaultSurveyOwner(
     tx: EntityManager,

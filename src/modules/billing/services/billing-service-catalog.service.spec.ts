@@ -30,7 +30,7 @@ const doctor = {
  */
 function build() {
   // Sin vinculaciones activas por defecto: sin `runWithTenant` de por medio,
-  // `attachDefaultSatisfactionSurvey` corta antes de pedir el tenant.
+  // `attachDefaultSatisfactionSurveys` corta antes de pedir el tenant.
   const tx = {
     flush: mockFn().mockResolvedValue(undefined),
     find: mockFn().mockResolvedValue([]),
@@ -374,6 +374,63 @@ describe('BillingServiceCatalogService', () => {
         expect(res).toEqual(item);
         expect(d.templatesRepo.createTemplate).not.toHaveBeenCalled();
         expect(d.logger.warn).toHaveBeenCalled();
+      });
+    });
+
+    describe('encuesta de satisfacción en lote (importación del arancel)', () => {
+      it('crea una encuesta por servicio, busca el dueño una vez por práctica y escribe por etapas', async () => {
+        const d = build();
+        d.tx.find.mockResolvedValue([
+          {
+            practitionerProfileId: 'hp-vieja',
+            isPrimary: false,
+            createdAt: new Date('2026-01-01'),
+          },
+        ]);
+        let seq = 0;
+        d.templatesRepo.createTemplate.mockImplementation(() => ({
+          id: `tpl-${++seq}`,
+        }));
+        d.templatesRepo.createVersion.mockImplementation(
+          (_tx: unknown, data: { surveyTemplateId: string }) => ({
+            id: `ver-of-${data.surveyTemplateId}`,
+          }),
+        );
+        const items = [
+          { id: 's1', practiceId: 'pr1', name: 'Uno' },
+          { id: 's2', practiceId: 'pr1', name: 'Dos' },
+        ] as any[];
+
+        await runWithTenant('tenant-1', () =>
+          d.service.attachDefaultSatisfactionSurveys(d.tx as any, items, actor),
+        );
+
+        expect(d.tx.find).toHaveBeenCalledTimes(1);
+        expect(d.templatesRepo.createTemplate).toHaveBeenCalledTimes(2);
+        expect(d.templatesRepo.createQuestion).toHaveBeenCalledTimes(2);
+        expect(d.assignmentsRepo.create).toHaveBeenCalledTimes(2);
+        expect(d.assignmentsRepo.create).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({
+            surveyVersionId: 'ver-of-tpl-2',
+            targetId: 's2',
+          }),
+        );
+        // Plantillas, versiones, preguntas y asignaciones: un flush por etapa.
+        expect(d.tx.flush).toHaveBeenCalledTimes(4);
+      });
+
+      it('sin servicios no toca nada', async () => {
+        const d = build();
+
+        await d.service.attachDefaultSatisfactionSurveys(
+          d.tx as any,
+          [],
+          actor,
+        );
+
+        expect(d.tx.find).not.toHaveBeenCalled();
+        expect(d.tx.flush).not.toHaveBeenCalled();
       });
     });
 
