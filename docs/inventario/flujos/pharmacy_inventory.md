@@ -791,9 +791,9 @@ flowchart TD
   n7 --> n8
   n9[("LEE pharmacy.pharmacies")]:::efecto
   n8 --> n9
-  n10["Llama a PharmacyDirectoryAdapter.findActiveProductsByIds"]:::llamada
+  n10["Llama a PharmacyDirectoryAdapter.findSellableProductsByIds"]:::llamada
   n9 --> n10
-  n11["Llama a PharmacyReadRepository.findActiveProductsByIds"]:::llamada
+  n11["Llama a PharmacyReadRepository.findSellableProductsByIds"]:::llamada
   n10 --> n11
   n12[("LEE pharmacy.pharmacy_products")]:::efecto
   n11 --> n12
@@ -2232,10 +2232,10 @@ flowchart TD
   n28 --> n29
   n30(["404 NOT_FOUND Receta no encontrada"]):::error
   n29 -->|"sí"| n30
-  n31["Llama a PharmacyDirectoryAdapter.findActiveProductsByIds"]:::llamada
+  n31["Llama a PharmacyDirectoryAdapter.findSellableProductsByIds"]:::llamada
   n29 -->|"no"| n31
   n26 -->|"no"| n31
-  n32["Llama a PharmacyReadRepository.findActiveProductsByIds"]:::llamada
+  n32["Llama a PharmacyReadRepository.findSellableProductsByIds"]:::llamada
   n31 --> n32
   n33[("LEE pharmacy.pharmacy_products")]:::efecto
   n32 --> n33

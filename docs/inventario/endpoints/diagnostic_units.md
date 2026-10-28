@@ -5,7 +5,7 @@
 - **Bloque:** Clínico y Diagnóstico (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 - **Operaciones:** 21 (21 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 0 · MEDIO 15 · BAJO 6
-- **Tablas distintas que tocan:** 16
+- **Tablas distintas que tocan:** 17
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/diagnostic-units.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -28,7 +28,7 @@
 | 14 | POST | `/diagnostic-units/{id}/sites` | Registrar un sitio operativo de la unidad | MEDIO | 2 | SECURITY_ADMIN |
 | 15 | PUT | `/diagnostic-units/{id}/specialties` | Declarar las especialidades de la unidad | MEDIO | 4 | SECURITY_ADMIN |
 | 16 | POST | `/diagnostic-units/{id}/study-offerings` | Publicar oferta de estudio con componentes (panel) | MEDIO | 5 | SECURITY_ADMIN |
-| 17 | POST | `/diagnostic-units/{id}/verify-and-publish` | Verificar la unidad y publicar su perfil público | MEDIO | 8 | SECURITY_ADMIN |
+| 17 | POST | `/diagnostic-units/{id}/verify-and-publish` | Verificar la unidad y publicar su perfil público | MEDIO | 9 | SECURITY_ADMIN |
 | 18 | GET | `/diagnostic-units/administration` | Listar las unidades del tenant, publicadas o no | BAJO | 5 | SECURITY_ADMIN |
 | 19 | GET | `/diagnostic-units/search` | Buscar centros de diagnóstico, laboratorio e imagen | BAJO | 10 | sesión (sin roles) |
 | 20 | POST | `/price-schedules/{scheduleId}/study-prices` | Fijar/versionar el precio de un estudio (append-only) | MEDIO | 6 | SECURITY_ADMIN |
@@ -254,7 +254,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `diagnostic_units.diagnostic_unit_accreditations` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticUnitAccreditationsController.renew → DiagnosticUnitsService.renewAccreditation | `src/modules/diagnostic_units/services/diagnostic-units.service.ts:442` |
+| `diagnostic_units.diagnostic_unit_accreditations` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticUnitAccreditationsController.renew → DiagnosticUnitsService.renewAccreditation | `src/modules/diagnostic_units/services/diagnostic-units.service.ts:446` |
 | `diagnostic_units.diagnostic_unit_accreditations` | ESCRIBE | CREA | DIRECTA | DiagnosticUnitAccreditationsController.renew → DiagnosticUnitsService.renewAccreditation → DiagnosticUnitAccreditationsRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-unit-accreditations.repository.ts:75` |
 | `diagnostic_units.diagnostic_unit_accreditations` | LEE | LEE | DIRECTA | DiagnosticUnitAccreditationsController.renew → DiagnosticUnitsService.renewAccreditation → DiagnosticUnitScopeService.accreditation → DiagnosticUnitAccreditationsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-unit-accreditations.repository.ts:61` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticUnitAccreditationsController.renew → DiagnosticUnitsService.renewAccreditation → DiagnosticUnitScopeService.accreditation → DiagnosticUnitScopeService.viaUnit → DiagnosticUnitsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-units.repository.ts:69` |
@@ -359,7 +359,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `diagnostic_units.diagnostic_unit_sites` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticUnitSitesController.updateSite → DiagnosticUnitsService.updateSite | `src/modules/diagnostic_units/services/diagnostic-units.service.ts:199` |
+| `diagnostic_units.diagnostic_unit_sites` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticUnitSitesController.updateSite → DiagnosticUnitsService.updateSite | `src/modules/diagnostic_units/services/diagnostic-units.service.ts:201` |
 | `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticUnitSitesController.updateSite → DiagnosticUnitsService.updateSite → DiagnosticUnitScopeService.site → DiagnosticUnitSitesRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-unit-sites.repository.ts:50` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticUnitSitesController.updateSite → DiagnosticUnitsService.updateSite → DiagnosticUnitScopeService.site → DiagnosticUnitScopeService.viaUnit → DiagnosticUnitsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-units.repository.ts:69` |
 
@@ -1715,7 +1715,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `diagnostic_units.diagnostic_unit_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticUnitsController.setSpecialties → DiagnosticUnitsService.setSpecialties | `src/modules/diagnostic_units/services/diagnostic-units.service.ts:300` |
+| `diagnostic_units.diagnostic_unit_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticUnitsController.setSpecialties → DiagnosticUnitsService.setSpecialties | `src/modules/diagnostic_units/services/diagnostic-units.service.ts:304` |
 | `diagnostic_units.diagnostic_unit_specialties` | ESCRIBE | CREA | DIRECTA | DiagnosticUnitsController.setSpecialties → DiagnosticUnitsService.setSpecialties → DiagnosticUnitSpecialtiesRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-unit-specialties.repository.ts:73` |
 | `diagnostic_units.diagnostic_unit_specialties` | LEE | LEE | DIRECTA | DiagnosticUnitsController.setSpecialties → DiagnosticUnitsService.setSpecialties → DiagnosticUnitSpecialtiesRepository.findOpenForUnit | `src/modules/diagnostic_units/repositories/diagnostic-unit-specialties.repository.ts:43` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticUnitsController.setSpecialties → DiagnosticUnitsService.setSpecialties → DiagnosticUnitsService.loadActiveUnit → DiagnosticUnitScopeService.unit → DiagnosticUnitsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-units.repository.ts:69` |
@@ -1958,7 +1958,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Cómo se atiende (sistema)
 
-`POST /diagnostic-units/{id}/verify-and-publish` la atiende `DiagnosticUnitsController.verifyAndPublish` (src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:220). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `DiagnosticUnitsService.verifyAndPublish`. Crea filas en community.public_profiles. Actualiza community.public_profiles, diagnostic_units.diagnostic_unit_accreditations, diagnostic_units.diagnostic_unit_specialties, diagnostic_units.diagnostic_units. Lee community.public_profiles, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units.
+`POST /diagnostic-units/{id}/verify-and-publish` la atiende `DiagnosticUnitsController.verifyAndPublish` (src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:220). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `DiagnosticUnitsService.verifyAndPublish`. Crea filas en community.public_profiles. Actualiza community.public_profiles, diagnostic_units.diagnostic_unit_accreditations, diagnostic_units.diagnostic_unit_specialties, diagnostic_units.diagnostic_units. Lee community.public_profiles, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, directory.tenants.
 
 ### Requerimientos
 
@@ -1980,8 +1980,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `diagnostic_units.diagnostic_unit_accreditations` | ESCRIBE | ACTUALIZA | DIRECTA | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish → DiagnosticUnitAccreditationsRepository.verifyOpenForUnit | `src/modules/diagnostic_units/repositories/diagnostic-unit-accreditations.repository.ts:98` |
 | `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish → DiagnosticUnitSitesRepository.countActiveForUnit | `src/modules/diagnostic_units/repositories/diagnostic-unit-sites.repository.ts:58` |
 | `diagnostic_units.diagnostic_unit_specialties` | ESCRIBE | ACTUALIZA | DIRECTA | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish → DiagnosticUnitSpecialtiesRepository.verifyOpenForUnit | `src/modules/diagnostic_units/repositories/diagnostic-unit-specialties.repository.ts:93` |
-| `diagnostic_units.diagnostic_units` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish | `src/modules/diagnostic_units/services/diagnostic-units.service.ts:244` |
+| `diagnostic_units.diagnostic_units` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish | `src/modules/diagnostic_units/services/diagnostic-units.service.ts:248` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish → DiagnosticUnitsService.loadActiveUnit → DiagnosticUnitScopeService.unit → DiagnosticUnitsRepository.findById | `src/modules/diagnostic_units/repositories/diagnostic-units.repository.ts:69` |
+| `directory.tenants` | LEE | LEE | DIRECTA | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish → DiagnosticUnitsService.assertLaboratoryMayOperate | `src/modules/diagnostic_units/services/diagnostic-units.service.ts:512` |
 
 ### Parámetros
 
@@ -2014,7 +2015,7 @@ La operación no recibe cuerpo.
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La unidad no está activa; PreconditionFailedException: La unidad no tiene ningún sitio activo para publicar |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La unidad no está activa; PreconditionFailedException: La unidad no tiene ningún sitio activo para publicar; PreconditionFailedException: El laboratorio no se publica hasta que la plataforma verifique a su organización con la matrícula del SEPREC, la licencia de funcionamiento y el certificado del SEDES |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
@@ -2023,6 +2024,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/laboratory-registration.int-spec.ts:459` |
 | CONTROLADOR | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.spec.ts:109` |
 
 ### Flujos

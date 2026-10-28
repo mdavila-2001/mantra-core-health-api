@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1598 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1598 requests en 146 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1612 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1612 requests en 146 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -30914,7 +30914,7 @@
       ]
     },
     {
-      "name": "consent (22)",
+      "name": "consent (27)",
       "item": [
         {
           "name": "consent-consents",
@@ -32036,6 +32036,73 @@
           "name": "consent-treatment-informed-consents",
           "item": [
             {
+              "name": "GET /consent/treatment-informed-consents · Listar consentimientos informados de tratamiento",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/consent/treatment-informed-consents?patientProfileId={{patientProfileId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "consent",
+                    "treatment-informed-consents"
+                  ],
+                  "query": [
+                    {
+                      "key": "patientProfileId",
+                      "value": "{{patientProfileId}}",
+                      "description": "Paciente titular",
+                      "disabled": false
+                    },
+                    {
+                      "key": "targetType",
+                      "value": "MEDICATION_REQUEST",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "targetId",
+                      "value": "{{targetId}}",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Listar consentimientos informados de tratamiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /consent/treatment-informed-consents`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `TreatmentInformedConsentsController_list`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.treatmentInformedConsents || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('treatmentInformedConsentId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "POST /consent/treatment-informed-consents · Capturar consentimiento informado de tratamiento",
               "request": {
                 "method": "POST",
@@ -32064,7 +32131,7 @@
                 "description": "Capturar consentimiento informado de tratamiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /consent/treatment-informed-consents`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `TreatmentInformedConsentsController_sign`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"decision\": \"ACCEPTED\",\n  \"informationVersion\": \"informationVersion-ejemplo\",\n  \"tenantId\": \"{{tenantId}}\"\n}",
+                  "raw": "{\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"decision\": \"ACCEPTED\",\n  \"informationVersion\": \"informationVersion-ejemplo\",\n  \"tenantId\": \"{{tenantId}}\",\n  \"targetType\": \"MEDICATION_REQUEST\",\n  \"targetId\": \"{{targetId}}\",\n  \"targetLabel\": \"targetLabel-ejemplo\",\n  \"diagnosisText\": \"diagnosisText-ejemplo\",\n  \"purposeText\": \"purposeText-ejemplo\",\n  \"benefitsText\": \"benefitsText-ejemplo\",\n  \"risksText\": \"risksText-ejemplo\",\n  \"personalizedRisksText\": \"personalizedRisksText-ejemplo\",\n  \"alternativesText\": \"alternativesText-ejemplo\",\n  \"refusalConsequencesText\": \"refusalConsequencesText-ejemplo\",\n  \"patientQuestionsText\": \"patientQuestionsText-ejemplo\",\n  \"grantedBy\": \"PATIENT\",\n  \"representativeName\": \"representativeName-ejemplo\",\n  \"representativeDocument\": \"representativeDocument-ejemplo\",\n  \"representativeRelationship\": \"representativeRelationship-ejemplo\",\n  \"incapacityReason\": \"incapacityReason-ejemplo\",\n  \"channel\": \"IN_PERSON\",\n  \"exceptionType\": \"EMERGENCY\",\n  \"exceptionJustification\": \"exceptionJustification-ejemplo\",\n  \"witnessName\": \"witnessName-ejemplo\",\n  \"witnessDocument\": \"witnessDocument-ejemplo\",\n  \"informationLanguage\": \"informationLanguage-ejemplo\",\n  \"assentObtained\": true,\n  \"assentNotes\": \"assentNotes-ejemplo\",\n  \"revocationRightInformed\": true\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -32132,7 +32199,7 @@
                 "description": "Registrar el consentimiento informado del encuentro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /consent/encounters/{encounterId}/informed-consent`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `EncounterInformedConsentsController_register`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"decision\": \"ACCEPTED\",\n  \"informationVersion\": \"informationVersion-ejemplo\"\n}",
+                  "raw": "{\n  \"decision\": \"ACCEPTED\",\n  \"informationVersion\": \"informationVersion-ejemplo\",\n  \"targetType\": \"MEDICATION_REQUEST\",\n  \"targetId\": \"{{targetId}}\",\n  \"targetLabel\": \"targetLabel-ejemplo\",\n  \"diagnosisText\": \"diagnosisText-ejemplo\",\n  \"purposeText\": \"purposeText-ejemplo\",\n  \"benefitsText\": \"benefitsText-ejemplo\",\n  \"risksText\": \"risksText-ejemplo\",\n  \"personalizedRisksText\": \"personalizedRisksText-ejemplo\",\n  \"alternativesText\": \"alternativesText-ejemplo\",\n  \"refusalConsequencesText\": \"refusalConsequencesText-ejemplo\",\n  \"patientQuestionsText\": \"patientQuestionsText-ejemplo\",\n  \"grantedBy\": \"PATIENT\",\n  \"representativeName\": \"representativeName-ejemplo\",\n  \"representativeDocument\": \"representativeDocument-ejemplo\",\n  \"representativeRelationship\": \"representativeRelationship-ejemplo\",\n  \"incapacityReason\": \"incapacityReason-ejemplo\",\n  \"channel\": \"IN_PERSON\",\n  \"exceptionType\": \"EMERGENCY\",\n  \"exceptionJustification\": \"exceptionJustification-ejemplo\",\n  \"witnessName\": \"witnessName-ejemplo\",\n  \"witnessDocument\": \"witnessDocument-ejemplo\",\n  \"informationLanguage\": \"informationLanguage-ejemplo\",\n  \"assentObtained\": true,\n  \"assentNotes\": \"assentNotes-ejemplo\",\n  \"revocationRightInformed\": true\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -32156,6 +32223,74 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.encounterId);",
                       "  if (id) pm.environment.set('encounterId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /consent/treatment-informed-consents/{id}/evidence · Adjuntar evidencia de firma al consentimiento de tratamiento",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/consent/treatment-informed-consents/:id/evidence",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "consent",
+                    "treatment-informed-consents",
+                    ":id",
+                    "evidence"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{treatmentInformedConsentId}}",
+                      "description": "Identificador de ruta · variable `{{treatmentInformedConsentId}}`"
+                    }
+                  ]
+                },
+                "description": "Adjuntar evidencia de firma al consentimiento de tratamiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /consent/treatment-informed-consents/{id}/evidence`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `TreatmentInformedConsentsController_recordEvidence`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"policySnapshotHash\": \"policySnapshotHash-ejemplo\",\n  \"evidenceHash\": \"evidenceHash-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{treatmentInformedConsentId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.treatmentInformedConsentId);",
+                      "  if (id) pm.environment.set('treatmentInformedConsentId', id);",
                       "}"
                     ]
                   }
@@ -32213,6 +32348,183 @@
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('encounterId', first.id);",
                       "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /consent/treatment-informed-consents/{id} · Leer un consentimiento informado de tratamiento",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/consent/treatment-informed-consents/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "consent",
+                    "treatment-informed-consents",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{treatmentInformedConsentId}}",
+                      "description": "Identificador de ruta · variable `{{treatmentInformedConsentId}}`"
+                    }
+                  ]
+                },
+                "description": "Leer un consentimiento informado de tratamiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /consent/treatment-informed-consents/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `TreatmentInformedConsentsController_get`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.treatmentInformedConsents || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('treatmentInformedConsentId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PATCH /consent/treatment-informed-consents/{id}/post-emergency-information · Registrar la información posterior a una emergencia",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/consent/treatment-informed-consents/:id/post-emergency-information",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "consent",
+                    "treatment-informed-consents",
+                    ":id",
+                    "post-emergency-information"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{treatmentInformedConsentId}}",
+                      "description": "Identificador de ruta · variable `{{treatmentInformedConsentId}}`"
+                    }
+                  ]
+                },
+                "description": "Registrar la información posterior a una emergencia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /consent/treatment-informed-consents/{id}/post-emergency-information`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `TreatmentInformedConsentsController_postEmergencyInformation`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"informedAt\": \"2026-01-01T00:00:00.000Z\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PATCH /consent/treatment-informed-consents/{id}/withdraw · Revocar un consentimiento informado de tratamiento",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/consent/treatment-informed-consents/:id/withdraw",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "consent",
+                    "treatment-informed-consents",
+                    ":id",
+                    "withdraw"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{treatmentInformedConsentId}}",
+                      "description": "Identificador de ruta · variable `{{treatmentInformedConsentId}}`"
+                    }
+                  ]
+                },
+                "description": "Revocar un consentimiento informado de tratamiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /consent/treatment-informed-consents/{id}/withdraw`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `TreatmentInformedConsentsController_withdraw`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"reason-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
                     ]
                   }
                 }
@@ -76112,7 +76424,7 @@
       ]
     },
     {
-      "name": "profiles (59)",
+      "name": "profiles (63)",
       "item": [
         {
           "name": "profiles-patients",
@@ -79525,6 +79837,218 @@
                   ]
                 },
                 "description": "Quitar la foto del perfil profesional. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`DELETE /profiles/practitioners/{profileId}/photo`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `ProfilesPractitionersController_removePractitionerPhoto`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "profiles-primary-practitioner",
+          "item": [
+            {
+              "name": "GET /profiles/patients/me/primary-practitioner · Consultar el propio médico de cabecera",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/primary-practitioner",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "primary-practitioner"
+                  ]
+                },
+                "description": "Consultar el propio médico de cabecera. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /profiles/patients/me/primary-practitioner`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `PrimaryPractitionerController_getOwn`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.patients || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('patientId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /profiles/practitioners/me/primary-patients · Listar los pacientes que me eligieron como médico de cabecera",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/practitioners/me/primary-patients",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "practitioners",
+                    "me",
+                    "primary-patients"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Nombre, código de paciente y desde cuándo: ningún dato del expediente.\n\n`GET /profiles/practitioners/me/primary-patients`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `PrimaryPractitionerController_listOwnPatients`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.primaryPatients || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('primaryPatientId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /profiles/patients/me/primary-practitioner · Elegir o cambiar el propio médico de cabecera",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/primary-practitioner",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "primary-practitioner"
+                  ]
+                },
+                "description": "Cierra la elección vigente (si la hay) y abre otra. Elegir al que ya es el vigente no cambia nada. No concede acceso clínico.\n\n`PUT /profiles/patients/me/primary-practitioner`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `PrimaryPractitionerController_setOwn`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"practitionerProfileId\": \"{{practitionerProfileId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "DELETE /profiles/patients/me/primary-practitioner · Quitar el propio médico de cabecera",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/primary-practitioner",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "primary-practitioner"
+                  ]
+                },
+                "description": "Quitar el propio médico de cabecera. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`DELETE /profiles/patients/me/primary-practitioner`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 422, 429, 500, 504\n\noperationId: `PrimaryPractitionerController_removeOwn`"
               },
               "response": [],
               "event": [
@@ -83940,291 +84464,584 @@
       ]
     },
     {
-      "name": "referrals (5)",
+      "name": "referrals (10)",
       "item": [
         {
-          "name": "GET /referrals · Listar derivaciones de un paciente",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/referrals?patientProfileId=patientProfileId-ejemplo",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "referrals"
-              ],
-              "query": [
-                {
-                  "key": "patientProfileId",
-                  "value": "patientProfileId-ejemplo",
-                  "description": "",
-                  "disabled": false
-                }
-              ]
-            },
-            "description": "Listar derivaciones de un paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /referrals`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `ReferralsController_listByPatient`"
-          },
-          "response": [],
-          "event": [
+          "name": "clinical-ext-referrals",
+          "item": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
-                  "if (pm.response.code === 200) {",
-                  "  const body = pm.response.json();",
-                  "  const list = Array.isArray(body) ? body : (body.referrals || body.items || body.data || body.results);",
-                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
-                  "  if (first && first.id) pm.environment.set('referralId', first.id);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "GET /referrals/me · Mis derivaciones",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/referrals/me",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "referrals",
-                "me"
-              ]
-            },
-            "description": "Mis derivaciones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /referrals/me`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `ReferralsController_listMine`"
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
-                  "if (pm.response.code === 200) {",
-                  "  const body = pm.response.json();",
-                  "  const list = Array.isArray(body) ? body : (body.referrals || body.items || body.data || body.results);",
-                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
-                  "  if (first && first.id) pm.environment.set('referralId', first.id);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "POST /referrals · Emitir una referencia desde un encuentro",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
+              "name": "GET /referrals · Listar derivaciones de un paciente",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/referrals?patientProfileId=patientProfileId-ejemplo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "referrals"
+                  ],
+                  "query": [
+                    {
+                      "key": "patientProfileId",
+                      "value": "patientProfileId-ejemplo",
+                      "description": "",
+                      "disabled": false
+                    }
+                  ]
+                },
+                "description": "Listar derivaciones de un paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /referrals`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `ReferralsController_listByPatient`"
               },
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/referrals",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "referrals"
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.referrals || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('referralId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
               ]
             },
-            "description": "Emitir una referencia desde un encuentro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /referrals`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `ReferralsController_create`",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"reasonText\": \"reasonText-ejemplo\",\n  \"validUntil\": \"2026-01-01\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [],
-          "event": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 201', function () {",
-                  "  pm.response.to.have.status(201);",
-                  "});",
-                  "",
-                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{referralId}}.",
-                  "if (pm.response.code < 300) {",
-                  "  const body = pm.response.json();",
-                  "  const id = body && (body.id || body.referralId);",
-                  "  if (id) pm.environment.set('referralId', id);",
-                  "}"
-                ]
-              }
+              "name": "GET /referrals/me · Mis derivaciones",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/referrals/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "referrals",
+                    "me"
+                  ]
+                },
+                "description": "Mis derivaciones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /referrals/me`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `ReferralsController_listMine`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.referrals || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('referralId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /referrals/target-services · Servicios activos de un destino de derivación",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/referrals/target-services",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "referrals",
+                    "target-services"
+                  ],
+                  "query": [
+                    {
+                      "key": "targetProfileId",
+                      "value": "<targetProfileId: uuid existente>",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "targetTenantId",
+                      "value": "<targetTenantId: uuid existente>",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Servicios activos de un destino de derivación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /referrals/target-services`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `ReferralsController_listTargetServices`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.targetServices || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('targetServiceId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /referrals/targets · Buscar destinos de derivación",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/referrals/targets?q=q-ejemplo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "referrals",
+                    "targets"
+                  ],
+                  "query": [
+                    {
+                      "key": "q",
+                      "value": "q-ejemplo",
+                      "description": "",
+                      "disabled": false
+                    },
+                    {
+                      "key": "kind",
+                      "value": "PRACTITIONER",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Buscar destinos de derivación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /referrals/targets`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `ReferralsController_searchTargets`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.targets || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('targetId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /referrals · Emitir una referencia desde un encuentro",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/referrals",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "referrals"
+                  ]
+                },
+                "description": "Emitir una referencia desde un encuentro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /referrals`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `ReferralsController_create`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"reasonText\": \"reasonText-ejemplo\",\n  \"validUntil\": \"2026-01-01\",\n  \"referralType\": \"CONSULTATION\",\n  \"targetExternalName\": \"targetExternalName-ejemplo\",\n  \"targetExternalContact\": \"targetExternalContact-ejemplo\",\n  \"requestedServiceText\": \"requestedServiceText-ejemplo\",\n  \"diagnosisText\": \"diagnosisText-ejemplo\",\n  \"clinicalSummary\": \"clinicalSummary-ejemplo\",\n  \"treatmentGivenText\": \"treatmentGivenText-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{referralId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.referralId);",
+                      "  if (id) pm.environment.set('referralId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /referrals/{id} · Leer una derivación",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/referrals/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "referrals",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{referralId}}",
+                      "description": "Identificador de ruta · variable `{{referralId}}`"
+                    }
+                  ]
+                },
+                "description": "Leer una derivación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /referrals/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `ReferralsController_get`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.referrals || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('referralId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PATCH /referrals/{id}/cancel · Anular una derivación",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/referrals/:id/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "referrals",
+                    ":id",
+                    "cancel"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{referralId}}",
+                      "description": "Identificador de ruta · variable `{{referralId}}`"
+                    }
+                  ]
+                },
+                "description": "Anular una derivación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /referrals/{id}/cancel`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `ReferralsController_cancel`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PATCH /referrals/{id}/counter-referral · Registrar la contrarreferencia de una derivación",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/referrals/:id/counter-referral",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "referrals",
+                    ":id",
+                    "counter-referral"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{referralId}}",
+                      "description": "Identificador de ruta · variable `{{referralId}}`"
+                    }
+                  ]
+                },
+                "description": "Registrar la contrarreferencia de una derivación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /referrals/{id}/counter-referral`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `ReferralsController_counterReferral`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"counterReferralText\": \"counterReferralText-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PATCH /referrals/{id}/respond · Responder / aceptar una referencia inter-tenant",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/referrals/:id/respond",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "referrals",
+                    ":id",
+                    "respond"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{referralId}}",
+                      "description": "Identificador de ruta · variable `{{referralId}}`"
+                    }
+                  ]
+                },
+                "description": "Responder / aceptar una referencia inter-tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /referrals/{id}/respond`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `ReferralsController_respond`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"decision\": \"ACCEPT\",\n  \"rejectReason\": \"rejectReason-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             }
           ]
         },
         {
-          "name": "POST /referrals/{id}/qualify · Calificar el referido y premiar a ambas partes",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
+          "name": "loyalty",
+          "item": [
+            {
+              "name": "POST /referrals/{id}/qualify · Calificar el referido y premiar a ambas partes",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/referrals/:id/qualify",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "referrals",
+                    ":id",
+                    "qualify"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{referralId}}",
+                      "description": "Identificador de ruta · variable `{{referralId}}`"
+                    }
+                  ]
+                },
+                "description": "Idempotente por referido: reentregar el evento no duplica la recompensa.\n\n`POST /referrals/{id}/qualify`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `LoyaltyController_qualifyReferral`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"refereeUserId\": \"<refereeUserId: uuid existente>\",\n  \"qualifyingEvent\": \"SIGNUP\",\n  \"referrerMembershipId\": \"<referrerMembershipId: uuid existente>\",\n  \"refereeMembershipId\": \"<refereeMembershipId: uuid existente>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
               },
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/referrals/:id/qualify",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "referrals",
-                ":id",
-                "qualify"
-              ],
-              "variable": [
+              "response": [],
+              "event": [
                 {
-                  "key": "id",
-                  "value": "{{referralId}}",
-                  "description": "Identificador de ruta · variable `{{referralId}}`"
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{referralId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.referralId);",
+                      "  if (id) pm.environment.set('referralId', id);",
+                      "}"
+                    ]
+                  }
                 }
               ]
-            },
-            "description": "Idempotente por referido: reentregar el evento no duplica la recompensa.\n\n`POST /referrals/{id}/qualify`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `LoyaltyController_qualifyReferral`",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"refereeUserId\": \"<refereeUserId: uuid existente>\",\n  \"qualifyingEvent\": \"SIGNUP\",\n  \"referrerMembershipId\": \"<referrerMembershipId: uuid existente>\",\n  \"refereeMembershipId\": \"<refereeMembershipId: uuid existente>\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{referralId}}.",
-                  "if (pm.response.code < 300) {",
-                  "  const body = pm.response.json();",
-                  "  const id = body && (body.id || body.referralId);",
-                  "  if (id) pm.environment.set('referralId', id);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "PATCH /referrals/{id}/respond · Responder / aceptar una referencia inter-tenant",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/referrals/:id/respond",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "referrals",
-                ":id",
-                "respond"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "{{referralId}}",
-                  "description": "Identificador de ruta · variable `{{referralId}}`"
-                }
-              ]
-            },
-            "description": "Responder / aceptar una referencia inter-tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /referrals/{id}/respond`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `ReferralsController_respond`",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"decision\": \"ACCEPT\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});"
-                ]
-              }
             }
           ]
         }

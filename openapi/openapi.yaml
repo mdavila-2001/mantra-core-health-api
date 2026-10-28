@@ -24089,6 +24089,228 @@ paths:
       description: >-
         Capturar consentimiento informado de tratamiento. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+    get:
+      operationId: TreatmentInformedConsentsController_list
+      parameters:
+        - name: patientProfileId
+          required: true
+          in: query
+          description: Paciente titular
+          schema:
+            format: uuid
+            type: string
+        - name: targetType
+          required: false
+          in: query
+          schema:
+            type: string
+            enum:
+              - MEDICATION_REQUEST
+              - SERVICE_REQUEST
+              - REFERRAL
+              - PROCEDURE
+              - CARE_PLAN
+        - name: targetId
+          required: false
+          in: query
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Listar consentimientos informados de tratamiento
+      tags:
+        - consent-treatment-informed-consents
+      description: >-
+        Listar consentimientos informados de tratamiento. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /consent/treatment-informed-consents/{id}:
+    get:
+      operationId: TreatmentInformedConsentsController_get
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Leer un consentimiento informado de tratamiento
+      tags:
+        - consent-treatment-informed-consents
+      description: >-
+        Leer un consentimiento informado de tratamiento. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /consent/treatment-informed-consents/{id}/withdraw:
+    patch:
+      operationId: TreatmentInformedConsentsController_withdraw
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WithdrawTreatmentInformedConsentDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Revocar un consentimiento informado de tratamiento
+      tags:
+        - consent-treatment-informed-consents
+      description: >-
+        Revocar un consentimiento informado de tratamiento. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /consent/treatment-informed-consents/{id}/post-emergency-information:
+    patch:
+      operationId: TreatmentInformedConsentsController_postEmergencyInformation
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostEmergencyInformationDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Registrar la información posterior a una emergencia
+      tags:
+        - consent-treatment-informed-consents
+      description: >-
+        Registrar la información posterior a una emergencia. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /consent/treatment-informed-consents/{id}/evidence:
+    post:
+      operationId: TreatmentInformedConsentsController_recordEvidence
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordTreatmentConsentEvidenceDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Adjuntar evidencia de firma al consentimiento de tratamiento
+      tags:
+        - consent-treatment-informed-consents
+      description: >-
+        Adjuntar evidencia de firma al consentimiento de tratamiento. Requiere JWT y los roles o alcances declarados por
+        el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /consent/consent-evidence:
     post:
       operationId: ConsentEvidenceController_record
@@ -33004,6 +33226,12 @@ paths:
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReferralListItemDto'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -33024,6 +33252,95 @@ paths:
       description: >-
         Listar derivaciones de un paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
         respuestas de error usan el envelope ErrorResponse.
+  /referrals/targets:
+    get:
+      operationId: ReferralsController_searchTargets
+      parameters:
+        - name: q
+          required: true
+          in: query
+          schema:
+            minLength: 2
+            maxLength: 100
+            type: string
+        - name: kind
+          required: false
+          in: query
+          schema:
+            type: string
+            enum:
+              - PRACTITIONER
+              - ORGANIZATION
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReferralTargetListDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Buscar destinos de derivación
+      tags:
+        - clinical-ext-referrals
+      description: >-
+        Buscar destinos de derivación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /referrals/target-services:
+    get:
+      operationId: ReferralsController_listTargetServices
+      parameters:
+        - name: targetProfileId
+          required: false
+          in: query
+          schema:
+            format: uuid
+            type: string
+        - name: targetTenantId
+          required: false
+          in: query
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReferralTargetServiceListDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Servicios activos de un destino de derivación
+      tags:
+        - clinical-ext-referrals
+      description: >-
+        Servicios activos de un destino de derivación. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /referrals/{id}/respond:
     patch:
       operationId: ReferralsController_respond
@@ -33070,6 +33387,90 @@ paths:
       description: >-
         Responder / aceptar una referencia inter-tenant. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /referrals/{id}/counter-referral:
+    patch:
+      operationId: ReferralsController_counterReferral
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CounterReferralDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Registrar la contrarreferencia de una derivación
+      tags:
+        - clinical-ext-referrals
+      description: >-
+        Registrar la contrarreferencia de una derivación. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /referrals/{id}/cancel:
+    patch:
+      operationId: ReferralsController_cancel
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Anular una derivación
+      tags:
+        - clinical-ext-referrals
+      description: >-
+        Anular una derivación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas
+        de error usan el envelope ErrorResponse.
   /referrals/me:
     get:
       operationId: ReferralsController_listMine
@@ -33077,6 +33478,12 @@ paths:
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReferralListItemDto'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -33096,6 +33503,40 @@ paths:
         - clinical-ext-referrals
       description: >-
         Mis derivaciones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de
+        error usan el envelope ErrorResponse.
+  /referrals/{id}:
+    get:
+      operationId: ReferralsController_get
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Leer una derivación
+      tags:
+        - clinical-ext-referrals
+      description: >-
+        Leer una derivación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de
         error usan el envelope ErrorResponse.
   /care-gaps/recompute:
     post:
@@ -69323,7 +69764,8 @@ components:
           format: uuid
           description: >-
             Escritura de constitución (fileId de POST /iam/auth/upload-registration-document). Obligatoria salvo para
-            UNIPERSONAL, que no la tiene; el servicio responde 422 nombrando el documento faltante
+            UNIPERSONAL y PROFESIONAL_INDEPENDIENTE (personas naturales), que no la tienen; el servicio responde 422
+            nombrando el documento faltante
         taxIdentifierFileId:
           type: string
           format: uuid
@@ -69331,7 +69773,10 @@ components:
         commerceRegistryFileId:
           type: string
           format: uuid
-          description: Registro mercantil (matrícula SEPREC en Bolivia)
+          description: >-
+            Registro mercantil (matrícula SEPREC en Bolivia). Obligatorio salvo para PROFESIONAL_INDEPENDIENTE, que
+            ejerce con su NIT personal sin matrícula de comercio; el servicio responde 422 nombrando el documento
+            faltante
         operatingLicenseFileId:
           type: string
           format: uuid
@@ -69342,7 +69787,6 @@ components:
           description: Certificado de la autoridad sanitaria (SEDES en Bolivia)
       required:
         - taxIdentifierFileId
-        - commerceRegistryFileId
         - operatingLicenseFileId
         - healthAuthorityCertificateFileId
       additionalProperties: false
@@ -84212,10 +84656,170 @@ components:
           type: string
           description: Tenant propietario
           format: uuid
+        targetType:
+          type: string
+          description: A qué se consiente (va junto con targetId)
+          enum:
+            - MEDICATION_REQUEST
+            - SERVICE_REQUEST
+            - REFERRAL
+            - PROCEDURE
+            - CARE_PLAN
+        targetId:
+          type: string
+          description: Id del objeto consentido (va junto con targetType)
+          format: uuid
+        targetLabel:
+          type: string
+          description: Instantánea legible de lo consentido
+          maxLength: 300
+        diagnosisText:
+          type: string
+          description: Diagnóstico que lo motiva
+          maxLength: 4000
+        purposeText:
+          type: string
+          description: Naturaleza y objetivo del tratamiento, estudio o derivación
+          maxLength: 4000
+        benefitsText:
+          type: string
+          description: Beneficios esperados
+          maxLength: 4000
+        risksText:
+          type: string
+          description: Riesgos frecuentes y graves / efectos adversos
+          maxLength: 4000
+        personalizedRisksText:
+          type: string
+          description: Riesgos personalizados del paciente
+          maxLength: 4000
+        alternativesText:
+          type: string
+          description: Alternativas disponibles
+          maxLength: 4000
+        refusalConsequencesText:
+          type: string
+          description: Consecuencias previsibles de no aceptar
+          maxLength: 4000
+        patientQuestionsText:
+          type: string
+          description: Preguntas del paciente y respuestas
+          maxLength: 4000
+        grantedBy:
+          type: string
+          description: Quién otorga (por defecto el titular)
+          enum:
+            - PATIENT
+            - LEGAL_REPRESENTATIVE
+            - GUARDIAN
+            - SUBSTITUTE_RELATIVE
+        representativeName:
+          type: string
+          description: Nombre del representante (obligatorio si no otorga el titular)
+          maxLength: 200
+        representativeDocument:
+          type: string
+          description: Documento del representante (CI u otro)
+          maxLength: 60
+        representativeRelationship:
+          type: string
+          description: Parentesco o calidad del representante (obligatorio si no otorga el titular)
+          maxLength: 80
+        incapacityReason:
+          type: string
+          description: Por qué no consiente el titular
+          maxLength: 4000
+        informedByProfileId:
+          type: string
+          description: Profesional que informa (practitioner profile id)
+          format: uuid
+        channel:
+          type: string
+          description: Canal por el que se informó
+          enum:
+            - IN_PERSON
+            - TELEHEALTH
+        exceptionType:
+          type: string
+          description: Excepción legal al consentimiento
+          enum:
+            - EMERGENCY
+            - PUBLIC_HEALTH_RISK
+            - PATIENT_WAIVER
+        exceptionJustification:
+          type: string
+          description: Justificación de la excepción (obligatoria si hay excepción)
+          maxLength: 4000
+        witnessName:
+          type: string
+          description: Testigo externo (nombre)
+          maxLength: 200
+        witnessDocument:
+          type: string
+          description: Documento del testigo externo
+          maxLength: 60
+        informationLanguage:
+          type: string
+          description: Idioma de la información (por defecto es)
+          maxLength: 40
+        assentObtained:
+          type: boolean
+          description: Asentimiento obtenido (obligatorio si otorga un representante)
+        assentNotes:
+          type: string
+          description: Notas del asentimiento
+          maxLength: 4000
+        revocationRightInformed:
+          type: boolean
+          description: Se informó el derecho a revocar
       required:
         - patientProfileId
         - encounterId
         - decision
+      additionalProperties: false
+    WithdrawTreatmentInformedConsentDto:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: Motivo de la revocación
+          maxLength: 4000
+      required:
+        - reason
+      additionalProperties: false
+    PostEmergencyInformationDto:
+      type: object
+      properties:
+        informedAt:
+          type: string
+          format: date-time
+      required:
+        - informedAt
+      additionalProperties: false
+    RecordTreatmentConsentEvidenceDto:
+      type: object
+      properties:
+        evidenceTypeConceptId:
+          type: string
+          description: Tipo de evidencia (concept id); por defecto firma
+        documentFileId:
+          type: string
+          description: Documento firmado (file id)
+          format: uuid
+        signatureId:
+          type: string
+          description: Firma clínica asociada (signature id)
+          format: uuid
+        capturedChannelConceptId:
+          type: string
+          description: Canal de captura (concept id)
+          format: uuid
+        policySnapshotHash:
+          type: string
+          description: Hash del snapshot de política
+        evidenceHash:
+          type: string
+          description: Hash de la evidencia (integridad reproducible)
       additionalProperties: false
     CreateConsentEvidenceDto:
       type: object
@@ -84324,6 +84928,122 @@ components:
           type: string
           description: Testigo (user id)
           format: uuid
+        targetType:
+          type: string
+          description: A qué se consiente (va junto con targetId)
+          enum:
+            - MEDICATION_REQUEST
+            - SERVICE_REQUEST
+            - REFERRAL
+            - PROCEDURE
+            - CARE_PLAN
+        targetId:
+          type: string
+          description: Id del objeto consentido (va junto con targetType)
+          format: uuid
+        targetLabel:
+          type: string
+          description: Instantánea legible de lo consentido
+          maxLength: 300
+        diagnosisText:
+          type: string
+          description: Diagnóstico que lo motiva
+          maxLength: 4000
+        purposeText:
+          type: string
+          description: Naturaleza y objetivo del tratamiento, estudio o derivación
+          maxLength: 4000
+        benefitsText:
+          type: string
+          description: Beneficios esperados
+          maxLength: 4000
+        risksText:
+          type: string
+          description: Riesgos frecuentes y graves / efectos adversos
+          maxLength: 4000
+        personalizedRisksText:
+          type: string
+          description: Riesgos personalizados del paciente
+          maxLength: 4000
+        alternativesText:
+          type: string
+          description: Alternativas disponibles
+          maxLength: 4000
+        refusalConsequencesText:
+          type: string
+          description: Consecuencias previsibles de no aceptar
+          maxLength: 4000
+        patientQuestionsText:
+          type: string
+          description: Preguntas del paciente y respuestas
+          maxLength: 4000
+        grantedBy:
+          type: string
+          description: Quién otorga (por defecto el titular)
+          enum:
+            - PATIENT
+            - LEGAL_REPRESENTATIVE
+            - GUARDIAN
+            - SUBSTITUTE_RELATIVE
+        representativeName:
+          type: string
+          description: Nombre del representante (obligatorio si no otorga el titular)
+          maxLength: 200
+        representativeDocument:
+          type: string
+          description: Documento del representante (CI u otro)
+          maxLength: 60
+        representativeRelationship:
+          type: string
+          description: Parentesco o calidad del representante (obligatorio si no otorga el titular)
+          maxLength: 80
+        incapacityReason:
+          type: string
+          description: Por qué no consiente el titular
+          maxLength: 4000
+        informedByProfileId:
+          type: string
+          description: Profesional que informa (practitioner profile id)
+          format: uuid
+        channel:
+          type: string
+          description: Canal por el que se informó
+          enum:
+            - IN_PERSON
+            - TELEHEALTH
+        exceptionType:
+          type: string
+          description: Excepción legal al consentimiento
+          enum:
+            - EMERGENCY
+            - PUBLIC_HEALTH_RISK
+            - PATIENT_WAIVER
+        exceptionJustification:
+          type: string
+          description: Justificación de la excepción (obligatoria si hay excepción)
+          maxLength: 4000
+        witnessName:
+          type: string
+          description: Testigo externo (nombre)
+          maxLength: 200
+        witnessDocument:
+          type: string
+          description: Documento del testigo externo
+          maxLength: 60
+        informationLanguage:
+          type: string
+          description: Idioma de la información (por defecto es)
+          maxLength: 40
+        assentObtained:
+          type: boolean
+          description: Asentimiento obtenido (obligatorio si otorga un representante)
+        assentNotes:
+          type: string
+          description: Notas del asentimiento
+          maxLength: 4000
+        revocationRightInformed:
+          type: boolean
+          description: Se informó el derecho a revocar
       required:
         - decision
       additionalProperties: false
@@ -89389,9 +90109,142 @@ components:
           type: string
           format: date
           description: Vigencia de la referencia
+        referralType:
+          type: string
+          enum:
+            - TREATMENT
+            - CONSULTATION
+            - DIAGNOSTIC_STUDY
+            - PROCEDURE
+            - SECOND_OPINION
+            - THERAPY
+            - HOSPITALIZATION
+            - OTHER
+          default: CONSULTATION
+          description: Tipo de derivación (tratamiento, consulta, estudio, …)
+        targetBranchId:
+          type: string
+          format: uuid
+          description: Sede u organización médica destino
+        targetExternalName:
+          type: string
+          description: Doctor u organización destino fuera de la plataforma
+          maxLength: 200
+        targetExternalContact:
+          type: string
+          description: Contacto del destino externo
+          maxLength: 200
+        requestedServiceText:
+          type: string
+          description: Servicio específico pedido
+          maxLength: 500
+        requestedServiceConceptId:
+          type: string
+          format: uuid
+          description: Servicio codificado (concept id)
+        diagnosisText:
+          type: string
+          description: Diagnóstico presuntivo o definitivo
+          maxLength: 4000
+        clinicalSummary:
+          type: string
+          description: Resumen clínico
+          maxLength: 8000
+        treatmentGivenText:
+          type: string
+          description: Tratamiento realizado antes de derivar
+          maxLength: 4000
+        informedConsentId:
+          type: string
+          format: uuid
+          description: >-
+            NO enviar: se rechaza con 400 REFERRAL_CONSENT_LINK_NOT_ALLOWED. El vínculo lo escribe el consentimiento
+            registrado con targetType=REFERRAL y targetId=<derivación>.
+        targetServiceCatalogId:
+          type: string
+          format: uuid
+          description: Servicio del catálogo del destino
       required:
         - patientProfileId
       additionalProperties: false
+    ReferralTargetDto:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum:
+            - PRACTITIONER
+            - ORGANIZATION
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        tenantId:
+          type: string
+          format: uuid
+          nullable: true
+        subtitle:
+          type: string
+          nullable: true
+      required:
+        - kind
+        - id
+        - displayName
+        - tenantId
+        - subtitle
+    ReferralTargetListDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReferralTargetDto'
+      required:
+        - items
+    ReferralTargetServiceDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        price:
+          type: number
+        currency:
+          type: string
+          nullable: true
+        tenantId:
+          type: string
+          format: uuid
+          nullable: true
+        practiceName:
+          type: string
+          nullable: true
+      required:
+        - id
+        - code
+        - name
+        - description
+        - price
+        - currency
+        - tenantId
+        - practiceName
+    ReferralTargetServiceListDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReferralTargetServiceDto'
+      required:
+        - items
     RespondReferralDto:
       type: object
       properties:
@@ -89401,9 +90254,158 @@ components:
             - ACCEPT
             - REJECT
           description: Decisión del tenant destino
+        rejectReason:
+          type: string
+          description: Motivo del rechazo (obligatorio si REJECT)
+          maxLength: 4000
       required:
         - decision
       additionalProperties: false
+    CounterReferralDto:
+      type: object
+      properties:
+        counterReferralText:
+          type: string
+          description: Contrarreferencia
+          maxLength: 8000
+      required:
+        - counterReferralText
+      additionalProperties: false
+    ReferralListItemDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        patientProfileId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - PENDING
+            - ACCEPTED
+            - REJECTED
+            - COMPLETED
+            - CANCELLED
+        statusConceptId:
+          type: string
+          format: uuid
+          description: Estado de la referencia (concept id)
+        referralType:
+          type: string
+          enum:
+            - TREATMENT
+            - CONSULTATION
+            - DIAGNOSTIC_STUDY
+            - PROCEDURE
+            - SECOND_OPINION
+            - THERAPY
+            - HOSPITALIZATION
+            - OTHER
+          nullable: true
+        referralTypeConceptId:
+          type: string
+          format: uuid
+        targetServiceCatalogId:
+          type: string
+          format: uuid
+          nullable: true
+        sourceEncounterId:
+          type: string
+          format: uuid
+        referringProfileId:
+          type: string
+          format: uuid
+        targetProfileId:
+          type: string
+          format: uuid
+        targetTenantId:
+          type: string
+          format: uuid
+        targetTenantName:
+          type: string
+        targetBranchId:
+          type: string
+          format: uuid
+        targetBranchName:
+          type: string
+        targetExternalName:
+          type: string
+        targetExternalContact:
+          type: string
+        specialtyConceptId:
+          type: string
+          format: uuid
+        serviceRequestId:
+          type: string
+          format: uuid
+        requestedServiceText:
+          type: string
+        requestedServiceConceptId:
+          type: string
+          format: uuid
+        reasonConceptId:
+          type: string
+          format: uuid
+        reasonText:
+          type: string
+        diagnosisText:
+          type: string
+        clinicalSummary:
+          type: string
+        treatmentGivenText:
+          type: string
+        informedConsentId:
+          type: string
+          format: uuid
+        priorityConceptId:
+          type: string
+          format: uuid
+        validUntil:
+          type: string
+          format: date
+        respondedAt:
+          type: string
+          format: date-time
+        rejectReason:
+          type: string
+        counterReferralText:
+          type: string
+        counterReferralAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        createdByUserId:
+          type: string
+          format: uuid
+        updatedByUserId:
+          type: string
+          format: uuid
+        rowVersion:
+          type: number
+        targetDisplayName:
+          type: string
+          nullable: true
+        targetServiceName:
+          type: string
+          nullable: true
+      required:
+        - id
+        - patientProfileId
+        - status
+        - statusConceptId
+        - referralType
+        - targetServiceCatalogId
+        - createdAt
+        - rowVersion
+        - targetDisplayName
+        - targetServiceName
     CareGapInputDto:
       type: object
       properties:

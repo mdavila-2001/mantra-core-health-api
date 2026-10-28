@@ -5,7 +5,7 @@
 - **Bloque:** Clínico y Diagnóstico (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 - **Operaciones:** 42 (42 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 1 · MEDIO 30 · BAJO 11
-- **Tablas distintas que tocan:** 91
+- **Tablas distintas que tocan:** 92
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/clinical.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -25,7 +25,7 @@
 | 11 | GET | `/clinical/encounters/{id}/attachments` | Listar los adjuntos de un encuentro | BAJO | 22 | CLINICIAN, PRACTITIONER, PATIENT |
 | 12 | POST | `/clinical/encounters/{id}/attachments` | Adjuntar un archivo ya subido a un encuentro | MEDIO | 21 | CLINICIAN, PRACTITIONER |
 | 13 | POST | `/clinical/encounters/{id}/close` | Cerrar un encuentro en curso (gatilla facturación) | MEDIO | 40 | CLINICIAN, PRACTITIONER |
-| 14 | POST | `/clinical/encounters/check-in` | Check-in de un encuentro con participantes y ubicación | MEDIO | 8 | CLINICIAN, PRACTITIONER |
+| 14 | POST | `/clinical/encounters/check-in` | Check-in de un encuentro con participantes y ubicación | MEDIO | 27 | CLINICIAN, PRACTITIONER |
 | 15 | POST | `/clinical/immunizations` | Registrar una inmunización | MEDIO | 4 | CLINICIAN, PRACTITIONER |
 | 16 | POST | `/clinical/internal/prescription-expiry-notices` | Avisar al paciente de las recetas por vencer (barrido) | MEDIO | 13 | SYSTEM, SYSTEM_WORKER |
 | 17 | GET | `/clinical/me/medical-aspects` | Ver mis aspectos médicos declarados | BAJO | 3 | sesión (sin roles) |
@@ -174,7 +174,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:614` |
+| INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:623` |
 | CONTROLADOR | `src/modules/clinical/controllers/clinical-records.controller.spec.ts:68` |
 
 ### Flujos
@@ -515,7 +515,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/clinical-c14-c23-notas-e-internacion.int-spec.ts:279` |
-| INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:586` |
+| INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:595` |
 | CONTROLADOR | `src/modules/clinical/controllers/clinical-encounters.controller.spec.ts:33` |
 
 ### Flujos
@@ -648,7 +648,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/br14-encuentros-seguridad-clinica.int-spec.ts:151` |
-| INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:603` |
+| INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:612` |
 | INTEGRACION | `test/integration/fx17-sello-del-encuentro.int-spec.ts:161` |
 | INTEGRACION | `test/integration/hardening/mch-007.int-spec.ts:125` |
 | CONTROLADOR | `src/modules/clinical/controllers/clinical-records.controller.spec.ts:57` |
@@ -1596,16 +1596,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
 | `chart.care_plan_activities` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → CarePlansRepository.findByEncounter → CarePlansRepository.findActivitiesForPlans | `src/modules/chart/repositories/care-plans.repository.ts:171` |
 | `chart.care_plans` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → CarePlansRepository.findByEncounter | `src/modules/chart/repositories/care-plans.repository.ts:131` |
-| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → ClinicalNotesRepository.findHeadersByEncounter | `src/modules/chart/repositories/clinical-notes.repository.ts:280` |
-| `chart.clinical_note_versions` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → ClinicalNotesRepository.findVersionsByIds | `src/modules/chart/repositories/clinical-notes.repository.ts:368` |
+| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → ClinicalNotesRepository.findHeadersByEncounter | `src/modules/chart/repositories/clinical-notes.repository.ts:284` |
+| `chart.clinical_note_versions` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → ClinicalNotesRepository.findVersionsByIds | `src/modules/chart/repositories/clinical-notes.repository.ts:372` |
 | `chart.document_record_files` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → DocumentsRepository.findByEncounter → DocumentsRepository.findFilesForRecords | `src/modules/chart/repositories/documents.repository.ts:174` |
 | `chart.document_records` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → DocumentsRepository.findByEncounter | `src/modules/chart/repositories/documents.repository.ts:138` |
 | `clinical.conditions` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → ConditionsRepository.findByEncounter | `src/modules/clinical/repositories/conditions.repository.ts:122` |
-| `clinical.encounter_locations` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalEncountersController.close → EncountersService.close | `src/modules/clinical/services/encounters.service.ts:397` |
+| `clinical.encounter_locations` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalEncountersController.close → EncountersService.close | `src/modules/clinical/services/encounters.service.ts:427` |
 | `clinical.encounter_locations` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncountersRepository.findActiveLocations | `src/modules/clinical/repositories/encounters.repository.ts:390` |
-| `clinical.encounter_participants` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalEncountersController.close → EncountersService.close | `src/modules/clinical/services/encounters.service.ts:386` |
+| `clinical.encounter_participants` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalEncountersController.close → EncountersService.close | `src/modules/clinical/services/encounters.service.ts:416` |
 | `clinical.encounter_participants` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncountersRepository.findActiveParticipants | `src/modules/clinical/repositories/encounters.repository.ts:371` |
-| `clinical.encounters` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalEncountersController.close → EncountersService.close | `src/modules/clinical/services/encounters.service.ts:376` |
+| `clinical.encounters` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalEncountersController.close → EncountersService.close | `src/modules/clinical/services/encounters.service.ts:406` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
 | `clinical.medication_requests` | LEE | LEE | DIRECTA | ClinicalEncountersController.close → EncountersService.close → EncounterSealService.computeHash → EncounterSealService.buildPayload → MedicationRequestsRepository.findByEncounter | `src/modules/clinical/repositories/medication-requests.repository.ts:162` |
 | `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalEncountersController.close → EncountersService.close → ClinicalNotificationsService.encounterClosed → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
@@ -1715,7 +1715,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/encounters/check-in` la atiende `ClinicalEncountersController.checkIn` (src/modules/clinical/controllers/clinical-encounters.controller.ts:89). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CheckInEncounterDto` (17 campos, 2 obligatorios). Delega en `EncountersService.checkIn`. Crea filas en clinical.encounter_locations, clinical.encounter_participants, clinical.encounters. Lee clinical.appointments, clinical.care_episodes, clinical.encounter_locations, clinical.encounter_participants, clinical.encounters.
+`POST /clinical/encounters/check-in` la atiende `ClinicalEncountersController.checkIn` (src/modules/clinical/controllers/clinical-encounters.controller.ts:89). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CheckInEncounterDto` (17 campos, 2 obligatorios). Delega en `EncountersService.checkIn`. Crea filas en audit.audit_log, authz.care_relationships, clinical.encounter_locations, clinical.encounter_participants, clinical.encounters, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza iam.devices. Lee audit.audit_log, authz.care_relationships, clinical.appointments, clinical.care_episodes, clinical.encounter_locations, clinical.encounter_participants, clinical.encounters, directory.tenant_memberships y 10 más.
 
 ### Requerimientos
 
@@ -1732,6 +1732,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.recordEncounterCareRelationships → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.recordEncounterCareRelationships → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `authz.care_relationships` | ESCRIBE | CREA | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.recordEncounterCareRelationships → CareRelationshipsRepository.create | `src/modules/authz/repositories/care-relationships.repository.ts:233` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.recordEncounterCareRelationships → CareRelationshipsRepository.findActiveInTenant | `src/modules/authz/repositories/care-relationships.repository.ts:86` |
 | `clinical.appointments` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → EncountersService.resolverAppointmentEncounter → EncountersRepository.findAppointmentForUpdate | `src/modules/clinical/repositories/encounters.repository.ts:265` |
 | `clinical.care_episodes` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → CareEpisodesRepository.findById | `src/modules/clinical/repositories/care-episodes.repository.ts:50` |
 | `clinical.encounter_locations` | ESCRIBE | CREA | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → EncountersRepository.createLocation | `src/modules/clinical/repositories/encounters.repository.ts:237` |
@@ -1740,6 +1744,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.encounter_participants` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → EncountersService.resolverAppointmentEncounter → EncountersRepository.findActiveParticipants | `src/modules/clinical/repositories/encounters.repository.ts:371` |
 | `clinical.encounters` | ESCRIBE | CREA | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → EncountersRepository.create | `src/modules/clinical/repositories/encounters.repository.ts:180` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → EncountersService.resolverAppointmentEncounter → EncountersRepository.findByAppointmentId | `src/modules/clinical/repositories/encounters.repository.ts:283` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.recordEncounterCareRelationships → AuthzClinicalScopeService.isPatientInTenant → AuthzClinicalScopeRepository.patientHasFootprintInTenant | `src/modules/authz/repositories/authz-clinical-scope.repository.ts:99` |
+| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.notifyEncounterCareRelationshipRequests → AuthzCareRelationshipsService.notifyRequest → NotificationsService.emitInApp → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
+| `iam.devices` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.notifyEncounterCareRelationshipRequests → AuthzCareRelationshipsService.notifyRequest → NotificationsService.emitInApp → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `iam.sessions` | LEE | LEE | POR_SQL | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.recordEncounterCareRelationships → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.notifyEncounterCareRelationshipRequests → AuthzCareRelationshipsService.notifyRequest → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
+| `messaging.in_app_notifications` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.notifyEncounterCareRelationshipRequests → AuthzCareRelationshipsService.notifyRequest → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findUnreadInAppForResource | `src/modules/messaging/repositories/notifications.repository.ts:845` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.notifyEncounterCareRelationshipRequests → AuthzCareRelationshipsService.notifyRequest → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:189` |
+| `messaging.messaging_providers` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.notifyEncounterCareRelationshipRequests → AuthzCareRelationshipsService.notifyRequest → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
+| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.notifyEncounterCareRelationshipRequests → AuthzCareRelationshipsService.notifyRequest → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.notifyEncounterCareRelationshipRequests → AuthzCareRelationshipsService.notifyRequest → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
+| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.notifyEncounterCareRelationshipRequests → AuthzCareRelationshipsService.notifyRequest → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.notifyEncounterCareRelationshipRequests → AuthzCareRelationshipsService.notifyRequest → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.recordEncounterCareRelationships → AuthzClinicalScopeService.isPatientInTenant → AuthzClinicalScopeRepository.patientExists | `src/modules/authz/repositories/authz-clinical-scope.repository.ts:40` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.recordEncounterCareRelationships → AuthzClinicalScopeService.isPatientInTenant → AuthzClinicalScopeRepository.patientHasFootprintInTenant | `src/modules/authz/repositories/authz-clinical-scope.repository.ts:85` |
+| `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | ClinicalEncountersController.checkIn → EncountersService.checkIn → AuthzCareRelationshipsService.recordEncounterCareRelationships → AuthzClinicalScopeService.isPatientInTenant → AuthzClinicalScopeRepository.patientHasFootprintInTenant | `src/modules/authz/repositories/authz-clinical-scope.repository.ts:91` |
 
 ### Cuerpo — DTO `CheckInEncounterDto` · `application/json`
 
@@ -1838,9 +1857,10 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 |---|---|
 | INTEGRACION | `test/integration/br14-encuentros-seguridad-clinica.int-spec.ts:125` |
 | INTEGRACION | `test/integration/clinical-c14-c23-notas-e-internacion.int-spec.ts:183` |
-| INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:592` |
+| INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:601` |
 | INTEGRACION | `test/integration/fx12-check-in-idempotente-por-cita.int-spec.ts:187` |
 | INTEGRACION | `test/integration/fx13-encuentro-en-la-reserva.int-spec.ts:211` |
+| INTEGRACION | `test/integration/p40-orden-basada-en-notas.int-spec.ts:133` |
 | INTEGRACION | `test/integration/virtual-encounter-auth.int-spec.ts:92` |
 | CONTROLADOR | `src/modules/clinical/controllers/clinical-encounters.controller.spec.ts:42` |
 
@@ -2596,7 +2616,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/clinical-prescriptions-pdf.int-spec.ts:148` |
-| INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:635` |
+| INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:644` |
 | INTEGRACION | `test/integration/hardening/mch-007.int-spec.ts:245` |
 | CONTROLADOR | `src/modules/clinical/controllers/clinical-records.controller.spec.ts:79` |
 
@@ -3825,7 +3845,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 |---|---|
 | INTEGRACION | `test/integration/br14-encuentros-seguridad-clinica.int-spec.ts:172` |
 | INTEGRACION | `test/integration/clinical-c14-c23-notas-e-internacion.int-spec.ts:193` |
-| INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:624` |
+| INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:633` |
 | INTEGRACION | `test/integration/hardening/mch-008.int-spec.ts:84` |
 | CONTROLADOR | `src/modules/clinical/controllers/clinical-observations.controller.spec.ts:35` |
 
@@ -4245,7 +4265,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 | INTEGRACION | `test/integration/br14-encuentros-seguridad-clinica.int-spec.ts:300` |
 | INTEGRACION | `test/integration/clinical-c14-c23-notas-e-internacion.int-spec.ts:141` |
 | INTEGRACION | `test/integration/dependent-link-requests.int-spec.ts:129` |
-| INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:648` |
+| INTEGRACION | `test/integration/frontend-read-flows.int-spec.ts:657` |
 | INTEGRACION | `test/integration/fx16-dependientes-y-tutor-legal.int-spec.ts:425` |
 | INTEGRACION | `test/integration/hardening/mch-007.int-spec.ts:186` |
 
@@ -5051,7 +5071,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 | INTEGRACION | `test/integration/hardening/mch-027.int-spec.ts:69` |
 | INTEGRACION | `test/integration/lab-reception-inbox.int-spec.ts:158` |
 | INTEGRACION | `test/integration/medical-centers.int-spec.ts:755` |
-| INTEGRACION | `test/integration/p40-orden-basada-en-notas.int-spec.ts:163` |
+| INTEGRACION | `test/integration/p40-orden-basada-en-notas.int-spec.ts:171` |
 | INTEGRACION | `test/integration/patient-diagnostic-orders.int-spec.ts:87` |
 | CONTROLADOR | `src/modules/clinical/controllers/clinical-orders.controller.spec.ts:36` |
 
