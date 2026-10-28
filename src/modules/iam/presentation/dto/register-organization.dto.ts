@@ -53,7 +53,7 @@ export class RegisterOrganizationLegalDocumentsDto {
   @ApiPropertyOptional({
     format: 'uuid',
     description:
-      'Escritura de constitución (fileId de POST /iam/auth/upload-registration-document). Obligatoria salvo para UNIPERSONAL, que no la tiene; el servicio responde 422 nombrando el documento faltante',
+      'Escritura de constitución (fileId de POST /iam/auth/upload-registration-document). Obligatoria salvo para UNIPERSONAL y PROFESIONAL_INDEPENDIENTE (personas naturales), que no la tienen; el servicio responde 422 nombrando el documento faltante',
   })
   @IsOptional()
   @IsUUID()
@@ -72,12 +72,14 @@ export class RegisterOrganizationLegalDocumentsDto {
   /**
    * Registro mercantil — la matrícula de comercio SEPREC en Bolivia (1.3).
    */
-  @ApiProperty({
+  @ApiPropertyOptional({
     format: 'uuid',
-    description: 'Registro mercantil (matrícula SEPREC en Bolivia)',
+    description:
+      'Registro mercantil (matrícula SEPREC en Bolivia). Obligatorio salvo para PROFESIONAL_INDEPENDIENTE, que ejerce con su NIT personal sin matrícula de comercio; el servicio responde 422 nombrando el documento faltante',
   })
+  @IsOptional()
   @IsUUID()
-  commerceRegistryFileId!: string;
+  commerceRegistryFileId?: string;
 
   /**
    * Licencia de funcionamiento municipal (1.4).
