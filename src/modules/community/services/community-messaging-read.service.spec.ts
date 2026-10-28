@@ -46,6 +46,9 @@ function build() {
   };
   const visibility = {
     assertOwnProfile: mockFn().mockResolvedValue(undefined),
+    // Variante de mensajería (titular o personal de la organización): la usan
+    // bandeja, hilo, adjuntos y presencia. La búsqueda de contactos no.
+    assertOwnMessagingProfile: mockFn().mockResolvedValue(undefined),
     isBlockedBetween: mockFn().mockResolvedValue(false),
   };
   // F4.2: la presencia se dobla; por defecto nadie está en línea.
@@ -215,6 +218,19 @@ describe('CommunityMessagingReadService', () => {
       expect(d.profilesRepo.searchChatContacts).not.toHaveBeenCalled();
     });
 
+    it('el personal de una farmacia no busca contactos como la farmacia', async () => {
+      const d = build();
+      d.visibility.assertOwnProfile.mockRejectedValue(
+        new ForbiddenException('perfil ajeno'),
+      );
+
+      await expect(
+        d.service.searchContacts('p-farmacia', actor, 'Juan', 10),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      // Titularidad estricta: la membresía en la organización no cuenta acá.
+      expect(d.visibility.assertOwnMessagingProfile).not.toHaveBeenCalled();
+    });
+
     it('una consulta vacía no enumera perfiles', async () => {
       const d = build();
 
@@ -274,7 +290,7 @@ describe('CommunityMessagingReadService', () => {
 
     it('mismo tenant no sustituye perfil propio ni membresía', async () => {
       const d = build();
-      d.visibility.assertOwnProfile.mockRejectedValue(
+      d.visibility.assertOwnMessagingProfile.mockRejectedValue(
         new ForbiddenException('perfil ajeno'),
       );
 
@@ -419,7 +435,7 @@ describe('CommunityMessagingReadService', () => {
 
     it('exige ser el titular del perfil', async () => {
       const d = build();
-      d.visibility.assertOwnProfile.mockRejectedValue(new Error('prohibido'));
+      d.visibility.assertOwnMessagingProfile.mockRejectedValue(new Error('prohibido'));
       await expect(
         d.service.listConversations('p-ajeno', actor, { limit: 20 }),
       ).rejects.toThrow('prohibido');

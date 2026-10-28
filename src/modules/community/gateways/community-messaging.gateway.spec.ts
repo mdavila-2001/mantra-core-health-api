@@ -52,7 +52,7 @@ function build() {
     ]),
   };
   const visibility = {
-    assertOwnProfile: mockFn().mockResolvedValue(undefined),
+    assertOwnMessagingProfile: mockFn().mockResolvedValue(undefined),
   };
   const presence = {
     markInLine: mockFn().mockResolvedValue(true),
@@ -176,7 +176,7 @@ describe('CommunityMessagingGateway', () => {
 
     it('un perfil ajeno no entra a la bandeja ni marca presencia', async () => {
       const d = build();
-      d.visibility.assertOwnProfile.mockRejectedValue(new Error('no'));
+      d.visibility.assertOwnMessagingProfile.mockRejectedValue(new Error('no'));
       const { client } = socket();
 
       await d.gateway.handleJoinInbox(client as any, { profileId: 'p-ajeno' });

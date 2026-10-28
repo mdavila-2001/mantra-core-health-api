@@ -136,6 +136,21 @@ export class PublicProfilesRepository {
   }
 
   /**
+   * Las vitrinas de varios sujetos en una consulta (por `target_id`).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param targetIds - Sujetos (p. ej. tenants de organizaciones).
+   * @returns Los perfiles existentes, sin orden garantizado.
+   */
+  listByTargetIds(
+    em: EntityManager,
+    targetIds: string[],
+  ): Promise<PublicProfiles[]> {
+    if (targetIds.length === 0) return Promise.resolve([]);
+    return em.find(PublicProfiles, { targetId: { $in: targetIds } });
+  }
+
+  /**
    * Personas activas que se pueden elegir para iniciar un chat.
    *
    * Es una lectura autenticada y deliberadamente distinta del directorio

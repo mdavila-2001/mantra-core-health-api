@@ -28,6 +28,11 @@ import { TerminologyModule } from '../terminology/terminology.module';
 import { ClinicalModule } from '../clinical/clinical.module';
 import { SearchPlatformModule } from '../search_platform/search_platform.module';
 import { RedisRuntimeModule } from '../redis_runtime/redis_runtime.module';
+// Membresías de tenant: quién atiende la bandeja de una vitrina de
+// organización. Es el módulo de autorización suelto de `directory`, sin
+// imports propios, así que no cierra el ciclo con `DirectoryModule` (que sí
+// importa a `community`).
+import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
 import { WsJwtGuard } from '../../common';
 import {
   CommunitySocialController,
@@ -80,6 +85,8 @@ import {
   CommunitySearchIndexService,
   CommunityVerificationService,
   CommunityProfileStatsService,
+  CommunityOrganizationStaffService,
+  CommunityOrderChatService,
 } from './services';
 import { CommunityMessagingGateway } from './gateways';
 import {
@@ -136,6 +143,7 @@ import {
     RedisRuntimeModule,
     MessagingModule,
     TerminologyModule,
+    DirectoryAuthorizationModule,
   ],
   controllers: [
     CommunitySocialController,
@@ -202,6 +210,8 @@ import {
     CommunityChatAutoReplyService,
     CommunityMessagingService,
     CommunityBookingChatService,
+    CommunityOrganizationStaffService,
+    CommunityOrderChatService,
     CommunityMessagingGateway,
     CommunityMessageNotificationsService,
     // F4.2 · presencia del chat sobre el Redis compartido del módulo.
@@ -254,6 +264,8 @@ import {
     CommunityMessagingService,
     // La agenda deja la confirmación de una cita en el chat (hilo profesional-paciente).
     CommunityBookingChatService,
+    // El pedido de farmacia abre el hilo paciente ↔ vitrina de la farmacia.
+    CommunityOrderChatService,
   ],
 })
 export class CommunityModule {}

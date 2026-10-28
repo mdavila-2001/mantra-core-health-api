@@ -24,6 +24,7 @@ import { CommunityMessagingGateway } from '../gateways/community-messaging.gatew
 // Directo y no por el barrel, por el mismo ciclo que el gateway.
 import { CommunityVisibilityService } from './community-visibility.service';
 import { CommunityChatAutoReplyService } from './community-chat-auto-reply.service';
+import { CommunityOrganizationStaffService } from './community-organization-staff.service';
 import { COMM } from '../community.concepts';
 import { CommunityErrorReason } from '../community.error-reasons';
 import {
@@ -54,6 +55,12 @@ import type { DirectMessages } from '../entities';
  */
 export const EDIT_WINDOW_MS = 5 * 60_000;
 
+/** Destinatarios que son personas: los encarna su propia cuenta. */
+const PERSON_RECIPIENT_TYPES: readonly string[] = [
+  COMM.PROFILE_TARGET_USER,
+  COMM.PROFILE_TARGET_PRACTITIONER,
+];
+
 /**
  * Mensajería social: crea conversaciones con participantes (bootstrap), envía
  * mensajes directos (UC-19-06) y marca mensajes como leídos vía recibos
@@ -72,6 +79,7 @@ export class CommunityMessagingService {
    * @param autoReply - La respuesta automática por inactividad (F4.7).
    * @param visibility - Que el perfil con el que se escribe sea del actor.
    * @param logger - Valor de logger requerido por la operación.
+   * @param organizationStaff - Elegibilidad de una vitrina de organización.
    */
   constructor(
     private readonly em: EntityManager,
@@ -84,6 +92,7 @@ export class CommunityMessagingService {
     private readonly visibility: CommunityVisibilityService,
     private readonly attachableFiles: AttachableFileService,
     private readonly logger: PinoLogger,
+    private readonly organizationStaff: CommunityOrganizationStaffService,
   ) {
     this.logger.setContext(CommunityMessagingService.name);
   }
@@ -144,7 +153,19 @@ export class CommunityMessagingService {
   ): Promise<IdResponseDto> {
     const result = await this.em.transactional(async (tx) => {
       const [initiatorProfileId] = dto.participantProfileIds;
-      await this.visibility.assertActsAsProfile(tx, initiatorProfileId, actor);
+      // Por el endpoint público sólo inicia el titular: el personal de una
+      // organización no puede abrir hilos en frío como la farmacia. Su único
+      // camino para iniciar es el canal de sistema de un hecho que ya los une
+      // (un pedido), que llega con `requirePublicRecipient = false`.
+      if (requirePublicRecipient) {
+        await this.visibility.assertActsAsProfile(tx, initiatorProfileId, actor);
+      } else {
+        await this.visibility.assertActsAsMessagingProfile(
+          tx,
+          initiatorProfileId,
+          actor,
+        );
+      }
 
       const participantIds = new Set(dto.participantProfileIds);
       if (participantIds.size !== dto.participantProfileIds.length) {
@@ -167,9 +188,17 @@ export class CommunityMessagingService {
         recipient?.statusConceptId === CONCEPTS.STATE_ACTIVE &&
         (!requirePublicRecipient ||
           recipient.visibilityConceptId === COMM.PROFILE_VISIBILITY_PUBLIC) &&
-        [COMM.PROFILE_TARGET_USER, COMM.PROFILE_TARGET_PRACTITIONER].includes(
-          recipient.targetTypeConceptId,
-        );
+        (PERSON_RECIPIENT_TYPES.includes(recipient.targetTypeConceptId) ||
+          // Una farmacia o clínica: su vitrina sólo es pública si el tenant se
+          // verificó, pero un tenant puede suspenderse después. Se exige las
+          // dos cosas: vitrina pública (aun por el canal de sistema) y tenant
+          // activo y verificado. La atiende su personal.
+          (this.organizationStaff.isOrganizationProfile(recipient) &&
+            recipient.visibilityConceptId === COMM.PROFILE_VISIBILITY_PUBLIC &&
+            (await this.organizationStaff.isVerifiedActiveTenant(
+              tx,
+              recipient.targetId,
+            ))));
       if (!eligibleRecipient) {
         throw new PreconditionFailedException(
           'La persona no está disponible para iniciar una conversación',
@@ -266,7 +295,7 @@ export class CommunityMessagingService {
     );
     const sent = await this.em.transactional(async (tx) => {
       if (authorizingActor) {
-        await this.visibility.assertActsAsProfile(
+        await this.visibility.assertActsAsMessagingProfile(
           tx,
           dto.senderProfileId,
           authorizingActor,
@@ -606,7 +635,7 @@ export class CommunityMessagingService {
     const result = await this.em.transactional(async (tx) => {
       // El lector sale del cuerpo, así que se prueba contra la sesión: sin
       // esto cualquiera podía dejar «leído» un hilo ajeno a nombre de otro.
-      await this.visibility.assertActsAsProfile(
+      await this.visibility.assertActsAsMessagingProfile(
         tx,
         dto.recipientProfileId,
         actor,
@@ -693,7 +722,7 @@ export class CommunityMessagingService {
     actor: AuthenticatedUser,
   ): Promise<ParticipantPreferencesDto> {
     return this.em.transactional(async (tx) => {
-      await this.visibility.assertActsAsProfile(tx, dto.profileId, actor);
+      await this.visibility.assertActsAsMessagingProfile(tx, dto.profileId, actor);
       const participant = await this.activeOrNotFoundParticipant(
         tx,
         conversationId,
@@ -735,7 +764,7 @@ export class CommunityMessagingService {
     actor: AuthenticatedUser,
   ): Promise<DirectMessageDto> {
     const result = await this.em.transactional(async (tx) => {
-      await this.visibility.assertActsAsProfile(tx, dto.senderProfileId, actor);
+      await this.visibility.assertActsAsMessagingProfile(tx, dto.senderProfileId, actor);
       await this.activeOrNotFoundParticipant(
         tx,
         conversationId,
@@ -780,7 +809,7 @@ export class CommunityMessagingService {
     actor: AuthenticatedUser,
   ): Promise<DeletedMessageResponseDto> {
     const result = await this.em.transactional(async (tx) => {
-      await this.visibility.assertActsAsProfile(tx, profileId, actor);
+      await this.visibility.assertActsAsMessagingProfile(tx, profileId, actor);
       await this.activeOrNotFoundParticipant(tx, conversationId, profileId);
       const message = await this.ownLiveMessage(
         tx,
@@ -842,7 +871,7 @@ export class CommunityMessagingService {
     actor: AuthenticatedUser,
   ): Promise<PinnedMessageResponseDto> {
     const recipients = await this.em.transactional(async (tx) => {
-      await this.visibility.assertActsAsProfile(tx, dto.profileId, actor);
+      await this.visibility.assertActsAsMessagingProfile(tx, dto.profileId, actor);
       await this.activeOrNotFoundParticipant(tx, conversationId, dto.profileId);
       const conversation = await this.conversationsRepo.findConversationById(
         tx,
@@ -883,7 +912,7 @@ export class CommunityMessagingService {
     actor: AuthenticatedUser,
   ): Promise<PinnedMessageResponseDto> {
     const recipients = await this.em.transactional(async (tx) => {
-      await this.visibility.assertActsAsProfile(tx, profileId, actor);
+      await this.visibility.assertActsAsMessagingProfile(tx, profileId, actor);
       await this.activeOrNotFoundParticipant(tx, conversationId, profileId);
       const conversation = await this.conversationsRepo.findConversationById(
         tx,

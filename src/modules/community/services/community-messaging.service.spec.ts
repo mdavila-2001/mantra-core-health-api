@@ -68,6 +68,17 @@ function build() {
   // F4: que el perfil con el que se escribe sea del actor. Por defecto lo es.
   const visibility = {
     assertActsAsProfile: mockFn().mockResolvedValue(undefined),
+    // La variante de mensajería (titular o personal de la organización): la
+    // usan todas las escrituras del hilo y el canal de sistema.
+    assertActsAsMessagingProfile: mockFn().mockResolvedValue(undefined),
+  };
+  // La regla real de qué es una vitrina de organización; el tenant, doblado.
+  const organizationStaff = {
+    isOrganizationProfile: (profile: any) =>
+      [COMM.PROFILE_TARGET_ORGANIZATION, COMM.PROFILE_TARGET_PHARMACY].includes(
+        profile?.targetTypeConceptId,
+      ),
+    isVerifiedActiveTenant: mockFn().mockResolvedValue(true),
   };
   // F4.7 · la respuesta automática, doblada: enviar se prueba acá, contestar
   // solo se prueba en su propio servicio. Por defecto no contesta nadie, que
@@ -90,8 +101,10 @@ function build() {
     visibility as any,
     attachableFiles as any,
     logger as any,
+    organizationStaff as any,
   );
   return {
+    organizationStaff,
     autoReply,
     service,
     tx,
@@ -283,12 +296,123 @@ describe('CommunityMessagingService', () => {
     ).rejects.toBeInstanceOf(ForbiddenException);
 
     expect(d.visibility.assertActsAsProfile).not.toHaveBeenCalled();
+    expect(d.visibility.assertActsAsMessagingProfile).not.toHaveBeenCalled();
+  });
+
+  /* --- Bandeja de organización (farmacia) --------------------------------- */
+
+  const pharmacyShowcase = (overrides: Record<string, unknown> = {}) => ({
+    id: 'p-farmacia',
+    targetId: 'tenant-farmacia',
+    statusConceptId: CONCEPTS.STATE_ACTIVE,
+    visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC,
+    targetTypeConceptId: COMM.PROFILE_TARGET_PHARMACY,
+    ...overrides,
+  });
+
+  it('acepta como destinataria la vitrina pública de una farmacia verificada', async () => {
+    const d = build();
+    d.profilesRepo.findById.mockResolvedValue(pharmacyShowcase());
+    d.conversationsRepo.createConversation.mockReturnValue({ id: 'conv-f' });
+
+    await expect(
+      d.service.createConversation(
+        { participantProfileIds: ['p1', 'p-farmacia'] },
+        actor,
+      ),
+    ).resolves.toEqual({ id: 'conv-f' });
+    expect(d.organizationStaff.isVerifiedActiveTenant).toHaveBeenCalledWith(
+      d.tx,
+      'tenant-farmacia',
+    );
+    // Por el endpoint público el iniciador sigue siendo el titular estricto.
+    expect(d.visibility.assertActsAsProfile).toHaveBeenCalledWith(
+      d.tx,
+      'p1',
+      actor,
+    );
+    expect(d.visibility.assertActsAsMessagingProfile).not.toHaveBeenCalled();
+  });
+
+  it('acepta también la vitrina de una organización (clínica) verificada', async () => {
+    const d = build();
+    d.profilesRepo.findById.mockResolvedValue(
+      pharmacyShowcase({
+        targetTypeConceptId: COMM.PROFILE_TARGET_ORGANIZATION,
+      }),
+    );
+    d.conversationsRepo.createConversation.mockReturnValue({ id: 'conv-o' });
+
+    await expect(
+      d.service.createConversation(
+        { participantProfileIds: ['p1', 'p-farmacia'] },
+        actor,
+      ),
+    ).resolves.toEqual({ id: 'conv-o' });
+  });
+
+  it.each([
+    ['con tenant no verificado o suspendido', {}, false],
+    [
+      'privada',
+      { visibilityConceptId: COMM.PROFILE_VISIBILITY_PRIVATE },
+      true,
+    ],
+    ['pendiente', { statusConceptId: CONCEPTS.STATE_PENDING }, true],
+    [
+      'de un tipo que no es persona ni organización',
+      { targetTypeConceptId: COMM.PROFILE_TARGET_INSURER },
+      true,
+    ],
+  ])(
+    'rechaza una vitrina de organización %s',
+    async (_case, overrides, tenantOk) => {
+      const d = build();
+      d.profilesRepo.findById.mockResolvedValue(pharmacyShowcase(overrides));
+      d.organizationStaff.isVerifiedActiveTenant.mockResolvedValue(tenantOk);
+
+      await expect(
+        d.service.createConversation(
+          { participantProfileIds: ['p1', 'p-farmacia'] },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.conversationsRepo.createConversation).not.toHaveBeenCalled();
+    },
+  );
+
+  it('el canal de sistema deja iniciar al personal como la farmacia', async () => {
+    const d = build();
+    d.profilesRepo.findById.mockResolvedValue({
+      id: 'p-paciente',
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+      visibilityConceptId: COMM.PROFILE_VISIBILITY_PRIVATE,
+      targetTypeConceptId: COMM.PROFILE_TARGET_USER,
+    });
+    d.conversationsRepo.createConversation.mockReturnValue({ id: 'conv-s' });
+    const staffAsSystem = {
+      id: 'staff-1',
+      roles: ['PHARMACY_STAFF', 'SYSTEM'],
+    } as any;
+
+    await expect(
+      d.service.createSystemDirectConversation(
+        { participantProfileIds: ['p-farmacia', 'p-paciente'] },
+        staffAsSystem,
+      ),
+    ).resolves.toEqual({ id: 'conv-s' });
+    expect(d.visibility.assertActsAsMessagingProfile).toHaveBeenCalledWith(
+      d.tx,
+      'p-farmacia',
+      staffAsSystem,
+    );
+    expect(d.visibility.assertActsAsProfile).not.toHaveBeenCalled();
   });
 
   describe('sendMessage (UC-19-06)', () => {
     it('exige que el perfil remitente pertenezca al actor', async () => {
       const d = build();
-      d.visibility.assertActsAsProfile.mockRejectedValue(
+      d.visibility.assertActsAsMessagingProfile.mockRejectedValue(
         new ForbiddenException('perfil ajeno'),
       );
 
@@ -601,7 +725,7 @@ describe('CommunityMessagingService', () => {
 
     it('exige que el perfil lector pertenezca al actor', async () => {
       const d = build();
-      d.visibility.assertActsAsProfile.mockRejectedValue(
+      d.visibility.assertActsAsMessagingProfile.mockRejectedValue(
         new ForbiddenException('perfil ajeno'),
       );
       d.conversationsRepo.findConversationById.mockResolvedValue({
@@ -616,7 +740,7 @@ describe('CommunityMessagingService', () => {
       await expect(
         d.service.markRead('conv1', { recipientProfileId: 'p-ajeno' }, actor),
       ).rejects.toBeInstanceOf(ForbiddenException);
-      expect(d.visibility.assertActsAsProfile).toHaveBeenCalledWith(
+      expect(d.visibility.assertActsAsMessagingProfile).toHaveBeenCalledWith(
         expect.anything(),
         'p-ajeno',
         actor,
@@ -654,7 +778,7 @@ describe('CommunityMessagingService', () => {
         isPinned: true,
         archivedAt: null,
       });
-      expect(d.visibility.assertActsAsProfile).toHaveBeenCalledWith(
+      expect(d.visibility.assertActsAsMessagingProfile).toHaveBeenCalledWith(
         expect.anything(),
         'p1',
         actor,
