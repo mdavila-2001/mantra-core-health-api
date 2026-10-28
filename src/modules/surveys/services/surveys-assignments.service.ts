@@ -12,6 +12,7 @@ import {
 import {
   AssignmentsRepository,
   InvitationsRepository,
+  TargetsRepository,
   TemplatesRepository,
 } from '../repositories';
 import {
@@ -20,14 +21,45 @@ import {
   InvitationsIssuedDto,
   IssueInvitationsDto,
 } from '../dto';
-import { SURVEYS, TARGET_TYPE_BY_CODE } from '../surveys.concepts';
+import {
+  isSystemOwnerType,
+  SURVEYS,
+  TARGET_TYPE_BY_CODE,
+} from '../surveys.concepts';
 import { SurveysErrorReason } from '../surveys.error-reasons';
+import { assertNotSystemTemplate } from '../surveys.system-guard';
+import type { SystemSurveyKind } from '../surveys.base-definitions';
+import { SurveysSystemTemplatesService } from './surveys-system-templates.service';
 import { AppointmentBookings } from '../../scheduling/entities/appointment_bookings.entity';
 import { BookableSlots } from '../../scheduling/entities/bookable_slots.entity';
 import { SCHED } from '../../scheduling/domain/scheduling.concepts';
+import type {
+  SurveyAssignments,
+  SurveyTemplates,
+  SurveyVersions,
+} from '../entities';
 
 /** Milisegundos de un día, para derivar la ventana de respuesta. */
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+/**
+ * Qué tan específico es el destino de una asignación: cuanto menor, más
+ * específico. Decide cuál de las encuestas del profesional viaja dentro de la
+ * invitación base cuando aplican varias a la misma reserva.
+ */
+const TARGET_SPECIFICITY: Readonly<Record<string, number>> = {
+  [SURVEYS.TARGET_APPOINTMENT]: 0,
+  [SURVEYS.TARGET_SERVICE]: 1,
+  [SURVEYS.TARGET_CARE_TYPE]: 2,
+};
+
+/** Una encuesta del profesional que aplica a la reserva que se está cerrando. */
+interface PractitionerCandidate {
+  /** La asignación que la trae. */
+  assignment: SurveyAssignments;
+  /** Su versión publicada y vigente. */
+  version: SurveyVersions;
+}
 
 /**
  * Reparto del instrumento: a qué se asocia y a quién se le pide.
@@ -48,6 +80,8 @@ export class SurveysAssignmentsService {
    * @param invitationsRepo - Acceso a invitaciones.
    * @param templatesRepo - Acceso a plantillas y versiones.
    * @param logger - Registro estructurado del módulo.
+   * @param systemTemplates - La encuesta base del sistema.
+   * @param targetsRepo - Lectura de reservas, servicios y profesionales.
    */
   constructor(
     private readonly em: EntityManager,
@@ -55,29 +89,37 @@ export class SurveysAssignmentsService {
     private readonly invitationsRepo: InvitationsRepository,
     private readonly templatesRepo: TemplatesRepository,
     private readonly logger: PinoLogger,
+    private readonly systemTemplates: SurveysSystemTemplatesService,
+    private readonly targetsRepo: TargetsRepository,
   ) {
     this.logger.setContext(SurveysAssignmentsService.name);
   }
 
-  /** Asocia una versión publicada a la cosa evaluada. */
+  /**
+   * Asocia una versión publicada a la cosa evaluada.
+   *
+   * El destino tiene que existir, ser de la organización y ser algo que el
+   * profesional atiende: sin eso la asignación quedaría viva y no emitiría
+   * nunca, y el profesional no tendría cómo enterarse.
+   *
+   * - `SERVICE`: `targetId` es `billing.service_catalog.id`, y el profesional
+   *   tiene que ofrecerlo (`practitioner_service_offerings`).
+   * - `CARE_TYPE`: sólo existe «todas mis consultas»
+   *   ({@link SURVEYS.CARE_TYPE_CONSULTATION}); `targetId` puede omitirse.
+   * - `APPOINTMENT`: una reserva de la organización atendida por el profesional.
+   */
   async createAssignment(
     dto: CreateAssignmentDto,
     actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
     const tenantId = requireTenantId();
 
-    // El tipo de atención no se puede resolver desde una reserva: ni
-    // `scheduling.appointment_bookings` ni `scheduling.bookable_slots` llevan
-    // una referencia a él (solo `service_concept_id`). Aceptar la asignación
-    // dejaría una que jamás emitiría una invitación, y el profesional no
-    // tendría cómo enterarse. Se rechaza acá, que es donde todavía puede
-    // elegir otro destino. Ver «Deuda restante» en el README del módulo.
-    if (dto.targetType === 'CARE_TYPE') {
-      throw new PreconditionFailedException(
-        'El modelo de agenda no lleva tipo de atención en la reserva: asigná la encuesta por servicio o por cita concreta',
-        { targetType: dto.targetType },
-      );
-    }
+    // El modelo de agenda no lleva «tipo de atención» en la reserva: lo único
+    // que distingue una consulta de un servicio es que la reserva no tenga
+    // oferta de servicio. Por eso «consulta» es el único tipo de atención que
+    // se puede asociar; cualquier otro se rechaza acá, que es donde todavía
+    // puede elegir otro destino.
+    const targetId = this.resolveTargetId(dto);
 
     return this.em
       .transactional(async (tx) => {
@@ -106,11 +148,21 @@ export class SurveysAssignmentsService {
             surveyVersionId: dto.surveyVersionId,
           });
         }
+        // La encuesta base se reparte sola: ningún profesional la asigna.
+        assertNotSystemTemplate(template, template.id);
         if (template.ownerPractitionerId !== actor.practitionerProfileId) {
           throw new ResourceNotFoundException('Versión no encontrada', {
             surveyVersionId: dto.surveyVersionId,
           });
         }
+
+        await this.assertTargetUsable(
+          tx,
+          dto.targetType,
+          targetId,
+          tenantId,
+          actor.practitionerProfileId,
+        );
 
         // La comprobación de duplicado y el alta no son atómicas por sí solas: se
         // bloquea la versión para que dos altas simultáneas se serialicen y la
@@ -121,7 +173,7 @@ export class SurveysAssignmentsService {
           tx,
           dto.surveyVersionId,
           targetTypeConceptId,
-          dto.targetId,
+          targetId,
         );
         if (duplicate) {
           throw new ConflictException(
@@ -135,7 +187,7 @@ export class SurveysAssignmentsService {
           surveyVersionId: dto.surveyVersionId,
           tenantId,
           targetTypeConceptId,
-          targetId: dto.targetId,
+          targetId,
           active: true,
           actorUserId: actor.id,
         });
@@ -166,9 +218,17 @@ export class SurveysAssignmentsService {
   }
 
   /**
-   * Emite las invitaciones que correspondan a una reserva completada.
+   * Emite la invitación de una reserva completada.
    *
-   * Es **idempotente**: si la reserva ya tiene invitación de una versión, no se
+   * Es **una sola invitación por reserva**: lleva las preguntas base del
+   * sistema (de consulta o de servicio, según la reserva) y, detrás, las de la
+   * encuesta del profesional que atendió si la asoció a este servicio o a sus
+   * consultas. Si aplican varias encuestas del profesional, la más específica
+   * (cita > servicio > tipo de atención; a igualdad, la más antigua) viaja
+   * dentro de la invitación base y las demás se emiten sueltas, como antes.
+   *
+   * Es **idempotente**: si la reserva ya tiene la invitación base, o una
+   * versión del profesional ya fue emitida (suelta o dentro de la base), no se
    * emite otra. Cerrar dos veces la misma cita —o reintentar tras un fallo de
    * red— no puede terminar reclamándole al paciente el mismo cuestionario dos
    * veces.
@@ -201,7 +261,22 @@ export class SurveysAssignmentsService {
           );
         }
 
-        const targetIds = await this.resolveTargets(tx, booking);
+        // Una consulta no lleva oferta de servicio; un servicio sí. Cada una
+        // tiene su encuesta base. Se materializa en su propia transacción: ver
+        // `ensureSystemTemplate`.
+        const kind: SystemSurveyKind = booking.practitionerServiceOfferingId
+          ? 'SERVICE'
+          : 'CONSULTATION';
+        const base = await this.systemTemplates.ensureSystemTemplate(
+          tenantId,
+          kind,
+          actor.id,
+        );
+
+        const { targetIds, practitionerProfileId } = await this.resolveTargets(
+          tx,
+          booking,
+        );
         const assignments = await this.assignmentsRepo.listActiveByTargets(
           tx,
           tenantId,
@@ -212,45 +287,38 @@ export class SurveysAssignmentsService {
           tx,
           booking.id,
         );
-        const alreadyByVersion = new Set(
-          existing.map((invitation) => invitation.surveyVersionId),
-        );
+        // Una versión del profesional ya está repartida si es la principal de
+        // una invitación suelta o viaja como extensión de una base.
+        const alreadyByVersion = new Set<string>();
+        for (const invitation of existing) {
+          alreadyByVersion.add(invitation.surveyVersionId);
+          if (invitation.extensionSurveyVersionId) {
+            alreadyByVersion.add(invitation.extensionSurveyVersionId);
+          }
+        }
+        const baseAlreadyIssued = alreadyByVersion.has(base.versionId);
 
         const now = new Date();
         const ids: string[] = [];
         let alreadyIssued = 0;
 
-        for (const assignment of assignments) {
-          if (alreadyByVersion.has(assignment.surveyVersionId)) {
-            alreadyIssued += 1;
-            continue;
-          }
+        const candidates = await this.practitionerCandidates(
+          tx,
+          assignments,
+          practitionerProfileId,
+          now,
+        );
+        const extension = baseAlreadyIssued
+          ? undefined
+          : candidates.find((c) => !alreadyByVersion.has(c.version.id));
 
-          const version = await this.templatesRepo.findVersionById(
-            tx,
-            assignment.surveyVersionId,
-          );
-          if (!version) continue;
-          if (
-            !this.isEffective(version.effectiveFrom, version.effectiveTo, now)
-          )
-            continue;
-
-          const template = await this.templatesRepo.findTemplateById(
-            tx,
-            version.surveyTemplateId,
-          );
-          // Una plantilla desactivada deja de repartirse; lo ya emitido sigue en
-          // pie, que es exactamente la diferencia entre desactivar y borrar.
-          if (
-            !template ||
-            template.statusConceptId === SURVEYS.TEMPLATE_INACTIVE
-          )
-            continue;
-
+        if (baseAlreadyIssued) {
+          alreadyIssued += 1;
+        } else {
           const invitation = this.invitationsRepo.create(tx, {
-            surveyVersionId: version.id,
-            surveyAssignmentId: assignment.id,
+            surveyVersionId: base.versionId,
+            extensionSurveyVersionId: extension?.version.id,
+            surveyAssignmentId: base.assignmentId,
             tenantId,
             patientProfileId: booking.patientProfileId,
             appointmentBookingId: booking.id,
@@ -259,11 +327,35 @@ export class SurveysAssignmentsService {
             // Se congela al emitir en vez de calcularse al leer: si mañana
             // alguien acorta el plazo, la ventana ya prometida no se mueve.
             expiresAt: new Date(
-              now.getTime() + version.responseWindowDays * MS_PER_DAY,
+              now.getTime() + base.responseWindowDays * MS_PER_DAY,
             ),
             actorUserId: actor.id,
           });
-          alreadyByVersion.add(version.id);
+          alreadyByVersion.add(base.versionId);
+          if (extension) alreadyByVersion.add(extension.version.id);
+          ids.push(invitation.id);
+        }
+
+        for (const candidate of candidates) {
+          if (candidate === extension) continue;
+          if (alreadyByVersion.has(candidate.version.id)) {
+            alreadyIssued += 1;
+            continue;
+          }
+          const invitation = this.invitationsRepo.create(tx, {
+            surveyVersionId: candidate.version.id,
+            surveyAssignmentId: candidate.assignment.id,
+            tenantId,
+            patientProfileId: booking.patientProfileId,
+            appointmentBookingId: booking.id,
+            statusConceptId: SURVEYS.INVITATION_PENDING,
+            issuedAt: now,
+            expiresAt: new Date(
+              now.getTime() + candidate.version.responseWindowDays * MS_PER_DAY,
+            ),
+            actorUserId: actor.id,
+          });
+          alreadyByVersion.add(candidate.version.id);
           ids.push(invitation.id);
         }
 
@@ -273,6 +365,8 @@ export class SurveysAssignmentsService {
           {
             operation: 'surveys.invitation.issue',
             appointmentBookingId: booking.id,
+            kind,
+            withExtension: extension !== undefined,
             issued: ids.length,
             alreadyIssued,
           },
@@ -293,18 +387,176 @@ export class SurveysAssignmentsService {
   }
 
   /**
-   * Identificadores contra los que se buscan asignaciones activas: la reserva
-   * misma y el servicio al que corresponde.
+   * El destino de una asignación. Para `CARE_TYPE` sólo existe «consulta», y
+   * `targetId` puede omitirse; cualquier otro tipo de atención se rechaza.
+   */
+  private resolveTargetId(dto: CreateAssignmentDto): string {
+    if (dto.targetType !== 'CARE_TYPE') return dto.targetId as string;
+    if (
+      dto.targetId !== undefined &&
+      dto.targetId !== SURVEYS.CARE_TYPE_CONSULTATION
+    ) {
+      throw new PreconditionFailedException(
+        'El único tipo de atención que se puede asociar es «consulta»: asigne la encuesta por servicio, por cita concreta o a todas sus consultas',
+        { targetType: dto.targetType },
+        SurveysErrorReason.ASSIGNMENT_CARE_TYPE_UNSUPPORTED,
+      );
+    }
+    return SURVEYS.CARE_TYPE_CONSULTATION;
+  }
+
+  /**
+   * Comprueba que el destino exista, sea de la organización y lo atienda el
+   * profesional. Un destino inexistente, de otra organización o de otro
+   * profesional responde igual (404): no se confirma que exista.
+   */
+  private async assertTargetUsable(
+    tx: EntityManager,
+    targetType: CreateAssignmentDto['targetType'],
+    targetId: string,
+    tenantId: string,
+    practitionerProfileId: string | undefined,
+  ): Promise<void> {
+    if (targetType === 'CARE_TYPE') return;
+
+    const notFound = (message: string) =>
+      new ResourceNotFoundException(
+        message,
+        { targetType },
+        SurveysErrorReason.ASSIGNMENT_TARGET_NOT_FOUND,
+      );
+
+    if (targetType === 'APPOINTMENT') {
+      const booking = await this.targetsRepo.findBooking(tx, targetId);
+      if (!booking || booking.tenantId !== tenantId) {
+        throw notFound('Cita no encontrada');
+      }
+      const attendedBy = await this.targetsRepo.findPractitionerOfBooking(
+        tx,
+        booking,
+      );
+      if (attendedBy === null || attendedBy !== practitionerProfileId) {
+        throw notFound('Cita no encontrada');
+      }
+      return;
+    }
+
+    // SERVICE: identidad canónica = billing.service_catalog.id.
+    const service = await this.targetsRepo.findServiceCatalog(tx, targetId);
+    if (
+      !service ||
+      (await this.targetsRepo.findTenantOfPractice(tx, service.practiceId)) !==
+        tenantId
+    ) {
+      throw notFound('Servicio no encontrado');
+    }
+    const offering = practitionerProfileId
+      ? await this.targetsRepo.findOfferingOf(
+          tx,
+          practitionerProfileId,
+          service.id,
+        )
+      : null;
+    if (!offering) {
+      throw new PreconditionFailedException(
+        'Usted no ofrece ese servicio: declárelo en sus servicios antes de asociarle una encuesta',
+        { targetType },
+        SurveysErrorReason.ASSIGNMENT_SERVICE_NOT_OFFERED,
+      );
+    }
+  }
+
+  /**
+   * Las encuestas del profesional que atendió que aplican a la reserva, de la
+   * más específica a la menos.
    *
-   * El servicio se toma de la reserva y, si no lo lleva, del cupo reservado —
-   * que es donde la agenda lo declara cuando la reserva se hizo sin
-   * especificarlo.
+   * Aplica una asignación activa cuya versión está vigente, cuya plantilla está
+   * activa y **es del profesional que atendió** (una asignación heredada o mal
+   * cargada no puede repartir la encuesta de un colega), y que no es la base
+   * del sistema, que se emite aparte. Una misma versión asignada por dos
+   * destinos cuenta una vez.
+   */
+  private async practitionerCandidates(
+    tx: EntityManager,
+    assignments: SurveyAssignments[],
+    practitionerProfileId: string | null,
+    now: Date,
+  ): Promise<PractitionerCandidate[]> {
+    if (practitionerProfileId === null) return [];
+
+    const ordered = [...assignments].sort(
+      (a, b) =>
+        (TARGET_SPECIFICITY[a.targetTypeConceptId] ?? 3) -
+          (TARGET_SPECIFICITY[b.targetTypeConceptId] ?? 3) ||
+        (a.createdAt?.getTime() ?? 0) - (b.createdAt?.getTime() ?? 0),
+    );
+
+    const candidates: PractitionerCandidate[] = [];
+    const seen = new Set<string>();
+    for (const assignment of ordered) {
+      if (seen.has(assignment.surveyVersionId)) continue;
+      const version = await this.templatesRepo.findVersionById(
+        tx,
+        assignment.surveyVersionId,
+      );
+      if (!version) continue;
+      if (!this.isEffective(version.effectiveFrom, version.effectiveTo, now))
+        continue;
+
+      const template = await this.templatesRepo.findTemplateById(
+        tx,
+        version.surveyTemplateId,
+      );
+      // Una plantilla desactivada deja de repartirse; lo ya emitido sigue en
+      // pie, que es exactamente la diferencia entre desactivar y borrar.
+      if (!template || template.statusConceptId === SURVEYS.TEMPLATE_INACTIVE)
+        continue;
+      if (!this.isPractitionerOf(template, practitionerProfileId)) continue;
+
+      seen.add(version.id);
+      candidates.push({ assignment, version });
+    }
+    return candidates;
+  }
+
+  /** Si la plantilla es del profesional (y no una encuesta de sistema). */
+  private isPractitionerOf(
+    template: SurveyTemplates,
+    practitionerProfileId: string,
+  ): boolean {
+    return (
+      !isSystemOwnerType(template.ownerTypeConceptId) &&
+      template.ownerPractitionerId === practitionerProfileId
+    );
+  }
+
+  /**
+   * Identificadores contra los que se buscan asignaciones activas, y el
+   * profesional que atendió.
+   *
+   * - la reserva misma;
+   * - el servicio al que corresponde, por su **identidad canónica**
+   *   (`billing.service_catalog.id`): la que el profesional elige al asociar la
+   *   encuesta. Sale de la copia congelada de la reserva
+   *   (`service_snapshot.serviceCatalogId`) o, si no la trae, de la oferta
+   *   reservada;
+   * - el concepto de servicio de la reserva (o, si no lo lleva, el del cupo
+   *   reservado), por compatibilidad con asignaciones anteriores;
+   * - «consulta», si la reserva no es de un servicio.
    */
   private async resolveTargets(
     em: EntityManager,
     booking: AppointmentBookings,
-  ): Promise<string[]> {
-    const targets: string[] = [booking.id];
+  ): Promise<{
+    /** Identificadores candidatos del destino. */
+    targetIds: string[];
+    /** Profesional que atendió, o `null` si no se puede determinar. */
+    practitionerProfileId: string | null;
+  }> {
+    const targetIds: string[] = [booking.id];
+
+    const serviceCatalogId = await this.resolveServiceCatalogId(em, booking);
+    if (serviceCatalogId) targetIds.push(serviceCatalogId);
 
     let serviceConceptId = booking.serviceConceptId;
     if (!serviceConceptId) {
@@ -313,9 +565,35 @@ export class SurveysAssignmentsService {
       });
       serviceConceptId = slot?.serviceConceptId;
     }
-    if (serviceConceptId) targets.push(serviceConceptId);
+    if (serviceConceptId) targetIds.push(serviceConceptId);
 
-    return targets;
+    if (!booking.practitionerServiceOfferingId) {
+      targetIds.push(SURVEYS.CARE_TYPE_CONSULTATION);
+    }
+
+    const practitionerProfileId =
+      await this.targetsRepo.findPractitionerOfBooking(em, booking);
+    return { targetIds, practitionerProfileId };
+  }
+
+  /** El `billing.service_catalog.id` del servicio reservado, si la reserva es de un servicio. */
+  private async resolveServiceCatalogId(
+    em: EntityManager,
+    booking: AppointmentBookings,
+  ): Promise<string | null> {
+    if (!booking.practitionerServiceOfferingId) return null;
+    const snapshot = booking.serviceSnapshot as {
+      /** Servicio del catálogo congelado al reservar. */
+      serviceCatalogId?: unknown;
+    } | null;
+    if (typeof snapshot?.serviceCatalogId === 'string') {
+      return snapshot.serviceCatalogId;
+    }
+    const offering = await this.targetsRepo.findOffering(
+      em,
+      booking.practitionerServiceOfferingId,
+    );
+    return offering?.serviceCatalogId ?? null;
   }
 
   /** Si el instante indicado cae dentro de la vigencia de la versión. */

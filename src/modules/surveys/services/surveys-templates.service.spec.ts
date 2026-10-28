@@ -11,6 +11,7 @@ import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import { SurveysTemplatesService } from './surveys-templates.service';
 import { SurveysErrorReason } from '../surveys.error-reasons';
 import { SURVEYS, ANSWER_TYPE_BY_CODE } from '../surveys.concepts';
+import { DomainException } from '../../../common';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -826,6 +827,123 @@ describe('SurveysTemplatesService', () => {
       await expect(
         withTenant(() => d.service.deactivateTemplate('tpl-1', actor)),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+  });
+});
+
+describe('SurveysTemplatesService · la encuesta base es del sistema y las preguntas del médico son opcionales (F3)', () => {
+  /** La plantilla de sistema de consulta del tenant: sin profesional dueño. */
+  const systemTemplate = () =>
+    ownedTemplate({
+      ownerPractitionerId: undefined,
+      ownerTypeConceptId: SURVEYS.SYSTEM_BASE_CONSULTATION,
+    });
+
+  describe('required forzado a false en las plantillas del médico', () => {
+    it('addQuestion guarda required=false aunque el cliente mande true', async () => {
+      const d = build();
+      d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
+      d.templatesRepo.findLatestVersion.mockResolvedValue(draft());
+      d.templatesRepo.countQuestions.mockResolvedValue(0);
+      d.templatesRepo.createQuestion.mockReturnValue(question('q-1', 1));
+
+      await withTenant(() =>
+        d.service.addQuestion(
+          'tpl-1',
+          { questionText: '¿Volvería?', answerType: 'BOOLEAN', required: true },
+          actor,
+        ),
+      );
+
+      expect(d.templatesRepo.createQuestion).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ required: false }),
+      );
+    });
+
+    it('updateQuestion deja required=false aunque el cliente mande true, también sobre una pregunta que lo tenía', async () => {
+      const d = build();
+      d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
+      d.templatesRepo.findLatestVersion.mockResolvedValue(draft());
+      const q = question('q1', 1, { required: true });
+      d.templatesRepo.findQuestionById.mockResolvedValue(q);
+
+      await withTenant(() =>
+        d.service.updateQuestion('tpl-1', 'q1', { required: true }, actor),
+      );
+
+      expect(q.required).toBe(false);
+    });
+  });
+
+  describe('guardas de inmutabilidad: 403 SURVEY_SYSTEM_TEMPLATE_IMMUTABLE en toda mutación', () => {
+    const calls: [string, (s: SurveysTemplatesService) => Promise<unknown>][] =
+      [
+        [
+          'addQuestion',
+          (s) =>
+            s.addQuestion(
+              'tpl-1',
+              { questionText: 'x', answerType: 'TEXT' },
+              actor,
+            ),
+        ],
+        [
+          'updateTemplate',
+          (s) => s.updateTemplate('tpl-1', { title: 'x' }, actor),
+        ],
+        [
+          'updateQuestion',
+          (s) => s.updateQuestion('tpl-1', 'q1', { questionText: 'x' }, actor),
+        ],
+        ['deleteQuestion', (s) => s.deleteQuestion('tpl-1', 'q1', actor)],
+        [
+          'reorderQuestions',
+          (s) => s.reorderQuestions('tpl-1', { questionIds: ['q1'] }, actor),
+        ],
+        [
+          'publishVersion',
+          (s) => s.publishVersion('tpl-1', 1, {} as any, actor),
+        ],
+        ['deactivateTemplate', (s) => s.deactivateTemplate('tpl-1', actor)],
+        ['createNextVersion', (s) => s.createNextVersion('tpl-1', actor)],
+      ];
+
+    it.each(calls)('%s sobre la plantilla de sistema', async (_name, call) => {
+      const d = build();
+      d.templatesRepo.findTemplateById.mockResolvedValue(systemTemplate());
+
+      const error: any = await withTenant(() => call(d.service)).catch(
+        (e) => e,
+      );
+
+      expect(error).toBeInstanceOf(DomainException);
+      expect(error.getStatus()).toBe(403);
+      expect(error.reason).toBe(SurveysErrorReason.SYSTEM_TEMPLATE_IMMUTABLE);
+      expect(d.templatesRepo.createQuestion).not.toHaveBeenCalled();
+      expect(d.templatesRepo.createVersion).not.toHaveBeenCalled();
+      expect(d.templatesRepo.removeQuestion).not.toHaveBeenCalled();
+    });
+
+    it('la plantilla de sistema de OTRO tenant sigue siendo 404 (no se confirma nada)', async () => {
+      const d = build();
+      d.templatesRepo.findTemplateById.mockResolvedValue({
+        ...systemTemplate(),
+        tenantId: 'ten-otro',
+      });
+
+      await expect(
+        withTenant(() => d.service.deactivateTemplate('tpl-1', actor)),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('la lectura del detalle no la expone: la base no es de ningún profesional (404)', async () => {
+      const d = build();
+      d.templatesRepo.findTemplateById.mockResolvedValue(systemTemplate());
+
+      await expect(
+        withTenant(() => d.service.getTemplate('tpl-1', actor)),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 });
