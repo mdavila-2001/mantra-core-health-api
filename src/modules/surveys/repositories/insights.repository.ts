@@ -70,12 +70,10 @@ export interface InsightsValueRow {
   count: number;
 }
 
-/** Un comentario abierto: texto y mes, nada más. */
+/** Un comentario abierto: sólo el texto, sin fecha. */
 export interface InsightsCommentRow {
   /** Texto. */
   text: string;
-  /** Mes del envío, `YYYY-MM` UTC. */
-  month: string;
 }
 
 /** Tipos de recurso de agenda que representan a un profesional. */
@@ -249,7 +247,7 @@ export class InsightsRepository {
   }
 
   /**
-   * Una muestra de los comentarios abiertos: texto y mes, sin día ni hora ni vínculo
+   * Una muestra de los comentarios abiertos: sólo el texto, sin fecha ni vínculo
    * con la respuesta, el paciente o la atención.
    *
    * El orden es por un hash estable del id de la respuesta, **no cronológico**:
@@ -267,8 +265,7 @@ export class InsightsRepository {
     const scoped = this.buildScope(scope, 'day');
     return em.getConnection().execute<InsightsCommentRow[]>(
       `${scoped.sql}
-       SELECT a.value_text AS "text",
-              to_char(r.submitted_at AT TIME ZONE 'UTC', 'YYYY-MM') AS "month"
+       SELECT a.value_text AS "text"
          FROM scope sc
          JOIN surveys.survey_responses r
            ON r.survey_invitation_id = sc.invitation_id
