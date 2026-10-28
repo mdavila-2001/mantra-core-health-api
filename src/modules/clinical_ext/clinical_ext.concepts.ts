@@ -77,6 +77,15 @@ export const { seeds: CLINICAL_EXT_CONCEPT_SEEDS, ids: CEXT } =
     },
     REFERRAL_ACCEPTED: { code: 'REF_ACCEPTED', display: 'Referral accepted' },
     REFERRAL_REJECTED: { code: 'REF_REJECTED', display: 'Referral rejected' },
+    // v4266: cierre con contrarreferencia y anulación por quien deriva.
+    REFERRAL_COMPLETED: {
+      code: 'REF_COMPLETED',
+      display: 'Referral completed (counter-referral received)',
+    },
+    REFERRAL_CANCELLED: {
+      code: 'REF_CANCELLED',
+      display: 'Referral cancelled',
+    },
     REFERRAL_PRIORITY_ROUTINE: {
       code: 'REF_ROUTINE',
       display: 'Routine referral priority',
@@ -107,6 +116,18 @@ export const { seeds: CLINICAL_EXT_CONCEPT_SEEDS, ids: CEXT } =
     REFERRAL_TYPE_SECOND_OPINION: {
       code: 'REF_TYPE_SECOND_OPINION',
       display: 'Referral for second opinion',
+    },
+    REFERRAL_TYPE_THERAPY: {
+      code: 'REF_TYPE_THERAPY',
+      display: 'Referral for therapy',
+    },
+    REFERRAL_TYPE_HOSPITALIZATION: {
+      code: 'REF_TYPE_HOSPITALIZATION',
+      display: 'Referral for hospitalization',
+    },
+    REFERRAL_TYPE_OTHER: {
+      code: 'REF_TYPE_OTHER',
+      display: 'Referral of another type',
     },
 
     // --- care_gaps -----------------------------------------------------------
