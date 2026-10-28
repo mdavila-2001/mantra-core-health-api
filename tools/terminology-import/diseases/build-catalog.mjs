@@ -26,7 +26,8 @@ import { buildMedlineplusGenetics, parseGhrConditions } from './lib/medlineplus-
 import { readDescriptors, readSupplementals } from './lib/mesh.mjs';
 import { resolveXrefs } from './lib/resolve.mjs';
 import { SNAPSHOT_DIR, writeSnapshot } from './lib/snapshot.mjs';
-import { GARD, NDJSON_DIR, SOURCES_DIR } from './lib/sources.mjs';
+import { buildWikidata, readWikidata } from './lib/wikidata.mjs';
+import { GARD, NDJSON_DIR, SOURCES_DIR, WIKIDATA } from './lib/sources.mjs';
 
 // Fuentes cuya licencia NO está verificada por texto (o que el propietario dejó sin aprobar): se construyen sólo con
 // el flag explícito, nunca por defecto (ver SOURCES.md, «Condicionadas»).
@@ -124,6 +125,17 @@ async function main() {
   const oncotree = buildOncotree(JSON.parse(readFileSync(m.oncotree.path, 'utf8')), m.oncotree, '2025-10-03');
   console.log(`[oncotree] ${oncotree.records.length}`);
 
+  // Wikidata (CC0): sólo si `fetch-wikidata.mjs` terminó (deja manifest.json). Las etiquetas en castellano las escribe la comunidad.
+  let wikidata = { records: [], version: null };
+  const wdManifestPath = join(WIKIDATA.dir, 'manifest.json');
+  if (existsSync(wdManifestPath)) {
+    const wdm = JSON.parse(readFileSync(wdManifestPath, 'utf8'));
+    const wdMeta = { key: 'wikidata', url: WIKIDATA.endpoint, sha256: wdm.combinedSha256, retrievedAt: wdm.queriedAt, license: WIKIDATA.license, publisher: 'Wikidata' };
+    m.wikidata = wdMeta;
+    wikidata = buildWikidata(readWikidata(WIKIDATA.dir), wdMeta, wdm.queriedAt.slice(0, 10));
+    console.log(`[wikidata-disease] ${wikidata.records.length} (${JSON.stringify(wikidata.excluded)})`);
+  }
+
   const citations = {
     'hpo-annotations': citeHpoAnnotations(m['hpo-annotations'].path),
     'phenopacket-store': citePhenopackets(m['phenopacket-store'].unzippedTo),
@@ -201,6 +213,7 @@ async function main() {
     'medlineplus-genetics': fileOf('medlineplus-genetics'),
     nando: fileOf('nando'),
     oncotree: fileOf('oncotree'),
+    ...(wikidata.records.length ? { 'wikidata-disease': fileOf('wikidata') } : {}),
     ...Object.fromEntries([...byCs.keys()].filter((cs) => SYSTEMS[cs]?.keyOnly).map((cs) => [cs, keyFiles])),
   }, true);
 
@@ -219,6 +232,7 @@ async function main() {
       'medlineplus-genetics': ghr.version,
       nando: nando.version,
       oncotree: oncotree.version,
+      'wikidata-disease': wikidata.version,
       keys: KEY_VERSION,
     },
     excluded: { mondo: mondo.excluded, 'ncit-disease': ncit.excluded, 'efo-disease': efo.excluded, mesh: mesh.excluded },
@@ -232,7 +246,7 @@ async function main() {
   // Instantánea versionada en git (gzip, partes < 45 MB): ver lib/snapshot.mjs.
   // El manifiesto de fuentes va sin las rutas locales de esta máquina.
   const sourcesManifest = JSON.parse(readFileSync(join(SOURCES_DIR, 'manifest.json'), 'utf8'));
-  sourcesManifest.sources = [...sourcesManifest.sources, ...(WITH_GARD ? ['gard-list', 'gard-trimmed', 'gard-singles'] : []).map((k) => m[k])].map(({ path: _path, unzippedTo: _unzipped, ...rest }) => rest);
+  sourcesManifest.sources = [...sourcesManifest.sources, ...[...(WITH_GARD ? ['gard-list', 'gard-trimmed', 'gard-singles'] : []), ...(wikidata.records.length ? ['wikidata'] : [])].map((k) => m[k])].map(({ path: _path, unzippedTo: _unzipped, ...rest }) => rest);
   writeJson(join(BUILD_DIR, 'diseases-sources-manifest.json'), sourcesManifest, true);
   const snapshot = writeSnapshot(
     byCs,

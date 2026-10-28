@@ -13,22 +13,22 @@ Sin DDL (ADR-0021): todo entra en las tablas existentes del módulo 03.
 | Etapa | Script | Red | Qué hace |
 |---|---|---|---|
 | 0 | `fetch-sources.mjs` | sí | Baja los archivos de `lib/sources.mjs` a `<GLOSSARY_BUILD_DIR>/diseases-sources/`, verifica los hashes esperados (y, en los zips de MeSH, el de los XML de adentro), descomprime y escribe `manifest.json`. Reanudable (`--force`, `--only <clave>`). |
-| 0b | `fetch-gard.mjs` | sí | GARD (NCATS/NIH): la lista oficial en CSV y las ~6 300 fichas públicas (`assets/singles/<id>.json`), con ≤ 2 pedidos a la vez y ≥ 600 ms entre pedidos. Reanudable. Deja `gard/manifest.json` con el SHA-256 de cada pieza. |
+| 0b | `fetch-gard.mjs` | sí | (Condicionada: ver SOURCES.md; el build la ignora salvo `--with-gard`.) GARD (NCATS/NIH): la lista oficial en CSV y las ~6 300 fichas públicas (`assets/singles/<id>.json`), con ≤ 2 pedidos a la vez y ≥ 600 ms entre pedidos. Reanudable. Deja `gard/manifest.json` con el SHA-256 de cada pieza. |
 | 0c | `fetch-wikidata.mjs` | sí | Wikidata (CC0) por SPARQL: enfermedades con etiqueta en castellano o sin identificador de otro sistema del catálogo, por lotes de 200. Respeta `Retry-After`; reanudable. |
-| 1 | `build-catalog.mjs` | no | Fuentes → `ndjson/diseases/<codeSystem>.ndjson` (un registro común por concepto), `_systems.json`, `diseases-build-stats.json`, `diseases-citations.json`. ~40 s; necesita más heap que el de Node por defecto (con MeSH, GARD y Wikidata se corrió con `--max-old-space-size=6000`; con 2500 se queda sin memoria). |
+| 1 | `build-catalog.mjs` | no | Fuentes → `ndjson/diseases/<codeSystem>.ndjson` (un registro común por concepto), `_systems.json`, `diseases-build-stats.json`, `diseases-citations.json`. ~40 s; corre con `--max-old-space-size=2500` (MeSH oficial, NCIt de EVS, NANDO y OncoTree incluidos; con GARD y Wikidata no se midió). Flags: `--with-gard` (licencia de GARD sin texto verificable) y `--with-icd11-es` (títulos CIE-11 en castellano, CC BY-ND: decisión del propietario); sin ellos no entran. |
 | 2 | `load-catalog.mjs` | no (base) | NDJSON → `terminology.*`. `--dry-run` no toca la base; `--systems a,b` acota (los mapeos hacia sistemas todavía no cargados se saltean; se completan al volver a correr con esos sistemas); `--from-snapshot` lee `diseases/data/` (verificando cada SHA-256), y es lo que usa si no hay build local. Idempotente. |
-| 1b | (dentro de `build-catalog.mjs`) | no | Escribe la **instantánea versionada** `diseases/data/`: un `<codeSystem>.part-NN.ndjson.gz` por sistema (gzip determinista, partes < 45 MB), `_systems.json`, estadísticas, citas, manifiesto de fuentes sin rutas locales y `MANIFEST.json` con el SHA-256 de cada archivo. Se sube a git: otras sesiones enlazan contra la rama y se puede cargar sin red ni fuentes. |
+| 1b | (dentro de `build-catalog.mjs`) | no | Escribe la **instantánea versionada** `diseases/data/`: un `<codeSystem>.part-NN.ndjson.gz` por sistema (gzip determinista, partes < 45 MB), `_systems.json`, estadísticas, citas, manifiesto de fuentes sin rutas locales y `MANIFEST.json` y `SHA256SUMS` (formato `sha256sum -c`) con el SHA-256 de cada archivo. Se sube a git: otras sesiones enlazan contra la rama y se puede cargar sin red ni fuentes. |
 | — | `coverage-report.mjs` | no | Pasadas de saturación, conceptos por sistema y por capítulo, cruces y cobertura contra MONDO → `diseases-coverage.{json,md}`. |
 
 ```sh
 node tools/terminology-import/diseases/fetch-sources.mjs
 node tools/terminology-import/diseases/fetch-gard.mjs        # ≈ 1 h a ≤ 2 pedidos/s
 node tools/terminology-import/diseases/fetch-wikidata.mjs
-node --max-old-space-size=8000 tools/terminology-import/diseases/build-catalog.mjs
-node --max-old-space-size=8000 tools/terminology-import/diseases/load-catalog.mjs --dry-run
-node --max-old-space-size=8000 tools/terminology-import/diseases/load-catalog.mjs   # .env DB_*; la API tiene que haber sembrado terminology
-node --max-old-space-size=8000 tools/terminology-import/diseases/load-catalog.mjs --from-snapshot   # sin red ni fuentes: desde diseases/data/
-node --max-old-space-size=8000 tools/terminology-import/diseases/coverage-report.mjs
+node --max-old-space-size=2500 tools/terminology-import/diseases/build-catalog.mjs
+node --max-old-space-size=2500 tools/terminology-import/diseases/load-catalog.mjs --dry-run
+node --max-old-space-size=2500 tools/terminology-import/diseases/load-catalog.mjs   # .env DB_*; la API tiene que haber sembrado terminology
+node --max-old-space-size=2500 tools/terminology-import/diseases/load-catalog.mjs --from-snapshot   # sin red ni fuentes: desde diseases/data/
+node --max-old-space-size=2500 tools/terminology-import/diseases/coverage-report.mjs
 node --test "tools/terminology-import/diseases/test/*.test.mjs"
 ```
 

@@ -1,6 +1,6 @@
 # Catálogo exhaustivo de enfermedades — investigación, saturación y cobertura
 
-Fecha de corte: **2026-10-24**. Importador: `tools/terminology-import/diseases/`
+Fecha de corte: **2026-10-24**; cierre de huecos (MeSH oficial, NCIt de EVS, NANDO, OncoTree, MedlinePlus Genetics, tablas OMS 2026-01) el **2026-10-28**: ver §12 (antes/después). Donde una sección vieja contradice al §12, vale el §12. Importador: `tools/terminology-import/diseases/`
 ([README](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/tools/terminology-import/diseases/README.md),
 [SOURCES.md](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/tools/terminology-import/diseases/SOURCES.md)).
 Sin DDL: todo entra en las tablas existentes del módulo 03 `terminology`.
@@ -9,17 +9,17 @@ Sin DDL: todo entra en las tablas existentes del módulo 03 `terminology`.
 
 | | |
 |---|---|
-| Sistemas con nomenclatura propia | `mondo`, `orphanet` (**castellano**), `doid`, `ncit-disease`, `icd11-mms`, `efo-disease` |
+| Sistemas con nomenclatura propia | `mondo`, `orphanet` (**castellano**), `doid`, `ncit-disease` (+ `ncit-xref`), `icd11-mms`, `efo-disease`, `mesh` (oficial 2026), `nando`, `oncotree`, `medlineplus-genetics` |
 | Sistemas de clave cruzada (sólo código) | `omim`, `icd10-who`, `icd11-foundation`, `mesh`, `umls`, `decipher` |
-| Conceptos | **184 896** (114 784 de nomenclatura + 70 112 claves) |
-| Designaciones | 311 525 (25 942 en castellano, todas de Orphanet) |
-| Aristas de jerarquía (`REL_IS_A`) | 147 815 |
-| Alineamientos publicados (`concept_maps`) | 191 467 (+ los condicionales hacia `icd10cm` / CIE-10-ES si esos conceptos existen) |
-| Propiedades | 495 193 |
+| Conceptos | **194 291** (antes 184 896; ver §12) |
+| Designaciones | 369 606 (antes 311 525; 25 942 en castellano, todas de Orphanet) |
+| Aristas de jerarquía (`REL_IS_A`) | 160 233 cargadas (antes 147 815) |
+| Alineamientos publicados (`concept_maps`) | 219 192 cargados (antes 191 467) (+ los condicionales hacia `icd10cm` / CIE-10-ES si esos conceptos existen) |
+| Propiedades | 624 713 (antes 495 193) |
 | Peso en Postgres 16 (tablas + índices del módulo 03) | 423 MB la base de prueba completa; `concept_properties` 159 MB |
 | Carga en base limpia / segunda corrida | 88 s / 42 s con **0 filas nuevas** (idempotente; desde la instantánea) |
-| Instantánea en git | `tools/terminology-import/diseases/data/` — 12 `*.ndjson.gz` (14 MB, la mayor 4,2 MB) + `MANIFEST.json`; `load-catalog.mjs --from-snapshot` carga desde ahí sin red: 88 s / 42 s con 0 nuevas |
-| Saturación | **Alcanzada según el protocolo** (19 pasadas; las cuatro últimas —ClinGen, ClinVar, Alliance, CURE ID— aportan 0). Quedan fuentes que sí aportarían pero no se pueden cargar (MeSH oficial, GARD, NANDO, OncoTree): ver §5. |
+| Instantánea en git | `tools/terminology-import/diseases/data/` — 16 `*.ndjson.gz` (18 MB, la mayor 4,3 MB) + `MANIFEST.json` + `SHA256SUMS`; `load-catalog.mjs --from-snapshot` carga desde ahí sin red: 99 s en base limpia, segunda corrida con 0 filas nuevas (`evidencia/C1/carga-1.txt`, `carga-2.txt`) |
+| Saturación | Ver §12: 25 pasadas; ClinGen, ClinVar, Alliance, CURE ID, Hetionet, Orphadata p6/p9 aportan 0 y GenCC 2 componentes (códigos que el catálogo ya tiene, sin equivalencia publicada con otra pasada). Pendientes por licencia: GARD, CIE-11 ES; por tiempo: Wikidata. |
 
 Todos los nombres, sinónimos y definiciones son **verbatim** de la fuente y
 en el idioma que ella trae: Orphanet en castellano (oficial); MONDO, DOID,
@@ -394,7 +394,13 @@ Tablas generadas por `coverage-report.mjs` (`glossary-data-build/diseases-covera
 | MONDO | CC BY 4.0 | Cargada, con atribución en `terminology_sources.license` |
 | Orphanet | CC BY 4.0 | Cargada |
 | DOID | CC0 1.0 | Cargada |
-| NCI Thesaurus | CC BY 4.0 según los términos de uso de NCI EVS (revisados en `docs/terminology-expansion/SOURCE-REGISTER.md`; el `.obo` no declara licencia y la página de EVS no fue accesible desde esta red: **reconfirmar**) | Cargada (subárbol C2991), nombrada como subconjunto y no como la edición oficial |
+| NCI Thesaurus | **CC BY 4.0**, texto literal de `ThesaurusTermsofUse.htm` leído el 2026-10-28 (captura en `evidencia/C1/licencias-capturas-2026-10-28.txt`) | Cargada (subárbol C2991, 26.09d del archivo plano oficial de EVS), nombrada como subconjunto y no como la edición oficial |
+| MeSH 2026 oficial | Uso libre con atribución a NLM («NLM freely provides MeSH data»; términos de `nlm.nih.gov/databases/download/terms_and_conditions_mesh.html`, capturados) | Cargada (árboles C y F03 + SCR clase 3), sólo inglés |
+| MedlinePlus / MedlinePlus Genetics | Dominio público (obra del gobierno de EE. UU.), atribución pedida | Cargada (1 305 condiciones genéticas; pares MeSH → tema en español) |
+| NANDO | **CC BY 4.0** (README del repo y `dcterms:license` dentro de `nando.ttl`) | Cargada |
+| OncoTree | **CC BY 4.0** (sección License del README, capturada) | Cargada |
+| GARD (NCATS/NIH) | Sin texto de licencia legible por HTTP (SPA; la política de NIH está tras Cloudflare) | **No se carga**: lector listo detrás de `--with-gard`; decisión del propietario |
+| CIE-11 títulos en castellano (OMS) | CC BY-ND 3.0 IGO | **No se carga**: lector listo detrás de `--with-icd11-es`; el propietario excluyó la CIE-11 (la versión inglesa ya cargada es precedente previo) |
 | CIE-11 MMS y tablas de correspondencia | CC BY-ND 3.0 IGO (OMS) | Cargada **sin modificar** (títulos verbatim; sin traducción ni agregados). Los títulos en castellano no están accesibles |
 | EFO | Apache-2.0 | Cargada (clases propias) |
 | Anotaciones HPO | Licencia HPO (uso libre con atribución) | Sólo identificadores |
@@ -409,7 +415,6 @@ Tablas generadas por `coverage-report.mjs` (`glossary-data-build/diseases-covera
 | ICD-O-3 | Licencia OMS | **Sin licencia** (sin archivo accesible) |
 | CIAP-2 / ICPC-2 | WONCA | **Sin licencia** (sin archivo accesible) |
 | DSM | APA | Excluido |
-| NANDO, OncoTree | No declarada en el repositorio | **Sin confirmar** con el editor |
 
 ## 9. Propuestas para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)
 
@@ -452,10 +457,67 @@ Nada de esto bloquea la carga; son mejoras para consultar el catálogo:
 
 ```sh
 node tools/terminology-import/diseases/fetch-sources.mjs
-node --max-old-space-size=8000 tools/terminology-import/diseases/build-catalog.mjs
-node --max-old-space-size=8000 tools/terminology-import/diseases/coverage-report.mjs
-node --max-old-space-size=8000 tools/terminology-import/diseases/load-catalog.mjs --dry-run
-node --max-old-space-size=8000 tools/terminology-import/diseases/load-catalog.mjs
-node --max-old-space-size=8000 tools/terminology-import/diseases/load-catalog.mjs --from-snapshot   # sin red: desde diseases/data/
+node --max-old-space-size=2500 tools/terminology-import/diseases/build-catalog.mjs
+node --max-old-space-size=2500 tools/terminology-import/diseases/coverage-report.mjs
+node --max-old-space-size=2500 tools/terminology-import/diseases/load-catalog.mjs --dry-run
+node --max-old-space-size=2500 tools/terminology-import/diseases/load-catalog.mjs
+node --max-old-space-size=2500 tools/terminology-import/diseases/load-catalog.mjs --from-snapshot   # sin red: desde diseases/data/
 node --test "tools/terminology-import/diseases/test/*.test.mjs"
 ```
+
+## 12. Cierre de huecos del 2026-10-28 (carril C1)
+
+Re-sondeo de cada host el 2026-10-28 (`docs/trabajo/2026-10-27-terminologia-cierre-huecos/evidencia/C1/sondeo-M1-resondeo-2026-10-28.txt`).
+Las pasadas del 2026-10-24 daban por bloqueados `nlmpubs.nlm.nih.gov`, `evs.nci.nih.gov`, `icdcdn.who.int`,
+`rarediseases.info.nih.gov` y `query.wikidata.org`: hoy responden los cinco.
+
+| Hueco (§5/§10) | Estado hoy | Qué se hizo |
+|---|---|---|
+| MeSH oficial (árbol C, SCR de enfermedades raras) | `nlmpubs.nlm.nih.gov` 200 | **Cargado**: MeSH 2026 oficial, 12 490 conceptos (antes 9 320, todos claves sin nombre): 5 182 descriptores de los árboles C/F03 y 6 545 SCR clase 3 con nombre, sinónimos, nota de alcance y números de árbol; 7 963 aristas `is_a`; 834 enlaces a temas de MedlinePlus en español. 763 claves MeSH citadas por MONDO siguen sin nombre (`displayIsCode`): ya no existen en el MeSH 2026 de árboles C/F03 |
+| NCIt más nuevo que la OBO Edition 26.02d | `evs.nci.nih.gov` 200 | **Cargado** el archivo plano oficial 26.09d: `ncit-disease` 22 379 → 22 854 y 645 `ncit-xref` (conceptos citados fuera de C2991 o retirados) |
+| NANDO (licencia «sin declarar») | CC BY 4.0 en el README y en el propio `nando.ttl` | **Cargado**: 2 777 conceptos |
+| OncoTree (licencia «sin declarar») | CC BY 4.0 en el README | **Cargado**: 898 conceptos |
+| MedlinePlus Genetics | `medlineplus.gov` 200, dominio público | **Cargado**: 1 305 condiciones con sinónimos y descripción |
+| Tablas OMS CIE-10 ↔ CIE-11 | `icdcdn.who.int` 200 | Reemplazadas por la release 2026-01 oficial (antes, copia de terceros 2025-01) |
+| CIE-11 en castellano | `icdcdn.who.int` 200 (SHA-256 `7c7e5a02…`) | **No cargado**: CC BY-ND y exclusión del propietario; lector probado, flag `--with-icd11-es` |
+| GARD oficial | `rarediseases.info.nih.gov` 200 | **No cargado**: sin texto de licencia verificable; lector probado, flag `--with-gard` (ver SOURCES.md) |
+| Orphadata en castellano | 200; el repo oficial sólo tiene `es_product1/4/9`, `es_funct_consequences` | Sin novedad: `es_product1` ya cargado (mismo tamaño que `orphadata.com`); `es_product6` no existe (404); `es_product4` es de síntomas (C2) |
+| CTD, OMIM, DeCS | CTD: verificación de navegador; OMIM y DeCS: 403 | Hueco de licencia/acceso, sin eludir |
+
+### Antes / después (instantánea 2026-10-24 → 2026-10-28; conceptos / designaciones / is-a / alineamientos)
+
+| Sistema | Antes | Después |
+|---|---|---|
+| mesh | 9 320 / 0 / 0 / 0 (sólo claves) | **12 490 / 42 487 / 7 963 / 14 509** |
+| ncit-disease | 22 379 / 69 326 / 37 305 / 13 981 | 22 854 / 69 987 / 38 089 / 13 608 |
+| ncit-xref | — | 645 / 1 633 / 0 / 564 |
+| nando | — | 2 777 / 4 746 / 2 774 / 2 341 |
+| oncotree | — | 898 / 898 / 897 / 1 360 |
+| medlineplus-genetics | — | 1 305 / 7 656 / 0 / 8 638 |
+| icd11-mms | 37 052 / 37 052 / 37 024 / 19 024 | 37 052 / 37 052 / 37 024 / 19 068 |
+| mondo, doid, efo-disease, orphanet | sin cambio de conceptos | alineamientos de MONDO 77 343 → 80 490, DOID 28 366 → 28 696, EFO 1 244 → 1 341 (MeSH ahora resuelve) |
+| omim, umls (claves) | 10 871 / 32 589 | 10 892 / 32 693 |
+| **Total** | **184 896 / 311 525 / 147 963 / 197 374** | **194 291 / 369 606 / 160 381 / 228 021** |
+
+Pasadas de saturación del 2026-10-28 (`data/diseases-coverage.md`): 25 pasadas. MeSH aporta 1 312 conceptos
+sin cruce publicado hacia otra fuente (1 293 entidades), NANDO 685, OncoTree 195, NCIt 26.09d 14 880, ClinGen,
+ClinVar, Alliance, CURE ID, Hetionet y Orphadata p6/p9 **0**, GenCC 2 (códigos que el catálogo ya tiene).
+Dos pasadas seguidas en 0 por causa real (Orphadata p6 y p9) tras las últimas fuentes cargadas.
+
+### Integridad en Postgres 16 desechable (`evidencia/C1/integridad-C1-salida.txt`)
+
+Duplicados por (code system, versión, code): 0; entre versiones: 0. Huérfanos en designaciones, propiedades,
+relaciones y mapas: 0; `replaced_by` huérfano: 0; auto-lazos `is_a`: 0; nombres o códigos vacíos: 0; designaciones
+sin idioma: 0. Conceptos sin designación preferida: 763 `mesh` (claves citadas sin nombre en el MeSH 2026) y 2
+`nando` (sólo etiqueta japonesa: el idioma `ja` no existe como concepto interno; queda en `display` y en
+`nando_ja`). Procedencia (`disease_provenance`) en el 100 % de las filas de los 16 sistemas; SHA-256 de los
+archivos de origen y licencia por sistema en `code_system_versions.checksum` y `terminology_sources.license`
+(`evidencia/C1/procedencia-por-sistema.txt`). Segunda corrida: `+0` en todos los sistemas.
+
+### Lo que sigue faltando
+
+- **Castellano**: sigue siendo sólo Orphanet. El MeSH oficial es inglés; los títulos CIE-11 en castellano están
+  listos pero detrás de una decisión del propietario.
+- **GARD** (~16 000 enfermedades, nombres en castellano): decisión de licencia del propietario.
+- **CIE-10 con títulos, OMIM, UMLS/MedGen, SNOMED CT, MedDRA, DeCS, ICD-O-3**: licencia.
+- **CTD MEDIC, UniProt `humdisease`**: licencia sin texto verificable (CTD) / derivada de OMIM (UniProt).

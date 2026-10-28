@@ -1,0 +1,20 @@
+    internal_code     |      version       | tiene_licencia |                           licencia                           | largo_checksum | conceptos 
+----------------------+--------------------+----------------+--------------------------------------------------------------+----------------+-----------
+ decipher             | xref-keys          | t              | Sólo el identificador, tal como lo citan HPO y MONDO; decip |            597 |        61
+ doid                 | 2026-09-30         | t              | CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/) |             76 |     14854
+ efo-disease          | 3.95.0             | t              | Apache-2.0 (https://github.com/EBISPOT/efo/blob/master/LICEN |             75 |      1159
+ icd10-who            | xref-keys          | t              | Sólo el código. Los títulos de la CIE-10 son © OMS; la d |            597 |     12640
+ icd11-foundation     | xref-keys          | t              | Sólo el identificador de entidad. La CIE-11 es CC BY-ND 3.0 |            597 |      4631
+ icd11-mms            | 2026-01            | t              | Sólo el identificador de entidad. La CIE-11 es CC BY-ND 3.0 |            252 |     37052
+ medlineplus-genetics | 2026-10-27         | t              | Dominio público (obra del gobierno federal de EE. UU.): «S |             92 |      1305
+ mesh                 | 2026               | t              | Uso libre con atribución («Courtesy of the U.S. National L |            590 |     12490
+ mondo                | 2026-10-06         | t              | CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/) — |             77 |     27695
+ nando                | 1.0.0 (2023-11-27) | t              | CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/), de |             77 |      2777
+ ncit-disease         | 26.09d             | t              | CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/legal |            174 |     22854
+ ncit-xref            | 26.09d             | t              | CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/legal |            174 |       645
+ omim                 | xref-keys          | t              | Sólo el número MIM, tal como lo publica la fuente que alin |            597 |     10892
+ oncotree             | 2025-10-03         | t              | CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/), de |             80 |       898
+ orphanet             | 2026-06-23         | t              | CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/legal |            278 |     11645
+ umls                 | xref-keys          | t              | Sólo el CUI. El Metathesaurus exige cuenta UTS y licencia:  |            597 |     32693
+(16 rows)
+
