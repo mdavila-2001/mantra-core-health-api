@@ -213,9 +213,47 @@ export const OTRAS = {
     ]),
   ],
 
+  /*
+   * Reorientado el 2026-10-28: el consentimiento es DIRIGIDO a una indicación
+   * concreta —receta, orden de análisis o estudio, derivación, procedimiento o
+   * plan de cuidados—, no a «un procedimiento» genérico. Suma los elementos
+   * que la norma boliviana y la práctica regional piden y la v2 no tenía:
+   * riesgos personalizados, quién informa y por qué canal, idioma, excepción
+   * legal con su justificación, testigo, asentimiento y la constancia del
+   * derecho a revocar. Los códigos de la v2 se conservan con su tipo: la
+   * siembra reconcilia por código y las capturas hechas los leen.
+   */
   TRANSV_CONSENTIMIENTO_INFORMADO: () => [
-    seccion('Procedimiento', [
-      obl(t('procedimiento_propuesto', 'Procedimiento propuesto')),
+    seccion('Qué se consiente', [
+      obl(
+        una(
+          'tipo_de_indicacion',
+          '¿A qué se consiente?',
+          [
+            'Receta o tratamiento farmacológico',
+            'Orden de análisis o estudio',
+            'Derivación a otro profesional o establecimiento',
+            'Procedimiento',
+            'Plan de cuidados',
+          ],
+          {
+            ayuda:
+              'CPE, art. 44.I: ninguna persona será sometida a intervención quirúrgica, examen médico o de laboratorio sin su consentimiento o el de terceros legalmente autorizados, salvo peligro inminente de su vida.',
+          },
+        ),
+      ),
+      obl(
+        t(
+          'procedimiento_propuesto',
+          'Tratamiento, receta, orden o derivación a la que se consiente',
+          {
+            ayuda:
+              'Lo concreto: el fármaco por su denominación común y su dosis, el estudio pedido, el servicio y el destino de la derivación, o el procedimiento.',
+          },
+        ),
+      ),
+    ]),
+    seccion('Información', [
       obl(t('diagnostico_que_lo_motiva', 'Diagnóstico que lo motiva')),
       obl(t('beneficios_esperados', 'Beneficios esperados')),
       obl(
@@ -224,7 +262,14 @@ export const OTRAS = {
           'Riesgos y complicaciones frecuentes y graves',
         ),
       ),
-      t('alternativas_disponibles', 'Alternativas disponibles'),
+      t('riesgos_personalizados', 'Riesgos personalizados', {
+        ayuda:
+          'Los que dependen de esta persona: edad, embarazo, comorbilidades, otros medicamentos.',
+      }),
+      t('alternativas_disponibles', 'Alternativas disponibles', {
+        ayuda:
+          'Incluida la de no tratar. La persona puede pedir otra opinión médica (Ley 3131).',
+      }),
       t('consecuencias_de_no_aceptar', 'Consecuencias de no aceptar'),
       b('hubo_preguntas', '¿El paciente hizo preguntas?'),
       ...si('hubo_preguntas', true, [
@@ -233,8 +278,43 @@ export const OTRAS = {
         }),
       ]),
     ]),
+    seccion('Quién informa y cómo', [
+      obl(s('profesional_que_informa', 'Profesional que informa')),
+      obl(
+        una('canal_de_informacion', 'Canal', ['En persona', 'Por telesalud']),
+      ),
+      una(
+        'idioma_de_la_informacion',
+        'Idioma en que se informó',
+        ['Castellano', 'Quechua', 'Aymara', 'Guaraní'],
+        { otro: true },
+      ),
+    ]),
+    seccion('Excepción legal', [
+      b(
+        'aplica_excepcion',
+        '¿Se actuó sin consentimiento previo por una excepción legal?',
+      ),
+      ...si('aplica_excepcion', true, [
+        una(
+          'tipo_de_excepcion',
+          'Excepción',
+          [
+            'Urgencia con peligro inminente para la vida',
+            'Riesgo para la salud pública',
+            'La persona renunció a recibir la información',
+          ],
+          { req: true },
+        ),
+        t('justificacion_de_la_excepcion', 'Justificación', {
+          req: true,
+          ayuda:
+            'En una urgencia, después se informa a la persona o a su familia y se deja constancia.',
+        }),
+      ]),
+    ]),
     seccion('Decisión', [
-      obl(b('acepta_el_procedimiento', 'Acepta el procedimiento')),
+      obl(b('acepta_el_procedimiento', 'Acepta la indicación')),
       ...si('acepta_el_procedimiento', false, [
         t('motivo_de_rechazo', 'Motivo del rechazo (disentimiento)', {
           req: true,
@@ -245,6 +325,7 @@ export const OTRAS = {
         s('nombre_del_representante', 'Nombre del representante', {
           req: true,
         }),
+        s('documento_del_representante', 'CI del representante'),
         una(
           'representante_vinculo',
           'Vínculo',
@@ -263,7 +344,23 @@ export const OTRAS = {
           ['Menor de edad', 'Incapacidad para decidir', 'Urgencia'],
           { req: true },
         ),
+        b(
+          'asentimiento_de_la_persona',
+          '¿La persona representada dio su asentimiento?',
+          { req: true },
+        ),
       ]),
+      s('nombre_del_testigo', 'Testigo', {
+        ayuda:
+          'Cuando la persona no puede consentir o no sabe firmar, el Código de Ética y Deontología Médica recomienda hacerlo ante testigos.',
+      }),
+      s('documento_del_testigo', 'CI del testigo'),
+      obl(
+        b(
+          'derecho_a_revocar_informado',
+          'Se informó que puede revocar su decisión en cualquier momento, sin efecto sobre lo ya realizado',
+        ),
+      ),
       obl(f('fecha_de_otorgamiento', 'Fecha de otorgamiento')),
     ]),
   ],

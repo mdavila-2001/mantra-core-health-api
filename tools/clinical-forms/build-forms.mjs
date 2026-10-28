@@ -320,7 +320,11 @@ function notaBase(ficha, campos) {
   return previa === '' ? agregado : `${previa} ${agregado}`;
 }
 
-const VERSION_V2 = { ODONTO_ODONTOGRAMA_OMS: 3 };
+const VERSION_V2 = {
+  ODONTO_ODONTOGRAMA_OMS: 3,
+  // 2026-10-28: consentimiento DIRIGIDO; sin subir la versión el seed no lo propaga.
+  TRANSV_CONSENTIMIENTO_INFORMADO: 3,
+};
 
 /**
  * Fichas escritas a mano (v4.2.0), fuera del generador: el script las lee y
