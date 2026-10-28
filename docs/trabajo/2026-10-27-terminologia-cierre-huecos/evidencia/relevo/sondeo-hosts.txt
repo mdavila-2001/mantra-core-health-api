@@ -1,0 +1,15 @@
+# Re-sondeo de hosts 2026-10-28 (curl -I, 15 s)
+https://cima.aemps.es 405
+https://rxnav.nlm.nih.gov 301
+https://api.fda.gov 404
+https://www.wikidata.org 301
+https://evsexplore.semantics.cancer.gov 302
+https://zenodo.org 200
+https://ftp.ncbi.nlm.nih.gov 200
+https://clinicaltrials.gov 200
+https://drugcentral.org 200
+https://loinc.org 403
+https://www.minsalud.gob.bo 000
+https://www.orphadata.com 200
+https://data.hpo.jax.org 000
+https://www.nlm.nih.gov/mesh 301
