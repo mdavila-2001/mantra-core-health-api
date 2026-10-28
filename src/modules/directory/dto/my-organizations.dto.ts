@@ -150,6 +150,48 @@ export class OrganizationContactPersonDto {
  * No reemplaza la validación: el servidor vuelve a comprobarlo en cada
  * escritura. Esto es para que la pantalla no mienta, no para autorizar.
  */
+/**
+ * Un papel de la carpeta legal de la organización, tal como quedó registrado.
+ *
+ * El archivo no viaja: su `fileId` sólo lo puede abrir quien lo subió, y la
+ * ficha tiene que decir qué se presentó y en qué estado está, no servirlo.
+ */
+export class OrganizationLegalDocumentDto {
+  @ApiProperty({
+    description: 'Rol canónico del documento',
+    enum: [
+      'CONSTITUTION_DOC',
+      'TAX_IDENTIFIER_DOC',
+      'COMMERCE_REGISTRY_DOC',
+      'OPERATING_LICENSE_DOC',
+      'HEALTH_AUTHORITY_CERT_DOC',
+      'POWER_OF_ATTORNEY_DOC',
+    ],
+  })
+  role!: string;
+
+  @ApiProperty({
+    description:
+      'Código del estado de verificación (`PENDIENTE`, `VERIFICADO`, `RECHAZADO`, `VENCIDO`)',
+    example: 'PENDIENTE',
+  })
+  verificationStatus!: string;
+
+  @ApiPropertyOptional({
+    description: 'Número del documento, si se declaró (hoy sólo el NIT)',
+  })
+  documentNumber?: string;
+
+  @ApiPropertyOptional({
+    description: 'Fecha en que se registró en la plataforma',
+    format: 'date',
+  })
+  registeredAt?: Date;
+
+  @ApiPropertyOptional({ description: 'Vigente hasta', format: 'date' })
+  validTo?: Date;
+}
+
 export class MyOrganizationDto extends TenantDetailResponseDto {
   /**
    * El rol del actor en esta organización.
@@ -213,6 +255,29 @@ export class MyOrganizationDto extends TenantDetailResponseDto {
   @ValidateNested({ each: true })
   @Type(() => OrganizationContactPersonDto)
   executives?: OrganizationContactPersonDto[];
+
+  @ApiPropertyOptional({
+    description:
+      'Código de la forma societaria (`SRL`, `SA`, `US_LLC`…), si es una del diccionario',
+    example: 'SRL',
+  })
+  legalEntityType?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Número de identificación tributaria declarado con el documento del NIT',
+  })
+  taxIdentifier?: string;
+
+  @ApiPropertyOptional({
+    type: [OrganizationLegalDocumentDto],
+    description:
+      'Los documentos legales presentados, uno por rol; ausente si no hay ninguno',
+  })
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => OrganizationLegalDocumentDto)
+  legalDocuments?: OrganizationLegalDocumentDto[];
 }
 
 /**
