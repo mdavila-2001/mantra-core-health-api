@@ -427,6 +427,26 @@ export const PATIENT_PORTAL_CATEGORIES: readonly string[] = [
 ];
 
 /**
+ * Las categorías que lista la ficha diagnóstica del paciente
+ * (`GET /diagnostics/patients/:id/orders`): las diagnósticas y los estudios
+ * que el formulario de la ficha también pide —cardiológicos y de anatomía
+ * patológica—. Lista aparte de
+ * {@link DIAGNOSTIC_CATEGORIES} por lo mismo que la del portal: esa alimenta
+ * colas y liquidaciones de laboratorio e imagen, y estas órdenes no son trabajo
+ * de esos equipos.
+ *
+ * La imagen de `clinical` entra también: es la que el catálogo de categorías
+ * publica, y las órdenes que se pidieron eligiéndola a mano se guardaron con
+ * ella. Sin esto esas radiografías desaparecían de la ficha que las pidió.
+ */
+export const PATIENT_CHART_ORDER_CATEGORIES: readonly string[] = [
+  ...DIAGNOSTIC_CATEGORIES,
+  CLIN.SERVICE_REQUEST_CATEGORY_IMAGING,
+  CLIN.SERVICE_REQUEST_CATEGORY_CARDIO,
+  CLIN.SERVICE_REQUEST_CATEGORY_PATHOLOGY,
+];
+
+/**
  * Las categorías de orden que llegan a la **recepción de muestras**: las que
  * tienen un espécimen que recibir. Imagenología queda afuera (una radiografía
  * no trae tubo) y anatomía patológica entra, porque su pieza también se recibe,
