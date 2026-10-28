@@ -10,6 +10,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
   MaxLength,
   Min,
   MinLength,
@@ -24,6 +25,7 @@ import type {
   BookingChannel,
 } from '../../domain/booking/booking-channels';
 import type { PaymentState } from '../../domain/booking/payment-state';
+import type { PaymentReceiptStatus } from '../../domain/booking/payment-receipt';
 
 /** Canal por el que se originó la reserva. */
 export type { BookingChannel };
@@ -1149,4 +1151,141 @@ export class PaymentStateDto {
   /** Cuándo. */
   @ApiProperty({ format: 'date-time' })
   markedAt!: string;
+}
+
+/** Las tres revisiones posibles de un comprobante. */
+export const PAYMENT_RECEIPT_STATUSES: readonly PaymentReceiptStatus[] = [
+  'PENDING',
+  'CONFIRMED',
+  'REJECTED',
+];
+
+/** Largo del motivo de rechazo y de la nota de un comprobante. */
+export const MIN_RECEIPT_REJECTION_LENGTH = 3;
+export const MAX_RECEIPT_TEXT_LENGTH = 500;
+
+/**
+ * Cuerpo de `POST /scheduling/bookings/{id}/payment-receipts`: el paciente sube
+ * el comprobante de lo que pagó.
+ */
+export class UploadPaymentReceiptDto {
+  /** El archivo ya subido a `common/files` por el propio paciente. */
+  @ApiProperty({
+    format: 'uuid',
+    description:
+      'Archivo del comprobante (png, jpeg, webp o pdf, hasta 5 MB), subido por quien lo adjunta.',
+  })
+  @IsUUID()
+  fileId!: string;
+
+  /**
+   * Lo que el paciente dice que pagó.
+   *
+   * Texto y no número: es dinero, y un `number` de JavaScript no guarda
+   * «150.10» sin redondeo. No se compara contra el precio de la cita.
+   */
+  @ApiPropertyOptional({
+    description: 'Monto declarado, como texto decimal con hasta dos decimales',
+    example: '150.00',
+  })
+  @IsOptional()
+  @IsString()
+  @Matches(/^\d{1,10}(\.\d{1,2})?$/, {
+    message: 'amount debe ser un monto decimal con hasta dos decimales',
+  })
+  amount?: string;
+
+  /** Cuándo dice el paciente que pagó. */
+  @ApiPropertyOptional({ format: 'date-time' })
+  @IsOptional()
+  @IsISO8601()
+  paidAt?: string;
+
+  /** Algo que el paciente quiere que el médico sepa del pago. */
+  @ApiPropertyOptional({ maxLength: MAX_RECEIPT_TEXT_LENGTH })
+  @IsOptional()
+  @IsString()
+  @MaxLength(MAX_RECEIPT_TEXT_LENGTH)
+  note?: string;
+}
+
+/** Cuerpo de `POST …/payment-receipts/{receiptId}/reject`. */
+export class RejectPaymentReceiptDto {
+  /** Por qué se rechaza. El paciente lo lee en el aviso. */
+  @ApiProperty({
+    description:
+      'Motivo del rechazo. Obligatorio: el paciente lo lee para saber qué volver a subir.',
+    minLength: MIN_RECEIPT_REJECTION_LENGTH,
+    maxLength: MAX_RECEIPT_TEXT_LENGTH,
+  })
+  @IsString()
+  @MinLength(MIN_RECEIPT_REJECTION_LENGTH)
+  @MaxLength(MAX_RECEIPT_TEXT_LENGTH)
+  reason!: string;
+}
+
+/** Quién hizo algo con un comprobante, con su nombre para mostrar. */
+export class PaymentReceiptActorDto {
+  @ApiProperty({ format: 'uuid' })
+  userId!: string;
+
+  @ApiProperty({ example: 'Ana Pérez' })
+  displayName!: string;
+}
+
+/** Un comprobante de pago tal como se lee. */
+export class PaymentReceiptDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  bookingId!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  fileId!: string;
+
+  @ApiProperty({
+    enum: ['image/png', 'image/jpeg', 'image/webp', 'application/pdf'],
+  })
+  mimeType!: string;
+
+  @ApiProperty({ type: String, nullable: true })
+  originalName!: string | null;
+
+  /** Decimal como texto: `"150.00"`. */
+  @ApiProperty({ type: String, nullable: true, example: '150.00' })
+  amount!: string | null;
+
+  @ApiProperty({ type: String, format: 'date-time', nullable: true })
+  paidAt!: string | null;
+
+  @ApiProperty({ type: String, nullable: true })
+  note!: string | null;
+
+  @ApiProperty({ format: 'date-time' })
+  uploadedAt!: string;
+
+  @ApiProperty({ type: PaymentReceiptActorDto })
+  uploadedBy!: PaymentReceiptActorDto;
+
+  @ApiProperty({ enum: PAYMENT_RECEIPT_STATUSES })
+  status!: PaymentReceiptStatus;
+
+  @ApiProperty({ type: String, format: 'date-time', nullable: true })
+  reviewedAt!: string | null;
+
+  @ApiProperty({ type: PaymentReceiptActorDto, nullable: true })
+  reviewedBy!: PaymentReceiptActorDto | null;
+
+  @ApiProperty({ type: String, nullable: true })
+  rejectionReason!: string | null;
+}
+
+/** Respuesta de confirmar un comprobante: el comprobante y el pago de la cita. */
+export class ConfirmPaymentReceiptResponseDto {
+  @ApiProperty({ type: PaymentReceiptDto })
+  receipt!: PaymentReceiptDto;
+
+  @ApiProperty({ type: PaymentStateDto })
+  paymentState!: PaymentStateDto;
 }

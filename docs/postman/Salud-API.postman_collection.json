@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1570 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1570 requests en 145 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1575 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1575 requests en 145 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -84694,7 +84694,7 @@
       ]
     },
     {
-      "name": "scheduling (58)",
+      "name": "scheduling (63)",
       "item": [
         {
           "name": "scheduling",
@@ -87263,6 +87263,211 @@
               ]
             },
             {
+              "name": "POST /scheduling/bookings/{id}/payment-receipts · Subir el comprobante de pago de una cita",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/bookings/:id/payment-receipts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "bookings",
+                    ":id",
+                    "payment-receipts"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{bookingId}}",
+                      "description": "Identificador de ruta · variable `{{bookingId}}`"
+                    }
+                  ]
+                },
+                "description": "El paciente adjunta un archivo propio (png, jpeg, webp o pdf, hasta 5 MB). 404 si la cita no es suya; 422 si el archivo no sirve o la cita está cancelada o rechazada; 409 si la cita ya está pagada.\n\n`POST /scheduling/bookings/{id}/payment-receipts`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `SchedulingBookingsController_uploadPaymentReceipt`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fileId\": \"{{fileId}}\",\n  \"amount\": \"150.00\",\n  \"paidAt\": \"2026-01-01T00:00:00.000Z\",\n  \"note\": \"note-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{paymentReceiptId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.paymentReceiptId);",
+                      "  if (id) pm.environment.set('paymentReceiptId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm · Confirmar un comprobante de pago",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/bookings/:id/payment-receipts/:receiptId/confirm",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "bookings",
+                    ":id",
+                    "payment-receipts",
+                    ":receiptId",
+                    "confirm"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{bookingId}}",
+                      "description": "Identificador de ruta · variable `{{bookingId}}`"
+                    },
+                    {
+                      "key": "receiptId",
+                      "value": "{{receiptId}}",
+                      "description": "Identificador de ruta · variable `{{receiptId}}`"
+                    }
+                  ]
+                },
+                "description": "Deja el comprobante confirmado y la cita pagada. 409 si el comprobante ya se rechazó; 422 si la cita está cancelada o rechazada.\n\n`POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `SchedulingBookingsController_confirmPaymentReceipt`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{paymentReceiptId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.paymentReceiptId);",
+                      "  if (id) pm.environment.set('paymentReceiptId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject · Rechazar un comprobante de pago",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/bookings/:id/payment-receipts/:receiptId/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "bookings",
+                    ":id",
+                    "payment-receipts",
+                    ":receiptId",
+                    "reject"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{bookingId}}",
+                      "description": "Identificador de ruta · variable `{{bookingId}}`"
+                    },
+                    {
+                      "key": "receiptId",
+                      "value": "{{receiptId}}",
+                      "description": "Identificador de ruta · variable `{{receiptId}}`"
+                    }
+                  ]
+                },
+                "description": "Guarda el motivo, que el paciente recibe en el aviso. 409 si el comprobante ya se confirmó.\n\n`POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `SchedulingBookingsController_rejectPaymentReceipt`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"reason-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{paymentReceiptId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.paymentReceiptId);",
+                      "  if (id) pm.environment.set('paymentReceiptId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "POST /scheduling/bookings/{id}/propose-schedule · Proponer otro horario para la solicitud",
               "request": {
                 "method": "POST",
@@ -87706,6 +87911,125 @@
                       "  const list = Array.isArray(body) ? body : (body.bookings || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('bookingId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /scheduling/bookings/{id}/payment-receipts · Listar los comprobantes de pago de una cita",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/bookings/:id/payment-receipts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "bookings",
+                    ":id",
+                    "payment-receipts"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{bookingId}}",
+                      "description": "Identificador de ruta · variable `{{bookingId}}`"
+                    }
+                  ]
+                },
+                "description": "Los ve el paciente de la cita y el prestador de esa agenda. Cualquier otro recibe 404.\n\n`GET /scheduling/bookings/{id}/payment-receipts`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `SchedulingBookingsController_listPaymentReceipts`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.paymentReceipts || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('paymentReceiptId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /scheduling/bookings/{id}/payment-receipts/{receiptId}/content · Descargar el archivo de un comprobante de pago",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/bookings/:id/payment-receipts/:receiptId/content",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "bookings",
+                    ":id",
+                    "payment-receipts",
+                    ":receiptId",
+                    "content"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{bookingId}}",
+                      "description": "Identificador de ruta · variable `{{bookingId}}`"
+                    },
+                    {
+                      "key": "receiptId",
+                      "value": "{{receiptId}}",
+                      "description": "Identificador de ruta · variable `{{receiptId}}`"
+                    }
+                  ]
+                },
+                "description": "Mismos permisos que la lista de comprobantes.\n\n`GET /scheduling/bookings/{id}/payment-receipts/{receiptId}/content`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `SchedulingBookingsController_paymentReceiptContent`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.paymentReceipts || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('paymentReceiptId', first.id);",
                       "}"
                     ]
                   }

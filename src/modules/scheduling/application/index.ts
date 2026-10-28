@@ -1,5 +1,6 @@
 export { SchedulingCatalogService } from './catalog/scheduling-catalog.service';
 export { SchedulingBookingsService } from './bookings/scheduling-bookings.service';
+export { SchedulingPaymentReceiptsService } from './bookings/scheduling-payment-receipts.service';
 export { SchedulingWaitlistService } from './waitlist/scheduling-waitlist.service';
 export {
   SchedulingConfirmationService,
