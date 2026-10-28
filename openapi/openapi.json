@@ -46365,7 +46365,17 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReferralListItemDto"
+                  }
+                }
+              }
+            }
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -46396,6 +46406,140 @@
           "clinical-ext-referrals"
         ],
         "description": "Listar derivaciones de un paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/referrals/targets": {
+      "get": {
+        "operationId": "ReferralsController_searchTargets",
+        "parameters": [
+          {
+            "name": "q",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "minLength": 2,
+              "maxLength": 100,
+              "type": "string"
+            }
+          },
+          {
+            "name": "kind",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PRACTITIONER",
+                "ORGANIZATION"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferralTargetListDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Buscar destinos de derivación",
+        "tags": [
+          "clinical-ext-referrals"
+        ],
+        "description": "Buscar destinos de derivación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/referrals/target-services": {
+      "get": {
+        "operationId": "ReferralsController_listTargetServices",
+        "parameters": [
+          {
+            "name": "targetProfileId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetTenantId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferralTargetServiceListDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Servicios activos de un destino de derivación",
+        "tags": [
+          "clinical-ext-referrals"
+        ],
+        "description": "Servicios activos de un destino de derivación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/referrals/{id}/respond": {
@@ -46474,7 +46618,17 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReferralListItemDto"
+                  }
+                }
+              }
+            }
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -56281,7 +56435,7 @@
             "$ref": "#/components/responses/GatewayTimeout"
           }
         },
-        "summary": "Nombre de la calle de un punto en Bolivia",
+        "summary": "Nombre de la calle de un punto del mapa",
         "tags": [
           "geo"
         ]
@@ -101528,6 +101682,10 @@
             "type": "string",
             "format": "uuid"
           },
+          "district": {
+            "type": "string",
+            "maxLength": 200
+          },
           "administrativeAreaConceptId": {
             "type": "string",
             "format": "uuid"
@@ -101765,6 +101923,11 @@
             "type": "string",
             "maxLength": 500,
             "description": "Calle y número del domicilio particular"
+          },
+          "homeDistrict": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Distrito o zona del domicilio particular"
           },
           "homeLatitude": {
             "type": "number",
@@ -102246,6 +102409,11 @@
             "maxLength": 500,
             "description": "Calle y número del domicilio"
           },
+          "homeDistrict": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Distrito o zona del domicilio"
+          },
           "homeLatitude": {
             "type": "number",
             "minimum": -90,
@@ -102265,6 +102433,11 @@
             "type": "string",
             "maxLength": 500,
             "description": "Calle y número del lugar de trabajo"
+          },
+          "workDistrict": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Distrito o zona del lugar de trabajo"
           },
           "workLatitude": {
             "type": "number",
@@ -103099,6 +103272,11 @@
             "maxLength": 500,
             "description": "Calle y número del domicilio particular"
           },
+          "homeDistrict": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Distrito o zona del domicilio particular"
+          },
           "homeLatitude": {
             "type": "number",
             "minimum": -90,
@@ -103436,6 +103614,15 @@
             "type": "string",
             "format": "uuid",
             "description": "Municipio (VS_BO_MUNICIPALITY)"
+          },
+          "administrativeArea2ConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio"
+          },
+          "district": {
+            "type": "string",
+            "description": "Distrito o zona, tal como lo dio el mapa"
           },
           "latitude": {
             "type": "number",
@@ -103889,6 +104076,16 @@
             "type": "string",
             "maxLength": 300,
             "description": "Dirección de trabajo. Vacío para quitarla."
+          },
+          "homeDistrict": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Distrito o zona del domicilio. Vacío para quitarlo."
+          },
+          "workDistrict": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Distrito o zona del trabajo. Vacío para quitarlo."
           },
           "issuerAdministrativeAreaConceptId": {
             "type": "string",
@@ -105151,6 +105348,16 @@
             "type": "string",
             "maxLength": 300,
             "description": "Dirección del lugar de trabajo. Vacío para quitarla."
+          },
+          "homeDistrict": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Distrito o zona del domicilio. Vacío para quitarlo."
+          },
+          "workDistrict": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Distrito o zona del trabajo. Vacío para quitarlo."
           },
           "workLatitude": {
             "type": "object",
@@ -126355,12 +126562,137 @@
             "type": "string",
             "format": "date",
             "description": "Vigencia de la referencia"
+          },
+          "referralType": {
+            "type": "string",
+            "enum": [
+              "TREATMENT",
+              "CONSULTATION",
+              "DIAGNOSTIC_STUDY",
+              "PROCEDURE",
+              "SECOND_OPINION"
+            ],
+            "default": "CONSULTATION",
+            "description": "Tipo de derivación (tratamiento, consulta, estudio, …)"
+          },
+          "targetServiceCatalogId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Servicio del catálogo del destino"
           }
         },
         "required": [
           "patientProfileId"
         ],
         "additionalProperties": false
+      },
+      "ReferralTargetDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "PRACTITIONER",
+              "ORGANIZATION"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "subtitle": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "displayName",
+          "tenantId",
+          "subtitle"
+        ]
+      },
+      "ReferralTargetListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReferralTargetDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "ReferralTargetServiceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "price": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "practiceName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "description",
+          "price",
+          "currency",
+          "tenantId",
+          "practiceName"
+        ]
+      },
+      "ReferralTargetServiceListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReferralTargetServiceDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
       },
       "RespondReferralDto": {
         "type": "object",
@@ -126378,6 +126710,125 @@
           "decision"
         ],
         "additionalProperties": false
+      },
+      "ReferralListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "patientProfileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceEncounterId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referringProfileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetProfileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetTenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "specialtyConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "serviceRequestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reasonConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reasonText": {
+            "type": "string"
+          },
+          "priorityConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "statusConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date"
+          },
+          "respondedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "updatedByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rowVersion": {
+            "type": "number"
+          },
+          "referralTypeConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referralType": {
+            "type": "string",
+            "enum": [
+              "TREATMENT",
+              "CONSULTATION",
+              "DIAGNOSTIC_STUDY",
+              "PROCEDURE",
+              "SECOND_OPINION"
+            ],
+            "nullable": true
+          },
+          "targetServiceCatalogId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "targetDisplayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "targetServiceName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "patientProfileId",
+          "statusConceptId",
+          "createdAt",
+          "updatedAt",
+          "rowVersion",
+          "referralType",
+          "targetServiceCatalogId",
+          "targetDisplayName",
+          "targetServiceName"
+        ]
       },
       "CareGapInputDto": {
         "type": "object",
@@ -131501,13 +131952,13 @@
         "properties": {
           "latitude": {
             "type": "number",
-            "minimum": -23.5,
-            "maximum": -9.2
+            "minimum": -90,
+            "maximum": 90
           },
           "longitude": {
             "type": "number",
-            "minimum": -70,
-            "maximum": -57
+            "minimum": -180,
+            "maximum": 180
           }
         },
         "required": [
@@ -131515,6 +131966,31 @@
           "longitude"
         ],
         "additionalProperties": false
+      },
+      "ReverseGeocodingAdminAreasDto": {
+        "type": "object",
+        "properties": {
+          "level1": {
+            "type": "string",
+            "description": "Nivel 1: departamento, estado o región",
+            "example": "Santa Cruz"
+          },
+          "level2": {
+            "type": "string",
+            "description": "Nivel 2: provincia o condado",
+            "example": "Provincia Andrés Ibáñez"
+          },
+          "level3": {
+            "type": "string",
+            "description": "Nivel 3: municipio o ciudad",
+            "example": "Santa Cruz de la Sierra"
+          },
+          "district": {
+            "type": "string",
+            "description": "Distrito o zona dentro del municipio",
+            "example": "Equipetrol"
+          }
+        }
       },
       "ReverseGeocodingResponseDto": {
         "type": "object",
@@ -131538,6 +132014,14 @@
           },
           "city": {
             "type": "string"
+          },
+          "countryCode": {
+            "type": "string",
+            "description": "País del punto, ISO 3166-1 alfa-2 en mayúsculas",
+            "example": "BO"
+          },
+          "adminAreas": {
+            "$ref": "#/components/schemas/ReverseGeocodingAdminAreasDto"
           },
           "attribution": {
             "type": "string",
