@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
@@ -9,13 +10,17 @@ import {
   Post,
   Put,
   Query,
+  Res,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiOkResponse,
   ApiOperation,
+  ApiProduces,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import type { Response } from 'express';
 import {
   Audited,
   CurrentUser,
@@ -27,6 +32,7 @@ import {
 import {
   SchedulingBookingsService,
   SchedulingDelayService,
+  SchedulingPaymentReceiptsService,
   SchedulingWaitlistService,
 } from '../../application';
 import {
@@ -34,6 +40,10 @@ import {
   RejectBookingDto,
   SetPaymentStateDto,
   PaymentStateDto,
+  UploadPaymentReceiptDto,
+  RejectPaymentReceiptDto,
+  PaymentReceiptDto,
+  ConfirmPaymentReceiptResponseDto,
   RequestBookingInfoDto,
   ProposeScheduleDto,
   ProposeScheduleResponseDto,
@@ -66,6 +76,7 @@ export class SchedulingBookingsController {
     private readonly bookingsService: SchedulingBookingsService,
     private readonly waitlistService: SchedulingWaitlistService,
     private readonly delayService: SchedulingDelayService,
+    private readonly receiptsService: SchedulingPaymentReceiptsService,
   ) {}
 
   /**
@@ -291,6 +302,124 @@ export class SchedulingBookingsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PaymentStateDto | null> {
     return this.bookingsService.getPaymentState(id, actor);
+  }
+
+  /**
+   * El paciente sube el comprobante de lo que pagó.
+   *
+   * Queda pendiente hasta que el prestador lo revise: el paciente sigue sin
+   * poder marcar su cita como pagada (`PUT payment-state` no lo deja).
+   */
+  @Audited({
+    action: 'BOOKING_PAYMENT_RECEIPT_UPLOADED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
+  @Post(':id/payment-receipts')
+  @Roles('PATIENT')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Subir el comprobante de pago de una cita',
+    description:
+      'El paciente adjunta un archivo propio (png, jpeg, webp o pdf, hasta 5 MB). 404 si la cita no es suya; 422 si el archivo no sirve o la cita está cancelada o rechazada; 409 si la cita ya está pagada.',
+  })
+  uploadPaymentReceipt(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UploadPaymentReceiptDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PaymentReceiptDto> {
+    return this.receiptsService.upload(id, dto, actor);
+  }
+
+  /** Los comprobantes de la cita, del más reciente al más viejo. */
+  @Get(':id/payment-receipts')
+  @Roles('PATIENT', 'PRACTITIONER', 'SCHEDULING_ADMIN', 'SCHEDULING_AGENT')
+  @ApiOperation({
+    summary: 'Listar los comprobantes de pago de una cita',
+    description:
+      'Los ve el paciente de la cita y el prestador de esa agenda. Cualquier otro recibe 404.',
+  })
+  @ApiOkResponse({ type: PaymentReceiptDto, isArray: true })
+  listPaymentReceipts(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PaymentReceiptDto[]> {
+    return this.receiptsService.list(id, actor);
+  }
+
+  /**
+   * El archivo de un comprobante.
+   *
+   * Lo autoriza la cita, no el archivo: `GET /common/files/:id/content` solo se
+   * lo da a quien lo subió, y quien tiene que mirarlo es el médico.
+   */
+  @Get(':id/payment-receipts/:receiptId/content')
+  @Roles('PATIENT', 'PRACTITIONER', 'SCHEDULING_ADMIN', 'SCHEDULING_AGENT')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({
+    summary: 'Descargar el archivo de un comprobante de pago',
+    description: 'Mismos permisos que la lista de comprobantes.',
+  })
+  @ApiProduces('image/png', 'image/jpeg', 'image/webp', 'application/pdf')
+  async paymentReceiptContent(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('receiptId', ParseUUIDPipe) receiptId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Res() res: Response,
+  ): Promise<void> {
+    const content = await this.receiptsService.content(id, receiptId, actor);
+    res.setHeader('Content-Type', content.mimeType);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.send(content.buffer);
+  }
+
+  /**
+   * Confirma un comprobante: la cita queda pagada, en la misma transacción.
+   *
+   * Confirmar uno basta. Volver a confirmarlo devuelve lo mismo sin escribir.
+   */
+  @Audited({
+    action: 'BOOKING_PAYMENT_RECEIPT_CONFIRMED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
+  @Post(':id/payment-receipts/:receiptId/confirm')
+  @Roles('PRACTITIONER', 'SCHEDULING_ADMIN', 'SCHEDULING_AGENT')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Confirmar un comprobante de pago',
+    description:
+      'Deja el comprobante confirmado y la cita pagada. 409 si el comprobante ya se rechazó; 422 si la cita está cancelada o rechazada.',
+  })
+  confirmPaymentReceipt(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('receiptId', ParseUUIDPipe) receiptId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ConfirmPaymentReceiptResponseDto> {
+    return this.receiptsService.confirm(id, receiptId, actor);
+  }
+
+  /** Rechaza un comprobante con su motivo. No cambia el estado de pago. */
+  @Audited({
+    action: 'BOOKING_PAYMENT_RECEIPT_REJECTED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
+  @Post(':id/payment-receipts/:receiptId/reject')
+  @Roles('PRACTITIONER', 'SCHEDULING_ADMIN', 'SCHEDULING_AGENT')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Rechazar un comprobante de pago',
+    description:
+      'Guarda el motivo, que el paciente recibe en el aviso. 409 si el comprobante ya se confirmó.',
+  })
+  rejectPaymentReceipt(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('receiptId', ParseUUIDPipe) receiptId: string,
+    @Body() dto: RejectPaymentReceiptDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PaymentReceiptDto> {
+    return this.receiptsService.reject(id, receiptId, dto, actor);
   }
 
   /**
