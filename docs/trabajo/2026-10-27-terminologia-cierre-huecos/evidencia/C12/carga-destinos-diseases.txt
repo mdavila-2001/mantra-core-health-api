@@ -1,0 +1,87 @@
+=== Catálogo de enfermedades → terminology.*  ===
+Leyendo la instantánea versionada /home/user/mantra-core-health-api/tools/terminology-import/diseases/data
+┌─────────┬────────────────┬──────────────┬──────────┬──────────────┬────────────┬───────────────┬───────┬────────────────────────┐
+│ (index) │ codeSystem     │ version      │ concepts │ designations │ properties │ relationships │ maps  │ externalMapsCandidates │
+├─────────┼────────────────┼──────────────┼──────────┼──────────────┼────────────┼───────────────┼───────┼────────────────────────┤
+│ 0       │ 'mesh'         │ '2026'       │ 12490    │ 42487        │ 82121      │ 7963          │ 13675 │ 834                    │
+│ 1       │ 'mondo'        │ '2026-10-06' │ 27695    │ 111790       │ 123821     │ 36104         │ 78285 │ 4410                   │
+│ 2       │ 'ncit-disease' │ '26.09d'     │ 22854    │ 69987        │ 89553      │ 38089         │ 13608 │ 0                      │
+│ 3       │ 'ncit-xref'    │ '26.09d'     │ 645      │ 1633         │ 3025       │ 0             │ 564   │ 0                      │
+│ 4       │ 'omim'         │ 'xref-keys'  │ 10892    │ 0            │ 21784      │ 0             │ 0     │ 0                      │
+│ 5       │ 'orphanet'     │ '2026-06-23' │ 11645    │ 52894        │ 50226      │ 19711         │ 45767 │ 0                      │
+└─────────┴────────────────┴──────────────┴──────────┴──────────────┴────────────┴───────────────┴───────┴────────────────────────┘
+Totales: {
+  concepts: 86221,
+  designations: 278791,
+  properties: 370530,
+  relationships: 101867,
+  maps: 151899,
+  externalMapsCandidates: 5244
+}
+[concepts] mesh +12490
+[concepts] mondo +27695
+[concepts] ncit-disease +22854
+[concepts] ncit-xref +645
+[concepts] omim +10892
+[concepts] orphanet +11645
+[load] mesh {"concepts":12490,"designations":42487,"properties":82121,"relationships":7963,"maps":13675,"externalMaps":0}
+[load] mondo {"concepts":27695,"designations":111790,"properties":123821,"relationships":36104,"maps":36736,"externalMaps":0}
+[load] ncit-disease {"concepts":22854,"designations":69987,"properties":89553,"relationships":38089,"maps":0,"externalMaps":0}
+[load] ncit-xref {"concepts":645,"designations":1633,"properties":3025,"relationships":0,"maps":0,"externalMaps":0}
+[load] omim {"concepts":10892,"designations":0,"properties":21784,"relationships":0,"maps":0,"externalMaps":0}
+[load] orphanet {"concepts":11645,"designations":52894,"properties":50226,"relationships":19711,"maps":20872,"externalMaps":0}
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "mesh": {
+      "concepts": 12490,
+      "designations": 42487,
+      "properties": 82121,
+      "relationships": 7963,
+      "maps": 13675,
+      "externalMaps": 0
+    },
+    "mondo": {
+      "concepts": 27695,
+      "designations": 111790,
+      "properties": 123821,
+      "relationships": 36104,
+      "maps": 36736,
+      "externalMaps": 0
+    },
+    "ncit-disease": {
+      "concepts": 22854,
+      "designations": 69987,
+      "properties": 89553,
+      "relationships": 38089,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "ncit-xref": {
+      "concepts": 645,
+      "designations": 1633,
+      "properties": 3025,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "omim": {
+      "concepts": 10892,
+      "designations": 0,
+      "properties": 21784,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "orphanet": {
+      "concepts": 11645,
+      "designations": 52894,
+      "properties": 50226,
+      "relationships": 19711,
+      "maps": 20872,
+      "externalMaps": 0
+    }
+  },
+  "segundos": 53
+}

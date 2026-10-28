@@ -1,0 +1,153 @@
+Pager usage is off.
+== 1. conceptos por code system y versión
+   internal_code    |                                  version                                   | conceptos 
+--------------------+----------------------------------------------------------------------------+-----------
+ clingen-terms      | 2026-10-28 + bajado 2026-10-28 (sin versión declarada ni Last-Modified)    |       103
+ clinvar-functional | 2026-04-03 + 2026-06-11                                                    |        56
+ clinvar-terms      | 2.6; February 26, 2026 + 2024-11-19 + 2025-08-20 + 2026-01-14 + 2026-10-27 |       349
+ ga4gh-vrs          | 2.0.1                                                                      |        48
+ hgnc               | 2026-10-27                                                                 |     45289
+ hgnc-gene-group    | 2026-10-27                                                                 |      2572
+ hgvs-syntax        | bajado 2026-10-28 (sin versión declarada ni Last-Modified)                 |        43
+ medgen             | 2026-10-27                                                                 |    101277
+ ncbi-gene-hs       | 2026-10-27                                                                 |    194025
+ sequence-ontology  | 2026-08-07                                                                 |      2409
+(10 rows)
+
+== 2. duplicados por (versión del code system, code) — la clave única del modelo: debe dar 0 filas
+ internal_code | version | code | count 
+---------------+---------+------+-------
+(0 rows)
+
+== 2b. duplicados por (code system, code) A TRAVÉS de versiones. Esperado: 0 en los 8 sistemas propios; en hgnc y sequence-ontology sólo si dictionaries/ cargó su versión en la misma base (ver coexistence.sql)
+   internal_code    | versiones | filas_de_codigos_repetidos_entre_versiones 
+--------------------+-----------+--------------------------------------------
+ clingen-terms      |         1 |                                          0
+ clinvar-functional |         1 |                                          0
+ clinvar-terms      |         1 |                                          0
+ ga4gh-vrs          |         1 |                                          0
+ hgnc               |         2 |                                      90550
+ hgnc-gene-group    |         1 |                                          0
+ hgvs-syntax        |         1 |                                          0
+ medgen             |         1 |                                          0
+ ncbi-gene-hs       |         1 |                                          0
+ sequence-ontology  |         2 |                                       4818
+(10 rows)
+
+== 3. nulos o vacíos indebidos en code/display, y definición cargada en la columna en castellano (debe ser NULL): todo 0
+   internal_code    | code_vacio | display_vacio | definition_no_nula | sin_estado 
+--------------------+------------+---------------+--------------------+------------
+ clingen-terms      |          0 |             0 |                  0 |          0
+ clinvar-functional |          0 |             0 |                  0 |          0
+ clinvar-terms      |          0 |             0 |                  0 |          0
+ ga4gh-vrs          |          0 |             0 |                  0 |          0
+ hgnc               |          0 |             0 |                  0 |          0
+ hgnc-gene-group    |          0 |             0 |                  0 |          0
+ hgvs-syntax        |          0 |             0 |                  0 |          0
+ medgen             |          0 |             0 |                  0 |          0
+ ncbi-gene-hs       |          0 |             0 |                  0 |          0
+ sequence-ontology  |          0 |             0 |                  0 |          0
+(10 rows)
+
+== 4. conceptos sin designación preferida: debe dar 0 por sistema
+ internal_code | sin_preferida 
+---------------+---------------
+(0 rows)
+
+== 5. procedencia por fila: conceptos a los que les falta alguna de las 8 propiedades de procedencia: debe dar 0
+ internal_code | con_procedencia_incompleta 
+---------------+----------------------------
+(0 rows)
+
+== 6. huérfanos: designaciones, propiedades, relaciones y mapas cuyo concepto no existe: debe dar 0 en todo
+ designaciones | propiedades | relaciones | mapas 
+---------------+-------------+------------+-------
+             0 |           0 |          0 |     0
+(1 row)
+
+== 7. autorreferencias y duplicados de la clave natural (origen, destino, tipo) en relaciones y mapas DE GENÉTICA: debe dar 0
+CREATE VIEW
+ rel_autorref | rel_duplicadas | map_autorref | map_duplicados 
+--------------+----------------+--------------+----------------
+            0 |              0 |            0 |              0
+(1 row)
+
+== 8. relaciones de genética por tipo (is-a / part-of) y sistema de origen
+  sistema_origen   |               tipo               | aristas 
+-------------------+----------------------------------+---------
+ ga4gh-vrs         | terminology:relationship:is-a    |      15
+ hgnc              | terminology:relationship:part-of |   36538
+ hgnc-gene-group   | terminology:relationship:is-a    |    1740
+ medgen            | terminology:relationship:is-a    |   58763
+ sequence-ontology | terminology:relationship:is-a    |    2517
+(5 rows)
+
+== 9. cruces por código exacto de genética: sistema de origen → sistema de destino
+       origen       |      destino      | cruces | con_equivalencia_afirmada 
+--------------------+-------------------+--------+---------------------------
+ clinvar-functional | sequence-ontology |     36 |                         0
+ hgnc               | ncbi-gene-hs      |  44498 |                         0
+ medgen             | mesh              |  15740 |                         0
+ medgen             | mondo             |  23328 |                         0
+ medgen             | ncit-disease      |  21675 |                         0
+ medgen             | ncit-xref         |    461 |                         0
+ medgen             | omim              |  11338 |                         0
+ medgen             | orphanet          |   8996 |                         0
+ ncbi-gene-hs       | hgnc              |  45192 |                         0
+(9 rows)
+
+== 10. cruces sin contexto, y cruces cuyo código de destino NO figura entre los xrefs que declara el concepto de origen: debe dar 0
+       origen       |      destino      | cruces | sin_contexto | destino_no_declarado 
+--------------------+-------------------+--------+--------------+----------------------
+ clinvar-functional | sequence-ontology |     36 |            0 |                    0
+ hgnc               | ncbi-gene-hs      |  44498 |            0 |                    0
+ medgen             | mesh              |  15740 |            0 |                    0
+ medgen             | mondo             |  23328 |            0 |                    0
+ medgen             | ncit-disease      |  21675 |            0 |                    0
+ medgen             | ncit-xref         |    461 |            0 |                    0
+ medgen             | omim              |  11338 |            0 |                    0
+ medgen             | orphanet          |   8996 |            0 |                    0
+ ncbi-gene-hs       | hgnc              |  45192 |            0 |                    0
+(9 rows)
+
+== 11. propiedades por sistema y filas de import batch
+   internal_code    | conceptos_con_props | propiedades 
+--------------------+---------------------+-------------
+ clingen-terms      |                 103 |        1236
+ clinvar-functional |                  56 |         560
+ clinvar-terms      |                 349 |        3846
+ ga4gh-vrs          |                  48 |         581
+ hgnc               |               45289 |      906500
+ hgnc-gene-group    |                2572 |       31421
+ hgvs-syntax        |                  43 |         495
+ medgen             |              101277 |     1723923
+ ncbi-gene-hs       |              194025 |     2986303
+ sequence-ontology  |                2409 |       26087
+(10 rows)
+
+   internal_code    | total_read | total_inserted | total_errors |     checksum     
+--------------------+------------+----------------+--------------+------------------
+ clingen-terms      |        103 |           1442 |            0 | a24f041bbcca186a
+ clinvar-functional |         56 |            708 |            0 | 3c974ff9ec3a1f53
+ clinvar-terms      |        349 |           4544 |            0 | 1d40c2cfd84e3431
+ ga4gh-vrs          |         48 |            692 |            0 | 75445d16ada63cbc
+ hgnc               |      45289 |        1179931 |            0 | d21b5a76140403a9
+ hgnc-gene-group    |       2572 |          38305 |            0 | 84e868dfb3161c0b
+ hgvs-syntax        |         43 |            581 |            0 | 0c0e56c480a4e8e3
+ medgen             |     101277 |        2334313 |            0 | f68a774d0b998d93
+ ncbi-gene-hs       |     194025 |        3687636 |            0 | 4114a49429adc93f
+ sequence-ontology  |       2409 |          37229 |            0 | 3af447d9a263b235
+(10 rows)
+
+== 12. muestra: HGNC:5 (A1BG) con su cruce a NCBI Gene, su grupo y la procedencia
+  code  | display |                                       propiedades                                        | cruces |                relaciones                 
+--------+---------+------------------------------------------------------------------------------------------+--------+-------------------------------------------
+ HGNC:5 | A1BG    |                                                                                          |        | 
+ HGNC:5 | A1BG    | approved_name="alpha-1-B glycoprotein"                                                  +| 1 A1BG | 594 Immunoglobulin like domain containing
+        |         |    cytogenetic_location="19q13.43"                                                      +|        | 
+        |         |    source="hgnc"                                                                        +|        | 
+        |         |    source_license="CC0 1.0 (HGNC License Agreement, https://www.genenames.org/about/lice+|        | 
+        |         |    source_url="https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:5"     +|        | 
+        |         |    source_version="2026-10-27"                                                           |        | 
+(2 rows)
+

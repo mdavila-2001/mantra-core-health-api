@@ -1,0 +1,61 @@
+Licencias leídas el 2026-10-28 (extractos textuales de las páginas oficiales; el 2026-10-27 está en licencias-2026-10-27.txt)
+
+== HGNC — https://www.genenames.org/about/license/
+The HUGO Gene Nomenclature Committee (HGNC) wants to ensure that our information is accessible to the public and free to use, for this reason all data is released under the Creative Commons Public Domain (CC0) License . This means that any form of reuse of the content is permitted . For further information, please visit the CC0 page or the Creative Commons FAQ about this type of license. Attribution Although stating the source is not mandatory, the HGNC recommends attribution (e.g. in publications, services or products) for any of its online services, databases or software as it helps us understand how our HGNC resource is used and secure funding for its ongoing development. Below is the rec
+
+== NCBI/NLM — https://www.ncbi.nlm.nih.gov/home/about/policies/
+Copyright Status of Webpages Information that is created by or for the US government on this site is within the public domain. Public domain information on the National Library of Medicine (NLM) Web pages may be freely distributed and copied. However, it is requested that in any subsequent use of this work, NLM be given appropriate acknowledgment. NOTE: This site contains resources which incorporate material contributed or licensed by individuals, companies, or organizations that may be protected by U.S. and foreign copyright laws. These include, but are not limited to PubMed Central (PMC) (see PMC Copyright Notice ), Bookshelf (see Bookshelf Copyright Notice ), OMIM (see OMIM Copyright Status ), and PubChem. All persons reproducing, redistributing, or making commercial use of this information are expected to adhere to the terms and conditions asserted by the copyright holder. Transmission or reproduction of protected items beyond that allowed by fair use (PDF) as defined in the copyright laws requires the written permission of the copyright owners. Molecular Data Usage Databases of molecular data on the NCBI Web site include such examples as nucleotide sequences (GenBank), protein
+
+== ClinGen — https://clinicalgenome.org/docs/terms-of-use/
+Curated content (e.g. gene-disease validity, dosage sensitivity and clinical actionability) distributed on the ClinGen website is released openly for the benefit of the wider community. You can freely capture the data and we encourage the use and publication of results generated from these data. All curated content published by ClinGen is available free of restriction under the CC0 1.0 Universal (CC0 1.0) Public Domain Dedication . However, ClinGen requests that you give attribution to ClinGen and provide the date accessed whenever possible and appropriate. Example Attribution Statements The following curated content was obtained from the Clinical Genome Resource ( www.clinicalgenome.org ): Gene-Disease Validity classifications [date accessed], Gene Dosage Sensitivity classification [date 
+
+== Sequence Ontology (LICENSE) — https://raw.githubusercontent.com/The-Sequence-Ontology/SO-Ontologies/master/LICENSE
+Attribution 4.0 International
+
+=======================================================================
+
+Creative Commons Corporation ("Creative Commons") is not a law firm and
+does not provide legal services or legal advice. Distribution of
+Creative Commons public licenses does not create a lawyer-c
+
+== HGVS README — https://raw.githubusercontent.com/HGVSnomenclature/hgvs-nomenclature/main/README.md
+Text describing the HGVS Nomenclature is released under the [CC0 1.0 Universal (CC0 1.0) Public Domain Dedication](https://creativecommons.org/publicdomain/zero/1.0/). See the [`LICENSE-CC0.txt`](LICENSE-CC0.txt) file for details.
+* Code, configuration files, and other computer-readable artefacts in the code repository are released under the [MIT License](https://opensource.org/licenses/MIT). See the [`LICENSE.txt`](LICENSE.txt) file for details.
+
+## Contributing
+
+The HGVS Nomenclature pages are
+
+== GA4GH VRS README — https://raw.githubusercontent.com/ga4gh/vrs/2.0/README.md
+VRS is licensed under the [Apache License 2.0](LICENSE).
+
+> **NOTE:** VRS is under active development.
+> See the [VRS Project Roadmap](https://github.com/orgs/ga4gh/projects/12).
+
+## Specific goals
+
+*
+
+== NCI EVS (términos de uso) — https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/ThesaurusTermsofUse.htm
+Terms of Use The NCI Thesaurus™ is released under the Creative Commons Attribution 4.0 International license (CC BY 4.0). The NCI Thesaurus™ is produced by the Enterprise Vocabulary Services group of the Center for Biomedical Informatics and Information Technology, National Cancer Institute, Maryland, USA. The name "NCI Thesaurus" is trademarked. Only the NCI Thesaurus™ published by the NCI can be released under this name. Please see https://creativecommons.org/licenses/by/4.0/legalcode for the terms of the CC BY 4.0 license.
+
+== MeSH (términos; extracto de las frases que tratan uso y atribución) — https://www.nlm.nih.gov/databases/download/terms_and_conditions_mesh.html
+Terms and Conditions MeSH Skip to main content An official website of the United States government Here’s how you know Here’s how you know Official websites use .gov A .gov website belongs to an official government organization in the United States. Secure .gov websites use HTTPS A lock ( Lock A locked padlock ) or https:// means you’ve safely connected to the .gov website. Share sensitive information only on official, secure websites. Menu Products and Services All Products and Services ClinicalTrials.gov Digital Collections LocatorPlus Catalog Medical Subject Headings (MeSH) MedlinePlus PubM
+
+
+== Orphadata (licencia) — https://www.orphadata.com/data/xml/en_product6.xml
+Creative Commons Attribution 4.0 International</FullName>
+      <ShortIdentifier>CC-BY-4.0</ShortIdentifier>
+      <LegalCode>https://creativecommons.org/licenses/by/4.0/legalcode</LegalCode>
+    </Licence>
+  </Availability>
+  <DisorderList count="4245">
+    <Disorder id="17601">
+      <OrphaCode>166024</OrphaCode>
+      <ExpertLink lang="en">http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=en&a
+
+== NCBI/NLM, «Molecular Data Usage» (continuación) — https://www.ncbi.nlm.nih.gov/home/about/policies/
+Molecular Data Usage Databases of molecular data on the NCBI Web site include such examples as nucleotide sequences (GenBank), protein sequences, macromolecular structures, molecular variation, gene expression, and mapping data. They are designed to provide and encourage access within the scientific community to sources of current and comprehensive information. Therefore, NCBI itself places no restrictions on the use or distribution of the data contained therein. Nor do we accept data when the submitter has requested restrictions on reuse or redistribution. However, some submitters of the original data (or the country of origin of such data) may claim patent, copyright, or other intellectual property rights in all or a portion of the data (that has been submitted). NCBI is not in a position to assess the validity of such claims and since there is no transfer of rights from submitters to NCBI, NCBI has no rights to transfer to a third party. Therefore, NCBI cannot provide comment or unrestricted permission concerning the use, copying, or distribution of the information contained in the molecular databases. Human Genomic Data Submitted to Unrestricted-Access Repositories If you plan to submit large-scale human genomic data, as defined by the NIH Genomic Data Sharing (GDS) Policy , to be maintained in an unrestricted-access NCBI database, NIH expects you to 1) submit an Institutional Certification to assure that the data submission and expectations defined in the NIH GDS Policy 
+
+== MeSH — frases de uso/atribución — https://www.nlm.nih.gov/databases/download/terms_and_conditions_mesh.html
+FIC TERMS NLM freely provides MeSH data. Use of MeSH Translation (MTMS) files is not covered under the NLM Terms and Conditions for MeSH data. GENERAL TERMS AND CONDITIONS Users of the data agree to: acknowledge NLM as the source of the data in a clear and conspicuous manner, not indicate or imply that NLM has endorsed its products/services/applications. Users who republish or redistribute the data (services, products or raw data) agree to: maintain the most current version of all distributed data, or make known in a clear and conspicuous manner that the products/services/applications do not r

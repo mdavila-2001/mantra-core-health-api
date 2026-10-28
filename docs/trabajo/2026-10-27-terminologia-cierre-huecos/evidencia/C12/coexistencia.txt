@@ -1,0 +1,28 @@
+Pager usage is off.
+== code systems compartidos: versiones, conceptos por versión y cuál es la predeterminada
+   internal_code   |             canonical_url             |  fuente   |                 version                  | is_default | conceptos 
+-------------------+---------------------------------------+-----------+------------------------------------------+------------+-----------
+ hgnc              | http://www.genenames.org/geneId       | DICT_HGNC | 2026-10-24                               | t          |     45277
+ hgnc              | http://www.genenames.org/geneId       | DICT_HGNC | 2026-10-27                               | f          |     45289
+ sequence-ontology | http://purl.obolibrary.org/obo/so.owl | DICT_SO   | 2026-08-07                               | f          |      2409
+ sequence-ontology | http://purl.obolibrary.org/obo/so.owl | DICT_SO   | 4340c143bac3578bba0c013d02e8c5f0e51ad14a | t          |      2409
+(4 rows)
+
+== un solo code system por internal_code y por URL canónica (debe ser 1 fila por sistema)
+   internal_code   | count 
+-------------------+-------
+ hgnc              |     1
+ sequence-ontology |     1
+(2 rows)
+
+== ¿más de una versión predeterminada por code system? (debe dar 0 filas para los sistemas de genética propios; los compartidos se informan arriba)
+ internal_code | defaults 
+---------------+----------
+(0 rows)
+
+== mismo código en las dos versiones de hgnc (esperado: sí, son dos versiones, con ids distintos)
+ codigos_en_ambas_versiones 
+----------------------------
+                      45275
+(1 row)
+

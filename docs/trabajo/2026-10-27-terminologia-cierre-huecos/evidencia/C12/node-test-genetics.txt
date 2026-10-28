@@ -1,0 +1,256 @@
+TAP version 13
+# Subtest: splitFields respeta comillas, comillas dobles escapadas y delimitadores dentro de comillas
+ok 1 - splitFields respeta comillas, comillas dobles escapadas y delimitadores dentro de comillas
+  ---
+  duration_ms: 1.852971
+  type: 'test'
+  ...
+# Subtest: readDelimited une las líneas físicas de un campo entrecomillado y rechaza filas con otra cantidad de campos
+ok 2 - readDelimited une las líneas físicas de un campo entrecomillado y rechaza filas con otra cantidad de campos
+  ---
+  duration_ms: 15.458265
+  type: 'test'
+  ...
+# Subtest: nullIf trata «», «-» y «NULL» como vacío
+ok 3 - nullIf trata «», «-» y «NULL» como vacío
+  ---
+  duration_ms: 0.26295
+  type: 'test'
+  ...
+# Subtest: HGNC: una fila por gen, verbatim, con grupos, cruce a NCBI Gene y procedencia
+ok 4 - HGNC: una fila por gen, verbatim, con grupos, cruce a NCBI Gene y procedencia
+  ---
+  duration_ms: 5.952832
+  type: 'test'
+  ...
+# Subtest: HGNC: un gen en dos grupos conserva el orden y los nombres con coma
+ok 5 - HGNC: un gen en dos grupos conserva el orden y los nombres con coma
+  ---
+  duration_ms: 2.014348
+  type: 'test'
+  ...
+# Subtest: HGNC: grupos de genes con jerarquía (sólo padres que existen) y conteo de miembros
+ok 6 - HGNC: grupos de genes con jerarquía (sólo padres que existen) y conteo de miembros
+  ---
+  duration_ms: 8.852779
+  type: 'test'
+  ...
+# Subtest: HGNC: un archivo con otras columnas se rechaza (no se adivina)
+ok 7 - HGNC: un archivo con otras columnas se rechaza (no se adivina)
+  ---
+  duration_ms: 4.93796
+  type: 'test'
+  ...
+# Subtest: NCBI Gene: GeneID como código, «-» como vacío, cruce a HGNC y tipos de gen conservados
+ok 8 - NCBI Gene: GeneID como código, «-» como vacío, cruce a HGNC y tipos de gen conservados
+  ---
+  duration_ms: 3.891443
+  type: 'test'
+  ...
+# Subtest: NCBI Gene: dbXrefs «HGNC:HGNC:5» se parte en base y id
+ok 9 - NCBI Gene: dbXrefs «HGNC:HGNC:5» se parte en base y id
+  ---
+  duration_ms: 0.473655
+  type: 'test'
+  ...
+# Subtest: NCBI Gene: rechaza un gene_info con columnas distintas
+ok 10 - NCBI Gene: rechaza un gene_info con columnas distintas
+  ---
+  duration_ms: 2.587822
+  type: 'test'
+  ...
+# Subtest: gene_condition_source_id: enlaces gen ↔ CUI sin el nombre de la condición
+ok 11 - gene_condition_source_id: enlaces gen ↔ CUI sin el nombre de la condición
+  ---
+  duration_ms: 2.716311
+  type: 'test'
+  ...
+# Subtest: MedGen: sólo CUI con nombre de fuente abierta; los de SNOMED/OMIM solos se descartan y se cuentan
+ok 12 - MedGen: sólo CUI con nombre de fuente abierta; los de SNOMED/OMIM solos se descartan y se cuentan
+  ---
+  duration_ms: 23.462741
+  type: 'test'
+  ...
+# Subtest: MedGen: ningún texto sale de SNOMED CT, OMIM, GeneReviews ni HPO
+ok 13 - MedGen: ningún texto sale de SNOMED CT, OMIM, GeneReviews ni HPO
+  ---
+  duration_ms: 11.970742
+  type: 'test'
+  ...
+# Subtest: MedGen: nombre a mostrar = pref_name si coincide con un átomo abierto; la regla queda registrada
+ok 14 - MedGen: nombre a mostrar = pref_name si coincide con un átomo abierto; la regla queda registrada
+  ---
+  duration_ms: 14.956247
+  type: 'test'
+  ...
+# Subtest: MedGen: jerarquía de MGREL — CHD = CUI2 es hijo de CUI1; sólo NCI isa se vuelve is-a; PAR es espejo
+ok 15 - MedGen: jerarquía de MGREL — CHD = CUI2 es hijo de CUI1; sólo NCI isa se vuelve is-a; PAR es espejo
+  ---
+  duration_ms: 12.200816
+  type: 'test'
+  ...
+# Subtest: MedGen: CUI retirados (MERGED.RRF, MedGen_CUI_history y ConceptID_history de ClinVar) quedan en el CUI vigente, sin crear conceptos
+ok 16 - MedGen: CUI retirados (MERGED.RRF, MedGen_CUI_history y ConceptID_history de ClinVar) quedan en el CUI vigente, sin crear conceptos
+  ---
+  duration_ms: 9.695019
+  type: 'test'
+  ...
+# Subtest: HGNC: withdrawn.txt — los fusionados en un gen aprobado van en retired_ids; los demás se cuentan
+ok 17 - HGNC: withdrawn.txt — los fusionados en un gen aprobado van en retired_ids; los demás se cuentan
+  ---
+  duration_ms: 3.718117
+  type: 'test'
+  ...
+# Subtest: MedGen: categoría de ClinVar por CUI exacto; separadores \\r de MGDEF pasan a salto de línea
+ok 18 - MedGen: categoría de ClinVar por CUI exacto; separadores \\r de MGDEF pasan a salto de línea
+  ---
+  duration_ms: 7.470755
+  type: 'test'
+  ...
+# Subtest: RRF: no corta registros en \\r sueltos y rechaza un registro con campos de más
+ok 19 - RRF: no corta registros en \\r sueltos y rechaza un registro con campos de más
+  ---
+  duration_ms: 10.779952
+  type: 'test'
+  ...
+# Subtest: SO: las obsoletas no son filas; padres sólo si existen; definición y sinónimos verbatim
+ok 20 - SO: las obsoletas no son filas; padres sólo si existen; definición y sinónimos verbatim
+  ---
+  duration_ms: 4.033782
+  type: 'test'
+  ...
+# Subtest: xlsx: la plantilla oficial trae la hoja oculta controlled_list
+ok 21 - xlsx: la plantilla oficial trae la hoja oculta controlled_list
+  ---
+  duration_ms: 29.001141
+  type: 'test'
+  ...
+# Subtest: ClinVar: listas controladas de la plantilla y enumeraciones del XSD; códigos = <lista>:<valor> verbatim, sin repetidos
+ok 22 - ClinVar: listas controladas de la plantilla y enumeraciones del XSD; códigos = <lista>:<valor> verbatim, sin repetidos
+  ---
+  duration_ms: 90.223281
+  type: 'test'
+  ...
+# Subtest: ClinVar: Lite es el único formato horizontal; las plantillas completas validan su encabezado
+ok 23 - ClinVar: Lite es el único formato horizontal; las plantillas completas validan su encabezado
+  ---
+  duration_ms: 28.457007
+  type: 'test'
+  ...
+# Subtest: XSD: sólo tipos simples con nombre y enumeración, con entidades XML decodificadas
+ok 24 - XSD: sólo tipos simples con nombre y enumeración, con entidades XML decodificadas
+  ---
+  duration_ms: 0.408145
+  type: 'test'
+  ...
+# Subtest: ClinVar funcional: sólo términos de Sequence Ontology; FENICS se cuenta y no se carga; cruce a SO por el ID que publica ClinVar
+ok 25 - ClinVar funcional: sólo términos de Sequence Ontology; FENICS se cuenta y no se carga; cruce a SO por el ID que publica ClinVar
+  ---
+  duration_ms: 1.436872
+  type: 'test'
+  ...
+# Subtest: parseTermIdFile rechaza un encabezado o una fila con otra cantidad de columnas
+ok 26 - parseTermIdFile rechaza un encabezado o una fila con otra cantidad de columnas
+  ---
+  duration_ms: 0.248105
+  type: 'test'
+  ...
+# Subtest: ClinVar: categorías de condición de disease_names como lista, con el conteo del archivo
+ok 27 - ClinVar: categorías de condición de disease_names como lista, con el conteo del archivo
+  ---
+  duration_ms: 5.526847
+  type: 'test'
+  ...
+# Subtest: ClinGen: valores controlados distintos de cada columna; no se cargan las afirmaciones por gen
+ok 28 - ClinGen: valores controlados distintos de cada columna; no se cargan las afirmaciones por gen
+  ---
+  duration_ms: 9.990038
+  type: 'test'
+  ...
+# Subtest: ClinGen: accionabilidad — valores de consensusAssertion y curationType de adultos y pediatría; las afirmaciones por gen no entran
+ok 29 - ClinGen: accionabilidad — valores de consensusAssertion y curationType de adultos y pediatría; las afirmaciones por gen no entran
+  ---
+  duration_ms: 4.105704
+  type: 'test'
+  ...
+# Subtest: ClinGen: un CSV con columnas distintas se rechaza
+ok 30 - ClinGen: un CSV con columnas distintas se rechaza
+  ---
+  duration_ms: 1.971398
+  type: 'test'
+  ...
+# Subtest: HGVS: elementos globales y tipos de variante por sección con sus formas verbatim
+ok 31 - HGVS: elementos globales y tipos de variante por sección con sus formas verbatim
+  ---
+  duration_ms: 9.946538
+  type: 'test'
+  ...
+# Subtest: VRS: clases del esquema con herencia y madurez, y valores de enumeración
+ok 32 - VRS: clases del esquema con herencia y madurez, y valores de enumeración
+  ---
+  duration_ms: 6.256849
+  type: 'test'
+  ...
+# Subtest: versiones: cada archivo declara la suya (OBO, XSD, ClinGen, VRS); si no, Last-Modified
+ok 33 - versiones: cada archivo declara la suya (OBO, XSD, ClinGen, VRS); si no, Last-Modified
+  ---
+  duration_ms: 0.940704
+  type: 'test'
+  ...
+# Subtest: plan de carga: ids deterministas, procedencia por fila y una propiedad por código
+ok 34 - plan de carga: ids deterministas, procedencia por fila y una propiedad por código
+  ---
+  duration_ms: 3.519728
+  type: 'test'
+  ...
+# Subtest: plan de carga: la definición de la fuente va a source_definition con su idioma
+ok 35 - plan de carga: la definición de la fuente va a source_definition con su idioma
+  ---
+  duration_ms: 3.423595
+  type: 'test'
+  ...
+# Subtest: plan de carga: relaciones sólo hacia códigos que existen; part-of y is-a con su tipo interno
+ok 36 - plan de carga: relaciones sólo hacia códigos que existen; part-of y is-a con su tipo interno
+  ---
+  duration_ms: 3.133798
+  type: 'test'
+  ...
+# Subtest: plan de carga: cruces sólo si el destino existe; equivalencia nula; id estable
+ok 37 - plan de carga: cruces sólo si el destino existe; equivalencia nula; id estable
+  ---
+  duration_ms: 1.381669
+  type: 'test'
+  ...
+# Subtest: plan de carga: code systems, orden y etiqueta de versión
+ok 38 - plan de carga: code systems, orden y etiqueta de versión
+  ---
+  duration_ms: 0.428005
+  type: 'test'
+  ...
+# Subtest: --apply exige conexión explícita (sin valores por defecto hacia la base del stack)
+ok 39 - --apply exige conexión explícita (sin valores por defecto hacia la base del stack)
+  ---
+  duration_ms: 0.293803
+  type: 'test'
+  ...
+# Subtest: designationList no repite el mismo texto y cleanProps descarta vacíos
+ok 40 - designationList no repite el mismo texto y cleanProps descarta vacíos
+  ---
+  duration_ms: 0.142838
+  type: 'test'
+  ...
+# Subtest: pack-data: splitByLines parte por líneas sin cortar filas y rechaza una fila que no entra
+ok 41 - pack-data: splitByLines parte por líneas sin cortar filas y rechaza una fila que no entra
+  ---
+  duration_ms: 1.796371
+  type: 'test'
+  ...
+1..41
+# tests 41
+# suites 0
+# pass 41
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 457.796576

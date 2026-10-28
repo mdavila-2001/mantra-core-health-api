@@ -1,0 +1,13 @@
+[unpack] clingen-terms.ndjson (103 filas) → /tmp/claude-0/-home-user-mantra-core-health-api/abfc3765-fecd-5e44-a7be-1fc725dff984/scratchpad/build-C12/genetics-from-data/ndjson/clingen-terms.ndjson
+[unpack] clinvar-functional.ndjson (56 filas) → /tmp/claude-0/-home-user-mantra-core-health-api/abfc3765-fecd-5e44-a7be-1fc725dff984/scratchpad/build-C12/genetics-from-data/ndjson/clinvar-functional.ndjson
+[unpack] clinvar-terms.ndjson (349 filas) → /tmp/claude-0/-home-user-mantra-core-health-api/abfc3765-fecd-5e44-a7be-1fc725dff984/scratchpad/build-C12/genetics-from-data/ndjson/clinvar-terms.ndjson
+[unpack] coverage.json → /tmp/claude-0/-home-user-mantra-core-health-api/abfc3765-fecd-5e44-a7be-1fc725dff984/scratchpad/build-C12/genetics-from-data/coverage.json
+[unpack] ga4gh-vrs.ndjson (48 filas) → /tmp/claude-0/-home-user-mantra-core-health-api/abfc3765-fecd-5e44-a7be-1fc725dff984/scratchpad/build-C12/genetics-from-data/ndjson/ga4gh-vrs.ndjson
+[unpack] hgnc-gene-group.ndjson (2572 filas) → /tmp/claude-0/-home-user-mantra-core-health-api/abfc3765-fecd-5e44-a7be-1fc725dff984/scratchpad/build-C12/genetics-from-data/ndjson/hgnc-gene-group.ndjson
+[unpack] hgnc.ndjson (45289 filas) → /tmp/claude-0/-home-user-mantra-core-health-api/abfc3765-fecd-5e44-a7be-1fc725dff984/scratchpad/build-C12/genetics-from-data/ndjson/hgnc.ndjson
+[unpack] hgvs-syntax.ndjson (43 filas) → /tmp/claude-0/-home-user-mantra-core-health-api/abfc3765-fecd-5e44-a7be-1fc725dff984/scratchpad/build-C12/genetics-from-data/ndjson/hgvs-syntax.ndjson
+[unpack] medgen.ndjson (101277 filas) → /tmp/claude-0/-home-user-mantra-core-health-api/abfc3765-fecd-5e44-a7be-1fc725dff984/scratchpad/build-C12/genetics-from-data/ndjson/medgen.ndjson
+[unpack] ncbi-gene-hs.ndjson (194025 filas) → /tmp/claude-0/-home-user-mantra-core-health-api/abfc3765-fecd-5e44-a7be-1fc725dff984/scratchpad/build-C12/genetics-from-data/ndjson/ncbi-gene-hs.ndjson
+[unpack] sequence-ontology.ndjson (2409 filas) → /tmp/claude-0/-home-user-mantra-core-health-api/abfc3765-fecd-5e44-a7be-1fc725dff984/scratchpad/build-C12/genetics-from-data/ndjson/sequence-ontology.ndjson
+[unpack] sources-manifest.json → /tmp/claude-0/-home-user-mantra-core-health-api/abfc3765-fecd-5e44-a7be-1fc725dff984/scratchpad/build-C12/sources-from-data/manifest.json
+UNPACK == BUILD: los NDJSON reconstruidos desde data/ son identicos byte a byte

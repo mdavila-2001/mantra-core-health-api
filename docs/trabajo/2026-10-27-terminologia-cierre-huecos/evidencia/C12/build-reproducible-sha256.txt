@@ -1,0 +1,14 @@
+== build 1 (OUT_DIR por defecto) vs build 2 (GENETICS_OUT_DIR distinto): sha256 de cada NDJSON
+a24f041bbcca186aa1b23295b5eb52e20b76206f8201e12141e9fdd1da0fa16f  clingen-terms.ndjson
+3c974ff9ec3a1f537add3b063a49d36e1cf62443f976a1ba795094ea9a39e144  clinvar-functional.ndjson
+1d40c2cfd84e3431790e2e0e4529808eebb58b2987dd1a86693e6bb18a1384e9  clinvar-terms.ndjson
+75445d16ada63cbcd80845fd85d77a3863530ea09414ee20b8d957273769192a  ga4gh-vrs.ndjson
+84e868dfb3161c0b4be29927cf79d8ebcd2fe6921c5dd9a54e42ed9c33a3dbf3  hgnc-gene-group.ndjson
+d21b5a76140403a98fdb974ae0ef69c6180d9a53ef0bb6f78e33fd906b386971  hgnc.ndjson
+0c0e56c480a4e8e3d5f744e7a0136adb61ed985eae27b15501d6a40667beda03  hgvs-syntax.ndjson
+f68a774d0b998d935bcbbaaa93ecf9b548014eafbcbdf8842fe97e88eac772f9  medgen.ndjson
+4114a49429adc93fb46e2f23ced6cde51cfb5713b78c15d6731d6803b3e16e91  ncbi-gene-hs.ndjson
+3af447d9a263b235f2a1fd1319766642cbb47fb90c76c51a88f249a35f8f2abe  sequence-ontology.ndjson
+== diff build1 build2
+IDENTICOS (diff exit 0)
+PACK REPRODUCIBLE: SHA256SUMS identico en 2 empaquetados

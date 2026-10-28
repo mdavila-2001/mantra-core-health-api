@@ -1,0 +1,88 @@
+# Pasada de saturación 2026-10-28 (después de cargar): listados de directorio de cada fuente, archivo por archivo
+
+== MedGen — https://ftp.ncbi.nlm.nih.gov/pub/medgen/ (18 archivos)
+  HPO_CUI_history.txt                           EXCLUIDO: historial de mapeos HPO↔CUI (HPO sin aprobación del propietario)
+  MERGED.RRF.gz                                 CARGADO
+  MGCONSO.RRF.gz                                CARGADO
+  MGDEF.RRF.gz                                  CARGADO
+  MGREL.RRF.gz                                  CARGADO
+  MGSAT.RRF.gz                                  EXCLUIDO: atributos propios de GTR (pesos, ids de pruebas) y calificadores de MeSH: no son vocabulario
+  MGSTY.RRF.gz                                  CARGADO
+  MONDO_CUI_history.txt                         EXCLUIDO: historial de mapeos MONDO↔CUI (identificadores ya cubiertos por MedGenIDMappings)
+  MedGenIDMappings.txt.gz                       CARGADO
+  MedGen_CUI_history.txt                        CARGADO
+  MedGen_HPO_Mapping.txt.gz                     EXCLUIDO: HPO
+  MedGen_HPO_OMIM_Mapping.txt.gz                EXCLUIDO: HPO y OMIM
+  MedGen_Sources.txt                            CARGADO
+  MedGen_UID_CUI_history.txt                    EXCLUIDO: historial de UID de la web (57 MB), no vocabulario
+  NAMES.RRF.gz                                  EXCLUIDO: un nombre preferido por CUI, 104 019 de SNOMED CT y 35 480 de OMIM: licencia
+  ORDO_CUI_history.txt                          EXCLUIDO: historial de mapeos Orphanet↔CUI (ídem)
+  README.txt                                    CARGADO
+  medgen_pubmed_lnk.txt.gz                      EXCLUIDO: enlaces CUI→PubMed (183 MB): datos, no vocabulario
+
+== ClinVar — https://ftp.ncbi.nlm.nih.gov/pub/clinvar/ (8 archivos)
+  ConceptID_history.txt                         CARGADO
+  README.txt                                    CARGADO
+  README_VCF.txt                                EXCLUIDO: documentación de VCF
+  clinvar_submission.xsd                        EXCLUIDO: esquema de envío de 2020, reemplazado por ClinVar_VCV.xsd
+  disease_names                                 CARGADO
+  functional_assay_types.txt                    CARGADO
+  functional_consequences.txt                   CARGADO
+  gene_condition_source_id                      CARGADO
+
+== ClinVar plantillas — https://ftp.ncbi.nlm.nih.gov/pub/clinvar/submission_templates/ (5 archivos)
+  README.txt                                    CARGADO
+  SubmissionTemplate.xlsx                       CARGADO
+  SubmissionTemplateFunctionalData.xlsx         CARGADO
+  SubmissionTemplateLite.xlsx                   CARGADO
+  SubmissionTemplateSomatic.xlsx                CARGADO
+
+== NCBI Gene — https://ftp.ncbi.nlm.nih.gov/gene/DATA/ (15 archivos)
+  README                                        EXCLUIDO: documentación
+  gene2accession.gz                             EXCLUIDO: datos de secuencia
+  gene2ensembl.gz                               EXCLUIDO: cruces de acceso (ids ya en dbXrefs)
+  gene2go.gz                                    EXCLUIDO: anotaciones GO (datos)
+  gene2pubmed.gz                                EXCLUIDO: citas
+  gene2refseq.gz                                EXCLUIDO: datos de secuencia
+  gene_group.gz                                 EXCLUIDO: relaciones gen–gen (datos)
+  gene_history.gz                               EXCLUIDO: historia de GeneID (154 MB; no vocabulario vigente)
+  gene_info.gz                                  EXCLUIDO: todas las especies (1,5 GB): se carga sólo Homo sapiens
+  gene_neighbors.gz                             EXCLUIDO: posiciones
+  gene_orthologs.gz                             EXCLUIDO: ortólogos (datos)
+  gene_refseq_uniprotkb_collab.gz               EXCLUIDO: cruces de secuencia
+  gene_summary.gz                               EXCLUIDO: texto resumen (no vocabulario)
+  go_process.xml                                EXCLUIDO: XML de GO de ejemplo
+  stopwords_gene                                EXCLUIDO: lista de palabras vacías de búsqueda
+
+== ClinGen — https://search.clinicalgenome.org/kb/downloads (29 enlaces de descarga)
+  ftp://ftp.clinicalgenome.org/ClinGen_gene_curation_list_GRCh37.tsv                                             EXCLUIDO: coordenadas/listas de genes o regiones (datos)
+  ftp://ftp.clinicalgenome.org/ClinGen_gene_curation_list_GRCh38.tsv                                             EXCLUIDO: coordenadas/listas de genes o regiones (datos)
+  ftp://ftp.clinicalgenome.org/ClinGen_haploinsufficiency_gene_GRCh37.bed                                        EXCLUIDO: coordenadas/listas de genes o regiones (datos)
+  ftp://ftp.clinicalgenome.org/ClinGen_haploinsufficiency_gene_GRCh38.bed                                        EXCLUIDO: coordenadas/listas de genes o regiones (datos)
+  ftp://ftp.clinicalgenome.org/ClinGen_recurrent_CNV_V2.0-hg37.bed                                               EXCLUIDO: coordenadas/listas de genes o regiones (datos)
+  ftp://ftp.clinicalgenome.org/ClinGen_recurrent_CNV_V2.0-hg38.bed                                               EXCLUIDO: coordenadas/listas de genes o regiones (datos)
+  ftp://ftp.clinicalgenome.org/ClinGen_region_curation_list_GRCh37.tsv                                           EXCLUIDO: coordenadas/listas de genes o regiones (datos)
+  ftp://ftp.clinicalgenome.org/ClinGen_region_curation_list_GRCh38.tsv                                           EXCLUIDO: coordenadas/listas de genes o regiones (datos)
+  ftp://ftp.clinicalgenome.org/ClinGen_triplosensitivity_gene_GRCh37.bed                                         EXCLUIDO: coordenadas/listas de genes o regiones (datos)
+  ftp://ftp.clinicalgenome.org/ClinGen_triplosensitivity_gene_GRCh38.bed                                         EXCLUIDO: coordenadas/listas de genes o regiones (datos)
+  https://actionability.clinicalgenome.org/ac/Adult/api/summ/assertion?format=tsv                                CARGADO (sólo valores controlados)
+  https://actionability.clinicalgenome.org/ac/Adult/api/summ/assertion?format=tsv&assertionType=all              EXCLUIDO: variante de las mismas afirmaciones por gen (datos, no vocabulario)
+  https://actionability.clinicalgenome.org/ac/Adult/api/summ/scoring?format=tsv&excludeNotScored=true            EXCLUIDO: variante de las mismas afirmaciones por gen (datos, no vocabulario)
+  https://actionability.clinicalgenome.org/ac/Adult/api/summ?format=tsv                                          EXCLUIDO: variante de las mismas afirmaciones por gen (datos, no vocabulario)
+  https://actionability.clinicalgenome.org/ac/Pediatric/api/summ/assertion?format=tsv                            CARGADO (sólo valores controlados)
+  https://actionability.clinicalgenome.org/ac/Pediatric/api/summ/assertion?format=tsv&assertionType=all          EXCLUIDO: variante de las mismas afirmaciones por gen (datos, no vocabulario)
+  https://actionability.clinicalgenome.org/ac/Pediatric/api/summ/scoring?format=tsv&excludeNotScored=true        EXCLUIDO: variante de las mismas afirmaciones por gen (datos, no vocabulario)
+  https://actionability.clinicalgenome.org/ac/Pediatric/api/summ?format=tsv                                      EXCLUIDO: variante de las mismas afirmaciones por gen (datos, no vocabulario)
+  https://erepo.clinicalgenome.org/evrepo/api/summary/classifications/download                                   EXCLUIDO: clasificaciones de variantes individuales (datos)
+  https://erepo.clinicalgenome.org/evrepo/api/summary/classifications/download?type=csv                          EXCLUIDO: clasificaciones de variantes individuales (datos)
+  https://search.clinicalgenome.org/kb/downloads                                                                 (ancla de la misma página)
+  https://search.clinicalgenome.org/kb/downloads#section_variant                                                 (ancla de la misma página)
+  https://search.clinicalgenome.org/kb/downloads/#section_actionability                                          (ancla de la misma página)
+  https://search.clinicalgenome.org/kb/downloads/#section_dosage                                                 (ancla de la misma página)
+  https://search.clinicalgenome.org/kb/downloads/#section_gene-disease-validity                                  (ancla de la misma página)
+  https://search.clinicalgenome.org/kb/gene-dosage/download                                                      CARGADO (sólo valores controlados)
+  https://search.clinicalgenome.org/kb/gene-dosage/downloadall                                                   EXCLUIDO: variante de las mismas afirmaciones por gen (datos, no vocabulario)
+  https://search.clinicalgenome.org/kb/gene-validity/download                                                    CARGADO (sólo valores controlados)
+  https://search.clinicalgenome.org/kb/gene-validity/download/ls                                                 EXCLUIDO: variante de las mismas afirmaciones por gen (datos, no vocabulario)
+
+Archivos nuevos sin clasificar: 0

@@ -1,0 +1,11 @@
+[pack] clingen-terms.ndjson: 103 filas → clingen-terms.ndjson.gz (0.0 MB)
+[pack] clinvar-functional.ndjson: 56 filas → clinvar-functional.ndjson.gz (0.0 MB)
+[pack] clinvar-terms.ndjson: 349 filas → clinvar-terms.ndjson.gz (0.0 MB)
+[pack] ga4gh-vrs.ndjson: 48 filas → ga4gh-vrs.ndjson.gz (0.0 MB)
+[pack] hgnc-gene-group.ndjson: 2572 filas → hgnc-gene-group.ndjson.gz (0.4 MB)
+[pack] hgnc.ndjson: 45289 filas → hgnc.ndjson.gz (6.2 MB)
+[pack] hgvs-syntax.ndjson: 43 filas → hgvs-syntax.ndjson.gz (0.0 MB)
+[pack] medgen.ndjson: 101277 filas → medgen.part01.ndjson.gz (5.9 MB), medgen.part02.ndjson.gz (4.5 MB), medgen.part03.ndjson.gz (4.1 MB), medgen.part04.ndjson.gz (4.0 MB), medgen.part05.ndjson.gz (0.0 MB)
+[pack] ncbi-gene-hs.ndjson: 194025 filas → ncbi-gene-hs.part01.ndjson.gz (5.4 MB), ncbi-gene-hs.part02.ndjson.gz (2.3 MB), ncbi-gene-hs.part03.ndjson.gz (2.1 MB), ncbi-gene-hs.part04.ndjson.gz (1.4 MB)
+[pack] sequence-ontology.ndjson: 2409 filas → sequence-ontology.ndjson.gz (0.2 MB)
+[pack] 12 archivos, 36.7 MB comprimidos en /home/user/mantra-core-health-api/tools/terminology-import/genetics/data

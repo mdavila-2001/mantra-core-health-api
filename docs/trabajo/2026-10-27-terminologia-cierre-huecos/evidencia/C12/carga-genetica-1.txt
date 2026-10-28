@@ -1,0 +1,201 @@
+=== Carga de genética a terminology.* (APPLY explícito) ===
+[scan] hgnc-gene-group: 2572 filas, versión «2026-10-27», sha256 84e868dfb3161c0b…
+[scan] hgnc: 45289 filas, versión «2026-10-27», sha256 d21b5a76140403a9…
+[scan] ncbi-gene-hs: 194025 filas, versión «2026-10-27», sha256 4114a49429adc93f…
+[scan] medgen: 101277 filas, versión «2026-10-27», sha256 f68a774d0b998d93…
+[scan] sequence-ontology: 2409 filas, versión «2026-08-07», sha256 3af447d9a263b235…
+[scan] clinvar-terms: 349 filas, versión «2.6; February 26, 2026 + 2024-11-19 + 2025-08-20 + 2026-01-14 + 2026-10-27», sha256 1d40c2cfd84e3431…
+[scan] clinvar-functional: 56 filas, versión «2026-04-03 + 2026-06-11», sha256 3c974ff9ec3a1f53…
+[scan] clingen-terms: 103 filas, versión «2026-10-28 + bajado 2026-10-28 (sin versión declarada ni Last-Modified)», sha256 a24f041bbcca186a…
+[scan] hgvs-syntax: 43 filas, versión «bajado 2026-10-28 (sin versión declarada ni Last-Modified)», sha256 0c0e56c480a4e8e3…
+[scan] ga4gh-vrs: 48 filas, versión «2.0.1», sha256 75445d16ada63cbc…
+[load 1/2] hgnc-gene-group: {"concepts":2572,"designations":2572,"properties":31421}
+[load 1/2] hgnc: {"concepts":45289,"designations":147106,"properties":906500}
+[load 1/2] ncbi-gene-hs: {"concepts":194025,"designations":462116,"properties":2986303}
+[load 1/2] medgen: {"concepts":101277,"designations":368812,"properties":1723923}
+[load 1/2] sequence-ontology: {"concepts":2409,"designations":6216,"properties":26087}
+[load 1/2] clinvar-terms: {"concepts":349,"designations":349,"properties":3846}
+[load 1/2] clinvar-functional: {"concepts":56,"designations":56,"properties":560}
+[load 1/2] clingen-terms: {"concepts":103,"designations":103,"properties":1236}
+[load 1/2] hgvs-syntax: {"concepts":43,"designations":43,"properties":495}
+[load 1/2] ga4gh-vrs: {"concepts":48,"designations":48,"properties":581}
+[load 2/2] hgnc-gene-group: {"relationships":1740,"maps":0,"mapsByTarget":{}}
+[load 2/2] hgnc: {"relationships":36538,"maps":44498,"mapsByTarget":{"ncbi-gene-hs":44498}}
+[load 2/2] ncbi-gene-hs: {"relationships":0,"maps":45192,"mapsByTarget":{"hgnc":45192}}
+[load 2/2] medgen: {"relationships":58763,"maps":81538,"mapsByTarget":{"mesh":15740,"mondo":23328,"ncit-disease":21675,"omim":11338,"orphanet":8996,"ncit-xref":461}}
+[load 2/2] sequence-ontology: {"relationships":2517,"maps":0,"mapsByTarget":{}}
+[load 2/2] clinvar-terms: {"relationships":0,"maps":0,"mapsByTarget":{}}
+[load 2/2] clinvar-functional: {"relationships":0,"maps":36,"mapsByTarget":{"sequence-ontology":36}}
+[load 2/2] clingen-terms: {"relationships":0,"maps":0,"mapsByTarget":{}}
+[load 2/2] hgvs-syntax: {"relationships":0,"maps":0,"mapsByTarget":{}}
+[load 2/2] ga4gh-vrs: {"relationships":15,"maps":0,"mapsByTarget":{}}
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "result": [
+    {
+      "codeSystem": "hgnc-gene-group",
+      "version": "2026-10-27",
+      "rows": 2572,
+      "codeSystemReutilizado": false,
+      "versionPorDefecto": true,
+      "nuevas": {
+        "concepts": 2572,
+        "designations": 2572,
+        "properties": 31421,
+        "relationships": 1740,
+        "maps": 0
+      },
+      "mapsByTarget": {}
+    },
+    {
+      "codeSystem": "hgnc",
+      "version": "2026-10-27",
+      "rows": 45289,
+      "codeSystemReutilizado": true,
+      "versionPorDefecto": false,
+      "nuevas": {
+        "concepts": 45289,
+        "designations": 147106,
+        "properties": 906500,
+        "relationships": 36538,
+        "maps": 44498
+      },
+      "mapsByTarget": {
+        "ncbi-gene-hs": 44498
+      }
+    },
+    {
+      "codeSystem": "ncbi-gene-hs",
+      "version": "2026-10-27",
+      "rows": 194025,
+      "codeSystemReutilizado": false,
+      "versionPorDefecto": true,
+      "nuevas": {
+        "concepts": 194025,
+        "designations": 462116,
+        "properties": 2986303,
+        "relationships": 0,
+        "maps": 45192
+      },
+      "mapsByTarget": {
+        "hgnc": 45192
+      }
+    },
+    {
+      "codeSystem": "medgen",
+      "version": "2026-10-27",
+      "rows": 101277,
+      "codeSystemReutilizado": false,
+      "versionPorDefecto": true,
+      "nuevas": {
+        "concepts": 101277,
+        "designations": 368812,
+        "properties": 1723923,
+        "relationships": 58763,
+        "maps": 81538
+      },
+      "mapsByTarget": {
+        "mesh": 15740,
+        "mondo": 23328,
+        "ncit-disease": 21675,
+        "omim": 11338,
+        "orphanet": 8996,
+        "ncit-xref": 461
+      }
+    },
+    {
+      "codeSystem": "sequence-ontology",
+      "version": "2026-08-07",
+      "rows": 2409,
+      "codeSystemReutilizado": true,
+      "versionPorDefecto": false,
+      "nuevas": {
+        "concepts": 2409,
+        "designations": 6216,
+        "properties": 26087,
+        "relationships": 2517,
+        "maps": 0
+      },
+      "mapsByTarget": {}
+    },
+    {
+      "codeSystem": "clinvar-terms",
+      "version": "2.6; February 26, 2026 + 2024-11-19 + 2025-08-20 + 2026-01-14 + 2026-10-27",
+      "rows": 349,
+      "codeSystemReutilizado": false,
+      "versionPorDefecto": true,
+      "nuevas": {
+        "concepts": 349,
+        "designations": 349,
+        "properties": 3846,
+        "relationships": 0,
+        "maps": 0
+      },
+      "mapsByTarget": {}
+    },
+    {
+      "codeSystem": "clinvar-functional",
+      "version": "2026-04-03 + 2026-06-11",
+      "rows": 56,
+      "codeSystemReutilizado": false,
+      "versionPorDefecto": true,
+      "nuevas": {
+        "concepts": 56,
+        "designations": 56,
+        "properties": 560,
+        "relationships": 0,
+        "maps": 36
+      },
+      "mapsByTarget": {
+        "sequence-ontology": 36
+      }
+    },
+    {
+      "codeSystem": "clingen-terms",
+      "version": "2026-10-28 + bajado 2026-10-28 (sin versión declarada ni Last-Modified)",
+      "rows": 103,
+      "codeSystemReutilizado": false,
+      "versionPorDefecto": true,
+      "nuevas": {
+        "concepts": 103,
+        "designations": 103,
+        "properties": 1236,
+        "relationships": 0,
+        "maps": 0
+      },
+      "mapsByTarget": {}
+    },
+    {
+      "codeSystem": "hgvs-syntax",
+      "version": "bajado 2026-10-28 (sin versión declarada ni Last-Modified)",
+      "rows": 43,
+      "codeSystemReutilizado": false,
+      "versionPorDefecto": true,
+      "nuevas": {
+        "concepts": 43,
+        "designations": 43,
+        "properties": 495,
+        "relationships": 0,
+        "maps": 0
+      },
+      "mapsByTarget": {}
+    },
+    {
+      "codeSystem": "ga4gh-vrs",
+      "version": "2.0.1",
+      "rows": 48,
+      "codeSystemReutilizado": false,
+      "versionPorDefecto": true,
+      "nuevas": {
+        "concepts": 48,
+        "designations": 48,
+        "properties": 581,
+        "relationships": 15,
+        "maps": 0
+      },
+      "mapsByTarget": {}
+    }
+  ],
+  "segundos": 368
+}

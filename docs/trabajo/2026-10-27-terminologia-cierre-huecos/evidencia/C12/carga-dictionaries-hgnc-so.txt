@@ -1,0 +1,51 @@
+=== Carga de diccionarios médicos a terminology.* (APPLY explícito) ===
+[load] {"source":"so","codeSystem":"sequence-ontology","reusedCodeSystem":null,"concepts":2409,"designations":6216,"properties":4818,"conceptsReused":0}
+[load] {"source":"hgnc","codeSystem":"hgnc","reusedCodeSystem":null,"concepts":45277,"designations":147073,"properties":90554,"conceptsReused":0}
+[load] {"source":"so","codeSystem":"sequence-ontology","reusedCodeSystem":null,"concepts":2409,"designations":6216,"properties":4818,"conceptsReused":0,"relationships":2702,"conceptMaps":0}
+[load] {"source":"hgnc","codeSystem":"hgnc","reusedCodeSystem":null,"concepts":45277,"designations":147073,"properties":90554,"conceptsReused":0,"relationships":0,"conceptMaps":0}
+[load] disease-agents {"source":"disease-agents","edges":0,"withOrganism":0,"resolvedDisease":0,"unresolvedDisease":0,"relationships":0,"inserted":0,"lookups":{"codes":0,"mesh":0,"ta98":0}}
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "finishedAt": "2026-10-28T02:36:40.914Z",
+  "seconds": 21,
+  "include": [],
+  "result": [
+    {
+      "source": "so",
+      "codeSystem": "sequence-ontology",
+      "reusedCodeSystem": null,
+      "concepts": 2409,
+      "designations": 6216,
+      "properties": 4818,
+      "conceptsReused": 0,
+      "relationships": 2702,
+      "conceptMaps": 0
+    },
+    {
+      "source": "hgnc",
+      "codeSystem": "hgnc",
+      "reusedCodeSystem": null,
+      "concepts": 45277,
+      "designations": 147073,
+      "properties": 90554,
+      "conceptsReused": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "disease-agents",
+      "edges": 0,
+      "withOrganism": 0,
+      "resolvedDisease": 0,
+      "unresolvedDisease": 0,
+      "relationships": 0,
+      "inserted": 0,
+      "lookups": {
+        "codes": 0,
+        "mesh": 0,
+        "ta98": 0
+      }
+    }
+  ]
+}

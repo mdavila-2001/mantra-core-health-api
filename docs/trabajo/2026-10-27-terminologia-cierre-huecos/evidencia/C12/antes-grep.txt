@@ -1,0 +1,27 @@
+# ANTES (2026-10-28): ¿algún importador, seed o catálogo del repo trae HGNC, NCBI Gene, MedGen como code system, Sequence Ontology, ClinVar o ClinGen?
+$ git grep -l -i -E "internal_code.*(hgnc|ncbi-gene|medgen|clinvar|clingen)|CodeSystem/(hgnc|ncbi-gene|medgen|so|clinvar|clingen)" -- src database tools docs ":!tools/terminology-import/genetics" ":!docs/trabajo"
+(sin coincidencias)
+
+$ git grep -c -i -E "hgnc|medgen" -- tools/terminology-import ":!tools/terminology-import/genetics" (menciones como xref, no como code system)
+tools/terminology-import/allergies/test/fixtures/mondo-excerpt.obo:10
+tools/terminology-import/diagnostic-devices/row/out/anvisa-produtos-modelos.ndjson.gz:1
+tools/terminology-import/dictionaries/README.md:6
+tools/terminology-import/dictionaries/SOURCES.md:2
+tools/terminology-import/dictionaries/build-dictionaries.mjs:9
+tools/terminology-import/dictionaries/data/INDEX.json:4
+tools/terminology-import/dictionaries/data/manifest.json:2
+tools/terminology-import/dictionaries/fetch-dictionaries.mjs:3
+tools/terminology-import/dictionaries/import-wikidata-es-labels.mjs:1
+tools/terminology-import/dictionaries/lib/hgnc.mjs:9
+tools/terminology-import/dictionaries/lib/sources.mjs:14
+tools/terminology-import/dictionaries/lib/terms.mjs:1
+tools/terminology-import/dictionaries/lib/wikidata-es.mjs:3
+tools/terminology-import/dictionaries/load-dictionaries.mjs:2
+tools/terminology-import/dictionaries/pack-dictionaries-data.mjs:2
+tools/terminology-import/dictionaries/test/c7.test.mjs:1
+tools/terminology-import/dictionaries/test/dictionaries.test.mjs:9
+tools/terminology-import/dictionaries/test/fixtures/hgnc-excerpt.json:5
+tools/terminology-import/dictionaries/test/fixtures/mondo-excerpt.obo:2
+tools/terminology-import/dictionaries/test/fixtures/pro-excerpt.obo:1
+
+Conclusión: 0 code systems de genética en el repo antes de este carril.

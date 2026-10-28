@@ -1,0 +1,39 @@
+MANIFEST.json: OK
+clingen-terms.ndjson.gz: OK
+clinvar-functional.ndjson.gz: OK
+clinvar-terms.ndjson.gz: OK
+coverage.json.gz: OK
+ga4gh-vrs.ndjson.gz: OK
+hgnc-gene-group.ndjson.gz: OK
+hgnc.ndjson.gz: OK
+hgvs-syntax.ndjson.gz: OK
+medgen.part01.ndjson.gz: OK
+medgen.part02.ndjson.gz: OK
+medgen.part03.ndjson.gz: OK
+medgen.part04.ndjson.gz: OK
+medgen.part05.ndjson.gz: OK
+ncbi-gene-hs.part01.ndjson.gz: OK
+ncbi-gene-hs.part02.ndjson.gz: OK
+ncbi-gene-hs.part03.ndjson.gz: OK
+ncbi-gene-hs.part04.ndjson.gz: OK
+sequence-ontology.ndjson.gz: OK
+sources-manifest.json.gz: OK
+gzip ok clingen-terms.ndjson.gz
+gzip ok clinvar-functional.ndjson.gz
+gzip ok clinvar-terms.ndjson.gz
+gzip ok coverage.json.gz
+gzip ok ga4gh-vrs.ndjson.gz
+gzip ok hgnc-gene-group.ndjson.gz
+gzip ok hgnc.ndjson.gz
+gzip ok hgvs-syntax.ndjson.gz
+gzip ok medgen.part01.ndjson.gz
+gzip ok medgen.part02.ndjson.gz
+gzip ok medgen.part03.ndjson.gz
+gzip ok medgen.part04.ndjson.gz
+gzip ok medgen.part05.ndjson.gz
+gzip ok ncbi-gene-hs.part01.ndjson.gz
+gzip ok ncbi-gene-hs.part02.ndjson.gz
+gzip ok ncbi-gene-hs.part03.ndjson.gz
+gzip ok ncbi-gene-hs.part04.ndjson.gz
+gzip ok sequence-ontology.ndjson.gz
+gzip ok sources-manifest.json.gz

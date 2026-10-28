@@ -1,0 +1,11 @@
+[build] hgnc: 45289 filas (3 s)
+[build] hgnc-gene-group: 2572 filas (0 s)
+[build] ncbi-gene-hs: 194025 filas (7 s)
+[build] medgen: 101277 filas (16 s)
+[build] sequence-ontology: 2409 filas (0 s)
+[build] clinvar-terms: 349 filas (0 s)
+[build] clinvar-functional: 56 filas (0 s)
+[build] clingen-terms: 103 filas (0 s)
+[build] hgvs-syntax: 43 filas (0 s)
+[build] ga4gh-vrs: 48 filas (0 s)
+[build] coverage.json → /tmp/claude-0/-home-user-mantra-core-health-api/abfc3765-fecd-5e44-a7be-1fc725dff984/scratchpad/build-C12/genetics/coverage.json

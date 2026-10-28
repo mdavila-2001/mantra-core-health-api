@@ -1,0 +1,5 @@
+catalog_concepts|480096
+concept_designations|1419501
+concept_properties|6146854
+concept_relationships|204142
+concept_maps|242547
