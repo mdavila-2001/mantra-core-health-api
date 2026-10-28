@@ -67565,6 +67565,36 @@ components:
           type: string
           description: Fecha de inscripción de la matrícula (ISO)
           format: date
+        licenseFileId:
+          type: string
+          description: fileId del PDF de la matrícula subido por POST /iam/auth/upload-registration-document
+          format: uuid
+        sedesLicenseFileId:
+          type: string
+          description: fileId del PDF del registro del SEDES subido por POST /iam/auth/upload-registration-document
+          format: uuid
+        sedesLicenseIssueDate:
+          type: string
+          description: Fecha de inscripción en el SEDES (ISO)
+          format: date
+        collegeLicenseNumber:
+          type: string
+          description: Número de registro en el colegio profesional
+          maxLength: 100
+          example: CMB-12345
+        collegeName:
+          type: string
+          description: Colegio profesional que emitió el registro
+          maxLength: 200
+          example: Colegio Médico de Bolivia
+        collegeLicenseIssueDate:
+          type: string
+          description: Fecha de inscripción en el colegio profesional (ISO)
+          format: date
+        collegeLicenseFileId:
+          type: string
+          description: fileId del PDF del registro del colegio subido por POST /iam/auth/upload-registration-document
+          format: uuid
         professionalTitle:
           type: string
           maxLength: 100
@@ -68588,6 +68618,36 @@ components:
           type: string
           description: Fecha de inscripción de la matrícula (ISO)
           format: date
+        licenseFileId:
+          type: string
+          description: fileId del PDF de la matrícula subido por POST /iam/auth/upload-registration-document
+          format: uuid
+        sedesLicenseFileId:
+          type: string
+          description: fileId del PDF del registro del SEDES subido por POST /iam/auth/upload-registration-document
+          format: uuid
+        sedesLicenseIssueDate:
+          type: string
+          description: Fecha de inscripción en el SEDES (ISO)
+          format: date
+        collegeLicenseNumber:
+          type: string
+          description: Número de registro en el colegio profesional
+          maxLength: 100
+          example: CMB-12345
+        collegeName:
+          type: string
+          description: Colegio profesional que emitió el registro
+          maxLength: 200
+          example: Colegio Médico de Bolivia
+        collegeLicenseIssueDate:
+          type: string
+          description: Fecha de inscripción en el colegio profesional (ISO)
+          format: date
+        collegeLicenseFileId:
+          type: string
+          description: fileId del PDF del registro del colegio subido por POST /iam/auth/upload-registration-document
+          format: uuid
         professionalTitle:
           type: string
           maxLength: 100
