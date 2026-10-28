@@ -20,10 +20,11 @@ import {
 } from '../../../common';
 import { ReferralsService } from '../services';
 import {
+  CounterReferralDto,
   CreateReferralDto,
   RespondReferralDto,
+  RespondReferralResultDto,
   ReferralResponseDto,
-  StatusResultDto,
 } from '../dto';
 
 /**
@@ -71,8 +72,41 @@ export class ReferralsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: RespondReferralDto,
     @CurrentUser() actor: AuthenticatedUser,
-  ): Promise<StatusResultDto> {
+  ): Promise<RespondReferralResultDto> {
     return this.referralsService.respond(id, dto, actor);
+  }
+
+  /** v4266: contrarreferencia del destino; cierra la derivación. */
+  @Audited({
+    action: 'REFERRAL_COUNTER_REFERRAL_RECORDED',
+    entity: 'referral',
+    entityId: 'param:id',
+  })
+  @Patch(':id/counter-referral')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Registrar la contrarreferencia de una derivación' })
+  counterReferral(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CounterReferralDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ReferralResponseDto> {
+    return this.referralsService.counterReferral(id, dto, actor);
+  }
+
+  /** v4266: anula una derivación pendiente o aceptada. */
+  @Audited({
+    action: 'REFERRAL_CANCELLED',
+    entity: 'referral',
+    entityId: 'param:id',
+  })
+  @Patch(':id/cancel')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Anular una derivación' })
+  cancel(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ReferralResponseDto> {
+    return this.referralsService.cancel(id, actor);
   }
   /**
    * La lectura que faltaba: derivaciones de un paciente.
@@ -86,7 +120,7 @@ export class ReferralsController {
   listByPatient(
     @Query('patientProfileId', ParseUUIDPipe) patientProfileId: string,
     @CurrentUser() actor: AuthenticatedUser,
-  ) {
+  ): Promise<ReferralResponseDto[]> {
     return this.referralsService.listByPatient(patientProfileId, actor);
   }
 
@@ -99,7 +133,23 @@ export class ReferralsController {
   @AccessLogged({ resourceType: 'REFERRALS', patient: 'actor' })
   @Roles('PATIENT')
   @ApiOperation({ summary: 'Mis derivaciones' })
-  listMine(@CurrentUser() actor: AuthenticatedUser) {
+  listMine(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ReferralResponseDto[]> {
     return this.referralsService.listMine(actor);
+  }
+
+  /**
+   * v4266: una derivación por id. Declarada después de `me` para que esa ruta
+   * no caiga acá. La lee quien puede leer la historia o el destino.
+   */
+  @Get(':id')
+  @AccessLogged({ resourceType: 'REFERRALS', resourceId: 'param:id' })
+  @ApiOperation({ summary: 'Leer una derivación' })
+  get(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ReferralResponseDto> {
+    return this.referralsService.get(id, actor);
   }
 }

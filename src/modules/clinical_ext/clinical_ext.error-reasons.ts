@@ -28,4 +28,25 @@ export enum ClinicalExtErrorReason {
   REFERRAL_ALREADY_EXISTS = 'REFERRAL_ALREADY_EXISTS',
   /** El encuentro ya tiene una sesión virtual. */
   VIRTUAL_ENCOUNTER_ALREADY_EXISTS = 'VIRTUAL_ENCOUNTER_ALREADY_EXISTS',
+
+  // --- Derivación a servicios específicos (v4266) ---
+  /** Una derivación tipada necesita al menos un destino. */
+  REFERRAL_TARGET_REQUIRED = 'REFERRAL_TARGET_REQUIRED',
+  /** Una derivación tipada necesita resumen clínico y servicio pedido. */
+  REFERRAL_SERVICE_INFORMATION_INCOMPLETE = 'REFERRAL_SERVICE_INFORMATION_INCOMPLETE',
+  /** La sede destino no existe. */
+  REFERRAL_TARGET_BRANCH_NOT_FOUND = 'REFERRAL_TARGET_BRANCH_NOT_FOUND',
+  /** La derivación no está pendiente de respuesta. */
+  REFERRAL_NOT_PENDING = 'REFERRAL_NOT_PENDING',
+  /** Rechazar exige motivo. */
+  REFERRAL_REJECT_REASON_REQUIRED = 'REFERRAL_REJECT_REASON_REQUIRED',
+  /** La derivación no está en un estado que admita contrarreferencia. */
+  REFERRAL_COUNTER_REFERRAL_NOT_ALLOWED = 'REFERRAL_COUNTER_REFERRAL_NOT_ALLOWED',
+  /** La derivación ya está cerrada (rechazada, completada o anulada). */
+  REFERRAL_ALREADY_CLOSED = 'REFERRAL_ALREADY_CLOSED',
+  /**
+   * `informedConsentId` no se acepta al crear: el vínculo lo escribe el
+   * consentimiento registrado con `targetType='REFERRAL'` sobre la derivación.
+   */
+  REFERRAL_CONSENT_LINK_NOT_ALLOWED = 'REFERRAL_CONSENT_LINK_NOT_ALLOWED',
 }

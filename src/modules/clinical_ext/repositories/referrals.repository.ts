@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { Referrals } from '../entities';
 import { createdBy } from '../../../common';
+import type { ReferralType } from '../referral.enums';
 
 /** Datos para emitir una referencia clínica. */
 export interface CreateReferralData {
@@ -57,6 +58,26 @@ export interface CreateReferralData {
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
+  /** Tipo de derivación (v4263). */
+  referralType?: ReferralType;
+  /** Sede destino. */
+  targetBranchId?: string;
+  /** Destino externo. */
+  targetExternalName?: string;
+  /** Contacto del destino externo. */
+  targetExternalContact?: string;
+  /** Servicio pedido. */
+  requestedServiceText?: string;
+  /** Servicio codificado. */
+  requestedServiceConceptId?: string;
+  /** Diagnóstico. */
+  diagnosisText?: string;
+  /** Resumen clínico. */
+  clinicalSummary?: string;
+  /** Tratamiento previo. */
+  treatmentGivenText?: string;
+  /** Consentimiento informado asociado. */
+  informedConsentId?: string;
 }
 
 /** Acceso a datos de `clinical_ext.referrals`. */
@@ -133,6 +154,16 @@ export class ReferralsRepository {
         priorityConceptId: data.priorityConceptId,
         statusConceptId: data.statusConceptId,
         validUntil: data.validUntil,
+        referralType: data.referralType,
+        targetBranchId: data.targetBranchId,
+        targetExternalName: data.targetExternalName,
+        targetExternalContact: data.targetExternalContact,
+        requestedServiceText: data.requestedServiceText,
+        requestedServiceConceptId: data.requestedServiceConceptId,
+        diagnosisText: data.diagnosisText,
+        clinicalSummary: data.clinicalSummary,
+        treatmentGivenText: data.treatmentGivenText,
+        informedConsentId: data.informedConsentId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

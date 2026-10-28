@@ -85,8 +85,8 @@ describe('Consent controllers (thin delegation)', () => {
     expect(service.version).toHaveBeenCalledWith(dto, actor);
   });
 
-  it('TreatmentInformedConsentsController delegates sign', async () => {
-    const service = { sign: mockFn() };
+  it('TreatmentInformedConsentsController delegates sign to create (authz por rol)', async () => {
+    const service = { create: mockFn() };
     const c = new TreatmentInformedConsentsController(service as any);
     const dto = {
       patientProfileId: 'p1',
@@ -94,7 +94,38 @@ describe('Consent controllers (thin delegation)', () => {
       decision: 'ACCEPTED',
     };
     await c.sign(dto as any, actor);
-    expect(service.sign).toHaveBeenCalledWith(dto, actor);
+    expect(service.create).toHaveBeenCalledWith(dto, actor);
+  });
+
+  it('TreatmentInformedConsentsController delegates list/get/withdraw/post-emergency/evidence (v4263)', async () => {
+    const service = {
+      list: mockFn(),
+      get: mockFn(),
+      withdraw: mockFn(),
+      recordPostEmergencyInformation: mockFn(),
+      recordEvidence: mockFn(),
+    };
+    const c = new TreatmentInformedConsentsController(service as any);
+    const query = { patientProfileId: 'p1', targetType: 'REFERRAL' };
+    await c.list(query as any, actor);
+    expect(service.list).toHaveBeenCalledWith(query, actor);
+    await c.get('t1', actor);
+    expect(service.get).toHaveBeenCalledWith('t1', actor);
+    await c.withdraw('t1', { reason: 'cambió de opinión' }, actor);
+    expect(service.withdraw).toHaveBeenCalledWith(
+      't1',
+      { reason: 'cambió de opinión' },
+      actor,
+    );
+    const info = { informedAt: '2026-10-28T10:00:00Z' };
+    await c.postEmergencyInformation('t1', info, actor);
+    expect(service.recordPostEmergencyInformation).toHaveBeenCalledWith(
+      't1',
+      info,
+      actor,
+    );
+    await c.recordEvidence('t1', {} as any, actor);
+    expect(service.recordEvidence).toHaveBeenCalledWith('t1', {}, actor);
   });
 
   it('ConsentEvidenceController delegates record', async () => {

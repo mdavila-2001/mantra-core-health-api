@@ -1,0 +1,6 @@
+
+Test Suites: 28 passed, 28 total
+Tests:       202 passed, 202 total
+Snapshots:   0 total
+Time:        18.2 s, estimated 19 s
+Ran all test suites matching src/modules/consent|src/modules/clinical_ext.
