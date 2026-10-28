@@ -215,10 +215,6 @@ export class InsightsCommentDto {
   /** Texto del comentario. */
   @ApiProperty()
   text!: string;
-
-  /** Mes del envío (`YYYY-MM`, UTC). Ni el día ni la hora. */
-  @ApiProperty({ type: String, example: '2026-10' })
-  month!: string;
 }
 
 /** Aviso de privacidad del resumen. */

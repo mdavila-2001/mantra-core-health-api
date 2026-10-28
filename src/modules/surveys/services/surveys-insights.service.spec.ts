@@ -190,11 +190,11 @@ function seedBaseScenario(repo: ReturnType<typeof build>['repo']) {
     valueRow({ questionId: 'q-nps', valueNumber: 3, count: 1 }),
   ]);
   repo.listRecentComments.mockResolvedValue([
-    { text: 'Muy amable', month: '2026-10' },
-    { text: 'Esperé mucho', month: '2026-10' },
-    { text: 'Todo bien', month: '2026-09' },
-    { text: 'Rápido', month: '2026-09' },
-    { text: 'Puntual', month: '2026-08' },
+    { text: 'Muy amable' },
+    { text: 'Esperé mucho' },
+    { text: 'Todo bien' },
+    { text: 'Rápido' },
+    { text: 'Puntual' },
   ]);
 }
 
@@ -443,11 +443,11 @@ describe('SurveysInsightsService', () => {
       { period: '2026-10-01', answered: 6, average: 3.67 },
     ]);
     expect(result.comments).toEqual([
-      { text: 'Muy amable', month: '2026-10' },
-      { text: 'Esperé mucho', month: '2026-10' },
-      { text: 'Todo bien', month: '2026-09' },
-      { text: 'Rápido', month: '2026-09' },
-      { text: 'Puntual', month: '2026-08' },
+      { text: 'Muy amable' },
+      { text: 'Esperé mucho' },
+      { text: 'Todo bien' },
+      { text: 'Rápido' },
+      { text: 'Puntual' },
     ]);
   });
 
@@ -925,10 +925,10 @@ describe('SurveysInsightsService', () => {
       const { repo, run } = build();
       seedBaseScenario(repo);
       repo.listRecentComments.mockResolvedValue([
-        { text: 'Uno', month: '2026-10' },
-        { text: 'Dos', month: '2026-10' },
-        { text: 'Tres', month: '2026-09' },
-        { text: 'Cuatro', month: '2026-09' },
+        { text: 'Uno' },
+        { text: 'Dos' },
+        { text: 'Tres' },
+        { text: 'Cuatro' },
       ]);
 
       const r = full(await run({ from: '2026-10-01', to: '2026-10-31' }));
@@ -937,7 +937,7 @@ describe('SurveysInsightsService', () => {
       expect(JSON.stringify(r)).not.toMatch(/Uno|Dos|Tres|Cuatro/);
     });
 
-    it('con 5 o más se devuelven con el mes, nunca el día ni la hora', async () => {
+    it('con 5 o más se devuelven sólo con el texto: sin día, mes ni hora', async () => {
       const { repo, run } = build();
       seedBaseScenario(repo);
 
@@ -945,7 +945,7 @@ describe('SurveysInsightsService', () => {
 
       expect(r.comments).toHaveLength(5);
       expect(JSON.stringify(r.comments)).not.toMatch(
-        /submittedAt|\d{4}-\d{2}-\d{2}/,
+        /submittedAt|month|\d{4}-\d{2}/,
       );
     });
   });
@@ -980,8 +980,7 @@ describe('SurveysInsightsService', () => {
       expect(json).not.toMatch(/patient|appointment|booking|invitation/i);
       expect(json).not.toContain('13:45');
       for (const comment of result.comments) {
-        expect(Object.keys(comment).sort()).toEqual(['month', 'text']);
-        expect(comment.month).toMatch(/^\d{4}-\d{2}$/);
+        expect(Object.keys(comment)).toEqual(['text']);
       }
     });
 

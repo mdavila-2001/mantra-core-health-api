@@ -100,8 +100,9 @@ Reglas que evitan identificar a un paciente (`insights.constants.ts`):
   ningún total (NPS, alertas, tendencia).
 - **Periodo en meses calendario.** `from` es el primer día de un mes, `to` el
   último día de un mes, hasta 12 meses; cualquier hora o día suelto responde 400.
-- **Comentarios** sólo si hay al menos 5 en el alcance, con el mes (no el día ni
-  la hora), máximo 20, en un orden estable por hash y no cronológico.
+- **Comentarios** sólo si hay al menos 5 en el alcance; salen únicamente con el
+  texto (sin día, mes ni hora), máximo 20, en un orden estable por hash y no
+  cronológico.
 
 Límite conocido: sin ruido añadido, comparar resúmenes de ventanas casi iguales
 o del mismo periodo con y sin `serviceId` puede acotar el aporte de pocas

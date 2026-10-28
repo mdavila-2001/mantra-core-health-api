@@ -558,7 +558,7 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
       { option: SAFETY_OPTIONS[2], count: 0 },
     ]);
 
-    // Comentarios (5 en el alcance): sólo texto y mes, ninguno ajeno, sin
+    // Comentarios (5 en el alcance): sólo el texto, sin fecha, ninguno ajeno, sin
     // orden cronológico forzado.
     expect(result.comments).toHaveLength(5);
     expect(
@@ -571,8 +571,7 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
       'Muy amable, gracias',
     ]);
     for (const comment of result.comments) {
-      expect(Object.keys(comment).sort()).toEqual(['month', 'text']);
-      expect(comment.month).toBe('2026-10');
+      expect(Object.keys(comment)).toEqual(['text']);
     }
   });
 

@@ -252,7 +252,7 @@ export class SurveysInsightsService {
       // persona casi identificable: no se devuelve ninguno.
       comments:
         commentRows.length >= MIN_COHORT
-          ? commentRows.map((row) => ({ text: row.text, month: row.month }))
+          ? commentRows.map((row) => ({ text: row.text }))
           : [],
     };
   }
