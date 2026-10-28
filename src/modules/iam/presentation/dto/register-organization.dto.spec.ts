@@ -303,6 +303,22 @@ describe('RegisterOrganizationDto · legalDocuments (1.2)', () => {
     ).toEqual(['organization.legalDocuments.healthAuthorityCertificateFileId']);
   });
 
+  it('la matrícula de comercio es opcional en el DTO: la exige el servicio según el tipo societario', async () => {
+    const { commerceRegistryFileId, ...withoutCommerce } =
+      LEGAL_DOCUMENTS_COMPLETE;
+    void commerceRegistryFileId;
+
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        organization: {
+          ...MINIMAL_REGISTRATION.organization,
+          legalDocuments: withoutCommerce,
+        },
+      }),
+    ).toEqual([]);
+  });
+
   it('rechaza un fileId que no es un uuid', async () => {
     expect(
       await propertiesWithError({

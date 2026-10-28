@@ -793,6 +793,69 @@ describe('SchedulingBookingsService', () => {
       expect(slot.statusConceptId).toBe(CONCEPTS.SLOT_OPEN);
     });
 
+    describe('v4.2.64 · plantilla mixta: la franja del cupo se ubica por día y hora', () => {
+      // Lunes de turnos fijos y martes flexible, en la misma plantilla.
+      const mixta = [
+        {
+          scheduleTemplateId: 'tpl-mixta',
+          dayOfWeek: 1,
+          startTime: '09:00:00',
+          endTime: '11:00:00',
+          flexibleHours: false,
+        },
+        {
+          scheduleTemplateId: 'tpl-mixta',
+          dayOfWeek: 2,
+          startTime: '09:00:00',
+          endTime: '11:00:00',
+          flexibleHours: true,
+        },
+      ];
+
+      function expiring(d: ReturnType<typeof build>, startAt: string) {
+        const slot = openSlot({
+          remainingCapacity: 0,
+          statusConceptId: CONCEPTS.SLOT_HELD,
+          scheduleTemplateId: 'tpl-mixta',
+          startAt: new Date(startAt),
+          endAt: new Date(new Date(startAt).getTime() + 20 * 60_000),
+        });
+        d.bookingsRepo.findExpiredHolds.mockResolvedValue([
+          { bookableSlotId: SLOT_ID, statusConceptId: CONCEPTS.HOLD_ACTIVE },
+        ]);
+        d.bookingsRepo.findSlotForUpdate.mockResolvedValue(slot);
+        d.catalogRepo.findTemplateById.mockResolvedValue({
+          id: 'tpl-mixta',
+          resourceId: 'res-1',
+          flexibleHours: false,
+        });
+        d.catalogRepo.findRulesByTemplates.mockResolvedValue(mixta);
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          timeZone: 'UTC',
+        });
+        return slot;
+      }
+
+      it('el cupo del martes (franja flexible) no se reofrece', async () => {
+        const d = build();
+        const slot = expiring(d, '2026-06-02T09:30:00Z');
+
+        await d.service.expireHolds(10);
+
+        expect(slot.statusConceptId).toBe(CONCEPTS.SLOT_BLOCKED);
+      });
+
+      it('el cupo del lunes (franja fija) sí se reofrece', async () => {
+        const d = build();
+        const slot = expiring(d, '2026-06-01T09:40:00Z');
+
+        await d.service.expireHolds(10);
+
+        expect(slot.statusConceptId).toBe(CONCEPTS.SLOT_OPEN);
+      });
+    });
+
     it('is a no-op when there is nothing expired', async () => {
       const d = build();
       d.bookingsRepo.findExpiredHolds.mockResolvedValue([]);
@@ -4442,6 +4505,23 @@ describe('SchedulingBookingsService · el estado de pago', () => {
     await expect(
       service.getPaymentState(BOOKING, actor as any),
     ).resolves.toBeNull();
+  });
+
+  it('la lectura carga la cita dentro de una transacción (lleva FOR UPDATE)', async () => {
+    // Fuera de una transacción MikroORM rechaza el bloqueo y la ruta
+    // respondía 500 siempre.
+    const { service, bookingsRepo, tx } = build();
+    bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+      bookingAt(CONCEPTS.BOOKING_CONFIRMED),
+    );
+
+    await service.getPaymentState(BOOKING, actor as any);
+
+    expect(bookingsRepo.findBookingByIdForUpdate).toHaveBeenCalledWith(
+      tx,
+      BOOKING,
+    );
+    expect(bookingsRepo.findPaymentState).toHaveBeenCalledWith(tx, BOOKING);
   });
 });
 

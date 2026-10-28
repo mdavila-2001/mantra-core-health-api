@@ -8,6 +8,7 @@ import {
   AppointmentBookings,
   BookableSlots,
   BookingReschedules,
+  ScheduleRules,
   ScheduleTemplates,
   SlotHolds,
 } from '../../entities';
@@ -200,5 +201,82 @@ describe('SchedulingCatalogRepository · retireTemplate', () => {
     expect(options).toEqual(
       expect.objectContaining({ lockMode: LockMode.PESSIMISTIC_WRITE }),
     );
+  });
+});
+
+/**
+ * v4.2.64 — la disponibilidad flexible lee las plantillas con AL MENOS una
+ * franja flexible, y de cada una sólo sus franjas flexibles.
+ */
+describe('SchedulingCatalogRepository · findFlexibleTemplatesOfResource', () => {
+  function withTemplates(templates: any[], rules: any[]) {
+    const em = {
+      find: mockFn(async (entity: unknown) => {
+        if (entity === ScheduleTemplates) return templates;
+        if (entity === ScheduleRules) return rules;
+        return [];
+      }),
+    };
+    return { em, repo: new SchedulingCatalogRepository() };
+  }
+
+  const band = (templateId: string, day: number, flexibleHours: boolean) => ({
+    scheduleTemplateId: templateId,
+    dayOfWeek: day,
+    startTime: '09:00:00',
+    endTime: '11:00:00',
+    flexibleHours,
+  });
+
+  it('una plantilla mixta trae sólo su franja flexible', async () => {
+    const { em, repo } = withTemplates(
+      [{ id: 'tpl-mixta', flexibleHours: false }],
+      [band('tpl-mixta', 1, false), band('tpl-mixta', 2, true)],
+    );
+
+    const res = await repo.findFlexibleTemplatesOfResource(
+      em as any,
+      'res-1',
+      'PUBLISHED',
+    );
+
+    expect(res).toHaveLength(1);
+    expect(res[0].rules.map((r) => r.dayOfWeek)).toEqual([2]);
+    // Ya no se filtra por la plantilla: una de turnos fijos puede tener
+    // franjas flexibles.
+    expect(em.find).toHaveBeenCalledWith(ScheduleTemplates, {
+      resourceId: 'res-1',
+      statusConceptId: 'PUBLISHED',
+    });
+  });
+
+  it('una plantilla toda flexible trae todas sus franjas, como antes', async () => {
+    const { em, repo } = withTemplates(
+      [{ id: 'tpl-flex', flexibleHours: true }],
+      [band('tpl-flex', 1, false), band('tpl-flex', 3, false)],
+    );
+
+    const res = await repo.findFlexibleTemplatesOfResource(
+      em as any,
+      'res-1',
+      'PUBLISHED',
+    );
+
+    expect(res[0].rules.map((r) => r.dayOfWeek)).toEqual([1, 3]);
+  });
+
+  it('una plantilla sin ninguna franja flexible no aparece', async () => {
+    const { em, repo } = withTemplates(
+      [{ id: 'tpl-fija', flexibleHours: false }],
+      [band('tpl-fija', 1, false)],
+    );
+
+    const res = await repo.findFlexibleTemplatesOfResource(
+      em as any,
+      'res-1',
+      'PUBLISHED',
+    );
+
+    expect(res).toEqual([]);
   });
 });

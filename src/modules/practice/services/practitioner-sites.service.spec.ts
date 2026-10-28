@@ -10,7 +10,13 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PractitionerSitesService } from './practitioner-sites.service';
 import { PRAC } from '../practice.concepts';
-import { ResourceNotFoundException, runWithTenant } from '../../../common';
+import {
+  CONCEPTS,
+  PreconditionFailedException,
+  ResourceNotFoundException,
+  runWithTenant,
+} from '../../../common';
+import { AttachableFileService } from '../../common/services/attachable-file.service';
 
 const TENANT = 'tenant-1';
 const OTHER_TENANT = 'tenant-2';
@@ -70,6 +76,15 @@ function build() {
     requireOwnPractitionerProfileId: mockFn().mockResolvedValue('prac-1'),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // La regla del archivo es la real: sólo se simulan las lecturas de
+  // `common.files` y `common.file_versions`.
+  const filesRepo = { findById: mockFn().mockResolvedValue(null) };
+  const fileVersionsRepo = { findById: mockFn().mockResolvedValue(null) };
+  const attachable = new AttachableFileService(
+    filesRepo as any,
+    fileVersionsRepo as any,
+    logger as any,
+  );
 
   const service = new PractitionerSitesService(
     em as any,
@@ -82,6 +97,7 @@ function build() {
     provisioning as any,
     ownership as any,
     logger as any,
+    attachable,
   );
   return {
     service,
@@ -96,7 +112,35 @@ function build() {
     provisioning,
     ownership,
     logger,
+    filesRepo,
+    fileVersionsRepo,
   };
+}
+
+/**
+ * Deja un archivo y su versión vigente a la vista de `AttachableFileService`.
+ * Por defecto es un png NORMAL de 1 MB subido por `user-1`.
+ */
+function withFile(
+  d: ReturnType<typeof build>,
+  file: Record<string, unknown> = {},
+  version: Record<string, unknown> = {},
+) {
+  d.filesRepo.findById.mockResolvedValue({
+    id: 'file-logo',
+    createdByUserId: 'user-1',
+    currentVersionId: 'ver-1',
+    categoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+    sensitivityConceptId: CONCEPTS.SENSITIVITY_NORMAL,
+    lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+    ...file,
+  });
+  d.fileVersionsRepo.findById.mockResolvedValue({
+    id: 'ver-1',
+    mimeType: 'image/png',
+    sizeBytes: String(1024 * 1024),
+    ...version,
+  });
 }
 
 /** Una sede de la práctica del tenant. */
@@ -387,6 +431,63 @@ describe('PractitionerSitesService', () => {
     });
   });
 
+  describe('createOwnSite con logo', () => {
+    const actor = { id: 'user-1', roles: ['PRACTITIONER'] } as any;
+
+    it('validates the logo before provisioning and returns it', async () => {
+      const d = build();
+      withFile(d);
+      d.provisioning.provision.mockResolvedValue({
+        practiceId: 'pr-own-1',
+        siteId: 'site-own-1',
+        site: {
+          id: 'site-own-1',
+          practiceId: 'pr-own-1',
+          code: 'MI-CONSULTORIO',
+          name: 'Mi consultorio',
+          logoFileId: 'file-logo',
+          statusConceptId: PRAC.SITE_ACTIVE,
+        },
+      });
+
+      const res = await runWithTenant(TENANT, () =>
+        d.service.createOwnSite(actor, {
+          name: 'Mi consultorio',
+          logoFileId: 'file-logo',
+        } as any),
+      );
+
+      expect(d.filesRepo.findById).toHaveBeenCalledWith(d.fork, 'file-logo');
+      expect(res.logoFileId).toBe('file-logo');
+    });
+
+    it('rejects an invalid logo with 422 and provisions nothing', async () => {
+      const d = build();
+      withFile(d, {}, { mimeType: 'application/pdf' });
+
+      await expect(
+        runWithTenant(TENANT, () =>
+          d.service.createOwnSite(actor, {
+            name: 'Mi consultorio',
+            logoFileId: 'file-logo',
+          } as any),
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.provisioning.provision).not.toHaveBeenCalled();
+    });
+
+    it('returns logoFileId null when no logo was declared', async () => {
+      const d = build();
+
+      const res = await runWithTenant(TENANT, () =>
+        d.service.createOwnSite(actor, { name: 'Mi consultorio' } as any),
+      );
+
+      expect(d.filesRepo.findById).not.toHaveBeenCalled();
+      expect(res.logoFileId).toBeNull();
+    });
+  });
+
   describe('deleteOwnSite (ALV-005)', () => {
     const actor = { id: 'user-1', roles: ['PRACTITIONER'] } as any;
 
@@ -441,6 +542,25 @@ describe('PractitionerSitesService', () => {
         isOwnSite: true,
         bankQrFileId: 'file-qr',
       });
+    });
+
+    it('returns the logo of each site, or null when it has none', async () => {
+      const d = build();
+      d.rolesRepo.findCurrentWithSite.mockResolvedValue([
+        { practitionerProfileId: 'prac-1', practiceSiteId: 'site-1' },
+        { practitionerProfileId: 'prac-1', practiceSiteId: 'site-2' },
+      ]);
+      d.sitesRepo.findById.mockImplementation((_em: unknown, id: string) =>
+        Promise.resolve(
+          id === 'site-1'
+            ? siteRecord({ id: 'site-1', logoFileId: 'file-logo' })
+            : siteRecord({ id: 'site-2' }),
+        ),
+      );
+
+      const res = await d.service.listSitesOfPractitioner('prac-1', TENANT);
+
+      expect(res.map((s) => s.logoFileId)).toEqual(['file-logo', null]);
     });
 
     it('does not mark a hospital as their own site', async () => {
@@ -554,6 +674,103 @@ describe('PractitionerSitesService', () => {
         actor.id,
       );
       expect(site.addressId).toBe('addr-nueva');
+    });
+  });
+
+  describe('setSiteLogo', () => {
+    const actor = { id: 'user-1', roles: ['PRACTITIONER'] } as any;
+
+    function withOwnOffice(d: ReturnType<typeof build>, site: any) {
+      d.sitesRepo.findById.mockResolvedValue(site);
+      d.practicesRepo.findOwnOffice.mockResolvedValue({ id: site.practiceId });
+    }
+
+    it('sets a 1 MB png on their own office and returns logoFileId', async () => {
+      const d = build();
+      const site = siteRecord({ id: 'site-own-1', practiceId: 'pr-own-1' });
+      withOwnOffice(d, site);
+      withFile(d);
+
+      const res = await runWithTenant(TENANT, () =>
+        d.service.setSiteLogo(actor, 'site-own-1', 'file-logo'),
+      );
+
+      expect(site.logoFileId).toBe('file-logo');
+      expect(d.fork.flush).toHaveBeenCalled();
+      expect(res).toMatchObject({ logoFileId: 'file-logo', isOwnSite: true });
+    });
+
+    it('clears the logo with an explicit null without reading any file', async () => {
+      const d = build();
+      const site = siteRecord({
+        id: 'site-own-1',
+        practiceId: 'pr-own-1',
+        logoFileId: 'file-viejo',
+      });
+      withOwnOffice(d, site);
+
+      const res = await runWithTenant(TENANT, () =>
+        d.service.setSiteLogo(actor, 'site-own-1', null),
+      );
+
+      expect(site.logoFileId).toBeUndefined();
+      expect(res.logoFileId).toBeNull();
+      expect(d.filesRepo.findById).not.toHaveBeenCalled();
+    });
+
+    it('fails with not found on a site of another organization', async () => {
+      const d = build();
+      d.sitesRepo.findById.mockResolvedValue(
+        siteRecord({ id: 'site-clinica', practiceId: 'pr-clinica' }),
+      );
+      d.practicesRepo.findOwnOffice.mockResolvedValue({ id: 'pr-own-1' });
+      withFile(d);
+
+      await expect(
+        runWithTenant(TENANT, () =>
+          d.service.setSiteLogo(actor, 'site-clinica', 'file-logo'),
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.fork.flush).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['a pdf', {}, { mimeType: 'application/pdf' }],
+      ['a 3 MB image', {}, { sizeBytes: String(3 * 1024 * 1024) }],
+      ['a PHI image', { sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI }, {}],
+      ['a file of another user', { createdByUserId: 'user-otro' }, {}],
+      [
+        'a file that is not an image',
+        { categoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT },
+        {},
+      ],
+    ])('rejects %s with 422', async (_label, file, version) => {
+      const d = build();
+      const site = siteRecord({ id: 'site-own-1', practiceId: 'pr-own-1' });
+      withOwnOffice(d, site);
+      withFile(d, file, version);
+
+      await expect(
+        runWithTenant(TENANT, () =>
+          d.service.setSiteLogo(actor, 'site-own-1', 'file-logo'),
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(site.logoFileId).toBeUndefined();
+      expect(d.fork.flush).not.toHaveBeenCalled();
+    });
+
+    it('rejects a file id that does not exist with 422', async () => {
+      const d = build();
+      withOwnOffice(
+        d,
+        siteRecord({ id: 'site-own-1', practiceId: 'pr-own-1' }),
+      );
+
+      await expect(
+        runWithTenant(TENANT, () =>
+          d.service.setSiteLogo(actor, 'site-own-1', 'file-no-existe'),
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
   });
 

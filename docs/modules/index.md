@@ -17,7 +17,7 @@
 | [`practice`](practice.md) | 9 | 15 | 12 | 11 | 21 |
 | [`clinical_ext`](clinical_ext.md) | 8 | 9 | 12 | 13 | 9 |
 | [`identity_assurance`](identity_assurance.md) | 8 | 12 | 10 | 11 | 17 |
-| [`scheduling`](scheduling.md) | 8 | 15 | 7 | 18 | 9 |
+| [`scheduling`](scheduling.md) | 8 | 16 | 8 | 19 | 9 |
 | [`system_ops`](system_ops.md) | 8 | 8 | 8 | 30 | 10 |
 | [`chart`](chart.md) | 7 | 9 | 4 | 11 | 6 |
 | [`diagnostics`](diagnostics.md) | 7 | 10 | 8 | 36 | 9 |
@@ -78,4 +78,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **294** | **476** | **439** | **1280** | **544** |
+| **Total** | **294** | **477** | **440** | **1281** | **544** |

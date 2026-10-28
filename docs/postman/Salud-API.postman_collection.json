@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1591 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1591 requests en 146 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1598 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1598 requests en 146 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -45576,7 +45576,7 @@
       ]
     },
     {
-      "name": "iam (39)",
+      "name": "iam (40)",
       "item": [
         {
           "name": "iam-auth",
@@ -46417,6 +46417,63 @@
               ]
             },
             {
+              "name": "POST /iam/auth/upload-registration-logo · Pre-cargar el logo del consultorio propio para el registro",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/auth/upload-registration-logo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "auth",
+                    "upload-registration-logo"
+                  ]
+                },
+                "description": "png, jpeg o webp de hasta 2 MB. El `fileId` se reenvía en `ownSite.logoFileId` del alta, que lo reclama en su misma transacción.\n\n`POST /iam/auth/upload-registration-logo`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500, 504\n\noperationId: `IamAuthController_uploadRegistrationLogo`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"file\": \"<binario>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{uploadRegistrationLogoId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.uploadRegistrationLogoId);",
+                      "  if (id) pm.environment.set('uploadRegistrationLogoId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "POST /iam/auth/upload-registration-signature-image · Pre-cargar una imagen de firma o sello para el registro",
               "request": {
                 "method": "POST",
@@ -46934,7 +46991,7 @@
                 "description": "Alta administrativa de un profesional (devuelve token de activación). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/users/assisted-practitioner-registration`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `IamUsersController_assistedPractitionerRegistration`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"{{email}}\",\n  \"personalEmail\": \"usuario@example.test\",\n  \"workEmail\": \"usuario@example.test\",\n  \"name\": \"Ana\",\n  \"middleName\": \"Lucía\",\n  \"lastName\": \"Rojas\",\n  \"motherLastName\": \"Paz\",\n  \"displayName\": \"displayName-ejemplo\",\n  \"licenseNumber\": \"licenseNumber-ejemplo\",\n  \"credentialNumber\": \"credentialNumber-ejemplo\",\n  \"sedesLicenseNumber\": \"T.I. 538/14\",\n  \"regulatoryAuthority\": \"2026-01-01T00:00:00.000Z\",\n  \"licenseIssueDate\": \"2026-01-01\",\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"specialtyConceptIds\": [\n    \"<specialtyConceptIds: uuid existente>\"\n  ],\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"issuerAdministrativeAreaConceptId\": \"<issuerAdministrativeAreaConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"homeLatitude\": -90,\n  \"homeLongitude\": -180,\n  \"workAddressLines\": \"workAddressLines-ejemplo\",\n  \"workLatitude\": -90,\n  \"workLongitude\": -180,\n  \"phone\": \"phone-ejemplo\",\n  \"mobilePhone\": \"mobilePhone-ejemplo\",\n  \"workMobilePhone\": \"workMobilePhone-ejemplo\",\n  \"workLandline\": \"workLandline-ejemplo\",\n  \"birthDate\": \"2026-01-01\",\n  \"gender\": \"MALE\",\n  \"sexAtBirth\": \"MALE\",\n  \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\",\n  \"acceptsNewPatients\": false,\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\",\n  \"timeZone\": \"timeZone-ejemplo\",\n  \"profilePhotoBase64\": \"2026-01-01T00:00:00.000Z\",\n  \"ownSite\": {\n    \"name\": \"name-ejemplo\",\n    \"timeZone\": \"America/La_Paz\",\n    \"address\": {\n      \"lines\": [\n        \"lines-ejemplo\"\n      ],\n      \"city\": \"city-ejemplo\",\n      \"latitude\": -90,\n      \"longitude\": -180\n    },\n    \"contactPhone\": \"+591 72123456\"\n  },\n  \"credentials\": [\n    {\n      \"credentialTypeConceptId\": \"<credentialTypeConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"number\": \"number-ejemplo\",\n      \"issuingInstitutionText\": \"issuingInstitutionText-ejemplo\",\n      \"issuingCityText\": \"issuingCityText-ejemplo\",\n      \"issuingCountryText\": \"issuingCountryText-ejemplo\",\n      \"professionConceptId\": \"<professionConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"titleText\": \"titleText-ejemplo\",\n      \"fileId\": \"{{fileId}}\"\n    }\n  ],\n  \"reason\": \"reason-ejemplo\",\n  \"clinicalRoles\": [\n    \"CLINICIAN\",\n    \"SURGEON\"\n  ]\n}",
+                  "raw": "{\n  \"email\": \"{{email}}\",\n  \"personalEmail\": \"usuario@example.test\",\n  \"workEmail\": \"usuario@example.test\",\n  \"name\": \"Ana\",\n  \"middleName\": \"Lucía\",\n  \"lastName\": \"Rojas\",\n  \"motherLastName\": \"Paz\",\n  \"displayName\": \"displayName-ejemplo\",\n  \"licenseNumber\": \"licenseNumber-ejemplo\",\n  \"credentialNumber\": \"credentialNumber-ejemplo\",\n  \"sedesLicenseNumber\": \"T.I. 538/14\",\n  \"regulatoryAuthority\": \"2026-01-01T00:00:00.000Z\",\n  \"licenseIssueDate\": \"2026-01-01\",\n  \"sedesLicenseIssueDate\": \"2026-01-01\",\n  \"collegeLicenseNumber\": \"CMB-12345\",\n  \"collegeName\": \"Colegio Médico de Bolivia\",\n  \"collegeLicenseIssueDate\": \"2026-01-01\",\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"specialtyConceptIds\": [\n    \"<specialtyConceptIds: uuid existente>\"\n  ],\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"issuerAdministrativeAreaConceptId\": \"<issuerAdministrativeAreaConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"homeDistrict\": \"homeDistrict-ejemplo\",\n  \"homeLatitude\": -90,\n  \"homeLongitude\": -180,\n  \"workAddressLines\": \"workAddressLines-ejemplo\",\n  \"workLatitude\": -90,\n  \"workLongitude\": -180,\n  \"phone\": \"phone-ejemplo\",\n  \"mobilePhone\": \"mobilePhone-ejemplo\",\n  \"workMobilePhone\": \"workMobilePhone-ejemplo\",\n  \"workLandline\": \"workLandline-ejemplo\",\n  \"birthDate\": \"2026-01-01\",\n  \"gender\": \"MALE\",\n  \"sexAtBirth\": \"MALE\",\n  \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\",\n  \"acceptsNewPatients\": false,\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\",\n  \"timeZone\": \"timeZone-ejemplo\",\n  \"profilePhotoBase64\": \"2026-01-01T00:00:00.000Z\",\n  \"ownSite\": {\n    \"name\": \"name-ejemplo\",\n    \"timeZone\": \"America/La_Paz\",\n    \"address\": {\n      \"lines\": [\n        \"lines-ejemplo\"\n      ],\n      \"city\": \"city-ejemplo\",\n      \"district\": \"district-ejemplo\",\n      \"latitude\": -90,\n      \"longitude\": -180\n    },\n    \"contactPhone\": \"+591 72123456\"\n  },\n  \"credentials\": [\n    {\n      \"credentialTypeConceptId\": \"<credentialTypeConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"number\": \"number-ejemplo\",\n      \"issuingInstitutionText\": \"issuingInstitutionText-ejemplo\",\n      \"issuingCityText\": \"issuingCityText-ejemplo\",\n      \"issuingCountryText\": \"issuingCountryText-ejemplo\",\n      \"professionConceptId\": \"<professionConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"titleText\": \"titleText-ejemplo\",\n      \"fileId\": \"{{fileId}}\"\n    }\n  ],\n  \"reason\": \"reason-ejemplo\",\n  \"clinicalRoles\": [\n    \"CLINICIAN\",\n    \"SURGEON\"\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -73026,7 +73083,7 @@
       ]
     },
     {
-      "name": "practitioners (10)",
+      "name": "practitioners (11)",
       "item": [
         {
           "name": "insurance",
@@ -73169,7 +73226,7 @@
                 "description": "Crea (o reutiliza) la práctica personal del profesional, la sede y la vinculación que la conecta con su agenda.\n\n`POST /practitioners/me/sites`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `PractitionerSitesController_createOwnSite`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"timeZone\": \"America/La_Paz\",\n  \"address\": {\n    \"lines\": [\n      \"lines-ejemplo\"\n    ],\n    \"city\": \"city-ejemplo\",\n    \"latitude\": -90,\n    \"longitude\": -180\n  },\n  \"contactPhone\": \"+591 72123456\"\n}",
+                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"timeZone\": \"America/La_Paz\",\n  \"address\": {\n    \"lines\": [\n      \"lines-ejemplo\"\n    ],\n    \"city\": \"city-ejemplo\",\n    \"district\": \"district-ejemplo\",\n    \"latitude\": -90,\n    \"longitude\": -180\n  },\n  \"contactPhone\": \"+591 72123456\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -73404,7 +73461,7 @@
                 "description": "Cambia nombre, huso horario o dirección sin retirar la sede: el id se conserva, y es el que la agenda referencia en cada turno.\n\n`PATCH /practitioners/me/sites/{siteId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PractitionerSitesController_updateOwnSite`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"timeZone\": \"America/La_Paz\",\n  \"address\": {\n    \"lines\": [\n      \"lines-ejemplo\"\n    ],\n    \"city\": \"city-ejemplo\",\n    \"latitude\": -90,\n    \"longitude\": -180\n  }\n}",
+                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"timeZone\": \"America/La_Paz\",\n  \"address\": {\n    \"lines\": [\n      \"lines-ejemplo\"\n    ],\n    \"city\": \"city-ejemplo\",\n    \"district\": \"district-ejemplo\",\n    \"latitude\": -90,\n    \"longitude\": -180\n  }\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -73529,6 +73586,68 @@
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"contactPhone\": \"+591 72123456\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /practitioners/me/sites/{siteId}/logo · Fijar o quitar el logo del consultorio propio",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/practitioners/me/sites/:siteId/logo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "practitioners",
+                    "me",
+                    "sites",
+                    ":siteId",
+                    "logo"
+                  ],
+                  "variable": [
+                    {
+                      "key": "siteId",
+                      "value": "{{siteId}}",
+                      "description": "Identificador de ruta · variable `{{siteId}}`"
+                    }
+                  ]
+                },
+                "description": "Asocia una imagen ya subida (png, jpeg o webp, NORMAL, hasta 2 MB) como logo del consultorio. `fileId: null` lo quita. 404 si la sede no es un consultorio propio; 422 si el archivo no sirve como logo.\n\n`PUT /practitioners/me/sites/{siteId}/logo`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PractitionerSitesController_setSiteLogo`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fileId\": {}\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -76531,7 +76650,7 @@
                 "description": "Guardar una dirección nueva. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /profiles/patients/me/addresses`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `PatientAddressBookController_create`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"label\": \"Casa de mi mamá\",\n  \"municipalityConceptId\": \"<municipalityConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"lines\": \"lines-ejemplo\",\n  \"latitude\": -90,\n  \"longitude\": -180,\n  \"isPreferred\": true\n}",
+                  "raw": "{\n  \"label\": \"Casa de mi mamá\",\n  \"municipalityConceptId\": \"<municipalityConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"lines\": \"lines-ejemplo\",\n  \"district\": \"district-ejemplo\",\n  \"latitude\": -90,\n  \"longitude\": -180,\n  \"isPreferred\": true\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -77406,7 +77525,7 @@
                 "description": "Editar los propios datos de filiación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /profiles/patients/me`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `ProfilesPatientsController_updateOwnProfile`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Lucía\",\n  \"middleName\": \"Andrea\",\n  \"lastName\": \"Mamani\",\n  \"motherLastName\": \"Quispe\",\n  \"birthDate\": {},\n  \"sexAtBirth\": \"MALE\",\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"phone\": \"phone-ejemplo\",\n  \"taxId\": \"taxId-ejemplo\",\n  \"taxHolderName\": \"taxHolderName-ejemplo\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"workAddressLines\": \"workAddressLines-ejemplo\",\n  \"homeLatitude\": {},\n  \"homeLongitude\": {},\n  \"workLatitude\": {},\n  \"workLongitude\": {},\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\",\n  \"guardianName\": \"guardianName-ejemplo\",\n  \"guardianPhone\": \"guardianPhone-ejemplo\"\n}",
+                  "raw": "{\n  \"name\": \"Lucía\",\n  \"middleName\": \"Andrea\",\n  \"lastName\": \"Mamani\",\n  \"motherLastName\": \"Quispe\",\n  \"birthDate\": {},\n  \"sexAtBirth\": \"MALE\",\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"phone\": \"phone-ejemplo\",\n  \"taxId\": \"taxId-ejemplo\",\n  \"taxHolderName\": \"taxHolderName-ejemplo\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"workAddressLines\": \"workAddressLines-ejemplo\",\n  \"homeDistrict\": \"homeDistrict-ejemplo\",\n  \"workDistrict\": \"workDistrict-ejemplo\",\n  \"homeLatitude\": {},\n  \"homeLongitude\": {},\n  \"workLatitude\": {},\n  \"workLongitude\": {},\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\",\n  \"guardianName\": \"guardianName-ejemplo\",\n  \"guardianPhone\": \"guardianPhone-ejemplo\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -77468,7 +77587,7 @@
                 "description": "Corregir una dirección (cierra la vigente y abre otra). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /profiles/patients/me/addresses/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PatientAddressBookController_update`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"label\": \"label-ejemplo\",\n  \"lines\": \"lines-ejemplo\",\n  \"latitude\": -90,\n  \"longitude\": -180\n}",
+                  "raw": "{\n  \"label\": \"label-ejemplo\",\n  \"lines\": \"lines-ejemplo\",\n  \"district\": \"district-ejemplo\",\n  \"latitude\": -90,\n  \"longitude\": -180\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -78682,7 +78801,7 @@
                 "description": "Editar la presentación del propio perfil profesional. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /profiles/practitioners/me`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `ProfilesPractitionersController_updateOwnPractitionerProfile`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"professionalBio\": \"professionalBio-ejemplo\",\n  \"acceptsNewPatients\": true,\n  \"telehealthAvailable\": true,\n  \"name\": \"name-ejemplo\",\n  \"middleName\": \"middleName-ejemplo\",\n  \"lastName\": \"lastName-ejemplo\",\n  \"motherLastName\": \"motherLastName-ejemplo\",\n  \"birthDate\": {},\n  \"sexAtBirth\": \"MALE\",\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"phone\": \"phone-ejemplo\",\n  \"workEmail\": \"usuario@example.test\",\n  \"personalEmail\": \"usuario@example.test\",\n  \"mobilePhone\": \"mobilePhone-ejemplo\",\n  \"workMobilePhone\": \"workMobilePhone-ejemplo\",\n  \"workLandline\": \"workLandline-ejemplo\",\n  \"taxId\": \"taxId-ejemplo\",\n  \"taxHolderName\": \"taxHolderName-ejemplo\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"homeLatitude\": {},\n  \"homeLongitude\": {},\n  \"workAddressLines\": \"workAddressLines-ejemplo\",\n  \"workLatitude\": {},\n  \"workLongitude\": {},\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\",\n  \"languages\": [\n    {\n      \"languageConceptId\": \"<languageConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"proficiencyConceptId\": \"<proficiencyConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"clinicalInterpretationAllowed\": true\n    }\n  ]\n}",
+                  "raw": "{\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"professionalBio\": \"professionalBio-ejemplo\",\n  \"acceptsNewPatients\": true,\n  \"telehealthAvailable\": true,\n  \"name\": \"name-ejemplo\",\n  \"middleName\": \"middleName-ejemplo\",\n  \"lastName\": \"lastName-ejemplo\",\n  \"motherLastName\": \"motherLastName-ejemplo\",\n  \"birthDate\": {},\n  \"sexAtBirth\": \"MALE\",\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"phone\": \"phone-ejemplo\",\n  \"workEmail\": \"usuario@example.test\",\n  \"personalEmail\": \"usuario@example.test\",\n  \"mobilePhone\": \"mobilePhone-ejemplo\",\n  \"workMobilePhone\": \"workMobilePhone-ejemplo\",\n  \"workLandline\": \"workLandline-ejemplo\",\n  \"taxId\": \"taxId-ejemplo\",\n  \"taxHolderName\": \"taxHolderName-ejemplo\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"homeLatitude\": {},\n  \"homeLongitude\": {},\n  \"workAddressLines\": \"workAddressLines-ejemplo\",\n  \"homeDistrict\": \"homeDistrict-ejemplo\",\n  \"workDistrict\": \"workDistrict-ejemplo\",\n  \"workLatitude\": {},\n  \"workLongitude\": {},\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\",\n  \"languages\": [\n    {\n      \"languageConceptId\": \"<languageConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"proficiencyConceptId\": \"<proficiencyConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"clinicalInterpretationAllowed\": true\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -79094,7 +79213,7 @@
                 "description": "`403` si quien pide no es el titular ni plataforma. `409` `NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY` si se corrige el número del documento de una identidad verificada o con un caso de verificación en curso.\n\n`PATCH /profiles/practitioners/{profileId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `ProfilesPractitionersController_updatePractitionerProfile`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"professionalBio\": \"professionalBio-ejemplo\",\n  \"acceptsNewPatients\": true,\n  \"telehealthAvailable\": true,\n  \"name\": \"name-ejemplo\",\n  \"middleName\": \"middleName-ejemplo\",\n  \"lastName\": \"lastName-ejemplo\",\n  \"motherLastName\": \"motherLastName-ejemplo\",\n  \"birthDate\": {},\n  \"sexAtBirth\": \"MALE\",\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"phone\": \"phone-ejemplo\",\n  \"workEmail\": \"usuario@example.test\",\n  \"personalEmail\": \"usuario@example.test\",\n  \"mobilePhone\": \"mobilePhone-ejemplo\",\n  \"workMobilePhone\": \"workMobilePhone-ejemplo\",\n  \"workLandline\": \"workLandline-ejemplo\",\n  \"taxId\": \"taxId-ejemplo\",\n  \"taxHolderName\": \"taxHolderName-ejemplo\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"homeLatitude\": {},\n  \"homeLongitude\": {},\n  \"workAddressLines\": \"workAddressLines-ejemplo\",\n  \"workLatitude\": {},\n  \"workLongitude\": {},\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\",\n  \"languages\": [\n    {\n      \"languageConceptId\": \"<languageConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"proficiencyConceptId\": \"<proficiencyConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"clinicalInterpretationAllowed\": true\n    }\n  ]\n}",
+                  "raw": "{\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"professionalBio\": \"professionalBio-ejemplo\",\n  \"acceptsNewPatients\": true,\n  \"telehealthAvailable\": true,\n  \"name\": \"name-ejemplo\",\n  \"middleName\": \"middleName-ejemplo\",\n  \"lastName\": \"lastName-ejemplo\",\n  \"motherLastName\": \"motherLastName-ejemplo\",\n  \"birthDate\": {},\n  \"sexAtBirth\": \"MALE\",\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"phone\": \"phone-ejemplo\",\n  \"workEmail\": \"usuario@example.test\",\n  \"personalEmail\": \"usuario@example.test\",\n  \"mobilePhone\": \"mobilePhone-ejemplo\",\n  \"workMobilePhone\": \"workMobilePhone-ejemplo\",\n  \"workLandline\": \"workLandline-ejemplo\",\n  \"taxId\": \"taxId-ejemplo\",\n  \"taxHolderName\": \"taxHolderName-ejemplo\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"homeLatitude\": {},\n  \"homeLongitude\": {},\n  \"workAddressLines\": \"workAddressLines-ejemplo\",\n  \"homeDistrict\": \"homeDistrict-ejemplo\",\n  \"workDistrict\": \"workDistrict-ejemplo\",\n  \"workLatitude\": {},\n  \"workLongitude\": {},\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\",\n  \"languages\": [\n    {\n      \"languageConceptId\": \"<languageConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"proficiencyConceptId\": \"<proficiencyConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"clinicalInterpretationAllowed\": true\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -80802,7 +80921,7 @@
           "name": "geo",
           "item": [
             {
-              "name": "POST /public/geo/reverse · Nombre de la calle de un punto en Bolivia",
+              "name": "POST /public/geo/reverse · Nombre de la calle de un punto del mapa",
               "request": {
                 "method": "POST",
                 "header": [
@@ -80825,7 +80944,7 @@
                 "description": "Sin sesión. 503 si el proveedor no responde: el alta sigue con la calle a mano. Nunca inventa una dirección.\n\n`POST /public/geo/reverse`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500, 504\n\noperationId: `ReverseGeocodingController_reverse`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"latitude\": -23.5,\n  \"longitude\": -70\n}",
+                  "raw": "{\n  \"latitude\": -90,\n  \"longitude\": -180\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -85702,7 +85821,7 @@
       ]
     },
     {
-      "name": "scheduling (60)",
+      "name": "scheduling (65)",
       "item": [
         {
           "name": "scheduling",
@@ -86866,7 +86985,7 @@
                 "description": "Publicar una plantilla de agenda con sus franjas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /scheduling/resources/{id}/templates`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `SchedulingController_createTemplate`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"rules\": [\n    {\n      \"dayOfWeek\": 0,\n      \"startTime\": \"08:00:00\",\n      \"endTime\": \"12:00:00\",\n      \"slotMinutes\": 1,\n      \"capacityPerSlot\": 1,\n      \"gapMinutes\": 0,\n      \"bookingMode\": \"CONSULTATIONS\",\n      \"telemedicineEnabled\": false\n    }\n  ],\n  \"slotMinutes\": 30,\n  \"bookingPolicyId\": \"{{bookingPolicyId}}\",\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"validTo\": \"2026-01-01T00:00:00.000Z\",\n  \"flexibleHours\": false\n}",
+                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"rules\": [\n    {\n      \"dayOfWeek\": 0,\n      \"startTime\": \"08:00:00\",\n      \"endTime\": \"12:00:00\",\n      \"slotMinutes\": 1,\n      \"capacityPerSlot\": 1,\n      \"gapMinutes\": 0,\n      \"bookingMode\": \"CONSULTATIONS\",\n      \"telemedicineEnabled\": false,\n      \"flexibleHours\": false\n    }\n  ],\n  \"slotMinutes\": 30,\n  \"bookingPolicyId\": \"{{bookingPolicyId}}\",\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"validTo\": \"2026-01-01T00:00:00.000Z\",\n  \"flexibleHours\": false\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -87716,7 +87835,7 @@
                 "description": "Todo opcional; lo que no se manda se conserva. `rules`, si viene, reemplaza el conjunto entero y no toca los cupos ya materializados.\n\n`PATCH /scheduling/templates/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `SchedulingController_updateTemplate`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"rules\": [\n    {\n      \"dayOfWeek\": 0,\n      \"startTime\": \"08:00:00\",\n      \"endTime\": \"12:00:00\",\n      \"slotMinutes\": 1,\n      \"capacityPerSlot\": 1,\n      \"gapMinutes\": 0,\n      \"bookingMode\": \"CONSULTATIONS\",\n      \"telemedicineEnabled\": false\n    }\n  ],\n  \"slotMinutes\": 1,\n  \"bookingPolicyId\": \"{{bookingPolicyId}}\",\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"validTo\": \"2026-01-01T00:00:00.000Z\"\n}",
+                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"rules\": [\n    {\n      \"dayOfWeek\": 0,\n      \"startTime\": \"08:00:00\",\n      \"endTime\": \"12:00:00\",\n      \"slotMinutes\": 1,\n      \"capacityPerSlot\": 1,\n      \"gapMinutes\": 0,\n      \"bookingMode\": \"CONSULTATIONS\",\n      \"telemedicineEnabled\": false,\n      \"flexibleHours\": false\n    }\n  ],\n  \"slotMinutes\": 1,\n  \"bookingPolicyId\": \"{{bookingPolicyId}}\",\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"validTo\": \"2026-01-01T00:00:00.000Z\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -88409,6 +88528,211 @@
               ]
             },
             {
+              "name": "POST /scheduling/bookings/{id}/payment-receipts · Subir el comprobante de pago de una cita",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/bookings/:id/payment-receipts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "bookings",
+                    ":id",
+                    "payment-receipts"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{bookingId}}",
+                      "description": "Identificador de ruta · variable `{{bookingId}}`"
+                    }
+                  ]
+                },
+                "description": "El paciente adjunta un archivo propio (png, jpeg, webp o pdf, hasta 5 MB). 404 si la cita no es suya; 422 si el archivo no sirve o la cita está cancelada o rechazada; 409 si la cita ya está pagada.\n\n`POST /scheduling/bookings/{id}/payment-receipts`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `SchedulingBookingsController_uploadPaymentReceipt`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fileId\": \"{{fileId}}\",\n  \"amount\": \"150.00\",\n  \"paidAt\": \"2026-01-01T00:00:00.000Z\",\n  \"note\": \"note-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{paymentReceiptId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.paymentReceiptId);",
+                      "  if (id) pm.environment.set('paymentReceiptId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm · Confirmar un comprobante de pago",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/bookings/:id/payment-receipts/:receiptId/confirm",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "bookings",
+                    ":id",
+                    "payment-receipts",
+                    ":receiptId",
+                    "confirm"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{bookingId}}",
+                      "description": "Identificador de ruta · variable `{{bookingId}}`"
+                    },
+                    {
+                      "key": "receiptId",
+                      "value": "{{receiptId}}",
+                      "description": "Identificador de ruta · variable `{{receiptId}}`"
+                    }
+                  ]
+                },
+                "description": "Deja el comprobante confirmado y la cita pagada. 409 si el comprobante ya se rechazó; 422 si la cita está cancelada o rechazada.\n\n`POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `SchedulingBookingsController_confirmPaymentReceipt`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{paymentReceiptId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.paymentReceiptId);",
+                      "  if (id) pm.environment.set('paymentReceiptId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject · Rechazar un comprobante de pago",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/bookings/:id/payment-receipts/:receiptId/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "bookings",
+                    ":id",
+                    "payment-receipts",
+                    ":receiptId",
+                    "reject"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{bookingId}}",
+                      "description": "Identificador de ruta · variable `{{bookingId}}`"
+                    },
+                    {
+                      "key": "receiptId",
+                      "value": "{{receiptId}}",
+                      "description": "Identificador de ruta · variable `{{receiptId}}`"
+                    }
+                  ]
+                },
+                "description": "Guarda el motivo, que el paciente recibe en el aviso. 409 si el comprobante ya se confirmó.\n\n`POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `SchedulingBookingsController_rejectPaymentReceipt`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"reason-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{paymentReceiptId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.paymentReceiptId);",
+                      "  if (id) pm.environment.set('paymentReceiptId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "POST /scheduling/bookings/{id}/propose-schedule · Proponer otro horario para la solicitud",
               "request": {
                 "method": "POST",
@@ -88852,6 +89176,125 @@
                       "  const list = Array.isArray(body) ? body : (body.bookings || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('bookingId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /scheduling/bookings/{id}/payment-receipts · Listar los comprobantes de pago de una cita",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/bookings/:id/payment-receipts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "bookings",
+                    ":id",
+                    "payment-receipts"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{bookingId}}",
+                      "description": "Identificador de ruta · variable `{{bookingId}}`"
+                    }
+                  ]
+                },
+                "description": "Los ve el paciente de la cita y el prestador de esa agenda. Cualquier otro recibe 404.\n\n`GET /scheduling/bookings/{id}/payment-receipts`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `SchedulingBookingsController_listPaymentReceipts`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.paymentReceipts || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('paymentReceiptId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /scheduling/bookings/{id}/payment-receipts/{receiptId}/content · Descargar el archivo de un comprobante de pago",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/bookings/:id/payment-receipts/:receiptId/content",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "bookings",
+                    ":id",
+                    "payment-receipts",
+                    ":receiptId",
+                    "content"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{bookingId}}",
+                      "description": "Identificador de ruta · variable `{{bookingId}}`"
+                    },
+                    {
+                      "key": "receiptId",
+                      "value": "{{receiptId}}",
+                      "description": "Identificador de ruta · variable `{{receiptId}}`"
+                    }
+                  ]
+                },
+                "description": "Mismos permisos que la lista de comprobantes.\n\n`GET /scheduling/bookings/{id}/payment-receipts/{receiptId}/content`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `SchedulingBookingsController_paymentReceiptContent`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.paymentReceipts || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('paymentReceiptId', first.id);",
                       "}"
                     ]
                   }
