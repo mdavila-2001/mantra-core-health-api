@@ -28,6 +28,7 @@ import {
   DirectoryMembershipsService,
   DirectoryReadService,
   DirectoryTenantsService,
+  TenantDocumentCompletionService,
 } from '../services';
 import {
   BranchAssignmentDto,
@@ -49,6 +50,10 @@ import {
   TenantDetailResponseDto,
   MyOrganizationsResponseDto,
   UpdateTenantDto,
+  CompleteAffiliationDocumentsDto,
+  CompleteAffiliationDocumentsResponseDto,
+  LaboratoryReadinessResponseDto,
+  PharmacyReadinessResponseDto,
 } from '../dto';
 
 /** Tope de filas por página cuando el cliente no pide uno. */
@@ -75,6 +80,7 @@ export class TenantsController {
     private readonly branchesService: DirectoryBranchesService,
     private readonly membershipsService: DirectoryMembershipsService,
     private readonly readService: DirectoryReadService,
+    private readonly documentCompletion: TenantDocumentCompletionService,
   ) {}
 
   /**
@@ -133,6 +139,66 @@ export class TenantsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<TenantResponseDto> {
     return this.tenantsService.updateTenant(tenantId, dto, actor);
+  }
+
+  /**
+   * P50: completar después del alta los papeles que el alta pública dejó
+   * opcionales (los seis PDF que una farmacia necesita para operar).
+   *
+   * Sólo owner o admin **de esa** organización (o la plataforma), y sólo
+   * mientras está pendiente de verificación.
+   */
+  @Audited({
+    action: 'TENANT_AFFILIATION_DOCUMENTS_COMPLETED',
+    entity: 'tenant',
+    entityId: 'param:tenantId',
+  })
+  @Post(':tenantId/affiliation-documents')
+  @ApiOperation({
+    summary: 'Completar los documentos legales de la organización',
+    description:
+      'Vincula PDF ya subidos con POST /iam/auth/upload-registration-document. ' +
+      '422 sin documentos, fuera de PENDING, con archivo repetido o sin representante para el poder; ' +
+      '409 si ese papel ya está presentado; 403 si no administra la organización.',
+  })
+  completeAffiliationDocuments(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Body() dto: CompleteAffiliationDocumentsDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<CompleteAffiliationDocumentsResponseDto> {
+    return this.documentCompletion.complete(tenantId, dto, actor);
+  }
+
+  /**
+   * P50: lo que le falta a una farmacia para que la plataforma pueda
+   * verificarla (los seis papeles y el punto de la casa central).
+   */
+  @Get(':tenantId/pharmacy-readiness')
+  @ApiOperation({
+    summary: 'Requisitos pendientes para que la farmacia opere',
+  })
+  getPharmacyReadiness(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyReadinessResponseDto> {
+    return this.documentCompletion.pharmacyReadiness(tenantId, actor);
+  }
+
+  /**
+   * P51: lo que le falta a un laboratorio para que la plataforma pueda
+   * verificarlo (SEPREC, licencia de funcionamiento y SEDES).
+   */
+  @Get(':tenantId/laboratory-readiness')
+  @ApiOperation({
+    summary: 'Requisitos pendientes para que el laboratorio opere',
+    description:
+      '403 si no pertenece a la organización; 422 si no es un laboratorio.',
+  })
+  getLaboratoryReadiness(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<LaboratoryReadinessResponseDto> {
+    return this.documentCompletion.laboratoryReadiness(tenantId, actor);
   }
 
   @Get(':tenantId')

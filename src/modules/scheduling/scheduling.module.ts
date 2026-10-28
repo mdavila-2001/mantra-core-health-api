@@ -9,6 +9,7 @@ import {
   SchedulingAgendaController,
   TenantAgendaController,
   SchedulingServiceOfferingsController,
+  SchedulingFlexibleController,
 } from './presentation/controllers';
 import {
   SchedulingCatalogService,
@@ -25,6 +26,7 @@ import {
   SchedulingServiceOfferingsService,
   SchedulingServiceAgendaService,
   SchedulingServiceBookingService,
+  SchedulingFlexibleBookingService,
   SchedulingPaymentReceiptsService,
 } from './application';
 import {
@@ -159,6 +161,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     SchedulingAgendaController,
     TenantAgendaController,
     SchedulingServiceOfferingsController,
+    SchedulingFlexibleController,
   ],
   providers: [
     FormInstanceOriginValidator,
@@ -196,6 +199,8 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     SchedulingServiceOfferingsService,
     SchedulingServiceAgendaService,
     SchedulingServiceBookingService,
+    // P36 · horario flexible: las horas libres y la retención de la elegida.
+    SchedulingFlexibleBookingService,
     // P8 · avisos de agenda. El puerto se resuelve hoy con el adaptador de
     // mensajería; cuando P1 publique su servicio de emisión, se sustituye
     // **sólo** esta línea y ningún caso de uso cambia.

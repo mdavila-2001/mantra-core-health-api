@@ -2,6 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 
 import { CONCEPTS } from '../../../common';
+import { adminDivisionLineage } from '../../../common/seed/admin-divisions.catalog';
 import {
   boDepartmentConceptId,
   departmentSiglaOfMunicipalityCode,
@@ -22,6 +23,11 @@ export interface ResidenceAddressData {
    * La columna es un varchar único (`common.addresses.lines`), no un arreglo.
    */
   readonly lines?: string;
+  /**
+   * Distrito o zona, como texto (ADR-0028): el que da el mapa. Antes viajaba
+   * pegado al final de `lines`.
+   */
+  readonly district?: string;
   /**
    * Latitud, si la persona compartió su ubicación.
    *
@@ -134,6 +140,28 @@ export function createWorkAddress(
  * El cuerpo compartido por los dos usos: lo único que los distingue es el
  * concepto de uso.
  */
+/** Una dirección de la libreta: la de {@link ResidenceAddressData} con nombre y preferencia. */
+export interface SavedAddressData extends ResidenceAddressData {
+  readonly label?: string;
+  readonly isPreferred?: boolean;
+}
+
+/**
+ * Guarda una dirección de la libreta del paciente (uso `ADDR_USE_SAVED`).
+ *
+ * Mismo camino que el domicilio —municipio validado contra el catálogo,
+ * departamento derivado, `city` legible—, más el nombre y la preferencia.
+ * Devuelve la fila creada, o `null` si no había nada que guardar.
+ */
+export async function createSavedAddress(
+  repo: AddressesRepository,
+  tx: EntityManager,
+  concepts: CatalogConceptsRepository,
+  data: SavedAddressData,
+): Promise<Addresses | null> {
+  return writeAddressRow(repo, tx, concepts, data, CONCEPTS.ADDR_USE_SAVED);
+}
+
 async function writeAddress(
   repo: AddressesRepository,
   tx: EntityManager,
@@ -141,12 +169,24 @@ async function writeAddress(
   data: ResidenceAddressData,
   useConceptId: string,
 ): Promise<boolean> {
+  return (
+    (await writeAddressRow(repo, tx, concepts, data, useConceptId)) !== null
+  );
+}
+
+async function writeAddressRow(
+  repo: AddressesRepository,
+  tx: EntityManager,
+  concepts: CatalogConceptsRepository,
+  data: SavedAddressData,
+  useConceptId: string,
+): Promise<Addresses | null> {
   const coordinates = coordinatesOf(data);
 
   // Sin municipio, sin calle y sin coordenadas no hay dirección: una fila con
   // país y nada más no es un dato, es una fila.
   if (!data.municipalityConceptId && !data.lines && !coordinates) {
-    return false;
+    return null;
   }
 
   const municipality = data.municipalityConceptId
@@ -160,8 +200,16 @@ async function writeAddress(
   const departmentSigla = municipality
     ? departmentSiglaOfMunicipalityCode(municipality.code)
     : undefined;
+  // El árbol de divisiones (ADR-0028) da la provincia —y el departamento,
+  // para un municipio cuyo código no lo trae— de cualquier país con catálogo.
+  // Un municipio que no está en el árbol (sembrado por el paquete del modelo
+  // con otra forma de código) queda sin provincia: no se adivina.
+  const lineage = data.municipalityConceptId
+    ? adminDivisionLineage(data.municipalityConceptId)
+    : undefined;
+  const district = data.district?.trim() || undefined;
 
-  repo.create(tx, {
+  return repo.create(tx, {
     ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
     ownerId: data.personId,
     countryConceptId: CONCEPTS.COUNTRY_BO,
@@ -169,7 +217,9 @@ async function writeAddress(
     // Derivado, nunca recibido: ver arriba.
     administrativeAreaConceptId: departmentSigla
       ? boDepartmentConceptId(departmentSigla)
-      : undefined,
+      : lineage?.level1ConceptId,
+    administrativeArea2ConceptId: lineage?.level2ConceptId,
+    districtText: district,
     // `city` es texto libre y el municipio ya es el dato de catálogo; se copia
     // el nombre para que quien lea la dirección sin resolver conceptos —un
     // export, un sobre— tenga algo legible.
@@ -179,9 +229,10 @@ async function writeAddress(
     longitude: coordinates?.longitude,
     useConceptId,
     typeConceptId: CONCEPTS.ADDR_TYPE_POSTAL,
+    label: data.label,
+    isPreferred: data.isPreferred,
     actorUserId: data.actorUserId,
   });
-  return true;
 }
 
 /**
@@ -229,6 +280,8 @@ export interface ReplaceResidenceAddressData {
    * sólo el municipio, sigue siendo un dato).
    */
   readonly lines?: string;
+  /** Distrito o zona. Mismos tres estados que `lines`: `''` lo borra. */
+  readonly district?: string;
   /**
    * Ambas o ninguna: el DTO ya rechaza el par incompleto.
    *
@@ -289,6 +342,12 @@ export async function replaceResidenceAddress(
       : data.lines.trim() === ''
         ? undefined
         : data.lines.trim();
+  const district =
+    data.district === undefined
+      ? current?.districtText
+      : data.district.trim() === ''
+        ? undefined
+        : data.district.trim();
   // Quitar el punto: los dos extremos en `null` (ver `latitude` en la interfaz).
   const removesGps = data.latitude === null && data.longitude === null;
   const hasGps =
@@ -307,6 +366,7 @@ export async function replaceResidenceAddress(
   const withoutChanges =
     (current?.municipalityConceptId ?? undefined) === municipalityConceptId &&
     (current?.lines ?? undefined) === lines &&
+    (current?.districtText ?? undefined) === district &&
     columnNumber(current?.latitude) === latitude &&
     columnNumber(current?.longitude) === longitude;
   if (withoutChanges) return;
@@ -321,6 +381,7 @@ export async function replaceResidenceAddress(
     personId: data.personId,
     municipalityConceptId,
     lines,
+    district,
     latitude,
     longitude,
     actorUserId: data.actorUserId,
@@ -332,6 +393,10 @@ export interface AddressSummary {
   readonly lines?: string;
   readonly city?: string;
   readonly municipalityConceptId?: string;
+  /** Provincia o condado, deducida del municipio (ADR-0028). */
+  readonly administrativeArea2ConceptId?: string;
+  /** Distrito o zona (ADR-0028). */
+  readonly district?: string;
   readonly latitude?: number;
   readonly longitude?: number;
 }
@@ -352,6 +417,10 @@ export function summarizeAddress(
     ...(row.municipalityConceptId === undefined
       ? {}
       : { municipalityConceptId: row.municipalityConceptId }),
+    ...(row.administrativeArea2ConceptId == null
+      ? {}
+      : { administrativeArea2ConceptId: row.administrativeArea2ConceptId }),
+    ...(row.districtText == null ? {} : { district: row.districtText }),
     // Las coordenadas viajan juntas o no viajan: media coordenada no ubica
     // nada. Se compara con `== null` y no `=== undefined`: la columna es
     // nullable y la base devuelve `null`, no `undefined` — con la

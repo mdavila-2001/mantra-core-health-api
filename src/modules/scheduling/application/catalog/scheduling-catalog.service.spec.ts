@@ -606,6 +606,8 @@ describe('SchedulingCatalogService', () => {
             startTime: '09:00:00',
             endTime: '13:00:00',
             telemedicineEnabled: false,
+            // v4.2.64: el horario flexible por franja también viaja siempre.
+            flexibleHours: false,
           },
         ]);
         expect(res.items[1].rules).toHaveLength(1);
@@ -677,6 +679,8 @@ describe('SchedulingCatalogService', () => {
         // sí viaja siempre: es un booleano derivado, no una columna anulable.
         expect(res.items[0]).toEqual({
           retired: false,
+          // P36: booleano derivado, viaja siempre como `retired`.
+          flexibleHours: false,
           id: 'tpl-1',
           name: 'Horario',
           statusConceptId: 'c',
@@ -687,9 +691,64 @@ describe('SchedulingCatalogService', () => {
               endTime: '13:00:00',
               // v4.2.61: NOT NULL DEFAULT false, viaja siempre.
               telemedicineEnabled: false,
+              // v4.2.64: ídem el horario flexible por franja.
+              flexibleHours: false,
             },
           ],
         });
+      });
+
+      it('devuelve el horario flexible de cada franja, resuelto con el de la plantilla (v4.2.64)', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+        d.catalogRepo.findTemplatesByResource.mockResolvedValue([
+          { id: 'tpl-mixta', name: 'Mixta', statusConceptId: 'c' },
+          {
+            id: 'tpl-flex',
+            name: 'Flexible',
+            statusConceptId: 'c',
+            flexibleHours: true,
+          },
+        ]);
+        d.catalogRepo.findRulesByTemplates.mockResolvedValue([
+          {
+            scheduleTemplateId: 'tpl-mixta',
+            dayOfWeek: 1,
+            startTime: '09:00:00',
+            endTime: '13:00:00',
+            flexibleHours: false,
+          },
+          {
+            scheduleTemplateId: 'tpl-mixta',
+            dayOfWeek: 2,
+            startTime: '09:00:00',
+            endTime: '13:00:00',
+            flexibleHours: true,
+          },
+          {
+            scheduleTemplateId: 'tpl-flex',
+            dayOfWeek: 3,
+            startTime: '09:00:00',
+            endTime: '13:00:00',
+            flexibleHours: false,
+          },
+        ]);
+
+        const res = await d.service.listTemplates(RESOURCE, actor);
+
+        expect(
+          res.items.map((t: any) =>
+            t.rules.map((r: any) => [r.dayOfWeek, r.flexibleHours]),
+          ),
+        ).toEqual([
+          [
+            [1, false],
+            [2, true],
+          ],
+          // La plantilla toda flexible implica la franja, aunque la columna
+          // de la franja diga `false` (filas anteriores a v4.2.64).
+          [[3, true]],
+        ]);
       });
 
       it('devuelve la telemedicina de cada franja (v4.2.61)', async () => {
@@ -991,6 +1050,135 @@ describe('SchedulingCatalogService', () => {
             actor as any,
           ),
         ).rejects.toBeInstanceOf(PreconditionFailedException);
+      });
+
+      /**
+       * P36 · horario flexible, sin turnos fijos (propietario, 18/09/2026).
+       */
+      describe('horario flexible (P36)', () => {
+        const flexibleDto = {
+          name: 'Mañanas flexibles',
+          flexibleHours: true,
+          slotMinutes: 20,
+          rules: [{ dayOfWeek: 1, startTime: '08:00:00', endTime: '12:00:00' }],
+        };
+
+        it('guarda el modo en la plantilla y franjas sin duración ni capacidad', async () => {
+          const d = buildCatalog();
+          d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+          d.catalogRepo.createTemplate.mockReturnValue({ id: 'tpl-1' });
+
+          const res = await d.service.createTemplate(
+            RESOURCE,
+            flexibleDto,
+            actor,
+          );
+
+          expect(res.flexibleHours).toBe(true);
+          expect(d.catalogRepo.createTemplate).toHaveBeenCalledWith(
+            d.tx,
+            expect.objectContaining({ flexibleHours: true, slotMinutes: 20 }),
+          );
+          const rule = d.catalogRepo.createRule.mock.calls[0][1];
+          expect(rule.slotMinutes).toBeUndefined();
+          expect(rule.capacityPerSlot).toBeUndefined();
+          expect(rule.gapMinutes).toBeUndefined();
+        });
+
+        it('sin la marca, la plantilla sigue siendo de turnos fijos', async () => {
+          const d = buildCatalog();
+          d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+          d.catalogRepo.createTemplate.mockReturnValue({ id: 'tpl-1' });
+
+          const res = await d.service.createTemplate(RESOURCE, dto, actor);
+
+          expect(res.flexibleHours).toBe(false);
+          expect(d.catalogRepo.createTemplate).toHaveBeenCalledWith(
+            d.tx,
+            expect.objectContaining({ flexibleHours: false }),
+          );
+          const rule = d.catalogRepo.createRule.mock.calls[0][1];
+          expect(rule.slotMinutes).toBe(30);
+          expect(rule.capacityPerSlot).toBe(1);
+        });
+
+        it.each([
+          ['slotMinutes', { slotMinutes: 30 }],
+          ['gapMinutes', { gapMinutes: 5 }],
+          ['capacityPerSlot', { capacityPerSlot: 3 }],
+        ])(
+          'rechaza una franja flexible que declara %s, sin escribir nada',
+          async (_campo, extra) => {
+            const d = buildCatalog();
+            await expect(
+              d.service.createTemplate(
+                RESOURCE,
+                {
+                  ...flexibleDto,
+                  rules: [
+                    {
+                      dayOfWeek: 1,
+                      startTime: '08:00:00',
+                      endTime: '12:00:00',
+                      ...extra,
+                    },
+                  ],
+                },
+                actor,
+              ),
+            ).rejects.toBeInstanceOf(PreconditionFailedException);
+            expect(d.catalogRepo.createTemplate).not.toHaveBeenCalled();
+          },
+        );
+
+        it('rechaza una franja más corta que el tiempo por paciente: no entraría nadie', async () => {
+          const d = buildCatalog();
+          await expect(
+            d.service.createTemplate(
+              RESOURCE,
+              {
+                ...flexibleDto,
+                rules: [
+                  { dayOfWeek: 1, startTime: '08:00:00', endTime: '08:15:00' },
+                ],
+              },
+              actor,
+            ),
+          ).rejects.toThrow(/dura menos que el tiempo por paciente/);
+        });
+
+        it('generar cupos de una plantilla flexible no materializa ninguno', async () => {
+          const d = buildCatalog();
+          d.catalogRepo.findTemplateById.mockResolvedValue({
+            id: 'tpl-1',
+            resourceId: RESOURCE,
+            slotMinutes: 20,
+            flexibleHours: true,
+          });
+          d.catalogRepo.findResourceById.mockResolvedValue({
+            id: RESOURCE,
+            resourceRefType: 'health_practitioner_profiles',
+            resourceRefId: 'hp-1',
+          });
+          d.catalogRepo.findRulesByTemplate.mockResolvedValue([
+            { dayOfWeek: 1, startTime: '08:00:00', endTime: '12:00:00' },
+          ]);
+          d.catalogRepo.findSlotsByTemplateInRange.mockResolvedValue([]);
+
+          const res = await d.service.generateSlots(
+            'tpl-1',
+            { from: '2026-06-01T00:00:00Z', to: '2026-06-09T00:00:00Z' },
+            actor as never,
+          );
+
+          expect(res).toEqual({
+            templateId: 'tpl-1',
+            created: 0,
+            skipped: 0,
+            omittedByCommitments: 0,
+          });
+          expect(d.catalogRepo.createSlot).not.toHaveBeenCalled();
+        });
       });
 
       it('accepts a slot that fills the franja exactly', async () => {
@@ -1854,6 +2042,7 @@ describe('SchedulingCatalogService', () => {
           'tpl-1',
           CONCEPTS.TEMPLATE_RETIRED,
           'u-1',
+          CONCEPTS.SLOT_BLOCKED,
         );
         expect(res.statusConceptId).toBe(CONCEPTS.TEMPLATE_RETIRED);
         // Los tres cupos con cita se conservan: ninguna cita se toca.
@@ -2536,6 +2725,136 @@ describe('SchedulingCatalogService', () => {
         const bands = d.catalogRepo.createRule.mock.calls.map((c: any) => c[1]);
         expect(bands[0].gapMinutes).toBe(10);
         expect(bands[1].gapMinutes).toBeUndefined();
+      });
+
+      /**
+       * v4.2.64 · horario flexible POR FRANJA: «el lunes doy turnos de 30 con
+       * 10 de pausa, el martes atiendo a la hora que me pidan».
+       */
+      describe('horario flexible por franja (v4.2.64)', () => {
+        const lunesFijo = {
+          dayOfWeek: 1,
+          startTime: '09:00:00',
+          endTime: '11:00:00',
+          slotMinutes: 30,
+          gapMinutes: 10,
+        };
+        const martesFlexible = {
+          dayOfWeek: 2,
+          startTime: '09:00:00',
+          endTime: '11:00:00',
+          flexibleHours: true,
+        };
+        const mixta = {
+          name: 'Mixta',
+          slotMinutes: 20,
+          rules: [lunesFijo, martesFlexible],
+        };
+
+        it('guarda el flexible de cada franja y deja la flexible sin duración, capacidad ni pausa', async () => {
+          const d = buildCatalog();
+          d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+          d.catalogRepo.createTemplate.mockReturnValue({ id: 'tpl-1' });
+
+          const res = await d.service.createTemplate(RESOURCE, mixta, actor);
+
+          expect(res.flexibleHours).toBe(false);
+          const [lunes, martes] = d.catalogRepo.createRule.mock.calls.map(
+            (c: any) => c[1],
+          );
+          expect(lunes).toMatchObject({
+            dayOfWeek: 1,
+            flexibleHours: false,
+            slotMinutes: 30,
+            capacityPerSlot: 1,
+            gapMinutes: 10,
+          });
+          expect(martes).toMatchObject({ dayOfWeek: 2, flexibleHours: true });
+          expect(martes.slotMinutes).toBeUndefined();
+          expect(martes.capacityPerSlot).toBeUndefined();
+          expect(martes.gapMinutes).toBeUndefined();
+        });
+
+        it('una plantilla toda flexible marca flexibles todas sus franjas', async () => {
+          const d = buildCatalog();
+          d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+          d.catalogRepo.createTemplate.mockReturnValue({ id: 'tpl-1' });
+
+          await d.service.createTemplate(
+            RESOURCE,
+            {
+              name: 'Toda flexible',
+              flexibleHours: true,
+              slotMinutes: 20,
+              rules: [
+                { dayOfWeek: 1, startTime: '09:00:00', endTime: '11:00:00' },
+              ],
+            },
+            actor,
+          );
+
+          expect(d.catalogRepo.createRule.mock.calls[0][1].flexibleHours).toBe(
+            true,
+          );
+        });
+
+        it.each([
+          ['gapMinutes', { gapMinutes: 10 }],
+          ['slotMinutes', { slotMinutes: 30 }],
+          ['capacityPerSlot', { capacityPerSlot: 2 }],
+        ])(
+          'rechaza una franja flexible que declara %s, sin escribir nada',
+          async (_campo, extra) => {
+            const d = buildCatalog();
+            await expect(
+              d.service.createTemplate(
+                RESOURCE,
+                {
+                  ...mixta,
+                  rules: [lunesFijo, { ...martesFlexible, ...extra }],
+                },
+                actor,
+              ),
+            ).rejects.toBeInstanceOf(PreconditionFailedException);
+            expect(d.catalogRepo.createTemplate).not.toHaveBeenCalled();
+          },
+        );
+
+        it('genera cupos sólo para la franja fija, respetando su pausa, y ninguno para la flexible', async () => {
+          const d = buildCatalog();
+          d.catalogRepo.findTemplateById.mockResolvedValue({
+            id: 'tpl-1',
+            resourceId: RESOURCE,
+            slotMinutes: 20,
+            flexibleHours: false,
+          });
+          d.catalogRepo.findRulesByTemplate.mockResolvedValue([
+            { ...lunesFijo, capacityPerSlot: 1, flexibleHours: false },
+            { ...martesFlexible },
+          ]);
+          d.catalogRepo.findSlotsByTemplateInRange.mockResolvedValue([]);
+
+          // Lunes 1 y martes 2 de junio de 2026.
+          const res = await d.service.generateSlots(
+            'tpl-1',
+            { from: '2026-06-01T00:00:00Z', to: '2026-06-03T00:00:00Z' },
+            actor,
+          );
+
+          const starts = d.catalogRepo.createSlot.mock.calls.map((c: any) =>
+            c[1].startAt.toISOString(),
+          );
+          // La plantilla no vuelve temprano: el lunes sí tiene grilla.
+          expect(res.created).toBe(3);
+          expect(starts).toEqual([
+            '2026-06-01T09:00:00.000Z',
+            '2026-06-01T09:40:00.000Z',
+            '2026-06-01T10:20:00.000Z',
+          ]);
+          expect(
+            starts.some((iso: string) => iso.startsWith('2026-06-02')),
+          ).toBe(false);
+        });
       });
 
       it('el respiro separa los turnos: el paso es slot + gap', async () => {

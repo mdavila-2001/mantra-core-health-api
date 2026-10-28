@@ -59,6 +59,7 @@ import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.servi
 import { TelemetryUxHeatmapSeedService } from './telemetry-ux-heatmap-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
+import { AdminDivisionsSeedService } from './admin-divisions-seed.service';
 import { LegalEntityTypesSeedService } from './legal-entity-types-seed.service';
 import { AffiliationCatalogsSeedService } from './affiliation-catalogs-seed.service';
 import { BoEmployersSeedService } from './bo-employers-seed.service';
@@ -161,6 +162,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     TelemetryUxHeatmapSeedService,
     GlossarySeedService,
     BoGeographySeedService,
+    AdminDivisionsSeedService,
     LegalEntityTypesSeedService,
     AffiliationCatalogsSeedService,
     BoOccupationsSeedService,
@@ -196,6 +198,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     TelemetryUxHeatmapSeedService,
     GlossarySeedService,
     BoGeographySeedService,
+    AdminDivisionsSeedService,
     LegalEntityTypesSeedService,
     AffiliationCatalogsSeedService,
     BoOccupationsSeedService,

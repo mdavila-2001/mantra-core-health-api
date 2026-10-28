@@ -16,6 +16,7 @@ import { DataAccessLogRepository } from '../../audit/repositories';
 import { AUD } from '../../audit/audit.concepts';
 import { ClinicalNotesRepository, DocumentsRepository } from '../repositories';
 import { CHART } from '../chart.concepts';
+import { readNoteEntries } from './chart-note-item.mapper';
 import type {
   MyChartDocumentListResponseDto,
   MyChartNoteListResponseDto,
@@ -121,6 +122,7 @@ export class ChartMeReadService {
           id: header.id,
           encounterId: header.encounterId,
           noteTypeConceptId: header.noteTypeConceptId,
+          entries: readNoteEntries(version?.entriesJson),
           chiefComplaintText: version?.chiefComplaintText,
           subjectiveText: version?.subjectiveText,
           objectiveText: version?.objectiveText,

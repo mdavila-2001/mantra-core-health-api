@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `pharmacy`.
- * 68 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 86 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const pharmacyIndexes: readonly IndexTuple[] = [
@@ -19,6 +19,7 @@ export const pharmacyIndexes: readonly IndexTuple[] = [
   ['pharmacies', 'ix_pharmacies_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['pharmacies', 'ix_pharmacies_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['pharmacies', 'ix_pharmacies_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
+  ['pharmacies', 'ix_pharmacies_primary_practice_site_id', ['primary_practice_site_id'], false, 'btree'],
   ['pharmacy_external_product_mappings', 'ix_pharmacy_external_product_mappings_pharmacy_integra_f6b3c236', ['pharmacy_integration_connection_id'], false, 'btree'],
   ['pharmacy_external_product_mappings', 'ix_pharmacy_external_product_mappings_pharmacy_product_id', ['pharmacy_product_id'], false, 'btree'],
   ['pharmacy_external_product_mappings', 'ix_pharmacy_external_product_mappings_verification_sta_079f1a0f', ['verification_status_concept_id'], false, 'btree'],
@@ -41,6 +42,12 @@ export const pharmacyIndexes: readonly IndexTuple[] = [
   ['pharmacy_licenses', 'ix_pharmacy_licenses_verification_status_concept_id', ['verification_status_concept_id'], false, 'btree'],
   ['pharmacy_licenses', 'ix_pharmacy_licenses_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['pharmacy_licenses', 'ix_pharmacy_licenses_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['pharmacy_on_call_shifts', 'ix_pharmacy_on_call_shifts_pharmacy_site_id', ['pharmacy_site_id'], false, 'btree'],
+  ['pharmacy_on_call_shifts', 'ix_pharmacy_on_call_shifts_source_concept_id', ['source_concept_id'], false, 'btree'],
+  ['pharmacy_on_call_shifts', 'ix_pharmacy_on_call_shifts_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['pharmacy_on_call_shifts', 'ix_pharmacy_on_call_shifts_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['pharmacy_on_call_shifts', 'ix_pharmacy_on_call_shifts_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['pharmacy_on_call_shifts', 'ix_pharmacy_on_call_shifts_site_window', ['pharmacy_site_id', 'ends_at desc', 'starts_at'], false, 'btree'],
   ['pharmacy_price_lists', 'ix_pharmacy_price_lists_pharmacy_id', ['pharmacy_id'], false, 'btree'],
   ['pharmacy_price_lists', 'ix_pharmacy_price_lists_pharmacy_site_id', ['pharmacy_site_id'], false, 'btree'],
   ['pharmacy_price_lists', 'ix_pharmacy_price_lists_price_list_type_concept_id', ['price_list_type_concept_id'], false, 'btree'],
@@ -49,6 +56,16 @@ export const pharmacyIndexes: readonly IndexTuple[] = [
   ['pharmacy_price_lists', 'ix_pharmacy_price_lists_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['pharmacy_price_lists', 'ix_pharmacy_price_lists_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['pharmacy_price_lists', 'ix_pharmacy_price_lists_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['pharmacy_product_categories', 'ix_pharmacy_product_categories_pharmacy_id', ['pharmacy_id'], false, 'btree'],
+  ['pharmacy_product_categories', 'uq_pharmacy_product_categories_pharmacy_id_name_key', ['pharmacy_id', 'name_key'], true, 'btree'],
+  ['pharmacy_product_categories', 'uq_pharmacy_product_categories_pharmacy_id_id', ['pharmacy_id', 'id'], true, 'btree'],
+  ['pharmacy_product_categories', 'ix_pharmacy_product_categories_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['pharmacy_product_categories', 'ix_pharmacy_product_categories_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['pharmacy_product_images', 'ix_pharmacy_product_images_pharmacy_product_id', ['pharmacy_product_id'], false, 'btree'],
+  ['pharmacy_product_images', 'ix_pharmacy_product_images_image_file_id', ['image_file_id'], false, 'btree'],
+  ['pharmacy_product_images', 'uq_pharmacy_product_images_pharmacy_product_id_ordinal', ['pharmacy_product_id', 'ordinal'], true, 'btree'],
+  ['pharmacy_product_images', 'uq_pharmacy_product_images_pharmacy_product_id_image_file_id', ['pharmacy_product_id', 'image_file_id'], true, 'btree'],
+  ['pharmacy_product_images', 'ix_pharmacy_product_images_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['pharmacy_products', 'ix_pharmacy_products_pharmacy_id', ['pharmacy_id'], false, 'btree'],
   ['pharmacy_products', 'ix_pharmacy_products_medication_concept_id', ['medication_concept_id'], false, 'btree'],
   ['pharmacy_products', 'ix_pharmacy_products_inventory_item_concept_id', ['inventory_item_concept_id'], false, 'btree'],
@@ -57,6 +74,7 @@ export const pharmacyIndexes: readonly IndexTuple[] = [
   ['pharmacy_products', 'ix_pharmacy_products_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['pharmacy_products', 'ix_pharmacy_products_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['pharmacy_products', 'ix_pharmacy_products_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['pharmacy_products', 'ix_pharmacy_products_pharmacy_product_category_id', ['pharmacy_product_category_id'], false, 'btree'],
   ['pharmacy_product_identifiers', 'ix_pharmacy_product_identifiers_pharmacy_product_id', ['pharmacy_product_id'], false, 'btree'],
   ['pharmacy_product_identifiers', 'ix_pharmacy_product_identifiers_identifier_type_concept_id', ['identifier_type_concept_id'], false, 'btree'],
   ['pharmacy_product_identifiers', 'ix_pharmacy_product_identifiers_assigning_authority_tenant_id', ['assigning_authority_tenant_id'], false, 'btree'],

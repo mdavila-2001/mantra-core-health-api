@@ -6,6 +6,7 @@ export * from './jurisdiction_authorizations.entity';
 export * from './patient_identity_links.entity';
 export * from './patient_merge_events.entity';
 export * from './patient_portal_proxies.entity';
+export * from './patient_primary_practitioners.entity';
 export * from './patient_profiles.entity';
 export * from './person_account_links.entity';
 export * from './person_profiles.entity';

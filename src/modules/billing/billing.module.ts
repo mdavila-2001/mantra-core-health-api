@@ -10,6 +10,7 @@ import {
   BillingOperationsController,
   BillingServiceCatalogController,
   BillingSimulatedController,
+  PatientSpendingController,
 } from './controllers';
 import {
   InvoicesService,
@@ -25,6 +26,7 @@ import {
   BillingServiceCatalogService,
   ProcedureNomenclatureService,
   BillingSimulatedService,
+  PatientSpendingService,
 } from './services';
 import {
   InvoicesRepository,
@@ -38,7 +40,10 @@ import {
   DunningRepository,
   KpiSnapshotsRepository,
   ServiceCatalogRepository,
+  PatientSpendingRepository,
 } from './repositories';
+import { SIAT_EMITTER_PORT } from './application/ports';
+import { SiatSimulatedAdapter, SiatRealAdapter } from './infrastructure/adapters';
 
 /**
  * Módulo Billing (17): facturación al paciente (CxC), cuentas por pagar (CxP),
@@ -66,6 +71,8 @@ import {
     BillingOperationsController,
     BillingServiceCatalogController,
     BillingSimulatedController,
+    // P44 — «Mis gastos» del paciente: lectura sobre sus facturas.
+    PatientSpendingController,
   ],
   providers: [
     // Repositorios
@@ -80,6 +87,7 @@ import {
     DunningRepository,
     KpiSnapshotsRepository,
     ServiceCatalogRepository,
+    PatientSpendingRepository,
     // Servicios
     InvoicesService,
     PaymentsReceivedService,
@@ -94,11 +102,20 @@ import {
     BillingServiceCatalogService,
     ProcedureNomenclatureService,
     BillingSimulatedService,
+    PatientSpendingService,
+    // Puerto SIAT — el adaptador se selecciona por SIAT_MODE (default: simulado).
+    {
+      provide: SIAT_EMITTER_PORT,
+      useClass:
+        process.env['SIAT_MODE'] === 'real'
+          ? SiatRealAdapter
+          : SiatSimulatedAdapter,
+    },
   ],
   // Carril 18 — `accounting` reutiliza `LedgerService.postToLedger` (anclar
   // `transaction_id` en el documento de origen, idempotente por documento)
   // para que el asiento de un ingreso de consulta quede enlazado a la factura
   // pagada que lo originó, sin reimplementar esa guarda en otro módulo.
-  exports: [LedgerService],
+  exports: [LedgerService, SIAT_EMITTER_PORT],
 })
 export class BillingModule {}

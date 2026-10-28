@@ -68,7 +68,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | ESCRIBE | CREA | DIRECTA | CommonAddressesController.create → AddressesService.create → AddressesRepository.create | `src/modules/common/repositories/addresses.repository.ts:118` |
+| `common.addresses` | ESCRIBE | CREA | DIRECTA | CommonAddressesController.create → AddressesService.create → AddressesRepository.create | `src/modules/common/repositories/addresses.repository.ts:154` |
 
 ### Cuerpo — DTO `CreateAddressDto` · `application/json`
 
@@ -491,6 +491,7 @@ El árbol de decisión completo está en [flujos](../flujos/common.md).
 |---|---|
 | INTEGRACION | `test/integration/common.int-spec.ts:106` |
 | INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:101` |
+| INTEGRACION | `test/integration/practitioner-profile-identity-fields.int-spec.ts:209` |
 | CONTROLADOR | `src/modules/common/controllers/common-files.controller.spec.ts:53` |
 
 ### Flujos
@@ -657,6 +658,7 @@ El árbol de decisión completo está en [flujos](../flujos/common.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/practitioner-credential-registration-files.int-spec.ts:199` |
+| INTEGRACION | `test/integration/practitioner-license-registration-files.int-spec.ts:115` |
 | INTEGRACION | `test/integration/practitioner-signature-registration.int-spec.ts:85` |
 
 ### Flujos

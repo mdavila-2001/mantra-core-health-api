@@ -14,6 +14,7 @@ import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.servi
 import { TelemetryUxHeatmapSeedService } from './telemetry-ux-heatmap-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
+import { AdminDivisionsSeedService } from './admin-divisions-seed.service';
 import { LegalEntityTypesSeedService } from './legal-entity-types-seed.service';
 import { AffiliationCatalogsSeedService } from './affiliation-catalogs-seed.service';
 import { BoEmployersSeedService } from './bo-employers-seed.service';
@@ -144,6 +145,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param patientPortalProxy - Alcance y base legal del apoderamiento de portal.
    * @param glossary - Taxonomía y catálogo curado del glosario médico.
    * @param boGeography - Departamentos de Bolivia (`VS_BO_DEPARTMENT`).
+   * @param adminDivisions - Divisiones administrativas de todo país con
+   *   catálogo (`VS_ADMIN_DIVISION`, ADR-0028).
    * @param legalEntityTypes - País y categoría canónica de cada forma societaria
    *   del diccionario internacional (subtarea 1.1).
    * @param affiliationCatalogs - Documentos de afiliación, autoridad emisora,
@@ -187,6 +190,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly telemetryUxHeatmap: TelemetryUxHeatmapSeedService,
     private readonly glossary: GlossarySeedService,
     private readonly boGeography: BoGeographySeedService,
+    private readonly adminDivisions: AdminDivisionsSeedService,
     private readonly legalEntityTypes: LegalEntityTypesSeedService,
     private readonly affiliationCatalogs: AffiliationCatalogsSeedService,
     private readonly boOccupations: BoOccupationsSeedService,
@@ -371,6 +375,14 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'departamentos de Bolivia',
         kind: 'core',
         run: () => this.boGeography.run(),
+      },
+      // El árbol multipaís (ADR-0028) apunta a los departamentos y municipios
+      // del paso anterior: va inmediatamente después. Es núcleo porque las
+      // direcciones deducen de acá la provincia del municipio.
+      {
+        name: 'divisiones administrativas',
+        kind: 'core',
+        run: () => this.adminDivisions.run(),
       },
       // Va justo después del catálogo de conceptos: sólo depende de que los 21
       // conceptos de `LEGAL_ENTITY_TYPES` ya existan (los materializa el paso

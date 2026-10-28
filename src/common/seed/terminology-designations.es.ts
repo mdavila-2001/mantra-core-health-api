@@ -1343,6 +1343,14 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
   [
+    CONCEPTS.ADDR_USE_SAVED,
+    {
+      display: 'Dirección guardada',
+      definition:
+        'Otra ubicación que la persona guarda en su libreta, además de su domicilio.',
+    },
+  ],
+  [
     CONCEPTS.ADDR_TYPE_POSTAL,
     {
       display: 'Dirección postal',
@@ -2600,6 +2608,14 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
       display: 'Estudio cardiológico',
       definition:
         'Electrocardiograma, ecocardiograma, Holter y demás estudios del corazón.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_CATEGORY_OTHER,
+    {
+      display: 'Otro estudio',
+      definition:
+        'Orden de análisis que no es de laboratorio ni de imagen; quien la ejecuta se elige aparte.',
     },
   ],
   [

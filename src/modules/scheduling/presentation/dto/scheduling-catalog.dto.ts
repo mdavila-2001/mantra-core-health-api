@@ -362,6 +362,24 @@ export class ScheduleRuleDto {
   @IsOptional()
   @IsBoolean()
   telemedicineEnabled?: boolean;
+
+  /**
+   * Horario flexible de **esta** franja (v4.2.64): «el lunes doy turnos de 30,
+   * el martes atiendo a la hora que me pidan».
+   *
+   * **Ausente ≡ `false`** (turnos fijos). Una franja flexible no lleva
+   * `slotMinutes`, `capacityPerSlot` ni `gapMinutes`: el tiempo por paciente es
+   * el `slotMinutes` de la plantilla. Si la plantilla declara
+   * `flexibleHours: true`, todas sus franjas son flexibles, digan lo que digan.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Horario flexible de esta franja: sin turnos fijos, el paciente elige la hora. No admite slotMinutes, capacityPerSlot ni gapMinutes. Ausente ≡ false',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  flexibleHours?: boolean;
 }
 
 /**
@@ -433,6 +451,27 @@ export class CreateTemplateDto {
   @IsOptional()
   @IsISO8601()
   validTo?: string;
+
+  /**
+   * Horario flexible, sin turnos fijos (P36, propietario 18/09/2026).
+   *
+   * `true` ≡ la plantilla declara cuándo se atiende pero **no se corta en
+   * turnos**: `generate-slots` no materializa cupos de consulta para ella y el
+   * paciente pide la hora que quiera dentro de la franja con
+   * `POST /scheduling/resources/{id}/flexible-holds`. `slotMinutes` pasa a ser
+   * cuánto se reserva por paciente. Ausente ≡ turnos fijos, como siempre.
+   *
+   * No se cambia con `PATCH`: pasar una agenda viva de un modo al otro es
+   * retirar y volver a publicar.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Horario flexible: sin turnos fijos, el paciente elige la hora dentro de la franja. slotMinutes es lo que se reserva por paciente. Ausente ≡ false',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  flexibleHours?: boolean;
 }
 
 /**
@@ -543,6 +582,13 @@ export class TemplateRuleDto {
    */
   @ApiProperty({ default: false })
   telemedicineEnabled!: boolean;
+
+  /**
+   * La franja es de horario flexible. Se emite siempre, ya resuelto: `true`
+   * si lo declara la franja o si la plantilla entera es flexible.
+   */
+  @ApiProperty({ default: false })
+  flexibleHours!: boolean;
 }
 
 /**
@@ -585,6 +631,16 @@ export class TemplateDetailDto {
   /** Duración por defecto de la plantilla, si la declara. */
   @ApiProperty({ required: false })
   slotMinutes?: number;
+
+  /**
+   * Horario flexible (P36): sin turnos fijos, el paciente pide la hora dentro
+   * de la franja. Viaja siempre —`false` en toda plantilla de turnos fijos—
+   * para que la pantalla no tenga que adivinar qué significa su ausencia.
+   */
+  @ApiProperty({
+    description: 'true cuando el horario es flexible, sin turnos fijos',
+  })
+  flexibleHours!: boolean;
 
   /** Desde cuándo rige. */
   @ApiProperty({ required: false, format: 'date-time' })
@@ -692,6 +748,12 @@ export class TemplateResponseDto {
    */
   @ApiProperty({ description: 'Franjas creadas' })
   ruleCount!: number;
+
+  /** Horario flexible (P36), tal como quedó publicado. */
+  @ApiProperty({
+    description: 'true cuando el horario es flexible, sin turnos fijos',
+  })
+  flexibleHours!: boolean;
 
   /**
    * Identificador asociado a status concept.

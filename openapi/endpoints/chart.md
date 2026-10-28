@@ -1122,6 +1122,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "id": "00000000-0000-4000-8000-000000000001",
       "encounterId": "00000000-0000-4000-8000-000000000001",
       "noteTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "entries": [
+        {
+          "label": "Presión arterial",
+          "value": "120/80"
+        }
+      ],
       "chiefComplaintText": "valor-ejemplo",
       "subjectiveText": "valor-ejemplo",
       "objectiveText": "valor-ejemplo",
@@ -1140,10 +1146,13 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<MyChartNoteItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","noteTypeConceptId":"00000000-0000-4000-8000-000000000001","chiefComplaintText":"valor-ejemplo","subjectiveText":"valor-ejemplo","objectiveText":"valor-ejemplo","assessmentText":"valor-ejemplo","planText":"valor-ejemplo","releasedAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items` | Sí | `array<MyChartNoteItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","noteTypeConceptId":"00000000-0000-4000-8000-000000000001","entries":[{"label":"Presión arterial","value":"120/80"}],"chiefComplaintText":"valor-ejemplo","subjectiveText":"valor-ejemplo","objectiveText":"valor-ejemplo","assessmentText":"valor-ejemplo","planText":"valor-ejemplo","releasedAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador de la nota (cabecera). | `00000000-0000-4000-8000-000000000001` |
 | `items[].encounterId` | No | `string` | formato `uuid` | Encuentro al que pertenece la nota. | `00000000-0000-4000-8000-000000000001` |
 | `items[].noteTypeConceptId` | No | `string` | formato `uuid` | Tipo de nota (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `items[].entries` | No | `array<ChartNoteEntryDto>` | Sin restricción adicional declarada | P39: filas campo/valor de la versión liberada. Ausente si no tiene. | `[{"label":"Presión arterial","value":"120/80"}]` |
+| `items[].entries[].label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Presión arterial` |
+| `items[].entries[].value` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `120/80` |
 | `items[].chiefComplaintText` | No | `string` | Sin restricción adicional declarada | Motivo de consulta de la versión liberada. | `valor-ejemplo` |
 | `items[].subjectiveText` | No | `string` | Sin restricción adicional declarada | Subjetivo (SOAP) de la versión liberada. | `valor-ejemplo` |
 | `items[].objectiveText` | No | `string` | Sin restricción adicional declarada | Objetivo (SOAP) de la versión liberada. | `valor-ejemplo` |
@@ -1265,6 +1274,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "currentVersionId": "00000000-0000-4000-8000-000000000001",
       "versionNumber": 1,
       "authorProfileId": "00000000-0000-4000-8000-000000000001",
+      "entries": [
+        {
+          "label": "Presión arterial",
+          "value": "120/80"
+        }
+      ],
       "chiefComplaintText": "valor-ejemplo",
       "subjectiveText": "valor-ejemplo",
       "objectiveText": "valor-ejemplo",
@@ -1286,7 +1301,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<ChartNoteListItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"noteId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","noteTypeConceptId":"00000000-0000-4000-8000-000000000001","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","versionNumber":1,"authorProfileId":"00000000-0000-4000-8000-000000000001","chiefComplaintText":"valor-ejemplo","subjectiveText":"valor-ejemplo","objectiveText":"valor-ejemplo","assessmentText":"valor-ejemplo","planText":"valor-ejemplo","signedAt":"2026-07-31T12:00:00.000Z","releasedToPatient":true,"createdAt":"2026-07-31T12:00:00.000Z","patientProfileId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items` | Sí | `array<ChartNoteListItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"noteId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","noteTypeConceptId":"00000000-0000-4000-8000-000000000001","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","versionNumber":1,"authorProfileId":"00000000-0000-4000-8000-000000000001","entries":[{"label":"Presión arterial","value":"120/80"}],"chiefComplaintText":"valor-ejemplo","subjectiveText":"valor-ejemplo","objectiveText":"valor-ejemplo","assessmentText":"valor-ejemplo","planText":"valor-ejemplo","signedAt":"2026-07-31T12:00:00.000Z","releasedToPatient":true,"createdAt":"2026-07-31T12:00:00.000Z","patientProfileId":"00000000-0000-4000-8000-000000000001"}]` |
 | `items[].noteId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].encounterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].noteTypeConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -1294,6 +1309,9 @@ Campos de la respuesta:
 | `items[].currentVersionId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].versionNumber` | No | `number` | Sin restricción adicional declarada | Número de la versión vigente | `1` |
 | `items[].authorProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].entries` | No | `array<ChartNoteEntryDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"label":"Presión arterial","value":"120/80"}]` |
+| `items[].entries[].label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Presión arterial` |
+| `items[].entries[].value` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `120/80` |
 | `items[].chiefComplaintText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].subjectiveText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].objectiveText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -1389,6 +1407,9 @@ Content-Type: application/json
 | `noteTypeConceptId` | No | `string` | formato `uuid` | Concept id del tipo de nota | `00000000-0000-4000-8000-000000000001` |
 | `confidentialityConceptId` | No | `string` | formato `uuid` | Concept id de confidencialidad | `00000000-0000-4000-8000-000000000001` |
 | `chiefComplaintText` | No | `string` | longitud máxima 1000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `entries` | No | `array<NoteEntryInputDto>` | máximo 40 elemento(s) | P39: filas campo/valor de la nota médica, en orden. Se guardan en la versión; omitirlas o mandar [] deja la versión sin filas | `[{"label":"Presión arterial","value":"120/80"}]` |
+| `entries[].label` | No | `string` | longitud mínima 1; longitud máxima 60 | Rótulo de la fila; se recorta. Único (sin distinguir mayúsculas ni tildes) dentro de la nota | `Presión arterial` |
+| `entries[].value` | No | `string` | longitud mínima 1; longitud máxima 500 | Valor de la fila; se recorta | `120/80` |
 | `subjectiveText` | No | `string` | Sin restricción adicional declarada | Bloque S (subjetivo) del SOAP | `valor-ejemplo` |
 | `objectiveText` | No | `string` | Sin restricción adicional declarada | Bloque O (objetivo) del SOAP | `valor-ejemplo` |
 | `assessmentText` | No | `string` | Sin restricción adicional declarada | Bloque A (evaluación) del SOAP | `valor-ejemplo` |
@@ -1411,6 +1432,12 @@ Content-Type: application/json
   "noteTypeConceptId": "00000000-0000-4000-8000-000000000001",
   "confidentialityConceptId": "00000000-0000-4000-8000-000000000001",
   "chiefComplaintText": "valor-ejemplo",
+  "entries": [
+    {
+      "label": "Presión arterial",
+      "value": "120/80"
+    }
+  ],
   "subjectiveText": "valor-ejemplo",
   "objectiveText": "valor-ejemplo",
   "assessmentText": "valor-ejemplo",
@@ -1540,6 +1567,9 @@ Content-Type: application/json
 | `authorProfileId` | No | `string` | formato `uuid` | Perfil del clínico que enmienda. Se toma de la sesión; si viaja otro, 403 | `00000000-0000-4000-8000-000000000001` |
 | `amendmentReasonText` | Sí | `string` | longitud mínima 1; longitud máxima 2000 | Motivo textual de la enmienda (obligatorio) | `Texto descriptivo de ejemplo` |
 | `amendmentReasonConceptId` | No | `string` | formato `uuid` | Concept id del motivo de enmienda | `00000000-0000-4000-8000-000000000001` |
+| `entries` | No | `array<NoteEntryInputDto>` | máximo 40 elemento(s) | P39: filas campo/valor de la nota médica, en orden. Se guardan en la versión; omitirlas o mandar [] deja la versión sin filas | `[{"label":"Presión arterial","value":"120/80"}]` |
+| `entries[].label` | No | `string` | longitud mínima 1; longitud máxima 60 | Rótulo de la fila; se recorta. Único (sin distinguir mayúsculas ni tildes) dentro de la nota | `Presión arterial` |
+| `entries[].value` | No | `string` | longitud mínima 1; longitud máxima 500 | Valor de la fila; se recorta | `120/80` |
 | `subjectiveText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `objectiveText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `assessmentText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -1559,6 +1589,12 @@ Content-Type: application/json
   "authorProfileId": "00000000-0000-4000-8000-000000000001",
   "amendmentReasonText": "Texto descriptivo de ejemplo",
   "amendmentReasonConceptId": "00000000-0000-4000-8000-000000000001",
+  "entries": [
+    {
+      "label": "Presión arterial",
+      "value": "120/80"
+    }
+  ],
   "subjectiveText": "valor-ejemplo",
   "objectiveText": "valor-ejemplo",
   "assessmentText": "valor-ejemplo",
@@ -1687,6 +1723,9 @@ Content-Type: application/json
 |---|:---:|---|---|---|---|
 | `authorProfileId` | No | `string` | formato `uuid` | Perfil del clínico autor. Se toma de la sesión; si viaja otro, 403 | `00000000-0000-4000-8000-000000000001` |
 | `chiefComplaintText` | No | `string` | longitud máxima 1000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `entries` | No | `array<NoteEntryInputDto>` | máximo 40 elemento(s) | P39: filas campo/valor de la nota médica, en orden. Se guardan en la versión; omitirlas o mandar [] deja la versión sin filas | `[{"label":"Presión arterial","value":"120/80"}]` |
+| `entries[].label` | No | `string` | longitud mínima 1; longitud máxima 60 | Rótulo de la fila; se recorta. Único (sin distinguir mayúsculas ni tildes) dentro de la nota | `Presión arterial` |
+| `entries[].value` | No | `string` | longitud mínima 1; longitud máxima 500 | Valor de la fila; se recorta | `120/80` |
 | `subjectiveText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `objectiveText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `assessmentText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -1705,6 +1744,12 @@ Content-Type: application/json
 {
   "authorProfileId": "00000000-0000-4000-8000-000000000001",
   "chiefComplaintText": "valor-ejemplo",
+  "entries": [
+    {
+      "label": "Presión arterial",
+      "value": "120/80"
+    }
+  ],
   "subjectiveText": "valor-ejemplo",
   "objectiveText": "valor-ejemplo",
   "assessmentText": "valor-ejemplo",
@@ -2559,6 +2604,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "currentVersionId": "00000000-0000-4000-8000-000000000001",
       "versionNumber": 1,
       "authorProfileId": "00000000-0000-4000-8000-000000000001",
+      "entries": [
+        {
+          "label": "Presión arterial",
+          "value": "120/80"
+        }
+      ],
       "chiefComplaintText": "valor-ejemplo",
       "subjectiveText": "valor-ejemplo",
       "objectiveText": "valor-ejemplo",
@@ -2620,7 +2671,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
-| `notes` | Sí | `array<ChartNoteItemDto>` | Sin restricción adicional declarada | Valor de notes mantenido por la instancia. | `[{"noteId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","noteTypeConceptId":"00000000-0000-4000-8000-000000000001","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","versionNumber":1,"authorProfileId":"00000000-0000-4000-8000-000000000001","chiefComplaintText":"valor-ejemplo","subjectiveText":"valor-ejemplo","objectiveText":"valor-ejemplo","assessmentText":"valor-ejemplo","planText":"valor-ejemplo","signedAt":"2026-07-31T12:00:00.000Z","releasedToPatient":true,"createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `notes` | Sí | `array<ChartNoteItemDto>` | Sin restricción adicional declarada | Valor de notes mantenido por la instancia. | `[{"noteId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","noteTypeConceptId":"00000000-0000-4000-8000-000000000001","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","versionNumber":1,"authorProfileId":"00000000-0000-4000-8000-000000000001","entries":[{"label":"Presión arterial","value":"120/80"}],"chiefComplaintText":"valor-ejemplo","subjectiveText":"valor-ejemplo","objectiveText":"valor-ejemplo","assessmentText":"valor-ejemplo","planText":"valor-ejemplo","signedAt":"2026-07-31T12:00:00.000Z","releasedToPatient":true,"createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `notes[].noteId` | Sí | `string` | formato `uuid` | Identificador asociado a note. | `00000000-0000-4000-8000-000000000001` |
 | `notes[].encounterId` | No | `string` | formato `uuid` | Identificador asociado a encounter. | `00000000-0000-4000-8000-000000000001` |
 | `notes[].noteTypeConceptId` | No | `string` | formato `uuid` | Identificador asociado a note type concept. | `00000000-0000-4000-8000-000000000001` |
@@ -2628,6 +2679,9 @@ Campos de la respuesta:
 | `notes[].currentVersionId` | No | `string` | formato `uuid` | Identificador asociado a current version. | `00000000-0000-4000-8000-000000000001` |
 | `notes[].versionNumber` | No | `number` | Sin restricción adicional declarada | Número de la versión vigente | `1` |
 | `notes[].authorProfileId` | No | `string` | formato `uuid` | Identificador asociado a author profile. | `00000000-0000-4000-8000-000000000001` |
+| `notes[].entries` | No | `array<ChartNoteEntryDto>` | Sin restricción adicional declarada | P39: filas campo/valor de la versión vigente, en orden. Ausente cuando la versión no tiene filas (las notas SOAP de antes de C1). | `[{"label":"Presión arterial","value":"120/80"}]` |
+| `notes[].entries[].label` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Presión arterial` |
+| `notes[].entries[].value` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `120/80` |
 | `notes[].chiefComplaintText` | No | `string` | Sin restricción adicional declarada | Valor de chief complaint text mantenido por la instancia. | `valor-ejemplo` |
 | `notes[].subjectiveText` | No | `string` | Sin restricción adicional declarada | Valor de subjective text mantenido por la instancia. | `valor-ejemplo` |
 | `notes[].objectiveText` | No | `string` | Sin restricción adicional declarada | Valor de objective text mantenido por la instancia. | `valor-ejemplo` |

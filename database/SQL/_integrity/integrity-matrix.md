@@ -44,8 +44,8 @@ El módulo 33 (`integrity`) **no posee tablas**: es una matriz de verificación 
 
 | Tabla | Estereotipo | Reglas declaradas |
 |-------|-------------|-------------------|
-| `siat_simulated_invoices` | `REFERENCE_ONLY` | **CHECK_SQL** ck_siat_simulated_invoices_simulated \| "simulated" = true; **CHECK_SQL** ck_siat_simulated_invoices_status \| "status" IN ('VALIDATED','OBSERVED','REJECTED','ANNULLED') |
-| `siat_simulated_outbox` | `REFERENCE_ONLY` | **CHECK_SQL** ck_siat_simulated_outbox_status \| "status" = 'NOT_SENT_SIMULATED' |
+| `siat_simulated_invoices` | `REFERENCE_ONLY` | **CHECK_SQL** ck_siat_simulated_invoices_simulated \| "simulated" = true; **CHECK_SQL** ck_siat_simulated_invoices_status \| "status" IN ('VALIDATED','OBSERVED','REJECTED','ANNULLED'); **CHECK_SQL** ck_siat_simulated_invoices_siat_mode \| "siat_mode" IN ('simulated','real') |
+| `siat_simulated_outbox` | `REFERENCE_ONLY` | **CHECK_SQL** ck_siat_simulated_outbox_status \| "status" = 'NOT_SENT_SIMULATED'; **CHECK_SQL** ck_siat_simulated_outbox_siat_mode \| "siat_mode" IN ('simulated','real') |
 | `billing.quotations` | `REFERENCE_ONLY` | **CHECK_SQL** chk_quotations_payment_frequency \| "payment_frequency" IN ('WEEKLY', 'BIWEEKLY', 'MONTHLY'); **CHECK_SQL** chk_quotations_down_payment_range \| ("down_payment_amount" >= 0 AND "down_payment_amount" <= "offered_price") |
 | `billing.quotation_installments` | `REFERENCE_ONLY` | **CHECK_SQL** chk_quotation_installments_amount_positive \| "amount" > 0 |
 
@@ -111,6 +111,12 @@ El módulo 33 (`integrity`) **no posee tablas**: es una matriz de verificación 
 |-------|-------------|-------------------|
 | `medical_groups.groups` | `REFERENCE_ONLY` | **CHECK_SQL** ck_medical_groups_groups_status \| "status" IN ('PENDING_TEAM', 'SCHEDULED', 'RESCHEDULE_PENDING', 'CLOSED') |
 | `medical_groups.group_members` | `REFERENCE_ONLY` | **CHECK_SQL** ck_medical_groups_group_members_invitation_status \| "invitation_status" IN ('PENDING', 'ACCEPTED', 'REJECTED') |
+
+### Módulo 24 · `pharmacy`
+
+| Tabla | Estereotipo | Reglas declaradas |
+|-------|-------------|-------------------|
+| `pharmacy_on_call_shifts` | `REFERENCE_ONLY` | **CHECK_SQL** ck_pharmacy_on_call_shifts_window \| ("ends_at" > "starts_at" AND "ends_at" - "starts_at" <= interval '72 hours'); **EXCLUDE_SQL** ex_pharmacy_on_call_shifts_site_overlap \| "pharmacy_site_id" WITH =, tstzrange("starts_at", "ends_at", '[)') WITH && \| "status_concept_id" = '14c92252-2ad8-576c-bc34-3ae2bbdb950d' |
 
 ### Módulo 25 · `pharmacy_inventory`
 

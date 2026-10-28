@@ -2769,6 +2769,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 422 | `PRECONDITION_FAILED` | La unidad no tiene ningún sitio activo para publicar | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-units.service.ts |
 | 422 | `PRECONDITION_FAILED` | La unidad no está activa | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-units.service.ts |
+| 422 | `PRECONDITION_FAILED` | El laboratorio no se publica hasta que la plataforma verifique a su organización con la matrícula del SEPREC, la licencia de funcionamiento y el certificado del SEDES | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-units.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

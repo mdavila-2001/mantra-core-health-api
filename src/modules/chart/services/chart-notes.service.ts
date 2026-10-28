@@ -30,6 +30,7 @@ import {
 import type { ClinicalNoteVersions } from '../entities';
 import { ClinicalReadService } from '../../clinical/services';
 import { ChartEncounterScopeService } from './chart-encounter-scope.service';
+import { toEntriesJson } from './chart-note-item.mapper';
 
 /**
  * Casos de uso de la nota clínica versionada (UC-15-01..08).
@@ -69,6 +70,11 @@ export class ChartNotesService {
       o: v.objectiveText ?? null,
       a: v.assessmentText ?? null,
       p: v.planText ?? null,
+      // P39: las filas entran al sello sólo si existen, así el hash de una
+      // versión SOAP pura (todas las anteriores a C1) no cambia.
+      ...(v.entriesJson === undefined || v.entriesJson === null
+        ? {}
+        : { e: v.entriesJson }),
     });
     return createHash('sha256').update(payload).digest('hex');
   }
@@ -117,6 +123,7 @@ export class ChartNotesService {
         objectiveText: dto.objectiveText,
         assessmentText: dto.assessmentText,
         planText: dto.planText,
+        entriesJson: toEntriesJson(dto.entries),
         recordedByUserId: actor.id,
       });
       await tx.flush();
@@ -181,6 +188,7 @@ export class ChartNotesService {
         objectiveText: dto.objectiveText,
         assessmentText: dto.assessmentText,
         planText: dto.planText,
+        entriesJson: toEntriesJson(dto.entries),
         supersedesVersionId: header.currentVersionId,
         recordedByUserId: actor.id,
       });
@@ -364,6 +372,7 @@ export class ChartNotesService {
         objectiveText: dto.objectiveText,
         assessmentText: dto.assessmentText,
         planText: dto.planText,
+        entriesJson: toEntriesJson(dto.entries),
         supersedesVersionId: header.currentVersionId,
         amendmentReasonConceptId:
           dto.amendmentReasonConceptId ?? CHART.AMENDMENT_REASON_CORRECTION,

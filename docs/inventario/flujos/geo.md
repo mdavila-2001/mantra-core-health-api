@@ -3,13 +3,13 @@
 # Flujos del módulo `geo`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 10 (10 con decisiones propias, 0 sin ellas)
+- **Operaciones:** 11 (11 con decisiones propias, 0 sin ellas)
 - Inventario de endpoints del módulo: [geo](../endpoints/geo.md)
 
 ## Proceso: Módulo Geo (13) — Geolocation and Mobile Tracking
 
-- **Código:** `geo` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 10
-- **Actores:** SECURITY_ADMIN
+- **Código:** `geo` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 11
+- **Actores:** Público (sin sesión) · SECURITY_ADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/geo/README.md`
 
@@ -33,12 +33,14 @@ _Fuente: `src/modules/geo/README.md:3`_
 |  |  | POST /geo/tracking-sessions/{id}/close | SECURITY_ADMIN | BAJO | 3 |
 | `ctrl:GeoTripsController` | Operaciones de GeoTripsController que el README no asigna a un caso de uso | POST /geo/trips | SECURITY_ADMIN | MEDIO | 4 |
 |  |  | POST /geo/trips/{id}/close | SECURITY_ADMIN | BAJO | 3 |
+| `ctrl:ReverseGeocodingController` | Operaciones de ReverseGeocodingController que el README no asigna a un caso de uso | POST /public/geo/reverse | Público (sin sesión) | BAJO | 0 |
 
 ### Diagrama — etapas `ctrl:GeoGeofencesController`, `ctrl:GeoTrackedSubjectsController`, `ctrl:GeoTrackingSessionsController`…
 
 ```mermaid
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
+  a19(["Público (sin sesión)"]):::actor
   t3[("geo.geofence_events")]:::tabla
   t4[("geo.geofences")]:::tabla
   t5[("geo.tracked_subjects")]:::tabla
@@ -62,6 +64,9 @@ flowchart LR
   subgraph s3["ctrl:GeoTripsController · Operaciones de GeoTripsController que el README no as…"]
     o16["POST /geo/trips"]:::op
     o17["POST /geo/trips/{id}/close"]:::op
+  end
+  subgraph s4["ctrl:ReverseGeocodingController · Operaciones de ReverseGeocodingController que…"]
+    o18["POST /public/geo/reverse"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -102,6 +107,7 @@ flowchart LR
   o17 -->|"LEE"| t5
   o17 -->|"LEE"| t11
   o17 -->|"LEE"| t15
+  a19 --> o18
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -625,6 +631,37 @@ flowchart TD
   n12 -->|"sí"| n13
   n14(("200 Responde con éxito")):::ok
   n12 -->|"no"| n14
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 11. POST /public/geo/reverse
+
+Nombre de la calle de un punto del mapa
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a ReverseGeocodingService.reverse"]:::llamada
+  n2 --> n3
+  n4["Llama a ReverseGeocodingService.consultar"]:::llamada
+  n3 --> n4
+  n5(["↩ (relanza el error capturado)"]):::error
+  n4 --> n5
+  n6(("200 Responde con éxito")):::ok
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

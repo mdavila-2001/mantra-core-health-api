@@ -3,9 +3,9 @@
 # Endpoints del módulo `billing`
 
 - **Bloque:** Financiero y ERP (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
-- **Operaciones:** 35 (35 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 5 · MEDIO 13 · BAJO 17
-- **Tablas distintas que tocan:** 36
+- **Operaciones:** 36 (36 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 5 · MEDIO 13 · BAJO 18
+- **Tablas distintas que tocan:** 41
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/billing.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -47,6 +47,7 @@
 | 33 | GET | `/billing/simulated/my-invoices/{invoiceId}` | Una de mis facturas | BAJO | 4 | sesión (sin roles) |
 | 34 | GET | `/billing/simulated/outbox` | Bandeja de correo simulada (sólo administración) | BAJO | 3 | sesión (sin roles) |
 | 35 | GET | `/billing/simulated/status` | Estado fiscal simulado: emisores y credenciales sintéticas | BAJO | 2 | sesión (sin roles) |
+| 36 | GET | `/patient-spending/me` | Mis gastos de salud | BAJO | 10 | PATIENT |
 
 ---
 
@@ -3627,6 +3628,110 @@ _Ninguna prueba existente menciona esta operación._
 ### Flujos
 
 - Módulo Billing (17) — etapa `ctrl:BillingSimulatedController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 36. GET /patient-spending/me
+
+- **Origen:** CONTRATO
+- **Nombre:** Mis gastos de salud
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PatientSpendingController.listMine` — `src/modules/billing/controllers/patient-spending.controller.ts:52`
+
+### Qué es y para qué sirve (negocio)
+
+Mis gastos de salud. Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`GET /patient-spending/me` la atiende `PatientSpendingController.listMine` (src/modules/billing/controllers/patient-spending.controller.ts:52). Exige sesión con alguno de los roles PATIENT. Delega en `PatientSpendingService.listMine`. Lee billing.invoice_lines, billing.invoices, diagnostic_units.diagnostic_study_offerings, directory.tenants, insurance.insurance_claim_lines, insurance.insurance_claims, practice.practice_sites, practice.practices y 2 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PATIENT | `src/modules/billing/controllers/patient-spending.controller.ts:52` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_QUERY | from (obligatorio) | `contrato (parameters)` |
+| PARAMETRO_QUERY | to (obligatorio) | `contrato (parameters)` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `billing.invoice_lines` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:107` |
+| `billing.invoices` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:107` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:107` |
+| `directory.tenants` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:107` |
+| `insurance.insurance_claim_lines` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:107` |
+| `insurance.insurance_claims` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:107` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:107` |
+| `practice.practices` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:107` |
+| `procedures_perioperative.procedure_charge_items` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:107` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:107` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `from` | query | Sí | `string` | Desde (inclusive) |
+| `to` | query | Sí | `string` | Hasta (inclusive) |
+| `limit` | query | No | `number` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<PatientSpendingResponseDto>` · DTO `PatientSpendingResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `currency` | `string` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:111` |
+| `from` | `string` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:115` |
+| `to` | `string` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:118` |
+| `items` | `array<PatientSpendingMovementDto>` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:122` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/billing/dto/patient-spending.dto.ts:71` |
+| `items[].occurredAt` | `string` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:75` |
+| `items[].description` | `string` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:79` |
+| `items[].category` | `PatientSpendingConceptDto` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:83` |
+| `items[].category.code` | `string` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:54` |
+| `items[].category.display` | `string` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:58` |
+| `items[].providerName` | `string` | Sí | admite null | — | — | `src/modules/billing/dto/patient-spending.dto.ts:87` |
+| `items[].grossAmount` | `string` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:91` |
+| `items[].coveredAmount` | `string` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:95` |
+| `items[].discountAmount` | `string` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:99` |
+| `items[].paidAmount` | `string` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:103` |
+| `truncated` | `boolean` | Sí | — | — | — | `src/modules/billing/dto/patient-spending.dto.ts:129` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene perfil de paciente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/patient-spending-http.int-spec.ts:122` |
+| CONTROLADOR | `src/modules/billing/controllers/patient-spending.controller.spec.ts:30` |
+
+### Flujos
+
+- Módulo Billing (17) — etapa `ctrl:PatientSpendingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

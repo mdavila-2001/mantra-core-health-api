@@ -18,6 +18,7 @@ const STEPS = [
   'telemetryUxHeatmap',
   'glossary',
   'boGeography',
+  'adminDivisions',
   'legalEntityTypes',
   'affiliationCatalogs',
   'boOccupations',
@@ -84,6 +85,7 @@ function build(fail: Step[] = [], coreState?: SeedCoreState) {
     double.telemetryUxHeatmap as never,
     double.glossary as never,
     double.boGeography as never,
+    double.adminDivisions as never,
     double.legalEntityTypes as never,
     double.affiliationCatalogs as never,
     double.boOccupations as never,
@@ -373,6 +375,9 @@ describe('SeedBootstrapService', () => {
         terms: 0,
         relationships: 0,
         orphanRelationships: 1,
+        // Artículos cuyo slug todavía no tiene concepto: se omiten, no se escriben.
+        articles: 0,
+        orphanArticles: 446,
       });
 
       const summary = await service.run();

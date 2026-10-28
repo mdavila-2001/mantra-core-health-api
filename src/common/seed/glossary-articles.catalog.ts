@@ -1,13 +1,25 @@
-import { GLOSSARY_ARTICLES_JSON } from './glossary-articles.generated';
+import articlesDataset from './data/glossary/glossary-articles.json';
 
 /**
- * Los artículos enciclopédicos de autoría propia del glosario curado.
+ * Los artículos enciclopédicos de autoría propia del glosario.
  *
  * El contenido nace en el front (`data/glossary/articulos/*.md`, un archivo
  * por término) y llega acá serializado por `scripts/glossary-articulos-alovida.mjs`
- * en `glossary-articles.generated.ts`. Este módulo sólo lo **lee y valida**: el
- * seed (`GlossarySeedService`) lo siembra como la propiedad `glossary-article`
- * del concepto, que `GET /terminology/concepts/:id/glossary-article` ya sirve.
+ * en `data/glossary/glossary-articles.json`. Este módulo sólo lo **lee y
+ * valida**: el seed (`GlossarySeedService`) lo siembra como la propiedad
+ * `glossary-article` del concepto cuyo `glossary-slug` coincide —sea un
+ * término curado de `GLOSSARY_TERMS` o uno de los que cargan los importadores
+ * de `tools/terminology-import/`—, que
+ * `GET /terminology/concepts/:id/glossary-article` ya sirve.
+ *
+ * ## Por qué un `.json` de cadenas
+ *
+ * Son cientos de artículos y varios MB de texto. Como dato (`.json` en
+ * `data/`, igual que los demás datasets del seed) no pasa por el linter ni por
+ * la cobertura, y `tsc` lo copia a `dist/` tal cual, sin mapa de fuentes. Cada
+ * artículo va como **cadena** JSON y no como objeto: así el tipo que infiere
+ * `tsc` es `{ [slug]: string }` y no la forma completa de cada documento, y el
+ * parseo de cada uno es perezoso (`glossaryArticleFor`).
  *
  * ## Procedencia
  *
@@ -20,7 +32,7 @@ import { GLOSSARY_ARTICLES_JSON } from './glossary-articles.generated';
  * ## Por qué sólo los términos que tienen artículo
  *
  * El seed adopta la propiedad `glossary-article` **únicamente** de los
- * términos que figuran acá. Un término curado sin artículo propio conserva el
+ * términos que figuran acá. Un término sin artículo propio conserva el
  * que le haya adjuntado otra canalización (la de MedlinePlus), en vez de
  * quedar borrado por una reconciliación.
  */
@@ -77,6 +89,10 @@ export interface GlossaryArticleDocument {
   }[];
 }
 
+/** Un artículo `GlossaryArticle` serializado como JSON, por slug del término. */
+const GLOSSARY_ARTICLES_JSON: Readonly<Record<string, string>> =
+  articlesDataset;
+
 /** Los slugs que tienen artículo propio, ordenados. */
 export const GLOSSARY_ARTICLE_SLUGS: readonly string[] = Object.keys(
   GLOSSARY_ARTICLES_JSON,
@@ -95,8 +111,8 @@ export function glossaryArticleFor(
 ): GlossaryArticleDocument | undefined {
   const cached = parsed.get(slug);
   if (cached !== undefined) return cached;
+  if (!Object.hasOwn(GLOSSARY_ARTICLES_JSON, slug)) return undefined;
   const raw = GLOSSARY_ARTICLES_JSON[slug];
-  if (raw === undefined) return undefined;
   const article = JSON.parse(raw) as GlossaryArticleDocument;
   parsed.set(slug, article);
   return article;

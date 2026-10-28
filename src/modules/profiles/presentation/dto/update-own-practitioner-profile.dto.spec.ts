@@ -53,3 +53,27 @@ describe('UpdateOwnPractitionerProfileDto · identidad fiscal', () => {
     expect(validateSync(dto).map((error) => error.property)).toContain('taxId');
   });
 });
+
+describe('UpdateOwnPractitionerProfileDto · número del documento (P28)', () => {
+  const errores = (body: object): string[] =>
+    validateSync(plainToInstance(UpdateOwnPractitionerProfileDto, body), {
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }).map((error) => error.property);
+
+  it('acepta el número con el mismo formato que el alta', () => {
+    expect(errores({ nationalId: '7654321' })).toEqual([]);
+    expect(errores({ nationalId: '7654321-1B' })).toEqual([]);
+    expect(errores({ nationalId: 'A'.repeat(40) })).toEqual([]);
+  });
+
+  it('rechaza vaciarlo: el alta del profesional lo exige', () => {
+    expect(errores({ nationalId: '' })).toEqual(['nationalId']);
+  });
+
+  it('rechaza lo que el alta tampoco acepta', () => {
+    expect(errores({ nationalId: 'A'.repeat(41) })).toEqual(['nationalId']);
+    expect(errores({ nationalId: '76 54' })).toEqual(['nationalId']);
+    expect(errores({ nationalId: "1'; drop" })).toEqual(['nationalId']);
+  });
+});

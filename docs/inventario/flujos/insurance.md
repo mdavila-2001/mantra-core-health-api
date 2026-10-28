@@ -3,12 +3,12 @@
 # Flujos del módulo `insurance`
 
 - **Procesos:** 1 · **Máquinas de estado:** 1
-- **Operaciones:** 71 (61 con decisiones propias, 10 sin ellas)
+- **Operaciones:** 72 (62 con decisiones propias, 10 sin ellas)
 - Inventario de endpoints del módulo: [insurance](../endpoints/insurance.md)
 
 ## Proceso: src / modules / insurance
 
-- **Código:** `insurance` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 71
+- **Código:** `insurance` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 72
 - **Actores:** BILLING · BILLING_OPERATOR · CLINICIAN · Cualquier sesión válida · FINANCE · PATIENT · PRACTITIONER · Público (sin sesión) · SCHEDULING_ADMIN · SCHEDULING_AGENT · SECURITY_ADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/insurance/README.md`
@@ -25,18 +25,19 @@ _Fuente: `src/modules/insurance/README.md:3`_
 |---|---|---|---|---|---|
 | `ctrl:AppealsController` | Operaciones de AppealsController que el README no asigna a un caso de uso | POST /claim-disputes/{id}/appeal-decisions | BILLING · FINANCE | MEDIO | 4 |
 | `ctrl:BrokerCommissionController` | Operaciones de BrokerCommissionController que el README no asigna a un caso de uso | POST /broker-commission-statements | BILLING · FINANCE | MEDIO | 4 |
-| `ctrl:ClaimsController` | Operaciones de ClaimsController que el README no asigna a un caso de uso | POST /insurance-claims | BILLING · FINANCE | MEDIO | 21 |
+| `ctrl:ClaimsController` | Operaciones de ClaimsController que el README no asigna a un caso de uso | POST /insurance-claims | BILLING · FINANCE | MEDIO | 22 |
 |  |  | POST /insurance-claims/{id}/adjudications | BILLING · FINANCE | MEDIO | 19 |
 |  |  | POST /insurance-claims/{id}/disputes | BILLING · FINANCE · BILLING_OPERATOR · SECURITY_ADMIN · PATIENT | MEDIO | 10 |
 |  |  | POST /insurance-claims/{id}/eob | BILLING · FINANCE | MEDIO | 21 |
 |  |  | POST /insurance-claims/{id}/patient-invoice | BILLING · FINANCE | MEDIO | 25 |
 |  |  | POST /insurance-claims/{id}/reversals | BILLING · FINANCE | MEDIO | 15 |
-|  |  | POST /insurance-claims/quote | BILLING · FINANCE | BAJO | 9 |
+|  |  | POST /insurance-claims/quote | BILLING · FINANCE | BAJO | 10 |
 | `ctrl:ClaimsReadController` | Operaciones de ClaimsReadController que el README no asigna a un caso de uso | GET /insurance-claims | BILLING_OPERATOR · SECURITY_ADMIN | BAJO | 11 |
 |  |  | GET /insurance-claims/{id} | BILLING_OPERATOR · SECURITY_ADMIN | BAJO | 20 |
 | `ctrl:CoverageController` | Operaciones de CoverageController que el README no asigna a un caso de uso | POST /coordination-of-benefits | BILLING · FINANCE | MEDIO | 4 |
 |  |  | POST /coverage-eligibility-requests | BILLING · FINANCE | MEDIO | 5 |
 |  |  | POST /patient-coverages | BILLING · FINANCE | MEDIO | 5 |
+|  |  | GET /patient-coverages/by-patient/{patientProfileId} | BILLING · FINANCE | BAJO | 6 |
 |  |  | GET /patient-coverages/me | BILLING · FINANCE · PATIENT | BAJO | 3 |
 | `ctrl:InsuranceAnalyticsController` | Operaciones de InsuranceAnalyticsController que el README no asigna a un caso de uso | GET /insurance/analytics/loss-ratio | Cualquier sesión válida | BAJO | 19 |
 | `ctrl:InsuranceBackboneController` | Operaciones de InsuranceBackboneController que el README no asigna a un caso de uso | POST /employer-groups | SECURITY_ADMIN | MEDIO | 1 |
@@ -83,7 +84,7 @@ _Fuente: `src/modules/insurance/README.md:3`_
 |  |  | POST /insurance/patients/search | Cualquier sesión válida | ALTO | 13 |
 | `ctrl:InsurerReceivedClaimsController` | Operaciones de InsurerReceivedClaimsController que el README no asigna a un caso de uso | GET /insurance/received-claims | Cualquier sesión válida | BAJO | 15 |
 |  |  | POST /insurance/received-claims/{id}/decision | Cualquier sesión válida | ALTO | 28 |
-| `ctrl:MyClaimsController` | Operaciones de MyClaimsController que el README no asigna a un caso de uso | GET /insurance/my-claims | Cualquier sesión válida | BAJO | 14 |
+| `ctrl:MyClaimsController` | Operaciones de MyClaimsController que el README no asigna a un caso de uso | GET /insurance/my-claims | Cualquier sesión válida | BAJO | 19 |
 | `ctrl:PractitionerInsuranceNetworksController` | Operaciones de PractitionerInsuranceNetworksController que el README no asigna a un caso de uso | GET /practitioners/{profileId}/insurance-networks | SECURITY_ADMIN · SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · CLINICIAN · PATIENT | BAJO | 4 |
 | `ctrl:PractitionerSettlementBatchesController` | Operaciones de PractitionerSettlementBatchesController que el README no asigna a un caso de uso | GET /practitioner-settlement-batches | Cualquier sesión válida | BAJO | 10 |
 |  |  | POST /practitioner-settlement-batches | Cualquier sesión válida | ALTO | 13 |
@@ -100,86 +101,89 @@ _Fuente: `src/modules/insurance/README.md:3`_
 ```mermaid
 flowchart LR
   a2(["BILLING · FINANCE"]):::actor
-  a20(["BILLING · FINANCE · BILLING_OPERATOR · SECURITY_ADMIN · PAT…"]):::actor
-  a44(["BILLING_OPERATOR · SECURITY_ADMIN"]):::actor
-  a61(["BILLING · FINANCE · PATIENT"]):::actor
-  a65(["Cualquier sesión válida"]):::actor
+  a21(["BILLING · FINANCE · BILLING_OPERATOR · SECURITY_ADMIN · PAT…"]):::actor
+  a45(["BILLING_OPERATOR · SECURITY_ADMIN"]):::actor
+  a64(["BILLING · FINANCE · PATIENT"]):::actor
+  a68(["Cualquier sesión válida"]):::actor
   t3[("insurance.claim_appeal_decisions")]:::tabla
   t4[("insurance.claim_disputes")]:::tabla
   t6[("insurance.broker_carrier_agreements")]:::tabla
   t7[("insurance.broker_commission_statements")]:::tabla
   t8[("insurance.insurance_brokers")]:::tabla
-  t10[("clinical.service_requests")]:::tabla
-  t11[("diagnostic_units.diagnostic_study_offerings")]:::tabla
-  t12[("diagnostic_units.diagnostic_units")]:::tabla
-  t13[("directory.tenant_memberships")]:::tabla
-  t14[("insurance.insurance_claim_lines")]:::tabla
-  t17[("insurance.claim_adjudication_versions")]:::tabla
-  t21[("insurance.insurance_claims")]:::tabla
-  t22[("insurance.patient_coverages")]:::tabla
-  t23[("messaging.domain_events")]:::tabla
-  t24[("messaging.outbox_messages")]:::tabla
-  e26>"~null"]:::evento
-  t28[("insurance.claim_line_adjudications")]:::tabla
-  t31[("billing.invoice_lines")]:::tabla
-  t32[("billing.invoices")]:::tabla
-  t33[("iam.devices")]:::tabla
-  t36[("insurance.claim_reversals")]:::tabla
-  t39[("insurance.insurance_plan_benefits")]:::tabla
-  t40[("insurance.insurance_plans")]:::tabla
-  t41[("insurance.insurance_products")]:::tabla
-  t45[("insurance.insurance_carriers")]:::tabla
-  t48[("clinical.diagnostic_reports")]:::tabla
-  t49[("diagnostics.diagnostic_report_versions")]:::tabla
-  t50[("directory.tenants")]:::tabla
-  t53[("insurance.coordination_of_benefits")]:::tabla
-  t55[("insurance.coverage_eligibility_requests")]:::tabla
-  t56[("insurance.coverage_eligibility_responses")]:::tabla
-  t58[("insurance.broker_clients")]:::tabla
-  t59[("insurance.coverage_dependents")]:::tabla
-  t62[("profiles.patient_profiles")]:::tabla
-  t63[("profiles.person_account_links")]:::tabla
-  t66[("clinical.appointments")]:::tabla
-  t67[("clinical.conditions")]:::tabla
-  t68[("clinical.encounters")]:::tabla
-  t69[("clinical.immunizations")]:::tabla
+  t10[("authz.care_relationships")]:::tabla
+  t11[("clinical.service_requests")]:::tabla
+  t12[("diagnostic_units.diagnostic_study_offerings")]:::tabla
+  t13[("diagnostic_units.diagnostic_units")]:::tabla
+  t14[("directory.tenant_memberships")]:::tabla
+  t15[("insurance.insurance_claim_lines")]:::tabla
+  t18[("insurance.claim_adjudication_versions")]:::tabla
+  t22[("insurance.insurance_claims")]:::tabla
+  t23[("insurance.patient_coverages")]:::tabla
+  t24[("messaging.domain_events")]:::tabla
+  t25[("messaging.outbox_messages")]:::tabla
+  e27>"~null"]:::evento
+  t29[("insurance.claim_line_adjudications")]:::tabla
+  t32[("billing.invoice_lines")]:::tabla
+  t33[("billing.invoices")]:::tabla
+  t34[("iam.devices")]:::tabla
+  t37[("insurance.claim_reversals")]:::tabla
+  t40[("insurance.insurance_plan_benefits")]:::tabla
+  t41[("insurance.insurance_plans")]:::tabla
+  t42[("insurance.insurance_products")]:::tabla
+  t46[("insurance.insurance_carriers")]:::tabla
+  t49[("clinical.diagnostic_reports")]:::tabla
+  t50[("diagnostics.diagnostic_report_versions")]:::tabla
+  t51[("directory.tenants")]:::tabla
+  t54[("insurance.coordination_of_benefits")]:::tabla
+  t56[("insurance.coverage_eligibility_requests")]:::tabla
+  t57[("insurance.coverage_eligibility_responses")]:::tabla
+  t59[("insurance.broker_clients")]:::tabla
+  t60[("insurance.coverage_dependents")]:::tabla
+  t62[("terminology.catalog_concepts")]:::tabla
+  t65[("profiles.patient_profiles")]:::tabla
+  t66[("profiles.person_account_links")]:::tabla
+  t69[("clinical.appointments")]:::tabla
+  t70[("clinical.conditions")]:::tabla
+  t71[("clinical.encounters")]:::tabla
+  t72[("clinical.immunizations")]:::tabla
   subgraph s0["ctrl:AppealsController · Operaciones de AppealsController que el README no asig…"]
     o1["POST /claim-disputes/{id}/appeal-decisions"]:::op
   end
   subgraph s1["ctrl:BrokerCommissionController · Operaciones de BrokerCommissionController que…"]
     o5["POST /broker-commission-statements"]:::op
   end
-  t15[("+15 tablas más")]
-  t18[("+13 tablas más")]
-  t25[("+4 tablas más")]
-  t29[("+15 tablas más")]
-  t34[("+19 tablas más")]
-  t37[("+9 tablas más")]
-  t42[("+3 tablas más")]
+  t16[("+16 tablas más")]
+  t19[("+13 tablas más")]
+  t26[("+4 tablas más")]
+  t30[("+15 tablas más")]
+  t35[("+19 tablas más")]
+  t38[("+9 tablas más")]
+  t43[("+4 tablas más")]
   subgraph s2["ctrl:ClaimsController · Operaciones de ClaimsController que el README no asigna…"]
     o9["POST /insurance-claims"]:::op
-    o16["POST /insurance-claims/{id}/adjudications"]:::op
-    o19["POST /insurance-claims/{id}/disputes"]:::op
-    o27["POST /insurance-claims/{id}/eob"]:::op
-    o30["POST /insurance-claims/{id}/patient-invoice"]:::op
-    o35["POST /insurance-claims/{id}/reversals"]:::op
-    o38["POST /insurance-claims/quote"]:::op
+    o17["POST /insurance-claims/{id}/adjudications"]:::op
+    o20["POST /insurance-claims/{id}/disputes"]:::op
+    o28["POST /insurance-claims/{id}/eob"]:::op
+    o31["POST /insurance-claims/{id}/patient-invoice"]:::op
+    o36["POST /insurance-claims/{id}/reversals"]:::op
+    o39["POST /insurance-claims/quote"]:::op
   end
-  t46[("+5 tablas más")]
-  t51[("+14 tablas más")]
+  t47[("+5 tablas más")]
+  t52[("+14 tablas más")]
   subgraph s3["ctrl:ClaimsReadController · Operaciones de ClaimsReadController que el README n…"]
-    o43["GET /insurance-claims"]:::op
-    o47["GET /insurance-claims/{id}"]:::op
+    o44["GET /insurance-claims"]:::op
+    o48["GET /insurance-claims/{id}"]:::op
   end
   subgraph s4["ctrl:CoverageController · Operaciones de CoverageController que el README no as…"]
-    o52["POST /coordination-of-benefits"]:::op
-    o54["POST /coverage-eligibility-requests"]:::op
-    o57["POST /patient-coverages"]:::op
-    o60["GET /patient-coverages/me"]:::op
+    o53["POST /coordination-of-benefits"]:::op
+    o55["POST /coverage-eligibility-requests"]:::op
+    o58["POST /patient-coverages"]:::op
+    o61["GET /patient-coverages/by-patient/{patientProfileId}"]:::op
+    o63["GET /patient-coverages/me"]:::op
   end
-  t70[("+13 tablas más")]
+  t73[("+13 tablas más")]
   subgraph s5["ctrl:InsuranceAnalyticsController · Operaciones de InsuranceAnalyticsController…"]
-    o64["GET /insurance/analytics/loss-ratio"]:::op
+    o67["GET /insurance/analytics/loss-ratio"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -196,104 +200,111 @@ flowchart LR
   o9 -->|"LEE"| t11
   o9 -->|"LEE"| t12
   o9 -->|"LEE"| t13
-  o9 -->|"CREA"| t14
   o9 -->|"LEE"| t14
-  o9 -.-> t15
-  a2 --> o16
-  o16 -->|"LEE"| t10
-  o16 -->|"LEE"| t11
-  o16 -->|"LEE"| t12
-  o16 -->|"LEE"| t13
-  o16 -->|"CREA"| t17
-  o16 -->|"LEE"| t17
-  o16 -.-> t18
-  a20 --> o19
-  o19 -->|"CREA"| t4
-  o19 -->|"LEE"| t4
-  o19 -->|"LEE"| t21
-  o19 -->|"LEE"| t22
-  o19 -->|"CREA"| t23
-  o19 -->|"CREA"| t24
-  o19 -.-> t25
-  o19 -->|"evento"| e26
-  a2 --> o27
-  o27 -->|"LEE"| t10
-  o27 -->|"LEE"| t11
-  o27 -->|"LEE"| t12
-  o27 -->|"LEE"| t13
-  o27 -->|"LEE"| t17
-  o27 -->|"LEE"| t28
-  o27 -.-> t29
-  a2 --> o30
-  o30 -->|"CREA"| t31
-  o30 -->|"LEE"| t31
-  o30 -->|"CREA"| t32
-  o30 -->|"ACTUALIZA"| t33
-  o30 -->|"LEE"| t33
-  o30 -->|"LEE"| t14
-  o30 -.-> t34
-  o30 -->|"evento"| e26
-  a2 --> o35
-  o35 -->|"LEE"| t10
-  o35 -->|"LEE"| t11
-  o35 -->|"LEE"| t12
-  o35 -->|"LEE"| t13
-  o35 -->|"LEE"| t17
-  o35 -->|"CREA"| t36
-  o35 -.-> t37
-  a2 --> o38
-  o38 -->|"LEE"| t14
-  o38 -->|"LEE"| t21
-  o38 -->|"LEE"| t39
-  o38 -->|"LEE"| t40
-  o38 -->|"LEE"| t41
-  o38 -->|"LEE"| t22
-  o38 -.-> t42
-  a44 --> o43
-  o43 -->|"LEE"| t12
-  o43 -->|"LEE"| t17
-  o43 -->|"LEE"| t4
-  o43 -->|"LEE"| t8
-  o43 -->|"LEE"| t45
-  o43 -->|"LEE"| t21
-  o43 -.-> t46
-  a44 --> o47
-  o47 -->|"LEE"| t48
-  o47 -->|"LEE"| t10
-  o47 -->|"LEE"| t12
-  o47 -->|"LEE"| t49
-  o47 -->|"LEE"| t50
-  o47 -->|"LEE"| t17
-  o47 -.-> t51
-  a2 --> o52
-  o52 -->|"ACTUALIZA"| t53
-  o52 -->|"CREA"| t53
-  o52 -->|"LEE"| t53
-  o52 -->|"LEE"| t22
-  a2 --> o54
-  o54 -->|"ACTUALIZA"| t55
-  o54 -->|"CREA"| t55
-  o54 -->|"LEE"| t55
-  o54 -->|"CREA"| t56
-  o54 -->|"LEE"| t22
-  a2 --> o57
-  o57 -->|"CREA"| t58
-  o57 -->|"CREA"| t59
-  o57 -->|"LEE"| t40
-  o57 -->|"CREA"| t22
-  o57 -->|"LEE"| t22
-  a61 --> o60
-  o60 -->|"LEE"| t22
-  o60 -->|"LEE"| t62
-  o60 -->|"LEE"| t63
-  a65 --> o64
-  o64 -->|"LEE"| t66
-  o64 -->|"LEE"| t67
-  o64 -->|"LEE"| t68
-  o64 -->|"LEE"| t69
-  o64 -->|"LEE"| t13
-  o64 -->|"LEE"| t17
-  o64 -.-> t70
+  o9 -->|"CREA"| t15
+  o9 -.-> t16
+  a2 --> o17
+  o17 -->|"LEE"| t11
+  o17 -->|"LEE"| t12
+  o17 -->|"LEE"| t13
+  o17 -->|"LEE"| t14
+  o17 -->|"CREA"| t18
+  o17 -->|"LEE"| t18
+  o17 -.-> t19
+  a21 --> o20
+  o20 -->|"CREA"| t4
+  o20 -->|"LEE"| t4
+  o20 -->|"LEE"| t22
+  o20 -->|"LEE"| t23
+  o20 -->|"CREA"| t24
+  o20 -->|"CREA"| t25
+  o20 -.-> t26
+  o20 -->|"evento"| e27
+  a2 --> o28
+  o28 -->|"LEE"| t11
+  o28 -->|"LEE"| t12
+  o28 -->|"LEE"| t13
+  o28 -->|"LEE"| t14
+  o28 -->|"LEE"| t18
+  o28 -->|"LEE"| t29
+  o28 -.-> t30
+  a2 --> o31
+  o31 -->|"CREA"| t32
+  o31 -->|"LEE"| t32
+  o31 -->|"CREA"| t33
+  o31 -->|"ACTUALIZA"| t34
+  o31 -->|"LEE"| t34
+  o31 -->|"LEE"| t15
+  o31 -.-> t35
+  o31 -->|"evento"| e27
+  a2 --> o36
+  o36 -->|"LEE"| t11
+  o36 -->|"LEE"| t12
+  o36 -->|"LEE"| t13
+  o36 -->|"LEE"| t14
+  o36 -->|"LEE"| t18
+  o36 -->|"CREA"| t37
+  o36 -.-> t38
+  a2 --> o39
+  o39 -->|"LEE"| t10
+  o39 -->|"LEE"| t15
+  o39 -->|"LEE"| t22
+  o39 -->|"LEE"| t40
+  o39 -->|"LEE"| t41
+  o39 -->|"LEE"| t42
+  o39 -.-> t43
+  a45 --> o44
+  o44 -->|"LEE"| t13
+  o44 -->|"LEE"| t18
+  o44 -->|"LEE"| t4
+  o44 -->|"LEE"| t8
+  o44 -->|"LEE"| t46
+  o44 -->|"LEE"| t22
+  o44 -.-> t47
+  a45 --> o48
+  o48 -->|"LEE"| t49
+  o48 -->|"LEE"| t11
+  o48 -->|"LEE"| t13
+  o48 -->|"LEE"| t50
+  o48 -->|"LEE"| t51
+  o48 -->|"LEE"| t18
+  o48 -.-> t52
+  a2 --> o53
+  o53 -->|"ACTUALIZA"| t54
+  o53 -->|"CREA"| t54
+  o53 -->|"LEE"| t54
+  o53 -->|"LEE"| t23
+  a2 --> o55
+  o55 -->|"ACTUALIZA"| t56
+  o55 -->|"CREA"| t56
+  o55 -->|"LEE"| t56
+  o55 -->|"CREA"| t57
+  o55 -->|"LEE"| t23
+  a2 --> o58
+  o58 -->|"CREA"| t59
+  o58 -->|"CREA"| t60
+  o58 -->|"LEE"| t41
+  o58 -->|"CREA"| t23
+  o58 -->|"LEE"| t23
+  a2 --> o61
+  o61 -->|"LEE"| t10
+  o61 -->|"LEE"| t46
+  o61 -->|"LEE"| t41
+  o61 -->|"LEE"| t42
+  o61 -->|"LEE"| t23
+  o61 -->|"LEE"| t62
+  a64 --> o63
+  o63 -->|"LEE"| t23
+  o63 -->|"LEE"| t65
+  o63 -->|"LEE"| t66
+  a68 --> o67
+  o67 -->|"LEE"| t69
+  o67 -->|"LEE"| t70
+  o67 -->|"LEE"| t71
+  o67 -->|"LEE"| t72
+  o67 -->|"LEE"| t14
+  o67 -->|"LEE"| t18
+  o67 -.-> t73
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -667,8 +678,8 @@ flowchart LR
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
   a29(["SECURITY_ADMIN · SCHEDULING_ADMIN · SCHEDULING_AGENT · PRAC…"]):::actor
-  a45(["BILLING · FINANCE"]):::actor
-  a57(["SECURITY_ADMIN"]):::actor
+  a46(["BILLING · FINANCE"]):::actor
+  a58(["SECURITY_ADMIN"]):::actor
   t3[("audit.data_access_log")]:::tabla
   t4[("common.contact_points")]:::tabla
   t5[("community.conversation_participants")]:::tabla
@@ -683,7 +694,7 @@ flowchart LR
   t21[("clinical.service_requests")]:::tabla
   t22[("diagnostic_units.diagnostic_study_offerings")]:::tabla
   e24>"~null"]:::evento
-  t26[("insurance.insurance_claim_lines")]:::tabla
+  t26[("insurance.claim_disputes")]:::tabla
   t30[("insurance.network_provider_memberships")]:::tabla
   t31[("insurance.provider_networks")]:::tabla
   t32[("practice.practitioner_role_assignments")]:::tabla
@@ -692,10 +703,11 @@ flowchart LR
   t36[("insurance.insurance_reconciliation_items")]:::tabla
   t39[("insurance.claim_line_adjudications")]:::tabla
   t40[("insurance.claim_reversals")]:::tabla
-  t46[("insurance.insurance_plans")]:::tabla
-  t47[("insurance.insurance_products")]:::tabla
-  t50[("insurance.patient_coverages")]:::tabla
-  t58[("practice.practices")]:::tabla
+  t41[("insurance.insurance_claim_lines")]:::tabla
+  t47[("insurance.insurance_plans")]:::tabla
+  t48[("insurance.insurance_products")]:::tabla
+  t51[("insurance.patient_coverages")]:::tabla
+  t59[("practice.practices")]:::tabla
   t7[("+9 tablas más")]
   t14[("+7 tablas más")]
   subgraph s0["ctrl:InsurerPatientsController · Operaciones de InsurerPatientsController que e…"]
@@ -709,7 +721,7 @@ flowchart LR
     o15["GET /insurance/received-claims"]:::op
     o20["POST /insurance/received-claims/{id}/decision"]:::op
   end
-  t27[("+8 tablas más")]
+  t27[("+13 tablas más")]
   subgraph s2["ctrl:MyClaimsController · Operaciones de MyClaimsController que el README no as…"]
     o25["GET /insurance/my-claims"]:::op
   end
@@ -717,26 +729,26 @@ flowchart LR
     o28["GET /practitioners/{profileId}/insurance-networks"]:::op
   end
   t37[("+4 tablas más")]
-  t41[("+7 tablas más")]
-  t43[("+5 tablas más")]
+  t42[("+7 tablas más")]
+  t44[("+5 tablas más")]
   subgraph s4["ctrl:PractitionerSettlementBatchesController · Operaciones de PractitionerSettl…"]
     o33["GET /practitioner-settlement-batches"]:::op
     o38["POST /practitioner-settlement-batches"]:::op
-    o42["GET /practitioner-settlement-batches/{id}"]:::op
+    o43["GET /practitioner-settlement-batches/{id}"]:::op
   end
-  t48[("+8 tablas más")]
-  t51[("+7 tablas más")]
-  t53[("+12 tablas más")]
-  t55[("+7 tablas más")]
+  t49[("+8 tablas más")]
+  t52[("+7 tablas más")]
+  t54[("+12 tablas más")]
+  t56[("+7 tablas más")]
   subgraph s5["ctrl:PriorAuthController · Operaciones de PriorAuthController que el README no…"]
-    o44["POST /prior-authorization-requests"]:::op
-    o49["GET /prior-authorization-requests/{id}"]:::op
-    o52["POST /prior-authorization-requests/{id}/determinations"]:::op
-    o54["GET /prior-authorization-requests/inbox"]:::op
+    o45["POST /prior-authorization-requests"]:::op
+    o50["GET /prior-authorization-requests/{id}"]:::op
+    o53["POST /prior-authorization-requests/{id}/determinations"]:::op
+    o55["GET /prior-authorization-requests/inbox"]:::op
   end
   subgraph s6["ctrl:ReconciliationController · Operaciones de ReconciliationController que el…"]
-    o56["POST /reconciliation-batches"]:::op
-    o59["POST /reconciliation-batches/{id}/items"]:::op
+    o57["POST /reconciliation-batches"]:::op
+    o60["POST /reconciliation-batches/{id}/items"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -779,8 +791,8 @@ flowchart LR
   o25 -->|"LEE"| t17
   o25 -->|"LEE"| t13
   o25 -->|"LEE"| t18
-  o25 -->|"LEE"| t10
   o25 -->|"LEE"| t26
+  o25 -->|"LEE"| t10
   o25 -.-> t27
   a29 --> o28
   o28 -->|"LEE"| t10
@@ -801,59 +813,59 @@ flowchart LR
   o38 -->|"LEE"| t39
   o38 -->|"LEE"| t40
   o38 -->|"LEE"| t10
-  o38 -->|"LEE"| t26
-  o38 -.-> t41
-  a2 --> o42
-  o42 -->|"LEE"| t17
-  o42 -->|"LEE"| t9
-  o42 -->|"LEE"| t18
-  o42 -->|"LEE"| t10
-  o42 -->|"LEE"| t34
-  o42 -->|"LEE"| t35
-  o42 -.-> t43
-  a45 --> o44
-  o44 -->|"LEE"| t21
-  o44 -->|"LEE"| t22
-  o44 -->|"LEE"| t17
-  o44 -->|"LEE"| t9
-  o44 -->|"LEE"| t46
-  o44 -->|"LEE"| t47
-  o44 -.-> t48
-  a45 --> o49
-  o49 -->|"LEE"| t22
-  o49 -->|"LEE"| t9
-  o49 -->|"LEE"| t10
-  o49 -->|"LEE"| t46
-  o49 -->|"LEE"| t47
-  o49 -->|"LEE"| t50
-  o49 -.-> t51
-  a45 --> o52
-  o52 -->|"LEE"| t21
-  o52 -->|"LEE"| t22
-  o52 -->|"LEE"| t17
-  o52 -->|"LEE"| t9
-  o52 -->|"LEE"| t10
-  o52 -->|"LEE"| t46
-  o52 -.-> t53
-  a45 --> o54
-  o54 -->|"LEE"| t22
-  o54 -->|"LEE"| t9
-  o54 -->|"LEE"| t10
-  o54 -->|"LEE"| t46
-  o54 -->|"LEE"| t47
-  o54 -->|"LEE"| t50
-  o54 -.-> t55
-  a57 --> o56
-  o56 -->|"LEE"| t10
-  o56 -->|"CREA"| t35
-  o56 -->|"LEE"| t58
-  a57 --> o59
-  o59 -->|"LEE"| t18
-  o59 -->|"LEE"| t10
-  o59 -->|"LEE"| t34
-  o59 -->|"LEE"| t35
-  o59 -->|"CREA"| t36
-  o59 -->|"LEE"| t58
+  o38 -->|"LEE"| t41
+  o38 -.-> t42
+  a2 --> o43
+  o43 -->|"LEE"| t17
+  o43 -->|"LEE"| t9
+  o43 -->|"LEE"| t18
+  o43 -->|"LEE"| t10
+  o43 -->|"LEE"| t34
+  o43 -->|"LEE"| t35
+  o43 -.-> t44
+  a46 --> o45
+  o45 -->|"LEE"| t21
+  o45 -->|"LEE"| t22
+  o45 -->|"LEE"| t17
+  o45 -->|"LEE"| t9
+  o45 -->|"LEE"| t47
+  o45 -->|"LEE"| t48
+  o45 -.-> t49
+  a46 --> o50
+  o50 -->|"LEE"| t22
+  o50 -->|"LEE"| t9
+  o50 -->|"LEE"| t10
+  o50 -->|"LEE"| t47
+  o50 -->|"LEE"| t48
+  o50 -->|"LEE"| t51
+  o50 -.-> t52
+  a46 --> o53
+  o53 -->|"LEE"| t21
+  o53 -->|"LEE"| t22
+  o53 -->|"LEE"| t17
+  o53 -->|"LEE"| t9
+  o53 -->|"LEE"| t10
+  o53 -->|"LEE"| t47
+  o53 -.-> t54
+  a46 --> o55
+  o55 -->|"LEE"| t22
+  o55 -->|"LEE"| t9
+  o55 -->|"LEE"| t10
+  o55 -->|"LEE"| t47
+  o55 -->|"LEE"| t48
+  o55 -->|"LEE"| t51
+  o55 -.-> t56
+  a58 --> o57
+  o57 -->|"LEE"| t10
+  o57 -->|"CREA"| t35
+  o57 -->|"LEE"| t59
+  a58 --> o60
+  o60 -->|"LEE"| t18
+  o60 -->|"LEE"| t10
+  o60 -->|"LEE"| t34
+  o60 -->|"LEE"| t35
+  o60 -->|"CREA"| t36
+  o60 -->|"LEE"| t59
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -3280,7 +3292,6 @@ Cotizar un cobro a la aseguradora (sin guardar)
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Cobertura no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Las secuencias de líneas deben ser únicas; PreconditionFailedException: La cobertura no corresponde a la aseguradora indicada; PreconditionFailedException: La cobertura del paciente no corresponde al plan del cobro |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -3301,116 +3312,128 @@ flowchart TD
   n6 --> n7
   n8{"!coverage"}:::decision
   n7 --> n8
-  n9(["404 NOT_FOUND Cobertura no encontrada"]):::error
+  n9(["↩ (relanza el error capturado)"]):::error
   n8 -->|"sí"| n9
-  n10["Llama a CatalogRepository.findPlanForCarrier"]:::llamada
+  n10["Llama a ClaimCareRelationshipGate.assertCareRelationship"]:::llamada
   n8 -->|"no"| n10
-  n11[("LEE insurance.insurance_plans")]:::efecto
+  n11["Llama a PatientCareRelationshipAdapter.hasCareRelationshipForPayment"]:::llamada
   n10 --> n11
-  n12["Llama a CatalogRepository.findProductForCarrier"]:::llamada
+  n12["Llama a CareRelationshipsRepository.hasActiveInTenantAt"]:::llamada
   n11 --> n12
-  n13[("LEE insurance.insurance_products")]:::efecto
+  n13[("LEE authz.care_relationships")]:::efecto
   n12 --> n13
-  n14{"!plan"}:::decision
+  n14{"!related"}:::decision
   n13 --> n14
-  n15(["422 PRECONDITION_FAILED La cobertura no corresponde a la aseguradora indicada"]):::error
+  n15(["↩ (relanza el error capturado)"]):::error
   n14 -->|"sí"| n15
-  n16["Repite: por cada const line de dto.lines"]:::bucle
+  n16["Llama a CatalogRepository.findPlanForCarrier"]:::llamada
   n14 -->|"no"| n16
-  n17["Llama a ClaimCoveragePolicy.quoteLine"]:::llamada
-  n16 -->|"cada elemento"| n17
-  n18["Intenta"]:::intento
+  n17[("LEE insurance.insurance_plans")]:::efecto
+  n16 --> n17
+  n18["Llama a CatalogRepository.findProductForCarrier"]:::llamada
   n17 --> n18
-  n19["Llama a ClaimCoveragePolicy.assertCoverageOfPlan"]:::llamada
+  n19[("LEE insurance.insurance_products")]:::efecto
   n18 --> n19
-  n20[("LEE insurance.patient_coverages")]:::efecto
+  n20{"!plan"}:::decision
   n19 --> n20
-  n21{"!coverage || coverage.insurancePlanId !== claim.planId"}:::decision
-  n20 --> n21
-  n22(["422 PRECONDITION_FAILED La cobertura del paciente no corresponde al plan del cobro"]):::error
-  n21 -->|"sí"| n22
-  n23["Llama a ClaimCoveragePolicy.benefitFor"]:::llamada
-  n21 -->|"no"| n23
-  n24{"!line.serviceConceptId"}:::decision
+  n21(["422 PRECONDITION_FAILED La cobertura no corresponde a la aseguradora indicada"]):::error
+  n20 -->|"sí"| n21
+  n22["Repite: por cada const line de dto.lines"]:::bucle
+  n20 -->|"no"| n22
+  n23["Llama a ClaimCoveragePolicy.quoteLine"]:::llamada
+  n22 -->|"cada elemento"| n23
+  n24["Intenta"]:::intento
   n23 --> n24
-  n25(["↩ (relanza el error capturado)"]):::error
-  n24 -->|"sí"| n25
-  n26[("LEE insurance.insurance_plan_benefits")]:::efecto
-  n24 -->|"no"| n26
-  n27{"benefits.length === 0"}:::decision
+  n25["Llama a ClaimCoveragePolicy.assertCoverageOfPlan"]:::llamada
+  n24 --> n25
+  n26[("LEE insurance.patient_coverages")]:::efecto
+  n25 --> n26
+  n27{"!coverage || coverage.insurancePlanId !== claim.planId"}:::decision
   n26 --> n27
-  n28(["↩ (relanza el error capturado)"]):::error
+  n28(["422 PRECONDITION_FAILED La cobertura del paciente no corresponde al plan del cobro"]):::error
   n27 -->|"sí"| n28
-  n29{"benefits.length › 1"}:::decision
+  n29["Llama a ClaimCoveragePolicy.benefitFor"]:::llamada
   n27 -->|"no"| n29
-  n30(["↩ (relanza el error capturado)"]):::error
-  n29 -->|"sí"| n30
-  n31["Intenta"]:::intento
-  n29 -->|"no"| n31
-  n32["Llama a ClaimCoveragePolicy.split"]:::llamada
-  n31 --> n32
-  n33["Intenta"]:::intento
+  n30{"!line.serviceConceptId"}:::decision
+  n29 --> n30
+  n31(["↩ (relanza el error capturado)"]):::error
+  n30 -->|"sí"| n31
+  n32[("LEE insurance.insurance_plan_benefits")]:::efecto
+  n30 -->|"no"| n32
+  n33{"benefits.length === 0"}:::decision
   n32 --> n33
-  n34{"!(error instanceof CoverageSplitError)"}:::decision
-  n33 -->|"si falla"| n34
-  n35(["↩ (relanza el error capturado)"]):::error
-  n34 -->|"sí"| n35
-  n36{"error.failure === 'BENEFIT_WITHOUT_TERMS'"}:::decision
-  n34 -->|"no"| n36
-  n37(["↩ (relanza el error capturado)"]):::error
-  n36 -->|"sí"| n37
-  n38(["↩ (relanza el error capturado)"]):::error
-  n36 -->|"no"| n38
-  n39{"requiresPriorAuthorization"}:::decision
-  n33 --> n39
-  n40["Intenta"]:::intento
-  n39 -->|"sí"| n40
-  n41["Llama a ClaimCoveragePolicy.assertPriorAuthorization"]:::llamada
-  n40 --> n41
-  n42{"!claim.priorAuthorizationRequestId"}:::decision
-  n41 --> n42
+  n34(["↩ (relanza el error capturado)"]):::error
+  n33 -->|"sí"| n34
+  n35{"benefits.length › 1"}:::decision
+  n33 -->|"no"| n35
+  n36(["↩ (relanza el error capturado)"]):::error
+  n35 -->|"sí"| n36
+  n37["Intenta"]:::intento
+  n35 -->|"no"| n37
+  n38["Llama a ClaimCoveragePolicy.split"]:::llamada
+  n37 --> n38
+  n39["Intenta"]:::intento
+  n38 --> n39
+  n40{"!(error instanceof CoverageSplitError)"}:::decision
+  n39 -->|"si falla"| n40
+  n41(["↩ (relanza el error capturado)"]):::error
+  n40 -->|"sí"| n41
+  n42{"error.failure === 'BENEFIT_WITHOUT_TERMS'"}:::decision
+  n40 -->|"no"| n42
   n43(["↩ (relanza el error capturado)"]):::error
   n42 -->|"sí"| n43
-  n44[("LEE insurance.prior_authorization_requests")]:::efecto
+  n44(["↩ (relanza el error capturado)"]):::error
   n42 -->|"no"| n44
-  n45{"!request || request.patientCoverageId !== claim.patientCoverageId || (request.serviceRequestId ?? null) !== (…"}:::decision
-  n44 --> n45
-  n46(["↩ (relanza el error capturado)"]):::error
+  n45{"requiresPriorAuthorization"}:::decision
+  n39 --> n45
+  n46["Intenta"]:::intento
   n45 -->|"sí"| n46
-  n47[("LEE insurance.prior_authorization_items")]:::efecto
-  n45 -->|"no"| n47
-  n48{"!item"}:::decision
+  n47["Llama a ClaimCoveragePolicy.assertPriorAuthorization"]:::llamada
+  n46 --> n47
+  n48{"!claim.priorAuthorizationRequestId"}:::decision
   n47 --> n48
   n49(["↩ (relanza el error capturado)"]):::error
   n48 -->|"sí"| n49
-  n50["Llama a ClaimCoveragePolicy.latestDetermination"]:::llamada
+  n50[("LEE insurance.prior_authorization_requests")]:::efecto
   n48 -->|"no"| n50
-  n51[("LEE insurance.prior_authorization_determinations · LEE insurance.prior_authorization_determinations")]:::efecto
+  n51{"!request || request.patientCoverageId !== claim.patientCoverageId || (request.serviceRequestId ?? null) !== (…"}:::decision
   n50 --> n51
-  n52{"!determination"}:::decision
-  n51 --> n52
-  n53(["↩ (relanza el error capturado)"]):::error
-  n52 -->|"sí"| n53
-  n54{"determination.decisionConceptId !== INS.DECISION_APPROVED && determination.decisionConceptId !== INS.DECISION…"}:::decision
-  n52 -->|"no"| n54
+  n52(["↩ (relanza el error capturado)"]):::error
+  n51 -->|"sí"| n52
+  n53[("LEE insurance.prior_authorization_items")]:::efecto
+  n51 -->|"no"| n53
+  n54{"!item"}:::decision
+  n53 --> n54
   n55(["↩ (relanza el error capturado)"]):::error
   n54 -->|"sí"| n55
-  n56{"(determination.validFrom && determination.validFrom.getTime() › at) || (determination.validTo && determinatio…"}:::decision
+  n56["Llama a ClaimCoveragePolicy.latestDetermination"]:::llamada
   n54 -->|"no"| n56
-  n57(["↩ (relanza el error capturado)"]):::error
-  n56 -->|"sí"| n57
-  n58["Llama a ClaimCoveragePolicy.billedUnderAuthorization"]:::llamada
-  n56 -->|"no"| n58
-  n59[("LEE insurance.insurance_claims · LEE insurance.insurance_claim_lines")]:::efecto
-  n58 --> n59
-  n60{"exceeds(total, determination.approvedAmount)"}:::decision
-  n59 --> n60
+  n57[("LEE insurance.prior_authorization_determinations · LEE insurance.prior_authorization_determinations")]:::efecto
+  n56 --> n57
+  n58{"!determination"}:::decision
+  n57 --> n58
+  n59(["↩ (relanza el error capturado)"]):::error
+  n58 -->|"sí"| n59
+  n60{"determination.decisionConceptId !== INS.DECISION_APPROVED && determination.decisionConceptId !== INS.DECISION…"}:::decision
+  n58 -->|"no"| n60
   n61(["↩ (relanza el error capturado)"]):::error
   n60 -->|"sí"| n61
-  n62(("200 Responde con éxito")):::ok
+  n62{"(determination.validFrom && determination.validFrom.getTime() › at) || (determination.validTo && determinatio…"}:::decision
   n60 -->|"no"| n62
-  n39 -->|"no"| n62
-  n16 -->|"al terminar"| n62
+  n63(["↩ (relanza el error capturado)"]):::error
+  n62 -->|"sí"| n63
+  n64["Llama a ClaimCoveragePolicy.billedUnderAuthorization"]:::llamada
+  n62 -->|"no"| n64
+  n65[("LEE insurance.insurance_claims · LEE insurance.insurance_claim_lines")]:::efecto
+  n64 --> n65
+  n66{"exceeds(total, determination.approvedAmount)"}:::decision
+  n65 --> n66
+  n67(["↩ (relanza el error capturado)"]):::error
+  n66 -->|"sí"| n67
+  n68(("200 Responde con éxito")):::ok
+  n66 -->|"no"| n68
+  n45 -->|"no"| n68
+  n22 -->|"al terminar"| n68
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4525,54 +4548,70 @@ flowchart TD
   n15 --> n16
   n17[("LEE insurance.insurance_carriers")]:::efecto
   n16 --> n17
-  n18{"tenantId"}:::decision
+  n18["Llama a PatientChargeBreakdownService.read"]:::llamada
   n17 --> n18
-  n10 -->|"no"| n18
-  n19["Transacción: runWithTenant(…)"]:::transaccion
-  n18 -->|"sí"| n19
-  n20{"process.env.RLS_ENFORCE !== 'true'"}:::decision
+  n19[("LEE insurance.patient_coverages · LEE insurance.insurance_claim_lines · LEE insurance.claim_disputes")]:::efecto
+  n18 --> n19
+  n20{"tenantId"}:::decision
   n19 --> n20
-  n21["Llama a MyClaimsService.readCenter"]:::llamada
+  n10 -->|"no"| n20
+  n21["Transacción: runWithTenant(…)"]:::transaccion
   n20 -->|"sí"| n21
-  n22["Llama a ClaimReadRepository.findActiveDiagnosticUnitsForTenant"]:::llamada
+  n22{"process.env.RLS_ENFORCE !== 'true'"}:::decision
   n21 --> n22
-  n23[("LEE diagnostic_units.diagnostic_units")]:::efecto
-  n22 --> n23
-  n24["Llama a MyClaimsService.readClaims"]:::llamada
+  n23["Llama a MyClaimsService.readCenter"]:::llamada
+  n22 -->|"sí"| n23
+  n24["Llama a ClaimReadRepository.findActiveDiagnosticUnitsForTenant"]:::llamada
   n23 --> n24
-  n25[("LEE insurance.insurance_claims")]:::efecto
+  n25[("LEE diagnostic_units.diagnostic_units")]:::efecto
   n24 --> n25
-  n26["Transacción: transactional(…)"]:::transaccion
+  n26["Llama a MyClaimsService.readClaims"]:::llamada
   n25 --> n26
-  n20 -->|"no"| n26
-  n27["Llama a MyClaimsService.readCenter"]:::llamada
+  n27[("LEE insurance.insurance_claims")]:::efecto
   n26 --> n27
-  n28["Llama a ClaimReadRepository.findActiveDiagnosticUnitsForTenant"]:::llamada
+  n28["Llama a PatientChargeBreakdownService.read"]:::llamada
   n27 --> n28
-  n29[("LEE diagnostic_units.diagnostic_units")]:::efecto
+  n29[("LEE insurance.patient_coverages · LEE insurance.insurance_claim_lines · LEE insurance.claim_disputes")]:::efecto
   n28 --> n29
-  n30["Llama a MyClaimsService.readClaims"]:::llamada
+  n30["Transacción: transactional(…)"]:::transaccion
   n29 --> n30
-  n31[("LEE insurance.insurance_claims")]:::efecto
+  n22 -->|"no"| n30
+  n31["Llama a MyClaimsService.readCenter"]:::llamada
   n30 --> n31
-  n32{"actor.roles.includes('PATIENT') && actor.patientProfileId"}:::decision
+  n32["Llama a ClaimReadRepository.findActiveDiagnosticUnitsForTenant"]:::llamada
   n31 --> n32
-  n18 -->|"no"| n32
-  n33[("LEE insurance.patient_coverages")]:::efecto
-  n32 -->|"sí"| n33
+  n33[("LEE diagnostic_units.diagnostic_units")]:::efecto
+  n32 --> n33
   n34["Llama a MyClaimsService.readClaims"]:::llamada
   n33 --> n34
   n35[("LEE insurance.insurance_claims")]:::efecto
   n34 --> n35
-  n36["Llama a InsurerReceivedClaimsService.buildMyItems"]:::llamada
+  n36["Llama a PatientChargeBreakdownService.read"]:::llamada
   n35 --> n36
-  n37["Llama a ClaimReadRepository.findCarriersByIds"]:::llamada
+  n37[("LEE insurance.patient_coverages · LEE insurance.insurance_claim_lines · LEE insurance.claim_disputes")]:::efecto
   n36 --> n37
-  n38[("LEE insurance.insurance_carriers")]:::efecto
+  n38{"actor.roles.includes('PATIENT') && actor.patientProfileId"}:::decision
   n37 --> n38
-  n39(("200 Responde con éxito")):::ok
-  n38 --> n39
-  n32 -->|"no"| n39
+  n20 -->|"no"| n38
+  n39[("LEE insurance.patient_coverages")]:::efecto
+  n38 -->|"sí"| n39
+  n40["Llama a MyClaimsService.readClaims"]:::llamada
+  n39 --> n40
+  n41[("LEE insurance.insurance_claims")]:::efecto
+  n40 --> n41
+  n42["Llama a InsurerReceivedClaimsService.buildMyItems"]:::llamada
+  n41 --> n42
+  n43["Llama a ClaimReadRepository.findCarriersByIds"]:::llamada
+  n42 --> n43
+  n44[("LEE insurance.insurance_carriers")]:::efecto
+  n43 --> n44
+  n45["Llama a PatientChargeBreakdownService.read"]:::llamada
+  n44 --> n45
+  n46[("LEE insurance.patient_coverages · LEE insurance.insurance_claim_lines · LEE insurance.claim_disputes")]:::efecto
+  n45 --> n46
+  n47(("200 Responde con éxito")):::ok
+  n46 --> n47
+  n38 -->|"no"| n47
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -5437,7 +5476,52 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 50. GET /practitioner-settlement-batches
+#### 50. GET /patient-coverages/by-patient/{patientProfileId}
+
+Seguros de una persona, para quien cobra
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a CoverageService.listForPatient"]:::llamada
+  n2 --> n3
+  n4["Llama a ClaimCareRelationshipGate.assertCareRelationship"]:::llamada
+  n3 --> n4
+  n5["Llama a PatientCareRelationshipAdapter.hasCareRelationshipForPayment"]:::llamada
+  n4 --> n5
+  n6["Llama a CareRelationshipsRepository.hasActiveInTenantAt"]:::llamada
+  n5 --> n6
+  n7[("LEE authz.care_relationships")]:::efecto
+  n6 --> n7
+  n8{"!related"}:::decision
+  n7 --> n8
+  n9(["↩ (relanza el error capturado)"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a CoverageRepository.findOptionsByPatient"]:::llamada
+  n8 -->|"no"| n10
+  n11[("LEE insurance.patient_coverages · LEE insurance.insurance_plans · LEE insurance.insurance_products · LEE insu…")]:::efecto
+  n10 --> n11
+  n12(("200 Responde con éxito")):::ok
+  n11 --> n12
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 51. GET /practitioner-settlement-batches
 
 Listar los lotes de liquidación del alcance del actor
 
@@ -5511,7 +5595,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 51. POST /practitioner-settlement-batches
+#### 52. POST /practitioner-settlement-batches
 
 Generar (o repetir) el lote de liquidación del período
 
@@ -5621,7 +5705,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 52. GET /practitioner-settlement-batches/{id}
+#### 53. GET /practitioner-settlement-batches/{id}
 
 Consultar un lote de liquidación
 
@@ -5709,7 +5793,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 53. POST /prior-authorization-requests
+#### 54. POST /prior-authorization-requests
 
 Solicitar autorización previa con items
 
@@ -5880,7 +5964,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 54. GET /prior-authorization-requests/{id}
+#### 55. GET /prior-authorization-requests/{id}
 
 Detalle de una solicitud de aprobación (aseguradora)
 
@@ -5977,7 +6061,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 55. POST /prior-authorization-requests/{id}/determinations
+#### 56. POST /prior-authorization-requests/{id}/determinations
 
 Emitir determinación de autorización previa
 
@@ -6133,7 +6217,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 56. GET /prior-authorization-requests/inbox
+#### 57. GET /prior-authorization-requests/inbox
 
 Bandeja de solicitudes de aprobación (aseguradora)
 
@@ -6215,7 +6299,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 57. POST /provider-networks
+#### 58. POST /provider-networks
 
 Alta de red de prestadores (soporte)
 
@@ -6259,7 +6343,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 58. POST /provider-networks/{id}/memberships
+#### 59. POST /provider-networks/{id}/memberships
 
 Alta de membresía de prestador en la red
 
@@ -6312,7 +6396,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 59. GET /public/portability/verify/{manifestHash}
+#### 60. GET /public/portability/verify/{manifestHash}
 
 Verificar la autenticidad de un certificado de portabilidad por su sello
 
@@ -6360,7 +6444,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 60. POST /reconciliation-batches
+#### 61. POST /reconciliation-batches
 
 Abrir lote de conciliación
 
@@ -6405,7 +6489,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 61. POST /reconciliation-batches/{id}/items
+#### 62. POST /reconciliation-batches/{id}/items
 
 Agregar ítem de conciliación al lote
 

@@ -45,9 +45,10 @@ export class ExpireHoldsUseCase {
         );
         if (!slot) continue;
         slot.remainingCapacity += 1;
-        if (slot.practitionerServiceOfferingId) {
-          // El cupo de un servicio nació para esta retención: no se reofrece, muere
-          // con ella y devuelve las consultas que había retraído.
+        if (await this.serviceSlots.isOneOffOnDemand(tx, slot)) {
+          // El cupo de un servicio —o de un horario flexible (P36)— nació para
+          // esta retención: no se reofrece, muere con ella y devuelve las
+          // consultas que había retraído.
           await this.serviceSlots.discardOneOffSlot(tx, slot, undefined);
           continue;
         }

@@ -2744,7 +2744,7 @@ Contexto declarado en el controlador: La lectura que faltaba: derivaciones de un
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /referrals` en `ReferralsController_listByPatient`. El controlador delega en `ReferralsService.listByPatient`. No recibe body. El tipo de retorno estático es `no declarado`.
+NestJS resuelve `GET /referrals` en `ReferralsController_listByPatient`. El controlador delega en `ReferralsService.listByPatient`. No recibe body. El tipo de retorno estático es `Promise<ReferralListItemDto[]>`.
 
 ### Parámetros
 
@@ -2785,15 +2785,50 @@ Authorization: Bearer <access_token_jwt>
 
 | HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
 |---:|---|---|---|
-| 200 | Operación completada correctamente. | `no declarado` | No |
-| 400 | Consulta completada correctamente. | `no declarado` | No |
-| 401 | Consulta completada correctamente. | `no declarado` | No |
-| 403 | Consulta completada correctamente. | `no declarado` | No |
-| 429 | Consulta completada correctamente. | `no declarado` | No |
-| 500 | Consulta completada correctamente. | `no declarado` | No |
-| 504 | Consulta completada correctamente. | `no declarado` | No |
+| 200 | Operación completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
 
-El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReferralListItemDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "patientProfileId": "00000000-0000-4000-8000-000000000001",
+    "sourceEncounterId": "00000000-0000-4000-8000-000000000001",
+    "referringProfileId": "00000000-0000-4000-8000-000000000001",
+    "targetProfileId": "00000000-0000-4000-8000-000000000001",
+    "targetTenantId": "00000000-0000-4000-8000-000000000001",
+    "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
+    "serviceRequestId": "00000000-0000-4000-8000-000000000001",
+    "reasonConceptId": "00000000-0000-4000-8000-000000000001",
+    "reasonText": "Texto descriptivo de ejemplo",
+    "priorityConceptId": "00000000-0000-4000-8000-000000000001",
+    "statusConceptId": "00000000-0000-4000-8000-000000000001",
+    "validUntil": "2026-07-31",
+    "respondedAt": "2026-07-31T12:00:00.000Z",
+    "createdAt": "2026-07-31T12:00:00.000Z",
+    "updatedAt": "2026-07-31T12:00:00.000Z",
+    "createdByUserId": "00000000-0000-4000-8000-000000000001",
+    "updatedByUserId": "00000000-0000-4000-8000-000000000001",
+    "rowVersion": 1,
+    "referralTypeConceptId": "00000000-0000-4000-8000-000000000001",
+    "referralType": {},
+    "targetServiceCatalogId": "00000000-0000-4000-8000-000000000001",
+    "targetDisplayName": "Nombre de ejemplo",
+    "targetServiceName": "Nombre de ejemplo"
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -2948,6 +2983,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 404 | `NOT_FOUND` | Servicio no encontrado | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -2955,6 +2991,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | El proveedor configurado para el canal no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | Ya existe una referencia equivalente | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La derivación necesita un destino: profesional, organización o servicio. | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ese servicio está inactivo en el catálogo. | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 422 | `PRECONDITION_FAILED` | El servicio no pertenece a la organización destino. | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional destino no ofrece ese servicio. | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -3123,7 +3163,7 @@ Contexto declarado en el controlador: CV-10 — el paciente lee sus propias deri
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /referrals/me` en `ReferralsController_listMine`. El controlador delega en `ReferralsService.listMine`. No recibe body. El tipo de retorno estático es `no declarado`.
+NestJS resuelve `GET /referrals/me` en `ReferralsController_listMine`. El controlador delega en `ReferralsService.listMine`. No recibe body. El tipo de retorno estático es `Promise<ReferralListItemDto[]>`.
 
 ### Parámetros
 
@@ -3162,15 +3202,50 @@ Authorization: Bearer <access_token_jwt>
 
 | HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
 |---:|---|---|---|
-| 200 | Operación completada correctamente. | `no declarado` | No |
-| 400 | Consulta completada correctamente. | `no declarado` | No |
-| 401 | Consulta completada correctamente. | `no declarado` | No |
-| 403 | Consulta completada correctamente. | `no declarado` | No |
-| 429 | Consulta completada correctamente. | `no declarado` | No |
-| 500 | Consulta completada correctamente. | `no declarado` | No |
-| 504 | Consulta completada correctamente. | `no declarado` | No |
+| 200 | Operación completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
 
-El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReferralListItemDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "patientProfileId": "00000000-0000-4000-8000-000000000001",
+    "sourceEncounterId": "00000000-0000-4000-8000-000000000001",
+    "referringProfileId": "00000000-0000-4000-8000-000000000001",
+    "targetProfileId": "00000000-0000-4000-8000-000000000001",
+    "targetTenantId": "00000000-0000-4000-8000-000000000001",
+    "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
+    "serviceRequestId": "00000000-0000-4000-8000-000000000001",
+    "reasonConceptId": "00000000-0000-4000-8000-000000000001",
+    "reasonText": "Texto descriptivo de ejemplo",
+    "priorityConceptId": "00000000-0000-4000-8000-000000000001",
+    "statusConceptId": "00000000-0000-4000-8000-000000000001",
+    "validUntil": "2026-07-31",
+    "respondedAt": "2026-07-31T12:00:00.000Z",
+    "createdAt": "2026-07-31T12:00:00.000Z",
+    "updatedAt": "2026-07-31T12:00:00.000Z",
+    "createdByUserId": "00000000-0000-4000-8000-000000000001",
+    "updatedByUserId": "00000000-0000-4000-8000-000000000001",
+    "rowVersion": 1,
+    "referralTypeConceptId": "00000000-0000-4000-8000-000000000001",
+    "referralType": {},
+    "targetServiceCatalogId": "00000000-0000-4000-8000-000000000001",
+    "targetDisplayName": "Nombre de ejemplo",
+    "targetServiceName": "Nombre de ejemplo"
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
