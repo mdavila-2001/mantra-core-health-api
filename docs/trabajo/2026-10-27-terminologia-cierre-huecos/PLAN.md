@@ -15,7 +15,7 @@
 ## H1 — Cierre de huecos por dominio (8 carriles paralelos, archivos disjuntos)
 **CA:** Dado el registro de huecos de un dominio, cuando se reintenta cada fuente hoy alcanzable, entonces su contenido queda en el corpus normalizado versionado (`data/`) con URL, versión, fecha, SHA-256 y licencia por fila, y el reporte de cobertura se actualiza con el antes/después.
 **DoD:** por dominio: `node --test` del dominio en verde · build reproducible (mismo SHA-256 en 2.ª corrida) · carga en Postgres 16 desechable con 2.ª corrida = 0 filas nuevas · consultas de huérfanos/duplicados/nulos pegadas · `docs/seed-research/<dominio>.md` y `SOURCES.md` actualizados. Peldaño máximo declarable sin más: `TESTED`/`VERIFIED` contra Postgres desechable, **no** contra la base real del stack.
-**Estado:** TODO
+**Estado:** A MEDIAS (13 carriles entregados y revisados; ver REPORTE.md)
 
 | Carril | Directorio exclusivo | Fuentes a reintentar (de los huecos documentados) |
 |---|---|---|
