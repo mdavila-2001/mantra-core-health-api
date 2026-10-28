@@ -56,6 +56,12 @@ const SPECIALTY_ALIASES: Readonly<Record<string, string>> = Object.freeze({
 
 /** Un procedimiento del arancel elegido para importar. */
 export interface ProcedureImportRow {
+  /**
+   * Id del concepto del arancel (`terminology.catalog_concepts`). Es lo que se
+   * guarda como `serviceConceptId` del servicio: las cláusulas de los seguros y
+   * las solicitudes de reembolso cruzan por él, no por el id del servicio.
+   */
+  conceptId: string;
   /** Código del arancel (`procedure:...`). */
   code: string;
   /** Nombre del procedimiento. */
@@ -204,7 +210,8 @@ export function matchTariffSpecialties(
  * práctica, un profesional sólo en su consultorio propio, 404 en cualquier
  * otra) y la encuesta de satisfacción automática de FT-31. El resultado de
  * cada fila es el que daría `POST /billing/service-catalog`: `name` = nombre del
- * procedimiento, `code` = código del arancel, `defaultPrice` = precio de
+ * procedimiento, `code` = código del arancel, `serviceConceptId` = concepto
+ * del arancel (por donde cruzan seguros y reembolsos), `defaultPrice` = precio de
  * referencia, activo. Como en el alta individual, no se declara moneda: el
  * precio del arancel es de una unidad (UMA) que no es dinero y convertirla sería
  * inventar un factor.
@@ -338,6 +345,7 @@ export class ProcedureImportService {
             practiceId: dto.practiceId,
             code: row.code,
             name: row.display,
+            serviceConceptId: row.conceptId,
             defaultPrice: toDefaultPrice(row.referencePrice),
             isActive: true,
             actorUserId: actor.id,
@@ -406,12 +414,13 @@ export class ProcedureImportService {
 
     const result = await this.em.getConnection().execute<
       {
+        id: string;
         code: string;
         display: string;
         price: string | null;
       }[]
     >(
-      `SELECT c.code, c.display,
+      `SELECT c.id, c.code, c.display,
               (SELECT p.value_json #>> '{}'
                  FROM terminology.concept_properties p
                 WHERE p.concept_id = c.id AND p.property_code = ?
@@ -435,6 +444,7 @@ export class ProcedureImportService {
       if (seen.has(row.code)) continue;
       seen.add(row.code);
       rows.push({
+        conceptId: row.id,
         code: row.code,
         display: row.display,
         referencePrice: row.price,
