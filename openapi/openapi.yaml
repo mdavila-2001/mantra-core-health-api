@@ -57955,6 +57955,218 @@ paths:
       summary: Leer el estado de pago de una cita
       tags:
         - scheduling-bookings
+  /scheduling/bookings/{id}/payment-receipts:
+    post:
+      description: >-
+        El paciente adjunta un archivo propio (png, jpeg, webp o pdf, hasta 5 MB). 404 si la cita no es suya; 422 si el
+        archivo no sirve o la cita está cancelada o rechazada; 409 si la cita ya está pagada.
+      operationId: SchedulingBookingsController_uploadPaymentReceipt
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadPaymentReceiptDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Subir el comprobante de pago de una cita
+      tags:
+        - scheduling-bookings
+    get:
+      description: Los ve el paciente de la cita y el prestador de esa agenda. Cualquier otro recibe 404.
+      operationId: SchedulingBookingsController_listPaymentReceipts
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaymentReceiptDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Listar los comprobantes de pago de una cita
+      tags:
+        - scheduling-bookings
+  /scheduling/bookings/{id}/payment-receipts/{receiptId}/content:
+    get:
+      description: Mismos permisos que la lista de comprobantes.
+      operationId: SchedulingBookingsController_paymentReceiptContent
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: receiptId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Descargar el archivo de un comprobante de pago
+      tags:
+        - scheduling-bookings
+  /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm:
+    post:
+      description: >-
+        Deja el comprobante confirmado y la cita pagada. 409 si el comprobante ya se rechazó; 422 si la cita está
+        cancelada o rechazada.
+      operationId: SchedulingBookingsController_confirmPaymentReceipt
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: receiptId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Confirmar un comprobante de pago
+      tags:
+        - scheduling-bookings
+  /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject:
+    post:
+      description: Guarda el motivo, que el paciente recibe en el aviso. 409 si el comprobante ya se confirmó.
+      operationId: SchedulingBookingsController_rejectPaymentReceipt
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: receiptId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RejectPaymentReceiptDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Rechazar un comprobante de pago
+      tags:
+        - scheduling-bookings
   /scheduling/bookings/{id}/start:
     post:
       description: 'Disponible sobre cualquier cita confirmada, en cualquier momento: no exige que haya llegado el día agendado.'
@@ -104359,6 +104571,120 @@ components:
           default: false
       required:
         - state
+      additionalProperties: false
+    UploadPaymentReceiptDto:
+      type: object
+      properties:
+        fileId:
+          type: string
+          format: uuid
+          description: Archivo del comprobante (png, jpeg, webp o pdf, hasta 5 MB), subido por quien lo adjunta.
+        amount:
+          type: string
+          description: Monto declarado, como texto decimal con hasta dos decimales
+          example: '150.00'
+        paidAt:
+          type: string
+          format: date-time
+        note:
+          type: string
+          maxLength: 500
+      required:
+        - fileId
+      additionalProperties: false
+    PaymentReceiptActorDto:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+          example: Ana Pérez
+      required:
+        - userId
+        - displayName
+    PaymentReceiptDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        bookingId:
+          type: string
+          format: uuid
+        fileId:
+          type: string
+          format: uuid
+        mimeType:
+          type: string
+          enum:
+            - image/png
+            - image/jpeg
+            - image/webp
+            - application/pdf
+        originalName:
+          type: string
+          nullable: true
+        amount:
+          type: string
+          nullable: true
+          example: '150.00'
+        paidAt:
+          type: string
+          format: date-time
+          nullable: true
+        note:
+          type: string
+          nullable: true
+        uploadedAt:
+          type: string
+          format: date-time
+        uploadedBy:
+          $ref: '#/components/schemas/PaymentReceiptActorDto'
+        status:
+          type: string
+          enum:
+            - PENDING
+            - CONFIRMED
+            - REJECTED
+        reviewedAt:
+          type: string
+          format: date-time
+          nullable: true
+        reviewedBy:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/PaymentReceiptActorDto'
+        rejectionReason:
+          type: string
+          nullable: true
+      required:
+        - id
+        - bookingId
+        - fileId
+        - mimeType
+        - originalName
+        - amount
+        - paidAt
+        - note
+        - uploadedAt
+        - uploadedBy
+        - status
+        - reviewedAt
+        - reviewedBy
+        - rejectionReason
+    RejectPaymentReceiptDto:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: 'Motivo del rechazo. Obligatorio: el paciente lo lee para saber qué volver a subir.'
+          minLength: 3
+          maxLength: 500
+      required:
+        - reason
       additionalProperties: false
     RescheduleBookingDto:
       type: object

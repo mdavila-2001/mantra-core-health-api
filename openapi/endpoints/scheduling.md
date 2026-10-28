@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `scheduling`
 
-Referencia exhaustiva de 61 operación(es) del módulo `scheduling`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 66 operación(es) del módulo `scheduling`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal`, `scheduling-tenant-agenda`
 - **Controladores:** `SchedulingAgendaController`, `SchedulingBookingsController`, `SchedulingConfirmationController`, `SchedulingController`, `SchedulingFlexibleController`, `SchedulingInternalController`, `SchedulingServiceOfferingsController`, `TenantAgendaController`
@@ -22,56 +22,61 @@ Referencia exhaustiva de 61 operación(es) del módulo `scheduling`, derivada de
 9. [POST /scheduling/bookings/{id}/check-in](#9-post-scheduling-bookings-id-check-in) — Registrar la llegada del paciente
 10. [POST /scheduling/bookings/{id}/complete](#10-post-scheduling-bookings-id-complete) — Completar la atención
 11. [POST /scheduling/bookings/{id}/delay](#11-post-scheduling-bookings-id-delay) — Informar una demora sobre una cita
-12. [GET /scheduling/bookings/{id}/payment-state](#12-get-scheduling-bookings-id-payment-state) — Leer el estado de pago de una cita
-13. [PUT /scheduling/bookings/{id}/payment-state](#13-put-scheduling-bookings-id-payment-state) — Marcar el estado de pago de una cita
-14. [POST /scheduling/bookings/{id}/propose-schedule](#14-post-scheduling-bookings-id-propose-schedule) — Proponer otro horario para la solicitud
-15. [POST /scheduling/bookings/{id}/reject](#15-post-scheduling-bookings-id-reject) — Rechazar la solicitud de cita
-16. [POST /scheduling/bookings/{id}/reminders](#16-post-scheduling-bookings-id-reminders) — Programar recordatorios para la cita
-17. [POST /scheduling/bookings/{id}/request-info](#17-post-scheduling-bookings-id-request-info) — Pedir documentación u orden médica antes de aceptar
-18. [POST /scheduling/bookings/{id}/reschedule](#18-post-scheduling-bookings-id-reschedule) — Reprogramar la cita a otro slot
-19. [POST /scheduling/bookings/{id}/start](#19-post-scheduling-bookings-id-start) — Iniciar la atención
-20. [GET /scheduling/confirmation-rules](#20-get-scheduling-confirmation-rules) — Listar las reglas de un tenant
-21. [POST /scheduling/confirmation-rules](#21-post-scheduling-confirmation-rules) — Crear una regla de confirmación
-22. [POST /scheduling/confirmation-rules/{id}/activate](#22-post-scheduling-confirmation-rules-id-activate) — Reactivar una regla desactivada
-23. [POST /scheduling/confirmation-rules/{id}/deactivate](#23-post-scheduling-confirmation-rules-id-deactivate) — Desactivar una regla (sin borrado duro)
-24. [POST /scheduling/confirmation-rules/evaluate](#24-post-scheduling-confirmation-rules-evaluate) — Evaluar una solicitud de reserva contra las reglas vigentes
-25. [GET /scheduling/exception-types](#25-get-scheduling-exception-types) — Listar los motivos de bloqueo de agenda
-26. [DELETE /scheduling/exceptions/{id}](#26-delete-scheduling-exceptions-id) — Eliminar una excepción de disponibilidad
-27. [PATCH /scheduling/exceptions/{id}](#27-patch-scheduling-exceptions-id) — Editar una excepción de disponibilidad
-28. [POST /scheduling/holds/{holdToken}/confirm](#28-post-scheduling-holds-holdtoken-confirm) — Confirmar la cita a partir de la reserva temporal
-29. [POST /scheduling/holds/{holdToken}/request](#29-post-scheduling-holds-holdtoken-request) — Solicitar la cita a partir de la reserva temporal
-30. [POST /scheduling/internal/dispatch-reminders](#30-post-scheduling-internal-dispatch-reminders) — Despachar los recordatorios cuya hora ya llegó
-31. [POST /scheduling/internal/expire-holds](#31-post-scheduling-internal-expire-holds) — Liberar las reservas temporales vencidas
-32. [POST /scheduling/internal/promote-waitlist/{slotId}](#32-post-scheduling-internal-promote-waitlist-slotid) — Promover candidatos de la lista de espera a un slot con cupo
-33. [GET /scheduling/internal/waitlist-candidates](#33-get-scheduling-internal-waitlist-candidates) — Listar slots con cupo libre y candidatos activos en espera
-34. [GET /scheduling/resources](#34-get-scheduling-resources) — Listar los recursos agendables de un tenant
-35. [POST /scheduling/resources](#35-post-scheduling-resources) — Dar de alta un recurso agendable
-36. [POST /scheduling/resources/{id}/close-slots](#36-post-scheduling-resources-id-close-slots) — Cerrar cupos sueltos, dejando el bloqueo que impide regenerarlos
-37. [POST /scheduling/resources/{id}/delay](#37-post-scheduling-resources-id-delay) — Informar una demora que alcanza a toda la agenda del recurso
-38. [GET /scheduling/resources/{id}/exceptions](#38-get-scheduling-resources-id-exceptions) — Listar las excepciones de disponibilidad de un recurso
-39. [POST /scheduling/resources/{id}/exceptions](#39-post-scheduling-resources-id-exceptions) — Registrar una excepción de disponibilidad
-40. [GET /scheduling/resources/{id}/flexible-availability](#40-get-scheduling-resources-id-flexible-availability) — Horas que se pueden pedir en un horario flexible
-41. [POST /scheduling/resources/{id}/flexible-holds](#41-post-scheduling-resources-id-flexible-holds) — Retener una hora de un horario flexible
-42. [POST /scheduling/resources/{id}/shift-slots](#42-post-scheduling-resources-id-shift-slots) — Correr los cupos de una agenda N minutos
-43. [GET /scheduling/resources/{id}/slots](#43-get-scheduling-resources-id-slots) — UC-41-14: agenda publicada del recurso en una ventana
-44. [GET /scheduling/resources/{id}/templates](#44-get-scheduling-resources-id-templates) — Listar las plantillas de agenda de un recurso
-45. [POST /scheduling/resources/{id}/templates](#45-post-scheduling-resources-id-templates) — Publicar una plantilla de agenda con sus franjas
-46. [GET /scheduling/resources/{resourceId}/waitlist](#46-get-scheduling-resources-resourceid-waitlist) — Listar quiénes esperan turno en una agenda
-47. [GET /scheduling/service-availability](#47-get-scheduling-service-availability) — Horarios donde cabe un servicio
-48. [GET /scheduling/service-offerings](#48-get-scheduling-service-offerings) — Los servicios que ofrece un profesional
-49. [POST /scheduling/service-offerings](#49-post-scheduling-service-offerings) — Declarar cómo ofrezco un servicio
-50. [PATCH /scheduling/service-offerings/{id}](#50-patch-scheduling-service-offerings-id) — Editar o apagar la oferta de un servicio
-51. [POST /scheduling/service-offerings/{id}/holds](#51-post-scheduling-service-offerings-id-holds) — Retener el turno de un servicio
-52. [GET /scheduling/slots](#52-get-scheduling-slots) — Consultar los cupos de una ventana
-53. [POST /scheduling/slots/{id}/holds](#53-post-scheduling-slots-id-holds) — Reservar temporalmente un cupo del slot
-54. [DELETE /scheduling/templates/{id}](#54-delete-scheduling-templates-id) — Retirar una plantilla de agenda y soltar sus cupos libres
-55. [PATCH /scheduling/templates/{id}](#55-patch-scheduling-templates-id) — Editar una plantilla de agenda ya publicada
-56. [POST /scheduling/templates/{id}/generate-slots](#56-post-scheduling-templates-id-generate-slots) — Materializar los slots de la plantilla en una ventana
-57. [GET /scheduling/templates/{id}/live-bookings](#57-get-scheduling-templates-id-live-bookings) — Listar las citas vivas de una plantilla antes de retirarla
-58. [POST /scheduling/templates/{id}/reactivate](#58-post-scheduling-templates-id-reactivate) — Reactivar un horario retirado
-59. [GET /scheduling/waitlist](#59-get-scheduling-waitlist) — Listar las entradas de lista de espera de un paciente
-60. [POST /scheduling/waitlist](#60-post-scheduling-waitlist) — Inscribir a un paciente en la lista de espera
-61. [GET /tenants/{tenantId}/agenda](#61-get-tenants-tenantid-agenda) — La agenda de la organización
+12. [GET /scheduling/bookings/{id}/payment-receipts](#12-get-scheduling-bookings-id-payment-receipts) — Listar los comprobantes de pago de una cita
+13. [POST /scheduling/bookings/{id}/payment-receipts](#13-post-scheduling-bookings-id-payment-receipts) — Subir el comprobante de pago de una cita
+14. [POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm](#14-post-scheduling-bookings-id-payment-receipts-receiptid-confirm) — Confirmar un comprobante de pago
+15. [GET /scheduling/bookings/{id}/payment-receipts/{receiptId}/content](#15-get-scheduling-bookings-id-payment-receipts-receiptid-content) — Descargar el archivo de un comprobante de pago
+16. [POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject](#16-post-scheduling-bookings-id-payment-receipts-receiptid-reject) — Rechazar un comprobante de pago
+17. [GET /scheduling/bookings/{id}/payment-state](#17-get-scheduling-bookings-id-payment-state) — Leer el estado de pago de una cita
+18. [PUT /scheduling/bookings/{id}/payment-state](#18-put-scheduling-bookings-id-payment-state) — Marcar el estado de pago de una cita
+19. [POST /scheduling/bookings/{id}/propose-schedule](#19-post-scheduling-bookings-id-propose-schedule) — Proponer otro horario para la solicitud
+20. [POST /scheduling/bookings/{id}/reject](#20-post-scheduling-bookings-id-reject) — Rechazar la solicitud de cita
+21. [POST /scheduling/bookings/{id}/reminders](#21-post-scheduling-bookings-id-reminders) — Programar recordatorios para la cita
+22. [POST /scheduling/bookings/{id}/request-info](#22-post-scheduling-bookings-id-request-info) — Pedir documentación u orden médica antes de aceptar
+23. [POST /scheduling/bookings/{id}/reschedule](#23-post-scheduling-bookings-id-reschedule) — Reprogramar la cita a otro slot
+24. [POST /scheduling/bookings/{id}/start](#24-post-scheduling-bookings-id-start) — Iniciar la atención
+25. [GET /scheduling/confirmation-rules](#25-get-scheduling-confirmation-rules) — Listar las reglas de un tenant
+26. [POST /scheduling/confirmation-rules](#26-post-scheduling-confirmation-rules) — Crear una regla de confirmación
+27. [POST /scheduling/confirmation-rules/{id}/activate](#27-post-scheduling-confirmation-rules-id-activate) — Reactivar una regla desactivada
+28. [POST /scheduling/confirmation-rules/{id}/deactivate](#28-post-scheduling-confirmation-rules-id-deactivate) — Desactivar una regla (sin borrado duro)
+29. [POST /scheduling/confirmation-rules/evaluate](#29-post-scheduling-confirmation-rules-evaluate) — Evaluar una solicitud de reserva contra las reglas vigentes
+30. [GET /scheduling/exception-types](#30-get-scheduling-exception-types) — Listar los motivos de bloqueo de agenda
+31. [DELETE /scheduling/exceptions/{id}](#31-delete-scheduling-exceptions-id) — Eliminar una excepción de disponibilidad
+32. [PATCH /scheduling/exceptions/{id}](#32-patch-scheduling-exceptions-id) — Editar una excepción de disponibilidad
+33. [POST /scheduling/holds/{holdToken}/confirm](#33-post-scheduling-holds-holdtoken-confirm) — Confirmar la cita a partir de la reserva temporal
+34. [POST /scheduling/holds/{holdToken}/request](#34-post-scheduling-holds-holdtoken-request) — Solicitar la cita a partir de la reserva temporal
+35. [POST /scheduling/internal/dispatch-reminders](#35-post-scheduling-internal-dispatch-reminders) — Despachar los recordatorios cuya hora ya llegó
+36. [POST /scheduling/internal/expire-holds](#36-post-scheduling-internal-expire-holds) — Liberar las reservas temporales vencidas
+37. [POST /scheduling/internal/promote-waitlist/{slotId}](#37-post-scheduling-internal-promote-waitlist-slotid) — Promover candidatos de la lista de espera a un slot con cupo
+38. [GET /scheduling/internal/waitlist-candidates](#38-get-scheduling-internal-waitlist-candidates) — Listar slots con cupo libre y candidatos activos en espera
+39. [GET /scheduling/resources](#39-get-scheduling-resources) — Listar los recursos agendables de un tenant
+40. [POST /scheduling/resources](#40-post-scheduling-resources) — Dar de alta un recurso agendable
+41. [POST /scheduling/resources/{id}/close-slots](#41-post-scheduling-resources-id-close-slots) — Cerrar cupos sueltos, dejando el bloqueo que impide regenerarlos
+42. [POST /scheduling/resources/{id}/delay](#42-post-scheduling-resources-id-delay) — Informar una demora que alcanza a toda la agenda del recurso
+43. [GET /scheduling/resources/{id}/exceptions](#43-get-scheduling-resources-id-exceptions) — Listar las excepciones de disponibilidad de un recurso
+44. [POST /scheduling/resources/{id}/exceptions](#44-post-scheduling-resources-id-exceptions) — Registrar una excepción de disponibilidad
+45. [GET /scheduling/resources/{id}/flexible-availability](#45-get-scheduling-resources-id-flexible-availability) — Horas que se pueden pedir en un horario flexible
+46. [POST /scheduling/resources/{id}/flexible-holds](#46-post-scheduling-resources-id-flexible-holds) — Retener una hora de un horario flexible
+47. [POST /scheduling/resources/{id}/shift-slots](#47-post-scheduling-resources-id-shift-slots) — Correr los cupos de una agenda N minutos
+48. [GET /scheduling/resources/{id}/slots](#48-get-scheduling-resources-id-slots) — UC-41-14: agenda publicada del recurso en una ventana
+49. [GET /scheduling/resources/{id}/templates](#49-get-scheduling-resources-id-templates) — Listar las plantillas de agenda de un recurso
+50. [POST /scheduling/resources/{id}/templates](#50-post-scheduling-resources-id-templates) — Publicar una plantilla de agenda con sus franjas
+51. [GET /scheduling/resources/{resourceId}/waitlist](#51-get-scheduling-resources-resourceid-waitlist) — Listar quiénes esperan turno en una agenda
+52. [GET /scheduling/service-availability](#52-get-scheduling-service-availability) — Horarios donde cabe un servicio
+53. [GET /scheduling/service-offerings](#53-get-scheduling-service-offerings) — Los servicios que ofrece un profesional
+54. [POST /scheduling/service-offerings](#54-post-scheduling-service-offerings) — Declarar cómo ofrezco un servicio
+55. [PATCH /scheduling/service-offerings/{id}](#55-patch-scheduling-service-offerings-id) — Editar o apagar la oferta de un servicio
+56. [POST /scheduling/service-offerings/{id}/holds](#56-post-scheduling-service-offerings-id-holds) — Retener el turno de un servicio
+57. [GET /scheduling/slots](#57-get-scheduling-slots) — Consultar los cupos de una ventana
+58. [POST /scheduling/slots/{id}/holds](#58-post-scheduling-slots-id-holds) — Reservar temporalmente un cupo del slot
+59. [DELETE /scheduling/templates/{id}](#59-delete-scheduling-templates-id) — Retirar una plantilla de agenda y soltar sus cupos libres
+60. [PATCH /scheduling/templates/{id}](#60-patch-scheduling-templates-id) — Editar una plantilla de agenda ya publicada
+61. [POST /scheduling/templates/{id}/generate-slots](#61-post-scheduling-templates-id-generate-slots) — Materializar los slots de la plantilla en una ventana
+62. [GET /scheduling/templates/{id}/live-bookings](#62-get-scheduling-templates-id-live-bookings) — Listar las citas vivas de una plantilla antes de retirarla
+63. [POST /scheduling/templates/{id}/reactivate](#63-post-scheduling-templates-id-reactivate) — Reactivar un horario retirado
+64. [GET /scheduling/waitlist](#64-get-scheduling-waitlist) — Listar las entradas de lista de espera de un paciente
+65. [POST /scheduling/waitlist](#65-post-scheduling-waitlist) — Inscribir a un paciente en la lista de espera
+66. [GET /tenants/{tenantId}/agenda](#66-get-tenants-tenantid-agenda) — La agenda de la organización
 
 ---
 
@@ -1806,7 +1811,746 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. GET /scheduling/bookings/{id}/payment-state
+## 12. GET /scheduling/bookings/{id}/payment-receipts
+
+- **Módulo:** `scheduling`
+- **Etiqueta OpenAPI:** `scheduling-bookings`
+- **Nombre:** Listar los comprobantes de pago de una cita
+- **Operation ID:** `SchedulingBookingsController_listPaymentReceipts`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SchedulingBookingsController.listPaymentReceipts](../../src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts)
+
+### Descripción de negocio
+
+Los ve el paciente de la cita y el prestador de esa agenda. Cualquier otro recibe 404.
+
+Contexto declarado en el controlador: Los comprobantes de la cita, del más reciente al más viejo.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /scheduling/bookings/{id}/payment-receipts` en `SchedulingBookingsController_listPaymentReceipts`. El controlador delega en `SchedulingPaymentReceiptsService.list`. No recibe body. El tipo de retorno estático es `Promise<PaymentReceiptDto[]>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /scheduling/bookings/00000000-0000-4000-8000-000000000001/payment-receipts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`, `PRACTITIONER`, `SCHEDULING_ADMIN`, `SCHEDULING_AGENT`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /scheduling/bookings/00000000-0000-4000-8000-000000000001/payment-receipts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PaymentReceiptDto[]>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PaymentReceiptDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PaymentReceiptDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PaymentReceiptDto[]>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PaymentReceiptDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PaymentReceiptDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PaymentReceiptDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PaymentReceiptDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PaymentReceiptDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "bookingId": "00000000-0000-4000-8000-000000000001",
+    "fileId": "00000000-0000-4000-8000-000000000001",
+    "mimeType": "image/png",
+    "originalName": "Nombre de ejemplo",
+    "amount": "150.00",
+    "paidAt": "2026-07-31T12:00:00.000Z",
+    "note": "valor-ejemplo",
+    "uploadedAt": "2026-07-31T12:00:00.000Z",
+    "uploadedBy": {
+      "userId": "00000000-0000-4000-8000-000000000001",
+      "displayName": "Ana Pérez"
+    },
+    "status": "PENDING",
+    "reviewedAt": "2026-07-31T12:00:00.000Z",
+    "reviewedBy": {
+      "userId": "00000000-0000-4000-8000-000000000001",
+      "displayName": "Ana Pérez"
+    },
+    "rejectionReason": "Texto descriptivo de ejemplo"
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT, PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 403 | `FORBIDDEN` | La agenda indicada pertenece a otra organización. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/scheduling/bookings/{id}/payment-receipts"
+}
+```
+
+---
+
+## 13. POST /scheduling/bookings/{id}/payment-receipts
+
+- **Módulo:** `scheduling`
+- **Etiqueta OpenAPI:** `scheduling-bookings`
+- **Nombre:** Subir el comprobante de pago de una cita
+- **Operation ID:** `SchedulingBookingsController_uploadPaymentReceipt`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SchedulingBookingsController.uploadPaymentReceipt](../../src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts)
+
+### Descripción de negocio
+
+El paciente adjunta un archivo propio (png, jpeg, webp o pdf, hasta 5 MB). 404 si la cita no es suya; 422 si el archivo no sirve o la cita está cancelada o rechazada; 409 si la cita ya está pagada.
+
+Contexto declarado en el controlador: El paciente sube el comprobante de lo que pagó. Queda pendiente hasta que el prestador lo revise: el paciente sigue sin poder marcar su cita como pagada (`PUT payment-state` no lo deja).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /scheduling/bookings/{id}/payment-receipts` en `SchedulingBookingsController_uploadPaymentReceipt`. El controlador delega en `SchedulingPaymentReceiptsService.upload`. Valida el body como `UploadPaymentReceiptDto` y consume `application/json`. El tipo de retorno estático es `Promise<PaymentReceiptDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UploadPaymentReceiptDto`; los campos opcionales se omiten.
+
+```http
+POST /scheduling/bookings/00000000-0000-4000-8000-000000000001/payment-receipts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "fileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `fileId` | Sí | `string` | formato `uuid` | Archivo del comprobante (png, jpeg, webp o pdf, hasta 5 MB), subido por quien lo adjunta. | `00000000-0000-4000-8000-000000000001` |
+| `amount` | No | `string` | patrón runtime `/^\d{1,10}(\.\d{1,2})?$/` | Monto declarado, como texto decimal con hasta dos decimales | `150.00` |
+| `paidAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `note` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /scheduling/bookings/00000000-0000-4000-8000-000000000001/payment-receipts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "fileId": "00000000-0000-4000-8000-000000000001",
+  "amount": "150.00",
+  "paidAt": "2026-07-31T12:00:00.000Z",
+  "note": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<PaymentReceiptDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<PaymentReceiptDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PaymentReceiptDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PaymentReceiptDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<PaymentReceiptDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PaymentReceiptDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PaymentReceiptDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PaymentReceiptDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PaymentReceiptDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PaymentReceiptDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PaymentReceiptDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PaymentReceiptDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "bookingId": "00000000-0000-4000-8000-000000000001",
+  "fileId": "00000000-0000-4000-8000-000000000001",
+  "mimeType": "image/png",
+  "originalName": "Nombre de ejemplo",
+  "amount": "150.00",
+  "paidAt": "2026-07-31T12:00:00.000Z",
+  "note": "valor-ejemplo",
+  "uploadedAt": "2026-07-31T12:00:00.000Z",
+  "uploadedBy": {
+    "userId": "00000000-0000-4000-8000-000000000001",
+    "displayName": "Ana Pérez"
+  },
+  "status": "PENDING",
+  "reviewedAt": "2026-07-31T12:00:00.000Z",
+  "reviewedBy": {
+    "userId": "00000000-0000-4000-8000-000000000001",
+    "displayName": "Ana Pérez"
+  },
+  "rejectionReason": "Texto descriptivo de ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `bookingId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `fileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `mimeType` | Sí | `string` | valores: `image/png`, `image/jpeg`, `image/webp`, `application/pdf` | Sin descripción específica en el contrato OpenAPI. | `image/png` |
+| `originalName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `amount` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `150.00` |
+| `paidAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `note` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `uploadedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `uploadedBy` | Sí | `PaymentReceiptActorDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"userId":"00000000-0000-4000-8000-000000000001","displayName":"Ana Pérez"}` |
+| `uploadedBy.userId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `uploadedBy.displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Ana Pérez` |
+| `status` | Sí | `string` | valores: `PENDING`, `CONFIRMED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `reviewedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `reviewedBy` | Sí | `PaymentReceiptActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"userId":"00000000-0000-4000-8000-000000000001","displayName":"Ana Pérez"}` |
+| `reviewedBy.userId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `reviewedBy.displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Ana Pérez` |
+| `rejectionReason` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | La cita ya está pagada: no hace falta otro comprobante. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/upload-payment-receipt.use-case.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Una cita cancelada o rechazada no lleva pago: no hay comprobante que subir. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/upload-payment-receipt.use-case.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/scheduling/bookings/{id}/payment-receipts"
+}
+```
+
+---
+
+## 14. POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm
+
+- **Módulo:** `scheduling`
+- **Etiqueta OpenAPI:** `scheduling-bookings`
+- **Nombre:** Confirmar un comprobante de pago
+- **Operation ID:** `SchedulingBookingsController_confirmPaymentReceipt`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SchedulingBookingsController.confirmPaymentReceipt](../../src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts)
+
+### Descripción de negocio
+
+Deja el comprobante confirmado y la cita pagada. 409 si el comprobante ya se rechazó; 422 si la cita está cancelada o rechazada.
+
+Contexto declarado en el controlador: Confirma un comprobante: la cita queda pagada, en la misma transacción. Confirmar uno basta. Volver a confirmarlo devuelve lo mismo sin escribir.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm` en `SchedulingBookingsController_confirmPaymentReceipt`. El controlador delega en `SchedulingPaymentReceiptsService.confirm`. No recibe body. El tipo de retorno estático es `Promise<ConfirmPaymentReceiptResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `receiptId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /scheduling/bookings/00000000-0000-4000-8000-000000000001/payment-receipts/00000000-0000-4000-8000-000000000001/confirm HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `SCHEDULING_ADMIN`, `SCHEDULING_AGENT`.
+- Deben ser UUID válidos: `id`, `receiptId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /scheduling/bookings/00000000-0000-4000-8000-000000000001/payment-receipts/00000000-0000-4000-8000-000000000001/confirm HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ConfirmPaymentReceiptResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ConfirmPaymentReceiptResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ConfirmPaymentReceiptResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ConfirmPaymentReceiptResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ConfirmPaymentReceiptResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ConfirmPaymentReceiptResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ConfirmPaymentReceiptResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ConfirmPaymentReceiptResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ConfirmPaymentReceiptResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ConfirmPaymentReceiptResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConfirmPaymentReceiptResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "receipt": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "bookingId": "00000000-0000-4000-8000-000000000001",
+    "fileId": "00000000-0000-4000-8000-000000000001",
+    "mimeType": "image/png",
+    "originalName": "Nombre de ejemplo",
+    "amount": "150.00",
+    "paidAt": "2026-07-31T12:00:00.000Z",
+    "note": "valor-ejemplo",
+    "uploadedAt": "2026-07-31T12:00:00.000Z",
+    "uploadedBy": {
+      "userId": "00000000-0000-4000-8000-000000000001",
+      "displayName": "Ana Pérez"
+    },
+    "status": "PENDING",
+    "reviewedAt": "2026-07-31T12:00:00.000Z",
+    "reviewedBy": {
+      "userId": "00000000-0000-4000-8000-000000000001",
+      "displayName": "Ana Pérez"
+    },
+    "rejectionReason": "Texto descriptivo de ejemplo"
+  },
+  "paymentState": {
+    "state": "PENDING",
+    "label": "Parcialmente pagada",
+    "conceptId": "00000000-0000-4000-8000-000000000001",
+    "insuranceUsed": true,
+    "markedByUserId": "00000000-0000-4000-8000-000000000001",
+    "markedAt": "2026-07-31T12:00:00.000Z"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `receipt` | Sí | `PaymentReceiptDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","bookingId":"00000000-0000-4000-8000-000000000001","fileId":"00000000-0000-4000-8000-000000000001","mimeType":"image/png","originalName":"Nombre de ejemplo","amount":"150.00","paidAt":"2026-07-31T12:00:00.000Z","note":"valor-ejemplo","uploadedAt":"2026-07-31T12:00:00.000Z","uploadedBy":{"userId":"00000000-0000-4000-8000-000000000001","displayName":"Ana Pérez"},"status":"PENDING","reviewedAt":"2026-07-31T12:00:00.000Z","reviewedBy":{"userId":"00000000-0000-4000-8000-000000000001","displayName":"Ana Pérez"},"rejectionReason":"Texto descriptivo de ejemplo"}` |
+| `receipt.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `receipt.bookingId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `receipt.fileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `receipt.mimeType` | Sí | `string` | valores: `image/png`, `image/jpeg`, `image/webp`, `application/pdf` | Sin descripción específica en el contrato OpenAPI. | `image/png` |
+| `receipt.originalName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `receipt.amount` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `150.00` |
+| `receipt.paidAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `receipt.note` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `receipt.uploadedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `receipt.uploadedBy` | Sí | `PaymentReceiptActorDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"userId":"00000000-0000-4000-8000-000000000001","displayName":"Ana Pérez"}` |
+| `receipt.uploadedBy.userId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `receipt.uploadedBy.displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Ana Pérez` |
+| `receipt.status` | Sí | `string` | valores: `PENDING`, `CONFIRMED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `receipt.reviewedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `receipt.reviewedBy` | Sí | `PaymentReceiptActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"userId":"00000000-0000-4000-8000-000000000001","displayName":"Ana Pérez"}` |
+| `receipt.reviewedBy.userId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `receipt.reviewedBy.displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Ana Pérez` |
+| `receipt.rejectionReason` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `paymentState` | Sí | `PaymentStateDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"state":"PENDING","label":"Parcialmente pagada","conceptId":"00000000-0000-4000-8000-000000000001","insuranceUsed":true,"markedByUserId":"00000000-0000-4000-8000-000000000001","markedAt":"2026-07-31T12:00:00.000Z"}` |
+| `paymentState.state` | Sí | `string` | valores: `PENDING`, `PARTIALLY_PAID`, `PAID` | Clave estable del estado. | `PENDING` |
+| `paymentState.label` | Sí | `string` | Sin restricción adicional declarada | Cómo se llama en pantalla, en castellano. | `Parcialmente pagada` |
+| `paymentState.conceptId` | Sí | `string` | formato `uuid` | El concepto real detrás, por si el cliente lo necesita. | `00000000-0000-4000-8000-000000000001` |
+| `paymentState.insuranceUsed` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `paymentState.markedByUserId` | Sí | `string` | formato `uuid` | Quién la dejó en este estado. | `00000000-0000-4000-8000-000000000001` |
+| `paymentState.markedAt` | Sí | `string` | formato `date-time` | Cuándo. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 403 | `FORBIDDEN` | La agenda indicada pertenece a otra organización. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 404 | `NOT_FOUND` | Comprobante no encontrado | Excepción explícita en src/modules/scheduling/application/bookings/support/payment-receipt-access.ts |
+| 409 | `CONFLICT` | Ese comprobante ya se rechazó: no se puede confirmar. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/confirm-payment-receipt.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/confirm-payment-receipt.use-case.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm"
+}
+```
+
+---
+
+## 15. GET /scheduling/bookings/{id}/payment-receipts/{receiptId}/content
+
+- **Módulo:** `scheduling`
+- **Etiqueta OpenAPI:** `scheduling-bookings`
+- **Nombre:** Descargar el archivo de un comprobante de pago
+- **Operation ID:** `SchedulingBookingsController_paymentReceiptContent`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SchedulingBookingsController.paymentReceiptContent](../../src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts)
+
+### Descripción de negocio
+
+Mismos permisos que la lista de comprobantes.
+
+Contexto declarado en el controlador: El archivo de un comprobante. Lo autoriza la cita, no el archivo: `GET /common/files/:id/content` solo se lo da a quien lo subió, y quien tiene que mirarlo es el médico.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /scheduling/bookings/{id}/payment-receipts/{receiptId}/content` en `SchedulingBookingsController_paymentReceiptContent`. El controlador delega en `SchedulingPaymentReceiptsService.content`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `receiptId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /scheduling/bookings/00000000-0000-4000-8000-000000000001/payment-receipts/00000000-0000-4000-8000-000000000001/content HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`, `PRACTITIONER`, `SCHEDULING_ADMIN`, `SCHEDULING_AGENT`.
+- Deben ser UUID válidos: `id`, `receiptId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /scheduling/bookings/00000000-0000-4000-8000-000000000001/payment-receipts/00000000-0000-4000-8000-000000000001/content HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<void>` | No |
+| 400 | Consulta completada correctamente. | `Promise<void>` | No |
+| 401 | Consulta completada correctamente. | `Promise<void>` | No |
+| 403 | Consulta completada correctamente. | `Promise<void>` | No |
+| 404 | Consulta completada correctamente. | `Promise<void>` | No |
+| 429 | Consulta completada correctamente. | `Promise<void>` | No |
+| 500 | Consulta completada correctamente. | `Promise<void>` | No |
+| 504 | Consulta completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT, PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 403 | `FORBIDDEN` | La agenda indicada pertenece a otra organización. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 404 | `NOT_FOUND` | Comprobante no encontrado | Excepción explícita en src/modules/scheduling/application/bookings/support/payment-receipt-access.ts |
+| 422 | `PRECONDITION_FAILED` | El archivo del comprobante ya no es de un formato que se pueda mostrar | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/get-payment-receipt-content.use-case.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/scheduling/bookings/{id}/payment-receipts/{receiptId}/content"
+}
+```
+
+---
+
+## 16. POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject
+
+- **Módulo:** `scheduling`
+- **Etiqueta OpenAPI:** `scheduling-bookings`
+- **Nombre:** Rechazar un comprobante de pago
+- **Operation ID:** `SchedulingBookingsController_rejectPaymentReceipt`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SchedulingBookingsController.rejectPaymentReceipt](../../src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts)
+
+### Descripción de negocio
+
+Guarda el motivo, que el paciente recibe en el aviso. 409 si el comprobante ya se confirmó.
+
+Contexto declarado en el controlador: Rechaza un comprobante con su motivo. No cambia el estado de pago.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject` en `SchedulingBookingsController_rejectPaymentReceipt`. El controlador delega en `SchedulingPaymentReceiptsService.reject`. Valida el body como `RejectPaymentReceiptDto` y consume `application/json`. El tipo de retorno estático es `Promise<PaymentReceiptDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `receiptId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `RejectPaymentReceiptDto`; los campos opcionales se omiten.
+
+```http
+POST /scheduling/bookings/00000000-0000-4000-8000-000000000001/payment-receipts/00000000-0000-4000-8000-000000000001/reject HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `SCHEDULING_ADMIN`, `SCHEDULING_AGENT`.
+- Deben ser UUID válidos: `id`, `receiptId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | Sí | `string` | longitud mínima 3; longitud máxima 500 | Motivo del rechazo. Obligatorio: el paciente lo lee para saber qué volver a subir. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /scheduling/bookings/00000000-0000-4000-8000-000000000001/payment-receipts/00000000-0000-4000-8000-000000000001/reject HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PaymentReceiptDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<PaymentReceiptDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PaymentReceiptDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PaymentReceiptDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<PaymentReceiptDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PaymentReceiptDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PaymentReceiptDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PaymentReceiptDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PaymentReceiptDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PaymentReceiptDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PaymentReceiptDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PaymentReceiptDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "bookingId": "00000000-0000-4000-8000-000000000001",
+  "fileId": "00000000-0000-4000-8000-000000000001",
+  "mimeType": "image/png",
+  "originalName": "Nombre de ejemplo",
+  "amount": "150.00",
+  "paidAt": "2026-07-31T12:00:00.000Z",
+  "note": "valor-ejemplo",
+  "uploadedAt": "2026-07-31T12:00:00.000Z",
+  "uploadedBy": {
+    "userId": "00000000-0000-4000-8000-000000000001",
+    "displayName": "Ana Pérez"
+  },
+  "status": "PENDING",
+  "reviewedAt": "2026-07-31T12:00:00.000Z",
+  "reviewedBy": {
+    "userId": "00000000-0000-4000-8000-000000000001",
+    "displayName": "Ana Pérez"
+  },
+  "rejectionReason": "Texto descriptivo de ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `bookingId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `fileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `mimeType` | Sí | `string` | valores: `image/png`, `image/jpeg`, `image/webp`, `application/pdf` | Sin descripción específica en el contrato OpenAPI. | `image/png` |
+| `originalName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `amount` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `150.00` |
+| `paidAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `note` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `uploadedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `uploadedBy` | Sí | `PaymentReceiptActorDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"userId":"00000000-0000-4000-8000-000000000001","displayName":"Ana Pérez"}` |
+| `uploadedBy.userId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `uploadedBy.displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Ana Pérez` |
+| `status` | Sí | `string` | valores: `PENDING`, `CONFIRMED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `reviewedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `reviewedBy` | Sí | `PaymentReceiptActorDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"userId":"00000000-0000-4000-8000-000000000001","displayName":"Ana Pérez"}` |
+| `reviewedBy.userId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `reviewedBy.displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Ana Pérez` |
+| `rejectionReason` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 403 | `FORBIDDEN` | La agenda indicada pertenece a otra organización. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 404 | `NOT_FOUND` | Comprobante no encontrado | Excepción explícita en src/modules/scheduling/application/bookings/support/payment-receipt-access.ts |
+| 409 | `CONFLICT` | Ese comprobante ya se confirmó: no se puede rechazar. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/reject-payment-receipt.use-case.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/scheduling/bookings/{id}/payment-receipts/{receiptId}/reject"
+}
+```
+
+---
+
+## 17. GET /scheduling/bookings/{id}/payment-state
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -1926,7 +2670,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. PUT /scheduling/bookings/{id}/payment-state
+## 18. PUT /scheduling/bookings/{id}/payment-state
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -2066,7 +2810,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /scheduling/bookings/{id}/propose-schedule
+## 19. POST /scheduling/bookings/{id}/propose-schedule
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -2209,7 +2953,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /scheduling/bookings/{id}/reject
+## 20. POST /scheduling/bookings/{id}/reject
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -2343,7 +3087,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /scheduling/bookings/{id}/reminders
+## 21. POST /scheduling/bookings/{id}/reminders
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -2478,7 +3222,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /scheduling/bookings/{id}/request-info
+## 22. POST /scheduling/bookings/{id}/request-info
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -2618,7 +3362,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /scheduling/bookings/{id}/reschedule
+## 23. POST /scheduling/bookings/{id}/reschedule
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -2758,7 +3502,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /scheduling/bookings/{id}/start
+## 24. POST /scheduling/bookings/{id}/start
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -2879,7 +3623,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /scheduling/confirmation-rules
+## 25. GET /scheduling/confirmation-rules
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-confirmation`
@@ -2992,7 +3736,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /scheduling/confirmation-rules
+## 26. POST /scheduling/confirmation-rules
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-confirmation`
@@ -3143,7 +3887,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /scheduling/confirmation-rules/{id}/activate
+## 27. POST /scheduling/confirmation-rules/{id}/activate
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-confirmation`
@@ -3266,7 +4010,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /scheduling/confirmation-rules/{id}/deactivate
+## 28. POST /scheduling/confirmation-rules/{id}/deactivate
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-confirmation`
@@ -3389,7 +4133,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /scheduling/confirmation-rules/evaluate
+## 29. POST /scheduling/confirmation-rules/evaluate
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-confirmation`
@@ -3538,7 +4282,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. GET /scheduling/exception-types
+## 30. GET /scheduling/exception-types
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -3654,7 +4398,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. DELETE /scheduling/exceptions/{id}
+## 31. DELETE /scheduling/exceptions/{id}
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -3754,7 +4498,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. PATCH /scheduling/exceptions/{id}
+## 32. PATCH /scheduling/exceptions/{id}
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -3893,7 +4637,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /scheduling/holds/{holdToken}/confirm
+## 33. POST /scheduling/holds/{holdToken}/confirm
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -4043,7 +4787,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /scheduling/holds/{holdToken}/request
+## 34. POST /scheduling/holds/{holdToken}/request
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -4189,7 +4933,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /scheduling/internal/dispatch-reminders
+## 35. POST /scheduling/internal/dispatch-reminders
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-internal`
@@ -4309,7 +5053,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. POST /scheduling/internal/expire-holds
+## 36. POST /scheduling/internal/expire-holds
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-internal`
@@ -4429,7 +5173,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. POST /scheduling/internal/promote-waitlist/{slotId}
+## 37. POST /scheduling/internal/promote-waitlist/{slotId}
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-internal`
@@ -4554,7 +5298,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. GET /scheduling/internal/waitlist-candidates
+## 38. GET /scheduling/internal/waitlist-candidates
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-internal`
@@ -4662,7 +5406,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. GET /scheduling/resources
+## 39. GET /scheduling/resources
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-agenda`
@@ -4809,7 +5553,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. POST /scheduling/resources
+## 40. POST /scheduling/resources
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -4954,7 +5698,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. POST /scheduling/resources/{id}/close-slots
+## 41. POST /scheduling/resources/{id}/close-slots
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -5109,7 +5853,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. POST /scheduling/resources/{id}/delay
+## 42. POST /scheduling/resources/{id}/delay
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -5252,7 +5996,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. GET /scheduling/resources/{id}/exceptions
+## 43. GET /scheduling/resources/{id}/exceptions
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -5386,7 +6130,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. POST /scheduling/resources/{id}/exceptions
+## 44. POST /scheduling/resources/{id}/exceptions
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -5542,7 +6286,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. GET /scheduling/resources/{id}/flexible-availability
+## 45. GET /scheduling/resources/{id}/flexible-availability
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -5668,7 +6412,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. POST /scheduling/resources/{id}/flexible-holds
+## 46. POST /scheduling/resources/{id}/flexible-holds
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -5814,7 +6558,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 42. POST /scheduling/resources/{id}/shift-slots
+## 47. POST /scheduling/resources/{id}/shift-slots
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -5957,7 +6701,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. GET /scheduling/resources/{id}/slots
+## 48. GET /scheduling/resources/{id}/slots
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -6106,7 +6850,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. GET /scheduling/resources/{id}/templates
+## 49. GET /scheduling/resources/{id}/templates
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -6252,7 +6996,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 45. POST /scheduling/resources/{id}/templates
+## 50. POST /scheduling/resources/{id}/templates
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -6429,7 +7173,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 46. GET /scheduling/resources/{resourceId}/waitlist
+## 51. GET /scheduling/resources/{resourceId}/waitlist
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -6563,7 +7307,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 47. GET /scheduling/service-availability
+## 52. GET /scheduling/service-availability
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -6690,7 +7434,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 48. GET /scheduling/service-offerings
+## 53. GET /scheduling/service-offerings
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -6829,7 +7573,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 49. POST /scheduling/service-offerings
+## 54. POST /scheduling/service-offerings
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -7000,7 +7744,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 50. PATCH /scheduling/service-offerings/{id}
+## 55. PATCH /scheduling/service-offerings/{id}
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -7165,7 +7909,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 51. POST /scheduling/service-offerings/{id}/holds
+## 56. POST /scheduling/service-offerings/{id}/holds
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -7313,7 +8057,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 52. GET /scheduling/slots
+## 57. GET /scheduling/slots
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-agenda`
@@ -7453,7 +8197,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 53. POST /scheduling/slots/{id}/holds
+## 58. POST /scheduling/slots/{id}/holds
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -7587,7 +8331,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 54. DELETE /scheduling/templates/{id}
+## 59. DELETE /scheduling/templates/{id}
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -7723,7 +8467,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 55. PATCH /scheduling/templates/{id}
+## 60. PATCH /scheduling/templates/{id}
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -7889,7 +8633,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 56. POST /scheduling/templates/{id}/generate-slots
+## 61. POST /scheduling/templates/{id}/generate-slots
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -8025,7 +8769,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 57. GET /scheduling/templates/{id}/live-bookings
+## 62. GET /scheduling/templates/{id}/live-bookings
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -8169,7 +8913,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 58. POST /scheduling/templates/{id}/reactivate
+## 63. POST /scheduling/templates/{id}/reactivate
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -8286,7 +9030,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 59. GET /scheduling/waitlist
+## 64. GET /scheduling/waitlist
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -8418,7 +9162,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 60. POST /scheduling/waitlist
+## 65. POST /scheduling/waitlist
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -8554,7 +9298,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 61. GET /tenants/{tenantId}/agenda
+## 66. GET /tenants/{tenantId}/agenda
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-tenant-agenda`
