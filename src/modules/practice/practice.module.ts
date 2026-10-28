@@ -48,6 +48,10 @@ import { ProcedureReferenceReader } from '../billing/services/procedure-referenc
 import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
 import { TenantsRepository } from '../directory/repositories';
 import { AddressesRepository } from '../common/repositories';
+// El logo del consultorio pasa por `AttachableFileService` (archivo vivo, de
+// imagen y subido por quien lo fija). `common` no importa `practice`, así que
+// no cierra ciclo.
+import { CommonModule } from '../common/common.module';
 // ALV-005/006: `PractitionerSitesService.createOwnSite` necesita saber de
 // quién es la sesión (`ProfileOwnershipService`); `OwnSiteProvisioningService`
 // necesita crear la dirección de la sede (`AddressesRepository`). Mismo
@@ -72,6 +76,7 @@ import {
     // Regla de administración por organización (A-6), sin importar
     // `DirectoryModule` entero.
     DirectoryAuthorizationModule,
+    CommonModule,
   ],
   controllers: [
     PracticesController,
