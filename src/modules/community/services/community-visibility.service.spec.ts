@@ -15,7 +15,10 @@ import { DIR } from '../../directory/directory.concepts';
 import { COMM } from '../community.concepts';
 import { CONCEPTS } from '../../../common';
 
-const em = {} as any;
+// `count` responde por `directory.tenants`: por defecto el `target_id` de una
+// vitrina de organización ES un tenant. Los casos que no lo son usan su propio em.
+const em = { count: mockFn(async () => 1) } as any;
+const emWithoutTenant = { count: mockFn(async () => 0) } as any;
 const patient = { id: 'user-1', roles: ['USER'] } as any;
 const platform = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -494,11 +497,11 @@ describe('CommunityVisibilityService', () => {
       ).rejects.toThrow(ForbiddenException);
     });
 
-    it('fuera de la mensajería, la membresía no permite actuar como la farmacia', async () => {
+    it('fuera de la mensajería, el STAFF no firma como la farmacia', async () => {
       const d = build();
       d.profilesRepo.findById.mockResolvedValue(pharmacyProfile);
       d.membershipsRepo.findActiveByUserTenant.mockResolvedValue({
-        tenantRoleConceptId: DIR.ROLE_OWNER,
+        tenantRoleConceptId: DIR.ROLE_STAFF,
       });
 
       await expect(
@@ -507,6 +510,137 @@ describe('CommunityVisibilityService', () => {
       await expect(
         d.service.assertOwnProfile(em, 'vitrina', staff),
       ).rejects.toThrow(ForbiddenException);
+    });
+
+    it.each([
+      ['OWNER', DIR.ROLE_OWNER],
+      ['ADMIN', DIR.ROLE_ADMIN],
+    ])(
+      'un %s activo administra la vitrina de su tenant (publicar, reseñar, seguir, bloquear)',
+      async (_label, role) => {
+        const d = build();
+        d.profilesRepo.findById.mockResolvedValue(pharmacyProfile);
+        d.membershipsRepo.findActiveByUserTenant.mockResolvedValue({
+          tenantRoleConceptId: role,
+        });
+        const owner = { id: 'owner-1', roles: ['USER'] } as any;
+
+        await expect(
+          d.service.assertActsAsProfile(em, 'vitrina', owner),
+        ).resolves.toBeUndefined();
+        await expect(
+          d.service.assertOwnProfile(em, 'vitrina', owner),
+        ).resolves.toBeUndefined();
+        expect(d.membershipsRepo.findActiveByUserTenant).toHaveBeenCalledWith(
+          em,
+          'owner-1',
+          PHARMACY_TENANT,
+          DIR.MEMBERSHIP_ACTIVE,
+        );
+      },
+    );
+
+    describe('quien creó la vitrina de un tenant no es por eso su titular', () => {
+      // `projectOrganization` la crea con el admin que verificó el tenant;
+      // `setOrganizationLogo`, con quien subió el logo (que puede irse).
+      const creator = { id: 'admin-que-verifico', roles: ['USER'] } as any;
+
+      it('sin membresía, el creador no escribe ni lee como la farmacia', async () => {
+        const d = build();
+        d.profilesRepo.findById.mockResolvedValue(pharmacyProfile);
+        d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(null);
+
+        for (const call of [
+          () => d.service.assertActsAsProfile(em, 'vitrina', creator),
+          () => d.service.assertOwnProfile(em, 'vitrina', creator),
+          () => d.service.assertActsAsMessagingProfile(em, 'vitrina', creator),
+          () => d.service.assertOwnMessagingProfile(em, 'vitrina', creator),
+        ]) {
+          await expect(call()).rejects.toThrow(ForbiddenException);
+        }
+      });
+
+      it('un ex-OWNER con la membresía terminada tampoco', async () => {
+        const d = build();
+        d.profilesRepo.findById.mockResolvedValue({
+          ...pharmacyProfile,
+          createdByUserId: 'ex-owner',
+        });
+        // La consulta exige estado ACTIVO: la terminada no aparece.
+        d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(null);
+        const exOwner = { id: 'ex-owner', roles: ['PHARMACY_STAFF'] } as any;
+
+        await expect(
+          d.service.assertActsAsProfile(em, 'vitrina', exOwner),
+        ).rejects.toThrow(ForbiddenException);
+        await expect(
+          d.service.assertOwnMessagingProfile(em, 'vitrina', exOwner),
+        ).rejects.toThrow(ForbiddenException);
+      });
+
+      it('con membresía, el acceso de mensajería es revocable (ORGANIZATION_STAFF), nunca HOLDER', async () => {
+        const d = build();
+        d.profilesRepo.findById.mockResolvedValue(pharmacyProfile);
+        d.membershipsRepo.findActiveByUserTenant.mockResolvedValue({
+          tenantRoleConceptId: DIR.ROLE_OWNER,
+        });
+        const ownerCreator = {
+          id: 'admin-que-verifico',
+          roles: ['PHARMACY_STAFF'],
+        } as any;
+
+        await expect(
+          d.service.assertOwnMessagingProfile(em, 'vitrina', ownerCreator),
+        ).resolves.toBe('ORGANIZATION_STAFF');
+      });
+    });
+
+    describe('vitrina de tipo organización que NO es de un tenant', () => {
+      // SupportAdmin: `target_id` = la cuenta del sistema, `created_by` = ella.
+      const supportAdminProfile = {
+        targetId: 'support-admin-user',
+        targetTypeConceptId: COMM.PROFILE_TARGET_ORGANIZATION,
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        createdByUserId: 'support-admin-user',
+      };
+
+      it('su cuenta sigue siendo titular (por target_id)', async () => {
+        const d = build();
+        d.profilesRepo.findById.mockResolvedValue(supportAdminProfile);
+        const supportAdmin = {
+          id: 'support-admin-user',
+          roles: ['SYSTEM'],
+        } as any;
+
+        await expect(
+          d.service.assertActsAsProfile(emWithoutTenant, 'p', supportAdmin),
+        ).resolves.toBeUndefined();
+        await expect(
+          d.service.assertActsAsMessagingProfile(
+            emWithoutTenant,
+            'p',
+            supportAdmin,
+          ),
+        ).resolves.toBeUndefined();
+        expect(d.membershipsRepo.findActiveByUserTenant).not.toHaveBeenCalled();
+      });
+
+      it('quien la creó sigue siendo titular (regla de siempre)', async () => {
+        const d = build();
+        d.profilesRepo.findById.mockResolvedValue({
+          ...supportAdminProfile,
+          targetId: 'unidad-diagnostica-1',
+          createdByUserId: 'quien-la-publico',
+        });
+        const creator = { id: 'quien-la-publico', roles: ['USER'] } as any;
+
+        await expect(
+          d.service.assertActsAsProfile(emWithoutTenant, 'p', creator),
+        ).resolves.toBeUndefined();
+        await expect(
+          d.service.assertOwnMessagingProfile(emWithoutTenant, 'p', creator),
+        ).resolves.toBe('HOLDER');
+      });
     });
   });
 });

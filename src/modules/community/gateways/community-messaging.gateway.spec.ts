@@ -19,6 +19,7 @@ function socket(rooms: string[] = [], profileIds: string[] = []) {
   const issuedToOther = mockFn();
   const client = {
     id: 's-1',
+    connected: true,
     rooms: new Set(rooms),
     data: { user, profileIds: new Set(profileIds) },
     join: mockFn(async (room: string) => {
@@ -82,6 +83,7 @@ function build() {
     conversationsRepo,
     presence,
     visibility,
+    logger,
   };
 }
 
@@ -367,6 +369,79 @@ describe('CommunityMessagingGateway', () => {
       await jest.advanceTimersByTimeAsync(STAFF_GRANT_RECHECK_MS * 2);
 
       expect(d.visibility.assertOwnMessagingProfile).not.toHaveBeenCalled();
+    });
+
+    it('una unión que termina después de desconectar no deja salas ni temporizador', async () => {
+      const d = build();
+      d.visibility.assertOwnMessagingProfile.mockImplementation(async () => {
+        // El socket se cae mientras se valida la membresía.
+        client.connected = false;
+        return 'ORGANIZATION_STAFF';
+      });
+      const { client } = socket();
+
+      await d.gateway.handleJoinInbox(client as any, {
+        profileId: 'p-farmacia',
+      });
+      await d.gateway.handleJoinConversation(client as any, {
+        conversationId: 'c-1',
+        profileId: 'p-farmacia',
+      });
+
+      expect(client.join).not.toHaveBeenCalled();
+      expect((client.data as any).staffGrants).toBeUndefined();
+      expect((client.data as any).staffRecheck).toBeUndefined();
+    });
+
+    it('la revalidación de un socket desconectado no consulta y se detiene', async () => {
+      const d = build();
+      const client = await joinedAsStaff(d);
+      client.connected = false;
+      d.visibility.assertOwnMessagingProfile.mockClear();
+
+      await d.gateway.recheckStaffGrants(client as any);
+
+      expect(d.visibility.assertOwnMessagingProfile).not.toHaveBeenCalled();
+      expect((client.data as any).staffRecheck).toBeUndefined();
+    });
+
+    it('un fallo inesperado de la revalidación se registra y no se escapa del temporizador', async () => {
+      jest.useFakeTimers();
+      const d = build();
+      const client = await joinedAsStaff(d);
+      // `leave` revienta durante la revocación: el rechazo no puede escapar.
+      d.visibility.assertOwnMessagingProfile.mockRejectedValue(new Error('no'));
+      client.leave.mockRejectedValue(new Error('adapter caído'));
+
+      await jest.advanceTimersByTimeAsync(STAFF_GRANT_RECHECK_MS);
+
+      expect(d.logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operation: 'community.gateway.staff-grant.recheck',
+        }),
+        expect.any(String),
+      );
+      await d.gateway.handleDisconnect(client as any);
+    });
+
+    it('dos vueltas no se solapan mientras la anterior espera a la base', async () => {
+      jest.useFakeTimers();
+      const d = build();
+      const client = await joinedAsStaff(d);
+      let release: () => void = () => undefined;
+      d.visibility.assertOwnMessagingProfile.mockClear();
+      d.visibility.assertOwnMessagingProfile.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            release = () => resolve('ORGANIZATION_STAFF');
+          }),
+      );
+
+      await jest.advanceTimersByTimeAsync(STAFF_GRANT_RECHECK_MS * 3);
+
+      expect(d.visibility.assertOwnMessagingProfile).toHaveBeenCalledTimes(1);
+      release();
+      await d.gateway.handleDisconnect(client as any);
     });
   });
 });

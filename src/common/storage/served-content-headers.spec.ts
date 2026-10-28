@@ -65,7 +65,10 @@ describe('servedContentHeaders', () => {
   });
 
   it('un nombre con un surrogate suelto omite el filename en vez de lanzar', () => {
-    const headers = servedContentHeaders('application/pdf', 'informe\uD800.pdf');
+    const headers = servedContentHeaders(
+      'application/pdf',
+      'informe\uD800.pdf',
+    );
     expect(headers['Content-Disposition']).toBe('attachment');
     expect(headers['Content-Type']).toBe('application/pdf');
   });

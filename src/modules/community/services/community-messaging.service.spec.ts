@@ -7,7 +7,10 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
-import { CommunityMessagingService } from './community-messaging.service';
+import {
+  CommunityMessagingService,
+  directPairLockKey,
+} from './community-messaging.service';
 import {
   CONCEPTS,
   PreconditionFailedException,
@@ -23,7 +26,11 @@ const actor = { id: 'admin-1', roles: [] } as any;
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn().mockResolvedValue(undefined) };
+  const tx = {
+    flush: mockFn().mockResolvedValue(undefined),
+    // El lock por par de perfiles (`pg_advisory_xact_lock`).
+    execute: mockFn().mockResolvedValue([]),
+  };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const conversationsRepo = {
     findConversationById: mockFn(),
@@ -79,6 +86,8 @@ function build() {
         profile?.targetTypeConceptId,
       ),
     isVerifiedActiveTenant: mockFn().mockResolvedValue(true),
+    // Por defecto el iniciador es una persona, no la vitrina de un tenant.
+    isTenantBacked: mockFn().mockResolvedValue(false),
   };
   // F4.7 · la respuesta automática, doblada: enviar se prueba acá, contestar
   // solo se prueba en su propio servicio. Por defecto no contesta nadie, que
@@ -403,6 +412,62 @@ describe('CommunityMessagingService', () => {
       staffAsSystem,
     );
     expect(d.visibility.assertActsAsProfile).not.toHaveBeenCalled();
+  });
+
+  /* --- Idempotencia bajo concurrencia ---------------------------------------- */
+
+  it('toma el lock del par (en cualquier orden) antes de buscar la conversación', async () => {
+    const d = build();
+    const order: string[] = [];
+    d.tx.execute.mockImplementation(async () => {
+      order.push('lock');
+      return [];
+    });
+    d.conversationsRepo.findDirectBetween.mockImplementation(async () => {
+      order.push('find');
+      return null;
+    });
+    d.conversationsRepo.createConversation.mockReturnValue({ id: 'conv1' });
+
+    await d.service.createConversation(
+      { participantProfileIds: ['p1', 'p2'] },
+      actor,
+    );
+
+    expect(order).toEqual(['lock', 'find']);
+    expect(d.tx.execute).toHaveBeenCalledWith(
+      'select pg_advisory_xact_lock(hashtextextended(?, 0))',
+      ['p1:p2'],
+    );
+    expect(directPairLockKey('p2', 'p1')).toBe(directPairLockKey('p1', 'p2'));
+  });
+
+  it('el canal de sistema también toma el lock del par', async () => {
+    const d = build();
+    d.conversationsRepo.createConversation.mockReturnValue({ id: 'conv-s' });
+
+    await d.service.createSystemDirectConversation(
+      { participantProfileIds: ['p-zeta', 'p-alfa'] },
+      { id: 'system-1', roles: ['SYSTEM'] } as any,
+    );
+
+    expect(d.tx.execute).toHaveBeenCalledWith(
+      'select pg_advisory_xact_lock(hashtextextended(?, 0))',
+      ['p-alfa:p-zeta'],
+    );
+  });
+
+  it('una vitrina de tenant no abre hilos en frío por el endpoint público', async () => {
+    const d = build();
+    d.organizationStaff.isTenantBacked.mockResolvedValue(true);
+
+    await expect(
+      d.service.createConversation(
+        { participantProfileIds: ['p-farmacia', 'p2'] },
+        actor,
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(d.conversationsRepo.createConversation).not.toHaveBeenCalled();
   });
 
   describe('sendMessage (UC-19-06)', () => {
