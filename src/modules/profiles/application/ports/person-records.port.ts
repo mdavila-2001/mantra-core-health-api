@@ -4,6 +4,10 @@ export interface PersonAddressSummary {
   readonly lines?: string;
   readonly city?: string;
   readonly municipalityConceptId?: string;
+  /** Provincia o condado, deducida del municipio (ADR-0028). */
+  readonly administrativeArea2ConceptId?: string;
+  /** Distrito o zona (ADR-0028). */
+  readonly district?: string;
   readonly latitude?: number;
   readonly longitude?: number;
 }
@@ -36,6 +40,7 @@ export interface PersonRecordsPort {
       useConceptId: string;
       municipalityConceptId?: string;
       lines?: string;
+      district?: string;
       latitude?: number;
       longitude?: number;
       actorUserId: string;
@@ -49,6 +54,7 @@ export interface PersonRecordsPort {
       useConceptId: string;
       municipalityConceptId?: string;
       lines?: string;
+      district?: string;
       latitude?: number | null;
       longitude?: number | null;
       actorUserId: string;

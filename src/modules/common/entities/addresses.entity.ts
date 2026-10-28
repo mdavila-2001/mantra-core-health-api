@@ -59,6 +59,17 @@ export class Addresses {
   administrativeAreaConceptId?: string;
 
   /**
+   * El nivel 2 —provincia, condado— de cualquier país (ADR-0028): concepto de
+   * `VS_ADMIN_DIVISION` de nivel 2, hijo de `administrativeAreaConceptId`.
+   */
+  @Property({
+    fieldName: 'administrative_area_2_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  administrativeArea2ConceptId?: string;
+
+  /**
    * Municipio boliviano (miembro de `VS_BO_MUNICIPALITY`), catálogo del INE.
    * `administrativeAreaConceptId` sigue siendo el departamento; este es el
    * nivel de detalle que `city` (texto libre) no puede garantizar consistente.
@@ -69,6 +80,17 @@ export class Addresses {
     nullable: true,
   }) // FK → terminology.catalog_concepts
   municipalityConceptId?: string;
+
+  /**
+   * El distrito o zona, como texto (ADR-0028): ningún catálogo oficial cubre
+   * los distritos de todos los países. Antes viajaba pegado a `lines`.
+   */
+  @Property({
+    fieldName: 'district_text',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  districtText?: string;
 
   /**
    * Valor de postal code mantenido por la instancia.

@@ -37,6 +37,13 @@ export interface CreateAddressData {
    */
   administrativeAreaConceptId?: string;
   /**
+   * Nivel 2 —provincia, condado— de cualquier país (ADR-0028): concepto de
+   * `VS_ADMIN_DIVISION`. Se deduce del municipio, no se recibe del cliente.
+   */
+  administrativeArea2ConceptId?: string;
+  /** Distrito o zona, como texto (ADR-0028). */
+  districtText?: string;
+  /**
    * Identificador asociado a use concept.
    */
   useConceptId?: string;
@@ -126,6 +133,8 @@ export class AddressesRepository {
         countryConceptId: data.countryConceptId,
         municipalityConceptId: data.municipalityConceptId,
         administrativeAreaConceptId: data.administrativeAreaConceptId,
+        administrativeArea2ConceptId: data.administrativeArea2ConceptId,
+        districtText: data.districtText,
         useConceptId: data.useConceptId,
         typeConceptId: data.typeConceptId,
         latitude: data.latitude,
