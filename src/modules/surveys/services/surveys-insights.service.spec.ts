@@ -190,8 +190,11 @@ function seedBaseScenario(repo: ReturnType<typeof build>['repo']) {
     valueRow({ questionId: 'q-nps', valueNumber: 3, count: 1 }),
   ]);
   repo.listRecentComments.mockResolvedValue([
-    { text: 'Muy amable', day: '2026-10-09' },
-    { text: 'Esperé mucho', day: '2026-10-02' },
+    { text: 'Muy amable', month: '2026-10' },
+    { text: 'Esperé mucho', month: '2026-10' },
+    { text: 'Todo bien', month: '2026-09' },
+    { text: 'Rápido', month: '2026-09' },
+    { text: 'Puntual', month: '2026-08' },
   ]);
 }
 
@@ -235,7 +238,7 @@ describe('SurveysInsightsService', () => {
         bucketRow('2026-10-01', 6, 4),
       ]);
 
-      const result = await run({ from: '2026-10-01', to: '2026-10-28' });
+      const result = await run({ from: '2026-10-01', to: '2026-10-31' });
 
       expect(result).toEqual({
         totals: { issued: 6, answered: 4, responseRate: 0.6667 },
@@ -257,15 +260,15 @@ describe('SurveysInsightsService', () => {
         bucketRow('2026-10-01', 5, 5),
       ]);
 
-      const result = await run({ from: '2026-10-01', to: '2026-10-28' });
+      const result = await run({ from: '2026-10-01', to: '2026-10-31' });
 
       const r = full(result);
       expect(r.totals).toEqual({ issued: 5, answered: 5, responseRate: 1 });
       expect(r.byQuestion.length).toBeGreaterThan(0);
-      expect(r.comments).toHaveLength(2);
+      expect(r.comments).toHaveLength(5);
     });
 
-    it('un filtro de un solo día con una respuesta no devuelve nada de esa respuesta', async () => {
+    it('un filtro por servicio con una respuesta suelta no devuelve nada de esa respuesta', async () => {
       const { repo, run } = build();
       seedBaseScenario(repo);
       repo.countInvitationsByBucket.mockResolvedValue([
@@ -273,8 +276,8 @@ describe('SurveysInsightsService', () => {
       ]);
 
       const result = await run({
-        from: '2026-10-10',
-        to: '2026-10-10',
+        from: '2026-10-01',
+        to: '2026-10-31',
         serviceId: 'svc-1',
       });
 
@@ -284,8 +287,7 @@ describe('SurveysInsightsService', () => {
       });
       expect(repo.listRecentComments).not.toHaveBeenCalled();
       const scope = repo.countInvitationsByBucket.mock.calls[0][1];
-      expect(scope.from).toEqual(new Date('2026-10-10T00:00:00.000Z'));
-      expect(scope.toExclusive).toEqual(new Date('2026-10-11T00:00:00.000Z'));
+      expect(scope.serviceId).toBe('svc-1');
     });
 
     it('una pregunta con menos de 5 respuestas dentro de un alcance suficiente no se desglosa', async () => {
@@ -299,7 +301,7 @@ describe('SurveysInsightsService', () => {
         ),
       );
 
-      const r = full(await run({ from: '2026-10-01', to: '2026-10-28' }));
+      const r = full(await run({ from: '2026-10-01', to: '2026-10-31' }));
 
       const access = r.byQuestion.find(
         (q) => q.dimension === 'esfuerzo_acceso',
@@ -330,7 +332,7 @@ describe('SurveysInsightsService', () => {
         ),
       );
 
-      const r = full(await run({ from: '2026-10-01', to: '2026-10-28' }));
+      const r = full(await run({ from: '2026-10-01', to: '2026-10-31' }));
 
       expect(r.safetyAlerts).toEqual({ n: 0 });
       const safety = r.byQuestion.find(
@@ -359,14 +361,14 @@ describe('SurveysInsightsService', () => {
           ]),
       );
 
-      const r = full(await run({ from: '2026-10-01', to: '2026-10-28' }));
+      const r = full(await run({ from: '2026-10-01', to: '2026-10-31' }));
 
       expect(r.nps).toEqual({
         value: null,
         promoters: 0,
         passives: 0,
         detractors: 0,
-        n: 3,
+        n: 0,
         suppressed: true,
       });
     });
@@ -376,7 +378,7 @@ describe('SurveysInsightsService', () => {
     const { repo, run } = build();
     seedBaseScenario(repo);
 
-    const result = full(await run({ from: '2026-10-01', to: '2026-10-28' }));
+    const result = full(await run({ from: '2026-10-01', to: '2026-10-31' }));
 
     expect(result.totals).toEqual({
       issued: 10,
@@ -441,8 +443,11 @@ describe('SurveysInsightsService', () => {
       { period: '2026-10-01', answered: 6, average: 3.67 },
     ]);
     expect(result.comments).toEqual([
-      { text: 'Muy amable', submittedAt: '2026-10-09' },
-      { text: 'Esperé mucho', submittedAt: '2026-10-02' },
+      { text: 'Muy amable', month: '2026-10' },
+      { text: 'Esperé mucho', month: '2026-10' },
+      { text: 'Todo bien', month: '2026-09' },
+      { text: 'Rápido', month: '2026-09' },
+      { text: 'Puntual', month: '2026-08' },
     ]);
   });
 
@@ -485,7 +490,7 @@ describe('SurveysInsightsService', () => {
         },
       );
 
-      const r = full(await run({ from: '2026-10-01', to: '2026-10-28' }));
+      const r = full(await run({ from: '2026-10-01', to: '2026-10-31' }));
 
       expect(r.trend).toEqual([
         { period: '2026-10-01', answered: 5, average: 4.4 },
@@ -500,7 +505,7 @@ describe('SurveysInsightsService', () => {
       const { repo, run } = build();
       scenario(repo, [['2026-10-01', 6]], { '2026-10-01': [5, 4, 3] });
 
-      const r = full(await run({ from: '2026-10-01', to: '2026-10-28' }));
+      const r = full(await run({ from: '2026-10-01', to: '2026-10-31' }));
 
       expect(r.trend).toEqual([{ period: '2026-10-01', answered: 6 }]);
     });
@@ -518,7 +523,7 @@ describe('SurveysInsightsService', () => {
         valueRow({ questionId: 'q-own', valueNumber: 4, count: 2 }),
       ]);
 
-      const r = full(await run({ from: '2026-10-01', to: '2026-10-28' }));
+      const r = full(await run({ from: '2026-10-01', to: '2026-10-31' }));
 
       expect(r.trend).toEqual([
         { period: '2026-10-01', answered: 5, average: 4.6 },
@@ -550,7 +555,7 @@ describe('SurveysInsightsService', () => {
       valueRow({ questionId: 'q-v2', valueNumber: 1, count: 2 }),
     ]);
 
-    const r = full(await run({ from: '2026-10-01' }));
+    const r = full(await run({ from: '2026-10-01', to: '2026-10-31' }));
 
     expect(r.byQuestion).toHaveLength(1);
     expect(r.byQuestion[0].questionId).toBe('q-v2');
@@ -582,7 +587,7 @@ describe('SurveysInsightsService', () => {
       valueRow({ questionId: 'q-s', valueNumber: 2, count: 3 }),
     ]);
 
-    const r = full(await run({ from: '2026-10-01' }));
+    const r = full(await run({ from: '2026-10-01', to: '2026-10-31' }));
 
     expect(r.byQuestion).toHaveLength(1);
     expect(r.byQuestion[0].dimension).toBe('satisfaccion_global');
@@ -632,7 +637,7 @@ describe('SurveysInsightsService', () => {
       valueRow({ questionId: 'q-bool', valueBoolean: false, count: 2 }),
     ]);
 
-    const r = full(await run({ from: '2026-10-01' }));
+    const r = full(await run({ from: '2026-10-01', to: '2026-10-31' }));
 
     const sala = r.byQuestion.find((q) => q.questionId === 'q-a2');
     expect(sala).toMatchObject({ dimension: null, n: 6, average: 2.5 });
@@ -667,7 +672,7 @@ describe('SurveysInsightsService', () => {
       valueRow({ questionId: 'q-rec', valueNumber: 0, count: 3 }),
     ]);
 
-    const r = full(await run({ from: '2026-10-01' }));
+    const r = full(await run({ from: '2026-10-01', to: '2026-10-31' }));
 
     expect(r.nps).toEqual({
       value: 0,
@@ -683,7 +688,7 @@ describe('SurveysInsightsService', () => {
       const { repo, run } = build();
       seedBaseScenario(repo);
 
-      await run({ from: '2026-10-01', serviceId: 'svc-1' });
+      await run({ from: '2026-10-01', to: '2026-10-31', serviceId: 'svc-1' });
 
       const scopes = [
         repo.countInvitationsByBucket.mock.calls[0][1],
@@ -715,8 +720,11 @@ describe('SurveysInsightsService', () => {
         ],
       );
 
-      const mine = await run({ from: '2026-10-01' }, doctor);
-      const theirs = await run({ from: '2026-10-01' }, otherDoctor);
+      const mine = await run({ from: '2026-10-01', to: '2026-10-31' }, doctor);
+      const theirs = await run(
+        { from: '2026-10-01', to: '2026-10-31' },
+        otherDoctor,
+      );
 
       expect(mine.totals.issued).toBe(7);
       expect(theirs.totals.issued).toBe(2);
@@ -737,60 +745,86 @@ describe('SurveysInsightsService', () => {
     });
   });
 
-  describe('periodo: sólo fechas de día', () => {
-    it('`to` incluye todo ese día: la cota superior es la medianoche siguiente', async () => {
+  describe('periodo: meses calendario', () => {
+    it('`from` es el primer día del mes y `to` el último: la cota superior es la medianoche siguiente', async () => {
       const { repo, run } = build();
-      await run({ from: '2026-10-01', to: '2026-10-28' });
+      await run({ from: '2026-10-01', to: '2026-10-31' });
       const scope = repo.countInvitationsByBucket.mock.calls[0][1];
       expect(scope.from).toEqual(new Date('2026-10-01T00:00:00.000Z'));
-      expect(scope.toExclusive).toEqual(new Date('2026-10-29T00:00:00.000Z'));
+      expect(scope.toExclusive).toEqual(new Date('2026-11-01T00:00:00.000Z'));
     });
 
-    it('sin `from` vale 365 días antes de `to`; sin `to`, hoy', async () => {
+    it('acepta febrero (28 y 29 días) y diciembre como último día de mes', async () => {
+      const { run } = build();
+      await expect(
+        run({ from: '2026-02-01', to: '2026-02-28' }),
+      ).resolves.toBeDefined();
+      await expect(
+        run({ from: '2028-02-01', to: '2028-02-29' }),
+      ).resolves.toBeDefined();
+      await expect(
+        run({ from: '2025-12-01', to: '2025-12-31' }),
+      ).resolves.toBeDefined();
+    });
+
+    it('sin `from` vale una ventana de 12 meses que termina en el mes de `to`; sin `to`, el fin del mes en curso', async () => {
       const { repo, run } = build();
-      await run({ to: '2026-10-28' });
+      await run({ to: '2026-10-31' });
       const scope = repo.countInvitationsByBucket.mock.calls[0][1];
-      expect(scope.from).toEqual(new Date('2025-10-28T00:00:00.000Z'));
+      expect(scope.from).toEqual(new Date('2025-11-01T00:00:00.000Z'));
+      expect(scope.toExclusive).toEqual(new Date('2026-11-01T00:00:00.000Z'));
 
       await run({});
       const open = repo.countInvitationsByBucket.mock.calls[1][1];
-      const today = new Date().toISOString().slice(0, 10);
-      expect(
-        open.toExclusive.getTime() - Date.parse(`${today}T00:00:00Z`),
-      ).toBe(24 * 60 * 60 * 1000);
+      expect(open.toExclusive.getUTCDate()).toBe(1);
+      expect(open.from.getUTCDate()).toBe(1);
+      const months =
+        open.toExclusive.getUTCFullYear() * 12 +
+        open.toExclusive.getUTCMonth() -
+        (open.from.getUTCFullYear() * 12 + open.from.getUTCMonth());
+      expect(months).toBe(12);
     });
 
     it.each([
-      ['from con hora', { from: '2026-10-01T10:00:00Z' }],
-      ['from con hora y offset', { from: '2026-10-01T10:00:00-04:00' }],
-      ['to con hora', { to: '2026-10-28T12:00:00.000Z' }],
-      ['to como instante', { to: '2026-10-28T00:00:00Z' }],
+      ['from con hora', { from: '2026-10-01T10:00:00Z', to: '2026-10-31' }],
+      ['from con hora y offset', { from: '2026-10-01T00:00:00-04:00' }],
+      ['to con hora', { from: '2026-10-01', to: '2026-10-31T12:00:00.000Z' }],
+      ['to como instante', { to: '2026-10-31T00:00:00Z' }],
       ['fecha imposible', { from: '2026-13-45' }],
-      ['día inexistente', { to: '2026-02-30' }],
+      ['día inexistente', { from: '2026-02-01', to: '2026-02-30' }],
       ['formato libre', { from: '1/10/2026' }],
-      ['from posterior a to', { from: '2026-10-28', to: '2026-10-01' }],
-      ['más de 366 días', { from: '2025-10-01', to: '2026-10-28' }],
+      [
+        'from que no es primer día de mes',
+        { from: '2026-10-02', to: '2026-10-31' },
+      ],
+      [
+        'to que no es último día de mes',
+        { from: '2026-10-01', to: '2026-10-30' },
+      ],
+      ['to a mitad de mes', { from: '2026-10-01', to: '2026-10-15' }],
+      ['febrero sin su último día', { from: '2026-02-01', to: '2026-02-27' }],
+      ['from posterior a to', { from: '2026-10-01', to: '2026-08-31' }],
+      ['más de 12 meses', { from: '2025-10-01', to: '2026-10-31' }],
     ])('rechaza con 400: %s', async (_name, query) => {
       const { repo, run } = build();
       await expect(run(query)).rejects.toBeInstanceOf(BadRequestException);
       expect(repo.countInvitationsByBucket).not.toHaveBeenCalled();
     });
 
-    it('acepta el mismo día en ambos extremos y el máximo de 366 días', async () => {
+    it('acepta un solo mes y el máximo de 12 meses', async () => {
       const { run } = build();
       await expect(
-        run({ from: '2026-10-10', to: '2026-10-10' }),
+        run({ from: '2026-10-01', to: '2026-10-31' }),
       ).resolves.toBeDefined();
-      // 2025-10-28 → 2026-10-28 son 366 días con ambos extremos.
       await expect(
-        run({ from: '2025-10-28', to: '2026-10-28' }),
+        run({ from: '2025-11-01', to: '2026-10-31' }),
       ).resolves.toBeDefined();
     });
 
     it.each([
-      ['2026-10-01', '2026-10-30', 'DAY', 'day'],
-      ['2026-08-01', '2026-10-28', 'WEEK', 'week'],
-      ['2025-11-01', '2026-10-28', 'MONTH', 'month'],
+      ['2026-10-01', '2026-10-31', 'DAY', 'day'],
+      ['2026-07-01', '2026-10-31', 'WEEK', 'week'],
+      ['2025-11-01', '2026-10-31', 'MONTH', 'month'],
     ])('periodo %s → %s: tendencia %s', async (from, to, granularity, unit) => {
       const { repo, run } = build();
       seedBaseScenario(repo);
@@ -799,6 +833,120 @@ describe('SurveysInsightsService', () => {
       expect(repo.countInvitationsByBucket.mock.calls[0][2]).toBe(unit);
       expect(repo.countAnswersByQuestion.mock.calls[0][2]).toBe(unit);
       expect(repo.countAnswerValues.mock.calls[0][2]).toBe(unit);
+    });
+  });
+
+  describe('lo suprimido no alimenta ningún total', () => {
+    it('una pregunta suprimida no entra en la tendencia: el promedio sale sólo de las no suprimidas', async () => {
+      const { repo, run } = build();
+      repo.countInvitationsByBucket.mockResolvedValue([
+        bucketRow('2026-10-01', 8, 8),
+      ]);
+      repo.countAnswersByQuestion.mockResolvedValue([
+        // Satisfacción global: sólo 3 respuestas (suprimida) y todas 1.
+        questionRow({ questionId: 'q-g', text: T.global, n: 3 }),
+        // Una escala 1-5 propia con 6 respuestas todas 5.
+        questionRow({ questionId: 'q-own', text: 'Mi pregunta', n: 6 }),
+      ]);
+      repo.countAnswerValues.mockResolvedValue([
+        valueRow({ questionId: 'q-g', valueNumber: 1, count: 3 }),
+        valueRow({ questionId: 'q-own', valueNumber: 5, count: 6 }),
+      ]);
+
+      const r = full(await run({ from: '2026-10-01', to: '2026-10-31' }));
+
+      expect(r.trend).toEqual([
+        { period: '2026-10-01', answered: 8, average: 5 },
+      ]);
+      expect(JSON.stringify(r.trend)).not.toMatch(/"average":(1|[2-4])/);
+    });
+
+    it('si la pregunta de satisfacción es la única y está suprimida, la tendencia no trae promedio', async () => {
+      const { repo, run } = build();
+      repo.countInvitationsByBucket.mockResolvedValue([
+        bucketRow('2026-10-01', 8, 8),
+      ]);
+      repo.countAnswersByQuestion.mockResolvedValue([
+        questionRow({ questionId: 'q-g', text: T.global, n: 4 }),
+      ]);
+      repo.countAnswerValues.mockResolvedValue([
+        valueRow({ questionId: 'q-g', valueNumber: 2, count: 4 }),
+      ]);
+
+      const r = full(await run({ from: '2026-10-01', to: '2026-10-31' }));
+
+      expect(r.trend).toEqual([{ period: '2026-10-01', answered: 8 }]);
+    });
+
+    it('un NPS suprimido no deja rastro: ni valor, ni conteos, ni n', async () => {
+      const { repo, run } = build();
+      seedBaseScenario(repo);
+      const rows = await repo.countAnswersByQuestion();
+      repo.countAnswersByQuestion.mockResolvedValue(
+        rows.map((row: any) =>
+          row.questionId === 'q-nps' ? { ...row, n: 4 } : row,
+        ),
+      );
+
+      const r = full(await run({ from: '2026-10-01', to: '2026-10-31' }));
+
+      expect(r.nps).toEqual({
+        value: null,
+        promoters: 0,
+        passives: 0,
+        detractors: 0,
+        n: 0,
+        suppressed: true,
+      });
+      const q = r.byQuestion.find((x) => x.dimension === 'recomendacion_nps')!;
+      expect(q.suppressed).toBe(true);
+      expect(q.distribution).toEqual([]);
+      expect(q.average).toBeUndefined();
+    });
+
+    it('la alerta de seguridad de una pregunta suprimida no se suma a ningún total', async () => {
+      const { repo, run } = build();
+      seedBaseScenario(repo);
+      const rows = await repo.countAnswersByQuestion();
+      repo.countAnswersByQuestion.mockResolvedValue(
+        rows.map((row: any) =>
+          row.questionId === 'q-safety' ? { ...row, n: 4 } : row,
+        ),
+      );
+
+      const r = full(await run({ from: '2026-10-01', to: '2026-10-31' }));
+
+      expect(r.safetyAlerts).toEqual({ n: 0 });
+    });
+  });
+
+  describe('comentarios', () => {
+    it('con menos de 5 comentarios en el alcance no se devuelve ninguno', async () => {
+      const { repo, run } = build();
+      seedBaseScenario(repo);
+      repo.listRecentComments.mockResolvedValue([
+        { text: 'Uno', month: '2026-10' },
+        { text: 'Dos', month: '2026-10' },
+        { text: 'Tres', month: '2026-09' },
+        { text: 'Cuatro', month: '2026-09' },
+      ]);
+
+      const r = full(await run({ from: '2026-10-01', to: '2026-10-31' }));
+
+      expect(r.comments).toEqual([]);
+      expect(JSON.stringify(r)).not.toMatch(/Uno|Dos|Tres|Cuatro/);
+    });
+
+    it('con 5 o más se devuelven con el mes, nunca el día ni la hora', async () => {
+      const { repo, run } = build();
+      seedBaseScenario(repo);
+
+      const r = full(await run({ from: '2026-10-01', to: '2026-10-31' }));
+
+      expect(r.comments).toHaveLength(5);
+      expect(JSON.stringify(r.comments)).not.toMatch(
+        /submittedAt|\d{4}-\d{2}-\d{2}/,
+      );
     });
   });
 
@@ -825,15 +973,15 @@ describe('SurveysInsightsService', () => {
         );
       }
 
-      const result = full(await run({ from: '2026-10-01' }));
+      const result = full(await run({ from: '2026-10-01', to: '2026-10-31' }));
       const json = JSON.stringify(result);
 
       expect(json).not.toMatch(/SECRET/);
       expect(json).not.toMatch(/patient|appointment|booking|invitation/i);
       expect(json).not.toContain('13:45');
       for (const comment of result.comments) {
-        expect(Object.keys(comment).sort()).toEqual(['submittedAt', 'text']);
-        expect(comment.submittedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+        expect(Object.keys(comment).sort()).toEqual(['month', 'text']);
+        expect(comment.month).toMatch(/^\d{4}-\d{2}$/);
       }
     });
 
@@ -841,7 +989,7 @@ describe('SurveysInsightsService', () => {
       const { repo, run, logger } = build();
       seedBaseScenario(repo);
 
-      await run({ from: '2026-10-01' });
+      await run({ from: '2026-10-01', to: '2026-10-31' });
 
       const logged = JSON.stringify(logger.info.mock.calls);
       expect(logged).not.toContain('Muy amable');

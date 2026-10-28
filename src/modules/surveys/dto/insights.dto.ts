@@ -2,8 +2,9 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsUUID, Matches } from 'class-validator';
 import {
   DATE_ONLY_PATTERN,
-  MAX_RANGE_DAYS,
+  MAX_RANGE_MONTHS,
   MIN_COHORT,
+  MONTH_START_PATTERN,
 } from '../insights.constants';
 import { ANSWER_TYPE_CODES, type AnswerTypeCode } from '../surveys.concepts';
 
@@ -12,20 +13,22 @@ export type InsightsTrendGranularity = 'DAY' | 'WEEK' | 'MONTH';
 
 /** Parámetros de `GET /surveys/insights`. Todos opcionales. */
 export class InsightsQueryDto {
-  /** Primer día del periodo (inclusive), `YYYY-MM-DD`. */
+  /** Primer día de un mes (inclusive), `YYYY-MM-01`. */
   @ApiPropertyOptional({
-    description: `Primer día del periodo, inclusive. Sólo fecha de día (YYYY-MM-DD, UTC); con hora se rechaza con 400. Se filtra por la fecha de emisión del cuestionario. Sin valor: 365 días antes de \`to\`.`,
+    description: `Primer día de un mes (YYYY-MM-01, UTC). Cualquier otro día, o una hora, se rechaza con 400. Se filtra por la fecha de emisión del cuestionario. Sin valor: ${MAX_RANGE_MONTHS - 1} meses antes del mes de \`to\` (ventana de ${MAX_RANGE_MONTHS} meses).`,
     example: '2026-08-01',
     format: 'date',
   })
   @IsOptional()
-  @Matches(DATE_ONLY_PATTERN, { message: 'from debe ser una fecha YYYY-MM-DD' })
+  @Matches(MONTH_START_PATTERN, {
+    message: 'from debe ser el primer día de un mes (YYYY-MM-01)',
+  })
   from?: string;
 
-  /** Último día del periodo (inclusive), `YYYY-MM-DD`. */
+  /** Último día de un mes (inclusive), `YYYY-MM-DD`. */
   @ApiPropertyOptional({
-    description: `Último día del periodo, inclusive. Sólo fecha de día (YYYY-MM-DD, UTC). Debe ser igual o posterior a \`from\`; el periodo no puede pasar de ${MAX_RANGE_DAYS} días. Sin valor: hoy (UTC).`,
-    example: '2026-10-28',
+    description: `Último día de un mes (p. ej. 2026-10-31, UTC). Cualquier otro día, o una hora, se rechaza con 400. No puede ser anterior a \`from\` y el periodo no puede pasar de ${MAX_RANGE_MONTHS} meses. Sin valor: el último día del mes en curso.`,
+    example: '2026-10-31',
     format: 'date',
   })
   @IsOptional()
@@ -213,9 +216,9 @@ export class InsightsCommentDto {
   @ApiProperty()
   text!: string;
 
-  /** Día del envío (`YYYY-MM-DD`, UTC). Nunca la hora. */
-  @ApiProperty({ type: String, format: 'date', example: '2026-10-27' })
-  submittedAt!: string;
+  /** Mes del envío (`YYYY-MM`, UTC). Ni el día ni la hora. */
+  @ApiProperty({ type: String, example: '2026-10' })
+  month!: string;
 }
 
 /** Aviso de privacidad del resumen. */
@@ -270,8 +273,8 @@ export class SurveyInsightsDto {
   safetyAlerts?: InsightsSafetyAlertsDto;
 
   /**
-   * Comentarios abiertos (tope 20), en un orden estable que no es
-   * cronológico. Ausente si suprimido.
+   * Comentarios abiertos (tope 20) en un orden estable que no es cronológico.
+   * Vacío si en el alcance hay menos de {@link MIN_COHORT}. Ausente si suprimido.
    */
   @ApiPropertyOptional({ type: [InsightsCommentDto] })
   comments?: InsightsCommentDto[];

@@ -198,7 +198,7 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
     t: { versionId: string; assignmentId: string; q: Record<string, string> },
     tenantId: string,
     bookingId: string | null,
-    issuedDay: number,
+    issuedDay: number | Date,
     answers?: Array<{
       key: string;
       text?: string;
@@ -209,6 +209,8 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
   ) => {
     const invitationId = randomUUID();
     const patientId = randomUUID();
+    const issuedAt = typeof issuedDay === 'number' ? day(issuedDay) : issuedDay;
+    const submittedAt = new Date(issuedAt.getTime() + 86_400_000);
     await insert(tx, 'surveys.survey_invitations', {
       id: invitationId,
       survey_version_id: t.versionId,
@@ -222,9 +224,9 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
       status_concept_id: answers
         ? SURVEYS.INVITATION_ANSWERED
         : SURVEYS.INVITATION_PENDING,
-      issued_at: day(issuedDay),
-      expires_at: day(issuedDay + 20),
-      answered_at: answers ? day(issuedDay + 1) : null,
+      issued_at: issuedAt,
+      expires_at: new Date(issuedAt.getTime() + 20 * 86_400_000),
+      answered_at: answers ? submittedAt : null,
       ...stamp,
     });
     if (!answers) return;
@@ -235,7 +237,7 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
       survey_version_id: t.versionId,
       tenant_id: tenantId,
       patient_profile_id: patientId,
-      submitted_at: day(issuedDay + 1),
+      submitted_at: submittedAt,
       ...stamp,
     });
     for (const a of answers) {
@@ -354,6 +356,7 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
           { key: 'global', number: 5 },
           { key: 'nps', number: 9 },
           { key: 'safety', choices: [SAFETY_OPTIONS[0]] },
+          { key: 'open', text: 'Comentario seis' },
         ],
       );
       await makeInvitation(
@@ -368,6 +371,7 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
           { key: 'global', number: 4 },
           { key: 'nps', number: 10 },
           { key: 'safety', choices: [SAFETY_OPTIONS[0]] },
+          { key: 'open', text: 'Comentario siete' },
         ],
       );
       // Propia, pendiente (dia 4).
@@ -393,7 +397,17 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
         { key: 'safety', choices: [SAFETY_OPTIONS[0]] },
         { key: 'global', number: 4 },
         { key: 'nps', number: 8 },
+        { key: 'open', text: 'Comentario doce' },
       ]);
+      // Septiembre: una respuesta suelta de otro mes, para probar ventanas.
+      await makeInvitation(
+        tx,
+        own,
+        tenant,
+        await makeBooking(tx, tenant, d1),
+        new Date(Date.UTC(2026, 8, 15, 10, 0, 0)),
+        [{ key: 'global', number: 5 }],
+      );
       // Propia con un destino de servicio por asignación (otro servicio), dia 20.
       const svcAssignment = randomUUID();
       await insert(tx, 'surveys.survey_assignments', {
@@ -475,7 +489,7 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
     return result as Required<SurveyInsightsDto>;
   };
   const insights = (
-    query: Record<string, string>,
+    query: { from?: string; to?: string; serviceId?: string },
     practitioner = d1,
     tenantId = tenant,
   ) =>
@@ -485,7 +499,7 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
 
   it('suma las plantillas propias y las de sistema emitidas por las atenciones del médico', async () => {
     const result = full(
-      await insights({ from: '2026-10-01', to: '2026-10-28' }),
+      await insights({ from: '2026-10-01', to: '2026-10-31' }),
     );
 
     // propias: dias 3, 6, 7 (resp), 4 (pend), 20 (resp, por asignación de servicio)
@@ -544,64 +558,61 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
       { option: SAFETY_OPTIONS[2], count: 0 },
     ]);
 
-    // Comentarios: sólo texto y día, ninguno ajeno, sin orden cronológico forzado.
+    // Comentarios (5 en el alcance): sólo texto y mes, ninguno ajeno, sin
+    // orden cronológico forzado.
+    expect(result.comments).toHaveLength(5);
     expect(
-      [...result.comments].sort((a, b) => a.text.localeCompare(b.text)),
+      result.comments.map((c) => c.text).sort((a, b) => a.localeCompare(b)),
     ).toEqual([
-      { text: 'Esperé demasiado', submittedAt: '2026-10-11' },
-      { text: 'Muy amable, gracias', submittedAt: '2026-10-04' },
+      'Comentario doce',
+      'Comentario seis',
+      'Comentario siete',
+      'Esperé demasiado',
+      'Muy amable, gracias',
     ]);
+    for (const comment of result.comments) {
+      expect(Object.keys(comment).sort()).toEqual(['month', 'text']);
+      expect(comment.month).toBe('2026-10');
+    }
   });
 
-  it('suprime todo con menos de 5 respondidas: un día, un servicio o una respuesta suelta', async () => {
-    // Un solo día con una sola respuesta (la del dia 10, de la encuesta de sistema).
-    const oneDay = await insights({ from: '2026-10-10', to: '2026-10-10' });
-    expect(oneDay).toEqual({
+  it('suprime todo con menos de 5 respondidas: un mes con una respuesta suelta', async () => {
+    // Septiembre tiene una sola respuesta de D1.
+    const september = await insights({ from: '2026-09-01', to: '2026-09-30' });
+    expect(september).toEqual({
       totals: { issued: 1, answered: 1, responseRate: 1 },
       privacy: { minCohort: 5, suppressed: true },
     });
-    expect(JSON.stringify(oneDay)).not.toContain('Esperé demasiado');
-
-    // Del 1 al 10 hay 4 respondidas (dias 3, 6, 7 y 10): no alcanza.
-    const four = await insights({ from: '2026-10-01', to: '2026-10-10' });
-    expect(four.totals).toMatchObject({ issued: 5, answered: 4 });
-    expect(four.privacy.suppressed).toBe(true);
-    expect(four.byQuestion).toBeUndefined();
-    expect(four.comments).toBeUndefined();
+    expect(JSON.stringify(september)).not.toMatch(/Comentario|Muy amable/);
   });
 
-  it('muestra el resumen justo al llegar a 5 respondidas', async () => {
-    // dias 3, 6, 7, 10 y 12 → 5 respondidas (el 4 pendiente cuenta como emitido).
-    const five = await insights({ from: '2026-10-01', to: '2026-10-12' });
-    expect(five.totals).toEqual({
-      issued: 6,
-      answered: 5,
-      responseRate: 0.8333,
+  it('muestra el resumen cuando el alcance suma 5 o más respondidas', async () => {
+    const both = full(await insights({ from: '2026-09-01', to: '2026-10-31' }));
+    expect(both.totals).toEqual({
+      issued: 8,
+      answered: 7,
+      responseRate: 0.875,
     });
-    expect(five.privacy.suppressed).toBe(false);
-    expect(five.byQuestion!.length).toBeGreaterThan(0);
-
-    // Sin el dia 12 son 4: se suprime.
-    const four = await insights({ from: '2026-10-01', to: '2026-10-11' });
-    expect(four.totals.answered).toBe(4);
-    expect(four.privacy.suppressed).toBe(true);
+    expect(both.byQuestion.length).toBeGreaterThan(0);
   });
 
-  it('rechaza con 400 un periodo con hora, invertido o de más de 366 días', async () => {
+  it('rechaza con 400 un periodo con hora, que no sea de meses enteros, invertido o de más de 12 meses', async () => {
     for (const query of [
       { from: '2026-10-01T10:00:00Z' },
-      { to: '2026-10-28T23:59:59Z' },
-      { from: '2026-10-28', to: '2026-10-01' },
-      { from: '2025-01-01', to: '2026-10-28' },
+      { to: '2026-10-31T23:59:59Z' },
+      { from: '2026-10-02', to: '2026-10-31' },
+      { from: '2026-10-01', to: '2026-10-30' },
+      { from: '2026-10-01', to: '2026-08-31' },
+      { from: '2025-10-01', to: '2026-10-31' },
     ]) {
       await expect(insights(query)).rejects.toBeInstanceOf(BadRequestException);
     }
   });
 
   it('aísla por médico: D2 no ve nada de D1 y D1 no ve nada de D2', async () => {
-    const mine = await insights({ from: '2026-10-01', to: '2026-10-28' }, d1);
+    const mine = await insights({ from: '2026-10-01', to: '2026-10-31' }, d1);
     const theirs = full(
-      await insights({ from: '2026-10-01', to: '2026-10-28' }, d2),
+      await insights({ from: '2026-10-01', to: '2026-10-31' }, d2),
     );
 
     // D2: su plantilla (dia 5 y 7..9) + la de sistema emitida por su atención (dia 6).
@@ -620,7 +631,7 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
 
   it('aísla por tenant: el mismo médico en otro tenant sólo ve lo de ese tenant', async () => {
     const result = await insights(
-      { from: '2026-10-01', to: '2026-10-28' },
+      { from: '2026-10-01', to: '2026-10-31' },
       d1,
       otherTenant,
     );
@@ -642,7 +653,7 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
   it('filtra por servicio: por la oferta de la reserva y por la asignación de servicio', async () => {
     const byOffering = await insights({
       from: '2026-10-01',
-      to: '2026-10-28',
+      to: '2026-10-31',
       serviceId: svcCatalog,
     });
     // sólo la encuesta de sistema del dia 10 (atención con esa oferta)
@@ -655,7 +666,7 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
 
     const byAssignment = await insights({
       from: '2026-10-01',
-      to: '2026-10-28',
+      to: '2026-10-31',
       serviceId: svcOther,
     });
     // sólo la propia del dia 20, asignada a ese servicio
@@ -667,7 +678,7 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
 
     const unknown = await insights({
       from: '2026-10-01',
-      to: '2026-10-28',
+      to: '2026-10-31',
       serviceId: randomUUID(),
     });
     expect(unknown.totals.issued).toBe(0);
@@ -675,7 +686,7 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
 
   it('la tendencia agrupa por tramo y funde los tramos con menos de 5 respondidos', async () => {
     const result = full(
-      await insights({ from: '2026-10-01', to: '2026-10-28' }),
+      await insights({ from: '2026-10-01', to: '2026-10-31' }),
     );
     expect(result.trendGranularity).toBe('DAY');
     // Por día: 3(1) 4(0) 6(1) 7(1) 10(1) 12(1) 20(1). Se funden hasta sumar 5
@@ -685,25 +696,27 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
     ]);
 
     const weekly = full(
-      await insights({ from: '2026-08-01', to: '2026-10-28' }),
+      await insights({ from: '2026-07-01', to: '2026-10-31' }),
     );
     expect(weekly.trendGranularity).toBe('WEEK');
     for (const point of weekly.trend) {
       expect(point.answered).toBeGreaterThanOrEqual(5);
     }
-    // Semana ISO que empieza el lunes: el dia 3 (sábado) cae en la del 28/9.
-    expect(weekly.trend[0].period).toBe('2026-09-28');
+    // Semana ISO que empieza el lunes: el 15/9 (martes) cae en la del 14/9.
+    expect(weekly.trend[0].period).toBe('2026-09-14');
 
     const monthly = full(
-      await insights({ from: '2025-11-01', to: '2026-10-28' }),
+      await insights({ from: '2025-11-01', to: '2026-10-31' }),
     );
     expect(monthly.trendGranularity).toBe('MONTH');
-    expect(monthly.trend.map((p) => p.period)).toEqual(['2026-10-01']);
+    expect(monthly.trend.map((p) => p.period)).toEqual(['2026-09-01']);
+    expect(monthly.trend[0].answered).toBe(7);
   });
 
   it('no devuelve nada que identifique al paciente o a la atención, ni la hora', async () => {
-    const result = await insights({ from: '2026-10-01', to: '2026-10-28' });
+    const result = await insights({ from: '2026-10-01', to: '2026-10-31' });
     expect(result.privacy.suppressed).toBe(false);
+    expect(result.comments!.length).toBeGreaterThan(0);
     const json = JSON.stringify(result);
     const rows = (await em.getConnection().execute(
       `select patient_profile_id::text as id from surveys.survey_invitations where tenant_id = ?
@@ -720,7 +733,7 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
 
   it('usa un número fijo de consultas, sin importar cuántas invitaciones haya (sin N+1)', async () => {
     queries = 0;
-    await insights({ from: '2026-10-01', to: '2026-10-28' });
+    await insights({ from: '2026-10-01', to: '2026-10-31' });
     const small = queries;
 
     // Cuatro invitaciones más de D1 → mismas consultas.
@@ -752,7 +765,7 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
     });
 
     queries = 0;
-    const result = await insights({ from: '2026-10-01', to: '2026-10-28' });
+    const result = await insights({ from: '2026-10-01', to: '2026-10-31' });
     expect(queries).toBe(small);
     expect(small).toBe(4);
     expect(result.totals.issued).toBe(11);

@@ -93,13 +93,13 @@ describe('InsightsRepository', () => {
     },
   );
 
-  it('los comentarios salen con el día, nunca con la hora, con tope de 20 y sin orden cronológico', async () => {
-    const b = build([{ text: 'hola', day: '2026-10-09' }]);
+  it('los comentarios salen con el mes, nunca con el día ni la hora, con tope de 20 y sin orden cronológico', async () => {
+    const b = build([{ text: 'hola', month: '2026-10' }]);
     const result = await b.repo.listRecentComments(b.em, scope);
     const [sql, params] = b.execute.mock.calls[0] as [string, unknown[]];
 
     expect(sql).toContain(
-      "to_char(r.submitted_at AT TIME ZONE 'UTC', 'YYYY-MM-DD')",
+      "to_char(r.submitted_at AT TIME ZONE 'UTC', 'YYYY-MM')",
     );
     expect(sql).toMatch(/LIMIT \?/);
     expect(params.at(-1)).toBe(20);
@@ -107,7 +107,7 @@ describe('InsightsRepository', () => {
     expect(sql).toContain('ORDER BY md5(a.id::text)');
     expect(sql).not.toMatch(/ORDER BY[^\n]*submitted_at/);
     expect(params).toContain(SURVEYS.ANSWER_TYPE_TEXT);
-    expect(result).toEqual([{ text: 'hola', day: '2026-10-09' }]);
+    expect(result).toEqual([{ text: 'hola', month: '2026-10' }]);
   });
 
   it('el periodo y el servicio se agregan como parámetros, en el orden del SQL', async () => {
