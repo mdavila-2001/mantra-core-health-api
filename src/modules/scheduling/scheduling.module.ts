@@ -71,6 +71,10 @@ import { MessagingModule } from '../messaging/messaging.module';
 // (`community.conversations`, reusado tal cual). `community` no importa
 // `scheduling`, así que la dependencia no cierra ciclo.
 import { CommunityModule } from '../community/community.module';
+// La encuesta de satisfacción se emite al completarse la reserva (F3), detrás de
+// `BOOKING_COMPLETED_PORT`. `surveys` no importa `scheduling` (sólo lee sus
+// entidades), así que la dependencia es de un solo sentido y no cierra ciclo.
+import { SurveysModule } from '../surveys/surveys.module';
 // Las entidades de `profiles` que el aviso necesita leer para saber a qué
 // cuenta va y cómo se llama el profesional. Se registran acá —y no se importa
 // el módulo entero— por el mismo criterio que `AppointmentsRepository`.
@@ -118,7 +122,9 @@ import { ProfilesPatientRepresentationAdapter } from './infrastructure/adapters/
 import { schedulingPersistenceProviders } from './infrastructure/persistence/scheduling.persistence';
 import { AGENDA_NOTICE_PORT } from './application/ports/agenda-notice.port';
 import { BOOKING_CHAT_PORT } from './application/ports/booking-chat.port';
+import { BOOKING_COMPLETED_PORT } from './application/ports/booking-completed.port';
 import { CommunityBookingChatAdapter } from './infrastructure/adapters/community-booking-chat.adapter';
+import { SurveysBookingCompletedAdapter } from './infrastructure/adapters/surveys-booking-completed.adapter';
 import { MessagingAgendaNoticeAdapter } from './infrastructure/adapters/messaging-agenda-notice.adapter';
 import { PAYMENT_RECEIPT_FILES_PORT } from './application/ports/payment-receipt-files.port';
 import { CommonPaymentReceiptFilesAdapter } from './infrastructure/adapters/common-payment-receipt-files.adapter';
@@ -152,6 +158,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     InsuranceModule,
     ProfilesModule,
     CommonModule,
+    SurveysModule,
   ],
   controllers: [
     SchedulingController,
@@ -211,6 +218,13 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     { provide: AGENDA_NOTICE_PORT, useExisting: MessagingAgendaNoticeAdapter },
     CommunityBookingChatAdapter,
     { provide: BOOKING_CHAT_PORT, useExisting: CommunityBookingChatAdapter },
+    // F3 · al completarse la atención se emite la encuesta (base + la del
+    // profesional) al paciente. El puerto no lanza.
+    SurveysBookingCompletedAdapter,
+    {
+      provide: BOOKING_COMPLETED_PORT,
+      useExisting: SurveysBookingCompletedAdapter,
+    },
     // Puertos hacia otros contextos (audit, profiles, clinical, insurance,
     // forms): los casos de uso dependen del token; el adaptador es el único que
     // conoce al otro módulo.
