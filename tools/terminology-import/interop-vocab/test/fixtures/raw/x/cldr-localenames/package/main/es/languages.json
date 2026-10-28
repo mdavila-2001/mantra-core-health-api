@@ -1,0 +1,18 @@
+{
+ "main": {
+  "es": {
+   "identity": {
+    "language": "es"
+   },
+   "localeDisplayNames": {
+    "languages": {
+     "aa": "afar",
+     "ar": "árabe",
+     "ar-001": "árabe estándar moderno",
+     "en": "inglés",
+     "es": "español"
+    }
+   }
+  }
+ }
+}

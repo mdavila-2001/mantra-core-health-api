@@ -1,0 +1,7 @@
+AB|Abbott Laboratories|includes Ross Products Division, Solvay|Inactive|2017/11/16
+ACA|Acambis, Inc|acquired by sanofi in sept 2008|Inactive|2010/05/28
+AD|Adams Laboratories, Inc.||Inactive|2017/11/16
+BTP|Biotest Pharmaceuticals Corporation|New owner of NABI HB as of December 2007, Does NOT replace NABI Biopharmaceuticals in this code list.|Active|2010/05/28
+DVC|DynPort Vaccine Company, LLC||Active|2010/05/28
+MIP|Emergent BioSolutions|Companies include Emergent Product Development Gaithersburg Inc. and former Emergent BioDefense Operations Lansing and Michigan Biologic Products Institute|Active|2023/11/01
+PMC|Sanofi Pasteur|Starting 2026 existing NDC labeler for Sanofi Pasteur, Inc. updated to Sanofi USA, Inc. Historic: prior company names include Aventis Pasteur, Pasteur Merieux Connaught (includes Connaught Laboratories); and Pasteur Merieux. Acquired ACAMBIS; Acquired Protein Sciences (8/28/2017)|Active|2026/04/14

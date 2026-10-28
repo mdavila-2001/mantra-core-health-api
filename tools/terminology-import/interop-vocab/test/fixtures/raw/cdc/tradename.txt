@@ -1,0 +1,7 @@
+BEYFORTUS|RSV, mAb, nirsevimab-alip, 0.5 mL, neonate to 24 months|306       |Sanofi Pasteur|PMC       |Active|Active|2023/07/21|
+BIOTHRAX|Anthrax, pre-exposure prophylaxis, post-exposure prophylaxis|24        |Emergent BioSolutions|MIP       |Active|Active|2013/08/09|
+DENGVAXIA|dengue fever tetravalent|56        |Sanofi Pasteur|PMC       |Active|Active|2019/09/04|
+Sanofi COVID-19 |COVID-19, D614, recomb, preS dTM, AS03 adjuvant add, PF, 5mcg/0.5mL|225       |Sanofi Pasteur|PMC       |Active|Inactive|2025/09/09|
+ACEL-IMUNE|DTaP|20        ||          |Inactive|Inactive|2010/09/01|
+ACAM2000|Vaccinia (smallpox, monkeypox), live|75        |Emergent BioSolutions|MIP       |Active|Active|2022/06/10|
+ACAM2000|Vaccinia (smallpox, monkeypox), live|75        |Acambis, Inc|ACA       |Inactive|Inactive|2010/05/28|

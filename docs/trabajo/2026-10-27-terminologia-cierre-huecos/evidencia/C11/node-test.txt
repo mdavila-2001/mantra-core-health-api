@@ -1,0 +1,208 @@
+TAP version 13
+# Subtest: CVX: BOM, código con relleno, notas, noVacuna, fecha ISO y caracteres no ASCII
+ok 1 - CVX: BOM, código con relleno, notas, noVacuna, fecha ISO y caracteres no ASCII
+  ---
+  duration_ms: 4.724144
+  type: 'test'
+  ...
+# Subtest: CVX: rechaza líneas con otro número de campos y códigos repetidos
+ok 2 - CVX: rechaza líneas con otro número de campos y códigos repetidos
+  ---
+  duration_ms: 1.164883
+  type: 'test'
+  ...
+# Subtest: MVX: cinco campos, notas opcionales, estado
+ok 3 - MVX: cinco campos, notas opcionales, estado
+  ---
+  duration_ms: 0.519765
+  type: 'test'
+  ...
+# Subtest: tradename.txt: ocho campos con «|» final, fabricante y MVX opcionales, marcas repetidas
+ok 4 - tradename.txt: ocho campos con «|» final, fabricante y MVX opcionales, marcas repetidas
+  ---
+  duration_ms: 0.670063
+  type: 'test'
+  ...
+# Subtest: UCUM: prefijos, unidades base y derivadas; atributos, marcado y funciones verbatim
+ok 5 - UCUM: prefijos, unidades base y derivadas; atributos, marcado y funciones verbatim
+  ---
+  duration_ms: 1.621166
+  type: 'test'
+  ...
+# Subtest: UCUM: un Code repetido dentro de la misma clase es error
+ok 6 - UCUM: un Code repetido dentro de la misma clase es error
+  ---
+  duration_ms: 1.031994
+  type: 'test'
+  ...
+# Subtest: IANA: registros, descripciones múltiples, rangos, continuaciones y campos
+ok 7 - IANA: registros, descripciones múltiples, rangos, continuaciones y campos
+  ---
+  duration_ms: 1.292569
+  type: 'test'
+  ...
+# Subtest: IANA: un campo desconocido o un tipo repetido es error (no se ignora en silencio)
+ok 8 - IANA: un campo desconocido o un tipo repetido es error (no se ignora en silencio)
+  ---
+  duration_ms: 0.594877
+  type: 'test'
+  ...
+# Subtest: identidad: internal_code estable derivado de la URL canónica
+ok 9 - identidad: internal_code estable derivado de la URL canónica
+  ---
+  duration_ms: 0.631424
+  type: 'test'
+  ...
+# Subtest: licencia: SNOMED, DICOM y ejemplos del estándar no entran; los recursos de HL7 sí
+ok 10 - licencia: SNOMED, DICOM y ejemplos del estándar no entran; los recursos de HL7 sí
+  ---
+  duration_ms: 1.551115
+  type: 'test'
+  ...
+# Subtest: CodeSystem FHIR: jerarquía anidada, propiedades y designaciones verbatim
+ok 11 - CodeSystem FHIR: jerarquía anidada, propiedades y designaciones verbatim
+  ---
+  duration_ms: 0.99366
+  type: 'test'
+  ...
+# Subtest: corpus: capas presentes, versiones por edición y una sola edición por defecto por URL
+ok 12 - corpus: capas presentes, versiones por edición y una sola edición por defecto por URL
+  ---
+  duration_ms: 0.459807
+  type: 'test'
+  ...
+# Subtest: corpus: lo omitido queda registrado con su motivo exacto
+ok 13 - corpus: lo omitido queda registrado con su motivo exacto
+  ---
+  duration_ms: 0.333752
+  type: 'test'
+  ...
+# Subtest: corpus: CVX/MVX con OID de HL7, estado verbatim y selectable sólo para Active
+ok 14 - corpus: CVX/MVX con OID de HL7, estado verbatim y selectable sólo para Active
+  ---
+  duration_ms: 0.256801
+  type: 'test'
+  ...
+# Subtest: corpus: marcas del CDC adjuntas al CVX y al MVX exactos, sin cruzar por nombre
+ok 15 - corpus: marcas del CDC adjuntas al CVX y al MVX exactos, sin cruzar por nombre
+  ---
+  duration_ms: 0.33146
+  type: 'test'
+  ...
+# Subtest: corpus: NamingSystem — id como código, URI y OID verbatim, solo licencia del paquete
+ok 16 - corpus: NamingSystem — id como código, URI y OID verbatim, solo licencia del paquete
+  ---
+  duration_ms: 0.21877
+  type: 'test'
+  ...
+# Subtest: corpus: CLDR — nombres en/es verbatim, alfa-3 y numérico de CLDR, part-of sólo geográfico
+ok 17 - corpus: CLDR — nombres en/es verbatim, alfa-3 y numérico de CLDR, part-of sólo geográfico
+  ---
+  duration_ms: 0.386901
+  type: 'test'
+  ...
+# Subtest: corpus: CLDR — monedas con numérico tal cual lo publica CLDR y formas de nombre completas
+ok 18 - corpus: CLDR — monedas con numérico tal cual lo publica CLDR y formas de nombre completas
+  ---
+  duration_ms: 0.300886
+  type: 'test'
+  ...
+# Subtest: Wikidata ISO 3166-2: un código con dos ítems no se carga (no se elige uno); sin etiqueta no se completa
+ok 19 - Wikidata ISO 3166-2: un código con dos ítems no se carga (no se elige uno); sin etiqueta no se completa
+  ---
+  duration_ms: 0.897742
+  type: 'test'
+  ...
+# Subtest: corpus: Wikidata — QID y licencia CC0 por fila, display desde la etiqueta disponible
+ok 20 - corpus: Wikidata — QID y licencia CC0 por fila, display desde la etiqueta disponible
+  ---
+  duration_ms: 0.259099
+  type: 'test'
+  ...
+# Subtest: corpus: UCUM y prefijos en code systems distintos, sin cruzar códigos
+ok 21 - corpus: UCUM y prefijos en code systems distintos, sin cruzar códigos
+  ---
+  duration_ms: 0.330378
+  type: 'test'
+  ...
+# Subtest: corpus: IANA — región ISO 3166-1, deprecado con valor preferido y rango verbatim
+ok 22 - corpus: IANA — región ISO 3166-1, deprecado con valor preferido y rango verbatim
+  ---
+  duration_ms: 0.322577
+  type: 'test'
+  ...
+# Subtest: corpus: value sets expandidos sólo sobre contenido cargado, con ediciones separadas
+ok 23 - corpus: value sets expandidos sólo sobre contenido cargado, con ediciones separadas
+  ---
+  duration_ms: 0.316182
+  type: 'test'
+  ...
+# Subtest: ConceptMap: R4 equivalence y R5 relationship llegan a la misma equivalencia interna
+ok 24 - ConceptMap: R4 equivalence y R5 relationship llegan a la misma equivalencia interna
+  ---
+  duration_ms: 0.254527
+  type: 'test'
+  ...
+# Subtest: ConceptMap: los pares con un extremo fuera del corpus se cuentan, no se cargan
+ok 25 - ConceptMap: los pares con un extremo fuera del corpus se cuentan, no se cargan
+  ---
+  duration_ms: 0.161978
+  type: 'test'
+  ...
+# Subtest: corpus: dos armados seguidos dan exactamente los mismos bytes
+ok 26 - corpus: dos armados seguidos dan exactamente los mismos bytes
+  ---
+  duration_ms: 16.409474
+  type: 'test'
+  ...
+# Subtest: plan: ids deterministas, sin repetidos, y toda relación/miembro/mapa apunta a un concepto del plan
+ok 27 - plan: ids deterministas, sin repetidos, y toda relación/miembro/mapa apunta a un concepto del plan
+  ---
+  duration_ms: 36.489732
+  type: 'test'
+  ...
+# Subtest: plan: is-a sólo cuando el code system declara hierarchyMeaning; si no, el padre queda como propiedad
+ok 28 - plan: is-a sólo cuando el code system declara hierarchyMeaning; si no, el padre queda como propiedad
+  ---
+  duration_ms: 13.662601
+  type: 'test'
+  ...
+# Subtest: plan: designaciones sólo en inglés/español/sin idioma; todas quedan en fhir_designations
+ok 29 - plan: designaciones sólo en inglés/español/sin idioma; todas quedan en fhir_designations
+  ---
+  duration_ms: 0.545084
+  type: 'test'
+  ...
+# Subtest: plan: una propiedad de la fuente con nombre reservado es error
+ok 30 - plan: una propiedad de la fuente con nombre reservado es error
+  ---
+  duration_ms: 0.304923
+  type: 'test'
+  ...
+# Subtest: plan: conceptos internos exigidos, con los ids de concepts.ts
+ok 31 - plan: conceptos internos exigidos, con los ids de concepts.ts
+  ---
+  duration_ms: 0.361114
+  type: 'test'
+  ...
+# Subtest: procedencia por fila: URL, versión, fecha, SHA-256 y licencia en cada concepto
+ok 32 - procedencia por fila: URL, versión, fecha, SHA-256 y licencia en cada concepto
+  ---
+  duration_ms: 0.725903
+  type: 'test'
+  ...
+# Subtest: fuentes: cada archivo del fetch tiene licencia declarada o es una página de licencia
+ok 33 - fuentes: cada archivo del fetch tiene licencia declarada o es una página de licencia
+  ---
+  duration_ms: 0.384713
+  type: 'test'
+  ...
+1..33
+# tests 33
+# suites 0
+# pass 33
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 221.172489

@@ -22,7 +22,7 @@ const ONLY = args.includes('--only') ? new Set(args[args.indexOf('--only') + 1].
 
 const manifestPath = join(RAW_DIR, 'manifest.json');
 const manifest = existsSync(manifestPath) ? readJson(manifestPath) : { files: {} };
-for (const k of Object.keys(manifest.files)) if (!SOURCES.some((s) => s.key === k)) delete manifest.files[k]; // claves retiradas de sources.mjs
+for (const k of Object.keys(manifest.files)) if (!SOURCES.some((s) => s.key === k) && k !== 'wikidata-iso3166-2') delete manifest.files[k]; // claves retiradas de sources.mjs (la de Wikidata la escribe fetch-wikidata.mjs)
 
 async function npmIntegrity(metaUrl) {
   const res = await fetch(metaUrl, { headers: { Accept: 'application/json' } });

@@ -38,6 +38,17 @@ const HL7_STAMP = /^(HL7 International\.?|HL7 Inc\.?|This is an example set\.?|T
 const THIRD_PARTY =
   /(SNOMED|IHTSDO|\bLOINC\b|Regenstrief|\bDICOM\b|\bNEMA\b|ISO Standard|\bISO\b[ \d/:.-]*(?:TS|standard)|\bASTM\b|\bETSI\b|\bIHE\b|\bAHA\b|\bNUBC\b|\bUB-?0?4\b|\bUB-?92\b|\bNEHTA\b|World Wide Web Consortium|\bW3C\b|\bAMA\b|\bCPT\b|American Medical Association|Third Party IP|American Dental Association|\bNUCC\b)/i;
 
+/** Editor que no es HL7 y cuyo contenido tiene dueño propio (DICOM/NEMA, ISO, SNOMED…): no se carga aunque el recurso no traiga `copyright`. */
+const THIRD_PARTY_PUBLISHER = /(NEMA|DICOM|IHTSDO|SNOMED|Regenstrief|LOINC|American (Medical|Dental)|\bADA\b|\bAMA\b|\bISO\b|ASTM|ETSI|W3C|World Wide Web|NUBC|NUCC)/i;
+
+/** Recursos de ejemplo del propio estándar (editor ficticio o sistema externo simulado): HL7 los publica, pero no son terminología. */
+export function illustrativeReason(resource) {
+  const publisher = resource.publisher ?? '';
+  if (/^(Acme Co|FHIR \(Example\))$/i.test(publisher)) return `recurso de ejemplo del estándar (editor «${publisher}»)`;
+  if (/\/fhir\/sid\/ex-/.test(resource.url ?? '')) return 'sistema externo simulado con códigos de muestra («ex-»); podría confundirse con el real';
+  return null;
+}
+
 const isHl7Url = (url) => /^https?:\/\/(terminology\.)?hl7\.org\//i.test(url);
 
 /**
@@ -48,6 +59,7 @@ const isHl7Url = (url) => /^https?:\/\/(terminology\.)?hl7\.org\//i.test(url);
 export function classifyLicense(resource) {
   const copyright = (resource.copyright ?? '').replace(/\s+/g, ' ').trim();
   const url = resource.url ?? '';
+  if (resource.publisher && THIRD_PARTY_PUBLISHER.test(resource.publisher)) return { ok: false, spdx: null, reason: `editor externo a HL7 con contenido propio: «${resource.publisher}»` };
   if (THIRD_PARTY.test(copyright)) return { ok: false, spdx: null, reason: `contenido de terceros según su copyright: «${copyright.slice(0, 140)}…»` };
   if (copyright && (HL7_OPEN_STATEMENT.test(copyright) || HL7_STAMP.test(copyright))) return { ok: true, spdx: 'CC0-1.0', reason: 'copyright del recurso: CC0/dominio público/sello de HL7' };
   if (!copyright && isHl7Url(url)) return { ok: true, spdx: 'CC0-1.0', reason: 'recurso de HL7 sin copyright propio (paquete CC0-1.0)' };

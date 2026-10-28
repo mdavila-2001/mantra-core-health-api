@@ -1,0 +1,12 @@
+interop-vocab-codesystems.ndjson.gz: OK
+interop-vocab-conceptmaps.ndjson.gz: OK
+interop-vocab-concepts.part-01.ndjson.gz: OK
+interop-vocab-concepts.part-02.ndjson.gz: OK
+interop-vocab-coverage.json: OK
+interop-vocab-valuesets.ndjson.gz: OK
+interop-vocab.meta.json: OK
+gzip ok interop-vocab-codesystems.ndjson.gz
+gzip ok interop-vocab-conceptmaps.ndjson.gz
+gzip ok interop-vocab-concepts.part-01.ndjson.gz
+gzip ok interop-vocab-concepts.part-02.ndjson.gz
+gzip ok interop-vocab-valuesets.ndjson.gz

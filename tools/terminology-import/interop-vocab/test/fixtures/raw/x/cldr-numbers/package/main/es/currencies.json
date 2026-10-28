@@ -1,0 +1,31 @@
+{
+ "main": {
+  "es": {
+   "identity": {
+    "language": "es"
+   },
+   "numbers": {
+    "currencies": {
+     "ADP": {
+      "displayName": "peseta andorrana",
+      "displayName-count-one": "peseta andorrana",
+      "displayName-count-other": "pesetas andorranas"
+     },
+     "ARS": {
+      "displayName": "peso argentino",
+      "displayName-count-one": "peso argentino",
+      "displayName-count-other": "pesos argentinos",
+      "symbol-alt-narrow": "$"
+     },
+     "EUR": {
+      "displayName": "euro",
+      "displayName-count-one": "euro",
+      "displayName-count-other": "euros",
+      "symbol": "€",
+      "symbol-alt-narrow": "€"
+     }
+    }
+   }
+  }
+ }
+}

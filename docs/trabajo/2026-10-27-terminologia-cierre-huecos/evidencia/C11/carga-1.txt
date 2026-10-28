@@ -1,0 +1,35 @@
+=== Carga de vocabularios de interoperabilidad a terminology.*  ===
+{
+  "sources": 9,
+  "codeSystems": 1566,
+  "codeSystemVersions": 2972,
+  "concepts": 62956,
+  "designations": 15158,
+  "properties": 413142,
+  "relationships": 13901,
+  "valueSets": 3258,
+  "valueSetVersions": 4795,
+  "valueSetMembers": 75070,
+  "conceptMaps": 1230,
+  "parentsDeclaredButUnresolved": 0
+}
+Base: 127.0.0.1:55451/c11
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "sources": 9,
+    "codeSystems": 1566,
+    "codeSystemVersions": 2972,
+    "concepts": 62956,
+    "designations": 15158,
+    "properties": 413142,
+    "relationships": 13901,
+    "valueSets": 3258,
+    "valueSetVersions": 4795,
+    "members": 75070,
+    "conceptMaps": 1230,
+    "importBatches": 2972
+  },
+  "segundos": 22
+}

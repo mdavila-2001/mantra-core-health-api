@@ -1,0 +1,19 @@
+{
+ "main": {
+  "en": {
+   "identity": {
+    "language": "en"
+   },
+   "localeDisplayNames": {
+    "scripts": {
+     "Arab": "Arabic",
+     "Arab-alt-variant": "Perso-Arabic",
+     "Cyrl": "Cyrillic",
+     "Hans": "Simplified",
+     "Hans-alt-stand-alone": "Simplified Han",
+     "Latn": "Latin"
+    }
+   }
+  }
+ }
+}

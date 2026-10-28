@@ -1,0 +1,6 @@
+ internal_code |        version         | is_default | conceptos 
+---------------+------------------------+------------+-----------
+ ucum          | ucum-lhc-8.0.1         | t          |         0
+ ucum          | essence-2.2-2024-06-17 | f          |       312
+(2 rows)
+

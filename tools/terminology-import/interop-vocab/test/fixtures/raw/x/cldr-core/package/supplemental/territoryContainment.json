@@ -1,0 +1,65 @@
+{
+ "supplemental": {
+  "version": {
+   "_unicodeVersion": "16.0.0",
+   "_cldrVersion": "49"
+  },
+  "territoryContainment": {
+   "001": {
+    "_contains": [
+     "019",
+     "150"
+    ]
+   },
+   "005": {
+    "_contains": [
+     "AR"
+    ]
+   },
+   "013": {
+    "_contains": []
+   },
+   "019": {
+    "_contains": [
+     "013",
+     "029",
+     "005"
+    ]
+   },
+   "029": {
+    "_contains": []
+   },
+   "039": {
+    "_contains": [
+     "ES"
+    ]
+   },
+   "150": {
+    "_contains": [
+     "039"
+    ]
+   },
+   "419": {
+    "_contains": [
+     "013",
+     "029",
+     "005"
+    ],
+    "_grouping": "true"
+   },
+   "EU": {
+    "_contains": [
+     "ES"
+    ],
+    "_grouping": "true"
+   },
+   "UN": {
+    "_contains": [
+     "AR",
+     "ES"
+    ],
+    "_grouping": "true"
+   }
+  }
+ }
+}

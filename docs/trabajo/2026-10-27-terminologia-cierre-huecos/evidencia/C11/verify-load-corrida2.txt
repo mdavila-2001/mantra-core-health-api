@@ -1,0 +1,47 @@
+== conteos por fuente de esta carga ==
+      fuente      | code_systems | versiones | conceptos 
+------------------+--------------+-----------+-----------
+ INTEROP_CDC_CVX  |            1 |         1 |       290
+ INTEROP_CDC_MVX  |            1 |         1 |        89
+ INTEROP_CLDR     |            5 |         5 |      1545
+ INTEROP_HL7_FHIR |          580 |      1090 |     11690
+ INTEROP_HL7_IG   |           64 |        64 |       550
+ INTEROP_HL7_THO  |          905 |      1801 |     33906
+ INTEROP_IANA_LSR |            7 |         7 |      9296
+ INTEROP_UCUM     |            2 |         2 |       336
+ INTEROP_WIKIDATA |            1 |         1 |      5254
+
+== value sets / miembros / mapas ==
+ value_sets | value_set_versions | miembros | concept_maps 
+------------+--------------------+----------+--------------
+       3258 |               4795 |    75070 |         1230
+
+== PROBLEMAS (cada fila debe ser 0) ==
+                     control                     | n 
+-------------------------------------------------+---
+ conceptos sin versión (huérfanos)               | 0
+ duplicados (versión, código)                    | 0
+ display nulo o vacío                            | 0
+ code nulo o vacío                               | 0
+ state_concept_id nulo                           | 0
+ sin propiedad interop_provenance                | 0
+ sin propiedad source_license                    | 0
+ designaciones sin concepto                      | 0
+ propiedades sin concepto                        | 0
+ propiedades con value_json nulo                 | 0
+ relaciones con extremo ausente                  | 0
+ relaciones entre versiones distintas            | 0
+ auto-relaciones                                 | 0
+ miembros sin concepto                           | 0
+ versiones de value set sin miembros             | 0
+ code systems de INTEROP sin versión por defecto | 0
+ code systems con más de una versión por defecto | 0
+ value sets con más de una versión por defecto   | 0
+ concept_maps con extremo ausente                | 0
+ lotes de importación huérfanos                  | 0
+
+== lotes: leídos vs insertados (deben coincidir en la primera corrida) ==
+ lotes | leidos | insertados 
+-------+--------+------------
+  2972 |  62956 |      62956
+

@@ -1,0 +1,23 @@
+{
+  "codeSystems": 2972,
+  "concepts": 62956,
+  "valueSets": 4795,
+  "valueSetMembers": 75070,
+  "conceptMapPairs": 1230,
+  "conceptsByLayer": {
+    "cdc-cvx": 290,
+    "cdc-mvx": 89,
+    "cldr": 1545,
+    "fhir-r4": 16594,
+    "tho-r4": 19445,
+    "ig-extensions": 387,
+    "fhir-r5": 4621,
+    "fhir-r4b": 4840,
+    "ig-genomics": 194,
+    "ig-sdc": 65,
+    "iana-lsr": 9296,
+    "ucum-essence": 336,
+    "wikidata": 5254
+  }
+}
+Escrito en /tmp/claude-0/-home-user-mantra-core-health-api/abfc3765-fecd-5e44-a7be-1fc725dff984/scratchpad/build-C11/out2: 5 archivos NDJSON, 4539767 bytes comprimidos

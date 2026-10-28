@@ -1,0 +1,117 @@
+== Licencias leídas el 2026-10-28 (extractos textuales de los archivos descargados) ==
+
+--- THO 7.5.0 (https://terminology.hl7.org/7.5.0/en/license.html) ---
+ Contents: Disclaimer and Warning of Use HL7® (Health Level Seven, Inc.) Terminology Copyright and License Additional information Third-party artifacts and terminologies 
+ Copyright © 1989+ HL7. 
+ This content is made widely and freely available for unrestricted use, and at no cost, in accordance with the Creative Commons Zero ( CC0 ) designation. 
+ While HL7 places no restrictions on the right to copy the HL7 Terminology or to create derivative works per the Creative Commons Zero (CC0) designation, we implore users to follow best practices for the use and development of controlled terminologies. For example, avoid alterting the representation of a concept in ways that change its meaning. HL7 welcomes community feedback and proposals for enhancing the HL7 Terminology .
+ Third-party artifacts and terminologies 
+ The HL7 Terminology contains and references intellectual property owned by third parties ("Third Party IP"). Acceptance of these License Terms does not grant any rights with respect to Third Party IP. The licensee alone is responsible for identifying and obtaining any necessary licenses or authorizations to utilize Third Party IP in connection with the specification or otherwise. 
+
+--- FHIR R5 (https://hl7.org/fhir/R5/license.html) ---
+public domain using CC0 1.0 in order to encourage adoption of FHIR as a foundation for better
+This specification is licensed under Creative Commons "No Rights Reserved" ( CC0 ).
+While HL7 places no restrictions on the right to copy the FHIR specification or to create derivative works per the Creative Commons license, 
+
+--- FHIR R4 (https://hl7.org/fhir/R4/license.html) ---
+This document is licensed under Creative Commons "No Rights Reserved" ( CC0 ).
+specification or to create derivative works per the Creative Commons license, HL7 protects the "FHIR"
+
+--- package.json de los paquetes (campo license) ---
+tho-r4 hl7.terminology.r4@7.5.0 license = CC0-1.0 | npm: None
+fhir-r4 hl7.fhir.r4.core@4.0.1 license = CC0-1.0 | npm: None
+fhir-r4b hl7.fhir.r4b.core@4.3.0 license = CC0-1.0 | npm: CC0-1.0
+fhir-r5 hl7.fhir.r5.core@5.0.0 license = CC0-1.0 | npm: CC0-1.0
+ig-extensions hl7.fhir.uv.extensions.r4@5.4.0 license = CC0-1.0 | npm: None
+ig-genomics hl7.fhir.uv.genomics-reporting@3.0.0 license = CC0-1.0 | npm: None
+ig-sdc hl7.fhir.uv.sdc@4.0.0 license = CC0-1.0 | npm: None
+cldr-core cldr-core@49.0.0 license = Unicode-3.0 | npm: Unicode-3.0
+cldr-localenames cldr-localenames-full@49.0.0 license = Unicode-3.0 | npm: Unicode-3.0
+cldr-numbers cldr-numbers-full@49.0.0 license = Unicode-3.0 | npm: Unicode-3.0
+
+--- UCUM (ucum-org/ucum LICENSE.md, v1.1 junio 2024) ---
+# UCUM Copyright Notice and License
+
+Version 1.1, June 2024
+
+The Unified Code for Units of Measure (UCUM), also known as the “UCUM
+Specification,” is copyright ©1999-2024, Regenstrief Institute, Inc. All
+rights reserved.
+
+### Section 2. License Grant.
+
+Subject to the terms and conditions of this License, each Contributor
+hereby grants to You a worldwide, non-exclusive, no-charge,
+royalty-free, revocable license to reproduce, publicly display, publicly
+perform, and distribute the Work, and to use the Work for the purposes
+of developing and commercializing Software Applications that will
+communicate with and interoperate with the Work.
+
+### Section 3. License Conditions.
+
+Your exercise of the License Grant is expressly made subject to the
+following conditions.
+
+a. You may not: 
+i. use the Work for the purpose of developing or
+promulgating a different standard for identifying units of measure; 
+ii. use the Work in any way which may dilute the Work’s purpose of providing
+a definitive standard for identifying precisely defined, unambiguous
+units of measure in electronic documents and messages; 
+iii. use the Work in any way that expressly or implicitly change its meaning; 
+iv. add, delete, or modify the Work’s content including field names, field
+contents, descriptions, and comments; or 
+v. use the Work to create Derivative Works. 
+b. Attribution. 
+  i. If you reproduce or distribute
+copies of the Work in its entirety, including but not limited to
+reproduction or distribution in connection with a Software Application, You must:
+
+1.  provide the following with the Work: a. a copyright notice; b. a
+    notice that refers to this License; c. a notice that refers to the
+    disclaimer of warranties; and d. the text of or the URL or hyperlink
+    to, this Copyright Notice and License. ii. You may satisfy the
+    conditions in Section 3(b) in any reasonable manner based on the
+    medium, means, and context in which You exercise the Licensed
+    Rights. For example, it may be reasonable to satisfy the conditions
+    by providing a URL or hyperlink that includes the required
+    information when distributing the Work by electronic download.
+
+### Section 4. Grant of Patent License.
+
+--- IANA (https://www.iana.org/help/licensing-terms) ---
+ IANA and IETF intend that the Protocol Registries may be freely used by any party for any purpose. Both IANA and IETF believe that the Protocol Registries consist primarily of factual information that is unlikely to be protectable as a matter of copyright law. However, for additional clarity, and to avoid any potential confusion about applicable rights, both IANA and IETF desire to (a) dedicate any applicable copyright rights that they may own in the Protocol Registries to the public domain, and (b) license any copyright or related rights for which they are a licensee (with a right to sublicense) to the broadest extent that they are permitted to do so. Accordingly, both IANA and IETF affirm that any applicable rights that they may have in the Protocol Registries are subject to the Creative Commons CC0 1.0 dedication found at https://creativecommons.org/publicdomain/zero/1.0/legalcode . 
+ Disclaimer. While as of the date of this statement neither IANA nor IETF are aware of any third parties claiming intellectual property rights in the Protocol Registries, neither can guarantee that third parties will not do so. Further, the Protocol Registries are made available without any other sort of representation or warranty. The limitations and disclaimers found in the CC0 1.0 dedication are an integral part of this joint statement. For example, in no way are the patent or trademark rights of any person affected by CC0, nor are the rights that other persons may have in the work or in how the work is used, including data protection rights. 
+
+--- Unicode CLDR (cldr-json LICENSE) ---
+UNICODE LICENSE V3
+
+COPYRIGHT AND PERMISSION NOTICE
+
+Copyright © 2015-2024 Unicode, Inc.
+
+NOTICE TO USER: Carefully read the following legal agreement. BY
+DOWNLOADING, INSTALLING, COPYING OR OTHERWISE USING DATA FILES, AND/OR
+SOFTWARE, YOU UNEQUIVOCALLY ACCEPT, AND AGREE TO BE BOUND BY, ALL OF THE
+TERMS AND CONDITIONS OF THIS AGREEMENT. IF YOU DO NOT AGREE, DO NOT
+DOWNLOAD, INSTALL, COPY, DISTRIBUTE OR USE THE DATA FILES OR SOFTWARE.
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of data files and any associated documentation (the "Data Files") or
+software and any associated documentation (the "Software") to deal in the
+Data Files or Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, and/or sell
+copies of the Data Files or Software, and to permit persons to whom the
+Data Files or Software are furnished to do so, provided that either (a)
+this copyright and permission notice appear with all copies of the Data
+Files or Software, or (b) this copyright and permission notice appear in
+associated Documentation.
+
+--- US Gov (https://www.usa.gov/government-copyright), respaldo de CVX/MVX ---
+ Find U.S. government materials you can use The Library of Congress (LOC) has a special collection of federal government materials that are not subject to copyright protection.&nbsp; Find copyright-free images &nbsp;from the federal government. Search LOC’s digital collections to&nbsp; find copyright-free books, newspapers, maps, music, films, and more . Restrictions on using U.S. government materials Not everything that appears on a federal government website is a government work. Government work is something created by a U.S. government officer or employee as part of their official duties. Content on federal websites may include protected intellectual property used with the right holder's permission. Check with the federal agency or program that manages the website to make sure the materials are not restricted before using them. This includes texts, trademarks, logos, or images. Publicity and privacy rights On federal websites, other people may have rights to the work itself or how people use it. This includes publicity or privacy rights under state law. These rights protect the interests of the person or people who may be the subject of the work. Endorsement, trademarks, and agency logos You cannot use government materials in a way that implies endorsement by a government agency, official, or employee.&nbsp; For example, you cannot use a photo in your advertisement of a government official wearing or using your product. You also cannot use federal government trademarks or federal government agency logos without permission.&nbsp; For example, in general, you cannot use an agency logo or trademark on your social media page to suggest endorsement or sponsorship by the agency. Attribution In some cases, agencies will have specific language that they request you include with the materials they allow you to use. In other cases, agencies may release copyright-protected materials under a Creative Commons “CC-BY” or similar license, which requires attribution for use. State and local government materials The U.S. government work designation does not apply to works of state and local governments. Those works may be protected by copyright.&nbsp; Contact your state &nbsp;or local government for more information about their copyrighted works. Copyright laws differ internationally U.S. copyright laws may not protect U.S. government works outside the country. But the work may be protected under the copyright laws of other jurisdictions when used in these jurisdictions. The U.S. government may assert copyright outside of the United States for U.S. government works. Learn more about U.S. government works and copyright law Copyright Law of the United States of America, Sections 101 and 105 &nbsp;– Read the section of the law that describes U.S. government works. U.S. Copyright Office Compendium, Section 313.6(C)(1)[PDF, 695KB] – Learn about “works of the U.S. government” and exceptions. Frequently asked questions about copyright[PDF, 1.4MB] &nbsp;– Find answers to common questions about U.S. government works. Difference between patents, trademarks, service marks, and copyrights &nbsp;– Many people confuse copyrights with patents and trademarks. Learn about the different types of intellectual property and get examples of each. Visit the&nbsp;U.S. Copyright Office&nbsp;website &nbsp;to search copyright records and to register your work. 
+
+--- CDC: la página de política www.cdc.gov/other/agencymaterials.html responde 403 desde esta red (ver M1-sondeo) ---
+
+--- Wikidata (https://www.wikidata.org/wiki/Wikidata:Licensing) ---
+ All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero . Text in other namespaces is copyrighted and available under the Creative Commons Attribution-ShareAlike 4.0 License .
+ All data in Wikidata has a CC0 license. Wikidata avoids hosting data that lacks a CC0 license. However, in cases where the Wikidata community decides not to host data due to a copyright claim, that decision does not constitute recognition or confirmation by the Wikidata community (or any authority) of the given copyright claim's validity. The copyright claim may well have merit; more often, the Wikidata community wishes to avoid conflict with an organization asserting a copyright claim over data that, in fact, may not be eligible for copyright.

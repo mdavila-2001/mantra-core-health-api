@@ -1,0 +1,23 @@
+{
+ "main": {
+  "en": {
+   "identity": {
+    "language": "en"
+   },
+   "localeDisplayNames": {
+    "territories": {
+     "001": "world",
+     "005": "South America",
+     "419": "Latin America",
+     "AR": "Argentina",
+     "ES": "Spain",
+     "EU": "European Union",
+     "GB": "United Kingdom",
+     "GB-alt-short": "UK",
+     "UN": "United Nations",
+     "UN-alt-short": "UN"
+    }
+   }
+  }
+ }
+}

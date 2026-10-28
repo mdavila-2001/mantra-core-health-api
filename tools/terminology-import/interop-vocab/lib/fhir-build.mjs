@@ -7,10 +7,10 @@
 import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { SystemIndex, Unresolved, classifyLicense, expandValueSet, oidIndex, parseCodeSystem, valueSetInternalCode, vsState } from './fhir.mjs';
+import { SystemIndex, Unresolved, classifyLicense, illustrativeReason, expandValueSet, oidIndex, parseCodeSystem, valueSetInternalCode, vsState } from './fhir.mjs';
 
 /** Orden de preferencia: la edición más nueva primero (la primera que se carga queda como versión por defecto). */
-export const PACKAGE_ORDER = ['tho-r4', 'fhir-r5', 'fhir-r4b', 'fhir-r4'];
+export const PACKAGE_ORDER = ['tho-r4', 'fhir-r5', 'fhir-r4b', 'fhir-r4', 'ig-extensions', 'ig-genomics', 'ig-sdc'];
 
 /**
  * Code systems que otro carril YA carga con la misma URL y versión (verificado en
@@ -41,7 +41,8 @@ const readResources = (pkgDir, prefix) =>
  * @param {Record<string, {sha256: string, retrievedAt: string, url: string, version: string, name: string}>} manifestFiles
  */
 export function buildFhirCorpus(rawDir, manifestFiles) {
-  const packages = PACKAGE_ORDER.map((key) => {
+  const REQUIRED = new Set(['tho-r4', 'fhir-r5', 'fhir-r4b', 'fhir-r4']);
+  const packages = PACKAGE_ORDER.filter((key) => manifestFiles[key] || REQUIRED.has(key)).map((key) => {
     const m = manifestFiles[key];
     if (!m) throw new Error(`falta ${key} en raw/manifest.json: corré fetch-sources.mjs`);
     return { key, name: m.name, version: m.version, file: `package/`, tarballSha256: m.sha256, tarballUrl: m.url, retrievedAt: m.retrievedAt, dir: join(rawDir, 'x', key, 'package') };
@@ -70,6 +71,15 @@ export function buildFhirCorpus(rawDir, manifestFiles) {
       const lic = classifyLicense(resource);
       if (!lic.ok) {
         coverage.codeSystems.push({ ...row, decision: 'omitido', reason: `licencia: ${lic.reason}` });
+        continue;
+      }
+      const illustrative = illustrativeReason(resource);
+      if (illustrative) {
+        coverage.codeSystems.push({ ...row, decision: 'omitido', reason: illustrative });
+        continue;
+      }
+      if (!(resource.concept?.length > 0)) {
+        coverage.codeSystems.push({ ...row, decision: 'omitido', reason: 'content=complete pero sin ningún concepto (lista vacía en la fuente)' });
         continue;
       }
       const prior = acceptedCs.get(id);
@@ -131,7 +141,9 @@ export function buildFhirCorpus(rawDir, manifestFiles) {
         return hit ? expandEntry(hit) : null;
       };
       entry.license = lic;
-      entry.expansion = expandValueSet(index, entry.resource, entry.pkg.key, resolveRef);
+      const expanded = expandValueSet(index, entry.resource, entry.pkg.key, resolveRef);
+      if (expanded.length === 0) throw new Unresolved('compose expande a 0 miembros con la semántica estricta de FHIR (varios filtros de un include se combinan con AND); no se carga un value set vacío');
+      entry.expansion = expanded;
       return entry.expansion;
     } catch (err) {
       if (!(err instanceof Unresolved)) throw err;
@@ -154,5 +166,5 @@ export function buildFhirCorpus(rawDir, manifestFiles) {
       coverage.valueSets.push({ ...row, decision: 'omitido', reason: err.message });
     }
   }
-  return { packages, systems, valueSets, coverage, vsInternalCode: valueSetInternalCode, vsState };
+  return { packages, systems, valueSets, coverage, oidsAll: oids, vsInternalCode: valueSetInternalCode, vsState };
 }

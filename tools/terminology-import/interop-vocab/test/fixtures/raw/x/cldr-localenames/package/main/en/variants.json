@@ -1,0 +1,15 @@
+{
+ "main": {
+  "en": {
+   "identity": {
+    "language": "en"
+   },
+   "localeDisplayNames": {
+    "variants": {
+     "1901": "Traditional German orthography",
+     "1996": "German orthography of 1996"
+    }
+   }
+  }
+ }
+}

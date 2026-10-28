@@ -1,0 +1,18 @@
+﻿54        |adenovirus, type 4|adenovirus vaccine, type 4, live, oral||Inactive|False|2010/05/28
+55        |adenovirus, type 7|adenovirus vaccine, type 7, live, oral||Inactive|False|2010/05/28
+82        |adenovirus, unspecified formulation|adenovirus vaccine, unspecified formulation|This CVX code allows reporting of a vaccination when formulation is unknown (for example, when recording a adenovirus vaccination when noted on a vaccination card)|Inactive|False|2010/09/30
+24        |Anthrax, pre-exposure prophylaxis, post-exposure prophylaxis|Anthrax vaccine, adsorbed, pre-exposure and post-exposure prophylaxis||Active|False|2024/01/25
+27        |botulinum antitoxin|botulinum antitoxin||Active|True|2020/09/04
+56        |dengue fever tetravalent|dengue fever vaccine, tetravalent|Applies to tetravalent product (e.g. DENGVAXIA)|Active|False|2024/12/11
+102       |DTP-Hib-Hep B|DTP- Haemophilus influenzae type b conjugate and hepatitis b vaccine|This CVX has been corrected. This non-US vaccine contained DTP, Hib and Hep B. It was withdrawn in 2007 .|Non-US|False|2016/05/20
+57        |hantavirus|hantavirus vaccine||Never Active|False|2020/09/09
+14        |IG, unspecified formulation|immune globulin, unspecified formulation||Inactive|True|2023/03/09
+71        |RSV-IGIV|respiratory syncytial virus immune globulin, intravenous|No active NDCs or CPT codes associated to this CVX|Inactive|True|2023/07/19
+117       |VZIG (IND)|varicella zoster immune globulin (Investigational New Drug)||Never Active|True|2020/09/09
+154       |Hep A, IG|Hepatitis A immune globulin|Do not use this code. This product may be used for Hep A and other viral infections. The correct vaccine / CVX is 86 (IG).|Never Active|True|2020/09/09
+156       |Rho(D)-IG|Rho(D) Immune globulin- IV or IM|This immune globulin may be administered either IM or IV.|Active|True|2020/09/04
+172       |cholera, WC-rBS|cholera, WC-rBS||Non-US|False|2016/06/17
+225       |COVID-19, D614, recomb, preS dTM, AS03 adjuvant add, PF, 5mcg/0.5mL|SARS-COV-2 (COVID-19) vaccine, D614, prefusion spike recombinant protein subunit (CoV2 preS dTM), AS03 adjuvant added, preservative free, 5mcg/0.5mL dose|EUA submission withdrawn by Sanofi|Never Active|False|2023/03/09
+306       |RSV, mAb, nirsevimab-alip, 0.5 mL, neonate to 24 months|Respiratory syncytial virus (RSV) monoclonal antibody, IgG1κ, (nirsevimab-alip), 0.5 mL, neonates and children to 24 months|RSV monoclonal antibody (Beyfortus)|Active|False|2023/07/25
+20        |DTaP|diphtheria, tetanus toxoids and acellular pertussis vaccine||Active|False|2010/05/28
+75        |Vaccinia (smallpox, monkeypox), live|Vaccinia (smallpox, monkeypox) vaccine, live||Active|False|2025/11/19

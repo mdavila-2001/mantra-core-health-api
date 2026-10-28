@@ -1,0 +1,199 @@
+{
+ "head": {
+  "vars": [
+   "item",
+   "code",
+   "labelEn",
+   "labelEs"
+  ]
+ },
+ "results": {
+  "bindings": [
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q24260"
+    },
+    "labelEs": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Canillo"
+    },
+    "labelEn": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Canillo"
+    },
+    "code": {
+     "type": "literal",
+     "value": "AD-02"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q24269"
+    },
+    "labelEs": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Encamp"
+    },
+    "labelEn": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Encamp"
+    },
+    "code": {
+     "type": "literal",
+     "value": "AD-03"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q24276"
+    },
+    "labelEs": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "La Massana"
+    },
+    "labelEn": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "La Massana"
+    },
+    "code": {
+     "type": "literal",
+     "value": "AD-04"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q24272"
+    },
+    "labelEs": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Ordino"
+    },
+    "labelEn": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Ordino"
+    },
+    "code": {
+     "type": "literal",
+     "value": "AD-05"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q24282"
+    },
+    "labelEs": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "San Julián de Loria"
+    },
+    "labelEn": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Sant Julià de Lòria"
+    },
+    "code": {
+     "type": "literal",
+     "value": "AD-06"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q2522163"
+    },
+    "labelEs": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Parroquia de Andorra la Vella"
+    },
+    "labelEn": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Andorra la Vella"
+    },
+    "code": {
+     "type": "literal",
+     "value": "AD-07"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1863"
+    },
+    "labelEs": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Andorra la Vieja"
+    },
+    "labelEn": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Andorra la Vella"
+    },
+    "code": {
+     "type": "literal",
+     "value": "AD-07"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q40942"
+    },
+    "labelEs": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Pernambuco"
+    },
+    "code": {
+     "type": "literal",
+     "value": "BR-PE"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q21979624"
+    },
+    "labelEn": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Naftalan"
+    },
+    "code": {
+     "type": "literal",
+     "value": "AZ-NA"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q4674283"
+    },
+    "labelEn": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Acklins and Crooked Islands"
+    },
+    "code": {
+     "type": "literal",
+     "value": "BS-AC"
+    }
+   }
+  ]
+ }
+}

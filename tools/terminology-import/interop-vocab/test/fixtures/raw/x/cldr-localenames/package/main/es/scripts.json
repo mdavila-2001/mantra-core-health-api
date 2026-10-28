@@ -1,0 +1,19 @@
+{
+ "main": {
+  "es": {
+   "identity": {
+    "language": "es"
+   },
+   "localeDisplayNames": {
+    "scripts": {
+     "Arab": "árabe",
+     "Arab-alt-variant": "perso-árabe",
+     "Cyrl": "cirílico",
+     "Hans": "simplificado",
+     "Hans-alt-stand-alone": "han simplificado",
+     "Latn": "latino"
+    }
+   }
+  }
+ }
+}

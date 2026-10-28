@@ -1,0 +1,33 @@
+{
+ "supplemental": {
+  "version": {
+   "_unicodeVersion": "16.0.0",
+   "_cldrVersion": "49"
+  },
+  "codeMappings": {
+   "AA": {
+    "_numeric": "958",
+    "_alpha3": "AAA"
+   },
+   "AR": {
+    "_numeric": "032",
+    "_alpha3": "ARG"
+   },
+   "BU": {
+    "_numeric": "104",
+    "_alpha3": "BUR"
+   },
+   "ES": {
+    "_numeric": "724",
+    "_alpha3": "ESP",
+    "_fips10": "SP"
+   },
+   "ARS": {
+    "_numeric": "32"
+   },
+   "EUR": {
+    "_numeric": "978"
+   }
+  }
+ }
+}
