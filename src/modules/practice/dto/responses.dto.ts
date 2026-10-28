@@ -383,6 +383,12 @@ export class PractitionerSiteDto {
    */
   @ApiPropertyOptional({ format: 'uuid', nullable: true })
   bankQrFileId!: string | null;
+  /**
+   * Logo del consultorio, el que sale en el membrete de sus PDF, o `null` si
+   * no tiene. Se lee con `GET /common/files/:id/content`.
+   */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  logoFileId!: string | null;
   /** Concepto de estado. */
   @ApiProperty({ format: 'uuid' }) status!: string;
 }

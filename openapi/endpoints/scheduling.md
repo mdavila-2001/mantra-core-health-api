@@ -1920,6 +1920,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT, PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 403 | `FORBIDDEN` | La agenda indicada pertenece a otra organización. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
 | 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2256,6 +2257,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 403 | `FORBIDDEN` | La agenda indicada pertenece a otra organización. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
 | 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
 | 404 | `NOT_FOUND` | Comprobante no encontrado | Excepción explícita en src/modules/scheduling/application/bookings/support/payment-receipt-access.ts |
 | 409 | `CONFLICT` | Ese comprobante ya se rechazó: no se puede confirmar. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/confirm-payment-receipt.use-case.ts |
@@ -2358,6 +2360,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT, PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 403 | `FORBIDDEN` | La agenda indicada pertenece a otra organización. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
 | 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
 | 404 | `NOT_FOUND` | Comprobante no encontrado | Excepción explícita en src/modules/scheduling/application/bookings/support/payment-receipt-access.ts |
 | 422 | `PRECONDITION_FAILED` | El archivo del comprobante ya no es de un formato que se pueda mostrar | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/get-payment-receipt-content.use-case.ts |
@@ -2523,6 +2526,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, SCHEDULING_ADMIN, SCHEDULING_AGENT. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 403 | `FORBIDDEN` | La agenda indicada pertenece a otra organización. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
 | 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
 | 404 | `NOT_FOUND` | Comprobante no encontrado | Excepción explícita en src/modules/scheduling/application/bookings/support/payment-receipt-access.ts |
 | 409 | `CONFLICT` | Ese comprobante ya se confirmó: no se puede rechazar. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/reject-payment-receipt.use-case.ts |

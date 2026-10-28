@@ -3168,6 +3168,63 @@
         "description": "Pre-cargar una imagen de firma o sello para el registro. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/iam/auth/upload-registration-logo": {
+      "post": {
+        "description": "png, jpeg o webp de hasta 2 MB. El `fileId` se reenvía en `ownSite.logoFileId` del alta, que lo reclama en su misma transacción.",
+        "operationId": "IamAuthController_uploadRegistrationLogo",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "summary": "Pre-cargar el logo del consultorio propio para el registro",
+        "tags": [
+          "iam-auth"
+        ],
+        "security": []
+      }
+    },
     "/iam/auth/upload-registration-document": {
       "post": {
         "operationId": "IamAuthController_uploadRegistrationDocument",
@@ -29876,6 +29933,76 @@
           }
         ],
         "summary": "Fijar o quitar el QR bancario de una sede",
+        "tags": [
+          "practice"
+        ]
+      }
+    },
+    "/practitioners/me/sites/{siteId}/logo": {
+      "put": {
+        "description": "Asocia una imagen ya subida (png, jpeg o webp, NORMAL, hasta 2 MB) como logo del consultorio. `fileId: null` lo quita. 404 si la sede no es un consultorio propio; 422 si el archivo no sirve como logo.",
+        "operationId": "PractitionerSitesController_setSiteLogo",
+        "parameters": [
+          {
+            "name": "siteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetSiteLogoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Fijar o quitar el logo del consultorio propio",
         "tags": [
           "practice"
         ]
@@ -101440,6 +101567,10 @@
             "type": "string",
             "example": "+591 72123456",
             "maxLength": 40
+          },
+          "logoFileId": {
+            "type": "string",
+            "format": "uuid"
           }
         },
         "required": [
@@ -117137,6 +117268,21 @@
             "format": "uuid",
             "nullable": true,
             "description": "Archivo del QR ya subido, o null para quitarlo"
+          }
+        },
+        "required": [
+          "fileId"
+        ],
+        "additionalProperties": false
+      },
+      "SetSiteLogoDto": {
+        "type": "object",
+        "properties": {
+          "fileId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Imagen del logo ya subida, o null para quitarlo"
           }
         },
         "required": [

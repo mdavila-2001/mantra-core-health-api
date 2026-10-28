@@ -155,6 +155,9 @@ export class OwnSiteProvisioningService {
       statusConceptId: PRAC.SITE_ACTIVE,
       actorUserId,
     });
+    // El archivo ya lo validó quien llama: el alta lo reclama como pre-carga
+    // anónima y `POST /practitioners/me/sites` comprueba que es del actor.
+    site.logoFileId = dto.logoFileId;
     await tx.flush();
 
     this.rolesRepo.create(tx, {
