@@ -59,6 +59,7 @@ CI/staging que posea esos recursos debe activar y conservar su propia evidencia.
 | Credenciales Google completas      | `google-email-provider.int-spec.ts`                                  | OAuth/client id, secret, refresh token y destinatario de prueba                                                             |
 | `SURVEYS_IT_DB_URL`                | `surveys-encuesta-base.int-spec.ts`                                  | PostgreSQL **desechable** (nombre con `test`/`it`/`ci`/`tmp`/`scratch`/`disposable`/`smoke`); recrea `surveys`, `scheduling`, `billing` y `practice` desde `database/SQL` sin las FK entre esquemas |
 | `DATA_CATALOG_IT_DB_URL`           | `data-catalog.int-spec.ts`                                           | PostgreSQL **desechable** (crea schemas de fixtures, aplica el patch v4.2.19 y altera tablas); ver cabecera del spec        |
+| `SURVEYS_INSIGHTS_IT=1` | `surveys-insights.int-spec.ts` | PostgreSQL **desechable** (`DB_NAME` con `test`/`ci`/`tmp`/`scratch`/`smoke`/`disposable`) con el DDL de `surveys` y `scheduling`; usuario superusuario (desactiva las FK al cargar sus filas) |
 | `RLS_TEST=1`                       | `rls.int-spec.ts`                                                    | rol runtime real sin `BYPASSRLS`; modifica políticas del esquema                                                            |
 
 Para una base local desechable, RLS puede crear temporalmente el login de prueba
