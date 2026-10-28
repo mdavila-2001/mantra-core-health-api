@@ -1,0 +1,208 @@
+TAP version 13
+# Subtest: readObo conserva nombre, definición con referencias, sinónimos y anotaciones de xref/is_a
+ok 1 - readObo conserva nombre, definición con referencias, sinónimos y anotaciones de xref/is_a
+  ---
+  duration_ms: 20.43267
+  type: 'test'
+  ...
+# Subtest: normalizeCurie: prefijos de cada fuente al sistema del catálogo; SNOMED y MedDRA no se mapean
+ok 2 - normalizeCurie: prefijos de cada fuente al sistema del catálogo; SNOMED y MedDRA no se mapean
+  ---
+  duration_ms: 0.649688
+  type: 'test'
+  ...
+# Subtest: MONDO: sólo enfermedad humana; animales no humanos y «disease characteristic» quedan fuera
+ok 3 - MONDO: sólo enfermedad humana; animales no humanos y «disease characteristic» quedan fuera
+  ---
+  duration_ms: 13.190977
+  type: 'test'
+  ...
+# Subtest: DOID: xrefs sin semántica declarada → mapeo sin equivalencia; SNOMED descartado
+ok 4 - DOID: xrefs sin semántica declarada → mapeo sin equivalencia; SNOMED descartado
+  ---
+  duration_ms: 3.701512
+  type: 'test'
+  ...
+# Subtest: NCIt: sólo el subárbol Disease or Disorder (C2991); hallazgos y fármacos fuera
+ok 5 - NCIt: sólo el subárbol Disease or Disorder (C2991); hallazgos y fármacos fuera
+  ---
+  duration_ms: 6.79105
+  type: 'test'
+  ...
+# Subtest: Orphanet: nombre, sinónimos y definición en castellano; equivalencias tal como las declara Orphanet
+ok 6 - Orphanet: nombre, sinónimos y definición en castellano; equivalencias tal como las declara Orphanet
+  ---
+  duration_ms: 5.678145
+  type: 'test'
+  ...
+# Subtest: claves cruzadas: un concepto por código citado, con el código como display; destinos ausentes = no resueltos
+ok 7 - claves cruzadas: un concepto por código citado, con el código como display; destinos ausentes = no resueltos
+  ---
+  duration_ms: 26.27741
+  type: 'test'
+  ...
+# Subtest: plan: ids deterministas y únicos, vigentes antes que obsoletos, conceptos internos de la API
+ok 8 - plan: ids deterministas y únicos, vigentes antes que obsoletos, conceptos internos de la API
+  ---
+  duration_ms: 7.802119
+  type: 'test'
+  ...
+# Subtest: tabulación simple CIE-11: filas residuales sin URI de Fundación y notas de codificación multilínea
+ok 9 - tabulación simple CIE-11: filas residuales sin URI de Fundación y notas de codificación multilínea
+  ---
+  duration_ms: 3.322683
+  type: 'test'
+  ...
+# Subtest: buildIcd11Mms: jerarquía capítulo → bloque → categoría y correspondencia OMS 11→10
+ok 10 - buildIcd11Mms: jerarquía capítulo → bloque → categoría y correspondencia OMS 11→10
+  ---
+  duration_ms: 6.51963
+  type: 'test'
+  ...
+# Subtest: OMS 10→11: un destino por código CIE-10; los destinos poscoordinados no se reducen
+ok 11 - OMS 10→11: un destino por código CIE-10; los destinos poscoordinados no se reducen
+  ---
+  duration_ms: 0.589853
+  type: 'test'
+  ...
+# Subtest: citas: anotaciones HPO (OMIM, ORPHA, DECIPHER) y diagnósticos de phenopacket-store
+ok 12 - citas: anotaciones HPO (OMIM, ORPHA, DECIPHER) y diagnósticos de phenopacket-store
+  ---
+  duration_ms: 2.042052
+  type: 'test'
+  ...
+# Subtest: resolveXrefs: citas → claves con `citedBy`; un ORPHA citado que no existe queda sin resolver
+ok 13 - resolveXrefs: citas → claves con `citedBy`; un ORPHA citado que no existe queda sin resolver
+  ---
+  duration_ms: 1.296558
+  type: 'test'
+  ...
+# Subtest: saturación: deduplica por equivalencia o xref publicados; «más amplio/estrecho» no deduplica
+ok 14 - saturación: deduplica por equivalencia o xref publicados; «más amplio/estrecho» no deduplica
+  ---
+  duration_ms: 6.645416
+  type: 'test'
+  ...
+# Subtest: instantánea versionada: gzip partido, SHA-256 en MANIFEST.json y lectura idéntica
+ok 15 - instantánea versionada: gzip partido, SHA-256 en MANIFEST.json y lectura idéntica
+  ---
+  duration_ms: 6.692131
+  type: 'test'
+  ...
+# Subtest: enfermedades comunes de HPO (Groza 2015): MeSH y DOID; los ceros a la izquierda del DOID se resuelven contra DOID
+ok 16 - enfermedades comunes de HPO (Groza 2015): MeSH y DOID; los ceros a la izquierda del DOID se resuelven contra DOID
+  ---
+  duration_ms: 2.564323
+  type: 'test'
+  ...
+# Subtest: saturación: un código retirado se sigue por su replaced_by; uno retirado sin reemplazo no cuenta como nuevo
+ok 17 - saturación: un código retirado se sigue por su replaced_by; uno retirado sin reemplazo no cuenta como nuevo
+  ---
+  duration_ms: 1.108371
+  type: 'test'
+  ...
+# Subtest: Monarch KG: ids de enfermedad de la columna object; DOID retirado por alt_id
+ok 18 - Monarch KG: ids de enfermedad de la columna object; DOID retirado por alt_id
+  ---
+  duration_ms: 4.937839
+  type: 'test'
+  ...
+# Subtest: MeSH: números de árbol, términos sin permutados y nota de alcance del concepto preferido
+ok 19 - MeSH: números de árbol, términos sin permutados y nota de alcance del concepto preferido
+  ---
+  duration_ms: 20.483476
+  type: 'test'
+  ...
+# Subtest: MeSH: entra C (menos C22 exclusivo) y F03; lo citado por otra fuente entra aunque esté fuera; los animales no
+ok 20 - MeSH: entra C (menos C22 exclusivo) y F03; lo citado por otra fuente entra aunque esté fuera; los animales no
+  ---
+  duration_ms: 24.91933
+  type: 'test'
+  ...
+# Subtest: MeSH SCR: el «mapped to» queda como alineamiento publicado sin equivalencia declarada; sin jerarquía inventada
+ok 21 - MeSH SCR: el «mapped to» queda como alineamiento publicado sin equivalencia declarada; sin jerarquía inventada
+  ---
+  duration_ms: 14.547599
+  type: 'test'
+  ...
+# Subtest: resolve: MeSH admite claves de respaldo (UI que MeSH 2026 ya no tiene) y NCIt cae a ncit-xref
+ok 22 - resolve: MeSH admite claves de respaldo (UI que MeSH 2026 ya no tiene) y NCIt cae a ncit-xref
+  ---
+  duration_ms: 0.598312
+  type: 'test'
+  ...
+# Subtest: NCIt EVS: subárbol C2991 por los padres que declara NCI; retirados y fuera de C2991 sólo si alguien los cita
+ok 23 - NCIt EVS: subárbol C2991 por los padres que declara NCI; retirados y fuera de C2991 sólo si alguien los cita
+  ---
+  duration_ms: 1.110711
+  type: 'test'
+  ...
+# Subtest: NANDO: sólo clases; inglés en designaciones, japonés en propiedades; closeMatch a MONDO = inexacto; licencia del propio archivo
+ok 24 - NANDO: sólo clases; inglés en designaciones, japonés en propiedades; closeMatch a MONDO = inexacto; licencia del propio archivo
+  ---
+  duration_ms: 2.212618
+  type: 'test'
+  ...
+# Subtest: OncoTree: jerarquía por `parent`, NCI/UMLS publicados como alineamientos sin equivalencia
+ok 25 - OncoTree: jerarquía por `parent`, NCI/UMLS publicados como alineamientos sin equivalencia
+  ---
+  duration_ms: 0.724444
+  type: 'test'
+  ...
+# Subtest: GARD: lista oficial (CSV con comillas), fichas, castellano de la ficha y xrefs tipados sólo si no son ambiguos
+ok 26 - GARD: lista oficial (CSV con comillas), fichas, castellano de la ficha y xrefs tipados sólo si no son ambiguos
+  ---
+  duration_ms: 2.304706
+  type: 'test'
+  ...
+# Subtest: GARD: el id se compara por número (Orphanet y DOID lo citan sin ceros) y C+6 dígitos queda sin tipar
+ok 27 - GARD: el id se compara por número (Orphanet y DOID lo citan sin ceros) y C+6 dígitos queda sin tipar
+  ---
+  duration_ms: 0.530389
+  type: 'test'
+  ...
+# Subtest: CIE-11: la tabulación en castellano se ubica por encabezado (TitleEN + Title) y calza fila por fila con el inglés
+ok 28 - CIE-11: la tabulación en castellano se ubica por encabezado (TitleEN + Title) y calza fila por fila con el inglés
+  ---
+  duration_ms: 1.211044
+  type: 'test'
+  ...
+# Subtest: buildIcd11Mms: designación ES oficial de la OMS además de la EN; display sigue en inglés
+ok 29 - buildIcd11Mms: designación ES oficial de la OMS además de la EN; display sigue en inglés
+  ---
+  duration_ms: 1.327841
+  type: 'test'
+  ...
+# Subtest: OMS 10→11 (2026-01): destinos poscoordinados textuales y códigos repartidos en varias categorías
+ok 30 - OMS 10→11 (2026-01): destinos poscoordinados textuales y códigos repartidos en varias categorías
+  ---
+  duration_ms: 0.493665
+  type: 'test'
+  ...
+# Subtest: MedlinePlus: el tema en español hereda los descriptores MeSH de su tema inglés; el mapeo apunta al concepto del glosario
+ok 31 - MedlinePlus: el tema en español hereda los descriptores MeSH de su tema inglés; el mapeo apunta al concepto del glosario
+  ---
+  duration_ms: 17.548673
+  type: 'test'
+  ...
+# Subtest: MedlinePlus Genetics: condición con sinónimos, descripción en texto plano y claves; SNOMED CT descartado
+ok 32 - MedlinePlus Genetics: condición con sinónimos, descripción en texto plano y claves; SNOMED CT descartado
+  ---
+  duration_ms: 3.169512
+  type: 'test'
+  ...
+# Subtest: snapshot: SHA256SUMS en formato `sha256sum -c`, gzip determinista y lectura que verifica cada parte
+ok 33 - snapshot: SHA256SUMS en formato `sha256sum -c`, gzip determinista y lectura que verifica cada parte
+  ---
+  duration_ms: 9.473826
+  type: 'test'
+  ...
+1..33
+# tests 33
+# suites 0
+# pass 33
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 293.720636
