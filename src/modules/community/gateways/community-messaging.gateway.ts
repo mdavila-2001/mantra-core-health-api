@@ -90,6 +90,8 @@ interface GatewaySocketData {
   staffGrants?: Map<string, Set<string>>;
   /** El temporizador de esa revalidación, mientras haya alguna concesión. */
   staffRecheck?: ReturnType<typeof setInterval>;
+  /** Hay una revalidación en curso: la siguiente vuelta no se le encima. */
+  staffRecheckRunning?: boolean;
 }
 
 /**
@@ -231,9 +233,13 @@ export class CommunityMessagingGateway
       client.emit('error', { code: 'NOT_OWN_PROFILE', event: 'join:inbox' });
       return;
     }
+    // La validación de arriba es asíncrona: si el socket se desconectó
+    // mientras tanto, `handleDisconnect` ya corrió y nadie limpiaría lo que se
+    // registre ahora (un temporizador huérfano, entre otras cosas).
+    if (!client.connected) return;
     await client.join(this.profileRoom(body.profileId));
     this.rememberProfile(client, body.profileId);
-    if (access === 'ORGANIZATION_STAFF') {
+    if (access === 'ORGANIZATION_STAFF' && client.connected) {
       this.rememberStaffGrant(client, body.profileId);
     }
 
@@ -287,9 +293,12 @@ export class CommunityMessagingGateway
       return;
     }
 
+    // Mismo motivo que en `join:inbox`: las consultas de arriba pueden
+    // terminar después de la desconexión.
+    if (!client.connected) return;
     await client.join(this.conversationRoom(body.conversationId));
     this.rememberProfile(client, body.profileId);
-    if (access === 'ORGANIZATION_STAFF') {
+    if (access === 'ORGANIZATION_STAFF' && client.connected) {
       this.rememberStaffGrant(client, body.profileId, body.conversationId);
     }
   }
@@ -516,11 +525,15 @@ export class CommunityMessagingGateway
     const data = client.data as GatewaySocketData;
     const user = data.user;
     const grants = data.staffGrants;
-    if (!grants || grants.size === 0) {
+    if (!client.connected || !grants || grants.size === 0) {
       this.stopStaffRecheck(client);
       return;
     }
     for (const [profileId, conversationIds] of [...grants]) {
+      if (!client.connected) {
+        this.stopStaffRecheck(client);
+        return;
+      }
       let stillAllowed = false;
       if (user) {
         try {
@@ -567,11 +580,32 @@ export class CommunityMessagingGateway
     data.staffGrants.set(profileId, conversations);
     if (!data.staffRecheck) {
       const timer = setInterval(() => {
-        void this.recheckStaffGrants(client);
+        void this.runStaffRecheck(client);
       }, STAFF_GRANT_RECHECK_MS);
       // No retiene el proceso vivo por un socket abierto.
       timer.unref?.();
       data.staffRecheck = timer;
+    }
+  }
+
+  /**
+   * Una vuelta del temporizador: nunca lanza (un rechazo sin capturar en un
+   * `setInterval` tumba el proceso según la política de Node) y no se solapa
+   * con la anterior si ésta todavía espera a la base.
+   */
+  private async runStaffRecheck(client: Socket): Promise<void> {
+    const data = client.data as GatewaySocketData;
+    if (data.staffRecheckRunning) return;
+    data.staffRecheckRunning = true;
+    try {
+      await this.recheckStaffGrants(client);
+    } catch (error) {
+      this.logger.warn(
+        { operation: 'community.gateway.staff-grant.recheck', err: error },
+        'No se pudo revalidar la membresía del socket',
+      );
+    } finally {
+      data.staffRecheckRunning = false;
     }
   }
 

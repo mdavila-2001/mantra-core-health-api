@@ -26,6 +26,9 @@ const ACCOUNT = 'dddddddd-dddd-dddd-dddd-dddddddddddd';
 function build() {
   const em: any = {};
   em.fork = mockFn(() => em);
+  // `directory.tenants`: por defecto el target de una vitrina de organización
+  // es un tenant; el caso SupportAdmin lo apaga.
+  em.count = mockFn(async () => 1);
   const notifications = {
     emitInApp: mockFn(() => Promise.resolve({ suppressed: false })),
   };
@@ -60,6 +63,7 @@ function build() {
     new CommunityOrganizationStaffService(membershipsRepo as any),
   );
   return {
+    em,
     service,
     notifications,
     profilesRepo,
@@ -192,6 +196,33 @@ describe('CommunityMessageNotificationsService · enganche P2 → P1', () => {
         (call: any[]) => call[0].recipientUserId,
       );
       expect(recipients).toEqual(['owner-1']);
+    });
+
+    it('una vitrina de organización que no es de un tenant (SupportAdmin) avisa como siempre', async () => {
+      const d = build();
+      d.em.count.mockResolvedValue(0);
+      d.accountLinks.findActiveByPerson.mockResolvedValue(null);
+      d.profilesRepo.findById.mockImplementation((_em: any, id: string) =>
+        Promise.resolve(
+          id === SENDER
+            ? { id, displayName: 'Juan Paciente', targetId: 'persona-a' }
+            : {
+                id,
+                displayName: 'SupportAdmin',
+                targetId: 'cuenta-support-admin',
+                targetTypeConceptId: COMM.PROFILE_TARGET_ORGANIZATION,
+                createdByUserId: 'cuenta-support-admin',
+              },
+        ),
+      );
+
+      await d.service.newMessage(CONVERSATION, SENDER, [RECIPIENT], 'user-1');
+
+      const recipients = d.notifications.emitInApp.mock.calls.map(
+        (call: any[]) => call[0].recipientUserId,
+      );
+      expect(recipients).toEqual(['cuenta-support-admin']);
+      expect(d.membershipsRepo.findByTenantAndStatus).not.toHaveBeenCalled();
     });
   });
 });
