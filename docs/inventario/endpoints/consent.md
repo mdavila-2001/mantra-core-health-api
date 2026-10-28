@@ -3,7 +3,7 @@
 # Endpoints del módulo `consent`
 
 - **Bloque:** Identidad y Seguridad (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
-- **Operaciones:** 27 (22 en el contrato, 5 sólo en el código)
+- **Operaciones:** 27 (27 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 0 · MEDIO 19 · BAJO 8
 - **Tablas distintas que tocan:** 41
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/consent.md` (generado aparte por `yarn docs:endpoints:generate`)
@@ -33,12 +33,12 @@
 | 19 | GET | `/consent/practitioner-access-requests/mine` | Mis solicitudes de vínculo pendientes de decisión | BAJO | 4 | PATIENT |
 | 20 | POST | `/consent/privacy-restrictions` | Aplicar restricción de privacidad que afecta RLS clínico | MEDIO | 3 | SECURITY_ADMIN |
 | 21 | POST | `/consent/processing-legal-bases` | Establecer/versionar base legal de procesamiento | MEDIO | 3 | SECURITY_ADMIN |
-| 22 | GET | `/consent/treatment-informed-consents` | v4266: consentimientos de un paciente, opcionalmente por objeto. | BAJO | 20 | CLINICIAN, PRACTITIONER |
+| 22 | GET | `/consent/treatment-informed-consents` | Listar consentimientos informados de tratamiento | BAJO | 20 | CLINICIAN, PRACTITIONER |
 | 23 | POST | `/consent/treatment-informed-consents` | Capturar consentimiento informado de tratamiento | MEDIO | 21 | SECURITY_ADMIN, CLINICIAN, PRACTITIONER |
-| 24 | GET | `/consent/treatment-informed-consents/{id}` | v4266: un consentimiento por id. | BAJO | 20 | CLINICIAN, PRACTITIONER |
-| 25 | POST | `/consent/treatment-informed-consents/{id}/evidence` | Enmienda 1: evidencia (firma, documento) del consentimiento, registrada con el servicio de evidencia existente (`consent.consent_evidence`). | MEDIO | 18 | CLINICIAN, PRACTITIONER |
-| 26 | PATCH | `/consent/treatment-informed-consents/{id}/post-emergency-information` | Enmienda 1: cierre de la excepción EMERGENCY. | MEDIO | 19 | CLINICIAN, PRACTITIONER |
-| 27 | PATCH | `/consent/treatment-informed-consents/{id}/withdraw` | v4266: revocación (409 si ya estaba revocado). | MEDIO | 22 | CLINICIAN, PRACTITIONER |
+| 24 | GET | `/consent/treatment-informed-consents/{id}` | Leer un consentimiento informado de tratamiento | BAJO | 20 | CLINICIAN, PRACTITIONER |
+| 25 | POST | `/consent/treatment-informed-consents/{id}/evidence` | Adjuntar evidencia de firma al consentimiento de tratamiento | MEDIO | 18 | CLINICIAN, PRACTITIONER |
+| 26 | PATCH | `/consent/treatment-informed-consents/{id}/post-emergency-information` | Registrar la información posterior a una emergencia | MEDIO | 19 | CLINICIAN, PRACTITIONER |
+| 27 | PATCH | `/consent/treatment-informed-consents/{id}/withdraw` | Revocar un consentimiento informado de tratamiento | MEDIO | 22 | CLINICIAN, PRACTITIONER |
 
 ---
 
@@ -638,7 +638,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /consent/encounters/{encounterId}/informed-consent` la atiende `EncounterInformedConsentsController.register` (src/modules/consent/controllers/encounter-informed-consents.controller.ts:42). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `RegisterEncounterInformedConsentDto` (5 campos, 1 obligatorio). Delega en `EncounterInformedConsentsService.register`. Crea filas en consent.consent_events, consent.treatment_informed_consents. Actualiza clinical_ext.referrals. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 10 más.
+`POST /consent/encounters/{encounterId}/informed-consent` la atiende `EncounterInformedConsentsController.register` (src/modules/consent/controllers/encounter-informed-consents.controller.ts:42). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `RegisterEncounterInformedConsentDto` (31 campos, 1 obligatorio). Delega en `EncounterInformedConsentsService.register`. Crea filas en consent.consent_events, consent.treatment_informed_consents. Actualiza clinical_ext.referrals. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 10 más.
 
 ### Requerimientos
 
@@ -693,6 +693,32 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `informationVersion` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Versión del material informativo vigente | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:86` |
 | `interpreterUserId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Intérprete presente (user id) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:97` |
 | `witnessUserId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Testigo (user id) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:105` |
+| `targetType` | `string` | No | valores: MEDICATION_REQUEST, SERVICE_REQUEST, REFERRAL, PROCEDURE, CARE_PLAN | `@IsOptional()` `@IsIn(INFORMED_CONSENT_TARGET_TYPES)` | A qué se consiente (va junto con targetId) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:124` |
+| `targetId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Id del objeto consentido (va junto con targetType) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:135` |
+| `targetLabel` | `string` | No | longitud mínima 1; longitud máxima 300 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(300)` | Instantánea legible de lo consentido | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:148` |
+| `diagnosisText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Diagnóstico que lo motiva | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:161` |
+| `purposeText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Naturaleza y objetivo del tratamiento, estudio o derivación | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:174` |
+| `benefitsText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Beneficios esperados | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:184` |
+| `risksText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Riesgos frecuentes y graves / efectos adversos | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:197` |
+| `personalizedRisksText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Riesgos personalizados del paciente | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:210` |
+| `alternativesText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Alternativas disponibles | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:223` |
+| `refusalConsequencesText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Consecuencias previsibles de no aceptar | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:236` |
+| `patientQuestionsText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Preguntas del paciente y respuestas | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:249` |
+| `grantedBy` | `string` | No | valores: PATIENT, LEGAL_REPRESENTATIVE, GUARDIAN, SUBSTITUTE_RELATIVE | `@IsOptional()` `@IsIn(INFORMED_CONSENT_GRANTED_BY)` | Quién otorga (por defecto el titular) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:260` |
+| `representativeName` | `string` | No | longitud mínima 1; longitud máxima 200 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(200)` | Nombre del representante (obligatorio si no otorga el titular) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:274` |
+| `representativeDocument` | `string` | No | longitud mínima 1; longitud máxima 60 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(60)` | Documento del representante (CI u otro) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:287` |
+| `representativeRelationship` | `string` | No | longitud mínima 1; longitud máxima 80 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(80)` | Parentesco o calidad del representante (obligatorio si no otorga el titular) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:301` |
+| `incapacityReason` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Por qué no consiente el titular | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:314` |
+| `informedByProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Profesional que informa (practitioner profile id) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:325` |
+| `channel` | `string` | No | valores: IN_PERSON, TELEHEALTH | `@IsOptional()` `@IsIn(INFORMED_CONSENT_CHANNELS)` | Canal por el que se informó | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:336` |
+| `exceptionType` | `string` | No | valores: EMERGENCY, PUBLIC_HEALTH_RISK, PATIENT_WAIVER | `@IsOptional()` `@IsIn(INFORMED_CONSENT_EXCEPTION_TYPES)` | Excepción legal al consentimiento | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:347` |
+| `exceptionJustification` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Justificación de la excepción (obligatoria si hay excepción) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:360` |
+| `witnessName` | `string` | No | longitud mínima 1; longitud máxima 200 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(200)` | Testigo externo (nombre) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:373` |
+| `witnessDocument` | `string` | No | longitud mínima 1; longitud máxima 60 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(60)` | Documento del testigo externo | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:386` |
+| `informationLanguage` | `string` | No | longitud mínima 1; longitud máxima 40 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(40)` | Idioma de la información (por defecto es) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:399` |
+| `assentObtained` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Asentimiento obtenido (obligatorio si otorga un representante) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:411` |
+| `assentNotes` | `string` | No | longitud máxima 4000 | `@IsOptional()` `@IsString()` `@MaxLength(4000)` | Notas del asentimiento | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:423` |
+| `revocationRightInformed` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Se informó el derecho a revocar | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:432` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -710,7 +736,33 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
   "procedureCodeConceptId": "00000000-0000-4000-8000-000000000001",
   "informationVersion": "valor-ejemplo",
   "interpreterUserId": "00000000-0000-4000-8000-000000000001",
-  "witnessUserId": "00000000-0000-4000-8000-000000000001"
+  "witnessUserId": "00000000-0000-4000-8000-000000000001",
+  "targetType": "MEDICATION_REQUEST",
+  "targetId": "00000000-0000-4000-8000-000000000001",
+  "targetLabel": "valor-ejemplo",
+  "diagnosisText": "valor-ejemplo",
+  "purposeText": "valor-ejemplo",
+  "benefitsText": "valor-ejemplo",
+  "risksText": "valor-ejemplo",
+  "personalizedRisksText": "valor-ejemplo",
+  "alternativesText": "valor-ejemplo",
+  "refusalConsequencesText": "valor-ejemplo",
+  "patientQuestionsText": "valor-ejemplo",
+  "grantedBy": "PATIENT",
+  "representativeName": "Nombre de ejemplo",
+  "representativeDocument": "valor-ejemplo",
+  "representativeRelationship": "valor-ejemplo",
+  "incapacityReason": "Texto descriptivo de ejemplo",
+  "informedByProfileId": "00000000-0000-4000-8000-000000000001",
+  "channel": "IN_PERSON",
+  "exceptionType": "EMERGENCY",
+  "exceptionJustification": "valor-ejemplo",
+  "witnessName": "Nombre de ejemplo",
+  "witnessDocument": "valor-ejemplo",
+  "informationLanguage": "es-BO",
+  "assentObtained": true,
+  "assentNotes": "Texto descriptivo de ejemplo",
+  "revocationRightInformed": true
 }
 ```
 
@@ -2243,8 +2295,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 22. GET /consent/treatment-informed-consents
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** v4266: consentimientos de un paciente, opcionalmente por objeto.
+- **Origen:** CONTRATO
+- **Nombre:** Listar consentimientos informados de tratamiento
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -2252,7 +2304,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-v4266: consentimientos de un paciente, opcionalmente por objeto. Dentro del módulo (descripción del modelo, en inglés): «Separates legal authority for processing from patient consent, HIPAA-style authorizations, treatment informed consent, privacy restrictions and objections.» Dominio: Identidad y Seguridad.
+Listar consentimientos informados de tratamiento. Dentro del módulo (descripción del modelo, en inglés): «Separates legal authority for processing from patient consent, HIPAA-style authorizations, treatment informed consent, privacy restrictions and objections.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_07_consent.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -2267,6 +2319,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:73` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_QUERY | patientProfileId (obligatorio) | `contrato (parameters)` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
@@ -2298,7 +2351,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `ListTreatmentInformedConsentsQueryDto` | — |
+| `patientProfileId` | query | Sí | `string` | Paciente titular |
+| `targetType` | query | No | `string` | — |
+| `targetId` | query | No | `string` | — |
 
 ### Cuerpo
 
@@ -2364,6 +2419,7 @@ La operación no recibe cuerpo.
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -2397,7 +2453,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 
 ### Cómo se atiende (sistema)
 
-`POST /consent/treatment-informed-consents` la atiende `TreatmentInformedConsentsController.sign` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:56). Exige sesión con alguno de los roles SECURITY_ADMIN, CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateTreatmentInformedConsentDto` (8 campos, 3 obligatorios). Delega en `TreatmentInformedConsentsService.create`. Crea filas en consent.consent_events, consent.treatment_informed_consents. Actualiza clinical_ext.referrals. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 10 más.
+`POST /consent/treatment-informed-consents` la atiende `TreatmentInformedConsentsController.sign` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:56). Exige sesión con alguno de los roles SECURITY_ADMIN, CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateTreatmentInformedConsentDto` (34 campos, 3 obligatorios). Delega en `TreatmentInformedConsentsService.create`. Crea filas en consent.consent_events, consent.treatment_informed_consents. Actualiza clinical_ext.referrals. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 10 más.
 
 ### Requerimientos
 
@@ -2448,6 +2504,32 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 | `interpreterUserId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Intérprete presente (user id) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:97` |
 | `witnessUserId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Testigo (user id) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:105` |
 | `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant propietario | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:113` |
+| `targetType` | `string` | No | valores: MEDICATION_REQUEST, SERVICE_REQUEST, REFERRAL, PROCEDURE, CARE_PLAN | `@IsOptional()` `@IsIn(INFORMED_CONSENT_TARGET_TYPES)` | A qué se consiente (va junto con targetId) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:124` |
+| `targetId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Id del objeto consentido (va junto con targetType) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:135` |
+| `targetLabel` | `string` | No | longitud mínima 1; longitud máxima 300 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(300)` | Instantánea legible de lo consentido | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:148` |
+| `diagnosisText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Diagnóstico que lo motiva | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:161` |
+| `purposeText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Naturaleza y objetivo del tratamiento, estudio o derivación | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:174` |
+| `benefitsText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Beneficios esperados | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:184` |
+| `risksText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Riesgos frecuentes y graves / efectos adversos | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:197` |
+| `personalizedRisksText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Riesgos personalizados del paciente | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:210` |
+| `alternativesText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Alternativas disponibles | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:223` |
+| `refusalConsequencesText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Consecuencias previsibles de no aceptar | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:236` |
+| `patientQuestionsText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Preguntas del paciente y respuestas | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:249` |
+| `grantedBy` | `string` | No | valores: PATIENT, LEGAL_REPRESENTATIVE, GUARDIAN, SUBSTITUTE_RELATIVE | `@IsOptional()` `@IsIn(INFORMED_CONSENT_GRANTED_BY)` | Quién otorga (por defecto el titular) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:260` |
+| `representativeName` | `string` | No | longitud mínima 1; longitud máxima 200 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(200)` | Nombre del representante (obligatorio si no otorga el titular) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:274` |
+| `representativeDocument` | `string` | No | longitud mínima 1; longitud máxima 60 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(60)` | Documento del representante (CI u otro) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:287` |
+| `representativeRelationship` | `string` | No | longitud mínima 1; longitud máxima 80 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(80)` | Parentesco o calidad del representante (obligatorio si no otorga el titular) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:301` |
+| `incapacityReason` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Por qué no consiente el titular | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:314` |
+| `informedByProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Profesional que informa (practitioner profile id) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:325` |
+| `channel` | `string` | No | valores: IN_PERSON, TELEHEALTH | `@IsOptional()` `@IsIn(INFORMED_CONSENT_CHANNELS)` | Canal por el que se informó | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:336` |
+| `exceptionType` | `string` | No | valores: EMERGENCY, PUBLIC_HEALTH_RISK, PATIENT_WAIVER | `@IsOptional()` `@IsIn(INFORMED_CONSENT_EXCEPTION_TYPES)` | Excepción legal al consentimiento | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:347` |
+| `exceptionJustification` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Justificación de la excepción (obligatoria si hay excepción) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:360` |
+| `witnessName` | `string` | No | longitud mínima 1; longitud máxima 200 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(200)` | Testigo externo (nombre) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:373` |
+| `witnessDocument` | `string` | No | longitud mínima 1; longitud máxima 60 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(60)` | Documento del testigo externo | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:386` |
+| `informationLanguage` | `string` | No | longitud mínima 1; longitud máxima 40 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(40)` | Idioma de la información (por defecto es) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:399` |
+| `assentObtained` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Asentimiento obtenido (obligatorio si otorga un representante) | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:411` |
+| `assentNotes` | `string` | No | longitud máxima 4000 | `@IsOptional()` `@IsString()` `@MaxLength(4000)` | Notas del asentimiento | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:423` |
+| `revocationRightInformed` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Se informó el derecho a revocar | `src/modules/consent/dto/create-treatment-informed-consent.dto.ts:432` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2470,7 +2552,33 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
   "informationVersion": "valor-ejemplo",
   "interpreterUserId": "00000000-0000-4000-8000-000000000001",
   "witnessUserId": "00000000-0000-4000-8000-000000000001",
-  "tenantId": "00000000-0000-4000-8000-000000000001"
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "targetType": "MEDICATION_REQUEST",
+  "targetId": "00000000-0000-4000-8000-000000000001",
+  "targetLabel": "valor-ejemplo",
+  "diagnosisText": "valor-ejemplo",
+  "purposeText": "valor-ejemplo",
+  "benefitsText": "valor-ejemplo",
+  "risksText": "valor-ejemplo",
+  "personalizedRisksText": "valor-ejemplo",
+  "alternativesText": "valor-ejemplo",
+  "refusalConsequencesText": "valor-ejemplo",
+  "patientQuestionsText": "valor-ejemplo",
+  "grantedBy": "PATIENT",
+  "representativeName": "Nombre de ejemplo",
+  "representativeDocument": "valor-ejemplo",
+  "representativeRelationship": "valor-ejemplo",
+  "incapacityReason": "Texto descriptivo de ejemplo",
+  "informedByProfileId": "00000000-0000-4000-8000-000000000001",
+  "channel": "IN_PERSON",
+  "exceptionType": "EMERGENCY",
+  "exceptionJustification": "valor-ejemplo",
+  "witnessName": "Nombre de ejemplo",
+  "witnessDocument": "valor-ejemplo",
+  "informationLanguage": "es-BO",
+  "assentObtained": true,
+  "assentNotes": "Texto descriptivo de ejemplo",
+  "revocationRightInformed": true
 }
 ```
 
@@ -2555,8 +2663,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 24. GET /consent/treatment-informed-consents/{id}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** v4266: un consentimiento por id.
+- **Origen:** CONTRATO
+- **Nombre:** Leer un consentimiento informado de tratamiento
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -2564,7 +2672,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-v4266: un consentimiento por id. Dentro del módulo (descripción del modelo, en inglés): «Separates legal authority for processing from patient consent, HIPAA-style authorizations, treatment informed consent, privacy restrictions and objections.» Dominio: Identidad y Seguridad.
+Leer un consentimiento informado de tratamiento. Dentro del módulo (descripción del modelo, en inglés): «Separates legal authority for processing from patient consent, HIPAA-style authorizations, treatment informed consent, privacy restrictions and objections.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_07_consent.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -2696,8 +2804,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 25. POST /consent/treatment-informed-consents/{id}/evidence
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Enmienda 1: evidencia (firma, documento) del consentimiento, registrada con el servicio de evidencia existente (`consent.consent_evidence`).
+- **Origen:** CONTRATO
+- **Nombre:** Adjuntar evidencia de firma al consentimiento de tratamiento
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -2705,13 +2813,13 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Enmienda 1: evidencia (firma, documento) del consentimiento, registrada con el servicio de evidencia existente (`consent.consent_evidence`). Dentro del módulo (descripción del modelo, en inglés): «Separates legal authority for processing from patient consent, HIPAA-style authorizations, treatment informed consent, privacy restrictions and objections.» Dominio: Identidad y Seguridad.
+Adjuntar evidencia de firma al consentimiento de tratamiento. Dentro del módulo (descripción del modelo, en inglés): «Separates legal authority for processing from patient consent, HIPAA-style authorizations, treatment informed consent, privacy restrictions and objections.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_07_consent.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
-`POST /consent/treatment-informed-consents/{id}/evidence` la atiende `TreatmentInformedConsentsController.recordEvidence` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:143). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `RecordTreatmentConsentEvidenceDto` (0 campos, 0 obligatorios). Delega en `TreatmentInformedConsentsService.recordEvidence`. Crea filas en consent.consent_evidence. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 9 más.
+`POST /consent/treatment-informed-consents/{id}/evidence` la atiende `TreatmentInformedConsentsController.recordEvidence` (src/modules/consent/controllers/treatment-informed-consents.controller.ts:143). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `RecordTreatmentConsentEvidenceDto` (6 campos, 0 obligatorios). Delega en `TreatmentInformedConsentsService.recordEvidence`. Crea filas en consent.consent_evidence. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 9 más.
 
 ### Requerimientos
 
@@ -2721,6 +2829,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:143` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:143` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
@@ -2752,9 +2862,37 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|
 | `id` | path | Sí | `string` | — |
 
-### Cuerpo — DTO `RecordTreatmentConsentEvidenceDto`
+### Cuerpo — DTO `RecordTreatmentConsentEvidenceDto` · `application/json`
 
-_El DTO no declara campos documentables, o no se pudo leer._
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `evidenceTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tipo de evidencia (concept id); por defecto firma | `src/modules/consent/dto/create-consent-evidence.dto.ts:38` |
+| `documentFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Documento firmado (file id) | `src/modules/consent/dto/create-consent-evidence.dto.ts:49` |
+| `signatureId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Firma clínica asociada (signature id) | `src/modules/consent/dto/create-consent-evidence.dto.ts:60` |
+| `capturedChannelConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Canal de captura (concept id) | `src/modules/consent/dto/create-consent-evidence.dto.ts:71` |
+| `policySnapshotHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash del snapshot de política | `src/modules/consent/dto/create-consent-evidence.dto.ts:80` |
+| `evidenceHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash de la evidencia (integridad reproducible) | `src/modules/consent/dto/create-consent-evidence.dto.ts:91` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "evidenceTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "documentFileId": "00000000-0000-4000-8000-000000000001",
+  "signatureId": "00000000-0000-4000-8000-000000000001",
+  "capturedChannelConceptId": "00000000-0000-4000-8000-000000000001",
+  "policySnapshotHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "evidenceHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}
+```
+
+</details>
 
 ### Respuesta — `Promise<ConsentEvidenceResponseDto>` · DTO `ConsentEvidenceResponseDto` · HTTP `HttpStatus.CREATED`
 
@@ -2769,7 +2907,7 @@ _El DTO no declara campos documentables, o no se pudo leer._
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento informado no encontrado |
@@ -2790,8 +2928,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 26. PATCH /consent/treatment-informed-consents/{id}/post-emergency-information
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Enmienda 1: cierre de la excepción EMERGENCY.
+- **Origen:** CONTRATO
+- **Nombre:** Registrar la información posterior a una emergencia
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -2799,7 +2937,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Enmienda 1: cierre de la excepción EMERGENCY. Dentro del módulo (descripción del modelo, en inglés): «Separates legal authority for processing from patient consent, HIPAA-style authorizations, treatment informed consent, privacy restrictions and objections.» Dominio: Identidad y Seguridad.
+Registrar la información posterior a una emergencia. Dentro del módulo (descripción del modelo, en inglés): «Separates legal authority for processing from patient consent, HIPAA-style authorizations, treatment informed consent, privacy restrictions and objections.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_07_consent.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -2815,6 +2953,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:120` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:120` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
@@ -2847,11 +2987,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|
 | `id` | path | Sí | `string` | — |
 
-### Cuerpo — DTO `PostEmergencyInformationDto`
+### Cuerpo — DTO `PostEmergencyInformationDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `informedAt` | `string` | Sí | formato date-time | `@IsISO8601()` | Cuándo se informó al paciente (o a su representante). | `src/modules/consent/dto/treatment-informed-consent-actions.dto.ts:66` |
+| `informedAt` | `string` | Sí | formato date-time | `@IsISO8601()` | — | `src/modules/consent/dto/treatment-informed-consent-actions.dto.ts:66` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2930,7 +3070,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento informado no encontrado |
@@ -2952,8 +3092,8 @@ _Ninguna prueba existente menciona esta operación._
 
 ## 27. PATCH /consent/treatment-informed-consents/{id}/withdraw
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** v4266: revocación (409 si ya estaba revocado).
+- **Origen:** CONTRATO
+- **Nombre:** Revocar un consentimiento informado de tratamiento
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -2961,7 +3101,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-v4266: revocación (409 si ya estaba revocado). Dentro del módulo (descripción del modelo, en inglés): «Separates legal authority for processing from patient consent, HIPAA-style authorizations, treatment informed consent, privacy restrictions and objections.» Dominio: Identidad y Seguridad.
+Revocar un consentimiento informado de tratamiento. Dentro del módulo (descripción del modelo, en inglés): «Separates legal authority for processing from patient consent, HIPAA-style authorizations, treatment informed consent, privacy restrictions and objections.» Dominio: Identidad y Seguridad.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_07_consent.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
@@ -2977,6 +3117,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:100` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:100` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
@@ -3012,7 +3154,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|
 | `id` | path | Sí | `string` | — |
 
-### Cuerpo — DTO `WithdrawTreatmentInformedConsentDto`
+### Cuerpo — DTO `WithdrawTreatmentInformedConsentDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
@@ -3095,7 +3237,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento informado no encontrado |

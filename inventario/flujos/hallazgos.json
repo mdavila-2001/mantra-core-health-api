@@ -12434,46 +12434,6 @@
     "queHacer": "Regenerar el contrato o decidir si deben dejar de existir. Los clientes generados no las ven.",
     "items": [
       {
-        "operacion": "ReferralsController_get",
-        "metodo": "GET",
-        "ruta": "/referrals/{id}",
-        "modulo": "clinical_ext",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/clinical_ext/controllers/referrals.controller.ts:193"
-      },
-      {
-        "operacion": "ReferralsController_cancel",
-        "metodo": "PATCH",
-        "ruta": "/referrals/{id}/cancel",
-        "modulo": "clinical_ext",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/clinical_ext/controllers/referrals.controller.ts:142"
-      },
-      {
-        "operacion": "ReferralsController_counterReferral",
-        "metodo": "PATCH",
-        "ruta": "/referrals/{id}/counter-referral",
-        "modulo": "clinical_ext",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/clinical_ext/controllers/referrals.controller.ts:125"
-      },
-      {
-        "operacion": "ReferralsController_listTargetServices",
-        "metodo": "GET",
-        "ruta": "/referrals/target-services",
-        "modulo": "clinical_ext",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/clinical_ext/controllers/referrals.controller.ts:97"
-      },
-      {
-        "operacion": "ReferralsController_searchTargets",
-        "metodo": "GET",
-        "ruta": "/referrals/targets",
-        "modulo": "clinical_ext",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/clinical_ext/controllers/referrals.controller.ts:86"
-      },
-      {
         "operacion": "CommunityPublicController_toInt",
         "metodo": "DESCONOCIDO",
         "ruta": "/",
@@ -12504,46 +12464,6 @@
         "modulo": "community",
         "detalle": "handler sin operación en openapi.json",
         "fuente": "src/modules/community/controllers/community-public.controller.ts:607"
-      },
-      {
-        "operacion": "TreatmentInformedConsentsController_list",
-        "metodo": "GET",
-        "ruta": "/consent/treatment-informed-consents",
-        "modulo": "consent",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/consent/controllers/treatment-informed-consents.controller.ts:73"
-      },
-      {
-        "operacion": "TreatmentInformedConsentsController_get",
-        "metodo": "GET",
-        "ruta": "/consent/treatment-informed-consents/{id}",
-        "modulo": "consent",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/consent/controllers/treatment-informed-consents.controller.ts:85"
-      },
-      {
-        "operacion": "TreatmentInformedConsentsController_recordEvidence",
-        "metodo": "POST",
-        "ruta": "/consent/treatment-informed-consents/{id}/evidence",
-        "modulo": "consent",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/consent/controllers/treatment-informed-consents.controller.ts:143"
-      },
-      {
-        "operacion": "TreatmentInformedConsentsController_postEmergencyInformation",
-        "metodo": "PATCH",
-        "ruta": "/consent/treatment-informed-consents/{id}/post-emergency-information",
-        "modulo": "consent",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/consent/controllers/treatment-informed-consents.controller.ts:120"
-      },
-      {
-        "operacion": "TreatmentInformedConsentsController_withdraw",
-        "metodo": "PATCH",
-        "ruta": "/consent/treatment-informed-consents/{id}/withdraw",
-        "modulo": "consent",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/consent/controllers/treatment-informed-consents.controller.ts:100"
       },
       {
         "operacion": "IamAuthController_deliverTokens",
@@ -12586,7 +12506,7 @@
         "fuente": "src/modules/search_platform/controllers/search-platform.controller.ts:114"
       }
     ],
-    "cuenta": 19
+    "cuenta": 9
   },
   {
     "id": "FLU-09",

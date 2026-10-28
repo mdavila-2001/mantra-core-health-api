@@ -13,7 +13,7 @@ Cada hallazgo sale de cruzar los datos del inventario. Ninguno corrige código: 
 | [FLU-05](#flu-05) | MEDIA | Proceso con operaciones de riesgo ALTO y ninguna prueba de integración | 13 |
 | [FLU-06](#flu-06) | ALTA | Operaciones que el frontend llama y la API no tiene | 10 |
 | [FLU-07](#flu-07) | INFO | Operaciones de la API que ningún cliente del frontend llama | 1223 |
-| [FLU-08](#flu-08) | MEDIA | Operaciones que existen en el código y el contrato OpenAPI no publica | 19 |
+| [FLU-08](#flu-08) | MEDIA | Operaciones que existen en el código y el contrato OpenAPI no publica | 9 |
 | [FLU-09](#flu-09) | BAJA | Máquinas de estado sin ninguna operación que las ejerza | 0 |
 | [FLU-10](#flu-10) | BAJA | Operaciones que pueden terminar en un 500 por una excepción sin tipar | 112 |
 
@@ -609,26 +609,16 @@ _Se muestran 200 de 1223; la lista completa está en `inventario/flujos/hallazgo
 
 ## FLU-08
 
-**Operaciones que existen en el código y el contrato OpenAPI no publica** — severidad MEDIA — 19 caso(s).
+**Operaciones que existen en el código y el contrato OpenAPI no publica** — severidad MEDIA — 9 caso(s).
 
 **Qué hacer:** Regenerar el contrato o decidir si deben dejar de existir. Los clientes generados no las ven.
 
 | Dónde | Módulo | Detalle | Fuente |
 |---|---|---|---|
-| GET /referrals/{id} | clinical_ext | handler sin operación en openapi.json | `src/modules/clinical_ext/controllers/referrals.controller.ts:193` |
-| PATCH /referrals/{id}/cancel | clinical_ext | handler sin operación en openapi.json | `src/modules/clinical_ext/controllers/referrals.controller.ts:142` |
-| PATCH /referrals/{id}/counter-referral | clinical_ext | handler sin operación en openapi.json | `src/modules/clinical_ext/controllers/referrals.controller.ts:125` |
-| GET /referrals/target-services | clinical_ext | handler sin operación en openapi.json | `src/modules/clinical_ext/controllers/referrals.controller.ts:97` |
-| GET /referrals/targets | clinical_ext | handler sin operación en openapi.json | `src/modules/clinical_ext/controllers/referrals.controller.ts:86` |
 | DESCONOCIDO / | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:582` |
 | DESCONOCIDO / | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:589` |
 | DESCONOCIDO / | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:602` |
 | DESCONOCIDO / | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:607` |
-| GET /consent/treatment-informed-consents | consent | handler sin operación en openapi.json | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:73` |
-| GET /consent/treatment-informed-consents/{id} | consent | handler sin operación en openapi.json | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:85` |
-| POST /consent/treatment-informed-consents/{id}/evidence | consent | handler sin operación en openapi.json | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:143` |
-| PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | consent | handler sin operación en openapi.json | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:120` |
-| PATCH /consent/treatment-informed-consents/{id}/withdraw | consent | handler sin operación en openapi.json | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:100` |
 | DESCONOCIDO /iam/auth | iam | handler sin operación en openapi.json | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:460` |
 | DESCONOCIDO /notifications/web-push | messaging | handler sin operación en openapi.json | `src/modules/messaging/controllers/web-push.controller.ts:78` |
 | DESCONOCIDO / | promotions | handler sin operación en openapi.json | `src/modules/promotions/controllers/loyalty.controller.ts:185` |

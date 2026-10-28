@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `consent`
 
-Referencia exhaustiva de 22 operación(es) del módulo `consent`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 27 operación(es) del módulo `consent`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `consent-consents`, `consent-evidence`, `consent-hipaa-authorizations`, `consent-internal`, `consent-me`, `consent-patient-objections`, `consent-practitioner-access`, `consent-privacy-restrictions`, `consent-processing-legal-bases`, `consent-treatment-informed-consents`
 - **Controladores:** `ConsentEvidenceController`, `ConsentMeController`, `ConsentSweepController`, `ConsentsController`, `EncounterInformedConsentsController`, `HipaaAuthorizationsController`, `PatientObjectionsController`, `PractitionerAccessRequestsController`, `PrivacyRestrictionsController`, `ProcessingLegalBasesController`, `TreatmentInformedConsentsController`
@@ -32,7 +32,12 @@ Referencia exhaustiva de 22 operación(es) del módulo `consent`, derivada del c
 19. [GET /consent/practitioner-access-requests/mine](#19-get-consent-practitioner-access-requests-mine) — Mis solicitudes de vínculo pendientes de decisión
 20. [POST /consent/privacy-restrictions](#20-post-consent-privacy-restrictions) — Aplicar restricción de privacidad que afecta RLS clínico
 21. [POST /consent/processing-legal-bases](#21-post-consent-processing-legal-bases) — Establecer/versionar base legal de procesamiento
-22. [POST /consent/treatment-informed-consents](#22-post-consent-treatment-informed-consents) — Capturar consentimiento informado de tratamiento
+22. [GET /consent/treatment-informed-consents](#22-get-consent-treatment-informed-consents) — Listar consentimientos informados de tratamiento
+23. [POST /consent/treatment-informed-consents](#23-post-consent-treatment-informed-consents) — Capturar consentimiento informado de tratamiento
+24. [GET /consent/treatment-informed-consents/{id}](#24-get-consent-treatment-informed-consents-id) — Leer un consentimiento informado de tratamiento
+25. [POST /consent/treatment-informed-consents/{id}/evidence](#25-post-consent-treatment-informed-consents-id-evidence) — Adjuntar evidencia de firma al consentimiento de tratamiento
+26. [PATCH /consent/treatment-informed-consents/{id}/post-emergency-information](#26-patch-consent-treatment-informed-consents-id-post-emergency-information) — Registrar la información posterior a una emergencia
+27. [PATCH /consent/treatment-informed-consents/{id}/withdraw](#27-patch-consent-treatment-informed-consents-id-withdraw) — Revocar un consentimiento informado de tratamiento
 
 ---
 
@@ -806,6 +811,32 @@ Content-Type: application/json
 | `informationVersion` | No | `string` | Sin restricción adicional declarada | Versión del material informativo vigente | `valor-ejemplo` |
 | `interpreterUserId` | No | `string` | formato `uuid` | Intérprete presente (user id) | `00000000-0000-4000-8000-000000000001` |
 | `witnessUserId` | No | `string` | formato `uuid` | Testigo (user id) | `00000000-0000-4000-8000-000000000001` |
+| `targetType` | No | `string` | valores: `MEDICATION_REQUEST`, `SERVICE_REQUEST`, `REFERRAL`, `PROCEDURE`, `CARE_PLAN` | A qué se consiente (va junto con targetId) | `MEDICATION_REQUEST` |
+| `targetId` | No | `string` | formato `uuid` | Id del objeto consentido (va junto con targetType) | `00000000-0000-4000-8000-000000000001` |
+| `targetLabel` | No | `string` | longitud máxima 300 | Instantánea legible de lo consentido | `valor-ejemplo` |
+| `diagnosisText` | No | `string` | longitud máxima 4000 | Diagnóstico que lo motiva | `valor-ejemplo` |
+| `purposeText` | No | `string` | longitud máxima 4000 | Naturaleza y objetivo del tratamiento, estudio o derivación | `valor-ejemplo` |
+| `benefitsText` | No | `string` | longitud máxima 4000 | Beneficios esperados | `valor-ejemplo` |
+| `risksText` | No | `string` | longitud máxima 4000 | Riesgos frecuentes y graves / efectos adversos | `valor-ejemplo` |
+| `personalizedRisksText` | No | `string` | longitud máxima 4000 | Riesgos personalizados del paciente | `valor-ejemplo` |
+| `alternativesText` | No | `string` | longitud máxima 4000 | Alternativas disponibles | `valor-ejemplo` |
+| `refusalConsequencesText` | No | `string` | longitud máxima 4000 | Consecuencias previsibles de no aceptar | `valor-ejemplo` |
+| `patientQuestionsText` | No | `string` | longitud máxima 4000 | Preguntas del paciente y respuestas | `valor-ejemplo` |
+| `grantedBy` | No | `string` | valores: `PATIENT`, `LEGAL_REPRESENTATIVE`, `GUARDIAN`, `SUBSTITUTE_RELATIVE` | Quién otorga (por defecto el titular) | `PATIENT` |
+| `representativeName` | No | `string` | longitud máxima 200 | Nombre del representante (obligatorio si no otorga el titular) | `Nombre de ejemplo` |
+| `representativeDocument` | No | `string` | longitud máxima 60 | Documento del representante (CI u otro) | `valor-ejemplo` |
+| `representativeRelationship` | No | `string` | longitud máxima 80 | Parentesco o calidad del representante (obligatorio si no otorga el titular) | `valor-ejemplo` |
+| `incapacityReason` | No | `string` | longitud máxima 4000 | Por qué no consiente el titular | `Texto descriptivo de ejemplo` |
+| `informedByProfileId` | No | `string` | formato `uuid` | Profesional que informa (practitioner profile id) | `00000000-0000-4000-8000-000000000001` |
+| `channel` | No | `string` | valores: `IN_PERSON`, `TELEHEALTH` | Canal por el que se informó | `IN_PERSON` |
+| `exceptionType` | No | `string` | valores: `EMERGENCY`, `PUBLIC_HEALTH_RISK`, `PATIENT_WAIVER` | Excepción legal al consentimiento | `EMERGENCY` |
+| `exceptionJustification` | No | `string` | longitud máxima 4000 | Justificación de la excepción (obligatoria si hay excepción) | `valor-ejemplo` |
+| `witnessName` | No | `string` | longitud máxima 200 | Testigo externo (nombre) | `Nombre de ejemplo` |
+| `witnessDocument` | No | `string` | longitud máxima 60 | Documento del testigo externo | `valor-ejemplo` |
+| `informationLanguage` | No | `string` | longitud máxima 40 | Idioma de la información (por defecto es) | `es-BO` |
+| `assentObtained` | No | `boolean` | Sin restricción adicional declarada | Asentimiento obtenido (obligatorio si otorga un representante) | `true` |
+| `assentNotes` | No | `string` | longitud máxima 4000 | Notas del asentimiento | `Texto descriptivo de ejemplo` |
+| `revocationRightInformed` | No | `boolean` | Sin restricción adicional declarada | Se informó el derecho a revocar | `true` |
 
 ### Payload completo de ejemplo
 
@@ -822,7 +853,33 @@ Content-Type: application/json
   "procedureCodeConceptId": "00000000-0000-4000-8000-000000000001",
   "informationVersion": "valor-ejemplo",
   "interpreterUserId": "00000000-0000-4000-8000-000000000001",
-  "witnessUserId": "00000000-0000-4000-8000-000000000001"
+  "witnessUserId": "00000000-0000-4000-8000-000000000001",
+  "targetType": "MEDICATION_REQUEST",
+  "targetId": "00000000-0000-4000-8000-000000000001",
+  "targetLabel": "valor-ejemplo",
+  "diagnosisText": "valor-ejemplo",
+  "purposeText": "valor-ejemplo",
+  "benefitsText": "valor-ejemplo",
+  "risksText": "valor-ejemplo",
+  "personalizedRisksText": "valor-ejemplo",
+  "alternativesText": "valor-ejemplo",
+  "refusalConsequencesText": "valor-ejemplo",
+  "patientQuestionsText": "valor-ejemplo",
+  "grantedBy": "PATIENT",
+  "representativeName": "Nombre de ejemplo",
+  "representativeDocument": "valor-ejemplo",
+  "representativeRelationship": "valor-ejemplo",
+  "incapacityReason": "Texto descriptivo de ejemplo",
+  "informedByProfileId": "00000000-0000-4000-8000-000000000001",
+  "channel": "IN_PERSON",
+  "exceptionType": "EMERGENCY",
+  "exceptionJustification": "valor-ejemplo",
+  "witnessName": "Nombre de ejemplo",
+  "witnessDocument": "valor-ejemplo",
+  "informationLanguage": "es-BO",
+  "assentObtained": true,
+  "assentNotes": "Texto descriptivo de ejemplo",
+  "revocationRightInformed": true
 }
 ```
 
@@ -2949,7 +3006,220 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /consent/treatment-informed-consents
+## 22. GET /consent/treatment-informed-consents
+
+- **Módulo:** `consent`
+- **Etiqueta OpenAPI:** `consent-treatment-informed-consents`
+- **Nombre:** Listar consentimientos informados de tratamiento
+- **Operation ID:** `TreatmentInformedConsentsController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TreatmentInformedConsentsController.list](../../src/modules/consent/controllers/treatment-informed-consents.controller.ts)
+
+### Descripción de negocio
+
+Listar consentimientos informados de tratamiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: v4266: consentimientos de un paciente, opcionalmente por objeto.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /consent/treatment-informed-consents` en `TreatmentInformedConsentsController_list`. El controlador delega en `TreatmentInformedConsentsService.list`. No recibe body. El tipo de retorno estático es `Promise<TreatmentInformedConsentListDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `patientProfileId` | query | Sí | `string` | formato `uuid` | Paciente titular | `00000000-0000-4000-8000-000000000001` |
+| `targetType` | query | No | `string` | valores: `MEDICATION_REQUEST`, `SERVICE_REQUEST`, `REFERRAL`, `PROCEDURE`, `CARE_PLAN` | Sin descripción específica en OpenAPI. | `MEDICATION_REQUEST` |
+| `targetId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /consent/treatment-informed-consents?patientProfileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /consent/treatment-informed-consents?patientProfileId=00000000-0000-4000-8000-000000000001&targetType=MEDICATION_REQUEST&targetId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<TreatmentInformedConsentListDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<TreatmentInformedConsentListDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<TreatmentInformedConsentListDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<TreatmentInformedConsentListDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<TreatmentInformedConsentListDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<TreatmentInformedConsentListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<TreatmentInformedConsentListDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TreatmentInformedConsentListDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "encounterId": "00000000-0000-4000-8000-000000000001",
+      "status": "ACTIVE",
+      "decision": "ACCEPTED",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "decisionConceptId": "00000000-0000-4000-8000-000000000001",
+      "procedureCodeConceptId": "00000000-0000-4000-8000-000000000001",
+      "informationVersion": "valor-ejemplo",
+      "interpreterUserId": "00000000-0000-4000-8000-000000000001",
+      "witnessUserId": "00000000-0000-4000-8000-000000000001",
+      "targetType": {},
+      "targetId": "00000000-0000-4000-8000-000000000001",
+      "targetLabel": "valor-ejemplo",
+      "diagnosisText": "valor-ejemplo",
+      "purposeText": "valor-ejemplo",
+      "benefitsText": "valor-ejemplo",
+      "risksText": "valor-ejemplo",
+      "personalizedRisksText": "valor-ejemplo",
+      "alternativesText": "valor-ejemplo",
+      "refusalConsequencesText": "valor-ejemplo",
+      "patientQuestionsText": "valor-ejemplo",
+      "grantedBy": {},
+      "representativeName": "Nombre de ejemplo",
+      "representativeDocument": "valor-ejemplo",
+      "representativeRelationship": "valor-ejemplo",
+      "incapacityReason": "Texto descriptivo de ejemplo",
+      "informedByProfileId": "00000000-0000-4000-8000-000000000001",
+      "channel": {},
+      "exceptionType": {},
+      "exceptionJustification": "valor-ejemplo",
+      "withdrawalReason": "Texto descriptivo de ejemplo",
+      "witnessName": "Nombre de ejemplo",
+      "witnessDocument": "valor-ejemplo",
+      "informationLanguage": "es-BO",
+      "assentObtained": true,
+      "assentNotes": "Texto descriptivo de ejemplo",
+      "revocationRightInformed": true,
+      "postEmergencyInformedAt": "2026-07-31T12:00:00.000Z",
+      "evidence": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "evidenceTypeConceptId": "00000000-0000-4000-8000-000000000001",
+          "capturedChannelConceptId": "00000000-0000-4000-8000-000000000001",
+          "recordedAt": "2026-07-31T12:00:00.000Z"
+        }
+      ],
+      "signatureStatus": "SIGNED",
+      "signedAt": "2026-07-31T12:00:00.000Z",
+      "withdrawnAt": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<TreatmentInformedConsentResponseDto>` | Sin restricción adicional declarada | Consentimientos, del más reciente al más antiguo. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","status":"ACTIVE","decision":"ACCEPTED","statusConceptId":"00000000-0000-4000-8000-000000000001","decisionConceptId":"00000000-0000-4000-8000-000000000001","procedureCodeConceptId":"00000000-0000-4000-8000-000000000001","informationVersion":"valor-ejemplo","interpreterUserId":"00000000-0000-4000-8000-000000000001","witnessUserId":"00000000-0000-4000-8000-000000000001","targetType":{},"targetId":"00000000-0000-4000-8000-000000000001","targetLabel":"valor-ejemplo","diagnosisText":"valor-ejemplo","purposeText":"valor-ejemplo","benefitsText":"valor-ejemplo","risksText":"valor-ejemplo","personalizedRisksText":"valor-ejemplo","alternativesText":"valor-ejemplo","refusalConsequencesText":"valor-ejemplo","patientQuestionsText":"valor-ejemplo","grantedBy":{},"representativeName":"Nombre de ejemplo","representativeDocument":"valor-ejemplo","representativeRelationship":"valor-ejemplo","incapacityReason":"Texto descriptivo de ejemplo","informedByProfileId":"00000000-0000-4000-8000-000000000001","channel":{},"exceptionType":{},"exceptionJustification":"valor-ejemplo","withdrawalReason":"Texto descriptivo de ejemplo","witnessName":"Nombre de ejemplo","witnessDocument":"valor-ejemplo","informationLanguage":"es-BO","assentObtained":true,"assentNotes":"Texto descriptivo de ejemplo","revocationRightInformed":true,"postEmergencyInformedAt":"2026-07-31T12:00:00.000Z","evidence":[{"id":"00000000-0000-4000-8000-000000000001","evidenceTypeConceptId":"00000000-0000-4000-8000-000000000001","capturedChannelConceptId":"00000000-0000-4000-8000-000000000001","recordedAt":"2026-07-31T12:00:00.000Z"}],"signatureStatus":"SIGNED","signedAt":"2026-07-31T12:00:00.000Z","withdrawnAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `items[].patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
+| `items[].tenantId` | No | `string` | formato `uuid` | Tenant propietario. | `00000000-0000-4000-8000-000000000001` |
+| `items[].encounterId` | No | `string` | formato `uuid` | Encuentro en el que se registró. | `00000000-0000-4000-8000-000000000001` |
+| `items[].status` | Sí | `string` | valores: `ACTIVE`, `WITHDRAWN` | Estado legible: `ACTIVE` mientras no se revoque, `WITHDRAWN` después. | `ACTIVE` |
+| `items[].decision` | Sí | `string` | valores: `ACCEPTED`, `DECLINED` | Decisión del paciente. | `ACCEPTED` |
+| `items[].statusConceptId` | No | `string` | formato `uuid` | Estado (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `items[].decisionConceptId` | No | `string` | formato `uuid` | Decisión (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `items[].procedureCodeConceptId` | No | `string` | formato `uuid` | Código de procedimiento (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `items[].informationVersion` | No | `string` | Sin restricción adicional declarada | Versión del material informativo. | `valor-ejemplo` |
+| `items[].interpreterUserId` | No | `string` | formato `uuid` | Intérprete presente. | `00000000-0000-4000-8000-000000000001` |
+| `items[].witnessUserId` | No | `string` | formato `uuid` | Testigo. | `00000000-0000-4000-8000-000000000001` |
+| `items[].targetType` | No | `object` | Sin restricción adicional declarada | A qué se consiente. | `{}` |
+| `items[].targetId` | No | `string` | formato `uuid` | Objeto consentido. | `00000000-0000-4000-8000-000000000001` |
+| `items[].targetLabel` | No | `string` | Sin restricción adicional declarada | Instantánea legible de lo consentido. | `valor-ejemplo` |
+| `items[].diagnosisText` | No | `string` | Sin restricción adicional declarada | Diagnóstico que lo motiva. | `valor-ejemplo` |
+| `items[].purposeText` | No | `string` | Sin restricción adicional declarada | Naturaleza y objetivo. | `valor-ejemplo` |
+| `items[].benefitsText` | No | `string` | Sin restricción adicional declarada | Beneficios esperados. | `valor-ejemplo` |
+| `items[].risksText` | No | `string` | Sin restricción adicional declarada | Riesgos frecuentes y graves. | `valor-ejemplo` |
+| `items[].personalizedRisksText` | No | `string` | Sin restricción adicional declarada | Riesgos personalizados. | `valor-ejemplo` |
+| `items[].alternativesText` | No | `string` | Sin restricción adicional declarada | Alternativas. | `valor-ejemplo` |
+| `items[].refusalConsequencesText` | No | `string` | Sin restricción adicional declarada | Consecuencias de no aceptar. | `valor-ejemplo` |
+| `items[].patientQuestionsText` | No | `string` | Sin restricción adicional declarada | Preguntas y respuestas. | `valor-ejemplo` |
+| `items[].grantedBy` | No | `object` | Sin restricción adicional declarada | Quién otorga. | `{}` |
+| `items[].representativeName` | No | `string` | Sin restricción adicional declarada | Nombre del representante. | `Nombre de ejemplo` |
+| `items[].representativeDocument` | No | `string` | Sin restricción adicional declarada | Documento del representante. | `valor-ejemplo` |
+| `items[].representativeRelationship` | No | `string` | Sin restricción adicional declarada | Parentesco o calidad del representante. | `valor-ejemplo` |
+| `items[].incapacityReason` | No | `string` | Sin restricción adicional declarada | Por qué no consiente el titular. | `Texto descriptivo de ejemplo` |
+| `items[].informedByProfileId` | No | `string` | formato `uuid` | Profesional que informa. | `00000000-0000-4000-8000-000000000001` |
+| `items[].channel` | No | `object` | Sin restricción adicional declarada | Canal. | `{}` |
+| `items[].exceptionType` | No | `object` | Sin restricción adicional declarada | Excepción legal. | `{}` |
+| `items[].exceptionJustification` | No | `string` | Sin restricción adicional declarada | Justificación de la excepción. | `valor-ejemplo` |
+| `items[].withdrawalReason` | No | `string` | Sin restricción adicional declarada | Motivo de la revocación. | `Texto descriptivo de ejemplo` |
+| `items[].witnessName` | No | `string` | Sin restricción adicional declarada | Testigo externo. | `Nombre de ejemplo` |
+| `items[].witnessDocument` | No | `string` | Sin restricción adicional declarada | Documento del testigo externo. | `valor-ejemplo` |
+| `items[].informationLanguage` | No | `string` | Sin restricción adicional declarada | Idioma de la información. | `es-BO` |
+| `items[].assentObtained` | No | `boolean` | Sin restricción adicional declarada | Asentimiento obtenido. | `true` |
+| `items[].assentNotes` | No | `string` | Sin restricción adicional declarada | Notas del asentimiento. | `Texto descriptivo de ejemplo` |
+| `items[].revocationRightInformed` | No | `boolean` | Sin restricción adicional declarada | Se informó el derecho a revocar. | `true` |
+| `items[].postEmergencyInformedAt` | No | `string` | formato `date-time` | Cuándo se informó a posteriori tras la emergencia. | `2026-07-31T12:00:00.000Z` |
+| `items[].evidence` | Sí | `array<TreatmentConsentEvidenceItemDto>` | Sin restricción adicional declarada | Evidencia registrada en `consent.consent_evidence` para este consentimiento. | `[{"id":"00000000-0000-4000-8000-000000000001","evidenceTypeConceptId":"00000000-0000-4000-8000-000000000001","capturedChannelConceptId":"00000000-0000-4000-8000-000000000001","recordedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].evidence[].id` | Sí | `string` | formato `uuid` | Identificador de la evidencia. | `00000000-0000-4000-8000-000000000001` |
+| `items[].evidence[].evidenceTypeConceptId` | Sí | `string` | formato `uuid` | Tipo de evidencia (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `items[].evidence[].capturedChannelConceptId` | No | `string` | formato `uuid` | Canal de captura (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `items[].evidence[].recordedAt` | Sí | `string` | formato `date-time` | Cuándo se registró. | `2026-07-31T12:00:00.000Z` |
+| `items[].signatureStatus` | Sí | `string` | valores: `SIGNED`, `PENDING` | `SIGNED` si hay evidencia de firma o documento; `PENDING` si no. | `SIGNED` |
+| `items[].signedAt` | No | `string` | formato `date-time` | Cuándo se firmó. | `2026-07-31T12:00:00.000Z` |
+| `items[].withdrawnAt` | No | `string` | formato `date-time` | Cuándo se revocó. | `2026-07-31T12:00:00.000Z` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/consent/treatment-informed-consents"
+}
+```
+
+---
+
+## 23. POST /consent/treatment-informed-consents
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-treatment-informed-consents`
@@ -3006,6 +3276,32 @@ Content-Type: application/json
 | `interpreterUserId` | No | `string` | formato `uuid` | Intérprete presente (user id) | `00000000-0000-4000-8000-000000000001` |
 | `witnessUserId` | No | `string` | formato `uuid` | Testigo (user id) | `00000000-0000-4000-8000-000000000001` |
 | `tenantId` | No | `string` | formato `uuid` | Tenant propietario | `00000000-0000-4000-8000-000000000001` |
+| `targetType` | No | `string` | valores: `MEDICATION_REQUEST`, `SERVICE_REQUEST`, `REFERRAL`, `PROCEDURE`, `CARE_PLAN` | A qué se consiente (va junto con targetId) | `MEDICATION_REQUEST` |
+| `targetId` | No | `string` | formato `uuid` | Id del objeto consentido (va junto con targetType) | `00000000-0000-4000-8000-000000000001` |
+| `targetLabel` | No | `string` | longitud mínima 1; longitud máxima 300 | Instantánea legible de lo consentido | `valor-ejemplo` |
+| `diagnosisText` | No | `string` | longitud mínima 1; longitud máxima 4000 | Diagnóstico que lo motiva | `valor-ejemplo` |
+| `purposeText` | No | `string` | longitud mínima 1; longitud máxima 4000 | Naturaleza y objetivo del tratamiento, estudio o derivación | `valor-ejemplo` |
+| `benefitsText` | No | `string` | longitud mínima 1; longitud máxima 4000 | Beneficios esperados | `valor-ejemplo` |
+| `risksText` | No | `string` | longitud mínima 1; longitud máxima 4000 | Riesgos frecuentes y graves / efectos adversos | `valor-ejemplo` |
+| `personalizedRisksText` | No | `string` | longitud mínima 1; longitud máxima 4000 | Riesgos personalizados del paciente | `valor-ejemplo` |
+| `alternativesText` | No | `string` | longitud mínima 1; longitud máxima 4000 | Alternativas disponibles | `valor-ejemplo` |
+| `refusalConsequencesText` | No | `string` | longitud mínima 1; longitud máxima 4000 | Consecuencias previsibles de no aceptar | `valor-ejemplo` |
+| `patientQuestionsText` | No | `string` | longitud mínima 1; longitud máxima 4000 | Preguntas del paciente y respuestas | `valor-ejemplo` |
+| `grantedBy` | No | `string` | valores: `PATIENT`, `LEGAL_REPRESENTATIVE`, `GUARDIAN`, `SUBSTITUTE_RELATIVE` | Quién otorga (por defecto el titular) | `PATIENT` |
+| `representativeName` | No | `string` | longitud mínima 1; longitud máxima 200 | Nombre del representante (obligatorio si no otorga el titular) | `Nombre de ejemplo` |
+| `representativeDocument` | No | `string` | longitud mínima 1; longitud máxima 60 | Documento del representante (CI u otro) | `valor-ejemplo` |
+| `representativeRelationship` | No | `string` | longitud mínima 1; longitud máxima 80 | Parentesco o calidad del representante (obligatorio si no otorga el titular) | `valor-ejemplo` |
+| `incapacityReason` | No | `string` | longitud mínima 1; longitud máxima 4000 | Por qué no consiente el titular | `Texto descriptivo de ejemplo` |
+| `informedByProfileId` | No | `string` | formato `uuid` | Profesional que informa (practitioner profile id) | `00000000-0000-4000-8000-000000000001` |
+| `channel` | No | `string` | valores: `IN_PERSON`, `TELEHEALTH` | Canal por el que se informó | `IN_PERSON` |
+| `exceptionType` | No | `string` | valores: `EMERGENCY`, `PUBLIC_HEALTH_RISK`, `PATIENT_WAIVER` | Excepción legal al consentimiento | `EMERGENCY` |
+| `exceptionJustification` | No | `string` | longitud mínima 1; longitud máxima 4000 | Justificación de la excepción (obligatoria si hay excepción) | `valor-ejemplo` |
+| `witnessName` | No | `string` | longitud mínima 1; longitud máxima 200 | Testigo externo (nombre) | `Nombre de ejemplo` |
+| `witnessDocument` | No | `string` | longitud mínima 1; longitud máxima 60 | Documento del testigo externo | `valor-ejemplo` |
+| `informationLanguage` | No | `string` | longitud mínima 1; longitud máxima 40 | Idioma de la información (por defecto es) | `es-BO` |
+| `assentObtained` | No | `boolean` | Sin restricción adicional declarada | Asentimiento obtenido (obligatorio si otorga un representante) | `true` |
+| `assentNotes` | No | `string` | longitud máxima 4000 | Notas del asentimiento | `Texto descriptivo de ejemplo` |
+| `revocationRightInformed` | No | `boolean` | Sin restricción adicional declarada | Se informó el derecho a revocar | `true` |
 
 ### Payload completo de ejemplo
 
@@ -3025,7 +3321,33 @@ Content-Type: application/json
   "informationVersion": "valor-ejemplo",
   "interpreterUserId": "00000000-0000-4000-8000-000000000001",
   "witnessUserId": "00000000-0000-4000-8000-000000000001",
-  "tenantId": "00000000-0000-4000-8000-000000000001"
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "targetType": "MEDICATION_REQUEST",
+  "targetId": "00000000-0000-4000-8000-000000000001",
+  "targetLabel": "valor-ejemplo",
+  "diagnosisText": "valor-ejemplo",
+  "purposeText": "valor-ejemplo",
+  "benefitsText": "valor-ejemplo",
+  "risksText": "valor-ejemplo",
+  "personalizedRisksText": "valor-ejemplo",
+  "alternativesText": "valor-ejemplo",
+  "refusalConsequencesText": "valor-ejemplo",
+  "patientQuestionsText": "valor-ejemplo",
+  "grantedBy": "PATIENT",
+  "representativeName": "Nombre de ejemplo",
+  "representativeDocument": "valor-ejemplo",
+  "representativeRelationship": "valor-ejemplo",
+  "incapacityReason": "Texto descriptivo de ejemplo",
+  "informedByProfileId": "00000000-0000-4000-8000-000000000001",
+  "channel": "IN_PERSON",
+  "exceptionType": "EMERGENCY",
+  "exceptionJustification": "valor-ejemplo",
+  "witnessName": "Nombre de ejemplo",
+  "witnessDocument": "valor-ejemplo",
+  "informationLanguage": "es-BO",
+  "assentObtained": true,
+  "assentNotes": "Texto descriptivo de ejemplo",
+  "revocationRightInformed": true
 }
 ```
 
@@ -3182,6 +3504,810 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/consent/treatment-informed-consents"
+}
+```
+
+---
+
+## 24. GET /consent/treatment-informed-consents/{id}
+
+- **Módulo:** `consent`
+- **Etiqueta OpenAPI:** `consent-treatment-informed-consents`
+- **Nombre:** Leer un consentimiento informado de tratamiento
+- **Operation ID:** `TreatmentInformedConsentsController_get`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TreatmentInformedConsentsController.get](../../src/modules/consent/controllers/treatment-informed-consents.controller.ts)
+
+### Descripción de negocio
+
+Leer un consentimiento informado de tratamiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: v4266: un consentimiento por id.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /consent/treatment-informed-consents/{id}` en `TreatmentInformedConsentsController_get`. El controlador delega en `TreatmentInformedConsentsService.get`. No recibe body. El tipo de retorno estático es `Promise<TreatmentInformedConsentResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /consent/treatment-informed-consents/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /consent/treatment-informed-consents/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TreatmentInformedConsentResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "encounterId": "00000000-0000-4000-8000-000000000001",
+  "status": "ACTIVE",
+  "decision": "ACCEPTED",
+  "statusConceptId": "00000000-0000-4000-8000-000000000001",
+  "decisionConceptId": "00000000-0000-4000-8000-000000000001",
+  "procedureCodeConceptId": "00000000-0000-4000-8000-000000000001",
+  "informationVersion": "valor-ejemplo",
+  "interpreterUserId": "00000000-0000-4000-8000-000000000001",
+  "witnessUserId": "00000000-0000-4000-8000-000000000001",
+  "targetType": {},
+  "targetId": "00000000-0000-4000-8000-000000000001",
+  "targetLabel": "valor-ejemplo",
+  "diagnosisText": "valor-ejemplo",
+  "purposeText": "valor-ejemplo",
+  "benefitsText": "valor-ejemplo",
+  "risksText": "valor-ejemplo",
+  "personalizedRisksText": "valor-ejemplo",
+  "alternativesText": "valor-ejemplo",
+  "refusalConsequencesText": "valor-ejemplo",
+  "patientQuestionsText": "valor-ejemplo",
+  "grantedBy": {},
+  "representativeName": "Nombre de ejemplo",
+  "representativeDocument": "valor-ejemplo",
+  "representativeRelationship": "valor-ejemplo",
+  "incapacityReason": "Texto descriptivo de ejemplo",
+  "informedByProfileId": "00000000-0000-4000-8000-000000000001",
+  "channel": {},
+  "exceptionType": {},
+  "exceptionJustification": "valor-ejemplo",
+  "withdrawalReason": "Texto descriptivo de ejemplo",
+  "witnessName": "Nombre de ejemplo",
+  "witnessDocument": "valor-ejemplo",
+  "informationLanguage": "es-BO",
+  "assentObtained": true,
+  "assentNotes": "Texto descriptivo de ejemplo",
+  "revocationRightInformed": true,
+  "postEmergencyInformedAt": "2026-07-31T12:00:00.000Z",
+  "evidence": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "evidenceTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "capturedChannelConceptId": "00000000-0000-4000-8000-000000000001",
+      "recordedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "signatureStatus": "SIGNED",
+  "signedAt": "2026-07-31T12:00:00.000Z",
+  "withdrawnAt": "2026-07-31T12:00:00.000Z",
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Tenant propietario. | `00000000-0000-4000-8000-000000000001` |
+| `encounterId` | No | `string` | formato `uuid` | Encuentro en el que se registró. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | valores: `ACTIVE`, `WITHDRAWN` | Estado legible: `ACTIVE` mientras no se revoque, `WITHDRAWN` después. | `ACTIVE` |
+| `decision` | Sí | `string` | valores: `ACCEPTED`, `DECLINED` | Decisión del paciente. | `ACCEPTED` |
+| `statusConceptId` | No | `string` | formato `uuid` | Estado (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `decisionConceptId` | No | `string` | formato `uuid` | Decisión (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `procedureCodeConceptId` | No | `string` | formato `uuid` | Código de procedimiento (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `informationVersion` | No | `string` | Sin restricción adicional declarada | Versión del material informativo. | `valor-ejemplo` |
+| `interpreterUserId` | No | `string` | formato `uuid` | Intérprete presente. | `00000000-0000-4000-8000-000000000001` |
+| `witnessUserId` | No | `string` | formato `uuid` | Testigo. | `00000000-0000-4000-8000-000000000001` |
+| `targetType` | No | `object` | Sin restricción adicional declarada | A qué se consiente. | `{}` |
+| `targetId` | No | `string` | formato `uuid` | Objeto consentido. | `00000000-0000-4000-8000-000000000001` |
+| `targetLabel` | No | `string` | Sin restricción adicional declarada | Instantánea legible de lo consentido. | `valor-ejemplo` |
+| `diagnosisText` | No | `string` | Sin restricción adicional declarada | Diagnóstico que lo motiva. | `valor-ejemplo` |
+| `purposeText` | No | `string` | Sin restricción adicional declarada | Naturaleza y objetivo. | `valor-ejemplo` |
+| `benefitsText` | No | `string` | Sin restricción adicional declarada | Beneficios esperados. | `valor-ejemplo` |
+| `risksText` | No | `string` | Sin restricción adicional declarada | Riesgos frecuentes y graves. | `valor-ejemplo` |
+| `personalizedRisksText` | No | `string` | Sin restricción adicional declarada | Riesgos personalizados. | `valor-ejemplo` |
+| `alternativesText` | No | `string` | Sin restricción adicional declarada | Alternativas. | `valor-ejemplo` |
+| `refusalConsequencesText` | No | `string` | Sin restricción adicional declarada | Consecuencias de no aceptar. | `valor-ejemplo` |
+| `patientQuestionsText` | No | `string` | Sin restricción adicional declarada | Preguntas y respuestas. | `valor-ejemplo` |
+| `grantedBy` | No | `object` | Sin restricción adicional declarada | Quién otorga. | `{}` |
+| `representativeName` | No | `string` | Sin restricción adicional declarada | Nombre del representante. | `Nombre de ejemplo` |
+| `representativeDocument` | No | `string` | Sin restricción adicional declarada | Documento del representante. | `valor-ejemplo` |
+| `representativeRelationship` | No | `string` | Sin restricción adicional declarada | Parentesco o calidad del representante. | `valor-ejemplo` |
+| `incapacityReason` | No | `string` | Sin restricción adicional declarada | Por qué no consiente el titular. | `Texto descriptivo de ejemplo` |
+| `informedByProfileId` | No | `string` | formato `uuid` | Profesional que informa. | `00000000-0000-4000-8000-000000000001` |
+| `channel` | No | `object` | Sin restricción adicional declarada | Canal. | `{}` |
+| `exceptionType` | No | `object` | Sin restricción adicional declarada | Excepción legal. | `{}` |
+| `exceptionJustification` | No | `string` | Sin restricción adicional declarada | Justificación de la excepción. | `valor-ejemplo` |
+| `withdrawalReason` | No | `string` | Sin restricción adicional declarada | Motivo de la revocación. | `Texto descriptivo de ejemplo` |
+| `witnessName` | No | `string` | Sin restricción adicional declarada | Testigo externo. | `Nombre de ejemplo` |
+| `witnessDocument` | No | `string` | Sin restricción adicional declarada | Documento del testigo externo. | `valor-ejemplo` |
+| `informationLanguage` | No | `string` | Sin restricción adicional declarada | Idioma de la información. | `es-BO` |
+| `assentObtained` | No | `boolean` | Sin restricción adicional declarada | Asentimiento obtenido. | `true` |
+| `assentNotes` | No | `string` | Sin restricción adicional declarada | Notas del asentimiento. | `Texto descriptivo de ejemplo` |
+| `revocationRightInformed` | No | `boolean` | Sin restricción adicional declarada | Se informó el derecho a revocar. | `true` |
+| `postEmergencyInformedAt` | No | `string` | formato `date-time` | Cuándo se informó a posteriori tras la emergencia. | `2026-07-31T12:00:00.000Z` |
+| `evidence` | Sí | `array<TreatmentConsentEvidenceItemDto>` | Sin restricción adicional declarada | Evidencia registrada en `consent.consent_evidence` para este consentimiento. | `[{"id":"00000000-0000-4000-8000-000000000001","evidenceTypeConceptId":"00000000-0000-4000-8000-000000000001","capturedChannelConceptId":"00000000-0000-4000-8000-000000000001","recordedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `evidence[].id` | Sí | `string` | formato `uuid` | Identificador de la evidencia. | `00000000-0000-4000-8000-000000000001` |
+| `evidence[].evidenceTypeConceptId` | Sí | `string` | formato `uuid` | Tipo de evidencia (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `evidence[].capturedChannelConceptId` | No | `string` | formato `uuid` | Canal de captura (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `evidence[].recordedAt` | Sí | `string` | formato `date-time` | Cuándo se registró. | `2026-07-31T12:00:00.000Z` |
+| `signatureStatus` | Sí | `string` | valores: `SIGNED`, `PENDING` | `SIGNED` si hay evidencia de firma o documento; `PENDING` si no. | `SIGNED` |
+| `signedAt` | No | `string` | formato `date-time` | Cuándo se firmó. | `2026-07-31T12:00:00.000Z` |
+| `withdrawnAt` | No | `string` | formato `date-time` | Cuándo se revocó. | `2026-07-31T12:00:00.000Z` |
+| `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 404 | `NOT_FOUND` | Consentimiento informado no encontrado | Excepción explícita en src/modules/consent/services/treatment-informed-consents.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/consent/treatment-informed-consents/{id}"
+}
+```
+
+---
+
+## 25. POST /consent/treatment-informed-consents/{id}/evidence
+
+- **Módulo:** `consent`
+- **Etiqueta OpenAPI:** `consent-treatment-informed-consents`
+- **Nombre:** Adjuntar evidencia de firma al consentimiento de tratamiento
+- **Operation ID:** `TreatmentInformedConsentsController_recordEvidence`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TreatmentInformedConsentsController.recordEvidence](../../src/modules/consent/controllers/treatment-informed-consents.controller.ts)
+
+### Descripción de negocio
+
+Adjuntar evidencia de firma al consentimiento de tratamiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Enmienda 1: evidencia (firma, documento) del consentimiento, registrada con el servicio de evidencia existente (`consent.consent_evidence`).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /consent/treatment-informed-consents/{id}/evidence` en `TreatmentInformedConsentsController_recordEvidence`. El controlador delega en `TreatmentInformedConsentsService.recordEvidence`. Valida el body como `RecordTreatmentConsentEvidenceDto` y consume `application/json`. El tipo de retorno estático es `Promise<ConsentEvidenceResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `RecordTreatmentConsentEvidenceDto`; los campos opcionales se omiten.
+
+```http
+POST /consent/treatment-informed-consents/00000000-0000-4000-8000-000000000001/evidence HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `evidenceTypeConceptId` | No | `string` | Sin restricción adicional declarada | Tipo de evidencia (concept id); por defecto firma | `00000000-0000-4000-8000-000000000001` |
+| `documentFileId` | No | `string` | formato `uuid` | Documento firmado (file id) | `00000000-0000-4000-8000-000000000001` |
+| `signatureId` | No | `string` | formato `uuid` | Firma clínica asociada (signature id) | `00000000-0000-4000-8000-000000000001` |
+| `capturedChannelConceptId` | No | `string` | formato `uuid` | Canal de captura (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `policySnapshotHash` | No | `string` | Sin restricción adicional declarada | Hash del snapshot de política | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `evidenceHash` | No | `string` | Sin restricción adicional declarada | Hash de la evidencia (integridad reproducible) | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /consent/treatment-informed-consents/00000000-0000-4000-8000-000000000001/evidence HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "evidenceTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "documentFileId": "00000000-0000-4000-8000-000000000001",
+  "signatureId": "00000000-0000-4000-8000-000000000001",
+  "capturedChannelConceptId": "00000000-0000-4000-8000-000000000001",
+  "policySnapshotHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "evidenceHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<ConsentEvidenceResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ConsentEvidenceResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ConsentEvidenceResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ConsentEvidenceResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ConsentEvidenceResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ConsentEvidenceResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ConsentEvidenceResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ConsentEvidenceResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ConsentEvidenceResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ConsentEvidenceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ConsentEvidenceResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConsentEvidenceResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "subjectId": "00000000-0000-4000-8000-000000000001",
+  "recordedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `subjectId` | Sí | `string` | formato `uuid` | Identificador asociado a subject. | `00000000-0000-4000-8000-000000000001` |
+| `recordedAt` | Sí | `string` | formato `date-time` | Valor de recorded at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 404 | `NOT_FOUND` | Consentimiento informado no encontrado | Excepción explícita en src/modules/consent/services/treatment-informed-consents.service.ts |
+| 409 | `CONFLICT` | El consentimiento está revocado | Excepción explícita en src/modules/consent/services/treatment-informed-consents.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/consent/treatment-informed-consents/{id}/evidence"
+}
+```
+
+---
+
+## 26. PATCH /consent/treatment-informed-consents/{id}/post-emergency-information
+
+- **Módulo:** `consent`
+- **Etiqueta OpenAPI:** `consent-treatment-informed-consents`
+- **Nombre:** Registrar la información posterior a una emergencia
+- **Operation ID:** `TreatmentInformedConsentsController_postEmergencyInformation`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TreatmentInformedConsentsController.postEmergencyInformation](../../src/modules/consent/controllers/treatment-informed-consents.controller.ts)
+
+### Descripción de negocio
+
+Registrar la información posterior a una emergencia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Enmienda 1: cierre de la excepción EMERGENCY.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /consent/treatment-informed-consents/{id}/post-emergency-information` en `TreatmentInformedConsentsController_postEmergencyInformation`. El controlador delega en `TreatmentInformedConsentsService.recordPostEmergencyInformation`. Valida el body como `PostEmergencyInformationDto` y consume `application/json`. El tipo de retorno estático es `Promise<TreatmentInformedConsentResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `PostEmergencyInformationDto`; los campos opcionales se omiten.
+
+```http
+PATCH /consent/treatment-informed-consents/00000000-0000-4000-8000-000000000001/post-emergency-information HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "informedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `informedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /consent/treatment-informed-consents/00000000-0000-4000-8000-000000000001/post-emergency-information HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "informedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TreatmentInformedConsentResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "encounterId": "00000000-0000-4000-8000-000000000001",
+  "status": "ACTIVE",
+  "decision": "ACCEPTED",
+  "statusConceptId": "00000000-0000-4000-8000-000000000001",
+  "decisionConceptId": "00000000-0000-4000-8000-000000000001",
+  "procedureCodeConceptId": "00000000-0000-4000-8000-000000000001",
+  "informationVersion": "valor-ejemplo",
+  "interpreterUserId": "00000000-0000-4000-8000-000000000001",
+  "witnessUserId": "00000000-0000-4000-8000-000000000001",
+  "targetType": {},
+  "targetId": "00000000-0000-4000-8000-000000000001",
+  "targetLabel": "valor-ejemplo",
+  "diagnosisText": "valor-ejemplo",
+  "purposeText": "valor-ejemplo",
+  "benefitsText": "valor-ejemplo",
+  "risksText": "valor-ejemplo",
+  "personalizedRisksText": "valor-ejemplo",
+  "alternativesText": "valor-ejemplo",
+  "refusalConsequencesText": "valor-ejemplo",
+  "patientQuestionsText": "valor-ejemplo",
+  "grantedBy": {},
+  "representativeName": "Nombre de ejemplo",
+  "representativeDocument": "valor-ejemplo",
+  "representativeRelationship": "valor-ejemplo",
+  "incapacityReason": "Texto descriptivo de ejemplo",
+  "informedByProfileId": "00000000-0000-4000-8000-000000000001",
+  "channel": {},
+  "exceptionType": {},
+  "exceptionJustification": "valor-ejemplo",
+  "withdrawalReason": "Texto descriptivo de ejemplo",
+  "witnessName": "Nombre de ejemplo",
+  "witnessDocument": "valor-ejemplo",
+  "informationLanguage": "es-BO",
+  "assentObtained": true,
+  "assentNotes": "Texto descriptivo de ejemplo",
+  "revocationRightInformed": true,
+  "postEmergencyInformedAt": "2026-07-31T12:00:00.000Z",
+  "evidence": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "evidenceTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "capturedChannelConceptId": "00000000-0000-4000-8000-000000000001",
+      "recordedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "signatureStatus": "SIGNED",
+  "signedAt": "2026-07-31T12:00:00.000Z",
+  "withdrawnAt": "2026-07-31T12:00:00.000Z",
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Tenant propietario. | `00000000-0000-4000-8000-000000000001` |
+| `encounterId` | No | `string` | formato `uuid` | Encuentro en el que se registró. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | valores: `ACTIVE`, `WITHDRAWN` | Estado legible: `ACTIVE` mientras no se revoque, `WITHDRAWN` después. | `ACTIVE` |
+| `decision` | Sí | `string` | valores: `ACCEPTED`, `DECLINED` | Decisión del paciente. | `ACCEPTED` |
+| `statusConceptId` | No | `string` | formato `uuid` | Estado (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `decisionConceptId` | No | `string` | formato `uuid` | Decisión (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `procedureCodeConceptId` | No | `string` | formato `uuid` | Código de procedimiento (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `informationVersion` | No | `string` | Sin restricción adicional declarada | Versión del material informativo. | `valor-ejemplo` |
+| `interpreterUserId` | No | `string` | formato `uuid` | Intérprete presente. | `00000000-0000-4000-8000-000000000001` |
+| `witnessUserId` | No | `string` | formato `uuid` | Testigo. | `00000000-0000-4000-8000-000000000001` |
+| `targetType` | No | `object` | Sin restricción adicional declarada | A qué se consiente. | `{}` |
+| `targetId` | No | `string` | formato `uuid` | Objeto consentido. | `00000000-0000-4000-8000-000000000001` |
+| `targetLabel` | No | `string` | Sin restricción adicional declarada | Instantánea legible de lo consentido. | `valor-ejemplo` |
+| `diagnosisText` | No | `string` | Sin restricción adicional declarada | Diagnóstico que lo motiva. | `valor-ejemplo` |
+| `purposeText` | No | `string` | Sin restricción adicional declarada | Naturaleza y objetivo. | `valor-ejemplo` |
+| `benefitsText` | No | `string` | Sin restricción adicional declarada | Beneficios esperados. | `valor-ejemplo` |
+| `risksText` | No | `string` | Sin restricción adicional declarada | Riesgos frecuentes y graves. | `valor-ejemplo` |
+| `personalizedRisksText` | No | `string` | Sin restricción adicional declarada | Riesgos personalizados. | `valor-ejemplo` |
+| `alternativesText` | No | `string` | Sin restricción adicional declarada | Alternativas. | `valor-ejemplo` |
+| `refusalConsequencesText` | No | `string` | Sin restricción adicional declarada | Consecuencias de no aceptar. | `valor-ejemplo` |
+| `patientQuestionsText` | No | `string` | Sin restricción adicional declarada | Preguntas y respuestas. | `valor-ejemplo` |
+| `grantedBy` | No | `object` | Sin restricción adicional declarada | Quién otorga. | `{}` |
+| `representativeName` | No | `string` | Sin restricción adicional declarada | Nombre del representante. | `Nombre de ejemplo` |
+| `representativeDocument` | No | `string` | Sin restricción adicional declarada | Documento del representante. | `valor-ejemplo` |
+| `representativeRelationship` | No | `string` | Sin restricción adicional declarada | Parentesco o calidad del representante. | `valor-ejemplo` |
+| `incapacityReason` | No | `string` | Sin restricción adicional declarada | Por qué no consiente el titular. | `Texto descriptivo de ejemplo` |
+| `informedByProfileId` | No | `string` | formato `uuid` | Profesional que informa. | `00000000-0000-4000-8000-000000000001` |
+| `channel` | No | `object` | Sin restricción adicional declarada | Canal. | `{}` |
+| `exceptionType` | No | `object` | Sin restricción adicional declarada | Excepción legal. | `{}` |
+| `exceptionJustification` | No | `string` | Sin restricción adicional declarada | Justificación de la excepción. | `valor-ejemplo` |
+| `withdrawalReason` | No | `string` | Sin restricción adicional declarada | Motivo de la revocación. | `Texto descriptivo de ejemplo` |
+| `witnessName` | No | `string` | Sin restricción adicional declarada | Testigo externo. | `Nombre de ejemplo` |
+| `witnessDocument` | No | `string` | Sin restricción adicional declarada | Documento del testigo externo. | `valor-ejemplo` |
+| `informationLanguage` | No | `string` | Sin restricción adicional declarada | Idioma de la información. | `es-BO` |
+| `assentObtained` | No | `boolean` | Sin restricción adicional declarada | Asentimiento obtenido. | `true` |
+| `assentNotes` | No | `string` | Sin restricción adicional declarada | Notas del asentimiento. | `Texto descriptivo de ejemplo` |
+| `revocationRightInformed` | No | `boolean` | Sin restricción adicional declarada | Se informó el derecho a revocar. | `true` |
+| `postEmergencyInformedAt` | No | `string` | formato `date-time` | Cuándo se informó a posteriori tras la emergencia. | `2026-07-31T12:00:00.000Z` |
+| `evidence` | Sí | `array<TreatmentConsentEvidenceItemDto>` | Sin restricción adicional declarada | Evidencia registrada en `consent.consent_evidence` para este consentimiento. | `[{"id":"00000000-0000-4000-8000-000000000001","evidenceTypeConceptId":"00000000-0000-4000-8000-000000000001","capturedChannelConceptId":"00000000-0000-4000-8000-000000000001","recordedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `evidence[].id` | Sí | `string` | formato `uuid` | Identificador de la evidencia. | `00000000-0000-4000-8000-000000000001` |
+| `evidence[].evidenceTypeConceptId` | Sí | `string` | formato `uuid` | Tipo de evidencia (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `evidence[].capturedChannelConceptId` | No | `string` | formato `uuid` | Canal de captura (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `evidence[].recordedAt` | Sí | `string` | formato `date-time` | Cuándo se registró. | `2026-07-31T12:00:00.000Z` |
+| `signatureStatus` | Sí | `string` | valores: `SIGNED`, `PENDING` | `SIGNED` si hay evidencia de firma o documento; `PENDING` si no. | `SIGNED` |
+| `signedAt` | No | `string` | formato `date-time` | Cuándo se firmó. | `2026-07-31T12:00:00.000Z` |
+| `withdrawnAt` | No | `string` | formato `date-time` | Cuándo se revocó. | `2026-07-31T12:00:00.000Z` |
+| `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 404 | `NOT_FOUND` | Consentimiento informado no encontrado | Excepción explícita en src/modules/consent/services/treatment-informed-consents.service.ts |
+| 409 | `CONFLICT` | La información posterior a la emergencia ya estaba registrada | Excepción explícita en src/modules/consent/services/treatment-informed-consents.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La información posterior sólo aplica a la excepción de emergencia | Excepción explícita en src/modules/consent/services/treatment-informed-consents.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/consent/treatment-informed-consents/{id}/post-emergency-information"
+}
+```
+
+---
+
+## 27. PATCH /consent/treatment-informed-consents/{id}/withdraw
+
+- **Módulo:** `consent`
+- **Etiqueta OpenAPI:** `consent-treatment-informed-consents`
+- **Nombre:** Revocar un consentimiento informado de tratamiento
+- **Operation ID:** `TreatmentInformedConsentsController_withdraw`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TreatmentInformedConsentsController.withdraw](../../src/modules/consent/controllers/treatment-informed-consents.controller.ts)
+
+### Descripción de negocio
+
+Revocar un consentimiento informado de tratamiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: v4266: revocación (409 si ya estaba revocado).
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /consent/treatment-informed-consents/{id}/withdraw` en `TreatmentInformedConsentsController_withdraw`. El controlador delega en `TreatmentInformedConsentsService.withdraw`. Valida el body como `WithdrawTreatmentInformedConsentDto` y consume `application/json`. El tipo de retorno estático es `Promise<TreatmentInformedConsentResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `WithdrawTreatmentInformedConsentDto`; los campos opcionales se omiten.
+
+```http
+PATCH /consent/treatment-informed-consents/00000000-0000-4000-8000-000000000001/withdraw HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | Sí | `string` | longitud mínima 1; longitud máxima 4000 | Motivo de la revocación | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /consent/treatment-informed-consents/00000000-0000-4000-8000-000000000001/withdraw HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TreatmentInformedConsentResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "encounterId": "00000000-0000-4000-8000-000000000001",
+  "status": "ACTIVE",
+  "decision": "ACCEPTED",
+  "statusConceptId": "00000000-0000-4000-8000-000000000001",
+  "decisionConceptId": "00000000-0000-4000-8000-000000000001",
+  "procedureCodeConceptId": "00000000-0000-4000-8000-000000000001",
+  "informationVersion": "valor-ejemplo",
+  "interpreterUserId": "00000000-0000-4000-8000-000000000001",
+  "witnessUserId": "00000000-0000-4000-8000-000000000001",
+  "targetType": {},
+  "targetId": "00000000-0000-4000-8000-000000000001",
+  "targetLabel": "valor-ejemplo",
+  "diagnosisText": "valor-ejemplo",
+  "purposeText": "valor-ejemplo",
+  "benefitsText": "valor-ejemplo",
+  "risksText": "valor-ejemplo",
+  "personalizedRisksText": "valor-ejemplo",
+  "alternativesText": "valor-ejemplo",
+  "refusalConsequencesText": "valor-ejemplo",
+  "patientQuestionsText": "valor-ejemplo",
+  "grantedBy": {},
+  "representativeName": "Nombre de ejemplo",
+  "representativeDocument": "valor-ejemplo",
+  "representativeRelationship": "valor-ejemplo",
+  "incapacityReason": "Texto descriptivo de ejemplo",
+  "informedByProfileId": "00000000-0000-4000-8000-000000000001",
+  "channel": {},
+  "exceptionType": {},
+  "exceptionJustification": "valor-ejemplo",
+  "withdrawalReason": "Texto descriptivo de ejemplo",
+  "witnessName": "Nombre de ejemplo",
+  "witnessDocument": "valor-ejemplo",
+  "informationLanguage": "es-BO",
+  "assentObtained": true,
+  "assentNotes": "Texto descriptivo de ejemplo",
+  "revocationRightInformed": true,
+  "postEmergencyInformedAt": "2026-07-31T12:00:00.000Z",
+  "evidence": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "evidenceTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "capturedChannelConceptId": "00000000-0000-4000-8000-000000000001",
+      "recordedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "signatureStatus": "SIGNED",
+  "signedAt": "2026-07-31T12:00:00.000Z",
+  "withdrawnAt": "2026-07-31T12:00:00.000Z",
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Tenant propietario. | `00000000-0000-4000-8000-000000000001` |
+| `encounterId` | No | `string` | formato `uuid` | Encuentro en el que se registró. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | valores: `ACTIVE`, `WITHDRAWN` | Estado legible: `ACTIVE` mientras no se revoque, `WITHDRAWN` después. | `ACTIVE` |
+| `decision` | Sí | `string` | valores: `ACCEPTED`, `DECLINED` | Decisión del paciente. | `ACCEPTED` |
+| `statusConceptId` | No | `string` | formato `uuid` | Estado (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `decisionConceptId` | No | `string` | formato `uuid` | Decisión (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `procedureCodeConceptId` | No | `string` | formato `uuid` | Código de procedimiento (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `informationVersion` | No | `string` | Sin restricción adicional declarada | Versión del material informativo. | `valor-ejemplo` |
+| `interpreterUserId` | No | `string` | formato `uuid` | Intérprete presente. | `00000000-0000-4000-8000-000000000001` |
+| `witnessUserId` | No | `string` | formato `uuid` | Testigo. | `00000000-0000-4000-8000-000000000001` |
+| `targetType` | No | `object` | Sin restricción adicional declarada | A qué se consiente. | `{}` |
+| `targetId` | No | `string` | formato `uuid` | Objeto consentido. | `00000000-0000-4000-8000-000000000001` |
+| `targetLabel` | No | `string` | Sin restricción adicional declarada | Instantánea legible de lo consentido. | `valor-ejemplo` |
+| `diagnosisText` | No | `string` | Sin restricción adicional declarada | Diagnóstico que lo motiva. | `valor-ejemplo` |
+| `purposeText` | No | `string` | Sin restricción adicional declarada | Naturaleza y objetivo. | `valor-ejemplo` |
+| `benefitsText` | No | `string` | Sin restricción adicional declarada | Beneficios esperados. | `valor-ejemplo` |
+| `risksText` | No | `string` | Sin restricción adicional declarada | Riesgos frecuentes y graves. | `valor-ejemplo` |
+| `personalizedRisksText` | No | `string` | Sin restricción adicional declarada | Riesgos personalizados. | `valor-ejemplo` |
+| `alternativesText` | No | `string` | Sin restricción adicional declarada | Alternativas. | `valor-ejemplo` |
+| `refusalConsequencesText` | No | `string` | Sin restricción adicional declarada | Consecuencias de no aceptar. | `valor-ejemplo` |
+| `patientQuestionsText` | No | `string` | Sin restricción adicional declarada | Preguntas y respuestas. | `valor-ejemplo` |
+| `grantedBy` | No | `object` | Sin restricción adicional declarada | Quién otorga. | `{}` |
+| `representativeName` | No | `string` | Sin restricción adicional declarada | Nombre del representante. | `Nombre de ejemplo` |
+| `representativeDocument` | No | `string` | Sin restricción adicional declarada | Documento del representante. | `valor-ejemplo` |
+| `representativeRelationship` | No | `string` | Sin restricción adicional declarada | Parentesco o calidad del representante. | `valor-ejemplo` |
+| `incapacityReason` | No | `string` | Sin restricción adicional declarada | Por qué no consiente el titular. | `Texto descriptivo de ejemplo` |
+| `informedByProfileId` | No | `string` | formato `uuid` | Profesional que informa. | `00000000-0000-4000-8000-000000000001` |
+| `channel` | No | `object` | Sin restricción adicional declarada | Canal. | `{}` |
+| `exceptionType` | No | `object` | Sin restricción adicional declarada | Excepción legal. | `{}` |
+| `exceptionJustification` | No | `string` | Sin restricción adicional declarada | Justificación de la excepción. | `valor-ejemplo` |
+| `withdrawalReason` | No | `string` | Sin restricción adicional declarada | Motivo de la revocación. | `Texto descriptivo de ejemplo` |
+| `witnessName` | No | `string` | Sin restricción adicional declarada | Testigo externo. | `Nombre de ejemplo` |
+| `witnessDocument` | No | `string` | Sin restricción adicional declarada | Documento del testigo externo. | `valor-ejemplo` |
+| `informationLanguage` | No | `string` | Sin restricción adicional declarada | Idioma de la información. | `es-BO` |
+| `assentObtained` | No | `boolean` | Sin restricción adicional declarada | Asentimiento obtenido. | `true` |
+| `assentNotes` | No | `string` | Sin restricción adicional declarada | Notas del asentimiento. | `Texto descriptivo de ejemplo` |
+| `revocationRightInformed` | No | `boolean` | Sin restricción adicional declarada | Se informó el derecho a revocar. | `true` |
+| `postEmergencyInformedAt` | No | `string` | formato `date-time` | Cuándo se informó a posteriori tras la emergencia. | `2026-07-31T12:00:00.000Z` |
+| `evidence` | Sí | `array<TreatmentConsentEvidenceItemDto>` | Sin restricción adicional declarada | Evidencia registrada en `consent.consent_evidence` para este consentimiento. | `[{"id":"00000000-0000-4000-8000-000000000001","evidenceTypeConceptId":"00000000-0000-4000-8000-000000000001","capturedChannelConceptId":"00000000-0000-4000-8000-000000000001","recordedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `evidence[].id` | Sí | `string` | formato `uuid` | Identificador de la evidencia. | `00000000-0000-4000-8000-000000000001` |
+| `evidence[].evidenceTypeConceptId` | Sí | `string` | formato `uuid` | Tipo de evidencia (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `evidence[].capturedChannelConceptId` | No | `string` | formato `uuid` | Canal de captura (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `evidence[].recordedAt` | Sí | `string` | formato `date-time` | Cuándo se registró. | `2026-07-31T12:00:00.000Z` |
+| `signatureStatus` | Sí | `string` | valores: `SIGNED`, `PENDING` | `SIGNED` si hay evidencia de firma o documento; `PENDING` si no. | `SIGNED` |
+| `signedAt` | No | `string` | formato `date-time` | Cuándo se firmó. | `2026-07-31T12:00:00.000Z` |
+| `withdrawnAt` | No | `string` | formato `date-time` | Cuándo se revocó. | `2026-07-31T12:00:00.000Z` |
+| `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 404 | `NOT_FOUND` | Consentimiento informado no encontrado | Excepción explícita en src/modules/consent/services/treatment-informed-consents.service.ts |
+| 409 | `CONFLICT` | El consentimiento ya estaba revocado | Excepción explícita en src/modules/consent/services/treatment-informed-consents.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/consent/treatment-informed-consents/{id}/withdraw"
 }
 ```
 

@@ -3,7 +3,7 @@
 # Endpoints del módulo `clinical_ext`
 
 - **Bloque:** Clínico y Diagnóstico (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
-- **Operaciones:** 32 (27 en el contrato, 5 sólo en el código)
+- **Operaciones:** 32 (32 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 2 · MEDIO 20 · BAJO 10
 - **Tablas distintas que tocan:** 51
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/clinical-ext.md` (generado aparte por `yarn docs:endpoints:generate`)
@@ -34,13 +34,13 @@
 | 20 | DELETE | `/prescription-favorites/{id}` | Borrar un favorito de prescripción propio | ALTO | 4 | sesión (sin roles) |
 | 21 | GET | `/referrals` | Listar derivaciones de un paciente | BAJO | 22 | CLINICIAN, PRACTITIONER |
 | 22 | POST | `/referrals` | Emitir una referencia desde un encuentro | MEDIO | 38 | CLINICIAN, PRACTITIONER |
-| 23 | GET | `/referrals/{id}` | v4266: una derivación por id. Declarada después de `me` para que esa ruta no caiga acá. La lee quien puede leer la historia o el destino. | BAJO | 21 | CLINICIAN, PRACTITIONER |
-| 24 | PATCH | `/referrals/{id}/cancel` | v4266: anula una derivación pendiente o aceptada. | MEDIO | 20 | CLINICIAN, PRACTITIONER |
-| 25 | PATCH | `/referrals/{id}/counter-referral` | v4266: contrarreferencia del destino; cierra la derivación. | MEDIO | 20 | CLINICIAN, PRACTITIONER |
+| 23 | GET | `/referrals/{id}` | Leer una derivación | BAJO | 21 | CLINICIAN, PRACTITIONER |
+| 24 | PATCH | `/referrals/{id}/cancel` | Anular una derivación | MEDIO | 20 | CLINICIAN, PRACTITIONER |
+| 25 | PATCH | `/referrals/{id}/counter-referral` | Registrar la contrarreferencia de una derivación | MEDIO | 20 | CLINICIAN, PRACTITIONER |
 | 26 | PATCH | `/referrals/{id}/respond` | Responder / aceptar una referencia inter-tenant | MEDIO | 3 | CLINICIAN, PRACTITIONER |
 | 27 | GET | `/referrals/me` | Mis derivaciones | BAJO | 6 | CLINICIAN, PRACTITIONER, PATIENT |
-| 28 | GET | `/referrals/target-services` | Servicios activos de un profesional u organización destino. | BAJO | 4 | CLINICIAN, PRACTITIONER |
-| 29 | GET | `/referrals/targets` | Destinos posibles de una derivación (profesionales y organizaciones). Va antes de cualquier ruta con `:id` para que `targets` no se lea como id. | BAJO | 5 | CLINICIAN, PRACTITIONER |
+| 28 | GET | `/referrals/target-services` | Servicios activos de un destino de derivación | BAJO | 4 | CLINICIAN, PRACTITIONER |
+| 29 | GET | `/referrals/targets` | Buscar destinos de derivación | BAJO | 5 | CLINICIAN, PRACTITIONER |
 | 30 | POST | `/virtual-encounters` | Iniciar una sesión de telesalud | MEDIO | 4 | CLINICIAN, PRACTITIONER |
 | 31 | PATCH | `/virtual-encounters/{id}/end` | Finalizar una sesión de telesalud | MEDIO | 4 | CLINICIAN, PRACTITIONER |
 | 32 | PATCH | `/virtual-encounters/{id}/join` | Unirse a una sesión de telesalud | MEDIO | 4 | CLINICIAN, PRACTITIONER, PATIENT |
@@ -2216,11 +2216,45 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `createdByUserId` | `string` | No | formato uuid | — | Quién la creó. | `src/modules/clinical_ext/dto/referral.dto.ts:662` |
-| `updatedByUserId` | `string` | No | formato uuid | — | Quién la modificó por última vez. | `src/modules/clinical_ext/dto/referral.dto.ts:666` |
-| `rowVersion` | `number` | Sí | — | — | Versión de la fila. | `src/modules/clinical_ext/dto/referral.dto.ts:670` |
-| `targetDisplayName` | `string` | Sí | admite null | — | Nombre del profesional u organización destino, o `null`. | `src/modules/clinical_ext/dto/referral.dto.ts:674` |
-| `targetServiceName` | `string` | Sí | admite null | — | Nombre del servicio destino, o `null`. | `src/modules/clinical_ext/dto/referral.dto.ts:678` |
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:435` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:441` |
+| `status` | `string` | Sí | valores: PENDING, ACCEPTED, REJECTED, COMPLETED, CANCELLED | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:449` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Estado de la referencia (concept id) | `src/modules/clinical_ext/dto/referral.dto.ts:458` |
+| `referralType` | `string` | Sí | valores: TREATMENT, CONSULTATION, DIAGNOSTIC_STUDY, PROCEDURE, SECOND_OPINION, THERAPY, HOSPITALIZATION, OTHER; admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:465` |
+| `referralTypeConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:471` |
+| `targetServiceCatalogId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:477` |
+| `sourceEncounterId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:483` |
+| `referringProfileId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:489` |
+| `targetProfileId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:495` |
+| `targetTenantId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:501` |
+| `targetTenantName` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:507` |
+| `targetBranchId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:513` |
+| `targetBranchName` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:519` |
+| `targetExternalName` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:525` |
+| `targetExternalContact` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:531` |
+| `specialtyConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:537` |
+| `serviceRequestId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:543` |
+| `requestedServiceText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:549` |
+| `requestedServiceConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:555` |
+| `reasonConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:561` |
+| `reasonText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:567` |
+| `diagnosisText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:573` |
+| `clinicalSummary` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:579` |
+| `treatmentGivenText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:585` |
+| `informedConsentId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:591` |
+| `priorityConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:597` |
+| `validUntil` | `string` | No | formato date | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:603` |
+| `respondedAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:609` |
+| `rejectReason` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:615` |
+| `counterReferralText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:621` |
+| `counterReferralAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:627` |
+| `updatedAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:633` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:639` |
+| `createdByUserId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:662` |
+| `updatedByUserId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:666` |
+| `rowVersion` | `number` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:670` |
+| `targetDisplayName` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:674` |
+| `targetServiceName` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:678` |
 
 ### Respuestas posibles
 
@@ -2263,7 +2297,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /referrals` la atiende `ReferralsController.create` (src/modules/clinical_ext/controllers/referrals.controller.ts:66). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ClinicalExtCreateReferralDto` (10 campos, 1 obligatorio). Delega en `ReferralsService.create`. Crea filas en clinical_ext.referrals, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza iam.devices, messaging.notification_requests. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 24 más.
+`POST /referrals` la atiende `ReferralsController.create` (src/modules/clinical_ext/controllers/referrals.controller.ts:66). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ClinicalExtCreateReferralDto` (21 campos, 1 obligatorio). Delega en `ReferralsService.create`. Crea filas en clinical_ext.referrals, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza iam.devices, messaging.notification_requests. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 24 más.
 
 ### Requerimientos
 
@@ -2333,6 +2367,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `reasonText` | `string` | No | longitud máxima 1000 | `@IsOptional()` `@IsString()` `@MaxLength(1000)` | — | `src/modules/clinical_ext/dto/referral.dto.ts:120` |
 | `priorityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Prioridad (concept id) | `src/modules/clinical_ext/dto/referral.dto.ts:131` |
 | `validUntil` | `string` | No | formato date | `@IsOptional()` `@IsISO8601()` | Vigencia de la referencia | `src/modules/clinical_ext/dto/referral.dto.ts:143` |
+| `referralType` | `string` | No | valores: TREATMENT, CONSULTATION, DIAGNOSTIC_STUDY, PROCEDURE, SECOND_OPINION, THERAPY, HOSPITALIZATION, OTHER | `@IsOptional()` `@IsIn(REFERRAL_TYPES)` | Tipo de derivación (tratamiento, consulta, estudio, …) | `src/modules/clinical_ext/dto/referral.dto.ts:155` |
+| `targetBranchId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sede u organización médica destino | `src/modules/clinical_ext/dto/referral.dto.ts:166` |
+| `targetExternalName` | `string` | No | longitud mínima 1; longitud máxima 200 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(200)` | Doctor u organización destino fuera de la plataforma | `src/modules/clinical_ext/dto/referral.dto.ts:179` |
+| `targetExternalContact` | `string` | No | longitud mínima 1; longitud máxima 200 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(200)` | Contacto del destino externo | `src/modules/clinical_ext/dto/referral.dto.ts:192` |
+| `requestedServiceText` | `string` | No | longitud mínima 1; longitud máxima 500 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(500)` | Servicio específico pedido | `src/modules/clinical_ext/dto/referral.dto.ts:205` |
+| `requestedServiceConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Servicio codificado (concept id) | `src/modules/clinical_ext/dto/referral.dto.ts:216` |
+| `diagnosisText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Diagnóstico presuntivo o definitivo | `src/modules/clinical_ext/dto/referral.dto.ts:229` |
+| `clinicalSummary` | `string` | No | longitud mínima 1; longitud máxima 8000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(8000)` | Resumen clínico | `src/modules/clinical_ext/dto/referral.dto.ts:239` |
+| `treatmentGivenText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(4000)` | Tratamiento realizado antes de derivar | `src/modules/clinical_ext/dto/referral.dto.ts:252` |
+| `informedConsentId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | NO enviar: se rechaza con 400 REFERRAL_CONSENT_LINK_NOT_ALLOWED. El vínculo lo escribe el consentimiento registrado con targetType=REFERRAL y targetId=<derivación>. | `src/modules/clinical_ext/dto/referral.dto.ts:264` |
+| `targetServiceCatalogId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Servicio del catálogo del destino | `src/modules/clinical_ext/dto/referral.dto.ts:277` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2355,7 +2400,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
   "reasonConceptId": "00000000-0000-4000-8000-000000000001",
   "reasonText": "Texto descriptivo de ejemplo",
   "priorityConceptId": "00000000-0000-4000-8000-000000000001",
-  "validUntil": "2026-07-31"
+  "validUntil": "2026-07-31",
+  "referralType": "CONSULTATION",
+  "targetBranchId": "00000000-0000-4000-8000-000000000001",
+  "targetExternalName": "Nombre de ejemplo",
+  "targetExternalContact": "valor-ejemplo",
+  "requestedServiceText": "valor-ejemplo",
+  "requestedServiceConceptId": "00000000-0000-4000-8000-000000000001",
+  "diagnosisText": "valor-ejemplo",
+  "clinicalSummary": "valor-ejemplo",
+  "treatmentGivenText": "valor-ejemplo",
+  "informedConsentId": "00000000-0000-4000-8000-000000000001",
+  "targetServiceCatalogId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -2398,8 +2454,8 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ## 23. GET /referrals/{id}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** v4266: una derivación por id. Declarada después de `me` para que esa ruta no caiga acá. La lee quien puede leer la historia o el destino.
+- **Origen:** CONTRATO
+- **Nombre:** Leer una derivación
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -2407,7 +2463,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ### Qué es y para qué sirve (negocio)
 
-v4266: una derivación por id. Declarada después de `me` para que esa ruta no caiga acá. La lee quien puede leer la historia o el destino. Dominio: Clínico y Diagnóstico.
+Leer una derivación. Dominio: Clínico y Diagnóstico.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
@@ -2496,8 +2552,8 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ## 24. PATCH /referrals/{id}/cancel
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** v4266: anula una derivación pendiente o aceptada.
+- **Origen:** CONTRATO
+- **Nombre:** Anular una derivación
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -2505,7 +2561,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ### Qué es y para qué sirve (negocio)
 
-v4266: anula una derivación pendiente o aceptada. Dominio: Clínico y Diagnóstico.
+Anular una derivación. Dominio: Clínico y Diagnóstico.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
@@ -2594,8 +2650,8 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ## 25. PATCH /referrals/{id}/counter-referral
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** v4266: contrarreferencia del destino; cierra la derivación.
+- **Origen:** CONTRATO
+- **Nombre:** Registrar la contrarreferencia de una derivación
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -2603,7 +2659,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ### Qué es y para qué sirve (negocio)
 
-v4266: contrarreferencia del destino; cierra la derivación. Dominio: Clínico y Diagnóstico.
+Registrar la contrarreferencia de una derivación. Dominio: Clínico y Diagnóstico.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
@@ -2619,6 +2675,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:125` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/referrals.controller.ts:125` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
@@ -2652,7 +2710,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|
 | `id` | path | Sí | `string` | — |
 
-### Cuerpo — DTO `CounterReferralDto`
+### Cuerpo — DTO `CounterReferralDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
@@ -2689,7 +2747,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Referencia no encontrada |
@@ -2727,7 +2785,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /referrals/{id}/respond` la atiende `ReferralsController.respond` (src/modules/clinical_ext/controllers/referrals.controller.ts:108). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `RespondReferralDto` (1 campo, 1 obligatorio). Delega en `ReferralsService.respond`. Actualiza clinical_ext.referrals. Lee clinical_ext.referrals, directory.branches.
+`PATCH /referrals/{id}/respond` la atiende `ReferralsController.respond` (src/modules/clinical_ext/controllers/referrals.controller.ts:108). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `RespondReferralDto` (2 campos, 1 obligatorio). Delega en `ReferralsService.respond`. Actualiza clinical_ext.referrals. Lee clinical_ext.referrals, directory.branches.
 
 ### Requerimientos
 
@@ -2760,6 +2818,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
 | `decision` | `string` | Sí | valores: ACCEPT, REJECT | `@IsIn(['ACCEPT', 'REJECT'])` | Decisión del tenant destino | `src/modules/clinical_ext/dto/referral.dto.ts:401` |
+| `rejectReason` | `string` | No | longitud máxima 4000 | `@IsOptional()` `@IsString()` `@MaxLength(4000)` | Motivo del rechazo (obligatorio si REJECT) | `src/modules/clinical_ext/dto/referral.dto.ts:413` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2773,7 +2832,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ```json
 {
-  "decision": "ACCEPT"
+  "decision": "ACCEPT",
+  "rejectReason": "Texto descriptivo de ejemplo"
 }
 ```
 
@@ -2858,11 +2918,45 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `createdByUserId` | `string` | No | formato uuid | — | Quién la creó. | `src/modules/clinical_ext/dto/referral.dto.ts:662` |
-| `updatedByUserId` | `string` | No | formato uuid | — | Quién la modificó por última vez. | `src/modules/clinical_ext/dto/referral.dto.ts:666` |
-| `rowVersion` | `number` | Sí | — | — | Versión de la fila. | `src/modules/clinical_ext/dto/referral.dto.ts:670` |
-| `targetDisplayName` | `string` | Sí | admite null | — | Nombre del profesional u organización destino, o `null`. | `src/modules/clinical_ext/dto/referral.dto.ts:674` |
-| `targetServiceName` | `string` | Sí | admite null | — | Nombre del servicio destino, o `null`. | `src/modules/clinical_ext/dto/referral.dto.ts:678` |
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:435` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:441` |
+| `status` | `string` | Sí | valores: PENDING, ACCEPTED, REJECTED, COMPLETED, CANCELLED | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:449` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Estado de la referencia (concept id) | `src/modules/clinical_ext/dto/referral.dto.ts:458` |
+| `referralType` | `string` | Sí | valores: TREATMENT, CONSULTATION, DIAGNOSTIC_STUDY, PROCEDURE, SECOND_OPINION, THERAPY, HOSPITALIZATION, OTHER; admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:465` |
+| `referralTypeConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:471` |
+| `targetServiceCatalogId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:477` |
+| `sourceEncounterId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:483` |
+| `referringProfileId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:489` |
+| `targetProfileId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:495` |
+| `targetTenantId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:501` |
+| `targetTenantName` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:507` |
+| `targetBranchId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:513` |
+| `targetBranchName` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:519` |
+| `targetExternalName` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:525` |
+| `targetExternalContact` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:531` |
+| `specialtyConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:537` |
+| `serviceRequestId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:543` |
+| `requestedServiceText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:549` |
+| `requestedServiceConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:555` |
+| `reasonConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:561` |
+| `reasonText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:567` |
+| `diagnosisText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:573` |
+| `clinicalSummary` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:579` |
+| `treatmentGivenText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:585` |
+| `informedConsentId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:591` |
+| `priorityConceptId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:597` |
+| `validUntil` | `string` | No | formato date | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:603` |
+| `respondedAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:609` |
+| `rejectReason` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:615` |
+| `counterReferralText` | `string` | No | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:621` |
+| `counterReferralAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:627` |
+| `updatedAt` | `string` | No | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:633` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:639` |
+| `createdByUserId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:662` |
+| `updatedByUserId` | `string` | No | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:666` |
+| `rowVersion` | `number` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:670` |
+| `targetDisplayName` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:674` |
+| `targetServiceName` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:678` |
 
 ### Respuestas posibles
 
@@ -2889,8 +2983,8 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ## 28. GET /referrals/target-services
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Servicios activos de un profesional u organización destino.
+- **Origen:** CONTRATO
+- **Nombre:** Servicios activos de un destino de derivación
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -2898,7 +2992,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Servicios activos de un profesional u organización destino. Dominio: Clínico y Diagnóstico.
+Servicios activos de un destino de derivación. Dominio: Clínico y Diagnóstico.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
@@ -2928,7 +3022,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `ListReferralTargetServicesQueryDto` | — |
+| `targetProfileId` | query | No | `string` | — |
+| `targetTenantId` | query | No | `string` | — |
 
 ### Cuerpo
 
@@ -2938,15 +3033,15 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<ReferralTargetServiceDto>` | Sí | — | — | Servicios activos del destino. | `src/modules/clinical_ext/dto/referral.dto.ts:388` |
-| `items[].id` | `string` | Sí | formato uuid | — | Id en `billing.service_catalog`. | `src/modules/clinical_ext/dto/referral.dto.ts:353` |
-| `items[].code` | `string` | Sí | — | — | Código del servicio. | `src/modules/clinical_ext/dto/referral.dto.ts:357` |
-| `items[].name` | `string` | Sí | — | — | Nombre del servicio. | `src/modules/clinical_ext/dto/referral.dto.ts:361` |
-| `items[].description` | `string` | Sí | admite null | — | Descripción, si la hay. | `src/modules/clinical_ext/dto/referral.dto.ts:365` |
-| `items[].price` | `number` | Sí | — | — | Precio de lista. | `src/modules/clinical_ext/dto/referral.dto.ts:369` |
-| `items[].currency` | `string` | Sí | admite null | — | Código de la moneda, si la hay. | `src/modules/clinical_ext/dto/referral.dto.ts:373` |
-| `items[].tenantId` | `string` | Sí | formato uuid; admite null | — | Tenant de la práctica que presta el servicio. | `src/modules/clinical_ext/dto/referral.dto.ts:377` |
-| `items[].practiceName` | `string` | Sí | admite null | — | Nombre de la práctica que presta el servicio. | `src/modules/clinical_ext/dto/referral.dto.ts:381` |
+| `items` | `array<ReferralTargetServiceDto>` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:388` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:353` |
+| `items[].code` | `string` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:357` |
+| `items[].name` | `string` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:361` |
+| `items[].description` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:365` |
+| `items[].price` | `number` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:369` |
+| `items[].currency` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:373` |
+| `items[].tenantId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:377` |
+| `items[].practiceName` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:381` |
 
 ### Respuestas posibles
 
@@ -2974,8 +3069,8 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ## 29. GET /referrals/targets
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Destinos posibles de una derivación (profesionales y organizaciones). Va antes de cualquier ruta con `:id` para que `targets` no se lea como id.
+- **Origen:** CONTRATO
+- **Nombre:** Buscar destinos de derivación
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -2983,7 +3078,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Destinos posibles de una derivación (profesionales y organizaciones). Va antes de cualquier ruta con `:id` para que `targets` no se lea como id. Dominio: Clínico y Diagnóstico.
+Buscar destinos de derivación. Dominio: Clínico y Diagnóstico.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
@@ -2998,6 +3093,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:86` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_QUERY | q (obligatorio) | `contrato (parameters)` |
 | RATE_LIMIT | Límite propio: Throttle(REFERRAL_TARGETS_RATE_LIMIT) | `src/modules/clinical_ext/controllers/referrals.controller.ts:86` |
 
 ### Tablas que afecta
@@ -3014,7 +3110,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `SearchReferralTargetsQueryDto` | — |
+| `q` | query | Sí | `string` | — |
+| `kind` | query | No | `string` | — |
 
 ### Cuerpo
 
@@ -3024,18 +3121,19 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<ReferralTargetDto>` | Sí | — | — | Destinos encontrados (máximo 20). | `src/modules/clinical_ext/dto/referral.dto.ts:346` |
-| `items[].kind` | `object` | Sí | — | — | Clase de destino. | `src/modules/clinical_ext/dto/referral.dto.ts:323` |
-| `items[].id` | `string` | Sí | formato uuid | — | Perfil profesional (PRACTITIONER) o tenant (ORGANIZATION). | `src/modules/clinical_ext/dto/referral.dto.ts:327` |
-| `items[].displayName` | `string` | Sí | — | — | Nombre legible. | `src/modules/clinical_ext/dto/referral.dto.ts:331` |
-| `items[].tenantId` | `string` | Sí | formato uuid; admite null | — | Tenant del destino, si se conoce. | `src/modules/clinical_ext/dto/referral.dto.ts:335` |
-| `items[].subtitle` | `string` | Sí | admite null | — | Línea secundaria (título, sede o razón social). | `src/modules/clinical_ext/dto/referral.dto.ts:339` |
+| `items` | `array<ReferralTargetDto>` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:346` |
+| `items[].kind` | `string` | Sí | valores: PRACTITIONER, ORGANIZATION | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:323` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:327` |
+| `items[].displayName` | `string` | Sí | — | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:331` |
+| `items[].tenantId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:335` |
+| `items[].subtitle` | `string` | Sí | admite null | — | — | `src/modules/clinical_ext/dto/referral.dto.ts:339` |
 
 ### Respuestas posibles
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La búsqueda necesita al menos dos caracteres. |

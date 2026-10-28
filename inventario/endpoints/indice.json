@@ -2,8 +2,8 @@
   "resumen": {
     "total": 1621,
     "porOrigen": {
-      "CONTRATO": 1602,
-      "CONTRATO_AUSENTE": 19
+      "CONTRATO": 1612,
+      "CONTRATO_AUSENTE": 9
     },
     "porRiesgo": {
       "BAJO": 524,
@@ -5366,12 +5366,12 @@
     },
     {
       "id": "ReferralsController_get",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/referrals/{id}",
       "modulo": "clinical_ext",
       "bloque": "Clínico y Diagnóstico",
-      "nombre": "v4266: una derivación por id. Declarada después de `me` para que esa ruta no caiga acá. La lee quien puede leer la historia o el destino.",
+      "nombre": "Leer una derivación",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -5385,12 +5385,12 @@
     },
     {
       "id": "ReferralsController_cancel",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "PATCH",
       "ruta": "/referrals/{id}/cancel",
       "modulo": "clinical_ext",
       "bloque": "Clínico y Diagnóstico",
-      "nombre": "v4266: anula una derivación pendiente o aceptada.",
+      "nombre": "Anular una derivación",
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [
@@ -5404,12 +5404,12 @@
     },
     {
       "id": "ReferralsController_counterReferral",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "PATCH",
       "ruta": "/referrals/{id}/counter-referral",
       "modulo": "clinical_ext",
       "bloque": "Clínico y Diagnóstico",
-      "nombre": "v4266: contrarreferencia del destino; cierra la derivación.",
+      "nombre": "Registrar la contrarreferencia de una derivación",
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [
@@ -5462,12 +5462,12 @@
     },
     {
       "id": "ReferralsController_listTargetServices",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/referrals/target-services",
       "modulo": "clinical_ext",
       "bloque": "Clínico y Diagnóstico",
-      "nombre": "Servicios activos de un profesional u organización destino.",
+      "nombre": "Servicios activos de un destino de derivación",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -5481,12 +5481,12 @@
     },
     {
       "id": "ReferralsController_searchTargets",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/referrals/targets",
       "modulo": "clinical_ext",
       "bloque": "Clínico y Diagnóstico",
-      "nombre": "Destinos posibles de una derivación (profesionales y organizaciones). Va antes de cualquier ruta con `:id` para que `targets` no se lea como id.",
+      "nombre": "Buscar destinos de derivación",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -7939,12 +7939,12 @@
     },
     {
       "id": "TreatmentInformedConsentsController_list",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/consent/treatment-informed-consents",
       "modulo": "consent",
       "bloque": "Identidad y Seguridad",
-      "nombre": "v4266: consentimientos de un paciente, opcionalmente por objeto.",
+      "nombre": "Listar consentimientos informados de tratamiento",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -7978,12 +7978,12 @@
     },
     {
       "id": "TreatmentInformedConsentsController_get",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/consent/treatment-informed-consents/{id}",
       "modulo": "consent",
       "bloque": "Identidad y Seguridad",
-      "nombre": "v4266: un consentimiento por id.",
+      "nombre": "Leer un consentimiento informado de tratamiento",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -7997,12 +7997,12 @@
     },
     {
       "id": "TreatmentInformedConsentsController_recordEvidence",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "POST",
       "ruta": "/consent/treatment-informed-consents/{id}/evidence",
       "modulo": "consent",
       "bloque": "Identidad y Seguridad",
-      "nombre": "Enmienda 1: evidencia (firma, documento) del consentimiento, registrada con el servicio de evidencia existente (`consent.consent_evidence`).",
+      "nombre": "Adjuntar evidencia de firma al consentimiento de tratamiento",
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [
@@ -8016,12 +8016,12 @@
     },
     {
       "id": "TreatmentInformedConsentsController_postEmergencyInformation",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "PATCH",
       "ruta": "/consent/treatment-informed-consents/{id}/post-emergency-information",
       "modulo": "consent",
       "bloque": "Identidad y Seguridad",
-      "nombre": "Enmienda 1: cierre de la excepción EMERGENCY.",
+      "nombre": "Registrar la información posterior a una emergencia",
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [
@@ -8035,12 +8035,12 @@
     },
     {
       "id": "TreatmentInformedConsentsController_withdraw",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "PATCH",
       "ruta": "/consent/treatment-informed-consents/{id}/withdraw",
       "modulo": "consent",
       "bloque": "Identidad y Seguridad",
-      "nombre": "v4266: revocación (409 si ya estaba revocado).",
+      "nombre": "Revocar un consentimiento informado de tratamiento",
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [

@@ -2,7 +2,7 @@
 
 # Inventario de endpoints
 
-Se inventarían **1621 operaciones HTTP** en **72 módulos**: 1602 publicadas en el contrato OpenAPI y 19 que existen sólo en el código.
+Se inventarían **1621 operaciones HTTP** en **72 módulos**: 1612 publicadas en el contrato OpenAPI y 9 que existen sólo en el código.
 
 - Con al menos una tabla identificada: 1559
 - Riesgo ALTO 199 · MEDIO 898 · BAJO 524

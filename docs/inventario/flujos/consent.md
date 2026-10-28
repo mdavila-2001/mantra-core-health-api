@@ -1795,11 +1795,12 @@ flowchart TD
 
 #### 17. GET /consent/treatment-informed-consents
 
-v4266: consentimientos de un paciente, opcionalmente por objeto.
+Listar consentimientos informados de tratamiento
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1807,7 +1808,7 @@ v4266: consentimientos de un paciente, opcionalmente por objeto.
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a TreatmentInformedConsentsService.list"]:::llamada
   n2 --> n3
@@ -2050,7 +2051,7 @@ flowchart TD
 
 #### 19. GET /consent/treatment-informed-consents/{id}
 
-v4266: un consentimiento por id.
+Leer un consentimiento informado de tratamiento
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -2141,12 +2142,12 @@ flowchart TD
 
 #### 20. POST /consent/treatment-informed-consents/{id}/evidence
 
-Enmienda 1: evidencia (firma, documento) del consentimiento, registrada con el servicio de evidencia existente (`consent.consent_evidence`).
+Adjuntar evidencia de firma al consentimiento de tratamiento
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento informado no encontrado |
@@ -2156,7 +2157,7 @@ Enmienda 1: evidencia (firma, documento) del consentimiento, registrada con el s
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
   n1 --> n2
   n3["Llama a TreatmentInformedConsentsService.recordEvidence"]:::llamada
   n2 --> n3
@@ -2214,12 +2215,12 @@ flowchart TD
 
 #### 21. PATCH /consent/treatment-informed-consents/{id}/post-emergency-information
 
-Enmienda 1: cierre de la excepción EMERGENCY.
+Registrar la información posterior a una emergencia
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento informado no encontrado |
@@ -2230,7 +2231,7 @@ Enmienda 1: cierre de la excepción EMERGENCY.
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
   n1 --> n2
   n3["Llama a TreatmentInformedConsentsService.recordPostEmergencyInformation"]:::llamada
   n2 --> n3
@@ -2296,12 +2297,12 @@ flowchart TD
 
 #### 22. PATCH /consent/treatment-informed-consents/{id}/withdraw
 
-v4266: revocación (409 si ya estaba revocado).
+Revocar un consentimiento informado de tratamiento
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento informado no encontrado |
@@ -2311,7 +2312,7 @@ v4266: revocación (409 si ya estaba revocado).
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
   n1 --> n2
   n3["Llama a TreatmentInformedConsentsService.withdraw"]:::llamada
   n2 --> n3

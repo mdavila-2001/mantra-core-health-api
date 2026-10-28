@@ -1797,7 +1797,7 @@ flowchart TD
 
 #### 21. GET /referrals/{id}
 
-v4266: una derivación por id. Declarada después de `me` para que esa ruta no caiga acá. La lee quien puede leer la historia o el destino.
+Leer una derivación
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1898,7 +1898,7 @@ flowchart TD
 
 #### 22. PATCH /referrals/{id}/cancel
 
-v4266: anula una derivación pendiente o aceptada.
+Anular una derivación
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1971,12 +1971,12 @@ flowchart TD
 
 #### 23. PATCH /referrals/{id}/counter-referral
 
-v4266: contrarreferencia del destino; cierra la derivación.
+Registrar la contrarreferencia de una derivación
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Referencia no encontrada |
@@ -1986,7 +1986,7 @@ v4266: contrarreferencia del destino; cierra la derivación.
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
   n1 --> n2
   n3["Llama a ReferralsService.counterReferral"]:::llamada
   n2 --> n3
@@ -2123,7 +2123,7 @@ flowchart TD
 
 #### 25. GET /referrals/target-services
 
-Servicios activos de un profesional u organización destino.
+Servicios activos de un destino de derivación
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -2185,11 +2185,12 @@ flowchart TD
 
 #### 26. GET /referrals/targets
 
-Destinos posibles de una derivación (profesionales y organizaciones). Va antes de cualquier ruta con `:id` para que `targets` no se lea como id.
+Buscar destinos de derivación
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La búsqueda necesita al menos dos caracteres. |
@@ -2198,7 +2199,7 @@ Destinos posibles de una derivación (profesionales y organizaciones). Va antes 
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a ReferralsService.searchTargets"]:::llamada
   n2 --> n3
