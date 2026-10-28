@@ -25,7 +25,8 @@
 // Uso: node tools/terminology-import/dictionaries/import-wikidata-es-labels.mjs [P1554 P7963 …]
 // =============================================================================
 
-import { createReadStream, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { createReadStream, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { dirname, join } from 'node:path';
 import { USER_AGENT, cacheDir, nowIso, sleep, writeJson, writeNdjson } from '../lib/glossary-es/common.mjs';
@@ -158,7 +159,11 @@ async function main() {
   }
   rows.sort((a, b) => a.codeSystem.localeCompare(b.codeSystem) || a.code.localeCompare(b.code) || a.q.localeCompare(b.q));
   await writeNdjson(join(NDJSON_DIR, 'wikidata-es-labels.ndjson'), rows);
-  writeJson(join(NDJSON_DIR, 'wikidata-es-labels.meta.json'), { retrievedAt, endpoint: SPARQL_ENDPOINT, license: 'CC0 1.0', perProperty, http: stats }, true);
+  // Wikidata es una fuente viva sin versiones: lo que queda como constancia es el SHA-256 de cada respuesta que se leyó
+  // (la caché se borra al normalizar). `inputsSha256` = SHA-256 de la lista ordenada «archivo sha256».
+  const inputs = Object.fromEntries(readdirSync(CACHE).filter((f) => f !== 'entity-labels.json' && props.some((p) => f.startsWith(`${p}-`))).sort().map((f) => [f, createHash('sha256').update(readFileSync(join(CACHE, f))).digest('hex')]));
+  const inputsSha256 = createHash('sha256').update(Object.entries(inputs).map(([f, h]) => `${f} ${h}`).join('\n')).digest('hex');
+  writeJson(join(NDJSON_DIR, 'wikidata-es-labels.meta.json'), { retrievedAt, endpoint: SPARQL_ENDPOINT, license: 'CC0 1.0', perProperty, http: stats, inputsSha256, inputs }, true);
   console.log(JSON.stringify({ perProperty, total: rows.length, http: stats }, null, 2));
 }
 

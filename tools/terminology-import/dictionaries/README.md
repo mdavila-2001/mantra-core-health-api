@@ -20,7 +20,7 @@ Extiende lo que ya existía en `tools/terminology-import/` sin duplicarlo: reusa
 |---|---|---|---|
 | 1 | `fetch-dictionaries.mjs [ids…]` | Baja cada archivo a `dictionaries-sources/<id>/` y deja `manifest.json` (URL, SHA-256, bytes, fecha). Reanudable. | sí |
 | 2 | `build-dictionaries.mjs` | Normaliza a `dictionaries/ndjson/<id>.ndjson` (+ `.meta.json`), `disease-agents.ndjson` y `coverage.json`. Determinista. ~40 s; ~650 MB de NDJSON. | no |
-| 2b | `import-wikidata-es-labels.mjs` | Nombres ES de Wikidata (CC0) por id declarado (P1554 UBERON, P7963 CL, P1402 FMA, P354 HGNC, P685 NCBITaxon…). **No corrido**: query.wikidata.org bloqueado en la sesión que lo escribió. | sí |
+| 2b | `import-wikidata-es-labels.mjs` | Nombres ES de Wikidata (CC0) por id declarado (P1554 UBERON, P7963 CL, P1402 FMA, P354 HGNC, P685 NCBITaxon…). Corrido el 2026-10-28: 61 312 filas (ver `SOURCES.md`); respeta `Retry-After` de los 429 y es reanudable por caché. | sí |
 | 2c | `pack-dictionaries-data.mjs --pack` / `--unpack` | Guarda el corpus normalizado en git (`data/`, gzip determinista, partes ≤ 45 MB, `INDEX.json` con SHA-256) y lo restaura verificado, para cargar sin volver a bajar ni construir. Los crudos no se suben: `data/manifest.json` trae URL y SHA-256 para re-bajarlos con `fetch`. | no |
 | 3 | `load-dictionaries.mjs` | Dry-run por defecto; `--apply` carga a `terminology.*`. `--include go,pato,fma-full,abbreviations-literature,…` suma lo opt-in; `--only uberon,cl` limita. | base |
 
@@ -30,7 +30,7 @@ node tools/terminology-import/dictionaries/build-dictionaries.mjs          # ~40
 node tools/terminology-import/dictionaries/pack-dictionaries-data.mjs --unpack   # alternativa a fetch+build: restaura el corpus de data/ (31,7 MB)
 node tools/terminology-import/dictionaries/load-dictionaries.mjs           # plan y conteos, sin base
 node tools/terminology-import/dictionaries/load-dictionaries.mjs --apply   # .env DB_*; exige la API arrancada una vez
-node --test "tools/terminology-import/dictionaries/test/*.test.mjs"        # 18 pruebas con recortes reales
+node --test "tools/terminology-import/dictionaries/test/*.test.mjs"        # 45 pruebas con recortes reales
 ```
 
 La carga exige que la API haya sembrado los conceptos internos que usa (idiomas EN/ES/LA, tipos de
@@ -56,7 +56,7 @@ designación, equivalencia, y los tipos de relación `is-a`, `part-of`, `develop
 
 **Idempotencia**: ids `md5('mantra:dictionaries:<tipo>:<clave>')`, `ON CONFLICT DO NOTHING`, nunca
 `UPDATE`. Medido en un Postgres 16 desechable con el DDL del módulo 03: 1.ª corrida 46 s → 111 389
-conceptos; 2.ª corrida 28 s → 0 filas nuevas (sólo el lote de auditoría).
+conceptos; 2.ª corrida 28 s → 0 filas nuevas (sólo el lote de auditoría). Con el carril C7 (2026-10-28, +ChEBI, PRO, NCIt, MeSH, EMDN, AbreMES-DB y Wikidata ES): 392 818 conceptos, 1.ª corrida 266 s, 2.ª 179 s → 0 filas nuevas (sólo 29 lotes de auditoría).
 
 ## Reglas
 

@@ -1,0 +1,14 @@
+# Re-sondeo C7 2026-10-28T02:11:21Z (curl -I -L, UA identificable, un pedido por host)
+200 https://query.wikidata.org/sparql?query=ASK%7B%7D
+429 https://www.wikidata.org/w/api.php?action=query&meta=siteinfo&format=json
+200 https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi.obo
+200 https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump_archive/taxdmp_2026-10-01.zip
+200 https://webgate.ec.europa.eu/dyna2/emdn/
+200 https://zenodo.org/api/records/2207130
+000 https://fipat.library.dal.ca/ta2/
+000 https://fipat.library.dal.ca/
+200 https://ta2viewer.openanatomy.org/
+200 https://lpsn.dsmz.de/
+200 https://decs.bvsalud.org/
+200 https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/
+403 https://www.loinc.org/

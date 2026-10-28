@@ -26,6 +26,40 @@
   (registro completo de OBO Foundry + fuentes no OBO conocidas). No es saturación del universo total: las
   fuentes bloqueadas siguen siendo huecos documentados abajo.
 
+## Cierre de huecos de red (carril C7, 2026-10-28)
+
+Re-sondeo del 2026-10-28 (`docs/trabajo/2026-10-27-terminologia-cierre-huecos/evidencia/C7/M1b-resondeo-2026-10-28.txt`):
+las fuentes que el 2026-10-24 daban 403 hoy responden. Se cargaron seis fuentes nuevas y las etiquetas ES de Wikidata.
+
+| Hueco documentado | Estado hoy | Qué se cargó |
+|---|---|---|
+| Wikidata ES (WDQS 429) | 200 (WDQS) y 429 intermitente en la API; el importador respeta `Retry-After` y es reanudable | 61 312 filas de 10 propiedades (UBERON, CL, FMA, HGNC, NCBITaxon, GO, SO, ChEBI, NCIt, MeSH); 54 414 conceptos cargados con designaciones ES (nunca preferidas) y su ítem Q. 446 pedidos, 37 respuestas 429 |
+| ChEBI | 200 (`ftp.ebi.ac.uk`) | release 256: 218 723 conceptos construidos, 62 215 cargados (rama de roles y entradas de 3 estrellas); sin sinónimos/xrefs de KEGG, DrugBank, HMDB ni ChEMBL |
+| PRO | 200 (`proconsortium.org`; el PURL de OBO redirige ahí) | release 73.1: 132 491 cargados |
+| NCIt (OBO Edition) | 200 (release de GitHub) | v2026-03-19: 179 432 construidos, 70 782 cargados |
+| MeSH (D27 acciones farmacológicas, E05.318 métodos epidemiológicos) | 200 (`nlmpubs.nlm.nih.gov`) | desc2026: 932 conceptos |
+| NCBI Taxonomy | 200 (`ftp.ncbi.nlm.nih.gov`) | taxdmp 2026-10-01 completa las etiquetas: de los 138 taxones declarados sin etiqueta por Mondo, se completan las etiquetas de 306 taxones (entre ellos esos 138) y queda 1 sin resolver (NCBITaxon:93349, eliminado en `delnodes.dmp`) |
+| EMDN | 200 (`webgate.ec.europa.eu/dyna2/emdn/`) | v2026 en inglés: 8 516 códigos con su jerarquía de 7 niveles |
+| AbreMES-DB | 200 (`zenodo.org`) | 58 519 pares construidos; 6 180 cargados (vistos ≥ 3 veces; la fuente es una extracción automática) |
+| FIPAT / TA2 | `fipat.library.dal.ca` falla (502 del proxy); `ta2viewer.openanatomy.org` 200 sin descarga masiva | nada: sin licencia verificada ni archivo |
+
+**Antes / después** (Postgres 16 desechable, puerto 55437, DDL del repo; salidas en `evidencia/C7/`):
+
+| | Antes (2026-10-24) | Después |
+|---|---|---|
+| Conceptos construidos | 496 272 (43 fuentes) | 1 095 198 (49 fuentes) |
+| Conceptos cargados por defecto | 111 389 (23 fuentes) | 392 818 (29 fuentes) |
+| Designaciones | 292 796 | 1 133 015 |
+| Relaciones | 65 928 | 452 995 |
+| concept_maps | 7 614 | 10 874 |
+| Nombres en castellano | 486 (FMA) | 486 + 71 056 designaciones ES de Wikidata (CC0) |
+
+- 1.ª corrida 266 s; **2.ª corrida 179 s → 0 filas nuevas** (solo 29 lotes de auditoría). Integridad (`integridad-c7.sql`): 13 chequeos, todos 0 (huérfanos, duplicados por versión de code system y código, nulos, designaciones repetidas, procedencia sin SHA-256 o licencia).
+- Build reproducible: dos builds desde los mismos crudos dan los mismos SHA-256 en los 49 `.ndjson`; los `.meta.json` difieren solo en `generatedAt`.
+- Corpus versionado: `data/` pasó de 33 MB a 94 MB (102 archivos, `SHA256SUMS`, partes < 45 MB). Los `.ndjson.gz` de las fuentes anteriores se regeneraron: cambió `provenance.retrievedAt` (se volvieron a bajar los mismos archivos por SHA-256) y las aristas que ahora resuelven hacia ChEBI/NCIt/PRO.
+- Un defecto encontrado y corregido: 5 conceptos FMA quedaban con la misma designación ES dos veces (la del FMA y la de Wikidata); el cargador ya no repite un nombre que la fuente declara.
+- `wikidata-es-labels.meta.json` guarda el SHA-256 de las 406 respuestas leídas (Wikidata es una fuente viva sin versiones) y de la lista.
+
 ## Paso 0: lo que ya había
 
 - `tools/terminology-import/`: importadores del glosario ES (`load-glossary-es.mjs`: CIE-10-ES, CIMA,
@@ -171,17 +205,17 @@ por clave y, entre fuentes distintas, por xref publicado (concept_maps), nunca p
 
 | Dominio | Hueco | Por qué | Qué lo cierra |
 |---|---|---|---|
-| Todos | Nombres en castellano | Las ontologías abiertas alcanzables están en inglés; DeCS, Wikidata, TA2 y MedlinePlus, bloqueados | Habilitar `query.wikidata.org` y correr `import-wikidata-es-labels.mjs`; habilitar DeCS (BIREME) y escribir su importador contra el archivo real |
-| Anatomía | TA2 en latín/inglés/español | FIPAT bloqueado; TA2 no está en git | Habilitar FIPAT. Mientras tanto el latín TA98 entra por FMA (8 669 nombres latinos en 6 744 clases) |
-| Microbiología | 138 taxones declarados por Mondo sin etiqueta | El módulo de importación de NCBITaxon de Mondo es más viejo que sus aristas | NCBI Taxonomy (FTP bloqueado) o un release de OBO NCBITaxon |
+| Todos | Nombres en castellano | **Parcialmente cerrado (2026-10-28)**: 71 056 designaciones ES de Wikidata. Faltan DeCS (licencia BIREME, no verificada; `decs.bvsalud.org` responde 200 pero no se cargó) y TA2 | DeCS: decisión del propietario sobre su licencia; luego importador contra el archivo real |
+| Anatomía | TA2 en latín/inglés/español | 2026-10-28: `fipat.library.dal.ca` falla (502 del proxy); el visor remite a FIPAT para la licencia; no hay archivo ni licencia verificada | Alcanzar FIPAT y leer su licencia. Mientras tanto el latín TA98 entra por FMA (8 669 nombres latinos en 6 744 clases) |
+| Microbiología | 138 taxones declarados por Mondo sin etiqueta | **Cerrado (2026-10-28)** con `taxdmp_2026-10-01.zip`; queda 1 (NCBITaxon:93349, eliminado del NCBI) | Nada |
 | Microbiología | LPSN (nomenclatura procariota) | Bloqueado | Habilitar `lpsn.dsmz.de` y verificar licencia |
-| Farmacología general | Clases farmacológicas y mecanismos (ATC 1-4, MeSH «Pharmacological Action», MED-RT, roles de ChEBI, NCIt) | Todos bloqueados; CHIRO trae los ids de ChEBI sin nombres | Habilitar `ftp.ebi.ac.uk` (ChEBI) o `purl.obolibrary.org` (NCIt OBO). ARO cubre las clases de antibióticos y PBPKO la farmacocinética |
-| Bioquímica | ChEBI, PRO | Bloqueados | Ídem |
-| Dispositivos | GMDN / EMDN | GMDN exige membresía; EMDN bloqueado (UE) | Habilitar `webgate.ec.europa.eu` (EMDN es de acceso libre de la Comisión; confirmar licencia de reutilización) |
+| Farmacología general | Clases farmacológicas y mecanismos (ATC 1-4, MeSH «Pharmacological Action», MED-RT, roles de ChEBI, NCIt) | **Parcialmente cerrado (2026-10-28)**: roles de ChEBI, MeSH D27 y NCIt OBO cargados. ATC/DDD (OMS) sin licencia; MED-RT lo carga el carril de tratamientos | ATC: decisión del propietario |
+| Bioquímica | ChEBI, PRO | **Cerrado (2026-10-28)**. De ChEBI quedan fuera (opt-in) las entradas de 1-2 estrellas (156 508) y los sinónimos/xrefs con origen KEGG, DrugBank, HMDB o ChEMBL | Nada |
+| Dispositivos | GMDN / EMDN | **EMDN cerrado (2026-10-28)**: 8 516 códigos, solo inglés. GMDN exige membresía (no se crean cuentas) | EMDN en castellano: la Comisión no lo publica en el archivo; hueco de fuente |
 | Especialidades y profesiones | Nada nuevo en castellano | ESCO/ISCO (OIT) bloqueados; ya existen NUCC, `bo-professions`, `bo-occupations` y las especialidades de Wikidata del glosario | OMRSE aporta roles y organizaciones; OccO (EE. UU.) queda opt-in |
 | Epónimos, prefijos, sufijos, raíces | Sin fuente abierta estructurada | Wiktionary/Wikipedia bloqueados; los diccionarios (RANM, Cosnautas) tienen copyright | Epónimos anatómicos: 267 estructuras de FMA. El resto, hueco |
-| Abreviaturas | En castellano | AbreMES-DB (PlanTL, licencia MIT) está en Zenodo, bloqueado | Habilitar `zenodo.org` y cargar AbreMES-DB (registro 2207130) |
-| Salud pública | MeSH «Epidemiologic Methods», DeCS | Bloqueados | Ídem DeCS |
+| Abreviaturas | En castellano | **Cerrado (2026-10-28)**: AbreMES-DB cargado (CC BY 4.0 según Zenodo): 6 180 pares con frecuencia ≥ 3; 52 339 más construidos y opt-in (extracción automática con ruido) | Curaduría clínica si se quiere subir el piso |
+| Salud pública | MeSH «Epidemiologic Methods», DeCS | **MeSH E05.318 cargado (2026-10-28)**; DeCS no | DeCS: licencia |
 | Literatura | Detección de huecos con PubMed / Europe PMC | APIs bloqueadas | Habilitar `eutils.ncbi.nlm.nih.gov` / `www.ebi.ac.uk` |
 | Referencia | UMLS Metathesaurus como medida de cobertura | Exige cuenta UTS | **Sin cuenta** (no se creó) |
 
@@ -189,8 +223,9 @@ por clave y, entre fuentes distintas, por xref publicado (concept_maps), nunca p
 
 1. **FMA** — licencia abierta de la UW (2006) / CC BY 3.0 según Bioregistry; la página oficial no fue
    alcanzable. **Confirmada por el propietario el 2026-10-24.**
-2. **EMDN** — si se habilita: el portal de la Comisión dice «accesible a todos, sin cargo»; confirmar la
-   política de reutilización (Decisión 2011/833/UE) antes de cargarla.
+2. **EMDN** — cargada el 2026-10-28: el aviso legal de la Comisión (leído ese día) licencia su contenido bajo CC BY 4.0 «salvo indicación contraria» (Decisión 2011/833/UE) y el archivo no trae aviso propio. **Decisión del propietario**: confirmar que ese aviso general alcanza a la planilla EMDN.
+4. **ChEBI, PRO, NCIt, AbreMES-DB** — CC BY 4.0, leída del propio archivo o registro el 2026-10-28 (detalle en `SOURCES.md`). Sin restricción NC/SA.
+5. **Wikidata** — CC0; fuente viva sin versiones, con el SHA-256 de cada respuesta en el meta.
 3. **UMLS** — requiere que el propietario acepte la licencia UTS.
 
 ## Qué requiere el repo del modelo
@@ -227,7 +262,7 @@ Cambios de **datos** (no DDL) que trae este PR en `src/common/constants/concepts
 
 ## Verificación
 
-- `node --test "tools/terminology-import/dictionaries/test/*.test.mjs"`: 18/18 (recortes reales de
+- `node --test "tools/terminology-import/dictionaries/test/*.test.mjs"`: 45/45 (2026-10-28; antes 18/18 (recortes reales de
   Uberon, CL, SO, Mondo, DOID, HGNC, Metainventario, OGMS e IDO). Con los del glosario: 52/52.
 - `corepack yarn typecheck` (tsc): verde. `eslint` y `prettier --check` sobre `concepts.ts`: verdes
   (los `.mjs` de `tools/` están fuera del alcance de `yarn lint`, como el resto del directorio).

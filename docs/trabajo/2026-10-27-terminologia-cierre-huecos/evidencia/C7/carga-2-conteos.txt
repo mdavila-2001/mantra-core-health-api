@@ -1,0 +1,7 @@
+catalog_import_batches|58
+code_systems|30
+concept_maps|10874
+catalog_concepts|392831
+concept_relationships|452995
+concept_designations|1133015
+concept_properties|840050

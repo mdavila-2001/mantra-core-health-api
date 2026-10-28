@@ -6,7 +6,7 @@ release o a un commit, nunca a una rama: dos corridas leen los mismos bytes. La 
 OBO es la que declara el registro de OBO Foundry (`registry/ontologies.jsonld`, commit
 `2e6d1f43e5ca74100c64920ec11cb9fb7680fc59`) y coincide con el `LICENSE` de su repositorio.
 
-Total: 45 archivos, ~500 MB. Se citan por fuente en `dictionary-provenance` de cada concepto (archivo,
+Total: 51 archivos, ~1,5 GB (los crudos no se versionan; se borran al normalizar). Las filas anteriores a la tabla de C7 son de la corrida del 2026-10-24. Se citan por fuente en `dictionary-provenance` de cada concepto (archivo,
 SHA-256, fecha, licencia, URI del término).
 
 | Fuente (id) | Archivo | Versión fijada | Bytes | SHA-256 | Descargado (UTC) | Licencia | Carga |
@@ -57,6 +57,18 @@ SHA-256, fecha, licencia, URI del término).
 | hgnc | [hgnc_complete_set.json](https://storage.googleapis.com/public-download-files/hgnc/json/json/hgnc_complete_set.json) | fecha de descarga | 33242047 | `72bfe0c05800163c040a2cf663c70501f9ac9236469fbd0b552f2cd37a4d7f67` | 2026-10-24 00:47 | CC0 1.0 (HGNC: «freely available … no restrictions on their use») | default |
 | abbreviations-metainventory | [Metainventory_Version1.0.0.csv](https://raw.githubusercontent.com/lisavirginia/clinical-abbreviations/v1.0.2/metainventory/Metainventory_Version1.0.0.csv) | v1.0.2 | 40035867 | `35ebc2b7e40f43448ce47cb74f6195f32facb04a32bd42aeda33bed8280ba257` | 2026-10-24 00:47 | CC BY 4.0 | default |
 
+Fuentes sumadas el **2026-10-28** (carril C7; antes bloqueadas por red; las seis primeras filas son archivos nuevos y la última completa etiquetas de taxones):
+
+| Fuente (id) | Archivo | Versión fijada | Bytes | SHA-256 | Descargado (UTC) | Licencia | Carga |
+|---|---|---|---:|---|---|---|---|
+| chebi | [chebi.obo](https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi.obo) | release 256 (`data-version: 256`, 2026-10-06) | 271094615 | `1fd3e7d0b9ba51934b20ebcda01eefe6e14f3b3b835a737a4665414da2122c50` | 2026-10-28 01:07 | CC BY 4.0 (`terms:license` del propio archivo) | default |
+| pro | [pro_reasoned.obo](https://proconsortium.org/download/current/pro_reasoned.obo) | release 73.1 (`data-version`, 2026-09-15; URL «current», sin fijar) | 205871685 | `8e33bb64b847ebce998a94f45e4ebf4c050afcd2b6b4d782b89ce753360929df` | 2026-10-28 01:07 | CC BY 4.0 (`remark` y `dc:license` del archivo) | default |
+| ncit-general | [ncit.obo](https://github.com/ncit-obo-org/ncit-obo-edition/releases/download/v2026-03-19/ncit.obo) | v2026-03-19 (`owl:versionInfo 26.02d`) | 248162694 | `8fdc2d29c9ebd91ada8330ed023b0c56ae787a31e6aedff453ee9bfef6fc18f6` | 2026-10-28 01:09 | CC BY 4.0 (Términos de uso del NCI Thesaurus, leídos el 2026-10-28) | default |
+| mesh-subset | [desc2026.xml](https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.xml) | 2026 | 312952703 | `449792ed59ba4d60035e44724352f7361ec0dc945b67dcd821a50ff32f81bcdb` | 2026-10-28 01:09 | datos de MeSH de uso libre citando a NLM | default |
+| emdn | [EMDN_v2026_EN.xlsx](https://webgate.ec.europa.eu/dyna2/emdn/build/EMDN%20v2026_EN..xlsx) | 2026 | 382642 | `a973dcdd8ae291248c9d06d355d3cc859d89a5584004db9354721c9c596bc1bd` | 2026-10-28 01:07 | CC BY 4.0 por el aviso legal de la Comisión (el archivo no trae aviso propio) | default |
+| abremes | [AbreMES-DB.zip](https://zenodo.org/api/records/2207130/files/AbreMES-DB.zip/content) | zenodo 2207130 (2018-11-20) | 22225927 | `e8921fe9c66527e1e71bad7178b3efe3dd2a4e0f7e2a2a12535b8b8a3fb16e74` | 2026-10-28 01:08 | CC BY 4.0 (`license.id` del registro de Zenodo, leído el 2026-10-28) | default |
+| ncbitaxon-medical | [taxdmp_2026-10-01.zip](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump_archive/taxdmp_2026-10-01.zip) | NCBI Taxonomy 2026-10-01 | 79650311 | `d744af371c0b9fc7269d80b49546b6ac4c9ddc52a2fd97bcbfd02783edb5c9eb` | 2026-10-28 01:08 | Dominio público (NCBI) | default |
+
 ## Notas de licencia
 
 - **CC BY 3.0 / 4.0** (Uberon, CL, SO, GO, Mondo, ARO, …): reutilización con atribución. La atribución
@@ -73,28 +85,36 @@ SHA-256, fecha, licencia, URI del término).
 - **Metainventario de abreviaturas**: CC BY 4.0 (`LICENSE.txt` del repositorio). Incluye registros
   derivados de UMLS-LRABR (léxico SPECIALIST de la NLM, de uso libre) y de ADAM; ésos son los que quedan
   opt-in.
-- **Etiquetas ES de Wikidata** (`import-wikidata-es-labels.mjs`, no corrido): CC0; son nombres de la
-  comunidad, no traducciones oficiales, y se cargarían como sinónimos ES con su ítem Q.
+- **Etiquetas ES de Wikidata** (`import-wikidata-es-labels.mjs`, corrido el 2026-10-28): CC0; son nombres de la
+  comunidad, no traducciones oficiales, y se cargan como sinónimos ES (nunca preferidos) con su ítem Q. Wikidata es una fuente
+  viva sin versiones: `wikidata-es-labels.meta.json` guarda el SHA-256 de cada una de las 406 respuestas leídas y el de la lista
+  (`inputsSha256`); las respuestas crudas se borran. 61 312 filas (54 414 conceptos cargados por defecto); ver el recuento por propiedad en el meta.
+- **ChEBI, PRO, NCIt**: CC BY 4.0, leída del propio archivo (ChEBI `terms:license`, PRO `remark` y `dc:license`) y de los
+  Términos de uso de NCI (`ThesaurusTermsofUse.htm`: «released under the Creative Commons Attribution 4.0 International license»).
+  NCIt aquí es la **edición OBO** (subconjunto «no-enfermedad»); el nombre «NCI Thesaurus» es marca registrada del NCI.
+  Del contenido de ChEBI **no se cargan** los sinónimos ni xrefs cuyo origen es KEGG, DrugBank, HMDB (no comercial) ni ChEMBL (CC BY-SA): ver `RESTRICTED_ORIGIN` en `lib/sources.mjs`.
+- **MeSH**: «NLM freely provides MeSH data»; se cita a NLM y la versión (2026). No cubre las traducciones (MTMS/DeCS).
+- **EMDN**: el sitio de la Comisión la publica de acceso libre; el aviso legal de la Comisión (leído el 2026-10-28) licencia su
+  contenido bajo CC BY 4.0 «salvo indicación contraria» y el archivo no trae aviso propio. Es solo inglés y en MAYÚSCULAS, tal cual.
+- **AbreMES-DB**: CC BY 4.0 (registro de Zenodo; el pedido original hablaba de MIT). Es una extracción automática (no curada): se
+  carga por defecto lo visto ≥ 3 veces (6 180 de 58 519 pares); el resto queda construido y opt-in.
 
 ## Fuentes que NO se usaron
 
 | Fuente | Motivo |
 |---|---|
 | DeCS/MeSH en castellano (BIREME/OPS) | `decs.bvsalud.org`, `api.bvsalud.org` e `id.nlm.nih.gov` bloqueados por la política de red de la sesión (403). |
-| Terminologia Anatomica 2 (FIPAT) | `fipat.library.dal.ca` y `ta2viewer.openanatomy.org` bloqueados. El TA98 en latín entra vía FMA. |
 | Diccionario de Términos Médicos (RANM) / Diccionario panhispánico (RAE-RANM) | Con copyright: no se copian; además `dtme.ranm.es` y `dpej.rae.es` bloqueados. A lo sumo, enlace. |
 | Cosnautas / Tremédica, TERMCAT, IATE | De pago (Cosnautas) o hosts bloqueados (`www.termcat.cat`, `iate.europa.eu`). |
-| NCI Thesaurus (OBO Edition y EVS) | El repo sólo trae `imports.ofn`; el release es un asset (`github.com` web y `evs.nci.nih.gov` bloqueados). |
-| ChEBI, PRO, MRO | Sin datos en git; `ftp.ebi.ac.uk` y `purl.obolibrary.org` bloqueados. CHIRO trae 245 ids de ChEBI **sin nombres**: no aporta términos sin ChEBI. |
+| Terminologia Anatomica 2 (FIPAT) | `fipat.library.dal.ca` (la página de licencia y estado de TA2) da 502 del proxy (`CONNECT tunnel failed`) el 2026-10-28; `ta2viewer.openanatomy.org` responde 200 pero es una SPA sin descarga masiva y remite a FIPAT para la licencia. Sin licencia verificada no se carga. El TA98 en latín entra vía FMA. |
+| MRO (MHC Restriction Ontology) | No se investigó en esta pasada (queda como hueco abierto; sin consulta de producto identificada). |
+| NCIt completa (EVS) | `evs.nci.nih.gov/ftp1/NCI_Thesaurus/` responde 200, pero esta pasada solo carga la OBO Edition «no-enfermedad» (`ncit-general`); la cobertura de NCIt para enfermedades está en `diseases/` (no se verificó el solapamiento en esta pasada). |
 | GenEpiO | El `genepio.obo` publicado tiene 14 bytes; sólo hay OWL de 2021. |
 | PCL (Provisional Cell Ontology) | El `pcl-edit.owl` en git no declara clases. |
-| EMDN (UE) | `webgate.ec.europa.eu` y `health.ec.europa.eu` bloqueados. El repo de ANS (Francia) sólo trae un subconjunto de 16 códigos EMDN con nombres en francés: no es el nomenclador. |
 | GMDN | Exige membresía (licencia). No se crean cuentas. |
 | ICNP, NANDA-I, NIC, NOC | Enfermería: la carga otra sesión (`justin/seed-nursing-care`). NANDA-I (NANDA International) y NIC/NOC (Elsevier) tienen copyright. |
 | UMLS Metathesaurus | Exige cuenta UTS: **sin cuenta** (no se creó). |
 | SNOMED CT | Bolivia no es miembro de SNOMED International; además se descartan los xrefs `SCTID` de las OBO. |
 | MedlinePlus en español | Ya está en el glosario (`import-medlineplus-es.mjs`); `medlineplus.gov` bloqueado. |
-| Wikidata | `query.wikidata.org` y `www.wikidata.org` bloqueados: el importador ES queda escrito y no corrido. |
-| AbreMES-DB (abreviaturas médicas en español, PlanTL) | Licencia permisiva (MIT, SEAD 2018), pero los datos están en Zenodo (bloqueado); el repo de GitHub sólo trae README y licencia. |
 | PubMed / Europe PMC | `eutils.ncbi.nlm.nih.gov` y `www.ebi.ac.uk` bloqueados: no se pudo buscar literatura para detectar huecos. |
 | Wiktionary / Wikipedia (prefijos, sufijos, raíces, epónimos) | Bloqueados; no hay otra fuente estructurada y abierta alcanzable. Los epónimos anatómicos salen de FMA (267 estructuras). |

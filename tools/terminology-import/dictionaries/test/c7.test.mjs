@@ -20,7 +20,7 @@ import { crossCheckLabels, readDeleted, readMerged, readNames, readNodes, taxaFr
 import { descriptorRecords, meshRows, parentTreeNumber, parseDescriptor } from '../lib/mesh.mjs';
 import { abremesRows, parsePairs } from '../lib/abremes.mjs';
 import { ABREMES_SOURCE, CHEBI_SOURCE, EMDN_SOURCE, MESH_SOURCE, NCIT_SOURCE, PRO_SOURCE, corpusKey } from '../lib/sources.mjs';
-import { CONCEPT, designationTuples, isDefaultLoaded } from '../lib/load-plan.mjs';
+import { CONCEPT, designationTuples, esLabelTuples, isDefaultLoaded } from '../lib/load-plan.mjs';
 import { ID_PROPERTIES, NO_ENRICH, corpusCode, entitiesUrl, esLabelRows, labelPairs, labelsSparql, labelsSparqlFor } from '../lib/wikidata-es.mjs';
 import { combineCoverage, layerCoverage } from '../lib/coverage.mjs';
 
@@ -304,7 +304,7 @@ test('Wikidata ES: propiedades nuevas, códigos del corpus y consultas mínimas'
 test('Wikidata ES: respuestas reales (mapeo SPARQL + wbgetentities) → filas con procedencia', () => {
   const map = JSON.parse(fx('wikidata-map-excerpt.json'));
   const ent = JSON.parse(fx('wikidata-entities-excerpt.json'));
-  const pairs = mappingPairs(map, 'P7963');
+  const pairs = labelPairs(map, 'P7963');
   assert.ok(pairs.length >= 3 && pairs.every((p) => /^Q\d+$/.test(p.q) && /^CL:\d+$/.test(p.code)));
   const rows = esLabelRows(pairs, ent, 'P7963', '2026-10-27T00:00:00.000Z');
   assert.ok(rows.length >= 1);
@@ -313,7 +313,22 @@ test('Wikidata ES: respuestas reales (mapeo SPARQL + wbgetentities) → filas co
     assert.ok(r.esLabel.length > 0);
     assert.ok(pairs.some((p) => p.q === r.q && p.code === r.code), 'el vínculo es el id declarado por el ítem, no el nombre');
   }
-  assert.equal(esLabelRows(pairs, { entities: {} }, 'P7963', 'x').length, 0, 'sin etiqueta en castellano no hay fila');
+  // La etiqueta del mapeo SPARQL ya es la etiqueta ES verbatim: sin respuesta de entidades igual hay fila, con alias/descripción vacíos.
+  const bare = esLabelRows(pairs, { entities: {} }, 'P7963', 'x');
+  assert.equal(bare.length, pairs.length);
+  assert.ok(bare.every((r) => r.esAliases.length === 0 && r.esDescription === null));
+  // Un binding sin etiqueta en castellano no genera par ni fila.
+  const sinEtiqueta = { results: { bindings: [{ item: { value: 'http://www.wikidata.org/entity/Q1' }, id: { value: 'CL_0000001' } }] } };
+  assert.equal(labelPairs(sinEtiqueta, 'P7963').length, 0, 'sin etiqueta en castellano no hay fila');
+});
+
+test('Wikidata ES: un nombre idéntico al que la fuente ya declara en castellano no se duplica como designación', () => {
+  const rows = [{ q: 'Q1', property: 'P1402', esLabel: 'Rodilla', esAliases: ['Articulación de la rodilla'], esDescription: null, retrievedAt: 'x' }];
+  const sinFiltro = esLabelTuples('fma|FMA:24974', rows);
+  assert.deepEqual(sinFiltro.designations.map((d) => d[4]).sort(), ['Articulación de la rodilla', 'Rodilla']);
+  const filtrado = esLabelTuples('fma|FMA:24974', rows, new Set(['Rodilla']));
+  assert.deepEqual(filtrado.designations.map((d) => d[4]), ['Articulación de la rodilla']);
+  assert.ok(filtrado.designations.every((d) => d[5] === false), 'nunca preferida');
 });
 
 // ---------------------------------------------------------------- cobertura incremental

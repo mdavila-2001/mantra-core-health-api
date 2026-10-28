@@ -95,6 +95,8 @@ async function* layerChunks(source, counters = { skipped: 0 }, size = CHUNK) {
 /** Barrido previo: claves cargadas (para filtrar relaciones) y versión de cada fuente. Copias planas de las claves. */
 async function scanLayers(sources) {
   const loadedKeys = new Set();
+  /** Nombres ES que la propia fuente declara (FMA): el nombre de Wikidata idéntico no se duplica. */
+  const ownEs = new Map();
   const layers = [];
   for (const source of sources) {
     const counters = { skipped: 0 };
@@ -104,6 +106,7 @@ async function scanLayers(sources) {
     for await (const chunk of layerChunks(source, counters)) {
       for (const r of chunk) {
         loadedKeys.add(Buffer.from(r.key, 'utf8').toString('utf8'));
+        if (r.designationsEs?.length) ownEs.set(Buffer.from(r.key, 'utf8').toString('utf8'), new Set(r.designationsEs));
         if (r.provenance.version) versions.add(r.provenance.version);
         retrieved.add(r.provenance.retrievedAt.slice(0, 10));
         count++;
@@ -114,7 +117,7 @@ async function scanLayers(sources) {
     const version = versions.size ? [...versions].sort().at(-1) : [...retrieved].sort().at(-1);
     layers.push({ source, count, skipped: counters.skipped, plan: codeSystemPlan(source, [{ provenance: { version: versions.size ? version : null, retrievedAt: `${version}T00:00:00.000Z` } }]) });
   }
-  return { layers, loadedKeys };
+  return { layers, loadedKeys, ownEs };
 }
 
 async function insertMany(client, table, columns, tuples, casts) {
@@ -247,7 +250,7 @@ function diseaseAgentTuples(edges, lookups, keyToId) {
 }
 
 /** Nombres ES de Wikidata (wikidata-es-labels.ndjson) sólo para conceptos que se cargan en esta corrida. */
-function esLabelPlan(loadedKeys) {
+function esLabelPlan(loadedKeys, ownEs = new Map()) {
   const esPath = join(NDJSON_DIR, 'wikidata-es-labels.ndjson');
   const byKey = new Map();
   if (existsSync(esPath)) {
@@ -258,7 +261,7 @@ function esLabelPlan(loadedKeys) {
       byKey.get(key).push(r);
     }
   }
-  const es = [...byKey].map(([key, rows]) => esLabelTuples(key, rows));
+  const es = [...byKey].map(([key, rows]) => esLabelTuples(key, rows, ownEs.get(key)));
   return { concepts: es.length, designations: es.flatMap((x) => x.designations), properties: es.map((x) => x.property) };
 }
 
@@ -266,10 +269,10 @@ async function main() {
   const t0 = Date.now();
   console.log(`=== Carga de diccionarios médicos a terminology.* ${DRY_RUN ? '(DRY-RUN por defecto, sin base)' : '(APPLY explícito)'} ===`);
   const sources = activeSources();
-  const { layers, loadedKeys } = await scanLayers(sources);
+  const { layers, loadedKeys, ownEs } = await scanLayers(sources);
   const edgesPath = join(NDJSON_DIR, 'disease-agents.ndjson');
   const edges = existsSync(edgesPath) ? readNdjson(edgesPath) : [];
-  const es = esLabelPlan(loadedKeys);
+  const es = esLabelPlan(loadedKeys, ownEs);
 
   if (DRY_RUN) {
     const summary = [];

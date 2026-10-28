@@ -1,0 +1,81 @@
+[load] sin filas por política (opt-in): ecto (4487 saltadas)
+[load] sin filas por política (opt-in): oba (25364 saltadas)
+[load] sin filas por política (opt-in): nbo (932 saltadas)
+[load] sin filas por política (opt-in): envo (4007 saltadas)
+[load] sin filas por política (opt-in): bto (6511 saltadas)
+[load] sin filas por política (opt-in): occo (1723 saltadas)
+[load] sin filas por política (opt-in): hancestro (589 saltadas)
+[load] sin filas por política (opt-in): hso (104 saltadas)
+[load] sin filas por política (opt-in): mf (95 saltadas)
+[load] sin filas por política (opt-in): mfoem (219 saltadas)
+[load] sin filas por política (opt-in): pw (2704 saltadas)
+[load] sin filas por política (opt-in): omp (2006 saltadas)
+[load] sin filas por política (opt-in): ohpi (105 saltadas)
+[load] sin filas por política (opt-in): ohmi (896 saltadas)
+[load] sin filas por política (opt-in): mod (1971 saltadas)
+[load] sin filas por política (opt-in): rbo (192 saltadas)
+[load] sin filas por política (opt-in): taxrank (77 saltadas)
+[load] sin filas por política (opt-in): clo (39018 saltadas)
+[load] sin filas por política (opt-in): go (37948 saltadas)
+[load] sin filas por política (opt-in): pato (1943 saltadas)
+[load] {"source":"ncbitaxon-medical","codeSystem":"ncbitaxon","reusedCodeSystem":null,"concepts":1644,"designations":2282,"properties":3288,"conceptsReused":0}
+[load] {"source":"uberon","codeSystem":"uberon","reusedCodeSystem":null,"concepts":13412,"designations":37535,"properties":26824,"conceptsReused":0}
+[load] {"source":"cl","codeSystem":"cl","reusedCodeSystem":null,"concepts":3070,"designations":5704,"properties":6140,"conceptsReused":0}
+[load] {"source":"ehdaa2","codeSystem":"ehdaa2","reusedCodeSystem":null,"concepts":2456,"designations":2457,"properties":4912,"conceptsReused":0}
+[load] {"source":"aeo","codeSystem":"aeo","reusedCodeSystem":null,"concepts":133,"designations":133,"properties":266,"conceptsReused":0}
+[load] {"source":"caro","codeSystem":"caro","reusedCodeSystem":null,"concepts":84,"designations":87,"properties":168,"conceptsReused":0}
+[load] {"source":"hsapdv","codeSystem":"hsapdv","reusedCodeSystem":null,"concepts":239,"designations":275,"properties":478,"conceptsReused":0}
+[load] {"source":"so","codeSystem":"sequence-ontology","reusedCodeSystem":null,"concepts":2409,"designations":6216,"properties":4818,"conceptsReused":0}
+[load] {"source":"ogms","codeSystem":"ogms","reusedCodeSystem":null,"concepts":119,"designations":119,"properties":238,"conceptsReused":0}
+[load] {"source":"ido","codeSystem":"ido","reusedCodeSystem":null,"concepts":253,"designations":253,"properties":506,"conceptsReused":0}
+[load] {"source":"omrse","codeSystem":"omrse","reusedCodeSystem":null,"concepts":288,"designations":311,"properties":576,"conceptsReused":0}
+[load] {"source":"trans","codeSystem":"pathogen-transmission","reusedCodeSystem":null,"concepts":32,"designations":36,"properties":64,"conceptsReused":0}
+[load] {"source":"apollo_sv","codeSystem":"apollo-sv","reusedCodeSystem":null,"concepts":616,"designations":616,"properties":1232,"conceptsReused":0}
+[load] {"source":"stato","codeSystem":"stato","reusedCodeSystem":null,"concepts":712,"designations":712,"properties":1424,"conceptsReused":0}
+[load] {"source":"exo","codeSystem":"exo","reusedCodeSystem":null,"concepts":163,"designations":171,"properties":326,"conceptsReused":0}
+[load] {"source":"geno","codeSystem":"geno","reusedCodeSystem":null,"concepts":222,"designations":222,"properties":444,"conceptsReused":0}
+[load] {"source":"aro","codeSystem":"aro","reusedCodeSystem":null,"concepts":9030,"designations":11141,"properties":18060,"conceptsReused":0}
+[load] {"source":"pbpko","codeSystem":"pbpko","reusedCodeSystem":null,"concepts":858,"designations":858,"properties":1716,"conceptsReused":0}
+[load] {"source":"opl","codeSystem":"opl","reusedCodeSystem":null,"concepts":413,"designations":413,"properties":826,"conceptsReused":0}
+[load] {"source":"obcs","codeSystem":"obcs","reusedCodeSystem":null,"concepts":370,"designations":370,"properties":740,"conceptsReused":0}
+[load] {"source":"fma","codeSystem":"fma","reusedCodeSystem":null,"concepts":12457,"designations":36642,"properties":24914,"conceptsReused":0}
+[load] {"source":"hgnc","codeSystem":"hgnc","reusedCodeSystem":null,"concepts":45277,"designations":147073,"properties":90554,"conceptsReused":0}
+[load] {"source":"abbreviations-metainventory","codeSystem":"medical-abbreviations-metainventory","reusedCodeSystem":null,"concepts":17445,"designations":39511,"properties":34890,"conceptsReused":0}
+[load] {"source":"chebi","codeSystem":"chebi","reusedCodeSystem":null,"concepts":62215,"designations":106130,"properties":124430,"conceptsReused":0}
+[load] {"source":"pro","codeSystem":"protein-ontology","reusedCodeSystem":null,"concepts":132491,"designations":412592,"properties":264982,"conceptsReused":0}
+[load] {"source":"ncit-general","codeSystem":"ncit-general","reusedCodeSystem":null,"concepts":70782,"designations":222522,"properties":141564,"conceptsReused":0}
+[load] {"source":"mesh-subset","codeSystem":"mesh","reusedCodeSystem":null,"concepts":932,"designations":6707,"properties":1864,"conceptsReused":0}
+[load] {"source":"emdn","codeSystem":"emdn","reusedCodeSystem":null,"concepts":8516,"designations":8516,"properties":17032,"conceptsReused":0}
+[load] {"source":"abremes","codeSystem":"abremes-db","reusedCodeSystem":null,"concepts":6180,"designations":12360,"properties":12360,"conceptsReused":0}
+[load] {"source":"ncbitaxon-medical","codeSystem":"ncbitaxon","reusedCodeSystem":null,"concepts":1644,"designations":2282,"properties":3288,"conceptsReused":0,"relationships":1643,"conceptMaps":0}
+[load] {"source":"uberon","codeSystem":"uberon","reusedCodeSystem":null,"concepts":13412,"designations":37535,"properties":26824,"conceptsReused":0,"relationships":17405,"conceptMaps":10045}
+[load] {"source":"cl","codeSystem":"cl","reusedCodeSystem":null,"concepts":3070,"designations":5704,"properties":6140,"conceptsReused":0,"relationships":5658,"conceptMaps":32}
+[load] {"source":"ehdaa2","codeSystem":"ehdaa2","reusedCodeSystem":null,"concepts":2456,"designations":2457,"properties":4912,"conceptsReused":0,"relationships":7925,"conceptMaps":0}
+[load] {"source":"aeo","codeSystem":"aeo","reusedCodeSystem":null,"concepts":133,"designations":133,"properties":266,"conceptsReused":0,"relationships":156,"conceptMaps":0}
+[load] {"source":"caro","codeSystem":"caro","reusedCodeSystem":null,"concepts":84,"designations":87,"properties":168,"conceptsReused":0,"relationships":99,"conceptMaps":1}
+[load] {"source":"hsapdv","codeSystem":"hsapdv","reusedCodeSystem":null,"concepts":239,"designations":275,"properties":478,"conceptsReused":0,"relationships":475,"conceptMaps":21}
+[load] {"source":"so","codeSystem":"sequence-ontology","reusedCodeSystem":null,"concepts":2409,"designations":6216,"properties":4818,"conceptsReused":0,"relationships":2702,"conceptMaps":0}
+[load] {"source":"ogms","codeSystem":"ogms","reusedCodeSystem":null,"concepts":119,"designations":119,"properties":238,"conceptsReused":0,"relationships":78,"conceptMaps":0}
+[load] {"source":"ido","codeSystem":"ido","reusedCodeSystem":null,"concepts":253,"designations":253,"properties":506,"conceptsReused":0,"relationships":168,"conceptMaps":0}
+[load] {"source":"omrse","codeSystem":"omrse","reusedCodeSystem":null,"concepts":288,"designations":311,"properties":576,"conceptsReused":0,"relationships":181,"conceptMaps":0}
+[load] {"source":"trans","codeSystem":"pathogen-transmission","reusedCodeSystem":null,"concepts":32,"designations":36,"properties":64,"conceptsReused":0,"relationships":31,"conceptMaps":0}
+[load] {"source":"apollo_sv","codeSystem":"apollo-sv","reusedCodeSystem":null,"concepts":616,"designations":616,"properties":1232,"conceptsReused":0,"relationships":359,"conceptMaps":0}
+[load] {"source":"stato","codeSystem":"stato","reusedCodeSystem":null,"concepts":712,"designations":712,"properties":1424,"conceptsReused":0,"relationships":586,"conceptMaps":0}
+[load] {"source":"exo","codeSystem":"exo","reusedCodeSystem":null,"concepts":163,"designations":171,"properties":326,"conceptsReused":0,"relationships":173,"conceptMaps":0}
+[load] {"source":"geno","codeSystem":"geno","reusedCodeSystem":null,"concepts":222,"designations":222,"properties":444,"conceptsReused":0,"relationships":223,"conceptMaps":1}
+[load] {"source":"aro","codeSystem":"aro","reusedCodeSystem":null,"concepts":9030,"designations":11141,"properties":18060,"conceptsReused":0,"relationships":9386,"conceptMaps":373}
+[load] {"source":"pbpko","codeSystem":"pbpko","reusedCodeSystem":null,"concepts":858,"designations":858,"properties":1716,"conceptsReused":0,"relationships":837,"conceptMaps":0}
+[load] {"source":"opl","codeSystem":"opl","reusedCodeSystem":null,"concepts":413,"designations":413,"properties":826,"conceptsReused":0,"relationships":691,"conceptMaps":9}
+[load] {"source":"obcs","codeSystem":"obcs","reusedCodeSystem":null,"concepts":370,"designations":370,"properties":740,"conceptsReused":0,"relationships":281,"conceptMaps":13}
+[load] {"source":"fma","codeSystem":"fma","reusedCodeSystem":null,"concepts":12457,"designations":36642,"properties":24914,"conceptsReused":0,"relationships":17193,"conceptMaps":0}
+[load] {"source":"hgnc","codeSystem":"hgnc","reusedCodeSystem":null,"concepts":45277,"designations":147073,"properties":90554,"conceptsReused":0,"relationships":0,"conceptMaps":0}
+[load] {"source":"abbreviations-metainventory","codeSystem":"medical-abbreviations-metainventory","reusedCodeSystem":null,"concepts":17445,"designations":39511,"properties":34890,"conceptsReused":0,"relationships":0,"conceptMaps":0}
+[load] {"source":"chebi","codeSystem":"chebi","reusedCodeSystem":null,"concepts":62215,"designations":106130,"properties":124430,"conceptsReused":0,"relationships":113762,"conceptMaps":0}
+[load] {"source":"pro","codeSystem":"protein-ontology","reusedCodeSystem":null,"concepts":132491,"designations":412592,"properties":264982,"conceptsReused":0,"relationships":180997,"conceptMaps":3}
+[load] {"source":"ncit-general","codeSystem":"ncit-general","reusedCodeSystem":null,"concepts":70782,"designations":222522,"properties":141564,"conceptsReused":0,"relationships":82369,"conceptMaps":376}
+[load] {"source":"mesh-subset","codeSystem":"mesh","reusedCodeSystem":null,"concepts":932,"designations":6707,"properties":1864,"conceptsReused":0,"relationships":1124,"conceptMaps":0}
+[load] {"source":"emdn","codeSystem":"emdn","reusedCodeSystem":null,"concepts":8516,"designations":8516,"properties":17032,"conceptsReused":0,"relationships":8493,"conceptMaps":0}
+[load] {"source":"abremes","codeSystem":"abremes-db","reusedCodeSystem":null,"concepts":6180,"designations":12360,"properties":12360,"conceptsReused":0,"relationships":0,"conceptMaps":0}
+[load] {"source":"wikidata-es-labels","concepts":54414,"designations":71051,"properties":54414}
+[load] disease-agents {"source":"disease-agents","edges":1367,"withOrganism":1366,"resolvedDisease":0,"unresolvedDisease":1366,"relationships":0,"inserted":0,"lookups":{"codes":0,"mesh":0,"ta98":0}}
+exit 0 segundos 266

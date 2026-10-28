@@ -1,0 +1,88 @@
+{
+ "head": {
+  "vars": [
+   "item",
+   "id",
+   "esLabel"
+  ]
+ },
+ "results": {
+  "bindings": [
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q107647"
+    },
+    "id": {
+     "type": "literal",
+     "value": "CL_0000234"
+    },
+    "esLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Fagocito"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q107988"
+    },
+    "id": {
+     "type": "literal",
+     "value": "CL_0000767"
+    },
+    "esLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "basófilo"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q43054"
+    },
+    "id": {
+     "type": "literal",
+     "value": "CL_0000540"
+    },
+    "esLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "neurona"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1075549"
+    },
+    "id": {
+     "type": "literal",
+     "value": "CL_0010016"
+    },
+    "esLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Coanocito"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1076064"
+    },
+    "id": {
+     "type": "literal",
+     "value": "CL_0000058"
+    },
+    "esLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "condroblasto"
+    }
+   }
+  ]
+ }
+}

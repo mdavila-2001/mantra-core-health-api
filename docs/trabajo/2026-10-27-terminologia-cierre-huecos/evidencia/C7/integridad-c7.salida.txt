@@ -1,0 +1,13 @@
+conceptos sin version de code system|0
+conceptos de fuentes C7 sin dictionary-provenance|0
+provenance C7 sin sha256 o licencia|0
+propiedades sin concepto|0
+designaciones sin concepto|0
+designaciones con valor nulo o vacio|0
+relaciones con origen inexistente|0
+duplicados (version de code system, code)|0
+relaciones con destino inexistente|0
+mapas con origen o destino inexistente|0
+conceptos con code nulo o vacio|0
+designaciones duplicadas (concepto, idioma, tipo, valor)|0
+conceptos con display nulo o vacio|0

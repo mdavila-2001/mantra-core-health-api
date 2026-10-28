@@ -1,0 +1,7 @@
+catalog_concepts|13
+concept_designations|0
+concept_properties|0
+concept_relationships|0
+concept_maps|0
+code_systems|1
+catalog_import_batches|0

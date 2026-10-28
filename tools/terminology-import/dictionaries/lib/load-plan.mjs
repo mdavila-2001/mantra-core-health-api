@@ -167,9 +167,10 @@ export function lookupKeys(xrefId) {
  * designaciones ES (sinónimo, nunca preferida: no es el nombre oficial) y una
  * propiedad con su procedencia por ítem. `rows` son las filas de un mismo concepto.
  */
-export function esLabelTuples(key, rows) {
+export function esLabelTuples(key, rows, ownEs = new Set()) {
   const cid = conceptId(key);
-  const values = [...new Set(rows.flatMap((r) => [r.esLabel, ...r.esAliases]))];
+  // Un nombre idéntico al que la fuente del concepto ya declara en castellano no se repite como designación.
+  const values = [...new Set(rows.flatMap((r) => [r.esLabel, ...r.esAliases]))].filter((v) => !ownEs.has(v));
   const designations = values.map((v) => [md5uuid(`mantra:dictionaries:designation:wikidata-es:${key}:${v}`), cid, CONCEPT.LANG_ES, CONCEPT.DESIG_SYNONYM, v, false]);
   const provenance = rows.map((r) => ({ source: 'wikidata', item: r.q, uri: `https://www.wikidata.org/wiki/${r.q}`, property: r.property, label: r.esLabel, aliases: r.esAliases, description: r.esDescription, retrievedAt: r.retrievedAt, license: 'CC0 1.0', note: 'nombre de la comunidad de Wikidata, no traducción oficial' }));
   return { designations, property: [md5uuid(`mantra:dictionaries:property:dictionary-es-labels:${key}`), cid, 'dictionary-es-labels', 'json', JSON.stringify(provenance)] };
