@@ -136,7 +136,9 @@ describe('InsightsRepository', () => {
     expect(placeholders(sql)).toBe(params.length);
     expect(sql).toContain('i.issued_at >= ?');
     expect(sql).toContain('i.issued_at < ?');
-    expect(params.slice(0, 5)).toEqual([
+    expect(params.slice(0, 6)).toEqual([
+      // El profesional dueño de la extensión (primer `?` del SELECT).
+      'hp-1',
       SURVEYS.INVITATION_ANSWERED,
       'ten-1',
       'ten-1',
