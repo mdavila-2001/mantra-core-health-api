@@ -2,11 +2,11 @@
 
 # Inventario de endpoints
 
-Se inventarían **1591 operaciones HTTP** en **72 módulos**: 1582 publicadas en el contrato OpenAPI y 9 que existen sólo en el código.
+Se inventarían **1605 operaciones HTTP** en **72 módulos**: 1596 publicadas en el contrato OpenAPI y 9 que existen sólo en el código.
 
-- Con al menos una tabla identificada: 1530
-- Riesgo ALTO 194 · MEDIO 890 · BAJO 507
-- Mencionadas por al menos una prueba: 928
+- Con al menos una tabla identificada: 1543
+- Riesgo ALTO 196 · MEDIO 892 · BAJO 517
+- Mencionadas por al menos una prueba: 930
 
 Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [README del inventario](../README.md).
 
@@ -34,18 +34,18 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `delegated_access` | 12 | 1 | [delegated_access.md](delegated_access.md) |
 | `diagnostic_units` | 21 | 0 | [diagnostic_units.md](diagnostic_units.md) |
 | `diagnostics` | 31 | 9 | [diagnostics.md](diagnostics.md) |
-| `directory` | 25 | 10 | [directory.md](directory.md) |
+| `directory` | 26 | 10 | [directory.md](directory.md) |
 | `document_store` | 5 | 0 | [document_store.md](document_store.md) |
 | `education` | 14 | 0 | [education.md](education.md) |
 | `erp` | 17 | 0 | [erp.md](erp.md) |
 | `forms` | 25 | 0 | [forms.md](forms.md) |
-| `geo` | 10 | 0 | [geo.md](geo.md) |
+| `geo` | 11 | 0 | [geo.md](geo.md) |
 | `graph_intelligence` | 15 | 4 | [graph_intelligence.md](graph_intelligence.md) |
 | `health_context` | 13 | 0 | [health_context.md](health_context.md) |
 | `health_data` | 16 | 0 | [health_data.md](health_data.md) |
-| `iam` | 39 | 18 | [iam.md](iam.md) |
+| `iam` | 40 | 18 | [iam.md](iam.md) |
 | `identity_assurance` | 28 | 5 | [identity_assurance.md](identity_assurance.md) |
-| `insurance` | 71 | 27 | [insurance.md](insurance.md) |
+| `insurance` | 72 | 27 | [insurance.md](insurance.md) |
 | `integration_contracts` | 12 | 0 | [integration_contracts.md](integration_contracts.md) |
 | `integrations` | 15 | 2 | [integrations.md](integrations.md) |
 | `lakehouse` | 13 | 0 | [lakehouse.md](lakehouse.md) |
@@ -64,7 +64,7 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `polyglot_storage` | 15 | 0 | [polyglot_storage.md](polyglot_storage.md) |
 | `practice` | 36 | 4 | [practice.md](practice.md) |
 | `procedures_perioperative` | 32 | 0 | [procedures_perioperative.md](procedures_perioperative.md) |
-| `profiles` | 58 | 26 | [profiles.md](profiles.md) |
+| `profiles` | 63 | 28 | [profiles.md](profiles.md) |
 | `promotions` | 20 | 0 | [promotions.md](promotions.md) |
 | `public` | 4 | 0 | [public.md](public.md) |
 | `qa_execution` | 9 | 0 | [qa_execution.md](qa_execution.md) |
@@ -73,7 +73,7 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `read_models` | 15 | 1 | [read_models.md](read_models.md) |
 | `redis_runtime` | 6 | 0 | [redis_runtime.md](redis_runtime.md) |
 | `reporting` | 12 | 0 | [reporting.md](reporting.md) |
-| `scheduling` | 61 | 3 | [scheduling.md](scheduling.md) |
+| `scheduling` | 66 | 3 | [scheduling.md](scheduling.md) |
 | `search_platform` | 4 | 0 | [search_platform.md](search_platform.md) |
 | `surveys` | 17 | 2 | [surveys.md](surveys.md) |
 | `system_context` | 13 | 0 | [system_context.md](system_context.md) |
