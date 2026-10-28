@@ -172,6 +172,7 @@ function build() {
 /** Filas del arancel como las devuelve la consulta de selección. */
 function tariffRows(count: number, price: string | null = '10') {
   return Array.from({ length: count }, (_, i) => ({
+    id: `concept-${i}`,
     code: `procedure:bo:C${String(i).padStart(5, '0')}`,
     display: `Procedimiento ${i}`,
     price,
@@ -223,8 +224,13 @@ describe('ProcedureImportService.importProcedures', () => {
   it('crea como el alta individual: nombre, código, precio de referencia, activo', async () => {
     const d = build();
     d.execute.mockResolvedValue([
-      { code: 'procedure:bo:A', display: 'General', price: '150' },
-      { code: 'procedure:bo:B', display: 'Sin precio', price: null },
+      { id: 'cpt-A', code: 'procedure:bo:A', display: 'General', price: '150' },
+      {
+        id: 'cpt-B',
+        code: 'procedure:bo:B',
+        display: 'Sin precio',
+        price: null,
+      },
     ]);
 
     const res = await d.service.importProcedures(
@@ -237,6 +243,7 @@ describe('ProcedureImportService.importProcedures', () => {
       practiceId: PRACTICE,
       code: 'procedure:bo:A',
       name: 'General',
+      serviceConceptId: 'cpt-A',
       defaultPrice: '150',
       isActive: true,
       actorUserId: 'user-med',
@@ -244,7 +251,11 @@ describe('ProcedureImportService.importProcedures', () => {
     expect(d.serviceCatalogRepo.create).toHaveBeenNthCalledWith(
       2,
       d.tx,
-      expect.objectContaining({ code: 'procedure:bo:B', defaultPrice: '0' }),
+      expect.objectContaining({
+        code: 'procedure:bo:B',
+        serviceConceptId: 'cpt-B',
+        defaultPrice: '0',
+      }),
     );
     // Misma garantía FT-31 que el alta individual: encuesta por servicio.
     expect(d.catalog.attachDefaultSatisfactionSurveys).toHaveBeenCalledTimes(1);
@@ -334,6 +345,54 @@ describe('ProcedureImportService.importProcedures', () => {
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(d.em.transactional).not.toHaveBeenCalled();
     expect(d.serviceCatalogRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('cada servicio creado lleva el concepto de su fila del arancel, también en lotes de varias inserciones', async () => {
+    const d = build();
+    d.execute.mockResolvedValue(tariffRows(1200));
+
+    await d.service.importProcedures({ practiceId: PRACTICE, q: 'a' }, admin);
+
+    const created = d.serviceCatalogRepo.create.mock.calls.map(
+      (call: any[]) => [call[1].code, call[1].serviceConceptId],
+    );
+    expect(created).toHaveLength(1200);
+    expect(created[0]).toEqual(['procedure:bo:C00000', 'concept-0']);
+    expect(created[1199]).toEqual(['procedure:bo:C01199', 'concept-1199']);
+    expect(
+      created.every(([, concept]: string[]) => concept !== undefined),
+    ).toBe(true);
+    // Los servicios que recibe la encuesta automática son los mismos, con el concepto.
+    const surveyed =
+      d.catalog.attachDefaultSatisfactionSurveys.mock.calls[0][1];
+    expect(surveyed[0].serviceConceptId).toBe('concept-0');
+  });
+
+  it('un servicio saltado por idempotencia no se toca: el concepto sólo va en los nuevos', async () => {
+    const d = build();
+    d.execute.mockResolvedValue(tariffRows(2));
+    d.serviceCatalogRepo.findExistingCodes.mockResolvedValue(
+      new Set(['procedure:bo:C00000']),
+    );
+
+    await d.service.importProcedures({ practiceId: PRACTICE, q: 'a' }, admin);
+
+    expect(d.serviceCatalogRepo.create).toHaveBeenCalledTimes(1);
+    expect(d.serviceCatalogRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        code: 'procedure:bo:C00001',
+        serviceConceptId: 'concept-1',
+      }),
+    );
+  });
+
+  it('el SELECT del arancel trae el id del concepto', async () => {
+    const d = build();
+
+    await d.service.select({ specialties: [], codes: [], q: 'a' });
+
+    expect(d.execute.mock.calls[0][0]).toMatch(/SELECT c\.id, c\.code/);
   });
 
   it('no duplica un código que el arancel repite', async () => {
