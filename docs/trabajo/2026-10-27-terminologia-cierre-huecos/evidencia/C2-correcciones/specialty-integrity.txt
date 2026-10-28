@@ -1,0 +1,58 @@
+== conceptos nuevos por code system (FONASA, CUPS copias, CUPS 2025)
+   internal_code   | count 
+-------------------+-------
+ cups-co           |   186
+ cups-co-2706-2025 |   190
+ fonasa-mle-2026   |   962
+(3 rows)
+
+== relaciones servicio -> especialidad
+ relaciones 
+------------
+       5113
+(1 row)
+
+== duplicados por (versión, código)
+ duplicados 
+------------
+          0
+(1 row)
+
+== relaciones huérfanas
+ huerfanas 
+-----------
+         0
+(1 row)
+
+== relaciones cuyo destino NO es una especialidad de VS_MEDICAL_SPECIALTY
+ destino_no_especialidad 
+-------------------------
+                       0
+(1 row)
+
+== value sets de servicios: miembros = relaciones
+ miembros | relaciones 
+----------+------------
+     5113 |       5113
+(1 row)
+
+== nulos indebidos
+ display_vacio 
+---------------
+             0
+(1 row)
+
+== conceptos nuevos sin evidencia de especialidad
+ sin_evidencia 
+---------------
+             0
+(1 row)
+
+== Medicina del Trabajo (cierra el hueco de las copias CUPS)
+   code    |                                                     display                                                     
+-----------+-----------------------------------------------------------------------------------------------------------------
+ 89.0.2.62 | CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA DEL TRABAJO O SEGURIDAD Y SALUD EN EL TRABAJO
+ 89.0.3.62 | CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MEDICINA DEL TRABAJO O SEGURIDAD Y SALUD EN EL TRABAJO
+ 89.0.4.62 | INTERCONSULTA POR ESPECIALISTA EN MEDICINA DEL TRABAJO O SEGURIDAD Y SALUD EN EL TRABAJO
+(3 rows)
+

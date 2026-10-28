@@ -28,7 +28,7 @@ importador deja afuera.
 
 **Licencias.** Las filas de openEHR CKM son CC-BY-SA (atribución por fila en `provenance`); las
 del CMDIC son reutilizables con tres condiciones (Aviso legal del Ministerio, leído el
-2026-10-27; las filas conservan el texto de la fecha de armado); las de Omaha son de dominio público con cita obligatoria
+2026-10-27; las 617 filas llevan `reuse-allowed-with-conditions` con la cita del aviso); las de Omaha son de dominio público con cita obligatoria
 del libro de 2005; el registro sale de un paquete CC0. Detalle en `../SOURCES.md`.
 
 ```sh

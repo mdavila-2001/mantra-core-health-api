@@ -396,3 +396,9 @@ FONASA **209** (20), CUPS copias **184** (55) y CUPS 2025 **185** (55).
    89.0.2.13 y equivalentes). Si el modelo quiere relacionarlas, necesita decidir si entran al mismo value set o a uno de profesiones.
 6. (2026-10-27) La relación servicio → especialidad se guarda con la evidencia en una propiedad del servicio; sigue sin haber dónde
    guardar la procedencia de la relación (punto 3).
+
+## Corrección posterior a la revisión independiente (2026-10-28)
+
+- `data/` versionada estaba armada con el código anterior: cada registro llevaba `source.retrievedAt` (el SHA-256 del corpus variaba con la fecha de descarga) y el `MANIFEST.json` no tenía `retrievedAt`, de modo que `load-specialty-services.mjs` desde `data/` guardaba la procedencia **sin** fecha de descarga. Se regeneró con `build-specialty-services.mjs --write-repo-data`: el corpus (5 033 registros, 5 113 relaciones) tiene SHA-256 `34feeadc…9163` y es **idéntico** entre dos armados con descargas frescas (distinto `retrievedAt`); lo que sí cambia con la fecha es la parte `meta` y el manifiesto, por diseño. Lo cubre un test sobre `data/`.
+- Carga repetida desde `data/` en un Postgres 16 desechable (1.ª: 1 338 conceptos, 5 113 relaciones, 53 value sets; 2.ª: 0 en todo; integridad: 0 duplicados, 0 huérfanas, 0 destinos fuera de `VS_MEDICAL_SPECIALTY`): `docs/trabajo/2026-10-27-terminologia-cierre-huecos/evidencia/C2-correcciones/`.
+- `test/disposable-db/fresh-db.sh` (hace `drop database`) sólo corre con servidor local y base `*_test`; probado en `test/specialty-services.test.mjs`.

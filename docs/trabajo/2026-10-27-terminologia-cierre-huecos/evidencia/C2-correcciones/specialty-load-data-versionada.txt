@@ -1,0 +1,49 @@
+# data/ regenerada con --write-repo-data (HEAD 5f2bbc2); carga desde data/ versionada, 2026-10-28T02:42:45Z
+# 1.ª corrida
+Corpus: copia versionada de /home/user/mantra-core-health-api/tools/terminology-import/specialty-services/data (descarga de las fuentes 2026-10-28T02:42:14.078Z)
+=== Servicios por especialidad → terminology.*  ===
+{
+  "skippedBoConceptsMissing": 0,
+  "concepts": 1338,
+  "designations": 1338,
+  "properties": 7709,
+  "relationships": 5113,
+  "valueSets": 53,
+  "valueSetMembers": 5113,
+  "unresolvedSpecialties": {},
+  "inserted": {
+    "concepts": 1338,
+    "designations": 1338,
+    "properties": 7709,
+    "relationships": 5113,
+    "valueSets": 53,
+    "valueSetVersions": 53,
+    "valueSetMembers": 5113,
+    "batches": 4
+  },
+  "segundos": 1
+}
+# 2.ª corrida
+Corpus: copia versionada de /home/user/mantra-core-health-api/tools/terminology-import/specialty-services/data (descarga de las fuentes 2026-10-28T02:42:14.078Z)
+=== Servicios por especialidad → terminology.*  ===
+{
+  "skippedBoConceptsMissing": 0,
+  "concepts": 1338,
+  "designations": 1338,
+  "properties": 7709,
+  "relationships": 5113,
+  "valueSets": 53,
+  "valueSetMembers": 5113,
+  "unresolvedSpecialties": {},
+  "inserted": {
+    "concepts": 0,
+    "designations": 0,
+    "properties": 0,
+    "relationships": 0,
+    "valueSets": 0,
+    "valueSetVersions": 0,
+    "valueSetMembers": 0,
+    "batches": 0
+  },
+  "segundos": 1
+}

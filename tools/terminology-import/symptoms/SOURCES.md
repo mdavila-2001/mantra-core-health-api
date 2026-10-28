@@ -63,7 +63,7 @@ HP:0040280–0040285 salvo 15 pares cuya frecuencia cambió entre las dos public
 ³ **NCIt** — release fijada del repo oficial `ncit-obo-org` (la misma que usa
 `seed-diseases` para `ncit-disease`, así el corte contra C2991 coincide; el repo
 anterior `NCI-Thesaurus/thesaurus-obo-edition` quedó en 24.04e). `ncit.obo` no
-trae `license` en su cabecera. **Reconfirmada el 2026-10-27** en los
+trae `license` en su cabecera. **Reconfirmada el 2026-10-27 y otra vez el 2026-10-28** (misma página, mismo SHA-256 `c42ebee4…36ef3`; MeSH y la cabecera de Orphadata también sin cambios: `docs/trabajo/2026-10-27-terminologia-cierre-huecos/evidencia/C2-correcciones/licencias-recaptura-2026-10-28.txt`) en los
 [términos de uso de NCI EVS](https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/ThesaurusTermsofUse.htm)
 (HTTP 200), textual: *«The NCI Thesaurus™ is released under the Creative Commons
 Attribution 4.0 International license (CC BY 4.0). […] The name "NCI Thesaurus"

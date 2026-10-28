@@ -175,3 +175,10 @@ Los 7 058 conceptos de CKM fuera del subconjunto de enfermería (arquetipos clí
 nodos y respuestas, con 99 415 propiedades) y los 475 del CMDIC fuera del subconjunto quedan como
 catálogo de referencia: ninguna pantalla los consulta hoy. Todo el esquema `terminology` de la base
 desechable, con estas cargas, ocupa 45 MB. Los 12 del registro de terminologías sólo documentan licencias.
+
+## Corrección posterior a la revisión independiente (2026-10-28)
+
+- Omaha (`omaha-system`) y la escala de Glasgow de adultos NO se cargan por defecto: el cargador los omite salvo `--owner-approved=omaha-system` / `--owner-approved=glasgow-coma-scale` con `--approval-ref="quién, cuándo, dónde consta"` (Omaha: la FAQ pide contactar a la editorial a quien vende software; Glasgow: el permiso cubre atención clínica e investigación sin costo y las filas vienen de un arquetipo CC BY-SA). Ya cubierto por `test/omaha.test.mjs`.
+- CMDIC: las 617 filas versionadas llevan `reuse-allowed-with-conditions` (0 con `official-publication-license-not-stated`); un test sobre `data/` lo exige.
+- Los hash de Omaha no dependen de `retrievedAt` (se agrega al cargar desde `omaha-meta`); test en `test/omaha.test.mjs`.
+- `test/disposable-db/fresh-db.sh` sólo corre con servidor local y base `*_test`; probado en `test/nursing-care.test.mjs`.

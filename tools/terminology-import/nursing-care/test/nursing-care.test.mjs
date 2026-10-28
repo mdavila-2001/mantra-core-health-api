@@ -252,3 +252,27 @@ test('Datos versionados: partición por filas y lectura verificada contra MANIFE
   const reg = parseNdjsonText(readRepoDataset('nursing-terminology-registry'));
   assert.equal(reg.length, 12);
 });
+
+test('las 617 filas versionadas del CMDIC llevan la licencia confirmada, no «no declarada» (docs y datos alineados)', async () => {
+  const { readRepoDataset, parseNdjsonText } = await import('../lib/repo-data.mjs');
+  const rows = parseNdjsonText(readRepoDataset('es-msssi-cmdic-13606'));
+  assert.equal(rows.length, 617);
+  assert.ok(!JSON.stringify(rows).includes('official-publication-license-not-stated'));
+  assert.ok(rows.every((r) => r.contentLicense.status === 'reuse-allowed-with-conditions' && r.contentLicense.conditions.length === 3));
+});
+
+test('fresh-db.sh (hace drop database) se niega salvo servidor local y base *_test', async () => {
+  const { spawnSync } = await import('node:child_process');
+  const script = join(dirname(fileURLToPath(import.meta.url)), 'disposable-db', 'fresh-db.sh');
+  for (const env of [
+    { DB_HOST: '127.0.0.1', DB_PORT: '1', DB_USER: 'u', DB_NAME: 'mantra_redesa_health' }, // nombre del stack real
+    { DB_HOST: '127.0.0.1', DB_PORT: '1', DB_USER: 'u', DB_NAME: 'postgres' },
+    { DB_HOST: 'db.example.com', DB_PORT: '1', DB_USER: 'u', DB_NAME: 'x_test' }, // servidor remoto
+    { DB_PORT: '1', DB_USER: 'u', DB_NAME: 'x_test' }, // sin DB_HOST
+    { DB_HOST: '127.0.0.1', DB_PORT: '1', DB_USER: 'u' }, // sin DB_NAME
+  ]) {
+    const r = spawnSync('sh', [script], { env: { PATH: process.env.PATH, ...env }, encoding: 'utf8' });
+    assert.equal(r.status, 2, `debía negarse: ${JSON.stringify(env)} → ${r.stderr}`);
+    assert.match(r.stderr, /ABORTA/);
+  }
+});

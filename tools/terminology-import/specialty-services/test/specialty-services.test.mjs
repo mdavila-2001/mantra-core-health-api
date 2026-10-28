@@ -131,3 +131,32 @@ test('copia versionada: las partes .gz vuelven idénticas y se rechazan si algui
   write(file, bytes);
   assert.throws(() => readGzParts(dir, parts), /SHA-256/);
 });
+
+test('fresh-db.sh (hace drop database) se niega salvo servidor local y base *_test', async () => {
+  const { spawnSync } = await import('node:child_process');
+  const script = join(dirname(fileURLToPath(import.meta.url)), 'disposable-db', 'fresh-db.sh');
+  for (const env of [
+    { DB_HOST: '127.0.0.1', DB_PORT: '1', DB_USER: 'u', DB_NAME: 'mantra_redesa_health' }, // nombre del stack real
+    { DB_HOST: '127.0.0.1', DB_PORT: '1', DB_USER: 'u', DB_NAME: 'postgres' },
+    { DB_HOST: 'db.example.com', DB_PORT: '1', DB_USER: 'u', DB_NAME: 'x_test' }, // servidor remoto
+    { DB_PORT: '1', DB_USER: 'u', DB_NAME: 'x_test' }, // sin DB_HOST
+    { DB_HOST: '127.0.0.1', DB_PORT: '1', DB_USER: 'u' }, // sin DB_NAME
+  ]) {
+    const r = spawnSync('sh', [script], { env: { PATH: process.env.PATH, ...env }, encoding: 'utf8' });
+    assert.equal(r.status, 2, `debía negarse: ${JSON.stringify(env)} → ${r.stderr}`);
+    assert.match(r.stderr, /ABORTA/);
+  }
+});
+
+test('data/ versionada: los registros no llevan retrievedAt (el hash del corpus no depende de la fecha de descarga) y el manifiesto sí', async () => {
+  const { readGzParts, REPO_DATA_DIR } = await import('../lib/common.mjs');
+  const { createHash } = await import('node:crypto');
+  const manifest = JSON.parse(readFileSync(join(REPO_DATA_DIR, 'MANIFEST.json'), 'utf8'));
+  assert.match(manifest.retrievedAt, /^\d{4}-\d{2}-\d{2}T/);
+  const lines = readGzParts(REPO_DATA_DIR, manifest.corpus);
+  assert.equal(lines.length, manifest.records);
+  assert.ok(lines.every((l) => !l.includes('retrievedAt')), 'un registro del corpus versionado lleva retrievedAt');
+  for (const part of manifest.corpus) {
+    assert.equal(createHash('sha256').update(readFileSync(join(REPO_DATA_DIR, part.file))).digest('hex'), part.sha256);
+  }
+});

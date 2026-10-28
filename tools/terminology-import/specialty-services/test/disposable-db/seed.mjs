@@ -12,7 +12,7 @@ import { CORPUS_PATH, REPO_DATA_DIR, readGzParts } from '../../lib/common.mjs';
 import { loadModelSpecialties } from '../../lib/rules.mjs';
 import { existsSync } from 'node:fs';
 
-if (!/^desechable_[a-z0-9_]+$/.test(process.env.DB_NAME ?? '')) throw new Error(`ABORTA: DB_NAME='${process.env.DB_NAME}' no empieza con 'desechable_': estos scripts sólo corren contra una base desechable`);
+if (!/^[a-z0-9_]+_test$/.test(process.env.DB_NAME ?? '')) throw new Error(`ABORTA: DB_NAME='${process.env.DB_NAME}' no termina en _test: estos scripts sólo corren contra una base desechable`);
 const c = new pg.Client({ host: process.env.DB_HOST, port: Number(process.env.DB_PORT ?? 5432), user: process.env.DB_USER, password: process.env.DB_PASSWORD, database: process.env.DB_NAME });
 await c.connect();
 const ins = (sql, params) => c.query(sql, params);
