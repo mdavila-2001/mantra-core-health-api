@@ -171,7 +171,15 @@ export class PracticeSitesService {
    * El tenant no basta para aislar a un `PRACTITIONER`: los médicos
    * auto-registrados comparten el tenant `DEFAULT`, así que a él sólo se le
    * listan las prácticas donde tiene una vinculación ACTIVE
-   * (`PracticeAccessService`).
+   * (`PracticeAccessService`) **y su consultorio propio**.
+   *
+   * El consultorio propio se lista aunque no haya vinculación ACTIVE que lo
+   * pruebe (vinculación cerrada o pendiente, perfil profesional ausente del
+   * token): es la práctica que `BillingServiceCatalogService` le deja tocar —
+   * `isOwnOffice`: tipo consultorio y él como administrador— y un selector de
+   * «a qué práctica importo» que no la mostrara dejaba al médico sin opciones
+   * en la única práctica donde sí puede dar de alta servicios. Lo que ese alta
+   * permite, esta lista lo muestra; no se abre nada que no estuviera abierto.
    *
    * @param tenantId - Tenant del contexto.
    * @param actor - Actor autenticado, para acotar lo que ve un profesional.
@@ -195,7 +203,10 @@ export class PracticeSitesService {
         : this.access.allowedPracticeIds(actor),
     ]);
     return practices
-      .filter((p) => allowed === null || allowed.has(p.id))
+      .filter(
+        (p) =>
+          allowed === null || allowed.has(p.id) || isOwnOfficeOf(p, actor.id),
+      )
       .map((p) => ({
         id: p.id,
         code: p.code,
@@ -450,4 +461,21 @@ export class PracticeSitesService {
     }
     return administers;
   }
+}
+
+/**
+ * ¿Es esta práctica el consultorio propio de ese usuario?
+ *
+ * La misma regla que `PracticeTenantLookupService.isOwnOffice` —práctica de tipo
+ * consultorio con el usuario como administrador—, aplicada a una fila ya leída
+ * para no hacer una consulta por práctica.
+ */
+function isOwnOfficeOf(
+  practice: { adminUserId?: string; typeConceptId?: string },
+  userId: string,
+): boolean {
+  return (
+    practice.adminUserId === userId &&
+    practice.typeConceptId === PRAC.PRACTICE_TYPE_OFFICE
+  );
 }

@@ -25,6 +25,7 @@ import {
   KpiSnapshotsService,
   BillingServiceCatalogService,
   ProcedureNomenclatureService,
+  ProcedureImportService,
   BillingSimulatedService,
   PatientSpendingService,
 } from './services';
@@ -101,6 +102,7 @@ import { SiatSimulatedAdapter, SiatRealAdapter } from './infrastructure/adapters
     KpiSnapshotsService,
     BillingServiceCatalogService,
     ProcedureNomenclatureService,
+    ProcedureImportService,
     BillingSimulatedService,
     PatientSpendingService,
     // Puerto SIAT — el adaptador se selecciona por SIAT_MODE (default: simulado).
