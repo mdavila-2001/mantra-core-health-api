@@ -1,0 +1,6 @@
+CIMA totalFilas vivo 25507
+openFDA export 2026-10-28 262903
+{"idGroup":{"rxnormId":["161"]}}  "sha256": "4114ff01a24c72284127d974e2357620a861f48863026d1ce430dc319b1fd5d3",
+  "fileTimestamp": "2026-10-28T06:03:03Z",
+  "records": 2754,
+  "atc5": 822,

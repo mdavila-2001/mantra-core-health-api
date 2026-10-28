@@ -1,0 +1,10 @@
+fecha: 2026-10-28T00:21:37Z (GET, no HEAD; CIMA responde 405 a HEAD)
+200	https://cima.aemps.es/cima/rest/medicamentos?pagina=1
+200	https://api.fda.gov/download.json
+200	https://rxnav.nlm.nih.gov/REST/rxcui.json?idtype=ATC&id=N02BE01
+200	https://www.ema.europa.eu/en/documents/report/medicines-output-medicines_json-report_en.json
+200	https://dailymed.nlm.nih.gov/dailymed/services/v2/spls.json?pagesize=1
+200	https://www.whocc.no/atc_ddd_index/
+200	https://api.cpicpgx.org/v1/drug?limit=1
+000	https://api.pharmgkb.org/v1/data/drug?limit=1
+200	https://ddinter2.scbdd.com/

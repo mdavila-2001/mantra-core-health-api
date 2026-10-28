@@ -25,7 +25,7 @@ import { existsSync } from 'node:fs';
 import { writeJson } from '../lib/glossary-es/common.mjs';
 import { CONCEPT, md5uuid } from '../lib/glossary-es/load-plan.mjs';
 import { parseArgs } from './lib/cli.mjs';
-import { streamNdjson } from './lib/ndjson-stream.mjs';
+import { streamLines } from './lib/ndjson-stream.mjs';
 import { CODE_SYSTEM, EQUIV_EQUIVALENT, PROPERTY_PREFIX, REL_IS_A, planFor, vademecumMapTuple } from './lib/load-plan.mjs';
 import { DRY_RUN_PLAN, MONOGRAPHS_NDJSON } from './lib/paths.mjs';
 
@@ -35,6 +35,7 @@ const PRUNE = !has('--no-prune');
 const BATCH = 500;
 const MAX_STATEMENT_BYTES = 24 * 1024 * 1024; // las secciones largas (jsonb) llegan a cientos de KB: se corta también por tamaño
 const MONOGRAPHS_PER_BATCH = 25;
+const MAX_BATCH_CHARS = 12 * 1024 * 1024;
 
 const DB_CONFIG = {
   host: process.env.DB_HOST ?? 'localhost',
@@ -144,14 +145,25 @@ async function prune(client, csvId) {
   return res.rowCount;
 }
 
-/** Lotes de monografías leídos en flujo (el NDJSON completo no cabe en una cadena de V8). */
+/**
+ * Lotes de monografías leídos en flujo (el NDJSON completo no cabe en una cadena de V8). El lote se corta por cantidad
+ * Y por tamaño: con la pasada exhaustiva de CIMA una monografía llega a ~85 MB de JSON, y 25 juntas agotan el heap.
+ */
 async function* batches() {
   let batch = [];
-  for await (const m of streamNdjson(MONOGRAPHS_NDJSON())) {
-    batch.push(m);
+  let bytes = 0;
+  for await (const line of streamLines(MONOGRAPHS_NDJSON())) {
+    if (batch.length > 0 && bytes + line.length > MAX_BATCH_CHARS) {
+      yield batch;
+      batch = [];
+      bytes = 0;
+    }
+    batch.push(JSON.parse(line));
+    bytes += line.length;
     if (batch.length >= MONOGRAPHS_PER_BATCH) {
       yield batch;
       batch = [];
+      bytes = 0;
     }
   }
   if (batch.length > 0) yield batch;
@@ -168,6 +180,7 @@ async function main() {
   let first = null;
   const summary = { codeSystem: CODE_SYSTEM, version: null, monographs: 0, concepts: 0, designations: 0, properties: 0, relationships: 0, uniqueIds: 0 };
   const atc5 = [];
+  let lastLogged = 0;
   let client = null;
   let ids = null;
   const result = { concepts: 0, designations: 0, relationships: 0, properties: 0 };
@@ -201,7 +214,10 @@ async function main() {
       result.relationships += await insertMany(client, 'concept_relationships', ['id', 'source_concept_id', 'target_concept_id', 'relationship_type_concept_id', 'ordinal'], plan.relationships, ['uuid', 'uuid', 'uuid', 'uuid', 'int']);
       await collectPlanIds(client, plan.properties.map((p) => p[0]));
       result.properties += await insertMany(client, 'concept_properties', ['id', 'concept_id', 'property_code', 'data_type', 'value_json'], plan.properties, ['uuid', 'uuid', null, 'terminology.technical_data_type', 'jsonb']);
-      if (summary.monographs % 500 < MONOGRAPHS_PER_BATCH) console.log(`[load] ${summary.monographs} monografías…`);
+      if (Math.floor(summary.monographs / 250) > lastLogged) {
+        lastLogged = Math.floor(summary.monographs / 250);
+        console.log(`[load] ${summary.monographs} monografías…`);
+      }
     }
     summary.version = version?.version ?? null;
     summary.uniqueIds = seenIds.size;

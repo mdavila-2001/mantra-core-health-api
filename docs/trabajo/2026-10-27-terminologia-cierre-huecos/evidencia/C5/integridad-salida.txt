@@ -1,0 +1,30 @@
+Pager usage is off.
+                              k                              | count  
+-------------------------------------------------------------+--------
+ conceptos                                                   |   4052
+ designaciones                                               |   4044
+ propiedades                                                 | 405290
+ IS_A                                                        |   4038
+ concept_maps->vademecum                                     |    425
+ duplicados (code system,code)                               |      0
+ huerfanos: propiedades sin concepto                         |      0
+ huerfanos: IS_A con extremo ausente                         |      0
+ nulos: code/display en conceptos                            |      0
+ nulos: value_json                                           |      0
+ secciones sin source/document.id/version-fecha/licencia/url |      0
+ IS_A ciclos de 1 (auto-referencia)                          |      0
+(12 rows)
+
+    fuente     | secciones 
+---------------+-----------
+ aemps-cima    |    334640
+ openfda-label |     46305
+ ema-medicines |       959
+(3 rows)
+
+ atc5 | count 
+------+-------
+ f    |  1089
+ t    |  2963
+(2 rows)
+

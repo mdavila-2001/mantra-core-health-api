@@ -1,0 +1,24 @@
+{
+  "generatedAt": "2026-10-28T08:00:37.038Z",
+  "granularity": "product",
+  "universe": 6045,
+  "monographs": 2963,
+  "sections": 381904,
+  "sectionsBySource": {
+    "aemps-cima": 334640,
+    "openfda-label": 46305,
+    "ema-medicines": 959
+  },
+  "cimaProductsWithoutAtc5": 468,
+  "openFdaLabelsScanned": 262902,
+  "openFdaAtcWithLabels": 2035,
+  "openFdaReferenceLabels": 2140,
+  "cimaDocsMissing": 0,
+  "cimaSectionsWithoutVersion": 54299,
+  "skippedWithoutData": 3082,
+  "uniiWithoutLabel": 630,
+  "bridgesComplete": 2656,
+  "bridgesIncomplete": 3389,
+  "bridgesMissing": 0,
+  "segundos": 441
+}

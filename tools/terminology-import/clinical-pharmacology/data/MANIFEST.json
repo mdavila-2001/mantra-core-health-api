@@ -1,36 +1,113 @@
 {
-  "generatedAt": "2026-10-24T02:51:36.959Z",
+  "generatedAt": "2026-10-28T08:22:10.756Z",
   "note": "Datos normalizados (no crudos). Ver SOURCES.md y docs/seed-research/clinical-pharmacology.md.",
   "files": [
     {
+      "name": "monographs.part-001.ndjson.gz",
+      "from": "out/monographs.ndjson",
+      "bytes": 24694016,
+      "sha256": "42e879ee8856c7a9119ea85025d38f212ea44c51c537176e71a101b2e3ca6dcd",
+      "rows": 1057
+    },
+    {
+      "name": "monographs.part-002.ndjson.gz",
+      "from": "out/monographs.ndjson",
+      "bytes": 47987,
+      "sha256": "98e9094b9324bb607ff73b6e505bfa21af6803cef963e1fac3f24f5c28ac26a7",
+      "rows": 1
+    },
+    {
+      "name": "monographs.part-003.ndjson.gz",
+      "from": "out/monographs.ndjson",
+      "bytes": 27495395,
+      "sha256": "8f18548a4352014ad28a37c3ce4a81a71f955beba7574bea9c76091e8dc175bf",
+      "rows": 865
+    },
+    {
+      "name": "monographs.part-004.ndjson.gz",
+      "from": "out/monographs.ndjson",
+      "bytes": 28706,
+      "sha256": "b59bf133eca88676af7b5f5ea389ccc821e2e135adf17961efa7363a84f3a5ac",
+      "rows": 1
+    },
+    {
+      "name": "monographs.part-005.ndjson.gz",
+      "from": "out/monographs.ndjson",
+      "bytes": 25953459,
+      "sha256": "bc4b3e70b7b8fa3b331978813e73b5f8b4bed8618265a6c70cc3470a8897b0e5",
+      "rows": 746
+    },
+    {
+      "name": "monographs.part-006.ndjson.gz",
+      "from": "out/monographs.ndjson",
+      "bytes": 29676,
+      "sha256": "57072b0c0a34c2d9ffaafa71100341005740c005845c099a6848fa7e6430d606",
+      "rows": 1
+    },
+    {
+      "name": "monographs.part-007.ndjson.gz",
+      "from": "out/monographs.ndjson",
+      "bytes": 5915046,
+      "sha256": "41ab800ae7d57793a340a4b047c0866b70b283d9e992b0dd952077836807b66e",
+      "rows": 292
+    },
+    {
       "name": "monographs.meta.json.gz",
       "from": "out/monographs.meta.json",
-      "bytes": 229,
-      "sha256": "3974258c107f94edf85b3e5ec4ba2e5e1767dcba53add71f7a7a576ae2f48d76",
+      "bytes": 354,
+      "sha256": "8f3cf2e7e8ba198a4578861290db69f0cbe7f0f7797fd7d849bb9a55f88fab1b",
       "rows": null
     },
     {
       "name": "coverage.json.gz",
       "from": "out/coverage.json",
-      "bytes": 2112,
-      "sha256": "7abdd28d2ad46ade70de78959b9e1d44d06099e0422dbfbc303b432033bf8a2b",
+      "bytes": 3038,
+      "sha256": "406cb718fb87d020881a57976759ebe893c139df2dad685e875b2521b968687d",
       "rows": null
     },
     {
       "name": "coverage.md.gz",
       "from": "out/coverage.md",
-      "bytes": 415,
-      "sha256": "5b1c04f20367900af1f52c16ac9fef81d1c0154e0ca68356d7d9cba832e3704b",
+      "bytes": 862,
+      "sha256": "4e2953b7839e862474f2b6a3e6fc929b6ba5b036e2bcb6962d36c9bc4a070956",
+      "rows": null
+    },
+    {
+      "name": "validate-links.json.gz",
+      "from": "out/validate-links.json",
+      "bytes": 495,
+      "sha256": "902499bbb96e0c56cc72191cdb3fe49019e4d59999d21513e029ff2a71611518",
       "rows": null
     },
     {
       "name": "load-plan.dry-run.json.gz",
       "from": "out/load-plan.dry-run.json",
-      "bytes": 185,
-      "sha256": "6fd88177993dad37aec0e2c7f9d010aced8ebcccf9e794e3341660d32719e3d7",
+      "bytes": 206,
+      "sha256": "0c1749e9235f23b341029822778a1b8c6ea91e9082ff6c7f2b9ebcb05e554365",
+      "rows": null
+    },
+    {
+      "name": "cima__fetch.meta.json.gz",
+      "from": "cache/cima/fetch.meta.json",
+      "bytes": 286,
+      "sha256": "0d9990c9fc5314af95a5d1056b604fba25156770cd4f22812f13220ff9b41650",
+      "rows": null
+    },
+    {
+      "name": "rxnav__fetch.meta.json.gz",
+      "from": "cache/rxnav/fetch.meta.json",
+      "bytes": 197,
+      "sha256": "96c4526c0803a9b42a427e72a589f603ac1062a69c23f2650729bf1c8b0ac192",
+      "rows": null
+    },
+    {
+      "name": "openfda__fetch.meta.json.gz",
+      "from": "cache/openfda/fetch.meta.json",
+      "bytes": 1037,
+      "sha256": "37e2241d2a821be5e4737b872a1a6009a996866e03ced34553341fe29df50728",
       "rows": null
     }
   ],
-  "monographsSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  "monographs": 0
+  "monographsSha256": "d70115f6acb9a9a7d16566c41b808984a9fbb82d4ab189d7a28481eeed351783",
+  "monographs": 2963
 }

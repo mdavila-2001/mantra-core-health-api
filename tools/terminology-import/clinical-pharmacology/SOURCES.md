@@ -4,12 +4,11 @@ Monografías por principio activo (ATC nivel 5) con texto **literal** de fuentes
 archivo dice de dónde sale cada dato, bajo qué licencia y qué queda afuera. El registro de pasadas
 (protocolo de saturación) está en `docs/seed-research/clinical-pharmacology.md`.
 
-> **Estado al 2026-10-27.** La sesión del 2026-10-24 escribió el importador sin red (403 a todos los hosts).
-> El 2026-10-27 la salida a CIMA, RxNav, openFDA y EMA estaba abierta y se ejecutaron las pasadas reales;
-> los parsers se validaron contra respuestas y archivos reales y se corrigieron cuatro defectos que sólo
-> el dato real mostraba (ver «Hallazgos de la validación»). Conteos, fechas y sha256 de cada pasada:
-> `docs/seed-research/clinical-pharmacology.md`. Las licencias de CIMA, openFDA y EMA se releyeron ese día
-> en las páginas citadas.
+> **Estado al 2026-10-28.** Pasada exhaustiva ejecutada: 25 507 fichas/medicamentos de CIMA (53 685 pedidos), 14 particiones de
+> openFDA (262 903 etiquetas, export 2026-10-27), RxNav para los 6 045 ATC 5 del universo y el archivo de datos abiertos de la
+> EMA. Las licencias de CIMA, openFDA, EMA y RxNav se releyeron el 2026-10-28 y se guardaron como texto en
+> `docs/trabajo/2026-10-27-terminologia-cierre-huecos/evidencia/C5/licencias/`. Conteos, fechas y sha256:
+> `docs/seed-research/clinical-pharmacology.md`.
 
 ## Hallazgos de la validación contra datos reales (2026-10-27)
 
@@ -43,11 +42,12 @@ value set del glosario y no debe agregarse a uno sin filtrar esas secciones.
 
 | Fuente | Qué aporta | Acceso | Licencia | Estado |
 |---|---|---|---|---|
-| **CIMA (AEMPS, España)** — `https://cima.aemps.es/cima/rest/` | Fichas técnicas por sección (2, 3, 4.1–4.9, 5.1–5.3, 6.1, 6.2; la 10 sólo para fecha de revisión), nombres ATC en castellano de los 5 niveles (detalle + maestra 7), formas y vías por producto, notas de seguridad | API REST pública, sin cuenta | Aviso legal AEMPS: «Se autoriza la reproducción total o parcial de los contenidos de la web, siempre que se cite expresamente su origen» (`https://www.aemps.gob.es/aviso-legal/`), citado ya en `lib/glossary-es/cima.mjs` | Licencia verificada por la sesión del glosario (2026-09-30), no reverificada acá. **Sin descargar** (403). Parser validado con respuestas reales versionadas |
-| **openFDA drug labels** — `https://api.fda.gov/download.json` → `download.open.fda.gov/drug/label/` | Etiquetas SPL (las de DailyMed) por campo: indicaciones, posología, contraindicaciones, advertencias, recuadro, interacciones, reacciones adversas (+ tablas), poblaciones especiales, sobredosis, mecanismo, farmacodinamia/cinética, farmacogenómica; clases EPC/MoA | Descarga masiva, sin cuenta (evita el tope de 1 000 pedidos/día sin clave) | Dominio público / CC0 1.0 según `https://open.fda.gov/license/` | No reverificada. **Sin descargar** (403). Parser escrito contra los campos documentados, **no validado con una partición real** |
-| **RxNav (NLM)** — `https://rxnav.nlm.nih.gov/REST/` | Puente por códigos ATC 5 → RxCUI (IN/MIN/PIN) → UNII, para encontrar las etiquetas de la FDA del mismo principio activo | API pública, sin cuenta (≤ 20 pedidos/s) | Términos de servicio de RxNav (`https://lhncbc.nlm.nih.gov/RxNav/TermsofService.html`); sólo se guardan identificadores | No reverificada. **Sin descargar** (403). Parsers defensivos, **no validados con respuestas reales** |
+| **CIMA (AEMPS, España)** — `https://cima.aemps.es/cima/rest/` | Fichas técnicas por sección (2, 3, 4.1–4.9, 5.1–5.3, 6.1, 6.2; la 10 sólo para fecha de revisión), nombres ATC en castellano de los 5 niveles (detalle + maestra 7), formas y vías por producto, notas de seguridad | API REST pública, sin cuenta | Aviso legal AEMPS: «Se autoriza la reproducción total o parcial de los contenidos de la web, siempre que se cite expresamente su origen» (`https://www.aemps.gob.es/aviso-legal/`), citado ya en `lib/glossary-es/cima.mjs` | **Reverificada el 2026-10-28** (texto en `evidencia/C5/licencias/aemps.txt`): además de citar el origen, «el usuario queda obligado a mencionar la fecha de la última actualización de los documentos»; cada sección lleva `document.version` (fecha de la ficha) o `revisionDateInText`, y las que no tienen ninguna **no se publican** (11 860 en la granularidad `route`, 54 299 en `product`). Descargado completo (listado, 25 507 detalles, 22 510 fichas segmentadas) |
+| **openFDA drug labels** — `https://api.fda.gov/download.json` → `download.open.fda.gov/drug/label/` | Etiquetas SPL (las de DailyMed) por campo: indicaciones, posología, contraindicaciones, advertencias, recuadro, interacciones, reacciones adversas (+ tablas), poblaciones especiales, sobredosis, mecanismo, farmacodinamia/cinética, farmacogenómica; clases EPC/MoA | Descarga masiva, sin cuenta (evita el tope de 1 000 pedidos/día sin clave) | Dominio público / CC0 1.0 según `https://open.fda.gov/license/` | **Reverificada el 2026-10-28** (`evidencia/C5/licencias/openfda.txt`: CC0 1.0 «even for commercial purposes»). Descargadas las 14 particiones (1,86 GB; sha256 en `data/openfda__fetch.meta.json.gz`) |
+| **RxNav (NLM)** — `https://rxnav.nlm.nih.gov/REST/` | Puente por códigos ATC 5 → RxCUI (IN/MIN/PIN) → UNII, para encontrar las etiquetas de la FDA del mismo principio activo | API pública, sin cuenta (≤ 20 pedidos/s) | Términos de servicio de RxNav (`https://lhncbc.nlm.nih.gov/RxNav/TermsofService.html`); sólo se guardan identificadores | Términos releídos el 2026-10-28 (`evidencia/C5/licencias/rxnav.txt`); sólo se guardan identificadores. Descargado para los 6 045 ATC 5 (16 946 pedidos, 0 fallos) |
 | **LINAME 2022-2024 (Bolivia)** — `tools/bolivia-datasets/data/liname-2022-2024.json` (sha256 en el archivo) | Universo de ATC 5 esenciales de Bolivia; el hueco «esencial sin monografía» del informe | Ya en el repo | «Documento público del Estado Plurinacional de Bolivia; se cita la fuente» (del propio archivo) | Usada. No aporta texto clínico; no se duplica en propiedades (ya está en `vademecum.liname_presentations`) |
 | **vademecum (dataset de la app)** — `src/common/seed/data/vademecum/vademecum.dataset.json` | ATC 5 de la receta; destino de los `concept_maps` | Ya en el repo | — | Usada (sólo códigos e ids) |
+| **EMA — datos abiertos de medicamentos** — `https://www.ema.europa.eu/en/documents/report/medicines-output-medicines_json-report_en.json` | Un archivo (2 754 registros; 1 402 humanos autorizados con ATC 5, 822 ATC 5): campo `therapeutic_indication` de los medicamentos centralizados, literal, en inglés | Descarga directa, sin cuenta | Aviso legal de la EMA, **releído el 2026-10-28** (`evidencia/C5/licencias/ema.txt`): reproducible «for non-commercial and commercial purposes, provided that EMA is always acknowledged as the source»; la cita de cada fila nombra a la EMA, el archivo, su sha256 y su `timestamp` | Usada. Re-descarga del 2026-10-28: 0 registros nuevos/retirados (sólo cambió el `timestamp` del archivo; se conservó el de 2026-10-27, sha256 `5d6cd024…`) |
 
 ## Fuentes evaluadas y no usadas
 
@@ -56,12 +56,12 @@ value set del glosario y no debe agregarse a uno sin filtrar esas secciones.
 | vademecum.es, PLM, BNF, Martindale, Lexicomp, Medscape, UpToDate | Comerciales con copyright. Sólo para detectar huecos; nunca se copia contenido. |
 | MedDRA (codificación de reacciones adversas) | Licencia por suscripción del MSSO (gratuita sólo para reguladores y uso académico sin fines de lucro). No se codifica: la reacción adversa queda como texto literal de la ficha, con su tabla y su frecuencia tal como están escritas. |
 | WHO ATC/DDD Index (WHOCC) | Los códigos ATC se usan como identificadores, pero el índice con nombres y DDD no se redistribuye para uso comercial sin permiso del WHOCC. Los nombres vienen de la AEMPS; **las DDD no se cargan** (hueco declarado). No reverificado. |
-| WHO Model Formulary (2008) y WHO EML/eEML | © OMS; la EML se publica bajo CC BY-NC-SA 3.0 IGO (no comercial). Requiere decisión legal del propietario. Además, `list.essentialmeds.org` y `www.who.int` devolvieron 403. No reverificado. |
-| EMA EPAR / SmPC centralizados | Las fichas de los medicamentos centralizados están en PDF (también en castellano). CIMA ya publica la mayoría de esos medicamentos; los que CIMA no segmenta quedan como hueco. **No se escribió un parser de PDF sin un archivo real contra el cual validarlo** (mismo criterio que la fase UMLS del README). `www.ema.europa.eu` devolvió 403. |
+| WHO Model Formulary (2008) y WHO EML/eEML | © OMS; la EML se publica bajo CC BY-NC-SA 3.0 IGO (no comercial). Requiere decisión legal del propietario. Re-sondeo 2026-10-28: ambos hosts responden 200; la licencia no cambió, por eso no se carga. |
+| EMA EPAR / SmPC centralizados | Las fichas de los medicamentos centralizados están en PDF (también en castellano). CIMA ya publica la mayoría de esos medicamentos; los que CIMA no segmenta quedan como hueco. **No se escribió un parser de PDF sin un archivo real contra el cual validarlo** (mismo criterio que la fase UMLS del README). `www.ema.europa.eu` responde 200 el 2026-10-28 (re-sondeo); sigue sin parser de PDF. |
 | DailyMed (servicio propio) | Publica las mismas SPL que openFDA; sólo aportaría las etiquetas que openFDA no indexa. No se consultó. |
-| DDInter | Licencia no verificada (se sabe que restringe el uso comercial; confirmar). No usado; las interacciones quedan como texto literal de 4.5 / `drug_interactions`. `ddinter2.scbdd.com` devolvió 403. |
+| DDInter | Licencia no verificada (se sabe que restringe el uso comercial; confirmar). No usado; las interacciones quedan como texto literal de 4.5 / `drug_interactions`. `ddinter2.scbdd.com` responde 200 (re-sondeo 2026-10-28), pero sin licencia verificada no se carga. |
 | ONC High-Priority DDI list | Publicada en un artículo (Phansalkar et al., JAMIA 2012); no hay un archivo oficial legible por máquina ni licencia explícita. No usado. |
-| PharmGKB/ClinPGx, CPIC | ClinPGx publica bajo CC BY-SA 4.0 (share-alike: decisión del propietario); CPIC: licencia por confirmar. Hosts con 403. La farmacogenómica de la FDA (`pharmacogenomics` de openFDA) sí está mapeada. |
+| PharmGKB/ClinPGx, CPIC | ClinPGx publica bajo CC BY-SA 4.0 (share-alike: decisión del propietario); CPIC: licencia por confirmar. Re-sondeo 2026-10-28: `api.cpicpgx.org` 200, `api.pharmgkb.org` sin conexión (502 del túnel); no se cargan. La farmacogenómica de la FDA (`pharmacogenomics` de openFDA) sí está mapeada. |
 | AGEMED (Bolivia) | El portal consulta de a un registro y exige reCAPTCHA: **no se elude**. Hay que pedir la base por acceso a información pública. |
 | Formulario Terapéutico Nacional (Bolivia) | PDF del Ministerio de Salud; host bloqueado y licencia sin confirmar. No se parsea PDF sin archivo real. |
 | SNOMED CT | Bolivia no es miembro de SNOMED International. |
@@ -95,9 +95,8 @@ La monografía por secciones **cabe** en el módulo 03 tal como está:
 3. Si se quiere búsqueda de texto completo en las monografías, conviene una columna generada /
    índice GIN sobre `value_json->>'text'` (cambio del modelo, no de la API).
 
-## Hosts que hay que habilitar para correr las pasadas
+## Hosts (re-sondeo con GET el 2026-10-28; CIMA responde 405 a HEAD)
 
-`cima.aemps.es`, `api.fda.gov`, `download.open.fda.gov`, `rxnav.nlm.nih.gov`; para pasadas
-siguientes: `dailymed.nlm.nih.gov`, `www.ema.europa.eu`, `www.minsalud.gob.bo`,
-`list.essentialmeds.org`, `www.whocc.no`, `api.cpicpgx.org`, `api.pharmgkb.org`,
-`ddinter2.scbdd.com`, `www.ebi.ac.uk`, `eutils.ncbi.nlm.nih.gov`.
+200: `cima.aemps.es`, `api.fda.gov`, `download.open.fda.gov`, `rxnav.nlm.nih.gov`, `www.ema.europa.eu`, `dailymed.nlm.nih.gov`,
+`www.whocc.no`, `api.cpicpgx.org`, `ddinter2.scbdd.com`. Sin conexión: `api.pharmgkb.org` (502 del túnel). Salidas en
+`evidencia/C5/M1-*.txt`. Que respondan no cambia la decisión de licencia de los no cargados.

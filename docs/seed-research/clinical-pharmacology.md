@@ -1,84 +1,72 @@
 # Farmacología clínica — registro de pasadas y cobertura
 
-Rama `justin/seed-clinical-pharmacology`. Importador: `tools/terminology-import/clinical-pharmacology/`
-(fuentes y licencias en su `SOURCES.md`). Pedido: una monografía por principio activo de uso clínico
-con clase ATC (5 niveles), mecanismo, farmacocinética, indicaciones, posología, contraindicaciones,
-advertencias, interacciones, reacciones adversas con frecuencia, embarazo y lactancia, sobredosis,
-formas y vías; todo lo clínico **literal** de una fuente oficial y citado.
+Importador: `tools/terminology-import/clinical-pharmacology/` (fuentes y licencias en su `SOURCES.md`).
+Pedido: una monografía por principio activo de uso clínico con clase ATC (5 niveles), mecanismo, farmacocinética,
+indicaciones, posología, contraindicaciones, advertencias, interacciones, reacciones adversas con frecuencia, embarazo y
+lactancia, sobredosis, formas y vías; todo lo clínico **literal** de una fuente oficial y citado. Evidencia de la corrida:
+`docs/trabajo/2026-10-27-terminologia-cierre-huecos/evidencia/C5/` (reporte: `REPORTE-C5.md`).
 
-## Estado: NO saturado — bloqueado por la red de la sesión
+## Hueco → estado hoy → qué se cargó
 
-La sesión que escribió el importador (2026-10-24) no tenía salida a ninguna fuente: el proxy de
-egreso devolvió **403** a `cima.aemps.es`, `api.fda.gov`, `download.open.fda.gov`,
-`dailymed.nlm.nih.gov`, `www.ema.europa.eu`, `rxnav.nlm.nih.gov`, `www.whocc.no`,
-`list.essentialmeds.org`, `www.who.int`, `iris.who.int`, `api.cpicpgx.org`, `api.pharmgkb.org`,
-`ddinter2.scbdd.com`, `www.minsalud.gob.bo`, `www.ebi.ac.uk` y `eutils.ncbi.nlm.nih.gov` (también
-vía WebFetch). Sólo estaban abiertos los registros de paquetes y GitHub.
+| Hueco documentado el 2026-10-24 | Estado hoy (2026-10-28) | Qué se cargó |
+|---|---|---|
+| «Bloqueado: 403 a CIMA, openFDA, RxNav, EMA, DailyMed, WHOCC, CPIC…» | Re-sondeo con GET: todos responden 200 salvo `api.pharmgkb.org` (502 del túnel). Ya no hay hueco de red | — |
+| CIMA fichas técnicas | Descargadas: 25 507 medicamentos, 25 507 detalles, 22 510 fichas segmentadas, 7 358 filas de la maestra ATC | 37 088 secciones (granularidad `route`) / 334 640 (`product`) |
+| openFDA drug labels | 14 particiones (1,86 GB, export 2026-10-27, 262 903 etiquetas leídas 262 902 por el autómata; ver «No cubierto») | 46 305 secciones de 2 140 etiquetas de referencia para 2 035 ATC 5 |
+| RxNav ATC→RxCUI→UNII | 6 045 ATC 5; 3 634 con RxCUI; 2 656 con puente completo (UNII) | Sólo como propiedad `pharmacology_rxnorm_bridge` (identificadores) |
+| EMA | 1 archivo, 2 754 registros, 822 ATC 5 | 959 secciones `therapeutic_indication` (inglés, literal) |
+| WHO ATC/DDD, MedDRA, DDInter, PharmGKB/CPIC, EML | Alcanzables pero **sin licencia para cargar** | Nada (decisión del propietario, ver `SOURCES.md`) |
 
-Por eso las pasadas 1 y siguientes figuran como **bloqueadas**, no como «0 nuevos»: un cero por
-bloqueo no es saturación y **no cuenta** para la regla de «dos pasadas seguidas con 0». La orden
-del propietario de iterar con `/loop` hasta que sea imposible encontrar más tampoco se pudo
-cumplir: cada iteración habría sido otro 403. Los hosts necesarios están listados en `SOURCES.md`.
+## Pasadas (protocolo de saturación; deduplicación por código, nunca por nombre)
 
-## Pasadas
+| # | Fecha | Fuentes | Nuevos por causa real | Resultado |
+|---|---|---|---|---|
+| 0 | 2026-10-24 | LINAME + `vademecum` (repo) | 483 ATC 5 (universo) | Sin texto clínico |
+| 1–2 | 2026-10-24 | CIMA, RxNav, openFDA | — | **Bloqueadas (403)**: no cuentan como «0 nuevos» |
+| 3 | 2026-10-28 | CIMA completo (`--granularity product`): 25 502 medicamentos, 53 545 pedidos, 0 fallos | 2 236 ATC 5 con producto; 22 505 fichas | Universo final 6 045 ATC 5 (maestra ∪ CIMA ∪ LINAME ∪ vademecum ∪ EMA) |
+| 4 | 2026-10-28 | RxNav 6 045 ATC 5 (16 946 pedidos, 0 fallos); openFDA 14 particiones; EMA | 3 634 ATC con RxCUI; 2 035 con etiqueta | — |
+| 5 | 2026-10-28 | CIMA re-listado (el vivo informaba 25 507 tras 8 h) | **5 medicamentos nuevos** (nº reg. 91661, 91662, 91663, 91688, 91689), 0 ATC 5 nuevos, 0 retirados | 140 pedidos; los 5 con ficha bajada |
+| 6 | 2026-10-28 | CIMA totalFilas vivo = 25 507 = lo bajado; `--plan`: 0 detalles y 0 fichas por bajar. RxNav re-corrida: 0 pedidos (16 946 aciertos de caché). EMA re-descargada: 0 registros nuevos/retirados (idénticas por posición). openFDA: `total_records` 262 903 igual (export_date pasó a 2026-10-28; no se re-descargó, ver «No cubierto») | **0** | Saturado (el cero de la pasada 6 es de contenido, no de red: todos los pedidos respondieron 200) |
 
-Deduplicación siempre por código (ATC 5; dentro de CIMA, nº de registro; en openFDA, `set_id`),
-nunca por nombre.
+## Conteos antes / después
 
-| # | Fecha | Fuentes | ATC 5 nuevos | Secciones nuevas | Resultado |
-|---|---|---|---:|---:|---|
-| 0 | 2026-10-24 | Archivos ya en el repo: LINAME 2022-2024 (482 ATC 5), dataset `vademecum` (483 ATC 5) | 483 (universo) | 0 | Fija el universo inicial. Ninguna de las dos trae texto clínico (la LINAME no tiene indicaciones, dosis ni contraindicaciones), así que no genera monografías. |
-| 1 | 2026-10-24 | CIMA: listado, detalle, maestra ATC, fichas técnicas completas, notas de seguridad | — | — | **Bloqueada (403).** Código y parser validados con respuestas reales ya versionadas. |
-| 2 | 2026-10-24 | RxNav (ATC 5 → RxCUI → UNII) + openFDA drug labels | — | — | **Bloqueada (403).** Código listo; parser de openFDA/RxNav sin validar contra datos reales. |
+| Medida | Antes | Después |
+|---|---:|---:|
+| Monografías versionadas en `data/` | 0 | 2 963 |
+| Secciones versionadas en `data/` (`route`) | 0 | 84 352 (CIMA 37 088 · openFDA 46 305 · EMA 959) |
+| Secciones del corpus exhaustivo (`product`, **no versionado**) | 0 | 381 904 (CIMA 334 640) |
+| ATC 5 del universo | 483 | 6 045 |
+| ATC 5 con monografía | 0 | 2 963 (2 953 con nombre AEMPS) |
+| Cobertura openFDA (ATC con puente completo y con etiqueta) | — | 2 035 de 2 656 (630 sin etiqueta por UNII: hueco real de la fuente) |
+| Postgres desechable (corpus `product`): conceptos / designaciones / IS_A / propiedades / `concept_maps`→vademecum | 5 / 3 / 4 / 14 / 1 (ficha de prueba) | 4 052 / 4 044 / 4 038 / 405 290 / 425 |
+| 2.ª corrida | — | 0 / 0 / 0 / 0 / 0 filas nuevas, 0 borradas |
+
+Secciones de CIMA sin fecha ni versión (no se publican, no se inventa una): 11 860 en `route`, 54 299 en `product`.
+
+## Cobertura por requisito (corpus `route`, `coverage.md`)
+
+CIMA: 1 531 monografías con alguna sección, 1 506 completas (las 10 requisitos). openFDA: 2 008 con sección, 1 216 completas.
+EMA: 822, sólo indicaciones. Detalle y huecos por ATC: `data/coverage.json.gz`.
+
+## Corte propuesto del volumen (decisión del propietario)
+
+El corpus exhaustivo `product` pesa 3,2 GB de NDJSON y **606 MB** en gzip (monografías individuales de hasta 85 MB: lenalidomida L04AX04, rivaroxabán B01AF01…
+reúnen las fichas de todos sus medicamentos). Supera el tope de ~300 MB del brief. Se versionó el corpus `route` (una ficha de referencia
+por principio activo VTM y vías; todo openFDA y EMA): 462 MB de NDJSON, **81 MB** gzip en 7 partes < 45 MB, `data/SHA256SUMS`.
+El `product` se regenera con `fetch-cima.mjs --granularity product` + `build-monographs.mjs --granularity product`
+(sha256 del NDJSON `product`: `80cc25a0…2733`, ver `evidencia/C5/monographs-product.sha256`). Alternativa: versionarlo en 2
+repos de datos o en un almacén de objetos.
 
 ## Fuentes descartadas
 
-| Fuente | Motivo |
-|---|---|
-| vademecum.es, PLM, BNF, Martindale, Lexicomp, Medscape | Copyright comercial: sólo para detectar huecos. |
-| MedDRA | Licencia por suscripción; las reacciones adversas quedan como texto literal con su tabla y frecuencia. |
-| WHO ATC/DDD (WHOCC) | Sin redistribución comercial del índice; nombres ATC desde la AEMPS; DDD no cargadas. |
-| WHO Model Formulary / EML | © OMS / CC BY-NC-SA 3.0 IGO (no comercial): decisión del propietario. |
-| DDInter, ONC High-Priority DDI | Licencia no verificada / sin archivo oficial. Interacciones = texto literal de la ficha. |
-| PharmGKB/ClinPGx, CPIC | CC BY-SA 4.0 / licencia por confirmar; farmacogenómica sólo desde la etiqueta FDA. |
-| AGEMED | reCAPTCHA: no se elude. Pedir la base por acceso a información pública. |
-| SNOMED CT | Bolivia no es miembro de SNOMED International. |
-| PubMed / Europe PMC / Google Scholar | Literatura: descubrir fuentes, no contenido de monografía. |
+Ver `SOURCES.md` («Fuentes evaluadas y no usadas»): comerciales, MedDRA, WHO ATC/DDD, WHO EML/Model Formulary, DDInter, ONC DDI,
+PharmGKB/CPIC, AGEMED (reCAPTCHA, no se elude), SNOMED CT.
 
-## Cobertura medida (2026-10-24)
+## No cubierto
 
-`coverage-report.mjs` sobre lo disponible (sólo pasada 0):
-
-| Métrica | Valor |
-|---|---:|
-| Universo ATC 5 (LINAME ∪ vademecum) | 483 |
-| Monografías | 0 |
-| Secciones (cualquier fuente) | 0 |
-| LINAME esenciales sin monografía | 482 |
-| Cruce con el catálogo de productos | no medido (los `medicines-*.ndjson` no están en la sesión) |
-
-El informe completo (por nivel ATC, por fuente y requisito, sin match con el catálogo de productos
-en los dos sentidos, huecos del armado) se regenera con `coverage-report.mjs` después de cada
-pasada y se pega acá.
-
-## Carga y enlaces verificados
-
-En un Postgres 16 desechable con el DDL de `database/SQL/00_shared` y `03_terminology` tal cual
-(sin la API, sin DDL nuevo), con la ficha real de bencilpenicilina procaína (CIMA nº reg. 15419,
-versión 2026-04-16) como única caché:
-
-| Corrida | Conceptos | Designaciones | IS_A | Propiedades | `concept_maps` → vademecum | Borradas |
-|---|---:|---:|---:|---:|---:|---:|
-| 1.ª | 5 | 3 | 4 | 14 | 1 | 0 |
-| 2.ª (misma fuente) | 0 | 0 | 0 | 0 | 0 | 0 |
-| Ficha con fecha nueva | 0 | 0 | 0 | 2 | 0 | 2 |
-| Vuelta a la versión original | 0 | 0 | 0 | 2 | 0 | 2 |
-
-El `textSha256` guardado coincide con el sha256 del texto de la ficha real. `validate-links.mjs`
-encontró el `concept_map` J01CE09 → `vademecum` y, con una relación fármaco→enfermedad simulada
-(J01CE09 y N02BE01), informó correctamente N02BE01 como ATC 5 sin monografía.
-
-**Ramas hermanas:** `justin/seed-drug-treatments` y `justin/seed-diseases` no existían en
-`origin` al 2026-10-24, así que el enlace con sus datos no se validó. `validate-links.mjs` queda
-listo: revisa por código cualquier `concept_relationships` cuyo extremo sea un concepto con código
-ATC 5 (de cualquier code system) y los RxCUI del puente contra `rxnorm_full`/`rxterms`.
+- No se re-descargó openFDA tras el cambio de `export_date` (2026-10-27 → 2026-10-28): contenido de etiquetas actualizadas hoy.
+- Una etiqueta de las 262 903 declaradas no fue contada por el lector en flujo (262 902 leídas): sin diagnosticar.
+- Ningún cruce con el catálogo de productos (`cima/invima/anvisa-medicamentos`) ni con relaciones de otros carriles: `validate-links`
+  corrió sin esos datos en la base desechable.
+- Carga contra la base real del stack: no hecha (sólo desechable).
+- La posología (4.2) es contenido profesional; este code system no debe entrar a value sets del glosario para pacientes sin filtrarla.

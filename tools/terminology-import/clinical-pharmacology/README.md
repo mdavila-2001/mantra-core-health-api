@@ -31,7 +31,11 @@ node $D/pack-data.mjs                         # lo normalizado → data/*.gz (< 
 node --test $D/test/*.test.mjs
 ```
 
-Medido en un Postgres 16 desechable (DDL de `database/SQL/00_shared` + `03_terminology`, sin la
-API) con la ficha real de bencilpenicilina procaína (nº reg. 15419): 1.ª carga 5 conceptos,
-3 designaciones, 4 IS_A, 14 propiedades, 1 `concept_map` a `vademecum`; 2.ª carga 0 filas nuevas y
-0 borradas; con la ficha en otra versión, 2 retiradas y 2 nuevas, y el total se mantiene.
+Verificar lo versionado: `cd data && sha256sum -c SHA256SUMS`.
+
+Medido el 2026-10-28 en un Postgres 16 desechable (DDL de `database/SQL/00_shared` + `03_terminology`, sin la API;
+`test/disposable-db/seed-vademecum.mjs` siembra `vademecum` y los conceptos internos, y sólo corre si `DB_NAME` termina en `_test`)
+con el corpus exhaustivo `product` (2 963 monografías, 381 904 secciones): 1.ª carga 4 052 conceptos, 4 044 designaciones,
+4 038 IS_A, 405 290 propiedades, 425 `concept_maps` a `vademecum`; 2.ª carga 0 filas nuevas y 0 borradas. El cargador corta los
+lotes por tamaño (una monografía llega a 85 MB). Detalle y huecos: `docs/seed-research/clinical-pharmacology.md`.
+Cuidado: cargar el corpus `route` sobre una base con el `product` ya cargado **retiraría** (`--prune`, según el código; no probado) las secciones que `route` no trae; usar `--no-prune`.

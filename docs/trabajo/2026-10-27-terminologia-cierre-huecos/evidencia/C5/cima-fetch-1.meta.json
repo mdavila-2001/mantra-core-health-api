@@ -1,0 +1,20 @@
+{
+  "source": "aemps-cima",
+  "endpoint": "https://cima.aemps.es/cima/rest",
+  "finishedAt": "2026-10-28T07:45:31.199Z",
+  "granularity": "product",
+  "medicamentos": 25502,
+  "sinAtc5": 468,
+  "atc5": 2236,
+  "fichasReferencia": 22505,
+  "pedidosSeccionSuelta": 576,
+  "maestraAtc": 7358,
+  "http": {
+    "requests": 53545,
+    "retries": 0,
+    "cacheHits": 0,
+    "failures": 0,
+    "bytes": 5834566343
+  },
+  "segundos": 26778
+}

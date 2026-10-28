@@ -79,7 +79,7 @@ export async function packNdjsonFile(path, maxBytes = MAX_PART_BYTES) {
 }
 
 async function main() {
-  for (const name of readdirSync(DATA_DIR)) if (name.endsWith('.gz') || name === 'MANIFEST.json') unlinkSync(join(DATA_DIR, name));
+  for (const name of readdirSync(DATA_DIR)) if (name.endsWith('.gz') || name === 'MANIFEST.json' || name === 'SHA256SUMS') unlinkSync(join(DATA_DIR, name));
   const manifest = { generatedAt: new Date().toISOString(), note: 'Datos normalizados (no crudos). Ver SOURCES.md y docs/seed-research/clinical-pharmacology.md.', files: [] };
   const add = (name, gz, rows, from) => {
     writeFileSync(join(DATA_DIR, name), gz);
@@ -110,6 +110,8 @@ async function main() {
     add(`${from.replace(/^(out|cache)\//, '').replace(/\//g, '__')}.gz`, gzipSync(buf, { level: 9 }), null, from);
   }
   writeFileSync(join(DATA_DIR, 'MANIFEST.json'), JSON.stringify(manifest, null, 2) + '\n');
+  // Formato de `sha256sum -c`: se verifica con `cd data && sha256sum -c SHA256SUMS`.
+  writeFileSync(join(DATA_DIR, 'SHA256SUMS'), manifest.files.map((f) => `${f.sha256}  ${f.name}`).join('\n') + '\n');
   console.log(JSON.stringify(manifest, null, 2));
 }
 

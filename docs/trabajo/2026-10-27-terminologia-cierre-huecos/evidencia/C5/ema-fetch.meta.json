@@ -1,0 +1,23 @@
+{
+  "source": "ema-medicines",
+  "url": "https://www.ema.europa.eu/en/documents/report/medicines-output-medicines_json-report_en.json",
+  "bytes": 6795904,
+  "sha256": "5d6cd024196ba7ff25f211019ad4b934814b6733fac7fe4f09932b309295a0ab",
+  "fileTimestamp": "2026-10-27T18:19:10Z",
+  "declaredRecords": 2754,
+  "records": 2754,
+  "humanAuthorisedWithAtc5": 1402,
+  "atc5": 822,
+  "skipped": {
+    "notHuman": 397,
+    "notAuthorised": 791,
+    "withoutAtc5": 167
+  },
+  "http": {
+    "requests": 1,
+    "retries": 0,
+    "cacheHits": 0,
+    "failures": 0,
+    "bytes": 6795904
+  }
+}

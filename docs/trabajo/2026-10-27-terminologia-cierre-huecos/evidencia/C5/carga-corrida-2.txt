@@ -1,0 +1,36 @@
+=== Farmacología clínica → terminology.*  ===
+[load] 253 monografías…
+[load] 521 monografías…
+[load] 758 monografías…
+[load] 1004 monografías…
+[load] 1250 monografías…
+[load] 1519 monografías…
+[load] 1755 monografías…
+[load] 2017 monografías…
+[load] 2261 monografías…
+[load] 2500 monografías…
+[load] 2763 monografías…
+{
+  "codeSystem": "clinical-pharmacology",
+  "version": "1",
+  "monographs": 2963,
+  "concepts": 4052,
+  "designations": 4044,
+  "properties": 405290,
+  "relationships": 4038,
+  "uniqueIds": 417424
+}
+
+=== RESUMEN (filas NUEVAS/BORRADAS; 0 y 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "concepts": 0,
+    "designations": 0,
+    "relationships": 0,
+    "properties": 0,
+    "prunedProperties": 0,
+    "vademecumMaps": 0,
+    "vademecumMapsPlanned": 425
+  },
+  "segundos": 76
+}

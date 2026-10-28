@@ -1,0 +1,15 @@
+{
+  "source": "nlm-rxnav",
+  "finishedAt": "2026-10-28T02:41:59.124Z",
+  "atc5": 6045,
+  "conRxcui": 3634,
+  "conUniiCompleto": 2656,
+  "http": {
+    "requests": 16946,
+    "retries": 0,
+    "cacheHits": 0,
+    "failures": 0,
+    "bytes": 1391179
+  },
+  "segundos": 8474
+}
