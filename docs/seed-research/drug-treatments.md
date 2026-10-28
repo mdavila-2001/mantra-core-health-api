@@ -3,7 +3,7 @@
 - Rama: `justin/seed-drug-treatments` · importador: `tools/terminology-import/drug-treatments/` · fuentes y licencias: `tools/terminology-import/drug-treatments/SOURCES.md`
 - Depende de: `justin/seed-diseases` (enfermedades) y del catálogo de medicamentos ya existente (`vademecum`, ATC nivel 5).
 - Sesión hermana: `justin/seed-procedures-treatments` (procedimientos y terapias no farmacológicas).
-- Última actualización: 2026-10-24 (iteración de `/loop` 1: hosts oficiales siguen en 403; `justin/seed-diseases` aún no existe; ramas hermanas visibles: `seed-clinical-pharmacology`, `seed-procedures-treatments`, `seed-nursing-care`, ninguna trae un cruce a ATC).
+- Última actualización: 2026-10-28 (carril C6 del cierre de huecos: ver «0. Estado 2026-10-28»; el resto del documento conserva el registro histórico del 2026-10-24, cuyos «403» de §2 y §5 están **superados** por el re-sondeo de hoy; iteración de `/loop` 1: hosts oficiales siguen en 403; `justin/seed-diseases` aún no existe; ramas hermanas visibles: `seed-clinical-pharmacology`, `seed-procedures-treatments`, `seed-nursing-care`, ninguna trae un cruce a ATC).
 
 > **Esto es una base de relaciones publicadas, no un recomendador.** Cada relación conserva el
 > tipo exacto de su fuente (indicación rotulada, modificador de la enfermedad, sintomático, no
@@ -11,6 +11,34 @@
 > colapsa en un genérico «trata». No hay dosis, posologías ni interacciones. Los tipos con
 > `polarity = negative` («no es una indicación», «contraindicado», «sin respuesta observada»)
 > **nunca** deben mostrarse como tratamiento.
+
+## 0. Estado 2026-10-28 (carril C6 del cierre de huecos)
+
+**Hueco → estado hoy → qué se cargó.** El 2026-10-24 la red devolvía 403 y solo había 5 fuentes de GitHub (18 032 afirmaciones, 0 con ATC). El 2026-10-27 hubo salida por HTTP y se sumaron 9 fuentes. Re-sondeo de hoy en `evidencia/C6/resondeo-hosts-2026-10-28.txt`.
+
+| Fuente | Antes (2026-10-24) | Hoy | Afirmaciones cargadas |
+|---|---|---|---|
+| LabeledIn, PharmacotherapyDB, DrugCentral 2016, DrugMechDB, MAxO | cargadas | sin cambios | 2 850 · 1 388 · 9 094 · 4 662 · 38 |
+| MED-RT (VA) | hueco, 403 | 200, cargada | 30 002 |
+| ChEMBL `drug_indication` | hueco, 403 | 200, cargada | 60 055 |
+| DrugCentral 2027 | hueco, 403 | 200, cargada | 38 517 |
+| Wikidata P2176/P2175 | hueco, 403 | 200, cargada | 13 506 |
+| WHO eEML | hueco, 403 | 200, cargada | 1 068 |
+| EMA (EPAR) | hueco, 403 | 200, cargada | 2 514 |
+| Open Targets 26.09 (solo EMA/APPROVAL) | hueco | cargada | 2 331 |
+| ClinicalTrials.gov v2 (polaridad `investigational`) | hueco, 403 | 200, cargada | 171 847 |
+| CIViC (predictiva aceptada, `conditional`) | hueco, 403 | cargada por consulta | 3 147 |
+| **Total** | **18 032** | | **341 019** (+ 46 tipos de relación) |
+
+Polaridad del total: positiva 75 851 · negativa 38 643 · diagnóstica 159 · en investigación 223 219 · condicionada 3 147. Pares fármaco–enfermedad positivos distintos: 42 607 (el 2026-10-24: 13 972). Solo las afirmaciones de polaridad positiva son «tratamiento».
+
+**H-ATC cerrado por código exacto.** Afirmaciones con ATC nivel 5: 0 → 228 242; fármacos de un solo ingrediente con ATC: 0 → 5 466 de 21 668; códigos ATC distintos: 5 315. Cruces publicados: RxClass, `molecule.atc_classifications` de ChEMBL, P267 de Wikidata y DrugCentral; cada código lleva `via`/`predicate`/`from`. Solo el **código**: sin nombres de clase ni DDD (WHO ATC no se carga).
+
+**Todavía hueco (re-sondeo de hoy).** CTD (`ctdbase.org` redirige 302; licencia sin leer), NCATS Inxight Drugs (200; licencia sin verificar), PharmGKB (sin respuesta), LINAME/`minsalud.gob.bo` (sin respuesta), `whocc.no` (301; no se carga por licencia), CIViC `/downloads` (301; la evidencia se tomó por consulta). Ninguna se cargó: falta leer licencia o no hay acceso.
+
+**Decisiones del propietario** (no tomadas por el carril): (1) ChEMBL (CC BY-SA 3.0) y DrugCentral 2027 (CC BY-SA 4.0) están cargados en code systems propios para poder retirarlos con un `DELETE` por code system; confirmar si la condición «compartir igual» es aceptable en el producto. (2) MED-RT: el paquete no trae aviso de licencia; se trata como obra del gobierno federal. (3) Códigos ATC (de las fuentes eEML/EMA/Wikidata y `crosswalk.drug`): si la OMS exige permiso incluso para el código, se filtran las filas con `system = 'ATC'`. (4) CC BY 3.0 IGO de eEML exige la atribución indicada en `SOURCES.md`.
+
+**Verificación de hoy (base desechable, no la del stack).** `node --test`: 27/27. `gzip -t` y `sha256sum -c`: 19 partes + metadatos OK (63 MB versionados). Carga `--apply`: 1.ª corrida 15 code systems (341 019 afirmaciones + 46 tipos = 341 065 conceptos, 6 073 333 propiedades); 2.ª corrida **0 conceptos, 0 propiedades, 0 relaciones** en los 15. Huérfanos, duplicados y nulos: 0 filas. Detalle y límites en `evidencia/C6/REPORTE-C6.md`. **No cubierto:** el enlace fármaco/enfermedad contra catálogos reales; la base desechable no tiene `rxnorm_full`, `mesh`, `mondo` ni `vademecum`, así que `validate-links.mjs` midió 0 enlaces (esperado, no es cobertura).
 
 ## 1. Paso 0 — discovery
 
@@ -129,6 +157,8 @@ enfermedad (código) → anatomía (relaciones que cargan `justin/seed-diseases`
 `justin/seed-medical-dictionaries`).
 
 ## 5. Fuentes descartadas y huecos
+
+> Tabla histórica del 2026-10-24. Las filas «hueco» por 403 de MED-RT, RxClass, ChEMBL, Open Targets, eEML, EMA, ClinicalTrials, Wikidata, DrugCentral y CIViC están **superadas** (ver §0); quedan vigentes las descartadas por licencia.
 
 | Fuente | Estado | Motivo exacto | Qué aportaría |
 |---|---|---|---|

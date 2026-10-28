@@ -1,0 +1,20 @@
+# Re-sondeo 2026-10-28 (GET, timeout 20 s, 1 pedido cada 0.6 s)
+200 2873B  https://evs.nci.nih.gov/ftp1/MED-RT/
+200 48B  https://rxnav.nlm.nih.gov/REST/version.json
+200 212B  https://www.ebi.ac.uk/chembl/api/data/status.json
+200 14772B  https://drugcentral.org/download
+200 197B  https://query.wikidata.org/sparql?query=SELECT%20%3Fs%20WHERE%7B%3Fs%20wdt%3AP2176%20%3Fo%7D%20LIMIT%201&format=json
+200 7690B  https://clinicaltrials.gov/api/v2/studies?pageSize=1
+200 85750B  https://www.ema.europa.eu/en/medicines/download-medicine-data
+200 1295185B  https://list.essentialmeds.org/
+301 178B  https://civicdb.org/downloads
+404 0B  https://civicdb.org/api/graphql
+302 2774B  https://ctdbase.org/downloads/
+200 34078B  https://drugs.ncats.io/
+200 17364B  https://cima.aemps.es/cima/rest/medicamentos?nombre=aspirina
+200 3933B  https://api.fda.gov/drug/label.json?limit=1
+301 162B  https://www.whocc.no/atc_ddd_index/
+000 0B  https://www.minsalud.gob.bo/
+200 1204B  https://eutils.ncbi.nlm.nih.gov/entrez/eutils/einfo.fcgi
+200 163B  https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=a&format=json&pageSize=1
+000 0B  https://api.pharmgkb.org/v1/data/disease/PA1

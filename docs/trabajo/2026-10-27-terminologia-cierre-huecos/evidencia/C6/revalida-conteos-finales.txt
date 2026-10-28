@@ -1,0 +1,3 @@
+catalog_concepts total (341 065 drug-treatment + 1 concepto interno 'estado activo' sembrado): 341066
+concept_properties: 6073333
+relaciones: 0

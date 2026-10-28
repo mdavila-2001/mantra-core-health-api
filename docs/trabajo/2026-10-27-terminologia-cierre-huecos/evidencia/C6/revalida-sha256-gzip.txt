@@ -1,0 +1,22 @@
+drug-treatments.meta.json: OK
+manifest-http.json: OK
+manifest.json: OK
+gzip -t OK drug-treatments-000.ndjson.gz
+gzip -t OK drug-treatments-001.ndjson.gz
+gzip -t OK drug-treatments-002.ndjson.gz
+gzip -t OK drug-treatments-003.ndjson.gz
+gzip -t OK drug-treatments-004.ndjson.gz
+gzip -t OK drug-treatments-005.ndjson.gz
+gzip -t OK drug-treatments-006.ndjson.gz
+gzip -t OK drug-treatments-007.ndjson.gz
+gzip -t OK drug-treatments-008.ndjson.gz
+gzip -t OK drug-treatments-009.ndjson.gz
+gzip -t OK drug-treatments-010.ndjson.gz
+gzip -t OK drug-treatments-011.ndjson.gz
+gzip -t OK drug-treatments-012.ndjson.gz
+gzip -t OK drug-treatments-013.ndjson.gz
+gzip -t OK drug-treatments-014.ndjson.gz
+gzip -t OK drug-treatments-015.ndjson.gz
+gzip -t OK drug-treatments-016.ndjson.gz
+gzip -t OK drug-treatments-017.ndjson.gz
+gzip -t OK drug-treatments-018.ndjson.gz

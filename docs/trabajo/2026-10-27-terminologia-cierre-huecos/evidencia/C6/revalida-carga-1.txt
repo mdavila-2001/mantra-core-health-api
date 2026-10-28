@@ -1,0 +1,121 @@
+=== Tratamientos farmacológicos → terminology.* (CARGA REAL) ===
+[load] leyendo 19 partes versionadas de /home/user/mantra-core-health-api/tools/terminology-import/drug-treatments/data
+[load] labeledin: 2850 afirmaciones   [load] pharmacotherapydb: 1388 afirmaciones   [load] drugcentral-2016: 4000 afirmaciones   [load] drugcentral-2016: 8000 afirmaciones   [load] drugcentral-2016: 9094 afirmaciones   [load] drugmechdb: 4000 afirmaciones   [load] drugmechdb: 4662 afirmaciones   [load] maxo: 38 afirmaciones   [load] medrt: 4000 afirmaciones   [load] medrt: 8000 afirmaciones   [load] medrt: 12000 afirmaciones   [load] medrt: 16000 afirmaciones   [load] medrt: 20000 afirmaciones   [load] medrt: 24000 afirmaciones   [load] medrt: 28000 afirmaciones   [load] medrt: 30002 afirmaciones   [load] chembl: 4000 afirmaciones   [load] chembl: 8000 afirmaciones   [load] chembl: 12000 afirmaciones   [load] chembl: 16000 afirmaciones   [load] chembl: 20000 afirmaciones   [load] chembl: 24000 afirmaciones   [load] chembl: 28000 afirmaciones   [load] chembl: 32000 afirmaciones   [load] chembl: 36000 afirmaciones   [load] chembl: 40000 afirmaciones   [load] chembl: 44000 afirmaciones   [load] chembl: 48000 afirmaciones   [load] chembl: 52000 afirmaciones   [load] chembl: 56000 afirmaciones   [load] chembl: 60000 afirmaciones   [load] chembl: 60055 afirmaciones   [load] drugcentral: 4000 afirmaciones   [load] drugcentral: 8000 afirmaciones   [load] drugcentral: 12000 afirmaciones   [load] drugcentral: 16000 afirmaciones   [load] drugcentral: 20000 afirmaciones   [load] drugcentral: 24000 afirmaciones   [load] drugcentral: 28000 afirmaciones   [load] drugcentral: 32000 afirmaciones   [load] drugcentral: 36000 afirmaciones   [load] drugcentral: 38517 afirmaciones   [load] wikidata: 4000 afirmaciones   [load] wikidata: 8000 afirmaciones   [load] wikidata: 12000 afirmaciones   [load] wikidata: 13506 afirmaciones   [load] eeml: 1068 afirmaciones   [load] ema: 2514 afirmaciones   [load] opentargets: 2331 afirmaciones   [load] civic: 3147 afirmaciones   [load] clinicaltrials: 4000 afirmaciones   [load] clinicaltrials: 8000 afirmaciones   [load] clinicaltrials: 12000 afirmaciones   [load] clinicaltrials: 16000 afirmaciones   [load] clinicaltrials: 20000 afirmaciones   [load] clinicaltrials: 24000 afirmaciones   [load] clinicaltrials: 28000 afirmaciones   [load] clinicaltrials: 32000 afirmaciones   [load] clinicaltrials: 36000 afirmaciones   [load] clinicaltrials: 40000 afirmaciones   [load] clinicaltrials: 44000 afirmaciones   [load] clinicaltrials: 48000 afirmaciones   [load] clinicaltrials: 52000 afirmaciones   [load] clinicaltrials: 56000 afirmaciones   [load] clinicaltrials: 60000 afirmaciones   [load] clinicaltrials: 64000 afirmaciones   [load] clinicaltrials: 68000 afirmaciones   [load] clinicaltrials: 72000 afirmaciones   [load] clinicaltrials: 76000 afirmaciones   [load] clinicaltrials: 80000 afirmaciones   [load] clinicaltrials: 84000 afirmaciones   [load] clinicaltrials: 88000 afirmaciones   [load] clinicaltrials: 92000 afirmaciones   [load] clinicaltrials: 96000 afirmaciones   [load] clinicaltrials: 100000 afirmaciones   [load] clinicaltrials: 104000 afirmaciones   [load] clinicaltrials: 108000 afirmaciones   [load] clinicaltrials: 112000 afirmaciones   [load] clinicaltrials: 116000 afirmaciones   [load] clinicaltrials: 120000 afirmaciones   [load] clinicaltrials: 124000 afirmaciones   [load] clinicaltrials: 128000 afirmaciones   [load] clinicaltrials: 132000 afirmaciones   [load] clinicaltrials: 136000 afirmaciones   [load] clinicaltrials: 140000 afirmaciones   [load] clinicaltrials: 144000 afirmaciones   [load] clinicaltrials: 148000 afirmaciones   [load] clinicaltrials: 152000 afirmaciones   [load] clinicaltrials: 156000 afirmaciones   [load] clinicaltrials: 160000 afirmaciones   [load] clinicaltrials: 164000 afirmaciones   [load] clinicaltrials: 168000 afirmaciones   [load] clinicaltrials: 171847 afirmaciones   
+[load] destinos usados por sistema: {"RXCUI":[],"DRUGCENTRAL":[],"MESH":[],"CHEMBL":[],"UNII":[],"DRUGBANK":[],"CHEBI":[],"ATC":[],"UMLS":[],"MONDO":[],"DOID":[],"EFO":[],"NCIT":[],"OMIM":[],"ICD11":[],"ORPHA":[],"ICD10CM":[],"ICD10WHO":[]}
+[load] enlace: {"labeledin":{"assertions":2850,"drug":0,"condition":0,"both":0},"pharmacotherapydb":{"assertions":1388,"drug":0,"condition":0,"both":0},"drugcentral-2016":{"assertions":9094,"drug":0,"condition":0,"both":0},"drugmechdb":{"assertions":4662,"drug":0,"condition":0,"both":0},"maxo":{"assertions":38,"drug":0,"condition":0,"both":0},"medrt":{"assertions":30002,"drug":0,"condition":0,"both":0},"chembl":{"assertions":60055,"drug":0,"condition":0,"both":0},"drugcentral":{"assertions":38517,"drug":0,"condition":0,"both":0},"wikidata":{"assertions":13506,"drug":0,"condition":0,"both":0},"eeml":{"assertions":1068,"drug":0,"condition":0,"both":0},"ema":{"assertions":2514,"drug":0,"condition":0,"both":0},"opentargets":{"assertions":2331,"drug":0,"condition":0,"both":0},"civic":{"assertions":3147,"drug":0,"condition":0,"both":0},"clinicaltrials":{"assertions":171847,"drug":0,"condition":0,"both":0}}
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "result": [
+    {
+      "codeSystem": "drug-treatment-relation-types",
+      "concepts": 46,
+      "properties": 180,
+      "relationships": 0,
+      "read": 46
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-labeledin",
+      "concepts": 2850,
+      "properties": 45639,
+      "relationships": 0,
+      "read": 2850
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-pharmacotherapydb",
+      "concepts": 1388,
+      "properties": 24984,
+      "relationships": 0,
+      "read": 1388
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-drugcentral-2016",
+      "concepts": 9094,
+      "properties": 163692,
+      "relationships": 0,
+      "read": 9094
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-drugmechdb",
+      "concepts": 4662,
+      "properties": 83916,
+      "relationships": 0,
+      "read": 4662
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-maxo",
+      "concepts": 38,
+      "properties": 684,
+      "relationships": 0,
+      "read": 38
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-medrt",
+      "concepts": 30002,
+      "properties": 540036,
+      "relationships": 0,
+      "read": 30002
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-chembl",
+      "concepts": 60055,
+      "properties": 1020935,
+      "relationships": 0,
+      "read": 60055
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-drugcentral",
+      "concepts": 38517,
+      "properties": 693306,
+      "relationships": 0,
+      "read": 38517
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-wikidata",
+      "concepts": 13506,
+      "properties": 243108,
+      "relationships": 0,
+      "read": 13506
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-eeml",
+      "concepts": 1068,
+      "properties": 19224,
+      "relationships": 0,
+      "read": 1068
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-ema",
+      "concepts": 2514,
+      "properties": 45252,
+      "relationships": 0,
+      "read": 2514
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-opentargets",
+      "concepts": 2331,
+      "properties": 42145,
+      "relationships": 0,
+      "read": 2331
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-civic",
+      "concepts": 3147,
+      "properties": 56986,
+      "relationships": 0,
+      "read": 3147
+    },
+    {
+      "codeSystem": "drug-treatment-assertions-clinicaltrials",
+      "concepts": 171847,
+      "properties": 3093246,
+      "relationships": 0,
+      "read": 171847
+    }
+  ],
+  "segundos": 265
+}
+
+real	4m25.567s
+user	1m30.224s
+sys	0m6.746s

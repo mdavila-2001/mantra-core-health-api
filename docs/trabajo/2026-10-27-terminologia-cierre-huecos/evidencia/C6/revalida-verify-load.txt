@@ -1,0 +1,91 @@
+Pager usage is off.
+--- 1. Conceptos, propiedades y relaciones por code system (drug-treatment-*)
+                internal_code                | conceptos | propiedades 
+---------------------------------------------+-----------+-------------
+ drug-treatment-assertions-chembl            |     60055 |     1020935
+ drug-treatment-assertions-civic             |      3147 |       56986
+ drug-treatment-assertions-clinicaltrials    |    171847 |     3093246
+ drug-treatment-assertions-drugcentral       |     38517 |      693306
+ drug-treatment-assertions-drugcentral-2016  |      9094 |      163692
+ drug-treatment-assertions-drugmechdb        |      4662 |       83916
+ drug-treatment-assertions-eeml              |      1068 |       19224
+ drug-treatment-assertions-ema               |      2514 |       45252
+ drug-treatment-assertions-labeledin         |      2850 |       45639
+ drug-treatment-assertions-maxo              |        38 |         684
+ drug-treatment-assertions-medrt             |     30002 |      540036
+ drug-treatment-assertions-opentargets       |      2331 |       42145
+ drug-treatment-assertions-pharmacotherapydb |      1388 |       24984
+ drug-treatment-assertions-wikidata          |     13506 |      243108
+ drug-treatment-relation-types               |        46 |         180
+(15 rows)
+
+--- 2. Relaciones estructurales por tipo (assertion:drug / assertion:condition)
+ tipo | relaciones 
+------+------------
+(0 rows)
+
+--- 3. HUÉRFANOS (esperado: 0 filas): relaciones cuyo origen no es una afirmación, o cuyo destino/tipo no existe
+ problema | count 
+----------+-------
+(0 rows)
+
+--- 4. DUPLICADOS (esperado: 0 filas): (code system versión, code) repetido en las afirmaciones
+ code_system_version_id | code | count 
+------------------------+------+-------
+(0 rows)
+
+--- 5. NULOS INDEBIDOS (esperado: 0 filas): afirmación sin alguna propiedad de procedencia obligatoria
+ internal_code | falta | afirmaciones 
+---------------+-------+--------------
+(0 rows)
+
+--- 6. Procedencia de las fuentes HTTP: sin commit, con release y URL del archivo (esperado: 0 filas con falta)
+ internal_code | sin_release_ni_commit 
+---------------+-----------------------
+(0 rows)
+
+--- 7. Polaridad por code system (positiva = tratamiento; el resto NO se muestra como tratamiento)
+                internal_code                |    polaridad    | count  
+---------------------------------------------+-----------------+--------
+ drug-treatment-assertions-chembl            | investigational |  51372
+ drug-treatment-assertions-chembl            | positive        |   8683
+ drug-treatment-assertions-civic             | conditional     |   3147
+ drug-treatment-assertions-clinicaltrials    | investigational | 171847
+ drug-treatment-assertions-drugcentral       | diagnostic      |      1
+ drug-treatment-assertions-drugcentral       | negative        |  26851
+ drug-treatment-assertions-drugcentral       | positive        |  11665
+ drug-treatment-assertions-drugcentral-2016  | positive        |   9094
+ drug-treatment-assertions-drugmechdb        | positive        |   4662
+ drug-treatment-assertions-eeml              | positive        |   1068
+ drug-treatment-assertions-ema               | positive        |   2514
+ drug-treatment-assertions-labeledin         | positive        |   2850
+ drug-treatment-assertions-maxo              | negative        |      1
+ drug-treatment-assertions-maxo              | positive        |     37
+ drug-treatment-assertions-medrt             | diagnostic      |    158
+ drug-treatment-assertions-medrt             | negative        |  11548
+ drug-treatment-assertions-medrt             | positive        |  18296
+ drug-treatment-assertions-opentargets       | positive        |   2331
+ drug-treatment-assertions-pharmacotherapydb | negative        |    243
+ drug-treatment-assertions-pharmacotherapydb | positive        |   1145
+ drug-treatment-assertions-wikidata          | positive        |  13506
+(21 rows)
+
+--- 8. Afirmaciones enlazadas a un fármaco / a una enfermedad ya cargados (por código exacto), por code system
+                internal_code                | afirmaciones | con_farmaco | con_enfermedad 
+---------------------------------------------+--------------+-------------+----------------
+ drug-treatment-assertions-chembl            |        60055 |           0 |              0
+ drug-treatment-assertions-civic             |         3147 |           0 |              0
+ drug-treatment-assertions-clinicaltrials    |       171847 |           0 |              0
+ drug-treatment-assertions-drugcentral       |        38517 |           0 |              0
+ drug-treatment-assertions-drugcentral-2016  |         9094 |           0 |              0
+ drug-treatment-assertions-drugmechdb        |         4662 |           0 |              0
+ drug-treatment-assertions-eeml              |         1068 |           0 |              0
+ drug-treatment-assertions-ema               |         2514 |           0 |              0
+ drug-treatment-assertions-labeledin         |         2850 |           0 |              0
+ drug-treatment-assertions-maxo              |           38 |           0 |              0
+ drug-treatment-assertions-medrt             |        30002 |           0 |              0
+ drug-treatment-assertions-opentargets       |         2331 |           0 |              0
+ drug-treatment-assertions-pharmacotherapydb |         1388 |           0 |              0
+ drug-treatment-assertions-wikidata          |        13506 |           0 |              0
+(14 rows)
+

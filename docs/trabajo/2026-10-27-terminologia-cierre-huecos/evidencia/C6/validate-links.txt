@@ -1,0 +1,143 @@
+[load] leyendo 19 partes versionadas de /home/user/mantra-core-health-api/tools/terminology-import/drug-treatments/data
+{
+  "generatedAt": "2026-10-28T01:00:49.776Z",
+  "targets": {
+    "RXCUI": [
+      "rxnorm_full",
+      "rxterms"
+    ],
+    "ICD10CM": [
+      "icd10cm"
+    ],
+    "ATC": [
+      "vademecum"
+    ]
+  },
+  "used": {
+    "RXCUI": [],
+    "DRUGCENTRAL": [],
+    "MESH": [],
+    "CHEMBL": [],
+    "UNII": [],
+    "DRUGBANK": [],
+    "CHEBI": [],
+    "ATC": [],
+    "UMLS": [],
+    "MONDO": [],
+    "DOID": [],
+    "EFO": [],
+    "NCIT": [],
+    "OMIM": [],
+    "ICD11": [],
+    "ORPHA": [],
+    "ICD10CM": [],
+    "ICD10WHO": []
+  },
+  "existingCodeSystems": [
+    "drug-treatment-assertions-chembl",
+    "drug-treatment-assertions-civic",
+    "drug-treatment-assertions-clinicaltrials",
+    "drug-treatment-assertions-drugcentral",
+    "drug-treatment-assertions-drugcentral-2016",
+    "drug-treatment-assertions-drugmechdb",
+    "drug-treatment-assertions-eeml",
+    "drug-treatment-assertions-ema",
+    "drug-treatment-assertions-labeledin",
+    "drug-treatment-assertions-maxo",
+    "drug-treatment-assertions-medrt",
+    "drug-treatment-assertions-opentargets",
+    "drug-treatment-assertions-pharmacotherapydb",
+    "drug-treatment-assertions-wikidata",
+    "drug-treatment-relation-types",
+    "mantra-internal"
+  ],
+  "perSource": {
+    "labeledin": {
+      "assertions": 2850,
+      "drug": 0,
+      "condition": 0,
+      "both": 0
+    },
+    "pharmacotherapydb": {
+      "assertions": 1388,
+      "drug": 0,
+      "condition": 0,
+      "both": 0
+    },
+    "drugcentral-2016": {
+      "assertions": 9094,
+      "drug": 0,
+      "condition": 0,
+      "both": 0
+    },
+    "drugmechdb": {
+      "assertions": 4662,
+      "drug": 0,
+      "condition": 0,
+      "both": 0
+    },
+    "maxo": {
+      "assertions": 38,
+      "drug": 0,
+      "condition": 0,
+      "both": 0
+    },
+    "medrt": {
+      "assertions": 30002,
+      "drug": 0,
+      "condition": 0,
+      "both": 0
+    },
+    "chembl": {
+      "assertions": 60055,
+      "drug": 0,
+      "condition": 0,
+      "both": 0
+    },
+    "drugcentral": {
+      "assertions": 38517,
+      "drug": 0,
+      "condition": 0,
+      "both": 0
+    },
+    "wikidata": {
+      "assertions": 13506,
+      "drug": 0,
+      "condition": 0,
+      "both": 0
+    },
+    "eeml": {
+      "assertions": 1068,
+      "drug": 0,
+      "condition": 0,
+      "both": 0
+    },
+    "ema": {
+      "assertions": 2514,
+      "drug": 0,
+      "condition": 0,
+      "both": 0
+    },
+    "opentargets": {
+      "assertions": 2331,
+      "drug": 0,
+      "condition": 0,
+      "both": 0
+    },
+    "civic": {
+      "assertions": 3147,
+      "drug": 0,
+      "condition": 0,
+      "both": 0
+    },
+    "clinicaltrials": {
+      "assertions": 171847,
+      "drug": 0,
+      "condition": 0,
+      "both": 0
+    }
+  },
+  "drugsTotal": 21668,
+  "drugsWithCatalogMatch": 0,
+  "drugsWithoutCatalogMatch": 21668
+}

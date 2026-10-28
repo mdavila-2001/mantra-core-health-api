@@ -185,12 +185,23 @@ test('data/ versionado: hashes de SHA256SUMS y afirmaciones con id único y proc
   const sums = readFileSync(join(DATA, 'SHA256SUMS'), 'utf8').trim().split('\n').map((l) => l.split(/\s+/));
   for (const [hash, file] of sums) assert.equal(createHash('sha256').update(readFileSync(join(DATA, file))).digest('hex'), hash, file);
   const parts = sums.map(([, f]) => f).filter((f) => /^drug-treatments-\d{3}\.ndjson\.gz$/.test(f));
-  const rows = parts.flatMap((f) => gunzipSync(readFileSync(join(DATA, f))).toString('utf8').trim().split('\n').map((l) => JSON.parse(l)));
   const meta = JSON.parse(readFileSync(join(DATA, 'drug-treatments.meta.json'), 'utf8'));
-  assert.equal(rows.length, meta.assertions);
-  assert.equal(new Set(rows.map((r) => r.id)).size, rows.length);
-  for (const r of rows) {
-    assert.ok(RELATION_TYPES[r.relation.type], r.relation.type);
-    for (const k of ['recordId', 'uri', 'version', 'retrievedAt', 'commit', 'fileSha256']) assert.ok(r.source[k], `${r.id} ${k}`);
+  // Una parte a la vez: el corpus completo (~340 000 filas) no entra en un heap de 2 500 MB si se junta entero.
+  const ids = new Set();
+  let total = 0;
+  for (const f of parts) {
+    for (const l of gunzipSync(readFileSync(join(DATA, f))).toString('utf8').split('\n')) {
+      if (l.trim() === '') continue;
+      const r = JSON.parse(l);
+      total += 1;
+      ids.add(r.id);
+      assert.ok(RELATION_TYPES[r.relation.type], r.relation.type);
+      for (const k of ['recordId', 'uri', 'version', 'retrievedAt', 'license', 'fileSha256']) assert.ok(r.source[k], `${r.id} ${k}`);
+      // GitHub: commit fijado. HTTP: sin commit, pero con release y URL del archivo de origen.
+      if (r.source.repo) assert.ok(r.source.commit, `${r.id} commit`);
+      else for (const k of ['release', 'fileUrl']) assert.ok(r.source[k], `${r.id} ${k}`);
+    }
   }
+  assert.equal(total, meta.assertions);
+  assert.equal(ids.size, total);
 });
