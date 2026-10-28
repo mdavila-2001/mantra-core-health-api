@@ -9,8 +9,8 @@
 - OUT: `database/` (lo espeja el agente del modelo), frontend, otros módulos (sólo se reutilizan sus repositorios/servicios exportados).
 - Ambigüedades registradas:
   - A1. «Activo» para un servicio destino de un profesional: `service_catalog.is_active = true` **y** oferta `OFFERING_ACTIVE`. Supuesto tomado; confirmar con producto.
-  - A2. Búsqueda de profesionales: no hay método de búsqueda por nombre reutilizable (el directorio público sólo cubre perfiles publicados en `community.public_profiles`). Se consulta `profiles.health_practitioner_profiles` ⋈ `profiles.persons` (tablas existentes) y los nombres salen de `findPractitionerNames`. Confirmar si debe acotarse a verificados.
-  - A3. Organizaciones: `TenantsRepository.searchPage` acotado a `TENANT_ACTIVE`; incluye todo tipo de tenant.
+  - A2. Búsqueda de profesionales: se aplica la regla de visibilidad del directorio público (vitrina en `community.public_profiles` con `PROFILE_VISIBILITY_PUBLIC` + `STATE_ACTIVE`, tipo profesional). Sólo se compara el nombre, nunca `practitioner_code` (corrección tras revisión de seguridad, severidad MEDIUM).
+  - A3. Organizaciones: tenant `TENANT_ACTIVE` con vitrina pública activa de tipo organización; se compara por razón social o nombre comercial, nunca por `code`. Quedan afuera farmacias, unidades de diagnóstico y aseguradoras, que tienen sus propios tipos de vitrina.
   - A4. `currency` = código del concepto de moneda (`terminology.catalog_concepts.code`), `null` si no hay.
   - A5. Duplicado: mismo encuentro + mismo destino (profesional, o servicio si no hay profesional) + misma especialidad/servicio + mismo tipo. Si no hay datos para comparar, no se bloquea (comportamiento previo).
   - A6. Con `RLS_ENFORCE=true`, `practice.practices` de otro tenant no es visible: la derivación del tenant desde el servicio y el listado de servicios de otra organización pueden degradar. Riesgo residual, no se resuelve acá.
