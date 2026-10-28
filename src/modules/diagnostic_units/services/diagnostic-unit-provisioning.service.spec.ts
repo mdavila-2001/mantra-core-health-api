@@ -5,6 +5,8 @@ import { DiagnosticUnitProvisioningService } from './diagnostic-unit-provisionin
 import { PRAC } from '../../practice/practice.concepts';
 import { DUNIT } from '../diagnostic_units.concepts';
 import { CONCEPTS } from '../../../common';
+import { boProvinceConceptId } from '../../../common/seed/admin-divisions.catalog';
+import { boMunicipalityConceptId } from '../../../common/seed/bo-geography.catalog';
 
 const OWNER = {
   tenantId: 'tenant-1',
@@ -223,6 +225,35 @@ describe('DiagnosticUnitProvisioningService', () => {
         }),
       );
       expect(res.addressId).toBe('address-1');
+    });
+
+    it('ADR-0028: guarda el distrito aparte y deduce la provincia del municipio', async () => {
+      const d = build();
+
+      await d.service.provision(
+        d.tx as never,
+        OWNER,
+        {
+          primarySite: {
+            name: 'Sede Santa Cruz',
+            address: {
+              lines: ['Av. San Martín 123'],
+              district: '  Equipetrol  ',
+              municipalityConceptId: boMunicipalityConceptId('070101'),
+            },
+          },
+        },
+        OWNER.ownerUserId,
+      );
+
+      expect(d.addressesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          lines: 'Av. San Martín 123',
+          districtText: 'Equipetrol',
+          administrativeArea2ConceptId: boProvinceConceptId('0701'),
+        }),
+      );
     });
 
     it('crea una oferta activa por cada modalidad declarada, con el rótulo en castellano', async () => {

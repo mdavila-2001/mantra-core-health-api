@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { CONCEPTS } from '../../../common';
+import { adminDivisionLineage } from '../../../common/seed/admin-divisions.catalog';
 import { AddressesRepository } from '../../common/repositories';
 import { PRAC } from '../../practice/practice.concepts';
 import {
@@ -295,6 +296,13 @@ export class DiagnosticUnitProvisioningService {
         municipalityConceptId: declaredAddress.municipalityConceptId,
         administrativeAreaConceptId:
           declaredAddress.administrativeAreaConceptId,
+        // ADR-0028: la provincia sale del municipio y el distrito viaja aparte
+        // de las líneas, igual que en el consultorio propio.
+        administrativeArea2ConceptId: declaredAddress.municipalityConceptId
+          ? adminDivisionLineage(declaredAddress.municipalityConceptId)
+              ?.level2ConceptId
+          : undefined,
+        districtText: declaredAddress.district?.trim() || undefined,
         countryConceptId: CONCEPTS.COUNTRY_BO,
         useConceptId: CONCEPTS.ADDR_USE_WORK,
         typeConceptId: CONCEPTS.ADDR_TYPE_POSTAL,
