@@ -125,4 +125,55 @@ export class PracticeSites {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants (inferida)
+  tenantId!: string;
+
+  @Property({ fieldName: 'snis_code', columnType: 'varchar', nullable: true })
+  snisCode?: string;
+
+  @Property({ fieldName: 'subsector_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
+  subsectorConceptId?: string;
+
+  @Property({
+    fieldName: 'care_level_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  careLevelConceptId?: string;
+
+  @Property({
+    fieldName: 'facility_typology_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  facilityTypologyConceptId?: string;
+
+  @Property({
+    fieldName: 'managing_entity_name',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  managingEntityName?: string;
+
+  @Property({
+    fieldName: 'health_network_name',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  healthNetworkName?: string;
+
+  @Property({
+    fieldName: 'sedes_department_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  sedesDepartmentConceptId?: string;
+
+  @Property({
+    fieldName: 'municipality_name',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  municipalityName?: string;
 }
