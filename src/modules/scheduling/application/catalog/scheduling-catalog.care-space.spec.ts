@@ -50,6 +50,13 @@ function build() {
     findSlotsByTemplateInRange: mockFn().mockResolvedValue([]),
     createSlot: mockFn(),
     reactivateTemplate: mockFn(),
+    findBookingsOfSlots: mockFn().mockResolvedValue([]),
+    findSlotsOfTemplateForUpdate: mockFn().mockResolvedValue([]),
+    retireTemplate: mockFn().mockResolvedValue({
+      releasedSlots: 0,
+      keptSlots: 0,
+    }),
+    findBookingsOfTemplate: mockFn().mockResolvedValue({ live: 0, sample: [] }),
   };
   const careSpaces = {
     assertResourceInActiveTenant: mockFn(),
@@ -671,5 +678,147 @@ describe('autoridad sobre el espacio al editar un horario que ya lo ocupa (F5d)'
       ),
     ).rejects.toMatchObject({ status: 403 });
     expect(d.catalogRepo.findSlotsOfResourceForUpdate).not.toHaveBeenCalled();
+  });
+});
+
+describe('correr turnos y retirar un horario con espacio exigen la autoridad del espacio (F5d)', () => {
+  const slot = (templateId: string) => ({
+    id: `slot-${templateId}`,
+    scheduleTemplateId: templateId,
+    startAt: new Date('2026-11-02T18:00:00Z'),
+    endAt: new Date('2026-11-02T18:30:00Z'),
+  });
+  const window = {
+    from: '2026-11-02T00:00:00Z',
+    to: '2026-11-03T00:00:00Z',
+    shiftMinutes: 15,
+  } as any;
+
+  it('shiftSlots: 403 sin autoridad sobre el espacio de los turnos y NINGÚN turno se mueve', async () => {
+    const d = build();
+    const s = slot(TEMPLATE);
+    d.catalogRepo.findSlotsOfResourceForUpdate.mockResolvedValue([s]);
+    d.catalogRepo.findTemplateById.mockResolvedValue({
+      id: TEMPLATE,
+      careSpaceId: SPACE,
+    });
+    d.careSpaces.assertMayManageBound
+      .mockResolvedValueOnce(undefined) // el recurso no está atado a ninguna sala
+      .mockRejectedValueOnce(deny(403)); // el espacio de la plantilla del turno
+    await expect(
+      d.service.shiftSlots(RESOURCE, window, admin),
+    ).rejects.toMatchObject({
+      status: 403,
+    });
+    expect(d.careSpaces.assertMayManageBound).toHaveBeenLastCalledWith(
+      d.tx,
+      d.resource,
+      [SPACE],
+      admin,
+    );
+    expect(s.startAt).toEqual(new Date('2026-11-02T18:00:00Z'));
+    expect(d.tx.flush).not.toHaveBeenCalled();
+  });
+
+  it('shiftSlots: un recurso atado a una sala exige la autoridad de la sala ANTES de leer los turnos', async () => {
+    const d = build();
+    d.resource.careSpaceId = SPACE;
+    d.careSpaces.assertMayManageBound.mockRejectedValue(deny(403));
+    await expect(
+      d.service.shiftSlots(RESOURCE, window, admin),
+    ).rejects.toMatchObject({
+      status: 403,
+    });
+    expect(d.careSpaces.assertMayManageBound).toHaveBeenCalledWith(
+      d.tx,
+      d.resource,
+      [SPACE],
+      admin,
+    );
+    expect(d.catalogRepo.findSlotsOfResourceForUpdate).not.toHaveBeenCalled();
+  });
+
+  it('shiftSlots: el recurso de otra organización es 404 uniforme antes de tocar nada', async () => {
+    const d = build();
+    d.careSpaces.assertResourceInActiveTenant.mockImplementation(() => {
+      throw new ResourceNotFoundException('Recurso no encontrado');
+    });
+    await expect(
+      d.service.shiftSlots(RESOURCE, window, admin),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    expect(d.careSpaces.assertMayManageBound).not.toHaveBeenCalled();
+    expect(d.catalogRepo.findSlotsOfResourceForUpdate).not.toHaveBeenCalled();
+  });
+
+  it('shiftSlots: con la autoridad, mueve el turno (caso permitido) y pide los espacios distintos de sus plantillas', async () => {
+    const d = build();
+    const a = slot(TEMPLATE);
+    const b = slot(TEMPLATE);
+    d.catalogRepo.findSlotsOfResourceForUpdate.mockResolvedValue([a, b]);
+    d.catalogRepo.findTemplateById.mockResolvedValue({
+      id: TEMPLATE,
+      careSpaceId: SPACE,
+    });
+    const res = await d.service.shiftSlots(RESOURCE, window, admin);
+    expect(res.movedSlots).toBe(2);
+    expect(a.startAt).toEqual(new Date('2026-11-02T18:15:00Z'));
+    // Una sola plantilla distinta: se busca una vez.
+    expect(d.catalogRepo.findTemplateById).toHaveBeenCalledTimes(1);
+    expect(d.careSpaces.assertMayManageBound).toHaveBeenLastCalledWith(
+      d.tx,
+      d.resource,
+      [SPACE],
+      admin,
+    );
+  });
+
+  it('retireTemplate: 403 sin autoridad sobre el espacio y nada se retira ni se cancela', async () => {
+    const d = build();
+    d.catalogRepo.findTemplateById.mockResolvedValue({
+      id: TEMPLATE,
+      resourceId: RESOURCE,
+      careSpaceId: SPACE,
+    });
+    d.careSpaces.assertMayManageBound.mockRejectedValue(deny(403));
+    await expect(
+      d.service.retireTemplate(TEMPLATE, admin, {
+        cancelAffectedBookings: true,
+      } as any),
+    ).rejects.toMatchObject({ status: 403 });
+    expect(d.careSpaces.assertMayManageBound).toHaveBeenCalledWith(
+      d.tx,
+      d.resource,
+      [SPACE, undefined],
+      admin,
+    );
+    expect(d.catalogRepo.retireTemplate).not.toHaveBeenCalled();
+    expect(d.catalogRepo.findSlotsOfTemplateForUpdate).not.toHaveBeenCalled();
+  });
+
+  it('retireTemplate: la plantilla de otra organización es 404 uniforme', async () => {
+    const d = build();
+    d.catalogRepo.findTemplateById.mockResolvedValue({
+      id: TEMPLATE,
+      resourceId: RESOURCE,
+    });
+    d.careSpaces.assertResourceInActiveTenant.mockImplementation(() => {
+      throw new ResourceNotFoundException('Recurso no encontrado');
+    });
+    await expect(
+      d.service.retireTemplate(TEMPLATE, admin),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    expect(d.catalogRepo.retireTemplate).not.toHaveBeenCalled();
+  });
+
+  it('retireTemplate: con la autoridad retira (caso permitido)', async () => {
+    const d = build();
+    d.catalogRepo.findTemplateById.mockResolvedValue({
+      id: TEMPLATE,
+      resourceId: RESOURCE,
+      careSpaceId: SPACE,
+    });
+    const res = await d.service.retireTemplate(TEMPLATE, admin);
+    expect(res.statusConceptId).toBe(CONCEPTS.TEMPLATE_RETIRED);
+    expect(d.catalogRepo.retireTemplate).toHaveBeenCalled();
   });
 });

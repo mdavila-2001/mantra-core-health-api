@@ -1227,6 +1227,93 @@ describe('Infraestructura F5d · agenda de consultorios y salas', () => {
         .expect(200);
     });
 
+    it('correr turnos, retirar y leer las reservas de un horario con consultorio: 403 al profesional sin autoridad sobre el consultorio, 404 a otra organización; el coordinador sí', async () => {
+      await darMembresia(ctx, doc2.userId, orgA.tenantId);
+      await http()
+        .post(`/authz/users/${doc2.userId}/role-assignments`)
+        .set(bearer(ctx.adminToken))
+        .send({ roleCode: 'PRACTITIONER', tenantId: orgA.tenantId })
+        .expect(201);
+      const login = await http()
+        .post('/iam/auth/login')
+        .send({
+          email: `f4-prof-d2-${sufijo}@example.test`,
+          password: PASSWORD,
+        })
+        .expect(200);
+      const propio = {
+        token: login.body.accessToken as string,
+        tenantId: orgA.tenantId,
+      };
+      const c = await consultorio('Consultorio de turnos');
+      const { fecha, dow } = dia(24);
+      const t = await publicar(coordA, res2, {
+        careSpaceId: c.id,
+        rules: [regla(dow, '08:00', '10:00')],
+      }).expect(201);
+      await generar(t.body.id, fecha).expect(201);
+      const horarios = async () =>
+        filas(
+          ctx,
+          `select start_at from scheduling.bookable_slots where schedule_template_id = ? order by start_at`,
+          [t.body.id],
+        );
+      const antes = await horarios();
+      expect(antes.length).toBeGreaterThan(0);
+      const ventana = {
+        from: `${fecha}T00:00:00Z`,
+        to: `${fecha}T23:59:59Z`,
+        shiftMinutes: 15,
+      };
+      const correr = (quien: any) =>
+        http()
+          .post(`/scheduling/resources/${res2}/shift-slots`)
+          .set(como(quien))
+          .send(ventana);
+
+      // Su propia agenda, pero el consultorio no es suyo: 403 y ningún turno se mueve.
+      expect((await correr(propio)).status).toBe(403);
+      expect(await horarios()).toEqual(antes);
+      const retiro = await http()
+        .delete(`/scheduling/templates/${t.body.id}`)
+        .set(como(propio));
+      expect(retiro.status).toBe(403);
+      const [{ estado }] = await filas(
+        ctx,
+        `select status_concept_id as estado from scheduling.schedule_templates where id = ?`,
+        [t.body.id],
+      );
+      expect(estado).toBe(CONCEPTS.TEMPLATE_PUBLISHED);
+
+      // Otra organización: 404 uniforme (el recurso y la plantilla no existen para ella).
+      expect((await correr(coordB)).status).toBe(404);
+      expect(
+        (
+          await http()
+            .delete(`/scheduling/templates/${t.body.id}`)
+            .set(como(coordB))
+        ).status,
+      ).toBe(404);
+      expect(await horarios()).toEqual(antes);
+
+      // La coordinación del tenant sí: los turnos se corren y el horario se retira.
+      await correr(coordA).expect(200);
+      const despues = await horarios();
+      expect(new Date(despues[0].start_at).getTime()).toBe(
+        new Date(antes[0].start_at).getTime() + 15 * 60_000,
+      );
+      await http()
+        .delete(`/scheduling/templates/${t.body.id}`)
+        .set(como(coordA))
+        .expect(200);
+      const [{ estado: despuesRetiro }] = await filas(
+        ctx,
+        `select status_concept_id as estado from scheduling.schedule_templates where id = ?`,
+        [t.body.id],
+      );
+      expect(despuesRetiro).toBe(CONCEPTS.TEMPLATE_RETIRED);
+    });
+
     it('quien atiende el mostrador sin alcance sobre el consultorio no lo elige para una cita puntual: 404 y no queda cita', async () => {
       const c = await consultorio('Consultorio fuera de alcance');
       const { fecha } = dia(22);

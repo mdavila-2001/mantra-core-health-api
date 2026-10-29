@@ -125,7 +125,14 @@ export function createCatalogService(d: CatalogServiceDoubles) {
     ),
     new UpdateTemplateUseCase(em, catalogRepo, access, logger, careSpaces),
     new ReactivateTemplateUseCase(em, catalogRepo, access, logger, careSpaces),
-    new RetireTemplateUseCase(em, catalogRepo, access, blockedBookings, logger),
+    new RetireTemplateUseCase(
+      em,
+      catalogRepo,
+      access,
+      blockedBookings,
+      logger,
+      careSpaces,
+    ),
     new GenerateSlotsUseCase(
       em,
       catalogRepo,
@@ -143,7 +150,14 @@ export function createCatalogService(d: CatalogServiceDoubles) {
       logger,
       careSpaces,
     ),
-    new ShiftSlotsUseCase(em, catalogRepo, access, moveNotifier, logger),
+    new ShiftSlotsUseCase(
+      em,
+      catalogRepo,
+      access,
+      moveNotifier,
+      logger,
+      careSpaces,
+    ),
     new CreateExceptionUseCase(
       em,
       catalogRepo,
@@ -165,6 +179,7 @@ export function createCatalogService(d: CatalogServiceDoubles) {
       catalogRepo,
       access,
       blockedBookings,
+      careSpaces,
     ),
   );
 }

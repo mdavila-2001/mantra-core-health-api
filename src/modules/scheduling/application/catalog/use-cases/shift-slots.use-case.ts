@@ -4,6 +4,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../../../common';
+import { CareSpaceTemplateGuard } from '../support/care-space-template-guard';
 import { CatalogAccess } from '../support/catalog-access';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
@@ -24,6 +25,7 @@ export class ShiftSlotsUseCase {
     private readonly access: CatalogAccess,
     private readonly moveNotifier: SlotMoveNotifier,
     private readonly logger: PinoLogger,
+    private readonly careSpaces: CareSpaceTemplateGuard,
   ) {
     this.logger.setContext(ShiftSlotsUseCase.name);
   }
@@ -64,7 +66,16 @@ export class ShiftSlotsUseCase {
           resourceId,
         });
       }
+      this.careSpaces.assertResourceInActiveTenant(resource);
       this.access.assertActorResource(resource, actor);
+      // Correr los turnos de un consultorio es tocar el consultorio: la misma autoridad que para
+      // editar su horario. Primero la del recurso atado a una sala, antes de leer nada.
+      await this.careSpaces.assertMayManageBound(
+        tx,
+        resource,
+        [resource.careSpaceId],
+        actor,
+      );
 
       const slots = await this.catalogRepo.findSlotsOfResourceForUpdate(
         tx,
@@ -76,6 +87,24 @@ export class ShiftSlotsUseCase {
       if (slots.length === 0) {
         return { ids: [] as string[], displaced: 0 };
       }
+      // Y la de cada consultorio al que pertenecen los turnos afectados (el de su plantilla),
+      // antes de mover ninguno.
+      const templateIds = [
+        ...new Set(
+          slots
+            .map((slot) => slot.scheduleTemplateId)
+            .filter((id): id is string => !!id),
+        ),
+      ];
+      const spaceIds: (string | null | undefined)[] = [];
+      for (const templateId of templateIds) {
+        const template = await this.catalogRepo.findTemplateById(
+          tx,
+          templateId,
+        );
+        spaceIds.push(template?.careSpaceId);
+      }
+      await this.careSpaces.assertMayManageBound(tx, resource, spaceIds, actor);
 
       const ms = dto.shiftMinutes * 60_000;
       for (const slot of slots) {
