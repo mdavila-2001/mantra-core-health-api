@@ -15,13 +15,13 @@ import { RolesGuard } from '../../src/common/auth/roles.guard';
 import { SessionValidator } from '../../src/common/auth/session-validator';
 import { TokenService } from '../../src/common/auth/token.service';
 import { AllExceptionsFilter } from '../../src/common/filters/all-exceptions.filter';
-import { AdminCatalogController } from '../../src/modules/data_catalog/controllers/admin-catalog.controller';
-import { CatalogRepository } from '../../src/modules/data_catalog/repositories/catalog.repository';
-import { CatalogClassificationService } from '../../src/modules/data_catalog/services/catalog-classification.service';
-import { CatalogGovernanceService } from '../../src/modules/data_catalog/services/catalog-governance.service';
-import { CatalogReadService } from '../../src/modules/data_catalog/services/catalog-read.service';
-import { CatalogScanService } from '../../src/modules/data_catalog/services/catalog-scan.service';
-import { PermissionDriftService } from '../../src/modules/data_catalog/services/permission-drift.service';
+import { AdminCatalogController } from '../../src/modules/data_catalog/presentation/controllers/admin-catalog.controller';
+import { CatalogRepository } from '../../src/modules/data_catalog/infrastructure/repositories/catalog.repository';
+import { CatalogClassificationService } from '../../src/modules/data_catalog/application/catalog-classification.service';
+import { CatalogGovernanceService } from '../../src/modules/data_catalog/application/catalog-governance.service';
+import { CatalogReadService } from '../../src/modules/data_catalog/application/catalog-read.service';
+import { CatalogScanService } from '../../src/modules/data_catalog/application/catalog-scan.service';
+import { PermissionDriftService } from '../../src/modules/data_catalog/application/permission-drift.service';
 import { RouteIndexModule } from '../../src/observability/route-index/route-index.module';
 import { TracingService } from '../../src/observability';
 
@@ -1016,7 +1016,7 @@ describe('Catálogo de datos vivo /admin/catalog (DB real)', () => {
       const ok = await post(`/admin/catalog/objects/${objetoId}/evidence`, {
         kind: 'CODE_REFERENCE',
         reference:
-          'src/modules/data_catalog/repositories/catalog.repository.ts',
+          'src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts',
         excerpt: 'insert into data_catalog.catalog_evidence_items',
       }).expect(201);
       expect(ok.body).toMatchObject({
