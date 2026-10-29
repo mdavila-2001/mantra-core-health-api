@@ -14,6 +14,7 @@ import {
   ResourceNotFoundException,
   runWithTenant,
 } from '../../../common';
+import { DIAG } from '../../diagnostics/diagnostics.concepts';
 import { DUNIT } from '../diagnostic_units.concepts';
 import { DiagnosticUnitsErrorReason } from '../diagnostic_units.error-reasons';
 import { OpsErrorReason } from '../../practice/practice-ops.error-reasons';
@@ -345,6 +346,12 @@ describe('DiagnosticEquipmentService', () => {
           /update diagnostics\.imaging_procedure_steps/.test(q),
         ),
       ).toBe(true);
+      // Sólo se mueven los pasos programados: uno completado conserva la sala en que se hizo.
+      const move = d.tx.execute.mock.calls.find((c: any[]) =>
+        /update diagnostics\.imaging_procedure_steps/.test(String(c[0])),
+      );
+      expect(String(move[0])).toMatch(/status_concept_id = \?/);
+      expect(move[1]).toContain(DIAG.PROCEDURE_STEP_SCHEDULED);
       expect(d.agenda.relocateBookings).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({

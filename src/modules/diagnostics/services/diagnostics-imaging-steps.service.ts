@@ -2,10 +2,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
   createdBy,
   requireTenantId,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -13,6 +15,8 @@ import {
   CARE_SPACE_OPS_PORT,
   type CareSpaceOpsPort,
 } from '../../practice/services/care-space-ops.port';
+import { InfrastructureAccessService } from '../../practice/services/infrastructure-access.service';
+import { InsufficientRoleException } from '../../../common/errors/domain.exception';
 import { DUNIT } from '../../diagnostic_units/diagnostic_units.concepts';
 import { DIAG } from '../diagnostics.concepts';
 import { DiagnosticsErrorReason } from '../diagnostics.error-reasons';
@@ -24,10 +28,20 @@ import {
   ImagingWorklistQueryDto,
   ScheduleImagingStepDto,
 } from '../dto';
+import { DiagnosticsPatientAccessService } from './diagnostics-patient-access.service';
 import { DiagnosticsScopeService } from './diagnostics-scope.service';
 
 /** Cuánto dura un estudio cuando el paso no declara otra duración (supuesto de la ventana de reserva de la sala). */
 export const IMAGING_STEP_DEFAULT_MINUTES = 30;
+
+/** Máximo de la ventana de la worklist: una estación pide su jornada, no el historial. */
+export const IMAGING_WORKLIST_MAX_DAYS = 7;
+
+/** Estados desde los que un paso se programa o se reprograma. */
+const SCHEDULABLE_STEP_STATES: readonly string[] = [
+  DIAG.PROCEDURE_STEP_PLANNED,
+  DIAG.PROCEDURE_STEP_SCHEDULED,
+];
 
 /** Estados del equipo en los que no se programan estudios. */
 const EQUIPMENT_OUT_OF_SERVICE: readonly string[] = [
@@ -89,12 +103,16 @@ export class DiagnosticsImagingStepsService {
    * @param scope - Alcance de tenant de los recursos clínicos.
    * @param ops - Puerto de F2: ¿se puede reservar la sala?
    * @param logger - Logger.
+   * @param infra - Política de infraestructura (quién opera la estación).
+   * @param patientAccess - Política de acceso al paciente.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly scope: DiagnosticsScopeService,
     @Inject(CARE_SPACE_OPS_PORT) private readonly ops: CareSpaceOpsPort,
     private readonly logger: PinoLogger,
+    private readonly infra: InfrastructureAccessService,
+    private readonly patientAccess: DiagnosticsPatientAccessService,
   ) {
     this.logger.setContext(DiagnosticsImagingStepsService.name);
   }
@@ -179,10 +197,18 @@ export class DiagnosticsImagingStepsService {
         [stepId, tenantId],
       );
       if (found.length === 0) throw notAvailable();
-      await tx.execute(
-        `select 1 from diagnostics.imaging_procedure_steps where id = ? for update`,
+      // Relee el paso bloqueado: el estado se decide con la fila que nadie más puede cambiar.
+      const [locked] = await tx.execute<{ status_concept_id: string }[]>(
+        `select status_concept_id from diagnostics.imaging_procedure_steps where id = ? for update`,
         [stepId],
       );
+      if (!SCHEDULABLE_STEP_STATES.includes(locked.status_concept_id)) {
+        throw new ConflictException(
+          'El paso ya no se puede programar en su estado actual',
+          undefined,
+          DiagnosticsErrorReason.IMAGING_STEP_STATE_INVALID,
+        );
+      }
 
       // El equipo es de la organización del contexto; se bloquea `FOR SHARE` para que su
       // reubicación (que lo toma `FOR UPDATE`) se serialice con esta programación.
@@ -253,12 +279,23 @@ export class DiagnosticsImagingStepsService {
 
   /**
    * La Modality Worklist de una estación: los pasos programados en ese equipo, con el AE Title
-   * y la sala (SPS Location). Se pide por estación —no hay un volcado de todo el centro— y
-   * solo viaja el identificador del paciente.
+   * y la sala (SPS Location). Se pide por estación —no hay un volcado de todo el centro—, en una
+   * ventana de hasta {@link IMAGING_WORKLIST_MAX_DAYS} días y con tope de filas; solo viaja el
+   * identificador del paciente.
    *
-   * @throws PreconditionFailedException (`IMAGING_WORKLIST_STATION_REQUIRED`).
+   * Quién ve a qué paciente: quien opera la estación (plataforma, o administración de la
+   * organización o de la sede del equipo: `infra.equipment.worklist`) ve toda la lista; el resto
+   * del personal clínico ve únicamente los pacientes con los que tiene una relación asistencial
+   * vigente (la misma política que el resto de lo clínico). Un paciente sin relación no
+   * aparece, ni cuenta.
+   *
+   * @throws PreconditionFailedException (`IMAGING_WORKLIST_STATION_REQUIRED`,
+   *   `IMAGING_WORKLIST_WINDOW_INVALID`, `IMAGING_WORKLIST_WINDOW_TOO_LARGE`).
    */
-  async worklist(query: ImagingWorklistQueryDto): Promise<ImagingWorklistDto> {
+  async worklist(
+    query: ImagingWorklistQueryDto,
+    actor: AuthenticatedUser,
+  ): Promise<ImagingWorklistDto> {
     if (!query.equipmentId && !query.aeTitle) {
       throw new PreconditionFailedException(
         'Indique el equipo o el AE Title de la estación',
@@ -273,10 +310,29 @@ export class DiagnosticsImagingStepsService {
     const to = query.to
       ? new Date(query.to)
       : new Date(from.getTime() + 24 * 3_600_000);
+    if (to.getTime() <= from.getTime()) {
+      throw new PreconditionFailedException(
+        'La ventana termina antes de empezar',
+        undefined,
+        DiagnosticsErrorReason.IMAGING_WORKLIST_WINDOW_INVALID,
+      );
+    }
+    if (
+      to.getTime() - from.getTime() >
+      IMAGING_WORKLIST_MAX_DAYS * 86_400_000
+    ) {
+      throw new PreconditionFailedException(
+        `La ventana de la worklist admite hasta ${IMAGING_WORKLIST_MAX_DAYS} días`,
+        { maxDays: IMAGING_WORKLIST_MAX_DAYS },
+        DiagnosticsErrorReason.IMAGING_WORKLIST_WINDOW_TOO_LARGE,
+      );
+    }
+    const limit = Math.min(query.limit ?? 100, 200);
     const station = query.equipmentId
       ? { sql: 'e.id = ?', value: query.equipmentId }
       : { sql: 'e.ae_title = ?', value: query.aeTitle };
-    const rows = await this.em.fork().execute<WorklistRow[]>(
+    const em = this.em.fork();
+    const rows = await em.execute<WorklistRow[]>(
       `select s.id as step_id, s.imaging_study_id, st.dicom_study_instance_uid,
               st.accession_number, st.patient_profile_id, s.modality_concept_id,
               e.id as equipment_id, e.ae_title, e.station_name,
@@ -299,10 +355,17 @@ export class DiagnosticsImagingStepsService {
         station.value,
         from,
         to,
-        query.limit ?? 100,
+        limit + 1,
       ],
     );
-    const items = rows.map((row) => ({
+    const truncated = rows.length > limit;
+    const visible = await this.visibleRows(
+      em,
+      tenantId,
+      rows.slice(0, limit),
+      actor,
+    );
+    const items = visible.map((row) => ({
       stepId: row.step_id,
       imagingStudyId: row.imaging_study_id,
       studyInstanceUid: row.dicom_study_instance_uid,
@@ -316,7 +379,77 @@ export class DiagnosticsImagingStepsService {
       equipmentId: row.equipment_id,
       scheduledStartAt: new Date(row.scheduled_start_at).toISOString(),
     }));
-    return { items, count: items.length };
+    return { items, count: items.length, truncated };
+  }
+
+  /**
+   * Las filas que el actor puede ver: todas las de los equipos que opera, y de los demás solo las
+   * de pacientes con los que tiene relación asistencial (se consulta una vez por paciente).
+   */
+  private async visibleRows(
+    em: EntityManager,
+    tenantId: string,
+    rows: WorklistRow[],
+    actor: AuthenticatedUser,
+  ): Promise<WorklistRow[]> {
+    if (roleAuthorizesInTenant(actor, 'SUPERADMIN', tenantId)) return rows;
+    const operated = new Map<string, boolean>();
+    for (const row of rows) {
+      if (operated.has(row.equipment_id)) continue;
+      operated.set(
+        row.equipment_id,
+        await this.operatesStation(em, actor, row.scheduled_care_space_id),
+      );
+    }
+    const patients = new Map<string, boolean>();
+    const visible: WorklistRow[] = [];
+    for (const row of rows) {
+      if (operated.get(row.equipment_id)) {
+        visible.push(row);
+        continue;
+      }
+      let allowed = patients.get(row.patient_profile_id);
+      if (allowed === undefined) {
+        allowed = await this.patientAccess
+          .assertCanReadPatient(row.patient_profile_id, actor)
+          .then(
+            () => true,
+            (error: unknown) => {
+              if (error instanceof ResourceNotFoundException) return false;
+              throw error;
+            },
+          );
+        patients.set(row.patient_profile_id, allowed);
+      }
+      if (allowed) visible.push(row);
+    }
+    return visible;
+  }
+
+  /** ¿Opera la estación? Administración de la sala del equipo; sin alcance o sin rol, no. */
+  private async operatesStation(
+    em: EntityManager,
+    actor: AuthenticatedUser,
+    careSpaceId: string | null,
+  ): Promise<boolean> {
+    if (!careSpaceId) return false;
+    try {
+      await this.infra.assertCan(
+        actor,
+        'infra.equipment.worklist',
+        { careSpaceId },
+        em,
+      );
+      return true;
+    } catch (error) {
+      if (
+        error instanceof ResourceNotFoundException ||
+        error instanceof InsufficientRoleException
+      ) {
+        return false;
+      }
+      throw error;
+    }
   }
 
   private toDto(row: StepRow): ImagingStepDto {

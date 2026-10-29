@@ -29,4 +29,10 @@ export enum DiagnosticsErrorReason {
   IMAGING_EQUIPMENT_UNAVAILABLE = 'IMAGING_EQUIPMENT_UNAVAILABLE',
   /** La worklist se pide por estación: falta el equipo o el AE Title. */
   IMAGING_WORKLIST_STATION_REQUIRED = 'IMAGING_WORKLIST_STATION_REQUIRED',
+  /** La ventana de la worklist termina antes de empezar. */
+  IMAGING_WORKLIST_WINDOW_INVALID = 'IMAGING_WORKLIST_WINDOW_INVALID',
+  /** La ventana de la worklist excede el máximo (7 días). */
+  IMAGING_WORKLIST_WINDOW_TOO_LARGE = 'IMAGING_WORKLIST_WINDOW_TOO_LARGE',
+  /** El paso no está en un estado desde el que se pueda programar (planificado o programado). */
+  IMAGING_STEP_STATE_INVALID = 'IMAGING_STEP_STATE_INVALID',
 }

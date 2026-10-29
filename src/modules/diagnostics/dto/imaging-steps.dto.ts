@@ -97,7 +97,7 @@ export class ImagingWorklistQueryDto {
   @MaxLength(16)
   aeTitle?: string;
 
-  /** Desde (inclusive). Por omisión, hoy a las 00:00 UTC. */
+  /** Desde (inclusive). Por omisión, hoy a las 00:00 UTC. La ventana `from`–`to` admite hasta 7 días. */
   @ApiPropertyOptional({ format: 'date-time' })
   @IsOptional()
   @IsISO8601()
@@ -179,4 +179,8 @@ export class ImagingWorklistDto {
   /** Cuántos. */
   @ApiProperty()
   count!: number;
+
+  /** `true` si había más filas que `limit`: acote la ventana o la estación. */
+  @ApiProperty()
+  truncated!: boolean;
 }
