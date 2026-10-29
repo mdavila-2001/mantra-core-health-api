@@ -381,6 +381,14 @@ export class PeriopPreopRepository {
     );
   }
 
+  /** Check-list por id, sin bloquear. */
+  findChecklistById(
+    em: EntityManager,
+    id: string,
+  ): Promise<SurgicalSafetyChecklists | null> {
+    return em.findOne(SurgicalSafetyChecklists, { id });
+  }
+
   /**
    * Obtiene find checklist by case.
    *

@@ -12,6 +12,8 @@ import {
   PracticeSitesHistory,
   ClinicalUnitsHistory,
   CareSpacesHistory,
+  OperatingRoomBlocksHistory,
+  OperatingRoomBlockSeriesHistory,
 } from '../entities';
 
 /** Datos para sellar una revisión en una tabla `*_history` (write-side). */
@@ -161,6 +163,17 @@ const HISTORY_REGISTRY: Record<string, HistoryBinding> = {
   care_spaces: {
     entity: CareSpacesHistory,
     sourceField: 'careSpaceId',
+    revisionField: 'revisionNo',
+  },
+  // F4 de infraestructura hospitalaria: bloques de quirófano y sus series.
+  operating_room_blocks: {
+    entity: OperatingRoomBlocksHistory,
+    sourceField: 'operatingRoomBlockId',
+    revisionField: 'revisionNo',
+  },
+  operating_room_block_series: {
+    entity: OperatingRoomBlockSeriesHistory,
+    sourceField: 'operatingRoomBlockSeriesId',
     revisionField: 'revisionNo',
   },
 };

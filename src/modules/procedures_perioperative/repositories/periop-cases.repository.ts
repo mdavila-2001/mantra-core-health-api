@@ -13,7 +13,7 @@ import {
   ProcedureCancellations,
   ProcedureChargeItems,
 } from '../entities';
-import { createdBy } from '../../../common';
+import { CONCEPTS, createdBy } from '../../../common';
 
 /**
  * Describe el contrato estructural de create case data.
@@ -91,6 +91,14 @@ export interface CreateCaseData {
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
+  /** Foto de `care_spaces.prep_minutes` al programar (o el valor explícito del cliente). */
+  prepMinutes?: number;
+  /** Foto de `care_spaces.cleanup_minutes` al programar (o el valor explícito del cliente). */
+  cleanupMinutes?: number;
+  /** Recurso agendable activo de la sala (R0). */
+  schedulableResourceId?: string;
+  /** Bloque propio en el que cae la ventana, si lo hay. */
+  operatingRoomBlockId?: string;
 }
 
 /**
@@ -171,6 +179,10 @@ export class PeriopCasesRepository {
         scheduledStartAt: data.scheduledStartAt,
         scheduledEndAt: data.scheduledEndAt,
         urgencyReasonText: data.urgencyReasonText,
+        prepMinutes: data.prepMinutes,
+        cleanupMinutes: data.cleanupMinutes,
+        schedulableResourceId: data.schedulableResourceId,
+        operatingRoomBlockId: data.operatingRoomBlockId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },
@@ -378,8 +390,12 @@ export class PeriopCasesRepository {
   }
 
   /**
-   * Casos que ocupan el quirófano en un rango. Reservar un quirófano ya ocupado
-   * es el error que esta consulta existe para evitar.
+   * Casos vivos cuya **ventana reservada** (preparación + caso + limpieza) se solapa con
+   * `[from, to)` en la sala. Reservar un quirófano ya ocupado es el error que esta consulta
+   * existe para evitar; la base lo vuelve a impedir con `ex_procedure_cases_operating_room_reserved_time`.
+   *
+   * Las filas anteriores a la ventana reservada (`reserved_*` nulo) se comparan por su horario
+   * programado. `excludeCaseId` deja fuera al propio caso cuando se reprograma.
    */
   findOverlappingCases(
     em: EntityManager,
@@ -387,13 +403,72 @@ export class PeriopCasesRepository {
     from: Date,
     to: Date,
     blockingStatusConceptIds: string[],
+    excludeCaseId?: string,
   ): Promise<ProcedureCases[]> {
-    return em.find(ProcedureCases, {
-      operatingRoomId,
-      statusConceptId: { $in: blockingStatusConceptIds },
-      scheduledStartAt: { $lt: to },
-      scheduledEndAt: { $gt: from },
-    });
+    return em.find(
+      ProcedureCases,
+      {
+        operatingRoomId,
+        statusConceptId: { $in: blockingStatusConceptIds },
+        ...(excludeCaseId ? { id: { $ne: excludeCaseId } } : {}),
+        $or: [
+          { reservedStartAt: { $lt: to }, reservedEndAt: { $gt: from } },
+          {
+            reservedStartAt: null,
+            scheduledStartAt: { $lt: to },
+            scheduledEndAt: { $gt: from },
+          },
+        ],
+      },
+      { orderBy: { reservedStartAt: 'ASC' } },
+    );
+  }
+
+  /**
+   * Casos no cancelados de las salas cuya ventana reservada toca `[from, to)`: la agenda del
+   * día por sala. Acotado al tenant.
+   */
+  findCasesInWindow(
+    em: EntityManager,
+    custodianTenantId: string,
+    operatingRoomIds: readonly string[],
+    from: Date,
+    to: Date,
+  ): Promise<ProcedureCases[]> {
+    return em.find(
+      ProcedureCases,
+      {
+        custodianTenantId,
+        operatingRoomId: { $in: [...operatingRoomIds] },
+        statusConceptId: { $ne: CONCEPTS.CASE_CANCELLED },
+        $or: [
+          { reservedStartAt: { $lt: to }, reservedEndAt: { $gt: from } },
+          {
+            reservedStartAt: null,
+            scheduledStartAt: { $lt: to },
+            scheduledEndAt: { $gt: from },
+          },
+        ],
+      },
+      { orderBy: { scheduledStartAt: 'ASC' } },
+    );
+  }
+
+  /** Casos no cancelados ligados a los bloques indicados. Acotado al tenant. */
+  findCasesOfBlocks(
+    em: EntityManager,
+    custodianTenantId: string,
+    blockIds: readonly string[],
+  ): Promise<ProcedureCases[]> {
+    return em.find(
+      ProcedureCases,
+      {
+        custodianTenantId,
+        operatingRoomBlockId: { $in: [...blockIds] },
+        statusConceptId: { $ne: CONCEPTS.CASE_CANCELLED },
+      },
+      { orderBy: { scheduledStartAt: 'ASC' } },
+    );
   }
 
   /** Historial de estado: log append-only de toda transición del caso. */
@@ -739,6 +814,12 @@ export class PeriopCasesRepository {
        * Valor de details json mantenido por la instancia.
        */
       detailsJson?: unknown;
+      /** Tenant de la sala (la tabla tiene RLS por tenant). La base lo completa si falta. */
+      tenantId?: string;
+      /** Bloque al que pertenece el evento. */
+      operatingRoomBlockId?: string;
+      /** Instante real del hecho; por omisión, ahora. */
+      occurredAt?: Date;
     },
   ): OperatingRoomUtilizationEvents {
     return em.create(
@@ -747,12 +828,14 @@ export class PeriopCasesRepository {
         operatingRoomId: data.operatingRoomId,
         procedureCaseId: data.procedureCaseId,
         eventTypeConceptId: data.eventTypeConceptId,
-        occurredAt: new Date(),
+        occurredAt: data.occurredAt ?? new Date(),
         durationSeconds: data.durationSeconds,
         delayReasonConceptId: data.delayReasonConceptId,
         turnoverCategoryConceptId: data.turnoverCategoryConceptId,
         recordedByUserId: data.recordedByUserId,
         detailsJson: data.detailsJson,
+        tenantId: data.tenantId,
+        operatingRoomBlockId: data.operatingRoomBlockId,
         createdAt: new Date(),
       },
       { partial: true },

@@ -117,6 +117,8 @@ function build() {
     create: mockFn().mockResolvedValue({ id: 'sr-1' }),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // La compuerta del check-list OMS tiene su propio spec; acá se comprueba cuándo se llama.
+  const gate = { assertPhase: mockFn().mockResolvedValue(undefined) };
   const service = new PeriopPreopService(
     em as any,
     preopRepo,
@@ -124,10 +126,13 @@ function build() {
     serviceRequests as any,
     new PeriopReacceptanceService(casesRepo as any, outbox as any),
     logger as any,
+    outbox as any,
+    gate as any,
   );
   return {
     service: inTenant(service, TENANT_A),
     raw: service,
+    gate,
     serviceRequests,
     outbox,
     tx,
@@ -432,6 +437,8 @@ describe('PeriopPreopService', () => {
         checklistVersion: '2009',
         statusConceptId: CONCEPTS.CHECKLIST_IN_PROGRESS,
       };
+      // La fase por omisión de estas pruebas es la Pausa, que exige la Entrada completa.
+      checklist.signInCompletedAt = new Date();
       d.preopRepo.findChecklistForUpdate.mockResolvedValue(checklist);
       d.preopRepo.findItemsByPhase.mockResolvedValue(items);
       d.preopRepo.findResponsesByChecklist.mockResolvedValue([]);
@@ -532,6 +539,188 @@ describe('PeriopPreopService', () => {
       await expect(
         d.service.submitChecklistPhase(CASE, CHECKLIST, dto(), actor as any),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('F4 · la Pausa sin la Entrada y la Salida sin la Pausa se rechazan con CHECKLIST_PHASE_OUT_OF_ORDER', async () => {
+      const d = build();
+      const checklist = wire(d);
+      checklist.signInCompletedAt = undefined;
+
+      await expect(
+        d.service.submitChecklistPhase(CASE, CHECKLIST, dto(), actor as any),
+      ).rejects.toMatchObject({
+        reason: ProceduresPerioperativeErrorReason.CHECKLIST_PHASE_OUT_OF_ORDER,
+        details: { missingPhase: 'SIGN_IN' },
+      });
+
+      checklist.signInCompletedAt = new Date();
+      await expect(
+        d.service.submitChecklistPhase(
+          CASE,
+          CHECKLIST,
+          dto({ phase: 'SIGN_OUT' as const }),
+          actor as any,
+        ),
+      ).rejects.toMatchObject({
+        reason: ProceduresPerioperativeErrorReason.CHECKLIST_PHASE_OUT_OF_ORDER,
+        details: { missingPhase: 'TIME_OUT' },
+      });
+      expect(d.preopRepo.createResponse).not.toHaveBeenCalled();
+    });
+
+    it('F4 · completar una fase publica periop.checklist.phase_completed en la misma transacción; una fase abierta no', async () => {
+      const d = build();
+      wire(d);
+      await d.service.submitChecklistPhase(CASE, CHECKLIST, dto(), actor);
+      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          eventType: 'periop.checklist.phase_completed',
+          aggregateId: CHECKLIST,
+          tenantId: TENANT_A,
+          payloadJson: expect.objectContaining({
+            phase: 'TIME_OUT',
+            checklistCompleted: false,
+          }),
+        }),
+      );
+
+      const open = build();
+      wire(open, [
+        { id: ITEM, isMandatory: true },
+        { id: 'item-2', isMandatory: true },
+      ]);
+      await open.service.submitChecklistPhase(CASE, CHECKLIST, dto(), actor);
+      expect(open.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('createChecklist / getChecklist (F4)', () => {
+    it('crea el check-list OMS 2009, siembra los 19 ítems y publica periop.checklist.created', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue({
+        id: CASE,
+        statusConceptId: CONCEPTS.CASE_SCHEDULED,
+        custodianTenantId: TENANT_A,
+      });
+      d.preopRepo.findChecklistByCase.mockResolvedValue(null);
+      d.preopRepo.createChecklist.mockReturnValue({ id: CHECKLIST });
+      d.tx.execute = mockFn().mockResolvedValue([]);
+
+      const res = await d.service.createChecklist(CASE, undefined, actor);
+
+      expect(res).toMatchObject({
+        created: true,
+        id: CHECKLIST,
+        checklistVersion: '2009',
+        statusConceptId: CONCEPTS.CHECKLIST_IN_PROGRESS,
+      });
+      // 7 + 7 + 5, con ON CONFLICT con objetivo (idempotente aunque dos altas corran a la vez).
+      expect(d.tx.execute).toHaveBeenCalledTimes(19);
+      expect(d.tx.execute.mock.calls[0][0]).toContain(
+        'on conflict (checklist_type_concept_id, checklist_version, item_code) do nothing',
+      );
+      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ eventType: 'periop.checklist.created' }),
+      );
+    });
+
+    it('es idempotente: si el caso ya tiene check-list lo devuelve sin crear ni publicar', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue({
+        id: CASE,
+        statusConceptId: CONCEPTS.CASE_SCHEDULED,
+        custodianTenantId: TENANT_A,
+      });
+      d.preopRepo.findChecklistByCase.mockResolvedValue({
+        id: CHECKLIST,
+        checklistVersion: '2009',
+        statusConceptId: CONCEPTS.CHECKLIST_IN_PROGRESS,
+      });
+
+      const res = await d.service.createChecklist(CASE, undefined, actor);
+
+      expect(res).toMatchObject({ created: false, id: CHECKLIST });
+      expect(d.preopRepo.createChecklist).not.toHaveBeenCalled();
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    });
+
+    it('un caso cancelado → 409 CASE_CANCELLED', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue({
+        id: CASE,
+        statusConceptId: CONCEPTS.CASE_CANCELLED,
+        custodianTenantId: TENANT_A,
+      });
+      await expect(
+        d.service.createChecklist(CASE, undefined, actor),
+      ).rejects.toMatchObject({
+        status: 409,
+        reason: ProceduresPerioperativeErrorReason.CASE_CANCELLED,
+      });
+    });
+
+    it('un caso de otro tenant responde el mismo 404 y no toca el check-list', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue({
+        id: CASE,
+        statusConceptId: CONCEPTS.CASE_SCHEDULED,
+        custodianTenantId: 'otro-tenant',
+      });
+      await expect(
+        d.service.createChecklist(CASE, undefined, actor),
+      ).rejects.toMatchObject({ status: 404 });
+      expect(d.preopRepo.createChecklist).not.toHaveBeenCalled();
+    });
+
+    it('getChecklist devuelve las tres fases con sus ítems y respuestas; uno de otro caso es 404', async () => {
+      const d = build();
+      d.preopRepo.findChecklistById = mockFn().mockResolvedValue({
+        id: CHECKLIST,
+        procedureCaseId: CASE,
+        checklistTypeConceptId: CONCEPTS.CHECKLIST_WHO,
+        checklistVersion: '2009',
+        statusConceptId: CONCEPTS.CHECKLIST_IN_PROGRESS,
+        signInCompletedAt: new Date('2026-11-02T10:00:00Z'),
+      });
+      d.preopRepo.findResponsesByChecklist.mockResolvedValue([
+        {
+          surgicalSafetyItemId: ITEM,
+          responseStatusConceptId: CONCEPTS.RESPONSE_CONFIRMED,
+          responseBoolean: true,
+          respondedAt: new Date('2026-11-02T10:00:00Z'),
+        },
+      ]);
+      d.preopRepo.findItemsByPhase.mockResolvedValue([
+        { id: ITEM, itemCode: 'SI_01', promptText: '¿…?', isMandatory: true },
+      ]);
+
+      const res = await d.service.getChecklist(CASE, CHECKLIST);
+
+      expect(res.phases.map((p) => p.phase)).toEqual([
+        'SIGN_IN',
+        'TIME_OUT',
+        'SIGN_OUT',
+      ]);
+      expect(res.phases[0].completedAt).toBeInstanceOf(Date);
+      expect(res.phases[1].completedAt).toBeNull();
+      expect(res.phases[0].items[0]).toMatchObject({
+        id: ITEM,
+        mandatory: true,
+        response: { status: 'CONFIRMED', responseBoolean: true },
+      });
+
+      d.preopRepo.findChecklistById.mockResolvedValue({
+        id: CHECKLIST,
+        procedureCaseId: 'otro-caso',
+      });
+      await expect(
+        d.service.getChecklist(CASE, CHECKLIST),
+      ).rejects.toMatchObject({
+        status: 404,
+        reason: ProceduresPerioperativeErrorReason.CHECKLIST_NOT_FOUND,
+      });
     });
   });
 
@@ -753,6 +942,41 @@ describe('PeriopPreopService', () => {
           eventTypeConceptId: CONCEPTS.OR_EVENT_CASE_START,
         }),
       );
+    });
+
+    it('F4 · la inducción exige la Entrada del check-list; si falta no se registra nada', async () => {
+      const d = build();
+      wire(d);
+      d.gate.assertPhase.mockRejectedValue(
+        new PreconditionFailedException(
+          'falta',
+          { phase: 'SIGN_IN' },
+          ProceduresPerioperativeErrorReason.CHECKLIST_SIGN_IN_REQUIRED,
+        ),
+      );
+
+      await expect(
+        d.service.recordAnesthesiaEvent(
+          CASE,
+          dto({ eventType: 'INDUCTION' as const }),
+          actor as any,
+        ),
+      ).rejects.toMatchObject({
+        reason: ProceduresPerioperativeErrorReason.CHECKLIST_SIGN_IN_REQUIRED,
+      });
+      expect(d.gate.assertPhase).toHaveBeenCalledWith(d.tx, CASE, 'SIGN_IN');
+      expect(d.preopRepo.createAnesthesiaEvent).not.toHaveBeenCalled();
+    });
+
+    it('F4 · los demás eventos de anestesia no pasan por la compuerta', async () => {
+      const d = build();
+      wire(d);
+      await d.service.recordAnesthesiaEvent(
+        CASE,
+        dto({ eventType: 'VITALS' as const }),
+        actor,
+      );
+      expect(d.gate.assertPhase).not.toHaveBeenCalled();
     });
 
     it('refuses induction without an approved anesthesia plan', async () => {

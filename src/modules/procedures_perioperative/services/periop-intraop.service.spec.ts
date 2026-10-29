@@ -140,6 +140,8 @@ function build() {
     projectCompletedCase: mockFn().mockResolvedValue(undefined),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // La compuerta del check-list OMS tiene su propio spec; acá se comprueba cuándo se llama.
+  const gate = { assertPhase: mockFn().mockResolvedValue(undefined) };
   const service = new PeriopIntraopService(
     em as any,
     intraopRepo as any,
@@ -147,10 +149,12 @@ function build() {
     procedures as any,
     receivedServices as any,
     logger as any,
+    gate as any,
   );
   return {
     service: inTenant(service, TENANT_A),
     raw: service,
+    gate,
     tx,
     intraopRepo,
     casesRepo,
@@ -653,6 +657,37 @@ describe('PeriopIntraopService', () => {
           milestoneTypeConceptId: CONCEPTS.MILESTONE_CASE_END,
         }),
       );
+    });
+
+    it('F4 · firmar el reporte exige la Salida del check-list; sin ella no se firma ni se cierra el caso', async () => {
+      const d = build();
+      const report: any = {
+        id: REPORT,
+        procedureCaseId: CASE,
+        statusConceptId: CONCEPTS.OPERATIVE_REPORT_DRAFT,
+      };
+      d.intraopRepo.findReportForUpdate.mockResolvedValue(report);
+      const surgicalCase = caseInProgress();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(surgicalCase);
+      d.gate.assertPhase.mockRejectedValue(
+        new PreconditionFailedException(
+          'falta',
+          { phase: 'SIGN_OUT' },
+          ProceduresPerioperativeErrorReason.CHECKLIST_SIGN_OUT_REQUIRED,
+        ),
+      );
+
+      await expect(
+        d.service.signReport(CASE, REPORT, { signatureId: PROFILE }, actor),
+      ).rejects.toMatchObject({
+        reason: ProceduresPerioperativeErrorReason.CHECKLIST_SIGN_OUT_REQUIRED,
+      });
+      expect(d.gate.assertPhase).toHaveBeenCalledWith(d.tx, CASE, 'SIGN_OUT');
+      expect(report.statusConceptId).toBe(CONCEPTS.OPERATIVE_REPORT_DRAFT);
+      expect(surgicalCase.statusConceptId).toBe(
+        CONCEPTS.SURGICAL_CASE_IN_PROGRESS,
+      );
+      expect(d.casesRepo.createMilestone).not.toHaveBeenCalled();
     });
 
     it('signing the report projects the completed case to received services, with the reported procedure', async () => {
