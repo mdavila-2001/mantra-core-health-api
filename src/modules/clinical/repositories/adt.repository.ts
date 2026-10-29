@@ -413,31 +413,52 @@ export class AdtRepository {
     return rows.map(toLocation);
   }
 
-  /** La ubicación «sin cama» vigente del encuentro (la sede donde espera cama). */
+  /**
+   * La ubicación «sin cama» vigente del encuentro (la sede donde espera cama).
+   * Sólo cuenta la fila de sede que asienta el ADT (sin espacio): una ubicación
+   * con espacio que no es cama no es una fuente de autoridad.
+   */
   async currentSiteLocation(
     tx: EntityManager,
     encounterId: string,
+    forUpdate = true,
   ): Promise<AdtLocationRow | null> {
     const rows = await tx.execute<RawLocation[]>(
       `select ${LOCATION_COLUMNS} from clinical.encounter_locations el
-        where el.encounter_id = ? and not el.is_bed_assignment and el.location_status_concept_id = ?
-          and el.period_end is null
-        order by el.period_start desc limit 1 for update`,
+        where el.encounter_id = ? and not el.is_bed_assignment and el.care_space_id is null
+          and el.location_status_concept_id = ? and el.period_end is null
+        order by el.period_start desc limit 1 ${forUpdate ? 'for update' : ''}`,
       [encounterId, CLIN.LOCATION_ACTIVE],
     );
     return rows[0] ? toLocation(rows[0]) : null;
   }
 
-  /** Cualquier ubicación del encuentro (la más reciente), para resolver su sede. */
-  async anyLocation(
+  /**
+   * La ubicación **autoritativa** del encuentro: la que decide quién puede operar
+   * o leer al paciente. Es la cama ACTIVA vigente o, si espera cama, su sede
+   * ACTIVA. Nunca una reserva ni una fila cancelada: cualquiera con alcance sobre
+   * una cama puede crear una reserva, y no por eso gana autoridad sobre el paciente.
+   *
+   * Con `historical`, y sólo si el encuentro ya no tiene ubicación vigente (egresó),
+   * cae a la última ocupación que terminó (COMPLETED) para poder leer la estancia.
+   * No bloquea filas.
+   */
+  async authoritativeLocation(
     tx: EntityManager,
     encounterId: string,
+    historical = false,
   ): Promise<AdtLocationRow | null> {
+    const bed = await this.currentBed(tx, encounterId, false);
+    if (bed) return bed;
+    const site = await this.currentSiteLocation(tx, encounterId, false);
+    if (site) return site;
+    if (!historical) return null;
     const rows = await tx.execute<RawLocation[]>(
       `select ${LOCATION_COLUMNS} from clinical.encounter_locations el
-        where el.encounter_id = ?
-        order by el.period_start desc nulls last, el.created_at desc limit 1`,
-      [encounterId],
+        where el.encounter_id = ? and el.location_status_concept_id = ?
+          and (el.is_bed_assignment or el.care_space_id is null)
+        order by el.period_end desc nulls last, el.period_start desc nulls last limit 1`,
+      [encounterId, CLIN.LOCATION_COMPLETED],
     );
     return rows[0] ? toLocation(rows[0]) : null;
   }

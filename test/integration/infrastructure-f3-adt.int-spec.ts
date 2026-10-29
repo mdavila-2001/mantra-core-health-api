@@ -2026,6 +2026,237 @@ describe('Infraestructura F3 · internación / ADT', () => {
     });
   });
 
+  // ------------------------------------------------- autoridad sobre la ubicación actual
+  describe('la autoridad sale de la ubicación actual, no de una reserva ajena', () => {
+    const victimName = `Paciente Reservado ${suffix}`;
+    let attackerX: Staff;
+    let bedY: string;
+    let bedX: string;
+    let victim: any;
+
+    async function setUp() {
+      bedY = (await newBed()).bedId;
+      bedX = (await newBed()).bedId;
+      victim = await admit(await man(victimName), bedY);
+      attackerX = await createStaff(
+        ctx,
+        orgA,
+        'atk',
+        ROLE.NURSE,
+        { kind: 'SPACE', careSpaceId: bedX },
+        suffix,
+      );
+    }
+    const atk = () => as(attackerX.token, orgA.tenantId);
+
+    it('quien sólo tiene alcance sobre OTRA cama no puede crear la reserva: 403 y nada se escribe', async () => {
+      await setUp();
+      const before = await locations(victim.encounterId);
+      const v = await version(victim.encounterId);
+      const res = await http()
+        .post(`/clinical/encounters/${victim.encounterId}/bed-assignment`)
+        .set(atk())
+        .set(ifMatch(v))
+        .send({ careSpaceId: bedX, mode: 'RESERVE' })
+        .expect(403);
+      expect(res.body.reason).toBe('INFRA_ACTION_NOT_ALLOWED');
+      expect(await locations(victim.encounterId)).toHaveLength(before.length);
+      expect(await version(victim.encounterId)).toBe(v);
+    });
+
+    it('aunque exista una reserva sobre su cama, no puede leer la estancia ni el nombre, ni dar el alta', async () => {
+      await setUp();
+      // Una reserva legítima de quien sí opera al paciente deja una fila sobre bedX.
+      await http()
+        .post(`/clinical/encounters/${victim.encounterId}/bed-assignment`)
+        .set(nurseH())
+        .set(ifMatch(await version(victim.encounterId)))
+        .send({ careSpaceId: bedX, mode: 'RESERVE' })
+        .expect(200);
+
+      const stay = await http()
+        .get(`/clinical/encounters/${victim.encounterId}/stay`)
+        .set(atk());
+      expect(stay.status).toBe(403);
+      expect(JSON.stringify(stay.body)).not.toContain(victimName);
+
+      const v = await version(victim.encounterId);
+      const discharge = await http()
+        .post(`/clinical/encounters/${victim.encounterId}/discharge`)
+        .set(atk())
+        .set(ifMatch(v))
+        .send({
+          dischargeDispositionCode: 'DISP_HOME',
+          occurredAt: new Date(Date.now() - 1_000).toISOString(),
+        });
+      expect(discharge.status).toBe(403);
+      expect((await encounterRow(victim.encounterId)).status_concept_id).toBe(
+        CLIN.ENCOUNTER_IN_PROGRESS,
+      );
+      expect(await version(victim.encounterId)).toBe(v);
+
+      // Quien sí tiene alcance sobre la cama actual lee la estancia con el nombre.
+      const ok = await http()
+        .get(`/clinical/encounters/${victim.encounterId}/stay`)
+        .set(nurseH())
+        .expect(200);
+      expect(JSON.stringify(ok.body)).toContain(victimName);
+    });
+
+    it('traslado: exige alcance sobre el origen (aunque lo tenga sobre el destino); sin escribir', async () => {
+      await setUp();
+      const bedZ = (await newBed()).bedId;
+      await assign(ctx, attackerX.membershipId, ROLE.NURSE, {
+        kind: 'SPACE',
+        careSpaceId: bedZ,
+      });
+      const before = await locations(victim.encounterId);
+      const v = await version(victim.encounterId);
+      await http()
+        .post(`/clinical/encounters/${victim.encounterId}/transfer`)
+        .set(atk())
+        .set(ifMatch(v))
+        .send({ toCareSpaceId: bedZ, reasonCode: 'ERROR_ADMINISTRATIVO' })
+        .expect(403);
+      expect(await locations(victim.encounterId)).toHaveLength(before.length);
+      expect(await version(victim.encounterId)).toBe(v);
+    });
+
+    it('intercambio: exige alcance sobre las dos camas ocupadas; con una sola, 403 sin escribir', async () => {
+      await setUp();
+      const bedW = (await newBed()).bedId;
+      const other = await admit(await man(), bedW);
+      const onlyY = await createStaff(
+        ctx,
+        orgA,
+        'cruz',
+        ROLE.NURSE,
+        { kind: 'SPACE', careSpaceId: bedY },
+        suffix,
+      );
+      await http()
+        .post('/clinical/bed-swaps')
+        .set(as(onlyY.token, orgA.tenantId))
+        .send({
+          encounterAId: victim.encounterId,
+          encounterBId: other.encounterId,
+          reasonText: 'Intercambio entre camas por afinidad clínica',
+        })
+        .expect(403);
+      const rows = (await locations(victim.encounterId)).filter(
+        (r) => r.is_bed_assignment,
+      );
+      expect(rows).toHaveLength(1);
+      expect(rows[0].care_space_id).toBe(bedY);
+    });
+
+    describe('camas de otra sede', () => {
+      let site2: string;
+      let bed2: string;
+      beforeAll(async () => {
+        const res = await http()
+          .post(`/practices/${orgA.practiceId}/sites`)
+          .set(as(orgA.token, orgA.tenantId))
+          .send({ code: `F3-SEDE2-${suffix}`, name: 'Sede dos' })
+          .expect(201);
+        site2 = res.body.id;
+        const room = await createSpace(
+          ctx,
+          { ...orgA, siteId: site2 },
+          {
+            code: `R2-${suffix}`,
+            name: 'Hab sede 2',
+            formCode: 'LOC_FORM_ROOM',
+            functionCode: 'SPACE_FN_INPATIENT_ROOM',
+          },
+        );
+        const bed = await createSpace(
+          ctx,
+          { ...orgA, siteId: site2 },
+          {
+            code: `B2-${suffix}`,
+            name: 'Cama sede 2',
+            formCode: 'LOC_FORM_BED',
+            functionCode: 'SPACE_FN_BED_STANDARD',
+            parentSpaceId: room.id,
+            bedCategoryCode: 'BED_CAT_SHARED',
+            censable: true,
+          },
+        );
+        bed2 = bed.id;
+      });
+
+      it('asignar una cama de otra sede a un encuentro pendiente de cama ⇒ 422 BED_SITE_MISMATCH, sin escribir', async () => {
+        const wide = await createStaff(
+          ctx,
+          orgA,
+          'ancho',
+          ROLE.NURSE,
+          { kind: 'TENANT' },
+          suffix,
+        );
+        const pending = await admit(await man(), null);
+        const before = await locations(pending.encounterId);
+        const v = await version(pending.encounterId);
+        const res = await http()
+          .post(`/clinical/encounters/${pending.encounterId}/bed-assignment`)
+          .set(as(wide.token, orgA.tenantId))
+          .set(ifMatch(v))
+          .send({ careSpaceId: bed2, mode: 'ASSIGN' });
+        expect(res.status).toBe(422);
+        expect(res.body.reason).toBe('BED_SITE_MISMATCH');
+        expect(await locations(pending.encounterId)).toHaveLength(
+          before.length,
+        );
+        expect(await version(pending.encounterId)).toBe(v);
+      });
+
+      it('quien sólo opera la otra sede no puede asignar su cama a un encuentro de ésta: 403', async () => {
+        const only2 = await createStaff(
+          ctx,
+          orgA,
+          'sede2',
+          ROLE.NURSE,
+          { kind: 'SITE', siteId: site2 },
+          suffix,
+        );
+        const pending = await admit(await man(), null);
+        await http()
+          .post(`/clinical/encounters/${pending.encounterId}/bed-assignment`)
+          .set(as(only2.token, orgA.tenantId))
+          .set(ifMatch(await version(pending.encounterId)))
+          .send({ careSpaceId: bed2, mode: 'ASSIGN' })
+          .expect(403);
+        expect(
+          (await locations(pending.encounterId)).filter(
+            (r) => r.is_bed_assignment,
+          ),
+        ).toHaveLength(0);
+      });
+    });
+
+    it('tras el alta la estancia sigue legible por quien operaba al paciente y no por un ajeno', async () => {
+      await setUp();
+      await http()
+        .post(`/clinical/encounters/${victim.encounterId}/discharge`)
+        .set(nurseH())
+        .set(ifMatch(await version(victim.encounterId)))
+        .send({
+          dischargeDispositionCode: 'DISP_HOME',
+          occurredAt: new Date(Date.now() - 1_000).toISOString(),
+        })
+        .expect(200);
+      await http()
+        .get(`/clinical/encounters/${victim.encounterId}/stay`)
+        .set(nurseH())
+        .expect(200);
+      await http()
+        .get(`/clinical/encounters/${victim.encounterId}/stay`)
+        .set(atk())
+        .expect(403);
+    });
+  });
+
   // ------------------------------------------------- idempotencia y contratos varios
   describe('contratos varios', () => {
     it('sin sesión 401', async () => {

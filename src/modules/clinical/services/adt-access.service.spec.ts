@@ -54,7 +54,15 @@ function build(f: Fixtures = {}) {
     ),
     canSee: fn().mockReturnValue(true),
   };
-  return { tx, service: new AdtAccessService(structure as any), structure };
+  const repo = {
+    authoritativeLocation: fn().mockResolvedValue(null),
+  };
+  return {
+    tx,
+    service: new AdtAccessService(structure as any, repo as any),
+    structure,
+    repo,
+  };
 }
 
 const row = (
@@ -269,5 +277,61 @@ describe('AdtAccessService', () => {
     expect(b.service.can(scope, INFRA_F3_ACTIONS.INDICATORS_VIEW)).toBe(true);
     expect(b.service.can(scope, INFRA_F3_ACTIONS.CENSUS_CLOSE)).toBe(false);
     expect(b.service.can(scope, INFRA_F3_ACTIONS.INPATIENT_VIEW)).toBe(false);
+  });
+
+  describe('forEncounter · la autoridad sale de la ubicación autoritativa', () => {
+    const loc = (over: Record<string, unknown> = {}) => ({
+      id: 'l1',
+      careSpaceId: 'bed',
+      practiceSiteId: 's1',
+      ...over,
+    });
+
+    it('con cama activa resuelve el alcance de esa cama; sin cama, el de la sede', async () => {
+      const bed = build();
+      bed.repo.authoritativeLocation.mockResolvedValue(loc());
+      await inTenant(() => bed.service.forEncounter(bed.tx, 'e1', actor));
+      expect(
+        bed.tx.execute.mock.calls.some(([q]: [string]) =>
+          q.includes('from practice.care_spaces'),
+        ),
+      ).toBe(true);
+
+      const site = build();
+      site.repo.authoritativeLocation.mockResolvedValue(
+        loc({ careSpaceId: null }),
+      );
+      await inTenant(() => site.service.forEncounter(site.tx, 'e1', actor));
+      expect(
+        site.tx.execute.mock.calls.some(([q]: [string]) =>
+          q.includes('from practice.care_spaces'),
+        ),
+      ).toBe(false);
+    });
+
+    it('sin ubicación autoritativa (sólo reservas o filas canceladas) ⇒ 404 uniforme, sin mirar roles', async () => {
+      const b = build();
+      b.repo.authoritativeLocation.mockResolvedValue(null);
+      await expect(
+        inTenant(() => b.service.forEncounter(b.tx, 'e1', actor)),
+      ).rejects.toMatchObject({
+        status: 404,
+        reason: 'ADT_RESOURCE_OUT_OF_SCOPE',
+      });
+      expect(b.structure.resolve).not.toHaveBeenCalled();
+    });
+
+    it('la lectura histórica sólo se pide cuando el llamador la autoriza', async () => {
+      const b = build();
+      b.repo.authoritativeLocation.mockResolvedValue(loc());
+      await inTenant(() => b.service.forEncounter(b.tx, 'e1', actor));
+      await inTenant(() =>
+        b.service.forEncounter(b.tx, 'e1', actor, { historical: true }),
+      );
+      expect(b.repo.authoritativeLocation.mock.calls).toEqual([
+        [b.tx, 'e1', false],
+        [b.tx, 'e1', true],
+      ]);
+    });
   });
 });

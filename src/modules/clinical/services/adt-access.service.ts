@@ -16,6 +16,10 @@ import {
 } from '../../practice/services/structure-access.service';
 import { ClinicalErrorReason } from '../clinical.error-reasons';
 import {
+  AdtRepository,
+  type AdtLocationRow,
+} from '../repositories/adt.repository';
+import {
   IMPLIED_ROLES,
   INFRA_F3_ACTIONS,
   INFRA_F3_POLICY,
@@ -79,8 +83,43 @@ interface SpaceContainment {
 export class AdtAccessService {
   /**
    * @param structureAccess - Nivel de acceso a la estructura (admin org / sucursal / plataforma).
+   * @param repo - Ubicaciones del encuentro (para resolver su ubicación autoritativa).
    */
-  constructor(private readonly structureAccess: StructureAccessService) {}
+  constructor(
+    private readonly structureAccess: StructureAccessService,
+    private readonly repo: AdtRepository,
+  ) {}
+
+  /**
+   * Alcance sobre la ubicación **autoritativa** del encuentro (cama activa o, si
+   * espera cama, su sede activa). Es la única fuente válida para autorizar una
+   * operación o una lectura sobre el paciente: jamás una reserva ni una fila
+   * cancelada, que otro actor pudo crear.
+   *
+   * @param tx - Transacción o contexto de persistencia.
+   * @param encounterId - Encuentro (id del cliente).
+   * @param actor - Quien pide.
+   * @param options - `historical`: permite leer un encuentro egresado.
+   * @throws ResourceNotFoundException (404) si el encuentro no tiene ubicación
+   * autoritativa o su espacio es de otro tenant.
+   */
+  async forEncounter(
+    tx: EntityManager,
+    encounterId: string,
+    actor: AuthenticatedUser,
+    options: { historical?: boolean } = {},
+  ): Promise<{ scope: AdtScope; location: AdtLocationRow }> {
+    const location = await this.repo.authoritativeLocation(
+      tx,
+      encounterId,
+      options.historical === true,
+    );
+    if (!location) throw this.outOfScope();
+    const scope = location.careSpaceId
+      ? await this.forSpace(tx, location.careSpaceId, actor)
+      : await this.forSite(tx, location.practiceSiteId, actor);
+    return { scope, location };
+  }
 
   /**
    * Alcance sobre una sede.
