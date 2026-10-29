@@ -11,6 +11,11 @@ import {
   OrganizationPracticesController,
   PracticeInvitationsController,
   PractitionerInvitationsController,
+  CareSpacesController,
+  ClinicalUnitsController,
+  SiteInfrastructureController,
+  SiteLicensesController,
+  InfrastructureCatalogController,
 } from './controllers';
 import {
   PracticeSitesService,
@@ -28,6 +33,22 @@ import {
   PracticeAdministrationService,
   HealthcareServiceOffersService,
   PracticeAffiliationInvitationsService,
+  InfrastructureCatalogService,
+  StructureAccessService,
+  StructureContextService,
+  StructureEventsService,
+  CareSpaceReadService,
+  CareSpaceCreationService,
+  CareSpaceUpdateService,
+  CareSpaceLifecycleService,
+  SpaceUnitAssignmentsService,
+  ClinicalUnitsService,
+  SiteRegulatoryService,
+  SiteLicensesService,
+  SiteCapacityService,
+  RetireBlockerRegistry,
+  PracticeRetireBlockersInitializer,
+  RETIRE_BLOCKER_PROVIDERS,
 } from './services';
 import {
   PracticesRepository,
@@ -42,12 +63,25 @@ import {
   InventoryItemsRepository,
   InventoryMovementsRepository,
   PracticeOrganizationReadRepository,
+  InfrastructureRulesRepository,
+  SpaceUnitAssignmentsRepository,
+  SiteDeclaredCapacitiesRepository,
 } from './repositories';
 import { ServiceCatalogRepository } from '../billing/repositories';
 import { ProcedureReferenceReader } from '../billing/services/procedure-reference.reader';
 import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
 import { TenantsRepository } from '../directory/repositories';
 import { BranchesRepository } from '../directory/repositories/branches.repository';
+import { BranchMembershipsRepository } from '../directory/repositories/branch-memberships.repository';
+// F1 de infraestructura: las habilitaciones viven en
+// `organization_extensions.facility_licenses` (Desvíos del modelo v4.2.67b) y se
+// leen/escriben con sus repositorios sin estado, sin importar su módulo; el
+// outbox sí viene del módulo de mensajería (no importa `practice`).
+import {
+  FacilityLicensesRepository,
+  OrgextReferencesRepository,
+} from '../organization_extensions/repositories';
+import { MessagingModule } from '../messaging/messaging.module';
 // La estructura versiona en `audit.*_history` con el `HistoryRepository` que
 // exporta `AuditModule`; `audit` no importa `practice`, no cierra ciclo.
 import { AuditModule } from '../audit/audit.module';
@@ -82,6 +116,7 @@ import {
     DirectoryAuthorizationModule,
     CommonModule,
     AuditModule,
+    MessagingModule,
   ],
   controllers: [
     PracticesController,
@@ -93,6 +128,11 @@ import {
     OrganizationPracticesController,
     PracticeInvitationsController,
     PractitionerInvitationsController,
+    CareSpacesController,
+    ClinicalUnitsController,
+    SiteInfrastructureController,
+    SiteLicensesController,
+    InfrastructureCatalogController,
   ],
   providers: [
     // Repositorios
@@ -108,6 +148,13 @@ import {
     InventoryItemsRepository,
     InventoryMovementsRepository,
     PracticeOrganizationReadRepository,
+    InfrastructureRulesRepository,
+    SpaceUnitAssignmentsRepository,
+    SiteDeclaredCapacitiesRepository,
+    // Stateless (reciben el `em`): sucursales del actor y habilitaciones.
+    BranchMembershipsRepository,
+    FacilityLicensesRepository,
+    OrgextReferencesRepository,
     // El catálogo de servicios es de `billing`, pero acá se registra la clase y
     // no se importa `BillingModule`: la dependencia entre los dos módulos ya va
     // en el otro sentido (billing → practice, por `PracticeTenantLookupService`)
@@ -141,6 +188,25 @@ import {
     PracticeAdministrationService,
     HealthcareServiceOffersService,
     PracticeAffiliationInvitationsService,
+    // Infraestructura hospitalaria F1
+    InfrastructureCatalogService,
+    StructureAccessService,
+    StructureContextService,
+    StructureEventsService,
+    CareSpaceReadService,
+    CareSpaceCreationService,
+    CareSpaceUpdateService,
+    CareSpaceLifecycleService,
+    SpaceUnitAssignmentsService,
+    ClinicalUnitsService,
+    SiteRegulatoryService,
+    SiteLicensesService,
+    SiteCapacityService,
+    // Registro de bloqueos de clausura: los demás módulos suman el suyo
+    // inyectando `RETIRE_BLOCKER_PROVIDERS`, sin editar el servicio.
+    RetireBlockerRegistry,
+    { provide: RETIRE_BLOCKER_PROVIDERS, useExisting: RetireBlockerRegistry },
+    PracticeRetireBlockersInitializer,
   ],
   // `scheduling` resuelve con esto la sede de cada recurso agendable: el dato
   // vive acá y no se duplica allá. `practice` no importa `scheduling`, así que
@@ -163,6 +229,10 @@ import {
     OwnSiteProvisioningService,
     PracticesRepository,
     PracticeSitesRepository,
+    // F1 de infraestructura: un módulo con algo que impide clausurar un espacio
+    // (stock, equipos, reservas…) se registra acá sin editar `practice`.
+    RETIRE_BLOCKER_PROVIDERS,
+    RetireBlockerRegistry,
   ],
 })
 export class PracticeModule {}

@@ -17,3 +17,6 @@ export * from './responses.dto';
 export * from './organization-console.dto';
 export * from './update-own-site.dto';
 export * from './create-organization-practice.dto';
+export * from './update-clinical-unit.dto';
+export * from './site-regulatory.dto';
+export * from './infrastructure.types';

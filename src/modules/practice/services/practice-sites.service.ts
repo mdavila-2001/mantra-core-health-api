@@ -347,6 +347,7 @@ export class PracticeSitesService {
 
       const site = this.sitesRepo.create(tx, {
         practiceId,
+        tenantId: practice.tenantId,
         code: dto.code,
         name: dto.name,
         siteTypeConceptId: dto.siteTypeConceptId ?? PRAC.SITE_TYPE_HOSPITAL,
@@ -364,6 +365,8 @@ export class PracticeSitesService {
         operationConceptId: AUD.OPERATION_INSERT,
         dataSnapshot: structureSnapshot(site),
         changedByUserId: actor.id,
+        tenantId,
+        firstRevision: true,
       });
       await tx.flush();
       this.logger.info(
@@ -444,7 +447,7 @@ export class PracticeSitesService {
       // Una revisión por fila que el desmantelamiento cambió: la cascada es
       // la mutación de mayor alcance de la estructura y tiene que poder
       // reconstruirse punto a punto (`valid_to` cierra la revisión previa).
-      const revision = { changedByUserId: actor.id };
+      const revision = { changedByUserId: actor.id, tenantId };
       await this.historyRepo.append(tx, STRUCTURE_HISTORY.site, site.id, {
         ...revision,
         operationConceptId: AUD.OPERATION_UPDATE,

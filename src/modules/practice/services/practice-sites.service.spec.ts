@@ -328,11 +328,7 @@ describe('PracticeSitesService', () => {
         tenantId: TENANT_B,
       });
       await expect(
-        d.service.createSite(
-          'p1',
-          { code: 'S-1', name: 'S' } as any,
-          actor,
-        ),
+        d.service.createSite('p1', { code: 'S-1', name: 'S' } as any, actor),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
       expect(d.tenantAdministration.assertCanAdminister).not.toHaveBeenCalled();
       expect(d.sitesRepo.create).not.toHaveBeenCalled();
@@ -345,11 +341,7 @@ describe('PracticeSitesService', () => {
         new ForbiddenException('no'),
       );
       await expect(
-        d.service.createSite(
-          'p1',
-          { code: 'S-1', name: 'S' } as any,
-          actor,
-        ),
+        d.service.createSite('p1', { code: 'S-1', name: 'S' } as any, actor),
       ).rejects.toBeInstanceOf(ForbiddenException);
       expect(d.sitesRepo.create).not.toHaveBeenCalled();
     });
@@ -388,7 +380,10 @@ describe('PracticeSitesService', () => {
     it('branchId del tenant y admin: crea, autoriza y versiona', async () => {
       const d = build();
       d.practicesRepo.findById.mockResolvedValue(activePractice);
-      d.branchesRepo.findById.mockResolvedValue({ id: 'b1', tenantId: TENANT_A });
+      d.branchesRepo.findById.mockResolvedValue({
+        id: 'b1',
+        tenantId: TENANT_A,
+      });
       d.sitesRepo.findByPracticeAndCode.mockResolvedValue(null);
       d.sitesRepo.create.mockReturnValue(created);
       await d.service.createSite(

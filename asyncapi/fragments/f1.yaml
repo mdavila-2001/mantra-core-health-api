@@ -1,0 +1,381 @@
+asyncapi: 3.1.0
+info:
+  title: ALOVIDA Health API — Eventos de infraestructura hospitalaria (F1)
+  version: '0.1.0'
+  description: >
+    Fragmento de eventos de dominio que publica la estructura de infraestructura
+    (practice: espacios, unidades clínicas, vínculos, datos regulatorios, habilitaciones
+    y capacidad declarada). Se publican al outbox transaccional (`messaging.domain_events`)
+    DENTRO de la transacción de la mutación (INV-43): el cambio y su evento se confirman
+    juntos o ninguno. Este archivo es un fragmento: el integrador lo fusiona en
+    `asyncapi/asyncapi.yaml`; esta rama no edita ese archivo. Los payloads nunca llevan
+    datos clínicos, sólo ids, versiones y códigos.
+  license:
+    name: UNLICENSED
+
+defaultContentType: application/json
+
+channels:
+  practiceStructureEvents:
+    address: practice.structure
+    description: >
+      Hechos de la estructura de infraestructura. El envelope real es
+      `messaging.domain_events` (eventType, aggregateType, aggregateId, payloadJson);
+      aquí se describe el `payloadJson` de cada `eventType` dot.case.
+    messages:
+      CareSpaceCreated:
+        $ref: '#/components/messages/CareSpaceCreated'
+      CareSpaceUpdated:
+        $ref: '#/components/messages/CareSpaceUpdated'
+      CareSpaceMoved:
+        $ref: '#/components/messages/CareSpaceMoved'
+      CareSpaceLifecycleChanged:
+        $ref: '#/components/messages/CareSpaceLifecycleChanged'
+      ClinicalUnitCreated:
+        $ref: '#/components/messages/ClinicalUnitCreated'
+      ClinicalUnitUpdated:
+        $ref: '#/components/messages/ClinicalUnitUpdated'
+      ClinicalUnitLifecycleChanged:
+        $ref: '#/components/messages/ClinicalUnitLifecycleChanged'
+      SpaceUnitAssignmentCreated:
+        $ref: '#/components/messages/SpaceUnitAssignmentCreated'
+      SpaceUnitAssignmentClosed:
+        $ref: '#/components/messages/SpaceUnitAssignmentClosed'
+      SiteRegulatoryUpdated:
+        $ref: '#/components/messages/SiteRegulatoryUpdated'
+      SiteSnisVerified:
+        $ref: '#/components/messages/SiteSnisVerified'
+      SiteLicenseCreated:
+        $ref: '#/components/messages/SiteLicenseCreated'
+      SiteLicenseUpdated:
+        $ref: '#/components/messages/SiteLicenseUpdated'
+      SiteDeclaredCapacityRecorded:
+        $ref: '#/components/messages/SiteDeclaredCapacityRecorded'
+
+operations:
+  publishPracticeStructureEvent:
+    action: send
+    channel:
+      $ref: '#/channels/practiceStructureEvents'
+    summary: >
+      Los servicios de estructura de `practice` publican cada hecho con
+      `StructureEventsService` (OutboxService.publishDomainEvent) en la transacción de la mutación.
+
+components:
+  messages:
+    CareSpaceCreated:
+      name: CareSpaceCreated
+      title: practice.care_space.created
+      summary: 'Un espacio físico se creó (alta individual, masiva o importación).'
+      payload:
+        type: object
+        required:
+          [careSpaceId, practiceSiteId, code, formCode, status, rowVersion]
+        properties:
+          careSpaceId:
+            type: string
+            format: uuid
+          practiceSiteId:
+            type: string
+            format: uuid
+          parentSpaceId:
+            type: [string, 'null']
+            format: uuid
+          code:
+            type: string
+          formCode:
+            type: string
+          status:
+            type: string
+            enum: [SPACE_ACTIVE, SPACE_PLANNED]
+          rowVersion:
+            type: integer
+      x-event-type: practice.care_space.created
+      x-aggregate-type: care_space
+    CareSpaceUpdated:
+      name: CareSpaceUpdated
+      title: practice.care_space.updated
+      summary: 'Cambiaron atributos de un espacio (PATCH).'
+      payload:
+        type: object
+        required: [careSpaceId, changedFields, rowVersion]
+        properties:
+          careSpaceId:
+            type: string
+            format: uuid
+          changedFields:
+            type: array
+            items:
+              type: string
+          rowVersion:
+            type: integer
+      x-event-type: practice.care_space.updated
+      x-aggregate-type: care_space
+    CareSpaceMoved:
+      name: CareSpaceMoved
+      title: practice.care_space.moved
+      summary: 'Un espacio (con su subárbol) cambió de padre.'
+      payload:
+        type: object
+        required: [careSpaceId, rowVersion]
+        properties:
+          careSpaceId:
+            type: string
+            format: uuid
+          fromParentSpaceId:
+            type: [string, 'null']
+            format: uuid
+          toParentSpaceId:
+            type: [string, 'null']
+            format: uuid
+          rowVersion:
+            type: integer
+      x-event-type: practice.care_space.moved
+      x-aggregate-type: care_space
+    CareSpaceLifecycleChanged:
+      name: CareSpaceLifecycleChanged
+      title: practice.care_space.lifecycle_changed
+      summary: 'Transición de ciclo de vida de un espacio (abrir, cerrar, clausurar…).'
+      payload:
+        type: object
+        required: [careSpaceId, action, from, to, rowVersion]
+        properties:
+          careSpaceId:
+            type: string
+            format: uuid
+          action:
+            type: string
+          from:
+            type: string
+          to:
+            type: string
+          reason:
+            type: [string, 'null']
+          rowVersion:
+            type: integer
+      x-event-type: practice.care_space.lifecycle_changed
+      x-aggregate-type: care_space
+    ClinicalUnitCreated:
+      name: ClinicalUnitCreated
+      title: practice.clinical_unit.created
+      summary: 'Se creó una unidad clínica.'
+      payload:
+        type: object
+        required: [clinicalUnitId, practiceSiteId, code, rowVersion]
+        properties:
+          clinicalUnitId:
+            type: string
+            format: uuid
+          practiceSiteId:
+            type: string
+            format: uuid
+          parentUnitId:
+            type: [string, 'null']
+            format: uuid
+          code:
+            type: string
+          rowVersion:
+            type: integer
+      x-event-type: practice.clinical_unit.created
+      x-aggregate-type: clinical_unit
+    ClinicalUnitUpdated:
+      name: ClinicalUnitUpdated
+      title: practice.clinical_unit.updated
+      summary: 'Cambiaron atributos de una unidad clínica.'
+      payload:
+        type: object
+        required: [clinicalUnitId, changedFields, rowVersion]
+        properties:
+          clinicalUnitId:
+            type: string
+            format: uuid
+          changedFields:
+            type: array
+            items:
+              type: string
+          rowVersion:
+            type: integer
+      x-event-type: practice.clinical_unit.updated
+      x-aggregate-type: clinical_unit
+    ClinicalUnitLifecycleChanged:
+      name: ClinicalUnitLifecycleChanged
+      title: practice.clinical_unit.lifecycle_changed
+      summary: 'Transición de ciclo de vida de una unidad clínica.'
+      payload:
+        type: object
+        required: [clinicalUnitId, action, from, to, rowVersion]
+        properties:
+          clinicalUnitId:
+            type: string
+            format: uuid
+          action:
+            type: string
+          from:
+            type: string
+          to:
+            type: string
+          reason:
+            type: [string, 'null']
+          rowVersion:
+            type: integer
+      x-event-type: practice.clinical_unit.lifecycle_changed
+      x-aggregate-type: clinical_unit
+    SpaceUnitAssignmentCreated:
+      name: SpaceUnitAssignmentCreated
+      title: practice.space_unit_assignment.created
+      summary: 'Se vinculó un espacio con una unidad clínica.'
+      payload:
+        type: object
+        required: [assignmentId, careSpaceId, clinicalUnitId, role]
+        properties:
+          assignmentId:
+            type: string
+            format: uuid
+          careSpaceId:
+            type: string
+            format: uuid
+          clinicalUnitId:
+            type: string
+            format: uuid
+          role:
+            type: string
+      x-event-type: practice.space_unit_assignment.created
+      x-aggregate-type: care_space
+    SpaceUnitAssignmentClosed:
+      name: SpaceUnitAssignmentClosed
+      title: practice.space_unit_assignment.closed
+      summary: 'Se cerró la vigencia de un vínculo espacio-unidad.'
+      payload:
+        type: object
+        required: [assignmentId, careSpaceId, clinicalUnitId]
+        properties:
+          assignmentId:
+            type: string
+            format: uuid
+          careSpaceId:
+            type: string
+            format: uuid
+          clinicalUnitId:
+            type: string
+            format: uuid
+      x-event-type: practice.space_unit_assignment.closed
+      x-aggregate-type: care_space
+    SiteRegulatoryUpdated:
+      name: SiteRegulatoryUpdated
+      title: practice.site.regulatory_updated
+      summary: 'Cambiaron los datos regulatorios de un establecimiento.'
+      payload:
+        type: object
+        required: [practiceSiteId, changedFields, rowVersion]
+        properties:
+          practiceSiteId:
+            type: string
+            format: uuid
+          changedFields:
+            type: array
+            items:
+              type: string
+          rowVersion:
+            type: integer
+      x-event-type: practice.site.regulatory_updated
+      x-aggregate-type: practice_site
+    SiteSnisVerified:
+      name: SiteSnisVerified
+      title: practice.site.snis_verified
+      summary: 'La plataforma verificó el código SNIS de un establecimiento. Sólo la plataforma emite este hecho.'
+      payload:
+        type: object
+        required: [practiceSiteId, snisCode]
+        properties:
+          practiceSiteId:
+            type: string
+            format: uuid
+          snisCode:
+            type: string
+      x-event-type: practice.site.snis_verified
+      x-aggregate-type: practice_site
+    SiteLicenseCreated:
+      name: SiteLicenseCreated
+      title: practice.site_license.created
+      summary: 'Se registró una habilitación sobre organization_extensions.facility_licenses.'
+      payload:
+        type: object
+        required: [licenseId, practiceSiteId, rowVersion]
+        properties:
+          licenseId:
+            type: string
+            format: uuid
+          practiceSiteId:
+            type: string
+            format: uuid
+          rowVersion:
+            type: integer
+      x-event-type: practice.site_license.created
+      x-aggregate-type: facility_license
+    SiteLicenseUpdated:
+      name: SiteLicenseUpdated
+      title: practice.site_license.updated
+      summary: 'Cambió una habilitación del establecimiento.'
+      payload:
+        type: object
+        required: [licenseId, practiceSiteId, changedFields, rowVersion]
+        properties:
+          licenseId:
+            type: string
+            format: uuid
+          practiceSiteId:
+            type: string
+            format: uuid
+          changedFields:
+            type: array
+            items:
+              type: string
+          rowVersion:
+            type: integer
+      x-event-type: practice.site_license.updated
+      x-aggregate-type: facility_license
+    SiteDeclaredCapacityRecorded:
+      name: SiteDeclaredCapacityRecorded
+      title: practice.site.declared_capacity_recorded
+      summary: 'Se agregó una capacidad declarada (no sobrescribe: la capacidad derivada se calcula, nunca se escribe).'
+      payload:
+        type: object
+        required: [practiceSiteId, declarationId, kindCode, quantity, asOf]
+        properties:
+          practiceSiteId:
+            type: string
+            format: uuid
+          declarationId:
+            type: string
+            format: uuid
+          kindCode:
+            type: string
+          quantity:
+            type: integer
+          asOf:
+            type: string
+            format: date
+      x-event-type: practice.site.declared_capacity_recorded
+      x-aggregate-type: practice_site
+  schemas:
+    StructureEventEnvelope:
+      type: object
+      description: Campos del envelope que acompañan a todo evento de estructura.
+      required: [eventType, aggregateType, aggregateId, tenantId, actorUserId]
+      properties:
+        eventType:
+          type: string
+        aggregateType:
+          type: string
+        aggregateId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        actorUserId:
+          type: string
+          format: uuid
+        correlationId:
+          type: string
+          description: Es el `correlationId` de la petición HTTP que originó el cambio (el mismo que ven los errores).
