@@ -32,6 +32,7 @@ import { TerminologySeedService } from './terminology-seed.service';
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
 import { BoMedicalSpecialtiesSeedService } from './bo-medical-specialties-seed.service';
 import { PracticeDefaultServicesSeedService } from './practice-default-services-seed.service';
+import { InfrastructureCatalogSeedService } from './infrastructure-catalog-seed.service';
 import { PeopleSeedService } from './people-seed.service';
 import { DirectoryNetworksSeedService } from './directory-networks-seed.service';
 import { isCoreSeedFailureFatal, loadSeedBootEnv } from './seed-boot.env';
@@ -173,6 +174,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    *   suman a `VS_MEDICAL_SPECIALTY` (médicas, quirúrgicas y odontológicas).
    * @param practiceDefaultServices - «Cita médica» en las prácticas que nacieron
    *   sin catálogo.
+   * @param infrastructureCatalog - Reglas de infraestructura (padre→hijo, tipología) y backfills de F1.
    * @param people - Cuentas del padrón (H2, carril M2 · MacBook), sintéticas y
    *   opt-in por `SEED_PEOPLE_ENABLED`.
    * @param directoryNetworks - Médicos de las redes de Alianza y Nacional, con
@@ -211,6 +213,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly clinicalForms: ClinicalFormsSeedService,
     private readonly boMedicalSpecialties: BoMedicalSpecialtiesSeedService,
     private readonly practiceDefaultServices: PracticeDefaultServicesSeedService,
+    private readonly infrastructureCatalog: InfrastructureCatalogSeedService,
     private readonly people: PeopleSeedService,
     private readonly directoryNetworks: DirectoryNetworksSeedService,
     private readonly qaFlows: QaFlowsSeedService,
@@ -503,6 +506,16 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'permisos de plataforma',
         kind: 'core',
         run: () => this.platformPermissions.run(),
+      },
+      // Reglas padre→hijo y de tipología de la infraestructura hospitalaria
+      // (son datos: la validación las lee de las tablas) y el backfill de la forma
+      // de los espacios previos a F1. Es núcleo porque sin las reglas ningún
+      // espacio nuevo puede validarse; depende sólo del catálogo de conceptos
+      // (sus ids salen de `practice.concepts.ts`).
+      {
+        name: 'catálogo de infraestructura hospitalaria',
+        kind: 'core',
+        run: () => this.infrastructureCatalog.run(),
       },
       // Carril R2-5. Depende del catálogo de conceptos —siembra sus propias
       // especialidades sobre el mismo sistema de códigos— y es contenido, no

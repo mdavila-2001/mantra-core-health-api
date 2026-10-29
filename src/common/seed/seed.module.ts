@@ -79,6 +79,8 @@ import {
 } from '../../modules/forms/entities';
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
 import { PracticeDefaultServicesSeedService } from './practice-default-services-seed.service';
+import { InfrastructureCatalogSeedService } from './infrastructure-catalog-seed.service';
+import { InfrastructureRulesRepository } from '../../modules/practice/repositories/infrastructure-rules.repository';
 import { PeopleSeedService } from './people-seed.service';
 import { DirectoryNetworksSeedService } from './directory-networks-seed.service';
 import { InsuranceModule } from '../../modules/insurance/insurance.module';
@@ -185,6 +187,8 @@ import { Files, FileVersions } from '../../modules/common/entities';
     ClinicalFormsSeedService,
     BoMedicalSpecialtiesSeedService,
     PracticeDefaultServicesSeedService,
+    InfrastructureCatalogSeedService,
+    InfrastructureRulesRepository,
     PeopleSeedService,
     DirectoryNetworksSeedService,
     StickerPackSeedService,
@@ -219,6 +223,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     ClinicalFormsSeedService,
     BoMedicalSpecialtiesSeedService,
     PracticeDefaultServicesSeedService,
+    InfrastructureCatalogSeedService,
     PeopleSeedService,
     DirectoryNetworksSeedService,
     StickerPackSeedService,

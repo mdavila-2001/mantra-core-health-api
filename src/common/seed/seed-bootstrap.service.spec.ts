@@ -40,6 +40,7 @@ const STEPS = [
   'providerAccounts',
   'people',
   'directoryNetworks',
+  'infrastructureCatalog',
   'practiceDefaultServices',
   'qaFlows',
 ] as const;
@@ -106,6 +107,7 @@ function build(fail: Step[] = [], coreState?: SeedCoreState) {
     double.clinicalForms as never,
     double.boMedicalSpecialties as never,
     double.practiceDefaultServices as never,
+    double.infrastructureCatalog as never,
     double.people as never,
     double.directoryNetworks as never,
     double.qaFlows as never,
