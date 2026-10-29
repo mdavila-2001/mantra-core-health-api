@@ -92,6 +92,30 @@ export class SchedulingAgendaRepository {
   }
 
   /**
+   * La práctica de cada recurso, para ponerle precio a sus cupos (FAC-01).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param resourceIds - Los recursos de la página de cupos.
+   * @returns Id de práctica por id de recurso; sin entrada si no tiene.
+   */
+  async findResourcePractices(
+    em: EntityManager,
+    resourceIds: readonly string[],
+  ): Promise<Map<string, string>> {
+    if (resourceIds.length === 0) return new Map();
+    const rows = await em.find(
+      SchedulableResources,
+      { id: { $in: [...resourceIds] } },
+      { fields: ['id', 'practiceId'] },
+    );
+    return new Map(
+      rows
+        .filter((r) => r.practiceId)
+        .map((r) => [r.id, r.practiceId as string]),
+    );
+  }
+
+  /**
    * Cupos de la ventana, del más próximo al más lejano.
    *
    * Con `onlyAvailable` la ventana nunca empieza antes de `ahora`: lo que ya

@@ -5,6 +5,7 @@ import {
   ResourceNotFoundException,
 } from '../../../../../common';
 import { SCHED } from '../../../domain/scheduling.concepts';
+import { createFakeBookingBilling } from '../booking-billing.testing';
 import {
   BOOKING,
   RECEIPT,
@@ -160,5 +161,52 @@ describe('ConfirmPaymentReceiptUseCase · confirmar uno basta', () => {
     const notice = d.notices.emit.mock.calls[0][0];
     expect(notice.kind).toBe('PAYMENT_RECEIPT_REVIEWED');
     expect(notice.payload.change).toBe('PAYMENT_RECEIPT_CONFIRMED');
+  });
+});
+
+describe('ConfirmPaymentReceiptUseCase · FAC-01, el monto del comprobante llega a facturación', () => {
+  const PRACTICE = '99999999-9999-4999-8999-999999999999';
+
+  it('con monto y precio, factura como transferencia y devuelve lo cobrado', async () => {
+    const billing = createFakeBookingBilling({
+      [PRACTICE]: {
+        serviceCatalogId: 'svc',
+        name: 'Consulta',
+        price: '150.00',
+      },
+    });
+    const d = buildReceipts({ billing });
+    // El recurso de la agenda es de la práctica con precio publicado.
+    const resource = await d.catalogRepo.findResourceById();
+    d.catalogRepo.findResourceById.mockResolvedValue({
+      ...resource,
+      practiceId: PRACTICE,
+    });
+    d.receiptsRepo.findOfBookingForUpdate.mockResolvedValue(
+      receipt(SCHED.RECEIPT_PENDING, { amount: '100.00' }),
+    );
+
+    const res = await d.confirm.execute(BOOKING, RECEIPT, practitioner);
+
+    expect(res.billing).toMatchObject({
+      linked: true,
+      amountBilled: 150,
+      amountPaid: 100,
+    });
+    expect(res.paymentState.amountPaid).toBe(100);
+    const [invoice] = billing.invoices.values();
+    expect(invoice.payments[0].method).toBe('TRANSFER');
+  });
+
+  it('sin monto confirma igual y dice NO_AMOUNT', async () => {
+    const d = buildReceipts();
+    d.receiptsRepo.findOfBookingForUpdate.mockResolvedValue(
+      receipt(SCHED.RECEIPT_PENDING, { amount: undefined }),
+    );
+
+    const res = await d.confirm.execute(BOOKING, RECEIPT, practitioner);
+
+    expect(res.paymentState.state).toBe('PAID');
+    expect(res.billing).toMatchObject({ linked: false, reason: 'NO_AMOUNT' });
   });
 });

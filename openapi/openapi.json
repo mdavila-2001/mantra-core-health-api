@@ -35301,12 +35301,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "429": {
             "$ref": "#/components/responses/RateLimited"
           },
@@ -35321,7 +35315,8 @@
         "tags": [
           "pharmacy-public"
         ],
-        "description": "Farmacias abiertas ahora: 24 h o de turno vigente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "security": [],
+        "description": "Farmacias abiertas ahora: 24 h o de turno vigente. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/public/medications": {
@@ -82373,12 +82368,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -82395,7 +82384,8 @@
         "summary": "Sucursales de una farmacia, desde su ficha pública",
         "tags": [
           "public-catalog"
-        ]
+        ],
+        "security": []
       }
     },
     "/public/profiles/f/{slug}/branch-availability": {
@@ -82429,12 +82419,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -82460,7 +82444,8 @@
         "summary": "Disponibilidad de una receta en las sucursales de una farmacia",
         "tags": [
           "public-catalog"
-        ]
+        ],
+        "security": []
       }
     },
     "/qa/environments": {
@@ -123241,13 +123226,13 @@
             "description": "Precio de venta en bolivianos (número o texto decimal, hasta 2 decimales); `null` lo quita. Se versiona en la lista pública `CATALOGO`.",
             "oneOf": [
               {
-                "type": "number"
+                "type": "number",
+                "nullable": true
               },
               {
                 "type": "string"
               }
             ],
-            "nullable": true,
             "example": 12.5
           },
           "category": {
@@ -153037,6 +153022,11 @@
             "type": "boolean",
             "description": "Marca de que la cita se cubrió con seguro",
             "default": false
+          },
+          "amountReceived": {
+            "type": "number",
+            "description": "Monto recibido en Bs (> 0, hasta dos decimales)",
+            "example": 150
           }
         },
         "required": [

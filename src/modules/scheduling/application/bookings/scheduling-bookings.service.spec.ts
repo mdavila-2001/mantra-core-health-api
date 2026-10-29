@@ -4546,6 +4546,52 @@ describe('SchedulingBookingsService · el estado de pago', () => {
     );
   });
 
+  it('FAC-01 · un monto con «pendiente» es 422 y no abre la transacción', async () => {
+    const { service, em } = build();
+
+    await expect(
+      service.setPaymentState(
+        BOOKING,
+        { state: 'PENDING', amountReceived: 50 },
+        actor as any,
+      ),
+    ).rejects.toMatchObject({
+      reason: SchedulingErrorReason.PAYMENT_AMOUNT_WITHOUT_PAYMENT,
+    });
+    expect(em.transactional).not.toHaveBeenCalled();
+  });
+
+  it('FAC-01 · un monto mal escrito es 422 PAYMENT_AMOUNT_INVALID', async () => {
+    const { service } = build();
+
+    await expect(
+      service.setPaymentState(
+        BOOKING,
+        { state: 'PAID', amountReceived: 10.555 },
+        actor as any,
+      ),
+    ).rejects.toMatchObject({
+      reason: SchedulingErrorReason.PAYMENT_AMOUNT_INVALID,
+    });
+  });
+
+  it('FAC-01 · sin práctica la marca se guarda igual y dice por qué no se facturó', async () => {
+    const { service, bookingsRepo } = build();
+    bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+      bookingAt(CONCEPTS.BOOKING_CONFIRMED),
+    );
+
+    const res = await service.setPaymentState(
+      BOOKING,
+      { state: 'PAID', amountReceived: 150 },
+      actor as any,
+    );
+
+    expect(res.state).toBe('PAID');
+    expect(res.billing).toMatchObject({ linked: false, reason: 'NO_PRACTICE' });
+    expect(res.amountPaid).toBeUndefined();
+  });
+
   it('sin marca previa, la lectura devuelve null y no «pendiente»', async () => {
     // No son lo mismo: «pendiente de pago» es una afirmación que alguien firmó;
     // la ausencia de fila es que del pago todavía no se dijo nada.

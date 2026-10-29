@@ -9,9 +9,12 @@ import {
   requireTenantId,
   touch,
   type AuthenticatedUser,
-} from '../../../common';
-import { QaCatalogRepository, QaRunsRepository } from '../repositories';
-import { TestSchedules } from '../entities';
+} from '../../../../common';
+import {
+  QaCatalogRepository,
+  QaRunsRepository,
+} from '../../infrastructure/repositories';
+import { TestSchedules } from '../../entities';
 import {
   assertQaResource,
   qaOutOfScope,
@@ -35,7 +38,7 @@ import {
   type AssertionType,
   type AssertionOperator,
   type HttpMethod,
-} from '../dto';
+} from '../../presentation/dto';
 
 const ENVIRONMENT_CONCEPT: Readonly<Record<EnvironmentKind, string>> = {
   DEV: CONCEPTS.QA_ENV_DEV,
