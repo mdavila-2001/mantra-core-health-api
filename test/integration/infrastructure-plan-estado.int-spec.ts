@@ -296,9 +296,11 @@ describe('Infraestructura F1c · plano · estado y tarjeta del paciente', () => 
       const limpia = await ensureConcept(
         ctx,
         'practice',
-        'HYG_CLEAN',
-        'HYG_CLEAN',
+        'HYG_INSPECTED',
+        'HYG_INSPECTED',
       );
+      // F2: sin la excepción de la práctica, una cama limpia sigue «H» hasta
+      // que se inspecciona (infra.inspection_required por defecto).
       await filas(
         `update practice.care_spaces set hygiene_status_concept_id = ?::uuid, ops_version = ops_version + 1, updated_at = now() where id = ?::uuid`,
         [limpia, ids.b1b],
@@ -340,6 +342,167 @@ describe('Infraestructura F1c · plano · estado y tarjeta del paciente', () => 
         expect.arrayContaining([ids.b1a, ids.b1b]),
       );
       expect(caja.body.spaces[ids.b2a]).toBeUndefined();
+    });
+  });
+
+  // ------------------------------------------------------- datos clínicos libres
+  describe('texto clínico (aislamiento y condición del paciente): sólo Enfermería, Admisión y Control de infecciones', () => {
+    const ORGANISMO = 'Mycobacterium tuberculosis';
+    const CONDICION = 'Paciente con diarrea persistente';
+    const PIE = ['lim', 'man', 'dueno'] as const;
+
+    beforeAll(async () => {
+      users.ic = await createStaffUser(
+        ctx,
+        org,
+        'DA_ASSIGN_INFECTION_CONTROL',
+        { kind: 'SITE', siteId: org.siteId },
+        'ic',
+      );
+      const aire = await ensureConcept(
+        ctx,
+        'practice',
+        'ISO_AIRBORNE',
+        'ISO_AIRBORNE',
+      );
+      await filas(
+        `update practice.care_spaces set isolation_concept_id = ?::uuid, isolation_organism_text = ?,
+                isolation_changed_at = now(), ops_version = ops_version + 1, updated_at = now() where id = ?::uuid`,
+        [aire, ORGANISMO, ids.b1a],
+      );
+      const clinico = await ensureConcept(
+        ctx,
+        'practice',
+        'BLOCK_CLINICAL',
+        'BLOCK_CLINICAL',
+      );
+      const condicion = await ensureConcept(
+        ctx,
+        'practice',
+        'BLOCK_RSN_PATIENT_CONDITION',
+        'BLOCK_RSN_PATIENT_CONDITION',
+      );
+      await filas(
+        `insert into practice.care_space_blocks (id, tenant_id, care_space_id, kind_concept_id, reason_concept_id, reason_text, starts_at, created_at, updated_at)
+         values (gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, ?::uuid, ?, now() - interval '1 minute', now(), now())`,
+        [org.tenantId, ids.b1b, clinico, condicion, CONDICION],
+      );
+      // Como lo deja F2 al bloquear: el eje de disponibilidad con el mismo motivo.
+      const bloqueada = await ensureConcept(
+        ctx,
+        'practice',
+        'SPACE_OP_BLOCKED_CLINICAL',
+        'SPACE_OP_BLOCKED_CLINICAL',
+      );
+      await filas(
+        `update practice.care_spaces set operational_status_concept_id = ?::uuid, availability_reason_concept_id = ?::uuid,
+                availability_changed_at = now(), ops_version = ops_version + 1, updated_at = now() where id = ?::uuid`,
+        [bloqueada, condicion, ids.b1b],
+      );
+    });
+
+    const sinTextoClinico = (body: unknown, conPaciente = false) => {
+      const texto = JSON.stringify(body);
+      expect(texto).not.toContain(ORGANISMO);
+      expect(texto).not.toContain('Mycobacterium');
+      expect(texto).not.toContain(CONDICION);
+      expect(texto).not.toContain('diarrea');
+      expect(texto).not.toContain('"organism"');
+      if (!conPaciente) {
+        expect(texto).not.toContain('"patient"');
+        expect(texto).not.toContain('"initials"');
+      }
+    };
+
+    it.each(['enf', 'adm', 'ic'])(
+      '%s: ve el organismo y el texto de la condición del paciente',
+      async (rol) => {
+        const res = await estado(rol).expect(200);
+        expect(res.body.spaces[ids.b1a].isolation.organism).toBe(ORGANISMO);
+        expect(res.body.spaces[ids.b1b].availability.reasonText).toBe(
+          CONDICION,
+        );
+        const card = await tarjeta(rol, ids.b1b).expect(200);
+        expect(card.body.openBlocks[0].reasonText).toBe(CONDICION);
+      },
+    );
+
+    it('Enfermería de la otra unidad no los ve (el alcance es el de su unidad)', async () => {
+      const otraUnidad = await createStaffUser(
+        ctx,
+        org,
+        'DA_ASSIGN_NURSE',
+        { kind: 'UNIT', unitId: ids.uB },
+        'enfB',
+      );
+      users.enfB = otraUnidad;
+      const res = await estado('enfB').expect(200);
+      expect(res.body.spaces[ids.b1a]).toBeUndefined();
+      sinTextoClinico(res.body, true); // sí ve a sus pacientes (UN-B), no el texto de UN-A
+    });
+
+    it.each(PIE)(
+      '%s: la clave organism y el texto de condición NO existen en el estado (ausente, no nulo)',
+      async (rol) => {
+        const res = await estado(rol).expect(200);
+        const iso = res.body.spaces[ids.b1a].isolation;
+        expect(iso.code).toBe('ISO_AIRBORNE'); // el tipo de aislamiento sí: son las precauciones
+        expect(iso).not.toHaveProperty('organism');
+        expect(res.body.spaces[ids.b1b].availability).not.toHaveProperty(
+          'reasonText',
+        );
+        sinTextoClinico(res.body);
+      },
+    );
+
+    it.each(PIE)(
+      '%s: ni en el sondeo con un ETag viejo ni con axis acotado',
+      async (rol) => {
+        const primero = await estado(rol).expect(200);
+        const viejo = await estado(rol)
+          .set('If-None-Match', 'W/"fs:viejo"')
+          .expect(200);
+        sinTextoClinico(viejo.body);
+        const acotado = await estado(
+          rol,
+          '?axis=isolation,availability',
+        ).expect(200);
+        sinTextoClinico(acotado.body);
+        await estado(rol)
+          .set('If-None-Match', primero.headers.etag as string)
+          .expect(304);
+      },
+    );
+
+    it.each(PIE)(
+      '%s: ni en plan-card (ausente la clave del texto) ni en el layout',
+      async (rol) => {
+        const card = await tarjeta(rol, ids.b1b).expect(200);
+        expect(card.body.openBlocks).toHaveLength(1);
+        expect(card.body.openBlocks[0].reasonCode).toBe(
+          'BLOCK_RSN_PATIENT_CONDITION',
+        );
+        expect(card.body.openBlocks[0]).not.toHaveProperty('reasonText');
+        sinTextoClinico(card.body);
+        const layout = await http()
+          .get(`/floor-plans/${plan.id}/layout?detail=full`)
+          .set(
+            como(rol === 'dueno' ? org.token : users[rol].token, org.tenantId),
+          )
+          .expect(200);
+        sinTextoClinico(layout.body);
+      },
+    );
+
+    it('el texto clínico no llega al outbox ni al historial de ejes', async () => {
+      const eventos = await filas(
+        `select payload_json::text as p from messaging.domain_events where tenant_id = ?::uuid`,
+        [org.tenantId],
+      );
+      for (const e of eventos) {
+        expect(e.p).not.toContain('Mycobacterium');
+        expect(e.p).not.toContain('diarrea');
+      }
     });
   });
 

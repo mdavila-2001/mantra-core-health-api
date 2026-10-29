@@ -254,7 +254,7 @@ export interface SpaceState {
   readonly occupancy?: {
     code: 'OCC_FREE' | 'OCC_RESERVED' | 'OCC_OCCUPIED';
     since: string;
-    patient?: { initials: string; sexCode: string; ageYears: number };
+    patient?: { initials: string; sexCode: string; ageYears: number | null };
   };
   readonly hygiene?: { code: string; since: string; terminalRequired: boolean };
   readonly isolation?: { code: string; organism?: string; since: string };
@@ -319,7 +319,8 @@ export interface PlanCardResponse {
     id: string;
     kind: string;
     reasonCode: string | null;
-    reasonText: string | null;
+    /** Ausente (no `null`) cuando el texto es clínico y el actor no lo ve. */
+    reasonText?: string | null;
     startsAt: string;
     expectedEndAt: string | null;
   }[];

@@ -20,12 +20,20 @@ export type PatientVisibility = 'NONE' | 'ALL' | ReadonlySet<string>;
 export interface OpsStateRequest {
   readonly tenantId: string;
   readonly practiceId: string;
+  /** Establecimiento del lienzo. */
+  readonly siteId: string;
   readonly spaceIds: readonly string[];
   /**
    * Dónde viajan las iniciales del paciente. El puerto **no consulta** a la
    * persona fuera de este alcance: el dato no entra ni en memoria.
    */
   readonly patientVisibility: PatientVisibility;
+  /**
+   * Dónde viaja el texto clínico libre (organismo del aislamiento, motivo
+   * «condición del paciente»): Enfermería, Admisión y Control de infecciones,
+   * según `CLINICAL_TEXT_ROLES` de F2. Fuera de este alcance la clave no viaja.
+   */
+  readonly clinicalVisibility: PatientVisibility;
 }
 
 /** Bloqueo abierto de un espacio. */
@@ -33,7 +41,8 @@ export interface OpenBlockView {
   readonly id: string;
   readonly kind: string;
   readonly reasonCode: string | null;
-  readonly reasonText: string | null;
+  /** Ausente cuando el texto es clínico y el actor no lo ve. */
+  readonly reasonText?: string | null;
   readonly startsAt: string;
   readonly expectedEndAt: string | null;
 }
@@ -102,5 +111,6 @@ export interface PlanOperationalStatePort {
     tenantId: string,
     spaceId: string,
     withOccupant: boolean,
+    clinicalVisible: boolean,
   ): Promise<OpsCardView>;
 }

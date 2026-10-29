@@ -10,8 +10,11 @@
  * regla que `PATCH /care-spaces/:id`; no hay permiso nuevo.
  */
 
+import type { InfraRole } from '../../policies/infra-policy';
+import { CLINICAL_TEXT_ROLES } from '../../services/ops-privacy';
+
 /** Roles operativos que el plano distingue (por asignación delegada). */
-export type PlanRole = 'ENF' | 'ADM' | 'LIM' | 'MAN' | 'JQ' | 'FAC';
+export type PlanRole = 'ENF' | 'ADM' | 'LIM' | 'MAN' | 'JQ' | 'FAC' | 'IC';
 
 /** Acciones del plano. */
 export type PlanAction =
@@ -31,7 +34,19 @@ export const PLAN_ROLE_BY_ASSIGNMENT_CODE: Readonly<Record<string, PlanRole>> =
     'delegated_access:ASSIGN_ROLE_MAINTENANCE': 'MAN',
     'delegated_access:ASSIGN_ROLE_OR_MANAGER': 'JQ',
     'delegated_access:ASSIGN_ROLE_BILLING': 'FAC',
+    'delegated_access:ASSIGN_ROLE_INFECTION_CONTROL': 'IC',
   };
+
+/** Rol del plano → rol de infraestructura de F2 (para reutilizar sus conjuntos). */
+const INFRA_ROLE_OF: Readonly<Record<PlanRole, InfraRole>> = {
+  ENF: 'NURSE',
+  ADM: 'ADMISSION',
+  LIM: 'HOUSEKEEPING',
+  MAN: 'MAINTENANCE',
+  JQ: 'OR_MANAGER',
+  FAC: 'BILLING',
+  IC: 'INFECTION_CONTROL',
+};
 
 /** Roles que ven el estado superpuesto (Facturación no: F2 le da «—»). */
 export const STATE_ROLES: ReadonlySet<PlanRole> = new Set<PlanRole>([
@@ -40,6 +55,7 @@ export const STATE_ROLES: ReadonlySet<PlanRole> = new Set<PlanRole>([
   'LIM',
   'MAN',
   'JQ',
+  'IC',
 ]);
 
 /**
@@ -50,6 +66,16 @@ export const PATIENT_ROLES: ReadonlySet<PlanRole> = new Set<PlanRole>([
   'ENF',
   'ADM',
 ]);
+
+/**
+ * Roles que ven el texto clínico libre (organismo, «condición del paciente»).
+ * Sale de `CLINICAL_TEXT_ROLES` de F2: no se duplica la lista.
+ */
+export const CLINICAL_TEXT_PLAN_ROLES: ReadonlySet<PlanRole> = new Set(
+  (Object.keys(INFRA_ROLE_OF) as PlanRole[]).filter((role) =>
+    CLINICAL_TEXT_ROLES.includes(INFRA_ROLE_OF[role]),
+  ),
+);
 
 /** Quiénes pueden editar, para `details.requiredRoles` del 403. */
 export const PLAN_EDIT_REQUIRED_ROLES: readonly string[] = [

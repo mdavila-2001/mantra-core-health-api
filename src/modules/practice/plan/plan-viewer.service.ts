@@ -15,6 +15,7 @@ import {
 } from '../services/structure-access.service';
 import { FloorPlanReason } from './floor-plan.error-reasons';
 import {
+  CLINICAL_TEXT_PLAN_ROLES,
   InfraPlanPolicy,
   PATIENT_ROLES,
   PLAN_EDIT_REQUIRED_ROLES,
@@ -45,6 +46,8 @@ export interface PlanViewer {
   readonly state: ScopeSet | null;
   /** Alcance del nombre del paciente; `null` si nunca lo ve. */
   readonly patient: ScopeSet | null;
+  /** Alcance del texto clínico libre (organismo…); `null` si nunca lo ve. */
+  readonly clinical: ScopeSet | null;
   readonly canEdit: boolean;
   readonly isPlatform: boolean;
   readonly caps: ViewerCaps;
@@ -143,6 +146,7 @@ export class PlanViewerService {
     let identity: ScopeSet = adminLevel ? { ...NO_SCOPE, all: true } : NO_SCOPE;
     let state: ScopeSet = adminLevel ? { ...NO_SCOPE, all: true } : NO_SCOPE;
     let patient: ScopeSet = NO_SCOPE;
+    let clinical: ScopeSet = NO_SCOPE;
     let anyGrant = false;
 
     for (const row of rows) {
@@ -155,6 +159,7 @@ export class PlanViewerService {
       identity = union(identity, grant);
       if (STATE_ROLES.has(role)) state = union(state, grant);
       if (PATIENT_ROLES.has(role)) patient = union(patient, grant);
+      if (CLINICAL_TEXT_PLAN_ROLES.has(role)) clinical = union(clinical, grant);
     }
     // Sin ninguna asignación operativa el actor es un miembro que lee la
     // estructura (F1): ve la identidad de todos, no el estado.
@@ -162,6 +167,7 @@ export class PlanViewerService {
 
     const canSeeState = hasAny(state);
     const canSeePatient = hasAny(patient);
+    const canSeeClinical = hasAny(clinical) && canSeeState;
     const caps: ViewerCaps = {
       canEditPlan: canEdit,
       canSeeState,
@@ -179,6 +185,7 @@ export class PlanViewerService {
           identity,
           canSeeState ? state : null,
           canSeePatient ? patient : null,
+          canSeeClinical ? clinical : null,
         ]),
       )
       .digest('hex')
@@ -189,6 +196,7 @@ export class PlanViewerService {
       identity,
       state: canSeeState ? state : null,
       patient: canSeePatient ? patient : null,
+      clinical: canSeeClinical ? clinical : null,
       canEdit,
       isPlatform,
       caps,

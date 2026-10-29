@@ -224,8 +224,10 @@ export class FloorPlanStateService {
       const states = await this.ops.read(tx, {
         tenantId,
         practiceId: site.practiceId,
+        siteId: site.id,
         spaceIds,
         patientVisibility,
+        clinicalVisibility: await this.clinicalVisibility(tx, tenantId, viewer),
       });
 
       // Recuentos por contenedor (camas activas, hacia arriba por el árbol dibujado).
@@ -336,7 +338,16 @@ export class FloorPlanStateService {
       const mayShowPatient =
         visibility === 'ALL' ||
         (visibility !== 'NONE' && visibility.has(spaceId));
-      const view = await this.ops.card(tx, tenantId, spaceId, mayShowPatient);
+      const clinical = await this.clinicalVisibility(tx, tenantId, viewer);
+      const mayShowClinical =
+        clinical === 'ALL' || (clinical !== 'NONE' && clinical.has(spaceId));
+      const view = await this.ops.card(
+        tx,
+        tenantId,
+        spaceId,
+        mayShowPatient,
+        mayShowClinical,
+      );
       let patient: PlanCardResponse['patient'];
       if (view.occupant && mayShowPatient) {
         await this.recordOccupantAccess(
@@ -380,6 +391,17 @@ export class FloorPlanStateService {
   ): Promise<PatientVisibility> {
     if (!viewer.patient) return 'NONE';
     const ids = await this.viewers.resolveIds(tx, tenantId, viewer.patient);
+    return ids === 'ALL' ? 'ALL' : ids;
+  }
+
+  /** Dónde viaja el texto clínico libre (mismo criterio que F2: `CLINICAL_TEXT_ROLES`). */
+  private async clinicalVisibility(
+    tx: EntityManager,
+    tenantId: string,
+    viewer: PlanViewer,
+  ): Promise<PatientVisibility> {
+    if (!viewer.clinical) return 'NONE';
+    const ids = await this.viewers.resolveIds(tx, tenantId, viewer.clinical);
     return ids === 'ALL' ? 'ALL' : ids;
   }
 
