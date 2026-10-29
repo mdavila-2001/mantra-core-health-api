@@ -22,6 +22,7 @@ export const MIGRATED_MODULES: readonly string[] = [
   'billing',
   'audio_assets',
   'qa_lab',
+  'telemetry',
 ];
 
 const MODULES_DIR = join(process.cwd(), 'src', 'modules');

@@ -86,7 +86,7 @@ const RESTRICTED_DELETE_ALLOWLIST = new Set([
 ]);
 
 const AUTHN_NON_ROLE_ALLOWLIST =
-  /modules\/(telemetry|community|common)\/controllers\/|modules\/identity_assurance\/controllers\/identity-self-service\.controller\.ts|modules\/audio_assets\/presentation\/controllers\/audio-assets\.controller\.ts/;
+  /modules\/telemetry\/presentation\/controllers\/|modules\/(community|common)\/controllers\/|modules\/identity_assurance\/controllers\/identity-self-service\.controller\.ts|modules\/audio_assets\/presentation\/controllers\/audio-assets\.controller\.ts/;
 
 /** ¿Existe un JwtAuthGuard registrado como APP_GUARD global? (defensa por defecto) */
 function hasGlobalJwtGuard() {
