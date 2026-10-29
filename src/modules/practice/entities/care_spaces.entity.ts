@@ -106,8 +106,8 @@ export class CareSpaces {
   @Property({ fieldName: 'cleanup_minutes', columnType: 'int', nullable: true })
   cleanupMinutes?: number;
 
-  @Property({ fieldName: 'tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants (inferida)
-  tenantId?: string;
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants (inferida)
+  tenantId!: string;
 
   @Property({ fieldName: 'form_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
   formConceptId?: string;

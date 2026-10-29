@@ -11,6 +11,5 @@ export * from './practices.entity';
 export * from './practitioner_role_assignments.entity';
 export * from './practitioner_support_assignments.entity';
 export * from './site_declared_capacities.entity';
-export * from './site_licenses.entity';
 export * from './space_form_parent_rules.entity';
 export * from './space_unit_assignments.entity';

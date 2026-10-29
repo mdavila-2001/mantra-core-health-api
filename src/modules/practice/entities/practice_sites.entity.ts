@@ -176,4 +176,18 @@ export class PracticeSites {
     nullable: true,
   })
   municipalityName?: string;
+
+  @Property({
+    fieldName: 'snis_verified_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  snisVerifiedAt?: Date;
+
+  @Property({
+    fieldName: 'snis_verified_by_user_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → iam.users (inferida)
+  snisVerifiedByUserId?: string;
 }
