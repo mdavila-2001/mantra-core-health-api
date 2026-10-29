@@ -137,6 +137,8 @@ export enum AccountingErrorReason {
   UNIT_ALREADY_HAS_COST_CENTER = 'UNIT_ALREADY_HAS_COST_CENTER',
   /** La unidad clínica no existe en el tenant del actor (404, la ajena responde igual). */
   COST_CENTER_UNIT_NOT_FOUND = 'COST_CENTER_UNIT_NOT_FOUND',
+  /** La unidad está clausurada: no recibe centros de costo (422). */
+  COST_CENTER_UNIT_RETIRED = 'COST_CENTER_UNIT_RETIRED',
   /** La unidad no es de la práctica del centro de costo (422). */
   COST_CENTER_UNIT_PRACTICE_MISMATCH = 'COST_CENTER_UNIT_PRACTICE_MISMATCH',
 }

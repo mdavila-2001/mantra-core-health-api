@@ -97,13 +97,18 @@ export class AccountingInfrastructureService {
       await this.assertCanWrite(tx, actor, tenantId, NOT_FOUND_ITEM);
 
       if (dto.careSpaceId !== null) {
+        // El espacio se bloquea (`for share`) hasta que esta transacción confirme y su
+        // estado se lee DESPUÉS del bloqueo: una clausura que ya tomó la fila obliga a
+        // esperar y ve `SPACE_RETIRED`; si no, la clausura espera a que el activo
+        // quede escrito. Así nunca queda un activo en un espacio retirado.
         const spaces = await tx.execute<
           { practice_id: string; status_concept_id: string }[]
         >(
           `select s.practice_id, cs.status_concept_id
              from practice.care_spaces cs
              join practice.practice_sites s on s.id = cs.practice_site_id
-            where cs.id = ? and cs.tenant_id = ?`,
+            where cs.id = ? and cs.tenant_id = ?
+              for share of cs`,
           [dto.careSpaceId, tenantId],
         );
         if (spaces.length === 0)
@@ -191,11 +196,15 @@ export class AccountingInfrastructureService {
       const center = rows[0];
       await this.assertCanWrite(tx, actor, tenantId, NOT_FOUND_COST_CENTER);
 
-      const units = await tx.execute<{ practice_id: string }[]>(
-        `select s.practice_id
+      // Misma razón que el espacio: la unidad se bloquea antes de leer su estado.
+      const units = await tx.execute<
+        { practice_id: string; status_concept_id: string }[]
+      >(
+        `select s.practice_id, u.status_concept_id
            from practice.clinical_units u
            join practice.practice_sites s on s.id = u.practice_site_id
-          where u.id = ? and u.tenant_id = ?`,
+          where u.id = ? and u.tenant_id = ?
+            for share of u`,
         [dto.clinicalUnitId, tenantId],
       );
       if (units.length === 0)
@@ -209,6 +218,12 @@ export class AccountingInfrastructureService {
           'La unidad no es de la práctica del centro de costo',
           { errors: [{ field: 'clinicalUnitId' }] },
           AccountingErrorReason.COST_CENTER_UNIT_PRACTICE_MISMATCH,
+        );
+      if (units[0].status_concept_id === PRAC.UNIT_RETIRED)
+        throw new PreconditionFailedException(
+          'La unidad está clausurada: no recibe centros de costo',
+          { errors: [{ field: 'clinicalUnitId' }] },
+          AccountingErrorReason.COST_CENTER_UNIT_RETIRED,
         );
 
       if (center.clinical_unit_id === dto.clinicalUnitId)

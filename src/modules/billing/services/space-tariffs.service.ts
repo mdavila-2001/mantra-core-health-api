@@ -11,6 +11,7 @@ import {
 import { AUD } from '../../audit/audit.concepts';
 import { HistoryRepository } from '../../audit/repositories';
 import { ATTRIBUTES } from '../../practice/infrastructure-catalog';
+import { PRAC } from '../../practice/practice.concepts';
 import { BILL } from '../billing.concepts';
 import { BillingErrorReason } from '../billing.error-reasons';
 import { isIsoDay } from '../domain/zoned-time';
@@ -174,11 +175,16 @@ export class SpaceTariffsService {
     const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
       if (dto.careSpaceId) {
-        const space = await tx.execute<{ id: string }[]>(
-          `select id from practice.care_spaces cs
+        // El espacio se bloquea y su estado se lee después: una clausura en curso no
+        // deja una tarifa colgando de una sala retirada.
+        const space = await tx.execute<
+          { id: string; status_concept_id: string }[]
+        >(
+          `select cs.id, cs.status_concept_id from practice.care_spaces cs
             where cs.id = ? and cs.tenant_id = ?
               and exists (select 1 from practice.practice_sites s
-                           where s.id = cs.practice_site_id and s.practice_id = ?)`,
+                           where s.id = cs.practice_site_id and s.practice_id = ?)
+              for share of cs`,
           [dto.careSpaceId, tenantId, dto.practiceId],
         );
         if (space.length === 0)
@@ -193,6 +199,13 @@ export class SpaceTariffsService {
           'infra.tariff.write',
           dto.careSpaceId,
         );
+        if (space[0].status_concept_id === PRAC.SPACE_RETIRED)
+          throw this.invalid([
+            {
+              field: 'careSpaceId',
+              message: 'El espacio está clausurado: no recibe tarifas nuevas',
+            },
+          ]);
       } else {
         await this.access.forPractice(
           tx,
