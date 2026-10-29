@@ -12,6 +12,8 @@ import {
   PracticeSitesHistory,
   ClinicalUnitsHistory,
   CareSpacesHistory,
+  EncounterLocationsHistory,
+  PlacementIncidentsHistory,
 } from '../entities';
 
 /** Datos para sellar una revisión en una tabla `*_history` (write-side). */
@@ -161,6 +163,19 @@ const HISTORY_REGISTRY: Record<string, HistoryBinding> = {
   care_spaces: {
     entity: CareSpacesHistory,
     sourceField: 'careSpaceId',
+    revisionField: 'revisionNo',
+  },
+  // F3 de infraestructura hospitalaria: la internación versiona las ubicaciones de
+  // cama (ingreso, traslado, intercambio, egreso, cancelaciones) y los incidentes
+  // de colocación (compatibilidad forzada y su revisión).
+  encounter_locations: {
+    entity: EncounterLocationsHistory,
+    sourceField: 'encounterLocationId',
+    revisionField: 'revisionNo',
+  },
+  placement_incidents: {
+    entity: PlacementIncidentsHistory,
+    sourceField: 'placementIncidentId',
     revisionField: 'revisionNo',
   },
 };
