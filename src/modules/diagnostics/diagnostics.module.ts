@@ -33,6 +33,7 @@ import {
   DiagnosticsPatientResultsController,
   DiagnosticsReceptionController,
   DiagnosticsSamplePointsController,
+  DiagnosticsImagingStepsController,
 } from './controllers';
 import {
   DiagnosticsSpecimensService,
@@ -44,6 +45,7 @@ import {
   DiagnosticsPatientResultsService,
   DiagnosticsReceptionService,
   DiagnosticsSamplePointsService,
+  DiagnosticsImagingStepsService,
   DiagnosticsScopeService,
   DiagnosticsPatientAccessService,
 } from './services';
@@ -91,6 +93,7 @@ import {
     DiagnosticsPatientResultsController,
     DiagnosticsReceptionController,
     DiagnosticsSamplePointsController,
+    DiagnosticsImagingStepsController,
   ],
   providers: [
     // Repositorios
@@ -119,6 +122,7 @@ import {
     DiagnosticsPatientResultsService,
     DiagnosticsReceptionService,
     DiagnosticsSamplePointsService,
+    DiagnosticsImagingStepsService,
     // Alcance de tenant de los writes clínicos y política paciente–profesional.
     DiagnosticsScopeService,
     DiagnosticsPatientAccessService,

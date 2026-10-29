@@ -7,3 +7,4 @@ export * from './media-quality.dto';
 export * from './orders.dto';
 export * from './patient-results.dto';
 export * from './reception.dto';
+export * from './imaging-steps.dto';
