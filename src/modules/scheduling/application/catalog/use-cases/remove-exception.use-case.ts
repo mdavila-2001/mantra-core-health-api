@@ -41,6 +41,12 @@ export class RemoveExceptionUseCase {
       if (resource) {
         this.careSpaces.assertResourceInActiveTenant(resource);
         this.access.assertActorResource(resource, actor);
+        await this.careSpaces.assertMayManageBound(
+          tx,
+          resource,
+          [resource.careSpaceId],
+          actor,
+        );
       }
       assertManualException(exception.sourceKindConceptId);
 

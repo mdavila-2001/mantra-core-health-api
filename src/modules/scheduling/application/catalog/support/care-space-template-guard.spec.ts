@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { CONCEPTS } from '../../../../../common';
+import { CONCEPTS, ResourceNotFoundException } from '../../../../../common';
 import { runWithTenant } from '../../../../../common/tenant/tenant-context';
 import { PRAC } from '../../../../practice/practice.concepts';
 import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
@@ -95,6 +95,147 @@ describe('CareSpaceTemplateGuard · el recurso es del tenant del contexto', () =
     expect(() =>
       inTenant(() => guard.assertResourceInActiveTenant({ tenantId: TENANT })),
     ).not.toThrow();
+  });
+});
+
+describe('CareSpaceTemplateGuard.assertMayManageBound · editar un horario que ya ocupa un espacio', () => {
+  const OTHER_SPACE = '77777777-7777-4777-8777-777777777777';
+
+  it('SCHEDULING_ADMIN del tenant puede, sin pasar por la política del espacio', async () => {
+    const d = build();
+    await d.inTenant(() =>
+      d.guard.assertMayManageBound(d.tx as any, resource(), [SPACE], admin),
+    );
+    expect(d.state.loadSpace).toHaveBeenCalledWith(d.tx, TENANT, SPACE);
+    expect(d.infra.assertCan).not.toHaveBeenCalled();
+  });
+
+  it('un SCHEDULING_ADMIN de OTRA organización no vale aquí: sale por la política y, sobre su propio horario, es 403', async () => {
+    const d = build();
+    d.infra.assertCan.mockRejectedValue(
+      new ResourceNotFoundException('sin alcance'),
+    );
+    const foreignAdmin = {
+      id: 'u3',
+      roles: ['SCHEDULING_ADMIN'],
+      scopedRoles: { [OTHER_TENANT]: ['SCHEDULING_ADMIN'] },
+    } as any;
+    await expect(
+      d.inTenant(() =>
+        d.guard.assertMayManageBound(
+          d.tx as any,
+          resource(),
+          [SPACE],
+          foreignAdmin,
+        ),
+      ),
+    ).rejects.toMatchObject({
+      status: 403,
+      reason: 'INFRA_ACTION_NOT_ALLOWED',
+    });
+    expect(d.infra.assertCan).toHaveBeenCalledWith(
+      foreignAdmin,
+      'infra.agenda.assign',
+      { careSpaceId: SPACE },
+      d.tx,
+    );
+  });
+
+  it('al ATAR un espacio ajeno la política sigue respondiendo 404 (no confirma ids que no son suyos)', async () => {
+    const d = build();
+    d.infra.assertCan.mockRejectedValue(
+      new ResourceNotFoundException('sin alcance'),
+    );
+    await expect(
+      d.inTenant(() => d.guard.attach(d.tx as any, resource(), SPACE, nobody)),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+  });
+
+  it('quien no tiene la autoridad del espacio recibe 403 de la política', async () => {
+    const d = build();
+    d.infra.assertCan.mockRejectedValue(
+      Object.assign(new Error('x'), { status: 403 }),
+    );
+    await expect(
+      d.inTenant(() =>
+        d.guard.assertMayManageBound(d.tx as any, resource(), [SPACE], nobody),
+      ),
+    ).rejects.toMatchObject({ status: 403 });
+  });
+
+  it('exige la autoridad sobre cada espacio distinto (el actual y el nuevo), sin repetir ni contar los ausentes', async () => {
+    const d = build();
+    await d.inTenant(() =>
+      d.guard.assertMayManageBound(
+        d.tx as any,
+        resource(),
+        [SPACE, null, undefined, SPACE, OTHER_SPACE],
+        nobody,
+      ),
+    );
+    expect(d.infra.assertCan.mock.calls.map((c: any[]) => c[2])).toEqual([
+      { careSpaceId: SPACE },
+      { careSpaceId: OTHER_SPACE },
+    ]);
+  });
+
+  it('si el segundo espacio no se puede, falla (no basta con el primero)', async () => {
+    const d = build();
+    d.infra.assertCan
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(Object.assign(new Error('x'), { status: 403 }));
+    await expect(
+      d.inTenant(() =>
+        d.guard.assertMayManageBound(
+          d.tx as any,
+          resource(),
+          [SPACE, OTHER_SPACE],
+          nobody,
+        ),
+      ),
+    ).rejects.toMatchObject({ status: 403 });
+  });
+
+  it('sin espacio no consulta nada (un horario sin espacio sigue como siempre)', async () => {
+    const d = build();
+    await d.inTenant(() =>
+      d.guard.assertMayManageBound(
+        d.tx as any,
+        resource(),
+        [null, undefined],
+        nobody,
+      ),
+    );
+    expect(d.state.loadSpace).not.toHaveBeenCalled();
+    expect(d.infra.assertCan).not.toHaveBeenCalled();
+  });
+
+  it('un recurso de otra organización es 404 antes de leer el espacio', async () => {
+    const d = build();
+    await expect(
+      d.inTenant(() =>
+        d.guard.assertMayManageBound(
+          d.tx as any,
+          resource({ tenantId: OTHER_TENANT }),
+          [SPACE],
+          admin,
+        ),
+      ),
+    ).rejects.toMatchObject({ status: 404 });
+    expect(d.state.loadSpace).not.toHaveBeenCalled();
+  });
+
+  it('un espacio ajeno o inexistente es 404 uniforme antes de evaluar el alcance', async () => {
+    const d = build();
+    d.state.loadSpace.mockRejectedValue(
+      Object.assign(new Error('Espacio no encontrado'), { status: 404 }),
+    );
+    await expect(
+      d.inTenant(() =>
+        d.guard.assertMayManageBound(d.tx as any, resource(), [SPACE], nobody),
+      ),
+    ).rejects.toMatchObject({ status: 404 });
+    expect(d.infra.assertCan).not.toHaveBeenCalled();
   });
 });
 

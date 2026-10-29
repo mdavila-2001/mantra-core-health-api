@@ -7,9 +7,11 @@ import {
   como,
   crearEspacio,
   crearMiembro,
+  darMembresia,
   filas,
   http as httpFor,
   mkOrg,
+  PASSWORD,
   registrarOrg,
   registrarProfesional,
   type Profesional,
@@ -1132,6 +1134,134 @@ describe('Infraestructura F5d · agenda de consultorios y salas', () => {
         .set(como(coordB))
         .send({ from: `${fecha}T00:00:00Z`, to: `${fecha}T23:59:59Z` });
       expect(r.status).toBe(404);
+    });
+  });
+
+  // ------------------------------------------------------------ autoridad sobre el espacio
+  describe('la autoridad sobre el espacio no se pierde al editar ni al elegir', () => {
+    it('el profesional dueño de la agenda no mueve ni recorta un horario que ya ocupa un consultorio: 403 y nada cambia', async () => {
+      // doc1 es miembro de A y dueño de `res1`, pero no administra el consultorio.
+      await darMembresia(ctx, doc1.userId, orgA.tenantId);
+      await http()
+        .post(`/authz/users/${doc1.userId}/role-assignments`)
+        .set(bearer(ctx.adminToken))
+        .send({ roleCode: 'PRACTITIONER', tenantId: orgA.tenantId })
+        .expect(201);
+      const login = await http()
+        .post('/iam/auth/login')
+        .send({
+          email: `f4-prof-d1-${sufijo}@example.test`,
+          password: PASSWORD,
+        })
+        .expect(200);
+      const propio = {
+        token: login.body.accessToken as string,
+        tenantId: orgA.tenantId,
+      };
+      const c = await consultorio('Consultorio de autoridad');
+      const { dow } = dia(21);
+      const t = await publicar(coordA, res1, {
+        name: 'Horario con consultorio',
+        careSpaceId: c.id,
+        rules: [regla(dow, '08:00', '09:00')],
+      }).expect(201);
+      const estado = async () => {
+        const [fila] = await filas(
+          ctx,
+          `select name, care_space_id, valid_to, row_version from scheduling.schedule_templates where id = ?`,
+          [t.body.id],
+        );
+        const reglas = await filas(
+          ctx,
+          `select day_of_week, start_time, end_time from scheduling.schedule_rules where schedule_template_id = ? order by start_time`,
+          [t.body.id],
+        );
+        return { fila, reglas };
+      };
+      const antes = await estado();
+
+      for (const cuerpo of [
+        { rules: [regla(dow, '08:00', '08:30')] },
+        { validTo: '2031-01-01T00:00:00Z' },
+        { name: 'Renombrado' },
+        { careSpaceId: null },
+      ]) {
+        const r = await http()
+          .patch(`/scheduling/templates/${t.body.id}`)
+          .set(como(propio))
+          .send(cuerpo);
+        expect(r.status).toBe(403);
+      }
+      const gen = await http()
+        .post(`/scheduling/templates/${t.body.id}/generate-slots`)
+        .set(como(propio))
+        .send({
+          from: `${dia(21).fecha}T00:00:00Z`,
+          to: `${dia(21).fecha}T23:59:59Z`,
+        });
+      expect(gen.status).toBe(403);
+      expect(await estado()).toEqual(antes);
+      const [{ n }] = await filas(
+        ctx,
+        `select count(*)::int as n from scheduling.bookable_slots where schedule_template_id = ?`,
+        [t.body.id],
+      );
+      expect(n).toBe(0);
+
+      // Quien sí la administra edita, y el cambio queda persistido.
+      await http()
+        .patch(`/scheduling/templates/${t.body.id}`)
+        .set(como(coordA))
+        .send({ name: 'Renombrado por la coordinación' })
+        .expect(200);
+      expect((await estado()).fila.name).toBe('Renombrado por la coordinación');
+
+      // Un horario SIN consultorio sigue siendo del profesional: lo edita él mismo.
+      const libre = await publicar(coordA, res1, {
+        rules: [regla((dow + 3) % 7, '08:00', '09:00')],
+      }).expect(201);
+      await http()
+        .patch(`/scheduling/templates/${libre.body.id}`)
+        .set(como(propio))
+        .send({ name: 'Mío' })
+        .expect(200);
+    });
+
+    it('quien atiende el mostrador sin alcance sobre el consultorio no lo elige para una cita puntual: 404 y no queda cita', async () => {
+      const c = await consultorio('Consultorio fuera de alcance');
+      const { fecha } = dia(22);
+      const pac = await paciente();
+      const r = await directa(agenteA, res2, pac, lp(fecha, '10:00'), {
+        careSpaceId: c.id,
+      });
+      expect(r.status).toBe(404);
+      const [{ n }] = await filas(
+        ctx,
+        `select count(*)::int as n from clinical.appointments where patient_profile_id = ?`,
+        [pac],
+      );
+      expect(n).toBe(0);
+      // Con la misma petición, el coordinador de agendas del tenant sí puede.
+      const ok = await directa(coordA, res2, pac, lp(fecha, '10:00'), {
+        careSpaceId: c.id,
+      }).expect(201);
+      expect((await cita(ok.body.bookingId)).care_space_id).toBe(c.id);
+    });
+
+    it('el coordinador de OTRA organización no elige consultorios en la agenda de A: sin efecto y sin cita', async () => {
+      const c = await consultorio('Consultorio inaccesible para B');
+      const { fecha } = dia(23);
+      const pac = await paciente();
+      const r = await directa(coordB, res2, pac, lp(fecha, '10:00'), {
+        careSpaceId: c.id,
+      });
+      expect([403, 404]).toContain(r.status);
+      const [{ n }] = await filas(
+        ctx,
+        `select count(*)::int as n from clinical.appointments where patient_profile_id = ?`,
+        [pac],
+      );
+      expect(n).toBe(0);
     });
   });
 

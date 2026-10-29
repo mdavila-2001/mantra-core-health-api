@@ -119,6 +119,12 @@ export class CreateExceptionUseCase {
       // cupos (`CloseSlotsUseCase`) ya lo exigía; bloquear no, y hasta hoy no
       // devolvía nada que lo hiciera grave.
       this.access.assertActorResource(resource, actor);
+      await this.careSpaces.assertMayManageBound(
+        tx,
+        resource,
+        [resource.careSpaceId],
+        actor,
+      );
 
       const isAvailable = dto.isAvailable ?? false;
 

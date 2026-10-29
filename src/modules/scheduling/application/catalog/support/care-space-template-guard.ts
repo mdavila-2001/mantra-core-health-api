@@ -9,6 +9,8 @@ import {
   roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../../../common';
+import { InsufficientRoleException } from '../../../../../common/errors/domain.exception';
+import { OpsErrorReason } from '../../../../practice/practice-ops.error-reasons';
 import { OutboxService } from '../../../../messaging/services/outbox.service';
 import { FUNCTIONS } from '../../../../practice/infrastructure-catalog';
 import { PRAC } from '../../../../practice/practice.concepts';
@@ -90,6 +92,72 @@ export class CareSpaceTemplateGuard {
   }
 
   /**
+   * Quién puede tocar el horario de un espacio: el recurso es del tenant del contexto (404
+   * uniforme), el espacio también (404 uniforme: el inexistente y el ajeno no se distinguen) y
+   * el actor es `SCHEDULING_ADMIN` de ese tenant o tiene `infra.agenda.assign` sobre el espacio
+   * (administrador de la organización o de la sucursal; 403 si ve el espacio y no puede).
+   *
+   * Es la MISMA autorización para atar, cambiar, soltar o editar el horario de una plantilla
+   * que ya ocupa un espacio: quien edita franjas, vigencia o estado de un horario en un
+   * consultorio ajeno lo mueve o lo recorta igual que quien lo ata.
+   *
+   * @param alreadyBound - El horario YA está en ese espacio (el actor lo conoce: su propio
+   *   horario lo nombra). Sin alcance sobre él la respuesta es 403 y no el 404 de la política,
+   *   que sólo protege a quien nombra un id que no es suyo.
+   * @returns La fila del espacio.
+   */
+  async assertMayManageSpace(
+    tx: EntityManager,
+    resource: Pick<SchedulableResources, 'tenantId'>,
+    careSpaceId: string,
+    actor: AuthenticatedUser,
+    alreadyBound = false,
+  ): Promise<SpaceOpsRow> {
+    const tenantId = requireTenantId();
+    this.assertResourceInActiveTenant(resource);
+    const space = await this.state.loadSpace(tx, tenantId, careSpaceId);
+    if (!roleAuthorizesInTenant(actor, 'SCHEDULING_ADMIN', tenantId)) {
+      try {
+        await this.infra.assertCan(
+          actor,
+          'infra.agenda.assign',
+          { careSpaceId },
+          tx,
+        );
+      } catch (error) {
+        if (alreadyBound && error instanceof ResourceNotFoundException) {
+          throw new InsufficientRoleException(
+            'El horario ocupa un espacio que usted no administra',
+            { action: 'infra.agenda.assign' },
+            OpsErrorReason.INFRA_ACTION_NOT_ALLOWED,
+          );
+        }
+        throw error;
+      }
+    }
+    return space;
+  }
+
+  /**
+   * Exige {@link assertMayManageSpace} sobre cada espacio que el horario tiene o va a tener
+   * (el actual y el nuevo, sin repetir). Los ausentes no cuentan. Va antes de escribir nada y
+   * antes de comprobar el solape.
+   */
+  async assertMayManageBound(
+    tx: EntityManager,
+    resource: Pick<SchedulableResources, 'tenantId'>,
+    careSpaceIds: readonly (string | null | undefined)[],
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const distinct = [
+      ...new Set(careSpaceIds.filter((id): id is string => !!id)),
+    ];
+    for (const careSpaceId of distinct) {
+      await this.assertMayManageSpace(tx, resource, careSpaceId, actor, true);
+    }
+  }
+
+  /**
    * Valida y autoriza atar la plantilla de `resource` al espacio `careSpaceId`.
    *
    * @returns La fila del espacio, ya validada.
@@ -101,18 +169,12 @@ export class CareSpaceTemplateGuard {
     actor: AuthenticatedUser,
   ): Promise<SpaceOpsRow> {
     const tenantId = requireTenantId();
-    this.assertResourceInActiveTenant(resource);
-    // El 404 del espacio ajeno o inexistente sale de aquí, antes de decir nada más.
-    const space = await this.state.loadSpace(tx, tenantId, careSpaceId);
-
-    if (!roleAuthorizesInTenant(actor, 'SCHEDULING_ADMIN', tenantId)) {
-      await this.infra.assertCan(
-        actor,
-        'infra.agenda.assign',
-        { careSpaceId },
-        tx,
-      );
-    }
+    const space = await this.assertMayManageSpace(
+      tx,
+      resource,
+      careSpaceId,
+      actor,
+    );
 
     const fn = FUNCTIONS.byConceptId(space.spaceTypeConceptId)?.code;
     if (!fn || !AGENDA_SPACE_FUNCTIONS.includes(fn)) {

@@ -94,6 +94,13 @@ export class GenerateSlotsUseCase {
       if (resource) {
         this.careSpaces.assertResourceInActiveTenant(resource);
         this.access.assertActorResource(resource, actor);
+        // Generar cupos en un horario que ocupa un espacio lo usa: la misma autoridad.
+        await this.careSpaces.assertMayManageBound(
+          tx,
+          resource,
+          [template.careSpaceId, resource.careSpaceId],
+          actor,
+        );
       }
 
       // Horario flexible (P36): no hay grilla que materializar. El cupo nace

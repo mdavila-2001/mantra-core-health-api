@@ -53,6 +53,13 @@ export class ReactivateTemplateUseCase {
       }
       this.careSpaces.assertResourceInActiveTenant(resource);
       this.access.assertActorResource(resource, actor);
+      // Volver a publicar un horario en un espacio lo ocupa de nuevo.
+      await this.careSpaces.assertMayManageBound(
+        tx,
+        resource,
+        [template.careSpaceId, resource.careSpaceId],
+        actor,
+      );
 
       // Reactivar lo que ya está vigente no es un error del que haya que
       // avisar: es que alguien tocó dos veces. Se responde lo mismo.

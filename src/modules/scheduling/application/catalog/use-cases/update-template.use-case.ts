@@ -99,6 +99,15 @@ export class UpdateTemplateUseCase {
       }
       this.careSpaces.assertResourceInActiveTenant(resource);
       this.access.assertActorResource(resource, actor);
+      // Editar un horario que ya ocupa un espacio (franjas, vigencia, nombre, soltarlo) es tocar
+      // ese espacio: la misma autorización que para atarlo, sobre el espacio ACTUAL (el nuevo,
+      // si cambia, lo autoriza `attach`), antes de escribir y de comprobar el solape.
+      await this.careSpaces.assertMayManageBound(
+        tx,
+        resource,
+        [template.careSpaceId, resource.careSpaceId],
+        actor,
+      );
 
       // F5d · el espacio del horario. `undefined` lo conserva, `null` lo suelta y un id lo
       // cambia (con las mismas reglas que al publicar). El tenant de la plantilla lo fija el

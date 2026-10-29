@@ -218,6 +218,12 @@ export class CloseSlotsUseCase {
       }
       this.careSpaces.assertResourceInActiveTenant(resource);
       this.access.assertActorResource(resource, actor);
+      await this.careSpaces.assertMayManageBound(
+        tx,
+        resource,
+        [resource.careSpaceId],
+        actor,
+      );
 
       const slots = await this.catalogRepo.findSlotsOfResourceForUpdate(
         tx,

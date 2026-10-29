@@ -53,6 +53,7 @@ function build() {
   };
   const careSpaces = {
     assertResourceInActiveTenant: mockFn(),
+    assertMayManageBound: mockFn().mockResolvedValue(undefined),
     attach: mockFn().mockResolvedValue({ id: SPACE, practiceSiteId: SITE }),
     assertNoOverlap: mockFn().mockResolvedValue(undefined),
     assertReactivable: mockFn().mockResolvedValue(undefined),
@@ -480,5 +481,195 @@ describe('generateSlots · no ofrece lo que el espacio o el equipo no puede aten
       skipped: 0,
       omittedByCommitments: 0,
     });
+  });
+});
+
+const deny = (status: number) =>
+  Object.assign(new Error('x'), { status }) as unknown as Error;
+
+describe('autoridad sobre el espacio al editar un horario que ya lo ocupa (F5d)', () => {
+  const existing = (over: Record<string, unknown> = {}) => ({
+    id: TEMPLATE,
+    resourceId: RESOURCE,
+    name: 'H',
+    statusConceptId: CONCEPTS.TEMPLATE_PUBLISHED,
+    careSpaceId: SPACE,
+    flexibleHours: false,
+    ...over,
+  });
+
+  it('editar sólo las franjas de una plantilla con espacio exige la autoridad del espacio ACTUAL, antes de escribir y de comprobar el solape', async () => {
+    const d = build();
+    d.catalogRepo.findTemplateById.mockResolvedValue(existing());
+    await d.service.updateTemplate(TEMPLATE, { rules } as any, admin);
+    expect(d.careSpaces.assertMayManageBound).toHaveBeenCalledWith(
+      d.tx,
+      d.resource,
+      [SPACE, undefined],
+      admin,
+    );
+    const authorized =
+      d.careSpaces.assertMayManageBound.mock.invocationCallOrder[0];
+    expect(authorized).toBeLessThan(
+      d.catalogRepo.deleteRulesByTemplate.mock.invocationCallOrder[0],
+    );
+    expect(authorized).toBeLessThan(
+      d.careSpaces.assertNoOverlap.mock.invocationCallOrder[0],
+    );
+  });
+
+  it.each([
+    ['las franjas', { rules }],
+    ['la vigencia', { validTo: '2027-01-01T00:00:00Z' }],
+    ['el nombre', { name: 'Otro' }],
+    ['soltar el espacio', { careSpaceId: null }],
+  ])(
+    'sin permiso sobre el espacio, cambiar %s es 403 y NADA cambia',
+    async (_n, dto) => {
+      const d = build();
+      const template = existing();
+      d.catalogRepo.findTemplateById.mockResolvedValue(template);
+      d.careSpaces.assertMayManageBound.mockRejectedValue(deny(403));
+      await expect(
+        d.service.updateTemplate(TEMPLATE, dto as any, admin),
+      ).rejects.toMatchObject({ status: 403 });
+      expect(template.name).toBe('H');
+      expect(template.careSpaceId).toBe(SPACE);
+      expect(d.catalogRepo.deleteRulesByTemplate).not.toHaveBeenCalled();
+      expect(d.catalogRepo.createRule).not.toHaveBeenCalled();
+      expect(d.careSpaces.assertNoOverlap).not.toHaveBeenCalled();
+      expect(d.careSpaces.announce).not.toHaveBeenCalled();
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    },
+  );
+
+  it('moverlo a otro espacio exige también la autoridad sobre el NUEVO (attach)', async () => {
+    const d = build();
+    d.catalogRepo.findTemplateById.mockResolvedValue(existing());
+    d.careSpaces.attach.mockRejectedValue(deny(403));
+    await expect(
+      d.service.updateTemplate(
+        TEMPLATE,
+        { careSpaceId: 'otro-espacio' } as any,
+        admin,
+      ),
+    ).rejects.toMatchObject({ status: 403 });
+    expect(d.careSpaces.assertMayManageBound).toHaveBeenCalledWith(
+      d.tx,
+      d.resource,
+      [SPACE, undefined],
+      admin,
+    );
+    expect(d.tx.flush).not.toHaveBeenCalled();
+  });
+
+  it('una plantilla sin espacio se edita igual que siempre (la comprobación no encuentra espacio que autorizar)', async () => {
+    const d = build();
+    d.catalogRepo.findTemplateById.mockResolvedValue(
+      existing({ careSpaceId: undefined }),
+    );
+    await d.service.updateTemplate(TEMPLATE, { name: 'N' } as any, admin);
+    expect(d.careSpaces.assertMayManageBound).toHaveBeenCalledWith(
+      d.tx,
+      d.resource,
+      [undefined, undefined],
+      admin,
+    );
+  });
+
+  it('reactivar un horario con espacio exige la autoridad y, si falta, no lo vuelve a publicar', async () => {
+    const d = build();
+    d.catalogRepo.findTemplateById.mockResolvedValue(
+      existing({ statusConceptId: CONCEPTS.TEMPLATE_RETIRED }),
+    );
+    d.careSpaces.assertMayManageBound.mockRejectedValue(deny(403));
+    await expect(
+      d.service.reactivateTemplate(TEMPLATE, admin),
+    ).rejects.toMatchObject({
+      status: 403,
+    });
+    expect(d.catalogRepo.reactivateTemplate).not.toHaveBeenCalled();
+    expect(d.careSpaces.assertReactivable).not.toHaveBeenCalled();
+  });
+
+  it('publicar una plantilla en un recurso atado a una sala exige la autoridad de esa sala', async () => {
+    const d = build();
+    d.resource.careSpaceId = SPACE;
+    d.careSpaces.assertMayManageBound.mockRejectedValue(deny(403));
+    await expect(
+      d.service.createTemplate(RESOURCE, { name: 'H', rules } as any, admin),
+    ).rejects.toMatchObject({ status: 403 });
+    expect(d.catalogRepo.createTemplate).not.toHaveBeenCalled();
+  });
+
+  it('generar cupos de un horario con espacio exige la autoridad y, si falta, no crea ninguno', async () => {
+    const d = build();
+    d.catalogRepo.findTemplateById.mockResolvedValue(
+      existing({ slotMinutes: 30 }),
+    );
+    d.catalogRepo.findRulesByTemplate.mockResolvedValue([
+      {
+        dayOfWeek: 1,
+        startTime: '14:00:00',
+        endTime: '14:30:00',
+        slotMinutes: 30,
+      },
+    ]);
+    d.careSpaces.assertMayManageBound.mockRejectedValue(deny(403));
+    await expect(
+      d.service.generateSlots(
+        TEMPLATE,
+        { from: '2026-11-02T00:00:00Z', to: '2026-11-02T23:59:59Z' } as any,
+        admin,
+      ),
+    ).rejects.toMatchObject({ status: 403 });
+    expect(d.catalogRepo.createSlot).not.toHaveBeenCalled();
+  });
+
+  const exceptionDto = {
+    exceptionType: 'VACATION',
+    startAt: '2026-11-02T12:00:00Z',
+    endAt: '2026-11-02T14:00:00Z',
+  } as any;
+
+  it('crear una excepción sobre un recurso atado a una sala exige la autoridad de la sala', async () => {
+    const d = build();
+    d.resource.careSpaceId = SPACE;
+    d.careSpaces.assertMayManageBound.mockRejectedValue(deny(403));
+    await expect(
+      d.service.createException(RESOURCE, exceptionDto, admin),
+    ).rejects.toMatchObject({ status: 403 });
+    expect(d.catalogRepo.createException).not.toHaveBeenCalled();
+  });
+
+  it('quitar una excepción sobre un recurso atado a una sala exige la autoridad de la sala', async () => {
+    const d = build();
+    d.resource.careSpaceId = SPACE;
+    d.catalogRepo.findExceptionById.mockResolvedValue({
+      id: 'exc-1',
+      resourceId: RESOURCE,
+      sourceKindConceptId: undefined,
+    });
+    d.careSpaces.assertMayManageBound.mockRejectedValue(deny(403));
+    await expect(
+      d.service.removeException('exc-1', admin),
+    ).rejects.toMatchObject({
+      status: 403,
+    });
+    expect(d.catalogRepo.removeException).not.toHaveBeenCalled();
+  });
+
+  it('cerrar cupos de un recurso atado a una sala exige la autoridad de la sala', async () => {
+    const d = build();
+    d.resource.careSpaceId = SPACE;
+    d.careSpaces.assertMayManageBound.mockRejectedValue(deny(403));
+    await expect(
+      d.service.closeSlots(
+        RESOURCE,
+        { exceptionType: 'ERRAND', slotIds: ['s-1'] } as any,
+        admin,
+      ),
+    ).rejects.toMatchObject({ status: 403 });
+    expect(d.catalogRepo.findSlotsOfResourceForUpdate).not.toHaveBeenCalled();
   });
 });

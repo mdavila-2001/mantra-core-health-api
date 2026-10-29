@@ -1,11 +1,11 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../../../common';
 import { CLIN } from '../../../../clinical/clinical.concepts';
@@ -18,16 +18,23 @@ import {
   CARE_SPACE_OPS_PORT,
   type CareSpaceOpsPort,
 } from '../../../../practice/services/care-space-ops.port';
+import { InfrastructureAccessService } from '../../../../practice/services/infrastructure-access.service';
 import { OpsStateService } from '../../../../practice/services/ops-state';
 import {
   bandContaining,
   type TemplateBand,
 } from '../../../domain/catalog/care-space-agenda';
-import { operatesAnyAgenda } from '../../../domain/booking/agenda-actors';
+import {
+  AGENDA_OPERATOR_ROLES,
+  operatesAnyAgenda,
+} from '../../../domain/booking/agenda-actors';
 import { EQUIPMENT_REF_TYPE } from '../../../domain/catalog/catalog-concepts';
 import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 import type { SchedulableResources } from '../../../entities';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
+
+/** Roles que coordinan las agendas de todo el tenant: no necesitan alcance por espacio. */
+const COORDINATOR_ROLES: readonly string[] = ['SCHEDULING_ADMIN', 'SUPERADMIN'];
 
 /** Qué se sabe del turno cuando hay que decidir en qué espacio ocurre. */
 export interface AppointmentSpaceRequest {
@@ -85,11 +92,13 @@ export class CareSpaceAppointmentResolver {
    * @param state - Lectura de la fila de un espacio.
    * @param ops - Puerto de F2: ¿se puede reservar el espacio en la ventana?
    * @param catalogRepo - Repositorio del catálogo de agenda.
+   * @param infra - Evaluador de la política de infraestructura (alcance sobre el espacio).
    */
   constructor(
     private readonly state: OpsStateService,
     @Inject(CARE_SPACE_OPS_PORT) private readonly ops: CareSpaceOpsPort,
     private readonly catalogRepo: SchedulingCatalogRepository,
+    private readonly infra: InfrastructureAccessService,
   ) {}
 
   /** @see {@link CareSpaceAppointmentResolver} */
@@ -109,11 +118,7 @@ export class CareSpaceAppointmentResolver {
         );
       }
       if (!derived) {
-        if (!operatesAnyAgenda(request.actor)) {
-          throw new ForbiddenException(
-            'Sólo quien administra agendas elige el consultorio de una cita puntual.',
-          );
-        }
+        await this.assertMayChooseSpace(tx, request, requested);
         spaceId = requested;
       }
     }
@@ -154,6 +159,56 @@ export class CareSpaceAppointmentResolver {
     });
     if (request.commits) await this.assertFree(tx, tenantId, spaceId, request);
     return spaceId;
+  }
+
+  /**
+   * Quién puede nombrar el consultorio de una cita cuando la agenda no lo fija.
+   *
+   * - un rol de agenda (`SCHEDULING_ADMIN`, `SCHEDULING_AGENT`, `SUPERADMIN`) **del tenant del
+   *   recurso**: quien lo tiene sólo en otra organización responde 404 uniforme (no se confirma
+   *   nada de lo que no es suyo) y quien no tiene ninguno, 403;
+   * - el espacio es del tenant del recurso (404 uniforme si no);
+   * - quien **coordina** agendas del tenant (`SCHEDULING_ADMIN`, `SUPERADMIN`) las ve todas, igual
+   *   que al atar un horario; quien atiende el mostrador (`SCHEDULING_AGENT`) necesita además
+   *   alcance sobre ese espacio (`infra.agenda.book`: ADMISSION de la sede o del espacio, o
+   *   administración): sin alcance es el 404 de la política y, si lo ve pero su rol no alcanza,
+   *   403.
+   */
+  private async assertMayChooseSpace(
+    tx: EntityManager,
+    request: AppointmentSpaceRequest,
+    careSpaceId: string,
+  ): Promise<void> {
+    const tenantId = request.resource.tenantId;
+    const { actor } = request;
+    const operatesHere = AGENDA_OPERATOR_ROLES.some((role) =>
+      roleAuthorizesInTenant(actor, role, tenantId),
+    );
+    if (!operatesHere) {
+      if (operatesAnyAgenda(actor)) {
+        throw new ResourceNotFoundException(
+          'Recurso no encontrado',
+          undefined,
+          SchedulingErrorReason.RESOURCE_NOT_AVAILABLE,
+        );
+      }
+      throw new ForbiddenException(
+        'Sólo quien administra agendas elige el consultorio de una cita puntual.',
+      );
+    }
+    // El espacio ajeno o inexistente es 404 antes de evaluar el alcance.
+    await this.state.loadSpace(tx, tenantId, careSpaceId);
+    const coordinates = COORDINATOR_ROLES.some((role) =>
+      roleAuthorizesInTenant(actor, role, tenantId),
+    );
+    if (!coordinates) {
+      await this.infra.assertCan(
+        actor,
+        'infra.agenda.book',
+        { careSpaceId },
+        tx,
+      );
+    }
   }
 
   /**

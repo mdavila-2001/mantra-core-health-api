@@ -98,6 +98,13 @@ export class CreateTemplateUseCase {
       // El tenant antes que el rol: una agenda de otra organización responde 404 a todos.
       this.careSpaces.assertResourceInActiveTenant(resource);
       this.access.assertActorResource(resource, actor);
+      // Un recurso atado a una sala (ROOM, equipo) sólo lo agenda quien administra esa sala.
+      await this.careSpaces.assertMayManageBound(
+        tx,
+        resource,
+        [resource.careSpaceId],
+        actor,
+      );
       await this.overlapGuard.assertNoOverlapWithOtherAgendas(
         tx,
         resource,

@@ -21,6 +21,11 @@ export const INFRA_F5AGENDA_POLICY: InfraPolicy = {
       roles: ['SUPERADMIN', 'ORG_ADMIN', 'BRANCH_ADMIN'],
       summary: 'Atar el horario de una plantilla a un consultorio o sala',
     },
+    'infra.agenda.book': {
+      roles: ['SUPERADMIN', 'ORG_ADMIN', 'BRANCH_ADMIN', 'ADMISSION'],
+      summary:
+        'Elegir el consultorio de una cita puntual (la agenda no lo fija) dentro del alcance propio',
+    },
   },
 };
 

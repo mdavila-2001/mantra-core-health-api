@@ -78,6 +78,7 @@ export function createCatalogService(d: CatalogServiceDoubles) {
     attach: async () => {
       throw new Error('la prueba no esperaba atar un espacio');
     },
+    assertMayManageBound: async () => undefined,
     assertNoOverlap: async () => undefined,
     assertReactivable: async () => undefined,
     announce: async () => undefined,

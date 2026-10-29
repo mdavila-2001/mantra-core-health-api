@@ -1,6 +1,8 @@
 import { jest } from '@jest/globals';
 import { CONCEPTS } from '../../../../../common';
 import { CLIN } from '../../../../clinical/clinical.concepts';
+import { InsufficientRoleException } from '../../../../../common/errors/domain.exception';
+import { ResourceNotFoundException } from '../../../../../common';
 import { PRAC } from '../../../../practice/practice.concepts';
 import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 import { CareSpaceAppointmentResolver } from './care-space-appointment-resolver';
@@ -63,10 +65,12 @@ function build(
       return [];
     }),
   };
+  const infra = { assertCan: mockFn().mockResolvedValue(undefined) };
   const resolver = new CareSpaceAppointmentResolver(
     state as any,
     ops as any,
     catalogRepo as any,
+    infra as any,
   );
   const ask = (req: Record<string, unknown> = {}) =>
     resolver.resolve(
@@ -81,7 +85,7 @@ function build(
         ...req,
       } as any,
     );
-  return { resolver, state, ops, catalogRepo, tx, ask };
+  return { resolver, state, ops, catalogRepo, infra, tx, ask };
 }
 
 describe('CareSpaceAppointmentResolver · de dónde sale el espacio', () => {
@@ -202,6 +206,105 @@ describe('CareSpaceAppointmentResolver · el consultorio que nombra quien agenda
     await expect(
       d.ask({ requestedCareSpaceId: SPACE, scheduleTemplateId: 'tpl-x' }),
     ).resolves.toBe(SPACE);
+    // El coordinador del tenant ve todos los espacios: no pasa por el alcance por espacio.
+    expect(d.infra.assertCan).not.toHaveBeenCalled();
+  });
+
+  describe('el rol de agenda vale en el tenant del recurso, no en cualquiera', () => {
+    const scopedTo = (tenant: string, role = 'SCHEDULING_AGENT') =>
+      ({
+        id: 'u9',
+        roles: [role],
+        scopedRoles: { [tenant]: [role] },
+      }) as any;
+    const OTHER_TENANT = '99999999-9999-4999-8999-999999999999';
+    const ask = (d: ReturnType<typeof build>, actor: any) => {
+      d.catalogRepo.findTemplateById.mockResolvedValue(null);
+      return d.ask({
+        requestedCareSpaceId: SPACE,
+        scheduleTemplateId: 'tpl-x',
+        actor,
+      });
+    };
+
+    it('un agente de agenda de OTRO tenant recibe 404 uniforme y no se evalúa nada del espacio', async () => {
+      const d = build();
+      const error: any = await ask(d, scopedTo(OTHER_TENANT)).then(
+        () => null,
+        (e: unknown) => e,
+      );
+      expect(error).toBeInstanceOf(ResourceNotFoundException);
+      expect(error.reason).toBe(SchedulingErrorReason.RESOURCE_NOT_AVAILABLE);
+      expect(error.details).toBeUndefined();
+      expect(d.state.loadSpace).not.toHaveBeenCalled();
+      expect(d.infra.assertCan).not.toHaveBeenCalled();
+      expect(d.ops.assertBookable).not.toHaveBeenCalled();
+    });
+
+    it('un agente del tenant pero SIN alcance sobre el espacio: 403 y no se reserva nada', async () => {
+      const d = build();
+      d.infra.assertCan.mockRejectedValue(
+        new InsufficientRoleException(
+          'x',
+          undefined,
+          'INFRA_ACTION_NOT_ALLOWED',
+        ),
+      );
+      await expect(ask(d, scopedTo(TENANT))).rejects.toMatchObject({
+        status: 403,
+      });
+      expect(d.ops.assertBookable).not.toHaveBeenCalled();
+    });
+
+    it('un agente del tenant al que el espacio no le es visible (otra sede) recibe el 404 de la política', async () => {
+      const d = build();
+      d.infra.assertCan.mockRejectedValue(new ResourceNotFoundException('x'));
+      await expect(ask(d, scopedTo(TENANT))).rejects.toBeInstanceOf(
+        ResourceNotFoundException,
+      );
+      expect(d.ops.assertBookable).not.toHaveBeenCalled();
+    });
+
+    it('un espacio de otra organización es 404 aunque el rol sea del tenant (se carga en el tenant del recurso)', async () => {
+      const d = build();
+      d.state.loadSpace.mockRejectedValue(new ResourceNotFoundException('x'));
+      await expect(ask(d, scopedTo(TENANT))).rejects.toBeInstanceOf(
+        ResourceNotFoundException,
+      );
+      expect(d.state.loadSpace).toHaveBeenCalledWith(d.tx, TENANT, SPACE);
+      expect(d.infra.assertCan).not.toHaveBeenCalled();
+    });
+
+    it('con el rol y el alcance del tenant, la cita puntual elige el consultorio', async () => {
+      const d = build();
+      await expect(ask(d, scopedTo(TENANT))).resolves.toBe(SPACE);
+      expect(d.infra.assertCan).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'u9' }),
+        'infra.agenda.book',
+        { careSpaceId: SPACE },
+        d.tx,
+      );
+    });
+
+    it('un SCHEDULING_ADMIN del tenant (coordinador) no necesita alcance por espacio; el de otro tenant sí es 404', async () => {
+      const d = build();
+      await expect(ask(d, scopedTo(TENANT, 'SCHEDULING_ADMIN'))).resolves.toBe(
+        SPACE,
+      );
+      expect(d.infra.assertCan).not.toHaveBeenCalled();
+      const e = build();
+      await expect(
+        ask(e, scopedTo(OTHER_TENANT, 'SCHEDULING_ADMIN')),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('si la agenda ya fija el consultorio y el pedido coincide, no hace falta rol ni alcance', async () => {
+      const d = build();
+      await expect(
+        d.ask({ requestedCareSpaceId: SPACE, actor: practitioner }),
+      ).resolves.toBe(SPACE);
+      expect(d.infra.assertCan).not.toHaveBeenCalled();
+    });
   });
 
   it('y un profesional sobre su agenda no: 403', async () => {
