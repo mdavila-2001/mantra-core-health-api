@@ -1,5 +1,5 @@
 import { SYSTEM_ROLE_SEED } from '../../common/seed/authz-clinical-roles-seed.service';
-import { PLATFORM_ROLE_CODES } from '../data_catalog/services/permission-drift.service';
+import { PLATFORM_ROLE_CODES } from '../data_catalog/infrastructure/adapters/iam-platform-role-codes.adapter';
 import {
   AUTHZ_PLATFORM_ROLE_CODES,
   AUTHZ_PLATFORM_ROLE_SEED,

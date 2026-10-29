@@ -22,6 +22,7 @@ export const MIGRATED_MODULES: readonly string[] = [
   'billing',
   'audio_assets',
   'qa_lab',
+  'data_catalog',
   'telemetry',
 ];
 
