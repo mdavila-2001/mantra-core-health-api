@@ -15,6 +15,7 @@ import {
   InventoryItemsController,
 } from './index';
 import { runWithTenant } from '../../../common';
+import { PRAC } from '../practice.concepts';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -208,24 +209,58 @@ describe('SitesController', () => {
   it('delegates clinical unit and care space (UC-14-04/05)', async () => {
     const structureService = {
       createClinicalUnit: mockFn(),
-      createCareSpace: mockFn(),
     };
+    const spaceCreation = { create: mockFn() };
     const sitesService = { listCareSpaces: mockFn().mockResolvedValue([]) };
     const controller = new SitesController(
       structureService as any,
       sitesService as any,
+      spaceCreation as any,
     );
-    await controller.createClinicalUnit('s1', { code: 'U', name: 'N' }, actor);
+    await controller.createClinicalUnit(
+      's1',
+      { code: 'U', name: 'N' },
+      actor,
+      'req-1',
+    );
     expect(structureService.createClinicalUnit).toHaveBeenCalledWith(
       's1',
       { code: 'U', name: 'N' },
       actor,
+      'req-1',
     );
-    await controller.createCareSpace('s1', { code: 'C', name: 'N' }, actor);
-    expect(structureService.createCareSpace).toHaveBeenCalledWith(
+    await controller.createCareSpace(
       's1',
       { code: 'C', name: 'N' },
       actor,
+      'req-2',
+    );
+    expect(spaceCreation.create).toHaveBeenCalledWith(
+      's1',
+      { code: 'C', name: 'N', functionCode: undefined },
+      actor,
+      'req-2',
+    );
+  });
+
+  it('traduce el spaceTypeConceptId heredado a functionCode', async () => {
+    const spaceCreation = { create: mockFn() };
+    const controller = new SitesController(
+      { createClinicalUnit: mockFn() } as any,
+      { listCareSpaces: mockFn() } as any,
+      spaceCreation as any,
+    );
+    await controller.createCareSpace(
+      's1',
+      { code: 'C', name: 'N', spaceTypeConceptId: PRAC.SPACE_TYPE_ROOM },
+      actor,
+      undefined,
+    );
+    expect(spaceCreation.create).toHaveBeenCalledWith(
+      's1',
+      expect.objectContaining({ functionCode: 'SPACE_TYPE_ROOM' }),
+      actor,
+      undefined,
     );
   });
 });

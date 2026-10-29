@@ -16,12 +16,18 @@ import {
   requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
-import { ClinicalStructureService, PracticeSitesService } from '../services';
+import {
+  CareSpaceCreationService,
+  ClinicalStructureService,
+  PracticeSitesService,
+} from '../services';
+import { CorrelationId } from '../http/request-decorators';
+import { toSpaceInput } from '../dto/space-input.mapper';
+import type { CareSpaceDetail } from '../dto/infrastructure.types';
 import {
   CreateClinicalUnitDto,
   CreateCareSpaceDto,
   ClinicalUnitResponseDto,
-  CareSpaceResponseDto,
   CareSpaceSummaryDto,
 } from '../dto';
 
@@ -35,10 +41,12 @@ export class SitesController {
    *
    * @param structureService - Valor de structure service requerido por la operación.
    * @param sitesService - Lecturas de la estructura (prácticas, sedes, espacios).
+   * @param spaceCreation - Alta de espacios (individual, F1).
    */
   constructor(
     private readonly structureService: ClinicalStructureService,
     private readonly sitesService: PracticeSitesService,
+    private readonly spaceCreation: CareSpaceCreationService,
   ) {}
 
   /**
@@ -60,8 +68,14 @@ export class SitesController {
     @Param('siteId', ParseUUIDPipe) siteId: string,
     @Body() dto: CreateClinicalUnitDto,
     @CurrentUser() actor: AuthenticatedUser,
+    @CorrelationId() correlationId: string | undefined,
   ): Promise<ClinicalUnitResponseDto> {
-    return this.structureService.createClinicalUnit(siteId, dto, actor);
+    return this.structureService.createClinicalUnit(
+      siteId,
+      dto,
+      actor,
+      correlationId,
+    );
   }
 
   /**
@@ -103,7 +117,13 @@ export class SitesController {
     @Param('siteId', ParseUUIDPipe) siteId: string,
     @Body() dto: CreateCareSpaceDto,
     @CurrentUser() actor: AuthenticatedUser,
-  ): Promise<CareSpaceResponseDto> {
-    return this.structureService.createCareSpace(siteId, dto, actor);
+    @CorrelationId() correlationId: string | undefined,
+  ): Promise<CareSpaceDetail> {
+    return this.spaceCreation.create(
+      siteId,
+      toSpaceInput(dto),
+      actor,
+      correlationId,
+    );
   }
 }

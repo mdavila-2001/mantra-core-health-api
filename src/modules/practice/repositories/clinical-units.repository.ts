@@ -9,6 +9,12 @@ export interface CreateClinicalUnitData {
    * Identificador asociado a practice site.
    */
   practiceSiteId: string;
+  /** Tenant de la unidad: el de su sede (FK compuesta en la base). */
+  tenantId: string;
+  /** Descripción libre. */
+  description?: string;
+  /** Inicio de vigencia. */
+  validFrom?: Date;
   /**
    * Valor de code mantenido por la instancia.
    */
@@ -83,6 +89,9 @@ export class ClinicalUnitsRepository {
       ClinicalUnits,
       {
         practiceSiteId: data.practiceSiteId,
+        tenantId: data.tenantId,
+        description: data.description,
+        validFrom: data.validFrom,
         parentUnitId: data.parentUnitId,
         code: data.code,
         name: data.name,
