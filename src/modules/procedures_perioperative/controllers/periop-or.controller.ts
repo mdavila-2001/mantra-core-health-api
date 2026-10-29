@@ -10,7 +10,9 @@ import {
   Post,
   Query,
   Res,
+  UseInterceptors,
 } from '@nestjs/common';
+import { PractitionerRefsInterceptor } from '../policies/practitioner-refs.interceptor';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import {
@@ -55,6 +57,7 @@ const CASE_DAY_ROLES = [
  */
 @ApiTags('periop-or')
 @ApiBearerAuth()
+@UseInterceptors(PractitionerRefsInterceptor)
 @Controller()
 export class PeriopOrController {
   /**

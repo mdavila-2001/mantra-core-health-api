@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { bearer, type TestContext } from './harness';
+import { bearer, identidadProfesional, type TestContext } from './harness';
 import { CONCEPTS } from '../../src/common';
 import { PROF } from '../../src/modules/profiles/profiles.concepts';
 import { DIR } from '../../src/modules/directory/directory.concepts';
@@ -173,6 +173,72 @@ export async function ligarRecurso(
   return res.body.id;
 }
 
+/** Da una membresía STAFF vigente a un usuario en la organización. */
+export async function darMembresia(
+  ctx: TestContext,
+  userId: string,
+  tenantId: string,
+): Promise<void> {
+  await ctx.orm.em
+    .fork()
+    .getConnection()
+    .execute(
+      `insert into directory.tenant_memberships
+         (id, user_id, tenant_id, tenant_role_concept_id, status_concept_id,
+          access_scope_concept_id, start_date, created_at, updated_at)
+       values (?, ?, ?, ?, ?, ?, now(), now(), now())`,
+      [
+        randomUUID(),
+        userId,
+        tenantId,
+        DIR.ROLE_STAFF,
+        DIR.MEMBERSHIP_ACTIVE,
+        DIR.SCOPE_ALL_TENANT,
+      ],
+    );
+}
+
+/** Un profesional registrado por la API real: su perfil, su cuenta y su propia organización. */
+export interface Profesional {
+  hpid: string;
+  userId: string;
+  token: string;
+  /** Su organización propia (no la del hospital). */
+  tenantId: string;
+}
+
+/** Registra un profesional (perfil, cuenta y organización propia) por `register-practitioner`. */
+export async function registrarProfesional(
+  ctx: TestContext,
+  etiqueta: string,
+  sufijo: string,
+): Promise<Profesional> {
+  const email = `f4-prof-${etiqueta}-${sufijo}@example.test`;
+  const alta = await http(ctx)
+    .post('/iam/auth/register-practitioner')
+    .send({
+      ...identidadProfesional(email),
+      email,
+      password: PASSWORD,
+      name: 'Profesional',
+      lastName: etiqueta,
+      licenseNumber: `LIC-F4-${etiqueta}-${sufijo}`,
+      credentialNumber: `CRED-F4-${etiqueta}-${sufijo}`,
+    })
+    .expect(201);
+  const login = await http(ctx)
+    .post('/iam/auth/login')
+    .send({ email, password: PASSWORD })
+    .expect(200);
+  const c = claims(login.body.accessToken);
+  return {
+    hpid: alta.body.practitionerProfileId,
+    userId: c.sub,
+    token: login.body.accessToken,
+    tenantId: (c.tenants as string[])[0],
+  };
+}
+
 /**
  * Usuario que es MIEMBRO (sin rol de administración) de la organización y tiene los roles
  * indicados con ámbito en su tenant. Se registra como dueño de una organización propia,
@@ -188,23 +254,7 @@ export async function crearMiembro(
   const propia = mkOrg(`m${etiqueta}`, sufijo);
   propia.email = `f4-miembro-${etiqueta}-${sufijo}@example.test`;
   await registrarOrg(ctx, propia, `M${etiqueta}`, sufijo);
-  await ctx.orm.em
-    .fork()
-    .getConnection()
-    .execute(
-      `insert into directory.tenant_memberships
-       (id, user_id, tenant_id, tenant_role_concept_id, status_concept_id,
-        access_scope_concept_id, start_date, created_at, updated_at)
-     values (?, ?, ?, ?, ?, ?, now(), now(), now())`,
-      [
-        randomUUID(),
-        propia.userId,
-        org.tenantId,
-        DIR.ROLE_STAFF,
-        DIR.MEMBERSHIP_ACTIVE,
-        DIR.SCOPE_ALL_TENANT,
-      ],
-    );
+  await darMembresia(ctx, propia.userId, org.tenantId);
   for (const roleCode of roles) {
     await http(ctx)
       .post(`/authz/users/${propia.userId}/role-assignments`)

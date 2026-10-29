@@ -14,6 +14,7 @@ import { PeriopCasesRepository, PeriopPreopRepository } from '../repositories';
 import { OutboxService } from '../../messaging/services/outbox.service';
 import { PERIOP } from '../procedures_perioperative.concepts';
 import { PeriopChecklistGateService } from './periop-checklist-gate.service';
+import { PractitionerScopeService } from '../policies/practitioner-scope.service';
 import {
   OMS_2009_ITEMS,
   OMS_CHECKLIST_VERSION,
@@ -170,6 +171,7 @@ export class PeriopPreopService {
    * @param logger - Valor de logger requerido por la operación.
    * @param outbox - Outbox transaccional (eventos del check-list).
    * @param gate - Compuerta del check-list OMS.
+   * @param practitioners - Pertenencia de los profesionales citados al tenant.
    */
   constructor(
     private readonly em: EntityManager,
@@ -180,6 +182,7 @@ export class PeriopPreopService {
     private readonly logger: PinoLogger,
     private readonly outbox: OutboxService,
     private readonly gate: PeriopChecklistGateService,
+    private readonly practitioners: PractitionerScopeService,
   ) {
     this.logger.setContext(PeriopPreopService.name);
   }
@@ -1051,6 +1054,15 @@ export class PeriopPreopService {
           'El caso está cancelado',
           { caseId },
           ProceduresPerioperativeErrorReason.CASE_CANCELLED,
+        );
+      }
+      // El coordinador es un profesional de esta organización: un perfil de otra no se guarda
+      // ni se muestra después en la ficha (IDOR). Inexistente y ajeno responden igual.
+      if (coordinatorProfileId) {
+        await this.practitioners.assertInTenant(
+          tx,
+          surgicalCase.custodianTenantId,
+          [{ field: 'coordinatorProfileId', profileId: coordinatorProfileId }],
         );
       }
       const existing = await this.preopRepo.findChecklistByCase(tx, caseId);

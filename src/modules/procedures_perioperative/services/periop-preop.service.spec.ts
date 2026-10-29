@@ -119,6 +119,10 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   // La compuerta del check-list OMS tiene su propio spec; acá se comprueba cuándo se llama.
   const gate = { assertPhase: mockFn().mockResolvedValue(undefined) };
+  // Pertenencia de los profesionales citados al tenant (spec propio): por omisión, todos lo son.
+  const practitioners = {
+    assertInTenant: mockFn().mockResolvedValue(undefined),
+  };
   const service = new PeriopPreopService(
     em as any,
     preopRepo,
@@ -128,11 +132,13 @@ function build() {
     logger as any,
     outbox as any,
     gate as any,
+    practitioners as any,
   );
   return {
     service: inTenant(service, TENANT_A),
     raw: service,
     gate,
+    practitioners,
     serviceRequests,
     outbox,
     tx,
@@ -624,6 +630,53 @@ describe('PeriopPreopService', () => {
         d.tx,
         expect.objectContaining({ eventType: 'periop.checklist.created' }),
       );
+    });
+
+    it('el coordinador se comprueba contra el tenant del caso; uno ajeno → 422 y no se crea ni siembra nada', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue({
+        id: CASE,
+        statusConceptId: CONCEPTS.CASE_SCHEDULED,
+        custodianTenantId: TENANT_A,
+      });
+      d.preopRepo.findChecklistByCase.mockResolvedValue(null);
+      d.practitioners.assertInTenant.mockRejectedValue(
+        new PreconditionFailedException(
+          'no',
+          { fields: ['coordinatorProfileId'] },
+          ProceduresPerioperativeErrorReason.PRACTITIONER_NOT_IN_TENANT,
+        ),
+      );
+      d.tx.execute = mockFn().mockResolvedValue([]);
+
+      await expect(
+        d.service.createChecklist(CASE, 'perfil-ajeno', actor),
+      ).rejects.toMatchObject({
+        status: 422,
+        reason: ProceduresPerioperativeErrorReason.PRACTITIONER_NOT_IN_TENANT,
+      });
+      expect(d.practitioners.assertInTenant).toHaveBeenCalledWith(
+        d.tx,
+        TENANT_A,
+        [{ field: 'coordinatorProfileId', profileId: 'perfil-ajeno' }],
+      );
+      expect(d.preopRepo.createChecklist).not.toHaveBeenCalled();
+      expect(d.tx.execute).not.toHaveBeenCalled();
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    });
+
+    it('sin coordinador no se consulta la pertenencia', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue({
+        id: CASE,
+        statusConceptId: CONCEPTS.CASE_SCHEDULED,
+        custodianTenantId: TENANT_A,
+      });
+      d.preopRepo.findChecklistByCase.mockResolvedValue(null);
+      d.preopRepo.createChecklist.mockReturnValue({ id: CHECKLIST });
+      d.tx.execute = mockFn().mockResolvedValue([]);
+      await d.service.createChecklist(CASE, undefined, actor);
+      expect(d.practitioners.assertInTenant).not.toHaveBeenCalled();
     });
 
     it('es idempotente: si el caso ya tiene check-list lo devuelve sin crear ni publicar', async () => {

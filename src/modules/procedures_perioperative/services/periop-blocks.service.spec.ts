@@ -89,6 +89,9 @@ function build() {
   const outbox = { publishDomainEvent: mockFn().mockResolvedValue({}) };
   const history = { append: mockFn().mockResolvedValue(undefined) };
   const logger = { setContext: mockFn(), info: mockFn() };
+  const practitioners = {
+    assertInTenant: mockFn().mockResolvedValue(undefined),
+  };
   const service = new PeriopBlocksService(
     em as any,
     repo as any,
@@ -98,6 +101,7 @@ function build() {
     outbox as any,
     history as any,
     logger as any,
+    practitioners as any,
   );
   const inTenant = <T>(fn: () => T): T => runWithTenant(TENANT, fn);
   return {
@@ -109,6 +113,7 @@ function build() {
     access,
     outbox,
     history,
+    practitioners,
     created,
     inTenant,
     site,
@@ -331,21 +336,8 @@ describe('PeriopBlocksService.createBlocks', () => {
     ).rejects.toMatchObject({ reason: Reason.OR_BLOCK_OWNER_REQUIRED });
   });
 
-  it('un cirujano que no existe o una unidad de otro tenant → 422 OR_BLOCK_OWNER_REQUIRED', async () => {
+  it('una unidad de otro tenant → 422 OR_BLOCK_OWNER_REQUIRED', async () => {
     const d = build();
-    d.tx.execute.mockResolvedValue([]);
-    await expect(
-      d.inTenant(() =>
-        d.service.createBlocks(
-          SITE,
-          dto({ ownerKind: 'SURGEON', surgeonProfileId: SURGEON }),
-          actor,
-        ),
-      ),
-    ).rejects.toMatchObject({
-      reason: Reason.OR_BLOCK_OWNER_REQUIRED,
-      details: { cause: 'NOT_FOUND' },
-    });
     await expect(
       d.inTenant(() =>
         d.service.createBlocks(SITE, dto({ clinicalUnitId: UNIT }), actor),
@@ -376,6 +368,51 @@ describe('PeriopBlocksService.createBlocks', () => {
     expect(d.repo.createBlock.mock.calls[0][1].releaseAt).toEqual(
       new Date('2030-01-06T12:00:00Z'),
     );
+  });
+});
+
+describe('PeriopBlocksService · cirujano dueño del bloque (IDOR)', () => {
+  it('el cirujano se comprueba contra el tenant: uno ajeno o inexistente → 422 PRACTITIONER_NOT_IN_TENANT y no se escribe nada', async () => {
+    const d = build();
+    d.practitioners.assertInTenant.mockRejectedValue(
+      Object.assign(new Error('no'), {
+        status: 422,
+        reason: Reason.PRACTITIONER_NOT_IN_TENANT,
+      }),
+    );
+    await expect(
+      d.inTenant(() =>
+        d.service.createBlocks(
+          SITE,
+          dto({ ownerKind: 'SURGEON', surgeonProfileId: SURGEON }),
+          actor,
+        ),
+      ),
+    ).rejects.toMatchObject({
+      status: 422,
+      reason: Reason.PRACTITIONER_NOT_IN_TENANT,
+    });
+    expect(d.practitioners.assertInTenant).toHaveBeenCalledWith(d.tx, TENANT, [
+      { field: 'surgeonProfileId', profileId: SURGEON },
+    ]);
+    expect(d.repo.createBlock).not.toHaveBeenCalled();
+    expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+  });
+
+  it('uno propio crea el bloque de cirujano', async () => {
+    const d = build();
+    const res = await d.inTenant(() =>
+      d.service.createBlocks(
+        SITE,
+        dto({ ownerKind: 'SURGEON', surgeonProfileId: SURGEON }),
+        actor,
+      ),
+    );
+    expect(res.blocks).toHaveLength(1);
+    expect(d.repo.createBlock.mock.calls[0][1]).toMatchObject({
+      ownerKindConceptId: PERIOP.ORB_OWNER_SURGEON,
+      surgeonProfileId: SURGEON,
+    });
   });
 });
 

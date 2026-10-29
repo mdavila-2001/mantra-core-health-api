@@ -43,6 +43,7 @@ import type {
   ProcedureCases,
 } from '../entities';
 import { PeriopOperatingRoomService } from './periop-operating-room.service';
+import { PractitionerScopeService } from '../policies/practitioner-scope.service';
 
 /** Tope de instancias por solicitud (CONTRATO-F2-F5 §F4.3). */
 export const MAX_BLOCK_INSTANCES = 400;
@@ -165,6 +166,7 @@ export class PeriopBlocksService {
    * @param outbox - Outbox transaccional.
    * @param history - Historia append-only.
    * @param logger - Registro estructurado.
+   * @param practitioners - Pertenencia de los profesionales citados al tenant.
    */
   constructor(
     private readonly em: EntityManager,
@@ -175,6 +177,7 @@ export class PeriopBlocksService {
     private readonly outbox: OutboxService,
     private readonly history: HistoryRepository,
     private readonly logger: PinoLogger,
+    private readonly practitioners: PractitionerScopeService,
   ) {
     this.logger.setContext(PeriopBlocksService.name);
   }
@@ -968,11 +971,11 @@ export class PeriopBlocksService {
 
     if (dto.ownerKind === 'SURGEON') {
       if (!dto.surgeonProfileId) throw required('surgeonProfileId');
-      const rows = await tx.execute<{ profile_id: string }[]>(
-        'select profile_id from profiles.health_practitioner_profiles where profile_id = ?',
-        [dto.surgeonProfileId],
-      );
-      if (rows.length === 0) throw required('surgeonProfileId', 'NOT_FOUND');
+      // El cirujano dueño es un profesional de esta organización (inexistente y ajeno
+      // responden igual: no se confirma que el perfil existe en otra).
+      await this.practitioners.assertInTenant(tx, tenantId, [
+        { field: 'surgeonProfileId', profileId: dto.surgeonProfileId },
+      ]);
       return {
         kind: 'SURGEON',
         kindConceptId: PERIOP.ORB_OWNER_SURGEON,

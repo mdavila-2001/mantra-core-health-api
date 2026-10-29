@@ -40,6 +40,8 @@ import { ClinicalModule } from '../clinical/clinical.module';
 // este módulo, así que la dependencia va en un solo sentido.
 import { PracticeModule } from '../practice/practice.module';
 import { PeriopAccessModule } from './policies/periop-access.module';
+import { PractitionerScopeService } from './policies/practitioner-scope.service';
+import { PractitionerRefsInterceptor } from './policies/practitioner-refs.interceptor';
 import { CARE_SPACE_OPS_PORT } from './ports/care-space-ops.port';
 import { DirectReadCareSpaceOps } from './ports/direct-read-care-space-ops';
 
@@ -89,6 +91,9 @@ import { DirectReadCareSpaceOps } from './ports/direct-read-care-space-ops';
     PeriopRoomEventsService,
     PeriopUtilizationService,
     PeriopRetireBlockersInitializer,
+    // F4: todo id de profesional del cuerpo debe ser de la organización activa.
+    PractitionerScopeService,
+    PractitionerRefsInterceptor,
     // Puerto de operación de espacios (F2). Hasta que F2 lo enlace, la lectura directa de
     // ciclo de vida y bloqueos; el integrador lo reemplaza por `useExisting` hacia el
     // servicio de `practice` que implemente `CareSpaceOpsPort`.

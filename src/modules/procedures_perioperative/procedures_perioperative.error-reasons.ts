@@ -26,6 +26,10 @@ export enum ProceduresPerioperativeErrorReason {
   URGENCY_REASON_REQUIRED = 'URGENCY_REASON_REQUIRED',
   OPERATING_ROOM_SLOT_CONFLICT = 'OPERATING_ROOM_SLOT_CONFLICT',
 
+  // --- Profesionales citados por el cliente (F4, IDOR) ---
+  /** El perfil no existe o es de otra organización: el mismo error para los dos. */
+  PRACTITIONER_NOT_IN_TENANT = 'PRACTITIONER_NOT_IN_TENANT',
+
   // --- Quirófano como espacio (F4, INV-37/38) ---
   /** El espacio no existe, es de otro tenant o el actor no lo ve: mismo 404. */
   OPERATING_ROOM_NOT_FOUND = 'OPERATING_ROOM_NOT_FOUND',
