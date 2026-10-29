@@ -12,6 +12,7 @@ import {
 } from '../../../../common';
 import { DIR } from '../../../directory/directory.concepts';
 import type { RegisterOrganizationDto } from '../../presentation/dto';
+import { IamErrorReason } from '../../iam.error-reasons';
 
 const dto: RegisterOrganizationDto = {
   organization: {
@@ -48,8 +49,8 @@ describe('IamOrganizationSelfRegistrationService', () => {
     };
     const usersRepo = { create: fn(() => ({ id: 'user-1' })) };
     const credentialsRepo = {
-      lockSubjectForRegistration: fn().mockResolvedValue(undefined),
-      findLivePasswordBySubject: fn().mockResolvedValue(null),
+      lockEmailForRegistration: fn().mockResolvedValue(undefined),
+      findLivePasswordByEmail: fn().mockResolvedValue(null),
       createPassword: fn(),
     };
     const rolesRepo = { create: fn() };
@@ -522,7 +523,7 @@ describe('IamOrganizationSelfRegistrationService', () => {
 
   it('rejects an owner email that already has a live credential', async () => {
     const d = build();
-    d.credentialsRepo.findLivePasswordBySubject.mockResolvedValue({
+    d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue({
       id: 'cred-1',
     });
 
@@ -539,12 +540,33 @@ describe('IamOrganizationSelfRegistrationService', () => {
 
     await d.service.registerOrganization(dto);
 
-    const lock = d.credentialsRepo.lockSubjectForRegistration;
-    const check = d.credentialsRepo.findLivePasswordBySubject;
+    const lock = d.credentialsRepo.lockEmailForRegistration;
+    const check = d.credentialsRepo.findLivePasswordByEmail;
     expect(lock).toHaveBeenCalledWith(d.tx, dto.owner.email);
     expect(lock.mock.invocationCallOrder[0]).toBeLessThan(
       check.mock.invocationCallOrder[0],
     );
+  });
+
+  // #1000: el mismo buzón con otras mayúsculas es la misma cuenta.
+  it('rejects the same owner mailbox written with different case with EMAIL_ALREADY_REGISTERED', async () => {
+    const d = build();
+    d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue({
+      id: 'cred-1',
+    });
+    const upper = {
+      ...dto,
+      owner: { ...dto.owner, email: dto.owner.email.toUpperCase() },
+    };
+
+    await expect(d.service.registerOrganization(upper)).rejects.toMatchObject({
+      reason: IamErrorReason.EMAIL_ALREADY_REGISTERED,
+    });
+    expect(d.credentialsRepo.findLivePasswordByEmail).toHaveBeenCalledWith(
+      d.tx,
+      upper.owner.email,
+    );
+    expect(d.usersRepo.create).not.toHaveBeenCalled();
   });
 
   it('keeps the organization when the verification email cannot be queued', async () => {

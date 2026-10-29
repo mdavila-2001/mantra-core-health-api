@@ -506,8 +506,10 @@ export class IamPractitionerSelfRegistrationService {
 
     const created = await this.em.transactional(async (tx) => {
       // El correo es la identidad de login: comprobarlo antes de escribir nada
-      // convierte una violación de constraint (500) en un 409 explicativo.
-      const clash = await this.credentialsRepo.findLivePasswordBySubject(
+      // convierte una violación de constraint (500) en un 409 explicativo. Con
+      // cerrojo y sin distinguir mayúsculas, como el alta de organización (#1000).
+      await this.credentialsRepo.lockEmailForRegistration(tx, dto.email);
+      const clash = await this.credentialsRepo.findLivePasswordByEmail(
         tx,
         dto.email,
       );
