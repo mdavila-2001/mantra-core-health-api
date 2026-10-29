@@ -24,6 +24,7 @@ import pg from 'pg';
 import { BUILD_DIR, ensureDir } from './lib/glossary-es/common.mjs';
 import { existingConceptIds, loadF3Identity, readGlossaryDiagnoses } from './lib/glossary-es/f3-identity-inputs.mjs';
 import { catalogParentEdges, cie10ParentEdges, hierarchyToRelationshipRows } from './lib/glossary-es/hierarchy.mjs';
+import { insertIsARows } from './lib/glossary-es/hierarchy-load.mjs';
 import { readSnapshot } from './diseases/lib/snapshot.mjs';
 import { DB_CONFIG } from './symptoms/lib/db.mjs';
 
@@ -36,8 +37,6 @@ const LOAD = flag('--load');
 const DRY_RUN = flag('--dry-run');
 
 const HIERARCHY_SYSTEMS = new Set(['mondo', 'doid']);
-const COLUMNS = ['id', 'source_concept_id', 'target_concept_id', 'relationship_type_concept_id', 'ordinal'];
-const CASTS = ['uuid', 'uuid', 'uuid', 'uuid', 'int'];
 
 /** Con base: una arista cuyo extremo no existe en `catalog_concepts` no se carga (no se crean conceptos). */
 async function dropMissingConcepts(client, { rows, stats }) {
@@ -62,36 +61,13 @@ async function run(client) {
 
   await client.query('BEGIN');
   try {
-    const inserted = await insertManyInTransaction(client, rows);
+    const inserted = await insertIsARows(client, rows);
     console.log(`[f3 hierarchy] relaciones nuevas: ${inserted}${DRY_RUN ? ' (dry-run: se revierte)' : ''}`);
     await client.query(DRY_RUN ? 'ROLLBACK' : 'COMMIT');
   } catch (err) {
     await client.query('ROLLBACK').catch(() => {});
     throw err;
   }
-}
-
-/** Todos los lotes en la transacción del llamador (así `--dry-run` revierte todo). */
-async function insertManyInTransaction(client, rows) {
-  const BATCH = 1000;
-  let inserted = 0;
-  for (let i = 0; i < rows.length; i += BATCH) {
-    const chunk = rows.slice(i, i + BATCH);
-    const params = [];
-    const values = chunk.map((t) => {
-      const ph = t.map((v, j) => {
-        params.push(v);
-        return `$${params.length}::${CASTS[j]}`;
-      });
-      return `(${ph.join(', ')}, now(), now(), 1)`;
-    });
-    const res = await client.query(
-      `INSERT INTO terminology.concept_relationships (${[...COLUMNS, 'created_at', 'updated_at', 'row_version'].join(', ')}) VALUES ${values.join(',\n')} ON CONFLICT DO NOTHING`,
-      params,
-    );
-    inserted += res.rowCount;
-  }
-  return inserted;
 }
 
 async function main() {
