@@ -8,6 +8,7 @@ import {
   profileVerificationFor,
   targetStatus,
   visibleVerification,
+  visibleVerifications,
   type AdmissionAction,
   type AdmissionStatusCode,
 } from './admission-status';
@@ -152,5 +153,53 @@ describe('estado visible de verificación (el check)', () => {
     expect(visibleVerification({ status: 'EXPIRADA' }, NOW).status).toBe(
       'EXPIRED',
     );
+  });
+});
+
+describe('visibleVerifications · el lote que comparten Guía, búsqueda y mensajería', () => {
+  it('da un sello por id pedido: el sin admisión es UNVERIFIED, nunca IN_REVIEW', () => {
+    const result = visibleVerifications(
+      ['con', 'sin'],
+      new Map([
+        [
+          'con',
+          {
+            statusConceptId: ADMISSION_STATUS_CONCEPT.VERIFICADA,
+            decidedAt: new Date('2026-09-01T10:00:00Z'),
+            validUntil: new Date('2029-09-01T00:00:00Z'),
+          },
+        ],
+      ]),
+      NOW,
+    );
+    expect([...result.keys()]).toEqual(['con', 'sin']);
+    expect(result.get('con')).toEqual({
+      status: 'VERIFIED',
+      verifiedAt: '2026-09-01T10:00:00.000Z',
+      validUntil: '2029-09-01',
+    });
+    expect(result.get('sin')).toEqual({
+      status: 'UNVERIFIED',
+      verifiedAt: null,
+      validUntil: null,
+    });
+  });
+
+  it('da lo mismo que visibleVerification para cada estado', () => {
+    for (const status of ADMISSION_STATUS_CODES) {
+      const row = {
+        statusConceptId: ADMISSION_STATUS_CONCEPT[status],
+        decidedAt: new Date('2026-09-01T10:00:00Z'),
+        validUntil: new Date('2029-09-01T00:00:00Z'),
+      };
+      expect(
+        visibleVerifications(['a'], new Map([['a', row]]), NOW).get('a'),
+      ).toEqual(
+        visibleVerification(
+          { status, decidedAt: row.decidedAt, validUntil: row.validUntil },
+          NOW,
+        ),
+      );
+    }
   });
 });

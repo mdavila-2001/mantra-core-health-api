@@ -100,6 +100,7 @@ import { CommunityVerificationSealAdapter } from './infrastructure/adapters/comm
 import { MessagingAdmissionNoticeAdapter } from './infrastructure/adapters/messaging-admission-notice.adapter';
 import { PractitionerAdmissionsService } from './application/services/practitioner-admissions.service';
 import { PractitionerAdmissionsReadService } from './application/services/practitioner-admissions-read.service';
+import { PractitionerVerificationReader } from './application/services/practitioner-verification-reader.service';
 import { PractitionerAdmissionChecklistService } from './application/services/practitioner-admission-checklist.service';
 import { PractitionerAdmissionEvidenceService } from './application/services/practitioner-admission-evidence.service';
 import { PractitionerAdmissionDocumentsService } from './application/services/practitioner-admission-documents.service';
@@ -247,6 +248,7 @@ import { PractitionerVerificationProjector } from './application/services/practi
     PractitionerAdmissionChecklistService,
     PractitionerVerificationProjector,
     PractitionerAdmissionsReadService,
+    PractitionerVerificationReader,
     PractitionerAdmissionsService,
     PractitionerAdmissionDocumentsService,
     // Servicios
@@ -294,6 +296,8 @@ import { PractitionerVerificationProjector } from './application/services/practi
     // profesional (guía, ficha, buscador) piden el estado visible.
     PractitionerAdmissionsService,
     PractitionerAdmissionsReadService,
+    // El sello solo, para quien no puede importar este módulo (`community`).
+    PractitionerVerificationReader,
   ],
 })
 export class ProfilesModule {}

@@ -210,3 +210,42 @@ export function visibleVerification(
       return { status: 'UNVERIFIED', verifiedAt: null, validUntil: null };
   }
 }
+
+/**
+ * El estado visible de varios profesionales a partir de sus admisiones vigentes.
+ *
+ * La proyección que comparten la Guía, la búsqueda y la mensajería: lo que no
+ * tiene admisión (padrón cargado) es `UNVERIFIED`, nunca `IN_REVIEW`. Pura:
+ * quien la usa trae las admisiones en **una** consulta y se la pasa.
+ */
+export function visibleVerifications(
+  practitionerProfileIds: readonly string[],
+  current: ReadonlyMap<
+    string,
+    {
+      statusConceptId: string;
+      decidedAt?: Date | null;
+      validUntil?: Date | null;
+    }
+  >,
+  now: Date,
+): Map<string, PractitionerVerificationView> {
+  const result = new Map<string, PractitionerVerificationView>();
+  for (const id of practitionerProfileIds) {
+    const admission = current.get(id);
+    result.set(
+      id,
+      visibleVerification(
+        admission
+          ? {
+              status: admissionStatusCode(admission.statusConceptId),
+              decidedAt: admission.decidedAt,
+              validUntil: admission.validUntil,
+            }
+          : undefined,
+        now,
+      ),
+    );
+  }
+  return result;
+}
