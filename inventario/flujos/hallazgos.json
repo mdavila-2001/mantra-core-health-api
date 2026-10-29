@@ -171,7 +171,7 @@
         "ruta": "/community/blocks",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:301"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:325"
       },
       {
         "operacion": "CommunitySocialController_block",
@@ -179,7 +179,7 @@
         "ruta": "/community/blocks",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:248"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:272"
       },
       {
         "operacion": "CommunitySocialController_unbookmark",
@@ -187,7 +187,7 @@
         "ruta": "/community/bookmarks",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:286"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:310"
       },
       {
         "operacion": "CommunitySocialController_bookmark",
@@ -195,7 +195,7 @@
         "ruta": "/community/bookmarks",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:216"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:240"
       },
       {
         "operacion": "CommunitySocialController_createComment",
@@ -203,7 +203,7 @@
         "ruta": "/community/comments",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:183"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:207"
       },
       {
         "operacion": "CommunityMessagingController_createConversation",
@@ -211,7 +211,7 @@
         "ruta": "/community/conversations",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:69"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:70"
       },
       {
         "operacion": "CommunityMessagingController_sendMessage",
@@ -219,7 +219,7 @@
         "ruta": "/community/conversations/{conversationId}/messages",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:85"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:86"
       },
       {
         "operacion": "CommunityMessagingController_deleteMessage",
@@ -227,7 +227,7 @@
         "ruta": "/community/conversations/{conversationId}/messages/{messageId}",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:120"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:121"
       },
       {
         "operacion": "CommunityMessagingController_editMessage",
@@ -235,7 +235,7 @@
         "ruta": "/community/conversations/{conversationId}/messages/{messageId}",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:102"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:103"
       },
       {
         "operacion": "CommunityMessagingController_unpinMessage",
@@ -243,7 +243,7 @@
         "ruta": "/community/conversations/{conversationId}/pin",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:196"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:197"
       },
       {
         "operacion": "CommunityMessagingController_pinMessage",
@@ -251,7 +251,7 @@
         "ruta": "/community/conversations/{conversationId}/pin",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:179"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:180"
       },
       {
         "operacion": "CommunityMessagingController_markRead",
@@ -259,7 +259,7 @@
         "ruta": "/community/conversations/{conversationId}/read",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:143"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:144"
       },
       {
         "operacion": "CommunitySocialController_unfollow",
@@ -267,7 +267,7 @@
         "ruta": "/community/follows",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:271"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:295"
       },
       {
         "operacion": "CommunitySocialController_follow",
@@ -275,7 +275,7 @@
         "ruta": "/community/follows",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:232"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:256"
       },
       {
         "operacion": "CommunityGroupsController_createGroup",
@@ -347,7 +347,7 @@
         "ruta": "/community/profiles/{profileId}/posts",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:166"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:190"
       },
       {
         "operacion": "CommunityReviewsController_publishReview",
@@ -371,7 +371,7 @@
         "ruta": "/community/profiles/me",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:126"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:127"
       },
       {
         "operacion": "PartyRatingsController_rate",
@@ -387,7 +387,7 @@
         "ruta": "/community/reactions",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:199"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:223"
       },
       {
         "operacion": "CommunityModerationController_report",
@@ -867,7 +867,15 @@
         "ruta": "/pharmacy/orders/{id}",
         "modulo": "pharmacy_inventory",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:135"
+        "fuente": "src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:136"
+      },
+      {
+        "operacion": "PharmacyOrdersController_openConversation",
+        "metodo": "POST",
+        "ruta": "/pharmacy/orders/{id}/conversation",
+        "modulo": "pharmacy_inventory",
+        "detalle": "escribe y el controlador no declara roles",
+        "fuente": "src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:156"
       },
       {
         "operacion": "PracticesController_publishHealthcareService",
@@ -1230,7 +1238,7 @@
         "fuente": "src/modules/terminology/controllers/terminology-fhir.controller.ts:97"
       }
     ],
-    "cuenta": 152
+    "cuenta": 153
   },
   {
     "id": "FLU-03",
@@ -1541,7 +1549,7 @@
         "ruta": "/community/blocks",
         "modulo": "community",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:301"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:325"
       },
       {
         "operacion": "CommunitySocialController_unbookmark",
@@ -1549,7 +1557,7 @@
         "ruta": "/community/bookmarks",
         "modulo": "community",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:286"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:310"
       },
       {
         "operacion": "CommunitySocialController_bookmark",
@@ -1557,7 +1565,7 @@
         "ruta": "/community/bookmarks",
         "modulo": "community",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:216"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:240"
       },
       {
         "operacion": "CommunityMessagingController_deleteMessage",
@@ -1565,7 +1573,7 @@
         "ruta": "/community/conversations/{conversationId}/messages/{messageId}",
         "modulo": "community",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:120"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:121"
       },
       {
         "operacion": "CommunityMessagingController_editMessage",
@@ -1573,7 +1581,7 @@
         "ruta": "/community/conversations/{conversationId}/messages/{messageId}",
         "modulo": "community",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:102"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:103"
       },
       {
         "operacion": "CommunityMessagingController_unpinMessage",
@@ -1581,7 +1589,7 @@
         "ruta": "/community/conversations/{conversationId}/pin",
         "modulo": "community",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:196"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:197"
       },
       {
         "operacion": "CommunityMessagingController_pinMessage",
@@ -1589,7 +1597,7 @@
         "ruta": "/community/conversations/{conversationId}/pin",
         "modulo": "community",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:179"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:180"
       },
       {
         "operacion": "CommunitySocialController_unfollow",
@@ -1597,7 +1605,7 @@
         "ruta": "/community/follows",
         "modulo": "community",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:271"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:295"
       },
       {
         "operacion": "CommunityGroupsController_createGroup",
@@ -2168,6 +2176,14 @@
         "fuente": "src/modules/pharmacy/controllers/pharmacy.controller.ts:361"
       },
       {
+        "operacion": "PharmacyOrdersController_openConversation",
+        "metodo": "POST",
+        "ruta": "/pharmacy/orders/{id}/conversation",
+        "modulo": "pharmacy_inventory",
+        "detalle": "ninguna prueba la menciona",
+        "fuente": "src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:156"
+      },
+      {
         "operacion": "PatientAddressBookController_remove",
         "metodo": "DELETE",
         "ruta": "/profiles/patients/me/addresses/{id}",
@@ -2456,7 +2472,7 @@
         "fuente": "src/modules/vector_rag/controllers/vector-runtime.controller.ts:189"
       }
     ],
-    "cuenta": 133
+    "cuenta": 134
   },
   {
     "id": "FLU-05",
@@ -3697,6 +3713,22 @@
         "fuente": null
       },
       {
+        "operacion": "BillingServiceCatalogController_importProcedures",
+        "metodo": "POST",
+        "ruta": "/billing/service-catalog/import-procedures",
+        "modulo": "billing",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "BillingServiceCatalogController_listMyProcedureSpecialties",
+        "metodo": "GET",
+        "ruta": "/billing/service-catalog/procedure-specialties/mine",
+        "modulo": "billing",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "BillingSimulatedController_catalogs",
         "metodo": "GET",
         "ruta": "/billing/simulated/catalogs",
@@ -4532,6 +4564,14 @@
         "operacion": "CommunitySocialController_ownProfileStats",
         "metodo": "GET",
         "ruta": "/community/profiles/me/stats",
+        "modulo": "community",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "CommunitySocialController_listOwnOrganizationShowcases",
+        "metodo": "GET",
+        "ruta": "/community/profiles/organization-showcases/me",
         "modulo": "community",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -8865,6 +8905,14 @@
         "fuente": null
       },
       {
+        "operacion": "PharmacyOrdersController_openConversation",
+        "metodo": "POST",
+        "ruta": "/pharmacy/orders/{id}/conversation",
+        "modulo": "pharmacy_inventory",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "PharmacyOrdersController_dispense",
         "metodo": "POST",
         "ruta": "/pharmacy/orders/{id}/dispense",
@@ -11609,7 +11657,7 @@
         "fuente": null
       }
     ],
-    "cuenta": 1127
+    "cuenta": 1131
   },
   {
     "id": "FLU-08",
@@ -11840,7 +11888,7 @@
         "ruta": "/billing/service-catalog/{id}/image",
         "modulo": "billing",
         "detalle": "Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229)",
-        "fuente": "src/modules/billing/controllers/billing-service-catalog.controller.ts:131"
+        "fuente": "src/modules/billing/controllers/billing-service-catalog.controller.ts:136"
       },
       {
         "operacion": "ChartDocumentsController_getDocumentFileContent",
@@ -12055,7 +12103,7 @@
         "metodo": "POST",
         "ruta": "/common/files/upload",
         "modulo": "common",
-        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) | StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/common/storage/storage-publication.service.ts:76) | StorageLifecycleDenied: REMOTE_STATE_UNKNOWN (src/common/storage/storage-publication.service.ts:90)",
+        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:466) | StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/common/storage/storage-publication.service.ts:76) | StorageLifecycleDenied: REMOTE_STATE_UNKNOWN (src/common/storage/storage-publication.service.ts:90)",
         "fuente": "src/modules/common/controllers/common-files.controller.ts:73"
       },
       {
@@ -12096,7 +12144,7 @@
         "ruta": "/community/comments/media/{fileId}/content",
         "modulo": "community",
         "detalle": "DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317) | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229)",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:444"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:468"
       },
       {
         "operacion": "CommunityMessagingController_getAttachmentContent",
@@ -12104,7 +12152,7 @@
         "ruta": "/community/conversations/{conversationId}/attachments/{fileId}/content",
         "modulo": "community",
         "detalle": "Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229)",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:245"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:246"
       },
       {
         "operacion": "CommunitySearchIndexController_health",
@@ -12295,7 +12343,7 @@
         "metodo": "POST",
         "ruta": "/iam/auth/upload-registration-document",
         "modulo": "iam",
-        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:408) | StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149)",
+        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:466) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:424) | StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149)",
         "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:231"
       },
       {
@@ -12303,7 +12351,7 @@
         "metodo": "POST",
         "ruta": "/iam/auth/upload-registration-logo",
         "modulo": "iam",
-        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:408) | StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149)",
+        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:466) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:424) | StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149)",
         "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:184"
       },
       {
@@ -12311,7 +12359,7 @@
         "metodo": "POST",
         "ruta": "/iam/auth/upload-registration-signature-image",
         "modulo": "iam",
-        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:408) | StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149)",
+        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:466) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:424) | StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149)",
         "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:154"
       },
       {
@@ -12391,7 +12439,7 @@
         "metodo": "POST",
         "ruta": "/insurance/portability/export",
         "modulo": "insurance",
-        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:260)",
+        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:276)",
         "fuente": "src/modules/insurance/presentation/controllers/insurance-portability.controller.ts:58"
       },
       {

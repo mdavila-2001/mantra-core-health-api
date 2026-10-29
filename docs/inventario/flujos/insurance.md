@@ -79,7 +79,7 @@ _Fuente: `src/modules/insurance/README.md:3`_
 |  |  | GET /insurance-brokers/{id}/clients | Cualquier sesión válida | BAJO | 3 |
 |  |  | GET /insurance-carriers | Cualquier sesión válida | BAJO | 6 |
 |  |  | GET /insurance-carriers/{id} | Cualquier sesión válida | BAJO | 8 |
-| `ctrl:InsurerPatientsController` | Operaciones de InsurerPatientsController que el README no asigna a un caso de uso | POST /insurance/patients/conversation | Cualquier sesión válida | ALTO | 15 |
+| `ctrl:InsurerPatientsController` | Operaciones de InsurerPatientsController que el README no asigna a un caso de uso | POST /insurance/patients/conversation | Cualquier sesión válida | ALTO | 16 |
 |  |  | GET /insurance/patients/options | Cualquier sesión válida | BAJO | 2 |
 |  |  | POST /insurance/patients/search | Cualquier sesión válida | ALTO | 13 |
 | `ctrl:InsurerReceivedClaimsController` | Operaciones de InsurerReceivedClaimsController que el README no asigna a un caso de uso | GET /insurance/received-claims | Cualquier sesión válida | BAJO | 15 |
@@ -708,7 +708,7 @@ flowchart LR
   t48[("insurance.insurance_products")]:::tabla
   t51[("insurance.patient_coverages")]:::tabla
   t59[("practice.practices")]:::tabla
-  t7[("+9 tablas más")]
+  t7[("+10 tablas más")]
   t14[("+7 tablas más")]
   subgraph s0["ctrl:InsurerPatientsController · Operaciones de InsurerPatientsController que e…"]
     o1["POST /insurance/patients/conversation"]:::op
@@ -4629,7 +4629,7 @@ Abrir o reutilizar la conversación interna con un paciente autorizado
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {accessDenied}; ForbiddenException: {ACCESS_DENIED} |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {accessDenied}; ForbiddenException: {ACCESS_DENIED}; ForbiddenException: Una organización no inicia conversaciones por este canal |
 | 404 | `NOT_FOUND` | NotFoundException: Paciente no disponible |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La mensajería no está disponible para estos perfiles; PreconditionFailedException: Las conversaciones grupales se crean desde el flujo de grupos; PreconditionFailedException: Los participantes de una conversación deben ser distintos; PreconditionFailedException: Una conversación directa requiere exactamente dos participantes; PreconditionFailedException: La persona no está disponible para iniciar una conversación; PreconditionFailedException: No se puede iniciar una conversación entre perfiles bloqueados |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -4689,35 +4689,42 @@ flowchart TD
   n24 -->|"no"| n26
   n27["Transacción: transactional(…)"]:::transaccion
   n26 --> n27
-  n28{"participantIds.size !== dto.participantProfileIds.length"}:::decision
+  n28{"requirePublicRecipient"}:::decision
   n27 --> n28
-  n29(["422 PRECONDITION_FAILED Los participantes de una conversación deben ser distintos"]):::error
+  n29{"await this.organizationStaff.isTenantBacked(tx, initiator)"}:::decision
   n28 -->|"sí"| n29
-  n30{"dto.participantProfileIds.length !== 2"}:::decision
-  n28 -->|"no"| n30
-  n31(["422 PRECONDITION_FAILED Una conversación directa requiere exactamente dos participantes"]):::error
-  n30 -->|"sí"| n31
-  n32{"!eligibleRecipient"}:::decision
-  n30 -->|"no"| n32
-  n33(["422 PRECONDITION_FAILED La persona no está disponible para iniciar una conversación"]):::error
-  n32 -->|"sí"| n33
-  n34{"blocked"}:::decision
-  n32 -->|"no"| n34
-  n35(["422 PRECONDITION_FAILED No se puede iniciar una conversación entre perfiles bloqueados"]):::error
-  n34 -->|"sí"| n35
-  n36["Llama a InsurerPatientsService.recordAccess"]:::llamada
-  n34 -->|"no"| n36
-  n37["Repite: por cada const patientProfileId de patientIds"]:::bucle
-  n36 --> n37
-  n38["Llama a PatientDirectoryAdapter.record"]:::llamada
-  n37 -->|"cada elemento"| n38
-  n39["Llama a DataAccessLogRepository.record"]:::llamada
-  n38 --> n39
-  n40[("CREA audit.data_access_log")]:::efecto
+  n30(["403 FORBIDDEN Una organización no inicia conversaciones por este canal"]):::error
+  n29 -->|"sí"| n30
+  n31{"participantIds.size !== dto.participantProfileIds.length"}:::decision
+  n29 -->|"no"| n31
+  n28 -->|"no"| n31
+  n32(["422 PRECONDITION_FAILED Los participantes de una conversación deben ser distintos"]):::error
+  n31 -->|"sí"| n32
+  n33{"dto.participantProfileIds.length !== 2"}:::decision
+  n31 -->|"no"| n33
+  n34(["422 PRECONDITION_FAILED Una conversación directa requiere exactamente dos participantes"]):::error
+  n33 -->|"sí"| n34
+  n35{"!eligibleRecipient"}:::decision
+  n33 -->|"no"| n35
+  n36(["422 PRECONDITION_FAILED La persona no está disponible para iniciar una conversación"]):::error
+  n35 -->|"sí"| n36
+  n37{"blocked"}:::decision
+  n35 -->|"no"| n37
+  n38(["422 PRECONDITION_FAILED No se puede iniciar una conversación entre perfiles bloqueados"]):::error
+  n37 -->|"sí"| n38
+  n39["Llama a InsurerPatientsService.recordAccess"]:::llamada
+  n37 -->|"no"| n39
+  n40["Repite: por cada const patientProfileId de patientIds"]:::bucle
   n39 --> n40
-  n41(("200 Responde con éxito")):::ok
-  n40 --> n41
-  n37 -->|"al terminar"| n41
+  n41["Llama a PatientDirectoryAdapter.record"]:::llamada
+  n40 -->|"cada elemento"| n41
+  n42["Llama a DataAccessLogRepository.record"]:::llamada
+  n41 --> n42
+  n43[("CREA audit.data_access_log")]:::efecto
+  n42 --> n43
+  n44(("200 Responde con éxito")):::ok
+  n43 --> n44
+  n40 -->|"al terminar"| n44
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

@@ -3,9 +3,9 @@
 # Endpoints del módulo `billing`
 
 - **Bloque:** Financiero y ERP (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
-- **Operaciones:** 36 (36 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 5 · MEDIO 13 · BAJO 18
-- **Tablas distintas que tocan:** 37
+- **Operaciones:** 38 (38 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 5 · MEDIO 14 · BAJO 19
+- **Tablas distintas que tocan:** 38
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/billing.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -32,22 +32,24 @@
 | 18 | POST | `/billing/service-catalog` | Dar de alta un servicio en el catálogo maestro | MEDIO | 5 | SECURITY_ADMIN, PRACTITIONER, CLINICIAN |
 | 19 | PATCH | `/billing/service-catalog/{id}` | Corregir un servicio del catálogo de mi práctica | MEDIO | 4 | PRACTITIONER, CLINICIAN, SECURITY_ADMIN |
 | 20 | GET | `/billing/service-catalog/{id}/image` | Descargar la imagen de un servicio que el actor puede ver | BAJO | 4 | sesión (sin roles) |
-| 21 | GET | `/billing/service-catalog/procedure-specialties` | Listar las especialidades del nomenclador de procedimientos | BAJO | 1 | sesión (sin roles) |
-| 22 | GET | `/billing/service-catalog/procedures` | Listar el nomenclador de procedimientos (arancel de referencia) | BAJO | 2 | sesión (sin roles) |
-| 23 | GET | `/billing/simulated/catalogs` | Catálogos paramétricos del SIAT simulado | BAJO | 0 | sesión (sin roles) |
-| 24 | GET | `/billing/simulated/charges` | Cobros de consultas (opcionalmente de una persona) | BAJO | 11 | sesión (sin roles) |
-| 25 | POST | `/billing/simulated/charges/{chargeId}/instances/{instanceId}/payments` | Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN) | BAJO | 11 | sesión (sin roles) |
-| 26 | POST | `/billing/simulated/charges/{chargeId}/invoices` | Emitir la factura SIAT simulada de un cobro pagado | ALTO | 12 | sesión (sin roles) |
-| 27 | POST | `/billing/simulated/charges/{chargeId}/payment` | Registrar el pago real de un cobro | ALTO | 18 | sesión (sin roles) |
-| 28 | GET | `/billing/simulated/invoices/{invoiceId}` | Una factura simulada, dentro del alcance de quien la pide | BAJO | 11 | sesión (sin roles) |
-| 29 | POST | `/billing/simulated/invoices/{invoiceId}/annulment` | Anular la factura (sólo administración) | ALTO | 12 | sesión (sin roles) |
-| 30 | POST | `/billing/simulated/invoices/{invoiceId}/annulment-reversal` | Revertir la anulación (sólo administración) | ALTO | 12 | sesión (sin roles) |
-| 31 | POST | `/billing/simulated/invoices/{invoiceId}/email` | Encolar el envío (simulado, no se envía) de la factura | ALTO | 13 | sesión (sin roles) |
-| 32 | GET | `/billing/simulated/my-invoices` | Mis facturas: recibidas (paciente) o emitidas (quien factura) | BAJO | 4 | sesión (sin roles) |
-| 33 | GET | `/billing/simulated/my-invoices/{invoiceId}` | Una de mis facturas | BAJO | 4 | sesión (sin roles) |
-| 34 | GET | `/billing/simulated/outbox` | Bandeja de correo simulada (sólo administración) | BAJO | 3 | sesión (sin roles) |
-| 35 | GET | `/billing/simulated/status` | Estado fiscal simulado: emisores y credenciales sintéticas | BAJO | 2 | sesión (sin roles) |
-| 36 | GET | `/patient-spending/me` | Mis gastos de salud | BAJO | 10 | PATIENT |
+| 21 | POST | `/billing/service-catalog/import-procedures` | Importar en lote procedimientos del arancel al catálogo | MEDIO | 5 | SECURITY_ADMIN, PRACTITIONER, CLINICIAN |
+| 22 | GET | `/billing/service-catalog/procedure-specialties` | Listar las especialidades del nomenclador de procedimientos | BAJO | 1 | sesión (sin roles) |
+| 23 | GET | `/billing/service-catalog/procedure-specialties/mine` | Listar las especialidades del arancel que corresponden al médico | BAJO | 3 | sesión (sin roles) |
+| 24 | GET | `/billing/service-catalog/procedures` | Listar el nomenclador de procedimientos (arancel de referencia) | BAJO | 2 | sesión (sin roles) |
+| 25 | GET | `/billing/simulated/catalogs` | Catálogos paramétricos del SIAT simulado | BAJO | 0 | sesión (sin roles) |
+| 26 | GET | `/billing/simulated/charges` | Cobros de consultas (opcionalmente de una persona) | BAJO | 11 | sesión (sin roles) |
+| 27 | POST | `/billing/simulated/charges/{chargeId}/instances/{instanceId}/payments` | Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN) | BAJO | 11 | sesión (sin roles) |
+| 28 | POST | `/billing/simulated/charges/{chargeId}/invoices` | Emitir la factura SIAT simulada de un cobro pagado | ALTO | 12 | sesión (sin roles) |
+| 29 | POST | `/billing/simulated/charges/{chargeId}/payment` | Registrar el pago real de un cobro | ALTO | 18 | sesión (sin roles) |
+| 30 | GET | `/billing/simulated/invoices/{invoiceId}` | Una factura simulada, dentro del alcance de quien la pide | BAJO | 11 | sesión (sin roles) |
+| 31 | POST | `/billing/simulated/invoices/{invoiceId}/annulment` | Anular la factura (sólo administración) | ALTO | 12 | sesión (sin roles) |
+| 32 | POST | `/billing/simulated/invoices/{invoiceId}/annulment-reversal` | Revertir la anulación (sólo administración) | ALTO | 12 | sesión (sin roles) |
+| 33 | POST | `/billing/simulated/invoices/{invoiceId}/email` | Encolar el envío (simulado, no se envía) de la factura | ALTO | 13 | sesión (sin roles) |
+| 34 | GET | `/billing/simulated/my-invoices` | Mis facturas: recibidas (paciente) o emitidas (quien factura) | BAJO | 4 | sesión (sin roles) |
+| 35 | GET | `/billing/simulated/my-invoices/{invoiceId}` | Una de mis facturas | BAJO | 4 | sesión (sin roles) |
+| 36 | GET | `/billing/simulated/outbox` | Bandeja de correo simulada (sólo administración) | BAJO | 3 | sesión (sin roles) |
+| 37 | GET | `/billing/simulated/status` | Estado fiscal simulado: emisores y credenciales sintéticas | BAJO | 2 | sesión (sin roles) |
+| 38 | GET | `/patient-spending/me` | Mis gastos de salud | BAJO | 10 | PATIENT |
 
 ---
 
@@ -1917,7 +1919,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 - **Bloque:** Financiero y ERP
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `BillingServiceCatalogController.search` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:76`
+- **Implementación:** `BillingServiceCatalogController.search` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:81`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1927,14 +1929,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /billing/service-catalog` la atiende `BillingServiceCatalogController.search` (src/modules/billing/controllers/billing-service-catalog.controller.ts:76). Exige sesión; el controlador no declara roles. Delega en `BillingServiceCatalogService.search`. Lee billing.service_catalog.
+`GET /billing/service-catalog` la atiende `BillingServiceCatalogController.search` (src/modules/billing/controllers/billing-service-catalog.controller.ts:81). Exige sesión; el controlador no declara roles. Delega en `BillingServiceCatalogService.search`. Lee billing.service_catalog.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-service-catalog.controller.ts:76` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-service-catalog.controller.ts:81` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_QUERY | practiceId (obligatorio) | `contrato (parameters)` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
@@ -1943,7 +1945,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.service_catalog` | LEE | LEE | DIRECTA | BillingServiceCatalogController.search → BillingServiceCatalogService.search → ServiceCatalogRepository.searchPage | `src/modules/billing/repositories/service-catalog.repository.ts:152` |
+| `billing.service_catalog` | LEE | LEE | DIRECTA | BillingServiceCatalogController.search → BillingServiceCatalogService.search → ServiceCatalogRepository.searchPage | `src/modules/billing/repositories/service-catalog.repository.ts:178` |
 
 ### Parámetros
 
@@ -1998,7 +2000,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:42` |
+| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:47` |
 
 ### Flujos
 
@@ -2013,7 +2015,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `BillingServiceCatalogController.create` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:155`
+- **Implementación:** `BillingServiceCatalogController.create` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:160`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2023,14 +2025,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /billing/service-catalog` la atiende `BillingServiceCatalogController.create` (src/modules/billing/controllers/billing-service-catalog.controller.ts:155). Exige sesión con alguno de los roles SECURITY_ADMIN, PRACTITIONER, CLINICIAN. Valida el cuerpo como `CreateServiceCatalogItemDto` (11 campos, 4 obligatorios). Delega en `BillingServiceCatalogService.create`. Crea filas en billing.service_catalog. Lee billing.service_catalog, common.file_versions, common.files, practice.practices.
+`POST /billing/service-catalog` la atiende `BillingServiceCatalogController.create` (src/modules/billing/controllers/billing-service-catalog.controller.ts:160). Exige sesión con alguno de los roles SECURITY_ADMIN, PRACTITIONER, CLINICIAN. Valida el cuerpo como `CreateServiceCatalogItemDto` (11 campos, 4 obligatorios). Delega en `BillingServiceCatalogService.create`. Crea filas en billing.service_catalog. Lee billing.service_catalog, common.file_versions, common.files, practice.practices.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PRACTITIONER, CLINICIAN | `src/modules/billing/controllers/billing-service-catalog.controller.ts:155` |
+| ROL | Alguno de: SECURITY_ADMIN, PRACTITIONER, CLINICIAN | `src/modules/billing/controllers/billing-service-catalog.controller.ts:160` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
@@ -2040,7 +2042,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.service_catalog` | ESCRIBE | CREA | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → ServiceCatalogRepository.create | `src/modules/billing/repositories/service-catalog.repository.ts:169` |
+| `billing.service_catalog` | ESCRIBE | CREA | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → ServiceCatalogRepository.create | `src/modules/billing/repositories/service-catalog.repository.ts:195` |
 | `billing.service_catalog` | LEE | LEE | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → ServiceCatalogRepository.findByCode | `src/modules/billing/repositories/service-catalog.repository.ts:120` |
 | `common.file_versions` | LEE | LEE | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.assertImageUsable → AttachableFileService.assertUsableBy → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
 | `common.files` | LEE | LEE | DIRECTA | BillingServiceCatalogController.create → BillingServiceCatalogService.create → BillingServiceCatalogService.assertImageUsable → AttachableFileService.assertUsableBy → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
@@ -2131,7 +2133,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:79` |
+| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:107` |
 
 ### Flujos
 
@@ -2146,7 +2148,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `BillingServiceCatalogController.update` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:192`
+- **Implementación:** `BillingServiceCatalogController.update` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:229`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2156,16 +2158,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /billing/service-catalog/{id}` la atiende `BillingServiceCatalogController.update` (src/modules/billing/controllers/billing-service-catalog.controller.ts:192). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN, SECURITY_ADMIN. Valida el cuerpo como `UpdateServiceCatalogItemDto` (5 campos, 0 obligatorios). Delega en `BillingServiceCatalogService.update`. Actualiza billing.service_catalog. Lee billing.service_catalog, practice.practices, practice.practitioner_role_assignments.
+`PATCH /billing/service-catalog/{id}` la atiende `BillingServiceCatalogController.update` (src/modules/billing/controllers/billing-service-catalog.controller.ts:229). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN, SECURITY_ADMIN. Valida el cuerpo como `UpdateServiceCatalogItemDto` (5 campos, 0 obligatorios). Delega en `BillingServiceCatalogService.update`. Actualiza billing.service_catalog. Lee billing.service_catalog, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN, SECURITY_ADMIN | `src/modules/billing/controllers/billing-service-catalog.controller.ts:192` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN, SECURITY_ADMIN | `src/modules/billing/controllers/billing-service-catalog.controller.ts:229` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/billing-service-catalog.controller.ts:192` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/billing-service-catalog.controller.ts:229` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
@@ -2174,7 +2176,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.service_catalog` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingServiceCatalogController.update → BillingServiceCatalogService.update | `src/modules/billing/services/billing-service-catalog.service.ts:396` |
+| `billing.service_catalog` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingServiceCatalogController.update → BillingServiceCatalogService.update | `src/modules/billing/services/billing-service-catalog.service.ts:400` |
 | `billing.service_catalog` | LEE | LEE | DIRECTA | BillingServiceCatalogController.update → BillingServiceCatalogService.update → ServiceCatalogRepository.findById | `src/modules/billing/repositories/service-catalog.repository.ts:89` |
 | `practice.practices` | LEE | LEE | DIRECTA | BillingServiceCatalogController.update → BillingServiceCatalogService.update → BillingServiceCatalogService.assertCanEdit → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | BillingServiceCatalogController.update → BillingServiceCatalogService.update → BillingServiceCatalogService.assertCanEdit → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
@@ -2264,7 +2266,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Financiero y ERP
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `BillingServiceCatalogController.getImage` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:131`
+- **Implementación:** `BillingServiceCatalogController.getImage` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:136`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2274,16 +2276,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /billing/service-catalog/{id}/image` la atiende `BillingServiceCatalogController.getImage` (src/modules/billing/controllers/billing-service-catalog.controller.ts:131). Exige sesión; el controlador no declara roles. Delega en `BillingServiceCatalogService.getImageContent`. Lee billing.service_catalog, common.file_versions, common.files, practice.practices.
+`GET /billing/service-catalog/{id}/image` la atiende `BillingServiceCatalogController.getImage` (src/modules/billing/controllers/billing-service-catalog.controller.ts:136). Exige sesión; el controlador no declara roles. Delega en `BillingServiceCatalogService.getImageContent`. Lee billing.service_catalog, common.file_versions, common.files, practice.practices.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-service-catalog.controller.ts:131` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-service-catalog.controller.ts:136` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/billing-service-catalog.controller.ts:131` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/billing/controllers/billing-service-catalog.controller.ts:136` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
@@ -2328,7 +2330,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:118` |
+| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:146` |
 
 ### Flujos
 
@@ -2336,14 +2338,121 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 21. GET /billing/service-catalog/procedure-specialties
+## 21. POST /billing/service-catalog/import-procedures
+
+- **Origen:** CONTRATO
+- **Nombre:** Importar en lote procedimientos del arancel al catálogo
+- **Bloque:** Financiero y ERP
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `BillingServiceCatalogController.importProcedures` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:195`
+
+### Qué es y para qué sirve (negocio)
+
+Importar en lote procedimientos del arancel al catálogo. Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /billing/service-catalog/import-procedures` la atiende `BillingServiceCatalogController.importProcedures` (src/modules/billing/controllers/billing-service-catalog.controller.ts:195). Exige sesión con alguno de los roles SECURITY_ADMIN, PRACTITIONER, CLINICIAN. Valida el cuerpo como `ImportProceduresDto` (4 campos, 1 obligatorio). Delega en `ProcedureImportService.importProcedures`. Crea filas en billing.service_catalog. Lee billing.service_catalog, practice.practices, terminology.catalog_concepts, terminology.concept_properties.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, PRACTITIONER, CLINICIAN | `src/modules/billing/controllers/billing-service-catalog.controller.ts:195` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `billing.service_catalog` | ESCRIBE | CREA | DIRECTA | BillingServiceCatalogController.importProcedures → ProcedureImportService.importProcedures → ServiceCatalogRepository.create | `src/modules/billing/repositories/service-catalog.repository.ts:195` |
+| `billing.service_catalog` | LEE | LEE | DIRECTA | BillingServiceCatalogController.importProcedures → ProcedureImportService.importProcedures → ServiceCatalogRepository.findExistingCodes | `src/modules/billing/repositories/service-catalog.repository.ts:141` |
+| `practice.practices` | LEE | LEE | DIRECTA | BillingServiceCatalogController.importProcedures → ProcedureImportService.importProcedures → BillingServiceCatalogService.assertRegistrationCanRegister → PracticeTenantLookupService.isOwnOffice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | BillingServiceCatalogController.importProcedures → ProcedureImportService.importProcedures → ProcedureImportService.select | `src/modules/billing/services/procedure-import.service.ts:421` |
+| `terminology.concept_properties` | LEE | LEE | POR_SQL | BillingServiceCatalogController.importProcedures → ProcedureImportService.importProcedures → ProcedureImportService.select | `src/modules/billing/services/procedure-import.service.ts:391` |
+
+### Cuerpo — DTO `ImportProceduresDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `practiceId` | `string` | Sí | formato uuid | `@IsUUID()` | Práctica (practice.practices) cuyo catálogo recibe los servicios | `src/modules/billing/dto/procedure-import.dto.ts:29` |
+| `specialties` | `array<string>` | No | longitud máxima 200; máximo 100 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(100)` `@IsString({ each: true })` `@MaxLength(200, { each: true })` | Nombres exactos de especialidad del arancel (`GET procedure-specialties`) | `src/modules/billing/dto/procedure-import.dto.ts:43` |
+| `codes` | `array<string>` | No | longitud máxima 300; máximo PROCEDURE_IMPORT_MAX elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(PROCEDURE_IMPORT_MAX)` `@IsString({ each: true })` `@MaxLength(300, { each: true })` | Códigos del arancel (`procedure:...`) a importar | `src/modules/billing/dto/procedure-import.dto.ts:56` |
+| `q` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Texto a buscar en el nombre del procedimiento; sin tildes ni mayúsculas, todas las palabras | `src/modules/billing/dto/procedure-import.dto.ts:66` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "practiceId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "specialties": [
+    "Cardiología"
+  ],
+  "codes": [
+    "procedure:bo:BO_ARM_AUDITORIA_MEDICA_I_GENERAL"
+  ],
+  "q": "valor-ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<ImportProceduresResponseDto>` · DTO `ImportProceduresResponseDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `created` | `number` | Sí | — | — | Servicios creados | `src/modules/billing/dto/procedure-import.dto.ts:73` |
+| `skipped` | `number` | Sí | — | — | Coincidencias que ya existían en la práctica y se saltaron | `src/modules/billing/dto/procedure-import.dto.ts:80` |
+| `total` | `number` | Sí | — | — | Procedimientos del arancel que cumplen el filtro | `src/modules/billing/dto/procedure-import.dto.ts:87` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: El filtro abarca más de {PROCEDURE_IMPORT_MAX} procedimientos; acotalo por especialidad o texto |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:81` |
+
+### Flujos
+
+- Módulo Billing (17) — etapa `ctrl:BillingServiceCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 22. GET /billing/service-catalog/procedure-specialties
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar las especialidades del nomenclador de procedimientos
 - **Bloque:** Financiero y ERP
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `BillingServiceCatalogController.listProcedureSpecialties` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:223`
+- **Implementación:** `BillingServiceCatalogController.listProcedureSpecialties` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:260`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2353,14 +2462,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /billing/service-catalog/procedure-specialties` la atiende `BillingServiceCatalogController.listProcedureSpecialties` (src/modules/billing/controllers/billing-service-catalog.controller.ts:223). Exige sesión; el controlador no declara roles. Delega en `ProcedureNomenclatureService.listSpecialties`. Lee terminology.concept_properties.
+`GET /billing/service-catalog/procedure-specialties` la atiende `BillingServiceCatalogController.listProcedureSpecialties` (src/modules/billing/controllers/billing-service-catalog.controller.ts:260). Exige sesión; el controlador no declara roles. Delega en `ProcedureNomenclatureService.listSpecialties`. Lee terminology.concept_properties.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-service-catalog.controller.ts:223` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-service-catalog.controller.ts:260` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
@@ -2368,7 +2477,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `terminology.concept_properties` | LEE | LEE | POR_SQL | BillingServiceCatalogController.listProcedureSpecialties → ProcedureNomenclatureService.listSpecialties | `src/modules/billing/services/procedure-nomenclature.service.ts:80` |
+| `terminology.concept_properties` | LEE | LEE | POR_SQL | BillingServiceCatalogController.listProcedureSpecialties → ProcedureNomenclatureService.listSpecialties | `src/modules/billing/services/procedure-nomenclature.service.ts:127` |
 
 ### Cuerpo
 
@@ -2397,7 +2506,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:106` |
+| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:134` |
 
 ### Flujos
 
@@ -2405,14 +2514,85 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 22. GET /billing/service-catalog/procedures
+## 23. GET /billing/service-catalog/procedure-specialties/mine
+
+- **Origen:** CONTRATO
+- **Nombre:** Listar las especialidades del arancel que corresponden al médico
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `BillingServiceCatalogController.listMyProcedureSpecialties` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:279`
+
+### Qué es y para qué sirve (negocio)
+
+Listar las especialidades del arancel que corresponden al médico. Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`GET /billing/service-catalog/procedure-specialties/mine` la atiende `BillingServiceCatalogController.listMyProcedureSpecialties` (src/modules/billing/controllers/billing-service-catalog.controller.ts:279). Exige sesión; el controlador no declara roles. Delega en `ProcedureImportService.listMySpecialties`. Lee profiles.practitioner_specialties, terminology.catalog_concepts, terminology.concept_properties.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-service-catalog.controller.ts:279` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | BillingServiceCatalogController.listMyProcedureSpecialties → ProcedureImportService.listMySpecialties | `src/modules/billing/services/procedure-import.service.ts:253` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | BillingServiceCatalogController.listMyProcedureSpecialties → ProcedureImportService.listMySpecialties | `src/modules/billing/services/procedure-import.service.ts:253` |
+| `terminology.concept_properties` | LEE | LEE | POR_SQL | BillingServiceCatalogController.listMyProcedureSpecialties → ProcedureImportService.listMySpecialties | `src/modules/billing/services/procedure-import.service.ts:265` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<MyProcedureSpecialtiesResponseDto>` · DTO `MyProcedureSpecialtiesResponseDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<MyProcedureSpecialtyDto>` | Sí | — | — | Especialidades del arancel que corresponden al médico autenticado. | `src/modules/billing/dto/procedure-import.dto.ts:105` |
+| `items[].specialty` | `string` | Sí | — | — | Nombre exacto de la especialidad, tal cual lo publica el arancel. | `src/modules/billing/dto/procedure-import.dto.ts:94` |
+| `items[].count` | `number` | Sí | — | — | Procedimientos que el arancel agrupa bajo esa especialidad. | `src/modules/billing/dto/procedure-import.dto.ts:98` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:91` |
+
+### Flujos
+
+- Módulo Billing (17) — etapa `ctrl:BillingServiceCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 24. GET /billing/service-catalog/procedures
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar el nomenclador de procedimientos (arancel de referencia)
 - **Bloque:** Financiero y ERP
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `BillingServiceCatalogController.searchProcedures` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:241`
+- **Implementación:** `BillingServiceCatalogController.searchProcedures` — `src/modules/billing/controllers/billing-service-catalog.controller.ts:299`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2422,14 +2602,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /billing/service-catalog/procedures` la atiende `BillingServiceCatalogController.searchProcedures` (src/modules/billing/controllers/billing-service-catalog.controller.ts:241). Exige sesión; el controlador no declara roles. Delega en `ProcedureNomenclatureService.search`. Lee terminology.catalog_concepts, terminology.concept_properties.
+`GET /billing/service-catalog/procedures` la atiende `BillingServiceCatalogController.searchProcedures` (src/modules/billing/controllers/billing-service-catalog.controller.ts:299). Exige sesión; el controlador no declara roles. Delega en `ProcedureNomenclatureService.search`. Lee terminology.catalog_concepts, terminology.concept_properties.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-service-catalog.controller.ts:241` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/billing/controllers/billing-service-catalog.controller.ts:299` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
@@ -2437,15 +2617,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | BillingServiceCatalogController.searchProcedures → ProcedureNomenclatureService.search | `src/modules/billing/services/procedure-nomenclature.service.ts:156` |
-| `terminology.concept_properties` | LEE | LEE | POR_SQL | BillingServiceCatalogController.searchProcedures → ProcedureNomenclatureService.search | `src/modules/billing/services/procedure-nomenclature.service.ts:131` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | BillingServiceCatalogController.searchProcedures → ProcedureNomenclatureService.search | `src/modules/billing/services/procedure-nomenclature.service.ts:223` |
+| `terminology.concept_properties` | LEE | LEE | POR_SQL | BillingServiceCatalogController.searchProcedures → ProcedureNomenclatureService.search | `src/modules/billing/services/procedure-nomenclature.service.ts:185` |
 
 ### Parámetros
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
 | `specialty` | query | No | `string` | Especialidad exacta, tal cual la publica el arancel |
-| `q` | query | No | `string` | Texto a buscar en el nombre del procedimiento |
+| `q` | query | No | `string` | Palabras a buscar (todas deben aparecer), sin distinguir tildes ni mayúsculas, en el nombre, el código, el grupo o la especialidad |
 | `cursor` | query | No | `string` | Cursor opaco devuelto por la página anterior |
 | `limit` | query | No | `number` | Entradas por página |
 
@@ -2483,7 +2663,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:90` |
+| CONTROLADOR | `src/modules/billing/controllers/billing-service-catalog.controller.spec.ts:118` |
 
 ### Flujos
 
@@ -2491,7 +2671,7 @@ El árbol de decisión completo está en [flujos](../flujos/billing.md).
 
 ---
 
-## 23. GET /billing/simulated/catalogs
+## 25. GET /billing/simulated/catalogs
 
 - **Origen:** CONTRATO
 - **Nombre:** Catálogos paramétricos del SIAT simulado
@@ -2553,7 +2733,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 24. GET /billing/simulated/charges
+## 26. GET /billing/simulated/charges
 
 - **Origen:** CONTRATO
 - **Nombre:** Cobros de consultas (opcionalmente de una persona)
@@ -2635,7 +2815,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 25. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
+## 27. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
 
 - **Origen:** CONTRATO
 - **Nombre:** Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN)
@@ -2743,7 +2923,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 26. POST /billing/simulated/charges/{chargeId}/invoices
+## 28. POST /billing/simulated/charges/{chargeId}/invoices
 
 - **Origen:** CONTRATO
 - **Nombre:** Emitir la factura SIAT simulada de un cobro pagado
@@ -2871,7 +3051,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 27. POST /billing/simulated/charges/{chargeId}/payment
+## 29. POST /billing/simulated/charges/{chargeId}/payment
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar el pago real de un cobro
@@ -2983,7 +3163,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 28. GET /billing/simulated/invoices/{invoiceId}
+## 30. GET /billing/simulated/invoices/{invoiceId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Una factura simulada, dentro del alcance de quien la pide
@@ -3063,7 +3243,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 29. POST /billing/simulated/invoices/{invoiceId}/annulment
+## 31. POST /billing/simulated/invoices/{invoiceId}/annulment
 
 - **Origen:** CONTRATO
 - **Nombre:** Anular la factura (sólo administración)
@@ -3167,7 +3347,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 30. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
+## 32. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
 
 - **Origen:** CONTRATO
 - **Nombre:** Revertir la anulación (sólo administración)
@@ -3248,7 +3428,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 31. POST /billing/simulated/invoices/{invoiceId}/email
+## 33. POST /billing/simulated/invoices/{invoiceId}/email
 
 - **Origen:** CONTRATO
 - **Nombre:** Encolar el envío (simulado, no se envía) de la factura
@@ -3353,7 +3533,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 32. GET /billing/simulated/my-invoices
+## 34. GET /billing/simulated/my-invoices
 
 - **Origen:** CONTRATO
 - **Nombre:** Mis facturas: recibidas (paciente) o emitidas (quien factura)
@@ -3420,7 +3600,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 33. GET /billing/simulated/my-invoices/{invoiceId}
+## 35. GET /billing/simulated/my-invoices/{invoiceId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Una de mis facturas
@@ -3493,7 +3673,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 34. GET /billing/simulated/outbox
+## 36. GET /billing/simulated/outbox
 
 - **Origen:** CONTRATO
 - **Nombre:** Bandeja de correo simulada (sólo administración)
@@ -3559,7 +3739,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 35. GET /billing/simulated/status
+## 37. GET /billing/simulated/status
 
 - **Origen:** CONTRATO
 - **Nombre:** Estado fiscal simulado: emisores y credenciales sintéticas
@@ -3624,7 +3804,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 36. GET /patient-spending/me
+## 38. GET /patient-spending/me
 
 - **Origen:** CONTRATO
 - **Nombre:** Mis gastos de salud

@@ -10,7 +10,7 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [pharmacies](#pharmacies) | Representa organizaciones farmacéuticas integradas al sistema médico para identificar prestadores y operadores de farmacia. | 16 | 13 | 66 | DIVERGE |
+| [pharmacies](#pharmacies) | Representa organizaciones farmacéuticas integradas al sistema médico para identificar prestadores y operadores de farmacia. | 16 | 13 | 67 | DIVERGE |
 | [pharmacy_external_product_mappings](#pharmacy_external_product_mappings) | Mapea productos internos a referencias externas para intercambiar información farmacéutica entre sistemas. | 12 | 5 | 6 | COINCIDE |
 | [pharmacy_integration_connections](#pharmacy_integration_connections) | Configura conexiones de farmacia con sistemas externos para sincronizar catálogos u operaciones autorizadas. | 17 | 8 | 5 | COINCIDE |
 | [pharmacy_licenses](#pharmacy_licenses) | Registra licencias de farmacias para documentar habilitaciones vinculadas a su operación. | 16 | 9 | 4 | COINCIDE |
@@ -137,7 +137,7 @@ Representa organizaciones farmacéuticas integradas al sistema médico para iden
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_24_pharmacy.puml: pharmacies`
 - **Dominio:** Farmacia · **Diagrama:** `Mantra Core Health Context/modules/diagram_24_pharmacy.puml` · **DDL:** `SQL/24_pharmacy/02_tables.sql`
 - **Entidad del ORM:** `Pharmacies` — `src/modules/pharmacy/entities/pharmacies.entity.ts`
-- **Resumen:** 16 columnas · 13 índices · 9 FK salientes · 13 entrantes · 66 operaciones
+- **Resumen:** 16 columnas · 13 índices · 9 FK salientes · 13 entrantes · 67 operaciones
 
 #### Columnas
 
@@ -271,6 +271,7 @@ Representa organizaciones farmacéuticas integradas al sistema médico para iden
 | POST /pharmacy/orders/{id}/accept-substitutions | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/cancel | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/confirm | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/conversation | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/dispense | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/prefer-original | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/ready | LEE | DIRECTA |

@@ -342,8 +342,12 @@ export class BillingServiceCatalogService {
    *
    * Falla con 404 y no con 403 por el mismo motivo que `update`: el id de una
    * práctica ajena responde igual que uno inventado.
+   *
+   * Es público porque la importación en lote desde el arancel
+   * (`ProcedureImportService`) exige **exactamente** el mismo alcance que el alta
+   * individual: una sola regla, no dos copias que se desalineen.
    */
-  private async assertRegistrationCanRegister(
+  async assertRegistrationCanRegister(
     actor: AuthenticatedUser,
     practiceId: string,
   ): Promise<void> {

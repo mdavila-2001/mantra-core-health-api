@@ -393,7 +393,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | AdminTenantsController.updatePublicProfile → DirectoryTenantsService.updatePublicProfile → PublicProfileProjectionService.updateOrganizationShowcase | `src/modules/community/services/public-profile-projection.service.ts:202` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | AdminTenantsController.updatePublicProfile → DirectoryTenantsService.updatePublicProfile → PublicProfileProjectionService.updateOrganizationShowcase → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:302` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | AdminTenantsController.updatePublicProfile → DirectoryTenantsService.updatePublicProfile → PublicProfileProjectionService.updateOrganizationShowcase → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:350` |
 | `directory.tenants` | LEE | LEE | DIRECTA | AdminTenantsController.updatePublicProfile → DirectoryTenantsService.updatePublicProfile → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:71` |
 
 ### Parámetros
@@ -608,8 +608,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `common.addresses` | LEE | LEE | DIRECTA | AdminTenantsController.verify → DirectoryTenantsService.verify → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.evaluate → PharmacyOperatingRequirementsService.headquartersHasPoint | `src/modules/directory/services/pharmacy-operating-requirements.service.ts:327` |
 | `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | AdminTenantsController.verify → DirectoryTenantsService.verify → PublicProfileProjectionService.projectOrganization | `src/modules/community/services/public-profile-projection.service.ts:134` |
-| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | AdminTenantsController.verify → DirectoryTenantsService.verify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:344` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | AdminTenantsController.verify → DirectoryTenantsService.verify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:302` |
+| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | AdminTenantsController.verify → DirectoryTenantsService.verify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:392` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | AdminTenantsController.verify → DirectoryTenantsService.verify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:350` |
 | `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | AdminTenantsController.verify → DirectoryTenantsService.verify → PharmacyOperatingRequirementsService.evaluateForTenant → PharmacyOperatingRequirementsService.kindOf | `src/modules/directory/services/pharmacy-operating-requirements.service.ts:221` |
 | `directory.tenant_affiliation_documents` | ESCRIBE | ACTUALIZA | POR_TIPO | AdminTenantsController.verify → DirectoryTenantsService.verify → PharmacyOperatingRequirementsService.markDocumentsVerified | `src/modules/directory/services/pharmacy-operating-requirements.service.ts:310` |
 | `directory.tenant_affiliation_documents` | LEE | LEE | DIRECTA | AdminTenantsController.verify → DirectoryTenantsService.verify → PharmacyOperatingRequirementsService.markDocumentsVerified | `src/modules/directory/services/pharmacy-operating-requirements.service.ts:307` |
@@ -683,6 +683,7 @@ El árbol de decisión completo está en [flujos](../flujos/directory.md).
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/community-pharmacy-inbox.int-spec.ts:94` |
 | INTEGRACION | `test/integration/laboratory-registration.int-spec.ts:449` |
 | INTEGRACION | `test/integration/medical-center-registration.int-spec.ts:118` |
 | INTEGRACION | `test/integration/pharmacy-registration.int-spec.ts:245` |
@@ -1803,7 +1804,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.public_profiles` | LEE | LEE | DIRECTA | OrganizationLogoController.get → OrganizationLogoService.get → PublicProfileProjectionService.getOrganizationLogo → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:302` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | OrganizationLogoController.get → OrganizationLogoService.get → PublicProfileProjectionService.getOrganizationLogo → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:350` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | OrganizationLogoController.get → OrganizationLogoService.get → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
 | `directory.tenants` | LEE | LEE | DIRECTA | OrganizationLogoController.get → OrganizationLogoService.get → OrganizationLogoService.assertTenant → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:71` |
 
@@ -1882,8 +1883,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `common.file_versions` | LEE | LEE | DIRECTA | OrganizationLogoController.set → OrganizationLogoService.set → AttachableFileService.assertUsableBy → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
 | `common.files` | LEE | LEE | DIRECTA | OrganizationLogoController.set → OrganizationLogoService.set → AttachableFileService.assertUsableBy → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
 | `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | OrganizationLogoController.set → OrganizationLogoService.set → PublicProfileProjectionService.setOrganizationLogo | `src/modules/community/services/public-profile-projection.service.ts:105` |
-| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | OrganizationLogoController.set → OrganizationLogoService.set → PublicProfileProjectionService.setOrganizationLogo → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:344` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | OrganizationLogoController.set → OrganizationLogoService.set → PublicProfileProjectionService.setOrganizationLogo → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:302` |
+| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | OrganizationLogoController.set → OrganizationLogoService.set → PublicProfileProjectionService.setOrganizationLogo → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:392` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | OrganizationLogoController.set → OrganizationLogoService.set → PublicProfileProjectionService.setOrganizationLogo → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:350` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | OrganizationLogoController.set → OrganizationLogoService.set → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
 | `directory.tenants` | LEE | LEE | DIRECTA | OrganizationLogoController.set → OrganizationLogoService.set → OrganizationLogoService.assertTenant → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:71` |
 
@@ -1980,7 +1981,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `common.file_versions` | LEE | LEE | DIRECTA | OrganizationLogoController.content → OrganizationLogoService.content → AttachableFileService.assertUsableForAuthorizedContext → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
 | `common.files` | LEE | LEE | DIRECTA | OrganizationLogoController.content → OrganizationLogoService.content → AttachableFileService.assertUsableForAuthorizedContext → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | OrganizationLogoController.content → OrganizationLogoService.content → OrganizationLogoService.get → PublicProfileProjectionService.getOrganizationLogo → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:302` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | OrganizationLogoController.content → OrganizationLogoService.content → OrganizationLogoService.get → PublicProfileProjectionService.getOrganizationLogo → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:350` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | OrganizationLogoController.content → OrganizationLogoService.content → OrganizationLogoService.get → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
 | `directory.tenants` | LEE | LEE | DIRECTA | OrganizationLogoController.content → OrganizationLogoService.content → OrganizationLogoService.get → OrganizationLogoService.assertTenant → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:71` |
 

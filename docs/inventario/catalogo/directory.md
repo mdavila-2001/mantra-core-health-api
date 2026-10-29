@@ -14,9 +14,9 @@
 | [branches](#branches) | Identifica sedes de una organización sanitaria para ubicar prestación, operación y configuración local. | 14 | 7 | 22 | DIVERGE |
 | [tenant_affiliation_documents](#tenant_affiliation_documents) | Conserva documentos que respaldan afiliaciones de tenants con organizaciones o redes del sistema médico. | 23 | 8 | 13 | COINCIDE |
 | [tenant_legal_representatives](#tenant_legal_representatives) | Identifica representantes legales asociados a organizaciones para sostener trámites y responsabilidades institucionales. | 16 | 4 | 4 | COINCIDE |
-| [tenant_memberships](#tenant_memberships) | Relaciona usuarios o perfiles con una organización para delimitar pertenencia y acceso institucional. | 15 | 10 | 135 | COINCIDE |
+| [tenant_memberships](#tenant_memberships) | Relaciona usuarios o perfiles con una organización para delimitar pertenencia y acceso institucional. | 15 | 10 | 192 | COINCIDE |
 | [tenant_web_configs](#tenant_web_configs) | Almacena configuración web por tenant para presentar y dirigir servicios institucionales bajo sus dominios. | 18 | 3 | 0 | COINCIDE |
-| [tenants](#tenants) | Representa organizaciones o espacios administrativos aislados que operan dentro del sistema médico multi-tenant. | 19 | 13 | 62 | COINCIDE |
+| [tenants](#tenants) | Representa organizaciones o espacios administrativos aislados que operan dentro del sistema médico multi-tenant. | 19 | 13 | 137 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -492,7 +492,7 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_04_directory.puml: tenant_memberships`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_04_directory.puml` · **DDL:** `SQL/04_directory/02_tables.sql`
 - **Entidad del ORM:** `TenantMemberships` — `src/modules/directory/entities/tenant_memberships.entity.ts`
-- **Resumen:** 15 columnas · 10 índices · 9 FK salientes · 2 entrantes · 135 operaciones
+- **Resumen:** 15 columnas · 10 índices · 9 FK salientes · 2 entrantes · 192 operaciones
 
 #### Columnas
 
@@ -554,6 +554,31 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | POST /authz/patients/{patientProfileId}/break-the-glass | LEE | DIRECTA |
 | POST /authz/patients/{patientProfileId}/clinical-access-grants | LEE | DIRECTA |
 | POST /clinical/encounters/check-in | LEE | DIRECTA |
+| DELETE /community/blocks | LEE | DIRECTA |
+| GET /community/blocks | LEE | DIRECTA |
+| POST /community/blocks | LEE | DIRECTA |
+| DELETE /community/bookmarks | LEE | DIRECTA |
+| GET /community/bookmarks | LEE | DIRECTA |
+| POST /community/bookmarks | LEE | DIRECTA |
+| POST /community/comments | LEE | DIRECTA |
+| GET /community/comments/media/{fileId}/content | LEE | DIRECTA |
+| GET /community/conversations | LEE | DIRECTA |
+| POST /community/conversations | LEE | DIRECTA |
+| GET /community/conversations/{conversationId}/attachments/{fileId}/content | LEE | DIRECTA |
+| GET /community/conversations/{conversationId}/messages | LEE | DIRECTA |
+| POST /community/conversations/{conversationId}/messages | LEE | DIRECTA |
+| DELETE /community/conversations/{conversationId}/messages/{messageId} | LEE | DIRECTA |
+| PATCH /community/conversations/{conversationId}/messages/{messageId} | LEE | DIRECTA |
+| PATCH /community/conversations/{conversationId}/participant | LEE | DIRECTA |
+| DELETE /community/conversations/{conversationId}/pin | LEE | DIRECTA |
+| POST /community/conversations/{conversationId}/pin | LEE | DIRECTA |
+| GET /community/conversations/{conversationId}/presence | LEE | DIRECTA |
+| POST /community/conversations/{conversationId}/read | LEE | DIRECTA |
+| POST /community/conversations/contacts/search | LEE | DIRECTA |
+| GET /community/feed | LEE | DIRECTA |
+| DELETE /community/follows | LEE | DIRECTA |
+| GET /community/follows | LEE | DIRECTA |
+| POST /community/follows | LEE | DIRECTA |
 | GET /community/groups | LEE | DIRECTA |
 | POST /community/groups | LEE | DIRECTA |
 | GET /community/groups/{groupId} | LEE | DIRECTA |
@@ -563,6 +588,24 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | PATCH /community/groups/{groupId}/members/{member} | LEE | DIRECTA |
 | GET /community/groups/{groupId}/posts | LEE | DIRECTA |
 | POST /community/groups/{groupId}/posts | LEE | DIRECTA |
+| POST /community/moderation/decisions/{decisionId}/appeal | LEE | DIRECTA |
+| GET /community/moderation/decisions/mine | LEE | DIRECTA |
+| GET /community/notifications | LEE | DIRECTA |
+| GET /community/polls/{pollId} | LEE | DIRECTA |
+| POST /community/polls/{pollId}/votes | LEE | DIRECTA |
+| GET /community/posts/{postId} | LEE | DIRECTA |
+| GET /community/posts/{postId}/comments | LEE | DIRECTA |
+| POST /community/posts/{postId}/polls | LEE | DIRECTA |
+| GET /community/posts/{postId}/reactions | LEE | DIRECTA |
+| GET /community/profiles/{profileId} | LEE | DIRECTA |
+| GET /community/profiles/{profileId}/auto-reply | LEE | DIRECTA |
+| PUT /community/profiles/{profileId}/auto-reply | LEE | DIRECTA |
+| GET /community/profiles/{profileId}/posts | LEE | DIRECTA |
+| POST /community/profiles/{profileId}/posts | LEE | DIRECTA |
+| POST /community/profiles/{profileId}/reviews/{reviewId}/responses | LEE | DIRECTA |
+| GET /community/profiles/by-slug/{slug} | LEE | DIRECTA |
+| GET /community/profiles/organization-showcases/me | LEE | DIRECTA |
+| PUT /community/reactions | LEE | DIRECTA |
 | POST /admin/content-packs/{code}/apply | ACTUALIZA | POR_TIPO |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
@@ -661,6 +704,7 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | GET /pharmacy/pharmacies/{id}/summary | LEE | DIRECTA |
 | GET /pharmacy/products | LEE | DIRECTA |
 | GET /pharmacy/orders/{id} | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/conversation | LEE | DIRECTA |
 | GET /practices | LEE | DIRECTA |
 | GET /practices/{practiceId}/healthcare-services | LEE | DIRECTA |
 | POST /practices/{practiceId}/healthcare-services | LEE | DIRECTA |
@@ -682,6 +726,19 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject | LEE | DIRECTA |
 | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke | CREA | DIRECTA |
 | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke | LEE | DIRECTA |
+| POST /scheduling/appointments/direct | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/cancel | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
+| POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
+| POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
+| POST /scheduling/internal/promote-waitlist/{slotId} | LEE | DIRECTA |
+| POST /scheduling/resources/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/resources/{id}/shift-slots | LEE | DIRECTA |
 | GET /tenants/{tenantId}/agenda | LEE | DIRECTA |
 | POST /internal/governance/retention-executions/run | LEE | DIRECTA |
 
@@ -784,7 +841,7 @@ Representa organizaciones o espacios administrativos aislados que operan dentro 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_04_directory.puml: tenants`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_04_directory.puml` · **DDL:** `SQL/04_directory/02_tables.sql`
 - **Entidad del ORM:** `Tenants` — `src/modules/directory/entities/tenants.entity.ts`
-- **Resumen:** 19 columnas · 13 índices · 11 FK salientes · 299 entrantes · 62 operaciones
+- **Resumen:** 19 columnas · 13 índices · 11 FK salientes · 299 entrantes · 137 operaciones
 
 #### Columnas
 
@@ -1132,8 +1189,8 @@ Representa organizaciones o espacios administrativos aislados que operan dentro 
 | `uq_tenants_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
 | `ix_tenants_tenant_type_concept_id` | no | tenant_type_concept_id | Soporta la clave foránea fk_tenants_tenant_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_tenants_legal_entity_type_concept_id` | no | legal_entity_type_concept_id | Soporta la clave foránea fk_tenants_legal_entity_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_tenants_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_tenants_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_tenants_verification_status_concept_id` | no | verification_status_concept_id | Soporta la clave foránea fk_tenants_verification_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_tenants_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_tenants_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_tenants_verification_status_concept_id` | no | verification_status_concept_id | Soporta la clave foránea fk_tenants_verification_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «verification_status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_tenants_country_concept_id` | no | country_concept_id | Soporta la clave foránea fk_tenants_country_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_tenants_jurisdiction_concept_id` | no | jurisdiction_concept_id | Soporta la clave foránea fk_tenants_jurisdiction_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_tenants_data_residency_region_concept_id` | no | data_residency_region_concept_id | Soporta la clave foránea fk_tenants_data_residency_region_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1162,8 +1219,56 @@ Representa organizaciones o espacios administrativos aislados que operan dentro 
 | PATCH /referrals/{id}/counter-referral | LEE | DIRECTA |
 | GET /referrals/me | LEE | DIRECTA |
 | GET /referrals/targets | LEE | POR_SQL |
+| DELETE /community/blocks | LEE | DIRECTA |
+| GET /community/blocks | LEE | DIRECTA |
+| POST /community/blocks | LEE | DIRECTA |
+| DELETE /community/bookmarks | LEE | DIRECTA |
+| GET /community/bookmarks | LEE | DIRECTA |
+| POST /community/bookmarks | LEE | DIRECTA |
+| POST /community/comments | LEE | DIRECTA |
+| GET /community/comments/media/{fileId}/content | LEE | DIRECTA |
+| GET /community/conversations | LEE | DIRECTA |
+| POST /community/conversations | LEE | DIRECTA |
+| GET /community/conversations/{conversationId}/attachments/{fileId}/content | LEE | DIRECTA |
+| GET /community/conversations/{conversationId}/messages | LEE | DIRECTA |
+| POST /community/conversations/{conversationId}/messages | LEE | DIRECTA |
+| DELETE /community/conversations/{conversationId}/messages/{messageId} | LEE | DIRECTA |
+| PATCH /community/conversations/{conversationId}/messages/{messageId} | LEE | DIRECTA |
+| PATCH /community/conversations/{conversationId}/participant | LEE | DIRECTA |
+| DELETE /community/conversations/{conversationId}/pin | LEE | DIRECTA |
+| POST /community/conversations/{conversationId}/pin | LEE | DIRECTA |
+| GET /community/conversations/{conversationId}/presence | LEE | DIRECTA |
+| POST /community/conversations/{conversationId}/read | LEE | DIRECTA |
+| POST /community/conversations/contacts/search | LEE | DIRECTA |
+| GET /community/feed | LEE | DIRECTA |
+| DELETE /community/follows | LEE | DIRECTA |
+| GET /community/follows | LEE | DIRECTA |
+| POST /community/follows | LEE | DIRECTA |
 | POST /community/groups | LEE | DIRECTA |
+| GET /community/groups/{groupId} | LEE | DIRECTA |
+| GET /community/groups/{groupId}/members | LEE | DIRECTA |
+| POST /community/groups/{groupId}/members | LEE | DIRECTA |
+| DELETE /community/groups/{groupId}/members/{member} | LEE | DIRECTA |
+| PATCH /community/groups/{groupId}/members/{member} | LEE | DIRECTA |
+| GET /community/groups/{groupId}/posts | LEE | DIRECTA |
 | POST /community/groups/{groupId}/posts | LEE | DIRECTA |
+| POST /community/moderation/decisions/{decisionId}/appeal | LEE | DIRECTA |
+| GET /community/moderation/decisions/mine | LEE | DIRECTA |
+| GET /community/notifications | LEE | DIRECTA |
+| GET /community/polls/{pollId} | LEE | DIRECTA |
+| POST /community/polls/{pollId}/votes | LEE | DIRECTA |
+| GET /community/posts/{postId} | LEE | DIRECTA |
+| GET /community/posts/{postId}/comments | LEE | DIRECTA |
+| POST /community/posts/{postId}/polls | LEE | DIRECTA |
+| GET /community/posts/{postId}/reactions | LEE | DIRECTA |
+| GET /community/profiles/{profileId} | LEE | DIRECTA |
+| GET /community/profiles/{profileId}/auto-reply | LEE | DIRECTA |
+| PUT /community/profiles/{profileId}/auto-reply | LEE | DIRECTA |
+| GET /community/profiles/{profileId}/posts | LEE | DIRECTA |
+| POST /community/profiles/{profileId}/posts | LEE | DIRECTA |
+| POST /community/profiles/{profileId}/reviews/{reviewId}/responses | LEE | DIRECTA |
+| GET /community/profiles/by-slug/{slug} | LEE | DIRECTA |
+| PUT /community/reactions | LEE | DIRECTA |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /diagnostic-units/{id}/verify-and-publish | LEE | DIRECTA |
 | POST /diagnostics/service-requests/inbox | LEE | DIRECTA |
@@ -1204,11 +1309,38 @@ Representa organizaciones o espacios administrativos aislados que operan dentro 
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | POST /internal/identity/evidence/lifecycle-scan | LEE | DIRECTA |
 | GET /insurance-claims/{id} | LEE | DIRECTA |
+| POST /insurance/patients/conversation | LEE | DIRECTA |
 | POST /insurance/portability/export | LEE | POR_SQL |
 | POST /pharma-labs | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id} | LEE | DIRECTA |
+| GET /pharmacy/orders | LEE | DIRECTA |
+| POST /pharmacy/orders | LEE | DIRECTA |
+| GET /pharmacy/orders/{id} | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/accept-substitutions | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/cancel | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/confirm | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/conversation | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/dispense | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/prefer-original | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/ready | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/reject | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/review | LEE | DIRECTA |
+| GET /pharmacy/orders/me | LEE | DIRECTA |
 | POST /tenants/{tenantId}/practices | LEE | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
+| POST /scheduling/appointments/direct | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/cancel | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
+| POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
+| POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
+| POST /scheduling/internal/promote-waitlist/{slotId} | LEE | DIRECTA |
+| POST /scheduling/resources/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/resources/{id}/shift-slots | LEE | DIRECTA |
 | POST /admin/governance/tenant-residency-bindings | LEE | DIRECTA |
 | POST /internal/governance/retention-executions/run | LEE | DIRECTA |
 | POST /ts/admin/compression/run | LEE | DIRECTA |

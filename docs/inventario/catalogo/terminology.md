@@ -10,13 +10,13 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [catalog_concepts](#catalog_concepts) | Almacena conceptos normalizados de catálogos sanitarios que se referencian desde los registros clínicos y administrativos. | 16 | 8 | 153 | COINCIDE |
+| [catalog_concepts](#catalog_concepts) | Almacena conceptos normalizados de catálogos sanitarios que se referencian desde los registros clínicos y administrativos. | 16 | 8 | 155 | COINCIDE |
 | [catalog_import_batches](#catalog_import_batches) | Agrupa importaciones de terminología para trazar la carga de fuentes externas y sus resultados. | 13 | 6 | 3 | COINCIDE |
 | [code_system_versions](#code_system_versions) | Registra versiones de sistemas de códigos para preservar el contexto temporal de conceptos clínicos. | 14 | 6 | 19 | COINCIDE |
 | [code_systems](#code_systems) | Define sistemas de codificación sanitaria que permiten interpretar identificadores clínicos de forma interoperable. | 15 | 8 | 16 | COINCIDE |
 | [concept_designations](#concept_designations) | Conserva nombres, términos y designaciones lingüísticas asociadas a conceptos para su búsqueda y presentación. | 11 | 5 | 20 | COINCIDE |
 | [concept_maps](#concept_maps) | Mantiene correspondencias entre conceptos o sistemas de códigos para facilitar intercambio y normalización semántica. | 12 | 6 | 3 | COINCIDE |
-| [concept_properties](#concept_properties) | Registra propiedades descriptivas de conceptos para ampliar su significado sin duplicar el concepto principal. | 10 | 3 | 25 | COINCIDE |
+| [concept_properties](#concept_properties) | Registra propiedades descriptivas de conceptos para ampliar su significado sin duplicar el concepto principal. | 10 | 3 | 27 | COINCIDE |
 | [concept_relationships](#concept_relationships) | Expresa relaciones semánticas entre conceptos para navegación, mapeo y razonamiento sobre terminología clínica. | 10 | 5 | 10 | DIVERGE |
 | [tenant_catalog_policies](#tenant_catalog_policies) | Define políticas de catálogo por tenant para gobernar qué terminologías se habilitan en cada organización sanitaria. | 14 | 6 | 3 | COINCIDE |
 | [tenant_concept_config](#tenant_concept_config) | Guarda configuraciones de conceptos por tenant para permitir ajustes locales sin alterar el concepto canónico compartido. | 12 | 5 | 3 | COINCIDE |
@@ -196,7 +196,7 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: catalog_concepts`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `CatalogConcepts` — `src/modules/terminology/entities/catalog_concepts.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 5 FK salientes · 2522 entrantes · 153 operaciones
+- **Resumen:** 16 columnas · 8 índices · 5 FK salientes · 2522 entrantes · 155 operaciones
 
 #### Columnas
 
@@ -2775,6 +2775,8 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | Operación | Efecto | Confianza |
 |---|---|---|
 | GET /readiness | LEE | POR_SQL |
+| POST /billing/service-catalog/import-procedures | LEE | POR_SQL |
+| GET /billing/service-catalog/procedure-specialties/mine | LEE | POR_SQL |
 | GET /billing/service-catalog/procedures | LEE | POR_SQL |
 | GET /patient-spending/me | LEE | POR_SQL |
 | GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
@@ -3379,7 +3381,7 @@ Registra propiedades descriptivas de conceptos para ampliar su significado sin d
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: concept_properties`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `ConceptProperties` — `src/modules/terminology/entities/concept_properties.entity.ts`
-- **Resumen:** 10 columnas · 3 índices · 3 FK salientes · 0 entrantes · 25 operaciones
+- **Resumen:** 10 columnas · 3 índices · 3 FK salientes · 0 entrantes · 27 operaciones
 
 #### Columnas
 
@@ -3416,7 +3418,9 @@ Registra propiedades descriptivas de conceptos para ampliar su significado sin d
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /billing/service-catalog/import-procedures | LEE | POR_SQL |
 | GET /billing/service-catalog/procedure-specialties | LEE | POR_SQL |
+| GET /billing/service-catalog/procedure-specialties/mine | LEE | POR_SQL |
 | GET /billing/service-catalog/procedures | LEE | POR_SQL |
 | POST /admin/content-packs/{code}/apply | BORRA | POR_TIPO |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |

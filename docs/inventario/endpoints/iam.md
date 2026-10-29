@@ -527,6 +527,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/br14-encuentros-seguridad-clinica.int-spec.ts:64` |
 | INTEGRACION | `test/integration/clinical-c14-c23-notas-e-internacion.int-spec.ts:68` |
 | INTEGRACION | `test/integration/clinical-prescriptions-pdf.int-spec.ts:80` |
+| INTEGRACION | `test/integration/community-pharmacy-inbox.int-spec.ts:60` |
 | INTEGRACION | `test/integration/community-realtime-chat.int-spec.ts:104` |
 | INTEGRACION | `test/integration/dependent-link-requests.int-spec.ts:72` |
 | INTEGRACION | `test/integration/diagnostics-release.int-spec.ts:61` |
@@ -1185,6 +1186,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 |---|---|
 | INTEGRACION | `test/integration/accounting-practitioner-simple-http.int-spec.ts:173` |
 | INTEGRACION | `test/integration/admin-listados.int-spec.ts:55` |
+| INTEGRACION | `test/integration/community-pharmacy-inbox.int-spec.ts:73` |
 | INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:73` |
 | INTEGRACION | `test/integration/fx2-medico-multisede-publica-agenda.int-spec.ts:99` |
 | INTEGRACION | `test/integration/hardening/mch-001.int-spec.ts:54` |
@@ -1416,6 +1418,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/br14-encuentros-seguridad-clinica.int-spec.ts:72` |
 | INTEGRACION | `test/integration/clinical-c14-c23-notas-e-internacion.int-spec.ts:58` |
 | INTEGRACION | `test/integration/clinical-prescriptions-pdf.int-spec.ts:69` |
+| INTEGRACION | `test/integration/community-pharmacy-inbox.int-spec.ts:49` |
 | INTEGRACION | `test/integration/community-realtime-chat.int-spec.ts:124` |
 | INTEGRACION | `test/integration/dependent-link-requests.int-spec.ts:59` |
 | INTEGRACION | `test/integration/diagnostics-release.int-spec.ts:51` |

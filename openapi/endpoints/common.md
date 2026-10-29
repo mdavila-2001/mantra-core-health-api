@@ -1681,6 +1681,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | No se recibió contenido en el campo "file" | Excepción explícita en src/modules/common/services/file-upload.service.ts |
 | 422 | `PRECONDITION_FAILED` | El archivo excede el tamaño máximo permitido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | Las fotos HEIC, HEIF o AVIF no se aceptan: enviala como JPEG, PNG, WEBP o GIF | Excepción explícita en src/modules/common/services/file-upload.service.ts |
 | 422 | `PRECONDITION_FAILED` | El contenido no corresponde a ningún formato de archivo permitido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
 | 422 | `PRECONDITION_FAILED` | El formato del archivo no está permitido para esta categoría | Excepción explícita en src/modules/common/services/file-upload.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |

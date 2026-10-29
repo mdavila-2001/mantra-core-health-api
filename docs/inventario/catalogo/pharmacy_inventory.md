@@ -17,7 +17,7 @@
 | [inventory_lots](#inventory_lots) | Registra lotes de productos para rastrear vencimientos, origen y movimientos de inventario farmacéutico. | 15 | 6 | 10 | COINCIDE |
 | [inventory_recall_holds](#inventory_recall_holds) | Bloquea inventario afectado por alertas o retiros para evitar que productos comprometidos sigan disponibles. | 14 | 7 | 3 | COINCIDE |
 | [inventory_reservation_lines](#inventory_reservation_lines) | Desglosa productos y cantidades comprometidos en una reserva de inventario. | 16 | 8 | 34 | COINCIDE |
-| [inventory_reservations](#inventory_reservations) | Aparta existencias para procesos que requieren disponibilidad comprometida antes de su consumo o despacho. | 22 | 14 | 39 | COINCIDE |
+| [inventory_reservations](#inventory_reservations) | Aparta existencias para procesos que requieren disponibilidad comprometida antes de su consumo o despacho. | 22 | 14 | 40 | COINCIDE |
 | [inventory_serials](#inventory_serials) | Conserva números de serie de unidades controladas para habilitar trazabilidad individual de productos. | 11 | 5 | 0 | COINCIDE |
 | [inventory_stock_positions](#inventory_stock_positions) | Representa saldos de existencias por producto y ubicación para consultar disponibilidad farmacéutica. | 11 | 3 | 40 | COINCIDE |
 | [medication_dispensation_lines](#medication_dispensation_lines) | Detalla medicamentos y cantidades entregados dentro de cada dispensación vinculada al paciente o prescripción. | 12 | 6 | 5 | COINCIDE |
@@ -938,7 +938,7 @@ Aparta existencias para procesos que requieren disponibilidad comprometida antes
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml: inventory_reservations`
 - **Dominio:** Farmacia · **Diagrama:** `Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml` · **DDL:** `SQL/25_pharmacy_inventory/02_tables.sql`
 - **Entidad del ORM:** `InventoryReservations` — `src/modules/pharmacy_inventory/entities/inventory_reservations.entity.ts`
-- **Resumen:** 22 columnas · 14 índices · 11 FK salientes · 5 entrantes · 39 operaciones
+- **Resumen:** 22 columnas · 14 índices · 11 FK salientes · 5 entrantes · 40 operaciones
 
 #### Columnas
 
@@ -1045,6 +1045,7 @@ Aparta existencias para procesos que requieren disponibilidad comprometida antes
 | POST /pharmacy/orders/{id}/cancel | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/confirm | ACTUALIZA | POR_TIPO |
 | POST /pharmacy/orders/{id}/confirm | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/conversation | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/dispense | ACTUALIZA | POR_TIPO |
 | POST /pharmacy/orders/{id}/dispense | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/prefer-original | ACTUALIZA | POR_TIPO |

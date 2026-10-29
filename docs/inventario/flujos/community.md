@@ -3,12 +3,12 @@
 # Flujos del módulo `community`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 103 (91 con decisiones propias, 12 sin ellas)
+- **Operaciones:** 104 (91 con decisiones propias, 13 sin ellas)
 - Inventario de endpoints del módulo: [community](../endpoints/community.md)
 
 ## Proceso: Módulo Community (19)
 
-- **Código:** `community` · **Agrupación:** MIXTO · **Operaciones:** 103
+- **Código:** `community` · **Agrupación:** MIXTO · **Operaciones:** 104
 - **Actores:** Cualquier sesión válida · PATIENT · Público (sin sesión) · SEARCH_ADMIN · SECURITY_ADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/community/README.md`
@@ -23,50 +23,50 @@ _Fuente: `src/modules/community/README.md:3`_
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
-| `UC-19-01` | Publica post con hashtags, media y menciones | POST /community/profiles/{profileId}/posts | Cualquier sesión válida | ALTO | 10 |
-| `UC-19-02` | Comenta (hilo anidado) con contadores | POST /community/comments | Cualquier sesión válida | ALTO | 8 |
-| `UC-19-03` | Reacciona (upsert una reacción por actor/objeto) | PUT /community/reactions | Cualquier sesión válida | ALTO | 4 |
-| `UC-19-04` | Guarda bookmark en colección | POST /community/bookmarks | Cualquier sesión válida | ALTO | 3 |
-| `UC-19-05` | Sigue objeto social (perfil/tópico/hashtag/grupo) | POST /community/follows | Cualquier sesión válida | ALTO | 4 |
-| `UC-19-06` | Envía mensaje directo | POST /community/conversations/{conversationId}/messages | Cualquier sesión válida | ALTO | 23 |
-| `UC-19-07` | Marca mensajes como leídos (recibos) | POST /community/conversations/{conversationId}/read | Cualquier sesión válida | ALTO | 6 |
+| `UC-19-01` | Publica post con hashtags, media y menciones | POST /community/profiles/{profileId}/posts | Cualquier sesión válida | ALTO | 12 |
+| `UC-19-02` | Comenta (hilo anidado) con contadores | POST /community/comments | Cualquier sesión válida | ALTO | 10 |
+| `UC-19-03` | Reacciona (upsert una reacción por actor/objeto) | PUT /community/reactions | Cualquier sesión válida | ALTO | 6 |
+| `UC-19-04` | Guarda bookmark en colección | POST /community/bookmarks | Cualquier sesión válida | ALTO | 5 |
+| `UC-19-05` | Sigue objeto social (perfil/tópico/hashtag/grupo) | POST /community/follows | Cualquier sesión válida | ALTO | 6 |
+| `UC-19-06` | Envía mensaje directo | POST /community/conversations/{conversationId}/messages | Cualquier sesión válida | ALTO | 25 |
+| `UC-19-07` | Marca mensajes como leídos (recibos) | POST /community/conversations/{conversationId}/read | Cualquier sesión válida | ALTO | 8 |
 | `UC-19-08` | Reporta contenido y encola moderación | POST /community/reports | Cualquier sesión válida | ALTO | 3 |
 | `UC-19-09` | Resuelve moderación (decisión + strike) | POST /community/moderation/queue/{queueId}/decision | SECURITY_ADMIN | MEDIO | 6 |
-| `UC-19-10` | Apela una decisión | POST /community/moderation/decisions/{decisionId}/appeal | Cualquier sesión válida | ALTO | 7 |
+| `UC-19-10` | Apela una decisión | POST /community/moderation/decisions/{decisionId}/appeal | Cualquier sesión válida | ALTO | 9 |
 | `UC-19-11` | Publica review verificada de servicio | POST /community/profiles/{profileId}/reviews | Cualquier sesión válida | ALTO | 6 |
-| `UC-19-12` | Vota en encuesta | POST /community/polls/{pollId}/votes | Cualquier sesión válida | ALTO | 10 |
-| `UC-19-13` | Se une a grupo/comunidad | POST /community/groups/{groupId}/members | Cualquier sesión válida | ALTO | 9 |
-| `UC-19-14` | Bloquea a un usuario | POST /community/blocks | Cualquier sesión válida | ALTO | 6 |
+| `UC-19-12` | Vota en encuesta | POST /community/polls/{pollId}/votes | Cualquier sesión válida | ALTO | 12 |
+| `UC-19-13` | Se une a grupo/comunidad | POST /community/groups/{groupId}/members | Cualquier sesión válida | ALTO | 10 |
+| `UC-19-14` | Bloquea a un usuario | POST /community/blocks | Cualquier sesión válida | ALTO | 8 |
 | `UC-19-15` | Lote de posts publicados sin repartir, con sus seguidores | GET /internal/community/feed/pending | SYSTEM · SECURITY_ADMIN | BAJO | 3 |
 |  |  | POST /internal/community/feed/rebuild | SYSTEM · SECURITY_ADMIN | MEDIO | 2 |
 | `ctrl:CommunityFeedController` | Operaciones de CommunityFeedController que el README no asigna a un caso de uso | POST /internal/community/feed/ranking/apply | SYSTEM · SECURITY_ADMIN | MEDIO | 1 |
 |  |  | GET /internal/community/feed/ranking/pending | SYSTEM · SECURITY_ADMIN | BAJO | 4 |
 | `ctrl:CommunityGroupsController` | Operaciones de CommunityGroupsController que el README no asigna a un caso de uso | GET /community/groups | Cualquier sesión válida | BAJO | 5 |
 |  |  | POST /community/groups | Cualquier sesión válida | ALTO | 9 |
-|  |  | GET /community/groups/{groupId} | Cualquier sesión válida | BAJO | 6 |
-|  |  | GET /community/groups/{groupId}/members | Cualquier sesión válida | BAJO | 6 |
-|  |  | DELETE /community/groups/{groupId}/members/{member} | Cualquier sesión válida | ALTO | 8 |
-|  |  | PATCH /community/groups/{groupId}/members/{member} | Cualquier sesión válida | ALTO | 12 |
-|  |  | GET /community/groups/{groupId}/posts | Cualquier sesión válida | BAJO | 7 |
+|  |  | GET /community/groups/{groupId} | Cualquier sesión válida | BAJO | 7 |
+|  |  | GET /community/groups/{groupId}/members | Cualquier sesión válida | BAJO | 7 |
+|  |  | DELETE /community/groups/{groupId}/members/{member} | Cualquier sesión válida | ALTO | 9 |
+|  |  | PATCH /community/groups/{groupId}/members/{member} | Cualquier sesión válida | ALTO | 13 |
+|  |  | GET /community/groups/{groupId}/posts | Cualquier sesión válida | BAJO | 8 |
 |  |  | POST /community/groups/{groupId}/posts | Cualquier sesión válida | ALTO | 15 |
-| `ctrl:CommunityMessagingController` | Operaciones de CommunityMessagingController que el README no asigna a un caso de uso | GET /community/conversations | Cualquier sesión válida | BAJO | 4 |
-|  |  | POST /community/conversations | Cualquier sesión válida | ALTO | 6 |
-|  |  | GET /community/conversations/{conversationId}/attachments/{fileId}/content | Cualquier sesión válida | BAJO | 6 |
-|  |  | GET /community/conversations/{conversationId}/messages | Cualquier sesión válida | BAJO | 5 |
-|  |  | DELETE /community/conversations/{conversationId}/messages/{messageId} | Cualquier sesión válida | ALTO | 6 |
-|  |  | PATCH /community/conversations/{conversationId}/messages/{messageId} | Cualquier sesión válida | ALTO | 4 |
-|  |  | PATCH /community/conversations/{conversationId}/participant | Cualquier sesión válida | BAJO | 2 |
-|  |  | DELETE /community/conversations/{conversationId}/pin | Cualquier sesión válida | ALTO | 4 |
-|  |  | POST /community/conversations/{conversationId}/pin | Cualquier sesión válida | ALTO | 5 |
-|  |  | GET /community/conversations/{conversationId}/presence | Cualquier sesión válida | BAJO | 2 |
-|  |  | POST /community/conversations/contacts/search | Cualquier sesión válida | BAJO | 2 |
+| `ctrl:CommunityMessagingController` | Operaciones de CommunityMessagingController que el README no asigna a un caso de uso | GET /community/conversations | Cualquier sesión válida | BAJO | 6 |
+|  |  | POST /community/conversations | Cualquier sesión válida | ALTO | 8 |
+|  |  | GET /community/conversations/{conversationId}/attachments/{fileId}/content | Cualquier sesión válida | BAJO | 8 |
+|  |  | GET /community/conversations/{conversationId}/messages | Cualquier sesión válida | BAJO | 7 |
+|  |  | DELETE /community/conversations/{conversationId}/messages/{messageId} | Cualquier sesión válida | ALTO | 8 |
+|  |  | PATCH /community/conversations/{conversationId}/messages/{messageId} | Cualquier sesión válida | ALTO | 6 |
+|  |  | PATCH /community/conversations/{conversationId}/participant | Cualquier sesión válida | BAJO | 4 |
+|  |  | DELETE /community/conversations/{conversationId}/pin | Cualquier sesión válida | ALTO | 6 |
+|  |  | POST /community/conversations/{conversationId}/pin | Cualquier sesión válida | ALTO | 7 |
+|  |  | GET /community/conversations/{conversationId}/presence | Cualquier sesión válida | BAJO | 4 |
+|  |  | POST /community/conversations/contacts/search | Cualquier sesión válida | BAJO | 4 |
 | `ctrl:CommunityModerationController` | Operaciones de CommunityModerationController que el README no asigna a un caso de uso | GET /community/moderation/appeals | SECURITY_ADMIN | BAJO | 2 |
 |  |  | POST /community/moderation/appeals/{appealId}/resolve | SECURITY_ADMIN | MEDIO | 5 |
 |  |  | GET /community/moderation/decisions | SECURITY_ADMIN | BAJO | 1 |
-|  |  | GET /community/moderation/decisions/mine | Cualquier sesión válida | BAJO | 4 |
+|  |  | GET /community/moderation/decisions/mine | Cualquier sesión válida | BAJO | 6 |
 |  |  | GET /community/moderation/queue | SECURITY_ADMIN | BAJO | 2 |
-| `ctrl:CommunityPollsController` | Operaciones de CommunityPollsController que el README no asigna a un caso de uso | GET /community/polls/{pollId} | Cualquier sesión válida | BAJO | 7 |
-|  |  | POST /community/posts/{postId}/polls | Cualquier sesión válida | ALTO | 4 |
+| `ctrl:CommunityPollsController` | Operaciones de CommunityPollsController que el README no asigna a un caso de uso | GET /community/polls/{pollId} | Cualquier sesión válida | BAJO | 9 |
+|  |  | POST /community/posts/{postId}/polls | Cualquier sesión válida | ALTO | 6 |
 | `ctrl:CommunityPublicController` | Operaciones de CommunityPublicController que el README no asigna a un caso de uso | DESCONOCIDO / | Cualquier sesión válida | BAJO | 0 |
 |  |  | DESCONOCIDO / | Cualquier sesión válida | BAJO | 0 |
 |  |  | DESCONOCIDO / | Cualquier sesión válida | BAJO | 0 |
@@ -92,30 +92,31 @@ _Fuente: `src/modules/community/README.md:3`_
 |  |  | GET /public/search/practitioners | Público (sin sesión) | BAJO | 12 |
 |  |  | GET /s/{slug} | Público (sin sesión) | BAJO | 18 |
 | `ctrl:CommunityReviewsController` | Operaciones de CommunityReviewsController que el README no asigna a un caso de uso | GET /community/profiles/{profileId}/reviews | Cualquier sesión válida | BAJO | 5 |
-|  |  | POST /community/profiles/{profileId}/reviews/{reviewId}/responses | Cualquier sesión válida | ALTO | 4 |
+|  |  | POST /community/profiles/{profileId}/reviews/{reviewId}/responses | Cualquier sesión válida | ALTO | 6 |
 | `ctrl:CommunitySearchIndexController` | Operaciones de CommunitySearchIndexController que el README no asigna a un caso de uso | GET /internal/community/search/health | SYSTEM · SECURITY_ADMIN · SEARCH_ADMIN | BAJO | 1 |
 |  |  | POST /internal/community/search/reindex | SYSTEM · SECURITY_ADMIN · SEARCH_ADMIN | BAJO | 9 |
-| `ctrl:CommunitySocialController` | Operaciones de CommunitySocialController que el README no asigna a un caso de uso | DELETE /community/blocks | Cualquier sesión válida | ALTO | 3 |
-|  |  | GET /community/blocks | Cualquier sesión válida | BAJO | 2 |
-|  |  | DELETE /community/bookmarks | Cualquier sesión válida | ALTO | 3 |
-|  |  | GET /community/bookmarks | Cualquier sesión válida | BAJO | 2 |
-|  |  | GET /community/comments/media/{fileId}/content | Cualquier sesión válida | BAJO | 8 |
-|  |  | DELETE /community/follows | Cualquier sesión válida | ALTO | 3 |
-|  |  | GET /community/follows | Cualquier sesión válida | BAJO | 2 |
-|  |  | GET /community/posts/{postId} | Cualquier sesión válida | BAJO | 10 |
-|  |  | GET /community/posts/{postId}/comments | Cualquier sesión válida | BAJO | 6 |
-|  |  | GET /community/posts/{postId}/reactions | Cualquier sesión válida | BAJO | 5 |
-|  |  | GET /community/profiles/{profileId} | Cualquier sesión válida | BAJO | 4 |
-|  |  | GET /community/profiles/{profileId}/auto-reply | Cualquier sesión válida | BAJO | 2 |
-|  |  | PUT /community/profiles/{profileId}/auto-reply | Cualquier sesión válida | BAJO | 2 |
-|  |  | GET /community/profiles/{profileId}/posts | Cualquier sesión válida | BAJO | 6 |
-|  |  | GET /community/profiles/by-slug/{slug} | Cualquier sesión válida | BAJO | 4 |
+| `ctrl:CommunitySocialController` | Operaciones de CommunitySocialController que el README no asigna a un caso de uso | DELETE /community/blocks | Cualquier sesión válida | ALTO | 5 |
+|  |  | GET /community/blocks | Cualquier sesión válida | BAJO | 4 |
+|  |  | DELETE /community/bookmarks | Cualquier sesión válida | ALTO | 5 |
+|  |  | GET /community/bookmarks | Cualquier sesión válida | BAJO | 4 |
+|  |  | GET /community/comments/media/{fileId}/content | Cualquier sesión válida | BAJO | 10 |
+|  |  | DELETE /community/follows | Cualquier sesión válida | ALTO | 5 |
+|  |  | GET /community/follows | Cualquier sesión válida | BAJO | 4 |
+|  |  | GET /community/posts/{postId} | Cualquier sesión válida | BAJO | 12 |
+|  |  | GET /community/posts/{postId}/comments | Cualquier sesión válida | BAJO | 8 |
+|  |  | GET /community/posts/{postId}/reactions | Cualquier sesión válida | BAJO | 7 |
+|  |  | GET /community/profiles/{profileId} | Cualquier sesión válida | BAJO | 6 |
+|  |  | GET /community/profiles/{profileId}/auto-reply | Cualquier sesión válida | BAJO | 4 |
+|  |  | PUT /community/profiles/{profileId}/auto-reply | Cualquier sesión válida | BAJO | 4 |
+|  |  | GET /community/profiles/{profileId}/posts | Cualquier sesión válida | BAJO | 8 |
+|  |  | GET /community/profiles/by-slug/{slug} | Cualquier sesión válida | BAJO | 6 |
 |  |  | GET /community/profiles/me | Cualquier sesión válida | BAJO | 1 |
 |  |  | PUT /community/profiles/me | Cualquier sesión válida | ALTO | 4 |
 |  |  | GET /community/profiles/me/stats | Cualquier sesión válida | BAJO | 1 |
+|  |  | GET /community/profiles/organization-showcases/me | Cualquier sesión válida | BAJO | 2 |
 |  |  | POST /community/public-profiles | SECURITY_ADMIN | MEDIO | 1 |
-| `ctrl:CommunityTimelineController` | Operaciones de CommunityTimelineController que el README no asigna a un caso de uso | GET /community/feed | Cualquier sesión válida | BAJO | 7 |
-|  |  | GET /community/notifications | Cualquier sesión válida | BAJO | 2 |
+| `ctrl:CommunityTimelineController` | Operaciones de CommunityTimelineController que el README no asigna a un caso de uso | GET /community/feed | Cualquier sesión válida | BAJO | 9 |
+|  |  | GET /community/notifications | Cualquier sesión válida | BAJO | 4 |
 | `ctrl:CommunityTopicsController` | Operaciones de CommunityTopicsController que el README no asigna a un caso de uso | GET /community/topics | Cualquier sesión válida | BAJO | 1 |
 | `ctrl:CommunityVerificationController` | Operaciones de CommunityVerificationController que el README no asigna a un caso de uso | POST /internal/community/verification/badges | SECURITY_ADMIN | MEDIO | 6 |
 |  |  | POST /internal/community/verification/badges/{targetId}/revoke | SECURITY_ADMIN | MEDIO | 5 |
@@ -132,8 +133,8 @@ _Fuente: `src/modules/community/README.md:3`_
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
-  a31(["SECURITY_ADMIN"]):::actor
-  a54(["SYSTEM · SECURITY_ADMIN"]):::actor
+  a34(["SECURITY_ADMIN"]):::actor
+  a58(["SYSTEM · SECURITY_ADMIN"]):::actor
   t3[("common.file_versions")]:::tabla
   t4[("common.files")]:::tabla
   t5[("community.content_hashtags")]:::tabla
@@ -142,35 +143,37 @@ flowchart LR
   t10[("community.comments")]:::tabla
   t13[("community.public_profiles")]:::tabla
   t14[("community.reactions")]:::tabla
-  t16[("community.bookmarks")]:::tabla
-  t18[("community.social_follows")]:::tabla
-  t20[("community.chat_auto_replies")]:::tabla
-  t21[("community.conversation_participants")]:::tabla
-  t22[("community.conversations")]:::tabla
-  t25[("community.direct_messages")]:::tabla
-  t26[("community.message_receipts")]:::tabla
-  t28[("community.content_reports")]:::tabla
-  t29[("community.moderation_queue")]:::tabla
-  t32[("community.moderation_decisions")]:::tabla
-  t33[("community.moderation_strikes")]:::tabla
-  t35[("community.moderation_appeals")]:::tabla
-  t38[("clinical.encounter_participants")]:::tabla
-  t39[("clinical.encounters")]:::tabla
-  t40[("community.review_dimension_scores")]:::tabla
-  t41[("community.service_reviews")]:::tabla
-  t43[("community.poll_options")]:::tabla
-  t44[("community.poll_votes")]:::tabla
-  t45[("community.polls")]:::tabla
-  t48[("community.group_members")]:::tabla
-  t49[("community.groups")]:::tabla
-  t52[("community.user_blocks")]:::tabla
-  t55[("community.feed_items")]:::tabla
-  t56[("community.social_posts")]:::tabla
-  t7[("+4 tablas más")]
+  t15[("directory.tenant_memberships")]:::tabla
+  t16[("directory.tenants")]:::tabla
+  t18[("community.bookmarks")]:::tabla
+  t20[("community.social_follows")]:::tabla
+  t22[("community.chat_auto_replies")]:::tabla
+  t23[("community.conversation_participants")]:::tabla
+  t24[("community.conversations")]:::tabla
+  t27[("community.direct_messages")]:::tabla
+  t28[("community.message_receipts")]:::tabla
+  t31[("community.content_reports")]:::tabla
+  t32[("community.moderation_queue")]:::tabla
+  t35[("community.moderation_decisions")]:::tabla
+  t36[("community.moderation_strikes")]:::tabla
+  t38[("community.moderation_appeals")]:::tabla
+  t41[("clinical.encounter_participants")]:::tabla
+  t42[("clinical.encounters")]:::tabla
+  t43[("community.review_dimension_scores")]:::tabla
+  t44[("community.service_reviews")]:::tabla
+  t46[("community.poll_options")]:::tabla
+  t47[("community.poll_votes")]:::tabla
+  t48[("community.polls")]:::tabla
+  t51[("community.group_members")]:::tabla
+  t52[("community.groups")]:::tabla
+  t55[("community.user_blocks")]:::tabla
+  t59[("community.feed_items")]:::tabla
+  t60[("community.social_posts")]:::tabla
+  t7[("+6 tablas más")]
   subgraph s0["UC-19-01 · Publica post con hashtags, media y menciones"]
     o1["POST /community/profiles/{profileId}/posts"]:::op
   end
-  t11[("+2 tablas más")]
+  t11[("+4 tablas más")]
   subgraph s1["UC-19-02 · Comenta (hilo anidado) con contadores"]
     o8["POST /community/comments"]:::op
   end
@@ -178,49 +181,51 @@ flowchart LR
     o12["PUT /community/reactions"]:::op
   end
   subgraph s3["UC-19-04 · Guarda bookmark en colección"]
-    o15["POST /community/bookmarks"]:::op
+    o17["POST /community/bookmarks"]:::op
   end
   subgraph s4["UC-19-05 · Sigue objeto social (perfil/tópico/hashtag/grupo)"]
-    o17["POST /community/follows"]:::op
+    o19["POST /community/follows"]:::op
   end
-  t23[("+17 tablas más")]
+  t25[("+19 tablas más")]
   subgraph s5["UC-19-06 · Envía mensaje directo"]
-    o19["POST /community/conversations/{conversationId}/messages"]:::op
+    o21["POST /community/conversations/{conversationId}/messages"]:::op
   end
+  t29[("+2 tablas más")]
   subgraph s6["UC-19-07 · Marca mensajes como leídos (recibos)"]
-    o24["POST /community/conversations/{conversationId}/read"]:::op
+    o26["POST /community/conversations/{conversationId}/read"]:::op
   end
   subgraph s7["UC-19-08 · Reporta contenido y encola moderación"]
-    o27["POST /community/reports"]:::op
+    o30["POST /community/reports"]:::op
   end
   subgraph s8["UC-19-09 · Resuelve moderación (decisión + strike)"]
-    o30["POST /community/moderation/queue/{queueId}/decision"]:::op
+    o33["POST /community/moderation/queue/{queueId}/decision"]:::op
   end
-  t36[("+1 tablas más")]
+  t39[("+3 tablas más")]
   subgraph s9["UC-19-10 · Apela una decisión"]
-    o34["POST /community/moderation/decisions/{decisionId}/appeal"]:::op
+    o37["POST /community/moderation/decisions/{decisionId}/appeal"]:::op
   end
   subgraph s10["UC-19-11 · Publica review verificada de servicio"]
-    o37["POST /community/profiles/{profileId}/reviews"]:::op
+    o40["POST /community/profiles/{profileId}/reviews"]:::op
   end
-  t46[("+4 tablas más")]
+  t49[("+6 tablas más")]
   subgraph s11["UC-19-12 · Vota en encuesta"]
-    o42["POST /community/polls/{pollId}/votes"]:::op
+    o45["POST /community/polls/{pollId}/votes"]:::op
   end
-  t50[("+3 tablas más")]
+  t53[("+4 tablas más")]
   subgraph s12["UC-19-13 · Se une a grupo/comunidad"]
-    o47["POST /community/groups/{groupId}/members"]:::op
+    o50["POST /community/groups/{groupId}/members"]:::op
   end
+  t56[("+2 tablas más")]
   subgraph s13["UC-19-14 · Bloquea a un usuario"]
-    o51["POST /community/blocks"]:::op
+    o54["POST /community/blocks"]:::op
   end
   subgraph s14["UC-19-15 · Lote de posts publicados sin repartir, con sus seguidores"]
-    o53["GET /internal/community/feed/pending"]:::op
-    o57["POST /internal/community/feed/rebuild"]:::op
+    o57["GET /internal/community/feed/pending"]:::op
+    o61["POST /internal/community/feed/rebuild"]:::op
   end
   subgraph s15["ctrl:CommunityFeedController · Operaciones de CommunityFeedController que el RE…"]
-    o58["POST /internal/community/feed/ranking/apply"]:::op
-    o59["GET /internal/community/feed/ranking/pending"]:::op
+    o62["POST /internal/community/feed/ranking/apply"]:::op
+    o63["GET /internal/community/feed/ranking/pending"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -243,93 +248,101 @@ flowchart LR
   o12 -->|"ACTUALIZA"| t14
   o12 -->|"CREA"| t14
   o12 -->|"LEE"| t14
-  a2 --> o15
-  o15 -->|"CREA"| t16
-  o15 -->|"LEE"| t16
-  o15 -->|"LEE"| t13
+  o12 -->|"LEE"| t15
+  o12 -->|"LEE"| t16
   a2 --> o17
-  o17 -->|"LEE"| t13
-  o17 -->|"ACTUALIZA"| t18
   o17 -->|"CREA"| t18
   o17 -->|"LEE"| t18
+  o17 -->|"LEE"| t13
+  o17 -->|"LEE"| t15
+  o17 -->|"LEE"| t16
   a2 --> o19
-  o19 -->|"LEE"| t3
-  o19 -->|"LEE"| t4
+  o19 -->|"LEE"| t13
+  o19 -->|"ACTUALIZA"| t20
+  o19 -->|"CREA"| t20
   o19 -->|"LEE"| t20
-  o19 -->|"ACTUALIZA"| t21
-  o19 -->|"LEE"| t21
-  o19 -->|"ACTUALIZA"| t22
-  o19 -.-> t23
-  a2 --> o24
-  o24 -->|"ACTUALIZA"| t21
-  o24 -->|"LEE"| t21
-  o24 -->|"LEE"| t22
-  o24 -->|"LEE"| t25
-  o24 -->|"CREA"| t26
-  o24 -->|"LEE"| t13
-  a2 --> o27
-  o27 -->|"CREA"| t28
-  o27 -->|"CREA"| t29
-  o27 -->|"LEE"| t29
-  a31 --> o30
-  o30 -->|"ACTUALIZA"| t28
-  o30 -->|"LEE"| t28
+  o19 -->|"LEE"| t15
+  o19 -->|"LEE"| t16
+  a2 --> o21
+  o21 -->|"LEE"| t3
+  o21 -->|"LEE"| t4
+  o21 -->|"LEE"| t22
+  o21 -->|"ACTUALIZA"| t23
+  o21 -->|"LEE"| t23
+  o21 -->|"ACTUALIZA"| t24
+  o21 -.-> t25
+  a2 --> o26
+  o26 -->|"ACTUALIZA"| t23
+  o26 -->|"LEE"| t23
+  o26 -->|"LEE"| t24
+  o26 -->|"LEE"| t27
+  o26 -->|"CREA"| t28
+  o26 -->|"LEE"| t13
+  o26 -.-> t29
+  a2 --> o30
+  o30 -->|"CREA"| t31
   o30 -->|"CREA"| t32
-  o30 -->|"ACTUALIZA"| t29
-  o30 -->|"LEE"| t29
-  o30 -->|"CREA"| t33
-  a2 --> o34
-  o34 -->|"CREA"| t35
-  o34 -->|"LEE"| t35
-  o34 -->|"LEE"| t32
-  o34 -->|"CREA"| t29
-  o34 -->|"LEE"| t29
-  o34 -->|"LEE"| t33
-  o34 -.-> t36
+  o30 -->|"LEE"| t32
+  a34 --> o33
+  o33 -->|"ACTUALIZA"| t31
+  o33 -->|"LEE"| t31
+  o33 -->|"CREA"| t35
+  o33 -->|"ACTUALIZA"| t32
+  o33 -->|"LEE"| t32
+  o33 -->|"CREA"| t36
   a2 --> o37
+  o37 -->|"CREA"| t38
   o37 -->|"LEE"| t38
-  o37 -->|"LEE"| t39
-  o37 -->|"LEE"| t13
-  o37 -->|"CREA"| t40
-  o37 -->|"CREA"| t41
-  o37 -->|"LEE"| t41
-  a2 --> o42
-  o42 -->|"ACTUALIZA"| t43
-  o42 -->|"LEE"| t43
-  o42 -->|"CREA"| t44
-  o42 -->|"LEE"| t44
-  o42 -->|"ACTUALIZA"| t45
-  o42 -->|"LEE"| t45
-  o42 -.-> t46
-  a2 --> o47
-  o47 -->|"LEE"| t39
-  o47 -->|"ACTUALIZA"| t48
-  o47 -->|"CREA"| t48
-  o47 -->|"LEE"| t48
-  o47 -->|"ACTUALIZA"| t49
-  o47 -->|"LEE"| t49
-  o47 -.-> t50
-  a2 --> o51
-  o51 -->|"LEE"| t13
-  o51 -->|"ACTUALIZA"| t18
-  o51 -->|"LEE"| t18
-  o51 -->|"ACTUALIZA"| t52
-  o51 -->|"CREA"| t52
-  o51 -->|"LEE"| t52
-  a54 --> o53
-  o53 -->|"LEE"| t55
-  o53 -->|"LEE"| t18
-  o53 -->|"LEE"| t56
-  a54 --> o57
-  o57 -->|"CREA"| t55
-  o57 -->|"LEE"| t55
-  a54 --> o58
-  o58 -->|"ACTUALIZA"| t55
-  a54 --> o59
-  o59 -->|"LEE"| t10
-  o59 -->|"LEE"| t55
-  o59 -->|"LEE"| t14
-  o59 -->|"LEE"| t56
+  o37 -->|"LEE"| t35
+  o37 -->|"CREA"| t32
+  o37 -->|"LEE"| t32
+  o37 -->|"LEE"| t36
+  o37 -.-> t39
+  a2 --> o40
+  o40 -->|"LEE"| t41
+  o40 -->|"LEE"| t42
+  o40 -->|"LEE"| t13
+  o40 -->|"CREA"| t43
+  o40 -->|"CREA"| t44
+  o40 -->|"LEE"| t44
+  a2 --> o45
+  o45 -->|"ACTUALIZA"| t46
+  o45 -->|"LEE"| t46
+  o45 -->|"CREA"| t47
+  o45 -->|"LEE"| t47
+  o45 -->|"ACTUALIZA"| t48
+  o45 -->|"LEE"| t48
+  o45 -.-> t49
+  a2 --> o50
+  o50 -->|"LEE"| t42
+  o50 -->|"ACTUALIZA"| t51
+  o50 -->|"CREA"| t51
+  o50 -->|"LEE"| t51
+  o50 -->|"ACTUALIZA"| t52
+  o50 -->|"LEE"| t52
+  o50 -.-> t53
+  a2 --> o54
+  o54 -->|"LEE"| t13
+  o54 -->|"ACTUALIZA"| t20
+  o54 -->|"LEE"| t20
+  o54 -->|"ACTUALIZA"| t55
+  o54 -->|"CREA"| t55
+  o54 -->|"LEE"| t55
+  o54 -.-> t56
+  a58 --> o57
+  o57 -->|"LEE"| t59
+  o57 -->|"LEE"| t20
+  o57 -->|"LEE"| t60
+  a58 --> o61
+  o61 -->|"CREA"| t59
+  o61 -->|"LEE"| t59
+  a58 --> o62
+  o62 -->|"ACTUALIZA"| t59
+  a58 --> o63
+  o63 -->|"LEE"| t10
+  o63 -->|"LEE"| t59
+  o63 -->|"LEE"| t14
+  o63 -->|"LEE"| t60
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -341,7 +354,7 @@ flowchart LR
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
-  a41(["SECURITY_ADMIN"]):::actor
+  a49(["SECURITY_ADMIN"]):::actor
   t3[("clinical.encounters")]:::tabla
   t4[("community.groups")]:::tabla
   t5[("community.public_profiles")]:::tabla
@@ -349,62 +362,70 @@ flowchart LR
   t7[("directory.tenant_memberships")]:::tabla
   t9[("community.group_members")]:::tabla
   t10[("community.topics")]:::tabla
-  t19[("community.comments")]:::tabla
-  t24[("community.conversation_participants")]:::tabla
-  t25[("community.conversations")]:::tabla
-  t26[("community.direct_messages")]:::tabla
-  t28[("community.user_blocks")]:::tabla
-  t30[("common.file_versions")]:::tabla
-  t31[("common.files")]:::tabla
-  t42[("community.moderation_appeals")]:::tabla
-  t43[("community.moderation_decisions")]:::tabla
-  t45[("community.moderation_queue")]:::tabla
-  t48[("community.moderation_strikes")]:::tabla
-  t50[("community.content_reports")]:::tabla
-  t52[("community.poll_options")]:::tabla
-  t53[("community.poll_votes")]:::tabla
-  t54[("community.polls")]:::tabla
-  t55[("community.social_follows")]:::tabla
-  t56[("community.social_posts")]:::tabla
+  t21[("community.comments")]:::tabla
+  t26[("community.conversation_participants")]:::tabla
+  t27[("community.conversations")]:::tabla
+  t28[("community.direct_messages")]:::tabla
+  t29[("directory.tenants")]:::tabla
+  t31[("community.user_blocks")]:::tabla
+  t34[("common.file_versions")]:::tabla
+  t35[("common.files")]:::tabla
+  t50[("community.moderation_appeals")]:::tabla
+  t51[("community.moderation_decisions")]:::tabla
+  t53[("community.moderation_queue")]:::tabla
+  t56[("community.moderation_strikes")]:::tabla
+  t58[("community.content_reports")]:::tabla
+  t60[("community.poll_options")]:::tabla
+  t61[("community.poll_votes")]:::tabla
+  t62[("community.polls")]:::tabla
+  t63[("community.social_follows")]:::tabla
+  t64[("community.social_posts")]:::tabla
   t11[("+3 tablas más")]
-  t15[("+2 tablas más")]
-  t17[("+6 tablas más")]
-  t20[("+1 tablas más")]
-  t22[("+9 tablas más")]
+  t13[("+1 tablas más")]
+  t15[("+1 tablas más")]
+  t17[("+3 tablas más")]
+  t19[("+7 tablas más")]
+  t22[("+2 tablas más")]
+  t24[("+9 tablas más")]
   subgraph s0["ctrl:CommunityGroupsController · Operaciones de CommunityGroupsController que e…"]
     o1["GET /community/groups"]:::op
     o8["POST /community/groups"]:::op
     o12["GET /community/groups/{groupId}"]:::op
-    o13["GET /community/groups/{groupId}/members"]:::op
-    o14["DELETE /community/groups/{groupId}/members/{member}"]:::op
-    o16["PATCH /community/groups/{groupId}/members/{member}"]:::op
-    o18["GET /community/groups/{groupId}/posts"]:::op
-    o21["POST /community/groups/{groupId}/posts"]:::op
+    o14["GET /community/groups/{groupId}/members"]:::op
+    o16["DELETE /community/groups/{groupId}/members/{member}"]:::op
+    o18["PATCH /community/groups/{groupId}/members/{member}"]:::op
+    o20["GET /community/groups/{groupId}/posts"]:::op
+    o23["POST /community/groups/{groupId}/posts"]:::op
   end
+  t32[("+2 tablas más")]
+  t36[("+2 tablas más")]
+  t38[("+1 tablas más")]
+  t40[("+2 tablas más")]
+  t45[("+1 tablas más")]
   subgraph s1["ctrl:CommunityMessagingController · Operaciones de CommunityMessagingController…"]
-    o23["GET /community/conversations"]:::op
-    o27["POST /community/conversations"]:::op
-    o29["GET /community/conversations/{conversationId}/attachments/{fileId}/co…"]:::op
-    o32["GET /community/conversations/{conversationId}/messages"]:::op
-    o33["DELETE /community/conversations/{conversationId}/messages/{messageId}"]:::op
-    o34["PATCH /community/conversations/{conversationId}/messages/{messageId}"]:::op
-    o35["PATCH /community/conversations/{conversationId}/participant"]:::op
-    o36["DELETE /community/conversations/{conversationId}/pin"]:::op
-    o37["POST /community/conversations/{conversationId}/pin"]:::op
-    o38["GET /community/conversations/{conversationId}/presence"]:::op
-    o39["POST /community/conversations/contacts/search"]:::op
+    o25["GET /community/conversations"]:::op
+    o30["POST /community/conversations"]:::op
+    o33["GET /community/conversations/{conversationId}/attachments/{fileId}/co…"]:::op
+    o37["GET /community/conversations/{conversationId}/messages"]:::op
+    o39["DELETE /community/conversations/{conversationId}/messages/{messageId}"]:::op
+    o41["PATCH /community/conversations/{conversationId}/messages/{messageId}"]:::op
+    o42["PATCH /community/conversations/{conversationId}/participant"]:::op
+    o43["DELETE /community/conversations/{conversationId}/pin"]:::op
+    o44["POST /community/conversations/{conversationId}/pin"]:::op
+    o46["GET /community/conversations/{conversationId}/presence"]:::op
+    o47["POST /community/conversations/contacts/search"]:::op
   end
   subgraph s2["ctrl:CommunityModerationController · Operaciones de CommunityModerationControll…"]
-    o40["GET /community/moderation/appeals"]:::op
-    o44["POST /community/moderation/appeals/{appealId}/resolve"]:::op
-    o46["GET /community/moderation/decisions"]:::op
-    o47["GET /community/moderation/decisions/mine"]:::op
-    o49["GET /community/moderation/queue"]:::op
+    o48["GET /community/moderation/appeals"]:::op
+    o52["POST /community/moderation/appeals/{appealId}/resolve"]:::op
+    o54["GET /community/moderation/decisions"]:::op
+    o55["GET /community/moderation/decisions/mine"]:::op
+    o57["GET /community/moderation/queue"]:::op
   end
-  t57[("+1 tablas más")]
+  t65[("+3 tablas más")]
   subgraph s3["ctrl:CommunityPollsController · Operaciones de CommunityPollsController que el…"]
-    o51["GET /community/polls/{pollId}"]:::op
-    o58["POST /community/posts/{postId}/polls"]:::op
+    o59["GET /community/polls/{pollId}"]:::op
+    o66["POST /community/posts/{postId}/polls"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -427,134 +448,159 @@ flowchart LR
   o12 -->|"LEE"| t5
   o12 -->|"LEE"| t6
   o12 -->|"LEE"| t7
-  a2 --> o13
-  o13 -->|"LEE"| t3
-  o13 -->|"LEE"| t9
-  o13 -->|"LEE"| t4
-  o13 -->|"LEE"| t5
-  o13 -->|"LEE"| t6
-  o13 -->|"LEE"| t7
+  o12 -.-> t13
   a2 --> o14
   o14 -->|"LEE"| t3
-  o14 -->|"ACTUALIZA"| t9
   o14 -->|"LEE"| t9
-  o14 -->|"ACTUALIZA"| t4
   o14 -->|"LEE"| t4
   o14 -->|"LEE"| t5
+  o14 -->|"LEE"| t6
+  o14 -->|"LEE"| t7
   o14 -.-> t15
   a2 --> o16
   o16 -->|"LEE"| t3
   o16 -->|"ACTUALIZA"| t9
   o16 -->|"LEE"| t9
+  o16 -->|"ACTUALIZA"| t4
   o16 -->|"LEE"| t4
   o16 -->|"LEE"| t5
-  o16 -->|"LEE"| t6
   o16 -.-> t17
   a2 --> o18
   o18 -->|"LEE"| t3
-  o18 -->|"LEE"| t19
+  o18 -->|"ACTUALIZA"| t9
   o18 -->|"LEE"| t9
   o18 -->|"LEE"| t4
   o18 -->|"LEE"| t5
   o18 -->|"LEE"| t6
-  o18 -.-> t20
-  a2 --> o21
-  o21 -->|"LEE"| t3
-  o21 -->|"ACTUALIZA"| t19
-  o21 -->|"CREA"| t19
-  o21 -->|"LEE"| t19
-  o21 -->|"LEE"| t9
-  o21 -->|"LEE"| t4
-  o21 -.-> t22
+  o18 -.-> t19
+  a2 --> o20
+  o20 -->|"LEE"| t3
+  o20 -->|"LEE"| t21
+  o20 -->|"LEE"| t9
+  o20 -->|"LEE"| t4
+  o20 -->|"LEE"| t5
+  o20 -->|"LEE"| t6
+  o20 -.-> t22
   a2 --> o23
-  o23 -->|"LEE"| t24
-  o23 -->|"LEE"| t25
-  o23 -->|"LEE"| t26
-  o23 -->|"LEE"| t5
-  a2 --> o27
-  o27 -->|"CREA"| t24
-  o27 -->|"LEE"| t24
-  o27 -->|"CREA"| t25
-  o27 -->|"LEE"| t25
-  o27 -->|"LEE"| t5
-  o27 -->|"LEE"| t28
-  a2 --> o29
-  o29 -->|"LEE"| t30
-  o29 -->|"LEE"| t31
-  o29 -->|"LEE"| t24
-  o29 -->|"LEE"| t26
-  o29 -->|"LEE"| t5
-  o29 -->|"LEE"| t28
-  a2 --> o32
-  o32 -->|"LEE"| t24
-  o32 -->|"LEE"| t25
-  o32 -->|"LEE"| t26
-  o32 -->|"LEE"| t5
-  o32 -->|"LEE"| t28
+  o23 -->|"LEE"| t3
+  o23 -->|"ACTUALIZA"| t21
+  o23 -->|"CREA"| t21
+  o23 -->|"LEE"| t21
+  o23 -->|"LEE"| t9
+  o23 -->|"LEE"| t4
+  o23 -.-> t24
+  a2 --> o25
+  o25 -->|"LEE"| t26
+  o25 -->|"LEE"| t27
+  o25 -->|"LEE"| t28
+  o25 -->|"LEE"| t5
+  o25 -->|"LEE"| t7
+  o25 -->|"LEE"| t29
+  a2 --> o30
+  o30 -->|"CREA"| t26
+  o30 -->|"LEE"| t26
+  o30 -->|"CREA"| t27
+  o30 -->|"LEE"| t27
+  o30 -->|"LEE"| t5
+  o30 -->|"LEE"| t31
+  o30 -.-> t32
   a2 --> o33
-  o33 -->|"LEE"| t24
-  o33 -->|"ACTUALIZA"| t25
-  o33 -->|"LEE"| t25
-  o33 -->|"ACTUALIZA"| t26
+  o33 -->|"LEE"| t34
+  o33 -->|"LEE"| t35
   o33 -->|"LEE"| t26
+  o33 -->|"LEE"| t28
   o33 -->|"LEE"| t5
-  a2 --> o34
-  o34 -->|"LEE"| t24
-  o34 -->|"ACTUALIZA"| t26
-  o34 -->|"LEE"| t26
-  o34 -->|"LEE"| t5
-  a2 --> o35
-  o35 -->|"LEE"| t24
-  o35 -->|"LEE"| t5
-  a2 --> o36
-  o36 -->|"LEE"| t24
-  o36 -->|"ACTUALIZA"| t25
-  o36 -->|"LEE"| t25
-  o36 -->|"LEE"| t5
+  o33 -->|"LEE"| t31
+  o33 -.-> t36
   a2 --> o37
-  o37 -->|"LEE"| t24
-  o37 -->|"ACTUALIZA"| t25
-  o37 -->|"LEE"| t25
   o37 -->|"LEE"| t26
+  o37 -->|"LEE"| t27
+  o37 -->|"LEE"| t28
   o37 -->|"LEE"| t5
-  a2 --> o38
-  o38 -->|"LEE"| t24
-  o38 -->|"LEE"| t5
+  o37 -->|"LEE"| t31
+  o37 -->|"LEE"| t7
+  o37 -.-> t38
   a2 --> o39
-  o39 -->|"LEE"| t5
+  o39 -->|"LEE"| t26
+  o39 -->|"ACTUALIZA"| t27
+  o39 -->|"LEE"| t27
+  o39 -->|"ACTUALIZA"| t28
   o39 -->|"LEE"| t28
-  a41 --> o40
-  o40 -->|"LEE"| t42
-  o40 -->|"LEE"| t43
-  a41 --> o44
-  o44 -->|"ACTUALIZA"| t42
-  o44 -->|"LEE"| t42
-  o44 -->|"LEE"| t43
-  o44 -->|"ACTUALIZA"| t45
-  o44 -->|"LEE"| t45
-  a41 --> o46
-  o46 -->|"LEE"| t43
+  o39 -->|"LEE"| t5
+  o39 -.-> t40
+  a2 --> o41
+  o41 -->|"LEE"| t26
+  o41 -->|"ACTUALIZA"| t28
+  o41 -->|"LEE"| t28
+  o41 -->|"LEE"| t5
+  o41 -->|"LEE"| t7
+  o41 -->|"LEE"| t29
+  a2 --> o42
+  o42 -->|"LEE"| t26
+  o42 -->|"LEE"| t5
+  o42 -->|"LEE"| t7
+  o42 -->|"LEE"| t29
+  a2 --> o43
+  o43 -->|"LEE"| t26
+  o43 -->|"ACTUALIZA"| t27
+  o43 -->|"LEE"| t27
+  o43 -->|"LEE"| t5
+  o43 -->|"LEE"| t7
+  o43 -->|"LEE"| t29
+  a2 --> o44
+  o44 -->|"LEE"| t26
+  o44 -->|"ACTUALIZA"| t27
+  o44 -->|"LEE"| t27
+  o44 -->|"LEE"| t28
+  o44 -->|"LEE"| t5
+  o44 -->|"LEE"| t7
+  o44 -.-> t45
+  a2 --> o46
+  o46 -->|"LEE"| t26
+  o46 -->|"LEE"| t5
+  o46 -->|"LEE"| t7
+  o46 -->|"LEE"| t29
   a2 --> o47
-  o47 -->|"LEE"| t42
-  o47 -->|"LEE"| t43
-  o47 -->|"LEE"| t48
   o47 -->|"LEE"| t5
-  a41 --> o49
-  o49 -->|"LEE"| t50
-  o49 -->|"LEE"| t45
-  a2 --> o51
-  o51 -->|"LEE"| t52
-  o51 -->|"LEE"| t53
-  o51 -->|"LEE"| t54
-  o51 -->|"LEE"| t5
-  o51 -->|"LEE"| t55
-  o51 -->|"LEE"| t56
-  o51 -.-> t57
-  a2 --> o58
-  o58 -->|"CREA"| t52
-  o58 -->|"CREA"| t54
-  o58 -->|"LEE"| t5
-  o58 -->|"LEE"| t56
+  o47 -->|"LEE"| t31
+  o47 -->|"LEE"| t7
+  o47 -->|"LEE"| t29
+  a49 --> o48
+  o48 -->|"LEE"| t50
+  o48 -->|"LEE"| t51
+  a49 --> o52
+  o52 -->|"ACTUALIZA"| t50
+  o52 -->|"LEE"| t50
+  o52 -->|"LEE"| t51
+  o52 -->|"ACTUALIZA"| t53
+  o52 -->|"LEE"| t53
+  a49 --> o54
+  o54 -->|"LEE"| t51
+  a2 --> o55
+  o55 -->|"LEE"| t50
+  o55 -->|"LEE"| t51
+  o55 -->|"LEE"| t56
+  o55 -->|"LEE"| t5
+  o55 -->|"LEE"| t7
+  o55 -->|"LEE"| t29
+  a49 --> o57
+  o57 -->|"LEE"| t58
+  o57 -->|"LEE"| t53
+  a2 --> o59
+  o59 -->|"LEE"| t60
+  o59 -->|"LEE"| t61
+  o59 -->|"LEE"| t62
+  o59 -->|"LEE"| t5
+  o59 -->|"LEE"| t63
+  o59 -->|"LEE"| t64
+  o59 -.-> t65
+  a2 --> o66
+  o66 -->|"CREA"| t60
+  o66 -->|"CREA"| t62
+  o66 -->|"LEE"| t5
+  o66 -->|"LEE"| t64
+  o66 -->|"LEE"| t7
+  o66 -->|"LEE"| t29
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -567,7 +613,7 @@ flowchart LR
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
   a7(["Público (sin sesión)"]):::actor
-  a62(["SYSTEM · SECURITY_ADMIN · SEARCH_ADMIN"]):::actor
+  a64(["SYSTEM · SECURITY_ADMIN · SEARCH_ADMIN"]):::actor
   t8[("common.addresses")]:::tabla
   t9[("community.comments")]:::tabla
   t10[("community.post_media")]:::tabla
@@ -585,6 +631,8 @@ flowchart LR
   t40[("community.review_responses")]:::tabla
   t41[("profiles.persons")]:::tabla
   t43[("profiles.practitioner_specialties")]:::tabla
+  t61[("directory.tenant_memberships")]:::tabla
+  t62[("directory.tenants")]:::tabla
   t14[("+12 tablas más")]
   t16[("+12 tablas más")]
   t18[("+12 tablas más")]
@@ -630,10 +678,10 @@ flowchart LR
     o59["GET /community/profiles/{profileId}/reviews"]:::op
     o60["POST /community/profiles/{profileId}/reviews/{reviewId}/responses"]:::op
   end
-  t64[("+3 tablas más")]
+  t66[("+3 tablas más")]
   subgraph s2["ctrl:CommunitySearchIndexController · Operaciones de CommunitySearchIndexContro…"]
-    o61["GET /internal/community/search/health"]:::op
-    o63["POST /internal/community/search/reindex"]:::op
+    o63["GET /internal/community/search/health"]:::op
+    o65["POST /internal/community/search/reindex"]:::op
   end
   a2 --> o1
   a2 --> o3
@@ -796,16 +844,18 @@ flowchart LR
   o60 -->|"CREA"| t40
   o60 -->|"LEE"| t40
   o60 -->|"LEE"| t13
-  a62 --> o61
-  o61 -->|"LEE"| t11
-  a62 --> o63
-  o63 -->|"LEE"| t8
+  o60 -->|"LEE"| t61
+  o60 -->|"LEE"| t62
+  a64 --> o63
   o63 -->|"LEE"| t11
-  o63 -->|"LEE"| t13
-  o63 -->|"LEE"| t29
-  o63 -->|"LEE"| t43
-  o63 -->|"LEE"| t30
-  o63 -.-> t64
+  a64 --> o65
+  o65 -->|"LEE"| t8
+  o65 -->|"LEE"| t11
+  o65 -->|"LEE"| t13
+  o65 -->|"LEE"| t29
+  o65 -->|"LEE"| t43
+  o65 -->|"LEE"| t30
+  o65 -.-> t66
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -817,181 +867,216 @@ flowchart LR
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
-  a40(["SECURITY_ADMIN"]):::actor
-  a52(["SYSTEM · SECURITY_ADMIN"]):::actor
+  a46(["SECURITY_ADMIN"]):::actor
+  a58(["SYSTEM · SECURITY_ADMIN"]):::actor
   t3[("community.public_profiles")]:::tabla
   t4[("community.user_blocks")]:::tabla
-  t7[("community.bookmarks")]:::tabla
-  t10[("common.file_versions")]:::tabla
-  t11[("common.files")]:::tabla
-  t12[("community.comment_media")]:::tabla
-  t13[("community.comments")]:::tabla
-  t14[("community.social_follows")]:::tabla
-  t19[("community.content_hashtags")]:::tabla
-  t20[("community.hashtags")]:::tabla
-  t21[("community.mentions")]:::tabla
-  t22[("community.post_media")]:::tabla
-  t25[("community.social_posts")]:::tabla
-  t27[("community.reactions")]:::tabla
-  t29[("community.prestige_scores")]:::tabla
-  t30[("community.verified_badges")]:::tabla
-  t32[("community.chat_auto_replies")]:::tabla
-  t42[("community.feed_items")]:::tabla
-  t45[("community.social_notifications")]:::tabla
-  t47[("community.topics")]:::tabla
-  t49[("audit.verified_badges_history")]:::tabla
-  t15[("+2 tablas más")]
-  t23[("+4 tablas más")]
+  t5[("directory.tenant_memberships")]:::tabla
+  t6[("directory.tenants")]:::tabla
+  t9[("community.bookmarks")]:::tabla
+  t12[("common.file_versions")]:::tabla
+  t13[("common.files")]:::tabla
+  t14[("community.comment_media")]:::tabla
+  t15[("community.comments")]:::tabla
+  t16[("community.social_follows")]:::tabla
+  t21[("community.content_hashtags")]:::tabla
+  t22[("community.hashtags")]:::tabla
+  t23[("community.mentions")]:::tabla
+  t24[("community.post_media")]:::tabla
+  t27[("community.social_posts")]:::tabla
+  t30[("community.reactions")]:::tabla
+  t33[("community.prestige_scores")]:::tabla
+  t34[("community.verified_badges")]:::tabla
+  t36[("community.chat_auto_replies")]:::tabla
+  t48[("community.feed_items")]:::tabla
+  t51[("community.social_notifications")]:::tabla
+  t53[("community.topics")]:::tabla
+  t55[("audit.verified_badges_history")]:::tabla
+  t17[("+4 tablas más")]
+  t25[("+6 tablas más")]
+  t28[("+2 tablas más")]
+  t31[("+1 tablas más")]
+  t39[("+2 tablas más")]
   subgraph s0["ctrl:CommunitySocialController · Operaciones de CommunitySocialController que e…"]
     o1["DELETE /community/blocks"]:::op
-    o5["GET /community/blocks"]:::op
-    o6["DELETE /community/bookmarks"]:::op
-    o8["GET /community/bookmarks"]:::op
-    o9["GET /community/comments/media/{fileId}/content"]:::op
-    o16["DELETE /community/follows"]:::op
-    o17["GET /community/follows"]:::op
-    o18["GET /community/posts/{postId}"]:::op
-    o24["GET /community/posts/{postId}/comments"]:::op
-    o26["GET /community/posts/{postId}/reactions"]:::op
-    o28["GET /community/profiles/{profileId}"]:::op
-    o31["GET /community/profiles/{profileId}/auto-reply"]:::op
-    o33["PUT /community/profiles/{profileId}/auto-reply"]:::op
-    o34["GET /community/profiles/{profileId}/posts"]:::op
-    o35["GET /community/profiles/by-slug/{slug}"]:::op
-    o36["GET /community/profiles/me"]:::op
-    o37["PUT /community/profiles/me"]:::op
-    o38["GET /community/profiles/me/stats"]:::op
-    o39["POST /community/public-profiles"]:::op
+    o7["GET /community/blocks"]:::op
+    o8["DELETE /community/bookmarks"]:::op
+    o10["GET /community/bookmarks"]:::op
+    o11["GET /community/comments/media/{fileId}/content"]:::op
+    o18["DELETE /community/follows"]:::op
+    o19["GET /community/follows"]:::op
+    o20["GET /community/posts/{postId}"]:::op
+    o26["GET /community/posts/{postId}/comments"]:::op
+    o29["GET /community/posts/{postId}/reactions"]:::op
+    o32["GET /community/profiles/{profileId}"]:::op
+    o35["GET /community/profiles/{profileId}/auto-reply"]:::op
+    o37["PUT /community/profiles/{profileId}/auto-reply"]:::op
+    o38["GET /community/profiles/{profileId}/posts"]:::op
+    o40["GET /community/profiles/by-slug/{slug}"]:::op
+    o41["GET /community/profiles/me"]:::op
+    o42["PUT /community/profiles/me"]:::op
+    o43["GET /community/profiles/me/stats"]:::op
+    o44["GET /community/profiles/organization-showcases/me"]:::op
+    o45["POST /community/public-profiles"]:::op
   end
-  t43[("+1 tablas más")]
+  t49[("+3 tablas más")]
   subgraph s1["ctrl:CommunityTimelineController · Operaciones de CommunityTimelineController q…"]
-    o41["GET /community/feed"]:::op
-    o44["GET /community/notifications"]:::op
+    o47["GET /community/feed"]:::op
+    o50["GET /community/notifications"]:::op
   end
   subgraph s2["ctrl:CommunityTopicsController · Operaciones de CommunityTopicsController que e…"]
-    o46["GET /community/topics"]:::op
+    o52["GET /community/topics"]:::op
   end
   subgraph s3["ctrl:CommunityVerificationController · Operaciones de CommunityVerificationCont…"]
-    o48["POST /internal/community/verification/badges"]:::op
-    o50["POST /internal/community/verification/badges/{targetId}/revoke"]:::op
-    o51["POST /internal/community/verification/badges/expire-sweep"]:::op
+    o54["POST /internal/community/verification/badges"]:::op
+    o56["POST /internal/community/verification/badges/{targetId}/revoke"]:::op
+    o57["POST /internal/community/verification/badges/expire-sweep"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
   o1 -->|"ACTUALIZA"| t4
   o1 -->|"LEE"| t4
-  a2 --> o5
-  o5 -->|"LEE"| t3
-  o5 -->|"LEE"| t4
-  a2 --> o6
-  o6 -->|"BORRA"| t7
-  o6 -->|"LEE"| t7
-  o6 -->|"LEE"| t3
+  o1 -->|"LEE"| t5
+  o1 -->|"LEE"| t6
+  a2 --> o7
+  o7 -->|"LEE"| t3
+  o7 -->|"LEE"| t4
+  o7 -->|"LEE"| t5
+  o7 -->|"LEE"| t6
   a2 --> o8
-  o8 -->|"LEE"| t7
+  o8 -->|"BORRA"| t9
+  o8 -->|"LEE"| t9
   o8 -->|"LEE"| t3
-  a2 --> o9
-  o9 -->|"LEE"| t10
-  o9 -->|"LEE"| t11
-  o9 -->|"LEE"| t12
-  o9 -->|"LEE"| t13
-  o9 -->|"LEE"| t3
-  o9 -->|"LEE"| t14
-  o9 -.-> t15
-  a2 --> o16
-  o16 -->|"LEE"| t3
-  o16 -->|"ACTUALIZA"| t14
-  o16 -->|"LEE"| t14
-  a2 --> o17
-  o17 -->|"LEE"| t3
-  o17 -->|"LEE"| t14
+  o8 -->|"LEE"| t5
+  o8 -->|"LEE"| t6
+  a2 --> o10
+  o10 -->|"LEE"| t9
+  o10 -->|"LEE"| t3
+  o10 -->|"LEE"| t5
+  o10 -->|"LEE"| t6
+  a2 --> o11
+  o11 -->|"LEE"| t12
+  o11 -->|"LEE"| t13
+  o11 -->|"LEE"| t14
+  o11 -->|"LEE"| t15
+  o11 -->|"LEE"| t3
+  o11 -->|"LEE"| t16
+  o11 -.-> t17
   a2 --> o18
-  o18 -->|"LEE"| t13
-  o18 -->|"LEE"| t19
-  o18 -->|"LEE"| t20
-  o18 -->|"LEE"| t21
-  o18 -->|"LEE"| t22
   o18 -->|"LEE"| t3
-  o18 -.-> t23
-  a2 --> o24
-  o24 -->|"LEE"| t12
-  o24 -->|"LEE"| t13
-  o24 -->|"LEE"| t3
-  o24 -->|"LEE"| t14
-  o24 -->|"LEE"| t25
-  o24 -->|"LEE"| t4
+  o18 -->|"ACTUALIZA"| t16
+  o18 -->|"LEE"| t16
+  o18 -->|"LEE"| t5
+  o18 -->|"LEE"| t6
+  a2 --> o19
+  o19 -->|"LEE"| t3
+  o19 -->|"LEE"| t16
+  o19 -->|"LEE"| t5
+  o19 -->|"LEE"| t6
+  a2 --> o20
+  o20 -->|"LEE"| t15
+  o20 -->|"LEE"| t21
+  o20 -->|"LEE"| t22
+  o20 -->|"LEE"| t23
+  o20 -->|"LEE"| t24
+  o20 -->|"LEE"| t3
+  o20 -.-> t25
   a2 --> o26
-  o26 -->|"LEE"| t3
-  o26 -->|"LEE"| t27
   o26 -->|"LEE"| t14
-  o26 -->|"LEE"| t25
+  o26 -->|"LEE"| t15
+  o26 -->|"LEE"| t3
+  o26 -->|"LEE"| t16
+  o26 -->|"LEE"| t27
   o26 -->|"LEE"| t4
-  a2 --> o28
-  o28 -->|"LEE"| t29
-  o28 -->|"LEE"| t3
-  o28 -->|"LEE"| t4
-  o28 -->|"LEE"| t30
-  a2 --> o31
-  o31 -->|"LEE"| t32
-  o31 -->|"LEE"| t3
-  a2 --> o33
-  o33 -->|"LEE"| t32
-  o33 -->|"LEE"| t3
-  a2 --> o34
-  o34 -->|"LEE"| t13
-  o34 -->|"LEE"| t3
-  o34 -->|"LEE"| t27
-  o34 -->|"LEE"| t14
-  o34 -->|"LEE"| t25
-  o34 -->|"LEE"| t4
+  o26 -.-> t28
+  a2 --> o29
+  o29 -->|"LEE"| t3
+  o29 -->|"LEE"| t30
+  o29 -->|"LEE"| t16
+  o29 -->|"LEE"| t27
+  o29 -->|"LEE"| t4
+  o29 -->|"LEE"| t5
+  o29 -.-> t31
+  a2 --> o32
+  o32 -->|"LEE"| t33
+  o32 -->|"LEE"| t3
+  o32 -->|"LEE"| t4
+  o32 -->|"LEE"| t34
+  o32 -->|"LEE"| t5
+  o32 -->|"LEE"| t6
   a2 --> o35
-  o35 -->|"LEE"| t29
+  o35 -->|"LEE"| t36
   o35 -->|"LEE"| t3
-  o35 -->|"LEE"| t4
-  o35 -->|"LEE"| t30
-  a2 --> o36
-  o36 -->|"LEE"| t3
+  o35 -->|"LEE"| t5
+  o35 -->|"LEE"| t6
   a2 --> o37
-  o37 -->|"LEE"| t10
-  o37 -->|"LEE"| t11
-  o37 -->|"CREA"| t3
+  o37 -->|"LEE"| t36
   o37 -->|"LEE"| t3
+  o37 -->|"LEE"| t5
+  o37 -->|"LEE"| t6
   a2 --> o38
+  o38 -->|"LEE"| t15
   o38 -->|"LEE"| t3
-  a40 --> o39
-  o39 -->|"CREA"| t3
+  o38 -->|"LEE"| t30
+  o38 -->|"LEE"| t16
+  o38 -->|"LEE"| t27
+  o38 -->|"LEE"| t4
+  o38 -.-> t39
+  a2 --> o40
+  o40 -->|"LEE"| t33
+  o40 -->|"LEE"| t3
+  o40 -->|"LEE"| t4
+  o40 -->|"LEE"| t34
+  o40 -->|"LEE"| t5
+  o40 -->|"LEE"| t6
   a2 --> o41
-  o41 -->|"LEE"| t13
-  o41 -->|"LEE"| t42
   o41 -->|"LEE"| t3
-  o41 -->|"LEE"| t27
-  o41 -->|"LEE"| t14
-  o41 -->|"LEE"| t25
-  o41 -.-> t43
+  a2 --> o42
+  o42 -->|"LEE"| t12
+  o42 -->|"LEE"| t13
+  o42 -->|"CREA"| t3
+  o42 -->|"LEE"| t3
+  a2 --> o43
+  o43 -->|"LEE"| t3
   a2 --> o44
   o44 -->|"LEE"| t3
-  o44 -->|"LEE"| t45
-  a2 --> o46
-  o46 -->|"LEE"| t47
-  a40 --> o48
-  o48 -->|"CREA"| t49
-  o48 -->|"ACTUALIZA"| t3
-  o48 -->|"LEE"| t3
-  o48 -->|"ACTUALIZA"| t30
-  o48 -->|"CREA"| t30
-  o48 -->|"LEE"| t30
-  a40 --> o50
-  o50 -->|"CREA"| t49
-  o50 -->|"ACTUALIZA"| t3
+  o44 -->|"LEE"| t5
+  a46 --> o45
+  o45 -->|"CREA"| t3
+  a2 --> o47
+  o47 -->|"LEE"| t15
+  o47 -->|"LEE"| t48
+  o47 -->|"LEE"| t3
+  o47 -->|"LEE"| t30
+  o47 -->|"LEE"| t16
+  o47 -->|"LEE"| t27
+  o47 -.-> t49
+  a2 --> o50
   o50 -->|"LEE"| t3
-  o50 -->|"ACTUALIZA"| t30
-  o50 -->|"LEE"| t30
-  a52 --> o51
-  o51 -->|"CREA"| t49
-  o51 -->|"ACTUALIZA"| t3
-  o51 -->|"LEE"| t3
-  o51 -->|"ACTUALIZA"| t30
-  o51 -->|"LEE"| t30
+  o50 -->|"LEE"| t51
+  o50 -->|"LEE"| t5
+  o50 -->|"LEE"| t6
+  a2 --> o52
+  o52 -->|"LEE"| t53
+  a46 --> o54
+  o54 -->|"CREA"| t55
+  o54 -->|"ACTUALIZA"| t3
+  o54 -->|"LEE"| t3
+  o54 -->|"ACTUALIZA"| t34
+  o54 -->|"CREA"| t34
+  o54 -->|"LEE"| t34
+  a46 --> o56
+  o56 -->|"CREA"| t55
+  o56 -->|"ACTUALIZA"| t3
+  o56 -->|"LEE"| t3
+  o56 -->|"ACTUALIZA"| t34
+  o56 -->|"LEE"| t34
+  a58 --> o57
+  o57 -->|"CREA"| t55
+  o57 -->|"ACTUALIZA"| t3
+  o57 -->|"LEE"| t3
+  o57 -->|"ACTUALIZA"| t34
+  o57 -->|"LEE"| t34
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -1091,15 +1176,30 @@ flowchart TD
   n5 --> n6
   n7[("LEE community.public_profiles")]:::efecto
   n6 --> n7
-  n8(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n8["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n7 --> n8
-  n9["Llama a BlocksRepository.findByPair"]:::llamada
-  n10[("LEE community.user_blocks")]:::efecto
+  n9["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n8 --> n9
+  n10[("LEE directory.tenants")]:::efecto
   n9 --> n10
-  n11[("ACTUALIZA community.user_blocks")]:::efecto
+  n11{"await this.isHolder(em, profile, actor)"}:::decision
   n10 --> n11
-  n12(("200 Responde con éxito")):::ok
-  n11 --> n12
+  n12["Llama a CommunityVisibilityService.isHolder"]:::llamada
+  n11 -->|"sí"| n12
+  n13["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n12 --> n13
+  n14[("LEE directory.tenants")]:::efecto
+  n13 --> n14
+  n15(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n14 --> n15
+  n11 -->|"no"| n15
+  n16["Llama a BlocksRepository.findByPair"]:::llamada
+  n17[("LEE community.user_blocks")]:::efecto
+  n16 --> n17
+  n18[("ACTUALIZA community.user_blocks")]:::efecto
+  n17 --> n18
+  n19(("200 Responde con éxito")):::ok
+  n18 --> n19
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1133,13 +1233,28 @@ flowchart TD
   n4 --> n5
   n6[("LEE community.public_profiles")]:::efecto
   n5 --> n6
-  n7(["403 FORBIDDEN Sólo el titular del perfil puede leer su contenido privado"]):::error
+  n7["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n6 --> n7
-  n8["Llama a BlocksRepository.listByBlocker"]:::llamada
-  n9[("LEE community.user_blocks")]:::efecto
+  n8["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n7 --> n8
+  n9[("LEE directory.tenants")]:::efecto
   n8 --> n9
-  n10(("200 Responde con éxito")):::ok
+  n10{"await this.isHolder(em, profile, actor)"}:::decision
   n9 --> n10
+  n11["Llama a CommunityVisibilityService.isHolder"]:::llamada
+  n10 -->|"sí"| n11
+  n12["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n11 --> n12
+  n13[("LEE directory.tenants")]:::efecto
+  n12 --> n13
+  n14(["403 FORBIDDEN Sólo el titular del perfil puede leer su contenido privado"]):::error
+  n13 --> n14
+  n10 -->|"no"| n14
+  n15["Llama a BlocksRepository.listByBlocker"]:::llamada
+  n16[("LEE community.user_blocks")]:::efecto
+  n15 --> n16
+  n17(("200 Responde con éxito")):::ok
+  n16 --> n17
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1177,44 +1292,59 @@ flowchart TD
   n5 --> n6
   n7[("LEE community.public_profiles")]:::efecto
   n6 --> n7
-  n8(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n8["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n7 --> n8
-  n9{"dto.blockerProfileId === dto.blockedProfileId"}:::decision
-  n10(["422 PRECONDITION_FAILED No se puede bloquear a uno mismo"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a BlocksRepository.findByPair"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE community.user_blocks")]:::efecto
-  n11 --> n12
-  n13{"previous?.statusConceptId === CONCEPTS.STATE_ACTIVE"}:::decision
+  n9["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n8 --> n9
+  n10[("LEE directory.tenants")]:::efecto
+  n9 --> n10
+  n11{"await this.isHolder(em, profile, actor)"}:::decision
+  n10 --> n11
+  n12["Llama a CommunityVisibilityService.isHolder"]:::llamada
+  n11 -->|"sí"| n12
+  n13["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
   n12 --> n13
-  n14(["409 CONFLICT El usuario ya está bloqueado"]):::error
-  n13 -->|"sí"| n14
-  n15{"previous"}:::decision
-  n13 -->|"no"| n15
-  n16[("ACTUALIZA community.user_blocks")]:::efecto
-  n15 -->|"sí"| n16
-  n17{"dto.reason"}:::decision
-  n16 --> n17
-  n18[("ACTUALIZA community.user_blocks")]:::efecto
-  n17 -->|"sí"| n18
-  n19["Llama a BlocksRepository.create"]:::llamada
+  n14[("LEE directory.tenants")]:::efecto
+  n13 --> n14
+  n15(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n14 --> n15
+  n11 -->|"no"| n15
+  n16{"dto.blockerProfileId === dto.blockedProfileId"}:::decision
+  n17(["422 PRECONDITION_FAILED No se puede bloquear a uno mismo"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a BlocksRepository.findByPair"]:::llamada
+  n16 -->|"no"| n18
+  n19[("LEE community.user_blocks")]:::efecto
   n18 --> n19
-  n17 -->|"no"| n19
-  n15 -->|"no"| n19
-  n20[("CREA community.user_blocks")]:::efecto
+  n20{"previous?.statusConceptId === CONCEPTS.STATE_ACTIVE"}:::decision
   n19 --> n20
-  n21["Llama a FollowsRepository.findMutualBetween"]:::llamada
-  n20 --> n21
-  n22[("LEE community.social_follows")]:::efecto
-  n21 --> n22
-  n23["Repite: por cada const f de mutual"]:::bucle
-  n22 --> n23
-  n24[("ACTUALIZA community.social_follows")]:::efecto
-  n23 -->|"cada elemento"| n24
-  n25(("201 Responde con éxito")):::ok
-  n24 --> n25
-  n23 -->|"al terminar"| n25
+  n21(["409 CONFLICT El usuario ya está bloqueado"]):::error
+  n20 -->|"sí"| n21
+  n22{"previous"}:::decision
+  n20 -->|"no"| n22
+  n23[("ACTUALIZA community.user_blocks")]:::efecto
+  n22 -->|"sí"| n23
+  n24{"dto.reason"}:::decision
+  n23 --> n24
+  n25[("ACTUALIZA community.user_blocks")]:::efecto
+  n24 -->|"sí"| n25
+  n26["Llama a BlocksRepository.create"]:::llamada
+  n25 --> n26
+  n24 -->|"no"| n26
+  n22 -->|"no"| n26
+  n27[("CREA community.user_blocks")]:::efecto
+  n26 --> n27
+  n28["Llama a FollowsRepository.findMutualBetween"]:::llamada
+  n27 --> n28
+  n29[("LEE community.social_follows")]:::efecto
+  n28 --> n29
+  n30["Repite: por cada const f de mutual"]:::bucle
+  n29 --> n30
+  n31[("ACTUALIZA community.social_follows")]:::efecto
+  n30 -->|"cada elemento"| n31
+  n32(("201 Responde con éxito")):::ok
+  n31 --> n32
+  n30 -->|"al terminar"| n32
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1250,15 +1380,30 @@ flowchart TD
   n5 --> n6
   n7[("LEE community.public_profiles")]:::efecto
   n6 --> n7
-  n8(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n8["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n7 --> n8
-  n9["Llama a BookmarksRepository.findByProfileTarget"]:::llamada
-  n10[("LEE community.bookmarks")]:::efecto
+  n9["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n8 --> n9
+  n10[("LEE directory.tenants")]:::efecto
   n9 --> n10
-  n11[("BORRA community.bookmarks")]:::efecto
+  n11{"await this.isHolder(em, profile, actor)"}:::decision
   n10 --> n11
-  n12(("200 Responde con éxito")):::ok
-  n11 --> n12
+  n12["Llama a CommunityVisibilityService.isHolder"]:::llamada
+  n11 -->|"sí"| n12
+  n13["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n12 --> n13
+  n14[("LEE directory.tenants")]:::efecto
+  n13 --> n14
+  n15(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n14 --> n15
+  n11 -->|"no"| n15
+  n16["Llama a BookmarksRepository.findByProfileTarget"]:::llamada
+  n17[("LEE community.bookmarks")]:::efecto
+  n16 --> n17
+  n18[("BORRA community.bookmarks")]:::efecto
+  n17 --> n18
+  n19(("200 Responde con éxito")):::ok
+  n18 --> n19
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1292,13 +1437,28 @@ flowchart TD
   n4 --> n5
   n6[("LEE community.public_profiles")]:::efecto
   n5 --> n6
-  n7(["403 FORBIDDEN Sólo el titular del perfil puede leer su contenido privado"]):::error
+  n7["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n6 --> n7
-  n8["Llama a BookmarksRepository.listByProfilePage"]:::llamada
-  n9[("LEE community.bookmarks")]:::efecto
+  n8["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n7 --> n8
+  n9[("LEE directory.tenants")]:::efecto
   n8 --> n9
-  n10(("200 Responde con éxito")):::ok
+  n10{"await this.isHolder(em, profile, actor)"}:::decision
   n9 --> n10
+  n11["Llama a CommunityVisibilityService.isHolder"]:::llamada
+  n10 -->|"sí"| n11
+  n12["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n11 --> n12
+  n13[("LEE directory.tenants")]:::efecto
+  n12 --> n13
+  n14(["403 FORBIDDEN Sólo el titular del perfil puede leer su contenido privado"]):::error
+  n13 --> n14
+  n10 -->|"no"| n14
+  n15["Llama a BookmarksRepository.listByProfilePage"]:::llamada
+  n16[("LEE community.bookmarks")]:::efecto
+  n15 --> n16
+  n17(("200 Responde con éxito")):::ok
+  n16 --> n17
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1335,21 +1495,36 @@ flowchart TD
   n5 --> n6
   n7[("LEE community.public_profiles")]:::efecto
   n6 --> n7
-  n8(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n8["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n7 --> n8
-  n9["Llama a BookmarksRepository.findByProfileTarget"]:::llamada
-  n10[("LEE community.bookmarks")]:::efecto
+  n9["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n8 --> n9
+  n10[("LEE directory.tenants")]:::efecto
   n9 --> n10
-  n11{"dup"}:::decision
+  n11{"await this.isHolder(em, profile, actor)"}:::decision
   n10 --> n11
-  n12(["409 CONFLICT El contenido ya está guardado"]):::error
+  n12["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n11 -->|"sí"| n12
-  n13["Llama a BookmarksRepository.create"]:::llamada
-  n11 -->|"no"| n13
-  n14[("CREA community.bookmarks")]:::efecto
+  n13["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n12 --> n13
+  n14[("LEE directory.tenants")]:::efecto
   n13 --> n14
-  n15(("201 Responde con éxito")):::ok
+  n15(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
   n14 --> n15
+  n11 -->|"no"| n15
+  n16["Llama a BookmarksRepository.findByProfileTarget"]:::llamada
+  n17[("LEE community.bookmarks")]:::efecto
+  n16 --> n17
+  n18{"dup"}:::decision
+  n17 --> n18
+  n19(["409 CONFLICT El contenido ya está guardado"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a BookmarksRepository.create"]:::llamada
+  n18 -->|"no"| n20
+  n21[("CREA community.bookmarks")]:::efecto
+  n20 --> n21
+  n22(("201 Responde con éxito")):::ok
+  n21 --> n22
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1395,86 +1570,101 @@ flowchart TD
   n9 --> n10
   n11[("LEE community.public_profiles")]:::efecto
   n10 --> n11
-  n12(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n12["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n11 --> n12
-  n13{"dto.parentCommentId"}:::decision
-  n14["Llama a CommentsRepository.findById"]:::llamada
-  n13 -->|"sí"| n14
-  n15[("LEE community.comments")]:::efecto
+  n13["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n12 --> n13
+  n14[("LEE directory.tenants")]:::efecto
+  n13 --> n14
+  n15{"await this.isHolder(em, profile, actor)"}:::decision
   n14 --> n15
-  n16{"!parent"}:::decision
-  n15 --> n16
-  n17(["404 NOT_FOUND Comentario padre no encontrado"]):::error
-  n16 -->|"sí"| n17
-  n18[("ACTUALIZA community.comments")]:::efecto
-  n16 -->|"no"| n18
-  n19["Llama a CommentsRepository.create"]:::llamada
+  n16["Llama a CommunityVisibilityService.isHolder"]:::llamada
+  n15 -->|"sí"| n16
+  n17["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n16 --> n17
+  n18[("LEE directory.tenants")]:::efecto
+  n17 --> n18
+  n19(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
   n18 --> n19
-  n13 -->|"no"| n19
-  n20[("CREA community.comments")]:::efecto
-  n19 --> n20
-  n21["Repite: por cada const [i, m] de (dto.media ?? []).entries()"]:::bucle
-  n20 --> n21
-  n22["Llama a CommunitySocialService.assertMediaFileUsableBy"]:::llamada
-  n21 -->|"cada elemento"| n22
-  n23["Llama a AttachableFileService.assertUsableBy"]:::llamada
+  n15 -->|"no"| n19
+  n20{"dto.parentCommentId"}:::decision
+  n21["Llama a CommentsRepository.findById"]:::llamada
+  n20 -->|"sí"| n21
+  n22[("LEE community.comments")]:::efecto
+  n21 --> n22
+  n23{"!parent"}:::decision
   n22 --> n23
-  n24["Llama a FilesRepository.findById"]:::llamada
-  n23 --> n24
-  n25[("LEE common.files")]:::efecto
-  n24 --> n25
-  n26{"!file"}:::decision
+  n24(["404 NOT_FOUND Comentario padre no encontrado"]):::error
+  n23 -->|"sí"| n24
+  n25[("ACTUALIZA community.comments")]:::efecto
+  n23 -->|"no"| n25
+  n26["Llama a CommentsRepository.create"]:::llamada
   n25 --> n26
-  n27(["404 NOT_FOUND {labels.notFound}"]):::error
-  n26 -->|"sí"| n27
-  n28{"file.createdByUserId !== actor.id && !enAllowlist"}:::decision
-  n26 -->|"no"| n28
-  n29(["403 FORBIDDEN {labels.subject} no le pertenece"]):::error
-  n28 -->|"sí"| n29
-  n30{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
-  n28 -->|"no"| n30
-  n31(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
-  n30 -->|"sí"| n31
-  n32{"!file.currentVersionId"}:::decision
-  n30 -->|"no"| n32
-  n33(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n32 -->|"sí"| n33
-  n34["Llama a AttachableFileService.assertVersionUsable"]:::llamada
-  n32 -->|"no"| n34
-  n35{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
-  n34 --> n35
-  n36(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
+  n20 -->|"no"| n26
+  n27[("CREA community.comments")]:::efecto
+  n26 --> n27
+  n28["Repite: por cada const [i, m] de (dto.media ?? []).entries()"]:::bucle
+  n27 --> n28
+  n29["Llama a CommunitySocialService.assertMediaFileUsableBy"]:::llamada
+  n28 -->|"cada elemento"| n29
+  n30["Llama a AttachableFileService.assertUsableBy"]:::llamada
+  n29 --> n30
+  n31["Llama a FilesRepository.findById"]:::llamada
+  n30 --> n31
+  n32[("LEE common.files")]:::efecto
+  n31 --> n32
+  n33{"!file"}:::decision
+  n32 --> n33
+  n34(["404 NOT_FOUND {labels.notFound}"]):::error
+  n33 -->|"sí"| n34
+  n35{"file.createdByUserId !== actor.id && !enAllowlist"}:::decision
+  n33 -->|"no"| n35
+  n36(["403 FORBIDDEN {labels.subject} no le pertenece"]):::error
   n35 -->|"sí"| n36
-  n37{"!file.currentVersionId"}:::decision
+  n37{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
   n35 -->|"no"| n37
-  n38(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n38(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
   n37 -->|"sí"| n38
-  n39{"!version"}:::decision
+  n39{"!file.currentVersionId"}:::decision
   n37 -->|"no"| n39
   n40(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
   n39 -->|"sí"| n40
-  n41{"version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED"}:::decision
+  n41["Llama a AttachableFileService.assertVersionUsable"]:::llamada
   n39 -->|"no"| n41
-  n42(["422 PRECONDITION_FAILED {labels.subject} resultó infectado"]):::error
-  n41 -->|"sí"| n42
-  n43{"accepted && !accepted.includes(version.mimeType ?? '')"}:::decision
-  n41 -->|"no"| n43
-  n44(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
-  n43 -->|"sí"| n44
-  n45["Llama a CommentsRepository.createMedia"]:::llamada
-  n43 -->|"no"| n45
-  n46[("CREA community.comment_media")]:::efecto
-  n45 --> n46
-  n47["Repite: por cada const mention de dto.mentions ?? []"]:::bucle
-  n46 --> n47
-  n21 -->|"al terminar"| n47
-  n48["Llama a PostsRepository.createMention"]:::llamada
-  n47 -->|"cada elemento"| n48
-  n49[("CREA community.mentions")]:::efecto
-  n48 --> n49
-  n50(("201 Responde con éxito")):::ok
-  n49 --> n50
-  n47 -->|"al terminar"| n50
+  n42{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
+  n41 --> n42
+  n43(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
+  n42 -->|"sí"| n43
+  n44{"!file.currentVersionId"}:::decision
+  n42 -->|"no"| n44
+  n45(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n44 -->|"sí"| n45
+  n46{"!version"}:::decision
+  n44 -->|"no"| n46
+  n47(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n46 -->|"sí"| n47
+  n48{"version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED"}:::decision
+  n46 -->|"no"| n48
+  n49(["422 PRECONDITION_FAILED {labels.subject} resultó infectado"]):::error
+  n48 -->|"sí"| n49
+  n50{"accepted && !accepted.includes(version.mimeType ?? '')"}:::decision
+  n48 -->|"no"| n50
+  n51(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
+  n50 -->|"sí"| n51
+  n52["Llama a CommentsRepository.createMedia"]:::llamada
+  n50 -->|"no"| n52
+  n53[("CREA community.comment_media")]:::efecto
+  n52 --> n53
+  n54["Repite: por cada const mention de dto.mentions ?? []"]:::bucle
+  n53 --> n54
+  n28 -->|"al terminar"| n54
+  n55["Llama a PostsRepository.createMention"]:::llamada
+  n54 -->|"cada elemento"| n55
+  n56[("CREA community.mentions")]:::efecto
+  n55 --> n56
+  n57(("201 Responde con éxito")):::ok
+  n56 --> n57
+  n54 -->|"al terminar"| n57
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1659,59 +1849,65 @@ flowchart TD
   n1 --> n2
   n3["Llama a CommunityMessagingReadService.listConversations"]:::llamada
   n2 --> n3
-  n4["Llama a CommunityVisibilityService.assertOwnProfile"]:::llamada
+  n4["Llama a CommunityVisibilityService.assertOwnMessagingProfile"]:::llamada
   n3 --> n4
   n5["Llama a PublicProfilesRepository.findById"]:::llamada
   n4 --> n5
   n6[("LEE community.public_profiles")]:::efecto
   n5 --> n6
-  n7(["403 FORBIDDEN Sólo el titular del perfil puede leer su contenido privado"]):::error
+  n7["Llama a CommunityVisibilityService.messagingAccess"]:::llamada
   n6 --> n7
-  n8["Llama a ConversationsRepository.listActiveParticipationsOf"]:::llamada
-  n9[("LEE community.conversation_participants")]:::efecto
+  n8["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n7 --> n8
+  n9[("LEE directory.tenants")]:::efecto
   n8 --> n9
-  n10["Llama a ConversationsRepository.listConversationsByIds"]:::llamada
+  n10(["403 FORBIDDEN Sólo el titular del perfil puede leer su contenido privado"]):::error
   n9 --> n10
-  n11[("LEE community.conversations")]:::efecto
-  n10 --> n11
-  n12["Repite: map(…)"]:::bucle
+  n11["Llama a ConversationsRepository.listActiveParticipationsOf"]:::llamada
+  n12[("LEE community.conversation_participants")]:::efecto
   n11 --> n12
-  n13["Llama a ConversationsRepository.findParticipants"]:::llamada
-  n12 -->|"cada elemento"| n13
-  n14[("LEE community.conversation_participants")]:::efecto
+  n13["Llama a ConversationsRepository.listConversationsByIds"]:::llamada
+  n12 --> n13
+  n14[("LEE community.conversations")]:::efecto
   n13 --> n14
-  n15["Llama a PublicProfilesRepository.listByIds"]:::llamada
+  n15["Repite: map(…)"]:::bucle
   n14 --> n15
-  n12 -->|"al terminar"| n15
-  n16[("LEE community.public_profiles")]:::efecto
-  n15 --> n16
-  n17["Repite: map(…)"]:::bucle
+  n16["Llama a ConversationsRepository.findParticipants"]:::llamada
+  n15 -->|"cada elemento"| n16
+  n17[("LEE community.conversation_participants")]:::efecto
   n16 --> n17
-  n18["Llama a ConversationsRepository.findLastMessage"]:::llamada
-  n17 -->|"cada elemento"| n18
-  n19[("LEE community.direct_messages")]:::efecto
+  n18["Llama a PublicProfilesRepository.listByIds"]:::llamada
+  n17 --> n18
+  n15 -->|"al terminar"| n18
+  n19[("LEE community.public_profiles")]:::efecto
   n18 --> n19
-  n20["Llama a ConversationsRepository.countUnread"]:::llamada
+  n20["Repite: map(…)"]:::bucle
   n19 --> n20
-  n21[("LEE community.direct_messages")]:::efecto
-  n20 --> n21
-  n22{"!lastReadMessageId"}:::decision
+  n21["Llama a ConversationsRepository.findLastMessage"]:::llamada
+  n20 -->|"cada elemento"| n21
+  n22[("LEE community.direct_messages")]:::efecto
   n21 --> n22
-  n23[("LEE community.direct_messages")]:::efecto
-  n22 -->|"sí"| n23
-  n24[("LEE community.direct_messages · LEE community.direct_messages")]:::efecto
+  n23["Llama a ConversationsRepository.countUnread"]:::llamada
+  n22 --> n23
+  n24[("LEE community.direct_messages")]:::efecto
   n23 --> n24
-  n22 -->|"no"| n24
-  n25{"!lastRead?.sentAt"}:::decision
+  n25{"!lastReadMessageId"}:::decision
   n24 --> n25
   n26[("LEE community.direct_messages")]:::efecto
   n25 -->|"sí"| n26
-  n27[("LEE community.direct_messages")]:::efecto
+  n27[("LEE community.direct_messages · LEE community.direct_messages")]:::efecto
   n26 --> n27
   n25 -->|"no"| n27
-  n28(("200 Responde con éxito")):::ok
+  n28{"!lastRead?.sentAt"}:::decision
   n27 --> n28
-  n17 -->|"al terminar"| n28
+  n29[("LEE community.direct_messages")]:::efecto
+  n28 -->|"sí"| n29
+  n30[("LEE community.direct_messages")]:::efecto
+  n29 --> n30
+  n28 -->|"no"| n30
+  n31(("200 Responde con éxito")):::ok
+  n30 --> n31
+  n20 -->|"al terminar"| n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1729,7 +1925,7 @@ Crear una conversación con participantes
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No se puede escribir en el grafo social con un perfil ajeno |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No se puede escribir en el grafo social con un perfil ajeno; ForbiddenException: Una organización no inicia conversaciones por este canal |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Las conversaciones grupales se crean desde el flujo de grupos; PreconditionFailedException: Los participantes de una conversación deben ser distintos; PreconditionFailedException: Una conversación directa requiere exactamente dos participantes; PreconditionFailedException: La persona no está disponible para iniciar una conversación; PreconditionFailedException: No se puede iniciar una conversación entre perfiles bloqueados |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1748,59 +1944,85 @@ flowchart TD
   n4 -->|"no"| n6
   n7["Transacción: transactional(…)"]:::transaccion
   n6 --> n7
-  n8["Llama a CommunityVisibilityService.assertActsAsProfile"]:::llamada
+  n8{"requirePublicRecipient"}:::decision
   n7 --> n8
-  n9["Llama a PublicProfilesRepository.findById"]:::llamada
-  n8 --> n9
-  n10[("LEE community.public_profiles")]:::efecto
+  n9["Llama a CommunityVisibilityService.assertActsAsProfile"]:::llamada
+  n8 -->|"sí"| n9
+  n10["Llama a PublicProfilesRepository.findById"]:::llamada
   n9 --> n10
-  n11(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n11[("LEE community.public_profiles")]:::efecto
   n10 --> n11
-  n12{"participantIds.size !== dto.participantProfileIds.length"}:::decision
-  n13(["422 PRECONDITION_FAILED Los participantes de una conversación deben ser distintos"]):::error
-  n12 -->|"sí"| n13
-  n14{"dto.participantProfileIds.length !== 2"}:::decision
-  n12 -->|"no"| n14
-  n15(["422 PRECONDITION_FAILED Una conversación directa requiere exactamente dos participantes"]):::error
-  n14 -->|"sí"| n15
-  n16["Llama a PublicProfilesRepository.findById"]:::llamada
-  n14 -->|"no"| n16
-  n17[("LEE community.public_profiles")]:::efecto
+  n12(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n11 --> n12
+  n13["Llama a PublicProfilesRepository.findById"]:::llamada
+  n14[("LEE community.public_profiles")]:::efecto
+  n13 --> n14
+  n15["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n14 --> n15
+  n16[("LEE directory.tenants")]:::efecto
+  n15 --> n16
+  n17{"await this.organizationStaff.isTenantBacked(tx, initiator)"}:::decision
   n16 --> n17
-  n18{"!eligibleRecipient"}:::decision
-  n17 --> n18
-  n19(["422 PRECONDITION_FAILED La persona no está disponible para iniciar una conversación"]):::error
-  n18 -->|"sí"| n19
-  n20["Llama a BlocksRepository.existsBetween"]:::llamada
-  n18 -->|"no"| n20
-  n21[("LEE community.user_blocks")]:::efecto
+  n18(["403 FORBIDDEN Una organización no inicia conversaciones por este canal"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a CommunityVisibilityService.assertActsAsMessagingProfile"]:::llamada
+  n8 -->|"no"| n19
+  n20["Llama a PublicProfilesRepository.findById"]:::llamada
+  n19 --> n20
+  n21[("LEE community.public_profiles")]:::efecto
   n20 --> n21
-  n22{"blocked"}:::decision
+  n22(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
   n21 --> n22
-  n23(["422 PRECONDITION_FAILED No se puede iniciar una conversación entre perfiles bloqueados"]):::error
-  n22 -->|"sí"| n23
-  n24["Llama a ConversationsRepository.findDirectBetween"]:::llamada
-  n22 -->|"no"| n24
-  n25[("LEE community.conversation_participants · LEE community.conversations")]:::efecto
-  n24 --> n25
-  n26["Repite: por cada const conversation de candidates"]:::bucle
-  n25 --> n26
-  n27[("LEE community.conversation_participants")]:::efecto
-  n26 -->|"cada elemento"| n27
-  n28["Llama a ConversationsRepository.createConversation"]:::llamada
+  n23{"participantIds.size !== dto.participantProfileIds.length"}:::decision
+  n17 -->|"no"| n23
+  n24(["422 PRECONDITION_FAILED Los participantes de una conversación deben ser distintos"]):::error
+  n23 -->|"sí"| n24
+  n25{"dto.participantProfileIds.length !== 2"}:::decision
+  n23 -->|"no"| n25
+  n26(["422 PRECONDITION_FAILED Una conversación directa requiere exactamente dos participantes"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a PublicProfilesRepository.findById"]:::llamada
+  n25 -->|"no"| n27
+  n28[("LEE community.public_profiles")]:::efecto
   n27 --> n28
-  n26 -->|"al terminar"| n28
-  n29[("CREA community.conversations")]:::efecto
+  n29["Llama a CommunityOrganizationStaffService.isVerifiedActiveTenant"]:::llamada
   n28 --> n29
-  n30["Repite: por cada const profileId de dto.participantProfileIds"]:::bucle
+  n30[("LEE directory.tenants")]:::efecto
   n29 --> n30
-  n31["Llama a ConversationsRepository.createParticipant"]:::llamada
-  n30 -->|"cada elemento"| n31
-  n32[("CREA community.conversation_participants")]:::efecto
-  n31 --> n32
-  n33(("201 Responde con éxito")):::ok
-  n32 --> n33
-  n30 -->|"al terminar"| n33
+  n31{"!eligibleRecipient"}:::decision
+  n30 --> n31
+  n32(["422 PRECONDITION_FAILED La persona no está disponible para iniciar una conversación"]):::error
+  n31 -->|"sí"| n32
+  n33["Llama a BlocksRepository.existsBetween"]:::llamada
+  n31 -->|"no"| n33
+  n34[("LEE community.user_blocks")]:::efecto
+  n33 --> n34
+  n35{"blocked"}:::decision
+  n34 --> n35
+  n36(["422 PRECONDITION_FAILED No se puede iniciar una conversación entre perfiles bloqueados"]):::error
+  n35 -->|"sí"| n36
+  n37["Llama a ConversationsRepository.findDirectBetween"]:::llamada
+  n35 -->|"no"| n37
+  n38[("LEE community.conversation_participants · LEE community.conversations")]:::efecto
+  n37 --> n38
+  n39["Repite: por cada const conversation de candidates"]:::bucle
+  n38 --> n39
+  n40[("LEE community.conversation_participants")]:::efecto
+  n39 -->|"cada elemento"| n40
+  n41["Llama a ConversationsRepository.createConversation"]:::llamada
+  n40 --> n41
+  n39 -->|"al terminar"| n41
+  n42[("CREA community.conversations")]:::efecto
+  n41 --> n42
+  n43["Repite: por cada const profileId de dto.participantProfileIds"]:::bucle
+  n42 --> n43
+  n44["Llama a ConversationsRepository.createParticipant"]:::llamada
+  n43 -->|"cada elemento"| n44
+  n45[("CREA community.conversation_participants")]:::efecto
+  n44 --> n45
+  n46(("201 Responde con éxito")):::ok
+  n45 --> n46
+  n43 -->|"al terminar"| n46
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1832,114 +2054,120 @@ flowchart TD
   n2 --> n3
   n4["Intenta"]:::intento
   n3 --> n4
-  n5["Llama a CommunityVisibilityService.assertOwnProfile"]:::llamada
+  n5["Llama a CommunityVisibilityService.assertOwnMessagingProfile"]:::llamada
   n4 --> n5
   n6["Llama a PublicProfilesRepository.findById"]:::llamada
   n5 --> n6
   n7[("LEE community.public_profiles")]:::efecto
   n6 --> n7
-  n8(["403 FORBIDDEN Sólo el titular del perfil puede leer su contenido privado"]):::error
+  n8["Llama a CommunityVisibilityService.messagingAccess"]:::llamada
   n7 --> n8
-  n9{"error instanceof ForbiddenException"}:::decision
-  n4 -->|"si falla"| n9
-  n10(["↩ (relanza el error capturado)"]):::error
-  n9 -->|"sí"| n10
-  n11(["↩ (relanza el error capturado)"]):::error
-  n9 -->|"no"| n11
-  n12["Llama a ConversationsRepository.findActiveParticipant"]:::llamada
-  n13[("LEE community.conversation_participants")]:::efecto
-  n12 --> n13
-  n14{"!participant"}:::decision
-  n13 --> n14
-  n15(["↩ (relanza el error capturado)"]):::error
-  n14 -->|"sí"| n15
-  n16["Intenta"]:::intento
-  n14 -->|"no"| n16
-  n17["Llama a CommunityMessagingReadService.assertNoBlockWithPeers"]:::llamada
+  n9["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n8 --> n9
+  n10[("LEE directory.tenants")]:::efecto
+  n9 --> n10
+  n11(["403 FORBIDDEN Sólo el titular del perfil puede leer su contenido privado"]):::error
+  n10 --> n11
+  n12{"error instanceof ForbiddenException"}:::decision
+  n4 -->|"si falla"| n12
+  n13(["↩ (relanza el error capturado)"]):::error
+  n12 -->|"sí"| n13
+  n14(["↩ (relanza el error capturado)"]):::error
+  n12 -->|"no"| n14
+  n15["Llama a ConversationsRepository.findActiveParticipant"]:::llamada
+  n16[("LEE community.conversation_participants")]:::efecto
+  n15 --> n16
+  n17{"!participant"}:::decision
   n16 --> n17
-  n18["Llama a ConversationsRepository.findParticipants"]:::llamada
-  n17 --> n18
-  n19[("LEE community.conversation_participants")]:::efecto
-  n18 --> n19
-  n20["Repite: por cada const peer de peers"]:::bucle
+  n18(["↩ (relanza el error capturado)"]):::error
+  n17 -->|"sí"| n18
+  n19["Intenta"]:::intento
+  n17 -->|"no"| n19
+  n20["Llama a CommunityMessagingReadService.assertNoBlockWithPeers"]:::llamada
   n19 --> n20
-  n21["Llama a CommunityVisibilityService.isBlockedBetween"]:::llamada
-  n20 -->|"cada elemento"| n21
-  n22["Llama a BlocksRepository.existsBetween"]:::llamada
+  n21["Llama a ConversationsRepository.findParticipants"]:::llamada
+  n20 --> n21
+  n22[("LEE community.conversation_participants")]:::efecto
   n21 --> n22
-  n23[("LEE community.user_blocks")]:::efecto
+  n23["Repite: por cada const peer de peers"]:::bucle
   n22 --> n23
-  n24{"await this.visibility.isBlockedBetween(em, profileId, peer)"}:::decision
-  n23 --> n24
-  n25(["404 NOT_FOUND Conversación no encontrada"]):::error
-  n24 -->|"sí"| n25
-  n26{"error instanceof ResourceNotFoundException"}:::decision
-  n16 -->|"si falla"| n26
-  n27(["↩ (relanza el error capturado)"]):::error
-  n26 -->|"sí"| n27
-  n28(["↩ (relanza el error capturado)"]):::error
-  n26 -->|"no"| n28
-  n29["Llama a ConversationsRepository.findLiveMessagesByAttachmentFileId"]:::llamada
-  n24 -->|"no"| n29
-  n20 -->|"al terminar"| n29
-  n30[("LEE community.direct_messages")]:::efecto
-  n29 --> n30
-  n31{"!messages.some((message) =› message.conversationId === conversationId)"}:::decision
-  n30 --> n31
-  n32(["↩ (relanza el error capturado)"]):::error
-  n31 -->|"sí"| n32
-  n33["Intenta"]:::intento
-  n31 -->|"no"| n33
-  n34["Llama a FileUploadService.downloadForAuthorizedContext"]:::llamada
+  n24["Llama a CommunityVisibilityService.isBlockedBetween"]:::llamada
+  n23 -->|"cada elemento"| n24
+  n25["Llama a BlocksRepository.existsBetween"]:::llamada
+  n24 --> n25
+  n26[("LEE community.user_blocks")]:::efecto
+  n25 --> n26
+  n27{"await this.visibility.isBlockedBetween(em, profileId, peer)"}:::decision
+  n26 --> n27
+  n28(["404 NOT_FOUND Conversación no encontrada"]):::error
+  n27 -->|"sí"| n28
+  n29{"error instanceof ResourceNotFoundException"}:::decision
+  n19 -->|"si falla"| n29
+  n30(["↩ (relanza el error capturado)"]):::error
+  n29 -->|"sí"| n30
+  n31(["↩ (relanza el error capturado)"]):::error
+  n29 -->|"no"| n31
+  n32["Llama a ConversationsRepository.findLiveMessagesByAttachmentFileId"]:::llamada
+  n27 -->|"no"| n32
+  n23 -->|"al terminar"| n32
+  n33[("LEE community.direct_messages")]:::efecto
+  n32 --> n33
+  n34{"!messages.some((message) =› message.conversationId === conversationId)"}:::decision
   n33 --> n34
-  n35["Llama a FilesRepository.findById"]:::llamada
-  n34 --> n35
-  n36[("LEE common.files")]:::efecto
-  n35 --> n36
-  n37{"!file"}:::decision
+  n35(["↩ (relanza el error capturado)"]):::error
+  n34 -->|"sí"| n35
+  n36["Intenta"]:::intento
+  n34 -->|"no"| n36
+  n37["Llama a FileUploadService.downloadForAuthorizedContext"]:::llamada
   n36 --> n37
-  n38(["404 NOT_FOUND Archivo no encontrado"]):::error
-  n37 -->|"sí"| n38
-  n39["Llama a FileUploadService.serveCurrentVersion"]:::llamada
-  n37 -->|"no"| n39
-  n40["Llama a AttachableFileService.assertUsableForAuthorizedContext"]:::llamada
+  n38["Llama a FilesRepository.findById"]:::llamada
+  n37 --> n38
+  n39[("LEE common.files")]:::efecto
+  n38 --> n39
+  n40{"!file"}:::decision
   n39 --> n40
-  n41{"!file"}:::decision
-  n40 --> n41
-  n42(["404 NOT_FOUND {labels.notFound}"]):::error
-  n41 -->|"sí"| n42
-  n43["Llama a LocalDiskFileStorageAdapter.retrieve"]:::llamada
-  n41 -->|"no"| n43
-  n44["Intenta"]:::intento
+  n41(["404 NOT_FOUND Archivo no encontrado"]):::error
+  n40 -->|"sí"| n41
+  n42["Llama a FileUploadService.serveCurrentVersion"]:::llamada
+  n40 -->|"no"| n42
+  n43["Llama a AttachableFileService.assertUsableForAuthorizedContext"]:::llamada
+  n42 --> n43
+  n44{"!file"}:::decision
   n43 --> n44
-  n45{"isMissingFile(error)"}:::decision
-  n44 -->|"si falla"| n45
-  n46(["404 NOT_FOUND El contenido no está disponible en el almacenamiento local"]):::error
-  n45 -->|"sí"| n46
-  n47(["↩ (relanza el error capturado)"]):::error
-  n45 -->|"no"| n47
-  n48["Llama a S3FileStorageAdapter.retrieve"]:::llamada
-  n44 --> n48
-  n49["Intenta"]:::intento
-  n48 --> n49
-  n50{"!result.Body"}:::decision
-  n49 --> n50
-  n51(["500 INTERNAL S3 object body is empty"]):::error
-  n50 -->|"sí"| n51
-  n52{"isNotFound(error)"}:::decision
-  n49 -->|"si falla"| n52
-  n53(["404 NOT_FOUND El contenido no está disponible en el almacenamiento configurado"]):::error
-  n52 -->|"sí"| n53
-  n54(["↩ (relanza el error capturado)"]):::error
-  n52 -->|"no"| n54
-  n55{"error instanceof ResourceNotFoundException || error instanceof PreconditionFailedException"}:::decision
-  n33 -->|"si falla"| n55
-  n56(["↩ (relanza el error capturado)"]):::error
+  n45(["404 NOT_FOUND {labels.notFound}"]):::error
+  n44 -->|"sí"| n45
+  n46["Llama a LocalDiskFileStorageAdapter.retrieve"]:::llamada
+  n44 -->|"no"| n46
+  n47["Intenta"]:::intento
+  n46 --> n47
+  n48{"isMissingFile(error)"}:::decision
+  n47 -->|"si falla"| n48
+  n49(["404 NOT_FOUND El contenido no está disponible en el almacenamiento local"]):::error
+  n48 -->|"sí"| n49
+  n50(["↩ (relanza el error capturado)"]):::error
+  n48 -->|"no"| n50
+  n51["Llama a S3FileStorageAdapter.retrieve"]:::llamada
+  n47 --> n51
+  n52["Intenta"]:::intento
+  n51 --> n52
+  n53{"!result.Body"}:::decision
+  n52 --> n53
+  n54(["500 INTERNAL S3 object body is empty"]):::error
+  n53 -->|"sí"| n54
+  n55{"isNotFound(error)"}:::decision
+  n52 -->|"si falla"| n55
+  n56(["404 NOT_FOUND El contenido no está disponible en el almacenamiento configurado"]):::error
   n55 -->|"sí"| n56
   n57(["↩ (relanza el error capturado)"]):::error
   n55 -->|"no"| n57
-  n58(("200 Responde con éxito")):::ok
-  n50 -->|"no"| n58
+  n58{"error instanceof ResourceNotFoundException || error instanceof PreconditionFailedException"}:::decision
+  n36 -->|"si falla"| n58
+  n59(["↩ (relanza el error capturado)"]):::error
+  n58 -->|"sí"| n59
+  n60(["↩ (relanza el error capturado)"]):::error
+  n58 -->|"no"| n60
+  n61(("200 Responde con éxito")):::ok
+  n53 -->|"no"| n61
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1968,64 +2196,70 @@ flowchart TD
   n1 --> n2
   n3["Llama a CommunityMessagingReadService.listMessages"]:::llamada
   n2 --> n3
-  n4["Llama a CommunityVisibilityService.assertOwnProfile"]:::llamada
+  n4["Llama a CommunityVisibilityService.assertOwnMessagingProfile"]:::llamada
   n3 --> n4
   n5["Llama a PublicProfilesRepository.findById"]:::llamada
   n4 --> n5
   n6[("LEE community.public_profiles")]:::efecto
   n5 --> n6
-  n7(["403 FORBIDDEN Sólo el titular del perfil puede leer su contenido privado"]):::error
+  n7["Llama a CommunityVisibilityService.messagingAccess"]:::llamada
   n6 --> n7
-  n8["Llama a ConversationsRepository.findActiveParticipant"]:::llamada
-  n9[("LEE community.conversation_participants")]:::efecto
+  n8["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n7 --> n8
+  n9[("LEE directory.tenants")]:::efecto
   n8 --> n9
-  n10{"!participant"}:::decision
+  n10(["403 FORBIDDEN Sólo el titular del perfil puede leer su contenido privado"]):::error
   n9 --> n10
-  n11(["404 NOT_FOUND Conversación no encontrada"]):::error
-  n10 -->|"sí"| n11
-  n12["Llama a CommunityMessagingReadService.assertNoBlockWithPeers"]:::llamada
-  n10 -->|"no"| n12
-  n13["Llama a ConversationsRepository.findParticipants"]:::llamada
+  n11["Llama a ConversationsRepository.findActiveParticipant"]:::llamada
+  n12[("LEE community.conversation_participants")]:::efecto
+  n11 --> n12
+  n13{"!participant"}:::decision
   n12 --> n13
-  n14[("LEE community.conversation_participants")]:::efecto
-  n13 --> n14
-  n15["Repite: por cada const peer de peers"]:::bucle
-  n14 --> n15
-  n16["Llama a CommunityVisibilityService.isBlockedBetween"]:::llamada
-  n15 -->|"cada elemento"| n16
-  n17["Llama a BlocksRepository.existsBetween"]:::llamada
+  n14(["404 NOT_FOUND Conversación no encontrada"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a CommunityMessagingReadService.assertNoBlockWithPeers"]:::llamada
+  n13 -->|"no"| n15
+  n16["Llama a ConversationsRepository.findParticipants"]:::llamada
+  n15 --> n16
+  n17[("LEE community.conversation_participants")]:::efecto
   n16 --> n17
-  n18[("LEE community.user_blocks")]:::efecto
+  n18["Repite: por cada const peer de peers"]:::bucle
   n17 --> n18
-  n19{"await this.visibility.isBlockedBetween(em, profileId, peer)"}:::decision
-  n18 --> n19
-  n20(["404 NOT_FOUND Conversación no encontrada"]):::error
-  n19 -->|"sí"| n20
-  n21["Llama a ConversationsRepository.findConversationById"]:::llamada
-  n19 -->|"no"| n21
-  n15 -->|"al terminar"| n21
-  n22[("LEE community.conversations")]:::efecto
+  n19["Llama a CommunityVisibilityService.isBlockedBetween"]:::llamada
+  n18 -->|"cada elemento"| n19
+  n20["Llama a BlocksRepository.existsBetween"]:::llamada
+  n19 --> n20
+  n21[("LEE community.user_blocks")]:::efecto
+  n20 --> n21
+  n22{"await this.visibility.isBlockedBetween(em, profileId, peer)"}:::decision
   n21 --> n22
-  n23["Llama a CommunityMessagingReadService.resolvePeerReadUpTo"]:::llamada
-  n22 --> n23
-  n24["Llama a ConversationsRepository.findParticipants"]:::llamada
-  n23 --> n24
-  n25[("LEE community.conversation_participants")]:::efecto
+  n23(["404 NOT_FOUND Conversación no encontrada"]):::error
+  n22 -->|"sí"| n23
+  n24["Llama a ConversationsRepository.findConversationById"]:::llamada
+  n22 -->|"no"| n24
+  n18 -->|"al terminar"| n24
+  n25[("LEE community.conversations")]:::efecto
   n24 --> n25
-  n26["Llama a ConversationsRepository.findMessageById"]:::llamada
+  n26["Llama a CommunityMessagingReadService.resolvePeerReadUpTo"]:::llamada
   n25 --> n26
-  n27[("LEE community.direct_messages")]:::efecto
+  n27["Llama a ConversationsRepository.findParticipants"]:::llamada
   n26 --> n27
-  n28["Llama a ConversationsRepository.listMessagesPage"]:::llamada
+  n28[("LEE community.conversation_participants")]:::efecto
   n27 --> n28
-  n29[("LEE community.direct_messages")]:::efecto
+  n29["Llama a ConversationsRepository.findMessageById"]:::llamada
   n28 --> n29
-  n30["Llama a ConversationsRepository.findMessageById"]:::llamada
+  n30[("LEE community.direct_messages")]:::efecto
   n29 --> n30
-  n31[("LEE community.direct_messages")]:::efecto
+  n31["Llama a ConversationsRepository.listMessagesPage"]:::llamada
   n30 --> n31
-  n32(("200 Responde con éxito")):::ok
+  n32[("LEE community.direct_messages")]:::efecto
   n31 --> n32
+  n33["Llama a ConversationsRepository.findMessageById"]:::llamada
+  n32 --> n33
+  n34[("LEE community.direct_messages")]:::efecto
+  n33 --> n34
+  n35(("200 Responde con éxito")):::ok
+  n34 --> n35
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2061,7 +2295,7 @@ flowchart TD
   n4 --> n5
   n6{"authorizingActor"}:::decision
   n5 --> n6
-  n7["Llama a CommunityVisibilityService.assertActsAsProfile"]:::llamada
+  n7["Llama a CommunityVisibilityService.assertActsAsMessagingProfile"]:::llamada
   n6 -->|"sí"| n7
   n8["Llama a PublicProfilesRepository.findById"]:::llamada
   n7 --> n8
@@ -2227,60 +2461,75 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a CommunityVisibilityService.assertActsAsProfile"]:::llamada
+  n5["Llama a CommunityVisibilityService.assertActsAsMessagingProfile"]:::llamada
   n4 --> n5
   n6["Llama a PublicProfilesRepository.findById"]:::llamada
   n5 --> n6
   n7[("LEE community.public_profiles")]:::efecto
   n6 --> n7
-  n8(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n8["Llama a CommunityVisibilityService.messagingAccess"]:::llamada
   n7 --> n8
-  n9["Llama a CommunityMessagingService.activeOrNotFoundParticipant"]:::llamada
-  n10["Llama a ConversationsRepository.findActiveParticipant"]:::llamada
+  n9["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n8 --> n9
+  n10[("LEE directory.tenants")]:::efecto
   n9 --> n10
-  n11[("LEE community.conversation_participants")]:::efecto
+  n11{"await this.messagingAccess(em, profile, actor)"}:::decision
   n10 --> n11
-  n12{"!participant"}:::decision
-  n11 --> n12
-  n13(["404 NOT_FOUND Conversación no encontrada"]):::error
-  n12 -->|"sí"| n13
-  n14["Llama a CommunityMessagingService.ownLiveMessage"]:::llamada
-  n12 -->|"no"| n14
-  n15["Llama a ConversationsRepository.findMessageInConversation"]:::llamada
+  n12["Llama a CommunityVisibilityService.messagingAccess"]:::llamada
+  n11 -->|"sí"| n12
+  n13["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n12 --> n13
+  n14[("LEE directory.tenants")]:::efecto
+  n13 --> n14
+  n15(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
   n14 --> n15
-  n16[("LEE community.direct_messages")]:::efecto
-  n15 --> n16
-  n17{"!message"}:::decision
+  n11 -->|"no"| n15
+  n16["Llama a CommunityMessagingService.activeOrNotFoundParticipant"]:::llamada
+  n17["Llama a ConversationsRepository.findActiveParticipant"]:::llamada
   n16 --> n17
-  n18(["404 NOT_FOUND Mensaje no encontrado"]):::error
-  n17 -->|"sí"| n18
-  n19{"message.senderProfileId !== profileId"}:::decision
-  n17 -->|"no"| n19
-  n20(["422 PRECONDITION_FAILED Sólo el autor puede editar o eliminar su mensaje"]):::error
+  n18[("LEE community.conversation_participants")]:::efecto
+  n17 --> n18
+  n19{"!participant"}:::decision
+  n18 --> n19
+  n20(["404 NOT_FOUND Conversación no encontrada"]):::error
   n19 -->|"sí"| n20
-  n21{"message.deletedAt"}:::decision
+  n21["Llama a CommunityMessagingService.ownLiveMessage"]:::llamada
   n19 -->|"no"| n21
-  n22(["422 PRECONDITION_FAILED El mensaje ya fue eliminado"]):::error
-  n21 -->|"sí"| n22
-  n23[("ACTUALIZA community.direct_messages")]:::efecto
-  n21 -->|"no"| n23
-  n24["Llama a ConversationsRepository.findConversationById"]:::llamada
+  n22["Llama a ConversationsRepository.findMessageInConversation"]:::llamada
+  n21 --> n22
+  n23[("LEE community.direct_messages")]:::efecto
+  n22 --> n23
+  n24{"!message"}:::decision
   n23 --> n24
-  n25[("LEE community.conversations")]:::efecto
-  n24 --> n25
-  n26{"conversation?.pinnedMessageId === messageId"}:::decision
-  n25 --> n26
-  n27[("ACTUALIZA community.conversations")]:::efecto
+  n25(["404 NOT_FOUND Mensaje no encontrado"]):::error
+  n24 -->|"sí"| n25
+  n26{"message.senderProfileId !== profileId"}:::decision
+  n24 -->|"no"| n26
+  n27(["422 PRECONDITION_FAILED Sólo el autor puede editar o eliminar su mensaje"]):::error
   n26 -->|"sí"| n27
-  n28["Llama a CommunityMessagingService.otherParticipants"]:::llamada
-  n27 --> n28
+  n28{"message.deletedAt"}:::decision
   n26 -->|"no"| n28
-  n29["Llama a ConversationsRepository.findParticipants"]:::llamada
-  n28 --> n29
-  n30[("LEE community.conversation_participants")]:::efecto
-  n29 --> n30
-  n31(("200 Responde con éxito")):::ok
+  n29(["422 PRECONDITION_FAILED El mensaje ya fue eliminado"]):::error
+  n28 -->|"sí"| n29
+  n30[("ACTUALIZA community.direct_messages")]:::efecto
+  n28 -->|"no"| n30
+  n31["Llama a ConversationsRepository.findConversationById"]:::llamada
   n30 --> n31
+  n32[("LEE community.conversations")]:::efecto
+  n31 --> n32
+  n33{"conversation?.pinnedMessageId === messageId"}:::decision
+  n32 --> n33
+  n34[("ACTUALIZA community.conversations")]:::efecto
+  n33 -->|"sí"| n34
+  n35["Llama a CommunityMessagingService.otherParticipants"]:::llamada
+  n34 --> n35
+  n33 -->|"no"| n35
+  n36["Llama a ConversationsRepository.findParticipants"]:::llamada
+  n35 --> n36
+  n37[("LEE community.conversation_participants")]:::efecto
+  n36 --> n37
+  n38(("200 Responde con éxito")):::ok
+  n37 --> n38
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2312,61 +2561,76 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a CommunityVisibilityService.assertActsAsProfile"]:::llamada
+  n5["Llama a CommunityVisibilityService.assertActsAsMessagingProfile"]:::llamada
   n4 --> n5
   n6["Llama a PublicProfilesRepository.findById"]:::llamada
   n5 --> n6
   n7[("LEE community.public_profiles")]:::efecto
   n6 --> n7
-  n8(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n8["Llama a CommunityVisibilityService.messagingAccess"]:::llamada
   n7 --> n8
-  n9["Llama a CommunityMessagingService.activeOrNotFoundParticipant"]:::llamada
-  n10["Llama a ConversationsRepository.findActiveParticipant"]:::llamada
+  n9["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n8 --> n9
+  n10[("LEE directory.tenants")]:::efecto
   n9 --> n10
-  n11[("LEE community.conversation_participants")]:::efecto
+  n11{"await this.messagingAccess(em, profile, actor)"}:::decision
   n10 --> n11
-  n12{"!participant"}:::decision
-  n11 --> n12
-  n13(["404 NOT_FOUND Conversación no encontrada"]):::error
-  n12 -->|"sí"| n13
-  n14["Llama a CommunityMessagingService.ownLiveMessage"]:::llamada
-  n12 -->|"no"| n14
-  n15["Llama a ConversationsRepository.findMessageInConversation"]:::llamada
+  n12["Llama a CommunityVisibilityService.messagingAccess"]:::llamada
+  n11 -->|"sí"| n12
+  n13["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n12 --> n13
+  n14[("LEE directory.tenants")]:::efecto
+  n13 --> n14
+  n15(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
   n14 --> n15
-  n16[("LEE community.direct_messages")]:::efecto
-  n15 --> n16
-  n17{"!message"}:::decision
+  n11 -->|"no"| n15
+  n16["Llama a CommunityMessagingService.activeOrNotFoundParticipant"]:::llamada
+  n17["Llama a ConversationsRepository.findActiveParticipant"]:::llamada
   n16 --> n17
-  n18(["404 NOT_FOUND Mensaje no encontrado"]):::error
-  n17 -->|"sí"| n18
-  n19{"message.senderProfileId !== profileId"}:::decision
-  n17 -->|"no"| n19
-  n20(["422 PRECONDITION_FAILED Sólo el autor puede editar o eliminar su mensaje"]):::error
+  n18[("LEE community.conversation_participants")]:::efecto
+  n17 --> n18
+  n19{"!participant"}:::decision
+  n18 --> n19
+  n20(["404 NOT_FOUND Conversación no encontrada"]):::error
   n19 -->|"sí"| n20
-  n21{"message.deletedAt"}:::decision
+  n21["Llama a CommunityMessagingService.ownLiveMessage"]:::llamada
   n19 -->|"no"| n21
-  n22(["422 PRECONDITION_FAILED El mensaje ya fue eliminado"]):::error
-  n21 -->|"sí"| n22
-  n23["Llama a CommunityMessagingService.assertEditionWindowInside"]:::llamada
-  n21 -->|"no"| n23
-  n24{"!sent"}:::decision
+  n22["Llama a ConversationsRepository.findMessageInConversation"]:::llamada
+  n21 --> n22
+  n23[("LEE community.direct_messages")]:::efecto
+  n22 --> n23
+  n24{"!message"}:::decision
   n23 --> n24
-  n25(["422 PRECONDITION_FAILED El mensaje no tiene marca de envío: no se puede editar"]):::error
+  n25(["404 NOT_FOUND Mensaje no encontrado"]):::error
   n24 -->|"sí"| n25
-  n26{"elapsed › EDIT_WINDOW_MS"}:::decision
+  n26{"message.senderProfileId !== profileId"}:::decision
   n24 -->|"no"| n26
-  n27(["422 PRECONDITION_FAILED Pasaron más de 5 minutos: el mensaje ya no se puede editar"]):::error
+  n27(["422 PRECONDITION_FAILED Sólo el autor puede editar o eliminar su mensaje"]):::error
   n26 -->|"sí"| n27
-  n28[("ACTUALIZA community.direct_messages · ACTUALIZA community.direct_messages")]:::efecto
+  n28{"message.deletedAt"}:::decision
   n26 -->|"no"| n28
-  n29["Llama a CommunityMessagingService.otherParticipants"]:::llamada
-  n28 --> n29
-  n30["Llama a ConversationsRepository.findParticipants"]:::llamada
-  n29 --> n30
-  n31[("LEE community.conversation_participants")]:::efecto
+  n29(["422 PRECONDITION_FAILED El mensaje ya fue eliminado"]):::error
+  n28 -->|"sí"| n29
+  n30["Llama a CommunityMessagingService.assertEditionWindowInside"]:::llamada
+  n28 -->|"no"| n30
+  n31{"!sent"}:::decision
   n30 --> n31
-  n32(("200 Responde con éxito")):::ok
-  n31 --> n32
+  n32(["422 PRECONDITION_FAILED El mensaje no tiene marca de envío: no se puede editar"]):::error
+  n31 -->|"sí"| n32
+  n33{"elapsed › EDIT_WINDOW_MS"}:::decision
+  n31 -->|"no"| n33
+  n34(["422 PRECONDITION_FAILED Pasaron más de 5 minutos: el mensaje ya no se puede editar"]):::error
+  n33 -->|"sí"| n34
+  n35[("ACTUALIZA community.direct_messages · ACTUALIZA community.direct_messages")]:::efecto
+  n33 -->|"no"| n35
+  n36["Llama a CommunityMessagingService.otherParticipants"]:::llamada
+  n35 --> n36
+  n37["Llama a ConversationsRepository.findParticipants"]:::llamada
+  n36 --> n37
+  n38[("LEE community.conversation_participants")]:::efecto
+  n37 --> n38
+  n39(("200 Responde con éxito")):::ok
+  n38 --> n39
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2397,25 +2661,40 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a CommunityVisibilityService.assertActsAsProfile"]:::llamada
+  n5["Llama a CommunityVisibilityService.assertActsAsMessagingProfile"]:::llamada
   n4 --> n5
   n6["Llama a PublicProfilesRepository.findById"]:::llamada
   n5 --> n6
   n7[("LEE community.public_profiles")]:::efecto
   n6 --> n7
-  n8(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n8["Llama a CommunityVisibilityService.messagingAccess"]:::llamada
   n7 --> n8
-  n9["Llama a CommunityMessagingService.activeOrNotFoundParticipant"]:::llamada
-  n10["Llama a ConversationsRepository.findActiveParticipant"]:::llamada
+  n9["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n8 --> n9
+  n10[("LEE directory.tenants")]:::efecto
   n9 --> n10
-  n11[("LEE community.conversation_participants")]:::efecto
+  n11{"await this.messagingAccess(em, profile, actor)"}:::decision
   n10 --> n11
-  n12{"!participant"}:::decision
-  n11 --> n12
-  n13(["404 NOT_FOUND Conversación no encontrada"]):::error
-  n12 -->|"sí"| n13
-  n14(("200 Responde con éxito")):::ok
-  n12 -->|"no"| n14
+  n12["Llama a CommunityVisibilityService.messagingAccess"]:::llamada
+  n11 -->|"sí"| n12
+  n13["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n12 --> n13
+  n14[("LEE directory.tenants")]:::efecto
+  n13 --> n14
+  n15(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n14 --> n15
+  n11 -->|"no"| n15
+  n16["Llama a CommunityMessagingService.activeOrNotFoundParticipant"]:::llamada
+  n17["Llama a ConversationsRepository.findActiveParticipant"]:::llamada
+  n16 --> n17
+  n18[("LEE community.conversation_participants")]:::efecto
+  n17 --> n18
+  n19{"!participant"}:::decision
+  n18 --> n19
+  n20(["404 NOT_FOUND Conversación no encontrada"]):::error
+  n19 -->|"sí"| n20
+  n21(("200 Responde con éxito")):::ok
+  n19 -->|"no"| n21
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2446,41 +2725,56 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a CommunityVisibilityService.assertActsAsProfile"]:::llamada
+  n5["Llama a CommunityVisibilityService.assertActsAsMessagingProfile"]:::llamada
   n4 --> n5
   n6["Llama a PublicProfilesRepository.findById"]:::llamada
   n5 --> n6
   n7[("LEE community.public_profiles")]:::efecto
   n6 --> n7
-  n8(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n8["Llama a CommunityVisibilityService.messagingAccess"]:::llamada
   n7 --> n8
-  n9["Llama a CommunityMessagingService.activeOrNotFoundParticipant"]:::llamada
-  n10["Llama a ConversationsRepository.findActiveParticipant"]:::llamada
+  n9["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n8 --> n9
+  n10[("LEE directory.tenants")]:::efecto
   n9 --> n10
-  n11[("LEE community.conversation_participants")]:::efecto
+  n11{"await this.messagingAccess(em, profile, actor)"}:::decision
   n10 --> n11
-  n12{"!participant"}:::decision
-  n11 --> n12
-  n13(["404 NOT_FOUND Conversación no encontrada"]):::error
-  n12 -->|"sí"| n13
-  n14["Llama a ConversationsRepository.findConversationById"]:::llamada
-  n12 -->|"no"| n14
-  n15[("LEE community.conversations")]:::efecto
+  n12["Llama a CommunityVisibilityService.messagingAccess"]:::llamada
+  n11 -->|"sí"| n12
+  n13["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n12 --> n13
+  n14[("LEE directory.tenants")]:::efecto
+  n13 --> n14
+  n15(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
   n14 --> n15
-  n16{"!conversation"}:::decision
-  n15 --> n16
-  n17(["404 NOT_FOUND Conversación no encontrada"]):::error
-  n16 -->|"sí"| n17
-  n18[("ACTUALIZA community.conversations")]:::efecto
-  n16 -->|"no"| n18
-  n19["Llama a CommunityMessagingService.otherParticipants"]:::llamada
+  n11 -->|"no"| n15
+  n16["Llama a CommunityMessagingService.activeOrNotFoundParticipant"]:::llamada
+  n17["Llama a ConversationsRepository.findActiveParticipant"]:::llamada
+  n16 --> n17
+  n18[("LEE community.conversation_participants")]:::efecto
+  n17 --> n18
+  n19{"!participant"}:::decision
   n18 --> n19
-  n20["Llama a ConversationsRepository.findParticipants"]:::llamada
-  n19 --> n20
-  n21[("LEE community.conversation_participants")]:::efecto
-  n20 --> n21
-  n22(("200 Responde con éxito")):::ok
+  n20(["404 NOT_FOUND Conversación no encontrada"]):::error
+  n19 -->|"sí"| n20
+  n21["Llama a ConversationsRepository.findConversationById"]:::llamada
+  n19 -->|"no"| n21
+  n22[("LEE community.conversations")]:::efecto
   n21 --> n22
+  n23{"!conversation"}:::decision
+  n22 --> n23
+  n24(["404 NOT_FOUND Conversación no encontrada"]):::error
+  n23 -->|"sí"| n24
+  n25[("ACTUALIZA community.conversations")]:::efecto
+  n23 -->|"no"| n25
+  n26["Llama a CommunityMessagingService.otherParticipants"]:::llamada
+  n25 --> n26
+  n27["Llama a ConversationsRepository.findParticipants"]:::llamada
+  n26 --> n27
+  n28[("LEE community.conversation_participants")]:::efecto
+  n27 --> n28
+  n29(("200 Responde con éxito")):::ok
+  n28 --> n29
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2511,49 +2805,64 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a CommunityVisibilityService.assertActsAsProfile"]:::llamada
+  n5["Llama a CommunityVisibilityService.assertActsAsMessagingProfile"]:::llamada
   n4 --> n5
   n6["Llama a PublicProfilesRepository.findById"]:::llamada
   n5 --> n6
   n7[("LEE community.public_profiles")]:::efecto
   n6 --> n7
-  n8(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n8["Llama a CommunityVisibilityService.messagingAccess"]:::llamada
   n7 --> n8
-  n9["Llama a CommunityMessagingService.activeOrNotFoundParticipant"]:::llamada
-  n10["Llama a ConversationsRepository.findActiveParticipant"]:::llamada
+  n9["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n8 --> n9
+  n10[("LEE directory.tenants")]:::efecto
   n9 --> n10
-  n11[("LEE community.conversation_participants")]:::efecto
+  n11{"await this.messagingAccess(em, profile, actor)"}:::decision
   n10 --> n11
-  n12{"!participant"}:::decision
-  n11 --> n12
-  n13(["404 NOT_FOUND Conversación no encontrada"]):::error
-  n12 -->|"sí"| n13
-  n14["Llama a ConversationsRepository.findConversationById"]:::llamada
-  n12 -->|"no"| n14
-  n15[("LEE community.conversations")]:::efecto
+  n12["Llama a CommunityVisibilityService.messagingAccess"]:::llamada
+  n11 -->|"sí"| n12
+  n13["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n12 --> n13
+  n14[("LEE directory.tenants")]:::efecto
+  n13 --> n14
+  n15(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
   n14 --> n15
-  n16{"!conversation"}:::decision
-  n15 --> n16
-  n17(["404 NOT_FOUND Conversación no encontrada"]):::error
-  n16 -->|"sí"| n17
-  n18["Llama a ConversationsRepository.findMessageInConversation"]:::llamada
-  n16 -->|"no"| n18
-  n19[("LEE community.direct_messages")]:::efecto
+  n11 -->|"no"| n15
+  n16["Llama a CommunityMessagingService.activeOrNotFoundParticipant"]:::llamada
+  n17["Llama a ConversationsRepository.findActiveParticipant"]:::llamada
+  n16 --> n17
+  n18[("LEE community.conversation_participants")]:::efecto
+  n17 --> n18
+  n19{"!participant"}:::decision
   n18 --> n19
-  n20{"!message || message.deletedAt"}:::decision
-  n19 --> n20
-  n21(["404 NOT_FOUND Mensaje no encontrado"]):::error
-  n20 -->|"sí"| n21
-  n22[("ACTUALIZA community.conversations")]:::efecto
-  n20 -->|"no"| n22
-  n23["Llama a CommunityMessagingService.otherParticipants"]:::llamada
+  n20(["404 NOT_FOUND Conversación no encontrada"]):::error
+  n19 -->|"sí"| n20
+  n21["Llama a ConversationsRepository.findConversationById"]:::llamada
+  n19 -->|"no"| n21
+  n22[("LEE community.conversations")]:::efecto
+  n21 --> n22
+  n23{"!conversation"}:::decision
   n22 --> n23
-  n24["Llama a ConversationsRepository.findParticipants"]:::llamada
-  n23 --> n24
-  n25[("LEE community.conversation_participants")]:::efecto
-  n24 --> n25
-  n26(("200 Responde con éxito")):::ok
+  n24(["404 NOT_FOUND Conversación no encontrada"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a ConversationsRepository.findMessageInConversation"]:::llamada
+  n23 -->|"no"| n25
+  n26[("LEE community.direct_messages")]:::efecto
   n25 --> n26
+  n27{"!message || message.deletedAt"}:::decision
+  n26 --> n27
+  n28(["404 NOT_FOUND Mensaje no encontrado"]):::error
+  n27 -->|"sí"| n28
+  n29[("ACTUALIZA community.conversations")]:::efecto
+  n27 -->|"no"| n29
+  n30["Llama a CommunityMessagingService.otherParticipants"]:::llamada
+  n29 --> n30
+  n31["Llama a ConversationsRepository.findParticipants"]:::llamada
+  n30 --> n31
+  n32[("LEE community.conversation_participants")]:::efecto
+  n31 --> n32
+  n33(("200 Responde con éxito")):::ok
+  n32 --> n33
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2582,27 +2891,33 @@ flowchart TD
   n1 --> n2
   n3["Llama a CommunityMessagingReadService.conversationPresence"]:::llamada
   n2 --> n3
-  n4["Llama a CommunityVisibilityService.assertOwnProfile"]:::llamada
+  n4["Llama a CommunityVisibilityService.assertOwnMessagingProfile"]:::llamada
   n3 --> n4
   n5["Llama a PublicProfilesRepository.findById"]:::llamada
   n4 --> n5
   n6[("LEE community.public_profiles")]:::efecto
   n5 --> n6
-  n7(["403 FORBIDDEN Sólo el titular del perfil puede leer su contenido privado"]):::error
+  n7["Llama a CommunityVisibilityService.messagingAccess"]:::llamada
   n6 --> n7
-  n8["Llama a ConversationsRepository.findActiveParticipant"]:::llamada
-  n9[("LEE community.conversation_participants")]:::efecto
+  n8["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n7 --> n8
+  n9[("LEE directory.tenants")]:::efecto
   n8 --> n9
-  n10{"!participant"}:::decision
+  n10(["403 FORBIDDEN Sólo el titular del perfil puede leer su contenido privado"]):::error
   n9 --> n10
-  n11(["404 NOT_FOUND Conversación no encontrada"]):::error
-  n10 -->|"sí"| n11
-  n12["Llama a ConversationsRepository.findParticipants"]:::llamada
-  n10 -->|"no"| n12
-  n13[("LEE community.conversation_participants")]:::efecto
+  n11["Llama a ConversationsRepository.findActiveParticipant"]:::llamada
+  n12[("LEE community.conversation_participants")]:::efecto
+  n11 --> n12
+  n13{"!participant"}:::decision
   n12 --> n13
-  n14(("200 Responde con éxito")):::ok
-  n13 --> n14
+  n14(["404 NOT_FOUND Conversación no encontrada"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a ConversationsRepository.findParticipants"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE community.conversation_participants")]:::efecto
+  n15 --> n16
+  n17(("200 Responde con éxito")):::ok
+  n16 --> n17
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2634,44 +2949,59 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a CommunityVisibilityService.assertActsAsProfile"]:::llamada
+  n5["Llama a CommunityVisibilityService.assertActsAsMessagingProfile"]:::llamada
   n4 --> n5
   n6["Llama a PublicProfilesRepository.findById"]:::llamada
   n5 --> n6
   n7[("LEE community.public_profiles")]:::efecto
   n6 --> n7
-  n8(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n8["Llama a CommunityVisibilityService.messagingAccess"]:::llamada
   n7 --> n8
-  n9["Llama a ConversationsRepository.findConversationById"]:::llamada
-  n10[("LEE community.conversations")]:::efecto
+  n9["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n8 --> n9
+  n10[("LEE directory.tenants")]:::efecto
   n9 --> n10
-  n11{"!conversation"}:::decision
+  n11{"await this.messagingAccess(em, profile, actor)"}:::decision
   n10 --> n11
-  n12(["404 NOT_FOUND Conversación no encontrada"]):::error
+  n12["Llama a CommunityVisibilityService.messagingAccess"]:::llamada
   n11 -->|"sí"| n12
-  n13["Llama a ConversationsRepository.findActiveParticipant"]:::llamada
-  n11 -->|"no"| n13
-  n14[("LEE community.conversation_participants")]:::efecto
+  n13["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n12 --> n13
+  n14[("LEE directory.tenants")]:::efecto
   n13 --> n14
-  n15{"!participant"}:::decision
+  n15(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
   n14 --> n15
-  n16(["422 PRECONDITION_FAILED El perfil no es participante activo"]):::error
-  n15 -->|"sí"| n16
-  n17{"!messageId"}:::decision
-  n15 -->|"no"| n17
-  n18["Llama a ConversationsRepository.findLastMessage"]:::llamada
-  n17 -->|"sí"| n18
-  n19[("LEE community.direct_messages")]:::efecto
-  n18 --> n19
-  n20["Llama a ConversationsRepository.createReceipt"]:::llamada
-  n19 --> n20
-  n17 -->|"no"| n20
-  n21[("CREA community.message_receipts")]:::efecto
+  n11 -->|"no"| n15
+  n16["Llama a ConversationsRepository.findConversationById"]:::llamada
+  n17[("LEE community.conversations")]:::efecto
+  n16 --> n17
+  n18{"!conversation"}:::decision
+  n17 --> n18
+  n19(["404 NOT_FOUND Conversación no encontrada"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a ConversationsRepository.findActiveParticipant"]:::llamada
+  n18 -->|"no"| n20
+  n21[("LEE community.conversation_participants")]:::efecto
   n20 --> n21
-  n22[("ACTUALIZA community.conversation_participants")]:::efecto
+  n22{"!participant"}:::decision
   n21 --> n22
-  n23(("200 Responde con éxito")):::ok
-  n22 --> n23
+  n23(["422 PRECONDITION_FAILED El perfil no es participante activo"]):::error
+  n22 -->|"sí"| n23
+  n24{"!messageId"}:::decision
+  n22 -->|"no"| n24
+  n25["Llama a ConversationsRepository.findLastMessage"]:::llamada
+  n24 -->|"sí"| n25
+  n26[("LEE community.direct_messages")]:::efecto
+  n25 --> n26
+  n27["Llama a ConversationsRepository.createReceipt"]:::llamada
+  n26 --> n27
+  n24 -->|"no"| n27
+  n28[("CREA community.message_receipts")]:::efecto
+  n27 --> n28
+  n29[("ACTUALIZA community.conversation_participants")]:::efecto
+  n28 --> n29
+  n30(("200 Responde con éxito")):::ok
+  n29 --> n30
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2705,15 +3035,30 @@ flowchart TD
   n4 --> n5
   n6[("LEE community.public_profiles")]:::efecto
   n5 --> n6
-  n7(["403 FORBIDDEN Sólo el titular del perfil puede leer su contenido privado"]):::error
+  n7["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n6 --> n7
-  n8["Llama a PublicProfilesRepository.searchChatContacts"]:::llamada
-  n9["Transacción: then(…)"]:::transaccion
+  n8["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n7 --> n8
+  n9[("LEE directory.tenants")]:::efecto
   n8 --> n9
-  n10[("LEE community.public_profiles")]:::efecto
+  n10{"await this.isHolder(em, profile, actor)"}:::decision
   n9 --> n10
-  n11(("200 Responde con éxito")):::ok
-  n10 --> n11
+  n11["Llama a CommunityVisibilityService.isHolder"]:::llamada
+  n10 -->|"sí"| n11
+  n12["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n11 --> n12
+  n13[("LEE directory.tenants")]:::efecto
+  n12 --> n13
+  n14(["403 FORBIDDEN Sólo el titular del perfil puede leer su contenido privado"]):::error
+  n13 --> n14
+  n10 -->|"no"| n14
+  n15["Llama a PublicProfilesRepository.searchChatContacts"]:::llamada
+  n16["Transacción: then(…)"]:::transaccion
+  n15 --> n16
+  n17[("LEE community.public_profiles")]:::efecto
+  n16 --> n17
+  n18(("200 Responde con éxito")):::ok
+  n17 --> n18
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2747,41 +3092,56 @@ flowchart TD
   n4 --> n5
   n6[("LEE community.public_profiles")]:::efecto
   n5 --> n6
-  n7(["403 FORBIDDEN Sólo el titular del perfil puede leer su contenido privado"]):::error
+  n7["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n6 --> n7
-  n8["Llama a FeedRepository.listPageByOwner"]:::llamada
-  n9[("LEE community.feed_items")]:::efecto
+  n8["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n7 --> n8
+  n9[("LEE directory.tenants")]:::efecto
   n8 --> n9
-  n10["Llama a PostsRepository.listByIds"]:::llamada
+  n10{"await this.isHolder(em, profile, actor)"}:::decision
   n9 --> n10
-  n11[("LEE community.social_posts")]:::efecto
-  n10 --> n11
-  n12["Llama a CommunityVisibilityService.filterVisiblePosts"]:::llamada
+  n11["Llama a CommunityVisibilityService.isHolder"]:::llamada
+  n10 -->|"sí"| n11
+  n12["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
   n11 --> n12
-  n13["Llama a BlocksRepository.listBlockedPeers"]:::llamada
+  n13[("LEE directory.tenants")]:::efecto
   n12 --> n13
-  n14[("LEE community.user_blocks")]:::efecto
+  n14(["403 FORBIDDEN Sólo el titular del perfil puede leer su contenido privado"]):::error
   n13 --> n14
-  n15["Llama a FollowsRepository.listFollowedProfileIds"]:::llamada
-  n14 --> n15
-  n16[("LEE community.social_follows")]:::efecto
+  n10 -->|"no"| n14
+  n15["Llama a FeedRepository.listPageByOwner"]:::llamada
+  n16[("LEE community.feed_items")]:::efecto
   n15 --> n16
-  n17["Llama a CommunityEngagementService.ofPosts"]:::llamada
+  n17["Llama a PostsRepository.listByIds"]:::llamada
   n16 --> n17
-  n18["Llama a ReactionsRepository.summarizeByTargets"]:::llamada
+  n18[("LEE community.social_posts")]:::efecto
   n17 --> n18
-  n19[("LEE community.reactions")]:::efecto
+  n19["Llama a CommunityVisibilityService.filterVisiblePosts"]:::llamada
   n18 --> n19
-  n20["Llama a CommentsRepository.countByTargets"]:::llamada
+  n20["Llama a BlocksRepository.listBlockedPeers"]:::llamada
   n19 --> n20
-  n21[("LEE community.comments")]:::efecto
+  n21[("LEE community.user_blocks")]:::efecto
   n20 --> n21
-  n22["Llama a ReactionsRepository.listByActorTargets"]:::llamada
+  n22["Llama a FollowsRepository.listFollowedProfileIds"]:::llamada
   n21 --> n22
-  n23[("LEE community.reactions")]:::efecto
+  n23[("LEE community.social_follows")]:::efecto
   n22 --> n23
-  n24(("200 Responde con éxito")):::ok
+  n24["Llama a CommunityEngagementService.ofPosts"]:::llamada
   n23 --> n24
+  n25["Llama a ReactionsRepository.summarizeByTargets"]:::llamada
+  n24 --> n25
+  n26[("LEE community.reactions")]:::efecto
+  n25 --> n26
+  n27["Llama a CommentsRepository.countByTargets"]:::llamada
+  n26 --> n27
+  n28[("LEE community.comments")]:::efecto
+  n27 --> n28
+  n29["Llama a ReactionsRepository.listByActorTargets"]:::llamada
+  n28 --> n29
+  n30[("LEE community.reactions")]:::efecto
+  n29 --> n30
+  n31(("200 Responde con éxito")):::ok
+  n30 --> n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2817,15 +3177,30 @@ flowchart TD
   n5 --> n6
   n7[("LEE community.public_profiles")]:::efecto
   n6 --> n7
-  n8(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n8["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n7 --> n8
-  n9["Llama a FollowsRepository.findByFollowerTarget"]:::llamada
-  n10[("LEE community.social_follows")]:::efecto
+  n9["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n8 --> n9
+  n10[("LEE directory.tenants")]:::efecto
   n9 --> n10
-  n11[("ACTUALIZA community.social_follows")]:::efecto
+  n11{"await this.isHolder(em, profile, actor)"}:::decision
   n10 --> n11
-  n12(("200 Responde con éxito")):::ok
-  n11 --> n12
+  n12["Llama a CommunityVisibilityService.isHolder"]:::llamada
+  n11 -->|"sí"| n12
+  n13["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n12 --> n13
+  n14[("LEE directory.tenants")]:::efecto
+  n13 --> n14
+  n15(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n14 --> n15
+  n11 -->|"no"| n15
+  n16["Llama a FollowsRepository.findByFollowerTarget"]:::llamada
+  n17[("LEE community.social_follows")]:::efecto
+  n16 --> n17
+  n18[("ACTUALIZA community.social_follows")]:::efecto
+  n17 --> n18
+  n19(("200 Responde con éxito")):::ok
+  n18 --> n19
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2859,13 +3234,28 @@ flowchart TD
   n4 --> n5
   n6[("LEE community.public_profiles")]:::efecto
   n5 --> n6
-  n7(["403 FORBIDDEN Sólo el titular del perfil puede leer su contenido privado"]):::error
+  n7["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n6 --> n7
-  n8["Llama a FollowsRepository.listByFollowerPage"]:::llamada
-  n9[("LEE community.social_follows")]:::efecto
+  n8["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n7 --> n8
+  n9[("LEE directory.tenants")]:::efecto
   n8 --> n9
-  n10(("200 Responde con éxito")):::ok
+  n10{"await this.isHolder(em, profile, actor)"}:::decision
   n9 --> n10
+  n11["Llama a CommunityVisibilityService.isHolder"]:::llamada
+  n10 -->|"sí"| n11
+  n12["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n11 --> n12
+  n13[("LEE directory.tenants")]:::efecto
+  n12 --> n13
+  n14(["403 FORBIDDEN Sólo el titular del perfil puede leer su contenido privado"]):::error
+  n13 --> n14
+  n10 -->|"no"| n14
+  n15["Llama a FollowsRepository.listByFollowerPage"]:::llamada
+  n16[("LEE community.social_follows")]:::efecto
+  n15 --> n16
+  n17(("200 Responde con éxito")):::ok
+  n16 --> n17
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2903,30 +3293,45 @@ flowchart TD
   n5 --> n6
   n7[("LEE community.public_profiles")]:::efecto
   n6 --> n7
-  n8(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n8["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n7 --> n8
-  n9{"dto.followableType === 'PROFILE' && dto.followableRefId === dto.followerProfileId"}:::decision
-  n10(["422 PRECONDITION_FAILED No se puede seguir a uno mismo"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a FollowsRepository.findByFollowerTarget"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE community.social_follows")]:::efecto
-  n11 --> n12
-  n13{"dup && dup.statusConceptId === CONCEPTS.STATE_ACTIVE"}:::decision
+  n9["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n8 --> n9
+  n10[("LEE directory.tenants")]:::efecto
+  n9 --> n10
+  n11{"await this.isHolder(em, profile, actor)"}:::decision
+  n10 --> n11
+  n12["Llama a CommunityVisibilityService.isHolder"]:::llamada
+  n11 -->|"sí"| n12
+  n13["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
   n12 --> n13
-  n14(["409 CONFLICT Ya sigue este objeto"]):::error
-  n13 -->|"sí"| n14
-  n15{"dup"}:::decision
-  n13 -->|"no"| n15
-  n16[("ACTUALIZA community.social_follows")]:::efecto
-  n15 -->|"sí"| n16
-  n17["Llama a FollowsRepository.create"]:::llamada
-  n16 --> n17
-  n15 -->|"no"| n17
-  n18[("CREA community.social_follows")]:::efecto
-  n17 --> n18
-  n19(("201 Responde con éxito")):::ok
+  n14[("LEE directory.tenants")]:::efecto
+  n13 --> n14
+  n15(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n14 --> n15
+  n11 -->|"no"| n15
+  n16{"dto.followableType === 'PROFILE' && dto.followableRefId === dto.followerProfileId"}:::decision
+  n17(["422 PRECONDITION_FAILED No se puede seguir a uno mismo"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a FollowsRepository.findByFollowerTarget"]:::llamada
+  n16 -->|"no"| n18
+  n19[("LEE community.social_follows")]:::efecto
   n18 --> n19
+  n20{"dup && dup.statusConceptId === CONCEPTS.STATE_ACTIVE"}:::decision
+  n19 --> n20
+  n21(["409 CONFLICT Ya sigue este objeto"]):::error
+  n20 -->|"sí"| n21
+  n22{"dup"}:::decision
+  n20 -->|"no"| n22
+  n23[("ACTUALIZA community.social_follows")]:::efecto
+  n22 -->|"sí"| n23
+  n24["Llama a FollowsRepository.create"]:::llamada
+  n23 --> n24
+  n22 -->|"no"| n24
+  n25[("CREA community.social_follows")]:::efecto
+  n24 --> n25
+  n26(("201 Responde con éxito")):::ok
+  n25 --> n26
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4000,48 +4405,63 @@ flowchart TD
   n5 --> n6
   n7[("LEE community.public_profiles")]:::efecto
   n6 --> n7
-  n8(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n8["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n7 --> n8
-  n9["Llama a ModerationRepository.findDecisionById"]:::llamada
-  n10[("LEE community.moderation_decisions")]:::efecto
+  n9["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n8 --> n9
+  n10[("LEE directory.tenants")]:::efecto
   n9 --> n10
-  n11{"!decision"}:::decision
+  n11{"await this.isHolder(em, profile, actor)"}:::decision
   n10 --> n11
-  n12(["404 NOT_FOUND Decisión no encontrada"]):::error
+  n12["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n11 -->|"sí"| n12
-  n13["Llama a ModerationRepository.findStrikeByDecisionAndSubject"]:::llamada
-  n11 -->|"no"| n13
-  n14[("LEE community.moderation_strikes")]:::efecto
+  n13["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n12 --> n13
+  n14[("LEE directory.tenants")]:::efecto
   n13 --> n14
-  n15{"!strike"}:::decision
+  n15(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
   n14 --> n15
-  n16(["403 FORBIDDEN Sólo el sancionado por esta decisión puede apelarla"]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a ModerationRepository.findOpenAppealForDecision"]:::llamada
-  n15 -->|"no"| n17
-  n18[("LEE community.moderation_appeals")]:::efecto
+  n11 -->|"no"| n15
+  n16["Llama a ModerationRepository.findDecisionById"]:::llamada
+  n17[("LEE community.moderation_decisions")]:::efecto
+  n16 --> n17
+  n18{"!decision"}:::decision
   n17 --> n18
-  n19{"open"}:::decision
-  n18 --> n19
-  n20(["409 CONFLICT Ya existe una apelación abierta para esta decisión"]):::error
-  n19 -->|"sí"| n20
-  n21["Llama a ModerationRepository.createAppeal"]:::llamada
-  n19 -->|"no"| n21
-  n22[("CREA community.moderation_appeals")]:::efecto
+  n19(["404 NOT_FOUND Decisión no encontrada"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a ModerationRepository.findStrikeByDecisionAndSubject"]:::llamada
+  n18 -->|"no"| n20
+  n21[("LEE community.moderation_strikes")]:::efecto
+  n20 --> n21
+  n22{"!strike"}:::decision
   n21 --> n22
-  n23["Llama a ModerationRepository.findQueueById"]:::llamada
-  n22 --> n23
-  n24[("LEE community.moderation_queue")]:::efecto
-  n23 --> n24
-  n25{"queue"}:::decision
+  n23(["403 FORBIDDEN Sólo el sancionado por esta decisión puede apelarla"]):::error
+  n22 -->|"sí"| n23
+  n24["Llama a ModerationRepository.findOpenAppealForDecision"]:::llamada
+  n22 -->|"no"| n24
+  n25[("LEE community.moderation_appeals")]:::efecto
   n24 --> n25
-  n26["Llama a ModerationRepository.createQueue"]:::llamada
-  n25 -->|"sí"| n26
-  n27[("CREA community.moderation_queue")]:::efecto
-  n26 --> n27
-  n28(("201 Responde con éxito")):::ok
-  n27 --> n28
-  n25 -->|"no"| n28
+  n26{"open"}:::decision
+  n25 --> n26
+  n27(["409 CONFLICT Ya existe una apelación abierta para esta decisión"]):::error
+  n26 -->|"sí"| n27
+  n28["Llama a ModerationRepository.createAppeal"]:::llamada
+  n26 -->|"no"| n28
+  n29[("CREA community.moderation_appeals")]:::efecto
+  n28 --> n29
+  n30["Llama a ModerationRepository.findQueueById"]:::llamada
+  n29 --> n30
+  n31[("LEE community.moderation_queue")]:::efecto
+  n30 --> n31
+  n32{"queue"}:::decision
+  n31 --> n32
+  n33["Llama a ModerationRepository.createQueue"]:::llamada
+  n32 -->|"sí"| n33
+  n34[("CREA community.moderation_queue")]:::efecto
+  n33 --> n34
+  n35(("201 Responde con éxito")):::ok
+  n34 --> n35
+  n32 -->|"no"| n35
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4075,21 +4495,36 @@ flowchart TD
   n4 --> n5
   n6[("LEE community.public_profiles")]:::efecto
   n5 --> n6
-  n7(["403 FORBIDDEN Sólo el titular del perfil puede leer su contenido privado"]):::error
+  n7["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n6 --> n7
-  n8["Llama a ModerationRepository.listStrikesBySubject"]:::llamada
-  n9[("LEE community.moderation_strikes")]:::efecto
+  n8["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n7 --> n8
+  n9[("LEE directory.tenants")]:::efecto
   n8 --> n9
-  n10["Llama a ModerationRepository.listDecisionsByIds"]:::llamada
+  n10{"await this.isHolder(em, profile, actor)"}:::decision
   n9 --> n10
-  n11[("LEE community.moderation_decisions")]:::efecto
-  n10 --> n11
-  n12["Llama a ModerationRepository.findOpenAppealForDecision"]:::llamada
+  n11["Llama a CommunityVisibilityService.isHolder"]:::llamada
+  n10 -->|"sí"| n11
+  n12["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
   n11 --> n12
-  n13[("LEE community.moderation_appeals")]:::efecto
+  n13[("LEE directory.tenants")]:::efecto
   n12 --> n13
-  n14(("200 Responde con éxito")):::ok
+  n14(["403 FORBIDDEN Sólo el titular del perfil puede leer su contenido privado"]):::error
   n13 --> n14
+  n10 -->|"no"| n14
+  n15["Llama a ModerationRepository.listStrikesBySubject"]:::llamada
+  n16[("LEE community.moderation_strikes")]:::efecto
+  n15 --> n16
+  n17["Llama a ModerationRepository.listDecisionsByIds"]:::llamada
+  n16 --> n17
+  n18[("LEE community.moderation_decisions")]:::efecto
+  n17 --> n18
+  n19["Llama a ModerationRepository.findOpenAppealForDecision"]:::llamada
+  n18 --> n19
+  n20[("LEE community.moderation_appeals")]:::efecto
+  n19 --> n20
+  n21(("200 Responde con éxito")):::ok
+  n20 --> n21
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4190,17 +4625,32 @@ flowchart TD
   n4 --> n5
   n6[("LEE community.public_profiles")]:::efecto
   n5 --> n6
-  n7(["403 FORBIDDEN Sólo el titular del perfil puede leer su contenido privado"]):::error
+  n7["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n6 --> n7
-  n8["Llama a NotificationsRepository.listByRecipientPage"]:::llamada
-  n9[("LEE community.social_notifications")]:::efecto
+  n8["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n7 --> n8
+  n9[("LEE directory.tenants")]:::efecto
   n8 --> n9
-  n10["Llama a NotificationsRepository.countUnread"]:::llamada
+  n10{"await this.isHolder(em, profile, actor)"}:::decision
   n9 --> n10
-  n11[("LEE community.social_notifications")]:::efecto
-  n10 --> n11
-  n12(("200 Responde con éxito")):::ok
+  n11["Llama a CommunityVisibilityService.isHolder"]:::llamada
+  n10 -->|"sí"| n11
+  n12["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
   n11 --> n12
+  n13[("LEE directory.tenants")]:::efecto
+  n12 --> n13
+  n14(["403 FORBIDDEN Sólo el titular del perfil puede leer su contenido privado"]):::error
+  n13 --> n14
+  n10 -->|"no"| n14
+  n15["Llama a NotificationsRepository.listByRecipientPage"]:::llamada
+  n16[("LEE community.social_notifications")]:::efecto
+  n15 --> n16
+  n17["Llama a NotificationsRepository.countUnread"]:::llamada
+  n16 --> n17
+  n18[("LEE community.social_notifications")]:::efecto
+  n17 --> n18
+  n19(("200 Responde con éxito")):::ok
+  n18 --> n19
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4333,79 +4783,94 @@ flowchart TD
   n5 --> n6
   n7[("LEE community.public_profiles")]:::efecto
   n6 --> n7
-  n8(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n8["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n7 --> n8
-  n9["Llama a PollsRepository.findPollById"]:::llamada
-  n10[("LEE community.polls")]:::efecto
+  n9["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n8 --> n9
+  n10[("LEE directory.tenants")]:::efecto
   n9 --> n10
-  n11{"!poll"}:::decision
+  n11{"await this.isHolder(em, profile, actor)"}:::decision
   n10 --> n11
-  n12(["404 NOT_FOUND Encuesta no encontrada"]):::error
+  n12["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n11 -->|"sí"| n12
-  n13["Llama a PostsRepository.findById"]:::llamada
-  n11 -->|"no"| n13
-  n14[("LEE community.social_posts")]:::efecto
+  n13["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n12 --> n13
+  n14[("LEE directory.tenants")]:::efecto
   n13 --> n14
-  n15["Llama a CommunityVisibilityService.canViewPost"]:::llamada
+  n15(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
   n14 --> n15
-  n16["Llama a CommunityVisibilityService.isBlockedBetween"]:::llamada
-  n15 --> n16
-  n17["Llama a BlocksRepository.existsBetween"]:::llamada
+  n11 -->|"no"| n15
+  n16["Llama a PollsRepository.findPollById"]:::llamada
+  n17[("LEE community.polls")]:::efecto
   n16 --> n17
-  n18[("LEE community.user_blocks")]:::efecto
+  n18{"!poll"}:::decision
   n17 --> n18
-  n19{"según post.visibilityConceptId"}:::decision
-  n18 --> n19
-  n20["Llama a CommunityVisibilityService.followsProfile"]:::llamada
-  n19 -->|"COMM.POST_VISIBILITY_FOLLOWERS"| n20
-  n21["Llama a FollowsRepository.findByFollowerTarget"]:::llamada
+  n19(["404 NOT_FOUND Encuesta no encontrada"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a PostsRepository.findById"]:::llamada
+  n18 -->|"no"| n20
+  n21[("LEE community.social_posts")]:::efecto
   n20 --> n21
-  n22[("LEE community.social_follows")]:::efecto
+  n22["Llama a CommunityVisibilityService.canViewPost"]:::llamada
   n21 --> n22
-  n23{"!post || !(await this.visibility.canViewPost(tx, post, dto.voterProfileId))"}:::decision
+  n23["Llama a CommunityVisibilityService.isBlockedBetween"]:::llamada
   n22 --> n23
-  n19 -->|"otro"| n23
-  n24(["404 NOT_FOUND Encuesta no encontrada"]):::error
-  n23 -->|"sí"| n24
-  n25{"poll.statusConceptId !== COMM.POLL_OPEN || (poll.closesAt && poll.closesAt.getTime() ‹= Date.now())"}:::decision
-  n23 -->|"no"| n25
-  n26(["422 PRECONDITION_FAILED La encuesta está cerrada"]):::error
-  n25 -->|"sí"| n26
-  n27["Llama a PollsRepository.findOptionById"]:::llamada
-  n25 -->|"no"| n27
-  n28[("LEE community.poll_options")]:::efecto
+  n24["Llama a BlocksRepository.existsBetween"]:::llamada
+  n23 --> n24
+  n25[("LEE community.user_blocks")]:::efecto
+  n24 --> n25
+  n26{"según post.visibilityConceptId"}:::decision
+  n25 --> n26
+  n27["Llama a CommunityVisibilityService.followsProfile"]:::llamada
+  n26 -->|"COMM.POST_VISIBILITY_FOLLOWERS"| n27
+  n28["Llama a FollowsRepository.findByFollowerTarget"]:::llamada
   n27 --> n28
-  n29{"!option || option.pollId !== pollId"}:::decision
+  n29[("LEE community.social_follows")]:::efecto
   n28 --> n29
-  n30(["404 NOT_FOUND La opción no pertenece a la encuesta"]):::error
-  n29 -->|"sí"| n30
-  n31["Llama a PollsRepository.findVote"]:::llamada
-  n29 -->|"no"| n31
-  n32[("LEE community.poll_votes")]:::efecto
-  n31 --> n32
-  n33{"dupOption"}:::decision
-  n32 --> n33
-  n34(["409 CONFLICT Ya votó por esta opción"]):::error
-  n33 -->|"sí"| n34
-  n35{"!poll.allowsMultiple"}:::decision
-  n33 -->|"no"| n35
-  n36["Llama a PollsRepository.countVotesByVoter"]:::llamada
-  n35 -->|"sí"| n36
-  n37[("LEE community.poll_votes")]:::efecto
-  n36 --> n37
-  n38{"already › 0"}:::decision
-  n37 --> n38
-  n39(["409 CONFLICT La encuesta admite un único voto por votante"]):::error
-  n38 -->|"sí"| n39
-  n40["Llama a PollsRepository.createVote"]:::llamada
-  n38 -->|"no"| n40
-  n35 -->|"no"| n40
-  n41[("CREA community.poll_votes")]:::efecto
-  n40 --> n41
-  n42[("ACTUALIZA community.poll_options · ACTUALIZA community.polls")]:::efecto
-  n41 --> n42
-  n43(("201 Responde con éxito")):::ok
-  n42 --> n43
+  n30{"!post || !(await this.visibility.canViewPost(tx, post, dto.voterProfileId))"}:::decision
+  n29 --> n30
+  n26 -->|"otro"| n30
+  n31(["404 NOT_FOUND Encuesta no encontrada"]):::error
+  n30 -->|"sí"| n31
+  n32{"poll.statusConceptId !== COMM.POLL_OPEN || (poll.closesAt && poll.closesAt.getTime() ‹= Date.now())"}:::decision
+  n30 -->|"no"| n32
+  n33(["422 PRECONDITION_FAILED La encuesta está cerrada"]):::error
+  n32 -->|"sí"| n33
+  n34["Llama a PollsRepository.findOptionById"]:::llamada
+  n32 -->|"no"| n34
+  n35[("LEE community.poll_options")]:::efecto
+  n34 --> n35
+  n36{"!option || option.pollId !== pollId"}:::decision
+  n35 --> n36
+  n37(["404 NOT_FOUND La opción no pertenece a la encuesta"]):::error
+  n36 -->|"sí"| n37
+  n38["Llama a PollsRepository.findVote"]:::llamada
+  n36 -->|"no"| n38
+  n39[("LEE community.poll_votes")]:::efecto
+  n38 --> n39
+  n40{"dupOption"}:::decision
+  n39 --> n40
+  n41(["409 CONFLICT Ya votó por esta opción"]):::error
+  n40 -->|"sí"| n41
+  n42{"!poll.allowsMultiple"}:::decision
+  n40 -->|"no"| n42
+  n43["Llama a PollsRepository.countVotesByVoter"]:::llamada
+  n42 -->|"sí"| n43
+  n44[("LEE community.poll_votes")]:::efecto
+  n43 --> n44
+  n45{"already › 0"}:::decision
+  n44 --> n45
+  n46(["409 CONFLICT La encuesta admite un único voto por votante"]):::error
+  n45 -->|"sí"| n46
+  n47["Llama a PollsRepository.createVote"]:::llamada
+  n45 -->|"no"| n47
+  n42 -->|"no"| n47
+  n48[("CREA community.poll_votes")]:::efecto
+  n47 --> n48
+  n49[("ACTUALIZA community.poll_options · ACTUALIZA community.polls")]:::efecto
+  n48 --> n49
+  n50(("201 Responde con éxito")):::ok
+  n49 --> n50
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4627,20 +5092,35 @@ flowchart TD
   n9 --> n10
   n11[("LEE community.public_profiles")]:::efecto
   n10 --> n11
-  n12(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n12["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n11 --> n12
-  n13["Llama a PollsRepository.createPoll"]:::llamada
-  n14[("CREA community.polls")]:::efecto
+  n13["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n12 --> n13
+  n14[("LEE directory.tenants")]:::efecto
   n13 --> n14
-  n15["Repite: por cada const [i, label] de dto.options.entries()"]:::bucle
+  n15{"await this.isHolder(em, profile, actor)"}:::decision
   n14 --> n15
-  n16["Llama a PollsRepository.createOption"]:::llamada
-  n15 -->|"cada elemento"| n16
-  n17[("CREA community.poll_options")]:::efecto
+  n16["Llama a CommunityVisibilityService.isHolder"]:::llamada
+  n15 -->|"sí"| n16
+  n17["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
   n16 --> n17
-  n18(("201 Responde con éxito")):::ok
+  n18[("LEE directory.tenants")]:::efecto
   n17 --> n18
-  n15 -->|"al terminar"| n18
+  n19(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n18 --> n19
+  n15 -->|"no"| n19
+  n20["Llama a PollsRepository.createPoll"]:::llamada
+  n21[("CREA community.polls")]:::efecto
+  n20 --> n21
+  n22["Repite: por cada const [i, label] de dto.options.entries()"]:::bucle
+  n21 --> n22
+  n23["Llama a PollsRepository.createOption"]:::llamada
+  n22 -->|"cada elemento"| n23
+  n24[("CREA community.poll_options")]:::efecto
+  n23 --> n24
+  n25(("201 Responde con éxito")):::ok
+  n24 --> n25
+  n22 -->|"al terminar"| n25
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4810,17 +5290,32 @@ flowchart TD
   n1 --> n2
   n3["Llama a CommunityChatAutoReplyService.get"]:::llamada
   n2 --> n3
-  n4["Llama a CommunityVisibilityService.assertActsAsProfile"]:::llamada
+  n4["Llama a CommunityVisibilityService.assertActsAsMessagingProfile"]:::llamada
   n3 --> n4
   n5["Llama a PublicProfilesRepository.findById"]:::llamada
   n4 --> n5
   n6[("LEE community.public_profiles")]:::efecto
   n5 --> n6
-  n7(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n7["Llama a CommunityVisibilityService.messagingAccess"]:::llamada
   n6 --> n7
-  n8[("LEE community.chat_auto_replies")]:::efecto
-  n9(("200 Responde con éxito")):::ok
+  n8["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n7 --> n8
+  n9[("LEE directory.tenants")]:::efecto
   n8 --> n9
+  n10{"await this.messagingAccess(em, profile, actor)"}:::decision
+  n9 --> n10
+  n11["Llama a CommunityVisibilityService.messagingAccess"]:::llamada
+  n10 -->|"sí"| n11
+  n12["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n11 --> n12
+  n13[("LEE directory.tenants")]:::efecto
+  n12 --> n13
+  n14(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n13 --> n14
+  n10 -->|"no"| n14
+  n15[("LEE community.chat_auto_replies")]:::efecto
+  n16(("200 Responde con éxito")):::ok
+  n15 --> n16
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4850,17 +5345,32 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a CommunityVisibilityService.assertActsAsProfile"]:::llamada
+  n5["Llama a CommunityVisibilityService.assertActsAsMessagingProfile"]:::llamada
   n4 --> n5
   n6["Llama a PublicProfilesRepository.findById"]:::llamada
   n5 --> n6
   n7[("LEE community.public_profiles")]:::efecto
   n6 --> n7
-  n8(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n8["Llama a CommunityVisibilityService.messagingAccess"]:::llamada
   n7 --> n8
-  n9[("LEE community.chat_auto_replies")]:::efecto
-  n10(("200 Responde con éxito")):::ok
+  n9["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n8 --> n9
+  n10[("LEE directory.tenants")]:::efecto
   n9 --> n10
+  n11{"await this.messagingAccess(em, profile, actor)"}:::decision
+  n10 --> n11
+  n12["Llama a CommunityVisibilityService.messagingAccess"]:::llamada
+  n11 -->|"sí"| n12
+  n13["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n12 --> n13
+  n14[("LEE directory.tenants")]:::efecto
+  n13 --> n14
+  n15(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n14 --> n15
+  n11 -->|"no"| n15
+  n16[("LEE community.chat_auto_replies")]:::efecto
+  n17(("200 Responde con éxito")):::ok
+  n16 --> n17
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4982,91 +5492,106 @@ flowchart TD
   n9 --> n10
   n11[("LEE community.public_profiles")]:::efecto
   n10 --> n11
-  n12(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n12["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n11 --> n12
-  n13["Llama a PostsRepository.create"]:::llamada
-  n14[("CREA community.social_posts")]:::efecto
+  n13["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n12 --> n13
+  n14[("LEE directory.tenants")]:::efecto
   n13 --> n14
-  n15["Repite: por cada const [i, m] de (dto.media ?? []).entries()"]:::bucle
+  n15{"await this.isHolder(em, profile, actor)"}:::decision
   n14 --> n15
-  n16["Llama a CommunitySocialService.assertMediaFileUsableBy"]:::llamada
-  n15 -->|"cada elemento"| n16
-  n17["Llama a AttachableFileService.assertUsableBy"]:::llamada
+  n16["Llama a CommunityVisibilityService.isHolder"]:::llamada
+  n15 -->|"sí"| n16
+  n17["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
   n16 --> n17
-  n18["Llama a FilesRepository.findById"]:::llamada
+  n18[("LEE directory.tenants")]:::efecto
   n17 --> n18
-  n19[("LEE common.files")]:::efecto
+  n19(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
   n18 --> n19
-  n20{"!file"}:::decision
-  n19 --> n20
-  n21(["404 NOT_FOUND {labels.notFound}"]):::error
-  n20 -->|"sí"| n21
-  n22{"file.createdByUserId !== actor.id && !enAllowlist"}:::decision
-  n20 -->|"no"| n22
-  n23(["403 FORBIDDEN {labels.subject} no le pertenece"]):::error
-  n22 -->|"sí"| n23
-  n24{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
-  n22 -->|"no"| n24
-  n25(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
-  n24 -->|"sí"| n25
-  n26{"!file.currentVersionId"}:::decision
-  n24 -->|"no"| n26
-  n27(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n26 -->|"sí"| n27
-  n28["Llama a AttachableFileService.assertVersionUsable"]:::llamada
-  n26 -->|"no"| n28
-  n29{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
-  n28 --> n29
-  n30(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
+  n15 -->|"no"| n19
+  n20["Llama a PostsRepository.create"]:::llamada
+  n21[("CREA community.social_posts")]:::efecto
+  n20 --> n21
+  n22["Repite: por cada const [i, m] de (dto.media ?? []).entries()"]:::bucle
+  n21 --> n22
+  n23["Llama a CommunitySocialService.assertMediaFileUsableBy"]:::llamada
+  n22 -->|"cada elemento"| n23
+  n24["Llama a AttachableFileService.assertUsableBy"]:::llamada
+  n23 --> n24
+  n25["Llama a FilesRepository.findById"]:::llamada
+  n24 --> n25
+  n26[("LEE common.files")]:::efecto
+  n25 --> n26
+  n27{"!file"}:::decision
+  n26 --> n27
+  n28(["404 NOT_FOUND {labels.notFound}"]):::error
+  n27 -->|"sí"| n28
+  n29{"file.createdByUserId !== actor.id && !enAllowlist"}:::decision
+  n27 -->|"no"| n29
+  n30(["403 FORBIDDEN {labels.subject} no le pertenece"]):::error
   n29 -->|"sí"| n30
-  n31{"!file.currentVersionId"}:::decision
+  n31{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
   n29 -->|"no"| n31
-  n32(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n32(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
   n31 -->|"sí"| n32
-  n33{"!version"}:::decision
+  n33{"!file.currentVersionId"}:::decision
   n31 -->|"no"| n33
   n34(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
   n33 -->|"sí"| n34
-  n35{"version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED"}:::decision
+  n35["Llama a AttachableFileService.assertVersionUsable"]:::llamada
   n33 -->|"no"| n35
-  n36(["422 PRECONDITION_FAILED {labels.subject} resultó infectado"]):::error
-  n35 -->|"sí"| n36
-  n37{"accepted && !accepted.includes(version.mimeType ?? '')"}:::decision
-  n35 -->|"no"| n37
-  n38(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
-  n37 -->|"sí"| n38
-  n39["Llama a PostsRepository.createMedia"]:::llamada
-  n37 -->|"no"| n39
-  n40[("CREA community.post_media")]:::efecto
-  n39 --> n40
-  n41["Repite: por cada const raw de dto.hashtags ?? []"]:::bucle
-  n40 --> n41
-  n15 -->|"al terminar"| n41
-  n42["Llama a PostsRepository.upsertHashtag"]:::llamada
-  n41 -->|"cada elemento"| n42
-  n43[("LEE community.hashtags")]:::efecto
-  n42 --> n43
-  n44{"hashtag"}:::decision
-  n43 --> n44
-  n45[("ACTUALIZA community.hashtags")]:::efecto
+  n36{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
+  n35 --> n36
+  n37(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
+  n36 -->|"sí"| n37
+  n38{"!file.currentVersionId"}:::decision
+  n36 -->|"no"| n38
+  n39(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n38 -->|"sí"| n39
+  n40{"!version"}:::decision
+  n38 -->|"no"| n40
+  n41(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n40 -->|"sí"| n41
+  n42{"version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED"}:::decision
+  n40 -->|"no"| n42
+  n43(["422 PRECONDITION_FAILED {labels.subject} resultó infectado"]):::error
+  n42 -->|"sí"| n43
+  n44{"accepted && !accepted.includes(version.mimeType ?? '')"}:::decision
+  n42 -->|"no"| n44
+  n45(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
   n44 -->|"sí"| n45
-  n46[("CREA community.hashtags")]:::efecto
-  n45 --> n46
+  n46["Llama a PostsRepository.createMedia"]:::llamada
   n44 -->|"no"| n46
-  n47["Llama a PostsRepository.linkHashtag"]:::llamada
+  n47[("CREA community.post_media")]:::efecto
   n46 --> n47
-  n48[("CREA community.content_hashtags")]:::efecto
+  n48["Repite: por cada const raw de dto.hashtags ?? []"]:::bucle
   n47 --> n48
-  n49["Repite: por cada const mention de dto.mentions ?? []"]:::bucle
-  n48 --> n49
-  n41 -->|"al terminar"| n49
-  n50["Llama a PostsRepository.createMention"]:::llamada
-  n49 -->|"cada elemento"| n50
-  n51[("CREA community.mentions")]:::efecto
+  n22 -->|"al terminar"| n48
+  n49["Llama a PostsRepository.upsertHashtag"]:::llamada
+  n48 -->|"cada elemento"| n49
+  n50[("LEE community.hashtags")]:::efecto
+  n49 --> n50
+  n51{"hashtag"}:::decision
   n50 --> n51
-  n52(("201 Responde con éxito")):::ok
-  n51 --> n52
-  n49 -->|"al terminar"| n52
+  n52[("ACTUALIZA community.hashtags")]:::efecto
+  n51 -->|"sí"| n52
+  n53[("CREA community.hashtags")]:::efecto
+  n52 --> n53
+  n51 -->|"no"| n53
+  n54["Llama a PostsRepository.linkHashtag"]:::llamada
+  n53 --> n54
+  n55[("CREA community.content_hashtags")]:::efecto
+  n54 --> n55
+  n56["Repite: por cada const mention de dto.mentions ?? []"]:::bucle
+  n55 --> n56
+  n48 -->|"al terminar"| n56
+  n57["Llama a PostsRepository.createMention"]:::llamada
+  n56 -->|"cada elemento"| n57
+  n58[("CREA community.mentions")]:::efecto
+  n57 --> n58
+  n59(("201 Responde con éxito")):::ok
+  n58 --> n59
+  n56 -->|"al terminar"| n59
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -5271,29 +5796,44 @@ flowchart TD
   n9 --> n10
   n11[("LEE community.public_profiles")]:::efecto
   n10 --> n11
-  n12(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n12["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n11 --> n12
-  n13["Llama a ReviewsRepository.findById"]:::llamada
-  n14[("LEE community.service_reviews")]:::efecto
+  n13["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n12 --> n13
+  n14[("LEE directory.tenants")]:::efecto
   n13 --> n14
-  n15{"!review || review.targetPublicProfileId !== profileId"}:::decision
+  n15{"await this.isHolder(em, profile, actor)"}:::decision
   n14 --> n15
-  n16(["404 NOT_FOUND Reseña no encontrada"]):::error
+  n16["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n15 -->|"sí"| n16
-  n17["Llama a ReviewsRepository.findResponseByResponder"]:::llamada
-  n15 -->|"no"| n17
-  n18[("LEE community.review_responses")]:::efecto
+  n17["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n16 --> n17
+  n18[("LEE directory.tenants")]:::efecto
   n17 --> n18
-  n19{"previous"}:::decision
+  n19(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
   n18 --> n19
-  n20(["409 CONFLICT Ya respondiste esta reseña"]):::error
-  n19 -->|"sí"| n20
-  n21["Llama a ReviewsRepository.createResponse"]:::llamada
-  n19 -->|"no"| n21
-  n22[("CREA community.review_responses")]:::efecto
+  n15 -->|"no"| n19
+  n20["Llama a ReviewsRepository.findById"]:::llamada
+  n21[("LEE community.service_reviews")]:::efecto
+  n20 --> n21
+  n22{"!review || review.targetPublicProfileId !== profileId"}:::decision
   n21 --> n22
-  n23(("201 Responde con éxito")):::ok
-  n22 --> n23
+  n23(["404 NOT_FOUND Reseña no encontrada"]):::error
+  n22 -->|"sí"| n23
+  n24["Llama a ReviewsRepository.findResponseByResponder"]:::llamada
+  n22 -->|"no"| n24
+  n25[("LEE community.review_responses")]:::efecto
+  n24 --> n25
+  n26{"previous"}:::decision
+  n25 --> n26
+  n27(["409 CONFLICT Ya respondiste esta reseña"]):::error
+  n26 -->|"sí"| n27
+  n28["Llama a ReviewsRepository.createResponse"]:::llamada
+  n26 -->|"no"| n28
+  n29[("CREA community.review_responses")]:::efecto
+  n28 --> n29
+  n30(("201 Responde con éxito")):::ok
+  n29 --> n30
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -5963,22 +6503,37 @@ flowchart TD
   n5 --> n6
   n7[("LEE community.public_profiles")]:::efecto
   n6 --> n7
-  n8(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n8["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n7 --> n8
-  n9["Llama a ReactionsRepository.findByActorTarget"]:::llamada
-  n10[("LEE community.reactions")]:::efecto
+  n9["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
+  n8 --> n9
+  n10[("LEE directory.tenants")]:::efecto
   n9 --> n10
-  n11{"existing"}:::decision
+  n11{"await this.isHolder(em, profile, actor)"}:::decision
   n10 --> n11
-  n12[("ACTUALIZA community.reactions")]:::efecto
+  n12["Llama a CommunityVisibilityService.isHolder"]:::llamada
   n11 -->|"sí"| n12
-  n13["Llama a ReactionsRepository.create"]:::llamada
+  n13["Llama a CommunityOrganizationStaffService.isTenantBacked"]:::llamada
   n12 --> n13
-  n11 -->|"no"| n13
-  n14[("CREA community.reactions")]:::efecto
+  n14[("LEE directory.tenants")]:::efecto
   n13 --> n14
-  n15(("200 Responde con éxito")):::ok
+  n15(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
   n14 --> n15
+  n11 -->|"no"| n15
+  n16["Llama a ReactionsRepository.findByActorTarget"]:::llamada
+  n17[("LEE community.reactions")]:::efecto
+  n16 --> n17
+  n18{"existing"}:::decision
+  n17 --> n18
+  n19[("ACTUALIZA community.reactions")]:::efecto
+  n18 -->|"sí"| n19
+  n20["Llama a ReactionsRepository.create"]:::llamada
+  n19 --> n20
+  n18 -->|"no"| n20
+  n21[("CREA community.reactions")]:::efecto
+  n20 --> n21
+  n22(("200 Responde con éxito")):::ok
+  n21 --> n22
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -8772,6 +9327,7 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | GET /community/moderation/appeals | 200, 401, 403, 429 | 2 |
 | GET /community/moderation/decisions | 200, 401, 403, 429 | 1 |
 | GET /community/moderation/queue | 200, 401, 403, 429 | 2 |
+| GET /community/profiles/organization-showcases/me | 200, 401, 403, 429 | 2 |
 | POST /community/public-profiles | 201, 400, 401, 403, 429 | 1 |
 | GET /community/topics | 200, 401, 403, 429 | 1 |
 | GET /internal/community/feed/pending | 200, 400, 401, 403, 429 | 3 |

@@ -2,7 +2,7 @@
 
 # Mapa de operaciones
 
-1623 operaciones: ruta, proceso, módulo, riesgo, autorización, quién la llama y señales. Equivale a la vista `/flows` de AtlasAdminPortal.
+1627 operaciones: ruta, proceso, módulo, riesgo, autorización, quién la llama y señales. Equivale a la vista `/flows` de AtlasAdminPortal.
 
 «Quién la llama» sale del inventario de clientes del frontend (`docs/reports/generated/api-inventory.md`). Una operación sin cliente puede ser interna, móvil o deuda: la columna informa, no concluye.
 
@@ -198,7 +198,9 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | POST `/billing/service-catalog` | Módulo Billing (17) (ctrl:BillingServiceCatalogController) | billing | MEDIO | SECURITY_ADMIN · PRACTITIONER · CLINICIAN | ServicesCatalogClient | ESCRIBE · SIN_INTEGRACION · CON_DECISIONES |
 | PATCH `/billing/service-catalog/{id}` | Módulo Billing (17) (ctrl:BillingServiceCatalogController) | billing | MEDIO | PRACTITIONER · CLINICIAN · SECURITY_ADMIN | ServicesCatalogClient | ESCRIBE · SIN_PRUEBAS · CON_DECISIONES |
 | GET `/billing/service-catalog/{id}/image` | Módulo Billing (17) (ctrl:BillingServiceCatalogController) | billing | BAJO | Sesión sin roles | — | SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| POST `/billing/service-catalog/import-procedures` | Módulo Billing (17) (ctrl:BillingServiceCatalogController) | billing | MEDIO | SECURITY_ADMIN · PRACTITIONER · CLINICIAN | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/billing/service-catalog/procedure-specialties` | Módulo Billing (17) (ctrl:BillingServiceCatalogController) | billing | BAJO | Sesión sin roles | ServicesCatalogClient | SIN_INTEGRACION |
+| GET `/billing/service-catalog/procedure-specialties/mine` | Módulo Billing (17) (ctrl:BillingServiceCatalogController) | billing | BAJO | Sesión sin roles | — | SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT |
 | GET `/billing/service-catalog/procedures` | Módulo Billing (17) (ctrl:BillingServiceCatalogController) | billing | BAJO | Sesión sin roles | ServicesCatalogClient | SIN_INTEGRACION · CON_DECISIONES |
 | GET `/billing/simulated/catalogs` | Módulo Billing (17) (ctrl:BillingSimulatedController) | billing | BAJO | Sesión sin roles | — | SIN_TABLAS · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/billing/simulated/charges` | Módulo Billing (17) (ctrl:BillingSimulatedController) | billing | BAJO | Sesión sin roles | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
@@ -342,10 +344,10 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | POST `/community/bookmarks` | Módulo Community (19) (UC-19-04) | community | ALTO | Sesión sin roles | CommunityClient | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_INTEGRACION · CON_DECISIONES |
 | POST `/community/comments` | Módulo Community (19) (UC-19-02) | community | ALTO | Sesión sin roles | CommunityClient | ESCRIBE_SIN_ROLES · ESCRIBE · CON_DECISIONES |
 | GET `/community/comments/media/{fileId}/content` | Módulo Community (19) (ctrl:CommunitySocialController) | community | BAJO | Sesión sin roles | CommunityClient | SIN_PRUEBAS · CON_DECISIONES |
-| GET `/community/conversations` | Módulo Community (19) (ctrl:CommunityMessagingController) | community | BAJO | Sesión sin roles | CommunityClient | SIN_INTEGRACION · CON_DECISIONES |
+| GET `/community/conversations` | Módulo Community (19) (ctrl:CommunityMessagingController) | community | BAJO | Sesión sin roles | CommunityClient | CON_DECISIONES |
 | POST `/community/conversations` | Módulo Community (19) (ctrl:CommunityMessagingController) | community | ALTO | Sesión sin roles | CommunityClient | ESCRIBE_SIN_ROLES · ESCRIBE · CON_DECISIONES |
 | GET `/community/conversations/{conversationId}/attachments/{fileId}/content` | Módulo Community (19) (ctrl:CommunityMessagingController) | community | BAJO | Sesión sin roles | — | SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
-| GET `/community/conversations/{conversationId}/messages` | Módulo Community (19) (ctrl:CommunityMessagingController) | community | BAJO | Sesión sin roles | CommunityClient | SIN_PRUEBAS · CON_DECISIONES |
+| GET `/community/conversations/{conversationId}/messages` | Módulo Community (19) (ctrl:CommunityMessagingController) | community | BAJO | Sesión sin roles | CommunityClient | CON_DECISIONES |
 | POST `/community/conversations/{conversationId}/messages` | Módulo Community (19) (UC-19-06) | community | ALTO | Sesión sin roles | CommunityClient | ESCRIBE_SIN_ROLES · ESCRIBE · CON_DECISIONES |
 | DELETE `/community/conversations/{conversationId}/messages/{messageId}` | Módulo Community (19) (ctrl:CommunityMessagingController) | community | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | PATCH `/community/conversations/{conversationId}/messages/{messageId}` | Módulo Community (19) (ctrl:CommunityMessagingController) | community | ALTO | Sesión sin roles | CommunityClient | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_INTEGRACION · CON_DECISIONES |
@@ -394,6 +396,7 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | GET `/community/profiles/me` | Módulo Community (19) (ctrl:CommunitySocialController) | community | BAJO | Sesión sin roles | CommunityClient | SIN_PRUEBAS · CON_DECISIONES |
 | PUT `/community/profiles/me` | Módulo Community (19) (ctrl:CommunitySocialController) | community | ALTO | Sesión sin roles | CommunityClient | ESCRIBE_SIN_ROLES · ESCRIBE · CON_DECISIONES |
 | GET `/community/profiles/me/stats` | Módulo Community (19) (ctrl:CommunitySocialController) | community | BAJO | Sesión sin roles | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| GET `/community/profiles/organization-showcases/me` | Módulo Community (19) (ctrl:CommunitySocialController) | community | BAJO | Sesión sin roles | — | SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT |
 | POST `/community/public-profiles` | Módulo Community (19) (ctrl:CommunitySocialController) | community | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_CONSUMIDOR_FRONT |
 | GET `/community/ratings` | Módulo Community (19) (ctrl:PartyRatingsController) | community | BAJO | Sesión sin roles | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | PUT `/community/ratings` | Módulo Community (19) (ctrl:PartyRatingsController) | community | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
@@ -1142,6 +1145,7 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | POST `/pharmacy/orders/{id}/accept-substitutions` | src / modules / pharmacy inventory (ctrl:PharmacyOrdersController) | pharmacy_inventory | MEDIO | PATIENT | — | ESCRIBE · SIN_PRUEBAS · EVENTO · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/pharmacy/orders/{id}/cancel` | src / modules / pharmacy inventory (ctrl:PharmacyOrdersController) | pharmacy_inventory | MEDIO | PATIENT | — | ESCRIBE · SIN_PRUEBAS · EVENTO · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/pharmacy/orders/{id}/confirm` | src / modules / pharmacy inventory (ctrl:PharmacyOrdersController) | pharmacy_inventory | MEDIO | SECURITY_ADMIN · PHARMACY_STAFF | — | ESCRIBE · SIN_PRUEBAS · EVENTO · MAQUINA_DE_ESTADOS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| POST `/pharmacy/orders/{id}/conversation` | src / modules / pharmacy inventory (ctrl:PharmacyOrdersController) | pharmacy_inventory | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/pharmacy/orders/{id}/dispense` | src / modules / pharmacy inventory (ctrl:PharmacyOrdersController) | pharmacy_inventory | MEDIO | SECURITY_ADMIN · PHARMACY_STAFF | — | ESCRIBE · SIN_PRUEBAS · EVENTO · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/pharmacy/orders/{id}/prefer-original` | src / modules / pharmacy inventory (ctrl:PharmacyOrdersController) | pharmacy_inventory | MEDIO | PATIENT | — | ESCRIBE · SIN_PRUEBAS · EVENTO · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/pharmacy/orders/{id}/ready` | src / modules / pharmacy inventory (ctrl:PharmacyOrdersController) | pharmacy_inventory | MEDIO | SECURITY_ADMIN · PHARMACY_STAFF | — | ESCRIBE · SIN_PRUEBAS · EVENTO · MAQUINA_DE_ESTADOS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
