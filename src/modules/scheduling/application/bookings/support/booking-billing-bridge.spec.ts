@@ -156,10 +156,11 @@ describe('BookingBillingBridge · el pago de la agenda llega a facturación (FAC
   });
 
   it('una práctica sin precio publicado, o con 0: NO_PRICE, nunca una factura de 0', async () => {
-    for (const prices of [
+    const cases: Record<string, typeof CONSULTATION>[] = [
       {},
       { [PRACTICE]: { ...CONSULTATION, price: '0.00' } },
-    ]) {
+    ];
+    for (const prices of cases) {
       const { bridge, billing } = build({ prices });
       const row = {} as any;
       const link = await bridge.bill(uow, booking(), row, cash(100), ACTOR);
