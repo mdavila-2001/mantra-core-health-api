@@ -189,6 +189,15 @@ export async function bootstrapTestApp(
      * puerto.
      */
     realtime?: boolean;
+    /**
+     * Proveedores que se sustituyen por un doble antes de compilar el módulo.
+     * Para colaboradores de otra franja que todavía no existen (p. ej. el puerto
+     * de operación de camas de F2); el doble vive en `test/doubles`.
+     */
+    overrideProviders?: ReadonlyArray<{
+      token: string | symbol | (abstract new (...args: never[]) => unknown);
+      useValue: unknown;
+    }>;
   } = {},
 ): Promise<TestContext> {
   process.env.ORM_SCHEMA_SYNC = process.env.ORM_SCHEMA_SYNC ?? 'off';
@@ -213,6 +222,9 @@ export async function bootstrapTestApp(
     builder.overrideProvider(HttpDispatcherService).useValue({
       post: opts.httpDispatch,
     });
+  }
+  for (const override of opts.overrideProviders ?? []) {
+    builder.overrideProvider(override.token).useValue(override.useValue);
   }
   const moduleRef = await builder.compile();
 

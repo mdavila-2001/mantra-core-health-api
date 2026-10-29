@@ -17,6 +17,7 @@ import {
 import { ForbiddenException } from '@nestjs/common';
 import { OwnerType } from '../../common/dto';
 import { CLIN } from '../clinical.concepts';
+import { PRAC } from '../../practice/practice.concepts';
 
 const actor = { id: 'user-1', roles: [] } as any;
 
@@ -437,5 +438,120 @@ describe('EncountersService · MCH-007, cierre por id', () => {
     expect(enc.statusConceptId).toBe(CLIN.ENCOUNTER_IN_PROGRESS);
     expect(d.seal.computeHash).not.toHaveBeenCalled();
     expect(d.tx.flush).not.toHaveBeenCalled();
+  });
+});
+
+describe('EncountersService · F3 (internación)', () => {
+  describe('checkIn no ocupa camas', () => {
+    it('una cama en location ⇒ 422 BED_ASSIGNMENT_REQUIRES_ADT y no se crea nada', async () => {
+      const d = build();
+      (d.tx as any).execute = mockFn().mockResolvedValue([
+        { form: PRAC.LOC_FORM_BED },
+      ]);
+      await expect(
+        d.service.checkIn(
+          {
+            patientProfileId: 'p1',
+            tenantId: 't1',
+            location: { practiceSiteId: 'site1', careSpaceId: 'bed1' },
+          },
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        status: 422,
+        reason: 'BED_ASSIGNMENT_REQUIRES_ADT',
+        details: { careSpaceId: 'bed1' },
+      });
+      expect(d.encountersRepo.create).not.toHaveBeenCalled();
+      expect((d.tx as any).execute).toHaveBeenCalledWith(
+        expect.stringContaining('tenant_id = ?'),
+        ['bed1', 't1'],
+      );
+    });
+
+    it('un consultorio (o un espacio que no se ve en el tenant) sigue el camino de siempre', async () => {
+      for (const rows of [[{ form: PRAC.LOC_FORM_ROOM }], []]) {
+        const d = build();
+        (d.tx as any).execute = mockFn().mockResolvedValue(rows);
+        d.encountersRepo.create.mockReturnValue(encounter());
+        d.encountersRepo.createLocation.mockReturnValue({ id: 'loc1' });
+        const res = await d.service.checkIn(
+          {
+            patientProfileId: 'p1',
+            tenantId: 't1',
+            location: { practiceSiteId: 'site1', careSpaceId: 'room1' },
+          },
+          actor,
+        );
+        expect(res.locationIds).toEqual(['loc1']);
+      }
+    });
+
+    it('sin careSpaceId no consulta nada', async () => {
+      const d = build();
+      (d.tx as any).execute = mockFn();
+      d.encountersRepo.create.mockReturnValue(encounter());
+      d.encountersRepo.createLocation.mockReturnValue({ id: 'loc1' });
+      await d.service.checkIn(
+        {
+          patientProfileId: 'p1',
+          tenantId: 't1',
+          location: { practiceSiteId: 'site1' },
+        },
+        actor,
+      );
+      expect((d.tx as any).execute).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('completeForDischarge', () => {
+    it('cierra con el fin real, la disposición y el sello, sin pedir acceso de escritura a la historia', async () => {
+      const d = build();
+      const enc: any = encounter();
+      d.encountersRepo.findById.mockResolvedValue(enc);
+      const loc = { id: 'loc-site', updatedAt: new Date() };
+      d.encountersRepo.findActiveLocations.mockResolvedValue([loc]);
+      const endAt = new Date('2026-10-28T20:00:00Z');
+      const res = await d.service.completeForDischarge(
+        d.tx as any,
+        'enc1',
+        { endAt, dischargeDispositionConceptId: CLIN.DISP_HOME },
+        actor,
+      );
+      expect(enc.statusConceptId).toBe(CLIN.ENCOUNTER_FINISHED);
+      expect(enc.endAt).toBe(endAt);
+      expect(enc.dischargeDispositionConceptId).toBe(CLIN.DISP_HOME);
+      expect(enc.sealedAt).toBe(endAt);
+      expect((loc as any).periodEnd).toBe(endAt);
+      expect(d.seal.computeHash).toHaveBeenCalledWith(d.tx, enc);
+      expect(d.clinicalRead.assertCanWriteHistory).not.toHaveBeenCalled();
+      expect(res.status).toBe(CLIN.ENCOUNTER_FINISHED);
+    });
+
+    it('no cierra lo que no está en curso ni lo que no existe', async () => {
+      const d = build();
+      d.encountersRepo.findById.mockResolvedValue({
+        ...encounter(),
+        statusConceptId: CLIN.ENCOUNTER_FINISHED,
+      });
+      await expect(
+        d.service.completeForDischarge(
+          d.tx as any,
+          'enc1',
+          { endAt: new Date(), dischargeDispositionConceptId: CLIN.DISP_HOME },
+          actor,
+        ),
+      ).rejects.toMatchObject({ reason: 'ENCOUNTER_NOT_IN_PROGRESS' });
+      expect(d.seal.computeHash).not.toHaveBeenCalled();
+      d.encountersRepo.findById.mockResolvedValue(null);
+      await expect(
+        d.service.completeForDischarge(
+          d.tx as any,
+          'x',
+          { endAt: new Date(), dischargeDispositionConceptId: CLIN.DISP_HOME },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
   });
 });

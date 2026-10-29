@@ -195,6 +195,7 @@ export const { seeds: DELEGATED_ACCESS_CONCEPT_SEEDS, ids: DELEG } =
     // --- infraestructura hospitalaria F2: roles operativos (CONTRATO-F2-F5 §0.3).
     // El alcance (sede, unidad o espacio) lo da `access_scope_concept_id` y el
     // nodo de la fila; `practice` los lee en `InfrastructureAccessService`.
+    // F3 (ADT) usa estos mismos roles: una sola declaración de cada clave.
     ASSIGN_ROLE_NURSE_SUPERVISOR: {
       code: 'DA_ASSIGN_NURSE_SUPERVISOR',
       display: 'Nurse supervisor assignment',

@@ -33,3 +33,13 @@ export * from './prescription-expiry-notices.service';
 // es el único servicio de `clinical` que no registra nada clínico — sólo avisa.
 export { ClinicalNotificationsService } from './clinical-notifications.service';
 export * from './procedure-centers.service';
+// Internación / ADT (F3).
+export * from './adt-access.service';
+export * from './adt-events.service';
+export * from './adt-settings.service';
+export * from './adt-retire-blockers';
+export * from './bed-compatibility.service';
+export * from './inpatient-adt.service';
+export * from './inpatient-read.service';
+export * from './inpatient-census.service';
+export * from './inpatient-indicators.service';

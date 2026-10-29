@@ -37,6 +37,8 @@
     "start:worker:billing:dev": "nest start --watch --entryFile worker-billing",
     "start:worker:automation": "node dist/src/worker-automation",
     "start:worker:automation:dev": "nest start --watch --entryFile worker-automation",
+    "start:worker:clinical": "node dist/src/worker-clinical",
+    "start:worker:clinical:dev": "nest start --watch --entryFile worker-clinical",
     "start:worker:consent": "node dist/src/worker-consent",
     "start:worker:consent:dev": "nest start --watch --entryFile worker-consent",
     "start:worker:cross_store_consistency": "node dist/src/worker-cross_store_consistency",

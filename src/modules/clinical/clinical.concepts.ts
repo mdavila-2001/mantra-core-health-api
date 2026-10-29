@@ -1444,4 +1444,113 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       code: 'LOC_RESERVED',
       display: 'Encounter location reserved',
     },
+
+    // --- internación / ADT (CONTRATO-F2-F5, F3.1–F3.2) --------------------------
+    LOCATION_CANCELLED: {
+      code: 'LOC_CANCELLED',
+      display: 'Encounter location cancelled',
+    },
+    ENCOUNTER_CLASS_INPATIENT: {
+      code: 'ENC_IMP',
+      display: 'Inpatient encounter class',
+    },
+    /* Tipo de movimiento de una ubicación de cama (HL7 ADT A01/A02/A17/A14). */
+    ADT_ADMIT: { code: 'ADT_ADMIT', display: 'Admission to a bed' },
+    ADT_TRANSFER: { code: 'ADT_TRANSFER', display: 'Transfer to another bed' },
+    ADT_SWAP: { code: 'ADT_SWAP', display: 'Bed swap between two patients' },
+    ADT_RESERVE: { code: 'ADT_RESERVE', display: 'Bed reservation' },
+    /* Motivo con que se cierra una ubicación de cama. */
+    ADT_END_DISCHARGE: {
+      code: 'ADT_END_DISCHARGE',
+      display: 'Location ended by discharge',
+    },
+    ADT_END_TRANSFER_OUT: {
+      code: 'ADT_END_TRANSFER_OUT',
+      display: 'Location ended by transfer out',
+    },
+    ADT_END_SWAP: {
+      code: 'ADT_END_SWAP',
+      display: 'Location ended by bed swap',
+    },
+    ADT_END_RESERVATION_CANCELLED: {
+      code: 'ADT_END_RESERVATION_CANCELLED',
+      display: 'Reservation cancelled',
+    },
+    ADT_END_TRANSFER_CANCELLED: {
+      code: 'ADT_END_TRANSFER_CANCELLED',
+      display: 'Transfer cancelled',
+    },
+    ADT_END_RESERVATION_CONVERTED: {
+      code: 'ADT_END_RESERVATION_CONVERTED',
+      display: 'Reservation converted into occupancy',
+    },
+    /* Nivel de cuidado de la internación. */
+    LOC_CARE_GENERAL: { code: 'LOC_CARE_GENERAL', display: 'General care' },
+    LOC_CARE_INTERMEDIATE: {
+      code: 'LOC_CARE_INTERMEDIATE',
+      display: 'Intermediate care',
+    },
+    LOC_CARE_ICU: { code: 'LOC_CARE_ICU', display: 'Intensive care' },
+    LOC_CARE_NEONATAL_ICU: {
+      code: 'LOC_CARE_NEONATAL_ICU',
+      display: 'Neonatal intensive care',
+    },
+    /* Procedencia del ingreso. */
+    ADM_SRC_EMERGENCY: {
+      code: 'ADM_SRC_EMERGENCY',
+      display: 'Admission from emergency',
+    },
+    ADM_SRC_OUTPATIENT: {
+      code: 'ADM_SRC_OUTPATIENT',
+      display: 'Admission from outpatient care',
+    },
+    ADM_SRC_REFERRAL: {
+      code: 'ADM_SRC_REFERRAL',
+      display: 'Admission by referral',
+    },
+    ADM_SRC_BIRTH: { code: 'ADM_SRC_BIRTH', display: 'Admission by birth' },
+    ADM_SRC_TRANSFER_IN: {
+      code: 'ADM_SRC_TRANSFER_IN',
+      display: 'Admission by transfer from another facility',
+    },
+    /* Disposición al egreso. */
+    DISP_HOME: { code: 'DISP_HOME', display: 'Discharged home' },
+    DISP_TRANSFER: {
+      code: 'DISP_TRANSFER',
+      display: 'Discharged to another facility',
+    },
+    DISP_DEATH: { code: 'DISP_DEATH', display: 'Death' },
+    DISP_AGAINST_ADVICE: {
+      code: 'DISP_AGAINST_ADVICE',
+      display: 'Left against medical advice',
+    },
+    DISP_OTHER: { code: 'DISP_OTHER', display: 'Other discharge disposition' },
+    /* Incidente de colocación (compatibilidad forzada). */
+    PLC_INC_OPEN: { code: 'PLC_INC_OPEN', display: 'Placement incident open' },
+    PLC_INC_REVIEWED: {
+      code: 'PLC_INC_REVIEWED',
+      display: 'Placement incident reviewed',
+    },
+    PLC_INC_CLOSED: {
+      code: 'PLC_INC_CLOSED',
+      display: 'Placement incident closed',
+    },
+    /* Censo diario. */
+    CENSUS_OPEN: { code: 'CENSUS_OPEN', display: 'Census day open' },
+    CENSUS_CLOSED: { code: 'CENSUS_CLOSED', display: 'Census day closed' },
+    CEN_PRESENT: { code: 'CEN_PRESENT', display: 'Present at cutoff' },
+    CEN_ADMITTED: { code: 'CEN_ADMITTED', display: 'Admitted during the day' },
+    CEN_DISCHARGED: {
+      code: 'CEN_DISCHARGED',
+      display: 'Discharged during the day',
+    },
+    CEN_TRANSFER_IN: {
+      code: 'CEN_TRANSFER_IN',
+      display: 'Transferred in during the day',
+    },
+    CEN_TRANSFER_OUT: {
+      code: 'CEN_TRANSFER_OUT',
+      display: 'Transferred out during the day',
+    },
+    CEN_SAME_DAY: { code: 'CEN_SAME_DAY', display: 'Same-day stay' },
   });

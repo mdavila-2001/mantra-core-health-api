@@ -9,3 +9,5 @@ export * from './clinical-prescriptions.controller';
 export * from './clinical-prescriptions-public.controller';
 export * from './clinical-prescription-expiry.controller';
 export * from './clinical-procedure-centers.controller';
+export * from './clinical-adt.controller';
+export * from './clinical-census.controller';
