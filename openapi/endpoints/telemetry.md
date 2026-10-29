@@ -46,7 +46,7 @@ Referencia exhaustiva de 25 operación(es) del módulo `telemetry`, derivada del
 - **Nombre:** Embudos definidos con sus pasos
 - **Operation ID:** `TelemetryAnalyticsController_listFunnels`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryAnalyticsController.listFunnels](../../src/modules/telemetry/controllers/telemetry-analytics.controller.ts)
+- **Implementación:** [TelemetryAnalyticsController.listFunnels](../../src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts)
 
 ### Descripción de negocio
 
@@ -136,7 +136,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Embudo por sesión: denominador, conversión por paso y conversiones confirmadas por servidor
 - **Operation ID:** `TelemetryAnalyticsController_funnelReport`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryAnalyticsController.funnelReport](../../src/modules/telemetry/controllers/telemetry-analytics.controller.ts)
+- **Implementación:** [TelemetryAnalyticsController.funnelReport](../../src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts)
 
 ### Descripción de negocio
 
@@ -211,7 +211,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Embudo no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-analytics.service.ts |
+| 404 | `NOT_FOUND` | Embudo no encontrado | Excepción explícita en src/modules/telemetry/application/services/telemetry-analytics.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -236,7 +236,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Reporte de embudo y deserción paso a paso para formularios de alta
 - **Operation ID:** `TelemetryOnboardingAnalyticsController_getFunnelReport`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryOnboardingAnalyticsController.getFunnelReport](../../src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts)
+- **Implementación:** [TelemetryOnboardingAnalyticsController.getFunnelReport](../../src/modules/telemetry/presentation/controllers/telemetry-onboarding-analytics.controller.ts)
 
 ### Descripción de negocio
 
@@ -326,7 +326,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Mapa de calor por campo y nivel de fricción para formularios de alta
 - **Operation ID:** `TelemetryOnboardingAnalyticsController_getHeatmapReport`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryOnboardingAnalyticsController.getHeatmapReport](../../src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts)
+- **Implementación:** [TelemetryOnboardingAnalyticsController.getHeatmapReport](../../src/modules/telemetry/presentation/controllers/telemetry-onboarding-analytics.controller.ts)
 
 ### Descripción de negocio
 
@@ -419,7 +419,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Totales, rutas y eventos principales de la ventana
 - **Operation ID:** `TelemetryAnalyticsController_overview`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryAnalyticsController.overview](../../src/modules/telemetry/controllers/telemetry-analytics.controller.ts)
+- **Implementación:** [TelemetryAnalyticsController.overview](../../src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts)
 
 ### Descripción de negocio
 
@@ -515,7 +515,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Frescura, latencia de ingesta, desfase de reloj; lo no medido se declara
 - **Operation ID:** `TelemetryAnalyticsController_pipelineHealth`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryAnalyticsController.pipelineHealth](../../src/modules/telemetry/controllers/telemetry-analytics.controller.ts)
+- **Implementación:** [TelemetryAnalyticsController.pipelineHealth](../../src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts)
 
 ### Descripción de negocio
 
@@ -611,7 +611,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Sesiones de la ventana (sin identificadores de sesión ni sujeto)
 - **Operation ID:** `TelemetryAnalyticsController_listSessions`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryAnalyticsController.listSessions](../../src/modules/telemetry/controllers/telemetry-analytics.controller.ts)
+- **Implementación:** [TelemetryAnalyticsController.listSessions](../../src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts)
 
 ### Descripción de negocio
 
@@ -709,7 +709,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Timeline de una sesión: eventos y nombres de propiedad, sin valores
 - **Operation ID:** `TelemetryAnalyticsController_getSession`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryAnalyticsController.getSession](../../src/modules/telemetry/controllers/telemetry-analytics.controller.ts)
+- **Implementación:** [TelemetryAnalyticsController.getSession](../../src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts)
 
 ### Descripción de negocio
 
@@ -780,7 +780,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PLATFORM_ADMIN, SECURITY_ADMIN, DPO. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sesión no encontrada | Excepción explícita en src/modules/telemetry/services/telemetry-analytics.service.ts |
+| 404 | `NOT_FOUND` | Sesión no encontrada | Excepción explícita en src/modules/telemetry/application/services/telemetry-analytics.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -805,7 +805,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Eventos y sesiones por hora o día (UTC), cubos vacíos en 0
 - **Operation ID:** `TelemetryAnalyticsController_timeseries`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryAnalyticsController.timeseries](../../src/modules/telemetry/controllers/telemetry-analytics.controller.ts)
+- **Implementación:** [TelemetryAnalyticsController.timeseries](../../src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts)
 
 ### Descripción de negocio
 
@@ -901,7 +901,7 @@ Ejemplo de error normalizado:
 - **Nombre:** p50/p75/p95 por métrica sobre la distribución, con tamaño de muestra
 - **Operation ID:** `TelemetryAnalyticsController_webVitals`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryAnalyticsController.webVitals](../../src/modules/telemetry/controllers/telemetry-analytics.controller.ts)
+- **Implementación:** [TelemetryAnalyticsController.webVitals](../../src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts)
 
 ### Descripción de negocio
 
@@ -999,7 +999,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Capturar evento(s) de actividad consent-aware (batch)
 - **Operation ID:** `TelemetryEventsController_captureActivityEvents`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryEventsController.captureActivityEvents](../../src/modules/telemetry/controllers/telemetry-events.controller.ts)
+- **Implementación:** [TelemetryEventsController.captureActivityEvents](../../src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts)
 
 ### Descripción de negocio
 
@@ -1143,11 +1143,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Esquema de evento no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
-| 404 | `NOT_FOUND` | Sujeto de analítica no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
-| 404 | `NOT_FOUND` | Journey de sesión no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
+| 404 | `NOT_FOUND` | Esquema de evento no encontrado | Excepción explícita en src/modules/telemetry/application/services/telemetry-events.service.ts |
+| 404 | `NOT_FOUND` | Sujeto de analítica no encontrado | Excepción explícita en src/modules/telemetry/application/services/telemetry-events.service.ts |
+| 404 | `NOT_FOUND` | Journey de sesión no encontrado | Excepción explícita en src/modules/telemetry/application/services/telemetry-events.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La sesión autenticada no está registrada | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
+| 422 | `PRECONDITION_FAILED` | La sesión autenticada no está registrada | Excepción explícita en src/modules/telemetry/application/services/telemetry-events.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1172,7 +1172,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Provisionar sujeto de analítica pseudónimo
 - **Operation ID:** `TelemetryConsentController_provisionSubject`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryConsentController.provisionSubject](../../src/modules/telemetry/controllers/telemetry-consent.controller.ts)
+- **Implementación:** [TelemetryConsentController.provisionSubject](../../src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts)
 
 ### Descripción de negocio
 
@@ -1307,7 +1307,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Registrar contexto de cliente/dispositivo + journey
 - **Operation ID:** `TelemetryEventsController_captureClientContext`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryEventsController.captureClientContext](../../src/modules/telemetry/controllers/telemetry-events.controller.ts)
+- **Implementación:** [TelemetryEventsController.captureClientContext](../../src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts)
 
 ### Descripción de negocio
 
@@ -1435,10 +1435,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sujeto de analítica no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
-| 404 | `NOT_FOUND` | Journey de sesión no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
+| 404 | `NOT_FOUND` | Sujeto de analítica no encontrado | Excepción explícita en src/modules/telemetry/application/services/telemetry-events.service.ts |
+| 404 | `NOT_FOUND` | Journey de sesión no encontrado | Excepción explícita en src/modules/telemetry/application/services/telemetry-events.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La sesión autenticada no está registrada | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
+| 422 | `PRECONDITION_FAILED` | La sesión autenticada no está registrada | Excepción explícita en src/modules/telemetry/application/services/telemetry-events.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1463,7 +1463,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Registrar evento de conversión con atribución
 - **Operation ID:** `TelemetryEventsController_recordConversion`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryEventsController.recordConversion](../../src/modules/telemetry/controllers/telemetry-events.controller.ts)
+- **Implementación:** [TelemetryEventsController.recordConversion](../../src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts)
 
 ### Descripción de negocio
 
@@ -1572,10 +1572,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Funnel no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
-| 404 | `NOT_FOUND` | Sujeto de analítica no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
-| 404 | `NOT_FOUND` | Journey de sesión no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
-| 404 | `NOT_FOUND` | Evento de actividad no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
+| 404 | `NOT_FOUND` | Funnel no encontrado | Excepción explícita en src/modules/telemetry/application/services/telemetry-events.service.ts |
+| 404 | `NOT_FOUND` | Sujeto de analítica no encontrado | Excepción explícita en src/modules/telemetry/application/services/telemetry-events.service.ts |
+| 404 | `NOT_FOUND` | Journey de sesión no encontrado | Excepción explícita en src/modules/telemetry/application/services/telemetry-events.service.ts |
+| 404 | `NOT_FOUND` | Evento de actividad no encontrado | Excepción explícita en src/modules/telemetry/application/services/telemetry-events.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1601,7 +1601,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Registrar aceptación de disclosure por usuario/sesión
 - **Operation ID:** `TelemetryConsentController_acceptDisclosure`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryConsentController.acceptDisclosure](../../src/modules/telemetry/controllers/telemetry-consent.controller.ts)
+- **Implementación:** [TelemetryConsentController.acceptDisclosure](../../src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts)
 
 ### Descripción de negocio
 
@@ -1707,7 +1707,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Versión de disclosure no encontrada | Excepción explícita en src/modules/telemetry/services/telemetry-consent.service.ts |
+| 404 | `NOT_FOUND` | Versión de disclosure no encontrada | Excepción explícita en src/modules/telemetry/application/services/telemetry-consent.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1733,7 +1733,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Publicar versión de disclosure de tracking
 - **Operation ID:** `TelemetryGovernanceController_publishDisclosure`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryGovernanceController.publishDisclosure](../../src/modules/telemetry/controllers/telemetry-governance.controller.ts)
+- **Implementación:** [TelemetryGovernanceController.publishDisclosure](../../src/modules/telemetry/presentation/controllers/telemetry-governance.controller.ts)
 
 ### Descripción de negocio
 
@@ -1844,7 +1844,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | Ya existe esa versión del documento | Excepción explícita en src/modules/telemetry/services/telemetry-governance.service.ts |
+| 409 | `CONFLICT` | Ya existe esa versión del documento | Excepción explícita en src/modules/telemetry/application/services/telemetry-governance.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1870,7 +1870,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Registrar esquema de evento de actividad (versionado)
 - **Operation ID:** `TelemetryGovernanceController_registerEventSchema`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryGovernanceController.registerEventSchema](../../src/modules/telemetry/controllers/telemetry-governance.controller.ts)
+- **Implementación:** [TelemetryGovernanceController.registerEventSchema](../../src/modules/telemetry/presentation/controllers/telemetry-governance.controller.ts)
 
 ### Descripción de negocio
 
@@ -1990,10 +1990,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Propósito de tracking no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-governance.service.ts |
-| 409 | `CONFLICT` | Ya existe un esquema con ese nombre y versión | Excepción explícita en src/modules/telemetry/services/telemetry-governance.service.ts |
+| 404 | `NOT_FOUND` | Propósito de tracking no encontrado | Excepción explícita en src/modules/telemetry/application/services/telemetry-governance.service.ts |
+| 409 | `CONFLICT` | Ya existe un esquema con ese nombre y versión | Excepción explícita en src/modules/telemetry/application/services/telemetry-governance.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El propósito de tracking no está activo | Excepción explícita en src/modules/telemetry/services/telemetry-governance.service.ts |
+| 422 | `PRECONDITION_FAILED` | El propósito de tracking no está activo | Excepción explícita en src/modules/telemetry/application/services/telemetry-governance.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2018,7 +2018,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Definir funnel y sus pasos
 - **Operation ID:** `TelemetryGovernanceController_defineFunnel`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryGovernanceController.defineFunnel](../../src/modules/telemetry/controllers/telemetry-governance.controller.ts)
+- **Implementación:** [TelemetryGovernanceController.defineFunnel](../../src/modules/telemetry/presentation/controllers/telemetry-governance.controller.ts)
 
 ### Descripción de negocio
 
@@ -2149,10 +2149,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Propósito de tracking no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-governance.service.ts |
-| 409 | `CONFLICT` | El código de funnel ya existe | Excepción explícita en src/modules/telemetry/services/telemetry-governance.service.ts |
+| 404 | `NOT_FOUND` | Propósito de tracking no encontrado | Excepción explícita en src/modules/telemetry/application/services/telemetry-governance.service.ts |
+| 409 | `CONFLICT` | El código de funnel ya existe | Excepción explícita en src/modules/telemetry/application/services/telemetry-governance.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Esquema de evento de un paso no existe | Excepción explícita en src/modules/telemetry/services/telemetry-governance.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esquema de evento de un paso no existe | Excepción explícita en src/modules/telemetry/application/services/telemetry-governance.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2177,7 +2177,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Captura eventos de telemetría de alta y avance en formularios de registro
 - **Operation ID:** `TelemetryOnboardingAnalyticsController_recordEvents`
 - **Autenticación:** Pública
-- **Implementación:** [TelemetryOnboardingAnalyticsController.recordEvents](../../src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts)
+- **Implementación:** [TelemetryOnboardingAnalyticsController.recordEvents](../../src/modules/telemetry/presentation/controllers/telemetry-onboarding-analytics.controller.ts)
 
 ### Descripción de negocio
 
@@ -2321,7 +2321,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Cerrar journey de sesión y consolidar métricas
 - **Operation ID:** `TelemetryEventsController_closeJourney`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryEventsController.closeJourney](../../src/modules/telemetry/controllers/telemetry-events.controller.ts)
+- **Implementación:** [TelemetryEventsController.closeJourney](../../src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts)
 
 ### Descripción de negocio
 
@@ -2425,10 +2425,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Journey de sesión no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
-| 404 | `NOT_FOUND` | Evento de actividad no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
+| 404 | `NOT_FOUND` | Journey de sesión no encontrado | Excepción explícita en src/modules/telemetry/application/services/telemetry-events.service.ts |
+| 404 | `NOT_FOUND` | Evento de actividad no encontrado | Excepción explícita en src/modules/telemetry/application/services/telemetry-events.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El journey ya está cerrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
+| 422 | `PRECONDITION_FAILED` | El journey ya está cerrado | Excepción explícita en src/modules/telemetry/application/services/telemetry-events.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2453,7 +2453,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Otorgar consentimiento de tracking por propósito
 - **Operation ID:** `TelemetryConsentController_grantConsent`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryConsentController.grantConsent](../../src/modules/telemetry/controllers/telemetry-consent.controller.ts)
+- **Implementación:** [TelemetryConsentController.grantConsent](../../src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts)
 
 ### Descripción de negocio
 
@@ -2563,9 +2563,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Propósito de tracking no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-consent.service.ts |
+| 404 | `NOT_FOUND` | Propósito de tracking no encontrado | Excepción explícita en src/modules/telemetry/application/services/telemetry-consent.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El propósito no requiere consentimiento | Excepción explícita en src/modules/telemetry/services/telemetry-consent.service.ts |
+| 422 | `PRECONDITION_FAILED` | El propósito no requiere consentimiento | Excepción explícita en src/modules/telemetry/application/services/telemetry-consent.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2590,7 +2590,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Retirar consentimiento y desactivar sujeto (cascada)
 - **Operation ID:** `TelemetryConsentController_withdrawConsent`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryConsentController.withdrawConsent](../../src/modules/telemetry/controllers/telemetry-consent.controller.ts)
+- **Implementación:** [TelemetryConsentController.withdrawConsent](../../src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts)
 
 ### Descripción de negocio
 
@@ -2684,8 +2684,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Consentimiento no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-consent.service.ts |
-| 422 | `PRECONDITION_FAILED` | No hay un consentimiento vigente que retirar | Excepción explícita en src/modules/telemetry/services/telemetry-consent.service.ts |
+| 404 | `NOT_FOUND` | Consentimiento no encontrado | Excepción explícita en src/modules/telemetry/application/services/telemetry-consent.service.ts |
+| 422 | `PRECONDITION_FAILED` | No hay un consentimiento vigente que retirar | Excepción explícita en src/modules/telemetry/application/services/telemetry-consent.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2710,7 +2710,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Estado vigente de mi consentimiento de tracking
 - **Operation ID:** `TelemetryConsentController_getMyConsent`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryConsentController.getMyConsent](../../src/modules/telemetry/controllers/telemetry-consent.controller.ts)
+- **Implementación:** [TelemetryConsentController.getMyConsent](../../src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts)
 
 ### Descripción de negocio
 
@@ -2819,7 +2819,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Definir propósito de tracking y base legal
 - **Operation ID:** `TelemetryGovernanceController_definePurpose`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryGovernanceController.definePurpose](../../src/modules/telemetry/controllers/telemetry-governance.controller.ts)
+- **Implementación:** [TelemetryGovernanceController.definePurpose](../../src/modules/telemetry/presentation/controllers/telemetry-governance.controller.ts)
 
 ### Descripción de negocio
 
@@ -2939,7 +2939,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | El código de propósito ya existe | Excepción explícita en src/modules/telemetry/services/telemetry-governance.service.ts |
+| 409 | `CONFLICT` | El código de propósito ya existe | Excepción explícita en src/modules/telemetry/application/services/telemetry-governance.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2965,7 +2965,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Registrar métricas Core Web Vitals por ruta (batch)
 - **Operation ID:** `TelemetryEventsController_recordWebVitals`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TelemetryEventsController.recordWebVitals](../../src/modules/telemetry/controllers/telemetry-events.controller.ts)
+- **Implementación:** [TelemetryEventsController.recordWebVitals](../../src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts)
 
 ### Descripción de negocio
 
@@ -3089,10 +3089,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Journey de sesión no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
-| 404 | `NOT_FOUND` | Sujeto de analítica no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
-| 404 | `NOT_FOUND` | Evento de actividad no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
-| 404 | `NOT_FOUND` | Contexto de cliente no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
+| 404 | `NOT_FOUND` | Journey de sesión no encontrado | Excepción explícita en src/modules/telemetry/application/services/telemetry-events.service.ts |
+| 404 | `NOT_FOUND` | Sujeto de analítica no encontrado | Excepción explícita en src/modules/telemetry/application/services/telemetry-events.service.ts |
+| 404 | `NOT_FOUND` | Evento de actividad no encontrado | Excepción explícita en src/modules/telemetry/application/services/telemetry-events.service.ts |
+| 404 | `NOT_FOUND` | Contexto de cliente no encontrado | Excepción explícita en src/modules/telemetry/application/services/telemetry-events.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
