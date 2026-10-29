@@ -14,3 +14,4 @@ export type {
 } from './blocked-bookings-canceller';
 export { CatalogAccess } from './catalog-access';
 export { SlotMoveNotifier } from './slot-move-notifier';
+export { SpaceResourceLinker } from './space-resource-linker';

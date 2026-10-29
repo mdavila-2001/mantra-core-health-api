@@ -192,7 +192,8 @@ export async function bootstrapTestApp(
     /**
      * Proveedores que se sustituyen por un doble antes de compilar el módulo.
      * Para colaboradores de otra franja que todavía no existen (p. ej. el puerto
-     * de operación de camas de F2); el doble vive en `test/doubles`.
+     * de operación de camas de F2); el doble vive en `test/doubles`. Se declaran
+     * en la prueba que los usa; el resto de la aplicación es la real.
      */
     overrideProviders?: ReadonlyArray<{
       token: string | symbol | (abstract new (...args: never[]) => unknown);

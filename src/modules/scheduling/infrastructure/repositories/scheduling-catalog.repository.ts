@@ -40,6 +40,8 @@ export interface CreateResourceData {
    * Identificador asociado a resource ref.
    */
   resourceRefId: string;
+  /** FK real al espacio de infraestructura, sólo para recursos que apuntan a `care_spaces`. */
+  careSpaceId?: string;
   /**
    * Valor de name mantenido por la instancia.
    */
@@ -310,6 +312,7 @@ export class SchedulingCatalogRepository {
         resourceTypeConceptId: data.resourceTypeConceptId,
         resourceRefType: data.resourceRefType,
         resourceRefId: data.resourceRefId,
+        careSpaceId: data.careSpaceId,
         name: data.name,
         timeZone: data.timeZone,
         capacity: data.capacity,

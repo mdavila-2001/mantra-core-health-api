@@ -14,6 +14,7 @@ import {
   PeriopIntraopRepository,
 } from '../repositories';
 import { SEVERITY_CONCEPT } from './periop-preop.service';
+import { PeriopChecklistGateService } from './periop-checklist-gate.service';
 import {
   assertProcedureOfCasePatient,
   isCaseInScope,
@@ -129,6 +130,7 @@ export class PeriopIntraopService {
    * @param intraopRepo - Valor de intraop repo requerido por la operación.
    * @param casesRepo - Valor de cases repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
+   * @param gate - Compuerta del check-list OMS (la Salida cierra el caso).
    */
   constructor(
     private readonly em: EntityManager,
@@ -137,6 +139,7 @@ export class PeriopIntraopService {
     private readonly procedures: ProceduresService,
     private readonly receivedServices: ReceivedServicesProjector,
     private readonly logger: PinoLogger,
+    private readonly gate: PeriopChecklistGateService,
   ) {
     this.logger.setContext(PeriopIntraopService.name);
   }
@@ -617,6 +620,12 @@ export class PeriopIntraopService {
           ProceduresPerioperativeErrorReason.REPORT_NOT_FOUND,
         );
       }
+      // INV-39: firmar el reporte cierra el caso, y un caso no se cierra sin las tres fases
+      // del check-list (la Salida implica la Pausa y la Entrada: lo exige la base).
+      if (surgicalCase.statusConceptId !== CONCEPTS.CASE_COMPLETED) {
+        await this.gate.assertPhase(tx, caseId, 'SIGN_OUT');
+      }
+
       if (report.procedureCaseId !== caseId) {
         // «Es de otro caso» sólo se revela si ese caso es del tenant activo.
         if (

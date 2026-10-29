@@ -15,6 +15,9 @@ export {
   CaseSummaryDto,
   CaseListResponseDto,
   CaseDetailDto,
+  CaseOperatingRoomDto,
+  CaseBlockDto,
+  CaseChecklistDto,
   RiskScoreDto,
   CreatePreopAssessmentDto,
   PreopAssessmentResponseDto,
@@ -97,3 +100,21 @@ export {
   DentalCatalogEntryDto,
   DentalCatalogDto,
 } from './dental.dto';
+export {
+  BlockRecurrenceDto,
+  CreateOrBlocksDto,
+  BlockReasonDto,
+  EndSeriesDto,
+  ListOrBlocksQueryDto,
+  ListOperatingRoomsQueryDto,
+  CreateChecklistDto,
+  RecordRoomEventDto,
+  OrUtilizationQueryDto,
+  BLOCK_OWNER_KINDS,
+  ROOM_EVENT_CODES,
+} from './periop-or.dto';
+export type {
+  BlockOwnerKind,
+  RoomEventCode,
+  UtilizationGroupBy,
+} from './periop-or.dto';

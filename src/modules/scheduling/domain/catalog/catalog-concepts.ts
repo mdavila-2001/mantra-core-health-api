@@ -162,6 +162,26 @@ export const MAX_BOOKINGS_IN_NOTICE = 10;
 export const MAX_SLOTS_PER_RUN = 2000;
 
 /**
+ * Tipos de referencia admitidos para un recurso agendable, con el esquema al que
+ * pertenece cada tabla (lista CERRADA).
+ *
+ * `resourceRefType` es una referencia polimórfica que llega del cliente. Quien la valida
+ * (¿es un espacio? ¿hay que aplicar la regla estricta del quirófano?) y quien la consume
+ * después (reservas, plantillas, excepciones, disponibilidad, `CHECK` de la base) tienen
+ * que ver **el mismo texto**: si el validador normaliza y el almacén guarda lo crudo, un
+ * `« Care_Spaces »` esquivaba la validación y quedaba guardado como algo que otro módulo
+ * lee como espacio (diferencial de analizador). Por eso hay UN solo punto de
+ * normalización, {@link normalizeRefType}, que decide el camino y produce el valor que se
+ * persiste; lo que no esté en esta lista se rechaza (422), no se guarda.
+ */
+export const RESOURCE_REF_TYPE_SCHEMAS: Readonly<Record<string, string>> = {
+  health_practitioner_profiles: 'profiles',
+  care_spaces: 'practice',
+  practice_sites: 'practice',
+  diagnostic_equipment: 'diagnostic_units',
+};
+
+/**
  * Alias conocidos de una misma tabla, colapsados a su nombre real.
  *
  * `resourceRefType` es texto libre —el recurso puede apuntar a un profesional, a
@@ -185,6 +205,63 @@ export const TABLE_ALIAS: Readonly<Record<string, string>> = {
   practitioner_profiles: 'health_practitioner_profiles',
 };
 
+/** Un identificador de PostgreSQL sin comillas: minúsculas, dígitos y guion bajo. */
+const IDENTIFIER = /^[a-z][a-z0-9_]*$/;
+
+/**
+ * Normaliza un `resourceRefType` del cliente al valor canónico, o `null` si no es uno
+ * admitido.
+ *
+ * Pasos, en este orden y sin atajos: `NFKC` (las variantes de ancho completo caen a
+ * ASCII), `trim`, minúsculas, un único prefijo de esquema opcional que debe ser el esquema
+ * real de la tabla (`practice.care_spaces` sí; `otro.care_spaces` no), alias
+ * (`practitioner_profiles`) y pertenencia a {@link RESOURCE_REF_TYPE_SCHEMAS}. Cualquier
+ * carácter fuera de `[a-z0-9_]` en el identificador (comillas, espacios internos, ceros de
+ * ancho, punto y coma) lo descarta.
+ *
+ * @param raw - El valor tal como llegó.
+ * @returns El tipo canónico, o `null` si no está admitido.
+ */
+export function normalizeRefType(raw: unknown): string | null {
+  if (typeof raw !== 'string') return null;
+  const cleaned = raw.normalize('NFKC').trim().toLowerCase();
+  const parts = cleaned.split('.');
+  if (parts.length > 2) return null;
+  const table = parts[parts.length - 1];
+  const schema = parts.length === 2 ? parts[0] : undefined;
+  if (
+    !IDENTIFIER.test(table) ||
+    (schema !== undefined && !IDENTIFIER.test(schema))
+  ) {
+    return null;
+  }
+  const canonical = TABLE_ALIAS[table] ?? table;
+  const expectedSchema = RESOURCE_REF_TYPE_SCHEMAS[canonical];
+  if (expectedSchema === undefined) return null;
+  if (schema !== undefined && schema !== expectedSchema) return null;
+  return canonical;
+}
+
+/**
+ * El valor que se persiste para un `resourceRefType`: el canónico si es admitido; si no, el
+ * texto recortado y en minúsculas (nunca el crudo). Las rutas que escriben pasan antes por
+ * {@link normalizeRefType} y rechazan lo que devuelve `null`; esta función sólo existe para
+ * las comparaciones de acceso, que deben usar el mismo texto que el almacén.
+ */
 export function canonicalRefType(refType: string): string {
-  return TABLE_ALIAS[refType] ?? refType;
+  return (
+    normalizeRefType(refType) ?? refType.normalize('NFKC').trim().toLowerCase()
+  );
+}
+
+/**
+ * `resourceRefType` canónico de un recurso que apunta a un espacio de infraestructura
+ * (`practice.care_spaces`). Un recurso así lleva además la FK real `care_space_id`
+ * (R0 de F4, INV-40) y se crea por otro camino que el resto: ver `SpaceResourceLinker`.
+ */
+export const CARE_SPACES_REF_TYPE = 'care_spaces';
+
+/** ¿El recurso que se pide apunta a un espacio de infraestructura? (mismo analizador que el almacén) */
+export function refersToCareSpace(refType: string): boolean {
+  return normalizeRefType(refType) === CARE_SPACES_REF_TYPE;
 }

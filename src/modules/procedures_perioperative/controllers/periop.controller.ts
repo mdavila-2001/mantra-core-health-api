@@ -9,7 +9,9 @@ import {
   Query,
   Patch,
   Post,
+  UseInterceptors,
 } from '@nestjs/common';
+import { PractitionerRefsInterceptor } from '../policies/practitioner-refs.interceptor';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   Audited,
@@ -80,6 +82,7 @@ import {
 /** Endpoints del caso quirúrgico, desde la programación hasta el cierre. */
 @ApiTags('procedure-cases')
 @ApiBearerAuth()
+@UseInterceptors(PractitionerRefsInterceptor)
 @Controller()
 export class PeriopController {
   /**

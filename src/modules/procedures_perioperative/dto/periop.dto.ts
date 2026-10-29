@@ -158,6 +158,28 @@ export class ScheduleCaseDto {
   @IsOptional()
   @IsString()
   urgencyReasonText?: string;
+
+  /**
+   * Preparación (minutos) que se reserva antes del caso. Por omisión, la del quirófano
+   * (`care_spaces.prep_minutes`) en el momento de programar: queda como foto en el caso.
+   */
+  @ApiPropertyOptional({ minimum: 0, maximum: 480 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(480)
+  prepMinutes?: number;
+
+  /**
+   * Limpieza (minutos) que se reserva después del caso. Por omisión, la del quirófano
+   * (`care_spaces.cleanup_minutes`).
+   */
+  @ApiPropertyOptional({ minimum: 0, maximum: 480 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(480)
+  cleanupMinutes?: number;
 }
 
 /**
@@ -193,6 +215,22 @@ export class CaseResponseDto {
    */
   @ApiProperty({ format: 'uuid', description: 'Hito de programación creado' })
   milestoneId!: string;
+
+  /** Inicio de la ventana reservada (inicio − preparación). */
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  reservedStartAt?: Date;
+
+  /** Fin de la ventana reservada (fin + limpieza). */
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  reservedEndAt?: Date;
+
+  /** Bloque propio en el que cae el caso, si lo hay. */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  operatingRoomBlockId?: string | null;
+
+  /** Recurso agendable activo del quirófano (R0). */
+  @ApiPropertyOptional({ format: 'uuid' })
+  schedulableResourceId?: string;
 }
 
 /**
@@ -718,6 +756,79 @@ export class CaseSummaryDto {
    */
   @ApiPropertyOptional({ type: String, format: 'date-time' })
   scheduledEndAt?: Date;
+
+  /** Quirófano con su código, nombre y ruta (F4); `null` si el caso no tiene sala. */
+  @ApiPropertyOptional({ nullable: true })
+  operatingRoom?: CaseOperatingRoomDto | null;
+
+  /** Inicio de la ventana reservada. */
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  reservedStartAt?: Date | null;
+
+  /** Fin de la ventana reservada. */
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  reservedEndAt?: Date | null;
+
+  /** Preparación (minutos) con que se reservó. */
+  @ApiPropertyOptional({ nullable: true })
+  prepMinutes?: number | null;
+
+  /** Limpieza (minutos) con que se reservó. */
+  @ApiPropertyOptional({ nullable: true })
+  cleanupMinutes?: number | null;
+
+  /** Bloque en el que cae el caso. */
+  @ApiPropertyOptional({ nullable: true })
+  block?: CaseBlockDto | null;
+
+  /** Estado de las tres fases del check-list OMS. */
+  @ApiPropertyOptional({ nullable: true })
+  checklist?: CaseChecklistDto | null;
+}
+
+/** Quirófano de un caso. */
+export class CaseOperatingRoomDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty()
+  code!: string;
+
+  @ApiProperty()
+  name!: string;
+
+  /** Antecesores del quirófano, de la raíz hacia él (sin incluirlo). */
+  @ApiProperty({ type: 'array', items: { type: 'object' } })
+  path!: { id: string; code: string; name: string }[];
+}
+
+/** Bloque de un caso. */
+export class CaseBlockDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty({ type: 'object', additionalProperties: true })
+  owner!: {
+    kind: 'SERVICE' | 'SURGEON';
+    clinicalUnitId: string | null;
+    surgicalSpecialtyConceptId: string | null;
+    surgeonProfileId: string | null;
+  };
+}
+
+/** Fases del check-list OMS de un caso (instante en que se completó cada una). */
+export class CaseChecklistDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty({ type: String, format: 'date-time', nullable: true })
+  signIn!: Date | null;
+
+  @ApiProperty({ type: String, format: 'date-time', nullable: true })
+  timeOut!: Date | null;
+
+  @ApiProperty({ type: String, format: 'date-time', nullable: true })
+  signOut!: Date | null;
 }
 
 /** Página de la agenda quirúrgica. */

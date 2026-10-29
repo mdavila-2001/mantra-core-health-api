@@ -56,6 +56,9 @@ import {
 // pertenencia al tenant) que no son de esta agenda. `practice` no importa
 // `scheduling`, así que la dependencia no cierra ciclo.
 import { PracticeModule } from '../practice/practice.module';
+// R0 (F4): vincular un recurso a un espacio exige la política del espacio. Módulo mínimo,
+// sin ciclo: no importa `scheduling` ni `procedures_perioperative`.
+import { PeriopAccessModule } from '../procedures_perioperative/policies/periop-access.module';
 // AC-3.3: el mostrador atómico da de alta al paciente sin cuenta de portal
 // dentro de la misma transacción de la reserva, así que necesita los
 // repositorios de `profiles` (persona, perfiles) y `common` (documento,
@@ -91,6 +94,7 @@ import { bookingUseCases } from './application/bookings/use-cases';
 import {
   AgendaOverlapGuard,
   CatalogAccess,
+  SpaceResourceLinker,
   BlockedBookingsCanceller,
   SlotMoveNotifier,
 } from './application/catalog/support';
@@ -144,6 +148,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     // depende de `scheduling`.
     DirectoryModule,
     PracticeModule,
+    PeriopAccessModule,
     MessagingModule,
     CommunityModule,
     // ALV-021: la lista de consultas dice «Particular» o el nombre de la
@@ -277,6 +282,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     },
     // Catálogo de agenda: colaboradores compartidos y un caso de uso por operación.
     CatalogAccess,
+    SpaceResourceLinker,
     AgendaOverlapGuard,
     BlockedBookingsCanceller,
     SlotMoveNotifier,

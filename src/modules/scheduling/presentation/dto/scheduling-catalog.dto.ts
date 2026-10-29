@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
+import { normalizeRefType } from '../../domain/catalog/catalog-concepts';
 import {
   ArrayMinSize,
   IsArray,
@@ -53,6 +54,12 @@ export class CreateResourceDto {
   })
   @IsString()
   @MaxLength(100)
+  // Se canoniza al entrar (mayúsculas, espacios, esquema, alias): el valor que valida el
+  // servicio es el que se guarda. Lo que no es un tipo admitido pasa tal cual y el caso de
+  // uso lo rechaza con 422 `RESOURCE_REF_TYPE_NOT_ALLOWED`.
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? (normalizeRefType(value) ?? value) : value,
+  )
   resourceRefType!: string;
 
   /**

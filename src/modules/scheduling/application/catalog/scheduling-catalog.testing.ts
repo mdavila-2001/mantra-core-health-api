@@ -1,5 +1,10 @@
 import { SchedulingCatalogService } from './scheduling-catalog.service';
-import { AgendaOverlapGuard, CatalogAccess, SlotMoveNotifier } from './support';
+import {
+  AgendaOverlapGuard,
+  CatalogAccess,
+  SlotMoveNotifier,
+  type SpaceResourceLinker,
+} from './support';
 import { BlockedBookingsCanceller } from './support/blocked-bookings-canceller';
 import { CloseSlotsUseCase } from './use-cases/close-slots.use-case';
 import { ListTemplateLiveBookingsUseCase } from './use-cases/list-template-live-bookings.use-case';
@@ -34,6 +39,8 @@ export interface CatalogServiceDoubles {
    * basta para ellas.
    */
   cancelBooking?: any;
+  /** Vínculo con un espacio de infraestructura (R0). Sólo lo usan las pruebas de `care_spaces`. */
+  spaceLinker?: any;
 }
 
 /**
@@ -67,7 +74,13 @@ export function createCatalogService(d: CatalogServiceDoubles) {
   );
 
   return new SchedulingCatalogService(
-    new CreateResourceUseCase(em, catalogRepo, access, logger),
+    new CreateResourceUseCase(
+      em,
+      catalogRepo,
+      access,
+      logger,
+      d.spaceLinker ?? ({} as SpaceResourceLinker),
+    ),
     new CreateBookingPolicyUseCase(em, catalogRepo, access, logger),
     new CreateTemplateUseCase(em, catalogRepo, access, overlapGuard, logger),
     new UpdateTemplateUseCase(em, catalogRepo, access, logger),

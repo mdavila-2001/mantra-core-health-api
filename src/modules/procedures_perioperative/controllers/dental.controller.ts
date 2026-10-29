@@ -6,7 +6,9 @@ import {
   HttpStatus,
   Post,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
+import { PractitionerRefsInterceptor } from '../policies/practitioner-refs.interceptor';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   Audited,
@@ -46,6 +48,7 @@ import {
 @ApiTags('dental-procedures')
 @ApiBearerAuth()
 @Roles('CLINICIAN', 'PRACTITIONER')
+@UseInterceptors(PractitionerRefsInterceptor)
 @Controller()
 export class DentalController {
   /**

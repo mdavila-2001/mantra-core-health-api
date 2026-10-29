@@ -1,0 +1,293 @@
+asyncapi: 3.1.0
+info:
+  title: ALOVIDA Health API — Eventos de quirófano y perioperatorio (F4)
+  version: '0.1.0'
+  description: >
+    Fragmento de eventos de dominio de F4 (quirófano como recurso agendable, bloques de
+    quirófano, check-list de seguridad quirúrgica OMS y hechos de sala). Se publican al
+    outbox transaccional (`messaging.domain_events`) DENTRO de la transacción de la
+    mutación: el cambio y su evento se confirman juntos o ninguno. Este archivo es un
+    fragmento: el integrador lo fusiona en `asyncapi/asyncapi.yaml`; esta rama no edita
+    ese archivo. Los payloads nunca llevan datos clínicos ni nombres: sólo ids, códigos
+    y marcas de tiempo.
+  license:
+    name: UNLICENSED
+
+defaultContentType: application/json
+
+channels:
+  schedulingResourceEvents:
+    address: scheduling.resource
+    description: >
+      Hechos del catálogo de recursos agendables. El envelope real es
+      `messaging.domain_events`; aquí se describe el `payloadJson` de cada `eventType`.
+    messages:
+      ResourceLinkedToSpace:
+        $ref: '#/components/messages/ResourceLinkedToSpace'
+  periopOperatingRoomEvents:
+    address: periop.operating_room
+    description: >
+      Bloques de quirófano, check-list OMS y hechos de sala de un caso.
+    messages:
+      OrBlockCreated:
+        $ref: '#/components/messages/OrBlockCreated'
+      OrBlockReleased:
+        $ref: '#/components/messages/OrBlockReleased'
+      OrBlockCancelled:
+        $ref: '#/components/messages/OrBlockCancelled'
+      ChecklistCreated:
+        $ref: '#/components/messages/ChecklistCreated'
+      ChecklistPhaseCompleted:
+        $ref: '#/components/messages/ChecklistPhaseCompleted'
+      CaseRoomEventRecorded:
+        $ref: '#/components/messages/CaseRoomEventRecorded'
+
+operations:
+  publishSchedulingResourceEvent:
+    action: send
+    channel:
+      $ref: '#/channels/schedulingResourceEvents'
+    summary: >
+      `SpaceResourceLinker` publica el alta de un recurso ligado a un espacio con
+      OutboxService.publishDomainEvent, en la transacción del alta.
+  publishPeriopOperatingRoomEvent:
+    action: send
+    channel:
+      $ref: '#/channels/periopOperatingRoomEvents'
+    summary: >
+      Los servicios de bloques, check-list y hechos de sala publican cada hecho con
+      OutboxService.publishDomainEvent en la transacción de la mutación (los tick de
+      liberación automática los publican con `automatic: true` y sin actor).
+
+components:
+  messages:
+    ResourceLinkedToSpace:
+      name: ResourceLinkedToSpace
+      title: scheduling.resource.linked_to_space
+      summary: 'Un recurso agendable (quirófano) se creó ligado a un espacio físico.'
+      payload:
+        type: object
+        required: [resourceId, careSpaceId, siteId, practiceId, tenantId]
+        properties:
+          resourceId:
+            type: string
+            format: uuid
+          careSpaceId:
+            type: string
+            format: uuid
+          siteId:
+            type: string
+            format: uuid
+          practiceId:
+            type: string
+            format: uuid
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+    OrBlockCreated:
+      name: OrBlockCreated
+      title: periop.or_block.created
+      summary: 'Se creó un bloque de quirófano (o una serie semanal con sus instancias).'
+      payload:
+        type: object
+        required: [blockIds, operatingRoomId, practiceSiteId, ownerKind, count, tenantId]
+        properties:
+          seriesId:
+            type: [string, 'null']
+            format: uuid
+          blockIds:
+            type: array
+            items:
+              type: string
+              format: uuid
+          operatingRoomId:
+            type: string
+            format: uuid
+          practiceSiteId:
+            type: string
+            format: uuid
+          ownerKind:
+            type: string
+            enum: [SERVICE, SURGEON]
+          releaseHours:
+            type: integer
+          count:
+            type: integer
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+          requestId:
+            type: [string, 'null']
+            description: Correlación de la petición que originó el hecho.
+    OrBlockReleased:
+      name: OrBlockReleased
+      title: periop.or_block.released
+      summary: 'Un bloque liberó minutos a otros dueños (manual o por el tick de liberación).'
+      payload:
+        type: object
+        required: [blockId, operatingRoomId, releasedMinutes, automatic, tenantId]
+        properties:
+          blockId:
+            type: string
+            format: uuid
+          seriesId:
+            type: [string, 'null']
+            format: uuid
+          operatingRoomId:
+            type: string
+            format: uuid
+          releasedMinutes:
+            type: integer
+          automatic:
+            type: boolean
+          reasonText:
+            type: [string, 'null']
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+          requestId:
+            type: [string, 'null']
+            description: Correlación de la petición que originó el hecho.
+    OrBlockCancelled:
+      name: OrBlockCancelled
+      title: periop.or_block.cancelled
+      summary: 'Se canceló un bloque, o una serie desde una fecha (validTo).'
+      payload:
+        type: object
+        required: [blockIds, operatingRoomId, tenantId]
+        properties:
+          blockIds:
+            type: array
+            items:
+              type: string
+              format: uuid
+          seriesId:
+            type: [string, 'null']
+            format: uuid
+          operatingRoomId:
+            type: string
+            format: uuid
+          reasonText:
+            type: [string, 'null']
+          validTo:
+            type: [string, 'null']
+            format: date-time
+            description: Sólo en la cancelación de una serie.
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+          requestId:
+            type: [string, 'null']
+            description: Correlación de la petición que originó el hecho.
+    ChecklistCreated:
+      name: ChecklistCreated
+      title: periop.checklist.created
+      summary: 'Se abrió el check-list de seguridad quirúrgica OMS de un caso.'
+      payload:
+        type: object
+        required: [checklistId, procedureCaseId, checklistVersion, tenantId]
+        properties:
+          checklistId:
+            type: string
+            format: uuid
+          procedureCaseId:
+            type: string
+            format: uuid
+          checklistVersion:
+            type: string
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+          requestId:
+            type: [string, 'null']
+            description: Correlación de la petición que originó el hecho.
+    ChecklistPhaseCompleted:
+      name: ChecklistPhaseCompleted
+      title: periop.checklist.phase_completed
+      summary: 'Se completó una fase del check-list OMS (Sign In, Time Out o Sign Out).'
+      payload:
+        type: object
+        required: [checklistId, procedureCaseId, phase, completedAt, checklistCompleted, tenantId]
+        properties:
+          checklistId:
+            type: string
+            format: uuid
+          procedureCaseId:
+            type: string
+            format: uuid
+          phase:
+            type: string
+            enum: [SIGN_IN, TIME_OUT, SIGN_OUT]
+          completedAt:
+            type: [string, 'null']
+            format: date-time
+          checklistCompleted:
+            type: boolean
+          milestoneId:
+            type: [string, 'null']
+            format: uuid
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+          requestId:
+            type: [string, 'null']
+            description: Correlación de la petición que originó el hecho.
+    CaseRoomEventRecorded:
+      name: CaseRoomEventRecorded
+      title: periop.case.room_event_recorded
+      summary: 'Se registró un hecho de sala de un caso (entrada, anestesia, incisión, cierre, salida).'
+      payload:
+        type: object
+        required: [procedureCaseId, operatingRoomId, eventCode, occurredAt, utilizationEventId, tenantId]
+        properties:
+          procedureCaseId:
+            type: string
+            format: uuid
+          operatingRoomId:
+            type: string
+            format: uuid
+          operatingRoomBlockId:
+            type: [string, 'null']
+            format: uuid
+          eventCode:
+            type: string
+            enum: [PATIENT_IN_ROOM, ANESTHESIA_START, INCISION, CLOSURE, PATIENT_OUT_OF_ROOM]
+          occurredAt:
+            type: string
+            format: date-time
+          utilizationEventId:
+            type: string
+            format: uuid
+          milestoneId:
+            type: [string, 'null']
+            format: uuid
+          cleaningOrderId:
+            type: [string, 'null']
+            format: uuid
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+          requestId:
+            type: [string, 'null']
+            description: Correlación de la petición que originó el hecho.

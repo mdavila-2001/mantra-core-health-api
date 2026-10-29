@@ -76,7 +76,7 @@ function caseLookupMock(): any {
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn() };
+  const tx = { flush: mockFn(), execute: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const casesRepo = {
     createCase: mockFn(),
@@ -147,6 +147,27 @@ function build() {
   const clinicalRead = {
     assertCanReadHistory: mockFn().mockResolvedValue(undefined),
   };
+  // F4: el quirófano como espacio (reglas 1 a 5), el dueño del bloque (6), la compuerta del
+  // check-list OMS y la proyección de lectura. Por omisión, todo permitido: las pruebas de
+  // cada regla viven en sus propios specs.
+  const rooms = {
+    resolveForBooking: mockFn(async (_tx: unknown, input: any) => {
+      const space = {
+        practiceSiteId: 'site-1',
+        prepMinutes: undefined as number | undefined,
+        cleanupMinutes: undefined as number | undefined,
+      };
+      if (typeof input.window === 'function') input.window(space);
+      return { room: { space, site: {} }, resourceId: 'res-1' };
+    }),
+  };
+  const blocks = {
+    resolveOwnership: mockFn().mockResolvedValue({ overriddenBlockIds: [] }),
+  };
+  const gate = { assertPhase: mockFn().mockResolvedValue(undefined) };
+  const projection = {
+    project: mockFn().mockResolvedValue(new Map()),
+  };
   const service = new PeriopCasesService(
     em as any,
     casesRepo,
@@ -159,10 +180,18 @@ function build() {
     clinicalRead as any,
     new PeriopReacceptanceService(casesRepo as any, outbox as any),
     logger as any,
+    rooms as any,
+    blocks as any,
+    gate as any,
+    projection as any,
   );
   return {
     service: inTenant(service, TENANT_A),
     raw: service,
+    rooms,
+    blocks,
+    gate,
+    projection,
     clinicalRead,
     tx,
     casesRepo,
@@ -211,6 +240,29 @@ describe('PeriopCasesService', () => {
       d.casesRepo.createCase.mockReturnValue({ id: CASE });
       d.casesRepo.createMilestone.mockReturnValue({ id: 'milestone-1' });
     }
+
+    it('serializes the case number allocation per tenant before counting', async () => {
+      const d = build();
+      wire(d);
+      const order: string[] = [];
+      d.tx.execute.mockImplementation(
+        async (sql: string, params: unknown[]) => {
+          order.push(`lock:${String(params[0])}`);
+          expect(sql).toContain('pg_advisory_xact_lock');
+        },
+      );
+      d.casesRepo.countCases.mockImplementation(async () => {
+        order.push('count');
+        return 0;
+      });
+
+      await d.service.scheduleCase(scheduleDto(), actor);
+
+      expect(order.slice(0, 2)).toEqual([
+        expect.stringMatching(/^lock:procedure_case_number:/),
+        'count',
+      ]);
+    });
 
     it('schedules the case, reserves the room and seats the surgeon', async () => {
       const d = build();
@@ -652,6 +704,401 @@ describe('PeriopCasesService', () => {
       await expect(
         d.service.assignTeamMember(CASE, dto, actor as any),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('F4 · quirófano como espacio, ventana reservada y bloques', () => {
+    /** Una sala de la sede 'site-1' con preparación 15 y limpieza 20 y su recurso agendable. */
+    function wireRoom(d: ReturnType<typeof build>, prep = 15, cleanup = 20) {
+      d.rooms.resolveForBooking.mockImplementation(
+        async (_tx: unknown, input: any) => {
+          const space = {
+            practiceSiteId: 'site-1',
+            prepMinutes: prep,
+            cleanupMinutes: cleanup,
+          };
+          if (typeof input.window === 'function') input.window(space);
+          return { room: { space, site: {} }, resourceId: 'res-1' };
+        },
+      );
+      d.casesRepo.findOverlappingCases.mockResolvedValue([]);
+      d.casesRepo.countCases.mockResolvedValue(0);
+      d.casesRepo.findCaseByNumber.mockResolvedValue(null);
+      d.casesRepo.createCase.mockReturnValue({ id: CASE });
+      d.casesRepo.createMilestone.mockReturnValue({ id: 'milestone-1' });
+    }
+
+    it('caso 08:00–10:00 con prep 15 y limpieza 20: reserva 07:45–10:20, guarda la foto de prep/limpieza y el recurso', async () => {
+      const d = build();
+      wireRoom(d);
+
+      const res = await d.service.scheduleCase(
+        scheduleDto({
+          scheduledStartAt: '2026-11-02T08:00:00Z',
+          scheduledEndAt: '2026-11-02T10:00:00Z',
+        }),
+        actor,
+      );
+
+      expect(res.reservedStartAt).toEqual(new Date('2026-11-02T07:45:00Z'));
+      expect(res.reservedEndAt).toEqual(new Date('2026-11-02T10:20:00Z'));
+      expect(res.schedulableResourceId).toBe('res-1');
+      expect(d.casesRepo.createCase).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          prepMinutes: 15,
+          cleanupMinutes: 20,
+          schedulableResourceId: 'res-1',
+          practiceSiteId: 'site-1',
+        }),
+      );
+      // El solape se consulta con la ventana reservada, no con el horario programado.
+      expect(d.casesRepo.findOverlappingCases).toHaveBeenCalledWith(
+        d.tx,
+        ROOM,
+        new Date('2026-11-02T07:45:00Z'),
+        new Date('2026-11-02T10:20:00Z'),
+        expect.any(Array),
+      );
+    });
+
+    it('un valor explícito de prep/limpieza gana sobre la foto del quirófano', async () => {
+      const d = build();
+      wireRoom(d);
+      const res = await d.service.scheduleCase(
+        scheduleDto({
+          scheduledStartAt: '2026-11-02T08:00:00Z',
+          scheduledEndAt: '2026-11-02T10:00:00Z',
+          prepMinutes: 0,
+          cleanupMinutes: 60,
+        }),
+        actor,
+      );
+      expect(res.reservedStartAt).toEqual(new Date('2026-11-02T08:00:00Z'));
+      expect(res.reservedEndAt).toEqual(new Date('2026-11-02T11:00:00Z'));
+    });
+
+    it('B a las 10:10 choca con la ventana de A (409 con la ventana y el caso en conflicto)', async () => {
+      const d = build();
+      wireRoom(d);
+      d.casesRepo.findOverlappingCases.mockResolvedValue([
+        {
+          id: 'caso-a',
+          reservedStartAt: new Date('2026-11-02T07:45:00Z'),
+          reservedEndAt: new Date('2026-11-02T10:20:00Z'),
+        },
+      ]);
+
+      await expect(
+        d.service.scheduleCase(
+          scheduleDto({
+            scheduledStartAt: '2026-11-02T10:10:00Z',
+            scheduledEndAt: '2026-11-02T11:00:00Z',
+          }),
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        status: 409,
+        reason: ProceduresPerioperativeErrorReason.OPERATING_ROOM_SLOT_CONFLICT,
+        details: {
+          conflictingCaseId: 'caso-a',
+          reservedStartAt: new Date('2026-11-02T07:45:00Z'),
+          reservedEndAt: new Date('2026-11-02T10:20:00Z'),
+        },
+      });
+      expect(d.casesRepo.createCase).not.toHaveBeenCalled();
+    });
+
+    it('si el quirófano no es válido (función, sede, mantenimiento) no se escribe nada', async () => {
+      const d = build();
+      wireRoom(d);
+      d.rooms.resolveForBooking.mockRejectedValue(
+        Object.assign(new Error('no'), {
+          status: 422,
+          reason:
+            ProceduresPerioperativeErrorReason.OPERATING_ROOM_INVALID_FUNCTION,
+        }),
+      );
+      await expect(
+        d.service.scheduleCase(scheduleDto(), actor),
+      ).rejects.toMatchObject({
+        reason:
+          ProceduresPerioperativeErrorReason.OPERATING_ROOM_INVALID_FUNCTION,
+      });
+      expect(d.casesRepo.createCase).not.toHaveBeenCalled();
+      expect(d.casesRepo.createUtilizationEvent).not.toHaveBeenCalled();
+    });
+
+    it('pasa al dueño del bloque el cirujano, la especialidad, si es electivo y la ventana reservada; liga el bloque propio', async () => {
+      const d = build();
+      wireRoom(d);
+      d.blocks.resolveOwnership.mockResolvedValue({
+        blockId: 'blk-1',
+        overriddenBlockIds: [],
+      });
+
+      const res = await d.service.scheduleCase(
+        scheduleDto({
+          surgicalSpecialtyConceptId: 'trauma',
+          scheduledStartAt: '2026-11-02T08:00:00Z',
+          scheduledEndAt: '2026-11-02T10:00:00Z',
+        }),
+        actor,
+      );
+
+      expect(d.blocks.resolveOwnership).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          operatingRoomId: ROOM,
+          primarySurgeonProfileId: SURGEON,
+          surgicalSpecialtyConceptId: 'trauma',
+          elective: true,
+          window: {
+            start: new Date('2026-11-02T07:45:00Z'),
+            end: new Date('2026-11-02T10:20:00Z'),
+          },
+        }),
+      );
+      expect(res.operatingRoomBlockId).toBe('blk-1');
+      expect(d.casesRepo.createCase).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ operatingRoomBlockId: 'blk-1' }),
+      );
+      expect(d.casesRepo.createUtilizationEvent).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          operatingRoomBlockId: 'blk-1',
+          tenantId: TENANT,
+        }),
+      );
+    });
+
+    it('un bloque ajeno corta con 409 OR_BLOCK_OWNED_BY_OTHER antes de escribir', async () => {
+      const d = build();
+      wireRoom(d);
+      d.blocks.resolveOwnership.mockRejectedValue(
+        Object.assign(new Error('ajeno'), {
+          status: 409,
+          reason: ProceduresPerioperativeErrorReason.OR_BLOCK_OWNED_BY_OTHER,
+        }),
+      );
+      await expect(
+        d.service.scheduleCase(scheduleDto(), actor),
+      ).rejects.toMatchObject({
+        status: 409,
+        reason: ProceduresPerioperativeErrorReason.OR_BLOCK_OWNED_BY_OTHER,
+      });
+      expect(d.casesRepo.findOverlappingCases).not.toHaveBeenCalled();
+      expect(d.casesRepo.createCase).not.toHaveBeenCalled();
+    });
+
+    it('una urgencia dentro de un bloque ajeno se programa y deja constancia en el historial', async () => {
+      const d = build();
+      wireRoom(d);
+      d.blocks.resolveOwnership.mockResolvedValue({
+        overriddenBlockIds: ['blk-ajeno'],
+      });
+
+      await d.service.scheduleCase(
+        scheduleDto({ caseType: 'EMERGENCY', urgencyReasonText: 'hemorragia' }),
+        actor,
+      );
+
+      expect(d.blocks.resolveOwnership).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ elective: false }),
+      );
+      expect(d.casesRepo.createCase).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ operatingRoomBlockId: undefined }),
+      );
+      expect(d.casesRepo.createStatusHistory).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          reasonText: expect.stringContaining('bloque ajeno; hemorragia'),
+        }),
+      );
+    });
+  });
+
+  describe('F4 · reprogramar y cobrar', () => {
+    function liveCase(over: Record<string, unknown> = {}): any {
+      return {
+        id: CASE,
+        statusConceptId: CONCEPTS.CASE_SCHEDULED,
+        caseTypeConceptId: CONCEPTS.CASE_TYPE_ELECTIVE,
+        patientProfileId: PATIENT,
+        primarySurgeonProfileId: SURGEON,
+        operatingRoomId: ROOM,
+        practiceSiteId: 'site-1',
+        prepMinutes: 15,
+        cleanupMinutes: 20,
+        scheduledStartAt: new Date('2026-11-02T08:00:00Z'),
+        scheduledEndAt: new Date('2026-11-02T10:00:00Z'),
+        ...over,
+      };
+    }
+
+    it('mover el horario vuelve a validar la sala con la nueva ventana y excluye al propio caso del solape', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(liveCase());
+      d.rooms.resolveForBooking.mockImplementation(
+        async (_tx: unknown, input: any) => {
+          const space = { prepMinutes: 15, cleanupMinutes: 20 };
+          input.window(space);
+          return { room: { space, site: {} }, resourceId: 'res-2' };
+        },
+      );
+      d.casesRepo.findOverlappingCases.mockResolvedValue([]);
+      d.blocks.resolveOwnership.mockResolvedValue({
+        blockId: 'blk-9',
+        overriddenBlockIds: [],
+      });
+
+      await d.service.updateCase(
+        CASE,
+        {
+          scheduledStartAt: '2026-11-02T14:00:00Z',
+          scheduledEndAt: '2026-11-02T16:00:00Z',
+        },
+        actor,
+      );
+
+      expect(d.rooms.resolveForBooking).toHaveBeenCalledTimes(1);
+      expect(d.casesRepo.findOverlappingCases).toHaveBeenCalledWith(
+        d.tx,
+        ROOM,
+        new Date('2026-11-02T13:45:00Z'),
+        new Date('2026-11-02T16:20:00Z'),
+        expect.any(Array),
+        CASE,
+      );
+      const surgicalCase =
+        await d.casesRepo.findCaseForUpdate.mock.results[0].value;
+      expect(surgicalCase.operatingRoomBlockId).toBe('blk-9');
+      expect(surgicalCase.schedulableResourceId).toBe('res-2');
+    });
+
+    it('mover a una ventana ocupada → 409 con la ventana reservada del otro caso', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(liveCase());
+      d.rooms.resolveForBooking.mockImplementation(
+        async (_tx: unknown, input: any) => {
+          const space = { prepMinutes: 15, cleanupMinutes: 20 };
+          input.window(space);
+          return { room: { space, site: {} }, resourceId: 'res-1' };
+        },
+      );
+      d.blocks.resolveOwnership.mockResolvedValue({ overriddenBlockIds: [] });
+      d.casesRepo.findOverlappingCases.mockResolvedValue([
+        {
+          id: 'otro',
+          reservedStartAt: new Date('2026-11-02T13:00:00Z'),
+          reservedEndAt: new Date('2026-11-02T14:30:00Z'),
+        },
+      ]);
+      await expect(
+        d.service.updateCase(
+          CASE,
+          {
+            scheduledStartAt: '2026-11-02T14:00:00Z',
+            scheduledEndAt: '2026-11-02T16:00:00Z',
+          },
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        status: 409,
+        reason: ProceduresPerioperativeErrorReason.OPERATING_ROOM_SLOT_CONFLICT,
+        details: { conflictingCaseId: 'otro' },
+      });
+    });
+
+    it('cambiar sólo la prioridad no vuelve a validar la sala', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(liveCase());
+      await d.service.updateCase(CASE, { priority: 'URGENT' }, actor);
+      expect(d.rooms.resolveForBooking).not.toHaveBeenCalled();
+      expect(d.blocks.resolveOwnership).not.toHaveBeenCalled();
+    });
+
+    it('cobrar exige la Salida del check-list (INV-39) y, si falta, no se emite ningún cargo', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue({
+        id: CASE,
+        statusConceptId: CONCEPTS.CASE_COMPLETED,
+        custodianTenantId: TENANT,
+      });
+      d.gate.assertPhase.mockRejectedValue(
+        Object.assign(new Error('falta'), {
+          status: 422,
+          reason:
+            ProceduresPerioperativeErrorReason.CHECKLIST_SIGN_OUT_REQUIRED,
+        }),
+      );
+      await expect(
+        d.service.postCharges(
+          CASE,
+          {
+            items: [
+              {
+                chargeType: 'PROCEDURE',
+                billableItemId: BILLABLE,
+                quantity: '1',
+                unitPrice: '10',
+              },
+            ],
+          } as any,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        reason: ProceduresPerioperativeErrorReason.CHECKLIST_SIGN_OUT_REQUIRED,
+      });
+      expect(d.gate.assertPhase).toHaveBeenCalledWith(d.tx, CASE, 'SIGN_OUT');
+      expect(d.casesRepo.createChargeItem).not.toHaveBeenCalled();
+    });
+
+    it('el listado suma al resumen el quirófano, la ventana reservada, el bloque y el check-list', async () => {
+      const d = build();
+      d.casesRepo.findCases.mockResolvedValue([
+        {
+          id: CASE,
+          caseNumber: 'CQ-1',
+          patientProfileId: PATIENT,
+          statusConceptId: CONCEPTS.CASE_SCHEDULED,
+        },
+      ]);
+      d.casesRepo.countCasesMatching.mockResolvedValue(1);
+      d.projection.project.mockResolvedValue(
+        new Map([
+          [
+            CASE,
+            {
+              operatingRoom: {
+                id: ROOM,
+                code: 'QX-1',
+                name: 'Quirófano 1',
+                path: [],
+              },
+              block: null,
+              checklist: null,
+            },
+          ],
+        ]),
+      );
+
+      const res = await d.service.listCases(TENANT, {} as any);
+
+      expect(d.projection.project).toHaveBeenCalledWith(
+        expect.anything(),
+        TENANT,
+        expect.any(Array),
+      );
+      expect(res.items[0]).toMatchObject({
+        id: CASE,
+        operatingRoom: { code: 'QX-1' },
+        block: null,
+        checklist: null,
+      });
     });
   });
 

@@ -19,3 +19,9 @@ export type {
   CreateDentalProcedureData,
   CreateDentalSiteData,
 } from './periop-dental.repository';
+export { PeriopBlocksRepository } from './periop-blocks.repository';
+export type {
+  CreateSeriesData,
+  CreateBlockData,
+  ListBlocksFilter,
+} from './periop-blocks.repository';

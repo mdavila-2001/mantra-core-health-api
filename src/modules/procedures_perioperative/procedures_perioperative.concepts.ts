@@ -221,6 +221,53 @@ export const { seeds: PROCEDURES_PERIOPERATIVE_CONCEPT_SEEDS, ids: PERIOP } =
       code: 'ORB_OWNER_SURGEON',
       display: 'Bloque de quirófano asignado a un cirujano',
     },
+
+    // --- F4: eventos de caso en sala (`operating_room_utilization_events`) ---
+    // Los existentes (`OR_EVENT_RESERVED`, `CASE_START`, `CASE_END`, `TURNOVER`,
+    // `SLOT_RELEASED`, `CASE_CANCELLED`) viven en `CONCEPTS` y se conservan.
+    OR_EVENT_PATIENT_IN_ROOM: {
+      code: 'OR_PATIENT_IN_ROOM',
+      display: 'Paciente en sala',
+    },
+    OR_EVENT_ANESTHESIA_START: {
+      code: 'OR_ANESTHESIA_START',
+      display: 'Inicio de anestesia',
+    },
+    OR_EVENT_INCISION: { code: 'OR_INCISION', display: 'Incisión' },
+    OR_EVENT_CLOSURE: { code: 'OR_CLOSURE', display: 'Cierre' },
+    OR_EVENT_PATIENT_OUT_OF_ROOM: {
+      code: 'OR_PATIENT_OUT_OF_ROOM',
+      display: 'Paciente fuera de sala',
+    },
+    OR_EVENT_CLEANUP_START: {
+      code: 'OR_CLEANUP_START',
+      display: 'Inicio de limpieza del quirófano',
+    },
+    OR_EVENT_CLEANUP_END: {
+      code: 'OR_CLEANUP_END',
+      display: 'Fin de limpieza del quirófano',
+    },
+    OR_EVENT_ROOM_READY: {
+      code: 'OR_ROOM_READY',
+      display: 'Quirófano listo para el siguiente caso',
+    },
+
+    // --- F4: hitos nuevos (se reutilizan los `MILESTONE_*` de `CONCEPTS`) ---
+    MILESTONE_PATIENT_IN_ROOM: {
+      code: 'MS_PATIENT_IN_ROOM',
+      display: 'Paciente en sala',
+    },
+    MILESTONE_INCISION: { code: 'MS_INCISION', display: 'Incisión' },
+    MILESTONE_PATIENT_OUT_OF_ROOM: {
+      code: 'MS_PATIENT_OUT_OF_ROOM',
+      display: 'Paciente fuera de sala',
+    },
+
+    // --- F4: tipo de respuesta de los ítems del check-list OMS ---
+    CHECKLIST_RESPONSE_BOOLEAN: {
+      code: 'CHECKLIST_RESPONSE_BOOLEAN',
+      display: 'Respuesta de ítem del check-list: confirmación sí/no',
+    },
   });
 
 /**

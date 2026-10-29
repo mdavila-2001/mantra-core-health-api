@@ -9,7 +9,17 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { randomUUID } from 'node:crypto';
 import { PeriopCasesRepository, PeriopPreopRepository } from '../repositories';
+import { OutboxService } from '../../messaging/services/outbox.service';
+import { PERIOP } from '../procedures_perioperative.concepts';
+import { PeriopChecklistGateService } from './periop-checklist-gate.service';
+import { PractitionerScopeService } from '../policies/practitioner-scope.service';
+import {
+  OMS_2009_ITEMS,
+  OMS_CHECKLIST_VERSION,
+  type OmsPhase,
+} from '../domain/oms-checklist';
 import { PeriopReacceptanceService } from './periop-reacceptance.service';
 import {
   isCaseInScope,
@@ -123,6 +133,20 @@ export const SEVERITY_CONCEPT: Readonly<Record<ClinicalSeverity, string>> = {
   CRITICAL: CONCEPTS.SEVERITY_CRITICAL,
 };
 
+/** Eventos del check-list (`asyncapi/fragments/f4.yaml`). */
+export const CHECKLIST_EVENTS = {
+  created: 'periop.checklist.created',
+  phaseCompleted: 'periop.checklist.phase_completed',
+} as const;
+
+/** Código de la respuesta a partir del concepto guardado. */
+function responseStatusCode(conceptId: string): ResponseStatus {
+  const entry = (
+    Object.entries(RESPONSE_STATUS_CONCEPT) as [ResponseStatus, string][]
+  ).find(([, id]) => id === conceptId);
+  return entry ? entry[0] : 'CONFIRMED';
+}
+
 /** Hitos que crea cada evento de anestesia, cuando procede. */
 const EVENT_MILESTONE: Readonly<Partial<Record<AnesthesiaEventType, string>>> =
   {
@@ -145,6 +169,9 @@ export class PeriopPreopService {
    * @param serviceRequests - Órdenes clínicas que referencian las preoperatorias.
    * @param reacceptance - Invalidación de las aceptaciones del equipo.
    * @param logger - Valor de logger requerido por la operación.
+   * @param outbox - Outbox transaccional (eventos del check-list).
+   * @param gate - Compuerta del check-list OMS.
+   * @param practitioners - Pertenencia de los profesionales citados al tenant.
    */
   constructor(
     private readonly em: EntityManager,
@@ -153,6 +180,9 @@ export class PeriopPreopService {
     private readonly serviceRequests: ServiceRequestsService,
     private readonly reacceptance: PeriopReacceptanceService,
     private readonly logger: PinoLogger,
+    private readonly outbox: OutboxService,
+    private readonly gate: PeriopChecklistGateService,
+    private readonly practitioners: PractitionerScopeService,
   ) {
     this.logger.setContext(PeriopPreopService.name);
   }
@@ -469,7 +499,7 @@ export class PeriopPreopService {
     caseId: string,
     checklistId: string,
     dto: SubmitChecklistPhaseDto,
-    _actor: AuthenticatedUser,
+    actor: AuthenticatedUser,
   ): Promise<ChecklistPhaseResponseDto> {
     this.logger.info(
       { operation: 'periop.checklist.phase', caseId, phase: dto.phase },
@@ -491,7 +521,8 @@ export class PeriopPreopService {
 
     return this.em.transactional(async (tx) => {
       // El caso de la ruta debe ser del tenant activo antes de tocar el checklist.
-      await loadCaseInScope(this.casesRepo, tx, caseId);
+      const caseTenantId = (await loadCaseInScope(this.casesRepo, tx, caseId))
+        .custodianTenantId;
       const checklist = await this.preopRepo.findChecklistForUpdate(
         tx,
         checklistId,
@@ -544,6 +575,20 @@ export class PeriopPreopService {
             phase: dto.phase,
           },
           ProceduresPerioperativeErrorReason.CHECKLIST_PHASE_ALREADY_COMPLETED,
+        );
+      }
+      // La Pausa exige la Entrada y la Salida exige la Pausa. La base lo impide igual
+      // (`ck_surgical_safety_checklists_phase_order`); acá se responde con un motivo claro.
+      const previous: Partial<Record<ChecklistPhase, ChecklistPhase>> = {
+        TIME_OUT: 'SIGN_IN',
+        SIGN_OUT: 'TIME_OUT',
+      };
+      const required = previous[dto.phase];
+      if (required && !this.phaseCompletedAt(checklist, required)) {
+        throw new PreconditionFailedException(
+          'La fase anterior del check-list todavía no está completa',
+          { checklistId, phase: dto.phase, missingPhase: required },
+          ProceduresPerioperativeErrorReason.CHECKLIST_PHASE_OUT_OF_ORDER,
         );
       }
 
@@ -630,6 +675,27 @@ export class PeriopPreopService {
         }
       }
       checklist.updatedAt = new Date();
+
+      if (phaseCompleted) {
+        await this.outbox.publishDomainEvent(tx, {
+          tenantId: caseTenantId,
+          eventType: CHECKLIST_EVENTS.phaseCompleted,
+          aggregateType: 'surgical_safety_checklist',
+          aggregateId: checklistId,
+          payloadJson: {
+            checklistId,
+            procedureCaseId: caseId,
+            phase: dto.phase,
+            completedAt: this.phaseCompletedAt(checklist, dto.phase),
+            checklistCompleted:
+              checklist.statusConceptId === CONCEPTS.CHECKLIST_COMPLETED,
+            milestoneId: milestoneId ?? null,
+            tenantId: caseTenantId,
+            actorUserId: actor.id,
+          },
+          actorUserId: actor.id,
+        });
+      }
 
       return {
         checklistId,
@@ -866,6 +932,10 @@ export class PeriopPreopService {
           ProceduresPerioperativeErrorReason.INDUCTION_REQUIRES_APPROVED_ANESTHESIA_PLAN,
         );
       }
+      // INV-39: no se induce la anestesia sin la fase de Entrada del check-list.
+      if (dto.eventType === 'INDUCTION') {
+        await this.gate.assertPhase(tx, caseId, 'SIGN_IN');
+      }
 
       const severity = dto.severity ?? 'ROUTINE';
       const event = this.preopRepo.createAnesthesiaEvent(tx, {
@@ -930,6 +1000,8 @@ export class PeriopPreopService {
             procedureCaseId: caseId,
             eventTypeConceptId: CONCEPTS.OR_EVENT_CASE_START,
             recordedByUserId: actor.id,
+            tenantId: surgicalCase.custodianTenantId,
+            operatingRoomBlockId: surgicalCase.operatingRoomBlockId,
           });
         }
         touch(surgicalCase, actor.id);
@@ -941,6 +1013,219 @@ export class PeriopPreopService {
         milestoneId,
       };
     });
+  }
+
+  // --- Check-list OMS: alta y lectura (F4) ---
+
+  /**
+   * `POST /procedure-cases/:id/safety-checklists`: crea el check-list OMS del caso. Es
+   * idempotente: si el caso ya tiene uno, lo devuelve (`created: false`). Antes de F4 no
+   * había ningún endpoint que creara el check-list, así que ninguna fase se podía responder.
+   *
+   * Los 19 ítems de la versión 2009 (Entrada 7, Pausa 7, Salida 5) se siembran la primera vez
+   * (`ON CONFLICT` con objetivo: dos altas simultáneas no duplican).
+   *
+   * @param caseId - Caso de la ruta.
+   * @param coordinatorProfileId - Quien coordina el check-list.
+   * @param actor - Quien lo crea.
+   * @param correlationId - Id de correlación.
+   */
+  async createChecklist(
+    caseId: string,
+    coordinatorProfileId: string | undefined,
+    actor: AuthenticatedUser,
+    correlationId?: string,
+  ): Promise<{
+    created: boolean;
+    id: string;
+    procedureCaseId: string;
+    checklistVersion: string;
+    statusConceptId: string;
+  }> {
+    return this.em.transactional(async (tx) => {
+      // Con la fila del caso bloqueada, dos altas del mismo check-list se serializan.
+      const surgicalCase = await loadCaseForUpdateInScope(
+        this.casesRepo,
+        tx,
+        caseId,
+      );
+      if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
+        throw new ConflictException(
+          'El caso está cancelado',
+          { caseId },
+          ProceduresPerioperativeErrorReason.CASE_CANCELLED,
+        );
+      }
+      // El coordinador es un profesional de esta organización: un perfil de otra no se guarda
+      // ni se muestra después en la ficha (IDOR). Inexistente y ajeno responden igual.
+      if (coordinatorProfileId) {
+        await this.practitioners.assertInTenant(
+          tx,
+          surgicalCase.custodianTenantId,
+          [{ field: 'coordinatorProfileId', profileId: coordinatorProfileId }],
+        );
+      }
+      const existing = await this.preopRepo.findChecklistByCase(tx, caseId);
+      if (existing) {
+        return {
+          created: false,
+          id: existing.id,
+          procedureCaseId: caseId,
+          checklistVersion: existing.checklistVersion,
+          statusConceptId: existing.statusConceptId,
+        };
+      }
+      await this.ensureOmsItems(tx, actor.id);
+      const checklist = this.preopRepo.createChecklist(tx, {
+        procedureCaseId: caseId,
+        checklistTypeConceptId: CONCEPTS.CHECKLIST_WHO,
+        checklistVersion: OMS_CHECKLIST_VERSION,
+        statusConceptId: CONCEPTS.CHECKLIST_IN_PROGRESS,
+        coordinatorProfileId,
+      });
+      await this.outbox.publishDomainEvent(tx, {
+        tenantId: surgicalCase.custodianTenantId,
+        eventType: CHECKLIST_EVENTS.created,
+        aggregateType: 'surgical_safety_checklist',
+        aggregateId: checklist.id,
+        payloadJson: {
+          checklistId: checklist.id,
+          procedureCaseId: caseId,
+          checklistVersion: OMS_CHECKLIST_VERSION,
+          tenantId: surgicalCase.custodianTenantId,
+          actorUserId: actor.id,
+          requestId: correlationId ?? null,
+        },
+        correlationId,
+        actorUserId: actor.id,
+      });
+      return {
+        created: true,
+        id: checklist.id,
+        procedureCaseId: caseId,
+        checklistVersion: OMS_CHECKLIST_VERSION,
+        statusConceptId: CONCEPTS.CHECKLIST_IN_PROGRESS,
+      };
+    });
+  }
+
+  /**
+   * `GET /procedure-cases/:id/safety-checklists/:checklistId`: las tres fases con sus ítems y,
+   * si ya hay, la respuesta de cada uno.
+   *
+   * @param caseId - Caso de la ruta.
+   * @param checklistId - Check-list de la ruta.
+   */
+  async getChecklist(caseId: string, checklistId: string) {
+    return this.em.transactional(async (tx) => {
+      await loadCaseInScope(this.casesRepo, tx, caseId);
+      const checklist = await this.preopRepo.findChecklistById(tx, checklistId);
+      // Uno de otro caso responde igual que uno inexistente: no se revela que existe.
+      if (!checklist || checklist.procedureCaseId !== caseId) {
+        throw new ResourceNotFoundException(
+          'Checklist no encontrado',
+          { checklistId },
+          ProceduresPerioperativeErrorReason.CHECKLIST_NOT_FOUND,
+        );
+      }
+      const responses = await this.preopRepo.findResponsesByChecklist(
+        tx,
+        checklistId,
+      );
+      const byItem = new Map(responses.map((r) => [r.surgicalSafetyItemId, r]));
+      const phases: OmsPhase[] = ['SIGN_IN', 'TIME_OUT', 'SIGN_OUT'];
+      const out: {
+        phase: OmsPhase;
+        completedAt: Date | null;
+        items: {
+          id: string;
+          code: string;
+          prompt: string;
+          mandatory: boolean;
+          response: {
+            status: ResponseStatus;
+            responseBoolean: boolean | null;
+            responseText: string | null;
+            exceptionReason: string | null;
+            respondedAt: Date;
+          } | null;
+        }[];
+      }[] = [];
+      for (const phase of phases) {
+        const items = await this.preopRepo.findItemsByPhase(
+          tx,
+          checklist.checklistTypeConceptId,
+          checklist.checklistVersion,
+          PHASE_CONCEPT[phase],
+          CONCEPTS.STATE_ACTIVE,
+        );
+        out.push({
+          phase,
+          completedAt: this.phaseCompletedAt(checklist, phase) ?? null,
+          items: items.map((item) => {
+            const r = byItem.get(item.id);
+            return {
+              id: item.id,
+              code: item.itemCode,
+              prompt: item.promptText,
+              mandatory: item.isMandatory,
+              response: r
+                ? {
+                    status: responseStatusCode(r.responseStatusConceptId),
+                    responseBoolean: r.responseBoolean ?? null,
+                    responseText: r.responseText ?? null,
+                    exceptionReason: r.exceptionReason ?? null,
+                    respondedAt: r.respondedAt,
+                  }
+                : null,
+            };
+          }),
+        });
+      }
+      return {
+        id: checklist.id,
+        procedureCaseId: caseId,
+        checklistVersion: checklist.checklistVersion,
+        statusConceptId: checklist.statusConceptId,
+        phases: out,
+      };
+    });
+  }
+
+  /**
+   * Siembra los ítems OMS 2009 que falten. Un `INSERT … ON CONFLICT (tipo, versión, código)
+   * DO NOTHING` con objetivo explícito: es idempotente aunque dos altas corran a la vez.
+   */
+  private async ensureOmsItems(
+    tx: EntityManager,
+    userId: string,
+  ): Promise<void> {
+    const now = new Date();
+    for (const [index, item] of OMS_2009_ITEMS.entries()) {
+      await tx.execute(
+        `insert into procedures_perioperative.surgical_safety_items
+           (id, checklist_type_concept_id, checklist_version, phase_concept_id, item_code,
+            prompt_text, response_type_concept_id, display_order, is_mandatory,
+            state_concept_id, created_at, updated_at, created_by_user_id, updated_by_user_id)
+         values (?, ?, ?, ?, ?, ?, ?, ?, true, ?, ?, ?, ?, ?)
+         on conflict (checklist_type_concept_id, checklist_version, item_code) do nothing`,
+        [
+          randomUUID(),
+          CONCEPTS.CHECKLIST_WHO,
+          OMS_CHECKLIST_VERSION,
+          PHASE_CONCEPT[item.phase],
+          item.code,
+          item.prompt,
+          PERIOP.CHECKLIST_RESPONSE_BOOLEAN,
+          index + 1,
+          CONCEPTS.STATE_ACTIVE,
+          now,
+          now,
+          userId,
+          userId,
+        ],
+      );
+    }
   }
 
   // --- Apoyo ---

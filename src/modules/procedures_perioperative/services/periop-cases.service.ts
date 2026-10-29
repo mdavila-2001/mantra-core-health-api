@@ -66,6 +66,11 @@ import {
   periopCaseNotFound,
 } from './periop-scope';
 import { ProceduresPerioperativeErrorReason } from '../procedures_perioperative.error-reasons';
+import { reservedWindow } from '../domain/or-window';
+import { PeriopOperatingRoomService } from './periop-operating-room.service';
+import { PeriopBlocksService } from './periop-blocks.service';
+import { PeriopChecklistGateService } from './periop-checklist-gate.service';
+import { PeriopCaseProjectionService } from './periop-case-projection.service';
 
 /**
  * Roles de administración de la programación quirúrgica: ven el detalle de los
@@ -206,6 +211,10 @@ export class PeriopCasesService {
    * @param clinicalRead - Política de acceso al paciente (detalle del caso).
    * @param reacceptance - Invalidación de las aceptaciones del equipo.
    * @param logger - Valor de logger requerido por la operación.
+   * @param rooms - Reglas del quirófano como espacio (F4).
+   * @param blocks - Dueño del tiempo reservado (bloques, F4).
+   * @param gate - Compuerta del check-list OMS.
+   * @param projection - Lectura del quirófano, bloque y check-list de cada caso.
    */
   constructor(
     private readonly em: EntityManager,
@@ -222,6 +231,10 @@ export class PeriopCasesService {
     private readonly clinicalRead: ClinicalReadService,
     private readonly reacceptance: PeriopReacceptanceService,
     private readonly logger: PinoLogger,
+    private readonly rooms: PeriopOperatingRoomService,
+    private readonly blocks: PeriopBlocksService,
+    private readonly gate: PeriopChecklistGateService,
+    private readonly projection: PeriopCaseProjectionService,
   ) {
     this.logger.setContext(PeriopCasesService.name);
   }
@@ -280,11 +293,48 @@ export class PeriopCasesService {
           dto.patientProfileId,
         );
       }
+      // Validaciones del quirófano (F4, 1 a 5): existe en el tenant, es de la sede, es un
+      // quirófano, está activo y reservable en la ventana reservada y es un recurso agendable.
+      // Preparación y limpieza: el valor explícito o la foto de `care_spaces` de hoy.
+      let prepMinutes = dto.prepMinutes;
+      let cleanupMinutes = dto.cleanupMinutes;
+      const bookable = await this.rooms.resolveForBooking(tx, {
+        operatingRoomId: dto.operatingRoomId,
+        practiceSiteId: dto.practiceSiteId,
+        window: (space) => {
+          prepMinutes ??= space.prepMinutes ?? undefined;
+          cleanupMinutes ??= space.cleanupMinutes ?? undefined;
+          return reservedWindow(
+            scheduledStartAt,
+            scheduledEndAt,
+            prepMinutes,
+            cleanupMinutes,
+          );
+        },
+      });
+      const window = reservedWindow(
+        scheduledStartAt,
+        scheduledEndAt,
+        prepMinutes,
+        cleanupMinutes,
+      );
+
+      // 6: el tiempo de un bloque es de su dueño; urgencias y emergencias lo pueden pisar.
+      const ownership = await this.blocks.resolveOwnership(tx, {
+        operatingRoomId: dto.operatingRoomId,
+        window,
+        scheduled: { start: scheduledStartAt, end: scheduledEndAt },
+        primarySurgeonProfileId: dto.primarySurgeonProfileId,
+        surgicalSpecialtyConceptId: dto.surgicalSpecialtyConceptId,
+        elective: dto.caseType === 'ELECTIVE',
+      });
+
+      // 7: solape con la ventana reservada (duración + preparación + limpieza).
       const overlapping = await this.casesRepo.findOverlappingCases(
         tx,
         dto.operatingRoomId,
-        scheduledStartAt,
-        scheduledEndAt,
+        window.start,
+        window.end,
         [...BLOCKING_CASE_STATES],
       );
       if (overlapping.length > 0) {
@@ -293,6 +343,8 @@ export class PeriopCasesService {
           {
             operatingRoomId: dto.operatingRoomId,
             conflictingCaseId: overlapping[0].id,
+            reservedStartAt: overlapping[0].reservedStartAt ?? null,
+            reservedEndAt: overlapping[0].reservedEndAt ?? null,
           },
           ProceduresPerioperativeErrorReason.OPERATING_ROOM_SLOT_CONFLICT,
         );
@@ -312,12 +364,17 @@ export class PeriopCasesService {
         surgicalSpecialtyConceptId: dto.surgicalSpecialtyConceptId,
         requestedByProfileId: dto.requestedByProfileId,
         primarySurgeonProfileId: dto.primarySurgeonProfileId,
-        practiceSiteId: dto.practiceSiteId,
+        practiceSiteId:
+          dto.practiceSiteId ?? bookable.room.space.practiceSiteId,
         operatingRoomId: dto.operatingRoomId,
         scheduledStartAt,
         scheduledEndAt,
         urgencyReasonText: dto.urgencyReasonText,
         actorUserId: actor.id,
+        prepMinutes,
+        cleanupMinutes,
+        schedulableResourceId: bookable.resourceId,
+        operatingRoomBlockId: ownership.blockId,
       });
       // Las cuatro filas de abajo referencian el caso por una columna uuid
       // plana, no por una relación de MikroORM: el ORM no sabe que dependen de
@@ -336,7 +393,10 @@ export class PeriopCasesService {
         fromStatusConceptId: CONCEPTS.CASE_SCHEDULED,
         toStatusConceptId: CONCEPTS.CASE_SCHEDULED,
         changedByUserId: actor.id,
-        reasonText: 'Programación inicial',
+        reasonText:
+          ownership.overriddenBlockIds.length > 0
+            ? `Programación inicial (${dto.caseType}: dentro de un bloque ajeno; ${dto.urgencyReasonText})`
+            : 'Programación inicial',
       });
 
       const milestone = this.casesRepo.createMilestone(tx, {
@@ -351,6 +411,12 @@ export class PeriopCasesService {
         procedureCaseId: surgicalCase.id,
         eventTypeConceptId: CONCEPTS.OR_EVENT_RESERVED,
         recordedByUserId: actor.id,
+        tenantId: custodianTenantId,
+        operatingRoomBlockId: ownership.blockId,
+        detailsJson: {
+          reservedStartAt: window.start.toISOString(),
+          reservedEndAt: window.end.toISOString(),
+        },
       });
 
       // El cirujano principal es el primer miembro del equipo: un caso sin
@@ -369,6 +435,10 @@ export class PeriopCasesService {
         statusConceptId: CONCEPTS.CASE_SCHEDULED,
         operatingRoomId: dto.operatingRoomId,
         milestoneId: milestone.id,
+        reservedStartAt: window.start,
+        reservedEndAt: window.end,
+        operatingRoomBlockId: ownership.blockId ?? null,
+        schedulableResourceId: bookable.resourceId,
       };
     });
   }
@@ -483,6 +553,67 @@ export class PeriopCasesService {
           { caseId },
           ProceduresPerioperativeErrorReason.SCHEDULE_END_BEFORE_START,
         );
+      }
+
+      // F4: reprogramar vuelve a validar la sala con la nueva ventana reservada (reservable,
+      // dueño del bloque, solape contra los demás casos; el propio caso no cuenta).
+      if (
+        (dto.scheduledStartAt || dto.scheduledEndAt) &&
+        surgicalCase.operatingRoomId &&
+        surgicalCase.scheduledStartAt &&
+        surgicalCase.scheduledEndAt
+      ) {
+        const start = surgicalCase.scheduledStartAt;
+        const end = surgicalCase.scheduledEndAt;
+        const bookable = await this.rooms.resolveForBooking(tx, {
+          operatingRoomId: surgicalCase.operatingRoomId,
+          practiceSiteId: surgicalCase.practiceSiteId,
+          window: (space) =>
+            reservedWindow(
+              start,
+              end,
+              surgicalCase.prepMinutes ?? space.prepMinutes,
+              surgicalCase.cleanupMinutes ?? space.cleanupMinutes,
+            ),
+        });
+        const window = reservedWindow(
+          start,
+          end,
+          surgicalCase.prepMinutes ?? bookable.room.space.prepMinutes,
+          surgicalCase.cleanupMinutes ?? bookable.room.space.cleanupMinutes,
+        );
+        const ownership = await this.blocks.resolveOwnership(tx, {
+          operatingRoomId: surgicalCase.operatingRoomId,
+          window,
+          scheduled: { start, end },
+          primarySurgeonProfileId: surgicalCase.primarySurgeonProfileId,
+          surgicalSpecialtyConceptId: surgicalCase.surgicalSpecialtyConceptId,
+          elective:
+            surgicalCase.caseTypeConceptId === CONCEPTS.CASE_TYPE_ELECTIVE,
+        });
+        const overlapping = await this.casesRepo.findOverlappingCases(
+          tx,
+          surgicalCase.operatingRoomId,
+          window.start,
+          window.end,
+          [...BLOCKING_CASE_STATES],
+          surgicalCase.id,
+        );
+        if (overlapping.length > 0) {
+          throw new ConflictException(
+            'El quirófano ya está reservado en esa franja',
+            {
+              operatingRoomId: surgicalCase.operatingRoomId,
+              conflictingCaseId: overlapping[0].id,
+              reservedStartAt: overlapping[0].reservedStartAt ?? null,
+              reservedEndAt: overlapping[0].reservedEndAt ?? null,
+            },
+            ProceduresPerioperativeErrorReason.OPERATING_ROOM_SLOT_CONFLICT,
+          );
+        }
+        surgicalCase.operatingRoomBlockId = (ownership.blockId ??
+          null) as unknown as string;
+        surgicalCase.schedulableResourceId = bookable.resourceId;
       }
 
       // Spec 227-230: una aceptación vale para **la versión que se aceptó**.
@@ -976,7 +1107,11 @@ export class PeriopCasesService {
       }),
       this.casesRepo.countCasesMatching(this.em, tenantId, filters),
     ]);
-    return { items: cases.map((c) => this.toSummary(c)), total };
+    const f4 = await this.projection.project(this.em, tenantId, cases);
+    return {
+      items: cases.map((c) => ({ ...this.toSummary(c), ...f4.get(c.id) })),
+      total,
+    };
   }
 
   /**
@@ -1059,8 +1194,12 @@ export class PeriopCasesService {
       }
     }
 
+    const f4 = (
+      await this.projection.project(this.em, tenantId, [surgicalCase])
+    ).get(surgicalCase.id);
+
     return {
-      case: this.toSummary(surgicalCase),
+      case: { ...this.toSummary(surgicalCase), ...f4 },
       diagnoses: diagnoses.map((d) => ({
         id: d.id,
         conditionId: d.conditionId,
@@ -1551,6 +1690,8 @@ export class PeriopCasesService {
           eventTypeConceptId: CONCEPTS.OR_EVENT_SLOT_RELEASED,
           delayReasonConceptId: dto.cancellationReasonConceptId,
           recordedByUserId: actor.id,
+          tenantId: surgicalCase.custodianTenantId,
+          operatingRoomBlockId: surgicalCase.operatingRoomBlockId,
         });
         operatingRoomReleased = true;
       }
@@ -1599,6 +1740,8 @@ export class PeriopCasesService {
           ProceduresPerioperativeErrorReason.CHARGES_REQUIRE_COMPLETED_CASE,
         );
       }
+      // INV-39: tampoco se cobra un caso sin la Salida del check-list.
+      await this.gate.assertPhase(tx, caseId, 'SIGN_OUT');
 
       const existing = await this.casesRepo.findChargeItemsForUpdate(
         tx,
@@ -1663,6 +1806,8 @@ export class PeriopCasesService {
           operatingRoomId: surgicalCase.operatingRoomId,
           procedureCaseId: caseId,
           eventTypeConceptId: CONCEPTS.OR_EVENT_CASE_END,
+          tenantId: surgicalCase.custodianTenantId,
+          operatingRoomBlockId: surgicalCase.operatingRoomBlockId,
           durationSeconds:
             actualDurationSeconds !== undefined
               ? String(actualDurationSeconds)
@@ -1677,6 +1822,8 @@ export class PeriopCasesService {
             eventTypeConceptId: CONCEPTS.OR_EVENT_TURNOVER,
             durationSeconds: String(dto.turnoverSeconds),
             recordedByUserId: actor.id,
+            tenantId: surgicalCase.custodianTenantId,
+            operatingRoomBlockId: surgicalCase.operatingRoomBlockId,
           });
         }
       }
@@ -1693,15 +1840,32 @@ export class PeriopCasesService {
 
   // --- Apoyo ---
 
-  /** Número de caso correlativo por tenant. */
+  /**
+   * Número de caso correlativo por tenant.
+   *
+   * El número sale de contar los casos del tenant, así que dos altas simultáneas leían lo
+   * mismo y chocaban en la unicidad `(tenant, número)`: la perdedora respondía un 409 genérico
+   * en lugar del motivo real (por ejemplo, el quirófano ya reservado). El candado de
+   * transacción por tenant las serializa: la segunda espera a que la primera confirme, ve su
+   * caso y toma el número siguiente.
+   */
   private async nextCaseNumber(
     tx: EntityManager,
     custodianTenantId: string,
   ): Promise<string> {
+    await tx.execute('select pg_advisory_xact_lock(hashtextextended(?, 0))', [
+      `procedure_case_number:${custodianTenantId}`,
+    ]);
     const total = await this.casesRepo.countCases(tx, custodianTenantId);
     for (let attempt = 1; attempt <= 5; attempt += 1) {
       const candidate = `CQ-${String(total + attempt).padStart(6, '0')}`;
-      if (!(await this.casesRepo.findCaseByNumber(tx, candidate)))
+      if (
+        !(await this.casesRepo.findCaseByNumber(
+          tx,
+          candidate,
+          custodianTenantId,
+        ))
+      )
         return candidate;
     }
     throw new ConflictException(
