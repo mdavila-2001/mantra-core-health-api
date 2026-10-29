@@ -11,6 +11,7 @@ import { HistoryRepository } from '../../audit/repositories';
 import type { CareSpaces, PracticeSites } from '../entities';
 import { ATTRIBUTES, REGULATORY } from '../infrastructure-catalog';
 import { PRAC } from '../practice.concepts';
+import { conceptIdOf, HYGIENE, INITIAL_HYGIENE } from '../ops-catalog';
 import { PracticeErrorReason } from '../practice.error-reasons';
 import {
   CareSpacesRepository,
@@ -716,6 +717,14 @@ export class CareSpaceCreationService {
         statusConceptId: row.activate ? PRAC.SPACE_ACTIVE : PRAC.SPACE_PLANNED,
         validFrom: row.activate ? now : undefined,
         operationalStatusConceptId: PRAC.SPACE_OP_AVAILABLE,
+        // F2: un espacio que nace activo está listo para usar. La inspección
+        // (`infra.inspection_required`) sólo rige tras una orden de limpieza.
+        ...(row.activate
+          ? {
+              hygieneStatusConceptId: conceptIdOf(HYGIENE, INITIAL_HYGIENE),
+              hygieneChangedAt: now,
+            }
+          : {}),
         actorUserId: actor.id,
       });
       byCode.set(space.code, space);

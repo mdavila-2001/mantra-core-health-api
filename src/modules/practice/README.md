@@ -148,7 +148,10 @@ higiene y aislamiento) más la **ocupación, que se deriva** de
   `assertBookable`.
 - **Configuración** (`practice_settings`): `infra.inspection_required` (por omisión `true`),
   `infra.hvac_validation_max_days` (365), `infra.aiir_min_air_changes` y
-  `infra.cleaning_due_minutes` (opcionales).
+  `infra.cleaning_due_minutes` (opcionales). La inspección rige **después de una orden de
+  limpieza** (`HYG_CLEAN` no es asignable hasta inspeccionar); no rige el estado de partida: un
+  espacio que nace activo (`activate:true`) o se activa por el ciclo de vida queda en
+  `HYG_INSPECTED` (lista para usar) y es asignable al instante. Tras el egreso queda `HYG_DIRTY`.
 - **Eventos**: `practice.care_space.status_changed` (A20), `block_started|ended|cancelled|overdue` y
   `practice.cleaning_order.*`; contrato en `asyncapi/fragments/f2.yaml`.
 

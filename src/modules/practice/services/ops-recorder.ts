@@ -17,6 +17,7 @@ import {
   AXES,
   BLOCK_REASONS,
   HYGIENE,
+  INITIAL_HYGIENE,
   ISOLATION,
   OCCUPANCY,
   STATUS_SOURCES,
@@ -181,7 +182,7 @@ export class OpsRecorder {
     }
 
     const currentHygiene =
-      row.hygieneStatusConceptId ?? conceptIdOf(HYGIENE, 'HYG_CLEAN');
+      row.hygieneStatusConceptId ?? conceptIdOf(HYGIENE, INITIAL_HYGIENE);
     if (change.hygiene) {
       const toId = conceptIdOf(HYGIENE, change.hygiene.to);
       if (toId !== currentHygiene) {

@@ -23,7 +23,7 @@ describe('computeOperationalState', () => {
     });
   });
 
-  it('un eje sin escribir vale su valor por omisión: limpia sin inspeccionar es H con la inspección obligatoria', () => {
+  it('un eje sin escribir vale su valor por omisión: lista para usar, asignable aun con la inspección obligatoria', () => {
     const s = ver(
       makeRow({
         hygieneStatusConceptId: null,
@@ -33,13 +33,22 @@ describe('computeOperationalState', () => {
     );
     expect(s).toMatchObject({
       availability: 'SPACE_OP_AVAILABLE',
-      hygiene: 'HYG_CLEAN',
+      hygiene: 'HYG_INSPECTED',
       isolation: 'ISO_NONE',
+      v2Code: 'U',
+      assignable: true,
+    });
+  });
+
+  it('limpia sin inspeccionar es H con la inspección obligatoria y asignable sin ella (la inspección rige tras limpiar, no al activar)', () => {
+    const limpia = makeRow({ hygieneStatusConceptId: PRAC.HYG_CLEAN });
+    expect(ver(limpia)).toMatchObject({
+      hygiene: 'HYG_CLEAN',
       v2Code: 'H',
       assignable: false,
     });
     const sinInspeccion = computeOperationalState(
-      makeRow({ hygieneStatusConceptId: null }),
+      limpia,
       'OCC_FREE',
       null,
       { ...DEFAULT_INFRA_SETTINGS, inspectionRequired: false },
