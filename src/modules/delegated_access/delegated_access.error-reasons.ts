@@ -20,4 +20,10 @@ export enum DelegatedAccessErrorReason {
   DELEGATED_PATIENT_NOT_FOUND = 'DELEGATED_PATIENT_NOT_FOUND',
   /** El usuario evaluado no es el titular de la asignación del delegado (resultado de evaluación). */
   DELEGATED_SUBJECT_MISMATCH = 'DELEGATED_SUBJECT_MISMATCH',
+  /** El alcance de la asignación (sede, unidad, espacio) exige el nodo al que se asigna. */
+  DELEGATED_ASSIGNMENT_SCOPE_NODE_REQUIRED = 'DELEGATED_ASSIGNMENT_SCOPE_NODE_REQUIRED',
+  /** La membresía de la asignación no existe. */
+  DELEGATED_MEMBERSHIP_NOT_FOUND = 'DELEGATED_MEMBERSHIP_NOT_FOUND',
+  /** El nodo del alcance (práctica, sede, unidad, espacio…) no existe o es de otro tenant que la membresía. */
+  DELEGATED_SCOPE_NODE_NOT_FOUND = 'DELEGATED_SCOPE_NODE_NOT_FOUND',
 }

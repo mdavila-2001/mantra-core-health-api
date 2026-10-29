@@ -1,3 +1,10 @@
+import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
+import {
+  INFRA_POLICIES,
+  InfraPolicyRegistry,
+  type InfraPolicy,
+  type InfraRole,
+} from '../../practice/policies/infra-policy';
 import { DELEG } from '../../delegated_access/delegated_access.concepts';
 
 /**
@@ -5,18 +12,15 @@ import { DELEG } from '../../delegated_access/delegated_access.concepts';
  *
  * Es **declarativa**: dice qué rol puede cada acción y nada más. Quien la evalúa
  * (`AdtAccessService`) resuelve el rol del actor con el alcance que contiene el
- * espacio. Cuando F2 publique su evaluador único (`InfrastructureAccessService`
- * y el token multi-proveedor `INFRA_POLICIES`), este objeto se registra allí tal
- * cual: ninguna franja edita la política de otra.
+ * espacio. La misma tabla se registra
+ * en el token multi-proveedor `INFRA_POLICIES` de `practice`
+ * ({@link InfraF3PolicyInitializer}), de modo que el registro de políticas lista
+ * todas las franjas; ninguna franja edita la política de otra.
  */
 
 /** Rol operativo por asignación delegada. */
 export type InfraOperationalRole =
-  | 'NURSE'
-  | 'NURSE_SUPERVISOR'
-  | 'ADMISSION'
-  | 'INFECTION_CONTROL'
-  | 'BILLING';
+  'NURSE' | 'NURSE_SUPERVISOR' | 'ADMISSION' | 'INFECTION_CONTROL' | 'BILLING';
 
 /** Rol de estructura / plataforma. */
 export type InfraAdminRole = 'ORG_ADMIN' | 'BRANCH_ADMIN' | 'PLATFORM';
@@ -134,12 +138,55 @@ export const IMPLIED_ROLES: Readonly<
   NURSE_SUPERVISOR: ['NURSE'],
 };
 
+/** Rol de estructura / plataforma de F3 → rol del registro de infraestructura. */
+const REGISTRY_ROLE_OF_ADMIN: Readonly<Record<InfraAdminRole, InfraRole>> = {
+  ORG_ADMIN: 'ORG_ADMIN',
+  BRANCH_ADMIN: 'BRANCH_ADMIN',
+  PLATFORM: 'SUPERADMIN',
+};
+
 /**
- * Registro de la política para el evaluador de F2 (token `INFRA_POLICIES`).
- * Se exporta como valor para que el integrador lo enchufe con una línea.
+ * Registro de la política de F3 (módulo `clinical`) para el registro de políticas
+ * de infraestructura (token `INFRA_POLICIES`).
  */
 export const INFRA_F3_POLICY_REGISTRATION = {
   module: 'clinical',
   franja: 'F3',
   actions: INFRA_F3_POLICY,
 } as const;
+
+/**
+ * La política de F3 en la forma del registro de infraestructura (`InfraPolicy`):
+ * cada acción lista los roles que la pueden, operativos y de estructura juntos.
+ * Se deriva de {@link INFRA_F3_POLICY_REGISTRATION}, que apunta a la misma tabla que
+ * lee `AdtAccessService`: no hay una segunda copia que se pueda desalinear.
+ */
+export function infraF3RegistryPolicy(): InfraPolicy {
+  const rules: Record<string, InfraPolicy['rules'][string]> = {};
+  for (const [action, rule] of Object.entries(
+    INFRA_F3_POLICY_REGISTRATION.actions,
+  )) {
+    rules[action] = {
+      roles: [
+        ...rule.operational,
+        ...rule.admin.map((role) => REGISTRY_ROLE_OF_ADMIN[role]),
+      ],
+      summary: `ADT · ${action}`,
+    };
+  }
+  return { name: INFRA_F3_POLICY_REGISTRATION.franja, rules };
+}
+
+/** Alta de la política de F3 en el registro de `practice` al arrancar el módulo. */
+@Injectable()
+export class InfraF3PolicyInitializer implements OnModuleInit {
+  /** @param registry - Registro de políticas (`INFRA_POLICIES`). */
+  constructor(
+    @Inject(INFRA_POLICIES) private readonly registry: InfraPolicyRegistry,
+  ) {}
+
+  /** Alta de la política. */
+  onModuleInit(): void {
+    this.registry.register(infraF3RegistryPolicy());
+  }
+}

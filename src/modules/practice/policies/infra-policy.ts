@@ -37,6 +37,12 @@ export interface InfraActionRule {
   readonly onlyFunctions?: Readonly<
     Partial<Record<InfraRole, readonly string[]>>
   >;
+  /**
+   * Roles globales de plataforma o de tenant (`PERIOP_ADMIN`…) que también la
+   * conceden y que no son un {@link InfraRole}. Los evalúa el evaluador propio de
+   * la franja; este registro sólo los lista.
+   */
+  readonly globalRoles?: readonly string[];
   /** Resumen para personas (documentación de la política). */
   readonly summary: string;
 }

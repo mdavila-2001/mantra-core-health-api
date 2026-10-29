@@ -177,6 +177,7 @@ import { DirectoryAuthorizationModule } from '../directory/directory-authorizati
 import { StructureAccessService } from '../practice/services/structure-access.service';
 import { BranchMembershipsRepository } from '../directory/repositories/branch-memberships.repository';
 import { AdtRepository } from './repositories/adt.repository';
+import { InfraF3PolicyInitializer } from './policies/infra-f3.policy';
 
 /**
  * Módulo Clinical (08): registro clínico nuclear, órdenes y logística del
@@ -302,6 +303,8 @@ import { AdtRepository } from './repositories/adt.repository';
     InpatientCensusService,
     InpatientIndicatorsService,
     ClinicalRetireBlockersInitializer,
+    // Alta de la política de F3 en el registro de políticas de infraestructura.
+    InfraF3PolicyInitializer,
   ],
   // `procedures_perioperative` los usa para que el caso quirúrgico pueda dejar
   // su diagnóstico y su procedimiento en la historia sin escribir estas tablas:

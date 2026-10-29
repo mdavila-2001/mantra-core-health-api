@@ -40,6 +40,7 @@ import { ClinicalModule } from '../clinical/clinical.module';
 // este módulo, así que la dependencia va en un solo sentido.
 import { PracticeModule } from '../practice/practice.module';
 import { PeriopAccessModule } from './policies/periop-access.module';
+import { InfraF4PolicyInitializer } from './policies/infra-f4.policy';
 import { PractitionerScopeService } from './policies/practitioner-scope.service';
 import { PractitionerRefsInterceptor } from './policies/practitioner-refs.interceptor';
 
@@ -89,6 +90,8 @@ import { PractitionerRefsInterceptor } from './policies/practitioner-refs.interc
     PeriopRoomEventsService,
     PeriopUtilizationService,
     PeriopRetireBlockersInitializer,
+    // Alta de la política de F4 en el registro de políticas de infraestructura.
+    InfraF4PolicyInitializer,
     // F4: todo id de profesional del cuerpo debe ser de la organización activa.
     PractitionerScopeService,
     PractitionerRefsInterceptor,

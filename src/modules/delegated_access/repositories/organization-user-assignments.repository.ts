@@ -91,12 +91,27 @@ export class OrganizationUserAssignmentsRepository {
     assignmentRoleConceptId: string,
     accessScopeConceptId: string,
     activeStatusConceptId: string,
+    node: {
+      practiceId?: string;
+      practiceSiteId?: string;
+      clinicalUnitId?: string;
+      careSpaceId?: string;
+      diagnosticUnitId?: string;
+      pharmacyId?: string;
+    } = {},
   ): Promise<OrganizationUserAssignments | null> {
+    // El mismo rol y alcance en otro nodo (otra unidad, otra cama) no es un solape.
     return em.findOne(OrganizationUserAssignments, {
       tenantMembershipId,
       assignmentRoleConceptId,
       accessScopeConceptId,
       statusConceptId: activeStatusConceptId,
+      practiceId: node.practiceId ?? null,
+      practiceSiteId: node.practiceSiteId ?? null,
+      clinicalUnitId: node.clinicalUnitId ?? null,
+      careSpaceId: node.careSpaceId ?? null,
+      diagnosticUnitId: node.diagnosticUnitId ?? null,
+      pharmacyId: node.pharmacyId ?? null,
     });
   }
 

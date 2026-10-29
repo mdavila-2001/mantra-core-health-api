@@ -67,6 +67,7 @@ import {
 import { OpsSettingsReader } from './services/ops-settings';
 import { INFRA_POLICIES, InfraPolicyRegistry } from './policies/infra-policy';
 import { InfraF2PolicyInitializer } from './policies/infra-f2.policy';
+import { InfraPlanPolicyInitializer } from './plan/policies/infra-plan.policy';
 import {
   PracticesRepository,
   PracticeSitesRepository,
@@ -235,6 +236,7 @@ import {
     InfraPolicyRegistry,
     { provide: INFRA_POLICIES, useExisting: InfraPolicyRegistry },
     InfraF2PolicyInitializer,
+    InfraPlanPolicyInitializer,
     InfrastructureAccessService,
     OpsSettingsReader,
     OpsEventsService,

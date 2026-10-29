@@ -67,6 +67,78 @@ describe('OrgUserAssignmentsService', () => {
       expect(d.tx.flush).toHaveBeenCalledTimes(1);
     });
 
+    it('un rol operativo pide el nodo de su alcance (422 ASSIGNMENT_SCOPE_NODE_REQUIRED)', async () => {
+      const d = build();
+      await expect(
+        d.service.createAssignment(
+          'm1',
+          { role: 'HOUSEKEEPING', accessScope: 'UNIT' } as any,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        status: 422,
+        reason: 'DELEGATED_ASSIGNMENT_SCOPE_NODE_REQUIRED',
+        details: { requiredField: 'clinicalUnitId' },
+      });
+      expect(d.assignmentsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('un nodo de otro tenant que la membresía responde 404 y no crea nada', async () => {
+      const d = build();
+      (d.tx as any).execute = mockFn()
+        .mockResolvedValueOnce([{ tenant_id: 'tenant-a' }])
+        .mockResolvedValueOnce([]);
+      await expect(
+        d.service.createAssignment(
+          'm1',
+          {
+            role: 'NURSE_SUPERVISOR',
+            accessScope: 'SPACE',
+            careSpaceId: 'space-de-otro-tenant',
+          } as any,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        status: 404,
+        reason: 'DELEGATED_SCOPE_NODE_NOT_FOUND',
+      });
+      expect((d.tx as any).execute).toHaveBeenLastCalledWith(
+        expect.stringContaining('practice.care_spaces'),
+        ['space-de-otro-tenant', 'tenant-a'],
+      );
+      expect(d.assignmentsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('con un nodo del tenant crea la asignación y el solape se mide por nodo', async () => {
+      const d = build();
+      (d.tx as any).execute = mockFn()
+        .mockResolvedValueOnce([{ tenant_id: 'tenant-a' }])
+        .mockResolvedValueOnce([{ id: 'unit-1' }]);
+      d.assignmentsRepo.create.mockReturnValue({
+        id: 'a2',
+        statusConceptId: STATUS.ACTIVE,
+        createdAt: new Date('2026-01-01'),
+      });
+      await d.service.createAssignment(
+        'm1',
+        {
+          role: 'HOUSEKEEPING',
+          accessScope: 'UNIT',
+          clinicalUnitId: 'unit-1',
+        } as any,
+        actor,
+      );
+      expect(d.assignmentsRepo.findActiveOverlap).toHaveBeenCalledWith(
+        d.tx,
+        'm1',
+        expect.any(String),
+        expect.any(String),
+        STATUS.ACTIVE,
+        expect.objectContaining({ clinicalUnitId: 'unit-1' }),
+      );
+      expect(d.assignmentsRepo.create).toHaveBeenCalledTimes(1);
+    });
+
     it('rejects an overlapping active role+scope (conflict)', async () => {
       const d = build();
       d.assignmentsRepo.findActiveOverlap.mockResolvedValue({ id: 'x' });

@@ -1,4 +1,11 @@
+import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
 import { deterministicId } from '../../../common/constants/concepts';
+import {
+  INFRA_POLICIES,
+  InfraPolicyRegistry,
+  type InfraPolicy,
+  type InfraRole,
+} from '../../practice/policies/infra-policy';
 
 /**
  * Política de F4 (quirófanos): quién puede qué sobre un quirófano
@@ -6,10 +13,10 @@ import { deterministicId } from '../../../common/constants/concepts';
  *
  * Es **dato**, como pide el contrato: cada franja declara sus acciones en su propio
  * archivo (`<modulo>/policies/infra-<franja>.policy.ts`) y el evaluador las lee.
- * El evaluador único de F2 (`InfrastructureAccessService`) todavía no existe en esta
- * rama; `OperatingRoomAccessService` aplica esta misma tabla con las piezas que sí
- * están (`StructureAccessService` de F1 y el alcance delegado por espacio), y cuando
- * F2 integre su evaluador basta registrar este objeto en `INFRA_POLICIES`.
+ * `OperatingRoomAccessService` aplica esta tabla con `StructureAccessService` de F1
+ * y el alcance delegado por espacio, porque incluye roles globales de perioperatorio
+ * (`PERIOP_ADMIN`, `SURGEON`…) que el evaluador de F2 no conoce. La misma tabla se
+ * lista en el registro de políticas (`INFRA_POLICIES`, {@link InfraF4PolicyInitializer}).
  */
 export const INFRA_F4_ACTIONS = [
   /** `POST /scheduling/resources` con `care_spaces`: vincular el quirófano como recurso agendable. */
@@ -119,3 +126,51 @@ export function delegatedRoleConceptId(key: string): string {
 
 /** `reason` del 403 de F4 (el mismo que el evaluador de F2). */
 export const INFRA_ACTION_NOT_ALLOWED = 'INFRA_ACTION_NOT_ALLOWED';
+
+/** Clave del rol delegado de una acción de F4 → rol del registro de infraestructura. */
+const REGISTRY_ROLE_OF_DELEGATED: Readonly<Record<string, InfraRole>> = {
+  ASSIGN_ROLE_OR_MANAGER: 'OR_MANAGER',
+  ASSIGN_ROLE_NURSE: 'NURSE',
+  ASSIGN_ROLE_NURSE_SUPERVISOR: 'NURSE_SUPERVISOR',
+  ASSIGN_ROLE_HOUSEKEEPING: 'HOUSEKEEPING',
+  ASSIGN_ROLE_HOUSEKEEPING_SUPERVISOR: 'HOUSEKEEPING_SUPERVISOR',
+  ASSIGN_ROLE_MAINTENANCE: 'MAINTENANCE',
+  ASSIGN_ROLE_BILLING: 'BILLING',
+};
+
+/**
+ * La política de F4 en la forma del registro de infraestructura (`InfraPolicy`).
+ * Se deriva de {@link INFRA_F4_POLICY}, la tabla que lee `OperatingRoomAccessService`.
+ * Los roles globales de perioperatorio van en `globalRoles`.
+ */
+export function infraF4RegistryPolicy(): InfraPolicy {
+  const rules: Record<string, InfraPolicy['rules'][string]> = {};
+  for (const action of INFRA_F4_ACTIONS) {
+    const rule = INFRA_F4_POLICY[action];
+    rules[action] = {
+      roles: [
+        ...(rule.structureAdmin
+          ? (['SUPERADMIN', 'ORG_ADMIN', 'BRANCH_ADMIN'] as const)
+          : []),
+        ...rule.delegatedRoleKeys.map((key) => REGISTRY_ROLE_OF_DELEGATED[key]),
+      ],
+      globalRoles: rule.roles,
+      summary: `Quirófanos · ${action}`,
+    };
+  }
+  return { name: 'F4', rules };
+}
+
+/** Alta de la política de F4 en el registro de `practice` al arrancar el módulo. */
+@Injectable()
+export class InfraF4PolicyInitializer implements OnModuleInit {
+  /** @param registry - Registro de políticas (`INFRA_POLICIES`). */
+  constructor(
+    @Inject(INFRA_POLICIES) private readonly registry: InfraPolicyRegistry,
+  ) {}
+
+  /** Alta de la política. */
+  onModuleInit(): void {
+    this.registry.register(infraF4RegistryPolicy());
+  }
+}

@@ -9,6 +9,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { DelegatedAccessErrorReason } from '../delegated_access.error-reasons';
 import {
   OrganizationUserAssignmentsRepository,
   PractitionerDelegateAssignmentsRepository,
@@ -24,6 +25,25 @@ import {
   ASSIGNMENT_ROLE_CONCEPT,
   STATUS,
 } from './concept-maps';
+
+/** Nodo que cada alcance exige y el campo del cuerpo que lo lleva. */
+const SCOPE_NODE_FIELD: Readonly<
+  Record<string, 'practiceSiteId' | 'clinicalUnitId' | 'careSpaceId'>
+> = {
+  SITE: 'practiceSiteId',
+  UNIT: 'clinicalUnitId',
+  SPACE: 'careSpaceId',
+};
+
+/** Tabla (con `tenant_id`) de cada nodo de alcance que acepta el cuerpo. */
+const NODE_TABLE: Readonly<Record<string, string>> = {
+  practiceId: 'practice.practices',
+  practiceSiteId: 'practice.practice_sites',
+  clinicalUnitId: 'practice.clinical_units',
+  careSpaceId: 'practice.care_spaces',
+  diagnosticUnitId: 'diagnostic_units.diagnostic_units',
+  pharmacyId: 'pharmacy.pharmacies',
+};
 
 /**
  * UC-29-01 (asignar usuario de organización con alcance/vigencia) y UC-29-10
@@ -66,14 +86,31 @@ export class OrgUserAssignmentsService {
     );
     const roleConceptId = ASSIGNMENT_ROLE_CONCEPT[dto.role ?? 'STAFF'];
     const scopeConceptId = ACCESS_SCOPE_CONCEPT[dto.accessScope ?? 'TENANT'];
+    const scopeNode = SCOPE_NODE_FIELD[dto.accessScope ?? 'TENANT'];
+    if (scopeNode && !dto[scopeNode]) {
+      throw new PreconditionFailedException(
+        'El alcance pide el nodo al que se asigna',
+        { accessScope: dto.accessScope, requiredField: scopeNode },
+        DelegatedAccessErrorReason.DELEGATED_ASSIGNMENT_SCOPE_NODE_REQUIRED,
+      );
+    }
 
     return this.em.transactional(async (tx) => {
+      await this.assertNodesInMembershipTenant(tx, tenantMembershipId, dto);
       const overlap = await this.assignmentsRepo.findActiveOverlap(
         tx,
         tenantMembershipId,
         roleConceptId,
         scopeConceptId,
         STATUS.ACTIVE,
+        {
+          practiceId: dto.practiceId,
+          practiceSiteId: dto.practiceSiteId,
+          clinicalUnitId: dto.clinicalUnitId,
+          careSpaceId: dto.careSpaceId,
+          diagnosticUnitId: dto.diagnosticUnitId,
+          pharmacyId: dto.pharmacyId,
+        },
       );
       if (overlap) {
         this.logger.warn(
@@ -122,6 +159,47 @@ export class OrgUserAssignmentsService {
         createdAt: assignment.createdAt,
       };
     });
+  }
+
+  /**
+   * Cada nodo del alcance (práctica, sede, unidad, espacio…) tiene que ser del tenant
+   * de la membresía: un id de otro tenant no es una asignación válida y responde 404,
+   * sin decir si existe. Sin nodos no consulta nada.
+   */
+  private async assertNodesInMembershipTenant(
+    tx: EntityManager,
+    tenantMembershipId: string,
+    dto: CreateOrgUserAssignmentDto,
+  ): Promise<void> {
+    const nodes = Object.keys(NODE_TABLE).filter(
+      (field) => !!dto[field as keyof CreateOrgUserAssignmentDto],
+    );
+    if (nodes.length === 0) return;
+    const [membership] = await tx.execute<{ tenant_id: string }[]>(
+      'select tenant_id from directory.tenant_memberships where id = ?',
+      [tenantMembershipId],
+    );
+    if (!membership) {
+      throw new ResourceNotFoundException(
+        'Membresía no encontrada',
+        { tenantMembershipId },
+        DelegatedAccessErrorReason.DELEGATED_MEMBERSHIP_NOT_FOUND,
+      );
+    }
+    for (const field of nodes) {
+      const id = dto[field as keyof CreateOrgUserAssignmentDto] as string;
+      const rows = await tx.execute<{ id: string }[]>(
+        `select id from ${NODE_TABLE[field]} where id = ? and tenant_id = ?`,
+        [id, membership.tenant_id],
+      );
+      if (rows.length === 0) {
+        throw new ResourceNotFoundException(
+          'Nodo de alcance no encontrado',
+          { field },
+          DelegatedAccessErrorReason.DELEGATED_SCOPE_NODE_NOT_FOUND,
+        );
+      }
+    }
   }
 
   /** UC-29-10: reasigna supervisor / cambia scope / suspende (cascada a delegaciones). */

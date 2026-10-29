@@ -10,7 +10,13 @@
  * regla que `PATCH /care-spaces/:id`; no hay permiso nuevo.
  */
 
-import type { InfraRole } from '../../policies/infra-policy';
+import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
+import {
+  INFRA_POLICIES,
+  InfraPolicyRegistry,
+  type InfraPolicy,
+  type InfraRole,
+} from '../../policies/infra-policy';
 import { CLINICAL_TEXT_ROLES } from '../../services/ops-privacy';
 
 /** Roles operativos que el plano distingue (por asignación delegada). */
@@ -119,5 +125,74 @@ export class InfraPlanPolicy {
       case 'plan.patient':
         return [...facts.roles].some((role) => PATIENT_ROLES.has(role));
     }
+  }
+}
+
+/** Roles de infraestructura que cubre cada rol del plano (el supervisor incluido). */
+const INFRA_ROLES_OF_PLAN_ROLE: Readonly<Record<PlanRole, InfraRole[]>> = {
+  ENF: ['NURSE', 'NURSE_SUPERVISOR'],
+  ADM: ['ADMISSION'],
+  LIM: ['HOUSEKEEPING', 'HOUSEKEEPING_SUPERVISOR'],
+  MAN: ['MAINTENANCE'],
+  JQ: ['OR_MANAGER'],
+  FAC: ['BILLING'],
+  IC: ['INFECTION_CONTROL'],
+};
+
+/** Roles de estructura que editan y leen la historia del plano. */
+const PLAN_STRUCTURE_ROLES: readonly InfraRole[] = [
+  'SUPERADMIN',
+  'ORG_ADMIN',
+  'BRANCH_ADMIN',
+];
+
+/**
+ * La política del plano en la forma del registro de infraestructura. Se deriva de
+ * las mismas constantes que usa {@link InfraPlanPolicy} (`STATE_ROLES`,
+ * `PATIENT_ROLES`): ver el plano lo ve cualquiera con acceso a la sede, así que
+ * `plan.view` lista a todos los roles.
+ */
+export function infraPlanRegistryPolicy(): InfraPolicy {
+  const operational = (set: Iterable<PlanRole>): InfraRole[] =>
+    [...set].flatMap((role) => INFRA_ROLES_OF_PLAN_ROLE[role]);
+  const everyone: InfraRole[] = [
+    ...PLAN_STRUCTURE_ROLES,
+    ...operational(Object.keys(INFRA_ROLE_OF) as PlanRole[]),
+  ];
+  return {
+    name: 'PLAN',
+    rules: {
+      'plan.view': { roles: everyone, summary: 'Ver el plano de la sede' },
+      'plan.state': {
+        roles: [...PLAN_STRUCTURE_ROLES, ...operational(STATE_ROLES)],
+        summary: 'Ver el estado operativo superpuesto al plano',
+      },
+      'plan.patient': {
+        roles: operational(PATIENT_ROLES),
+        summary: 'Ver el nombre del paciente en la cama',
+      },
+      'plan.edit': {
+        roles: [...PLAN_STRUCTURE_ROLES],
+        summary: 'Editar el plano (es editar estructura)',
+      },
+      'plan.history': {
+        roles: [...PLAN_STRUCTURE_ROLES],
+        summary: 'Ver la historia del plano',
+      },
+    },
+  };
+}
+
+/** Alta de la política del plano en el registro de `practice` al arrancar el módulo. */
+@Injectable()
+export class InfraPlanPolicyInitializer implements OnModuleInit {
+  /** @param registry - Registro de políticas (`INFRA_POLICIES`). */
+  constructor(
+    @Inject(INFRA_POLICIES) private readonly registry: InfraPolicyRegistry,
+  ) {}
+
+  /** Alta de la política. */
+  onModuleInit(): void {
+    this.registry.register(infraPlanRegistryPolicy());
   }
 }

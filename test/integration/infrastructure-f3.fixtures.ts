@@ -186,18 +186,20 @@ export async function createSpace(
   return res.body;
 }
 
-/**
- * Un usuario sin rol global con una asignación delegada vigente: registra una
- * cuenta, le da membresía ordinaria en el tenant y le asigna el rol con alcance.
- */
-export async function createStaff(
+/** Una cuenta con membresía ordinaria en la organización, todavía sin rol delegado. */
+export interface Member {
+  userId: string;
+  membershipId: string;
+  nationalId: string;
+}
+
+/** Registra una cuenta y le da membresía ordinaria (STAFF) en el tenant de la organización. */
+export async function createMember(
   ctx: TestContext,
   org: InfraOrg,
   label: string,
-  role: string,
-  scope: StaffScope,
   suffix: string,
-): Promise<Staff> {
+): Promise<Member> {
   const { http, sql } = toolbox(ctx);
   const campos = await camposObligatoriosDePaciente(ctx);
   const nationalId = `F3${label.toUpperCase()}${suffix}${randomUUID().slice(0, 4)}`;
@@ -235,12 +237,41 @@ export async function createStaff(
       DIR.SCOPE_ALL_TENANT,
     ],
   );
-  await assign(ctx, membership.id, role, scope);
-  const login = await http()
+  return { userId, membershipId: membership.id, nationalId };
+}
+
+/** Inicia sesión como un miembro y devuelve su token. */
+export async function loginMember(
+  ctx: TestContext,
+  member: Member,
+): Promise<string> {
+  const login = await toolbox(ctx)
+    .http()
     .post('/iam/auth/login')
-    .send({ nationalId, password: PASSWORD })
+    .send({ nationalId: member.nationalId, password: PASSWORD })
     .expect(200);
-  return { userId, membershipId: membership.id, token: login.body.accessToken };
+  return login.body.accessToken;
+}
+
+/**
+ * Un usuario sin rol global con una asignación delegada vigente: registra una
+ * cuenta, le da membresía ordinaria en el tenant y le asigna el rol con alcance.
+ */
+export async function createStaff(
+  ctx: TestContext,
+  org: InfraOrg,
+  label: string,
+  role: string,
+  scope: StaffScope,
+  suffix: string,
+): Promise<Staff> {
+  const member = await createMember(ctx, org, label, suffix);
+  await assign(ctx, member.membershipId, role, scope);
+  return {
+    userId: member.userId,
+    membershipId: member.membershipId,
+    token: await loginMember(ctx, member),
+  };
 }
 
 /** Asigna un rol delegado con alcance a una membresía. */
