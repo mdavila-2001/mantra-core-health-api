@@ -58,6 +58,14 @@ export class AppointmentPaymentStates {
   insuranceUsed!: boolean;
 
   /**
+   * La cuenta por cobrar de la cita (FAC-01, M-01): la crea el primer pago
+   * confirmado con monto, y los siguientes se asignan a la misma. Nula sin
+   * factura: filas viejas, marcas sin monto, cita sin práctica o sin precio.
+   */
+  @Property({ fieldName: 'invoice_id', type: 'uuid', nullable: true }) // FK → billing.invoices
+  invoiceId?: string;
+
+  /**
    * Quién dejó la cita en este estado.
    */
   @Property({ fieldName: 'marked_by_user_id', type: 'uuid' }) // FK → iam.users

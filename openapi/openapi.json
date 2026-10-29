@@ -153022,6 +153022,11 @@
             "type": "boolean",
             "description": "Marca de que la cita se cubrió con seguro",
             "default": false
+          },
+          "amountReceived": {
+            "type": "number",
+            "description": "Monto recibido en Bs (> 0, hasta dos decimales)",
+            "example": 150
           }
         },
         "required": [
