@@ -4,9 +4,9 @@ import {
   requireTenantId,
   roleAuthorizesInTenant,
   type AuthenticatedUser,
-} from '../../../common';
-import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
-import { QaLabErrorReason } from '../qa_lab.error-reasons';
+} from '../../../../common';
+import { assertResourceInTenant } from '../../../../common/tenant/resource-scope';
+import { QaLabErrorReason } from '../../qa_lab.error-reasons';
 
 /**
  * Tenant al que se acota una operación sobre un recurso de `qa_lab` por UUID.

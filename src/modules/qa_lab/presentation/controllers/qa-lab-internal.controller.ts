@@ -5,8 +5,8 @@ import {
   CurrentUser,
   Roles,
   type AuthenticatedUser,
-} from '../../../common';
-import { QaCatalogService } from '../services';
+} from '../../../../common';
+import { QaCatalogService } from '../../application/services';
 import { RunDueSchedulesDto, RunDueSchedulesResponseDto } from '../dto';
 
 /**

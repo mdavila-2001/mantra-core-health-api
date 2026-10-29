@@ -402,7 +402,7 @@ const TENANT_SCOPE_SYSTEM_SWEEP_ALLOWLIST = new Set([
   // pares tiene que ver todas; filtrar por tenant dejaría pasar un borrado que
   // pisa una publicación ajena en curso. No lo alcanza ningún controlador.
   'src/modules/messaging/repositories/queues.repository.ts#findStorageIntents',
-  'src/modules/qa_lab/repositories/qa-catalog.repository.ts#claimDueSchedules',
+  'src/modules/qa_lab/infrastructure/repositories/qa-catalog.repository.ts#claimDueSchedules',
   'src/modules/reporting/repositories/reporting-runs.repository.ts#findDueSchedules',
   'src/modules/tracking/repositories/tracking.repository.ts#findOpenSubjectsForScan',
   'src/modules/vector_rag/repositories/vector-catalog.repository.ts#findQueuedJobs',
