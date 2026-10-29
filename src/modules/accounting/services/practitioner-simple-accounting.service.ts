@@ -92,15 +92,21 @@ export class PractitionerSimpleAccountingService {
   ) {}
 
   /**
-   * Práctica de una escritura: el profesional está vinculado a ella (misma regla
-   * que sus hermanos) y es del tenant activo (ACC-01, como `createOwnLiability`).
+   * Práctica de una operación por `practiceId`, de lectura o de escritura: el
+   * profesional está vinculado a ella (misma regla que sus hermanos) y es del
+   * tenant activo (ACC-01, como `createOwnLiability`). Lo ajeno responde idéntico
+   * a lo inexistente: 404, mismo mensaje y `reason`, sin `details`.
+   *
+   * @returns El perfil profesional del actor.
    */
-  private async ownPracticeForWrite(
+  private async ownPractice(
     actor: AuthenticatedUser,
     practiceId: string,
-  ): Promise<void> {
-    await this.practitionerAccounting.assertOwnsPractice(actor, practiceId);
+  ): Promise<string> {
+    const practitionerProfileId =
+      await this.practitionerAccounting.assertOwnsPractice(actor, practiceId);
     await this.scope.practice(practiceId);
+    return practitionerProfileId;
   }
 
   /**
@@ -144,8 +150,7 @@ export class PractitionerSimpleAccountingService {
     period: SimpleSummaryPeriod | undefined,
     actor: AuthenticatedUser,
   ): Promise<SimplePractitionerSummaryDto> {
-    const practitionerProfileId =
-      await this.practitionerAccounting.assertOwnsPractice(actor, practiceId);
+    const practitionerProfileId = await this.ownPractice(actor, practiceId);
     const range = summaryRange(period, new Date());
     const em = this.em.fork();
 
@@ -291,7 +296,7 @@ export class PractitionerSimpleAccountingService {
     practiceId: string,
     actor: AuthenticatedUser,
   ): Promise<SimpleAccountsResponseDto> {
-    await this.practitionerAccounting.assertOwnsPractice(actor, practiceId);
+    await this.ownPractice(actor, practiceId);
     const em = this.em.fork();
     await this.ensureGeneralAccounts(em, practiceId, actor.id);
     const rows = await this.repo.listAccounts(em, practiceId);
@@ -306,7 +311,7 @@ export class PractitionerSimpleAccountingService {
     dto: CreateSimpleAccountDto,
     actor: AuthenticatedUser,
   ): Promise<SimpleAccountDto> {
-    await this.ownPracticeForWrite(actor, dto.practiceId);
+    await this.ownPractice(actor, dto.practiceId);
     const name = this.validName(dto.name);
     const accountClass = this.validClass(dto.accountClass);
     const em = this.em.fork();
@@ -458,7 +463,7 @@ export class PractitionerSimpleAccountingService {
     kind: SimpleRecordKind | undefined,
     actor: AuthenticatedUser,
   ): Promise<SimpleRecordsResponseDto> {
-    await this.practitionerAccounting.assertOwnsPractice(actor, practiceId);
+    await this.ownPractice(actor, practiceId);
     const em = this.em.fork();
     const rows = await this.repo.listRecords(em, practiceId, kind);
     return { items: rows.map(toRecordDto) };
@@ -468,7 +473,7 @@ export class PractitionerSimpleAccountingService {
     dto: CreateSimpleRecordDto,
     actor: AuthenticatedUser,
   ): Promise<SimpleRecordDto> {
-    await this.ownPracticeForWrite(actor, dto.practiceId);
+    await this.ownPractice(actor, dto.practiceId);
     if (!isRecordKind(dto.kind))
       this.invalid('Falta qué es: gasto, activo o deuda.');
     const kind = dto.kind;
@@ -553,7 +558,7 @@ export class PractitionerSimpleAccountingService {
     practiceId: string,
     actor: AuthenticatedUser,
   ): Promise<SimpleTransactionsResponseDto> {
-    await this.practitionerAccounting.assertOwnsPractice(actor, practiceId);
+    await this.ownPractice(actor, practiceId);
     const em = this.em.fork();
     const rows = await this.repo.listTransactions(em, practiceId);
     return { items: rows.map(toTransactionDto) };
@@ -563,7 +568,7 @@ export class PractitionerSimpleAccountingService {
     dto: CreateSimpleTransactionDto,
     actor: AuthenticatedUser,
   ): Promise<SimpleTransactionDto> {
-    await this.ownPracticeForWrite(actor, dto.practiceId);
+    await this.ownPractice(actor, dto.practiceId);
     const em = this.em.fork();
     await this.assertTransactionContent(em, dto, dto.practiceId);
     const created = this.repo.createTransaction(em, {

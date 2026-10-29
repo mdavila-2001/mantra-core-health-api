@@ -187,7 +187,12 @@ function build() {
 
 /** Siembra las generales de la práctica y devuelve la cuenta por código. */
 async function seeded(ctx: ReturnType<typeof build>, practiceId = PRACTICE) {
-  await ctx.service.listAccounts(practiceId, actor);
+  if (practiceId === FOREIGN_PRACTICE) {
+    // Las filas ajenas ya existen en la base: el servicio no las siembra desde otro tenant.
+    await ctx.repo.seedAccounts(null, practiceId, GENERAL_ACCOUNTS, actor.id);
+  } else {
+    await ctx.service.listAccounts(practiceId, actor);
+  }
   const byCode = (code: string): Row =>
     ctx.repo.accounts.find(
       (a) => a.practiceId === practiceId && a.code === code,
@@ -436,6 +441,36 @@ describe('PractitionerSimpleAccountingService (P49)', () => {
       expect(ctx.repo.accounts).toHaveLength(before);
       expect(ctx.repo.records).toHaveLength(0);
       expect(ctx.repo.transactions).toHaveLength(0);
+    });
+  });
+
+  describe('alcance de tenant en las lecturas (ACC-01)', () => {
+    it('resumen, cuentas, registros y transacciones de una práctica de otro tenant → 404 «Práctica no encontrada», sin sembrar ni leer', async () => {
+      const ctx = build();
+      await seeded(ctx, FOREIGN_PRACTICE);
+      const before = ctx.repo.accounts.length;
+      ctx.repo.listAccounts.mockClear();
+      ctx.repo.listRecords.mockClear();
+      ctx.repo.listTransactions.mockClear();
+      ctx.repo.seedAccounts.mockClear();
+
+      const reads = [
+        ctx.service.summary(FOREIGN_PRACTICE, 'month', actor),
+        ctx.service.listAccounts(FOREIGN_PRACTICE, actor),
+        ctx.service.listRecords(FOREIGN_PRACTICE, undefined, actor),
+        ctx.service.listTransactions(FOREIGN_PRACTICE, actor),
+      ];
+      for (const read of reads) {
+        const error = await rejected(read);
+        expect(error).toBeInstanceOf(ResourceNotFoundException);
+        expect(error.message).toBe('Práctica no encontrada');
+        expect(JSON.stringify(error.getResponse())).not.toContain('details');
+      }
+      expect(ctx.repo.listAccounts).not.toHaveBeenCalled();
+      expect(ctx.repo.listRecords).not.toHaveBeenCalled();
+      expect(ctx.repo.listTransactions).not.toHaveBeenCalled();
+      expect(ctx.repo.seedAccounts).not.toHaveBeenCalled();
+      expect(ctx.repo.accounts).toHaveLength(before);
     });
   });
 

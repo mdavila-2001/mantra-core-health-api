@@ -590,6 +590,73 @@ describe('Contabilidad simple del doctor · HTTP real (JWT + RolesGuard)', () =>
     expect(despues[0].n).toBe(antes[0].n);
   });
 
+  it('ACC-01 en las lecturas: un médico vinculado a una práctica de OTRO tenant activo la recibe como inexistente (404 uniforme) en resumen, cuentas, registros y transacciones', async () => {
+    // A está vinculado a `practica` (tenant DEFAULT) pero actúa con el tenant ajeno activo.
+    const token = await tokenConTenants(medicoA, [
+      medicoA.tenantId,
+      tenantOtro,
+    ]);
+    const headers = { ...bearer(token), 'X-Tenant-Id': tenantOtro };
+    const lecturas = (practiceId: string) => [
+      {
+        nombre: 'resumen',
+        pegar: () =>
+          http().get(`${base}/summary`).query({ practiceId }).set(headers),
+      },
+      {
+        nombre: 'cuentas',
+        pegar: () =>
+          http().get(`${base}/accounts`).query({ practiceId }).set(headers),
+      },
+      {
+        nombre: 'registros',
+        pegar: () =>
+          http().get(`${base}/records`).query({ practiceId }).set(headers),
+      },
+      {
+        nombre: 'transacciones',
+        pegar: () =>
+          http().get(`${base}/transactions`).query({ practiceId }).set(headers),
+      },
+    ];
+
+    // Lo ajeno no se confirma ni se toca: ni lectura, ni siembra.
+    const cuentasAntes = await sql<{ n: string }>(
+      `select count(*)::text as n from accounting.practitioner_simple_accounts where practice_id = ?`,
+      [practica],
+    );
+    const resultados = await Promise.all(
+      lecturas(practica).map(async (l) => ({
+        nombre: l.nombre,
+        res: await l.pegar(),
+      })),
+    );
+    expect(
+      resultados.map((r) => ({ nombre: r.nombre, status: r.res.status })),
+    ).toEqual(
+      lecturas(practica).map((l) => ({ nombre: l.nombre, status: 404 })),
+    );
+    for (const { res } of resultados) {
+      expect(res.body.code).toBe('NOT_FOUND');
+      expect(res.body.details).toBeUndefined();
+      expect(res.body.items).toBeUndefined();
+    }
+    const cuentasDespues = await sql<{ n: string }>(
+      `select count(*)::text as n from accounting.practitioner_simple_accounts where practice_id = ?`,
+      [practica],
+    );
+    expect(cuentasDespues[0].n).toBe(cuentasAntes[0].n);
+
+    // Control: con su propio tenant activo la misma lectura responde 200.
+    const propia = await tokenConTenants(medicoA, [medicoA.tenantId]);
+    const ok = await http()
+      .get(`${base}/accounts`)
+      .query({ practiceId: practica })
+      .set({ ...bearer(propia), 'X-Tenant-Id': medicoA.tenantId })
+      .expect(200);
+    expect(ok.body.items).toHaveLength(Number(cuentasAntes[0].n));
+  });
+
   it('sin vinculación a la práctica: la ajena y la inexistente responden idéntico (422) en lecturas y altas', async () => {
     const intentos = (practiceId: string, persona: Persona) => [
       http().get(`${base}/summary`).query({ practiceId }).set(como(persona)),
