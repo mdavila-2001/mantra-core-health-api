@@ -172,6 +172,19 @@ export const CONSTRAINT_RULES: Readonly<Record<string, DatabaseViolationRule>> =
       'INVALID_BED_PERIOD',
       'El período de la cama no es válido',
     ),
+    // F2 de infraestructura: la API pre-valida estos tres; la base es la red.
+    ck_care_space_blocks_maintenance_eta: unprocessable(
+      'BLOCK_EXPECTED_END_REQUIRED',
+      'El mantenimiento exige la fecha estimada de fin',
+    ),
+    ck_care_space_blocks_end_after_start: unprocessable(
+      'BLOCK_PERIOD_INVALID',
+      'Las fechas del bloqueo no son coherentes',
+    ),
+    ck_cleaning_orders_inspector_differs: unprocessable(
+      'INSPECTION_BY_CLEANER_NOT_ALLOWED',
+      'Quien terminó la limpieza no puede inspeccionarla',
+    ),
     // --- FK que NO es de tenant (23503) ------------------------------------
     fk_space_tariffs_service_catalog_id: unprocessable(
       'TARIFF_SERVICE_NOT_IN_PRACTICE',

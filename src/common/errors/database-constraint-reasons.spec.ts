@@ -41,6 +41,22 @@ describe('resolveDatabaseViolation', () => {
     }
   });
 
+  it('23514: los CHECK de bloqueos y órdenes de limpieza de F2 responden 422 con su reason', () => {
+    const checks: Array<[string, string]> = [
+      ['ck_care_space_blocks_maintenance_eta', 'BLOCK_EXPECTED_END_REQUIRED'],
+      ['ck_care_space_blocks_end_after_start', 'BLOCK_PERIOD_INVALID'],
+      [
+        'ck_cleaning_orders_inspector_differs',
+        'INSPECTION_BY_CLEANER_NOT_ALLOWED',
+      ],
+    ];
+    for (const [constraint, reason] of checks) {
+      expect(
+        resolveDatabaseViolation({ sqlstate: '23514', constraint }),
+      ).toMatchObject({ status: HttpStatus.UNPROCESSABLE_ENTITY, reason });
+    }
+  });
+
   it('23505: los únicos parciales del modelo tienen reason propio', () => {
     expect(
       resolveDatabaseViolation({

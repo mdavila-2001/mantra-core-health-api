@@ -12,6 +12,8 @@ import {
   PracticeSitesHistory,
   ClinicalUnitsHistory,
   CareSpacesHistory,
+  CareSpaceBlocksHistory,
+  CleaningOrdersHistory,
 } from '../entities';
 
 /** Datos para sellar una revisión en una tabla `*_history` (write-side). */
@@ -161,6 +163,17 @@ const HISTORY_REGISTRY: Record<string, HistoryBinding> = {
   care_spaces: {
     entity: CareSpacesHistory,
     sourceField: 'careSpaceId',
+    revisionField: 'revisionNo',
+  },
+  // F2 de infraestructura: bloqueos y órdenes de limpieza (tablas mutables nuevas).
+  care_space_blocks: {
+    entity: CareSpaceBlocksHistory,
+    sourceField: 'careSpaceBlockId',
+    revisionField: 'revisionNo',
+  },
+  cleaning_orders: {
+    entity: CleaningOrdersHistory,
+    sourceField: 'cleaningOrderId',
     revisionField: 'revisionNo',
   },
 };
