@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1612 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1612 requests en 146 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1616 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1616 requests en 146 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -18431,7 +18431,7 @@
       ]
     },
     {
-      "name": "billing (35)",
+      "name": "billing (37)",
       "item": [
         {
           "name": "billing-operations",
@@ -19547,6 +19547,55 @@
               ]
             },
             {
+              "name": "GET /billing/service-catalog/procedure-specialties/mine · Listar las especialidades del arancel que corresponden al médico",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/billing/service-catalog/procedure-specialties/mine",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "billing",
+                    "service-catalog",
+                    "procedure-specialties",
+                    "mine"
+                  ]
+                },
+                "description": "Listar las especialidades del arancel que corresponden al médico. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /billing/service-catalog/procedure-specialties/mine`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `BillingServiceCatalogController_listMyProcedureSpecialties`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.procedureSpecialties || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('procedureSpecialtyId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "GET /billing/service-catalog/procedures · Listar el nomenclador de procedimientos (arancel de referencia)",
               "request": {
                 "method": "GET",
@@ -19578,7 +19627,7 @@
                     {
                       "key": "q",
                       "value": "q-ejemplo",
-                      "description": "Texto a buscar en el nombre del procedimiento",
+                      "description": "Palabras a buscar (todas deben aparecer), sin distinguir tildes ni mayúsculas, en el nombre, el código, el grupo o la especialidad",
                       "disabled": true
                     },
                     {
@@ -19673,6 +19722,66 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.serviceCatalogId);",
                       "  if (id) pm.environment.set('serviceCatalogId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /billing/service-catalog/import-procedures · Importar en lote procedimientos del arancel al catálogo",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/billing/service-catalog/import-procedures",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "billing",
+                    "service-catalog",
+                    "import-procedures"
+                  ]
+                },
+                "description": "Crea en el catálogo de la práctica todos los procedimientos del arancel que cumplan el filtro (especialidades, códigos y/o texto, combinados con Y; al menos uno). Idempotente: salta los códigos que la práctica ya tiene. Tope de 5000 coincidencias (400 si lo excede).\n\n`POST /billing/service-catalog/import-procedures`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `BillingServiceCatalogController_importProcedures`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"practiceId\": \"{{practiceId}}\",\n  \"specialties\": [\n    \"Cardiología\"\n  ],\n  \"codes\": [\n    \"procedure:bo:BO_ARM_AUDITORIA_MEDICA_I_GENERAL\"\n  ],\n  \"q\": \"q-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{importProcedureId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.importProcedureId);",
+                      "  if (id) pm.environment.set('importProcedureId', id);",
                       "}"
                     ]
                   }
@@ -26415,7 +26524,7 @@
       ]
     },
     {
-      "name": "community (68)",
+      "name": "community (69)",
       "item": [
         {
           "name": "community-groups",
@@ -29483,6 +29592,55 @@
                       "  const list = Array.isArray(body) ? body : (body.stats || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('statId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /community/profiles/organization-showcases/me · Vitrinas de organización que la sesión puede atender en el chat",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/community/profiles/organization-showcases/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "community",
+                    "profiles",
+                    "organization-showcases",
+                    "me"
+                  ]
+                },
+                "description": "Vitrinas de organización que la sesión puede atender en el chat. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /community/profiles/organization-showcases/me`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `CommunitySocialController_listOwnOrganizationShowcases`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.organizationShowcases || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('organizationShowcaseId', first.id);",
                       "}"
                     ]
                   }
@@ -51591,7 +51749,7 @@
                 "insurance-carrier-catalog"
               ]
             },
-            "description": "Catálogo público de aseguradoras y sus planes de salud. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /insurance-carrier-catalog`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 429, 500, 504\n\noperationId: `InsuranceCatalogController_listCatalog`",
+            "description": "Seguros públicos (seguridad social, SUS y cajas): siempre. Aseguradoras privadas: sólo las que tienen una cuenta registrada, es decir, un tenant activo con un OWNER o ADMIN vigente, usuario activo y credencial activa.\n\n`GET /insurance-carrier-catalog`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 429, 500, 504\n\noperationId: `InsuranceCatalogController_listCatalog`",
             "auth": {
               "type": "noauth"
             }
@@ -69426,7 +69584,7 @@
       ]
     },
     {
-      "name": "pharmacy (33)",
+      "name": "pharmacy (34)",
       "item": [
         {
           "name": "pharmacy-directory",
@@ -71146,6 +71304,61 @@
                     }
                   }
                 }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{orderId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.orderId);",
+                      "  if (id) pm.environment.set('orderId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /pharmacy/orders/{id}/conversation · Abrir el chat del pedido con la farmacia",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/pharmacy/orders/:id/conversation",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pharmacy",
+                    "orders",
+                    ":id",
+                    "conversation"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{orderId}}",
+                      "description": "Identificador de ruta · variable `{{orderId}}`"
+                    }
+                  ]
+                },
+                "description": "Idempotente: devuelve el mismo hilo directo entre el paciente titular y la vitrina pública de la farmacia. Lo piden el titular o el personal (PHARMACY_STAFF con membresía activa) de la farmacia del pedido; cualquier tercero recibe 404. 422 con reason ORGANIZATION_CHAT_PROFILE_UNAVAILABLE (farmacia sin vitrina activa/verificada), PATIENT_CHAT_PROFILE_MISSING (paciente sin perfil comunitario; no se crea) o bloqueo entre perfiles.\n\n`POST /pharmacy/orders/{id}/conversation`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `PharmacyOrdersController_openConversation`"
               },
               "response": [],
               "event": [
@@ -81648,14 +81861,7 @@
               "name": "GET /public/pharmacies/open-now · Farmacias abiertas ahora: 24 h o de turno vigente",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "X-Tenant-Id",
-                    "value": "{{tenantId}}",
-                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                    "disabled": false
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{baseUrl}}/public/pharmacies/open-now",
                   "host": [
@@ -81705,7 +81911,10 @@
                     }
                   ]
                 },
-                "description": "Farmacias abiertas ahora: 24 h o de turno vigente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /public/pharmacies/open-now`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `PharmacyPublicController_openNow`"
+                "description": "Farmacias abiertas ahora: 24 h o de turno vigente. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /public/pharmacies/open-now`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 429, 500, 504\n\noperationId: `PharmacyPublicController_openNow`",
+                "auth": {
+                  "type": "noauth"
+                }
               },
               "response": [],
               "event": [
@@ -81815,12 +82024,6 @@
                   {
                     "key": "Content-Type",
                     "value": "application/json"
-                  },
-                  {
-                    "key": "X-Tenant-Id",
-                    "value": "{{tenantId}}",
-                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                    "disabled": false
                   }
                 ],
                 "url": {
@@ -81843,7 +82046,7 @@
                     }
                   ]
                 },
-                "description": "Sin sesión. Cuerpo { items: string[] (1-20, texto libre), lat?, lng? }. Sólo cuenta lo que está en stock; un agotado es faltante. Orden del servidor: primero las completas, después la más cercana en línea recta. No guarda nada. Un slug inexistente, oculto o de otro tipo responde 404.\n\n`POST /public/profiles/f/{slug}/branch-availability`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PublicCatalogController_pharmacyBranchAvailability`",
+                "description": "Sin sesión. Cuerpo { items: string[] (1-20, texto libre), lat?, lng? }. Sólo cuenta lo que está en stock; un agotado es faltante. Orden del servidor: primero las completas, después la más cercana en línea recta. No guarda nada. Un slug inexistente, oculto o de otro tipo responde 404.\n\n`POST /public/profiles/f/{slug}/branch-availability`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PublicCatalogController_pharmacyBranchAvailability`",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"items\": [\n    \"Paracetamol 500 mg\",\n    \"Losartán\"\n  ],\n  \"lat\": -17.78,\n  \"lng\": -63.18\n}",
@@ -81852,6 +82055,9 @@
                       "language": "json"
                     }
                   }
+                },
+                "auth": {
+                  "type": "noauth"
                 }
               },
               "response": [],
@@ -81880,14 +82086,7 @@
               "name": "GET /public/profiles/f/{slug}/branches · Sucursales de una farmacia, desde su ficha pública",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "X-Tenant-Id",
-                    "value": "{{tenantId}}",
-                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                    "disabled": false
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{baseUrl}}/public/profiles/f/:slug/branches",
                   "host": [
@@ -81908,7 +82107,10 @@
                     }
                   ]
                 },
-                "description": "Sin sesión. Sedes activas de las farmacias activas y verificadas del tenant dueño de la ficha, por ciudad y nombre, con su punto si lo tiene. Un slug inexistente, oculto o de otro tipo responde 404.\n\n`GET /public/profiles/f/{slug}/branches`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `PublicCatalogController_pharmacyBranches`"
+                "description": "Sin sesión. Sedes activas de las farmacias activas y verificadas del tenant dueño de la ficha, por ciudad y nombre, con su punto si lo tiene. Un slug inexistente, oculto o de otro tipo responde 404.\n\n`GET /public/profiles/f/{slug}/branches`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 429, 500, 504\n\noperationId: `PublicCatalogController_pharmacyBranches`",
+                "auth": {
+                  "type": "noauth"
+                }
               },
               "response": [],
               "event": [

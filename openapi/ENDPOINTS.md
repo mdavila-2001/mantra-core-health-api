@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1614 de 1614 endpoints** en **73 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1616 de 1616 endpoints** en **73 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -19,7 +19,7 @@ Se documentan **1614 de 1614 endpoints** en **73 módulos**. La referencia compl
 | `clinical` | 42 | [Abrir referencia](endpoints/clinical.md) |
 | `clinical_ext` | 32 | [Abrir referencia](endpoints/clinical-ext.md) |
 | `common` | 19 | [Abrir referencia](endpoints/common.md) |
-| `community` | 98 | [Abrir referencia](endpoints/community.md) |
+| `community` | 99 | [Abrir referencia](endpoints/community.md) |
 | `consent` | 27 | [Abrir referencia](endpoints/consent.md) |
 | `content_packs` | 2 | [Abrir referencia](endpoints/content-packs.md) |
 | `crm` | 16 | [Abrir referencia](endpoints/crm.md) |
@@ -54,7 +54,7 @@ Se documentan **1614 de 1614 endpoints** en **73 módulos**. La referencia compl
 | `payments` | 14 | [Abrir referencia](endpoints/payments.md) |
 | `pharma_lab` | 76 | [Abrir referencia](endpoints/pharma-lab.md) |
 | `pharmacy` | 33 | [Abrir referencia](endpoints/pharmacy.md) |
-| `pharmacy_inventory` | 29 | [Abrir referencia](endpoints/pharmacy-inventory.md) |
+| `pharmacy_inventory` | 30 | [Abrir referencia](endpoints/pharmacy-inventory.md) |
 | `platform_ops` | 15 | [Abrir referencia](endpoints/platform-ops.md) |
 | `polyglot_storage` | 15 | [Abrir referencia](endpoints/polyglot-storage.md) |
 | `practice` | 37 | [Abrir referencia](endpoints/practice.md) |

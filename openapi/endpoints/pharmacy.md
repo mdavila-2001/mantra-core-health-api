@@ -2336,7 +2336,7 @@ Content-Type: application/json
 | `strengthText` | No | `string` | longitud mínima 1; longitud máxima 200; admite null | Concentración (texto libre); `null` la borra | `valor-ejemplo` |
 | `packageSizeText` | No | `string` | longitud mínima 1; longitud máxima 200; admite null | Tamaño de empaque (texto libre); `null` lo borra | `valor-ejemplo` |
 | `requiresPrescription` | No | `boolean` | admite null | Requiere receta; `null` lo borra | `true` |
-| `unitPrice` | No | `number | string` | admite null | Precio de venta en bolivianos (número o texto decimal, hasta 2 decimales); `null` lo quita. Se versiona en la lista pública `CATALOGO`. | `12.5` |
+| `unitPrice` | No | `number | string` | Sin restricción adicional declarada | Precio de venta en bolivianos (número o texto decimal, hasta 2 decimales); `null` lo quita. Se versiona en la lista pública `CATALOGO`. | `12.5` |
 | `category` | No | `string` | longitud máxima 60; admite null | Categoría por nombre (una de la farmacia; otra es 422); `null` la quita | `valor-ejemplo` |
 | `description` | No | `string` | longitud máxima 2000; admite null | Descripción para el paciente; `null` la borra | `Texto descriptivo de ejemplo` |
 | `inStock` | No | `boolean` | Sin restricción adicional declarada | `false` = «no lo tengo»; `true` vuelve a tenerlo (si el conteo estaba en 0 queda «sin conteo»). Junto con `stock` es 422. | `true` |
@@ -4789,7 +4789,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Farmacias abiertas ahora: 24 h o de turno vigente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Farmacias abiertas ahora: 24 h o de turno vigente. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
 
 Contexto declarado en el controlador: P34: qué farmacias están abiertas **ahora** — 24 h declaradas o de turno vigente —, sin sesión. Un turno vencido o cancelado nunca aparece (lo filtra la consulta, no el cliente). `asOf`/`asOfLocal` dicen con qué instante se decidió, en UTC y en la hora de Bolivia (`America/La_Paz`, UTC−4 todo el año).
 
@@ -4840,8 +4840,6 @@ Host: localhost:3000
 |---:|---|---|---|
 | 200 | Operación completada correctamente. | `Promise<PublicOpenNowPageDto>` | Sí |
 | 400 | Consulta completada correctamente. | `Promise<PublicOpenNowPageDto>` | No |
-| 401 | Consulta completada correctamente. | `Promise<PublicOpenNowPageDto>` | No |
-| 403 | Consulta completada correctamente. | `Promise<PublicOpenNowPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicOpenNowPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicOpenNowPageDto>` | No |
 | 504 | Consulta completada correctamente. | `Promise<PublicOpenNowPageDto>` | No |
