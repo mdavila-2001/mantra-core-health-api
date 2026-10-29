@@ -71,6 +71,7 @@ import { PeriopOperatingRoomService } from './periop-operating-room.service';
 import { PeriopBlocksService } from './periop-blocks.service';
 import { PeriopChecklistGateService } from './periop-checklist-gate.service';
 import { PeriopCaseProjectionService } from './periop-case-projection.service';
+import { assertNoAutomaticRoomCharge } from '../../billing/domain/room-charge-guard';
 
 /**
  * Roles de administración de la programación quirúrgica: ven el detalle de los
@@ -1719,6 +1720,9 @@ export class PeriopCasesService {
     dto: PostChargesDto,
     actor: AuthenticatedUser,
   ): Promise<PostChargesResponseDto> {
+    // El tiempo de sala lo devenga facturación al completar el caso (F5e): cargarlo
+    // acá además cobraría el quirófano dos veces.
+    assertNoAutomaticRoomCharge(dto.items);
     this.logger.info(
       { operation: 'periop.case.charges', caseId, items: dto.items.length },
       'Posting case charges',

@@ -21,6 +21,7 @@ import {
 import { PracticeTenantLookupService } from '../../practice/services';
 import {
   IssueInvoiceFromEncounterDto,
+  InvoiceLineInputDto,
   CreditNoteDto,
   CreatePaymentPlanDto,
   InvoiceResponseDto,
@@ -37,6 +38,10 @@ import {
   assertPracticeInTenant,
 } from '../billing-scope';
 import type { Invoices } from '../entities';
+import {
+  ChargeCapturesService,
+  type ChargeRow,
+} from './charge-captures.service';
 
 /** "No existe" del encuentro origen de una factura; el ajeno o de otro paciente responde idéntico. */
 const INVOICE_ENCOUNTER_NOT_FOUND = {
@@ -82,6 +87,7 @@ export class InvoicesService {
    * @param linksRepo - Valor de links repo requerido por la operación.
    * @param linkTargets - Lectura de los documentos que la factura vincula.
    * @param logger - Valor de logger requerido por la operación.
+   * @param captures - Cargos devengados (día-cama / quirófano por tiempo) que la factura incorpora.
    */
   constructor(
     private readonly em: EntityManager,
@@ -90,14 +96,24 @@ export class InvoicesService {
     private readonly linkTargets: BillingLinkTargetsRepository,
     private readonly practiceTenantLookup: PracticeTenantLookupService,
     private readonly logger: PinoLogger,
+    private readonly captures: ChargeCapturesService,
   ) {
     this.logger.setContext(InvoicesService.name);
   }
 
-  /** UC-17-01: emite una factura con sus líneas desde los cargos del encuentro. */
+  /**
+   * UC-17-01: emite una factura con sus líneas desde los cargos del encuentro.
+   *
+   * Con `chargeCaptureIds` incorpora además cargos devengados (día-cama /
+   * quirófano por tiempo): cada uno genera su línea con la cantidad y el precio que
+   * guardó y pasa a `INVOICED` **en la misma transacción** que la factura. Dos
+   * facturas que pidan el mismo cargo a la vez se serializan por el bloqueo de
+   * fila y la segunda recibe 409 `CHARGE_ALREADY_INVOICED`.
+   */
   async issueFromEncounter(
     dto: IssueInvoiceFromEncounterDto,
     actor: AuthenticatedUser,
+    correlationId?: string,
   ): Promise<InvoiceResponseDto> {
     this.logger.info(
       {
@@ -119,6 +135,7 @@ export class InvoicesService {
       );
     }
     const tenantId = activeTenantId();
+    const chargeIds = dto.chargeCaptureIds ?? [];
     return this.em.transactional(async (tx) => {
       await assertPracticeInTenant(
         this.practiceTenantLookup,
@@ -147,6 +164,57 @@ export class InvoicesService {
           );
         }
       }
+      // Cargos devengados: se cargan, se autorizan contra su cama y se validan ANTES de
+      // calcular nada; un cargo ajeno responde como uno inexistente.
+      let chargeRows: ChargeRow[] = [];
+      if (chargeIds.length > 0) {
+        if (!dto.encounterId)
+          throw new PreconditionFailedException(
+            'Los cargos devengados se facturan con el encuentro que los originó',
+            { errors: [{ field: 'encounterId' }] },
+            BillingErrorReason.CHARGE_NOT_OF_INVOICE,
+          );
+        chargeRows = await this.captures.loadForInvoice(
+          tx,
+          chargeIds,
+          {
+            practiceId: dto.practiceId,
+            patientProfileId: dto.patientProfileId,
+            encounterId: dto.encounterId,
+          },
+          actor,
+        );
+      }
+      const clientLines = dto.lines ?? [];
+      const lineInputs: InvoiceLineInputDto[] = [
+        ...clientLines,
+        ...chargeRows.map((row) => this.chargeLine(row)),
+      ];
+      if (lineInputs.length === 0)
+        throw new PreconditionFailedException(
+          'La factura necesita al menos una línea o un cargo devengado',
+          { errors: [{ field: 'lines' }] },
+          BillingErrorReason.INVOICE_LINES_REQUIRED,
+        );
+      const currencies = new Set(
+        chargeRows.map((row) => row.currency_concept_id),
+      );
+      if (
+        currencies.size > 1 ||
+        (dto.currencyConceptId !== undefined &&
+          currencies.size === 1 &&
+          !currencies.has(dto.currencyConceptId))
+      )
+        throw new PreconditionFailedException(
+          'Los cargos devengados están en otra moneda que la factura',
+          { errors: [{ field: 'currencyConceptId' }] },
+          BillingErrorReason.CHARGE_NOT_OF_INVOICE,
+        );
+      const currencyConceptId =
+        dto.currencyConceptId ??
+        chargeRows[0]?.currency_concept_id ??
+        undefined;
+
       const invoiceNumber = dto.invoiceNumber ?? this.generateNumber('INV');
       const clash = await this.invoicesRepo.findByNumber(
         tx,
@@ -167,7 +235,7 @@ export class InvoicesService {
       let subtotalCents = 0;
       let taxCents = 0;
       let discountCents = 0;
-      const lineTotals = dto.lines.map((l) => {
+      const lineTotals = lineInputs.map((l) => {
         const line = validateLineAmounts(l, {
           amount: BillingErrorReason.INVOICE_LINE_AMOUNT_INVALID,
           discountExceedsBase:
@@ -194,13 +262,13 @@ export class InvoicesService {
         total: fromCents(totalCents),
         paidTotal: '0.00',
         balance: fromCents(totalCents),
-        currencyConceptId: dto.currencyConceptId,
+        currencyConceptId,
         actorUserId: actor.id,
       });
       // FK planas: persistir la factura antes de las líneas y los vínculos.
       await tx.flush();
 
-      dto.lines.forEach((l, i) => {
+      const createdLines = lineInputs.map((l, i) =>
         this.invoicesRepo.createLine(tx, {
           invoiceId: invoice.id,
           serviceId: l.serviceId,
@@ -214,8 +282,8 @@ export class InvoicesService {
           incomeAccountId: l.incomeAccountId,
           costCenterId: l.costCenterId,
           actorUserId: actor.id,
-        });
-      });
+        }),
+      );
 
       if (dto.encounterId || dto.claimId) {
         this.linksRepo.create(tx, {
@@ -228,15 +296,33 @@ export class InvoicesService {
         });
       }
 
+      if (chargeRows.length > 0) {
+        // La base valida que la línea exista en la práctica del cargo: se persiste antes.
+        await tx.flush();
+        for (const [i, row] of chargeRows.entries()) {
+          await this.captures.markInvoiced(
+            tx,
+            row,
+            {
+              invoiceId: invoice.id,
+              invoiceLineId: createdLines[clientLines.length + i].id,
+            },
+            actor,
+            correlationId,
+          );
+        }
+      }
+
       this.logger.info(
         {
           operation: 'billing.invoice.issue',
           invoiceId: invoice.id,
-          lines: dto.lines.length,
+          lines: lineInputs.length,
+          chargeCaptures: chargeRows.length,
         },
         'Invoice issued',
       );
-      return this.toResponse(invoice, dto.lines.length);
+      return this.toResponse(invoice, lineInputs.length);
     });
   }
 
@@ -562,6 +648,33 @@ export class InvoicesService {
         practiceId,
       });
     }
+  }
+
+  /**
+   * Línea de factura de un cargo devengado: su cantidad y su precio, tal como los
+   * guardó el devengo (foto de la tarifa de ese día).
+   */
+  private chargeLine(row: ChargeRow): InvoiceLineInputDto {
+    const isOrTime = row.source_kind_concept_id === BILL.CHG_SRC_OR_TIME;
+    const line = new InvoiceLineInputDto();
+    line.serviceId = row.service_catalog_id ?? undefined;
+    line.description = isOrTime
+      ? `Uso de quirófano ${row.service_date} (${row.quantity} u.)`
+      : row.minimum_stay_charge
+        ? `Día-cama mínimo ${row.service_date}`
+        : `Día-cama ${row.service_date}`;
+    line.quantity = row.quantity;
+    line.unitPrice = this.moneyOf(row.unit_price ?? '0');
+    line.costCenterId = row.cost_center_id ?? undefined;
+    return line;
+  }
+
+  /** `350.000000` → `350.00`; un precio con más de dos decimales significativos queda tal cual y la validación lo rechaza. */
+  private moneyOf(price: string): string {
+    const [whole, fraction = ''] = price.split('.');
+    return /^0*$/.test(fraction.slice(2))
+      ? `${whole}.${fraction.slice(0, 2).padEnd(2, '0')}`
+      : price;
   }
 
   /**

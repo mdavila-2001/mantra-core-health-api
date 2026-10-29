@@ -4,3 +4,6 @@ export * from './billing-operations.controller';
 export * from './billing-service-catalog.controller';
 export * from './billing-simulated.controller';
 export * from './patient-spending.controller';
+export * from './billing-space-tariffs.controller';
+export * from './billing-charge-captures.controller';
+export * from './billing-charges-internal.controller';

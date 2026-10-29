@@ -48,11 +48,12 @@ describe('BillingReceivablesController', () => {
     const dto = { practiceId: 'pr1' };
     d.invoicesService.issueFromEncounter.mockResolvedValue({ id: 'inv1' });
     await expect(
-      d.controller.issueFromEncounter(dto as any, actor),
+      d.controller.issueFromEncounter(dto as any, actor, 'req-1'),
     ).resolves.toEqual({ id: 'inv1' });
     expect(d.invoicesService.issueFromEncounter).toHaveBeenCalledWith(
       dto,
       actor,
+      'req-1',
     );
   });
 

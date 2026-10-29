@@ -214,6 +214,9 @@ export enum BillingErrorReason {
   /** El cargo no pertenece al paciente, la práctica o el encuentro de la factura. */
   CHARGE_NOT_OF_INVOICE = 'CHARGE_NOT_OF_INVOICE',
 
+  /** La factura no trae ninguna línea ni cargo devengado. */
+  INVOICE_LINES_REQUIRED = 'INVOICE_LINES_REQUIRED',
+
   /** El cargo no tiene tarifa vigente (sin precio): se configura la tarifa antes de facturar. */
   CHARGE_WITHOUT_PRICE = 'CHARGE_WITHOUT_PRICE',
 

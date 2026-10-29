@@ -1,7 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   ArrayMinSize,
+  ArrayUnique,
   IsArray,
   IsBoolean,
   IsDateString,
@@ -207,15 +209,36 @@ export class IssueInvoiceFromEncounterDto {
   /**
    * Valor de lines mantenido por la instancia.
    */
-  @ApiProperty({
+  @ApiPropertyOptional({
     type: [InvoiceLineInputDto],
-    description: 'Líneas de cargo (al menos una)',
+    description:
+      'Líneas de cargo. Al menos una línea o un cargo devengado (`chargeCaptureIds`)',
   })
+  @IsOptional()
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
   @Type(() => InvoiceLineInputDto)
-  lines!: InvoiceLineInputDto[];
+  lines?: InvoiceLineInputDto[];
+
+  /**
+   * Cargos devengados (día-cama / quirófano por tiempo) que esta factura incorpora.
+   */
+  @ApiPropertyOptional({
+    type: [String],
+    format: 'uuid',
+    description:
+      'Cargos devengados del encuentro (`GET /billing/encounters/:id/pending-charges`). ' +
+      'Cada uno genera su línea con la cantidad y el precio guardados y queda `INVOICED` ' +
+      'en la misma transacción. Exige `encounterId`.',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(200)
+  @ArrayUnique()
+  @IsUUID('all', { each: true })
+  chargeCaptureIds?: string[];
 }
 
 /** Línea de reverso para una nota de crédito (UC-17-03). */

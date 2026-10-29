@@ -321,6 +321,56 @@ describe('InfrastructureAccessService.assertCan', () => {
     );
   });
 
+  it('F5e: el rol global BILLING del tenant cubre la sede; si está acotado a otro tenant, no cubre nada', async () => {
+    const registry = new InfraPolicyRegistry();
+    registry.register({
+      name: 'T',
+      rules: { 'infra.t.view': { roles: ['BILLING'], summary: 't' } },
+    });
+    const service = new InfrastructureAccessService(
+      {
+        resolve: fn().mockResolvedValue({
+          level: 'NONE',
+          branchIds: new Set(),
+        }),
+        canSee: fn(),
+      } as any,
+      { findActiveByUserTenant: fn().mockResolvedValue(null) } as any,
+      registry,
+    );
+    const tx = {
+      execute: fn(async (sql: string) =>
+        sql.includes('from practice.practice_sites s')
+          ? [{ id: SITE, practice_id: 'practice-1', branch_id: null }]
+          : [],
+      ),
+    };
+    const billing = {
+      id: 'user-b',
+      roles: ['USER', 'BILLING'],
+      scopedRoles: { [TENANT]: ['BILLING'] },
+    } as any;
+    const grant = await runWithTenant(TENANT, () =>
+      service.assertCan(billing, 'infra.t.view', { siteId: SITE }, tx as any),
+    );
+    expect(grant.actingRoles).toEqual(['BILLING']);
+
+    const otroTenant = {
+      ...billing,
+      scopedRoles: { 'otro-tenant': ['BILLING'] },
+    };
+    await expect(
+      runWithTenant(TENANT, () =>
+        service.assertCan(
+          otroTenant,
+          'infra.t.view',
+          { siteId: SITE },
+          tx as any,
+        ),
+      ),
+    ).rejects.toMatchObject({ status: 404 });
+  });
+
   it('una acción que ninguna franja declara es un error de programación, no un 403', async () => {
     const d = build({ level: 'ORG' });
     await expect(d.can('infra.nada')).rejects.toThrow('sin política');

@@ -142,10 +142,11 @@ export function validateTariffShape(
       field: 'minimumUnits',
       message: 'El mínimo es de al menos 1 unidad',
     });
-  if (!/^\d+(\.\d{1,6})?$/.test(input.unitPrice))
+  // La factura trabaja en centavos: un precio con más decimales no se podría facturar.
+  if (!/^\d+(\.\d{1,2})?$/.test(input.unitPrice))
     errors.push({
       field: 'unitPrice',
-      message: 'El precio es un decimal no negativo con hasta 6 decimales',
+      message: 'El precio es un decimal no negativo con hasta 2 decimales',
     });
   if (input.validTo && input.validTo <= input.validFrom)
     errors.push({

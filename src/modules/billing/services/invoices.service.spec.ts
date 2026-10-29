@@ -69,6 +69,10 @@ function build() {
     findTenantOfPractice: mockFn().mockResolvedValue('tenant-1'),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const captures = {
+    loadForInvoice: mockFn().mockResolvedValue([]),
+    markInvoiced: mockFn().mockResolvedValue(undefined),
+  };
   const raw = new InvoicesService(
     em as any,
     invoicesRepo as any,
@@ -76,6 +80,7 @@ function build() {
     linkTargets as any,
     practiceTenantLookup as any,
     logger as any,
+    captures as any,
   );
   return {
     service: inTenant(raw, TENANT_A),
@@ -87,6 +92,7 @@ function build() {
     linksRepo,
     linkTargets,
     practiceTenantLookup,
+    captures,
   };
 }
 

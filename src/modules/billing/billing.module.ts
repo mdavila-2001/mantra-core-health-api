@@ -4,6 +4,8 @@ import * as entities from './entities';
 import { CommonModule } from '../common/common.module';
 import { PracticeModule } from '../practice/practice.module';
 import { SurveysModule } from '../surveys/surveys.module';
+import { AuditModule } from '../audit/audit.module';
+import { MessagingModule } from '../messaging/messaging.module';
 import {
   BillingReceivablesController,
   BillingPayablesController,
@@ -11,6 +13,9 @@ import {
   BillingServiceCatalogController,
   BillingSimulatedController,
   PatientSpendingController,
+  BillingSpaceTariffsController,
+  BillingChargeCapturesController,
+  BillingChargesInternalController,
 } from './controllers';
 import {
   InvoicesService,
@@ -28,7 +33,15 @@ import {
   ProcedureImportService,
   BillingSimulatedService,
   PatientSpendingService,
+  BillingAccessService,
+  ChargeEventsService,
+  ChargeAccrualSupport,
+  ChargeCapturesService,
+  SpaceTariffsService,
+  BedDayChargesService,
+  OrTimeChargesService,
 } from './services';
+import { InfraF5ePolicyInitializer } from './policies/infra-f5.policy';
 import {
   InvoicesRepository,
   BillsRepository,
@@ -44,7 +57,10 @@ import {
   PatientSpendingRepository,
 } from './repositories';
 import { SIAT_EMITTER_PORT } from './application/ports';
-import { SiatSimulatedAdapter, SiatRealAdapter } from './infrastructure/adapters';
+import {
+  SiatSimulatedAdapter,
+  SiatRealAdapter,
+} from './infrastructure/adapters';
 
 /**
  * Módulo Billing (17): facturación al paciente (CxC), cuentas por pagar (CxP),
@@ -65,6 +81,9 @@ import { SiatSimulatedAdapter, SiatRealAdapter } from './infrastructure/adapters
     // Bytes de la imagen de un servicio (P-22-8): la autorización por contexto
     // la decide `billing`; `common` solo los sirve.
     CommonModule,
+    // F5e: historia de tarifas y cargos (`audit.*_history`) y eventos al outbox.
+    AuditModule,
+    MessagingModule,
   ],
   controllers: [
     BillingReceivablesController,
@@ -74,6 +93,10 @@ import { SiatSimulatedAdapter, SiatRealAdapter } from './infrastructure/adapters
     BillingSimulatedController,
     // P44 — «Mis gastos» del paciente: lectura sobre sus facturas.
     PatientSpendingController,
+    // F5e: tarifas de espacio, cargos devengados y los procesos de devengo.
+    BillingSpaceTariffsController,
+    BillingChargeCapturesController,
+    BillingChargesInternalController,
   ],
   providers: [
     // Repositorios
@@ -105,6 +128,15 @@ import { SiatSimulatedAdapter, SiatRealAdapter } from './infrastructure/adapters
     ProcedureImportService,
     BillingSimulatedService,
     PatientSpendingService,
+    // F5e: política de roles en `INFRA_POLICIES` y servicios de tarifas y devengo.
+    InfraF5ePolicyInitializer,
+    BillingAccessService,
+    ChargeEventsService,
+    ChargeAccrualSupport,
+    ChargeCapturesService,
+    SpaceTariffsService,
+    BedDayChargesService,
+    OrTimeChargesService,
     // Puerto SIAT — el adaptador se selecciona por SIAT_MODE (default: simulado).
     {
       provide: SIAT_EMITTER_PORT,
@@ -118,6 +150,11 @@ import { SiatSimulatedAdapter, SiatRealAdapter } from './infrastructure/adapters
   // `transaction_id` en el documento de origen, idempotente por documento)
   // para que el asiento de un ingreso de consulta quede enlazado a la factura
   // pagada que lo originó, sin reimplementar esa guarda en otro módulo.
-  exports: [LedgerService, SIAT_EMITTER_PORT],
+  exports: [
+    LedgerService,
+    SIAT_EMITTER_PORT,
+    // F5e: el módulo de quirófanos puede pedir el devengo de un caso al completarlo.
+    OrTimeChargesService,
+  ],
 })
 export class BillingModule {}

@@ -23,6 +23,7 @@ import {
   requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
+import { CorrelationId } from '../../practice/http/request-decorators';
 import {
   InvoicesService,
   PaymentsReceivedService,
@@ -157,14 +158,20 @@ export class BillingReceivablesController {
     entityId: 'result.id',
   })
   @Post('invoices\\:issue-from-encounter')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SECURITY_ADMIN', 'BILLING')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Emitir factura desde los cargos del encuentro' })
+  @ApiOperation({
+    summary: 'Emitir factura desde los cargos del encuentro',
+    description:
+      'Con `chargeCaptureIds` incorpora cargos devengados (día-cama / quirófano por tiempo): ' +
+      'cada uno queda `INVOICED` en la misma transacción (409 `CHARGE_ALREADY_INVOICED`).',
+  })
   issueFromEncounter(
     @Body() dto: IssueInvoiceFromEncounterDto,
     @CurrentUser() actor: AuthenticatedUser,
+    @CorrelationId() requestId: string | undefined,
   ): Promise<InvoiceResponseDto> {
-    return this.invoicesService.issueFromEncounter(dto, actor);
+    return this.invoicesService.issueFromEncounter(dto, actor, requestId);
   }
 
   /** UC-17-02. */

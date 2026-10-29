@@ -118,7 +118,7 @@ describe('validateTariffShape', () => {
       validateTariffShape({
         kind: 'TARIFF_BED_DAY',
         careSpaceId: 'x',
-        unitPrice: '10.500000',
+        unitPrice: '10.50',
         validFrom: '2026-01-01',
       }),
     ).toEqual([]);
@@ -178,7 +178,7 @@ describe('validateTariffShape', () => {
       }),
     ).toEqual([]);
   });
-  it('precio no negativo con a lo sumo 6 decimales, mínimo >= 1 y cierre posterior al inicio', () => {
+  it('precio no negativo con a lo sumo 2 decimales, mínimo >= 1 y cierre posterior al inicio', () => {
     const fields = (e: { field: string }[]) => e.map((x) => x.field).sort();
     expect(
       fields(
