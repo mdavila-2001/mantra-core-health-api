@@ -190,8 +190,8 @@ describe('Infraestructura F3 · censo diario e indicadores', () => {
         [
           orgC.tenantId,
           b5,
-          CONCEPTS.STATE_ACTIVE,
-          CONCEPTS.STATE_ACTIVE,
+          PRAC.BLOCK_ADMIN,
+          PRAC.BLOCK_RSN_ADMIN_DECISION,
           at('00:00', ayer),
         ],
       );

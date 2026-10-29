@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { PinoLogger } from 'nestjs-pino';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { OpsContext } from './ops-recorder';
 import { PRAC } from '../practice.concepts';
@@ -16,6 +17,8 @@ export interface BlocksTickResult {
   readonly deferred: number;
   /** Avisos `block_overdue` nuevos (la fecha estimada pasó y el bloqueo sigue abierto). */
   readonly overdue: number;
+  /** Bloqueos que fallaron al aplicarse (se registran y la pasada sigue con los demás). */
+  readonly failed: number;
 }
 
 /** Máximo de bloqueos que procesa una pasada de cada tipo. */
@@ -40,13 +43,17 @@ export class CareSpaceBlocksTickService {
    * @param state - Lectura del estado operativo.
    * @param blocks - Ciclo de vida de los bloqueos.
    * @param events - Outbox.
+   * @param logger - Registro estructurado.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly state: OpsStateService,
     private readonly blocks: CareSpaceBlocksService,
     private readonly events: OpsEventsService,
-  ) {}
+    private readonly logger: PinoLogger,
+  ) {
+    this.logger.setContext(CareSpaceBlocksTickService.name);
+  }
 
   /**
    * Una pasada.
@@ -57,6 +64,7 @@ export class CareSpaceBlocksTickService {
     let applied = 0;
     let deferred = 0;
     let overdue = 0;
+    let failed = 0;
 
     const due = await this.em
       .fork()
@@ -70,39 +78,25 @@ export class CareSpaceBlocksTickService {
         [now, PRAC.SPACE_OP_AVAILABLE, BATCH_LIMIT],
       );
     for (const candidate of due) {
-      const done = await this.em.transactional(async (tx) => {
-        const row = await this.state.loadSpace(
-          tx,
-          String(candidate.tenant_id),
-          String(candidate.care_space_id),
-          true,
-        );
-        const rows = await tx.execute<Record<string, unknown>[]>(
-          `select ${BLOCK_COLUMNS} from practice.care_space_blocks b where b.id = ? for update`,
-          [candidate.id],
-        );
-        if (!rows.length) return 'skip' as const;
-        const block = toBlockRow(rows[0]);
-        // Otro proceso ya lo aplicó, lo terminó o lo canceló.
-        if (block.endedAt || block.cancelledAt) return 'skip' as const;
-        const current = await this.state.stateOf(tx, row, now);
-        if (current.availability !== 'SPACE_OP_AVAILABLE')
-          return 'skip' as const;
-        if (!isLifecycleActive(row, now) || current.occupancy !== 'OCC_FREE')
-          return 'deferred' as const;
-        const ctx: OpsContext = {
-          tenantId: block.tenantId,
-          actorUserId: null,
-          source: 'SRC_SYSTEM',
-          action: 'BLOCK_TICK_APPLIED',
-          now,
-        };
-        await this.blocks.applyToSpace(tx, row, block, ctx, now);
-        await tx.flush();
-        return 'applied' as const;
-      });
+      // Un bloqueo que no se puede aplicar (dato inconsistente) no frena a los demás ni a
+      // los de otros tenants: se registra con sus ids y la pasada sigue.
+      const done = await this.applyOne(candidate, now).catch(
+        (error: unknown) => {
+          this.logger.error(
+            {
+              operation: 'practice.blocks_tick.apply',
+              blockId: candidate.id,
+              careSpaceId: candidate.care_space_id,
+              errorName: error instanceof Error ? error.name : 'UnknownError',
+            },
+            'No se pudo aplicar el bloqueo programado',
+          );
+          return 'failed' as const;
+        },
+      );
       if (done === 'applied') applied += 1;
       else if (done === 'deferred') deferred += 1;
+      else if (done === 'failed') failed += 1;
     }
 
     const late = await this.em.fork().execute<Record<string, unknown>[]>(
@@ -138,6 +132,43 @@ export class CareSpaceBlocksTickService {
       );
       if (published) overdue += 1;
     }
-    return { applied, deferred, overdue };
+    return { applied, deferred, overdue, failed };
+  }
+
+  /** Aplica un bloqueo programado en su propia transacción. */
+  private async applyOne(
+    candidate: { id: string; tenant_id: string; care_space_id: string },
+    now: Date,
+  ): Promise<'applied' | 'deferred' | 'skip'> {
+    return this.em.transactional(async (tx) => {
+      const row = await this.state.loadSpace(
+        tx,
+        String(candidate.tenant_id),
+        String(candidate.care_space_id),
+        true,
+      );
+      const rows = await tx.execute<Record<string, unknown>[]>(
+        `select ${BLOCK_COLUMNS} from practice.care_space_blocks b where b.id = ? for update`,
+        [candidate.id],
+      );
+      if (!rows.length) return 'skip' as const;
+      const block = toBlockRow(rows[0]);
+      // Otro proceso ya lo aplicó, lo terminó o lo canceló.
+      if (block.endedAt || block.cancelledAt) return 'skip' as const;
+      const current = await this.state.stateOf(tx, row, now);
+      if (current.availability !== 'SPACE_OP_AVAILABLE') return 'skip' as const;
+      if (!isLifecycleActive(row, now) || current.occupancy !== 'OCC_FREE')
+        return 'deferred' as const;
+      const ctx: OpsContext = {
+        tenantId: block.tenantId,
+        actorUserId: null,
+        source: 'SRC_SYSTEM',
+        action: 'BLOCK_TICK_APPLIED',
+        now,
+      };
+      await this.blocks.applyToSpace(tx, row, block, ctx, now);
+      await tx.flush();
+      return 'applied' as const;
+    });
   }
 }

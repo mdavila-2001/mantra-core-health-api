@@ -10,6 +10,7 @@ const BLOCKS_TICK_INTERVAL_MS = 60_000;
 interface BlocksTickResult {
   applied: number;
   deferred: number;
+  failed: number;
   overdue: number;
 }
 
@@ -37,7 +38,11 @@ export class CareSpaceBlocksTickJob {
         const result = await this.api.post<BlocksTickResult>(
           '/internal/practice/blocks-tick',
         );
-        if (result.applied + result.deferred + result.overdue === 0) return;
+        if (
+          result.applied + result.deferred + result.overdue + result.failed ===
+          0
+        )
+          return;
 
         this.logger.info(
           {
@@ -45,6 +50,7 @@ export class CareSpaceBlocksTickJob {
             applied: result.applied,
             deferred: result.deferred,
             overdue: result.overdue,
+            failed: result.failed,
           },
           'Applied scheduled care-space blocks and flagged overdue ones',
         );

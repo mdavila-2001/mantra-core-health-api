@@ -46,6 +46,7 @@ function build(
   };
   const blocks = { applyToSpace: fn().mockResolvedValue({}) };
   const events = { publish: fn().mockResolvedValue(true) };
+  const logger = { setContext: fn(), error: fn(), info: fn() };
   return {
     tx,
     fork,
@@ -56,7 +57,11 @@ function build(
       state as any,
       blocks as any,
       events as any,
+      logger as any,
     ),
+    logger,
+    em,
+    state,
   };
 }
 
@@ -65,6 +70,36 @@ const candidato = {
   tenant_id: TENANT,
   care_space_id: 'space-1',
 };
+
+describe('CareSpaceBlocksTickService.run · un bloqueo roto no frena a los demás', () => {
+  it('si aplicar uno falla, se registra con ids (sin mensaje) y la pasada sigue con el siguiente', async () => {
+    const d = build({
+      due: [
+        candidato,
+        { ...candidato, id: 'block-2', care_space_id: 'space-2' },
+      ],
+    });
+    d.blocks.applyToSpace
+      .mockRejectedValueOnce(
+        new TypeError('Cannot read properties of undefined'),
+      )
+      .mockResolvedValueOnce({});
+    const res = await d.service.run(NOW);
+    expect(res).toEqual({ applied: 1, deferred: 0, overdue: 0, failed: 1 });
+    expect(d.blocks.applyToSpace).toHaveBeenCalledTimes(2);
+    expect(d.logger.error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        operation: 'practice.blocks_tick.apply',
+        blockId: 'block-1',
+        errorName: 'TypeError',
+      }),
+      expect.any(String),
+    );
+    expect(JSON.stringify(d.logger.error.mock.calls)).not.toContain(
+      'Cannot read',
+    );
+  });
+});
 
 describe('CareSpaceBlocksTickService.run', () => {
   it('busca los bloqueos que ya empezaron, siguen abiertos y cuyo espacio figura disponible (sin columna «aplicado»)', async () => {
@@ -83,7 +118,7 @@ describe('CareSpaceBlocksTickService.run', () => {
   it('aplica el bloqueo cuya hora llegó, en nombre del sistema', async () => {
     const d = build({ due: [candidato] });
     const res = await d.service.run(NOW);
-    expect(res).toEqual({ applied: 1, deferred: 0, overdue: 0 });
+    expect(res).toEqual({ applied: 1, deferred: 0, overdue: 0, failed: 0 });
     expect(d.blocks.applyToSpace).toHaveBeenCalledTimes(1);
     expect(d.blocks.applyToSpace.mock.calls[0][3]).toMatchObject({
       actorUserId: null,
@@ -101,6 +136,7 @@ describe('CareSpaceBlocksTickService.run', () => {
       applied: 0,
       deferred: 1,
       overdue: 0,
+      failed: 0,
     });
     const yaAplicado = build({
       due: [candidato],
@@ -110,6 +146,7 @@ describe('CareSpaceBlocksTickService.run', () => {
       applied: 0,
       deferred: 0,
       overdue: 0,
+      failed: 0,
     });
     const terminado = build({
       due: [candidato],
@@ -119,6 +156,7 @@ describe('CareSpaceBlocksTickService.run', () => {
       applied: 0,
       deferred: 0,
       overdue: 0,
+      failed: 0,
     });
     for (const d of [ocupada, yaAplicado, terminado])
       expect(d.blocks.applyToSpace).not.toHaveBeenCalled();
