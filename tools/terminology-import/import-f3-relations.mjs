@@ -125,9 +125,43 @@ function buildBatches(identity, liveHp) {
   return batches;
 }
 
+/**
+ * La identidad puede apuntar a una ficha del glosario que esta base no tiene
+ * (p. ej. un código CIE-10-CM del glosario sin ficha cargada). No se crea nada:
+ * esas enfermedades quedan sin resolver, con su propio motivo.
+ */
+async function onlyExistingDiseases(client, identity) {
+  const wanted = [...new Set([...identity.groups.values()].map((g) => g.conceptId).filter(Boolean))];
+  const present = new Set();
+  const CHUNK = 20_000;
+  for (let i = 0; i < wanted.length; i += CHUNK) {
+    const { rows } = await client.query('SELECT id FROM terminology.catalog_concepts WHERE id = ANY($1::uuid[])', [wanted.slice(i, i + CHUNK)]);
+    for (const r of rows) present.add(r.id);
+  }
+  return {
+    ...identity,
+    resolve: (curie) => {
+      const found = identity.resolve(curie);
+      if (!found.conceptId || present.has(found.conceptId)) return found;
+      return { ...found, conceptId: null, reason: 'concept-not-in-database' };
+    },
+  };
+}
+
 async function main() {
   if (ONLY && !['hpo', 'orphanet'].includes(ONLY)) throw new Error(`--only acepta hpo u orphanet, no "${ONLY}".`);
-  const identity = await loadIdentity();
+  const client = LOAD ? new pg.Client(DB_CONFIG) : null;
+  if (client) await client.connect();
+  try {
+    await run(client);
+  } finally {
+    if (client) await client.end();
+  }
+}
+
+async function run(client) {
+  const rawIdentity = await loadIdentity();
+  const identity = client ? await onlyExistingDiseases(client, rawIdentity) : rawIdentity;
   const batches = buildBatches(identity, await liveHpoTerms());
   const summary = {
     generatedAt: new Date().toISOString(),
@@ -139,18 +173,12 @@ async function main() {
   console.log(JSON.stringify(summary, null, 2));
   if (!LOAD) return;
 
-  const client = new pg.Client(DB_CONFIG);
-  await client.connect();
-  try {
-    for (const b of batches) {
-      const ids = await ensureCodeSystem(client, b.plan, CONCEPT.TERM_ACTIVE);
-      const result = await bulkLoadRelationships(client, {
-        terminologySourceId: ids.sourceId, codeSystemVersionId: ids.versionId, rows: b.rows, dryRun: DRY_RUN, log: console.log,
-      });
-      console.log(`[f3 ${b.key}]`, JSON.stringify(result));
-    }
-  } finally {
-    await client.end();
+  for (const b of batches) {
+    const ids = await ensureCodeSystem(client, b.plan, CONCEPT.TERM_ACTIVE);
+    const result = await bulkLoadRelationships(client, {
+      terminologySourceId: ids.sourceId, codeSystemVersionId: ids.versionId, rows: b.rows, dryRun: DRY_RUN, log: console.log,
+    });
+    console.log(`[f3 ${b.key}]`, JSON.stringify(result));
   }
 }
 
