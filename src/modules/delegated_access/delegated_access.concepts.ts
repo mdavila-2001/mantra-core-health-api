@@ -191,4 +191,29 @@ export const { seeds: DELEGATED_ACCESS_CONCEPT_SEEDS, ids: DELEG } =
       code: 'DA_ASSIGN_UNIT_HEAD',
       display: 'Unit head assignment',
     },
+
+    // --- roles de operación hospitalaria (CONTRATO-F2-F5 §0.3). Los declara F2; se
+    // repiten aquí con las mismas claves y códigos porque la API de F3 (ADT) los
+    // exige en pruebas y ejecución. Claves idénticas ⇒ el mismo UUID: al fusionar
+    // con F2 queda una sola declaración de cada una. ---
+    ASSIGN_ROLE_NURSE_SUPERVISOR: {
+      code: 'DA_ASSIGN_NURSE_SUPERVISOR',
+      display: 'Nurse supervisor assignment',
+    },
+    ASSIGN_ROLE_ADMISSION: {
+      code: 'DA_ASSIGN_ADMISSION',
+      display: 'Admission assignment',
+    },
+    ASSIGN_ROLE_HOUSEKEEPING: {
+      code: 'DA_ASSIGN_HOUSEKEEPING',
+      display: 'Housekeeping assignment',
+    },
+    ASSIGN_ROLE_HOUSEKEEPING_SUPERVISOR: {
+      code: 'DA_ASSIGN_HOUSEKEEPING_SUPERVISOR',
+      display: 'Housekeeping supervisor assignment',
+    },
+    ASSIGN_ROLE_INFECTION_CONTROL: {
+      code: 'DA_ASSIGN_INFECTION_CONTROL',
+      display: 'Infection control assignment',
+    },
   });
