@@ -54,6 +54,7 @@ import { AudioTemplates } from '../../modules/audio_assets/entities';
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
 import { QaFlowsSeedService } from './qa-flows-seed.service';
 import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
+import { InsurerAccountsSeedService } from './insurer-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.service';
 import { TelemetryUxHeatmapSeedService } from './telemetry-ux-heatmap-seed.service';
@@ -180,6 +181,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     BootstrapAdminSeedService,
     QaFlowsSeedService,
     ProviderAccountsSeedService,
+    InsurerAccountsSeedService,
     SeedBootstrapService,
     SeedCoreState,
     ClinicalFormsSeedService,
@@ -216,6 +218,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     BootstrapAdminSeedService,
     QaFlowsSeedService,
     ProviderAccountsSeedService,
+    InsurerAccountsSeedService,
     ClinicalFormsSeedService,
     BoMedicalSpecialtiesSeedService,
     PracticeDefaultServicesSeedService,
