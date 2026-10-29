@@ -67,6 +67,10 @@ function build() {
     notifyEncounterCareRelationshipRequests:
       mockFn().mockResolvedValue(undefined),
   };
+  // FAC-01 · S-3: la factura de la cita cobrada se liga al encuentro.
+  const bookingsRepo = {
+    linkPaymentInvoiceToEncounter: mockFn().mockResolvedValue(false),
+  };
   const service = new EncountersService(
     em as any,
     encountersRepo,
@@ -77,9 +81,11 @@ function build() {
     clinicalRead as any,
     filesService as any,
     careRelationships as any,
+    bookingsRepo as any,
   );
   return {
     service,
+    bookingsRepo,
     em,
     tx,
     encountersRepo,
@@ -345,6 +351,23 @@ describe('EncountersService', () => {
       );
     });
 
+    it('FAC-01 · S-3: links the paid appointment invoice to the new encounter', async () => {
+      const d = build();
+      d.encountersRepo.findByAppointmentId.mockResolvedValue([]);
+      d.encountersRepo.create.mockReturnValue(encounter());
+
+      await d.service.checkIn(
+        { patientProfileId: 'p1', tenantId: 't1', appointmentId: 'appt1' },
+        actor,
+      );
+
+      expect(d.bookingsRepo.linkPaymentInvoiceToEncounter).toHaveBeenCalledWith(
+        d.tx,
+        'appt1',
+        encounter().id,
+      );
+    });
+
     it('does not look up the appointment when none is given', async () => {
       const d = build();
       d.encountersRepo.create.mockReturnValue(encounter());
@@ -356,6 +379,9 @@ describe('EncountersService', () => {
 
       expect(d.encountersRepo.findAppointmentForUpdate).not.toHaveBeenCalled();
       expect(d.encountersRepo.findByAppointmentId).not.toHaveBeenCalled();
+      expect(
+        d.bookingsRepo.linkPaymentInvoiceToEncounter,
+      ).not.toHaveBeenCalled();
     });
   });
 

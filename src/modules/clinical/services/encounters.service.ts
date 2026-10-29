@@ -29,6 +29,7 @@ import {
 // P25 (BR-11): adjuntar un archivo ya subido al encuentro por su ruta clínica,
 // calcado de `ProceduresService.attachFile`.
 import { FilesService } from '../../common/services';
+import { SchedulingBookingsRepository } from '../../scheduling/infrastructure/repositories';
 import {
   OwnerType,
   type FileLinkResponseDto,
@@ -71,6 +72,8 @@ export class EncountersService {
     private readonly clinicalRead: ClinicalReadService,
     private readonly filesService: FilesService,
     private readonly careRelationships: AuthzCareRelationshipsService,
+    // FAC-01 · S-3: la factura de una cita ya cobrada se liga al encuentro.
+    private readonly bookingsRepo: SchedulingBookingsRepository,
   ) {
     this.logger.setContext(EncountersService.name);
   }
@@ -220,6 +223,16 @@ export class EncountersService {
         locationIds.push(location.id);
       }
       await tx.flush();
+
+      // S-3 (FAC-01): si la cita ya se cobró, su factura queda ligada al
+      // encuentro que se acaba de abrir.
+      if (dto.appointmentId) {
+        await this.bookingsRepo.linkPaymentInvoiceToEncounter(
+          tx,
+          dto.appointmentId,
+          encounter.id,
+        );
+      }
 
       // REQ-16-035: el cobro con seguro exige relación asistencial vigente y
       // ningún otro flujo de atención la crea. Nace con el encuentro.
