@@ -227,11 +227,12 @@ export class EncountersService {
       // S-3 (FAC-01): si la cita ya se cobró, su factura queda ligada al
       // encuentro que se acaba de abrir.
       if (dto.appointmentId) {
-        await this.bookingsRepo.linkPaymentInvoiceToEncounter(
-          tx,
-          dto.appointmentId,
-          encounter.id,
-        );
+        await this.bookingsRepo.linkPaymentInvoiceToEncounter(tx, {
+          id: encounter.id,
+          appointmentId: dto.appointmentId,
+          patientProfileId: dto.patientProfileId,
+          tenantId: dto.tenantId,
+        });
       }
 
       // REQ-16-035: el cobro con seguro exige relación asistencial vigente y

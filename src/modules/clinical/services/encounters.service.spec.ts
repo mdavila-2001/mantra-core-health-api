@@ -363,8 +363,12 @@ describe('EncountersService', () => {
 
       expect(d.bookingsRepo.linkPaymentInvoiceToEncounter).toHaveBeenCalledWith(
         d.tx,
-        'appt1',
-        encounter().id,
+        {
+          id: encounter().id,
+          appointmentId: 'appt1',
+          patientProfileId: 'p1',
+          tenantId: 't1',
+        },
       );
     });
 
