@@ -39,8 +39,8 @@ const rolesOf = (r: InfraPolicyRegistry, action: string): InfraRole[] => [
   ...(r.rule(action)?.roles ?? []),
 ];
 
-describe('registro de políticas de infraestructura (F2, F3, F4 y plano)', () => {
-  it('registra las cuatro políticas, cada una con sus acciones y sin pisarse', () => {
+describe('registro de políticas de infraestructura (F2, F3, F4, plano, F5e y F5c)', () => {
+  it('registra las políticas de todas las franjas, cada una con sus acciones y sin pisarse', () => {
     const r = registry();
     expect(r.all().map((p) => p.name)).toEqual([
       'F2',
@@ -48,6 +48,7 @@ describe('registro de políticas de infraestructura (F2, F3, F4 y plano)', () =>
       'F4',
       'PLAN',
       INFRA_F5E_POLICY.name,
+      INFRA_F5C_POLICY.name,
     ]);
     const seen = new Map<string, string>();
     for (const policy of r.all()) {
