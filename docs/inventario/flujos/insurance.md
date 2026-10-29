@@ -69,7 +69,7 @@ _Fuente: `src/modules/insurance/README.md:3`_
 |  |  | GET /insurance/campaigns/active | Público (sin sesión) | BAJO | 4 |
 |  |  | GET /insurance/campaigns/my-benefits | Cualquier sesión válida | ALTO | 12 |
 |  |  | GET /insurance/campaigns/patient/{patientProfileId} | Cualquier sesión válida | ALTO | 12 |
-| `ctrl:InsuranceCatalogController` | Operaciones de InsuranceCatalogController que el README no asigna a un caso de uso | GET /insurance-carrier-catalog | Público (sin sesión) | BAJO | 3 |
+| `ctrl:InsuranceCatalogController` | Operaciones de InsuranceCatalogController que el README no asigna a un caso de uso | GET /insurance-carrier-catalog | Público (sin sesión) | BAJO | 7 |
 | `ctrl:InsurancePortabilityController` | Operaciones de InsurancePortabilityController que el README no asigna a un caso de uso | GET /insurance/portability/certificates/{certificateId}/json | Cualquier sesión válida | ALTO | 9 |
 |  |  | GET /insurance/portability/certificates/{certificateId}/pdf | Cualquier sesión válida | ALTO | 9 |
 |  |  | POST /insurance/portability/export | Cualquier sesión válida | ALTO | 37 |
@@ -79,7 +79,7 @@ _Fuente: `src/modules/insurance/README.md:3`_
 |  |  | GET /insurance-brokers/{id}/clients | Cualquier sesión válida | BAJO | 3 |
 |  |  | GET /insurance-carriers | Cualquier sesión válida | BAJO | 6 |
 |  |  | GET /insurance-carriers/{id} | Cualquier sesión válida | BAJO | 8 |
-| `ctrl:InsurerPatientsController` | Operaciones de InsurerPatientsController que el README no asigna a un caso de uso | POST /insurance/patients/conversation | Cualquier sesión válida | ALTO | 15 |
+| `ctrl:InsurerPatientsController` | Operaciones de InsurerPatientsController que el README no asigna a un caso de uso | POST /insurance/patients/conversation | Cualquier sesión válida | ALTO | 16 |
 |  |  | GET /insurance/patients/options | Cualquier sesión válida | BAJO | 2 |
 |  |  | POST /insurance/patients/search | Cualquier sesión válida | ALTO | 13 |
 | `ctrl:InsurerReceivedClaimsController` | Operaciones de InsurerReceivedClaimsController que el README no asigna a un caso de uso | GET /insurance/received-claims | Cualquier sesión válida | BAJO | 15 |
@@ -415,22 +415,25 @@ flowchart LR
   t7[("insurance.insurance_campaigns")]:::tabla
   t19[("insurance.insurance_carriers")]:::tabla
   t20[("terminology.catalog_concepts")]:::tabla
-  t41[("insurance.insurance_plans")]:::tabla
-  t42[("insurance.insurance_products")]:::tabla
-  t44[("common.file_versions")]:::tabla
-  t45[("common.files")]:::tabla
-  t46[("health_data.health_export_jobs")]:::tabla
-  t47[("health_data.health_export_manifests")]:::tabla
-  t52[("audit.data_access_log")]:::tabla
-  t53[("audit.dsar_requests")]:::tabla
-  t54[("clinical.conditions")]:::tabla
-  t55[("clinical.encounters")]:::tabla
-  t59[("insurance.broker_carrier_agreements")]:::tabla
-  t60[("insurance.insurance_brokers")]:::tabla
-  t63[("insurance.broker_clients")]:::tabla
-  t65[("insurance.provider_networks")]:::tabla
-  t67[("insurance.insurance_plan_benefits")]:::tabla
-  t68[("insurance.network_provider_memberships")]:::tabla
+  t41[("directory.tenants")]:::tabla
+  t42[("iam.authentication_credentials")]:::tabla
+  t43[("iam.users")]:::tabla
+  t44[("insurance.insurance_plans")]:::tabla
+  t47[("common.file_versions")]:::tabla
+  t48[("common.files")]:::tabla
+  t49[("health_data.health_export_jobs")]:::tabla
+  t50[("health_data.health_export_manifests")]:::tabla
+  t55[("audit.data_access_log")]:::tabla
+  t56[("audit.dsar_requests")]:::tabla
+  t57[("clinical.conditions")]:::tabla
+  t58[("clinical.encounters")]:::tabla
+  t62[("insurance.broker_carrier_agreements")]:::tabla
+  t63[("insurance.insurance_brokers")]:::tabla
+  t66[("insurance.broker_clients")]:::tabla
+  t68[("insurance.insurance_products")]:::tabla
+  t69[("insurance.provider_networks")]:::tabla
+  t71[("insurance.insurance_plan_benefits")]:::tabla
+  t72[("insurance.network_provider_memberships")]:::tabla
   t8[("+2 tablas más")]
   t10[("+8 tablas más")]
   t12[("+2 tablas más")]
@@ -463,27 +466,28 @@ flowchart LR
     o36["GET /insurance/campaigns/my-benefits"]:::op
     o38["GET /insurance/campaigns/patient/{patientProfileId}"]:::op
   end
+  t45[("+1 tablas más")]
   subgraph s1["ctrl:InsuranceCatalogController · Operaciones de InsuranceCatalogController que…"]
     o40["GET /insurance-carrier-catalog"]:::op
   end
-  t48[("+3 tablas más")]
-  t50[("+3 tablas más")]
-  t56[("+31 tablas más")]
+  t51[("+3 tablas más")]
+  t53[("+3 tablas más")]
+  t59[("+31 tablas más")]
   subgraph s2["ctrl:InsurancePortabilityController · Operaciones de InsurancePortabilityContro…"]
-    o43["GET /insurance/portability/certificates/{certificateId}/json"]:::op
-    o49["GET /insurance/portability/certificates/{certificateId}/pdf"]:::op
-    o51["POST /insurance/portability/export"]:::op
+    o46["GET /insurance/portability/certificates/{certificateId}/json"]:::op
+    o52["GET /insurance/portability/certificates/{certificateId}/pdf"]:::op
+    o54["POST /insurance/portability/export"]:::op
   end
   subgraph s3["ctrl:InsurancePortabilityPublicController · Operaciones de InsurancePortability…"]
-    o57["GET /public/portability/verify/{manifestHash}"]:::op
+    o60["GET /public/portability/verify/{manifestHash}"]:::op
   end
-  t69[("+2 tablas más")]
+  t73[("+2 tablas más")]
   subgraph s4["ctrl:InsuranceReadController · Operaciones de InsuranceReadController que el RE…"]
-    o58["GET /insurance-brokers"]:::op
-    o61["GET /insurance-brokers/{id}"]:::op
-    o62["GET /insurance-brokers/{id}/clients"]:::op
-    o64["GET /insurance-carriers"]:::op
-    o66["GET /insurance-carriers/{id}"]:::op
+    o61["GET /insurance-brokers"]:::op
+    o64["GET /insurance-brokers/{id}"]:::op
+    o65["GET /insurance-brokers/{id}/clients"]:::op
+    o67["GET /insurance-carriers"]:::op
+    o70["GET /insurance-carriers/{id}"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -608,64 +612,68 @@ flowchart LR
   o38 -->|"LEE"| t19
   o38 -.-> t39
   a18 --> o40
-  o40 -->|"LEE"| t19
+  o40 -->|"LEE"| t4
   o40 -->|"LEE"| t41
   o40 -->|"LEE"| t42
-  a2 --> o43
-  o43 -->|"CREA"| t3
-  o43 -->|"LEE"| t3
-  o43 -->|"LEE"| t44
-  o43 -->|"LEE"| t45
-  o43 -->|"LEE"| t46
-  o43 -->|"LEE"| t47
-  o43 -.-> t48
-  a2 --> o49
-  o49 -->|"CREA"| t3
-  o49 -->|"LEE"| t3
-  o49 -->|"LEE"| t44
-  o49 -->|"LEE"| t45
-  o49 -->|"LEE"| t46
-  o49 -->|"LEE"| t47
-  o49 -.-> t50
-  a2 --> o51
-  o51 -->|"CREA"| t3
-  o51 -->|"LEE"| t3
-  o51 -->|"CREA"| t52
-  o51 -->|"CREA"| t53
-  o51 -->|"LEE"| t54
-  o51 -->|"LEE"| t55
-  o51 -.-> t56
-  a18 --> o57
-  o57 -->|"LEE"| t46
-  o57 -->|"LEE"| t47
-  a2 --> o58
-  o58 -->|"LEE"| t59
-  o58 -->|"LEE"| t60
-  o58 -->|"LEE"| t20
+  o40 -->|"LEE"| t43
+  o40 -->|"LEE"| t19
+  o40 -->|"LEE"| t44
+  o40 -.-> t45
+  a2 --> o46
+  o46 -->|"CREA"| t3
+  o46 -->|"LEE"| t3
+  o46 -->|"LEE"| t47
+  o46 -->|"LEE"| t48
+  o46 -->|"LEE"| t49
+  o46 -->|"LEE"| t50
+  o46 -.-> t51
+  a2 --> o52
+  o52 -->|"CREA"| t3
+  o52 -->|"LEE"| t3
+  o52 -->|"LEE"| t47
+  o52 -->|"LEE"| t48
+  o52 -->|"LEE"| t49
+  o52 -->|"LEE"| t50
+  o52 -.-> t53
+  a2 --> o54
+  o54 -->|"CREA"| t3
+  o54 -->|"LEE"| t3
+  o54 -->|"CREA"| t55
+  o54 -->|"CREA"| t56
+  o54 -->|"LEE"| t57
+  o54 -->|"LEE"| t58
+  o54 -.-> t59
+  a18 --> o60
+  o60 -->|"LEE"| t49
+  o60 -->|"LEE"| t50
   a2 --> o61
-  o61 -->|"LEE"| t59
-  o61 -->|"LEE"| t60
-  o61 -->|"LEE"| t19
+  o61 -->|"LEE"| t62
+  o61 -->|"LEE"| t63
   o61 -->|"LEE"| t20
-  a2 --> o62
-  o62 -->|"LEE"| t63
-  o62 -->|"LEE"| t60
-  o62 -->|"LEE"| t20
   a2 --> o64
-  o64 -->|"LEE"| t4
+  o64 -->|"LEE"| t62
+  o64 -->|"LEE"| t63
   o64 -->|"LEE"| t19
-  o64 -->|"LEE"| t41
-  o64 -->|"LEE"| t42
-  o64 -->|"LEE"| t65
   o64 -->|"LEE"| t20
-  a2 --> o66
-  o66 -->|"LEE"| t4
-  o66 -->|"LEE"| t19
-  o66 -->|"LEE"| t67
-  o66 -->|"LEE"| t41
-  o66 -->|"LEE"| t42
-  o66 -->|"LEE"| t68
-  o66 -.-> t69
+  a2 --> o65
+  o65 -->|"LEE"| t66
+  o65 -->|"LEE"| t63
+  o65 -->|"LEE"| t20
+  a2 --> o67
+  o67 -->|"LEE"| t4
+  o67 -->|"LEE"| t19
+  o67 -->|"LEE"| t44
+  o67 -->|"LEE"| t68
+  o67 -->|"LEE"| t69
+  o67 -->|"LEE"| t20
+  a2 --> o70
+  o70 -->|"LEE"| t4
+  o70 -->|"LEE"| t19
+  o70 -->|"LEE"| t71
+  o70 -->|"LEE"| t44
+  o70 -->|"LEE"| t68
+  o70 -->|"LEE"| t72
+  o70 -.-> t73
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -708,7 +716,7 @@ flowchart LR
   t48[("insurance.insurance_products")]:::tabla
   t51[("insurance.patient_coverages")]:::tabla
   t59[("practice.practices")]:::tabla
-  t7[("+9 tablas más")]
+  t7[("+10 tablas más")]
   t14[("+7 tablas más")]
   subgraph s0["ctrl:InsurerPatientsController · Operaciones de InsurerPatientsController que e…"]
     o1["POST /insurance/patients/conversation"]:::op
@@ -4629,7 +4637,7 @@ Abrir o reutilizar la conversación interna con un paciente autorizado
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {accessDenied}; ForbiddenException: {ACCESS_DENIED} |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {accessDenied}; ForbiddenException: {ACCESS_DENIED}; ForbiddenException: Una organización no inicia conversaciones por este canal |
 | 404 | `NOT_FOUND` | NotFoundException: Paciente no disponible |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La mensajería no está disponible para estos perfiles; PreconditionFailedException: Las conversaciones grupales se crean desde el flujo de grupos; PreconditionFailedException: Los participantes de una conversación deben ser distintos; PreconditionFailedException: Una conversación directa requiere exactamente dos participantes; PreconditionFailedException: La persona no está disponible para iniciar una conversación; PreconditionFailedException: No se puede iniciar una conversación entre perfiles bloqueados |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -4689,35 +4697,42 @@ flowchart TD
   n24 -->|"no"| n26
   n27["Transacción: transactional(…)"]:::transaccion
   n26 --> n27
-  n28{"participantIds.size !== dto.participantProfileIds.length"}:::decision
+  n28{"requirePublicRecipient"}:::decision
   n27 --> n28
-  n29(["422 PRECONDITION_FAILED Los participantes de una conversación deben ser distintos"]):::error
+  n29{"await this.organizationStaff.isTenantBacked(tx, initiator)"}:::decision
   n28 -->|"sí"| n29
-  n30{"dto.participantProfileIds.length !== 2"}:::decision
-  n28 -->|"no"| n30
-  n31(["422 PRECONDITION_FAILED Una conversación directa requiere exactamente dos participantes"]):::error
-  n30 -->|"sí"| n31
-  n32{"!eligibleRecipient"}:::decision
-  n30 -->|"no"| n32
-  n33(["422 PRECONDITION_FAILED La persona no está disponible para iniciar una conversación"]):::error
-  n32 -->|"sí"| n33
-  n34{"blocked"}:::decision
-  n32 -->|"no"| n34
-  n35(["422 PRECONDITION_FAILED No se puede iniciar una conversación entre perfiles bloqueados"]):::error
-  n34 -->|"sí"| n35
-  n36["Llama a InsurerPatientsService.recordAccess"]:::llamada
-  n34 -->|"no"| n36
-  n37["Repite: por cada const patientProfileId de patientIds"]:::bucle
-  n36 --> n37
-  n38["Llama a PatientDirectoryAdapter.record"]:::llamada
-  n37 -->|"cada elemento"| n38
-  n39["Llama a DataAccessLogRepository.record"]:::llamada
-  n38 --> n39
-  n40[("CREA audit.data_access_log")]:::efecto
+  n30(["403 FORBIDDEN Una organización no inicia conversaciones por este canal"]):::error
+  n29 -->|"sí"| n30
+  n31{"participantIds.size !== dto.participantProfileIds.length"}:::decision
+  n29 -->|"no"| n31
+  n28 -->|"no"| n31
+  n32(["422 PRECONDITION_FAILED Los participantes de una conversación deben ser distintos"]):::error
+  n31 -->|"sí"| n32
+  n33{"dto.participantProfileIds.length !== 2"}:::decision
+  n31 -->|"no"| n33
+  n34(["422 PRECONDITION_FAILED Una conversación directa requiere exactamente dos participantes"]):::error
+  n33 -->|"sí"| n34
+  n35{"!eligibleRecipient"}:::decision
+  n33 -->|"no"| n35
+  n36(["422 PRECONDITION_FAILED La persona no está disponible para iniciar una conversación"]):::error
+  n35 -->|"sí"| n36
+  n37{"blocked"}:::decision
+  n35 -->|"no"| n37
+  n38(["422 PRECONDITION_FAILED No se puede iniciar una conversación entre perfiles bloqueados"]):::error
+  n37 -->|"sí"| n38
+  n39["Llama a InsurerPatientsService.recordAccess"]:::llamada
+  n37 -->|"no"| n39
+  n40["Repite: por cada const patientProfileId de patientIds"]:::bucle
   n39 --> n40
-  n41(("200 Responde con éxito")):::ok
-  n40 --> n41
-  n37 -->|"al terminar"| n41
+  n41["Llama a PatientDirectoryAdapter.record"]:::llamada
+  n40 -->|"cada elemento"| n41
+  n42["Llama a DataAccessLogRepository.record"]:::llamada
+  n41 --> n42
+  n43[("CREA audit.data_access_log")]:::efecto
+  n42 --> n43
+  n44(("200 Responde con éxito")):::ok
+  n43 --> n44
+  n40 -->|"al terminar"| n44
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -6568,7 +6583,7 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | GET /insurance-brokers | 200, 401, 403, 429 | 3 |
 | POST /insurance-brokers | 201, 400, 401, 403, 429 | 1 |
 | GET /insurance-campaigns/active | 200, 401, 429 | 4 |
-| GET /insurance-carrier-catalog | 200, 401, 429 | 3 |
+| GET /insurance-carrier-catalog | 200, 401, 429 | 7 |
 | GET /insurance-carriers | 200, 401, 403, 429 | 6 |
 | POST /insurance-carriers | 201, 400, 401, 403, 429 | 1 |
 | GET /insurance/campaigns/active | 200, 401, 429 | 4 |
