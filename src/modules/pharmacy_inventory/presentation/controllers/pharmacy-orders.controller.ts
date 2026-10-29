@@ -24,7 +24,6 @@ import {
   Roles,
   type AuthenticatedUser,
   AccessLogged,
-  Audited,
 } from '../../../../common';
 import { PharmacyOrdersService } from '../../services';
 import {
@@ -158,7 +157,7 @@ export class PharmacyOrdersController {
   @AccessLogged({ resourceType: 'PHARMACY_ORDER', resourceId: 'param:id' })
   @Audited({
     action: 'PHARMACY_ORDER_CONVERSATION_OPENED',
-    entity: 'pharmacy_order',
+    entity: 'medication_dispensation',
     entityId: 'param:id',
   })
   @HttpCode(HttpStatus.OK)
