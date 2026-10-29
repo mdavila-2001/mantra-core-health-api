@@ -137,7 +137,9 @@ export class DefaultPlanOperationalState implements PlanOperationalStatePort {
     const patients = await this.patients(
       tx,
       rows
-        .filter((r) => r.loc_status === CLIN.LOCATION_ACTIVE && visibleFor(r.id))
+        .filter(
+          (r) => r.loc_status === CLIN.LOCATION_ACTIVE && visibleFor(r.id),
+        )
         .map((r) => r.id),
     );
 
@@ -179,7 +181,9 @@ export class DefaultPlanOperationalState implements PlanOperationalStatePort {
         },
         isolation: {
           code: axes.isolationCode,
-          ...(row.isolation_organism ? { organism: row.isolation_organism } : {}),
+          ...(row.isolation_organism
+            ? { organism: row.isolation_organism }
+            : {}),
           since: row.isolation_since,
         },
         v2Code: deriveV2Code(axes),
@@ -278,7 +282,13 @@ export class DefaultPlanOperationalState implements PlanOperationalStatePort {
          join terminology.catalog_concepts p on p.id = co.priority_concept_id
         where co.care_space_id = ?::uuid and co.tenant_id = ?::uuid and co.status_concept_id in (?::uuid, ?::uuid, ?::uuid)
         order by co.requested_at desc limit 1`,
-      [spaceId, tenantId, PRAC.CLN_PENDING, PRAC.CLN_IN_PROGRESS, PRAC.CLN_DONE],
+      [
+        spaceId,
+        tenantId,
+        PRAC.CLN_PENDING,
+        PRAC.CLN_IN_PROGRESS,
+        PRAC.CLN_DONE,
+      ],
     );
     const openBlocks: OpenBlockView[] = blocks.map((b) => ({
       id: b.id,

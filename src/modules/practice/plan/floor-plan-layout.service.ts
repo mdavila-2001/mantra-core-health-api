@@ -5,11 +5,16 @@ import {
   PreconditionFailedException,
   type AuthenticatedUser,
 } from '../../../common';
-import { FORMS, FUNCTIONS, ATTRIBUTES, SPACE_LIFECYCLE } from '../infrastructure-catalog';
+import {
+  FORMS,
+  FUNCTIONS,
+  ATTRIBUTES,
+  SPACE_LIFECYCLE,
+} from '../infrastructure-catalog';
 import { PRAC } from '../practice.concepts';
 import { practiceOutOfScope } from '../services/practice-scope';
 import { openingPosition } from '../domain/plan-layout-validator';
-import type { Bbox, Pt } from '../domain/plan-geometry';
+import type { Bbox } from '../domain/plan-geometry';
 import type { LayoutQueryDto } from './floor-plan.dto';
 import { PLAN_LIMITS } from './floor-plan.constants';
 import { FloorPlanReason } from './floor-plan.error-reasons';
@@ -35,7 +40,11 @@ import { PlanViewerService } from './plan-viewer.service';
 /** Resultado de leer el layout: 304 sin cuerpo, o 200 con cuerpo. */
 export type LayoutReadResult =
   | { readonly status: 304; readonly etag: string }
-  | { readonly status: 200; readonly etag: string; readonly body: LayoutResponse };
+  | {
+      readonly status: 200;
+      readonly etag: string;
+      readonly body: LayoutResponse;
+    };
 
 const DEFAULT_DETAIL = 'lite';
 
@@ -127,12 +136,21 @@ export class FloorPlanLayoutService {
       // Foco por área/zona: subárbol de un espacio o espacios de una unidad.
       let focusIds: string[] | undefined;
       if (query.focusSpaceId) {
-        focusIds = await this.layout.subtreeIds(tx, tenantId, query.focusSpaceId);
-        if (focusIds.length === 0) throw practiceOutOfScope('Espacio no encontrado');
+        focusIds = await this.layout.subtreeIds(
+          tx,
+          tenantId,
+          query.focusSpaceId,
+        );
+        if (focusIds.length === 0)
+          throw practiceOutOfScope('Espacio no encontrado');
       } else if (query.unitId) {
         focusIds = await this.layout.unitSpaceIds(tx, tenantId, [query.unitId]);
       }
-      const identity = await this.viewers.resolveIds(tx, tenantId, viewer.identity);
+      const identity = await this.viewers.resolveIds(
+        tx,
+        tenantId,
+        viewer.identity,
+      );
       if (focusIds && identity !== 'ALL') {
         focusIds = focusIds.filter((id) => identity.has(id));
       }
@@ -165,9 +183,10 @@ export class FloorPlanLayoutService {
         }
       }
 
-      const full = detail === 'full'
-        ? await this.cardData(tx, tenantId, rows, identity)
-        : undefined;
+      const full =
+        detail === 'full'
+          ? await this.cardData(tx, tenantId, rows, identity)
+          : undefined;
       const spaces = rows.map((row) =>
         this.toSpace(row, identity, focusSet, mode, full),
       );
@@ -182,7 +201,12 @@ export class FloorPlanLayoutService {
 
       let focus: LayoutResponse['focus'];
       if (focusSet) {
-        const bounds = await this.layout.placedBounds(tx, plan.id, tenantId, focusIds ?? []);
+        const bounds = await this.layout.placedBounds(
+          tx,
+          plan.id,
+          tenantId,
+          focusIds ?? [],
+        );
         focus = { spaceIds: bounds.spaceIds, bbox: bounds.bbox };
       }
 
@@ -219,10 +243,14 @@ export class FloorPlanLayoutService {
     return [raw[0], raw[1], raw[2], raw[3]];
   }
 
-  private decodeCursor(raw: string | undefined): { z: number; id: string } | undefined {
+  private decodeCursor(
+    raw: string | undefined,
+  ): { z: number; id: string } | undefined {
     if (!raw) return undefined;
     try {
-      const parsed = JSON.parse(Buffer.from(raw, 'base64url').toString('utf8')) as {
+      const parsed = JSON.parse(
+        Buffer.from(raw, 'base64url').toString('utf8'),
+      ) as {
         z: unknown;
         id: unknown;
       };
@@ -272,7 +300,9 @@ export class FloorPlanLayoutService {
     identity: 'ALL' | ReadonlySet<string>,
     focusSet: ReadonlySet<string> | undefined,
     mode: 'filter' | 'flag',
-    full: { extras: Awaited<ReturnType<FloorPlanLayoutRepository['cardExtras']>> } | undefined,
+    full:
+      | { extras: Awaited<ReturnType<FloorPlanLayoutRepository['cardExtras']>> }
+      | undefined,
   ): SpacePlacementDTO {
     const inScope = identity === 'ALL' || identity.has(row.spaceId);
     const geometry: SpacePlacementDTO['geometry'] =
@@ -296,7 +326,9 @@ export class FloorPlanLayoutService {
       bbox: row.bbox,
       areaCalcM2: row.areaCalcM2,
       inScope,
-      ...(focusSet && mode === 'flag' ? { inFocus: focusSet.has(row.spaceId) } : {}),
+      ...(focusSet && mode === 'flag'
+        ? { inFocus: focusSet.has(row.spaceId) }
+        : {}),
     };
     // Fuera de alcance: sólo silueta. Ni código, nombre, forma, función ni estado.
     if (!inScope) return base;
@@ -307,7 +339,9 @@ export class FloorPlanLayoutService {
       name: row.name,
       parentId: row.parentId,
       form: { code: FORMS.byConceptId(row.formConceptId)?.code ?? '' },
-      function: { code: FUNCTIONS.byConceptId(row.functionConceptId)?.code ?? '' },
+      function: {
+        code: FUNCTIONS.byConceptId(row.functionConceptId)?.code ?? '',
+      },
       ...(row.statusConceptId === PRAC.SPACE_RETIRED ? { retired: true } : {}),
       ...(card ? { card } : {}),
     };
@@ -326,10 +360,13 @@ export class FloorPlanLayoutService {
     const pressure = ATTRIBUTES.pressure.byConceptId(row.pressureConceptId);
     const sex = ATTRIBUTES.sex.byConceptId(row.sexRestrictionConceptId);
     const age = ATTRIBUTES.ageGroup.byConceptId(row.ageGroupConceptId);
-    const bedCategory = ATTRIBUTES.bedCategory.byConceptId(row.bedCategoryConceptId);
+    const bedCategory = ATTRIBUTES.bedCategory.byConceptId(
+      row.bedCategoryConceptId,
+    );
     if (asepsis) technical.asepsis = asepsis.code;
     if (pressure) technical.pressure = pressure.code;
-    if (row.airChangesPerHour !== null) technical.airChangesPerHour = row.airChangesPerHour;
+    if (row.airChangesPerHour !== null)
+      technical.airChangesPerHour = row.airChangesPerHour;
     if (row.hvacValidatedOn) technical.hvacValidatedOn = row.hvacValidatedOn;
     if (sex) technical.sexRestriction = sex.code;
     if (age) technical.ageGroup = age.code;
@@ -363,12 +400,14 @@ export class FloorPlanLayoutService {
     // Una puerta que une dos locales no revela cuáles si el actor no los ve.
     const seen = (id: string | null): string | null =>
       id && (identity === 'ALL' || identity.has(id)) ? id : null;
-    const walls = new Map(rows.filter((r) => r.kind === 'WALL').map((r) => [r.id, r]));
+    const walls = new Map(
+      rows.filter((r) => r.kind === 'WALL').map((r) => [r.id, r]),
+    );
     return rows.map((row): PlanElementDTO => {
       const host = row.hostElementId ? walls.get(row.hostElementId) : undefined;
       const position =
         host?.vertices && row.offsetM !== null && row.widthM !== null
-          ? openingPosition(host.vertices as Pt[], row.offsetM, row.widthM)
+          ? openingPosition(host.vertices, row.offsetM, row.widthM)
           : null;
       return {
         id: row.id,
@@ -383,7 +422,9 @@ export class FloorPlanLayoutService {
         ...(row.swing ? { swing: row.swing } : {}),
         ...(row.swingSide ? { swingSide: row.swingSide } : {}),
         ...(row.label ? { label: row.label } : {}),
-        ...(row.verticalLinkCode ? { verticalLinkCode: row.verticalLinkCode } : {}),
+        ...(row.verticalLinkCode
+          ? { verticalLinkCode: row.verticalLinkCode }
+          : {}),
         ...(seen(row.connectsSpaceAId)
           ? { connectsSpaceAId: row.connectsSpaceAId as string }
           : {}),

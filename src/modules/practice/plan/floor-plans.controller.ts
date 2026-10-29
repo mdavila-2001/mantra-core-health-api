@@ -61,12 +61,17 @@ import {
   FloorPlanBackgroundService,
   type BackgroundResult,
 } from './floor-plan-background.service';
-import { isDryRun, LayoutIfMatch, SupportReason } from './plan-request-decorators';
+import {
+  isDryRun,
+  LayoutIfMatch,
+  SupportReason,
+} from './plan-request-decorators';
 
 const IF_MATCH_ROW = {
   name: 'If-Match',
   required: true,
-  description: 'rowVersion vigente del recurso (412 si no coincide, 428 si falta)',
+  description:
+    'rowVersion vigente del recurso (412 si no coincide, 428 si falta)',
 };
 const IF_MATCH_LAYOUT = {
   name: 'If-Match',
@@ -77,7 +82,8 @@ const IF_MATCH_LAYOUT = {
 const SUPPORT_REASON = {
   name: 'X-Support-Reason',
   required: false,
-  description: 'Motivo obligatorio sólo para el soporte de plataforma (422 si falta)',
+  description:
+    'Motivo obligatorio sólo para el soporte de plataforma (422 si falta)',
 };
 const DRY_RUN = {
   name: 'dryRun',
@@ -152,7 +158,8 @@ export class FloorPlansController {
   })
   @ApiResponse({
     status: 422,
-    description: 'PLAN_ANCHOR_FORM_INVALID · PLAN_ANCHOR_NOT_ACTIVE · PLAN_CANVAS_INVALID',
+    description:
+      'PLAN_ANCHOR_FORM_INVALID · PLAN_ANCHOR_NOT_ACTIVE · PLAN_CANVAS_INVALID',
   })
   create(
     @Param('siteId', ParseUUIDPipe) siteId: string,
@@ -185,7 +192,10 @@ export class FloorPlansController {
   @ApiHeader(IF_MATCH_ROW)
   @ApiHeader(SUPPORT_REASON)
   @ApiOperation({ summary: 'Editar un lienzo (If-Match: rowVersion)' })
-  @ApiResponse({ status: 409, description: 'PLAN_BOUNDS_EXCLUDE_CONTENT · PLAN_RETIRED' })
+  @ApiResponse({
+    status: 409,
+    description: 'PLAN_BOUNDS_EXCLUDE_CONTENT · PLAN_RETIRED',
+  })
   @ApiResponse({ status: 412, description: 'ROW_VERSION_MISMATCH' })
   patch(
     @Param('id', ParseUUIDPipe) id: string,
@@ -195,7 +205,14 @@ export class FloorPlansController {
     @SupportReason() supportReason: string | undefined,
     @CorrelationId() correlationId: string | undefined,
   ): Promise<FloorPlanWithViewer> {
-    return this.plans.patch(id, dto, expectedRowVersion, actor, supportReason, correlationId);
+    return this.plans.patch(
+      id,
+      dto,
+      expectedRowVersion,
+      actor,
+      supportReason,
+      correlationId,
+    );
   }
 
   /** Clausura o reabre un lienzo (con motivo). */
@@ -208,8 +225,13 @@ export class FloorPlansController {
   @HttpCode(HttpStatus.OK)
   @ApiHeader(IF_MATCH_ROW)
   @ApiHeader(SUPPORT_REASON)
-  @ApiOperation({ summary: 'Clausurar o reabrir un lienzo (If-Match: rowVersion)' })
-  @ApiResponse({ status: 409, description: 'PLAN_SPACE_OCCUPIED · PLAN_LIFECYCLE_INVALID' })
+  @ApiOperation({
+    summary: 'Clausurar o reabrir un lienzo (If-Match: rowVersion)',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'PLAN_SPACE_OCCUPIED · PLAN_LIFECYCLE_INVALID',
+  })
   lifecycle(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: FloorPlanLifecycleDto,
@@ -218,7 +240,14 @@ export class FloorPlansController {
     @SupportReason() supportReason: string | undefined,
     @CorrelationId() correlationId: string | undefined,
   ): Promise<FloorPlanWithViewer> {
-    return this.plans.lifecycle(id, dto, expectedRowVersion, actor, supportReason, correlationId);
+    return this.plans.lifecycle(
+      id,
+      dto,
+      expectedRowVersion,
+      actor,
+      supportReason,
+      correlationId,
+    );
   }
 
   // --------------------------------------------------------------------- fondo
@@ -232,8 +261,13 @@ export class FloorPlansController {
   @Put('floor-plans/:id/background')
   @ApiHeader(IF_MATCH_ROW)
   @ApiHeader(SUPPORT_REASON)
-  @ApiOperation({ summary: 'Importar y calibrar el fondo (If-Match: rowVersion)' })
-  @ApiResponse({ status: 404, description: 'Archivo de otro tenant o inexistente' })
+  @ApiOperation({
+    summary: 'Importar y calibrar el fondo (If-Match: rowVersion)',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Archivo de otro tenant o inexistente',
+  })
   @ApiResponse({
     status: 422,
     description: 'BACKGROUND_FILE_INVALID · BACKGROUND_CALIBRATION_INVALID',
@@ -246,7 +280,14 @@ export class FloorPlansController {
     @SupportReason() supportReason: string | undefined,
     @CorrelationId() correlationId: string | undefined,
   ): Promise<BackgroundResult> {
-    return this.background.set(id, dto, expectedRowVersion, actor, supportReason, correlationId);
+    return this.background.set(
+      id,
+      dto,
+      expectedRowVersion,
+      actor,
+      supportReason,
+      correlationId,
+    );
   }
 
   /** Quita la referencia al fondo (el archivo no se borra). */
@@ -266,13 +307,22 @@ export class FloorPlansController {
     @SupportReason() supportReason: string | undefined,
     @CorrelationId() correlationId: string | undefined,
   ): Promise<BackgroundResult> {
-    return this.background.clear(id, expectedRowVersion, actor, supportReason, correlationId);
+    return this.background.clear(
+      id,
+      expectedRowVersion,
+      actor,
+      supportReason,
+      correlationId,
+    );
   }
 
   /** Bytes del fondo, con la URL firmada de vida corta que emite la API. */
   @Get('floor-plans/:id/background/content')
   @ApiOperation({ summary: 'Contenido del fondo (URL firmada de vida corta)' })
-  @ApiResponse({ status: 403, description: 'BACKGROUND_URL_INVALID: firma inválida' })
+  @ApiResponse({
+    status: 403,
+    description: 'BACKGROUND_URL_INVALID: firma inválida',
+  })
   @ApiResponse({ status: 410, description: 'La URL venció' })
   async backgroundContent(
     @Param('id', ParseUUIDPipe) id: string,
@@ -292,7 +342,10 @@ export class FloorPlansController {
     // sus bytes, el navegador no ejecuta nada de esta respuesta.
     res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
     // Privado: un plano es información de seguridad; nunca una caché compartida.
-    res.setHeader('Cache-Control', `private, max-age=${content.expiresInSeconds}`);
+    res.setHeader(
+      'Cache-Control',
+      `private, max-age=${content.expiresInSeconds}`,
+    );
     res.send(content.buffer);
   }
 
@@ -300,7 +353,9 @@ export class FloorPlansController {
 
   /** Layout ligero, paginado y cacheable (ETag por layoutVersion, 304). */
   @Get('floor-plans/:id/layout')
-  @ApiOperation({ summary: 'Layout del lienzo (ETag, 304, ventana, foco, paginado)' })
+  @ApiOperation({
+    summary: 'Layout del lienzo (ETag, 304, ventana, foco, paginado)',
+  })
   @ApiQuery({ name: 'bbox', required: false, example: '0,0,32,13' })
   async readLayout(
     @Param('id', ParseUUIDPipe) id: string,
@@ -309,7 +364,12 @@ export class FloorPlansController {
     @CurrentUser() actor: AuthenticatedUser,
     @Res({ passthrough: true }) res: Response,
   ): Promise<unknown> {
-    const result = await this.layout.read(id, query, req.headers['if-none-match'], actor);
+    const result = await this.layout.read(
+      id,
+      query,
+      req.headers['if-none-match'],
+      actor,
+    );
     res.setHeader('ETag', result.etag);
     res.setHeader('Cache-Control', 'private, no-cache');
     if (result.status === 304) {
@@ -329,7 +389,9 @@ export class FloorPlansController {
   @ApiHeader(IF_MATCH_LAYOUT)
   @ApiHeader(SUPPORT_REASON)
   @ApiQuery(DRY_RUN)
-  @ApiOperation({ summary: `Guardar un delta del layout (máx. ${PLAN_LIMITS.maxItemsPerPatch} ítems)` })
+  @ApiOperation({
+    summary: `Guardar un delta del layout (máx. ${PLAN_LIMITS.maxItemsPerPatch} ítems)`,
+  })
   @ApiResponse({
     status: 422,
     description: 'PLAN_LAYOUT_INVALID con `details.errors` por elemento',
@@ -362,7 +424,9 @@ export class FloorPlansController {
   @ApiHeader(IF_MATCH_LAYOUT)
   @ApiHeader(SUPPORT_REASON)
   @ApiQuery(DRY_RUN)
-  @ApiOperation({ summary: `Reemplazar el layout (máx. ${PLAN_LIMITS.maxItemsPerReplace} ítems)` })
+  @ApiOperation({
+    summary: `Reemplazar el layout (máx. ${PLAN_LIMITS.maxItemsPerReplace} ítems)`,
+  })
   replaceLayout(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ReplaceLayoutDto,
@@ -372,11 +436,17 @@ export class FloorPlansController {
     @SupportReason() supportReason: string | undefined,
     @CorrelationId() correlationId: string | undefined,
   ): Promise<LayoutWriteResult> {
-    return this.writes.replace(id, dto, expectedLayoutVersion, isDryRun(dryRun), {
-      actor,
-      supportReason,
-      correlationId,
-    });
+    return this.writes.replace(
+      id,
+      dto,
+      expectedLayoutVersion,
+      isDryRun(dryRun),
+      {
+        actor,
+        supportReason,
+        correlationId,
+      },
+    );
   }
 
   // ----------------------------------------------------- operaciones sueltas
@@ -398,7 +468,11 @@ export class FloorPlansController {
     @SupportReason() supportReason: string | undefined,
     @CorrelationId() correlationId: string | undefined,
   ): Promise<LayoutWriteResult & { placementId: string | null }> {
-    return this.writes.createPlacement(id, dto, { actor, supportReason, correlationId });
+    return this.writes.createPlacement(id, dto, {
+      actor,
+      supportReason,
+      correlationId,
+    });
   }
 
   /** Mueve, redimensiona o rota un espacio dibujado. */
@@ -410,7 +484,9 @@ export class FloorPlansController {
   @Patch('space-placements/:id')
   @ApiHeader(IF_MATCH_ROW)
   @ApiHeader(SUPPORT_REASON)
-  @ApiOperation({ summary: 'Editar una ubicación (If-Match: rowVersion de la ubicación)' })
+  @ApiOperation({
+    summary: 'Editar una ubicación (If-Match: rowVersion de la ubicación)',
+  })
   updatePlacement(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdatePlacementDto,
@@ -436,7 +512,9 @@ export class FloorPlansController {
   @ApiHeader(IF_MATCH_ROW)
   @ApiHeader(SUPPORT_REASON)
   @ApiQuery({ name: 'cascade', required: false })
-  @ApiOperation({ summary: 'Quitar una ubicación del plano (If-Match: rowVersion)' })
+  @ApiOperation({
+    summary: 'Quitar una ubicación del plano (If-Match: rowVersion)',
+  })
   deletePlacement(
     @Param('id', ParseUUIDPipe) id: string,
     @IfMatch() expectedRowVersion: number,
@@ -445,11 +523,16 @@ export class FloorPlansController {
     @SupportReason() supportReason: string | undefined,
     @CorrelationId() correlationId: string | undefined,
   ): Promise<LayoutWriteResult> {
-    return this.writes.deletePlacement(id, expectedRowVersion, cascade === 'true', {
-      actor,
-      supportReason,
-      correlationId,
-    });
+    return this.writes.deletePlacement(
+      id,
+      expectedRowVersion,
+      cascade === 'true',
+      {
+        actor,
+        supportReason,
+        correlationId,
+      },
+    );
   }
 
   /** Agrega un elemento (muro, puerta, ventana, escalera…). */
@@ -469,7 +552,11 @@ export class FloorPlansController {
     @SupportReason() supportReason: string | undefined,
     @CorrelationId() correlationId: string | undefined,
   ): Promise<LayoutWriteResult> {
-    return this.writes.createElement(id, dto, { actor, supportReason, correlationId });
+    return this.writes.createElement(id, dto, {
+      actor,
+      supportReason,
+      correlationId,
+    });
   }
 
   /** Edita un elemento. */
@@ -541,6 +628,11 @@ export class FloorPlansController {
     @Query() query: UnplacedQueryDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<{ items: UnplacedSpace[]; nextCursor: string | null }> {
-    return this.plans.unplacedSpaces(id, query.cursor, query.limit ?? 200, actor);
+    return this.plans.unplacedSpaces(
+      id,
+      query.cursor,
+      query.limit ?? 200,
+      actor,
+    );
   }
 }

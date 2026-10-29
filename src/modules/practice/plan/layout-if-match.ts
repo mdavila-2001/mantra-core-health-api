@@ -21,7 +21,8 @@ export function parseLayoutIfMatch(
   planId: string,
 ): number {
   const raw = Array.isArray(header) ? header[0] : header;
-  if (raw === undefined || raw.trim() === '') throw new IfMatchRequiredException();
+  if (raw === undefined || raw.trim() === '')
+    throw new IfMatchRequiredException();
   const value = raw.trim().replace(/^W\//, '').replace(/^"|"$/g, '');
   const plain = /^(\d{1,9})$/.exec(value);
   if (plain) return Number(plain[1]);

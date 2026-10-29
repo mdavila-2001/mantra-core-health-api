@@ -7,12 +7,19 @@ import {
 } from '../../../common';
 import { SEED } from '../../../common/constants/concepts';
 import { AUD } from '../../audit/audit.concepts';
-import { FilesRepository, FileVersionsRepository } from '../../common/repositories';
+import {
+  FilesRepository,
+  FileVersionsRepository,
+} from '../../common/repositories';
 import { FileUploadService } from '../../common/services';
 import { RowVersionMismatchException } from '../http/row-version';
 import { practiceOutOfScope } from '../services/practice-scope';
 import type { SetBackgroundDto } from './floor-plan.dto';
-import { BACKGROUND_RULES, PLAN_EVENTS, PLAN_SETTING_KEYS } from './floor-plan.constants';
+import {
+  BACKGROUND_RULES,
+  PLAN_EVENTS,
+  PLAN_SETTING_KEYS,
+} from './floor-plan.constants';
 import { FloorPlanReason } from './floor-plan.error-reasons';
 import { toFloorPlanMeta } from './floor-plan.mapper';
 import type { FloorPlanMeta, ViewerCaps } from './floor-plan.types';
@@ -20,7 +27,10 @@ import { FloorPlanContextService } from './floor-plan-context.service';
 import { FloorPlanLayoutRepository } from './floor-plan-layout.repository';
 import { FloorPlansRepository, type PlanRow } from './floor-plans.repository';
 import { PlanBackgroundUrlService } from './plan-background-url.service';
-import { planDbException, translatePlanDbError } from './plan-constraint-reasons';
+import {
+  planDbException,
+  translatePlanDbError,
+} from './plan-constraint-reasons';
 import { PlanEventsService } from './plan-events.service';
 import { verifyBackgroundBytes } from './plan-background-guard';
 import { PlanViewerService } from './plan-viewer.service';
@@ -132,18 +142,27 @@ export class FloorPlanBackgroundService {
         file.updatedAt = new Date();
         await tx.flush();
       }
-      if (file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED) {
+      if (
+        file.deletedAt ||
+        file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED
+      ) {
         throw this.fileInvalid('El archivo está borrado', 'DELETED');
       }
       if (file.categoryConceptId !== CONCEPTS.FILE_CATEGORY_IMAGE) {
         throw this.fileInvalid('El archivo no es una imagen', 'CATEGORY');
       }
       if (!file.currentVersionId) {
-        throw this.fileInvalid('El archivo no tiene una versión vigente', 'NO_VERSION');
+        throw this.fileInvalid(
+          'El archivo no tiene una versión vigente',
+          'NO_VERSION',
+        );
       }
       const version = await this.versions.findById(tx, file.currentVersionId);
       if (!version) {
-        throw this.fileInvalid('El archivo no tiene una versión vigente', 'NO_VERSION');
+        throw this.fileInvalid(
+          'El archivo no tiene una versión vigente',
+          'NO_VERSION',
+        );
       }
       if (version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED) {
         throw this.fileInvalid('El archivo resultó infectado', 'INFECTED');
@@ -164,14 +183,15 @@ export class FloorPlanBackgroundService {
         'practice.floor_plan.background.check',
       );
       const verified = verifyBackgroundBytes(content.buffer);
-      if (
-        verified.width > limits.maxPx ||
-        verified.height > limits.maxPx
-      ) {
+      if (verified.width > limits.maxPx || verified.height > limits.maxPx) {
         throw this.fileInvalid(
           `La imagen no puede pasar de ${limits.maxPx} px por lado`,
           'TOO_LARGE_PX',
-          { maxPx: limits.maxPx, width: verified.width, height: verified.height },
+          {
+            maxPx: limits.maxPx,
+            width: verified.width,
+            height: verified.height,
+          },
         );
       }
       const size = { width: verified.width, height: verified.height };
@@ -205,7 +225,11 @@ export class FloorPlanBackgroundService {
       } catch (error) {
         throw this.translate(error, plan.id, correlationId);
       }
-      const updated = (await this.plans.findPlan(tx, plan.id, tenantId)) as PlanRow;
+      const updated = (await this.plans.findPlan(
+        tx,
+        plan.id,
+        tenantId,
+      )) as PlanRow;
       await this.events.publish(tx, {
         type: PLAN_EVENTS.backgroundChanged,
         floorPlanId: plan.id,
@@ -267,7 +291,11 @@ export class FloorPlanBackgroundService {
         actor.id,
         tenantId,
       );
-      const updated = (await this.plans.findPlan(tx, plan.id, tenantId)) as PlanRow;
+      const updated = (await this.plans.findPlan(
+        tx,
+        plan.id,
+        tenantId,
+      )) as PlanRow;
       await this.events.publish(tx, {
         type: PLAN_EVENTS.backgroundChanged,
         floorPlanId: plan.id,
@@ -306,7 +334,8 @@ export class FloorPlanBackgroundService {
       // Primero tenant y alcance (404), después la firma: una URL de un lienzo
       // ajeno no distingue «existe» de «no existe».
       this.urls.verify(plan.id, query);
-      if (!plan.backgroundFileId) throw practiceOutOfScope('El lienzo no tiene fondo');
+      if (!plan.backgroundFileId)
+        throw practiceOutOfScope('El lienzo no tiene fondo');
       const rows = await tx.execute<{ current_version_id: string | null }[]>(
         `select current_version_id from common.files where id = ?::uuid and tenant_id = ?::uuid`,
         [plan.backgroundFileId, plan.tenantId],
@@ -330,7 +359,10 @@ export class FloorPlanBackgroundService {
         version.fileId !== file.id ||
         version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED
       ) {
-        throw this.fileInvalid('El archivo del fondo ya no está disponible', 'UNAVAILABLE');
+        throw this.fileInvalid(
+          'El archivo del fondo ya no está disponible',
+          'UNAVAILABLE',
+        );
       }
       return { fileId: plan.backgroundFileId, versionId: query.v };
     });
@@ -364,7 +396,9 @@ export class FloorPlanBackgroundService {
         FloorPlanReason.BACKGROUND_CALIBRATION_INVALID,
       );
     if (dto.calibration && dto.scaleMPerPx !== undefined) {
-      throw invalid('Indicá la calibración por dos puntos o la escala, no las dos');
+      throw invalid(
+        'Indicá la calibración por dos puntos o la escala, no las dos',
+      );
     }
     let scale: number;
     if (dto.calibration) {
@@ -373,15 +407,23 @@ export class FloorPlanBackgroundService {
       if (![p1.px, p1.py, p2.px, p2.py, distanceM].every(Number.isFinite)) {
         throw invalid('Los puntos y la distancia deben ser números');
       }
-      if (pixels <= 0) throw invalid('Los dos puntos de calibración no pueden coincidir');
-      if (distanceM <= 0) throw invalid('La distancia real debe ser mayor que 0');
+      if (pixels <= 0)
+        throw invalid('Los dos puntos de calibración no pueden coincidir');
+      if (distanceM <= 0)
+        throw invalid('La distancia real debe ser mayor que 0');
       scale = distanceM / pixels;
     } else if (dto.scaleMPerPx !== undefined) {
       scale = dto.scaleMPerPx;
     } else {
-      throw invalid('Falta la calibración (dos puntos y la distancia real) o la escala');
+      throw invalid(
+        'Falta la calibración (dos puntos y la distancia real) o la escala',
+      );
     }
-    if (!Number.isFinite(scale) || scale < SCALE_RANGE.min || scale > SCALE_RANGE.max) {
+    if (
+      !Number.isFinite(scale) ||
+      scale < SCALE_RANGE.min ||
+      scale > SCALE_RANGE.max
+    ) {
       throw invalid(
         `La escala resultante (${scale} m/px) queda fuera de ${SCALE_RANGE.min}–${SCALE_RANGE.max}`,
       );
@@ -393,7 +435,10 @@ export class FloorPlanBackgroundService {
       ['offsetYM', dto.offsetYM, -100000, 100000],
     ];
     for (const [name, value, min, max] of extras) {
-      if (value !== undefined && (!Number.isFinite(value) || value < min || value > max)) {
+      if (
+        value !== undefined &&
+        (!Number.isFinite(value) || value < min || value > max)
+      ) {
         throw invalid(`${name} va de ${min} a ${max}`);
       }
     }
@@ -404,12 +449,23 @@ export class FloorPlanBackgroundService {
     tx: EntityManager,
     practiceId: string,
   ): Promise<{ maxBytes: number; maxPx: number }> {
-    const bytes = await this.plans.setting(tx, practiceId, PLAN_SETTING_KEYS.backgroundMaxBytes);
-    const px = await this.plans.setting(tx, practiceId, PLAN_SETTING_KEYS.backgroundMaxPx);
+    const bytes = await this.plans.setting(
+      tx,
+      practiceId,
+      PLAN_SETTING_KEYS.backgroundMaxBytes,
+    );
+    const px = await this.plans.setting(
+      tx,
+      practiceId,
+      PLAN_SETTING_KEYS.backgroundMaxPx,
+    );
     return {
       maxBytes:
-        typeof bytes === 'number' && bytes > 0 ? bytes : BACKGROUND_RULES.defaultMaxBytes,
-      maxPx: typeof px === 'number' && px > 0 ? px : BACKGROUND_RULES.defaultMaxPx,
+        typeof bytes === 'number' && bytes > 0
+          ? bytes
+          : BACKGROUND_RULES.defaultMaxBytes,
+      maxPx:
+        typeof px === 'number' && px > 0 ? px : BACKGROUND_RULES.defaultMaxPx,
     };
   }
 
@@ -425,9 +481,15 @@ export class FloorPlanBackgroundService {
     );
   }
 
-  private translate(error: unknown, subjectId: string, correlationId?: string): unknown {
+  private translate(
+    error: unknown,
+    subjectId: string,
+    correlationId?: string,
+  ): unknown {
     if (error instanceof PreconditionFailedException) return error;
     const translation = translatePlanDbError(error);
-    return translation ? planDbException(translation, subjectId, correlationId) : error;
+    return translation
+      ? planDbException(translation, subjectId, correlationId)
+      : error;
   }
 }

@@ -18,7 +18,8 @@ import type {
 } from './floor-plan.types';
 
 /** Historia de una tabla del plano: tabla de origen y columna que apunta a ella. */
-export type PlanHistoryKind = 'floor_plans' | 'space_placements' | 'plan_elements';
+export type PlanHistoryKind =
+  'floor_plans' | 'space_placements' | 'plan_elements';
 
 const HISTORY_COLUMN: Readonly<Record<PlanHistoryKind, string>> = {
   floor_plans: 'floor_plan_id',
@@ -270,7 +271,13 @@ export class FloorPlanLayoutRepository {
   ): Promise<PlanValidationIssue[]> {
     if (spaceIds.length === 0) return [];
     const rows = await tx.execute<
-      { severity: 'ERROR'; code: string; subject_id: string; other_id: string | null; detail: string }[]
+      {
+        severity: 'ERROR';
+        code: string;
+        subject_id: string;
+        other_id: string | null;
+        detail: string;
+      }[]
     >(
       `with t as (
          select sp.id, sp.care_space_id, sp.sibling_group_id, sp.overlap_outline, sp.outline
@@ -336,9 +343,10 @@ export class FloorPlanLayoutRepository {
         other_id: string | null;
         detail: string;
       }[]
-    >(`select severity, code, subject_id, other_id, detail from practice.plan_validate(?::uuid)`, [
-      planId,
-    ]);
+    >(
+      `select severity, code, subject_id, other_id, detail from practice.plan_validate(?::uuid)`,
+      [planId],
+    );
     return rows.map((row) => ({
       severity: row.severity,
       code: row.code,
@@ -386,10 +394,7 @@ export class FloorPlanLayoutRepository {
    * Sello de la estructura que alimenta el layout: el layout depende no sólo de
    * `layout_version` sino de los nombres, estados y vínculos de los espacios.
    */
-  async structureStamp(
-    tx: EntityManager,
-    planId: string,
-  ): Promise<string> {
+  async structureStamp(tx: EntityManager, planId: string): Promise<string> {
     const rows = await tx.execute<{ stamp: string }[]>(
       `select md5(
           coalesce((select max(cs.updated_at)::text || ':' || sum(cs.row_version)::text
@@ -567,11 +572,16 @@ export class FloorPlanLayoutRepository {
   ): Promise<{
     owners: Map<string, { id: string; code: string; name: string }>;
     beds: Map<string, { beds: number; censable: number }>;
-    paths: Map<string, { id: string; code: string; name: string; form: string }[]>;
+    paths: Map<
+      string,
+      { id: string; code: string; name: string; form: string }[]
+    >;
   }> {
     const ids = pgUuidArray(spaceIds);
     const [owners, beds, paths] = await Promise.all([
-      tx.execute<{ space_id: string; id: string; code: string; name: string }[]>(
+      tx.execute<
+        { space_id: string; id: string; code: string; name: string }[]
+      >(
         `select a.care_space_id as space_id, u.id, u.code, u.name
            from practice.space_unit_assignments a
            join practice.clinical_units u on u.id = a.clinical_unit_id
@@ -589,10 +599,24 @@ export class FloorPlanLayoutRepository {
                 count(*) filter (where cs.form_concept_id = ?::uuid and cs.status_concept_id = ?::uuid)::int as beds,
                 count(*) filter (where cs.form_concept_id = ?::uuid and cs.status_concept_id = ?::uuid and cs.censable is true)::int as censable
            from d join practice.care_spaces cs on cs.id = d.id group by d.root`,
-        [ids, tenantId, bedFormConceptId, activeConceptId, bedFormConceptId, activeConceptId],
+        [
+          ids,
+          tenantId,
+          bedFormConceptId,
+          activeConceptId,
+          bedFormConceptId,
+          activeConceptId,
+        ],
       ),
       tx.execute<
-        { start_id: string; id: string; code: string; name: string; form_concept_id: string; depth: number }[]
+        {
+          start_id: string;
+          id: string;
+          code: string;
+          name: string;
+          form_concept_id: string;
+          depth: number;
+        }[]
       >(
         `with recursive up(start_id, id, depth) as (
            select cs.id, cs.parent_space_id, 1 from practice.care_spaces cs
@@ -623,7 +647,10 @@ export class FloorPlanLayoutRepository {
     }
     return {
       owners: new Map(
-        owners.map((o) => [o.space_id, { id: o.id, code: o.code, name: o.name }]),
+        owners.map((o) => [
+          o.space_id,
+          { id: o.id, code: o.code, name: o.name },
+        ]),
       ),
       beds: new Map(
         beds.map((b) => [b.root, { beds: b.beds, censable: b.censable }]),

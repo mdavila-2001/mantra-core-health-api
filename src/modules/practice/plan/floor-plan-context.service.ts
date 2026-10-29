@@ -70,7 +70,13 @@ export class FloorPlanContextService {
       actor,
       'read',
     );
-    const viewer = await this.viewers.resolve(tx, tenantId, actor, site, access);
+    const viewer = await this.viewers.resolve(
+      tx,
+      tenantId,
+      actor,
+      site,
+      access,
+    );
     return { tenantId, plan, site, access, viewer };
   }
 
@@ -93,7 +99,13 @@ export class FloorPlanContextService {
       actor,
       'read',
     );
-    const viewer = await this.viewers.resolve(tx, tenantId, actor, site, access);
+    const viewer = await this.viewers.resolve(
+      tx,
+      tenantId,
+      actor,
+      site,
+      access,
+    );
     return { tenantId, site, access, viewer };
   }
 }

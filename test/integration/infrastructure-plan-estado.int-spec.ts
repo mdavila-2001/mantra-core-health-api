@@ -35,8 +35,15 @@ describe('Infraestructura F1c · plano · estado y tarjeta del paciente', () => 
   let plan: any;
   const users: Record<string, { userId: string; token: string }> = {};
 
-  const filas = (text: string, params: unknown[] = []) => sql<any>(ctx, text, params);
-  const mk = (code: string, form: string, fn: string, parent?: string, extra = {}) =>
+  const filas = (text: string, params: unknown[] = []) =>
+    sql<any>(ctx, text, params);
+  const mk = (
+    code: string,
+    form: string,
+    fn: string,
+    parent?: string,
+    extra = {},
+  ) =>
     createSpace(ctx, org, {
       code,
       name: `Espacio ${code}`,
@@ -55,7 +62,12 @@ describe('Infraestructura F1c · plano · estado y tarjeta del paciente', () => 
       .set(como(who === 'dueno' ? org.token : users[who].token, org.tenantId));
 
   /** Un paciente ingresado en una cama (fixture SQL: F3 aún no expone el ADT en esta rama). */
-  async function ingresar(bedId: string, name: string, lastName: string, birth: string) {
+  async function ingresar(
+    bedId: string,
+    name: string,
+    lastName: string,
+    birth: string,
+  ) {
     const personId = randomUUID();
     const encounterId = randomUUID();
     await filas(
@@ -96,16 +108,22 @@ describe('Infraestructura F1c · plano · estado y tarjeta del paciente', () => 
     ids.b1b = (await mk('CAMA-1B', 'BED', 'BED_STANDARD', ids.h1, bed)).id;
     ids.b2a = (await mk('CAMA-2A', 'BED', 'BED_STANDARD', ids.h2, bed)).id;
     // Las camas y locales se activan por SQL: activar por API exige el perfil completo de cada función.
-    await filas('update practice.care_spaces set status_concept_id = ? where practice_site_id = ?', [
-      PRAC.SPACE_ACTIVE,
-      org.siteId,
-    ]);
+    await filas(
+      'update practice.care_spaces set status_concept_id = ? where practice_site_id = ?',
+      [PRAC.SPACE_ACTIVE, org.siteId],
+    );
 
     plan = (
       await http()
         .post(`/sites/${org.siteId}/floor-plans`)
         .set(comoDueno(org))
-        .send({ code: 'EST-P1', name: 'Piso 1', anchorSpaceId: ids.piso, widthM: 40, heightM: 20 })
+        .send({
+          code: 'EST-P1',
+          name: 'Piso 1',
+          anchorSpaceId: ids.piso,
+          widthM: 40,
+          heightM: 20,
+        })
         .expect(201)
     ).body;
     await http()
@@ -132,7 +150,11 @@ describe('Infraestructura F1c · plano · estado y tarjeta del paciente', () => 
       ['uB', 'UN-B', ids.h2],
     ] as const) {
       const unit = (
-        await http().post(`/sites/${org.siteId}/clinical-units`).set(comoDueno(org)).send({ code, name: code }).expect(201)
+        await http()
+          .post(`/sites/${org.siteId}/clinical-units`)
+          .set(comoDueno(org))
+          .send({ code, name: code })
+          .expect(201)
       ).body;
       ids[key] = unit.id;
       await http()
@@ -142,24 +164,69 @@ describe('Infraestructura F1c · plano · estado y tarjeta del paciente', () => 
         .expect(201);
     }
 
-    users.enf = await createStaffUser(ctx, org, 'DA_ASSIGN_NURSE', { kind: 'UNIT', unitId: ids.uA }, 'enf');
-    users.adm = await createStaffUser(ctx, org, 'DA_ASSIGN_ADMISSION', { kind: 'SITE', siteId: org.siteId }, 'adm');
-    users.lim = await createStaffUser(ctx, org, 'DA_ASSIGN_HOUSEKEEPING', { kind: 'SITE', siteId: org.siteId }, 'lim');
-    users.man = await createStaffUser(ctx, org, 'DA_ASSIGN_MAINTENANCE', { kind: 'SITE', siteId: org.siteId }, 'man');
-    users.fac = await createStaffUser(ctx, org, 'DA_ASSIGN_BILLING', { kind: 'SITE', siteId: org.siteId }, 'fac');
+    users.enf = await createStaffUser(
+      ctx,
+      org,
+      'DA_ASSIGN_NURSE',
+      { kind: 'UNIT', unitId: ids.uA },
+      'enf',
+    );
+    users.adm = await createStaffUser(
+      ctx,
+      org,
+      'DA_ASSIGN_ADMISSION',
+      { kind: 'SITE', siteId: org.siteId },
+      'adm',
+    );
+    users.lim = await createStaffUser(
+      ctx,
+      org,
+      'DA_ASSIGN_HOUSEKEEPING',
+      { kind: 'SITE', siteId: org.siteId },
+      'lim',
+    );
+    users.man = await createStaffUser(
+      ctx,
+      org,
+      'DA_ASSIGN_MAINTENANCE',
+      { kind: 'SITE', siteId: org.siteId },
+      'man',
+    );
+    users.fac = await createStaffUser(
+      ctx,
+      org,
+      'DA_ASSIGN_BILLING',
+      { kind: 'SITE', siteId: org.siteId },
+      'fac',
+    );
     users.miembro = await createPlainMember(ctx, org, 'miembro');
 
     await ingresar(ids.b1a, 'Ana', 'Pérez', '1980-05-05');
     await ingresar(ids.b2a, 'Luis', 'Gómez', '1992-01-20');
     // Estado de F2 que ningún endpoint de esta rama escribe: higiene sucia y mantenimiento.
-    const sucia = await ensureConcept(ctx, 'practice', 'HYG_DIRTY', 'HYG_DIRTY');
+    const sucia = await ensureConcept(
+      ctx,
+      'practice',
+      'HYG_DIRTY',
+      'HYG_DIRTY',
+    );
     await filas(
       `update practice.care_spaces set hygiene_status_concept_id = ?::uuid, hygiene_changed_at = now(),
               ops_version = ops_version + 1, updated_at = now() where id = ?::uuid`,
       [sucia, ids.b1b],
     );
-    const bloqueo = await ensureConcept(ctx, 'practice', 'BLOCK_ADMIN', 'BLOCK_ADMIN');
-    const motivo = await ensureConcept(ctx, 'practice', 'BLOCK_RSN_OTHER', 'BLOCK_RSN_OTHER');
+    const bloqueo = await ensureConcept(
+      ctx,
+      'practice',
+      'BLOCK_ADMIN',
+      'BLOCK_ADMIN',
+    );
+    const motivo = await ensureConcept(
+      ctx,
+      'practice',
+      'BLOCK_RSN_OTHER',
+      'BLOCK_RSN_OTHER',
+    );
     await filas(
       `insert into practice.care_space_blocks (id, tenant_id, care_space_id, kind_concept_id, reason_concept_id, reason_text, starts_at, created_at, updated_at)
        values (gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, ?::uuid, 'Fuga en el techo', now(), now(), now())`,
@@ -190,12 +257,30 @@ describe('Infraestructura F1c · plano · estado y tarjeta del paciente', () => 
         v2Code: 'H',
         assignable: false,
       });
-      expect(res.body.rollups[ids.h1]).toMatchObject({ beds: 2, occupied: 1, dirty: 1, censable: 2 });
-      expect(res.body.rollups[ids.sala]).toMatchObject({ beds: 3, occupied: 2, dirty: 1 });
-      expect(res.body.counts).toMatchObject({ total: 3, occupied: 2, dirty: 1, assignable: 0 });
+      expect(res.body.rollups[ids.h1]).toMatchObject({
+        beds: 2,
+        occupied: 1,
+        dirty: 1,
+        censable: 2,
+      });
+      expect(res.body.rollups[ids.sala]).toMatchObject({
+        beds: 3,
+        occupied: 2,
+        dirty: 1,
+      });
+      expect(res.body.counts).toMatchObject({
+        total: 3,
+        occupied: 2,
+        dirty: 1,
+        assignable: 0,
+      });
       expect(Date.parse(res.body.asOf)).toBeGreaterThan(0);
       expect(res.body.layoutVersion).toBe(2);
-      expect(res.body.viewer).toMatchObject({ canSeeState: true, canSeePatient: false, scope: 'ALL' });
+      expect(res.body.viewer).toMatchObject({
+        canSeeState: true,
+        canSeePatient: false,
+        scope: 'ALL',
+      });
       // Ausente ≠ nulo: la clave ni existe, y el cuerpo no trae iniciales ni nombres.
       const texto = JSON.stringify(res.body);
       expect(texto).not.toContain('patient');
@@ -208,12 +293,19 @@ describe('Infraestructura F1c · plano · estado y tarjeta del paciente', () => 
       const etag = primero.headers.etag as string;
       expect(etag).toMatch(/^W\/"fs:/);
       await estado('dueno').set('If-None-Match', etag).expect(304);
-      const limpia = await ensureConcept(ctx, 'practice', 'HYG_CLEAN', 'HYG_CLEAN');
+      const limpia = await ensureConcept(
+        ctx,
+        'practice',
+        'HYG_CLEAN',
+        'HYG_CLEAN',
+      );
       await filas(
         `update practice.care_spaces set hygiene_status_concept_id = ?::uuid, ops_version = ops_version + 1, updated_at = now() where id = ?::uuid`,
         [limpia, ids.b1b],
       );
-      const despues = await estado('dueno').set('If-None-Match', etag).expect(200);
+      const despues = await estado('dueno')
+        .set('If-None-Match', etag)
+        .expect(200);
       expect(despues.headers.etag).not.toBe(etag);
       expect(despues.body.spaces[ids.b1b].v2Code).toBe('U');
       expect(despues.body.spaces[ids.b1b].assignable).toBe(true);
@@ -222,7 +314,9 @@ describe('Infraestructura F1c · plano · estado y tarjeta del paciente', () => 
 
     it('el ETag depende del rol: el de un rol no sirve a otro', async () => {
       const dueno = await estado('dueno').expect(200);
-      const lim = await estado('lim').set('If-None-Match', dueno.headers.etag as string).expect(200);
+      const lim = await estado('lim')
+        .set('If-None-Match', dueno.headers.etag as string)
+        .expect(200);
       expect(lim.headers.etag).not.toBe(dueno.headers.etag);
     });
 
@@ -238,9 +332,13 @@ describe('Infraestructura F1c · plano · estado y tarjeta del paciente', () => 
 
     it('ventana y foco acotan los espacios del estado', async () => {
       const foco = await estado('dueno', `?focusSpaceId=${ids.h2}`).expect(200);
-      expect(Object.keys(foco.body.spaces).sort()).toEqual([ids.b2a, ids.h2].sort());
+      expect(Object.keys(foco.body.spaces).sort()).toEqual(
+        [ids.b2a, ids.h2].sort(),
+      );
       const caja = await estado('dueno', '?bbox=2,2,8,10').expect(200);
-      expect(Object.keys(caja.body.spaces)).toEqual(expect.arrayContaining([ids.b1a, ids.b1b]));
+      expect(Object.keys(caja.body.spaces)).toEqual(
+        expect.arrayContaining([ids.b1a, ids.b1b]),
+      );
       expect(caja.body.spaces[ids.b2a]).toBeUndefined();
     });
   });
@@ -248,8 +346,14 @@ describe('Infraestructura F1c · plano · estado y tarjeta del paciente', () => 
   describe('el paciente según el rol', () => {
     it('Enfermería de la unidad: iniciales sólo en su unidad; la cama de la otra unidad no aparece', async () => {
       const res = await estado('enf').expect(200);
-      expect(res.body.viewer).toMatchObject({ canSeePatient: true, scope: 'UNITS', unitIds: [ids.uA] });
-      expect(Object.keys(res.body.spaces).sort()).toEqual([ids.b1a, ids.b1b, ids.h1].sort());
+      expect(res.body.viewer).toMatchObject({
+        canSeePatient: true,
+        scope: 'UNITS',
+        unitIds: [ids.uA],
+      });
+      expect(Object.keys(res.body.spaces).sort()).toEqual(
+        [ids.b1a, ids.b1b, ids.h1].sort(),
+      );
       expect(res.body.spaces[ids.b1a].occupancy.patient).toMatchObject({
         initials: 'AP',
         ageYears: expect.any(Number),
@@ -278,7 +382,9 @@ describe('Infraestructura F1c · plano · estado y tarjeta del paciente', () => 
         expect(texto).not.toMatch(/Ana|Pérez|Luis|Gómez/);
         if (rol !== 'miembro') {
           expect(res.body.viewer.canSeePatient).toBe(false);
-          expect(res.body.spaces[ids.b1a].occupancy).toMatchObject({ code: 'OCC_OCCUPIED' });
+          expect(res.body.spaces[ids.b1a].occupancy).toMatchObject({
+            code: 'OCC_OCCUPIED',
+          });
         } else {
           expect(res.body.viewer.canSeeState).toBe(false);
           expect(res.body.spaces).toEqual({});
@@ -288,7 +394,11 @@ describe('Infraestructura F1c · plano · estado y tarjeta del paciente', () => 
 
     it('Facturación no ve estado sobre el plano (200 vacío, no 403) y lo dice en viewer', async () => {
       const res = await estado('fac').expect(200);
-      expect(res.body).toMatchObject({ spaces: {}, rollups: {}, viewer: { canSeeState: false, scope: 'NONE' } });
+      expect(res.body).toMatchObject({
+        spaces: {},
+        rollups: {},
+        viewer: { canSeeState: false, scope: 'NONE' },
+      });
       expect(res.body.counts.total).toBe(0);
     });
 
@@ -308,7 +418,10 @@ describe('Infraestructura F1c · plano · estado y tarjeta del paciente', () => 
       const res = await tarjeta('adm', ids.b2a).expect(200);
       expect(res.body.patient.displayName).toBe('Luis Gómez');
       expect(res.body.openBlocks).toEqual([
-        expect.objectContaining({ reasonText: 'Fuga en el techo', kind: 'BLOCK_ADMIN' }),
+        expect.objectContaining({
+          reasonText: 'Fuga en el techo',
+          kind: 'BLOCK_ADMIN',
+        }),
       ]);
     });
 
@@ -362,8 +475,14 @@ describe('Infraestructura F1c · plano · estado y tarjeta del paciente', () => 
 
     it('un usuario de otra organización no obtiene nada: 404', async () => {
       const otro = await registerOrg(ctx, 'F', sufijo);
-      await http().get(`/floor-plans/${plan.id}/state`).set(comoDueno(otro)).expect(404);
-      await http().get(`/care-spaces/${ids.b1a}/plan-card`).set(comoDueno(otro)).expect(404);
+      await http()
+        .get(`/floor-plans/${plan.id}/state`)
+        .set(comoDueno(otro))
+        .expect(404);
+      await http()
+        .get(`/care-spaces/${ids.b1a}/plan-card`)
+        .set(comoDueno(otro))
+        .expect(404);
     });
   });
 });

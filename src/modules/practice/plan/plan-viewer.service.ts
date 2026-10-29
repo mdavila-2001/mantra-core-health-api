@@ -168,9 +168,7 @@ export class PlanViewerService {
       canSeePatient,
       canOpenSpaceFile: true,
       scope: !canSeeState ? 'NONE' : state.all ? 'ALL' : 'UNITS',
-      ...(canSeeState && !state.all
-        ? { unitIds: [...state.unitIds] }
-        : {}),
+      ...(canSeeState && !state.all ? { unitIds: [...state.unitIds] } : {}),
     };
     const key = createHash('sha1')
       .update(
@@ -242,7 +240,12 @@ export class PlanViewerService {
     if (scope.all) return 'ALL';
     if (!hasAny(scope)) return new Set();
     return new Set(
-      await this.layout.unitSpaceIds(tx, tenantId, scope.unitIds, scope.spaceIds),
+      await this.layout.unitSpaceIds(
+        tx,
+        tenantId,
+        scope.unitIds,
+        scope.spaceIds,
+      ),
     );
   }
 
@@ -262,8 +265,10 @@ export class PlanViewerService {
         ? { all: false, unitIds: [row.clinical_unit_id], spaceIds: [] }
         : null;
     }
-    if (row.practice_site_id) return row.practice_site_id === site.id ? all : null;
-    if (row.practice_id) return row.practice_id === site.practiceId ? all : null;
+    if (row.practice_site_id)
+      return row.practice_site_id === site.id ? all : null;
+    if (row.practice_id)
+      return row.practice_id === site.practiceId ? all : null;
     // Alcance de organización: sin sede, práctica, unidad ni espacio.
     return all;
   }

@@ -31,7 +31,11 @@ import type {
   UpdateElementDto,
   UpdatePlacementDto,
 } from './floor-plan.dto';
-import { LAYOUT_EVENT_ID_CAP, PLAN_EVENTS, PLAN_LIMITS } from './floor-plan.constants';
+import {
+  LAYOUT_EVENT_ID_CAP,
+  PLAN_EVENTS,
+  PLAN_LIMITS,
+} from './floor-plan.constants';
 import { FloorPlanReason } from './floor-plan.error-reasons';
 import type { LayoutWriteResult, PlanLayoutError } from './floor-plan.types';
 import { FloorPlanContextService } from './floor-plan-context.service';
@@ -41,7 +45,11 @@ import {
   type PlanRow,
   type WorkingModel,
 } from './floor-plans.repository';
-import { layoutVersionMismatch, planDbException, translatePlanDbError } from './plan-constraint-reasons';
+import {
+  layoutVersionMismatch,
+  planDbException,
+  translatePlanDbError,
+} from './plan-constraint-reasons';
 import { PlanEventsService } from './plan-events.service';
 import { PlanViewerService } from './plan-viewer.service';
 
@@ -328,9 +336,12 @@ export class FloorPlanLayoutWriteService {
       swing: dto.swing ?? current.swing ?? undefined,
       swingSide: dto.swingSide ?? current.swingSide ?? undefined,
       label: dto.label ?? current.label ?? undefined,
-      verticalLinkCode: dto.verticalLinkCode ?? current.verticalLinkCode ?? undefined,
-      connectsSpaceAId: dto.connectsSpaceAId ?? current.connectsSpaceAId ?? undefined,
-      connectsSpaceBId: dto.connectsSpaceBId ?? current.connectsSpaceBId ?? undefined,
+      verticalLinkCode:
+        dto.verticalLinkCode ?? current.verticalLinkCode ?? undefined,
+      connectsSpaceAId:
+        dto.connectsSpaceAId ?? current.connectsSpaceAId ?? undefined,
+      connectsSpaceBId:
+        dto.connectsSpaceBId ?? current.connectsSpaceBId ?? undefined,
       zOrder: dto.zOrder,
       expectedRowVersion,
     };
@@ -467,7 +478,8 @@ export class FloorPlanLayoutWriteService {
     }
     const infos = await this.plans.loadSpaceInfos(tx, tenantId, [...wanted]);
     for (const placement of delta.placements) {
-      if (!infos.has(placement.spaceId)) throw practiceOutOfScope('Espacio no encontrado');
+      if (!infos.has(placement.spaceId))
+        throw practiceOutOfScope('Espacio no encontrado');
     }
     for (const element of delta.elements) {
       for (const id of [element.connectsSpaceAId, element.connectsSpaceBId]) {
@@ -483,7 +495,9 @@ export class FloorPlanLayoutWriteService {
       tx,
       tenantId,
       plan.id,
-      delta.placements.map((p) => p.spaceId).filter((id) => !inThisPlan.has(id)),
+      delta.placements
+        .map((p) => p.spaceId)
+        .filter((id) => !inThisPlan.has(id)),
     );
     if (elsewhere.length > 0) {
       throw new ConflictException(
@@ -585,9 +599,14 @@ export class FloorPlanLayoutWriteService {
     };
     if (request.dryRun) throw new DryRunRollback(result);
 
-    const cap = (ids: readonly string[]): string[] => ids.slice(0, LAYOUT_EVENT_ID_CAP);
-    const placed = outcome.placementsToWrite.filter((w) => w.isNew).map((w) => w.spaceId);
-    const moved = outcome.placementsToWrite.filter((w) => !w.isNew).map((w) => w.spaceId);
+    const cap = (ids: readonly string[]): string[] =>
+      ids.slice(0, LAYOUT_EVENT_ID_CAP);
+    const placed = outcome.placementsToWrite
+      .filter((w) => w.isNew)
+      .map((w) => w.spaceId);
+    const moved = outcome.placementsToWrite
+      .filter((w) => !w.isNew)
+      .map((w) => w.spaceId);
     const removed = outcome.placementsToRemove.map((p) => p.spaceId);
     await this.events.publish(tx, {
       type: PLAN_EVENTS.layoutChanged,
@@ -697,15 +716,48 @@ export class FloorPlanLayoutWriteService {
           await this.layout.insertElement(tx, wctx, write);
           insertedElementIds.push(write.id);
         } else {
-          const ok = await this.layout.updateElement(tx, wctx, write, row.rowVersion);
+          const ok = await this.layout.updateElement(
+            tx,
+            wctx,
+            write,
+            row.rowVersion,
+          );
           if (!ok) throw new RowVersionMismatchException();
           updatedElementIds.push(write.id);
         }
       }
-      await this.layout.appendHistory(tx, 'space_placements', insertedPlacementIds, AUD.OPERATION_INSERT, actor.id, tenantId);
-      await this.layout.appendHistory(tx, 'space_placements', updatedPlacementIds, AUD.OPERATION_UPDATE, actor.id, tenantId);
-      await this.layout.appendHistory(tx, 'plan_elements', insertedElementIds, AUD.OPERATION_INSERT, actor.id, tenantId);
-      await this.layout.appendHistory(tx, 'plan_elements', updatedElementIds, AUD.OPERATION_UPDATE, actor.id, tenantId);
+      await this.layout.appendHistory(
+        tx,
+        'space_placements',
+        insertedPlacementIds,
+        AUD.OPERATION_INSERT,
+        actor.id,
+        tenantId,
+      );
+      await this.layout.appendHistory(
+        tx,
+        'space_placements',
+        updatedPlacementIds,
+        AUD.OPERATION_UPDATE,
+        actor.id,
+        tenantId,
+      );
+      await this.layout.appendHistory(
+        tx,
+        'plan_elements',
+        insertedElementIds,
+        AUD.OPERATION_INSERT,
+        actor.id,
+        tenantId,
+      );
+      await this.layout.appendHistory(
+        tx,
+        'plan_elements',
+        updatedElementIds,
+        AUD.OPERATION_UPDATE,
+        actor.id,
+        tenantId,
+      );
 
       // Lo que toca la verificación de la base: lo escrito y sus hijos.
       const touched = outcome.placementsToWrite.map((w) => w.spaceId);
@@ -749,7 +801,8 @@ export class FloorPlanLayoutWriteService {
     } catch (error) {
       if (error instanceof DomainException) throw error;
       const translation = translatePlanDbError(error);
-      if (translation) throw planDbException(translation, plan.id, correlationId);
+      if (translation)
+        throw planDbException(translation, plan.id, correlationId);
       throw error;
     }
   }

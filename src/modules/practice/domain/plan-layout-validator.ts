@@ -388,11 +388,7 @@ export function validateLayoutDelta(input: ValidatorInput): ValidationOutcome {
     nextPlacements.set(current.spaceId, { spaceId: current.spaceId });
     shapes.set(
       current.spaceId,
-      toShape(
-        current.spaceId,
-        verticesOfPlacement(current),
-        canvas.toleranceM,
-      ),
+      toShape(current.spaceId, verticesOfPlacement(current), canvas.toleranceM),
     );
   }
   const seenSpaces = new Set<string>();
@@ -679,7 +675,10 @@ export function validateLayoutDelta(input: ValidatorInput): ValidationOutcome {
   };
 }
 
-function samePlacement(current: PlacementState, write: PlacementWrite): boolean {
+function samePlacement(
+  current: PlacementState,
+  write: PlacementWrite,
+): boolean {
   if (
     current.zOrder !== write.zOrder ||
     current.locked !== write.locked ||
@@ -696,7 +695,10 @@ function samePlacement(current: PlacementState, write: PlacementWrite): boolean 
   );
 }
 
-function depthOf(spaceId: string, spaces: ReadonlyMap<string, SpaceInfo>): number {
+function depthOf(
+  spaceId: string,
+  spaces: ReadonlyMap<string, SpaceInfo>,
+): number {
   let depth = 0;
   let cursor = spaces.get(spaceId)?.parentId ?? null;
   while (cursor && depth < 64) {
@@ -754,7 +756,13 @@ function resolveGeometry(raw: unknown): ResolvedGeometry | { problem: string } {
     ) {
       return { problem: 'el centro está fuera del rango permitido' };
     }
-    const vertices = rectVertices(centerXM, centerYM, widthM, depthM, rotationDeg);
+    const vertices = rectVertices(
+      centerXM,
+      centerYM,
+      widthM,
+      depthM,
+      rotationDeg,
+    );
     return {
       shapeKind: 'RECT',
       centerXM: round3(centerXM),
@@ -877,19 +885,25 @@ function validateElements(
   for (const element of next.values()) {
     if (!HOSTED_KINDS.includes(element.kind)) continue;
     const isWritten = write.some((w) => w.id === element.id);
-    if (isWritten || (element.hostElementId && changedWalls.has(element.hostElementId))) {
+    if (
+      isWritten ||
+      (element.hostElementId && changedWalls.has(element.hostElementId))
+    ) {
       hostedToCheck.set(element.id, element);
     }
   }
   for (const element of hostedToCheck.values()) {
-    const host = element.hostElementId ? next.get(element.hostElementId) : undefined;
+    const host = element.hostElementId
+      ? next.get(element.hostElementId)
+      : undefined;
     if (!host || host.kind !== 'WALL' || !host.vertices) {
       push({
         kind: 'ELEMENT',
         id: element.id,
         code: FloorPlanReason.PLAN_HOST_NOT_WALL,
         field: 'host',
-        message: 'La puerta, ventana o abertura debe estar sobre un muro de este lienzo',
+        message:
+          'La puerta, ventana o abertura debe estar sobre un muro de este lienzo',
         nextAction: {
           label: 'Elegir un muro',
           hint: 'Indicá `hostElementId` de un muro del mismo lienzo (puede viajar en el mismo guardado).',
@@ -953,7 +967,8 @@ function resolveElement(
   });
   const kind = item.kind;
   const known = [...HOSTED_KINDS, ...POLYGON_KINDS, 'WALL', 'ANNOTATION'];
-  if (!known.includes(kind)) return invalid(`Tipo de elemento desconocido: ${kind}`);
+  if (!known.includes(kind))
+    return invalid(`Tipo de elemento desconocido: ${kind}`);
 
   const zOrder = item.zOrder ?? current?.zOrder ?? 0;
   if (
@@ -985,7 +1000,9 @@ function resolveElement(
     onlyIn('connectsSpaceAId', item.connectsSpaceAId, ['DOOR', 'OPENING']) ??
     onlyIn('connectsSpaceBId', item.connectsSpaceBId, ['DOOR', 'OPENING']) ??
     onlyIn('label', item.label, ['ANNOTATION']) ??
-    (HOSTED_KINDS.includes(kind) ? onlyIn('vertices', item.vertices, []) : null);
+    (HOSTED_KINDS.includes(kind)
+      ? onlyIn('vertices', item.vertices, [])
+      : null);
   if (misplaced) return misplaced;
 
   const base: Omit<ElementWrite, 'vertices'> = {
@@ -1048,10 +1065,14 @@ function resolveElement(
         connects.push(null);
         continue;
       }
-      if (typeof value !== 'string') return invalid(`\`${name}\` debe ser un id`);
+      if (typeof value !== 'string')
+        return invalid(`\`${name}\` debe ser un id`);
       const info = spaces.get(value);
       if (!info || info.siteId !== canvas.siteId) {
-        return invalid(`\`${name}\` no es un espacio de la sede del lienzo`, 'host');
+        return invalid(
+          `\`${name}\` no es un espacio de la sede del lienzo`,
+          'host',
+        );
       }
       connects.push(value);
     }
@@ -1099,7 +1120,8 @@ function resolveElement(
 
   if (kind === 'ANNOTATION') {
     const problem = checkVertexList(item.vertices, 1, 1);
-    if (problem) return invalid('Una anotación lleva un único punto', 'geometry');
+    if (problem)
+      return invalid('Una anotación lleva un único punto', 'geometry');
     if (
       typeof item.label !== 'string' ||
       item.label.trim() === '' ||

@@ -45,9 +45,16 @@ import type {
 } from './floor-plan.types';
 import { FloorPlanContextService } from './floor-plan-context.service';
 import { FloorPlanLayoutRepository } from './floor-plan-layout.repository';
-import { FloorPlansRepository, pgUuidArray, type PlanRow } from './floor-plans.repository';
+import {
+  FloorPlansRepository,
+  pgUuidArray,
+  type PlanRow,
+} from './floor-plans.repository';
 import { PlanBackgroundUrlService } from './plan-background-url.service';
-import { planDbException, translatePlanDbError } from './plan-constraint-reasons';
+import {
+  planDbException,
+  translatePlanDbError,
+} from './plan-constraint-reasons';
 import { PlanEventsService } from './plan-events.service';
 import { PlanViewerService } from './plan-viewer.service';
 
@@ -455,7 +462,11 @@ export class FloorPlansService {
       } catch (error) {
         throw this.translate(error, plan.id, correlationId);
       }
-      const updated = (await this.plans.findPlan(tx, plan.id, tenantId)) as PlanRow;
+      const updated = (await this.plans.findPlan(
+        tx,
+        plan.id,
+        tenantId,
+      )) as PlanRow;
       await this.events.publish(tx, {
         type: PLAN_EVENTS.updated,
         floorPlanId: plan.id,
@@ -533,7 +544,8 @@ export class FloorPlansService {
             {
               occupiedBeds: occupied.length,
               sampleSpaceIds: occupied.slice(0, 5),
-              nextAction: 'Trasladar o dar egreso a los pacientes antes de clausurar',
+              nextAction:
+                'Trasladar o dar egreso a los pacientes antes de clausurar',
             },
             FloorPlanReason.PLAN_SPACE_OCCUPIED,
           );
@@ -560,7 +572,11 @@ export class FloorPlansService {
       } catch (error) {
         throw this.translate(error, plan.id, correlationId);
       }
-      const updated = (await this.plans.findPlan(tx, plan.id, tenantId)) as PlanRow;
+      const updated = (await this.plans.findPlan(
+        tx,
+        plan.id,
+        tenantId,
+      )) as PlanRow;
       await this.events.publish(tx, {
         type: PLAN_EVENTS.lifecycleChanged,
         floorPlanId: plan.id,
@@ -597,11 +613,19 @@ export class FloorPlansService {
     actor: AuthenticatedUser,
   ): Promise<{ issues: PlanValidationIssue[] }> {
     return this.em.transactional(async (tx) => {
-      const { tenantId, plan, viewer } = await this.context.plan(tx, planId, actor);
+      const { tenantId, plan, viewer } = await this.context.plan(
+        tx,
+        planId,
+        actor,
+      );
       const issues = await this.layout.validate(tx, plan.id);
       // El detalle de un problema (m² declarados, vecinos) es identidad del
       // espacio: sólo se informa lo que el actor ve en el layout.
-      const visible = await this.viewers.resolveIds(tx, tenantId, viewer.identity);
+      const visible = await this.viewers.resolveIds(
+        tx,
+        tenantId,
+        viewer.identity,
+      );
       if (visible === 'ALL') return { issues };
       return {
         issues: issues.filter(
@@ -629,14 +653,24 @@ export class FloorPlansService {
     actor: AuthenticatedUser,
   ): Promise<{ items: UnplacedSpace[]; nextCursor: string | null }> {
     return this.em.transactional(async (tx) => {
-      const { tenantId, plan, viewer } = await this.context.plan(tx, planId, actor);
+      const { tenantId, plan, viewer } = await this.context.plan(
+        tx,
+        planId,
+        actor,
+      );
       // La paleta sólo la usa el editor, y nunca lista lo que el actor no ve.
       this.viewers.assertCanEdit(viewer);
-      const visible = await this.viewers.resolveIds(tx, tenantId, viewer.identity);
+      const visible = await this.viewers.resolveIds(
+        tx,
+        tenantId,
+        viewer.identity,
+      );
       let after: { depth: number; code: string } | undefined;
       if (cursor) {
         try {
-          after = JSON.parse(Buffer.from(cursor, 'base64url').toString('utf8'));
+          after = JSON.parse(
+            Buffer.from(cursor, 'base64url').toString('utf8'),
+          ) as { depth: number; code: string };
         } catch {
           throw new PreconditionFailedException(
             'El cursor no es válido',
@@ -682,7 +716,8 @@ export class FloorPlansService {
       const last = page[page.length - 1];
       const items = page.map((row): UnplacedSpace => {
         const retired = row.status_concept_id === PRAC.SPACE_RETIRED;
-        const rootInAnchored = row.parent_space_id === null && plan.anchorSpaceId !== null;
+        const rootInAnchored =
+          row.parent_space_id === null && plan.anchorSpaceId !== null;
         const placeable = !retired && row.parent_placed && !rootInAnchored;
         return {
           spaceId: row.care_space_id,
@@ -691,8 +726,12 @@ export class FloorPlansService {
           parentId: row.parent_space_id,
           depth: row.depth,
           form: this.concept(FORMS.byConceptId(row.form_concept_id)),
-          function: this.concept(FUNCTIONS.byConceptId(row.function_concept_id)),
-          lifecycle: this.concept(SPACE_LIFECYCLE.byConceptId(row.status_concept_id)),
+          function: this.concept(
+            FUNCTIONS.byConceptId(row.function_concept_id),
+          ),
+          lifecycle: this.concept(
+            SPACE_LIFECYCLE.byConceptId(row.status_concept_id),
+          ),
           placeable,
           ...(placeable
             ? {}
@@ -732,7 +771,11 @@ export class FloorPlansService {
       const tenantId = requireTenantId();
       const space = await this.spaces.findByIdInTenant(tx, spaceId, tenantId);
       if (!space) throw practiceOutOfScope('Espacio no encontrado');
-      const { viewer } = await this.context.site(tx, space.practiceSiteId, actor);
+      const { viewer } = await this.context.site(
+        tx,
+        space.practiceSiteId,
+        actor,
+      );
       await this.assertInIdentityScope(tx, tenantId, viewer, spaceId);
       const rows = await tx.execute<
         {
@@ -796,7 +839,11 @@ export class FloorPlansService {
     actor: AuthenticatedUser,
   ): Promise<PlanSearchHit[]> {
     return this.em.transactional(async (tx) => {
-      const { tenantId, site, viewer } = await this.context.site(tx, siteId, actor);
+      const { tenantId, site, viewer } = await this.context.site(
+        tx,
+        siteId,
+        actor,
+      );
       const term = q.trim();
       if (!term) return [];
       const ids = await this.viewers.resolveIds(tx, tenantId, viewer.identity);
@@ -812,7 +859,11 @@ export class FloorPlansService {
         scopeSql = 'and cs.id = any(?::uuid[])';
         params.push(pgUuidArray([...ids]));
       }
-      params.push(term.toLowerCase(), `${likeEscape(term.toLowerCase())}%`, limit);
+      params.push(
+        term.toLowerCase(),
+        `${likeEscape(term.toLowerCase())}%`,
+        limit,
+      );
       const rows = await tx.execute<
         {
           id: string;
@@ -863,10 +914,14 @@ export class FloorPlansService {
           floorPlanId: row.floor_plan_id,
           floorPlanName: row.plan_name,
           centerXM: placed
-            ? Math.round((((row.min_x as number) + (row.max_x as number)) / 2) * 1000) / 1000
+            ? Math.round(
+                (((row.min_x as number) + (row.max_x as number)) / 2) * 1000,
+              ) / 1000
             : null,
           centerYM: placed
-            ? Math.round((((row.min_y as number) + (row.max_y as number)) / 2) * 1000) / 1000
+            ? Math.round(
+                (((row.min_y as number) + (row.max_y as number)) / 2) * 1000,
+              ) / 1000
             : null,
           bbox: placed
             ? [
@@ -907,7 +962,11 @@ export class FloorPlansService {
       );
     }
     return this.em.transactional(async (tx) => {
-      const { tenantId, site, viewer } = await this.context.site(tx, siteId, actor);
+      const { tenantId, site, viewer } = await this.context.site(
+        tx,
+        siteId,
+        actor,
+      );
       let focusIds: string[];
       if (spaceId) {
         const space = await this.spaces.findByIdInTenant(tx, spaceId, tenantId);
@@ -921,10 +980,17 @@ export class FloorPlansService {
           [unitId, tenantId, site.id],
         );
         if (unit.length === 0) throw practiceOutOfScope('Unidad no encontrada');
-        focusIds = await this.layout.unitSpaceIds(tx, tenantId, [unitId as string]);
+        focusIds = await this.layout.unitSpaceIds(tx, tenantId, [
+          unitId as string,
+        ]);
       }
-      const allowed = await this.viewers.resolveIds(tx, tenantId, viewer.identity);
-      if (allowed !== 'ALL') focusIds = focusIds.filter((id) => allowed.has(id));
+      const allowed = await this.viewers.resolveIds(
+        tx,
+        tenantId,
+        viewer.identity,
+      );
+      if (allowed !== 'ALL')
+        focusIds = focusIds.filter((id) => allowed.has(id));
       if (focusIds.length === 0) return [];
       const rows = await tx.execute<
         {
@@ -1018,13 +1084,23 @@ export class FloorPlansService {
       }
     };
     if (values.code !== undefined && values.code === '')
-      problems.push({ field: 'code', message: 'El código no puede estar vacío' });
+      problems.push({
+        field: 'code',
+        message: 'El código no puede estar vacío',
+      });
     if (values.name === '')
-      problems.push({ field: 'name', message: 'El nombre no puede estar vacío' });
+      problems.push({
+        field: 'name',
+        message: 'El nombre no puede estar vacío',
+      });
     inRange('widthM', values.widthM, CANVAS_RANGES.sizeM);
     inRange('heightM', values.heightM, CANVAS_RANGES.sizeM);
     inRange('gridSizeM', values.gridSizeM, CANVAS_RANGES.gridSizeM);
-    inRange('contactToleranceM', values.contactToleranceM, CANVAS_RANGES.contactToleranceM);
+    inRange(
+      'contactToleranceM',
+      values.contactToleranceM,
+      CANVAS_RANGES.contactToleranceM,
+    );
     if (values.elevationM !== null)
       inRange('elevationM', values.elevationM, CANVAS_RANGES.elevationM);
     if (
@@ -1060,10 +1136,15 @@ export class FloorPlansService {
     subjectId: string,
     correlationId?: string,
   ): unknown {
-    if (error instanceof PreconditionFailedException || error instanceof ConflictException)
+    if (
+      error instanceof PreconditionFailedException ||
+      error instanceof ConflictException
+    )
       return error;
     const translation = translatePlanDbError(error);
-    return translation ? planDbException(translation, subjectId, correlationId) : error;
+    return translation
+      ? planDbException(translation, subjectId, correlationId)
+      : error;
   }
 
   /** 404 si el espacio está fuera de la identidad que el actor puede ver. */
@@ -1079,4 +1160,3 @@ export class FloorPlansService {
     }
   }
 }
-

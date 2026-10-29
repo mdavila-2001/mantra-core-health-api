@@ -601,7 +601,9 @@ export class StateQueryDto {
   @ApiPropertyOptional({ example: 'occupancy,hygiene' })
   @IsOptional()
   @IsString()
-  @Matches(/^(availability|occupancy|hygiene|isolation)(,(availability|occupancy|hygiene|isolation))*$/)
+  @Matches(
+    /^(availability|occupancy|hygiene|isolation)(,(availability|occupancy|hygiene|isolation))*$/,
+  )
   axis?: string;
 }
 

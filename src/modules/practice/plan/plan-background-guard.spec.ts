@@ -11,8 +11,14 @@ describe('verifyBackgroundBytes · el tipo sale del contenido, nunca de lo decla
   });
 
   it.each([
-    ['HTML con script', '<!doctype html><script>alert(document.cookie)</script>'],
-    ['SVG con script', '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'],
+    [
+      'HTML con script',
+      '<!doctype html><script>alert(document.cookie)</script>',
+    ],
+    [
+      'SVG con script',
+      '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>',
+    ],
     ['JavaScript', 'fetch("/steal?c="+document.cookie)'],
     ['texto vacío de firma', ''],
   ])('rechaza %s aunque se haya subido como image/png', (_name, body) => {
@@ -23,7 +29,9 @@ describe('verifyBackgroundBytes · el tipo sale del contenido, nunca de lo decla
 
   it('rechaza un GIF (imagen válida pero fuera de la lista cerrada)', () => {
     expect(() =>
-      verifyBackgroundBytes(Buffer.from('GIF89a\x01\x00\x01\x00\x00\x00\x00;', 'latin1')),
+      verifyBackgroundBytes(
+        Buffer.from('GIF89a\x01\x00\x01\x00\x00\x00\x00;', 'latin1'),
+      ),
     ).toThrow(expect.objectContaining({ status: 422 }));
   });
 

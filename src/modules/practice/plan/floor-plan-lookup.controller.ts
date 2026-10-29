@@ -9,7 +9,12 @@ import {
   Req,
   Res,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { CurrentUser, type AuthenticatedUser } from '../../../common';
 import {
@@ -46,7 +51,9 @@ export class FloorPlanLookupController {
 
   /** Estado operativo por espacio (sin geometría; el cliente lo une por `spaceId`). */
   @Get('floor-plans/:id/state')
-  @ApiOperation({ summary: 'Estado operativo del lienzo (ETag, 304, S7 con asOf)' })
+  @ApiOperation({
+    summary: 'Estado operativo del lienzo (ETag, 304, S7 con asOf)',
+  })
   async planState(
     @Param('id', ParseUUIDPipe) id: string,
     @Query() query: StateQueryDto,
@@ -54,7 +61,12 @@ export class FloorPlanLookupController {
     @CurrentUser() actor: AuthenticatedUser,
     @Res({ passthrough: true }) res: Response,
   ): Promise<unknown> {
-    const result = await this.state.state(id, query, req.headers['if-none-match'], actor);
+    const result = await this.state.state(
+      id,
+      query,
+      req.headers['if-none-match'],
+      actor,
+    );
     res.setHeader('ETag', result.etag);
     res.setHeader('Cache-Control', 'private, no-cache');
     if (result.status === 304) {
@@ -70,7 +82,9 @@ export class FloorPlanLookupController {
    */
   @Get('care-spaces/:id/plan-card')
   @Header('Cache-Control', 'private, no-store')
-  @ApiOperation({ summary: 'Tarjeta del espacio con el ocupante (solo roles autorizados)' })
+  @ApiOperation({
+    summary: 'Tarjeta del espacio con el ocupante (solo roles autorizados)',
+  })
   @ApiResponse({
     status: 200,
     description:
@@ -109,7 +123,9 @@ export class FloorPlanLookupController {
   /** Foco por área o zona: una entrada por lienzo (una unidad que cruza pisos devuelve varias). */
   @Get('sites/:siteId/plan-focus')
   @Header('Cache-Control', 'private, no-cache')
-  @ApiOperation({ summary: 'Lienzos donde está dibujado un espacio o una unidad' })
+  @ApiOperation({
+    summary: 'Lienzos donde está dibujado un espacio o una unidad',
+  })
   @ApiResponse({ status: 422, description: 'PLAN_FOCUS_PARAM_INVALID' })
   focus(
     @Param('siteId', ParseUUIDPipe) siteId: string,

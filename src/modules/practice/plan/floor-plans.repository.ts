@@ -6,7 +6,7 @@ import type {
   PlacementState,
   SpaceInfo,
 } from '../domain/plan-layout-validator';
-import type { Bbox, Pt } from '../domain/plan-geometry';
+import type { Bbox } from '../domain/plan-geometry';
 import { PRAC } from '../practice.concepts';
 import { CONCEPTS } from '../../../common';
 import { BACKGROUND_RULES } from './floor-plan.constants';
@@ -320,7 +320,9 @@ export class FloorPlansRepository {
     siteId: string,
     tenantId: string,
     includeRetired: boolean,
-  ): Promise<(PlanRow & { placed: number; unplaced: number; elements: number })[]> {
+  ): Promise<
+    (PlanRow & { placed: number; unplaced: number; elements: number })[]
+  > {
     const rows = await tx.execute<
       (RawPlan & { placed: number; unplaced: number; elements: number })[]
     >(
@@ -570,14 +572,14 @@ export class FloorPlansRepository {
         widthM: row.width_m,
         depthM: row.depth_m,
         rotationDeg: row.rotation_deg,
-        vertices: row.vertices as Pt[],
+        vertices: row.vertices,
       })),
       elements: elements.map((row) => ({
         id: row.id,
         kind: row.kind,
         rowVersion: row.row_version,
         zOrder: row.z_order,
-        vertices: row.vertices as Pt[] | null,
+        vertices: row.vertices,
         thicknessM: row.thickness_m,
         hostElementId: row.host_element_id,
         offsetM: row.offset_m,
@@ -644,7 +646,9 @@ export class FloorPlansRepository {
     tenantId: string,
     planId: string,
     spaceIds: readonly string[],
-  ): Promise<{ spaceId: string; floorPlanId: string; floorPlanName: string }[]> {
+  ): Promise<
+    { spaceId: string; floorPlanId: string; floorPlanName: string }[]
+  > {
     if (spaceIds.length === 0) return [];
     const rows = await tx.execute<
       { space_id: string; floor_plan_id: string; floor_plan_name: string }[]

@@ -86,7 +86,12 @@ describe('readImageSize', () => {
   it('un tipo que no es de esos tres, o una cabecera que no coincide, da null', () => {
     expect(readImageSize(png(10, 10), 'image/svg+xml')).toBeNull();
     expect(readImageSize(png(10, 10), 'image/jpeg')).toBeNull();
-    expect(readImageSize(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>'), 'image/png')).toBeNull();
+    expect(
+      readImageSize(
+        Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>'),
+        'image/png',
+      ),
+    ).toBeNull();
     expect(readImageSize(Buffer.alloc(4), 'image/png')).toBeNull();
   });
 

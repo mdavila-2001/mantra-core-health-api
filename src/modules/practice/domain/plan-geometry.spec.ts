@@ -59,7 +59,10 @@ describe('plan-geometry', () => {
     });
 
     it('conserva el área del rectángulo al rotar', () => {
-      expect(polygonArea(rectVertices(10, 10, 6, 3.5, 33.3))).toBeCloseTo(21, 2);
+      expect(polygonArea(rectVertices(10, 10, 6, 3.5, 33.3))).toBeCloseTo(
+        21,
+        2,
+      );
     });
   });
 
@@ -188,9 +191,13 @@ describe('plan-geometry', () => {
         ])?.code,
       ).toBe('OUT_OF_RANGE');
       expect(validatePolygon('no es una lista')?.code).toBe('VERTEX_COUNT');
-      expect(validatePolygon([[0, 0], ['a', 1], [1, 1]])?.code).toBe(
-        'NOT_FINITE',
-      );
+      expect(
+        validatePolygon([
+          [0, 0],
+          ['a', 1],
+          [1, 1],
+        ])?.code,
+      ).toBe('NOT_FINITE');
     });
   });
 
@@ -226,9 +233,9 @@ describe('plan-geometry', () => {
     });
 
     it('con tolerancia 0 la pared compartida sí cuenta como contacto', () => {
-      expect(polygonsShareAnyPoint(rect(0, 0, 4, 8.5), rect(4, 0, 4, 8.5))).toBe(
-        true,
-      );
+      expect(
+        polygonsShareAnyPoint(rect(0, 0, 4, 8.5), rect(4, 0, 4, 8.5)),
+      ).toBe(true);
     });
 
     it('un solape real se detecta', () => {
@@ -294,7 +301,9 @@ describe('plan-geometry', () => {
   describe('contención (outer @> inner)', () => {
     it('un hijo dentro del padre cabe, también si toca el borde', () => {
       expect(polygonContains(rect(0, 0, 10, 10), rect(1, 1, 3, 3))).toBe(true);
-      expect(polygonContains(rect(0, 0, 10, 10), rect(0, 0, 10, 10))).toBe(true);
+      expect(polygonContains(rect(0, 0, 10, 10), rect(0, 0, 10, 10))).toBe(
+        true,
+      );
     });
 
     it('un hijo que sobresale no cabe', () => {

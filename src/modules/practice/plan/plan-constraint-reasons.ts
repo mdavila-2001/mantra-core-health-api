@@ -62,7 +62,10 @@ export function readPlanDbViolation(error: unknown): PlanDbViolation | null {
       cause?: unknown;
       driverError?: unknown;
     };
-    if (typeof candidate.code === 'string' && /^[0-9A-Z]{5}$/.test(candidate.code)) {
+    if (
+      typeof candidate.code === 'string' &&
+      /^[0-9A-Z]{5}$/.test(candidate.code)
+    ) {
       return {
         sqlstate: candidate.code,
         constraint:
@@ -78,7 +81,10 @@ export function readPlanDbViolation(error: unknown): PlanDbViolation | null {
 }
 
 const CONSTRAINT_REASONS: Readonly<
-  Record<string, { status: HttpStatus; reason: FloorPlanReason; message: string }>
+  Record<
+    string,
+    { status: HttpStatus; reason: FloorPlanReason; message: string }
+  >
 > = {
   ex_space_placements_no_overlap: {
     status: HttpStatus.UNPROCESSABLE_ENTITY,
@@ -355,5 +361,39 @@ export function layoutVersionMismatch(
     'Otra persona modificó este plano; recargalo y volvé a aplicar tus cambios',
     { currentVersion, expectedVersion, layoutChangedAt: changedAt },
     FloorPlanReason.PLAN_VERSION_MISMATCH,
+  );
+}
+
+/** Reglas del dibujo que un `move` del árbol puede romper al confirmarse. */
+const MOVE_BREAKING_REASONS: ReadonlySet<FloorPlanReason> = new Set([
+  FloorPlanReason.PLAN_PARENT_NOT_PLACED,
+  FloorPlanReason.PLAN_CHILD_OUTSIDE_PARENT,
+  FloorPlanReason.SPACE_MOVE_BREAKS_PLAN,
+]);
+
+/**
+ * Traduce el rechazo de la base a un `move` del árbol (`POST /care-spaces/:id/move`).
+ *
+ * Mover un espacio dibujado revalida su dibujo y el de sus descendientes con
+ * los triggers diferidos del plano, así que el rechazo llega al confirmar la
+ * transacción con el vocabulario del dibujo (`PLAN_PARENT_NOT_PLACED`,
+ * `PLAN_CHILD_OUTSIDE_PARENT`). Para quien mueve en el árbol se informa con una
+ * sola regla: 409 `SPACE_MOVE_BREAKS_PLAN`, y se pide sacar el dibujo antes.
+ *
+ * @param error - Lo capturado al mover.
+ * @param spaceId - El espacio que se movió.
+ * @returns El 409 a lanzar, o `null` si no es un rechazo del dibujo.
+ */
+export function moveBreaksPlanException(
+  error: unknown,
+  spaceId: string,
+): ConflictException | null {
+  const translation = translatePlanDbError(error);
+  if (!translation || !MOVE_BREAKING_REASONS.has(translation.reason))
+    return null;
+  return new ConflictException(
+    'Mover el espacio rompería su dibujo en el plano; sacalo del plano antes de moverlo',
+    { spaceId },
+    FloorPlanReason.SPACE_MOVE_BREAKS_PLAN,
   );
 }

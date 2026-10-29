@@ -25,7 +25,9 @@ describe('readPlanDbViolation', () => {
       constraint: 'ex_space_placements_no_overlap',
     });
     expect(
-      readPlanDbViolation(Object.assign(new Error('w'), { driverError: inner })),
+      readPlanDbViolation(
+        Object.assign(new Error('w'), { driverError: inner }),
+      ),
     ).toMatchObject({ sqlstate: '23P01' });
   });
 
@@ -59,7 +61,10 @@ describe('translatePlanDbError', () => {
   });
 
   it.each([
-    ['ux_space_placements_care_space', FloorPlanReason.PLAN_SPACE_ALREADY_PLACED],
+    [
+      'ux_space_placements_care_space',
+      FloorPlanReason.PLAN_SPACE_ALREADY_PLACED,
+    ],
     ['ux_floor_plans_anchor_current', FloorPlanReason.PLAN_ANCHOR_TAKEN],
     ['ux_floor_plans_site_campus_current', FloorPlanReason.PLAN_CAMPUS_EXISTS],
     ['ux_floor_plans_site_code', FloorPlanReason.PLAN_CODE_TAKEN],
@@ -171,7 +176,9 @@ describe('planDbException', () => {
 
   it('el 404 por tenant no lleva ids', () => {
     const exception = planDbException(
-      translatePlanDbError(pgError('23503', 'x', 'fk_plan_elements_tenant_host'))!,
+      translatePlanDbError(
+        pgError('23503', 'x', 'fk_plan_elements_tenant_host'),
+      )!,
       'plan-1',
     );
     expect(exception.getStatus()).toBe(404);

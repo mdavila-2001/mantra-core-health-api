@@ -38,7 +38,8 @@ export class PlanBackgroundUrlService {
     fileVersionId: string,
     now: Date = new Date(),
   ): SignedBackgroundUrl {
-    const exp = Math.floor(now.getTime() / 1000) + BACKGROUND_RULES.signedUrlTtlSeconds;
+    const exp =
+      Math.floor(now.getTime() / 1000) + BACKGROUND_RULES.signedUrlTtlSeconds;
     const sig = this.signature(planId, fileVersionId, exp);
     return {
       url: `/floor-plans/${planId}/background/content?v=${fileVersionId}&exp=${exp}&sig=${sig}`,

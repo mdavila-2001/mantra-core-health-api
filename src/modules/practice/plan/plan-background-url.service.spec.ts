@@ -18,7 +18,9 @@ describe('PlanBackgroundUrlService', () => {
 
   it('firma una ruta de la API que no contiene el id del archivo', () => {
     const { url, expiresAt } = service.sign(PLAN, VERSION, now);
-    expect(url.startsWith(`/floor-plans/${PLAN}/background/content?`)).toBe(true);
+    expect(url.startsWith(`/floor-plans/${PLAN}/background/content?`)).toBe(
+      true,
+    );
     expect(expiresAt).toBe('2026-10-29T12:05:00.000Z');
   });
 
@@ -34,7 +36,11 @@ describe('PlanBackgroundUrlService', () => {
       service.verify('33333333-3333-4333-8333-333333333333', query, now),
     ).toThrow(expect.objectContaining({ status: 403 }));
     expect(() =>
-      service.verify(PLAN, { ...query, v: '44444444-4444-4444-8444-444444444444' }, now),
+      service.verify(
+        PLAN,
+        { ...query, v: '44444444-4444-4444-8444-444444444444' },
+        now,
+      ),
     ).toThrow(expect.objectContaining({ status: 403 }));
     expect(() =>
       service.verify(PLAN, { ...query, sig: '0'.repeat(64) }, now),

@@ -40,7 +40,13 @@ export const ifMatch = (version: number | string) => ({
 });
 
 /** Rectángulo axial dado por su esquina superior izquierda. */
-export const rect = (x: number, y: number, w: number, d: number, rotationDeg = 0) => ({
+export const rect = (
+  x: number,
+  y: number,
+  w: number,
+  d: number,
+  rotationDeg = 0,
+) => ({
   kind: 'RECT',
   centerXM: x + w / 2,
   centerYM: y + d / 2,
@@ -76,7 +82,12 @@ export async function registerOrg(
         countryConceptId: CONCEPTS.COUNTRY_BO,
         jurisdictionConceptId: PROF.JURISDICTION_SEDES_SANTA_CRUZ,
       },
-      owner: { email: org.email, password: PASSWORD, name: 'Dueña', lastName: letra },
+      owner: {
+        email: org.email,
+        password: PASSWORD,
+        name: 'Dueña',
+        lastName: letra,
+      },
     })
     .expect(201);
   org.tenantId = alta.body.tenantId;
@@ -210,7 +221,12 @@ export async function createStaffUser(
     { partial: true },
   );
   await em.flush();
-  const roleId = await ensureConcept(ctx, 'delegated_access', ROLE_KEY[roleCode], roleCode);
+  const roleId = await ensureConcept(
+    ctx,
+    'delegated_access',
+    ROLE_KEY[roleCode],
+    roleCode,
+  );
   em.create(
     OrganizationUserAssignments,
     {
@@ -280,7 +296,9 @@ export async function createPlainMember(
   await ensureTestSession(ctx.orm, userId, sid);
   return {
     userId,
-    token: ctx.app.get(TokenService).signAccessToken(userId, sid, [], [org.tenantId]),
+    token: ctx.app
+      .get(TokenService)
+      .signAccessToken(userId, sid, [], [org.tenantId]),
   };
 }
 

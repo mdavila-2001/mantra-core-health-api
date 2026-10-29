@@ -15,26 +15,23 @@ export type PlanRole = 'ENF' | 'ADM' | 'LIM' | 'MAN' | 'JQ' | 'FAC';
 
 /** Acciones del plano. */
 export type PlanAction =
-  | 'plan.view'
-  | 'plan.state'
-  | 'plan.patient'
-  | 'plan.edit'
-  | 'plan.history';
+  'plan.view' | 'plan.state' | 'plan.patient' | 'plan.edit' | 'plan.history';
 
 /**
  * Clave del concepto de la asignación delegada (`delegated_access:<CLAVE>`, que es
  * lo que se guarda en `terminology.catalog_concepts.code`) → rol del plano.
  */
-export const PLAN_ROLE_BY_ASSIGNMENT_CODE: Readonly<Record<string, PlanRole>> = {
-  'delegated_access:ASSIGN_ROLE_NURSE': 'ENF',
-  'delegated_access:ASSIGN_ROLE_NURSE_SUPERVISOR': 'ENF',
-  'delegated_access:ASSIGN_ROLE_ADMISSION': 'ADM',
-  'delegated_access:ASSIGN_ROLE_HOUSEKEEPING': 'LIM',
-  'delegated_access:ASSIGN_ROLE_HOUSEKEEPING_SUPERVISOR': 'LIM',
-  'delegated_access:ASSIGN_ROLE_MAINTENANCE': 'MAN',
-  'delegated_access:ASSIGN_ROLE_OR_MANAGER': 'JQ',
-  'delegated_access:ASSIGN_ROLE_BILLING': 'FAC',
-};
+export const PLAN_ROLE_BY_ASSIGNMENT_CODE: Readonly<Record<string, PlanRole>> =
+  {
+    'delegated_access:ASSIGN_ROLE_NURSE': 'ENF',
+    'delegated_access:ASSIGN_ROLE_NURSE_SUPERVISOR': 'ENF',
+    'delegated_access:ASSIGN_ROLE_ADMISSION': 'ADM',
+    'delegated_access:ASSIGN_ROLE_HOUSEKEEPING': 'LIM',
+    'delegated_access:ASSIGN_ROLE_HOUSEKEEPING_SUPERVISOR': 'LIM',
+    'delegated_access:ASSIGN_ROLE_MAINTENANCE': 'MAN',
+    'delegated_access:ASSIGN_ROLE_OR_MANAGER': 'JQ',
+    'delegated_access:ASSIGN_ROLE_BILLING': 'FAC',
+  };
 
 /** Roles que ven el estado superpuesto (Facturación no: F2 le da «—»). */
 export const STATE_ROLES: ReadonlySet<PlanRole> = new Set<PlanRole>([

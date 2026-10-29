@@ -32,7 +32,8 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
   const ids: Record<string, string> = {};
   let plan: any; // lienzo del piso (ancla: PISO)
 
-  const filas = (text: string, params: unknown[] = []) => sql<any>(ctx, text, params);
+  const filas = (text: string, params: unknown[] = []) =>
+    sql<any>(ctx, text, params);
 
   const mkSpace = (
     code: string,
@@ -50,8 +51,11 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
       ...extra,
     });
 
-  const layout = (token = orgA.token, tenant = orgA.tenantId, planId = plan.id) =>
-    http().get(`/floor-plans/${planId}/layout`).set(como(token, tenant));
+  const layout = (
+    token = orgA.token,
+    tenant = orgA.tenantId,
+    planId = plan.id,
+  ) => http().get(`/floor-plans/${planId}/layout`).set(como(token, tenant));
 
   const patchLayout = (
     body: Record<string, unknown>,
@@ -66,8 +70,12 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
       .send(body);
 
   const versionOf = async (planId = plan.id): Promise<number> =>
-    (await filas('select layout_version from practice.floor_plans where id = ?', [planId]))[0]
-      .layout_version;
+    (
+      await filas(
+        'select layout_version from practice.floor_plans where id = ?',
+        [planId],
+      )
+    )[0].layout_version;
 
   const count = async (table: string, planId = plan.id): Promise<number> =>
     (
@@ -83,11 +91,23 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
     orgB = await registerOrg(ctx, 'B', sufijo);
 
     ids.edif = (await mkSpace('EDIF', 'BUILDING', 'BUILDING_GENERIC')).id;
-    ids.piso = (await mkSpace('PISO-1', 'LEVEL', 'LEVEL_GENERIC', ids.edif, { floorNumber: 1 })).id;
+    ids.piso = (
+      await mkSpace('PISO-1', 'LEVEL', 'LEVEL_GENERIC', ids.edif, {
+        floorNumber: 1,
+      })
+    ).id;
     ids.sala = (await mkSpace('SALA-A', 'WARD', 'WARD_GENERIC', ids.piso)).id;
-    ids.h101 = (await mkSpace('HAB-101', 'ROOM', 'INPATIENT_ROOM', ids.sala, { areaM2: 42.5 })).id;
-    ids.h102 = (await mkSpace('HAB-102', 'ROOM', 'INPATIENT_ROOM', ids.sala)).id;
-    ids.h103 = (await mkSpace('HAB-103', 'ROOM', 'INPATIENT_ROOM', ids.sala)).id;
+    ids.h101 = (
+      await mkSpace('HAB-101', 'ROOM', 'INPATIENT_ROOM', ids.sala, {
+        areaM2: 42.5,
+      })
+    ).id;
+    ids.h102 = (
+      await mkSpace('HAB-102', 'ROOM', 'INPATIENT_ROOM', ids.sala)
+    ).id;
+    ids.h103 = (
+      await mkSpace('HAB-103', 'ROOM', 'INPATIENT_ROOM', ids.sala)
+    ).id;
     for (const [key, room] of [
       ['c101a', ids.h101],
       ['c101b', ids.h101],
@@ -100,7 +120,9 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
         })
       ).id;
     }
-    ids.cons = (await mkSpace('CONS-1', 'ROOM', 'CONSULTING_ROOM', ids.piso)).id;
+    ids.cons = (
+      await mkSpace('CONS-1', 'ROOM', 'CONSULTING_ROOM', ids.piso)
+    ).id;
     ids.bOtro = (await mkSpace('B-EDIF-2', 'BUILDING', 'BUILDING_GENERIC')).id;
   });
 
@@ -121,7 +143,10 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
         maxItemsPerReplace: 5000,
         maxPageSize: 2000,
       });
-      expect(res.body.defaults).toMatchObject({ gridSizeM: 0.5, contactToleranceM: 0.01 });
+      expect(res.body.defaults).toMatchObject({
+        gridSizeM: 0.5,
+        contactToleranceM: 0.01,
+      });
       expect(res.body.elementKinds.map((k: any) => k.code)).toEqual(
         expect.arrayContaining(['WALL', 'DOOR', 'STAIRS', 'ANNOTATION']),
       );
@@ -176,7 +201,10 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
         'select tenant_id, practice_site_id, layout_version from practice.floor_plans where id = ?',
         [plan.id],
       );
-      expect(fila).toMatchObject({ tenant_id: orgA.tenantId, practice_site_id: orgA.siteId });
+      expect(fila).toMatchObject({
+        tenant_id: orgA.tenantId,
+        practice_site_id: orgA.siteId,
+      });
       const hist = await filas(
         'select revision_no, tenant_id from audit.floor_plans_history where floor_plan_id = ?',
         [plan.id],
@@ -200,13 +228,25 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
       const repetido = await http()
         .post(`/sites/${orgA.siteId}/floor-plans`)
         .set(comoDueno(orgA))
-        .send({ code: 'PLANO-P1', name: 'Otro', anchorSpaceId: ids.edif, widthM: 10, heightM: 10 })
+        .send({
+          code: 'PLANO-P1',
+          name: 'Otro',
+          anchorSpaceId: ids.edif,
+          widthM: 10,
+          heightM: 10,
+        })
         .expect(409);
       expect(repetido.body.reason).toBe('PLAN_CODE_TAKEN');
       const anclaTomada = await http()
         .post(`/sites/${orgA.siteId}/floor-plans`)
         .set(comoDueno(orgA))
-        .send({ code: 'PLANO-P1B', name: 'Otro', anchorSpaceId: ids.piso, widthM: 10, heightM: 10 })
+        .send({
+          code: 'PLANO-P1B',
+          name: 'Otro',
+          anchorSpaceId: ids.piso,
+          widthM: 10,
+          heightM: 10,
+        })
         .expect(409);
       expect(anclaTomada.body.reason).toBe('PLAN_ANCHOR_TAKEN');
       await http()
@@ -226,13 +266,25 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
       const forma = await http()
         .post(`/sites/${orgA.siteId}/floor-plans`)
         .set(comoDueno(orgA))
-        .send({ code: 'X1', name: 'x', anchorSpaceId: ids.h101, widthM: 10, heightM: 10 })
+        .send({
+          code: 'X1',
+          name: 'x',
+          anchorSpaceId: ids.h101,
+          widthM: 10,
+          heightM: 10,
+        })
         .expect(422);
       expect(forma.body.reason).toBe('PLAN_ANCHOR_FORM_INVALID');
       const tamano = await http()
         .post(`/sites/${orgA.siteId}/floor-plans`)
         .set(comoDueno(orgA))
-        .send({ code: 'X2', name: 'x', anchorSpaceId: ids.bOtro, widthM: 0, heightM: 99999 })
+        .send({
+          code: 'X2',
+          name: 'x',
+          anchorSpaceId: ids.bOtro,
+          widthM: 0,
+          heightM: 99999,
+        })
         .expect(422);
       expect(tamano.body.reason).toBe('PLAN_CANVAS_INVALID');
       expect(tamano.body.details.errors.map((e: any) => e.property)).toEqual(
@@ -253,7 +305,10 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
         anchor: { code: 'PISO-1' },
       });
       expect(resumen.counts.unplaced).toBeGreaterThan(0);
-      const detalle = await http().get(`/floor-plans/${plan.id}`).set(comoDueno(orgA)).expect(200);
+      const detalle = await http()
+        .get(`/floor-plans/${plan.id}`)
+        .set(comoDueno(orgA))
+        .expect(200);
       expect(detalle.body.viewer.canEditPlan).toBe(true);
     });
 
@@ -264,7 +319,10 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
         .set(ifMatch(plan.rowVersion))
         .send({ name: 'Piso 1 · Internación' })
         .expect(200);
-      expect(ok.body).toMatchObject({ name: 'Piso 1 · Internación', rowVersion: 2 });
+      expect(ok.body).toMatchObject({
+        name: 'Piso 1 · Internación',
+        rowVersion: 2,
+      });
       plan = ok.body;
       const viejo = await http()
         .patch(`/floor-plans/${plan.id}`)
@@ -273,8 +331,15 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
         .send({ name: 'Pisada' })
         .expect(412);
       expect(viejo.body.reason).toBe('ROW_VERSION_MISMATCH');
-      await http().patch(`/floor-plans/${plan.id}`).set(comoDueno(orgA)).send({ name: 'x' }).expect(428);
-      const [fila] = await filas('select name from practice.floor_plans where id = ?', [plan.id]);
+      await http()
+        .patch(`/floor-plans/${plan.id}`)
+        .set(comoDueno(orgA))
+        .send({ name: 'x' })
+        .expect(428);
+      const [fila] = await filas(
+        'select name from practice.floor_plans where id = ?',
+        [plan.id],
+      );
       expect(fila.name).toBe('Piso 1 · Internación');
     });
   });
@@ -338,7 +403,13 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
       ).expect(200);
       expect(res.body).toMatchObject({
         layoutVersion: 2,
-        applied: { placed: 4, moved: 0, removed: 0, elementsUpserted: 2, elementsRemoved: 0 },
+        applied: {
+          placed: 4,
+          moved: 0,
+          removed: 0,
+          elementsUpserted: 2,
+          elementsRemoved: 0,
+        },
         warnings: [
           // HAB-101: declarada 42,5 m² frente a 42,5 dibujados: sin umbral configurado no hay veredicto.
         ],
@@ -385,7 +456,10 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
         'select area_calc_m2::float8 as area, sibling_group_id from practice.space_placements where care_space_id = ?',
         [ids.h101],
       );
-      expect(derivada).toMatchObject({ area: 42.5, sibling_group_id: ids.sala });
+      expect(derivada).toMatchObject({
+        area: 42.5,
+        sibling_group_id: ids.sala,
+      });
     });
 
     it('recargar: el layout devuelve lo guardado, con identidad, ruta y datos de la tarjeta (detail=full)', async () => {
@@ -393,9 +467,20 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
       expect(res.body.layoutVersion).toBe(2);
       expect(res.body.page.total).toBe(4);
       // Orden del contrato: (zOrder, id). Con zOrder iguales desempata el id, no el código.
-      const claves = res.body.spaces.map((s: any) => [s.zOrder, s.placementId] as [number, string]);
-      expect(claves).toEqual([...claves].sort((a, b) => a[0] - b[0] || (a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0)));
-      expect(res.body.spaces.map((s: any) => s.code).sort()).toEqual(['C101A', 'HAB-101', 'HAB-102', 'SALA-A']);
+      const claves = res.body.spaces.map(
+        (s: any) => [s.zOrder, s.placementId] as [number, string],
+      );
+      expect(claves).toEqual(
+        [...claves].sort(
+          (a, b) => a[0] - b[0] || (a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0),
+        ),
+      );
+      expect(res.body.spaces.map((s: any) => s.code).sort()).toEqual([
+        'C101A',
+        'HAB-101',
+        'HAB-102',
+        'SALA-A',
+      ]);
       const h101 = res.body.spaces.find((s: any) => s.code === 'HAB-101');
       expect(h101).toMatchObject({
         spaceId: ids.h101,
@@ -404,7 +489,14 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
         form: { code: 'LOC_FORM_ROOM' },
         function: { code: 'SPACE_FN_INPATIENT_ROOM' },
         areaCalcM2: 42.5,
-        geometry: { kind: 'RECT', centerXM: 4.5, centerYM: 6.25, widthM: 5, depthM: 8.5, rotationDeg: 0 },
+        geometry: {
+          kind: 'RECT',
+          centerXM: 4.5,
+          centerYM: 6.25,
+          widthM: 5,
+          depthM: 8.5,
+          rotationDeg: 0,
+        },
         bbox: [2, 2, 7, 10.5],
         card: {
           areaDeclaredM2: 42.5,
@@ -429,7 +521,11 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
     it('solape de hermanos: 422 PLAN_LAYOUT_INVALID con la figura, su vecino y los m²; la base no cambia', async () => {
       const antes = await versionOf();
       const res = await patchLayout(
-        { upsert: { placements: [{ spaceId: ids.h102, geometry: rect(6, 2, 5, 8.5) }] } },
+        {
+          upsert: {
+            placements: [{ spaceId: ids.h102, geometry: rect(6, 2, 5, 8.5) }],
+          },
+        },
         antes,
       ).expect(422);
       expect(res.body.reason).toBe('PLAN_LAYOUT_INVALID');
@@ -439,7 +535,9 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
         id: ids.h102,
         code: 'PLAN_SIBLING_OVERLAP',
         field: 'geometry',
-        conflictsWith: [{ kind: 'SPACE', id: ids.h101, code: 'HAB-101', overlapAreaM2: 8.5 }],
+        conflictsWith: [
+          { kind: 'SPACE', id: ids.h101, code: 'HAB-101', overlapAreaM2: 8.5 },
+        ],
         nextAction: { label: expect.any(String) },
       });
       expect(res.body.details.requestId).toBeTruthy();
@@ -454,17 +552,29 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
     it('pared compartida (tocarse) guarda; hermanos fuera del padre no', async () => {
       const antes = await versionOf();
       await patchLayout(
-        { upsert: { placements: [{ spaceId: ids.h103, geometry: rect(12, 2, 5, 8.5) }] } },
+        {
+          upsert: {
+            placements: [{ spaceId: ids.h103, geometry: rect(12, 2, 5, 8.5) }],
+          },
+        },
         antes,
       ).expect(200);
       const fuera = await patchLayout(
-        { upsert: { placements: [{ spaceId: ids.cons, geometry: rect(30, 12, 4, 4) }] } },
+        {
+          upsert: {
+            placements: [{ spaceId: ids.cons, geometry: rect(30, 12, 4, 4) }],
+          },
+        },
         antes + 1,
       ).expect(200);
       expect(fuera.body.applied.placed).toBe(1);
       // HAB-103 se corre fuera de SALA-A (que llega a x=22): no cabe.
       const cae = await patchLayout(
-        { upsert: { placements: [{ spaceId: ids.h103, geometry: rect(20, 2, 5, 8.5) }] } },
+        {
+          upsert: {
+            placements: [{ spaceId: ids.h103, geometry: rect(20, 2, 5, 8.5) }],
+          },
+        },
         antes + 2,
       ).expect(422);
       expect(cae.body.details.errors[0]).toMatchObject({
@@ -477,7 +587,11 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
     it('contención: sacar una cama de su habitación falla; mover la habitación con sus camas en el mismo guardado funciona', async () => {
       const v = await versionOf();
       const afuera = await patchLayout(
-        { upsert: { placements: [{ spaceId: ids.c101a, geometry: rect(9, 3, 1, 2) }] } },
+        {
+          upsert: {
+            placements: [{ spaceId: ids.c101a, geometry: rect(9, 3, 1, 2) }],
+          },
+        },
         v,
       ).expect(422);
       expect(afuera.body.details.errors[0]).toMatchObject({
@@ -486,11 +600,18 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
       });
       // La habitación sola no puede irse sin su cama...
       const sola = await patchLayout(
-        { upsert: { placements: [{ spaceId: ids.h101, geometry: rect(15, 2, 5, 8.5) }] } },
+        {
+          upsert: {
+            placements: [{ spaceId: ids.h101, geometry: rect(15, 2, 5, 8.5) }],
+          },
+        },
         v,
       ).expect(422);
       expect(sola.body.details.errors.map((e: any) => e.code)).toEqual(
-        expect.arrayContaining(['PLAN_SIBLING_OVERLAP', 'PLAN_CHILD_OUTSIDE_PARENT']),
+        expect.arrayContaining([
+          'PLAN_SIBLING_OVERLAP',
+          'PLAN_CHILD_OUTSIDE_PARENT',
+        ]),
       );
       // ...pero sí junto con ella (HAB-103 ocupa 12..17: se mueve 103 también).
       const juntas = await patchLayout(
@@ -537,18 +658,29 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
     it('412: otra persona guardó antes; el cuerpo trae la versión vigente', async () => {
       const v = await versionOf();
       const res = await patchLayout(
-        { upsert: { placements: [{ spaceId: ids.cons, geometry: rect(30, 12, 5, 5) }] } },
+        {
+          upsert: {
+            placements: [{ spaceId: ids.cons, geometry: rect(30, 12, 5, 5) }],
+          },
+        },
         v - 1,
       ).expect(412);
       expect(res.body.reason).toBe('PLAN_VERSION_MISMATCH');
-      expect(res.body.details).toMatchObject({ currentVersion: v, expectedVersion: v - 1 });
+      expect(res.body.details).toMatchObject({
+        currentVersion: v,
+        expectedVersion: v - 1,
+      });
       // También acepta el ETag completo del layout como If-Match.
       const etag = (await layout().expect(200)).headers.etag as string;
       await http()
         .patch(`/floor-plans/${plan.id}/layout`)
         .set(comoDueno(orgA))
         .set('If-Match', etag)
-        .send({ upsert: { placements: [{ spaceId: ids.cons, geometry: rect(30, 12, 5, 5) }] } })
+        .send({
+          upsert: {
+            placements: [{ spaceId: ids.cons, geometry: rect(30, 12, 5, 5) }],
+          },
+        })
         .expect(200);
       await http()
         .patch(`/floor-plans/${plan.id}/layout`)
@@ -565,7 +697,16 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
         [ids.h101],
       );
       const ok = await patchLayout(
-        { upsert: { placements: [{ spaceId: ids.c101b, geometry: rect(caja.x + 2, caja.y + 5, 1, 2) }] } },
+        {
+          upsert: {
+            placements: [
+              {
+                spaceId: ids.c101b,
+                geometry: rect(caja.x + 2, caja.y + 5, 1, 2),
+              },
+            ],
+          },
+        },
         v,
         '?dryRun=true',
       ).expect(200);
@@ -573,7 +714,11 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
       expect(await versionOf()).toBe(v);
       expect(await count('space_placements')).toBe(filasAntes);
       const mal = await patchLayout(
-        { upsert: { placements: [{ spaceId: ids.c101b, geometry: rect(0, 0, 1, 2) }] } },
+        {
+          upsert: {
+            placements: [{ spaceId: ids.c101b, geometry: rect(0, 0, 1, 2) }],
+          },
+        },
         v,
         '?dryRun=true',
       ).expect(422);
@@ -584,13 +729,23 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
       const otro = await http()
         .post(`/sites/${orgA.siteId}/floor-plans`)
         .set(comoDueno(orgA))
-        .send({ code: 'PLANO-EDIF', name: 'Edificio', anchorSpaceId: ids.edif, widthM: 60, heightM: 30 })
+        .send({
+          code: 'PLANO-EDIF',
+          name: 'Edificio',
+          anchorSpaceId: ids.edif,
+          widthM: 60,
+          heightM: 30,
+        })
         .expect(201);
       const res = await http()
         .patch(`/floor-plans/${otro.body.id}/layout`)
         .set(comoDueno(orgA))
         .set(ifMatch(1))
-        .send({ upsert: { placements: [{ spaceId: ids.h101, geometry: rect(2, 2, 5, 5) }] } })
+        .send({
+          upsert: {
+            placements: [{ spaceId: ids.h101, geometry: rect(2, 2, 5, 5) }],
+          },
+        })
         .expect(409);
       expect(res.body.reason).toBe('PLAN_SPACE_ALREADY_PLACED');
       expect(res.body.details.conflicts[0]).toMatchObject({
@@ -625,7 +780,10 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
         code: 'PLAN_OPENING_OUTSIDE_WALL',
         field: 'size',
       });
-      const quitar = await patchLayout({ remove: { elementIds: [muro.id] } }, v).expect(200);
+      const quitar = await patchLayout(
+        { remove: { elementIds: [muro.id] } },
+        v,
+      ).expect(200);
       expect(quitar.body.applied.elementsRemoved).toBe(2);
       const [restos] = await filas(
         'select count(*)::int as n from practice.plan_elements where id = any(?::uuid[])',
@@ -643,13 +801,19 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
 
     it('quitar una habitación con camas dibujadas pide cascade; con cascade quita también las camas', async () => {
       const v = await versionOf();
-      const sin = await patchLayout({ remove: { spaceIds: [ids.h101] } }, v).expect(422);
+      const sin = await patchLayout(
+        { remove: { spaceIds: [ids.h101] } },
+        v,
+      ).expect(422);
       expect(sin.body.details.errors[0]).toMatchObject({
         id: ids.h101,
         code: 'PLAN_HAS_PLACED_CHILDREN',
         conflictsWith: [{ id: ids.c101a }],
       });
-      const con = await patchLayout({ remove: { spaceIds: [ids.h101], cascade: true } }, v).expect(200);
+      const con = await patchLayout(
+        { remove: { spaceIds: [ids.h101], cascade: true } },
+        v,
+      ).expect(200);
       expect(con.body.applied.removed).toBe(2);
       const [restos] = await filas(
         'select count(*)::int as n from practice.space_placements where care_space_id = any(?::uuid[])',
@@ -657,8 +821,14 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
       );
       expect(restos.n).toBe(0);
       // Sacar del plano no borra el espacio del árbol (INV-PL-09).
-      const [espacio] = await filas('select code, parent_space_id from practice.care_spaces where id = ?', [ids.h101]);
-      expect(espacio).toMatchObject({ code: 'HAB-101', parent_space_id: ids.sala });
+      const [espacio] = await filas(
+        'select code, parent_space_id from practice.care_spaces where id = ?',
+        [ids.h101],
+      );
+      expect(espacio).toMatchObject({
+        code: 'HAB-101',
+        parent_space_id: ids.sala,
+      });
     });
 
     it('PUT reemplaza todo: exige confirmRemoval si quita algo; 413 con demasiados ítems', async () => {
@@ -667,7 +837,10 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
         .put(`/floor-plans/${plan.id}/layout`)
         .set(comoDueno(orgA))
         .set(ifMatch(v))
-        .send({ placements: [{ spaceId: ids.sala, geometry: rect(2, 2, 20, 8.5) }], elements: [] })
+        .send({
+          placements: [{ spaceId: ids.sala, geometry: rect(2, 2, 20, 8.5) }],
+          elements: [],
+        })
         .expect(422);
       expect(sin.body.reason).toBe('PLAN_REMOVAL_NOT_CONFIRMED');
       expect(sin.body.details.wouldRemove.spaces).toBeGreaterThan(0);
@@ -685,7 +858,11 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
       expect(await count('space_placements')).toBe(1);
 
       const demasiados = await patchLayout(
-        { remove: { elementIds: Array.from({ length: 501 }, () => randomUUID()) } },
+        {
+          remove: {
+            elementIds: Array.from({ length: 501 }, () => randomUUID()),
+          },
+        },
         await versionOf(),
       ).expect(413);
       expect(demasiados.body.reason).toBe('PLAN_TOO_MANY_ITEMS');
@@ -707,34 +884,61 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
         },
         v,
       ).expect(200);
-      const p1 = await layout().query({ limit: 2, include: 'spaces' }).expect(200);
+      const p1 = await layout()
+        .query({ limit: 2, include: 'spaces' })
+        .expect(200);
       expect(p1.body.spaces).toHaveLength(2);
       expect(p1.body.page.total).toBeGreaterThanOrEqual(5);
       expect(p1.body.page.nextCursor).toBeTruthy();
       const p2 = await layout()
         .query({ limit: 2, include: 'spaces', cursor: p1.body.page.nextCursor })
         .expect(200);
-      const vistos = [...p1.body.spaces, ...p2.body.spaces].map((s: any) => s.spaceId);
+      const vistos = [...p1.body.spaces, ...p2.body.spaces].map(
+        (s: any) => s.spaceId,
+      );
       expect(new Set(vistos).size).toBe(4);
       expect(p2.body.elements).toEqual([]);
       // Ventana: sólo lo que toca x 2..7.
-      const ventana = await layout().query({ bbox: '2,2,6,6', include: 'spaces' }).expect(200);
-      expect(ventana.body.spaces.map((s: any) => s.code).sort()).toEqual(['C101A', 'HAB-101', 'SALA-A']);
+      const ventana = await layout()
+        .query({ bbox: '2,2,6,6', include: 'spaces' })
+        .expect(200);
+      expect(ventana.body.spaces.map((s: any) => s.code).sort()).toEqual([
+        'C101A',
+        'HAB-101',
+        'SALA-A',
+      ]);
       // Foco: el subárbol de HAB-101.
-      const filtro = await layout().query({ focusSpaceId: ids.h101, unitMode: 'filter' }).expect(200);
-      expect(filtro.body.spaces.map((s: any) => s.code).sort()).toEqual(['C101A', 'HAB-101']);
+      const filtro = await layout()
+        .query({ focusSpaceId: ids.h101, unitMode: 'filter' })
+        .expect(200);
+      expect(filtro.body.spaces.map((s: any) => s.code).sort()).toEqual([
+        'C101A',
+        'HAB-101',
+      ]);
       expect(filtro.body.focus).toMatchObject({ bbox: [2, 2, 7, 10.5] });
-      expect(filtro.body.focus.spaceIds.sort()).toEqual([ids.c101a, ids.h101].sort());
-      const bandera = await layout().query({ focusSpaceId: ids.h101, unitMode: 'flag' }).expect(200);
+      expect(filtro.body.focus.spaceIds.sort()).toEqual(
+        [ids.c101a, ids.h101].sort(),
+      );
+      const bandera = await layout()
+        .query({ focusSpaceId: ids.h101, unitMode: 'flag' })
+        .expect(200);
       expect(bandera.body.spaces.length).toBeGreaterThan(2);
       expect(
-        bandera.body.spaces.filter((s: any) => s.inFocus).map((s: any) => s.code).sort(),
+        bandera.body.spaces
+          .filter((s: any) => s.inFocus)
+          .map((s: any) => s.code)
+          .sort(),
       ).toEqual(['C101A', 'HAB-101']);
-      await layout().query({ focusSpaceId: ids.h101, unitId: randomUUID() }).expect(422);
+      await layout()
+        .query({ focusSpaceId: ids.h101, unitId: randomUUID() })
+        .expect(422);
     });
 
     it('un lienzo clausurado no admite dibujo (409 PLAN_RETIRED); reabrirlo lo permite', async () => {
-      const [{ row_version }] = await filas('select row_version from practice.floor_plans where id = ?', [plan.id]);
+      const [{ row_version }] = await filas(
+        'select row_version from practice.floor_plans where id = ?',
+        [plan.id],
+      );
       const cerrado = await http()
         .post(`/floor-plans/${plan.id}/lifecycle`)
         .set(comoDueno(orgA))
@@ -743,7 +947,10 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
         .expect(200);
       expect(cerrado.body.retired).toBe(true);
       const v = await versionOf();
-      const res = await patchLayout({ remove: { spaceIds: [ids.c101a] } }, v).expect(409);
+      const res = await patchLayout(
+        { remove: { spaceIds: [ids.c101a] } },
+        v,
+      ).expect(409);
       expect(res.body.reason).toBe('PLAN_RETIRED');
       await http()
         .post(`/floor-plans/${plan.id}/lifecycle`)
@@ -763,7 +970,51 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
           where aggregate_id = ? and event_type = 'practice.floor_plan.lifecycle_changed' order by occurred_at`,
         [plan.id],
       );
-      expect(eventos.map((e: any) => e.action)).toEqual(['retire', 'reactivate']);
+      expect(eventos.map((e: any) => e.action)).toEqual([
+        'retire',
+        'reactivate',
+      ]);
+    });
+
+    it('mover en el árbol un espacio dibujado bajo un padre que no está dibujado: 409 SPACE_MOVE_BREAKS_PLAN y nada cambia', async () => {
+      const salaB = await mkSpace('SALA-B', 'WARD', 'WARD_GENERIC', ids.piso);
+      const [antes] = await filas(
+        `select cs.row_version, cs.parent_space_id,
+                (select count(*)::int from practice.space_placements sp where sp.care_space_id = cs.id) as dibujado
+           from practice.care_spaces cs where cs.id = ?`,
+        [ids.h101],
+      );
+      expect(antes.dibujado).toBe(1);
+      const res = await http()
+        .post(`/care-spaces/${ids.h101}/move`)
+        .set(comoDueno(orgA))
+        .set(ifMatch(antes.row_version))
+        .send({ parentSpaceId: salaB.id })
+        .expect(409);
+      expect(res.body.reason).toBe('SPACE_MOVE_BREAKS_PLAN');
+      expect(res.body.details).toMatchObject({ spaceId: ids.h101 });
+      const [despues] = await filas(
+        'select row_version, parent_space_id from practice.care_spaces where id = ?',
+        [ids.h101],
+      );
+      expect(despues).toEqual({
+        row_version: antes.row_version,
+        parent_space_id: ids.sala,
+      });
+
+      // Control: un espacio que no está dibujado se mueve sin que el plano intervenga.
+      const libre = await mkSpace(
+        'HAB-LIBRE',
+        'ROOM',
+        'INPATIENT_ROOM',
+        ids.sala,
+      );
+      await http()
+        .post(`/care-spaces/${libre.id}/move`)
+        .set(comoDueno(orgA))
+        .set(ifMatch(libre.rowVersion))
+        .send({ parentSpaceId: salaB.id })
+        .expect(200);
     });
   });
 
@@ -821,24 +1072,53 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
         .set(comoDueno(orgA))
         .send({ clinicalUnitId: unidad.id, roleCode: 'OWNER' })
         .expect(201);
-      enf = await createStaffUser(ctx, orgA, 'DA_ASSIGN_NURSE', { kind: 'UNIT', unitId: unidad.id }, 'enf');
+      enf = await createStaffUser(
+        ctx,
+        orgA,
+        'DA_ASSIGN_NURSE',
+        { kind: 'UNIT', unitId: unidad.id },
+        'enf',
+      );
       miembro = await createPlainMember(ctx, orgA, 'lector2');
     });
 
     it('Enfermería con alcance de unidad ve la identidad de su unidad y sólo la silueta del resto (fail-closed)', async () => {
       const res = await layout(enf.token).query({ detail: 'full' }).expect(200);
-      const porId = new Map<string, any>(res.body.spaces.map((s: any) => [s.spaceId, s]));
-      expect(porId.get(ids.h102)).toMatchObject({ inScope: true, code: 'HAB-102' });
+      const porId = new Map<string, any>(
+        res.body.spaces.map((s: any) => [s.spaceId, s]),
+      );
+      expect(porId.get(ids.h102)).toMatchObject({
+        inScope: true,
+        code: 'HAB-102',
+      });
       const ajena = porId.get(ids.h101);
       expect(ajena.inScope).toBe(false);
       expect(ajena.geometry).toBeTruthy();
-      for (const campo of ['code', 'name', 'parentId', 'form', 'function', 'card']) {
+      for (const campo of [
+        'code',
+        'name',
+        'parentId',
+        'form',
+        'function',
+        'card',
+      ]) {
         expect(ajena).not.toHaveProperty(campo);
       }
-      expect(res.body.viewer).toMatchObject({ canEditPlan: false, canSeeState: true, scope: 'UNITS', unitIds: [unidad.id] });
+      expect(res.body.viewer).toMatchObject({
+        canEditPlan: false,
+        canSeeState: true,
+        scope: 'UNITS',
+        unitIds: [unidad.id],
+      });
       expect(porId.get(ids.sala).inScope).toBe(false);
-      await http().get(`/care-spaces/${ids.h101}/plan-location`).set(como(enf.token, orgA.tenantId)).expect(404);
-      await http().get(`/care-spaces/${ids.h102}/plan-location`).set(como(enf.token, orgA.tenantId)).expect(200);
+      await http()
+        .get(`/care-spaces/${ids.h101}/plan-location`)
+        .set(como(enf.token, orgA.tenantId))
+        .expect(404);
+      await http()
+        .get(`/care-spaces/${ids.h102}/plan-location`)
+        .set(como(enf.token, orgA.tenantId))
+        .expect(200);
     });
 
     it('una puerta que une un local propio con uno ajeno no revela el ajeno', async () => {
@@ -855,7 +1135,17 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
             elements: [
               ...(muro
                 ? []
-                : [{ id: wall, kind: 'WALL', vertices: [[2, 2], [22, 2]], thicknessM: 0.15 }]),
+                : [
+                    {
+                      id: wall,
+                      kind: 'WALL',
+                      vertices: [
+                        [2, 2],
+                        [22, 2],
+                      ],
+                      thicknessM: 0.15,
+                    },
+                  ]),
               {
                 id: puertaId,
                 kind: 'DOOR',
@@ -870,9 +1160,16 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
         },
         v,
       ).expect(200);
-      const dueno = (await layout().expect(200)).body.elements.find((e: any) => e.id === puertaId);
-      expect(dueno).toMatchObject({ connectsSpaceAId: ids.h102, connectsSpaceBId: ids.h101 });
-      const vista = (await layout(enf.token).expect(200)).body.elements.find((e: any) => e.id === puertaId);
+      const dueno = (await layout().expect(200)).body.elements.find(
+        (e: any) => e.id === puertaId,
+      );
+      expect(dueno).toMatchObject({
+        connectsSpaceAId: ids.h102,
+        connectsSpaceBId: ids.h101,
+      });
+      const vista = (await layout(enf.token).expect(200)).body.elements.find(
+        (e: any) => e.id === puertaId,
+      );
       expect(vista.connectsSpaceAId).toBe(ids.h102);
       expect(vista).not.toHaveProperty('connectsSpaceBId');
     });
@@ -902,11 +1199,20 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
           where not exists (select 1 from practice.practice_settings where practice_id = ?::uuid and setting_key = 'infra.plan.area_tolerance_pct')`,
         [orgA.practiceId, orgA.practiceId],
       );
-      await filas('update practice.care_spaces set area_m2 = 30 where id = any(?::uuid[])', [`{${ids.h101},${ids.h102}}`]);
-      const completa = await http().get(`/floor-plans/${plan.id}/validation`).set(comoDueno(orgA)).expect(200);
+      await filas(
+        'update practice.care_spaces set area_m2 = 30 where id = any(?::uuid[])',
+        [`{${ids.h101},${ids.h102}}`],
+      );
+      const completa = await http()
+        .get(`/floor-plans/${plan.id}/validation`)
+        .set(comoDueno(orgA))
+        .expect(200);
       const sujetos = completa.body.issues.map((i: any) => i.subjectId);
       expect(sujetos).toEqual(expect.arrayContaining([ids.h101, ids.h102]));
-      const mia = await http().get(`/floor-plans/${plan.id}/validation`).set(como(enf.token, orgA.tenantId)).expect(200);
+      const mia = await http()
+        .get(`/floor-plans/${plan.id}/validation`)
+        .set(como(enf.token, orgA.tenantId))
+        .expect(200);
       expect(mia.body.issues.map((i: any) => i.subjectId)).toEqual([ids.h102]);
       expect(JSON.stringify(mia.body)).not.toContain(ids.h101);
 
@@ -915,8 +1221,13 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
         .set(como(enf.token, orgA.tenantId))
         .expect(200);
       expect(busqueda.body.map((h: any) => h.code)).toEqual(['HAB-102']);
-      const todo = await http().get(`/sites/${orgA.siteId}/plan-search?q=HAB`).set(comoDueno(orgA)).expect(200);
-      expect(todo.body.map((h: any) => h.code)).toEqual(expect.arrayContaining(['HAB-101', 'HAB-102', 'HAB-103']));
+      const todo = await http()
+        .get(`/sites/${orgA.siteId}/plan-search?q=HAB`)
+        .set(comoDueno(orgA))
+        .expect(200);
+      expect(todo.body.map((h: any) => h.code)).toEqual(
+        expect.arrayContaining(['HAB-101', 'HAB-102', 'HAB-103']),
+      );
       // Foco por unidad: un actor con alcance no obtiene espacios ajenos aunque pida el árbol entero.
       const foco = await http()
         .get(`/sites/${orgA.siteId}/plan-focus?spaceId=${ids.sala}`)
@@ -946,36 +1257,79 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
 
   // ---------------------------------------------------- otro tenant: 404 en todo
   describe('fail-closed por tenant: toda ruta responde 404 a una organización ajena', () => {
-    const unElemento = async () => (await layout().expect(200)).body.elements[0]?.id ?? randomUUID();
+    const unElemento = async () =>
+      (await layout().expect(200)).body.elements[0]?.id ?? randomUUID();
     const unaUbicacion = async () =>
-      (await filas('select id from practice.space_placements where floor_plan_id = ? limit 1', [plan.id]))[0].id;
+      (
+        await filas(
+          'select id from practice.space_placements where floor_plan_id = ? limit 1',
+          [plan.id],
+        )
+      )[0].id;
 
     it.each([
       ['GET', (p: string) => `/sites/${orgA.siteId}/floor-plans`, undefined],
-      ['POST', () => `/sites/${orgA.siteId}/floor-plans`, { code: 'Z', name: 'z', widthM: 5, heightM: 5 }],
+      [
+        'POST',
+        () => `/sites/${orgA.siteId}/floor-plans`,
+        { code: 'Z', name: 'z', widthM: 5, heightM: 5 },
+      ],
       ['GET', (p: string) => `/floor-plans/${p}`, undefined],
       ['PATCH', (p: string) => `/floor-plans/${p}`, { name: 'x' }],
-      ['POST', (p: string) => `/floor-plans/${p}/lifecycle`, { action: 'retire', reason: 'x' }],
-      ['PUT', (p: string) => `/floor-plans/${p}/background`, { fileId: randomUUID(), scaleMPerPx: 0.1 }],
+      [
+        'POST',
+        (p: string) => `/floor-plans/${p}/lifecycle`,
+        { action: 'retire', reason: 'x' },
+      ],
+      [
+        'PUT',
+        (p: string) => `/floor-plans/${p}/background`,
+        { fileId: randomUUID(), scaleMPerPx: 0.1 },
+      ],
       ['DELETE', (p: string) => `/floor-plans/${p}/background`, undefined],
       ['GET', (p: string) => `/floor-plans/${p}/layout`, undefined],
       ['PATCH', (p: string) => `/floor-plans/${p}/layout`, { remove: {} }],
-      ['PUT', (p: string) => `/floor-plans/${p}/layout`, { placements: [], elements: [] }],
-      ['POST', (p: string) => `/floor-plans/${p}/placements`, { spaceId: randomUUID(), geometry: rect(1, 1, 1, 1) }],
-      ['POST', (p: string) => `/floor-plans/${p}/elements`, { id: randomUUID(), kind: 'COLUMN' }],
+      [
+        'PUT',
+        (p: string) => `/floor-plans/${p}/layout`,
+        { placements: [], elements: [] },
+      ],
+      [
+        'POST',
+        (p: string) => `/floor-plans/${p}/placements`,
+        { spaceId: randomUUID(), geometry: rect(1, 1, 1, 1) },
+      ],
+      [
+        'POST',
+        (p: string) => `/floor-plans/${p}/elements`,
+        { id: randomUUID(), kind: 'COLUMN' },
+      ],
       ['GET', (p: string) => `/floor-plans/${p}/validation`, undefined],
       ['GET', (p: string) => `/floor-plans/${p}/unplaced-spaces`, undefined],
       ['GET', (p: string) => `/floor-plans/${p}/state`, undefined],
-      ['GET', (p: string) => `/floor-plans/${p}/background/content?v=${randomUUID()}&exp=1893456000&sig=${'a'.repeat(64)}`, undefined],
+      [
+        'GET',
+        (p: string) =>
+          `/floor-plans/${p}/background/content?v=${randomUUID()}&exp=1893456000&sig=${'a'.repeat(64)}`,
+        undefined,
+      ],
       ['GET', () => `/care-spaces/${ids.h102}/plan-card`, undefined],
       ['GET', () => `/care-spaces/${ids.h102}/plan-location`, undefined],
       ['GET', () => `/sites/${orgA.siteId}/plan-search?q=hab`, undefined],
-      ['GET', () => `/sites/${orgA.siteId}/plan-focus?spaceId=${ids.sala}`, undefined],
+      [
+        'GET',
+        () => `/sites/${orgA.siteId}/plan-focus?spaceId=${ids.sala}`,
+        undefined,
+      ],
     ] as const)('%s %s → 404', async (method, path, body) => {
       const url = path(plan.id);
-      const call = http()[method.toLowerCase() as 'get'](url).set(comoDueno(orgB));
-      if (['PATCH', 'POST', 'PUT', 'DELETE'].includes(method)) call.set(ifMatch(1));
-      const res = body === undefined ? await call : await call.send(body as object);
+      const call = http()
+        [method.toLowerCase() as 'get'](url)
+        .set(comoDueno(orgB));
+      if (['PATCH', 'POST', 'PUT', 'DELETE'].includes(method))
+        call.set(ifMatch(1));
+      const res =
+        body === undefined ? await call : await call.send(body as object);
       expect(res.status).toBe(404);
     });
 
@@ -1002,7 +1356,11 @@ describe('Infraestructura F1c · plano · lienzos y dibujo', () => {
         functionCode: 'SPACE_FN_BUILDING_GENERIC',
       });
       const res = await patchLayout(
-        { upsert: { placements: [{ spaceId: ajeno.id, geometry: rect(1, 1, 3, 3) }] } },
+        {
+          upsert: {
+            placements: [{ spaceId: ajeno.id, geometry: rect(1, 1, 3, 3) }],
+          },
+        },
         await versionOf(),
       );
       expect(res.status).toBe(404);

@@ -246,12 +246,14 @@ describe('validateLayoutDelta · ubicaciones', () => {
 
   it('un hijo directo del ancla no necesita padre dibujado; una raíz no cabe en un lienzo anclado', () => {
     expect(
-      run({ placements: [{ spaceId: 'ward', geometry: rectGeo(2, 2, 20, 8.5) }] })
-        .errors,
+      run({
+        placements: [{ spaceId: 'ward', geometry: rectGeo(2, 2, 20, 8.5) }],
+      }).errors,
     ).toEqual([]);
     expect(
-      run({ placements: [{ spaceId: 'level', geometry: rectGeo(0, 0, 60, 20) }] })
-        .errors[0].code,
+      run({
+        placements: [{ spaceId: 'level', geometry: rectGeo(0, 0, 60, 20) }],
+      }).errors[0].code,
     ).toBe(FloorPlanReason.PLAN_PARENT_NOT_PLACED);
   });
 
@@ -277,12 +279,14 @@ describe('validateLayoutDelta · ubicaciones', () => {
 
   it('una figura fuera del lienzo da PLAN_OUT_OF_BOUNDS; con la tolerancia de contacto cabe', () => {
     expect(
-      run({ placements: [{ spaceId: 'ward', geometry: rectGeo(60, 2, 10, 8) }] })
-        .errors[0].code,
+      run({
+        placements: [{ spaceId: 'ward', geometry: rectGeo(60, 2, 10, 8) }],
+      }).errors[0].code,
     ).toBe(FloorPlanReason.PLAN_OUT_OF_BOUNDS);
     expect(
-      run({ placements: [{ spaceId: 'ward', geometry: rectGeo(0, 0, 64, 26) }] })
-        .errors,
+      run({
+        placements: [{ spaceId: 'ward', geometry: rectGeo(0, 0, 64, 26) }],
+      }).errors,
     ).toEqual([]);
   });
 
@@ -378,13 +382,22 @@ describe('validateLayoutDelta · ubicaciones', () => {
     const out = run(
       {
         placements: [
-          { spaceId: 'ward', geometry: rectGeo(4, 2, 20, 8.5), expectedRowVersion: 1 },
+          {
+            spaceId: 'ward',
+            geometry: rectGeo(4, 2, 20, 8.5),
+            expectedRowVersion: 1,
+          },
         ],
       },
       [placed('ward', 2, 2, 20, 8.5, 3)],
     );
     expect(out.rowVersionConflicts).toEqual([
-      { kind: 'SPACE', id: 'ward', currentRowVersion: 3, expectedRowVersion: 1 },
+      {
+        kind: 'SPACE',
+        id: 'ward',
+        currentRowVersion: 3,
+        expectedRowVersion: 1,
+      },
     ]);
     expect(out.placementsToWrite).toEqual([]);
   });
@@ -483,7 +496,10 @@ describe('validateLayoutDelta · elementos', () => {
       ],
     });
     expect(out.errors).toEqual([]);
-    expect(out.elementsToWrite[0]).toMatchObject({ kind: 'WALL', thicknessM: 0.2 });
+    expect(out.elementsToWrite[0]).toMatchObject({
+      kind: 'WALL',
+      thicknessM: 0.2,
+    });
   });
 
   it('una puerta en un muro del mismo guardado: el muro se escribe primero', () => {
@@ -515,7 +531,13 @@ describe('validateLayoutDelta · elementos', () => {
   it('una puerta sin muro, o sobre algo que no es muro, da PLAN_HOST_NOT_WALL', () => {
     const out = run({
       elements: [
-        { id: 'd1', kind: 'DOOR', hostElementId: 'no-existe', offsetM: 0, widthM: 1 },
+        {
+          id: 'd1',
+          kind: 'DOOR',
+          hostElementId: 'no-existe',
+          offsetM: 0,
+          widthM: 1,
+        },
         {
           id: 'c1',
           kind: 'COLUMN',
@@ -541,7 +563,13 @@ describe('validateLayoutDelta · elementos', () => {
     const out = run(
       {
         elements: [
-          { id: 'd1', kind: 'DOOR', hostElementId: 'w1', offsetM: 9.5, widthM: 1 },
+          {
+            id: 'd1',
+            kind: 'DOOR',
+            hostElementId: 'w1',
+            offsetM: 9.5,
+            widthM: 1,
+          },
         ],
       },
       [],
@@ -622,9 +650,29 @@ describe('validateLayoutDelta · elementos', () => {
   it('espesor, ancho y enumeraciones fuera de rango', () => {
     const out = run({
       elements: [
-        { ...base, vertices: [[0, 0], [5, 0]], thicknessM: 5 },
-        { id: 'd1', kind: 'DOOR', hostElementId: 'w2', offsetM: 0, widthM: 0.1 },
-        { id: 'd2', kind: 'DOOR', hostElementId: 'w2', offsetM: 0, widthM: 1, swing: 'X' },
+        {
+          ...base,
+          vertices: [
+            [0, 0],
+            [5, 0],
+          ],
+          thicknessM: 5,
+        },
+        {
+          id: 'd1',
+          kind: 'DOOR',
+          hostElementId: 'w2',
+          offsetM: 0,
+          widthM: 0.1,
+        },
+        {
+          id: 'd2',
+          kind: 'DOOR',
+          hostElementId: 'w2',
+          offsetM: 0,
+          widthM: 1,
+          swing: 'X',
+        },
       ],
     });
     expect(out.errors).toHaveLength(3);
@@ -649,9 +697,9 @@ describe('validateLayoutDelta · elementos', () => {
       ],
     });
     expect(out.errors).toEqual([]);
-    expect(out.elementsToWrite.find((e) => e.id === 's1')?.verticalLinkCode).toBe(
-      'ESC-A',
-    );
+    expect(
+      out.elementsToWrite.find((e) => e.id === 's1')?.verticalLinkCode,
+    ).toBe('ESC-A');
     const bad = run({
       elements: [{ id: 'a2', kind: 'ANNOTATION', vertices: [[5, 5]] }],
     });
@@ -661,7 +709,14 @@ describe('validateLayoutDelta · elementos', () => {
   it('un elemento fuera del lienzo da PLAN_OUT_OF_BOUNDS', () => {
     const out = run({
       elements: [
-        { ...base, vertices: [[0, 0], [200, 0]], thicknessM: 0.2 },
+        {
+          ...base,
+          vertices: [
+            [0, 0],
+            [200, 0],
+          ],
+          thicknessM: 0.2,
+        },
       ],
     });
     expect(out.errors[0].code).toBe(FloorPlanReason.PLAN_OUT_OF_BOUNDS);
@@ -671,7 +726,15 @@ describe('validateLayoutDelta · elementos', () => {
     const out = run({
       elements: [
         { id: 'x', kind: 'TELEPORTER' },
-        { ...base, vertices: [[0, 0], [5, 0]], thicknessM: 0.2, zOrder: 5000 },
+        {
+          ...base,
+          vertices: [
+            [0, 0],
+            [5, 0],
+          ],
+          thicknessM: 0.2,
+          zOrder: 5000,
+        },
       ],
     });
     expect(out.errors).toHaveLength(2);
@@ -683,7 +746,10 @@ describe('validateLayoutDelta · elementos', () => {
         elements: [
           {
             ...base,
-            vertices: [[0, 0], [5, 0]],
+            vertices: [
+              [0, 0],
+              [5, 0],
+            ],
             thicknessM: 0.2,
             expectedRowVersion: 9,
           },
@@ -693,7 +759,12 @@ describe('validateLayoutDelta · elementos', () => {
       [wall('w1')],
     );
     expect(out.rowVersionConflicts).toEqual([
-      { kind: 'ELEMENT', id: 'w1', currentRowVersion: 1, expectedRowVersion: 9 },
+      {
+        kind: 'ELEMENT',
+        id: 'w1',
+        currentRowVersion: 1,
+        expectedRowVersion: 9,
+      },
     ]);
   });
 });

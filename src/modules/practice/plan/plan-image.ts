@@ -13,7 +13,9 @@ export interface ImageSize {
   readonly height: number;
 }
 
-const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+const PNG_SIGNATURE = Buffer.from([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+]);
 
 function pngSize(buffer: Buffer): ImageSize | null {
   if (buffer.length < 24 || !buffer.subarray(0, 8).equals(PNG_SIGNATURE))
@@ -23,7 +25,8 @@ function pngSize(buffer: Buffer): ImageSize | null {
 }
 
 function jpegSize(buffer: Buffer): ImageSize | null {
-  if (buffer.length < 4 || buffer[0] !== 0xff || buffer[1] !== 0xd8) return null;
+  if (buffer.length < 4 || buffer[0] !== 0xff || buffer[1] !== 0xd8)
+    return null;
   let offset = 2;
   while (offset + 9 < buffer.length) {
     if (buffer[offset] !== 0xff) {
@@ -35,7 +38,11 @@ function jpegSize(buffer: Buffer): ImageSize | null {
       offset += 1;
       continue;
     }
-    if (marker === 0xd8 || marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) {
+    if (
+      marker === 0xd8 ||
+      marker === 0x01 ||
+      (marker >= 0xd0 && marker <= 0xd7)
+    ) {
       offset += 2;
       continue;
     }

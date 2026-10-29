@@ -13,7 +13,10 @@ interface PlanRequest {
 export const LayoutIfMatch = createParamDecorator(
   (_data: unknown, context: ExecutionContext): number => {
     const request = context.switchToHttp().getRequest<PlanRequest>();
-    return parseLayoutIfMatch(request.headers['if-match'], request.params.id ?? '');
+    return parseLayoutIfMatch(
+      request.headers['if-match'],
+      request.params.id ?? '',
+    );
   },
 );
 

@@ -223,7 +223,10 @@ export function checkVertexList(
   max: number,
 ): GeometryProblem | null {
   if (!Array.isArray(raw)) {
-    return { code: 'VERTEX_COUNT', message: 'Los vértices deben ser una lista' };
+    return {
+      code: 'VERTEX_COUNT',
+      message: 'Los vértices deben ser una lista',
+    };
   }
   if (raw.length < min || raw.length > max) {
     return {
@@ -394,7 +397,10 @@ export function pointInPolygon(p: Pt, polygon: Vertices): boolean {
   for (let i = 0, j = n - 1; i < n; j = i, i += 1) {
     const [xi, yi] = polygon[i];
     const [xj, yj] = polygon[j];
-    if (yi > p[1] !== yj > p[1] && p[0] < ((xj - xi) * (p[1] - yi)) / (yj - yi) + xi) {
+    if (
+      yi > p[1] !== yj > p[1] &&
+      p[0] < ((xj - xi) * (p[1] - yi)) / (yj - yi) + xi
+    ) {
       inside = !inside;
     }
   }
@@ -441,7 +447,8 @@ type Triangle = readonly [Pt, Pt, Pt];
 
 /** Triangula un polígono simple por orejas. Tolera vértices colineales. */
 export function triangulate(vertices: Vertices): Triangle[] {
-  const ring: Pt[] = signedArea(vertices) >= 0 ? [...vertices] : [...vertices].reverse();
+  const ring: Pt[] =
+    signedArea(vertices) >= 0 ? [...vertices] : [...vertices].reverse();
   const triangles: Triangle[] = [];
   let guard = ring.length * ring.length + 10;
   while (ring.length > 3 && guard > 0) {

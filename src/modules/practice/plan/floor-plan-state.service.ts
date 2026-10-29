@@ -39,7 +39,11 @@ import { PlanViewerService, type PlanViewer } from './plan-viewer.service';
 /** Resultado de leer el estado: 304 sin cuerpo, o 200 con cuerpo. */
 export type StateReadResult =
   | { readonly status: 304; readonly etag: string }
-  | { readonly status: 200; readonly etag: string; readonly body: PlanStateResponse };
+  | {
+      readonly status: 200;
+      readonly etag: string;
+      readonly body: PlanStateResponse;
+    };
 
 const emptyRollup = (): PlanRollup => ({
   beds: 0,
@@ -56,7 +60,11 @@ const emptyRollup = (): PlanRollup => ({
 });
 
 /** Suma el estado de una cama a un recuento. */
-function addBed(rollup: PlanRollup, state: SpaceState, censable: boolean): void {
+function addBed(
+  rollup: PlanRollup,
+  state: SpaceState,
+  censable: boolean,
+): void {
   rollup.beds += 1;
   if (censable) rollup.censable += 1;
   if (state.assignable) rollup.assignable += 1;
@@ -71,7 +79,8 @@ function addBed(rollup: PlanRollup, state: SpaceState, censable: boolean): void 
   if (hygiene === 'HYG_DIRTY') rollup.dirty += 1;
   if (hygiene === 'HYG_CLEANING') rollup.cleaning += 1;
   if (hygiene === 'HYG_CONTAMINATED') rollup.contaminated += 1;
-  if (state.isolation && state.isolation.code !== 'ISO_NONE') rollup.isolation += 1;
+  if (state.isolation && state.isolation.code !== 'ISO_NONE')
+    rollup.isolation += 1;
 }
 
 /**
@@ -137,7 +146,9 @@ export class FloorPlanStateService {
       }
       const bbox = windowOf(query.bbox);
       const axes = new Set(
-        (query.axis ?? STATE_AXES.join(',')).split(',') as (typeof STATE_AXES)[number][],
+        (query.axis ?? STATE_AXES.join(',')).split(
+          ',',
+        ) as (typeof STATE_AXES)[number][],
       );
       const fingerprint = await this.ops.fingerprint(tx, tenantId, plan.id);
       const hash = createHash('sha1')
@@ -190,16 +201,26 @@ export class FloorPlanStateService {
         );
         allowed = new Set([...allowed].filter((id) => focus.has(id)));
       }
-      const stateScope = await this.viewers.resolveIds(tx, tenantId, viewer.state);
+      const stateScope = await this.viewers.resolveIds(
+        tx,
+        tenantId,
+        viewer.state,
+      );
       if (stateScope !== 'ALL') {
         allowed = new Set([...allowed].filter((id) => stateScope.has(id)));
       }
       const retired = new Set(
-        tree.filter((t) => t.statusConceptId === PRAC.SPACE_RETIRED).map((t) => t.spaceId),
+        tree
+          .filter((t) => t.statusConceptId === PRAC.SPACE_RETIRED)
+          .map((t) => t.spaceId),
       );
       const spaceIds = [...allowed].filter((id) => !retired.has(id));
 
-      const patientVisibility = await this.patientVisibility(tx, tenantId, viewer);
+      const patientVisibility = await this.patientVisibility(
+        tx,
+        tenantId,
+        viewer,
+      );
       const states = await this.ops.read(tx, {
         tenantId,
         practiceId: site.practiceId,
@@ -230,7 +251,11 @@ export class FloorPlanStateService {
 
       // Los recuentos de un contenedor fuera del alcance de identidad del actor no
       // se informan (ni su id): el contenedor es una silueta para él.
-      const identityScope = await this.viewers.resolveIds(tx, tenantId, viewer.identity);
+      const identityScope = await this.viewers.resolveIds(
+        tx,
+        tenantId,
+        viewer.identity,
+      );
       if (identityScope !== 'ALL') {
         for (const id of Object.keys(rollups)) {
           if (!identityScope.has(id)) delete rollups[id];
@@ -282,8 +307,16 @@ export class FloorPlanStateService {
       const tenantId = requireTenantId();
       const space = await this.spaces.findByIdInTenant(tx, spaceId, tenantId);
       if (!space) throw practiceOutOfScope('Espacio no encontrado');
-      const { viewer } = await this.context.site(tx, space.practiceSiteId, actor);
-      const identity = await this.viewers.resolveIds(tx, tenantId, viewer.identity);
+      const { viewer } = await this.context.site(
+        tx,
+        space.practiceSiteId,
+        actor,
+      );
+      const identity = await this.viewers.resolveIds(
+        tx,
+        tenantId,
+        viewer.identity,
+      );
       if (identity !== 'ALL' && !identity.has(spaceId)) {
         throw practiceOutOfScope('Espacio no encontrado');
       }
@@ -291,7 +324,11 @@ export class FloorPlanStateService {
       if (!viewer.state) {
         return { asOf, openBlocks: [], viewer: viewer.caps };
       }
-      const stateScope = await this.viewers.resolveIds(tx, tenantId, viewer.state);
+      const stateScope = await this.viewers.resolveIds(
+        tx,
+        tenantId,
+        viewer.state,
+      );
       if (stateScope !== 'ALL' && !stateScope.has(spaceId)) {
         return { asOf, openBlocks: [], viewer: viewer.caps };
       }
@@ -359,7 +396,13 @@ export class FloorPlanStateService {
         where user_id = ?::uuid and resource_type = ? and resource_id = ?::uuid and patient_profile_id = ?::uuid
           and recorded_at > now() - make_interval(secs => ?)
         limit 1`,
-      [userId, OCCUPANT_VIEWED, spaceId, patientProfileId, OCCUPANT_VIEWED_DEDUPE_SECONDS],
+      [
+        userId,
+        OCCUPANT_VIEWED,
+        spaceId,
+        patientProfileId,
+        OCCUPANT_VIEWED_DEDUPE_SECONDS,
+      ],
     );
     if (recent.length > 0) return;
     this.accessLog.record(tx, {
@@ -418,9 +461,13 @@ function filterAxes(
     ...(axes.has('availability') && state.availability
       ? { availability: state.availability }
       : {}),
-    ...(axes.has('occupancy') && state.occupancy ? { occupancy: state.occupancy } : {}),
+    ...(axes.has('occupancy') && state.occupancy
+      ? { occupancy: state.occupancy }
+      : {}),
     ...(axes.has('hygiene') && state.hygiene ? { hygiene: state.hygiene } : {}),
-    ...(axes.has('isolation') && state.isolation ? { isolation: state.isolation } : {}),
+    ...(axes.has('isolation') && state.isolation
+      ? { isolation: state.isolation }
+      : {}),
     v2Code: state.v2Code,
     assignable: state.assignable,
     ...(state.openCleaningOrderId
