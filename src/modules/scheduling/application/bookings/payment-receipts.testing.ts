@@ -1,7 +1,10 @@
 import { jest } from '@jest/globals';
 import { CONCEPTS } from '../../../../common';
 import { SCHED } from '../../domain/scheduling.concepts';
+import type { BookingBillingPort } from '../ports/booking-billing.port';
+import { createFakeBookingBilling } from './booking-billing.testing';
 import { BookingAccess } from './support/booking-access';
+import { BookingBillingBridge } from './support/booking-billing-bridge';
 import { BookingChangeNotifier } from './support/booking-change-notifier';
 import { PaymentReceiptAccess } from './support/payment-receipt-access';
 import { ConfirmPaymentReceiptUseCase } from './use-cases/confirm-payment-receipt.use-case';
@@ -92,7 +95,7 @@ export const BOOKING_SNAPSHOT = {
  * reales: así las pruebas miran la autorización y los avisos de verdad, no
  * una copia simulada de ellos.
  */
-export function buildReceipts() {
+export function buildReceipts(options?: { billing?: BookingBillingPort }) {
   const tx: any = {
     create: mockFn((_entity: any, data: any) => data),
     persist: mockFn(),
@@ -188,9 +191,12 @@ export function buildReceipts() {
     logger as any,
   );
 
+  const billing = options?.billing ?? createFakeBookingBilling();
+
   return {
     tx,
     em,
+    billing,
     bookingsRepo,
     catalogRepo,
     receiptsRepo,
@@ -224,6 +230,13 @@ export function buildReceipts() {
       receiptsAccess,
       history as any,
       notifier,
+      new BookingBillingBridge(
+        billing,
+        catalogRepo as any,
+        {
+          findLatestEncounterIds: async () => new Map(),
+        } as any,
+      ),
       logger as any,
     ),
     reject: new RejectPaymentReceiptUseCase(

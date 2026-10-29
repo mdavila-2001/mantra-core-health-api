@@ -51,6 +51,7 @@ export {
   RejectBookingDto,
   SetPaymentStateDto,
   PaymentStateDto,
+  SetPaymentStateResponseDto,
   PAYMENT_STATES,
   type PaymentState,
   UploadPaymentReceiptDto,
@@ -145,3 +146,8 @@ export {
 export * from './scheduling-service-offerings.dto';
 
 export * from './scheduling-flexible.dto';
+export {
+  BOOKING_BILLING_REASONS,
+  BookingBillingLinkDto,
+  type BookingBillingReason,
+} from './booking-billing-link.dto';
