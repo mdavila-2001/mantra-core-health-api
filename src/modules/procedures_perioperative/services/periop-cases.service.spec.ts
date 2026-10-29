@@ -76,7 +76,7 @@ function caseLookupMock(): any {
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn() };
+  const tx = { flush: mockFn(), execute: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const casesRepo = {
     createCase: mockFn(),
@@ -240,6 +240,29 @@ describe('PeriopCasesService', () => {
       d.casesRepo.createCase.mockReturnValue({ id: CASE });
       d.casesRepo.createMilestone.mockReturnValue({ id: 'milestone-1' });
     }
+
+    it('serializes the case number allocation per tenant before counting', async () => {
+      const d = build();
+      wire(d);
+      const order: string[] = [];
+      d.tx.execute.mockImplementation(
+        async (sql: string, params: unknown[]) => {
+          order.push(`lock:${String(params[0])}`);
+          expect(sql).toContain('pg_advisory_xact_lock');
+        },
+      );
+      d.casesRepo.countCases.mockImplementation(async () => {
+        order.push('count');
+        return 0;
+      });
+
+      await d.service.scheduleCase(scheduleDto(), actor);
+
+      expect(order.slice(0, 2)).toEqual([
+        expect.stringMatching(/^lock:procedure_case_number:/),
+        'count',
+      ]);
+    });
 
     it('schedules the case, reserves the room and seats the surgeon', async () => {
       const d = build();

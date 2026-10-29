@@ -1840,15 +1840,32 @@ export class PeriopCasesService {
 
   // --- Apoyo ---
 
-  /** Número de caso correlativo por tenant. */
+  /**
+   * Número de caso correlativo por tenant.
+   *
+   * El número sale de contar los casos del tenant, así que dos altas simultáneas leían lo
+   * mismo y chocaban en la unicidad `(tenant, número)`: la perdedora respondía un 409 genérico
+   * en lugar del motivo real (por ejemplo, el quirófano ya reservado). El candado de
+   * transacción por tenant las serializa: la segunda espera a que la primera confirme, ve su
+   * caso y toma el número siguiente.
+   */
   private async nextCaseNumber(
     tx: EntityManager,
     custodianTenantId: string,
   ): Promise<string> {
+    await tx.execute('select pg_advisory_xact_lock(hashtextextended(?, 0))', [
+      `procedure_case_number:${custodianTenantId}`,
+    ]);
     const total = await this.casesRepo.countCases(tx, custodianTenantId);
     for (let attempt = 1; attempt <= 5; attempt += 1) {
       const candidate = `CQ-${String(total + attempt).padStart(6, '0')}`;
-      if (!(await this.casesRepo.findCaseByNumber(tx, candidate)))
+      if (
+        !(await this.casesRepo.findCaseByNumber(
+          tx,
+          candidate,
+          custodianTenantId,
+        ))
+      )
         return candidate;
     }
     throw new ConflictException(

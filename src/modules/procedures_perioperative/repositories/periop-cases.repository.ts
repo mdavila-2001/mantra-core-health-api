@@ -253,8 +253,16 @@ export class PeriopCasesRepository {
   findCaseByNumber(
     em: EntityManager,
     caseNumber: string,
+    custodianTenantId?: string,
   ): Promise<ProcedureCases | null> {
-    return em.findOne(ProcedureCases, { caseNumber });
+    // El número es único por tenant (`uk_procedure_cases_tenant_number`): sin el tenant,
+    // la numeración de una organización chocaba con la de otra y no podía programar.
+    return em.findOne(
+      ProcedureCases,
+      custodianTenantId === undefined
+        ? { caseNumber }
+        : { caseNumber, custodianTenantId },
+    );
   }
 
   /**
