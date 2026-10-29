@@ -106,6 +106,11 @@ export function createBookingsService(d: BookingsServiceDoubles) {
     d.catalogRepo,
   );
   const clinicalSync = new ClinicalAppointmentSync(clinical);
+  const billing = new BookingBillingBridge(
+    d.billing ?? createFakeBookingBilling(),
+    d.catalogRepo,
+    clinical,
+  );
   const slotPolicy = new SlotPolicyResolver(d.catalogRepo);
   const materializer = new BookingMaterializer(
     d.em,
@@ -176,14 +181,10 @@ export function createBookingsService(d: BookingsServiceDoubles) {
       d.bookingsRepo,
       access,
       history,
-      new BookingBillingBridge(
-        d.billing ?? createFakeBookingBilling(),
-        d.catalogRepo,
-        clinical,
-      ),
+      billing,
       d.logger,
     ),
-    new GetPaymentStateUseCase(d.em, d.bookingsRepo, access),
+    new GetPaymentStateUseCase(d.em, d.bookingsRepo, access, billing),
     new AcceptBookingUseCase(
       d.em,
       d.bookingsRepo,
@@ -232,6 +233,7 @@ export function createBookingsService(d: BookingsServiceDoubles) {
       insurance,
       representation,
       assembler,
+      billing,
     ),
     new GetBookingUseCase(
       d.em,

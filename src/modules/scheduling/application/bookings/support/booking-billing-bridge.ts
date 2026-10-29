@@ -5,7 +5,10 @@ import type {
   AppointmentPaymentStates,
 } from '../../../entities';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
-import type { BookingBillingLinkDto } from '../../../presentation/dto';
+import type {
+  BookingBillingLinkDto,
+  PaymentStateDto,
+} from '../../../presentation/dto';
 import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 import {
   BOOKING_BILLING_PORT,
@@ -152,6 +155,38 @@ export class BookingBillingBridge {
     if (!row?.invoiceId) return null;
     const invoice = await this.billing.findInvoice(uow, row.invoiceId);
     return invoice ? linked(invoice) : null;
+  }
+
+  /**
+   * Agrega lo cobrado a los estados de pago ya proyectados de una página de
+   * citas (CONTRATO §2). Una consulta para toda la página.
+   *
+   * @param items - Los ítems de la lista, con su `paymentState` si lo tienen.
+   * @param rows - Las filas de pago de la página, por id de cita.
+   */
+  async withAmountsPaid<
+    T extends { id: string; paymentState?: PaymentStateDto },
+  >(
+    uow: UnitOfWork,
+    items: T[],
+    rows: ReadonlyMap<string, AppointmentPaymentStates>,
+  ): Promise<T[]> {
+    const paid = await this.paidByInvoice(uow, rows.values());
+    if (paid.size === 0) return items;
+    return items.map((item) => {
+      const invoiceId = rows.get(item.id)?.invoiceId;
+      const amountPaid = invoiceId ? paid.get(invoiceId) : undefined;
+      return item.paymentState && amountPaid !== undefined
+        ? {
+            ...item,
+            paymentState: {
+              ...item.paymentState,
+              amountPaid,
+              currencyCode: 'BOB',
+            },
+          }
+        : item;
+    });
   }
 
   /** Lo recibido por cada factura, para la lista de citas (CONTRATO §2). */
