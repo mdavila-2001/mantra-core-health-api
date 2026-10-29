@@ -76,6 +76,7 @@ function memoryRepo() {
       async (_em: any, practiceId: string) =>
         accounts.filter((a) => a.practiceId === practiceId && a.seeded).length,
     ),
+    lockAccountCodes: mockFn().mockResolvedValue(undefined),
     createAccount: mockFn(make(accounts)),
     // Mismo contrato que el real: `ON CONFLICT (practice_id, code) DO NOTHING`.
     seedAccounts: mockFn(
@@ -313,7 +314,9 @@ describe('PractitionerSimpleAccountingService (P49)', () => {
 
   describe('alcance de tenant (ACC-01)', () => {
     async function foreignRows(ctx: ReturnType<typeof build>) {
-      await seeded(ctx, FOREIGN_PRACTICE);
+      // La práctica ajena se siembra por el repositorio: por la API ya no se
+      // puede leer desde el tenant activo.
+      await ctx.repo.seedAccounts(null, FOREIGN_PRACTICE, GENERAL_ACCOUNTS);
       const account = ctx.repo.accounts.find(
         (a) => a.practiceId === FOREIGN_PRACTICE && a.code === '5.1',
       )!;
@@ -437,6 +440,31 @@ describe('PractitionerSimpleAccountingService (P49)', () => {
       expect(ctx.repo.records).toHaveLength(0);
       expect(ctx.repo.transactions).toHaveLength(0);
     });
+
+    it('no se lee una práctica de otro tenant aunque el profesional figure vinculado: misma respuesta que las escrituras (#995)', async () => {
+      const ctx = build();
+      const write = await rejected(
+        ctx.service.createAccount(
+          { practiceId: FOREIGN_PRACTICE, name: 'X', accountClass: 'ASSET' },
+          actor,
+        ),
+      );
+      const reads: Promise<unknown>[] = [
+        ctx.service.summary(FOREIGN_PRACTICE, 'month', actor),
+        ctx.service.listAccounts(FOREIGN_PRACTICE, actor),
+        ctx.service.listRecords(FOREIGN_PRACTICE, undefined, actor),
+        ctx.service.listTransactions(FOREIGN_PRACTICE, actor),
+      ];
+      for (const read of reads) {
+        const error = await rejected(read);
+        expect(error).toBeInstanceOf(ResourceNotFoundException);
+        expect(error.getStatus()).toBe(write.getStatus());
+        expect(error.getResponse()).toEqual(write.getResponse());
+      }
+      // ni siquiera siembra las generales en la práctica ajena
+      expect(ctx.repo.seedAccounts).not.toHaveBeenCalled();
+      expect(ctx.repo.accounts).toHaveLength(0);
+    });
   });
 
   describe('cuentas', () => {
@@ -520,6 +548,21 @@ describe('PractitionerSimpleAccountingService (P49)', () => {
           actorUserId: 'user-1',
         }),
       );
+    });
+
+    it('toma el cerrojo de la práctica en la transacción antes de calcular el código (#995)', async () => {
+      const ctx = build();
+      await ctx.service.createAccount(
+        { practiceId: PRACTICE, name: 'Capacitación', accountClass: 'EXPENSE' },
+        actor,
+      );
+      expect(ctx.em.transactional).toHaveBeenCalledTimes(1);
+      expect(ctx.repo.lockAccountCodes).toHaveBeenCalledWith(ctx.em, PRACTICE);
+      const lockedAt = ctx.repo.lockAccountCodes.mock.invocationCallOrder[0];
+      const listedAt = ctx.repo.listAccounts.mock.invocationCallOrder[0];
+      const createdAt = ctx.repo.createAccount.mock.invocationCallOrder[0];
+      expect(lockedAt).toBeLessThan(listedAt);
+      expect(lockedAt).toBeLessThan(createdAt);
     });
 
     it('rechaza con 422 y el motivo en castellano un nombre vacío, largo o una clase inválida', async () => {

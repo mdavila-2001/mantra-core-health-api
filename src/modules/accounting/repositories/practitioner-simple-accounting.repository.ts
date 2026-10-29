@@ -70,6 +70,18 @@ export class PractitionerSimpleAccountingRepository {
     return em.count(PractitionerSimpleAccounts, { practiceId, seeded: true });
   }
 
+  /**
+   * Serializa el alta de cuentas de una práctica hasta el fin de la transacción
+   * (`pg_advisory_xact_lock`). El código siguiente se calcula leyendo los ya
+   * usados: sin el cerrojo, dos altas simultáneas de la misma clase verían el
+   * mismo hueco y la segunda chocaría con el UNIQUE `(practice_id, code)`.
+   */
+  async lockAccountCodes(em: EntityManager, practiceId: string): Promise<void> {
+    await em.execute('select pg_advisory_xact_lock(hashtext(?))', [
+      `accounting.practitioner_simple_accounts:${practiceId}`,
+    ]);
+  }
+
   createAccount(
     em: EntityManager,
     data: CreateSimpleAccountData,
