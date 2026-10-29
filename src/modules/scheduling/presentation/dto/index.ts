@@ -133,6 +133,7 @@ export {
   ListResourcesResponseDto,
   ListSlotsQueryDto,
   SlotListItemDto,
+  SlotPriceDto,
   ListSlotsResponseDto,
 } from './scheduling-agenda.dto';
 export * from './tenant-agenda.dto';
