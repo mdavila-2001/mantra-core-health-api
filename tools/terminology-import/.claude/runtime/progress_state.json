@@ -1,0 +1,9 @@
+{
+  "lane": "41",
+  "phase": "F3.4-cli",
+  "state": "active",
+  "qa_status": "running",
+  "message": "hierarchy.mjs + 7 tests PASS; extrayendo identidad compartida y escribiendo CLI de carga",
+  "updated_at": "2026-10-29T19:33:03.264826+00:00",
+  "operations_since_progress": 0
+}
