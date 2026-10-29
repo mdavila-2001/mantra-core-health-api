@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
-import { SeedBootstrapService } from './seed-bootstrap.service';
+import { SeedBootstrapService, countInserted } from './seed-bootstrap.service';
 import { SeedCoreState } from './seed-core.state';
 
 /** Los seeds de la cadena, en el orden en que el orquestador los corre. */
@@ -571,6 +571,54 @@ describe('SeedBootstrapService · seed-cli --only y conteos por paso', () => {
 
     expect(doubles.people.run).toHaveBeenCalledTimes(1);
     expect(summary.skippedContent).toBeUndefined();
+  });
+
+  it('pedir un paso opt-in por id lo habilita aunque su variable esté apagada; sin --only usa la suya', async () => {
+    const organizations = padron();
+    const admins = padron();
+    const { service, dobles: doubles } = build([], undefined, {
+      padronOrganizations: organizations,
+      padronOrgAdmins: admins,
+    });
+
+    await service.run({
+      only: [
+        'padron-organizaciones',
+        'padron-administradores',
+        'padron-de-personas',
+        'directorio-de-redes-de-aseguradoras',
+      ],
+    });
+
+    const argsOf = (mock: unknown) =>
+      (mock as jest.Mock<(...args: unknown[]) => unknown>).mock.calls;
+    expect(argsOf(organizations.run)).toEqual([[true]]);
+    expect(argsOf(admins.run)).toEqual([[undefined, true]]);
+    expect(argsOf(doubles.people.run)).toEqual([[true]]);
+    expect(argsOf(doubles.directoryNetworks.run)).toEqual([[true]]);
+
+    organizations.run.mockClear();
+    await service.run();
+    expect(argsOf(organizations.run)).toEqual([[undefined]]);
+  });
+
+  it('countInserted suma lo escrito y no lo que el paso solo encontró hecho', () => {
+    expect(
+      countInserted({
+        created: 3,
+        verified: 0,
+        showcases: 2,
+        existing: 500,
+        adopted: 20,
+        adoptedTypeMismatch: 4,
+        practitionersExisting: 9,
+        pendingForPapers: 17,
+        organizationMissing: 6,
+        skipped: 8,
+        orphanRelationships: 1,
+      }),
+    ).toBe(5);
+    expect(countInserted({ existing: 3 })).toBeNull();
   });
 
   it('el código de salida sigue el resumen: un paso pedido que falla cuenta como fallo', async () => {

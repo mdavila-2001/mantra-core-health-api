@@ -110,9 +110,15 @@ export class BoliviaInsuranceSeedService {
   /**
    * Ejecuta el seed.
    *
+   * @param showcasesEnabled - Si proyecta la vitrina pública de cada
+   *   aseguradora. Es parte de la carga del padrón y comparte su interruptor
+   *   (`SEED_PADRON_ORGANIZATIONS_ENABLED`): con él apagado, un despliegue no
+   *   crea ni cambia nada nuevo.
    * @returns Cuántas filas se insertaron en cada nivel.
    */
-  async run(): Promise<BoliviaInsuranceResult> {
+  async run(
+    showcasesEnabled = process.env.SEED_PADRON_ORGANIZATIONS_ENABLED === 'true',
+  ): Promise<BoliviaInsuranceResult> {
     this.assertUniqueCodes();
 
     const em = this.orm.em.fork();
@@ -122,7 +128,7 @@ export class BoliviaInsuranceSeedService {
     const carriers = await this.seedCarriers(em, now);
     const products = await this.seedProducts(em, now);
     const plans = await this.seedPlans(em, now);
-    const showcases = await this.seedShowcases(em);
+    const showcases = showcasesEnabled ? await this.seedShowcases(em) : 0;
 
     const total = tenants + carriers + products + plans + showcases;
     if (total > 0) {

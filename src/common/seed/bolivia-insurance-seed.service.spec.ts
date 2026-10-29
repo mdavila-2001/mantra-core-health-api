@@ -39,6 +39,40 @@ function build(profiled: string[] = []) {
 }
 
 describe('BoliviaInsuranceSeedService: vitrinas', () => {
+  it('con el interruptor de la carga apagado no proyecta ninguna vitrina', async () => {
+    const { service, projection } = build();
+    for (const step of [
+      'seedTenants',
+      'seedCarriers',
+      'seedProducts',
+      'seedPlans',
+    ]) {
+      jest.spyOn(service as any, step).mockResolvedValue(0);
+    }
+
+    const result = await service.run(false);
+
+    expect(result.showcases).toBe(0);
+    expect(projection.projectOrganization).not.toHaveBeenCalled();
+  });
+
+  it('con el interruptor encendido las proyecta', async () => {
+    const { service, projection } = build();
+    for (const step of [
+      'seedTenants',
+      'seedCarriers',
+      'seedProducts',
+      'seedPlans',
+    ]) {
+      jest.spyOn(service as any, step).mockResolvedValue(0);
+    }
+
+    const result = await service.run(true);
+
+    expect(result.showcases).toBe(carrierCount());
+    expect(projection.projectOrganization).toHaveBeenCalled();
+  });
+
   it('proyecta la vitrina de toda aseguradora como INSURER, con el actor semilla', async () => {
     const { service, em, projection } = build();
 

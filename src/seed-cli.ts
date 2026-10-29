@@ -29,6 +29,10 @@ import { SchemaIntegrityState } from './orm';
  * inserta cero.
  */
 async function main(): Promise<void> {
+  if (process.argv.slice(2).includes('--help')) {
+    process.stdout.write(HELP);
+    process.exit(0);
+  }
   const only = parseOnly(process.argv.slice(2));
   process.env.SEED_ON_BOOT = 'false';
   // Migración y seed son el uso legítimo del rol dueño (DDL, catálogos): el
@@ -81,6 +85,20 @@ ${formatSeedCensus(census)}
     process.exit(1);
   }
 }
+
+const HELP = `Uso: node dist/src/seed-cli.js [--only=<id>,<id>] [--help]
+
+Siembra los datos estructurales una sola vez y termina.
+
+  --only=<id>,<id>  Corre solo esos pasos. Un id desconocido falla y lista los
+                    válidos. Pedir un paso por --only es intención explícita y
+                    lo habilita aunque su variable SEED_*_ENABLED esté apagada.
+                    El candado de las cuentas de demostración (SEED_DEMO_PASSWORD
+                    y SEED_DEMO_ALLOW_PRODUCTION=true) nunca se saltea.
+  --help            Muestra esta ayuda.
+
+Al terminar imprime el censo de la carga (paso<TAB>etiqueta<TAB>conteo).
+`;
 
 /**
  * Lee `--only=<id>,<id>` de los argumentos.

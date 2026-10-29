@@ -138,6 +138,10 @@ interface SeedStepDescriptor {
   readonly run: () => Promise<unknown>;
 }
 
+/** Contadores que describen filas que el paso no escribió. */
+const NOT_INSERTED =
+  /^(orphan|adopted|existing$|skipped$|pendingForPapers$|organizationMissing$)|(Existing|Adopted)$/;
+
 /**
  * Suma los contadores numéricos que devuelve un seed.
  *
@@ -160,9 +164,11 @@ export function countInserted(result: unknown): number | null {
     // resumen vino a eliminar. Por el mismo motivo, `people-seed.service.ts`
     // reporta `...Existing` — filas que ya estaban, no filas nuevas de esta
     // pasada — y tampoco cuentan.
-    .filter(
-      ([name]) => !name.startsWith('orphan') && !name.endsWith('Existing'),
-    )
+    // Tampoco cuentan las filas que el paso encontró hechas (`existing`,
+    // `adopted*`), las que dejó a la espera de algo (`pendingForPapers`,
+    // `organizationMissing`) ni las que saltó (`skipped`): el total es lo que
+    // este paso escribió, no lo que vio.
+    .filter(([name]) => !NOT_INSERTED.test(name))
     .map(([, value]) => value)
     .filter((value): value is number => typeof value === 'number');
   if (numbers.length === 0) return null;
@@ -647,18 +653,19 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
       // H2 (carril M2 · MacBook, 2026-09-26): después de los roles de sistema
       // y del administrador de arranque, porque el alta de médico/paciente
       // necesita `authz.roles` materializado y un actor con el que auditar.
-      // Opt-in con `SEED_PEOPLE_ENABLED`: sin la variable, no toca nada.
+      // Opt-in con `SEED_PEOPLE_ENABLED`: sin la variable, no toca nada. Pedido
+      // por `--only` se habilita igual (ver `explicitly`); el candado de demo no.
       {
         name: 'padrón de personas',
         kind: 'content',
-        run: () => this.people.run(),
+        run: () => this.people.run(this.explicitly()),
       },
       // H3: después de `people` sólo por orden de lectura; depende de las
       // aseguradoras (`boliviaInsurance`) y del actor de arranque.
       {
         name: 'directorio de redes de aseguradoras',
         kind: 'content',
-        run: () => this.directoryNetworks.run(),
+        run: () => this.directoryNetworks.run(this.explicitly()),
       },
       // Después de las aseguradoras y de las redes, y antes del servicio por
       // defecto de cada práctica: crea las organizaciones del padrón público
@@ -672,7 +679,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
               id: 'padron-organizaciones',
               name: 'organizaciones del padrón',
               kind: 'content' as const,
-              run: () => this.padronOrganizations!.run(),
+              run: () => this.padronOrganizations!.run(this.explicitly()),
             },
           ]
         : []),
@@ -685,7 +692,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
               id: 'padron-administradores',
               name: 'administradores de organizaciones del padrón',
               kind: 'content' as const,
-              run: () => this.padronOrgAdmins!.run(),
+              run: () =>
+                this.padronOrgAdmins!.run(undefined, this.explicitly()),
             },
           ]
         : []),
@@ -724,6 +732,18 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
           ]
         : []),
     ];
+  }
+
+  /**
+   * Interruptor de un paso opt-in (`SEED_*_ENABLED`) según cómo se lo pidió.
+   *
+   * Pedir un paso por `--only` es intención explícita: lo habilita aunque su
+   * variable esté apagada. Sin `--only` devuelve `undefined`, y el paso usa su
+   * propia variable. Solo cubre el interruptor: el candado de las cuentas de
+   * demostración (`demo-gate.ts`) lo evalúa cada paso y `--only` nunca lo saltea.
+   */
+  private explicitly(): true | undefined {
+    return this.onlyRequested ? true : undefined;
   }
 
   /**

@@ -26,6 +26,7 @@ import { ValueSetsRepository } from '../../modules/terminology/repositories';
 import { MEDICAL_SPECIALTY_VALUE_SET } from '../../modules/profiles/application/services/medical-specialty-catalog.service';
 import { SPANISH_DESIGNATIONS } from './terminology-designations.es';
 import { demoGateSkip } from './demo-gate';
+import { SEED_ACTOR_ID } from './seed-actor';
 import { PractitionerShowcaseSeed } from './practitioner-showcase-seed';
 import {
   syntheticBirthDate,
@@ -37,7 +38,6 @@ import networksDataset from './data/bolivia/provider-networks.dataset.json';
 
 /** Santa Cruz (`geo:bo:department:SC`): las dos redes son de esa plaza. */
 const DEPARTMENT_SANTA_CRUZ = '16fe92e8-bec7-577d-9e63-4a0d8ff3b0e4';
-const SEED_ACTOR_ID = deterministicId('seed:user:bootstrap-actor');
 const SOURCE_NAME = 'red de aseguradora';
 
 export interface DirectoryNetworksResult {
