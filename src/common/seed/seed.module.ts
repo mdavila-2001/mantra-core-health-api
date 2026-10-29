@@ -62,6 +62,7 @@ import { BoGeographySeedService } from './bo-geography-seed.service';
 import { AdminDivisionsSeedService } from './admin-divisions-seed.service';
 import { LegalEntityTypesSeedService } from './legal-entity-types-seed.service';
 import { AffiliationCatalogsSeedService } from './affiliation-catalogs-seed.service';
+import { AdmissionRequirementsSeedService } from './admission-requirements-seed.service';
 import { BoEmployersSeedService } from './bo-employers-seed.service';
 import { BoOccupationsSeedService } from './bo-occupations-seed.service';
 import { BoMedicalSpecialtiesSeedService } from './bo-medical-specialties-seed.service';
@@ -165,6 +166,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     AdminDivisionsSeedService,
     LegalEntityTypesSeedService,
     AffiliationCatalogsSeedService,
+    AdmissionRequirementsSeedService,
     BoOccupationsSeedService,
     BoProfessionsSeedService,
     BoEmployersSeedService,
@@ -201,6 +203,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     AdminDivisionsSeedService,
     LegalEntityTypesSeedService,
     AffiliationCatalogsSeedService,
+    AdmissionRequirementsSeedService,
     BoOccupationsSeedService,
     BoProfessionsSeedService,
     BoEmployersSeedService,

@@ -17,6 +17,7 @@ import { BoGeographySeedService } from './bo-geography-seed.service';
 import { AdminDivisionsSeedService } from './admin-divisions-seed.service';
 import { LegalEntityTypesSeedService } from './legal-entity-types-seed.service';
 import { AffiliationCatalogsSeedService } from './affiliation-catalogs-seed.service';
+import { AdmissionRequirementsSeedService } from './admission-requirements-seed.service';
 import { BoEmployersSeedService } from './bo-employers-seed.service';
 import { BoOccupationsSeedService } from './bo-occupations-seed.service';
 import { BoProfessionsSeedService } from './bo-professions-seed.service';
@@ -179,6 +180,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    *   sus sedes y membresías (H3), opt-in por `SEED_DIRECTORY_NETWORKS_ENABLED`.
    * @param qaFlows - Suites de `qa_lab` generadas desde el catálogo de flujos,
    *   opt-in por `SEED_QA_FLOWS`.
+   * @param admissionRequirements - Requisitos de la admisión ALTA_DE_DOCTOR
+   *   (proceso 2.1), el checklist que revisa el portal admin.
    * @param logger - Logger estructurado del arranque.
    * @param coreState - Dónde queda registrado qué paso núcleo falló, para que
    *   `/readiness` lo vea (SEED-01); opcional para quien arma el orquestador a mano.
@@ -214,6 +217,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly people: PeopleSeedService,
     private readonly directoryNetworks: DirectoryNetworksSeedService,
     private readonly qaFlows: QaFlowsSeedService,
+    private readonly admissionRequirements: AdmissionRequirementsSeedService,
     private readonly logger: PinoLogger,
     @Optional() private readonly coreState?: SeedCoreState,
   ) {
@@ -406,6 +410,15 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'catálogos de afiliación y representación legal',
         kind: 'core',
         run: () => this.affiliationCatalogs.run(),
+      },
+      // El checklist de la admisión de médicos (proceso 2.1). Es núcleo: sin
+      // requisitos la bandeja de Admisiones no tiene qué revisar, y el servidor
+      // se niega a verificar a quien no tiene checklist. Depende de los
+      // conceptos `profiles:ADMISSION_*` del catálogo de conceptos.
+      {
+        name: 'requisitos de admisión de profesionales',
+        kind: 'core',
+        run: () => this.admissionRequirements.run(),
       },
       // Y con ellos, por lo mismo: el alta de paciente resuelve
       // `VS_BO_OCCUPATION` por su código para el desplegable de ocupación.

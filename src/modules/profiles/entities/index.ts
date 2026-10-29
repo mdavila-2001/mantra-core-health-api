@@ -18,3 +18,7 @@ export * from './professional_credentials.entity';
 export * from './provider_operator_profiles.entity';
 export * from './related_persons.entity';
 export * from './secretary_profiles.entity';
+export * from './admission_requirements.entity';
+export * from './practitioner_admissions.entity';
+export * from './practitioner_admission_reviews.entity';
+export * from './practitioner_admission_events.entity';
