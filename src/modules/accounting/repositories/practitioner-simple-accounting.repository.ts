@@ -58,6 +58,18 @@ export class PractitionerSimpleAccountingRepository {
     return em.find(PractitionerSimpleAccounts, { practiceId });
   }
 
+  /**
+   * Serializa las altas de cuenta de una práctica: toma un lock advisory de
+   * transacción sobre ella (se suelta solo al confirmar o revertir). Sin esto,
+   * dos altas simultáneas leen las mismas cuentas, calculan el mismo código y
+   * una choca con el UNIQUE `(practice_id, code)`.
+   */
+  async lockAccountsOf(em: EntityManager, practiceId: string): Promise<void> {
+    await em.execute('select pg_advisory_xact_lock(hashtextextended(?, 0))', [
+      `practitioner_simple_accounts:${practiceId}`,
+    ]);
+  }
+
   findAccount(
     em: EntityManager,
     id: string,
