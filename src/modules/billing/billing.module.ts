@@ -3,7 +3,6 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { CommonModule } from '../common/common.module';
 import { PracticeModule } from '../practice/practice.module';
-import { SurveysModule } from '../surveys/surveys.module';
 import {
   BillingReceivablesController,
   BillingPayablesController,
@@ -61,10 +60,6 @@ import {
     // Puerto de lectura público para agrupar facturas por tenant sin importar
     // la entidad ORM de Practice dentro del dominio Billing.
     PracticeModule,
-    // FT-31 — reutiliza sus repositorios para auto-crear la encuesta de
-    // satisfacción por defecto de un servicio médico nuevo, en la misma
-    // transacción que lo da de alta.
-    SurveysModule,
     // Bytes de la imagen de un servicio (P-22-8): la autorización por contexto
     // la decide `billing`; `common` solo los sirve.
     CommonModule,

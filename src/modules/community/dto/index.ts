@@ -14,6 +14,7 @@ export * from './report.dto';
 export * from './moderation-decision.dto';
 export * from './appeal.dto';
 export * from './review.dto';
+export * from './reviewable-care.dto';
 export * from './poll.dto';
 export * from './group.dto';
 export * from './feed.dto';

@@ -11,6 +11,7 @@ import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import { SurveysTemplatesService } from './surveys-templates.service';
 import { SurveysErrorReason } from '../surveys.error-reasons';
 import { SURVEYS, ANSWER_TYPE_BY_CODE } from '../surveys.concepts';
+import { DomainException } from '../../../common';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -50,14 +51,23 @@ function build() {
     findQuestionById: mockFn(),
     removeQuestion: mockFn(),
     lockTemplate: mockFn().mockResolvedValue(undefined),
+    listVersions: mockFn().mockResolvedValue([]),
+  };
+  const assignmentsRepo = {
+    listActiveByVersions: mockFn().mockResolvedValue([]),
+  };
+  const targetsRepo = {
+    findServiceNames: mockFn().mockResolvedValue(new Map()),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new SurveysTemplatesService(
     em as any,
     templatesRepo as any,
     logger as any,
+    assignmentsRepo as any,
+    targetsRepo as any,
   );
-  return { service, tx, templatesRepo };
+  return { service, tx, templatesRepo, assignmentsRepo, targetsRepo };
 }
 
 /** Plantilla del profesional dueño, en el tenant de la prueba. */
@@ -827,5 +837,266 @@ describe('SurveysTemplatesService', () => {
         withTenant(() => d.service.deactivateTemplate('tpl-1', actor)),
       ).rejects.toBeInstanceOf(ConflictException);
     });
+  });
+});
+
+describe('SurveysTemplatesService · la encuesta base es del sistema y las preguntas del médico son opcionales (F3)', () => {
+  /** La plantilla de sistema de consulta del tenant: sin profesional dueño. */
+  const systemTemplate = () =>
+    ownedTemplate({
+      ownerPractitionerId: undefined,
+      ownerTypeConceptId: SURVEYS.SYSTEM_BASE_CONSULTATION,
+    });
+
+  describe('required forzado a false en las plantillas del médico', () => {
+    it('addQuestion guarda required=false aunque el cliente mande true', async () => {
+      const d = build();
+      d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
+      d.templatesRepo.findLatestVersion.mockResolvedValue(draft());
+      d.templatesRepo.countQuestions.mockResolvedValue(0);
+      d.templatesRepo.createQuestion.mockReturnValue(question('q-1', 1));
+
+      await withTenant(() =>
+        d.service.addQuestion(
+          'tpl-1',
+          { questionText: '¿Volvería?', answerType: 'BOOLEAN', required: true },
+          actor,
+        ),
+      );
+
+      expect(d.templatesRepo.createQuestion).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ required: false }),
+      );
+    });
+
+    it('updateQuestion deja required=false aunque el cliente mande true, también sobre una pregunta que lo tenía', async () => {
+      const d = build();
+      d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
+      d.templatesRepo.findLatestVersion.mockResolvedValue(draft());
+      const q = question('q1', 1, { required: true });
+      d.templatesRepo.findQuestionById.mockResolvedValue(q);
+
+      await withTenant(() =>
+        d.service.updateQuestion('tpl-1', 'q1', { required: true }, actor),
+      );
+
+      expect(q.required).toBe(false);
+    });
+  });
+
+  describe('guardas de inmutabilidad: 403 SURVEY_SYSTEM_TEMPLATE_IMMUTABLE en toda mutación', () => {
+    const calls: [string, (s: SurveysTemplatesService) => Promise<unknown>][] =
+      [
+        [
+          'addQuestion',
+          (s) =>
+            s.addQuestion(
+              'tpl-1',
+              { questionText: 'x', answerType: 'TEXT' },
+              actor,
+            ),
+        ],
+        [
+          'updateTemplate',
+          (s) => s.updateTemplate('tpl-1', { title: 'x' }, actor),
+        ],
+        [
+          'updateQuestion',
+          (s) => s.updateQuestion('tpl-1', 'q1', { questionText: 'x' }, actor),
+        ],
+        ['deleteQuestion', (s) => s.deleteQuestion('tpl-1', 'q1', actor)],
+        [
+          'reorderQuestions',
+          (s) => s.reorderQuestions('tpl-1', { questionIds: ['q1'] }, actor),
+        ],
+        [
+          'publishVersion',
+          (s) => s.publishVersion('tpl-1', 1, {} as any, actor),
+        ],
+        ['deactivateTemplate', (s) => s.deactivateTemplate('tpl-1', actor)],
+        ['createNextVersion', (s) => s.createNextVersion('tpl-1', actor)],
+      ];
+
+    it.each(calls)('%s sobre la plantilla de sistema', async (_name, call) => {
+      const d = build();
+      d.templatesRepo.findTemplateById.mockResolvedValue(systemTemplate());
+
+      const error: any = await withTenant(() => call(d.service)).catch(
+        (e) => e,
+      );
+
+      expect(error).toBeInstanceOf(DomainException);
+      expect(error.getStatus()).toBe(403);
+      expect(error.reason).toBe(SurveysErrorReason.SYSTEM_TEMPLATE_IMMUTABLE);
+      expect(d.templatesRepo.createQuestion).not.toHaveBeenCalled();
+      expect(d.templatesRepo.createVersion).not.toHaveBeenCalled();
+      expect(d.templatesRepo.removeQuestion).not.toHaveBeenCalled();
+    });
+
+    it('la plantilla de sistema de OTRO tenant sigue siendo 404 (no se confirma nada)', async () => {
+      const d = build();
+      d.templatesRepo.findTemplateById.mockResolvedValue({
+        ...systemTemplate(),
+        tenantId: 'ten-otro',
+      });
+
+      await expect(
+        withTenant(() => d.service.deactivateTemplate('tpl-1', actor)),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('la lectura del detalle no la expone: la base no es de ningún profesional (404)', async () => {
+      const d = build();
+      d.templatesRepo.findTemplateById.mockResolvedValue(systemTemplate());
+
+      await expect(
+        withTenant(() => d.service.getTemplate('tpl-1', actor)),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+});
+
+describe('SurveysTemplatesService · a qué está asociada la encuesta (getTemplate.assignments)', () => {
+  /** Una asignación activa de una versión de `tpl-1`. */
+  const assignment = (
+    id: string,
+    surveyVersionId: string,
+    type: string,
+    targetId: string,
+  ) => ({
+    id,
+    surveyVersionId,
+    targetTypeConceptId: type,
+    targetId,
+    active: true,
+  });
+
+  /** Plantilla con versiones 1 y 2 y la última versión cargada. */
+  function ready() {
+    const d = build();
+    d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
+    d.templatesRepo.findLatestVersion.mockResolvedValue(
+      draft({
+        id: 'ver-2',
+        versionNumber: 2,
+        publicationStatusConceptId: SURVEYS.VERSION_PUBLISHED,
+      }),
+    );
+    d.templatesRepo.listVersions.mockResolvedValue([
+      draft({ id: 'ver-1', versionNumber: 1 }),
+      draft({ id: 'ver-2', versionNumber: 2 }),
+    ]);
+    return d;
+  }
+
+  it('el id de «todas mis consultas» es el que el front envía', () => {
+    expect(SURVEYS.CARE_TYPE_CONSULTATION).toBe(
+      'a0038828-6e68-55c5-aa59-d4c747035db6',
+    );
+  });
+
+  it('informa las asignaciones activas con el nombre del servicio sólo en SERVICE', async () => {
+    const d = ready();
+    d.assignmentsRepo.listActiveByVersions.mockResolvedValue([
+      assignment('a-svc', 'ver-2', SURVEYS.TARGET_SERVICE, 'cat-1'),
+      assignment(
+        'a-care',
+        'ver-2',
+        SURVEYS.TARGET_CARE_TYPE,
+        SURVEYS.CARE_TYPE_CONSULTATION,
+      ),
+      assignment('a-appt', 'ver-2', SURVEYS.TARGET_APPOINTMENT, 'bkg-1'),
+    ]);
+    d.targetsRepo.findServiceNames.mockResolvedValue(
+      new Map([['cat-1', 'Laboratorio']]),
+    );
+
+    const res = await withTenant(() => d.service.getTemplate('tpl-1', actor));
+
+    expect(res.assignments).toEqual([
+      {
+        id: 'a-svc',
+        targetType: 'SERVICE',
+        targetId: 'cat-1',
+        targetName: 'Laboratorio',
+        active: true,
+      },
+      {
+        id: 'a-care',
+        targetType: 'CARE_TYPE',
+        targetId: SURVEYS.CARE_TYPE_CONSULTATION,
+        targetName: null,
+        active: true,
+      },
+      {
+        id: 'a-appt',
+        targetType: 'APPOINTMENT',
+        targetId: 'bkg-1',
+        targetName: null,
+        active: true,
+      },
+    ]);
+    expect(d.targetsRepo.findServiceNames).toHaveBeenCalledWith(
+      expect.anything(),
+      ['cat-1'],
+    );
+  });
+
+  it('busca las de todas las versiones de la plantilla, y sólo las activas', async () => {
+    const d = ready();
+
+    await withTenant(() => d.service.getTemplate('tpl-1', actor));
+
+    expect(d.assignmentsRepo.listActiveByVersions).toHaveBeenCalledWith(
+      expect.anything(),
+      ['ver-1', 'ver-2'],
+    );
+  });
+
+  it('la misma cosa asociada a dos versiones se informa una vez, con la versión más alta', async () => {
+    const d = ready();
+    d.assignmentsRepo.listActiveByVersions.mockResolvedValue([
+      assignment('a-v1', 'ver-1', SURVEYS.TARGET_SERVICE, 'cat-1'),
+      assignment('a-v2', 'ver-2', SURVEYS.TARGET_SERVICE, 'cat-1'),
+    ]);
+
+    const res = await withTenant(() => d.service.getTemplate('tpl-1', actor));
+
+    expect(res.assignments?.map((a) => a.id)).toEqual(['a-v2']);
+  });
+
+  it('una plantilla sin asociaciones devuelve una lista vacía', async () => {
+    const d = ready();
+
+    const res = await withTenant(() => d.service.getTemplate('tpl-1', actor));
+
+    expect(res.assignments).toEqual([]);
+  });
+
+  it('un servicio que ya no está en el catálogo sale con targetName nulo', async () => {
+    const d = ready();
+    d.assignmentsRepo.listActiveByVersions.mockResolvedValue([
+      assignment('a-svc', 'ver-2', SURVEYS.TARGET_SERVICE, 'cat-borrado'),
+    ]);
+
+    const res = await withTenant(() => d.service.getTemplate('tpl-1', actor));
+
+    expect(res.assignments?.[0].targetName).toBeNull();
+  });
+
+  it('la plantilla de sistema no se lee (404): nunca expone asignaciones', async () => {
+    const d = ready();
+    d.templatesRepo.findTemplateById.mockResolvedValue(
+      ownedTemplate({
+        ownerPractitionerId: undefined,
+        ownerTypeConceptId: SURVEYS.SYSTEM_BASE_CONSULTATION,
+      }),
+    );
+
+    await expect(
+      withTenant(() => d.service.getTemplate('tpl-1', actor)),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    expect(d.assignmentsRepo.listActiveByVersions).not.toHaveBeenCalled();
   });
 });

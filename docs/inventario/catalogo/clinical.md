@@ -18,11 +18,11 @@
 | [diagnostic_reports](#diagnostic_reports) | Gestiona el ciclo de vida del informe diagnóstico y lo vincula con su solicitud y encuentro; los resultados estructurados y archivos asociados se mantienen en el dominio de diagnóstico. | 16 | 14 | 20 | COINCIDE |
 | [encounter_locations](#encounter_locations) | Vincula un encuentro con los lugares de prestación para mantener el contexto físico de la atención. | 13 | 7 | 4 | COINCIDE |
 | [encounter_participants](#encounter_participants) | Identifica a las personas que participan en un encuentro y su rol para conservar quién intervino en la atención. | 14 | 7 | 11 | COINCIDE |
-| [encounters](#encounters) | Representa cada contacto asistencial y vincula paciente, equipo, sede, agenda, motivo y estado de atención. | 20 | 13 | 80 | COINCIDE |
+| [encounters](#encounters) | Representa cada contacto asistencial y vincula paciente, equipo, sede, agenda, motivo y estado de atención. | 20 | 13 | 83 | COINCIDE |
 | [family_member_history](#family_member_history) | Conserva antecedentes familiares relevantes para la evaluación de riesgo y la historia de salud del paciente. | 15 | 9 | 0 | COINCIDE |
 | [immunizations](#immunizations) | Registra inmunizaciones administradas o documentadas en la historia de salud para sostener seguimiento y continuidad preventiva. | 15 | 10 | 3 | COINCIDE |
 | [medication_records](#medication_records) | Conserva el historial clínico de uso o administración de medicación del paciente; no representa el inventario ni la dispensación de farmacia. | 16 | 12 | 1 | COINCIDE |
-| [medication_requests](#medication_requests) | Registra solicitudes o prescripciones de medicamentos, su indicación y trazabilidad clínica dentro de la atención del paciente. | 31 | 16 | 45 | DIVERGE |
+| [medication_requests](#medication_requests) | Registra solicitudes o prescripciones de medicamentos, su indicación y trazabilidad clínica dentro de la atención del paciente. | 31 | 16 | 46 | DIVERGE |
 | [observation_components](#observation_components) | Desglosa observaciones compuestas en componentes ordenados para preservar cada resultado y su tipo de valor de manera interpretable. | 23 | 10 | 2 | COINCIDE |
 | [observation_notes](#observation_notes) | Guarda notas narrativas complementarias sobre una observación cuando el dato codificado requiere contexto clínico adicional. | 5 | 2 | 2 | COINCIDE |
 | [observation_performers](#observation_performers) | Atribuye quién o qué dispositivo realizó una observación para dar procedencia al resultado clínico. | 8 | 4 | 1 | COINCIDE |
@@ -1004,7 +1004,7 @@ Representa cada contacto asistencial y vincula paciente, equipo, sede, agenda, m
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_08_clinical.puml: encounters`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_08_clinical.puml` · **DDL:** `SQL/08_clinical/02_tables.sql`
 - **Entidad del ORM:** `Encounters` — `src/modules/clinical/entities/encounters.entity.ts`
-- **Resumen:** 20 columnas · 13 índices · 11 FK salientes · 30 entrantes · 80 operaciones
+- **Resumen:** 20 columnas · 13 índices · 11 FK salientes · 30 entrantes · 83 operaciones
 
 #### Columnas
 
@@ -1150,9 +1150,11 @@ Representa cada contacto asistencial y vincula paciente, equipo, sede, agenda, m
 | POST /community/groups/{groupId}/posts | LEE | DIRECTA |
 | POST /community/profiles/{profileId}/reviews | LEE | DIRECTA |
 | PUT /community/ratings | LEE | DIRECTA |
+| GET /patients/me/reviewable-care | LEE | DIRECTA |
 | POST /patients/me/reviews | LEE | DIRECTA |
 | GET /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
 | POST /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents | LEE | DIRECTA |
 | POST /practitioner-delegates/{id}/grants | LEE | DIRECTA |
 | POST /diagnostics/clinical-media | LEE | DIRECTA |
 | POST /diagnostics/specimens | LEE | DIRECTA |
@@ -1169,6 +1171,7 @@ Representa cada contacto asistencial y vincula paciente, equipo, sede, agenda, m
 | POST /insurance/received-claims/{id}/decision | LEE | DIRECTA |
 | POST /procedure-cases/{id}/diagnoses | LEE | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
+| PATCH /profiles/practitioners/{profileId} | LEE | DIRECTA |
 | DELETE /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |
 | PUT /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |
 | GET /profiles/practitioners/{profileId}/summary | LEE | DIRECTA |
@@ -1445,7 +1448,7 @@ Registra solicitudes o prescripciones de medicamentos, su indicación y trazabil
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_08_clinical.puml: medication_requests`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_08_clinical.puml` · **DDL:** `SQL/08_clinical/02_tables.sql`
 - **Entidad del ORM:** `MedicationRequests` — `src/modules/clinical/entities/medication_requests.entity.ts`
-- **Resumen:** 31 columnas · 16 índices · 17 FK salientes · 8 entrantes · 45 operaciones
+- **Resumen:** 31 columnas · 16 índices · 17 FK salientes · 8 entrantes · 46 operaciones
 
 #### Columnas
 
@@ -1584,6 +1587,7 @@ Registra solicitudes o prescripciones de medicamentos, su indicación y trazabil
 | POST /pharmacy/orders/{id}/reject | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/review | LEE | DIRECTA |
 | GET /pharmacy/orders/me | LEE | DIRECTA |
+| PATCH /profiles/practitioners/{profileId} | LEE | DIRECTA |
 | DELETE /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |
 | PUT /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |
 | GET /profiles/practitioners/{profileId}/summary | LEE | DIRECTA |

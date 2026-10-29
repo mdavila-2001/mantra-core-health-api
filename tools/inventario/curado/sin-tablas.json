@@ -176,19 +176,19 @@
   "TelemetryOnboardingAnalyticsController_getFunnelReport": {
     "operacion": "GET /admin/analytics/onboarding/funnel",
     "motivo": "Calcula el embudo sobre los eventos de alta que el proceso acumula en memoria (`events`); no consulta la base de datos.",
-    "fuente": "src/modules/telemetry/services/telemetry-onboarding-analytics.service.ts:19",
+    "fuente": "src/modules/telemetry/application/services/telemetry-onboarding-analytics.service.ts:19",
     "revision": "manual, 2026-10-25"
   },
   "TelemetryOnboardingAnalyticsController_getHeatmapReport": {
     "operacion": "GET /admin/analytics/onboarding/heatmap",
     "motivo": "Calcula el mapa de calor sobre los eventos de alta que el proceso acumula en memoria (`events`); no consulta la base de datos.",
-    "fuente": "src/modules/telemetry/services/telemetry-onboarding-analytics.service.ts:19",
+    "fuente": "src/modules/telemetry/application/services/telemetry-onboarding-analytics.service.ts:19",
     "revision": "manual, 2026-10-25"
   },
   "TelemetryOnboardingAnalyticsController_recordEvents": {
     "operacion": "POST /telemetry/onboarding-events",
     "motivo": "Los eventos del embudo de alta se acumulan sólo en la memoria del proceso (`events`); no hay fila en Postgres.",
-    "fuente": "src/modules/telemetry/services/telemetry-onboarding-analytics.service.ts:19",
+    "fuente": "src/modules/telemetry/application/services/telemetry-onboarding-analytics.service.ts:19",
     "revision": "manual, 2026-10-25"
   },
   "TerminologyImportTemplateController_descargarPlantilla": {

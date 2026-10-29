@@ -86,7 +86,7 @@ const RESTRICTED_DELETE_ALLOWLIST = new Set([
 ]);
 
 const AUTHN_NON_ROLE_ALLOWLIST =
-  /modules\/(telemetry|community|common)\/controllers\/|modules\/identity_assurance\/controllers\/identity-self-service\.controller\.ts|modules\/audio_assets\/controllers\/audio-assets\.controller\.ts/;
+  /modules\/telemetry\/presentation\/controllers\/|modules\/(community|common)\/controllers\/|modules\/identity_assurance\/controllers\/identity-self-service\.controller\.ts|modules\/audio_assets\/presentation\/controllers\/audio-assets\.controller\.ts/;
 
 /** ¿Existe un JwtAuthGuard registrado como APP_GUARD global? (defensa por defecto) */
 function hasGlobalJwtGuard() {
@@ -387,8 +387,8 @@ const TENANT_SCOPE_SYSTEM_SWEEP_ALLOWLIST = new Set([
   // compartido (`tenant_id IS NULL`) no pertenece a ninguno. Aparecieron al
   // añadir `tenant_id` al módulo (2026-08-11): antes la entidad no tenía
   // columna de tenant y la regla no aplicaba.
-  'src/modules/audio_assets/repositories/audio-maintenance.repository.ts#listReady',
-  'src/modules/audio_assets/repositories/audio-maintenance.repository.ts#listGarbageCandidates',
+  'src/modules/audio_assets/infrastructure/repositories/audio-maintenance.repository.ts#listReady',
+  'src/modules/audio_assets/infrastructure/repositories/audio-maintenance.repository.ts#listGarbageCandidates',
   'src/modules/automation/repositories/automation-governance.repository.ts#findEnabledCalendarTriggers',
   'src/modules/practice/repositories/practices.repository.ts#findActive',
   'src/modules/consent/repositories/consents.repository.ts#findExpirable',
