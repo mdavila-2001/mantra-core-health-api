@@ -111,7 +111,7 @@ export const CONSTRAINT_RULES: Readonly<Record<string, DatabaseViolationRule>> =
       'El espacio se superpone con otro en el lienzo',
     ),
     ex_org_user_assignments_unit_head: conflict(
-      'UNIT_HEAD_OVERLAP',
+      'UNIT_HEAD_ALREADY_ASSIGNED',
       'La unidad ya tiene un responsable en ese período',
     ),
     ex_pharmacy_on_call_shifts_site_overlap: conflict(
@@ -156,7 +156,7 @@ export const CONSTRAINT_RULES: Readonly<Record<string, DatabaseViolationRule>> =
       'La unidad ya tiene un centro de costo activo',
     ),
     ux_inventory_locations_ward_stock_unit: conflict(
-      'UNIT_ALREADY_HAS_WARD_STOCK',
+      'WARD_STOCK_ALREADY_EXISTS',
       'La unidad ya tiene un botiquín',
     ),
     // --- CHECK (23514) -----------------------------------------------------
@@ -184,6 +184,20 @@ export const CONSTRAINT_RULES: Readonly<Record<string, DatabaseViolationRule>> =
     ck_cleaning_orders_inspector_differs: unprocessable(
       'INSPECTION_BY_CLEANER_NOT_ALLOWED',
       'Quien terminó la limpieza no puede inspeccionarla',
+    ),
+    // F5 de operaciones: la API pre-valida el par (punto de toma ↔ sede, alcance ↔
+    // objetivo) y responde 422 con el reason propio; la base es la red.
+    ck_service_requests_suggested_care_space_requires_site: unprocessable(
+      'COLLECTION_POINT_REQUIRES_SITE',
+      'El punto de toma exige la sede sugerida',
+    ),
+    ck_specimen_collection_events_care_space_requires_site: unprocessable(
+      'COLLECTION_POINT_REQUIRES_SITE',
+      'El punto de toma exige la sede de la toma',
+    ),
+    ck_org_user_assignments_scope_target: unprocessable(
+      'ASSIGNMENT_SCOPE_TARGET_REQUIRED',
+      'El alcance elegido exige su objetivo',
     ),
     // --- FK que NO es de tenant (23503) ------------------------------------
     fk_space_tariffs_service_catalog_id: unprocessable(

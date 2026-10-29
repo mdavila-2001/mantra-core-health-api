@@ -280,6 +280,10 @@ import {
     INFRA_POLICIES,
     InfraPolicyRegistry,
     InfrastructureAccessService,
+    // F5: el nivel del actor en la estructura (organización, sucursal) y el estado
+    // operativo de los espacios los consumen laboratorio, farmacia y acceso delegado.
+    StructureAccessService,
+    OpsStateService,
   ],
 })
 export class PracticeModule {}

@@ -1,11 +1,18 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsBoolean, IsIn, IsInt, IsOptional, IsUUID } from 'class-validator';
+import { ASSIGNMENT_SCOPES } from './create-org-user-assignment.dto';
 
-const SCOPES = ['TENANT', 'PRACTICE', 'SITE', 'UNIT'] as const;
+const SCOPES = ASSIGNMENT_SCOPES;
 
 /**
  * Cuerpo de `PATCH /org/user-assignments/{id}` (UC-29-10). Al menos uno de
- * `supervisorUserId`, `accessScope` o `suspend` debe venir (validado en servicio).
+ * `supervisorUserId`, `accessScope`, un objetivo (`practiceId`, `practiceSiteId`,
+ * `clinicalUnitId`, `careSpaceId`) o `suspend` debe venir (validado en servicio).
+ *
+ * Cambiar el alcance es cambiar el objetivo: si viaja `accessScope` o algún
+ * objetivo, los objetivos del cuerpo **reemplazan** a los de la asignación (los
+ * que no vienen quedan en blanco) y el conjunto tiene que ser coherente con el
+ * alcance resultante.
  */
 export class UpdateOrgUserAssignmentDto {
   /**
@@ -23,6 +30,30 @@ export class UpdateOrgUserAssignmentDto {
   @IsOptional()
   @IsIn(SCOPES)
   accessScope?: (typeof SCOPES)[number];
+
+  /** Nuevo objetivo: práctica (alcance PRACTICE). */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  practiceId?: string;
+
+  /** Nuevo objetivo: sede (alcance SITE). */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  practiceSiteId?: string;
+
+  /** Nuevo objetivo: unidad clínica (alcance UNIT). */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  clinicalUnitId?: string;
+
+  /** Nuevo objetivo: espacio (alcance SPACE). */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  careSpaceId?: string;
 
   /**
    * Valor de suspend mantenido por la instancia.

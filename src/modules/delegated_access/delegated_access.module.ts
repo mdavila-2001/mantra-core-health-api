@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { PracticeModule } from '../practice/practice.module';
+import { MessagingModule } from '../messaging/messaging.module';
 import * as entities from './entities';
 import {
   OrgUserAssignmentsController,
@@ -15,6 +17,9 @@ import {
   AccessRequestsService,
   DelegatedAccessEvaluationService,
   DelegationScopeService,
+  OrgAssignmentScopeService,
+  OrgAssignmentReadService,
+  DelegatedAccessEventsService,
 } from './services';
 import {
   OrganizationUserAssignmentsRepository,
@@ -35,7 +40,13 @@ import {
  * efectivo. Auth vía guard global; `TokenService` llega por `AuthModule` (global).
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    // El nivel del actor en la estructura (organización, sucursal) y el outbox de
+    // los cambios de alcance. Ninguno de los dos importa `delegated_access`.
+    PracticeModule,
+    MessagingModule,
+  ],
   controllers: [
     OrgUserAssignmentsController,
     DelegatedPermissionSetsController,
@@ -60,6 +71,9 @@ import {
     PractitionerDelegatesService,
     AccessRequestsService,
     DelegatedAccessEvaluationService,
+    OrgAssignmentScopeService,
+    OrgAssignmentReadService,
+    DelegatedAccessEventsService,
   ],
 })
 export class DelegatedAccessModule {}
