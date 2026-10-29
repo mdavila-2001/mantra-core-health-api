@@ -149,8 +149,11 @@ export class AdmissionsController {
       'formulario enviado y bitácora. La lectura queda registrada.',
   })
   @ApiOkResponse({ type: AdmissionDetailDto })
-  detail(@Param('id', ParseUUIDPipe) id: string): Promise<AdmissionDetailDto> {
-    return this.reads.detail(id);
+  detail(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<AdmissionDetailDto> {
+    return this.reads.detail(id, actor);
   }
 
   @Post(':id/claim')

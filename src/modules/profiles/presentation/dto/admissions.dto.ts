@@ -10,9 +10,11 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
   Max,
   MaxLength,
   Min,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 import {
@@ -214,6 +216,12 @@ export class AdmissionChecklistItemDto {
     description: 'El dato o el archivo cambió después de revisarse: la revisión ya no vale.',
   })
   evidenceChanged!: boolean;
+  @ApiProperty({
+    description:
+      'Huella (sha256) del dato y del archivo de HOY. Se devuelve tal cual en ' +
+      '`evidenceSha256` al revisar el ítem: así el servidor sabe qué vio el revisor.',
+  })
+  evidenceSha256!: string;
   @ApiPropertyOptional({ nullable: true, type: Number, description: 'expectedRowVersion del ítem.' })
   rowVersion!: number | null;
 }
@@ -252,6 +260,8 @@ export class AdmissionDocumentDto {
   @ApiPropertyOptional({ nullable: true, type: Number }) pages!: number | null;
   @ApiProperty({ enum: ['PENDING', 'VERIFIED', 'REJECTED', 'INFO_REQUIRED'] })
   reviewState!: string;
+  @ApiProperty({ description: 'Huella (sha256) de la evidencia del ítem al que pertenece el archivo.' })
+  evidenceSha256!: string;
 }
 
 /** Un bloqueo de la verificación. */
@@ -452,6 +462,18 @@ export class ReviewAdmissionItemDto {
   @IsString()
   @MaxLength(2000)
   verificationSourceUri?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Huella (`evidenceSha256`) del ítem tal como la entregó `GET /admissions/:id`: lo que el ' +
+      'revisor tuvo delante. OBLIGATORIA para VERIFIED; si ya no coincide con la evidencia viva ' +
+      'responde 409 ADMISSION_EVIDENCE_CHANGED y no cambia nada.',
+    pattern: '^[0-9a-f]{64}$',
+  })
+  @ValidateIf((o: ReviewAdmissionItemDto) => o.decision === 'VERIFIED' || o.evidenceSha256 !== undefined)
+  @IsString()
+  @Matches(/^[0-9a-f]{64}$/)
+  evidenceSha256?: string;
 
   @ApiProperty({ description: 'Versión del ÍTEM (`rowVersion` del item del checklist).', minimum: 1 })
   @IsInt()

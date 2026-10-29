@@ -128,6 +128,10 @@ export enum ProfilesErrorReason {
   ADMISSION_FOUR_EYES_REQUIRED = 'ADMISSION_FOUR_EYES_REQUIRED',
   /** Nadie revisa ni aprueba su propia admisión. */
   ADMISSION_SELF_REVIEW = 'ADMISSION_SELF_REVIEW',
+  /** Quien consulta es el propio profesional: el personal no ve ni actúa sobre su propia admisión. */
+  ADMISSION_SELF_ACCESS = 'ADMISSION_SELF_ACCESS',
+  /** El documento o dato cambió desde que el revisor lo miró: debe volver a revisarlo. */
+  ADMISSION_EVIDENCE_CHANGED = 'ADMISSION_EVIDENCE_CHANGED',
   /** Sólo quien tomó la revisión puede actuar sobre sus ítems. */
   ADMISSION_NOT_ASSIGNED_TO_ACTOR = 'ADMISSION_NOT_ASSIGNED_TO_ACTOR',
   /** El ítem pedido no existe en esta admisión. */

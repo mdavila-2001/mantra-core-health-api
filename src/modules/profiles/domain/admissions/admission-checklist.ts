@@ -228,6 +228,7 @@ export function evaluateChecklist<I extends ChecklistItemState>(
     rows,
     summary: { total, verified, rejected, pending },
     blockers,
-    canVerify: blockers.length === 0,
+    // Falla cerrado: sin catálogo de requisitos no hay nada que verificar.
+    canVerify: rows.length > 0 && blockers.length === 0,
   };
 }

@@ -1,5 +1,6 @@
 import { jest } from '@jest/globals';
 import { ResourceNotFoundException } from '../../../../common';
+import { InsufficientRoleException } from '../../../../common/errors/domain.exception';
 import { Identifiers } from '../../../common/entities';
 import { Users } from '../../../iam/entities';
 import { CatalogConcepts } from '../../../terminology/entities';
@@ -138,7 +139,7 @@ function viewOf(
     items: items.map((i) => ({
       state: i.state,
       evidenceChanged: i.changed ?? false,
-      live: { itemType: i.type ?? 'CREDENTIAL', itemId: i.id, label: `Título ${i.id}`, fileId: i.fileId },
+      live: { itemType: i.type ?? 'CREDENTIAL', itemId: i.id, label: `Título ${i.id}`, fileId: i.fileId, evidenceSha256: `h-${i.id}` },
       review: i.review,
     })),
   }));
@@ -342,7 +343,7 @@ describe('PractitionerAdmissionsReadService · detalle', () => {
   it('404 si no existe', async () => {
     const d = detalleBase();
     d.admissionsRepo.findById.mockResolvedValue(null);
-    const error = await d.service.detail('x', NOW).catch((e: Error) => e);
+    const error = await d.service.detail('x', ACTOR, NOW).catch((e: Error) => e);
     expect(error).toBeInstanceOf(ResourceNotFoundException);
     expect((error as any).reason).toBe(ProfilesErrorReason.ADMISSION_NOT_FOUND);
   });
@@ -386,7 +387,7 @@ describe('PractitionerAdmissionsReadService · detalle', () => {
         },
       ]),
     );
-    const detail = await d.service.detail('adm-1', NOW);
+    const detail = await d.service.detail('adm-1', ACTOR, NOW);
 
     expect(detail.requirements).toHaveLength(1);
     const [verified, rejected] = detail.requirements[0].items;
@@ -414,7 +415,7 @@ describe('PractitionerAdmissionsReadService · detalle', () => {
     d.checklist.buildView.mockResolvedValue(
       viewOf([{ requirement: requirement('TIT'), items: [{ id: 'c1', state: 'PENDING' }] }]),
     );
-    const detail = await d.service.detail('adm-1', NOW);
+    const detail = await d.service.detail('adm-1', ACTOR, NOW);
     expect(detail.requirements[0].items[0]).toMatchObject({ id: null, rowVersion: null, state: 'PENDING' });
   });
 
@@ -426,7 +427,7 @@ describe('PractitionerAdmissionsReadService · detalle', () => {
         { requirement: requirement('TIT'), items: [{ id: 'c1', state: 'PENDING', changed: true, review: { id: 'r', rowVersion: 1 } }] },
       ]),
     );
-    expect((await d.service.detail('adm-1', NOW)).requirements[0].items[0].evidenceChanged).toBe(true);
+    expect((await d.service.detail('adm-1', ACTOR, NOW)).requirements[0].items[0].evidenceChanged).toBe(true);
   });
 
   it('los bloqueos del checklist viajan con su causa', async () => {
@@ -438,7 +439,7 @@ describe('PractitionerAdmissionsReadService · detalle', () => {
         { requirement: requirement('TIT'), items: [{ id: 'c1', state: 'REJECTED', review: { id: 'r', rowVersion: 1 } }] },
       ]),
     );
-    const detail = await d.service.detail('adm-1', NOW);
+    const detail = await d.service.detail('adm-1', ACTOR, NOW);
     expect(detail.canVerify).toBe(false);
     expect(detail.blockers).toEqual([
       { requirementCode: 'COL', label: 'COL', reason: 'MISSING' },
@@ -472,7 +473,7 @@ describe('PractitionerAdmissionsReadService · detalle', () => {
           ['f-c1', { id: 'f-c1', name: 'titulo-1.jpg', mimeType: 'image/jpeg', sizeBytes: 99, uploadedAt: NOW }],
         ]),
       );
-      const { documents } = await d.service.detail('adm-1', NOW);
+      const { documents } = await d.service.detail('adm-1', ACTOR, NOW);
       expect(documents.map((x) => `${x.requirementCode}:${x.fileId}:${x.reviewState}`)).toEqual([
         'MAT:f-l1:VERIFIED',
         'TIT:f-c1:REJECTED',
@@ -507,7 +508,7 @@ describe('PractitionerAdmissionsReadService · detalle', () => {
       d.evidence.fileFacts.mockResolvedValue(
         new Map(ids.map((id) => [`f-${id}`, { id: `f-${id}`, name: nombre, mimeType: 'application/pdf', sizeBytes: 1, uploadedAt: NOW }])),
       );
-      const { documents } = await d.service.detail('adm-1', NOW);
+      const { documents } = await d.service.detail('adm-1', ACTOR, NOW);
       expect(documents).toHaveLength(60);
       expect(documents.every((x) => x.name === nombre)).toBe(true);
       expect(documents.map((x) => x.fileId)).toEqual([...ids].sort().map((id) => `f-${id}`));
@@ -532,7 +533,7 @@ describe('PractitionerAdmissionsReadService · detalle', () => {
         }),
       );
       d.checklist.buildView.mockResolvedValue(viewOf([]));
-      const detail = await d.service.detail('adm-1', NOW);
+      const detail = await d.service.detail('adm-1', ACTOR, NOW);
       expect(detail.submittedFormSource).toBe('SNAPSHOT');
       expect(detail.practitioner).toMatchObject({ nationalId: '7654321', nationalIdIssuer: 'SC', age: 41, personalEmail: 'ana@example.com' });
       expect(d.evidence.buildSnapshot).not.toHaveBeenCalled();
@@ -542,7 +543,7 @@ describe('PractitionerAdmissionsReadService · detalle', () => {
       const d = detalleBase();
       d.admissionsRepo.findById.mockResolvedValue(admission('EN_REVISION'));
       d.checklist.buildView.mockResolvedValue(viewOf([]));
-      const detail = await d.service.detail('adm-1', NOW);
+      const detail = await d.service.detail('adm-1', ACTOR, NOW);
       expect(detail.submittedFormSource).toBe('LIVE');
       expect(d.evidence.buildSnapshot).toHaveBeenCalledTimes(1);
       expect(detail.practitioner.nationalId).toBe('999');
@@ -565,7 +566,7 @@ describe('PractitionerAdmissionsReadService · detalle', () => {
         occurredAt: NOW,
       },
     ]);
-    const { events } = await d.service.detail('adm-1', NOW);
+    const { events } = await d.service.detail('adm-1', ACTOR, NOW);
     expect(events[0]).toMatchObject({
       type: 'CLAIMED',
       fromStatus: { code: 'ENVIADA', label: 'Enviada' },
@@ -685,5 +686,75 @@ describe('PractitionerAdmissionsReadService · estado visible de verificación',
     expect(map.get('p4')?.status).toBe('EXPIRED');
     expect(map.get('p5')?.status).toBe('UNVERIFIED');
     expect(d.admissionsRepo.findCurrentByPractitioners).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('PractitionerAdmissionsReadService · S-3 el profesional no ve su propia admisión por la vista del personal', () => {
+  const DOCTOR_REVIEWER = { id: 'u-doctor', roles: ['ADMISSIONS_REVIEWER'] } as never;
+  const OWN_LINK = { userId: 'u-doctor', personId: 'prac-1' };
+
+  it('detail: quien tiene rol de admisiones y es el titular de la admisión recibe 403 ADMISSION_SELF_ACCESS', async () => {
+    const d = build();
+    d.admissionsRepo.findById.mockResolvedValue(admission('EN_REVISION'));
+    d.accountLinksRepo.findActiveByUser.mockResolvedValue(OWN_LINK);
+    const error = await d.service.detail('adm-1', DOCTOR_REVIEWER, NOW).catch((e: Error) => e);
+    expect(error).toBeInstanceOf(InsufficientRoleException);
+    expect((error as any).reason).toBe(ProfilesErrorReason.ADMISSION_SELF_ACCESS);
+    // No se armó nada del detalle: ni checklist, ni bitácora, ni notas.
+    expect(d.checklist.buildView).not.toHaveBeenCalled();
+    expect(d.eventsRepo.findByAdmission).not.toHaveBeenCalled();
+  });
+
+  it('detail: el mismo usuario con perfil de médico ve la admisión de OTRO profesional', async () => {
+    const d = build();
+    d.admissionsRepo.findById.mockResolvedValue(admission('EN_REVISION', { practitionerProfileId: 'prac-2' }));
+    d.accountLinksRepo.findActiveByUser.mockResolvedValue(OWN_LINK);
+    d.checklist.buildView.mockResolvedValue(viewOf([]));
+    d.data.set(Persons, [{ id: 'prac-2', name: 'Luis' }]);
+    d.data.set(Identifiers, []);
+    d.data.set(ProfessionalCredentials, []);
+    d.data.set(HealthPractitionerProfiles, []);
+    d.data.set(JurisdictionAuthorizations, []);
+    d.data.set(PractitionerSpecialties, []);
+    d.data.set(CatalogConcepts, []);
+    const detail = await d.service.detail('adm-1', DOCTOR_REVIEWER, NOW);
+    expect(detail.id).toBe('adm-1');
+  });
+
+  it('detail: un revisor sin perfil de médico (sin vínculo de cuenta) lo ve normal', async () => {
+    const d = build();
+    d.admissionsRepo.findById.mockResolvedValue(admission('ENVIADA'));
+    d.accountLinksRepo.findActiveByUser.mockResolvedValue(null);
+    d.checklist.buildView.mockResolvedValue(viewOf([]));
+    d.data.set(Persons, [{ id: 'prac-1', name: 'Ana' }]);
+    for (const cls of [Identifiers, ProfessionalCredentials, HealthPractitionerProfiles, JurisdictionAuthorizations, PractitionerSpecialties, CatalogConcepts]) {
+      d.data.set(cls, []);
+    }
+    await expect(d.service.detail('adm-1', ACTOR, NOW)).resolves.toBeDefined();
+  });
+
+  it('list: excluye del listado Y de los conteos la admisión del propio llamador', async () => {
+    const d = build();
+    d.accountLinksRepo.findActiveByUser.mockResolvedValue(OWN_LINK);
+    await d.service.list({}, DOCTOR_REVIEWER, NOW);
+    expect(d.admissionsRepo.listPage.mock.calls[0][1]).toMatchObject({ excludePractitionerProfileId: 'prac-1' });
+    expect(d.admissionsRepo.countByStatus.mock.calls[0][1]).toMatchObject({ excludePractitionerProfileId: 'prac-1' });
+  });
+
+  it('list: sin perfil propio no excluye nada', async () => {
+    const d = build();
+    await d.service.list({}, ACTOR, NOW);
+    expect(d.admissionsRepo.listPage.mock.calls[0][1].excludePractitionerProfileId).toBeUndefined();
+  });
+
+  it('assertNotSelfAccess sirve a los documentos y a cualquier otra lectura del personal', async () => {
+    const d = build();
+    d.accountLinksRepo.findActiveByUser.mockResolvedValue(OWN_LINK);
+    await expect(
+      d.service.assertNotSelfAccess(d.em as never, { practitionerProfileId: 'prac-1' }, DOCTOR_REVIEWER),
+    ).rejects.toBeInstanceOf(InsufficientRoleException);
+    await expect(
+      d.service.assertNotSelfAccess(d.em as never, { practitionerProfileId: 'prac-9' }, DOCTOR_REVIEWER),
+    ).resolves.toBeUndefined();
   });
 });

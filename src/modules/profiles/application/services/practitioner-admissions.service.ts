@@ -262,6 +262,7 @@ export class PractitionerAdmissionsService {
       const role = isOwner
         ? this.roleFor(caller.user, 'REVIEWER')
         : this.roleFor(caller.user, 'APPROVER');
+      await this.assertNotOwnAdmission(tx, admission, caller.user);
       this.assertVersion(admission, expectedRowVersion);
       this.assertTransition('RELEASE', status);
       const now = new Date();
@@ -290,6 +291,7 @@ export class PractitionerAdmissionsService {
     return this.em.transactional(async (tx) => {
       const role = this.roleFor(caller.user, 'APPROVER');
       const admission = await this.loadLocked(tx, id);
+      await this.assertNotOwnAdmission(tx, admission, caller.user);
       const status = admissionStatusCode(admission.statusConceptId);
       this.assertVersion(admission, expectedRowVersion);
       // ENVIADA: reasignar es asignar y tomar a la vez.
@@ -338,6 +340,7 @@ export class PractitionerAdmissionsService {
     const detail = await this.em.transactional(async (tx) => {
       const role = this.roleFor(caller.user, 'REVIEWER');
       const admission = await this.loadLocked(tx, id);
+      await this.assertNotOwnAdmission(tx, admission, caller.user);
       const status = admissionStatusCode(admission.statusConceptId);
       this.assertVersion(admission, dto.expectedRowVersion);
       this.assertTransition('REQUEST_INFO', status);
@@ -429,9 +432,17 @@ export class PractitionerAdmissionsService {
       const status = admissionStatusCode(admission.statusConceptId);
       await this.assertNotOwnAdmission(tx, admission, caller.user);
 
+      const live = (await this.evidence.collect(tx, admission.practitionerProfileId)).items.find(
+        (i) => i.itemId === review.itemId,
+      );
+
       // Idempotencia: repetir la misma revisión no escribe ni duplica el evento.
       const recorded = reviewStateOf(review.statusConceptId);
-      if (recorded === dto.decision && this.sameReview(review, dto)) {
+      if (
+        recorded === dto.decision &&
+        this.sameReview(review, dto) &&
+        live?.evidenceSha256 === review.evidenceSha256
+      ) {
         return this.read.detailOf(tx, admission);
       }
       if (review.rowVersion !== dto.expectedRowVersion) {
@@ -445,6 +456,22 @@ export class PractitionerAdmissionsService {
         );
       }
       this.assertAssignee(admission, caller.user);
+
+      // TOCTOU: la huella que queda es la que el revisor tuvo delante
+      // (`dto.evidenceSha256`), nunca la de «hoy». Si el médico cambió el dato o
+      // el archivo entre que el revisor lo miró y decidió, no se verifica nada.
+      const seen = dto.evidenceSha256;
+      const evidenceMoved =
+        dto.decision === 'VERIFIED'
+          ? !live || seen !== live.evidenceSha256
+          : seen !== undefined && seen !== live?.evidenceSha256;
+      if (evidenceMoved) {
+        throw new ConcurrencyConflictException(
+          'La evidencia del ítem cambió desde que la revisó: vuelva a abrirla',
+          { currentEvidenceSha256: live?.evidenceSha256 ?? null },
+          ProfilesErrorReason.ADMISSION_EVIDENCE_CHANGED,
+        );
+      }
 
       const requirement = (
         await this.checklist.requirementsOf(tx, admission.admissionTypeConceptId)
@@ -464,10 +491,6 @@ export class PractitionerAdmissionsService {
         throw reasonRequired();
       }
 
-      // El revisor ve el dato y el archivo de HOY: la huella guarda lo que vio.
-      const live = (await this.evidence.collect(tx, admission.practitionerProfileId)).items.find(
-        (i) => i.itemId === review.itemId,
-      );
       if (live) {
         review.fileId = live.fileId;
         review.evidenceSha256 = live.evidenceSha256;
@@ -927,7 +950,14 @@ export class PractitionerAdmissionsService {
   ): Promise<boolean> {
     const now = new Date();
     const source = input.verificationSourceUri?.trim();
+    // Nadie verifica ni rechaza su propio título, ni siquiera fuera de una admisión.
+    await this.assertNotOwnAdmission(
+      tx,
+      { practitionerProfileId: input.practitionerProfileId },
+      input.actor,
+    );
     return this.recordItemOutcome(tx, {
+      gate: input.actor,
       itemId: input.credentialId,
       practitionerProfileId: input.practitionerProfileId,
       state: input.decision,
@@ -970,6 +1000,12 @@ export class PractitionerAdmissionsService {
   private async recordItemOutcome(
     tx: EntityManager,
     input: {
+      /**
+       * Revisión hecha por una PERSONA (CV-20): pasa por las mismas puertas que
+       * `reviewItem` —rol, no ser el propio profesional, admisión EN_REVISION y
+       * ser quien la tomó—. Sin `gate` es una autoridad externa (M27).
+       */
+      gate?: AuthenticatedUser;
       itemId: string;
       practitionerProfileId: string;
       state: 'VERIFIED' | 'REJECTED';
@@ -999,12 +1035,28 @@ export class PractitionerAdmissionsService {
     }
     const status = admissionStatusCode(admission.statusConceptId);
     if (status !== 'ENVIADA' && status !== 'EN_REVISION') return false;
+    let role = input.role;
+    if (input.gate) {
+      role = this.roleFor(input.gate, 'REVIEWER');
+      await this.assertNotOwnAdmission(tx, admission, input.gate);
+      if (status !== 'EN_REVISION') {
+        throw new PreconditionFailedException(
+          'La admisión no está en revisión: tómela antes de verificar sus títulos',
+          { action: 'REVIEW_ITEM', status },
+          ProfilesErrorReason.ADMISSION_INVALID_TRANSITION,
+        );
+      }
+      this.assertAssignee(admission, input.gate);
+    }
     const view = await this.checklist.materialize(tx, admission, {
       actorUserId: input.actorUserId,
     });
     for (const row of view.evaluation.rows) {
       for (const item of row.items) {
         if (item.live.itemId !== input.itemId || !item.review) continue;
+        // La huella que queda es la que el revisor tiene delante en este instante.
+        item.review.evidenceSha256 = item.live.evidenceSha256;
+        item.review.fileId = item.live.fileId;
         this.applyReview(item.review, input.state, input.actorUserId, input.now, {
           reason: input.reason,
           reasonCode: input.state === 'REJECTED' ? 'OTRO' : undefined,
@@ -1021,7 +1073,7 @@ export class PractitionerAdmissionsService {
           input.state === 'VERIFIED' ? 'ITEM_VERIFIED' : 'ITEM_REJECTED',
           {
             actorUserId: input.actorUserId,
-            role: input.role,
+            role,
             requirementId: row.requirement.id,
             itemType: item.live.itemType,
             itemId: item.live.itemId,
@@ -1099,7 +1151,7 @@ export class PractitionerAdmissionsService {
   /** Nadie revisa ni aprueba su propia admisión (un administrador que además es médico). */
   private async assertNotOwnAdmission(
     tx: EntityManager,
-    admission: PractitionerAdmissions,
+    admission: Pick<PractitionerAdmissions, 'practitionerProfileId'>,
     user: AuthenticatedUser,
   ): Promise<void> {
     const link = await this.accountLinksRepo.findActiveByPerson(

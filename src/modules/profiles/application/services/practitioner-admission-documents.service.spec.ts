@@ -20,6 +20,12 @@ function build(files: string[] = ['f1', 'f2']) {
       Promise.resolve(id === 'adm-1' ? { id, practitionerProfileId: 'prac-1' } : id === 'adm-2' ? { id, practitionerProfileId: 'prac-2' } : null),
     ),
   };
+  const accountLinksRepo = {
+    // 'u-doctor' es la cuenta del profesional prac-1 (además tiene rol de admisiones).
+    findActiveByUser: fn((_em: unknown, userId: string) =>
+      Promise.resolve(userId === 'u-doctor' ? { userId, personId: 'prac-1' } : null),
+    ),
+  };
   const evidence = {
     collect: fn((_em: unknown, practitioner: string) =>
       Promise.resolve({
@@ -43,6 +49,7 @@ function build(files: string[] = ['f1', 'f2']) {
   const service = new PractitionerAdmissionDocumentsService(
     em as never,
     admissionsRepo as never,
+    accountLinksRepo as never,
     evidence as never,
     filesService as never,
     logger as never,
@@ -56,6 +63,35 @@ function query(url: string) {
 }
 
 describe('PractitionerAdmissionDocumentsService', () => {
+  describe('S-3 · el profesional no abre sus documentos por la vista del personal', () => {
+    const DOCTOR = { id: 'u-doctor', roles: ['ADMISSIONS_REVIEWER'] } as never;
+
+    it('con rol de revisor pero dueño de la admisión: 403 ADMISSION_SELF_ACCESS al emitir', async () => {
+      const d = build();
+      const error = await d.service.issueUrl('adm-1', 'f1', DOCTOR, NOW).catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(InsufficientRoleException);
+      expect((error as any).reason ?? (error as any).getResponse?.().reason).toBe(
+        ProfilesErrorReason.ADMISSION_SELF_ACCESS,
+      );
+    });
+
+    it('tampoco lo abre con una URL firmada válida que le hayan pasado', async () => {
+      const d = build();
+      const issued = await d.service.issueUrl('adm-1', 'f1', REVIEWER, NOW);
+      // Misma firma pero otro actor: ya la rechaza la firma; la del dueño no se puede ni emitir.
+      await expect(d.service.open('adm-1', 'f1', query(issued.url), DOCTOR, NOW)).rejects.toBeInstanceOf(
+        InsufficientRoleException,
+      );
+      expect(d.filesService.downloadForAuthorizedContext).not.toHaveBeenCalled();
+    });
+
+    it('el mismo usuario con rol revisa la admisión de OTRO profesional sin problema', async () => {
+      const d = build();
+      const issued = await d.service.issueUrl('adm-2', 'f-otra', DOCTOR, NOW);
+      expect(issued.url).toContain('/admissions/adm-2/documents/f-otra/content');
+    });
+  });
+
   it('emite una URL firmada de dos minutos con el nombre y el tipo del archivo', async () => {
     const d = build();
     const issued = await d.service.issueUrl('adm-1', 'f1', REVIEWER, NOW);

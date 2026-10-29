@@ -122,8 +122,8 @@ describe('evaluateChecklist', () => {
     ]);
   });
 
-  it('una lista vacía no bloquea sola (el servicio exige catálogo no vacío)', () => {
-    expect(evaluateChecklist([]).canVerify).toBe(true);
+  it('una lista vacía no puede verificar (falla cerrado)', () => {
+    expect(evaluateChecklist([]).canVerify).toBe(false); // falla cerrado: catálogo vacío
   });
 
   it('200 ítems en un requisito se evalúan sin problema', () => {
