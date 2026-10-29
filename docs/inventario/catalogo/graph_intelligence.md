@@ -10,19 +10,19 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [graph_access_scopes](#graph_access_scopes) | Define alcances de acceso a proyecciones del grafo para limitar consultas por tenant y propósito. | 9 | 2 | 7 | COINCIDE |
+| [graph_access_scopes](#graph_access_scopes) | Define alcances de acceso a proyecciones del grafo para limitar consultas por tenant y propósito. | 9 | 2 | 6 | COINCIDE |
 | [graph_communities](#graph_communities) | Representa comunidades o agrupaciones detectadas en relaciones para análisis organizacional o de riesgo. | 7 | 2 | 5 | COINCIDE |
 | [graph_deletion_jobs](#graph_deletion_jobs) | Coordina eliminación de nodos y aristas derivados cuando cambia el dato canónico o su permiso de uso. | 9 | 2 | 5 | COINCIDE |
 | [graph_edge_evidence](#graph_edge_evidence) | Vincula evidencia de origen a aristas para explicar por qué existe cada relación proyectada. | 7 | 2 | 5 | COINCIDE |
-| [graph_edges](#graph_edges) | Representa relaciones entre nodos para consultas multi-salto en proyecciones derivadas. | 13 | 4 | 9 | COINCIDE |
+| [graph_edges](#graph_edges) | Representa relaciones entre nodos para consultas multi-salto en proyecciones derivadas. | 13 | 4 | 8 | COINCIDE |
 | [graph_node_identifiers](#graph_node_identifiers) | Relaciona nodos con identificadores de origen para resolver entidades proyectadas sin convertir el grafo en fuente canónica. | 6 | 2 | 3 | COINCIDE |
 | [graph_nodes](#graph_nodes) | Representa nodos de proyecciones de relaciones para análisis de derivaciones, organizaciones, fraude y linaje. | 11 | 4 | 11 | COINCIDE |
 | [graph_path_cache](#graph_path_cache) | Almacena rutas calculadas temporalmente para acelerar consultas repetidas del grafo. | 10 | 1 | 9 | COINCIDE |
 | [graph_projection_definitions](#graph_projection_definitions) | Configura proyecciones de grafos que se derivan de datos canónicos PostgreSQL. | 8 | 2 | 1 | COINCIDE |
-| [graph_projection_runs](#graph_projection_runs) | Registra construcción y actualización de proyecciones para mantener linaje y diagnóstico. | 9 | 2 | 4 | COINCIDE |
+| [graph_projection_runs](#graph_projection_runs) | Registra construcción y actualización de proyecciones para mantener linaje y diagnóstico. | 9 | 2 | 3 | COINCIDE |
 | [graph_risk_scores](#graph_risk_scores) | Conserva puntajes calculados sobre grafos para apoyar análisis de riesgos y relaciones. | 9 | 2 | 6 | COINCIDE |
 | [graph_rule_definitions](#graph_rule_definitions) | Define reglas que evalúan patrones de relaciones dentro de proyecciones del grafo. | 8 | 2 | 1 | COINCIDE |
-| [graph_rule_hits](#graph_rule_hits) | Registra ocurrencias de reglas sobre grafos para investigación y seguimiento. | 9 | 2 | 4 | COINCIDE |
+| [graph_rule_hits](#graph_rule_hits) | Registra ocurrencias de reglas sobre grafos para investigación y seguimiento. | 9 | 2 | 3 | COINCIDE |
 
 ### Tablas sin relaciones dentro del schema
 
@@ -39,7 +39,7 @@ Define alcances de acceso a proyecciones del grafo para limitar consultas por te
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml: graph_access_scopes`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml` · **DDL:** `SQL/61_graph_intelligence/02_tables.sql`
 - **Entidad del ORM:** `GraphAccessScopes` — `src/modules/graph_intelligence/entities/graph_access_scopes.entity.ts`
-- **Resumen:** 9 columnas · 2 índices · 0 FK salientes · 0 entrantes · 7 operaciones
+- **Resumen:** 9 columnas · 2 índices · 0 FK salientes · 0 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -74,7 +74,6 @@ Define alcances de acceso a proyecciones del grafo para limitar consultas por te
 |---|---|---|
 | POST /graph/access-scopes | CREA | DIRECTA |
 | POST /graph/access-scopes | LEE | DIRECTA |
-| PATCH /graph/access-scopes/{id} | ACTUALIZA | POR_TIPO |
 | PATCH /graph/access-scopes/{id} | LEE | DIRECTA |
 | POST /graph/paths | LEE | DIRECTA |
 | POST /graph/rules/{id}/evaluate | LEE | DIRECTA |
@@ -285,7 +284,7 @@ Representa relaciones entre nodos para consultas multi-salto en proyecciones der
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml: graph_edges`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml` · **DDL:** `SQL/61_graph_intelligence/02_tables.sql`
 - **Entidad del ORM:** `GraphEdges` — `src/modules/graph_intelligence/entities/graph_edges.entity.ts`
-- **Resumen:** 13 columnas · 4 índices · 0 FK salientes · 0 entrantes · 9 operaciones
+- **Resumen:** 13 columnas · 4 índices · 0 FK salientes · 0 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -326,7 +325,6 @@ Representa relaciones entre nodos para consultas multi-salto en proyecciones der
 |---|---|---|
 | POST /graph/deletion-jobs | BORRA | DIRECTA |
 | POST /graph/deletion-jobs | LEE | DIRECTA |
-| POST /graph/edges/{id}/expire | ACTUALIZA | POR_TIPO |
 | POST /graph/edges/{id}/expire | LEE | DIRECTA |
 | POST /graph/paths | LEE | DIRECTA |
 | POST /graph/projections/edges/upsert | ACTUALIZA | POR_TIPO |
@@ -609,7 +607,7 @@ Registra construcción y actualización de proyecciones para mantener linaje y d
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml: graph_projection_runs`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml` · **DDL:** `SQL/61_graph_intelligence/02_tables.sql`
 - **Entidad del ORM:** `GraphProjectionRuns` — `src/modules/graph_intelligence/entities/graph_projection_runs.entity.ts`
-- **Resumen:** 9 columnas · 2 índices · 0 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 9 columnas · 2 índices · 0 FK salientes · 0 entrantes · 3 operaciones
 
 #### Columnas
 
@@ -638,7 +636,6 @@ Registra construcción y actualización de proyecciones para mantener linaje y d
 |---|---|---|
 | POST /graph/projection-definitions/{id}/runs | CREA | DIRECTA |
 | POST /graph/projection-definitions/{id}/runs | LEE | DIRECTA |
-| POST /graph/projection-runs/{id}/advance | ACTUALIZA | POR_TIPO |
 | POST /graph/projection-runs/{id}/advance | LEE | DIRECTA |
 
 #### Gobierno
@@ -784,7 +781,7 @@ Registra ocurrencias de reglas sobre grafos para investigación y seguimiento.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml: graph_rule_hits`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml` · **DDL:** `SQL/61_graph_intelligence/02_tables.sql`
 - **Entidad del ORM:** `GraphRuleHits` — `src/modules/graph_intelligence/entities/graph_rule_hits.entity.ts`
-- **Resumen:** 9 columnas · 2 índices · 0 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 9 columnas · 2 índices · 0 FK salientes · 0 entrantes · 3 operaciones
 
 #### Columnas
 
@@ -811,7 +808,6 @@ Registra ocurrencias de reglas sobre grafos para investigación y seguimiento.
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| PATCH /graph/rule-hits/{id} | ACTUALIZA | POR_TIPO |
 | PATCH /graph/rule-hits/{id} | LEE | DIRECTA |
 | POST /graph/rules/{id}/evaluate | CREA | DIRECTA |
 | POST /graph/rules/{id}/evaluate | LEE | DIRECTA |

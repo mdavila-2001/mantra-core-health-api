@@ -44,14 +44,18 @@ function build() {
     findSitesByProcedures: mockFn().mockResolvedValue([]),
   };
   const auditTrail = { record: mockFn().mockResolvedValue(undefined) };
+  const receivedServices = {
+    projectProcedure: mockFn().mockResolvedValue(undefined),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new PeriopDentalService(
     em as any,
     dentalRepo as any,
+    receivedServices as any,
     auditTrail as any,
     logger as any,
   );
-  return { service, tx, dentalRepo, auditTrail, logger };
+  return { service, tx, dentalRepo, auditTrail, receivedServices, logger };
 }
 
 /**
@@ -89,6 +93,16 @@ describe('PeriopDentalService', () => {
           categoryConceptId: PERIOP.DENTAL_PROCEDURE_CATEGORY,
           statusConceptId: CLIN.PROCEDURE_COMPLETED,
         }),
+      );
+    });
+
+    it('proyecta el tratamiento a «Servicios recibidos», porque este camino no pasa por ProceduresService', async () => {
+      const d = build();
+      await d.service.record(dto(), TENANT, actor as any);
+      expect(d.receivedServices.projectProcedure).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ id: 'proc-1' }),
+        actor.id,
       );
     });
 

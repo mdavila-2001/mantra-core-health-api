@@ -15,3 +15,5 @@ export { SchemaFidelityService } from './fidelity/schema-fidelity.service';
 export type { FidelityReport, SchemaDrift } from './fidelity/fidelity-report';
 export { QueryMetrics } from './observability/query-metrics';
 export type { QueryMetricsSnapshot } from './observability/query-metrics';
+export { SchemaIntegrityState } from './bootstrap/schema-integrity.state';
+export type { SchemaIntegrityReport } from './bootstrap/schema-integrity.state';

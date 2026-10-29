@@ -1,0 +1,253 @@
+#!/usr/bin/env node
+// =============================================================================
+// Equipos de diagnóstico · ROW · etapa 0: descargas de los portales oficiales.
+//
+// Baja cada archivo de `OFFICIAL_DOWNLOADS` (sources.mjs) con curl, que usa el
+// proxy del entorno, a `$DX_DEVICES_BUILD_DIR/official/<grupo>/` (fuera de git)
+// y anota en `official/retrieved.json` la URL, `Last-Modified`, bytes, sha256 y
+// la fecha de descarga. No ejecuta nada de lo descargado.
+//
+// Uso: node tools/terminology-import/diagnostic-devices/row/fetch-official.mjs [--only anvisa,…] [--skip-existing]
+// =============================================================================
+
+import { execFileSync } from 'node:child_process';
+import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+import { BUILD_DIR, ensureDir, readJson, sha256File } from './lib/row.mjs';
+import { OFFICIAL_DOWNLOADS } from './sources.mjs';
+
+export const OFFICIAL_DIR = join(BUILD_DIR, 'official');
+export const OFFICIAL_RETRIEVED = join(OFFICIAL_DIR, 'retrieved.json');
+
+const args = process.argv.slice(2);
+const onlyIndex = args.indexOf('--only');
+const only = onlyIndex >= 0 ? new Set(args[onlyIndex + 1].split(',')) : null;
+const skipExisting = args.includes('--skip-existing');
+
+/** `Last-Modified` de un archivo de cabeceras de curl (`-D`), en ISO 8601. */
+export function lastModifiedOf(headersText) {
+  const blocks = headersText.split(/\r?\n\r?\n/).filter((b) => b.trim() !== '');
+  const last = blocks[blocks.length - 1] ?? '';
+  const m = /^last-modified:\s*(.+)$/im.exec(last);
+  if (m === null) return null;
+  const date = new Date(m[1].trim());
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
+/**
+ * Dataset Socrata (datos.gov.co, …) en páginas CSV de `pageSize` filas,
+ * ordenadas por `:id` para que la paginación sea estable. Cada página queda
+ * como `<name>-NNNN.csv` con su sha256; los metadatos del dataset
+ * (`/api/views/<id>.json`, con `rowsUpdatedAt` y licencia) van al lado.
+ */
+async function fetchSocrata(dir, group, file) {
+  const { domain, id, pageSize = 50000 } = file.socrata;
+  const metaPath = join(dir, `${file.name}.meta.json`);
+  execFileSync('curl', [
+    '-sS',
+    '--fail',
+    '-L',
+    '--retry',
+    '4',
+    '-m',
+    '300',
+    '-o',
+    metaPath,
+    `https://${domain}/api/views/${id}.json`,
+  ]);
+  const pages = [];
+  for (let offset = 0; ; offset += pageSize) {
+    const name = `${file.name}-${String(pages.length + 1).padStart(4, '0')}.csv`;
+    const path = join(dir, name);
+    const url = `https://${domain}/resource/${id}.csv?$limit=${pageSize}&$offset=${offset}&$order=:id`;
+    execFileSync('curl', [
+      '-sS',
+      '--fail',
+      '-L',
+      '--retry',
+      '4',
+      '--retry-delay',
+      '5',
+      '-m',
+      '1800',
+      '-o',
+      path,
+      url,
+    ]);
+    const lines =
+      readFileSync(path, 'utf8')
+        .split('\n')
+        .filter((l) => l !== '').length - 1;
+    pages.push({ name, offset, sha256: await sha256File(path) });
+    console.log(`${group}  ${name}  offset ${offset}`);
+    if (lines < pageSize) break;
+  }
+  const meta = readJson(metaPath);
+  return {
+    group,
+    path: join(group, file.name),
+    dataset: `https://${domain}/d/${id}`,
+    rowsUpdatedAt: meta.rowsUpdatedAt
+      ? new Date(meta.rowsUpdatedAt * 1000).toISOString()
+      : null,
+    license: meta.license?.name ?? null,
+    pages,
+    retrievedAt: new Date().toISOString(),
+  };
+}
+
+/**
+ * Dataset de data.gov.sg: `poll-download` devuelve una URL firmada del archivo;
+ * los metadatos (`lastUpdatedAt`, cobertura, tamaño) se guardan al lado.
+ */
+async function fetchDataGovSg(dir, group, file) {
+  const { id } = file.datagovsg;
+  const metaPath = join(dir, `${file.name}.meta.json`);
+  execFileSync('curl', [
+    '-sS',
+    '--fail',
+    '-L',
+    '--retry',
+    '4',
+    '-m',
+    '300',
+    '-o',
+    metaPath,
+    `https://api-production.data.gov.sg/v2/public/api/datasets/${id}/metadata`,
+  ]);
+  const poll = JSON.parse(
+    execFileSync(
+      'curl',
+      [
+        '-sS',
+        '--fail',
+        '-L',
+        '--retry',
+        '4',
+        '-m',
+        '300',
+        `https://api-open.data.gov.sg/v1/public/api/datasets/${id}/poll-download`,
+      ],
+      { encoding: 'utf8' },
+    ),
+  );
+  if (poll?.data?.status !== 'DOWNLOAD_SUCCESS')
+    throw new Error(
+      `${id}: poll-download ${JSON.stringify(poll).slice(0, 200)}`,
+    );
+  const path = join(dir, file.name);
+  execFileSync('curl', [
+    '-sS',
+    '--fail',
+    '-L',
+    '--retry',
+    '4',
+    '--retry-delay',
+    '5',
+    '-m',
+    '3600',
+    '-o',
+    path,
+    poll.data.url,
+  ]);
+  const meta = readJson(metaPath).data ?? {};
+  const entry = {
+    group,
+    path: join(group, file.name),
+    dataset: file.datagovsg.url,
+    lastUpdatedAt: meta.lastUpdatedAt ?? null,
+    coverageEnd: meta.coverageEnd ?? null,
+    bytes: statSync(path).size,
+    sha256: await sha256File(path),
+    retrievedAt: new Date().toISOString(),
+  };
+  console.log(
+    `${group}  ${file.name}  ${entry.bytes} B  ${entry.lastUpdatedAt}  ${entry.sha256.slice(0, 12)}…`,
+  );
+  return entry;
+}
+
+async function main() {
+  const retrieved = existsSync(OFFICIAL_RETRIEVED)
+    ? readJson(OFFICIAL_RETRIEVED)
+    : {};
+  for (const [group, files] of Object.entries(OFFICIAL_DOWNLOADS)) {
+    if (only !== null && !only.has(group)) continue;
+    const dir = ensureDir(join(OFFICIAL_DIR, group));
+    for (const file of files) {
+      if (file.datagovsg) {
+        retrieved[file.datagovsg.url] = await fetchDataGovSg(dir, group, file);
+        continue;
+      }
+      if (file.socrata) {
+        retrieved[file.socrata.url] = await fetchSocrata(dir, group, file);
+        continue;
+      }
+      const path = join(dir, file.name);
+      const headersPath = `${path}.headers`;
+      if (!(skipExisting && existsSync(path) && existsSync(headersPath))) {
+        execFileSync(
+          'curl',
+          [
+            '-sS',
+            '--fail',
+            '-L',
+            '--retry',
+            '4',
+            '--retry-delay',
+            '5',
+            '-m',
+            '3600',
+            '-A',
+            'Mozilla/5.0 (mantra-core-health terminology import)',
+            '-D',
+            headersPath,
+            '-o',
+            path,
+            file.url,
+          ],
+          { stdio: 'inherit' },
+        );
+        retrieved[file.url] = { retrievedAt: new Date().toISOString() };
+      }
+      const entry = {
+        group,
+        path: join(group, file.name),
+        bytes: statSync(path).size,
+        sha256: await sha256File(path),
+        lastModified: lastModifiedOf(readFileSync(headersPath, 'utf8')),
+        retrievedAt:
+          retrieved[file.url]?.retrievedAt ??
+          new Date(statSync(path).mtimeMs).toISOString(),
+      };
+      if (file.md5) {
+        // El portal publica el MD5 del archivo: si no coincide, no se usa.
+        const md5 = execFileSync('md5sum', [path], { encoding: 'utf8' })
+          .split(' ')[0]
+          .toUpperCase();
+        if (md5 !== file.md5)
+          throw new Error(`${file.name}: MD5 ${md5}, se esperaba ${file.md5}`);
+        entry.md5 = md5;
+      }
+      if (file.extract) {
+        const extractDir = ensureDir(`${path}.d`);
+        execFileSync('unzip', ['-o', '-q', path, '-d', extractDir]);
+        entry.extractedTo = join(group, `${file.name}.d`);
+      }
+      retrieved[file.url] = entry;
+      console.log(
+        `${group}  ${file.name}  ${entry.bytes} B  ${entry.lastModified}  ${entry.sha256.slice(0, 12)}…`,
+      );
+    }
+  }
+  writeFileSync(OFFICIAL_RETRIEVED, JSON.stringify(retrieved, null, 2) + '\n');
+  console.log(`retrieved.json → ${OFFICIAL_RETRIEVED}`);
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

@@ -11,6 +11,8 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { UnauthorizedException } from '@nestjs/common';
 import * as argon2 from 'argon2';
 import { IamAuthService } from './iam-auth.service';
+import { DirectoryTenantClaimsAdapter } from '../../infrastructure/adapters/directory-tenant-claims.adapter';
+import { ProfilesAccountProfileIdsAdapter } from '../../infrastructure/adapters/profiles-account-profile-ids.adapter';
 import { TracingService } from '../../../../observability';
 import { CONCEPTS } from '../../../../common';
 import { TenantMemberships, Tenants } from '../../../directory/entities';
@@ -105,9 +107,12 @@ function build() {
     lockoutsRepo,
     eventsRepo,
     effectiveRoles as any,
-    accountLinksRepo as any,
-    patientProfilesRepo as any,
-    practitionerProfilesRepo as any,
+    new ProfilesAccountProfileIdsAdapter(
+      accountLinksRepo as any,
+      patientProfilesRepo as any,
+      practitionerProfilesRepo as any,
+    ),
+    new DirectoryTenantClaimsAdapter(),
     logger as any,
     new TracingService(),
   );

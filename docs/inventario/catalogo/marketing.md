@@ -13,17 +13,17 @@
 | [attribution_touches](#attribution_touches) | Asocia puntos de contacto a conversiones para analizar contribución de canales y campañas. | 14 | 6 | 3 | COINCIDE |
 | [campaign_dispatch_recipients](#campaign_dispatch_recipients) | Detalla destinatarios incluidos en cada envío para auditar alcance y resultado de campaña. | 26 | 17 | 0 | COINCIDE |
 | [campaign_dispatches](#campaign_dispatches) | Representa envíos planificados o ejecutados de campañas a través de canales de comunicación. | 37 | 13 | 0 | COINCIDE |
-| [campaign_members](#campaign_members) | Relaciona personas o cuentas con campañas para seguir participación y elegibilidad de comunicación. | 16 | 5 | 6 | COINCIDE |
+| [campaign_members](#campaign_members) | Relaciona personas o cuentas con campañas para seguir participación y elegibilidad de comunicación. | 16 | 5 | 7 | COINCIDE |
 | [campaign_schedules](#campaign_schedules) | Programa campañas y establece cuándo se ejecutan sus envíos. | 31 | 11 | 0 | COINCIDE |
-| [content_templates](#content_templates) | Define contenidos reutilizables para mensajes y piezas incluidas en campañas o recorridos. | 17 | 10 | 4 | COINCIDE |
-| [journey_enrollments](#journey_enrollments) | Registra participantes incorporados a recorridos para seguir su progreso y elegibilidad. | 14 | 7 | 6 | COINCIDE |
+| [content_templates](#content_templates) | Define contenidos reutilizables para mensajes y piezas incluidas en campañas o recorridos. | 17 | 10 | 5 | COINCIDE |
+| [journey_enrollments](#journey_enrollments) | Registra participantes incorporados a recorridos para seguir su progreso y elegibilidad. | 14 | 7 | 4 | COINCIDE |
 | [journey_steps](#journey_steps) | Detalla pasos, esperas y decisiones de cada recorrido automatizado. | 16 | 8 | 5 | COINCIDE |
-| [journeys](#journeys) | Representa recorridos automatizados que organizan interacciones de marketing por etapas y condiciones. | 14 | 10 | 5 | COINCIDE |
-| [marketing_campaigns](#marketing_campaigns) | Representa campañas multicanal dirigidas a audiencias permitidas, sin usar PHI clínica para targeting. | 31 | 14 | 4 | COINCIDE |
+| [journeys](#journeys) | Representa recorridos automatizados que organizan interacciones de marketing por etapas y condiciones. | 14 | 10 | 8 | COINCIDE |
+| [marketing_campaigns](#marketing_campaigns) | Representa campañas multicanal dirigidas a audiencias permitidas, sin usar PHI clínica para targeting. | 31 | 14 | 8 | COINCIDE |
 | [marketing_touchpoints](#marketing_touchpoints) | Registra interacciones de marketing observadas para conocer contactos entre audiencias y campañas. | 18 | 9 | 4 | COINCIDE |
 | [segment_members](#segment_members) | Asocia miembros a segmentos para medir alcance y preparar campañas sujetas a consentimiento. | 12 | 5 | 3 | COINCIDE |
-| [segments](#segments) | Define audiencias segmentadas a partir de fuentes y reglas autorizadas para comunicación no clínica. | 15 | 9 | 6 | COINCIDE |
-| [tracked_links](#tracked_links) | Cataloga enlaces con parámetros de seguimiento para medir respuesta a campañas y canales. | 15 | 6 | 4 | COINCIDE |
+| [segments](#segments) | Define audiencias segmentadas a partir de fuentes y reglas autorizadas para comunicación no clínica. | 15 | 9 | 5 | COINCIDE |
+| [tracked_links](#tracked_links) | Cataloga enlaces con parámetros de seguimiento para medir respuesta a campañas y canales. | 15 | 6 | 6 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -506,7 +506,7 @@ Relaciona personas o cuentas con campañas para seguir participación y elegibil
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_50_marketing.puml: campaign_members`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
 - **Entidad del ORM:** `CampaignMembers` — `src/modules/marketing/entities/campaign_members.entity.ts`
-- **Resumen:** 16 columnas · 5 índices · 8 FK salientes · 0 entrantes · 6 operaciones
+- **Resumen:** 16 columnas · 5 índices · 8 FK salientes · 0 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -546,8 +546,8 @@ Relaciona personas o cuentas con campañas para seguir participación y elegibil
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_campaign_members_campaign_id` | no | campaign_id | Soporta la clave foránea fk_campaign_members_campaign_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «campaign_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_campaign_members_member_type_concept_id` | no | member_type_concept_id | Soporta la clave foránea fk_campaign_members_member_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «member_type_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_campaign_members_campaign_id` | no | campaign_id | Soporta la clave foránea fk_campaign_members_campaign_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «campaign_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_campaign_members_member_type_concept_id` | no | member_type_concept_id | Soporta la clave foránea fk_campaign_members_member_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «member_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_campaign_members_member_status_concept_id` | no | member_status_concept_id | Soporta la clave foránea fk_campaign_members_member_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_campaign_members_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_campaign_members_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_campaign_members_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_campaign_members_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -562,6 +562,7 @@ Relaciona personas o cuentas con campañas para seguir participación y elegibil
 | POST /marketing/enrollments/{id}/exit | LEE | DIRECTA |
 | POST /marketing/touchpoints | ACTUALIZA | POR_TIPO |
 | POST /marketing/touchpoints | LEE | DIRECTA |
+| POST /marketing/tracked-links/{id}/recipient-tokens | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -690,7 +691,7 @@ Define contenidos reutilizables para mensajes y piezas incluidas en campañas o 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_50_marketing.puml: content_templates`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
 - **Entidad del ORM:** `ContentTemplates` — `src/modules/marketing/entities/content_templates.entity.ts`
-- **Resumen:** 17 columnas · 10 índices · 7 FK salientes · 3 entrantes · 4 operaciones
+- **Resumen:** 17 columnas · 10 índices · 7 FK salientes · 3 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -733,7 +734,7 @@ Define contenidos reutilizables para mensajes y piezas incluidas en campañas o 
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_content_templates_tenant_id` | no | tenant_id | Soporta la clave foránea fk_content_templates_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_content_templates_tenant_id` | no | tenant_id | Soporta la clave foránea fk_content_templates_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_content_templates_channel_concept_id` | no | channel_concept_id | Soporta la clave foránea fk_content_templates_channel_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_content_templates_language_concept_id` | no | language_concept_id | Soporta la clave foránea fk_content_templates_language_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_content_templates_messaging_template_id` | no | messaging_template_id | Soporta la clave foránea fk_content_templates_messaging_template_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -758,6 +759,7 @@ Define contenidos reutilizables para mensajes y piezas incluidas en campañas o 
 | POST /marketing/content-templates/{code}/versions | CREA | DIRECTA |
 | POST /marketing/content-templates/{code}/versions | LEE | DIRECTA |
 | POST /marketing/journeys/{id}/steps | LEE | DIRECTA |
+| POST /marketing/touchpoints | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -782,7 +784,7 @@ Registra participantes incorporados a recorridos para seguir su progreso y elegi
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_50_marketing.puml: journey_enrollments`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
 - **Entidad del ORM:** `JourneyEnrollments` — `src/modules/marketing/entities/journey_enrollments.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 7 FK salientes · 0 entrantes · 6 operaciones
+- **Resumen:** 14 columnas · 7 índices · 7 FK salientes · 0 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -831,9 +833,7 @@ Registra participantes incorporados a recorridos para seguir su progreso y elegi
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| POST /marketing/enrollments/{id}/advance | ACTUALIZA | POR_TIPO |
 | POST /marketing/enrollments/{id}/advance | LEE | DIRECTA |
-| POST /marketing/enrollments/{id}/exit | ACTUALIZA | POR_TIPO |
 | POST /marketing/enrollments/{id}/exit | LEE | DIRECTA |
 | POST /marketing/journeys/{id}/activate | CREA | DIRECTA |
 | POST /marketing/journeys/{id}/activate | LEE | DIRECTA |
@@ -947,7 +947,7 @@ Representa recorridos automatizados que organizan interacciones de marketing por
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_50_marketing.puml: journeys`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
 - **Entidad del ORM:** `Journeys` — `src/modules/marketing/entities/journeys.entity.ts`
-- **Resumen:** 14 columnas · 10 índices · 7 FK salientes · 6 entrantes · 5 operaciones
+- **Resumen:** 14 columnas · 10 índices · 7 FK salientes · 6 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -991,7 +991,7 @@ Representa recorridos automatizados que organizan interacciones de marketing por
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `uq_journeys_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
-| `ix_journeys_tenant_id` | no | tenant_id | Soporta la clave foránea fk_journeys_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_journeys_tenant_id` | no | tenant_id | Soporta la clave foránea fk_journeys_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_journeys_entry_trigger_concept_id` | no | entry_trigger_concept_id | Soporta la clave foránea fk_journeys_entry_trigger_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_journeys_entry_segment_id` | no | entry_segment_id | Soporta la clave foránea fk_journeys_entry_segment_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_journeys_goal_metric_concept_id` | no | goal_metric_concept_id | Soporta la clave foránea fk_journeys_goal_metric_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1011,11 +1011,14 @@ Representa recorridos automatizados que organizan interacciones de marketing por
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /marketing/attribution/compute | LEE | DIRECTA |
+| POST /marketing/enrollments/{id}/advance | LEE | DIRECTA |
+| POST /marketing/enrollments/{id}/exit | LEE | DIRECTA |
 | POST /marketing/journeys | CREA | DIRECTA |
 | POST /marketing/journeys | LEE | DIRECTA |
-| POST /marketing/journeys/{id}/activate | ACTUALIZA | POR_TIPO |
 | POST /marketing/journeys/{id}/activate | LEE | DIRECTA |
 | POST /marketing/journeys/{id}/steps | LEE | DIRECTA |
+| POST /marketing/touchpoints | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1040,7 +1043,7 @@ Representa campañas multicanal dirigidas a audiencias permitidas, sin usar PHI 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_50_marketing.puml: marketing_campaigns; BIZ note`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
 - **Entidad del ORM:** `MarketingCampaigns` — `src/modules/marketing/entities/marketing_campaigns.entity.ts`
-- **Resumen:** 31 columnas · 14 índices · 14 FK salientes · 1 entrantes · 4 operaciones
+- **Resumen:** 31 columnas · 14 índices · 14 FK salientes · 1 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -1103,7 +1106,7 @@ Representa campañas multicanal dirigidas a audiencias permitidas, sin usar PHI 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `uq_marketing_campaigns_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
-| `ix_marketing_campaigns_tenant_id` | no | tenant_id | Soporta la clave foránea fk_marketing_campaigns_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_marketing_campaigns_tenant_id` | no | tenant_id | Soporta la clave foránea fk_marketing_campaigns_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_marketing_campaigns_campaign_type_concept_id` | no | campaign_type_concept_id | Soporta la clave foránea fk_marketing_campaigns_campaign_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_marketing_campaigns_objective_concept_id` | no | objective_concept_id | Soporta la clave foránea fk_marketing_campaigns_objective_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_marketing_campaigns_channel_concept_id` | no | channel_concept_id | Soporta la clave foránea fk_marketing_campaigns_channel_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1127,10 +1130,14 @@ Representa campañas multicanal dirigidas a audiencias permitidas, sin usar PHI 
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /marketing/attribution/compute | LEE | DIRECTA |
 | POST /marketing/campaigns | CREA | DIRECTA |
 | POST /marketing/campaigns | LEE | DIRECTA |
-| POST /marketing/campaigns/{id}/members/materialize | ACTUALIZA | POR_TIPO |
 | POST /marketing/campaigns/{id}/members/materialize | LEE | DIRECTA |
+| POST /marketing/enrollments/{id}/exit | LEE | DIRECTA |
+| POST /marketing/touchpoints | LEE | DIRECTA |
+| POST /marketing/tracked-links | LEE | DIRECTA |
+| POST /marketing/tracked-links/{id}/recipient-tokens | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1316,7 +1323,7 @@ Define audiencias segmentadas a partir de fuentes y reglas autorizadas para comu
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_50_marketing.puml: segments; BIZ note`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
 - **Entidad del ORM:** `MarketingSegments` — `src/modules/marketing/entities/segments.entity.ts`
-- **Resumen:** 15 columnas · 9 índices · 6 FK salientes · 3 entrantes · 6 operaciones
+- **Resumen:** 15 columnas · 9 índices · 6 FK salientes · 3 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -1357,7 +1364,7 @@ Define audiencias segmentadas a partir de fuentes y reglas autorizadas para comu
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `uq_segments_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
-| `ix_segments_tenant_id` | no | tenant_id | Soporta la clave foránea fk_segments_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_segments_tenant_id` | no | tenant_id | Soporta la clave foránea fk_segments_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_segments_segment_type_concept_id` | no | segment_type_concept_id | Soporta la clave foránea fk_segments_segment_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_segments_source_read_model_id` | no | source_read_model_id | Soporta la clave foránea fk_segments_source_read_model_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_segments_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_segments_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1380,7 +1387,6 @@ Define audiencias segmentadas a partir de fuentes y reglas autorizadas para comu
 | POST /marketing/journeys | LEE | DIRECTA |
 | POST /marketing/segments | CREA | DIRECTA |
 | POST /marketing/segments | LEE | DIRECTA |
-| POST /marketing/segments/{id}/refresh | ACTUALIZA | POR_TIPO |
 | POST /marketing/segments/{id}/refresh | LEE | DIRECTA |
 
 #### Gobierno
@@ -1406,7 +1412,7 @@ Cataloga enlaces con parámetros de seguimiento para medir respuesta a campañas
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_50_marketing.puml: tracked_links`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
 - **Entidad del ORM:** `TrackedLinks` — `src/modules/marketing/entities/tracked_links.entity.ts`
-- **Resumen:** 15 columnas · 6 índices · 4 FK salientes · 1 entrantes · 4 operaciones
+- **Resumen:** 15 columnas · 6 índices · 4 FK salientes · 1 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -1459,8 +1465,10 @@ Cataloga enlaces con parámetros de seguimiento para medir respuesta a campañas
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /marketing/touchpoints | LEE | DIRECTA |
 | POST /marketing/tracked-links | CREA | DIRECTA |
 | POST /marketing/tracked-links | LEE | DIRECTA |
+| POST /marketing/tracked-links/{id}/recipient-tokens | LEE | DIRECTA |
 | GET /r/{code} | ACTUALIZA | POR_TIPO |
 | GET /r/{code} | LEE | DIRECTA |
 

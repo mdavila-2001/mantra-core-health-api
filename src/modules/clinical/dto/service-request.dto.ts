@@ -1,6 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  ArrayMaxSize,
+  ArrayUnique,
+  IsArray,
   IsBoolean,
+  IsIn,
   IsOptional,
   IsString,
   IsUUID,
@@ -8,6 +12,13 @@ import {
   MinLength,
   ValidateIf,
 } from 'class-validator';
+import {
+  ANALYSIS_CATEGORIES,
+  type AnalysisCategory,
+} from '../service-request-category';
+
+/** Tope de notas citadas por orden: más es un listado, no un motivo. */
+export const MAX_BASED_ON_NOTES = 20;
 
 /** Cuerpo de `POST /clinical/service-requests` (UC-08-05). */
 export class CreateServiceRequestDto {
@@ -75,6 +86,44 @@ export class CreateServiceRequestDto {
   categoryConceptId?: string;
 
   /**
+   * P40 (carril C2): la categoría de análisis en texto. Se guarda como su
+   * concepto; si viaja junto con `categoryConceptId`, los dos tienen que
+   * decir lo mismo.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Categoría de análisis (C2). Se resuelve a categoryConceptId (LAB → SR_LAB, ' +
+      'IMAGING → SR_IMAGING, OTHER → SR_OTHER). Si viaja con categoryConceptId y no ' +
+      'coinciden: 422 SERVICE_REQUEST_CATEGORY_MISMATCH',
+    enum: ANALYSIS_CATEGORIES,
+  })
+  @IsOptional()
+  @IsIn(ANALYSIS_CATEGORIES)
+  category?: AnalysisCategory;
+
+  /**
+   * P40 (carril C2): las notas médicas que motivan la orden, en el orden en
+   * que se citan.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Notas médicas (chart.clinical_note_headers) que motivan la orden. Cada una ' +
+      'debe ser del mismo paciente, de un encuentro del tenant custodio, firmada o ' +
+      'enmendada y sin confidencialidad restringida (si no, 422 BASED_ON_NOTE_NOT_FOUND, ' +
+      'sin distinguir el motivo); y, si la orden tiene encuentro, del mismo encuentro ' +
+      '(422 BASED_ON_NOTE_ENCOUNTER_MISMATCH)',
+    type: [String],
+    format: 'uuid',
+    maxItems: MAX_BASED_ON_NOTES,
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(MAX_BASED_ON_NOTES)
+  @ArrayUnique()
+  @IsUUID(undefined, { each: true })
+  basedOnNoteIds?: string[];
+
+  /**
    * Identificador asociado a priority concept.
    */
   @ApiPropertyOptional({
@@ -103,6 +152,42 @@ export class CreateServiceRequestDto {
   @IsOptional()
   @IsUUID()
   performerTenantId?: string;
+
+  /**
+   * Modo de ejecutor recomendado. Omitido ⇒ que elija el paciente.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Quién ejecuta la orden (concept id del conjunto `service-request-performer-selection`: SR_PERF_SELF, SR_PERF_ORGANIZATION, SR_PERF_PATIENT_CHOICE). Es una recomendación, no un candado; omitido = que elija el paciente',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  performerSelectionConceptId?: string;
+
+  /**
+   * Médico ejecutor: obligatorio con «lo hago yo» e igual a quien pide; prohibido en los otros modos.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Médico ejecutor. Obligatorio con SR_PERF_SELF (debe ser quien pide la orden); prohibido con los otros modos',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  performerPractitionerProfileId?: string;
+
+  /**
+   * Sede sugerida: obligatoria con «lo hago yo» y «en este centro»; prohibida si elige el paciente.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Sede sugerida (practice.practice_sites). Obligatoria con SR_PERF_SELF y SR_PERF_ORGANIZATION; prohibida con SR_PERF_PATIENT_CHOICE. Debe ofrecer el procedimiento con precio. No concede acceso a la orden',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  suggestedPracticeSiteId?: string;
 
   /**
    * El informe diagnóstico previo que satisface este pedido (antiduplicación,
@@ -182,6 +267,26 @@ export class ServiceRequestResponseDto {
   formInstanceId?: string | null;
 
   /**
+   * P40: categoría de análisis derivada del concepto; ausente = sin clasificar.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Categoría de análisis derivada de categoryConceptId. Ausente = la orden no declara categoría',
+    enum: ANALYSIS_CATEGORIES,
+  })
+  category?: AnalysisCategory;
+
+  /**
+   * P40: notas médicas que motivan la orden, en el orden en que se citaron.
+   */
+  @ApiProperty({
+    description: 'Notas médicas que motivan la orden (vacío = ninguna)',
+    type: [String],
+    format: 'uuid',
+  })
+  basedOnNoteIds!: string[];
+
+  /**
    * Valor de status mantenido por la instancia.
    */
   @ApiProperty({ description: 'Estado (concept id)', format: 'uuid' })
@@ -192,6 +297,33 @@ export class ServiceRequestResponseDto {
    */
   @ApiProperty({ description: 'Intención (concept id)', format: 'uuid' })
   intent!: string;
+
+  /**
+   * Modo de ejecutor recomendado (concept id).
+   */
+  @ApiProperty({
+    description: 'Modo de ejecutor recomendado (concept id)',
+    format: 'uuid',
+  })
+  performerSelectionConceptId!: string;
+
+  /**
+   * Médico ejecutor, o `null`.
+   */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  performerPractitionerProfileId!: string | null;
+
+  /**
+   * Sede sugerida, o `null`.
+   */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  suggestedPracticeSiteId!: string | null;
+
+  /**
+   * Nombre de la sede sugerida: el paciente ve un nombre y nunca un uuid.
+   */
+  @ApiProperty({ nullable: true, type: String })
+  suggestedPracticeSiteName!: string | null;
 
   /**
    * Fecha y hora en que se creó el registro.

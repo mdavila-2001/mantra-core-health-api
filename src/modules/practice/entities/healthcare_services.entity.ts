@@ -68,6 +68,9 @@ export class HealthcareServices {
   })
   telehealthAvailable?: boolean;
 
+  @Property({ fieldName: 'service_catalog_id', type: 'uuid', nullable: true }) // FK → billing.service_catalog (inferida)
+  serviceCatalogId?: string;
+
   /**
    * Identificador asociado a status concept.
    */

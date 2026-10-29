@@ -5,11 +5,19 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
 import { CrmSalesRepository } from '../repositories';
+import { CrmErrorReason } from '../crm.error-reasons';
+import {
+  assertBodyTenantMatches,
+  crmNotFound,
+  notFound,
+  stageMismatch,
+} from './crm-scope';
 import {
   CreateAccountDto,
   AccountResponseDto,
@@ -38,6 +46,27 @@ const LEAD_SOURCE_CONCEPT: Readonly<Record<LeadSource, string>> = {
   REFERRAL: CONCEPTS.LEAD_SOURCE_REFERRAL,
   CAMPAIGN: CONCEPTS.LEAD_SOURCE_CAMPAIGN,
 };
+
+const ACCOUNT_NOT_FOUND = crmNotFound(
+  'Cuenta no encontrada',
+  CrmErrorReason.CRM_ACCOUNT_NOT_FOUND,
+);
+const LEAD_NOT_FOUND = crmNotFound(
+  'Lead no encontrado',
+  CrmErrorReason.CRM_LEAD_NOT_FOUND,
+);
+const OPPORTUNITY_NOT_FOUND = crmNotFound(
+  'Oportunidad no encontrada',
+  CrmErrorReason.CRM_OPPORTUNITY_NOT_FOUND,
+);
+const PIPELINE_NOT_FOUND = crmNotFound(
+  'Pipeline no encontrado',
+  CrmErrorReason.CRM_PIPELINE_NOT_FOUND,
+);
+const STAGE_NOT_FOUND = crmNotFound(
+  'Etapa no encontrada',
+  CrmErrorReason.CRM_STAGE_NOT_FOUND,
+);
 
 const LOST_REASON_CONCEPT: Readonly<
   Record<'PRICE' | 'COMPETITOR' | 'NO_BUDGET', string>
@@ -78,14 +107,17 @@ export class CrmSalesService {
     dto: CreateAccountDto,
     actor: AuthenticatedUser,
   ): Promise<AccountResponseDto> {
+    // El tenant sale del contexto verificado; el del cuerpo sólo se contrasta.
+    const tenantId = requireTenantId();
+    assertBodyTenantMatches(dto.tenantId, tenantId);
     this.logger.info(
-      { operation: 'crm.account.create', tenantId: dto.tenantId },
+      { operation: 'crm.account.create', tenantId },
       'Creating CRM account',
     );
 
     return this.em.transactional(async (tx) => {
       const account = this.salesRepo.createAccount(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         name: dto.name,
         accountTypeConceptId: ACCOUNT_TYPE_CONCEPT[dto.accountType],
         website: dto.website,
@@ -99,7 +131,7 @@ export class CrmSalesService {
       let primaryContactId: string | undefined;
       if (dto.primaryContactFirstName) {
         const contact = this.salesRepo.createContact(tx, {
-          tenantId: dto.tenantId,
+          tenantId,
           crmAccountId: account.id,
           firstName: dto.primaryContactFirstName,
           lastName: dto.primaryContactLastName,
@@ -140,13 +172,19 @@ export class CrmSalesService {
       'Adding account team member',
     );
 
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const account = await this.salesRepo.findAccountById(tx, accountId);
-      if (!account) {
-        throw new ResourceNotFoundException('Cuenta no encontrada', {
-          accountId,
-        });
-      }
+      const loaded = await this.salesRepo.findAccountById(
+        tx,
+        accountId,
+        tenantId,
+      );
+      assertResourceInTenant(
+        loaded,
+        loaded?.tenantId,
+        tenantId,
+        ACCOUNT_NOT_FOUND,
+      );
 
       const existing = await this.salesRepo.findTeamMember(
         tx,
@@ -187,18 +225,16 @@ export class CrmSalesService {
     dto: CreateLeadDto,
     actor: AuthenticatedUser,
   ): Promise<LeadResponseDto> {
+    const tenantId = requireTenantId();
+    assertBodyTenantMatches(dto.tenantId, tenantId);
     this.logger.info(
-      {
-        operation: 'crm.lead.create',
-        tenantId: dto.tenantId,
-        source: dto.source,
-      },
+      { operation: 'crm.lead.create', tenantId, source: dto.source },
       'Capturing lead',
     );
 
     return this.em.transactional(async (tx) => {
       const lead = this.salesRepo.createLead(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         leadSourceConceptId: LEAD_SOURCE_CONCEPT[dto.source],
         fullName: dto.fullName,
         email: dto.email,
@@ -225,11 +261,19 @@ export class CrmSalesService {
       'Qualifying lead',
     );
 
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const lead = await this.salesRepo.findLeadByIdForUpdate(tx, leadId);
-      if (!lead) {
-        throw new ResourceNotFoundException('Lead no encontrado', { leadId });
-      }
+      const loaded = await this.salesRepo.findLeadByIdForUpdate(
+        tx,
+        leadId,
+        tenantId,
+      );
+      const lead = assertResourceInTenant(
+        loaded,
+        loaded?.tenantId,
+        tenantId,
+        LEAD_NOT_FOUND,
+      );
       if (lead.leadStatusConceptId === CONCEPTS.LEAD_CONVERTED) {
         throw new ConflictException('El lead ya fue convertido', { leadId });
       }
@@ -266,11 +310,19 @@ export class CrmSalesService {
       'Converting lead',
     );
 
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const lead = await this.salesRepo.findLeadByIdForUpdate(tx, leadId);
-      if (!lead) {
-        throw new ResourceNotFoundException('Lead no encontrado', { leadId });
-      }
+      const loaded = await this.salesRepo.findLeadByIdForUpdate(
+        tx,
+        leadId,
+        tenantId,
+      );
+      const lead = assertResourceInTenant(
+        loaded,
+        loaded?.tenantId,
+        tenantId,
+        LEAD_NOT_FOUND,
+      );
       if (lead.leadStatusConceptId === CONCEPTS.LEAD_CONVERTED) {
         throw new ConflictException('El lead ya fue convertido', {
           leadId,
@@ -284,8 +336,45 @@ export class CrmSalesService {
         );
       }
 
+      // Pipeline, etapa y cuenta se resuelven dentro del tenant antes de
+      // crear nada: una referencia ajena responde como inexistente.
+      const pipeline = await this.salesRepo.findPipelineById(
+        tx,
+        dto.pipelineId,
+        tenantId,
+      );
+      assertResourceInTenant(
+        pipeline,
+        pipeline?.tenantId,
+        tenantId,
+        PIPELINE_NOT_FOUND,
+      );
+      const stage = await this.salesRepo.findStageById(
+        tx,
+        dto.stageId,
+        tenantId,
+      );
+      if (!stage) {
+        throw notFound(STAGE_NOT_FOUND);
+      } else if (stage.pipelineId !== dto.pipelineId) {
+        throw stageMismatch();
+      }
+      if (dto.crmAccountId) {
+        const account = await this.salesRepo.findAccountById(
+          tx,
+          dto.crmAccountId,
+          tenantId,
+        );
+        assertResourceInTenant(
+          account,
+          account?.tenantId,
+          tenantId,
+          ACCOUNT_NOT_FOUND,
+        );
+      }
+
       const opportunity = this.salesRepo.createOpportunity(tx, {
-        tenantId: lead.tenantId,
+        tenantId,
         pipelineId: dto.pipelineId,
         stageId: dto.stageId,
         name: dto.opportunityName,
@@ -337,16 +426,19 @@ export class CrmSalesService {
       'Advancing opportunity stage',
     );
 
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const opportunity = await this.salesRepo.findOpportunityByIdForUpdate(
+      const loaded = await this.salesRepo.findOpportunityByIdForUpdate(
         tx,
         opportunityId,
+        tenantId,
       );
-      if (!opportunity) {
-        throw new ResourceNotFoundException('Oportunidad no encontrada', {
-          opportunityId,
-        });
-      }
+      const opportunity = assertResourceInTenant(
+        loaded,
+        loaded?.tenantId,
+        tenantId,
+        OPPORTUNITY_NOT_FOUND,
+      );
       if (opportunity.statusConceptId !== CONCEPTS.OPPORTUNITY_OPEN) {
         throw new PreconditionFailedException(
           'La oportunidad ya está cerrada',
@@ -362,11 +454,17 @@ export class CrmSalesService {
         );
       }
 
-      const stage = await this.salesRepo.findStageById(tx, dto.toStageId);
+      const stage = await this.salesRepo.findStageById(
+        tx,
+        dto.toStageId,
+        tenantId,
+      );
       if (!stage) {
-        throw new ResourceNotFoundException('Etapa no encontrada', {
-          stageId: dto.toStageId,
-        });
+        throw notFound(STAGE_NOT_FOUND);
+      } else if (stage.pipelineId !== opportunity.pipelineId) {
+        // La probabilidad y el histórico se calcularían desde una etapa de
+        // otro embudo: se corta antes de mover nada.
+        throw stageMismatch();
       }
 
       const fromStageId = opportunity.stageId;
@@ -435,16 +533,19 @@ export class CrmSalesService {
       'Closing opportunity',
     );
 
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const opportunity = await this.salesRepo.findOpportunityByIdForUpdate(
+      const loaded = await this.salesRepo.findOpportunityByIdForUpdate(
         tx,
         opportunityId,
+        tenantId,
       );
-      if (!opportunity) {
-        throw new ResourceNotFoundException('Oportunidad no encontrada', {
-          opportunityId,
-        });
-      }
+      const opportunity = assertResourceInTenant(
+        loaded,
+        loaded?.tenantId,
+        tenantId,
+        OPPORTUNITY_NOT_FOUND,
+      );
       if (opportunity.statusConceptId !== CONCEPTS.OPPORTUNITY_OPEN) {
         throw new ConflictException('La oportunidad ya está cerrada', {
           opportunityId,

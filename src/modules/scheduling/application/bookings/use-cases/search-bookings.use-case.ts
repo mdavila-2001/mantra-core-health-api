@@ -1,7 +1,10 @@
 import {
   PreconditionFailedException,
+  requireTenantId,
   type AuthenticatedUser,
 } from '../../../../../common';
+import { assertResourceInTenant } from '../../../../../common/tenant/resource-scope';
+import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 import {
   BOOKING_HISTORY_PORT,
   type BookingHistoryPort,
@@ -21,7 +24,7 @@ import {
   INSURANCE_READ_PORT,
   type InsuranceReadPort,
 } from '../../ports/insurance-read.port';
-import { Inject, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import {
   PATIENT_REPRESENTATION_PORT,
   type PatientRepresentationPort,
@@ -35,7 +38,10 @@ import {
   hasReason,
   isDelay,
 } from '../../../domain/booking/booking-history-reading';
-import { isPatientActor } from '../../../domain/booking/agenda-actors';
+import {
+  isPatientActor,
+  operatesAnyAgenda,
+} from '../../../domain/booking/agenda-actors';
 
 /** UC-41-15: listado de citas por paciente, recurso y/o ventana temporal. */
 @Injectable()
@@ -110,11 +116,70 @@ export class SearchBookingsUseCase {
       );
     }
 
+    // El tenant sale del contexto que verificó el guard, nunca del cuerpo: es
+    // parte del `where` de la lectura, no un filtro posterior.
+    const tenantId = requireTenantId();
     const em = this.em.fork();
+
+    // A quiénes representa el actor, una vez para toda la lectura (B.1). Decide
+    // a qué citas puede llegar una cuenta de paciente y si el motivo de consulta
+    // de la cita de un dependiente se le muestra a quien lo pidió. Sólo se
+    // pregunta a una cuenta de paciente: al mostrador y a quien atiende se les
+    // decide por otro camino.
+    const representedPatients = isPatientActor(actor)
+      ? await this.representation.findActiveProxiedPatientIds(actor!.id, em)
+      : undefined;
+
+    // Lectura por agenda (SCHED-01): el recurso se resuelve **antes** de pedir
+    // una sola cita, y tiene que ser de la organización activa. Uno de otra
+    // organización responde igual que uno inexistente.
+    let patientProfileIds: string[] | undefined;
+    if (filters.resourceId) {
+      const found = await this.catalogRepo.findResourceById(
+        em,
+        filters.resourceId,
+      );
+      const resource = assertResourceInTenant(
+        found,
+        found?.tenantId,
+        tenantId,
+        {
+          message: 'Recurso no encontrado',
+          reason: SchedulingErrorReason.RESOURCE_NOT_AVAILABLE,
+        },
+      );
+      if (actor && !operatesAnyAgenda(actor)) {
+        if (actor.practitionerProfileId !== undefined) {
+          // Un profesional lista las citas de su propia agenda. Las de un
+          // colega son datos clínicos de pacientes que no son los suyos.
+          if (resource.resourceRefId !== actor.practitionerProfileId) {
+            throw new ForbiddenException(
+              'Esta agenda es de otro profesional: solo se lista desde su propia cuenta.',
+            );
+          }
+        } else if (!filters.patientProfileId) {
+          // Una cuenta de paciente nunca recibe las citas de una agenda: solo
+          // las suyas y las de quienes representa. La disponibilidad agregada
+          // se consulta por el endpoint de cupos, no por `AppointmentBookings`.
+          patientProfileIds = [
+            ...(actor.patientProfileId ? [actor.patientProfileId] : []),
+            ...(representedPatients ?? []),
+          ];
+          if (patientProfileIds.length === 0) {
+            throw new ForbiddenException(
+              'Esta cuenta no tiene un perfil de paciente con citas que listar.',
+            );
+          }
+        }
+      }
+    }
+
     const { rows, fetchCapReached } = await this.bookingsRepo.findBookings(
       em,
       {
+        tenantId,
         patientProfileId: filters.patientProfileId,
+        patientProfileIds,
         resourceId: filters.resourceId,
         from: filters.from,
         to: filters.to,
@@ -191,14 +256,6 @@ export class SearchBookingsUseCase {
       em,
       appointmentIds,
     );
-
-    // A quiénes representa el actor, una vez para toda la página (B.1). Decide
-    // si el motivo de consulta de la cita de un dependiente se le muestra a
-    // quien lo pidió. Sólo se pregunta a una cuenta de paciente: al mostrador y
-    // a quien atiende el motivo ya se les decide por otro camino.
-    const representedPatients = isPatientActor(actor)
-      ? await this.representation.findActiveProxiedPatientIds(actor!.id, em)
-      : undefined;
 
     // Los nombres, en lote y sólo cuando alguien va a poder verlos: si el actor
     // no es profesional ni titular, la proyección los descartaría igual y la

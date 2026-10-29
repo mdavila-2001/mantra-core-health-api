@@ -13,18 +13,18 @@
 | [inventory_count_lines](#inventory_count_lines) | Conserva cantidades contadas por producto, lote o ubicación durante una sesión de inventario. | 11 | 6 | 3 | COINCIDE |
 | [inventory_count_sessions](#inventory_count_sessions) | Registra conteos físicos de inventario para comparar existencias observadas con saldos del sistema. | 15 | 8 | 4 | COINCIDE |
 | [inventory_ledger_entries](#inventory_ledger_entries) | Mantiene el libro de movimientos de inventario para explicar cómo cambian las existencias farmacéuticas. | 23 | 16 | 36 | COINCIDE |
-| [inventory_locations](#inventory_locations) | Define ubicaciones de almacenamiento farmacéutico donde se controlan lotes y existencias. | 14 | 7 | 11 | COINCIDE |
-| [inventory_lots](#inventory_lots) | Registra lotes de productos para rastrear vencimientos, origen y movimientos de inventario farmacéutico. | 15 | 6 | 6 | COINCIDE |
+| [inventory_locations](#inventory_locations) | Define ubicaciones de almacenamiento farmacéutico donde se controlan lotes y existencias. | 14 | 7 | 18 | COINCIDE |
+| [inventory_lots](#inventory_lots) | Registra lotes de productos para rastrear vencimientos, origen y movimientos de inventario farmacéutico. | 15 | 6 | 10 | COINCIDE |
 | [inventory_recall_holds](#inventory_recall_holds) | Bloquea inventario afectado por alertas o retiros para evitar que productos comprometidos sigan disponibles. | 14 | 7 | 3 | COINCIDE |
 | [inventory_reservation_lines](#inventory_reservation_lines) | Desglosa productos y cantidades comprometidos en una reserva de inventario. | 16 | 8 | 34 | COINCIDE |
-| [inventory_reservations](#inventory_reservations) | Aparta existencias para procesos que requieren disponibilidad comprometida antes de su consumo o despacho. | 22 | 14 | 38 | COINCIDE |
+| [inventory_reservations](#inventory_reservations) | Aparta existencias para procesos que requieren disponibilidad comprometida antes de su consumo o despacho. | 22 | 14 | 39 | COINCIDE |
 | [inventory_serials](#inventory_serials) | Conserva números de serie de unidades controladas para habilitar trazabilidad individual de productos. | 11 | 5 | 0 | COINCIDE |
 | [inventory_stock_positions](#inventory_stock_positions) | Representa saldos de existencias por producto y ubicación para consultar disponibilidad farmacéutica. | 11 | 3 | 43 | COINCIDE |
 | [medication_dispensation_lines](#medication_dispensation_lines) | Detalla medicamentos y cantidades entregados dentro de cada dispensación vinculada al paciente o prescripción. | 12 | 6 | 5 | COINCIDE |
 | [medication_dispensations](#medication_dispensations) | Representa dispensaciones de medicamentos a pacientes para documentar el acto de entrega farmacéutica. | 17 | 13 | 6 | COINCIDE |
 | [pharmacy_goods_receipt_lines](#pharmacy_goods_receipt_lines) | Detalla lotes, productos y cantidades recibidos para actualizar y auditar existencias farmacéuticas. | 14 | 8 | 2 | COINCIDE |
 | [pharmacy_goods_receipts](#pharmacy_goods_receipts) | Registra recepciones de mercancía para confirmar productos entregados contra procesos de abastecimiento. | 15 | 8 | 2 | COINCIDE |
-| [pharmacy_inventory_sync_batches](#pharmacy_inventory_sync_batches) | Agrupa sincronizaciones de inventario con fuentes externas para seguir cargas de disponibilidad o catálogo. | 15 | 5 | 3 | COINCIDE |
+| [pharmacy_inventory_sync_batches](#pharmacy_inventory_sync_batches) | Agrupa sincronizaciones de inventario con fuentes externas para seguir cargas de disponibilidad o catálogo. | 15 | 5 | 4 | COINCIDE |
 | [pharmacy_inventory_sync_items](#pharmacy_inventory_sync_items) | Conserva el detalle de productos procesados durante sincronizaciones para revisar resultados y discrepancias. | 13 | 4 | 4 | COINCIDE |
 | [pharmacy_order_substitutions](#pharmacy_order_substitutions) | Registra sustituciones de productos realizadas sobre una reserva de pedido de farmacia y sus renglones, para mantener trazabilidad cuando se dispensa una alternativa terapéutica. | 15 | 8 | 23 | COINCIDE |
 | [pharmacy_purchase_order_lines](#pharmacy_purchase_order_lines) | Detalla productos y cantidades solicitados en cada orden de compra de farmacia. | 13 | 6 | 4 | COINCIDE |
@@ -563,7 +563,7 @@ Define ubicaciones de almacenamiento farmacéutico donde se controlan lotes y ex
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml: inventory_locations`
 - **Dominio:** Farmacia · **Diagrama:** `Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml` · **DDL:** `SQL/25_pharmacy_inventory/02_tables.sql`
 - **Entidad del ORM:** `InventoryLocations` — `src/modules/pharmacy_inventory/entities/inventory_locations.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 7 FK salientes · 7 entrantes · 11 operaciones
+- **Resumen:** 14 columnas · 7 índices · 7 FK salientes · 7 entrantes · 18 operaciones
 
 #### Columnas
 
@@ -607,7 +607,7 @@ Define ubicaciones de almacenamiento farmacéutico donde se controlan lotes y ex
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_inventory_locations_pharmacy_site_id` | no | pharmacy_site_id | Soporta la clave foránea fk_inventory_locations_pharmacy_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «pharmacy_site_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_inventory_locations_pharmacy_site_id` | no | pharmacy_site_id | Soporta la clave foránea fk_inventory_locations_pharmacy_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «pharmacy_site_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_inventory_locations_parent_location_id` | no | parent_location_id | Soporta la clave foránea fk_inventory_locations_parent_location_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_inventory_locations_location_type_concept_id` | no | location_type_concept_id | Soporta la clave foránea fk_inventory_locations_location_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_inventory_locations_temperature_zone_concept_id` | no | temperature_zone_concept_id | Soporta la clave foránea fk_inventory_locations_temperature_zone_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -623,12 +623,19 @@ Define ubicaciones de almacenamiento farmacéutico donde se controlan lotes y ex
 | GET /public/medications/{conceptId}/availability | LEE | POR_SQL |
 | GET /pharmacy-inventory/availability | LEE | DIRECTA |
 | GET /pharmacy-inventory/sites/{siteId}/stock | LEE | DIRECTA |
+| POST /pharmacy/{pharmacyId}/dispensations | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/goods-receipts | LEE | DIRECTA |
+| POST /pharmacy/{pharmacyId}/reservations | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/transfers | LEE | DIRECTA |
 | POST /pharmacy/{siteId}/count-sessions | LEE | DIRECTA |
 | POST /pharmacy/{siteId}/inventory-locations | CREA | DIRECTA |
+| POST /pharmacy/{siteId}/inventory-locations | LEE | DIRECTA |
+| POST /pharmacy/count-sessions/{id}/approve | LEE | DIRECTA |
+| POST /pharmacy/dispensations/{id}/reverse | LEE | DIRECTA |
 | POST /pharmacy/orders | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/accept-substitutions | LEE | DIRECTA |
+| POST /pharmacy/recall-holds | LEE | DIRECTA |
+| POST /pharmacy/recall-holds/{id}/release | LEE | DIRECTA |
 | GET /public/profiles/f/{slug}/products | LEE | POR_SQL |
 
 #### Gobierno
@@ -654,7 +661,7 @@ Registra lotes de productos para rastrear vencimientos, origen y movimientos de 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml: inventory_lots`
 - **Dominio:** Farmacia · **Diagrama:** `Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml` · **DDL:** `SQL/25_pharmacy_inventory/02_tables.sql`
 - **Entidad del ORM:** `InventoryLots` — `src/modules/pharmacy_inventory/entities/inventory_lots.entity.ts`
-- **Resumen:** 15 columnas · 6 índices · 6 FK salientes · 9 entrantes · 6 operaciones
+- **Resumen:** 15 columnas · 6 índices · 6 FK salientes · 9 entrantes · 10 operaciones
 
 #### Columnas
 
@@ -711,11 +718,15 @@ Registra lotes de productos para rastrear vencimientos, origen y movimientos de 
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /pharmacy/{pharmacyId}/dispensations | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/goods-receipts | CREA | DIRECTA |
 | POST /pharmacy/{pharmacyId}/goods-receipts | LEE | DIRECTA |
+| POST /pharmacy/{pharmacyId}/reservations | LEE | DIRECTA |
+| POST /pharmacy/{pharmacyId}/transfers | LEE | DIRECTA |
+| POST /pharmacy/{siteId}/count-sessions | LEE | DIRECTA |
+| POST /pharmacy/count-sessions/{id}/approve | LEE | DIRECTA |
 | POST /pharmacy/recall-holds | ACTUALIZA | POR_TIPO |
 | POST /pharmacy/recall-holds | LEE | DIRECTA |
-| POST /pharmacy/recall-holds/{id}/release | ACTUALIZA | POR_TIPO |
 | POST /pharmacy/recall-holds/{id}/release | LEE | DIRECTA |
 
 #### Gobierno
@@ -930,7 +941,7 @@ Aparta existencias para procesos que requieren disponibilidad comprometida antes
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml: inventory_reservations`
 - **Dominio:** Farmacia · **Diagrama:** `Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml` · **DDL:** `SQL/25_pharmacy_inventory/02_tables.sql`
 - **Entidad del ORM:** `InventoryReservations` — `src/modules/pharmacy_inventory/entities/inventory_reservations.entity.ts`
-- **Resumen:** 22 columnas · 14 índices · 11 FK salientes · 5 entrantes · 38 operaciones
+- **Resumen:** 22 columnas · 14 índices · 11 FK salientes · 5 entrantes · 39 operaciones
 
 #### Columnas
 
@@ -984,12 +995,12 @@ Aparta existencias para procesos que requieren disponibilidad comprometida antes
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_inventory_reservations_pharmacy_id` | no | pharmacy_id | Soporta la clave foránea fk_inventory_reservations_pharmacy_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «pharmacy_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_inventory_reservations_pharmacy_id` | no | pharmacy_id | Soporta la clave foránea fk_inventory_reservations_pharmacy_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «pharmacy_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_inventory_reservations_pharmacy_site_id` | no | pharmacy_site_id | Soporta la clave foránea fk_inventory_reservations_pharmacy_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_inventory_reservations_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_inventory_reservations_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_inventory_reservations_medication_request_id` | no | medication_request_id | Soporta la clave foránea fk_inventory_reservations_medication_request_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_inventory_reservations_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_inventory_reservations_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_inventory_reservations_medication_request_id` | no | medication_request_id | Soporta la clave foránea fk_inventory_reservations_medication_request_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «medication_request_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_inventory_reservations_quotation_id` | no | quotation_id | Soporta la clave foránea fk_inventory_reservations_quotation_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_inventory_reservations_reservation_status_concept_id` | no | reservation_status_concept_id | Soporta la clave foránea fk_inventory_reservations_reservation_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 7 consulta(s) de repositorio filtran u ordenan por «reservation_status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_inventory_reservations_reservation_status_concept_id` | no | reservation_status_concept_id | Soporta la clave foránea fk_inventory_reservations_reservation_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 9 consulta(s) de repositorio filtran u ordenan por «reservation_status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_inventory_reservations_delivery_mode_concept_id` | no | delivery_mode_concept_id | Soporta la clave foránea fk_inventory_reservations_delivery_mode_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_inventory_reservations_delivery_address_id` | no | delivery_address_id | Soporta la clave foránea fk_inventory_reservations_delivery_address_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_inventory_reservations_currency_concept_id` | no | currency_concept_id | Soporta la clave foránea fk_inventory_reservations_currency_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1023,6 +1034,7 @@ Aparta existencias para procesos que requieren disponibilidad comprometida antes
 | POST /pharmacy/{pharmacyId}/dispensations | ACTUALIZA | POR_TIPO |
 | POST /pharmacy/{pharmacyId}/dispensations | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/reservations | CREA | DIRECTA |
+| POST /pharmacy/{pharmacyId}/reservations | LEE | DIRECTA |
 | GET /pharmacy/orders | ACTUALIZA | POR_TIPO |
 | GET /pharmacy/orders | LEE | DIRECTA |
 | POST /pharmacy/orders | CREA | DIRECTA |
@@ -1171,7 +1183,7 @@ Representa saldos de existencias por producto y ubicación para consultar dispon
 |---|---|---|---|
 | `ix_inventory_stock_positions_inventory_location_id` | no | inventory_location_id | Soporta la clave foránea fk_inventory_stock_positions_inventory_location_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «inventory_location_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_inventory_stock_positions_pharmacy_product_id` | no | pharmacy_product_id | Soporta la clave foránea fk_inventory_stock_positions_pharmacy_product_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «pharmacy_product_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_inventory_stock_positions_inventory_lot_id` | no | inventory_lot_id | Soporta la clave foránea fk_inventory_stock_positions_inventory_lot_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «inventory_lot_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_inventory_stock_positions_inventory_lot_id` | no | inventory_lot_id | Soporta la clave foránea fk_inventory_stock_positions_inventory_lot_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «inventory_lot_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Operaciones que la tocan
 
@@ -1579,7 +1591,7 @@ Agrupa sincronizaciones de inventario con fuentes externas para seguir cargas de
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml: pharmacy_inventory_sync_batches`
 - **Dominio:** Farmacia · **Diagrama:** `Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml` · **DDL:** `SQL/25_pharmacy_inventory/02_tables.sql`
 - **Entidad del ORM:** `PharmacyInventorySyncBatches` — `src/modules/pharmacy_inventory/entities/pharmacy_inventory_sync_batches.entity.ts`
-- **Resumen:** 15 columnas · 5 índices · 5 FK salientes · 1 entrantes · 3 operaciones
+- **Resumen:** 15 columnas · 5 índices · 5 FK salientes · 1 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -1627,6 +1639,7 @@ Agrupa sincronizaciones de inventario con fuentes externas para seguir cargas de
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /internal/inventory-sync-batches | CREA | DIRECTA |
+| POST /internal/inventory-sync-batches | LEE | DIRECTA |
 | POST /internal/inventory-sync/{batchId}/reconcile | ACTUALIZA | POR_TIPO |
 | POST /internal/inventory-sync/{batchId}/reconcile | LEE | DIRECTA |
 

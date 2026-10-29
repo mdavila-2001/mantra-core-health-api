@@ -10,6 +10,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { UnauthorizedException } from '@nestjs/common';
 import { IamAssistedRegistrationService } from './iam-assisted-registration.service';
+import { profilesRegistration } from './iam-registration.testing';
 import { CONCEPTS, ConflictException } from '../../../../common';
 
 const actor = { id: 'clinician-1', roles: ['CLINICIAN'] };
@@ -38,6 +39,10 @@ function build() {
   const rolesRepo = { create: mockFn() };
   const activationsRepo = { create: mockFn(), findByTokenHash: mockFn() };
   const eventsRepo = { record: mockFn() };
+  const personsRepo = { create: mockFn(() => ({ id: 'person-1' })) };
+  const personProfilesRepo = { create: mockFn() };
+  const patientProfilesRepo = { create: mockFn() };
+  const accountLinksRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new IamAssistedRegistrationService(
@@ -48,6 +53,12 @@ function build() {
     rolesRepo as any,
     activationsRepo,
     eventsRepo as any,
+    profilesRegistration({
+      persons: personsRepo,
+      personProfiles: personProfilesRepo,
+      patientProfiles: patientProfilesRepo,
+      accountLinks: accountLinksRepo,
+    }),
     logger as any,
   );
   return {
@@ -60,6 +71,10 @@ function build() {
     rolesRepo,
     activationsRepo,
     eventsRepo,
+    personsRepo,
+    personProfilesRepo,
+    patientProfilesRepo,
+    accountLinksRepo,
   };
 }
 
@@ -116,6 +131,76 @@ describe('IamAssistedRegistrationService', () => {
           }),
         }),
       );
+    });
+
+    it('creates the person, its patient profile and the SELF account link in the same transaction (#820)', async () => {
+      const d = build();
+      d.credentialsRepo.findLivePasswordBySubject.mockResolvedValue(null);
+      d.usersRepo.create.mockReturnValue({ id: 'u1' });
+
+      await d.service.assistedRegistration(
+        {
+          name: 'Lucía',
+          middleName: 'Andrea',
+          lastName: 'Mamani',
+          motherLastName: 'Quispe',
+          email: 'paciente@x.io',
+          reason: 'paciente sin acceso digital',
+        },
+        actor,
+      );
+
+      // La persona lleva las partes del nombre y las mismas que la cuenta.
+      expect(d.personsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          name: 'Lucía',
+          middleName: 'Andrea',
+          lastName: 'Mamani',
+          motherLastName: 'Quispe',
+          displayName: 'Lucía Andrea Mamani Quispe',
+          actorUserId: actor.id,
+        }),
+      );
+      expect(d.personProfilesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ personId: 'person-1' }),
+      );
+      expect(d.patientProfilesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          profileId: 'person-1',
+          patientCode: expect.stringMatching(/^PAT-/),
+        }),
+      );
+      // Sin este vínculo la cuenta choca con ACCOUNT_WITHOUT_LINKED_PERSON al
+      // abrir su propio perfil.
+      expect(d.accountLinksRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          personId: 'person-1',
+          userId: 'u1',
+          actorUserId: actor.id,
+        }),
+      );
+      // Todo en la misma transacción que la cuenta.
+      expect(d.em.transactional).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not create any person when the identifier is already in use (#820)', async () => {
+      const d = build();
+      d.credentialsRepo.findLivePasswordBySubject.mockResolvedValue({
+        id: 'c1',
+      });
+
+      await expect(
+        d.service.assistedRegistration(
+          { name: 'A', lastName: 'B', email: 'x@x.io', reason: 'r' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.personsRepo.create).not.toHaveBeenCalled();
+      expect(d.accountLinksRepo.create).not.toHaveBeenCalled();
     });
 
     it('keeps honouring displayName for clients that still send it', async () => {

@@ -25,6 +25,8 @@ export {
   CreateTrackedLinkDto,
   TrackedLinkResponseDto,
   TrackedLinkClickResponseDto,
+  IssueTrackedLinkTokenDto,
+  TrackedLinkTokenResponseDto,
   RecordTouchpointDto,
   TouchpointResponseDto,
   ComputeAttributionDto,

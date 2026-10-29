@@ -1,0 +1,139 @@
+# Despliegue sin corte para los fronts de ALOVIDA (proveedor de archivos de Traefik).
+#
+# Cada dominio va a un servicio `failover`:
+#   principal → el contenedor vivo de Coolify, por su alias estable
+#               `alovida-live-<app>` en la red `alovida-edge`;
+#   respaldo  → `alovida-standby-<app>`, la última versión que estuvo sana.
+# El reconciliador `/usr/local/sbin/alovida-standby` mantiene alias y standby.
+#
+# Mientras Coolify reemplaza el contenedor (o si el nuevo no arranca), el
+# healthcheck del principal falla y Traefik sirve el standby: se sigue viendo
+# la versión anterior en vez de «no available server».
+#
+# Prioridad 100000: gana a los routers que Coolify genera por etiquetas (su
+# prioridad es el largo de la regla), así que esto manda sobre esos dominios.
+# Quitarlo = borrar este archivo; Traefik vuelve solo a las rutas de Coolify.
+http:
+  # Conectar a un contenedor que acaba de desaparecer no da «connection
+  # refused»: queda colgado hasta el dialTimeout, que por defecto es 30 s, y el
+  # reintento no llega a actuar. Medido el 25/10/2026 23:26:45 durante el
+  # cambio de contenedor del front de test. Los contenedores están en el mismo
+  # host: si no conecta en 1 s, ya no existe.
+  serversTransports:
+    alovida-fast-dial:
+      forwardingTimeouts:
+        dialTimeout: 1s
+
+  middlewares:
+    # Cubre los ~1–2 s entre que el principal cae y el healthcheck lo marca.
+    alovida-ha-retry:
+      retry:
+        attempts: 5
+        initialInterval: 300ms
+    # Marca para comprobar desde afuera que el pedido pasó por este failover.
+    alovida-ha-mark:
+      headers:
+        customResponseHeaders:
+          X-Alovida-Route: failover
+
+  routers:
+    alovida-ha-mockup-http:
+      rule: Host(`demo.alovidasalud.arauzsoftware.com`) || Host(`demo.alovidasalud.com`) || Host(`mockup.62.169.18.132.sslip.io`)
+      entryPoints: [http]
+      priority: 100000
+      middlewares: [alovida-redirect-https@file]
+      service: alovida-ha-mockup
+    alovida-ha-mockup-https:
+      rule: Host(`demo.alovidasalud.arauzsoftware.com`) || Host(`demo.alovidasalud.com`) || Host(`mockup.62.169.18.132.sslip.io`)
+      entryPoints: [https]
+      priority: 100000
+      middlewares: [alovida-ha-mark, alovida-ha-retry]
+      tls:
+        certResolver: letsencrypt
+      service: alovida-ha-mockup
+
+    alovida-ha-test-http:
+      rule: Host(`app.alovidasalud.arauzsoftware.com`) || Host(`www.app.alovidasalud.arauzsoftware.com`) || Host(`test.62.169.18.132.sslip.io`)
+      entryPoints: [http]
+      priority: 100000
+      middlewares: [alovida-redirect-https@file]
+      service: alovida-ha-test
+    alovida-ha-test-https:
+      rule: Host(`app.alovidasalud.arauzsoftware.com`) || Host(`www.app.alovidasalud.arauzsoftware.com`) || Host(`test.62.169.18.132.sslip.io`)
+      entryPoints: [https]
+      priority: 100000
+      middlewares: [alovida-ha-mark, alovida-ha-retry]
+      tls:
+        certResolver: letsencrypt
+      service: alovida-ha-test
+
+
+    alovida-ha-dev-http:
+      rule: Host(`app.alovidasalud.com`) || Host(`dev.62.169.18.132.sslip.io`)
+      entryPoints: [http]
+      priority: 100000
+      middlewares: [alovida-redirect-https@file]
+      service: alovida-ha-dev
+    alovida-ha-dev-https:
+      rule: Host(`app.alovidasalud.com`) || Host(`dev.62.169.18.132.sslip.io`)
+      entryPoints: [https]
+      priority: 100000
+      middlewares: [alovida-ha-mark, alovida-ha-retry]
+      tls:
+        certResolver: letsencrypt
+      service: alovida-ha-dev
+
+  services:
+    alovida-ha-mockup:
+      failover:
+        healthCheck: {}
+        service: alovida-ha-mockup-live
+        fallback: alovida-ha-mockup-standby
+    alovida-ha-mockup-live:
+      loadBalancer:
+        passHostHeader: true
+        serversTransport: alovida-fast-dial
+        healthCheck: { path: /auth, hostname: demo.alovidasalud.arauzsoftware.com, interval: 2s, timeout: 2s }
+        servers: [{ url: "http://alovida-live-mockup:4000" }]
+    alovida-ha-mockup-standby:
+      loadBalancer:
+        passHostHeader: true
+        serversTransport: alovida-fast-dial
+        healthCheck: { path: /auth, hostname: demo.alovidasalud.arauzsoftware.com, interval: 5s, timeout: 3s }
+        servers: [{ url: "http://alovida-standby-mockup:4000" }]
+
+    alovida-ha-test:
+      failover:
+        healthCheck: {}
+        service: alovida-ha-test-live
+        fallback: alovida-ha-test-standby
+    alovida-ha-test-live:
+      loadBalancer:
+        passHostHeader: true
+        serversTransport: alovida-fast-dial
+        healthCheck: { path: /auth, hostname: app.alovidasalud.arauzsoftware.com, interval: 2s, timeout: 2s }
+        servers: [{ url: "http://alovida-live-test:80" }]
+    alovida-ha-test-standby:
+      loadBalancer:
+        passHostHeader: true
+        serversTransport: alovida-fast-dial
+        healthCheck: { path: /auth, hostname: app.alovidasalud.arauzsoftware.com, interval: 5s, timeout: 3s }
+        servers: [{ url: "http://alovida-standby-test:80" }]
+
+    alovida-ha-dev:
+      failover:
+        healthCheck: {}
+        service: alovida-ha-dev-live
+        fallback: alovida-ha-dev-standby
+    alovida-ha-dev-live:
+      loadBalancer:
+        passHostHeader: true
+        serversTransport: alovida-fast-dial
+        healthCheck: { path: /auth, hostname: app.alovidasalud.com, interval: 2s, timeout: 2s }
+        servers: [{ url: "http://alovida-live-dev:80" }]
+    alovida-ha-dev-standby:
+      loadBalancer:
+        passHostHeader: true
+        serversTransport: alovida-fast-dial
+        healthCheck: { path: /auth, hostname: app.alovidasalud.com, interval: 5s, timeout: 3s }
+        servers: [{ url: "http://alovida-standby-dev:80" }]

@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { CommunityReviewsService } from '../services';
 import { CreateReviewDto, ReviewResponseDto } from '../dto';
 
@@ -38,6 +43,11 @@ export class PatientReviewsController {
    * lo haya atendido el profesional que queda calificado; y que no lo haya
    * calificado ya. Quién califica sale del token, nunca del cuerpo.
    */
+  @Audited({
+    action: 'PATIENT_SERVICE_REVIEW_PUBLISHED',
+    entity: 'service_review',
+    entityId: 'result.id',
+  })
   @Post('reviews')
   @Roles('PATIENT')
   @HttpCode(HttpStatus.CREATED)

@@ -20,6 +20,8 @@ import {
 import { ObjectStorageRepository, DicomRepository } from '../repositories';
 import { ClinicalReadService } from '../../clinical/services';
 import { AuditTrailService } from '../../audit/services';
+import { ObjectStorageErrorReason } from '../object_storage.error-reasons';
+import { findObjectAccessDenial } from './object-access.policy';
 import type {
   ObjectLocations,
   ObjectManifests,
@@ -40,7 +42,6 @@ import {
   DICOMWEB_OPERATION,
   DICOMWEB_OUTCOME,
   NAMESPACE_ACTIVE,
-  OBJECT_ACCESS_PURPOSES,
   OBJECT_LIFECYCLE,
   PLACEMENT_ROLE,
   REPLICATION_STATE,
@@ -872,9 +873,11 @@ export class ObjectStorageService {
   }> {
     const version = await this.storageRepo.findVersionById(tx, versionId);
     if (!version) {
-      throw new ResourceNotFoundException('Versión no encontrada', {
-        versionId,
-      });
+      throw new ResourceNotFoundException(
+        'Versión no encontrada',
+        { versionId },
+        ObjectStorageErrorReason.OBJECT_VERSION_NOT_FOUND,
+      );
     }
 
     const manifest = await this.storageRepo.findManifestById(
@@ -994,39 +997,29 @@ export class ObjectStorageService {
     purposeOfUseCode: string,
     context: Record<string, unknown>,
   ): Promise<void> {
-    const deny = (reason: string): never => {
-      this.logger.warn(
-        {
-          operation: 'object-storage.access.denied',
-          actorUserId: actor.id,
-          manifestId: manifest.id,
-          reason: reason,
-          ...context,
-        },
-        'Access to a stored object denied',
-      );
-      throw new ResourceNotFoundException('Versión no encontrada', context);
-    };
+    const denial = await findObjectAccessDenial(
+      this.clinicalAccess,
+      manifest,
+      actor,
+      purposeOfUseCode,
+    );
+    if (!denial) return;
 
-    if (!OBJECT_ACCESS_PURPOSES.includes(purposeOfUseCode)) {
-      deny('PURPOSE_NOT_ALLOWED');
-    }
-    if (!(actor.tenantIds ?? []).includes(manifest.tenantId)) {
-      deny('TENANT_MISMATCH');
-    }
-    if (!manifest.patientProfileId) return;
-
-    try {
-      await this.clinicalAccess.assertCanReadHistory(
-        manifest.patientProfileId,
-        actor,
-      );
-    } catch {
-      // La política responde 403 con el detalle del expediente; acá se
-      // uniforma, porque el que pregunta ni siquiera debería saber que el
-      // objeto existe.
-      deny('PATIENT_ACCESS_DENIED');
-    }
+    this.logger.warn(
+      {
+        operation: 'object-storage.access.denied',
+        actorUserId: actor.id,
+        manifestId: manifest.id,
+        reason: denial,
+        ...context,
+      },
+      'Access to a stored object denied',
+    );
+    throw new ResourceNotFoundException(
+      'Versión no encontrada',
+      context,
+      ObjectStorageErrorReason.OBJECT_VERSION_NOT_FOUND,
+    );
   }
 
   /**

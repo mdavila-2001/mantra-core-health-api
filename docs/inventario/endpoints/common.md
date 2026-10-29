@@ -4,7 +4,7 @@
 
 - **Bloque:** Núcleo y Terminología (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 - **Operaciones:** 19 (19 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 10 · MEDIO 5 · BAJO 4
+- **Riesgo:** ALTO 6 · MEDIO 9 · BAJO 4
 - **Tablas distintas que tocan:** 10
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/common.md` (generado aparte por `yarn docs:endpoints:generate`)
 
@@ -12,9 +12,9 @@
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | POST | `/common/addresses` | Registrar una dirección (UC-02-04) | ALTO | 1 | sesión (sin roles) |
-| 2 | POST | `/common/contact-points` | Registrar un punto de contacto (UC-02-02) | ALTO | 1 | sesión (sin roles) |
-| 3 | POST | `/common/contact-points/{id}/verify` | Verificar un punto de contacto (UC-02-03) | ALTO | 2 | sesión (sin roles) |
+| 1 | POST | `/common/addresses` | Registrar una dirección (UC-02-04) | MEDIO | 1 | SECURITY_ADMIN |
+| 2 | POST | `/common/contact-points` | Registrar un punto de contacto (UC-02-02) | MEDIO | 1 | SECURITY_ADMIN |
+| 3 | POST | `/common/contact-points/{id}/verify` | Verificar un punto de contacto (UC-02-03) | MEDIO | 2 | SECURITY_ADMIN |
 | 4 | POST | `/common/files` | Crear un archivo con su versión inicial (UC-02-05) | ALTO | 3 | sesión (sin roles) |
 | 5 | DELETE | `/common/files/{id}` | Borrar lógicamente un archivo (UC-02-10) | ALTO | 4 | sesión (sin roles) |
 | 6 | GET | `/common/files/{id}/content` | Descargar el contenido vigente de un archivo | BAJO | 2 | sesión (sin roles) |
@@ -24,7 +24,7 @@
 | 10 | POST | `/common/files/{id}/versions/{vid}/derivatives` | Generar un derivado de una versión (UC-02-07) | ALTO | 5 | sesión (sin roles) |
 | 11 | GET | `/common/files/links` | Listar los archivos adjuntos a un recurso (UC-02-08) | BAJO | 3 | sesión (sin roles) |
 | 12 | POST | `/common/files/upload` | Subir el contenido de un archivo (multipart) | ALTO | 6 | sesión (sin roles) |
-| 13 | POST | `/common/identifiers` | Registrar un identificador oficial (UC-02-01) | ALTO | 2 | sesión (sin roles) |
+| 13 | POST | `/common/identifiers` | Registrar un identificador oficial (UC-02-01) | MEDIO | 2 | SECURITY_ADMIN |
 | 14 | POST | `/internal/files/versions/{vid}/scan-result` | Registrar resultado de escaneo antimalware (UC-02-09) | MEDIO | 2 | SYSTEM, SECURITY_ADMIN |
 | 15 | GET | `/internal/files/versions/pending-scan` | Listar versiones pendientes de escaneo antimalware | BAJO | 1 | SYSTEM, SECURITY_ADMIN |
 | 16 | POST | `/internal/storage-lifecycle/audio/{assetId}/abort` | Abortar la publicación reservada de un audio | MEDIO | 3 | SYSTEM |
@@ -39,9 +39,9 @@
 - **Origen:** CONTRATO
 - **Nombre:** Registrar una dirección (UC-02-04)
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommonAddressesController.create` — `src/modules/common/controllers/common-addresses.controller.ts:21`
+- **Implementación:** `CommonAddressesController.create` — `src/modules/common/controllers/common-addresses.controller.ts:27`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -51,24 +51,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /common/addresses` la atiende `CommonAddressesController.create` (src/modules/common/controllers/common-addresses.controller.ts:21). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateAddressDto` (11 campos, 3 obligatorios). Delega en `AddressesService.create`. Crea filas en common.addresses.
+`POST /common/addresses` la atiende `CommonAddressesController.create` (src/modules/common/controllers/common-addresses.controller.ts:27). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateAddressDto` (11 campos, 3 obligatorios). Delega en `AddressesService.create`. Crea filas en common.addresses.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-addresses.controller.ts:21` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/common/controllers/common-addresses.controller.ts:27` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | ESCRIBE | CREA | DIRECTA | CommonAddressesController.create → AddressesService.create → AddressesRepository.create | `src/modules/common/repositories/addresses.repository.ts:118` |
+| `common.addresses` | ESCRIBE | CREA | DIRECTA | CommonAddressesController.create → AddressesService.create → AddressesRepository.create | `src/modules/common/repositories/addresses.repository.ts:154` |
 
 ### Cuerpo — DTO `CreateAddressDto` · `application/json`
 
@@ -153,6 +153,7 @@ El árbol de decisión completo está en [flujos](../flujos/common.md).
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/audit-trail-seal.int-spec.ts:82` |
 | INTEGRACION | `test/integration/common.int-spec.ts:92` |
 | CONTROLADOR | `src/modules/common/controllers/common-addresses.controller.spec.ts:20` |
 
@@ -167,9 +168,9 @@ El árbol de decisión completo está en [flujos](../flujos/common.md).
 - **Origen:** CONTRATO
 - **Nombre:** Registrar un punto de contacto (UC-02-02)
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommonContactPointsController.create` — `src/modules/common/controllers/common-contact-points.controller.ts:33`
+- **Implementación:** `CommonContactPointsController.create` — `src/modules/common/controllers/common-contact-points.controller.ts:40`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -179,18 +180,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /common/contact-points` la atiende `CommonContactPointsController.create` (src/modules/common/controllers/common-contact-points.controller.ts:33). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateContactPointDto` (6 campos, 4 obligatorios). Delega en `ContactPointsService.create`. Crea filas en common.contact_points.
+`POST /common/contact-points` la atiende `CommonContactPointsController.create` (src/modules/common/controllers/common-contact-points.controller.ts:40). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateContactPointDto` (6 campos, 4 obligatorios). Delega en `ContactPointsService.create`. Crea filas en common.contact_points.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-contact-points.controller.ts:33` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/common/controllers/common-contact-points.controller.ts:40` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -277,9 +278,9 @@ El árbol de decisión completo está en [flujos](../flujos/common.md).
 - **Origen:** CONTRATO
 - **Nombre:** Verificar un punto de contacto (UC-02-03)
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommonContactPointsController.verify` — `src/modules/common/controllers/common-contact-points.controller.ts:44`
+- **Implementación:** `CommonContactPointsController.verify` — `src/modules/common/controllers/common-contact-points.controller.ts:57`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -289,19 +290,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /common/contact-points/{id}/verify` la atiende `CommonContactPointsController.verify` (src/modules/common/controllers/common-contact-points.controller.ts:44). Exige sesión; el controlador no declara roles. Valida el cuerpo como `VerifyContactPointDto` (1 campo, 0 obligatorios). Delega en `ContactPointsService.verify`. Actualiza common.contact_points. Lee common.contact_points.
+`POST /common/contact-points/{id}/verify` la atiende `CommonContactPointsController.verify` (src/modules/common/controllers/common-contact-points.controller.ts:57). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `VerifyContactPointDto` (1 campo, 0 obligatorios). Delega en `ContactPointsService.verify`. Actualiza common.contact_points. Lee common.contact_points.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-contact-points.controller.ts:44` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/common/controllers/common-contact-points.controller.ts:44` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/common/controllers/common-contact-points.controller.ts:57` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/common/controllers/common-contact-points.controller.ts:57` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -383,7 +384,7 @@ El árbol de decisión completo está en [flujos](../flujos/common.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommonFilesController.createFile` — `src/modules/common/controllers/common-files.controller.ts:144`
+- **Implementación:** `CommonFilesController.createFile` — `src/modules/common/controllers/common-files.controller.ts:151`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -393,18 +394,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /common/files` la atiende `CommonFilesController.createFile` (src/modules/common/controllers/common-files.controller.ts:144). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateFileDto` (7 campos, 7 obligatorios). Delega en `FilesService.createFile`. Crea filas en common.file_versions, common.files. Lee messaging.queued_jobs.
+`POST /common/files` la atiende `CommonFilesController.createFile` (src/modules/common/controllers/common-files.controller.ts:151). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateFileDto` (7 campos, 7 obligatorios). Delega en `FilesService.createFile`. Crea filas en common.file_versions, common.files. Lee messaging.queued_jobs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-files.controller.ts:144` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-files.controller.ts:151` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -490,6 +491,7 @@ El árbol de decisión completo está en [flujos](../flujos/common.md).
 |---|---|
 | INTEGRACION | `test/integration/common.int-spec.ts:106` |
 | INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:101` |
+| INTEGRACION | `test/integration/practitioner-profile-identity-fields.int-spec.ts:209` |
 | CONTROLADOR | `src/modules/common/controllers/common-files.controller.spec.ts:53` |
 
 ### Flujos
@@ -505,7 +507,7 @@ El árbol de decisión completo está en [flujos](../flujos/common.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommonFilesController.softDelete` — `src/modules/common/controllers/common-files.controller.ts:194`
+- **Implementación:** `CommonFilesController.softDelete` — `src/modules/common/controllers/common-files.controller.ts:228`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -515,24 +517,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`DELETE /common/files/{id}` la atiende `CommonFilesController.softDelete` (src/modules/common/controllers/common-files.controller.ts:194). Exige sesión; el controlador no declara roles. Delega en `FilesService.softDelete`. Actualiza common.files. Lee common.file_versions, common.files, messaging.queued_jobs.
+`DELETE /common/files/{id}` la atiende `CommonFilesController.softDelete` (src/modules/common/controllers/common-files.controller.ts:228). Exige sesión; el controlador no declara roles. Delega en `FilesService.softDelete`. Actualiza common.files. Lee common.file_versions, common.files, messaging.queued_jobs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-files.controller.ts:194` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/common/controllers/common-files.controller.ts:194` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-files.controller.ts:228` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/common/controllers/common-files.controller.ts:228` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `common.file_versions` | LEE | LEE | DIRECTA | CommonFilesController.softDelete → FilesService.softDelete → StoragePublicationService.guardFile | `src/common/storage/storage-publication.service.ts:190` |
-| `common.files` | ESCRIBE | ACTUALIZA | POR_TIPO | CommonFilesController.softDelete → FilesService.softDelete | `src/modules/common/services/files.service.ts:552` |
+| `common.files` | ESCRIBE | ACTUALIZA | POR_TIPO | CommonFilesController.softDelete → FilesService.softDelete | `src/modules/common/services/files.service.ts:562` |
 | `common.files` | LEE | LEE | DIRECTA | CommonFilesController.softDelete → FilesService.softDelete → StoragePublicationService.guardFile | `src/common/storage/storage-publication.service.ts:182` |
 | `messaging.queued_jobs` | LEE | LEE | DIRECTA | CommonFilesController.softDelete → FilesService.softDelete → StoragePublicationService.guardFile → StorageLifecycleCoordinator.assertNoContender → QueuesRepository.findStorageIntents | `src/modules/messaging/repositories/queues.repository.ts:62` |
 
@@ -560,7 +562,7 @@ La operación no recibe cuerpo.
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No tiene permiso para modificar este archivo |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido; ResourceNotFoundException: Archivo no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El archivo está bajo retención legal y no puede borrarse |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -589,7 +591,7 @@ El árbol de decisión completo está en [flujos](../flujos/common.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommonFilesController.downloadContent` — `src/modules/common/controllers/common-files.controller.ts:119`
+- **Implementación:** `CommonFilesController.downloadContent` — `src/modules/common/controllers/common-files.controller.ts:126`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -599,17 +601,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /common/files/{id}/content` la atiende `CommonFilesController.downloadContent` (src/modules/common/controllers/common-files.controller.ts:119). Exige sesión; el controlador no declara roles. Delega en `FilesService.assertDownloadSignature`, `FileUploadService.download`. Lee common.file_versions, common.files.
+`GET /common/files/{id}/content` la atiende `CommonFilesController.downloadContent` (src/modules/common/controllers/common-files.controller.ts:126). Exige sesión; el controlador no declara roles. Delega en `FilesService.assertDownloadSignature`, `FileUploadService.download`. Lee common.file_versions, common.files.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-files.controller.ts:119` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/common/controllers/common-files.controller.ts:119` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-files.controller.ts:126` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/common/controllers/common-files.controller.ts:126` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -647,7 +649,7 @@ _No se identificó un DTO de respuesta con campos._
 | 410 | — | GoneException: {{ // Sin `code` propio el filtro global lo dejaba como INTE…} |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | Error: FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3; Error: S3 object body is empty |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.SERVICE_UNAVAILABLE}; Error: S3 object body is empty |
 
 El árbol de decisión completo está en [flujos](../flujos/common.md).
 
@@ -656,6 +658,7 @@ El árbol de decisión completo está en [flujos](../flujos/common.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/practitioner-credential-registration-files.int-spec.ts:199` |
+| INTEGRACION | `test/integration/practitioner-license-registration-files.int-spec.ts:115` |
 | INTEGRACION | `test/integration/practitioner-signature-registration.int-spec.ts:85` |
 
 ### Flujos
@@ -671,7 +674,7 @@ El árbol de decisión completo está en [flujos](../flujos/common.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommonFilesController.downloadUrl` — `src/modules/common/controllers/common-files.controller.ts:211`
+- **Implementación:** `CommonFilesController.downloadUrl` — `src/modules/common/controllers/common-files.controller.ts:250`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -681,17 +684,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /common/files/{id}/download-url` la atiende `CommonFilesController.downloadUrl` (src/modules/common/controllers/common-files.controller.ts:211). Exige sesión; el controlador no declara roles. Delega en `FilesService.generateDownloadUrl`. Lee common.file_versions, common.files.
+`POST /common/files/{id}/download-url` la atiende `CommonFilesController.downloadUrl` (src/modules/common/controllers/common-files.controller.ts:250). Exige sesión; el controlador no declara roles. Delega en `FilesService.generateDownloadUrl`. Lee common.file_versions, common.files.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-files.controller.ts:211` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/common/controllers/common-files.controller.ts:211` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-files.controller.ts:250` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/common/controllers/common-files.controller.ts:250` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -751,7 +754,7 @@ El árbol de decisión completo está en [flujos](../flujos/common.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommonFilesController.createLink` — `src/modules/common/controllers/common-files.controller.ts:182`
+- **Implementación:** `CommonFilesController.createLink` — `src/modules/common/controllers/common-files.controller.ts:210`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -761,19 +764,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /common/files/{id}/links` la atiende `CommonFilesController.createLink` (src/modules/common/controllers/common-files.controller.ts:182). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateFileLinkDto` (4 campos, 2 obligatorios). Delega en `FilesService.createLink`. Crea filas en common.file_links. Lee common.file_versions, common.files, messaging.queued_jobs.
+`POST /common/files/{id}/links` la atiende `CommonFilesController.createLink` (src/modules/common/controllers/common-files.controller.ts:210). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateFileLinkDto` (4 campos, 2 obligatorios). Delega en `FilesService.createLink`. Crea filas en common.file_links. Lee common.file_versions, common.files, messaging.queued_jobs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-files.controller.ts:182` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/common/controllers/common-files.controller.ts:182` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-files.controller.ts:210` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/common/controllers/common-files.controller.ts:210` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -838,7 +841,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No tiene permiso para modificar este archivo |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido; ResourceNotFoundException: Archivo no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: {identity.reasonCode}; StorageLifecycleDenied: TRANSACTION_REQUIRED; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: PURGE_IN_FLIGHT; StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: INTENT_ENVELOPE_UNKNOWN; StorageLifecycleDenied: PRODUCER_OR_PURGE_IN_FLIGHT |
@@ -865,7 +868,7 @@ El árbol de decisión completo está en [flujos](../flujos/common.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommonFilesController.createVersion` — `src/modules/common/controllers/common-files.controller.ts:157`
+- **Implementación:** `CommonFilesController.createVersion` — `src/modules/common/controllers/common-files.controller.ts:169`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -875,19 +878,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /common/files/{id}/versions` la atiende `CommonFilesController.createVersion` (src/modules/common/controllers/common-files.controller.ts:157). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateFileVersionDto` (4 campos, 4 obligatorios). Delega en `FilesService.createVersion`. Crea filas en common.file_versions. Actualiza common.files. Lee common.file_versions, common.files, messaging.queued_jobs.
+`POST /common/files/{id}/versions` la atiende `CommonFilesController.createVersion` (src/modules/common/controllers/common-files.controller.ts:169). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateFileVersionDto` (4 campos, 4 obligatorios). Delega en `FilesService.createVersion`. Crea filas en common.file_versions. Actualiza common.files. Lee common.file_versions, common.files, messaging.queued_jobs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-files.controller.ts:157` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/common/controllers/common-files.controller.ts:157` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-files.controller.ts:169` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/common/controllers/common-files.controller.ts:169` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -895,7 +898,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `common.file_versions` | ESCRIBE | CREA | DIRECTA | CommonFilesController.createVersion → FilesService.createVersion → FileVersionsRepository.create | `src/modules/common/repositories/file-versions.repository.ts:142` |
 | `common.file_versions` | LEE | LEE | DIRECTA | CommonFilesController.createVersion → FilesService.createVersion → StoragePublicationService.guardFile | `src/common/storage/storage-publication.service.ts:190` |
-| `common.files` | ESCRIBE | ACTUALIZA | POR_TIPO | CommonFilesController.createVersion → FilesService.createVersion | `src/modules/common/services/files.service.ts:288` |
+| `common.files` | ESCRIBE | ACTUALIZA | POR_TIPO | CommonFilesController.createVersion → FilesService.createVersion | `src/modules/common/services/files.service.ts:291` |
 | `common.files` | LEE | LEE | DIRECTA | CommonFilesController.createVersion → FilesService.createVersion → StoragePublicationService.guardFile | `src/common/storage/storage-publication.service.ts:182` |
 | `messaging.queued_jobs` | LEE | LEE | DIRECTA | CommonFilesController.createVersion → FilesService.createVersion → StoragePublicationService.guardFile → StorageLifecycleCoordinator.assertNoContender → QueuesRepository.findStorageIntents | `src/modules/messaging/repositories/queues.repository.ts:62` |
 
@@ -958,7 +961,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No tiene permiso para modificar este archivo |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido; ResourceNotFoundException: Archivo no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: {identity.reasonCode}; StorageLifecycleDenied: TRANSACTION_REQUIRED; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: PURGE_IN_FLIGHT; StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: INTENT_ENVELOPE_UNKNOWN; StorageLifecycleDenied: PRODUCER_OR_PURGE_IN_FLIGHT; StorageLifecycleDenied: REFERENCE_OBJECT_UNPROVEN; StorageLifecycleDenied: STORE_RECEIPT_UNKNOWN; StorageLifecycleDenied: RESERVATION_MISSING; StorageLifecycleDenied: RESERVATION_OWNER_MISMATCH; StorageLifecycleDenied: PUBLICATION_IDENTITY_CHANGED; StorageLifecycleDenied: REFERENCE_METADATA_MISMATCH |
@@ -985,7 +988,7 @@ El árbol de decisión completo está en [flujos](../flujos/common.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommonFilesController.createDerivative` — `src/modules/common/controllers/common-files.controller.ts:169`
+- **Implementación:** `CommonFilesController.createDerivative` — `src/modules/common/controllers/common-files.controller.ts:186`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -995,19 +998,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /common/files/{id}/versions/{vid}/derivatives` la atiende `CommonFilesController.createDerivative` (src/modules/common/controllers/common-files.controller.ts:169). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateFileDerivativeDto` (5 campos, 5 obligatorios). Delega en `FilesService.createDerivative`. Crea filas en common.file_derivatives, common.file_versions. Lee common.file_versions, common.files, messaging.queued_jobs.
+`POST /common/files/{id}/versions/{vid}/derivatives` la atiende `CommonFilesController.createDerivative` (src/modules/common/controllers/common-files.controller.ts:186). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateFileDerivativeDto` (5 campos, 5 obligatorios). Delega en `FilesService.createDerivative`. Crea filas en common.file_derivatives, common.file_versions. Lee common.file_versions, common.files, messaging.queued_jobs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-files.controller.ts:169` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, vid | `src/modules/common/controllers/common-files.controller.ts:169` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-files.controller.ts:186` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, vid | `src/modules/common/controllers/common-files.controller.ts:186` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1079,8 +1082,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido; ResourceNotFoundException: Versión de archivo no encontrada |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No tiene permiso para modificar este archivo |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido; ResourceNotFoundException: Archivo no encontrado; ResourceNotFoundException: Versión de archivo no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se pueden generar derivados de versiones con escaneo limpio |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: {identity.reasonCode}; StorageLifecycleDenied: TRANSACTION_REQUIRED; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: PURGE_IN_FLIGHT; StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: INTENT_ENVELOPE_UNKNOWN; StorageLifecycleDenied: PRODUCER_OR_PURGE_IN_FLIGHT; StorageLifecycleDenied: REFERENCE_OBJECT_UNPROVEN; StorageLifecycleDenied: STORE_RECEIPT_UNKNOWN; StorageLifecycleDenied: RESERVATION_MISSING; StorageLifecycleDenied: RESERVATION_OWNER_MISMATCH; StorageLifecycleDenied: PUBLICATION_IDENTITY_CHANGED; StorageLifecycleDenied: REFERENCE_METADATA_MISMATCH |
@@ -1107,7 +1110,7 @@ El árbol de decisión completo está en [flujos](../flujos/common.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommonFilesController.listLinks` — `src/modules/common/controllers/common-files.controller.ts:107`
+- **Implementación:** `CommonFilesController.listLinks` — `src/modules/common/controllers/common-files.controller.ts:114`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1117,18 +1120,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /common/files/links` la atiende `CommonFilesController.listLinks` (src/modules/common/controllers/common-files.controller.ts:107). Exige sesión; el controlador no declara roles. Delega en `FilesService.listLinkedFiles`. Lee common.file_links, common.file_versions, common.files.
+`GET /common/files/links` la atiende `CommonFilesController.listLinks` (src/modules/common/controllers/common-files.controller.ts:114). Exige sesión; el controlador no declara roles. Delega en `FilesService.listLinkedFiles`. Lee common.file_links, common.file_versions, common.files.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-files.controller.ts:107` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-files.controller.ts:114` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_QUERY | ownerType (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | ownerId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1199,7 +1202,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommonFilesController.upload` — `src/modules/common/controllers/common-files.controller.ts:71`
+- **Implementación:** `CommonFilesController.upload` — `src/modules/common/controllers/common-files.controller.ts:73`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1209,18 +1212,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /common/files/upload` la atiende `CommonFilesController.upload` (src/modules/common/controllers/common-files.controller.ts:71). Exige sesión; el controlador no declara roles. Delega en `FileUploadService.upload`. Crea filas en common.file_versions, common.files, messaging.queued_jobs. Actualiza messaging.queued_jobs. Lee messaging.message_queues, messaging.queued_jobs.
+`POST /common/files/upload` la atiende `CommonFilesController.upload` (src/modules/common/controllers/common-files.controller.ts:73). Exige sesión; el controlador no declara roles. Delega en `FileUploadService.upload`. Crea filas en common.file_versions, common.files, messaging.queued_jobs. Actualiza messaging.queued_jobs. Lee messaging.message_queues, messaging.queued_jobs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-files.controller.ts:71` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-files.controller.ts:73` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | multipart/form-data (obligatorio); el tamaño del archivo lo define la ruta, no el límite global | `contrato (requestBody)` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1287,7 +1290,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se recibió contenido en el campo "file"; PreconditionFailedException: El archivo excede el tamaño máximo permitido; PreconditionFailedException: El contenido no corresponde a ningún formato de archivo permitido; PreconditionFailedException: El formato del archivo no está permitido para esta categoría |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: REMOTE_STATE_UNKNOWN; StorageLifecycleDenied: ADAPTER_DID_NOT_CONSUME_PERMIT; StorageLifecycleDenied: PUBLICATION_RESULT_REQUIRES_RELOAD; StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED; Error: FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3; StorageLifecycleDenied: REFERENCE_OBJECT_UNPROVEN; StorageLifecycleDenied: REFERENCE_METADATA_MISMATCH |
+| 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: REMOTE_STATE_UNKNOWN; StorageLifecycleDenied: ADAPTER_DID_NOT_CONSUME_PERMIT; StorageLifecycleDenied: PUBLICATION_RESULT_REQUIRES_RELOAD; StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED; DomainException: {HttpStatus.SERVICE_UNAVAILABLE}; StorageLifecycleDenied: REFERENCE_OBJECT_UNPROVEN; StorageLifecycleDenied: REFERENCE_METADATA_MISMATCH |
 
 El árbol de decisión completo está en [flujos](../flujos/common.md).
 
@@ -1309,9 +1312,9 @@ El árbol de decisión completo está en [flujos](../flujos/common.md).
 - **Origen:** CONTRATO
 - **Nombre:** Registrar un identificador oficial (UC-02-01)
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommonIdentifiersController.create` — `src/modules/common/controllers/common-identifiers.controller.ts:21`
+- **Implementación:** `CommonIdentifiersController.create` — `src/modules/common/controllers/common-identifiers.controller.ts:27`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1321,18 +1324,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /common/identifiers` la atiende `CommonIdentifiersController.create` (src/modules/common/controllers/common-identifiers.controller.ts:21). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateIdentifierDto` (6 campos, 4 obligatorios). Delega en `IdentifiersService.create`. Crea filas en common.identifiers. Lee common.identifiers.
+`POST /common/identifiers` la atiende `CommonIdentifiersController.create` (src/modules/common/controllers/common-identifiers.controller.ts:27). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateIdentifierDto` (6 campos, 4 obligatorios). Delega en `IdentifiersService.create`. Crea filas en common.identifiers. Lee common.identifiers.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-identifiers.controller.ts:21` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/common/controllers/common-identifiers.controller.ts:27` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1438,17 +1441,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/common/controllers/internal-files.controller.ts:81` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: vid | `src/modules/common/controllers/internal-files.controller.ts:81` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.file_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | InternalFilesController.scanResult → FilesService.recordScanResult | `src/modules/common/services/files.service.ts:474` |
+| `common.file_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | InternalFilesController.scanResult → FilesService.recordScanResult | `src/modules/common/services/files.service.ts:483` |
 | `common.file_versions` | LEE | LEE | DIRECTA | InternalFilesController.scanResult → FilesService.recordScanResult → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
 
 ### Parámetros
@@ -1545,8 +1548,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/common/controllers/internal-files.controller.ts:65` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1603,7 +1606,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `InternalStorageLifecycleController.abort` — `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:39`
+- **Implementación:** `InternalStorageLifecycleController.abort` — `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:49`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1613,19 +1616,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/storage-lifecycle/audio/{assetId}/abort` la atiende `InternalStorageLifecycleController.abort` (src/modules/common/controllers/internal-storage-lifecycle.controller.ts:39). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `StorageReservationDto` (0 campos, 0 obligatorios). Delega en `StorageWorkerPublicationService.abortAudio`. Actualiza messaging.queued_jobs. Lee audio_assets.audio_assets, messaging.queued_jobs.
+`POST /internal/storage-lifecycle/audio/{assetId}/abort` la atiende `InternalStorageLifecycleController.abort` (src/modules/common/controllers/internal-storage-lifecycle.controller.ts:49). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `StorageReservationDto` (0 campos, 0 obligatorios). Delega en `StorageWorkerPublicationService.abortAudio`. Actualiza messaging.queued_jobs. Lee audio_assets.audio_assets, messaging.queued_jobs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM | `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:39` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:39` |
+| ROL | Alguno de: SYSTEM | `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:49` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:49` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1703,11 +1706,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:21` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:21` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1770,7 +1773,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `InternalStorageLifecycleController.dispatch` — `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:31`
+- **Implementación:** `InternalStorageLifecycleController.dispatch` — `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:36`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1780,19 +1783,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/storage-lifecycle/audio/{assetId}/dispatch` la atiende `InternalStorageLifecycleController.dispatch` (src/modules/common/controllers/internal-storage-lifecycle.controller.ts:31). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `StorageReservationDto` (0 campos, 0 obligatorios). Delega en `StorageWorkerPublicationService.dispatchAudio`. Actualiza messaging.queued_jobs. Lee audio_assets.audio_assets, messaging.queued_jobs.
+`POST /internal/storage-lifecycle/audio/{assetId}/dispatch` la atiende `InternalStorageLifecycleController.dispatch` (src/modules/common/controllers/internal-storage-lifecycle.controller.ts:36). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `StorageReservationDto` (0 campos, 0 obligatorios). Delega en `StorageWorkerPublicationService.dispatchAudio`. Actualiza messaging.queued_jobs. Lee audio_assets.audio_assets, messaging.queued_jobs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM | `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:31` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:31` |
+| ROL | Alguno de: SYSTEM | `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:36` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:36` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1852,7 +1855,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `InternalStorageLifecycleController.recover` — `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:47`
+- **Implementación:** `InternalStorageLifecycleController.recover` — `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:62`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1862,16 +1865,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/storage-lifecycle/recover` la atiende `InternalStorageLifecycleController.recover` (src/modules/common/controllers/internal-storage-lifecycle.controller.ts:47). Exige sesión con alguno de los roles SYSTEM. Delega en `StorageLifecycleCoordinator.recover`. Actualiza messaging.queued_jobs. Lee messaging.queued_jobs.
+`POST /internal/storage-lifecycle/recover` la atiende `InternalStorageLifecycleController.recover` (src/modules/common/controllers/internal-storage-lifecycle.controller.ts:62). Exige sesión con alguno de los roles SYSTEM. Delega en `StorageLifecycleCoordinator.recover`. Actualiza messaging.queued_jobs. Lee messaging.queued_jobs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM | `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:47` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SYSTEM | `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:62` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 

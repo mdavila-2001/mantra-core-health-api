@@ -6,6 +6,8 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  requireTenantId,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -37,10 +39,15 @@ import {
   VerificationCaseDetailDto,
 } from '../dto';
 import { IdentityVerificationEffectsService } from './identity-verification-effects.service';
+import { IdentityCaseScope } from './identity-case-scope.service';
 
 const MS_PER_HOUR = 3_600_000;
 /** Cuántos casos devuelve la cola de revisión si no se pide otra cosa. */
 const DEFAULT_QUEUE_SIZE = 50;
+/** Casos leídos por bloque al juntar la cola del tenant. */
+const QUEUE_PAGE_SIZE = 200;
+/** Bloques máximos por lectura de la cola: acota el costo si el tenant tiene pocos casos. */
+const QUEUE_MAX_PAGES = 5;
 /**
  * Estados en los que un caso está esperando que una persona lo mire.
  *
@@ -84,6 +91,8 @@ export class IdentityCasesService {
    * @param fraudRepo - Valor de fraud repo requerido por la operación.
    * @param reviewRepo - Valor de review repo requerido por la operación.
    * @param assertionsRepo - Valor de assertions repo requerido por la operación.
+   * @param effects - Efectos de dominio al cambiar el estado de un caso.
+   * @param scope - Alcance por tenant de casos, sujetos y referencias de evidencia.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -96,42 +105,56 @@ export class IdentityCasesService {
     private readonly reviewRepo: IdentityManualReviewCasesRepository,
     private readonly assertionsRepo: IdentityAssertionsRepository,
     private readonly effects: IdentityVerificationEffectsService,
+    private readonly scope: IdentityCaseScope,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IdentityCasesService.name);
   }
 
   /**
-   * Cola de revisión: los casos que esperan una decisión, el más viejo primero.
+   * Cola de revisión: los casos del tenant activo que esperan una decisión, el
+   * más viejo primero.
    *
    * Es la lectura que le faltaba a la superficie administrativa. Sin ella, un
    * revisor sólo puede actuar sobre un caso cuyo id ya conoce, y el caso que
    * abre un solicitante por autoservicio no llega por ningún lado.
    *
-   * > [!warning] El alcance de esta lectura lo da el rol, no el dato.
-   * > `identity_verification_cases` no tiene `tenant_id`, así que el RLS por
-   * > `app.current_tenant_id` no la alcanza: cubre las tablas que sí tienen esa
-   * > columna. Un `SECURITY_ADMIN` ve por acá los casos de todos los tenants.
-   * > Acotarlo de verdad exige `tenant_id` en la tabla —cambio de modelo, con
-   * > sus cuatro capas— o derivar el tenant del sujeto por join. Hasta
-   * > entonces, no ampliar los roles de este endpoint.
+   * > [!note] Alcance por tenant derivado del sujeto.
+   * > `identity_verification_cases` no tiene `tenant_id`, así que el RLS no la
+   * > alcanza. El alcance se deriva del sujeto de cada caso (`IdentityCaseScope`)
+   * > y la cola se pagina en bloques hasta juntar `limit` casos propios o agotar
+   * > un tope de lectura. Una columna `tenant_id` real sigue siendo un cambio de
+   * > modelo (cuatro capas) que no se hace acá.
    *
    * @param status - Estado concreto a listar; por defecto, los que esperan revisión.
    * @param limit - Tope de resultados.
-   * @returns Los casos en cola, ordenados por antigüedad.
+   * @returns Los casos del tenant en cola, ordenados por antigüedad.
    */
   async listQueue(
     status?: string,
     limit?: number,
   ): Promise<CaseQueueResponseDto> {
+    const tenantId = requireTenantId();
+    const wanted = limit ?? DEFAULT_QUEUE_SIZE;
     const em = this.em.fork();
-    const cases = await this.casesRepo.findByStatuses(
-      em,
-      status ? [status] : AWAITING_REVIEW_STATES,
-      limit ?? DEFAULT_QUEUE_SIZE,
-    );
+    const statuses = status ? [status] : AWAITING_REVIEW_STATES;
+    const cases: Awaited<ReturnType<IdentityCaseScope['filterToTenant']>> = [];
+    for (
+      let page = 0;
+      page < QUEUE_MAX_PAGES && cases.length < wanted;
+      page += 1
+    ) {
+      const batch = await this.casesRepo.findByStatuses(
+        em,
+        statuses,
+        QUEUE_PAGE_SIZE,
+        page * QUEUE_PAGE_SIZE,
+      );
+      cases.push(...(await this.scope.filterToTenant(em, batch, tenantId)));
+      if (batch.length < QUEUE_PAGE_SIZE) break;
+    }
     return {
-      cases: cases.map((kase) => ({
+      cases: cases.slice(0, wanted).map((kase) => ({
         id: kase.id,
         status: kase.statusConceptId,
         subjectTypeConceptId: kase.subjectTypeConceptId,
@@ -146,16 +169,9 @@ export class IdentityCasesService {
 
   /** Expediente de revisión, con metadatos de evidencia y sin contenido binario. */
   async getCaseDetail(id: string): Promise<VerificationCaseDetailDto> {
+    const tenantId = requireTenantId();
     const em = this.em.fork();
-    const kase = await this.casesRepo.findById(em, id);
-    if (!kase) {
-      throw new ResourceNotFoundException(
-        'Caso de verificación no encontrado',
-        {
-          caseId: id,
-        },
-      );
-    }
+    const kase = await this.scope.loadAuthorizedCase(em, id, tenantId);
     const records = await this.evidenceRepo.findByCase(em, id);
     return {
       id: kase.id,
@@ -187,7 +203,11 @@ export class IdentityCasesService {
       { operation: 'ida.case.open', actorId: actor.id },
       'Opening verification case',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
+      // El sujeto se resuelve dentro del tenant antes de abrir nada: un UUID de
+      // sujeto de otra organización responde como inexistente.
+      await this.scope.assertSubjectInTenant(tx, dto, tenantId);
       const policy = await this.policiesRepo.findById(
         tx,
         dto.identityVerificationPolicyId,
@@ -238,8 +258,9 @@ export class IdentityCasesService {
       { operation: 'ida.case.evidence', actorId: actor.id, caseId },
       'Submitting evidence',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const kase = await this.loadCase(tx, caseId);
+      const kase = await this.scope.loadAuthorizedCase(tx, caseId, tenantId);
       if (
         kase.statusConceptId !== IDA.CASE_OPEN &&
         kase.statusConceptId !== IDA.CASE_IN_VERIFICATION
@@ -252,6 +273,14 @@ export class IdentityCasesService {
           },
         );
       }
+
+      // Archivo y consentimiento se resuelven en la misma cadena de alcance.
+      await this.scope.assertAuthorityInTenant(
+        tx,
+        dto.issuerAuthorityId,
+        tenantId,
+      );
+      await this.scope.assertEvidenceReferences(tx, kase, dto, tenantId);
 
       const evidence = await this.evidenceRepo.create(tx, {
         identityVerificationCaseId: kase.id,
@@ -285,8 +314,9 @@ export class IdentityCasesService {
       { operation: 'ida.case.plan', actorId: actor.id, caseId },
       'Planning checks',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const kase = await this.loadCase(tx, caseId);
+      const kase = await this.scope.loadAuthorizedCase(tx, caseId, tenantId);
       if (kase.statusConceptId !== IDA.CASE_OPEN) {
         throw new PreconditionFailedException(
           'Solo un caso abierto puede planificar checks',
@@ -294,6 +324,14 @@ export class IdentityCasesService {
             caseId,
             status: kase.statusConceptId,
           },
+        );
+      }
+
+      for (const item of dto.checks) {
+        await this.scope.assertAuthorityInTenant(
+          tx,
+          item.authorityId,
+          tenantId,
         );
       }
 
@@ -328,8 +366,9 @@ export class IdentityCasesService {
       { operation: 'ida.case.fraud', actorId: actor.id, caseId },
       'Raising fraud signal',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const kase = await this.loadCase(tx, caseId);
+      const kase = await this.scope.loadAuthorizedCase(tx, caseId, tenantId);
 
       const signal = this.fraudRepo.create(tx, {
         identityVerificationCaseId: kase.id,
@@ -375,8 +414,9 @@ export class IdentityCasesService {
       { operation: 'ida.case.review.open', actorId: actor.id, caseId },
       'Opening manual review',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const kase = await this.loadCase(tx, caseId);
+      const kase = await this.scope.loadAuthorizedCase(tx, caseId, tenantId);
       if (
         kase.statusConceptId !== IDA.CASE_IN_VERIFICATION &&
         kase.statusConceptId !== IDA.CASE_AT_RISK
@@ -430,8 +470,9 @@ export class IdentityCasesService {
       { operation: 'ida.case.assert', actorId: actor.id, caseId },
       'Issuing identity assertion',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const kase = await this.loadCase(tx, caseId);
+      const kase = await this.scope.loadAuthorizedCase(tx, caseId, tenantId);
       if (kase.statusConceptId !== IDA.CASE_VERIFIED) {
         throw new PreconditionFailedException(
           'Solo un caso verificado puede emitir una aserción',
@@ -454,6 +495,11 @@ export class IdentityCasesService {
           },
         );
       }
+      await this.scope.assertAuthorityInTenant(
+        tx,
+        dto.issuerIdentityAuthorityId,
+        tenantId,
+      );
       const assuranceLevel =
         dto.assuranceLevelConceptId ?? kase.requestedAssuranceLevelConceptId;
       if (!assuranceLevel) {
@@ -499,13 +545,20 @@ export class IdentityCasesService {
       { operation: 'ida.case.expire-sweep', actorId: actor.id },
       'Running expiration sweep',
     );
+    // El barrido global es del proceso interno con identidad de servicio
+    // explícita (`SYSTEM`); un `SECURITY_ADMIN` barre sólo los casos de su tenant.
+    const systemSweep = roleAuthorizesInTenant(actor, 'SYSTEM', undefined);
+    const tenantId = systemSweep ? undefined : requireTenantId();
     return this.em.transactional(async (tx) => {
       const now = new Date();
-      const expirable = await this.casesRepo.findExpirable(
+      const candidates = await this.casesRepo.findExpirable(
         tx,
         OPEN_CASE_STATES,
         now,
       );
+      const expirable = tenantId
+        ? await this.scope.filterToTenant(tx, candidates, tenantId)
+        : candidates;
       const caseIds: string[] = [];
       for (const kase of expirable) {
         kase.statusConceptId = IDA.CASE_EXPIRED;
@@ -528,23 +581,5 @@ export class IdentityCasesService {
       await tx.flush();
       return { expiredCount: caseIds.length, caseIds };
     });
-  }
-
-  /**
-   * Obtiene load case.
-   *
-   * @param tx - Contexto de persistencia o transacción activa.
-   * @param caseId - Identificador de case.
-   * @returns Resultado de load case.
-   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
-   */
-  private async loadCase(tx: EntityManager, caseId: string) {
-    const kase = await this.casesRepo.findById(tx, caseId);
-    if (!kase)
-      throw new ResourceNotFoundException(
-        'Caso de verificación no encontrado',
-        { caseId },
-      );
-    return kase;
   }
 }

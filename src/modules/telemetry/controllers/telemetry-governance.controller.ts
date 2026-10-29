@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { TelemetryGovernanceService } from '../services';
 import {
   CreateTrackingPurposeDto,
@@ -30,6 +35,11 @@ export class TelemetryGovernanceController {
   constructor(private readonly governance: TelemetryGovernanceService) {}
 
   /** UC-28-01. */
+  @Audited({
+    action: 'TRACKING_PURPOSE_DEFINED',
+    entity: 'tracking_purpose_definition',
+    entityId: 'result.id',
+  })
   @Post('tracking-purposes')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -42,6 +52,11 @@ export class TelemetryGovernanceController {
   }
 
   /** UC-28-02. */
+  @Audited({
+    action: 'ACTIVITY_EVENT_SCHEMA_REGISTERED',
+    entity: 'activity_event_schema_definition',
+    entityId: 'result.id',
+  })
   @Post('event-schemas')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -56,6 +71,11 @@ export class TelemetryGovernanceController {
   }
 
   /** UC-28-03. */
+  @Audited({
+    action: 'TRACKING_DISCLOSURE_PUBLISHED',
+    entity: 'tracking_disclosure_version',
+    entityId: 'result.id',
+  })
   @Post('disclosure-versions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -68,6 +88,11 @@ export class TelemetryGovernanceController {
   }
 
   /** UC-28-10. */
+  @Audited({
+    action: 'FUNNEL_DEFINED',
+    entity: 'funnel_definition',
+    entityId: 'result.id',
+  })
   @Post('funnels')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

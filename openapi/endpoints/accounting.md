@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `accounting`
 
-Referencia exhaustiva de 45 operación(es) del módulo `accounting`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 59 operación(es) del módulo `accounting`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `accounting-accruals`, `accounting-assets`, `accounting-cockpit`, `accounting-fiscal`, `accounting-fx`, `accounting-ledger`, `accounting-liabilities`, `accounting-practitioner`, `accounting-subledger`
-- **Controladores:** `AccountingAccrualController`, `AccountingAssetController`, `AccountingCockpitController`, `AccountingExchangeRateController`, `AccountingFiscalController`, `AccountingLedgerController`, `AccountingLiabilityController`, `AccountingPractitionerController`, `AccountingSubledgerController`
+- **Controladores:** `AccountingAccrualController`, `AccountingAssetController`, `AccountingCockpitController`, `AccountingExchangeRateController`, `AccountingFiscalController`, `AccountingLedgerController`, `AccountingLiabilityController`, `AccountingPractitionerController`, `AccountingPractitionerSimpleController`, `AccountingSubledgerController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -46,16 +46,30 @@ Referencia exhaustiva de 45 operación(es) del módulo `accounting`, derivada de
 33. [GET /accounting/practitioner/assets](#33-get-accounting-practitioner-assets) — Listar los activos propios de una práctica
 34. [POST /accounting/practitioner/assets](#34-post-accounting-practitioner-assets) — Dar de alta un activo propio
 35. [PATCH /accounting/practitioner/assets/{id}/automation](#35-patch-accounting-practitioner-assets-id-automation) — Prender o apagar la automatización de un activo
-36. [POST /accounting/practitioner/assets/{id}/progress](#36-post-accounting-practitioner-assets-id-progress) — Registrar el avance (depreciación) de un activo
-37. [POST /accounting/practitioner/consultation-income](#37-post-accounting-practitioner-consultation-income) — Registrar ingreso por consulta pagada
-38. [POST /accounting/practitioner/entries](#38-post-accounting-practitioner-entries) — Registrar un gasto u otro ingreso
-39. [GET /accounting/practitioner/liabilities](#39-get-accounting-practitioner-liabilities) — Listar los pasivos propios de una práctica
-40. [POST /accounting/practitioner/liabilities](#40-post-accounting-practitioner-liabilities) — Dar de alta un pasivo propio (préstamo)
-41. [PATCH /accounting/practitioner/liabilities/{id}/automation](#41-patch-accounting-practitioner-liabilities-id-automation) — Prender o apagar la automatización de un pasivo
-42. [POST /accounting/practitioner/liabilities/{id}/progress](#42-post-accounting-practitioner-liabilities-id-progress) — Registrar el avance (pago de cuota) de un pasivo
-43. [GET /accounting/practitioner/liabilities/{id}/schedule](#43-get-accounting-practitioner-liabilities-id-schedule) — Cronograma de cuotas de un pasivo propio
-44. [GET /accounting/practitioner/paid-consultations](#44-get-accounting-practitioner-paid-consultations) — Consultas pagadas sin registrar contablemente
-45. [GET /accounting/trial-balance](#45-get-accounting-trial-balance) — Balance de sumas y saldos
+36. [GET /accounting/practitioner/assets/{id}/depreciations](#36-get-accounting-practitioner-assets-id-depreciations) — Histórico de depreciación de un activo propio
+37. [POST /accounting/practitioner/assets/{id}/progress](#37-post-accounting-practitioner-assets-id-progress) — Registrar el avance (depreciación) de un activo
+38. [POST /accounting/practitioner/consultation-income](#38-post-accounting-practitioner-consultation-income) — Registrar ingreso por consulta pagada
+39. [POST /accounting/practitioner/entries](#39-post-accounting-practitioner-entries) — Registrar un gasto u otro ingreso
+40. [GET /accounting/practitioner/liabilities](#40-get-accounting-practitioner-liabilities) — Listar los pasivos propios de una práctica
+41. [POST /accounting/practitioner/liabilities](#41-post-accounting-practitioner-liabilities) — Dar de alta un pasivo propio (préstamo)
+42. [PATCH /accounting/practitioner/liabilities/{id}/automation](#42-patch-accounting-practitioner-liabilities-id-automation) — Prender o apagar la automatización de un pasivo
+43. [POST /accounting/practitioner/liabilities/{id}/progress](#43-post-accounting-practitioner-liabilities-id-progress) — Registrar el avance (pago de cuota) de un pasivo
+44. [GET /accounting/practitioner/liabilities/{id}/schedule](#44-get-accounting-practitioner-liabilities-id-schedule) — Cronograma de cuotas de un pasivo propio
+45. [GET /accounting/practitioner/paid-consultations](#45-get-accounting-practitioner-paid-consultations) — Consultas pagadas sin registrar contablemente
+46. [GET /accounting/practitioner/simple/accounts](#46-get-accounting-practitioner-simple-accounts) — Cuentas de la contabilidad simple de una práctica
+47. [POST /accounting/practitioner/simple/accounts](#47-post-accounting-practitioner-simple-accounts) — Crear una cuenta (o un tipo de gasto, activo o deuda)
+48. [DELETE /accounting/practitioner/simple/accounts/{id}](#48-delete-accounting-practitioner-simple-accounts-id) — Borrar una cuenta propia
+49. [PUT /accounting/practitioner/simple/accounts/{id}](#49-put-accounting-practitioner-simple-accounts-id) — Renombrar una cuenta
+50. [GET /accounting/practitioner/simple/records](#50-get-accounting-practitioner-simple-records) — Gastos, activos y deudas de una práctica
+51. [POST /accounting/practitioner/simple/records](#51-post-accounting-practitioner-simple-records) — Registrar un gasto, un activo o una deuda
+52. [DELETE /accounting/practitioner/simple/records/{id}](#52-delete-accounting-practitioner-simple-records-id) — Borrar un gasto, un activo o una deuda
+53. [PUT /accounting/practitioner/simple/records/{id}](#53-put-accounting-practitioner-simple-records-id) — Editar un gasto, un activo o una deuda
+54. [GET /accounting/practitioner/simple/summary](#54-get-accounting-practitioner-simple-summary) — Pacientes atendidos, cobrado y esperado de las aseguradoras
+55. [GET /accounting/practitioner/simple/transactions](#55-get-accounting-practitioner-simple-transactions) — Transacciones debe/haber de una práctica
+56. [POST /accounting/practitioner/simple/transactions](#56-post-accounting-practitioner-simple-transactions) — Registrar una transacción debe/haber
+57. [DELETE /accounting/practitioner/simple/transactions/{id}](#57-delete-accounting-practitioner-simple-transactions-id) — Borrar una transacción debe/haber
+58. [PUT /accounting/practitioner/simple/transactions/{id}](#58-put-accounting-practitioner-simple-transactions-id) — Editar una transacción debe/haber
+59. [GET /accounting/trial-balance](#59-get-accounting-trial-balance) — Balance de sumas y saldos
 
 ---
 
@@ -124,6 +138,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ChartOfAccountsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ChartOfAccountsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ChartOfAccountsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ChartOfAccountsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChartOfAccountsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -171,6 +186,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | La práctica consultada pertenece a otra organización | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
 | 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se pudo verificar la vinculación del profesional con la práctica | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -282,6 +300,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AccountResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AccountResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AccountResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AccountResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AccountResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -394,6 +413,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<CockpitAccrualsDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<CockpitAccrualsDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<CockpitAccrualsDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CockpitAccrualsDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CockpitAccrualsDto`. Ejemplo completo derivado de ese DTO:
 
@@ -589,6 +609,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AccrualObjectResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AccrualObjectResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AccrualObjectResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AccrualObjectResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AccrualObjectResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -727,6 +748,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AccrualRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AccrualRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AccrualRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AccrualRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AccrualRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -755,7 +777,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Objeto de devengo no encontrado | Excepción explícita en src/modules/accounting/services/accrual.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El objeto de devengo no define cuentas | Excepción explícita en src/modules/accounting/services/accrual.service.ts |
 | 422 | `PRECONDITION_FAILED` | No hay líneas de devengo pendientes en el periodo | Excepción explícita en src/modules/accounting/services/accrual.service.ts |
@@ -841,6 +862,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<CockpitFixedAssetsDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<CockpitFixedAssetsDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<CockpitFixedAssetsDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CockpitFixedAssetsDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CockpitFixedAssetsDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1031,6 +1053,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AssetResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AssetResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AssetResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AssetResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AssetResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1152,6 +1175,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<BalanceSheetResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<BalanceSheetResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<BalanceSheetResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<BalanceSheetResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BalanceSheetResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1369,6 +1393,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ClearingResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ClearingResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ClearingResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ClearingResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ClearingResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1399,10 +1424,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | La práctica de la compensación pertenece a otra organización | Excepción explícita en src/modules/accounting/services/subledger.service.ts |
-| 404 | `NOT_FOUND` | Partida abierta no encontrada | Excepción explícita en src/modules/accounting/services/subledger.service.ts |
-| 404 | `NOT_FOUND` | Subledger no encontrado | Excepción explícita en src/modules/accounting/services/subledger.service.ts |
-| 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/accounting/services/subledger.service.ts |
 | 409 | `CONFLICT` | La partida ya está compensada | Excepción explícita en src/modules/accounting/services/subledger.service.ts |
 | 409 | `CONFLICT` | El número de clearing ya existe en el tenant | Excepción explícita en src/modules/accounting/services/subledger.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -1517,6 +1538,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DepreciationRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DepreciationRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DepreciationRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DepreciationRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DepreciationRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1629,6 +1651,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<CockpitDimensionsDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<CockpitDimensionsDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<CockpitDimensionsDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CockpitDimensionsDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CockpitDimensionsDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1705,7 +1728,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Registrar tipo de cambio para conversión. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Tabla de plataforma compartida por todas las organizaciones: la registra un actor de plataforma (SYSTEM o SUPERADMIN); un administrador de tenant recibe 403.
 
 
 ### Descripción del sistema
@@ -1737,7 +1760,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `SYSTEM`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -1782,6 +1805,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ExchangeRateResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ExchangeRateResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ExchangeRateResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExchangeRateResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExchangeRateResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1811,7 +1835,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM. | Roles/tenant/guards de autorización |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1909,6 +1933,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AccountingStatusDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AccountingStatusDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AccountingStatusDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AccountingStatusDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AccountingStatusDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1935,7 +1960,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Periodo fiscal no encontrado | Excepción explícita en src/modules/accounting/services/fiscal.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El periodo no está ABIERTO | Excepción explícita en src/modules/accounting/services/fiscal.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -2019,6 +2043,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<CockpitFiscalYearDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<CockpitFiscalYearDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<CockpitFiscalYearDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CockpitFiscalYearDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CockpitFiscalYearDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2197,6 +2222,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FiscalYearResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FiscalYearResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FiscalYearResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FiscalYearResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FiscalYearResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2317,6 +2343,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<GeneralLedgerResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<GeneralLedgerResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<GeneralLedgerResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<GeneralLedgerResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GeneralLedgerResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2472,6 +2499,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<IncomeStatementResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<IncomeStatementResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<IncomeStatementResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<IncomeStatementResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IncomeStatementResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2629,6 +2657,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ListJournalResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListJournalResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListJournalResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListJournalResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListJournalResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2641,6 +2670,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "transactionDate": "2026-07-31",
       "fiscalPeriodId": "00000000-0000-4000-8000-000000000001",
       "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "status": "DRAFT",
       "transactionTypeConceptId": "00000000-0000-4000-8000-000000000001",
       "currencyConceptId": "00000000-0000-4000-8000-000000000001",
       "totalAmount": "valor-ejemplo",
@@ -2656,12 +2686,13 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<JournalTransactionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","transactionNumber":"valor-ejemplo","transactionDate":"2026-07-31","fiscalPeriodId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","transactionTypeConceptId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001","totalAmount":"valor-ejemplo","postedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items` | Sí | `array<JournalTransactionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","transactionNumber":"valor-ejemplo","transactionDate":"2026-07-31","fiscalPeriodId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","status":"DRAFT","transactionTypeConceptId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001","totalAmount":"valor-ejemplo","postedAt":"2026-07-31T12:00:00.000Z"}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].transactionNumber` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].transactionDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `items[].fiscalPeriodId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].status` | No | `string` | valores: `DRAFT`, `AUTO_CLASSIFIED`, `PENDING_REVIEW`, `APPROVED`, `POSTED`, `REVERSED`; admite null | Código del estado en la máquina C-17 (borrador, posteado, reversado…) | `DRAFT` |
 | `items[].transactionTypeConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].currencyConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].totalAmount` | No | `string` | admite null | Importe total, decimal como texto | `valor-ejemplo` |
@@ -2680,6 +2711,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | La práctica consultada pertenece a otra organización | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
 | 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se pudo verificar la vinculación del profesional con la práctica | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2766,12 +2800,13 @@ Content-Type: application/json
 | `reference` | No | `string` | longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `sourceDocumentType` | No | `string` | longitud máxima 40 | Tipo del documento origen (p. ej. INVOICE, APPOINTMENT, EXPENSE) | `valor-ejemplo` |
 | `sourceDocumentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `lines` | Sí | `array<LedgerLineDto>` | mínimo 2 elemento(s) | Líneas balanceadas (>=2) | `[{"accountId":"00000000-0000-4000-8000-000000000001","direction":"DEBIT","amount":"100.00","costCenterId":"00000000-0000-4000-8000-000000000001","profitCenterId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001","fxRate":"3.75","amountBase":"375.00","memo":"valor-ejemplo"},{"accountId":"00000000-0000-4000-8000-000000000001","direction":"DEBIT","amount":"100.00","costCenterId":"00000000-0000-4000-8000-000000000001","profitCenterId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001","fxRate":"3.75","amountBase":"375.00","memo":"valor-ejemplo"}]` |
+| `lines` | Sí | `array<LedgerLineDto>` | mínimo 2 elemento(s) | Líneas balanceadas (>=2) | `[{"accountId":"00000000-0000-4000-8000-000000000001","direction":"DEBIT","amount":"100.00","costCenterId":"00000000-0000-4000-8000-000000000001","profitCenterId":"00000000-0000-4000-8000-000000000001","assetId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001","fxRate":"3.75","amountBase":"375.00","memo":"valor-ejemplo"},{"accountId":"00000000-0000-4000-8000-000000000001","direction":"DEBIT","amount":"100.00","costCenterId":"00000000-0000-4000-8000-000000000001","profitCenterId":"00000000-0000-4000-8000-000000000001","assetId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001","fxRate":"3.75","amountBase":"375.00","memo":"valor-ejemplo"}]` |
 | `lines[].accountId` | Sí | `string` | formato `uuid` | Cuenta contable postable | `00000000-0000-4000-8000-000000000001` |
 | `lines[].direction` | Sí | `string` | valores: `DEBIT`, `CREDIT` | Dirección de la partida | `DEBIT` |
 | `lines[].amount` | Sí | `string` | patrón runtime `POSITIVE_AMOUNT_REGEX` | Importe positivo de la línea | `100.00` |
 | `lines[].costCenterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].profitCenterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].assetId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].currencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].fxRate` | No | `string` | Sin restricción adicional declarada | Tipo de cambio a moneda base | `3.75` |
 | `lines[].amountBase` | No | `string` | Sin restricción adicional declarada | Importe convertido a moneda base | `375.00` |
@@ -2804,6 +2839,7 @@ Content-Type: application/json
       "amount": "100.00",
       "costCenterId": "00000000-0000-4000-8000-000000000001",
       "profitCenterId": "00000000-0000-4000-8000-000000000001",
+      "assetId": "00000000-0000-4000-8000-000000000001",
       "currencyConceptId": "00000000-0000-4000-8000-000000000001",
       "fxRate": "3.75",
       "amountBase": "375.00",
@@ -2815,6 +2851,7 @@ Content-Type: application/json
       "amount": "100.00",
       "costCenterId": "00000000-0000-4000-8000-000000000001",
       "profitCenterId": "00000000-0000-4000-8000-000000000001",
+      "assetId": "00000000-0000-4000-8000-000000000001",
       "currencyConceptId": "00000000-0000-4000-8000-000000000001",
       "fxRate": "3.75",
       "amountBase": "375.00",
@@ -2837,6 +2874,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `JournalTransactionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2968,6 +3006,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<JournalTransactionDetailDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<JournalTransactionDetailDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<JournalTransactionDetailDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<JournalTransactionDetailDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `JournalTransactionDetailDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2979,6 +3018,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "transactionDate": "2026-07-31",
   "fiscalPeriodId": "00000000-0000-4000-8000-000000000001",
   "statusConceptId": "00000000-0000-4000-8000-000000000001",
+  "status": "DRAFT",
   "currencyConceptId": "00000000-0000-4000-8000-000000000001",
   "totalAmount": "valor-ejemplo",
   "postedAt": "2026-07-31T12:00:00.000Z",
@@ -2990,6 +3030,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "directionConceptId": "00000000-0000-4000-8000-000000000001",
       "amountBase": "valor-ejemplo",
       "costCenterId": "00000000-0000-4000-8000-000000000001",
+      "profitCenterId": "00000000-0000-4000-8000-000000000001",
+      "assetId": "00000000-0000-4000-8000-000000000001",
       "currencyConceptId": "00000000-0000-4000-8000-000000000001"
     }
   ]
@@ -3006,16 +3048,19 @@ Campos de la respuesta:
 | `transactionDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `fiscalPeriodId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | No | `string` | valores: `DRAFT`, `AUTO_CLASSIFIED`, `PENDING_REVIEW`, `APPROVED`, `POSTED`, `REVERSED`; admite null | Código del estado en la máquina C-17 (borrador, posteado, reversado…) | `DRAFT` |
 | `currencyConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `totalAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `postedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
-| `lines` | Sí | `array<LedgerEntryItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","lineNo":1,"accountId":"00000000-0000-4000-8000-000000000001","directionConceptId":"00000000-0000-4000-8000-000000000001","amountBase":"valor-ejemplo","costCenterId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `lines` | Sí | `array<LedgerEntryItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","lineNo":1,"accountId":"00000000-0000-4000-8000-000000000001","directionConceptId":"00000000-0000-4000-8000-000000000001","amountBase":"valor-ejemplo","costCenterId":"00000000-0000-4000-8000-000000000001","profitCenterId":"00000000-0000-4000-8000-000000000001","assetId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001"}]` |
 | `lines[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].lineNo` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `lines[].accountId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].directionConceptId` | Sí | `string` | formato `uuid` | Debe o haber. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].amountBase` | Sí | `string` | Sin restricción adicional declarada | Importe en moneda base, decimal como texto | `valor-ejemplo` |
 | `lines[].costCenterId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].profitCenterId` | No | `string` | formato `uuid`; admite null | Centro de beneficio imputado a la línea, si lo tiene. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].assetId` | No | `string` | formato `uuid`; admite null | Activo fijo imputado a la línea, si lo tiene. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].currencyConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -3030,6 +3075,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | La práctica consultada pertenece a otra organización | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
 | 404 | `NOT_FOUND` | Asiento no encontrado | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
 | 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se pudo verificar la vinculación del profesional con la práctica | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3129,6 +3177,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `JournalTransactionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3276,6 +3325,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `JournalTransactionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3407,6 +3457,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<CockpitDocumentFlowDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<CockpitDocumentFlowDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<CockpitDocumentFlowDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CockpitDocumentFlowDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CockpitDocumentFlowDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3549,6 +3600,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AccountingStatusDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AccountingStatusDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AccountingStatusDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AccountingStatusDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AccountingStatusDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3675,6 +3727,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `JournalTransactionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3821,6 +3874,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `JournalTransactionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3968,6 +4022,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `JournalTransactionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4103,12 +4158,13 @@ Content-Type: application/json
 | `reference` | No | `string` | longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `sourceDocumentType` | No | `string` | longitud máxima 40 | Tipo del documento origen (p. ej. INVOICE, APPOINTMENT, EXPENSE) | `valor-ejemplo` |
 | `sourceDocumentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `lines` | Sí | `array<LedgerLineDto>` | mínimo 2 elemento(s) | Líneas balanceadas (>=2) | `[{"accountId":"00000000-0000-4000-8000-000000000001","direction":"DEBIT","amount":"100.00","costCenterId":"00000000-0000-4000-8000-000000000001","profitCenterId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001","fxRate":"3.75","amountBase":"375.00","memo":"valor-ejemplo"},{"accountId":"00000000-0000-4000-8000-000000000001","direction":"DEBIT","amount":"100.00","costCenterId":"00000000-0000-4000-8000-000000000001","profitCenterId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001","fxRate":"3.75","amountBase":"375.00","memo":"valor-ejemplo"}]` |
+| `lines` | Sí | `array<LedgerLineDto>` | mínimo 2 elemento(s) | Líneas balanceadas (>=2) | `[{"accountId":"00000000-0000-4000-8000-000000000001","direction":"DEBIT","amount":"100.00","costCenterId":"00000000-0000-4000-8000-000000000001","profitCenterId":"00000000-0000-4000-8000-000000000001","assetId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001","fxRate":"3.75","amountBase":"375.00","memo":"valor-ejemplo"},{"accountId":"00000000-0000-4000-8000-000000000001","direction":"DEBIT","amount":"100.00","costCenterId":"00000000-0000-4000-8000-000000000001","profitCenterId":"00000000-0000-4000-8000-000000000001","assetId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001","fxRate":"3.75","amountBase":"375.00","memo":"valor-ejemplo"}]` |
 | `lines[].accountId` | Sí | `string` | formato `uuid` | Cuenta contable postable | `00000000-0000-4000-8000-000000000001` |
 | `lines[].direction` | Sí | `string` | valores: `DEBIT`, `CREDIT` | Dirección de la partida | `DEBIT` |
 | `lines[].amount` | Sí | `string` | patrón runtime `POSITIVE_AMOUNT_REGEX` | Importe positivo de la línea | `100.00` |
 | `lines[].costCenterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].profitCenterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].assetId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].currencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].fxRate` | No | `string` | Sin restricción adicional declarada | Tipo de cambio a moneda base | `3.75` |
 | `lines[].amountBase` | No | `string` | Sin restricción adicional declarada | Importe convertido a moneda base | `375.00` |
@@ -4141,6 +4197,7 @@ Content-Type: application/json
       "amount": "100.00",
       "costCenterId": "00000000-0000-4000-8000-000000000001",
       "profitCenterId": "00000000-0000-4000-8000-000000000001",
+      "assetId": "00000000-0000-4000-8000-000000000001",
       "currencyConceptId": "00000000-0000-4000-8000-000000000001",
       "fxRate": "3.75",
       "amountBase": "375.00",
@@ -4152,6 +4209,7 @@ Content-Type: application/json
       "amount": "100.00",
       "costCenterId": "00000000-0000-4000-8000-000000000001",
       "profitCenterId": "00000000-0000-4000-8000-000000000001",
+      "assetId": "00000000-0000-4000-8000-000000000001",
       "currencyConceptId": "00000000-0000-4000-8000-000000000001",
       "fxRate": "3.75",
       "amountBase": "375.00",
@@ -4174,6 +4232,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<JournalTransactionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `JournalTransactionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4339,6 +4398,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<LiabilityPaymentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<LiabilityPaymentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<LiabilityPaymentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LiabilityPaymentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LiabilityPaymentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4369,7 +4429,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Pasivo no encontrado | Excepción explícita en src/modules/accounting/services/liability.service.ts |
 | 404 | `NOT_FOUND` | Cuota no encontrada para el pasivo | Excepción explícita en src/modules/accounting/services/liability.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | principal + interés no iguala el importe | Excepción explícita en src/modules/accounting/services/liability.service.ts |
@@ -4460,6 +4519,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<CockpitOpenItemsPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<CockpitOpenItemsPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<CockpitOpenItemsPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CockpitOpenItemsPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CockpitOpenItemsPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4651,6 +4711,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OpenItemResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OpenItemResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OpenItemResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OpenItemResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OpenItemResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4679,7 +4740,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Subledger no encontrado | Excepción explícita en src/modules/accounting/services/subledger.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -4780,6 +4840,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DeterminedAccountResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeterminedAccountResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeterminedAccountResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeterminedAccountResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeterminedAccountResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4890,6 +4951,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<readonly AssetSummaryDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<readonly AssetSummaryDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<readonly AssetSummaryDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<readonly AssetSummaryDto[]>` | No |
 
 El controlador declara `readonly AssetSummaryDto[]`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -5029,6 +5091,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AssetResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AssetResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AssetResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AssetResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AssetResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5165,6 +5228,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<void>` | No |
 | 429 | Operación completada correctamente. | `Promise<void>` | No |
 | 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -5198,7 +5262,130 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. POST /accounting/practitioner/assets/{id}/progress
+## 36. GET /accounting/practitioner/assets/{id}/depreciations
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-practitioner`
+- **Nombre:** Histórico de depreciación de un activo propio
+- **Operation ID:** `AccountingPractitionerController_readAssetDepreciations`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingPractitionerController.readAssetDepreciations](../../src/modules/accounting/controllers/accounting-practitioner.controller.ts)
+
+### Descripción de negocio
+
+Una fila por período fiscal depreciado, en orden de registro, con el valor en libros que dejó. Sólo el profesional vinculado a la práctica del activo; un activo ajeno responde 422 y uno de otra organización, 404.
+
+Contexto declarado en el controlador: El histórico de depreciación de un activo propio (T26 · criterio 6).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /accounting/practitioner/assets/{id}/depreciations` en `AccountingPractitionerController_readAssetDepreciations`. El controlador delega en `PractitionerAccountingService.readAssetDepreciations`. No recibe body. El tipo de retorno estático es `Promise<AssetDepreciationHistoryResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /accounting/practitioner/assets/00000000-0000-4000-8000-000000000001/depreciations HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /accounting/practitioner/assets/00000000-0000-4000-8000-000000000001/depreciations HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AssetDepreciationHistoryResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<AssetDepreciationHistoryResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<AssetDepreciationHistoryResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<AssetDepreciationHistoryResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<AssetDepreciationHistoryResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<AssetDepreciationHistoryResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<AssetDepreciationHistoryResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<AssetDepreciationHistoryResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AssetDepreciationHistoryResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "assetId": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "acquisitionCost": 5000,
+  "accumulatedDepreciation": 83.33,
+  "bookValue": 4916.67,
+  "depreciations": [
+    {}
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `assetId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `acquisitionCost` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `5000` |
+| `accumulatedDepreciation` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `83.33` |
+| `bookValue` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `4916.67` |
+| `depreciations` | Sí | `array<object>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{}]` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Activo no encontrado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/practitioner/assets/{id}/depreciations"
+}
+```
+
+---
+
+## 37. POST /accounting/practitioner/assets/{id}/progress
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5285,6 +5472,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ProgressRegisteredResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ProgressRegisteredResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ProgressRegisteredResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ProgressRegisteredResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProgressRegisteredResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5313,7 +5501,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Activo no encontrado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | No hay un período fiscal abierto para esa fecha | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
 | 422 | `PRECONDITION_FAILED` | Este activo no tiene depreciación pendiente para el período abierto | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
@@ -5338,7 +5525,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. POST /accounting/practitioner/consultation-income
+## 38. POST /accounting/practitioner/consultation-income
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5432,6 +5619,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PractitionerEntryResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PractitionerEntryResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PractitionerEntryResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PractitionerEntryResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerEntryResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5466,7 +5654,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Factura no encontrada | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
 | 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | La factura ya tiene un asiento contable asociado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
@@ -5478,7 +5665,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | La factura no registra un importe pagado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
 | 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
 | 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
-| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -5499,7 +5686,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. POST /accounting/practitioner/entries
+## 39. POST /accounting/practitioner/entries
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5597,6 +5784,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PractitionerEntryResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PractitionerEntryResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PractitionerEntryResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PractitionerEntryResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerEntryResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5636,7 +5824,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
 | 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
-| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -5657,7 +5845,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. GET /accounting/practitioner/liabilities
+## 40. GET /accounting/practitioner/liabilities
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5721,6 +5909,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<readonly LiabilitySummaryDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<readonly LiabilitySummaryDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<readonly LiabilitySummaryDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<readonly LiabilitySummaryDto[]>` | No |
 
 El controlador declara `readonly LiabilitySummaryDto[]`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -5752,7 +5941,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. POST /accounting/practitioner/liabilities
+## 41. POST /accounting/practitioner/liabilities
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5854,6 +6043,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<LiabilityCreatedResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<LiabilityCreatedResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<LiabilityCreatedResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LiabilityCreatedResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LiabilityCreatedResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5905,7 +6095,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. PATCH /accounting/practitioner/liabilities/{id}/automation
+## 42. PATCH /accounting/practitioner/liabilities/{id}/automation
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5987,6 +6177,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<void>` | No |
 | 429 | Operación completada correctamente. | `Promise<void>` | No |
 | 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -6020,7 +6211,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 42. POST /accounting/practitioner/liabilities/{id}/progress
+## 43. POST /accounting/practitioner/liabilities/{id}/progress
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -6105,6 +6296,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ProgressRegisteredResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ProgressRegisteredResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ProgressRegisteredResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ProgressRegisteredResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProgressRegisteredResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6133,7 +6325,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Pasivo no encontrado | Excepción explícita en src/modules/accounting/services/liability.service.ts |
 | 404 | `NOT_FOUND` | Cuota no encontrada para el pasivo | Excepción explícita en src/modules/accounting/services/liability.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Este pasivo no tiene cuotas pendientes | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
@@ -6162,7 +6353,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. GET /accounting/practitioner/liabilities/{id}/schedule
+## 44. GET /accounting/practitioner/liabilities/{id}/schedule
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -6228,6 +6419,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<LiabilityScheduleResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<LiabilityScheduleResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<LiabilityScheduleResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<LiabilityScheduleResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LiabilityScheduleResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6284,7 +6476,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. GET /accounting/practitioner/paid-consultations
+## 45. GET /accounting/practitioner/paid-consultations
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -6348,6 +6540,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PaidConsultationsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PaidConsultationsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PaidConsultationsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PaidConsultationsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PaidConsultationsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6412,7 +6605,1665 @@ Ejemplo de error normalizado:
 
 ---
 
-## 45. GET /accounting/trial-balance
+## 46. GET /accounting/practitioner/simple/accounts
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-practitioner`
+- **Nombre:** Cuentas de la contabilidad simple de una práctica
+- **Operation ID:** `AccountingPractitionerSimpleController_listAccounts`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingPractitionerSimpleController.listAccounts](../../src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts)
+
+### Descripción de negocio
+
+Incluye las 26 generales (`seeded: true`), que se siembran por práctica al primer acceso, y las propias del doctor.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /accounting/practitioner/simple/accounts` en `AccountingPractitionerSimpleController_listAccounts`. El controlador delega en `PractitionerSimpleAccountingService.listAccounts`. No recibe body. El tipo de retorno estático es `Promise<SimpleAccountsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `practiceId` | query | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /accounting/practitioner/simple/accounts?practiceId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /accounting/practitioner/simple/accounts?practiceId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SimpleAccountsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SimpleAccountsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SimpleAccountsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SimpleAccountsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SimpleAccountsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SimpleAccountsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SimpleAccountsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SimpleAccountsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "accountClass": {},
+      "seeded": true
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<SimpleAccountDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","accountClass":{},"seeded":true}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].code` | Sí | `string` | Sin restricción adicional declarada | Código corto (`5.3`); lo asigna el servidor. | `CODIGO_EJEMPLO` |
+| `items[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].accountClass` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof SIMPLE_ACCOUNT_CLASSES)[number] | `{}` |
+| `items[].seeded` | Sí | `boolean` | Sin restricción adicional declarada | Viene sembrada con la práctica: se puede renombrar, no borrar ni cambiar de clase. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/practitioner/simple/accounts"
+}
+```
+
+---
+
+## 47. POST /accounting/practitioner/simple/accounts
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-practitioner`
+- **Nombre:** Crear una cuenta (o un tipo de gasto, activo o deuda)
+- **Operation ID:** `AccountingPractitionerSimpleController_createAccount`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingPractitionerSimpleController.createAccount](../../src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts)
+
+### Descripción de negocio
+
+El código lo asigna el servidor. Nombre único por clase, sin distinguir tildes ni mayúsculas (409).
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /accounting/practitioner/simple/accounts` en `AccountingPractitionerSimpleController_createAccount`. El controlador delega en `PractitionerSimpleAccountingService.createAccount`. Valida el body como `CreateSimpleAccountDto` y consume `application/json`. El tipo de retorno estático es `Promise<SimpleAccountDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateSimpleAccountDto`; los campos opcionales se omiten.
+
+```http
+POST /accounting/practitioner/simple/accounts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "accountClass": "ASSET",
+  "practiceId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `name` | Sí | `string` | longitud máxima 80 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `accountClass` | Sí | `string` | valores: `ASSET`, `LIABILITY`, `EQUITY`, `INCOME`, `EXPENSE` | Sin descripción específica en el contrato OpenAPI. | `ASSET` |
+| `practiceId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /accounting/practitioner/simple/accounts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "accountClass": "ASSET",
+  "practiceId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<SimpleAccountDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<SimpleAccountDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SimpleAccountDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SimpleAccountDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SimpleAccountDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SimpleAccountDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SimpleAccountDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SimpleAccountDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SimpleAccountDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SimpleAccountDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SimpleAccountDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "accountClass": {},
+  "seeded": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Código corto (`5.3`); lo asigna el servidor. | `CODIGO_EJEMPLO` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `accountClass` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof SIMPLE_ACCOUNT_CLASSES)[number] | `{}` |
+| `seeded` | Sí | `boolean` | Sin restricción adicional declarada | Viene sembrada con la práctica: se puede renombrar, no borrar ni cambiar de clase. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | Ya tiene una cuenta con ese nombre en esa clase. | Excepción explícita en src/modules/accounting/services/practitioner-simple-accounting.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | message | Excepción explícita en src/modules/accounting/services/practitioner-simple-accounting.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/practitioner/simple/accounts"
+}
+```
+
+---
+
+## 48. DELETE /accounting/practitioner/simple/accounts/{id}
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-practitioner`
+- **Nombre:** Borrar una cuenta propia
+- **Operation ID:** `AccountingPractitionerSimpleController_deleteAccount`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingPractitionerSimpleController.deleteAccount](../../src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts)
+
+### Descripción de negocio
+
+409 si es una cuenta general o si la usa algún registro o transacción.
+
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /accounting/practitioner/simple/accounts/{id}` en `AccountingPractitionerSimpleController_deleteAccount`. El controlador delega en `PractitionerSimpleAccountingService.deleteAccount`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /accounting/practitioner/simple/accounts/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /accounting/practitioner/simple/accounts/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | Operación completada sin cuerpo de respuesta. | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | Operación completada correctamente. | `Promise<void>` | No |
+| 404 | Operación completada correctamente. | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | Es una cuenta general: se puede renombrar, no borrar. | Excepción explícita en src/modules/accounting/services/practitioner-simple-accounting.service.ts |
+| 409 | `CONFLICT` | La usa${uses === 1 ? '' : 'n'} ${uses} registro${uses === 1 ? '' : 's'}: cambiales la cuenta antes de borrarla. | Excepción explícita en src/modules/accounting/services/practitioner-simple-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/practitioner/simple/accounts/{id}"
+}
+```
+
+---
+
+## 49. PUT /accounting/practitioner/simple/accounts/{id}
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-practitioner`
+- **Nombre:** Renombrar una cuenta
+- **Operation ID:** `AccountingPractitionerSimpleController_updateAccount`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingPractitionerSimpleController.updateAccount](../../src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts)
+
+### Descripción de negocio
+
+Una cuenta general se renombra pero no cambia de clase; tampoco una que ya usa algún registro o transacción (409).
+
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /accounting/practitioner/simple/accounts/{id}` en `AccountingPractitionerSimpleController_updateAccount`. El controlador delega en `PractitionerSimpleAccountingService.updateAccount`. Valida el body como `SimpleAccountInputDto` y consume `application/json`. El tipo de retorno estático es `Promise<SimpleAccountDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SimpleAccountInputDto`; los campos opcionales se omiten.
+
+```http
+PUT /accounting/practitioner/simple/accounts/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "accountClass": "ASSET"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `name` | Sí | `string` | longitud máxima 80 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `accountClass` | Sí | `string` | valores: `ASSET`, `LIABILITY`, `EQUITY`, `INCOME`, `EXPENSE` | Sin descripción específica en el contrato OpenAPI. | `ASSET` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /accounting/practitioner/simple/accounts/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "accountClass": "ASSET"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SimpleAccountDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<SimpleAccountDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SimpleAccountDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SimpleAccountDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<SimpleAccountDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SimpleAccountDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SimpleAccountDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SimpleAccountDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SimpleAccountDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SimpleAccountDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SimpleAccountDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SimpleAccountDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "accountClass": {},
+  "seeded": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Código corto (`5.3`); lo asigna el servidor. | `CODIGO_EJEMPLO` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `accountClass` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof SIMPLE_ACCOUNT_CLASSES)[number] | `{}` |
+| `seeded` | Sí | `boolean` | Sin restricción adicional declarada | Viene sembrada con la práctica: se puede renombrar, no borrar ni cambiar de clase. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | No se puede cambiar la clase de una cuenta general o que ya se usa. | Excepción explícita en src/modules/accounting/services/practitioner-simple-accounting.service.ts |
+| 409 | `CONFLICT` | Ya tiene una cuenta con ese nombre en esa clase. | Excepción explícita en src/modules/accounting/services/practitioner-simple-accounting.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | message | Excepción explícita en src/modules/accounting/services/practitioner-simple-accounting.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/practitioner/simple/accounts/{id}"
+}
+```
+
+---
+
+## 50. GET /accounting/practitioner/simple/records
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-practitioner`
+- **Nombre:** Gastos, activos y deudas de una práctica
+- **Operation ID:** `AccountingPractitionerSimpleController_listRecords`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingPractitionerSimpleController.listRecords](../../src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts)
+
+### Descripción de negocio
+
+Con `kind` filtra por una de las tres; sin él, devuelve las tres. Más recientes primero.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /accounting/practitioner/simple/records` en `AccountingPractitionerSimpleController_listRecords`. El controlador delega en `PractitionerSimpleAccountingService.listRecords`. No recibe body. El tipo de retorno estático es `Promise<SimpleRecordsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `practiceId` | query | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `kind` | query | No | `string` | valores: `EXPENSE`, `ASSET`, `DEBT` | Sin `kind` devuelve los tres. | `EXPENSE` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /accounting/practitioner/simple/records?practiceId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /accounting/practitioner/simple/records?practiceId=00000000-0000-4000-8000-000000000001&kind=EXPENSE HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SimpleRecordsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SimpleRecordsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SimpleRecordsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SimpleRecordsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SimpleRecordsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SimpleRecordsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SimpleRecordsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SimpleRecordsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "kind": {},
+      "date": "2026-07-31",
+      "accountId": "00000000-0000-4000-8000-000000000001",
+      "description": "Texto descriptivo de ejemplo",
+      "amount": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<SimpleRecordDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","kind":{},"date":"2026-07-31","accountId":"00000000-0000-4000-8000-000000000001","description":"Texto descriptivo de ejemplo","amount":"valor-ejemplo"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].kind` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof SIMPLE_RECORD_KINDS)[number] | `{}` |
+| `items[].date` | Sí | `string` | formato `date` | `YYYY-MM-DD`. | `2026-07-31` |
+| `items[].accountId` | Sí | `string` | formato `uuid` | El tipo: una cuenta de la clase que corresponde (gasto → EXPENSE, activo → ASSET, deuda → LIABILITY). | `00000000-0000-4000-8000-000000000001` |
+| `items[].description` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `items[].amount` | Sí | `string` | Sin restricción adicional declarada | Cadena decimal, siempre mayor a cero. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/practitioner/simple/records"
+}
+```
+
+---
+
+## 51. POST /accounting/practitioner/simple/records
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-practitioner`
+- **Nombre:** Registrar un gasto, un activo o una deuda
+- **Operation ID:** `AccountingPractitionerSimpleController_createRecord`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingPractitionerSimpleController.createRecord](../../src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts)
+
+### Descripción de negocio
+
+El tipo es una cuenta de la clase que corresponde: gasto → EXPENSE, activo → ASSET, deuda → LIABILITY. No genera asiento.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /accounting/practitioner/simple/records` en `AccountingPractitionerSimpleController_createRecord`. El controlador delega en `PractitionerSimpleAccountingService.createRecord`. Valida el body como `CreateSimpleRecordDto` y consume `application/json`. El tipo de retorno estático es `Promise<SimpleRecordDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateSimpleRecordDto`; los campos opcionales se omiten.
+
+```http
+POST /accounting/practitioner/simple/records HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "kind": "EXPENSE",
+  "date": "2026-07-31",
+  "accountId": "00000000-0000-4000-8000-000000000001",
+  "description": "Texto descriptivo de ejemplo",
+  "amount": "valor-ejemplo",
+  "practiceId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `kind` | Sí | `string` | valores: `EXPENSE`, `ASSET`, `DEBT` | Sin descripción específica en el contrato OpenAPI. | `EXPENSE` |
+| `date` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `accountId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `description` | Sí | `string` | longitud máxima 160 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `amount` | Sí | `string` | Sin restricción adicional declarada | Cadena decimal > 0, hasta dos decimales. | `valor-ejemplo` |
+| `practiceId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /accounting/practitioner/simple/records HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "kind": "EXPENSE",
+  "date": "2026-07-31",
+  "accountId": "00000000-0000-4000-8000-000000000001",
+  "description": "Texto descriptivo de ejemplo",
+  "amount": "valor-ejemplo",
+  "practiceId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<SimpleRecordDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<SimpleRecordDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SimpleRecordDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SimpleRecordDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SimpleRecordDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SimpleRecordDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SimpleRecordDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SimpleRecordDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SimpleRecordDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SimpleRecordDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SimpleRecordDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "kind": {},
+  "date": "2026-07-31",
+  "accountId": "00000000-0000-4000-8000-000000000001",
+  "description": "Texto descriptivo de ejemplo",
+  "amount": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `kind` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof SIMPLE_RECORD_KINDS)[number] | `{}` |
+| `date` | Sí | `string` | formato `date` | `YYYY-MM-DD`. | `2026-07-31` |
+| `accountId` | Sí | `string` | formato `uuid` | El tipo: una cuenta de la clase que corresponde (gasto → EXPENSE, activo → ASSET, deuda → LIABILITY). | `00000000-0000-4000-8000-000000000001` |
+| `description` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `amount` | Sí | `string` | Sin restricción adicional declarada | Cadena decimal, siempre mayor a cero. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | message | Excepción explícita en src/modules/accounting/services/practitioner-simple-accounting.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/practitioner/simple/records"
+}
+```
+
+---
+
+## 52. DELETE /accounting/practitioner/simple/records/{id}
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-practitioner`
+- **Nombre:** Borrar un gasto, un activo o una deuda
+- **Operation ID:** `AccountingPractitionerSimpleController_deleteRecord`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingPractitionerSimpleController.deleteRecord](../../src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts)
+
+### Descripción de negocio
+
+Borrar un gasto, un activo o una deuda. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /accounting/practitioner/simple/records/{id}` en `AccountingPractitionerSimpleController_deleteRecord`. El controlador delega en `PractitionerSimpleAccountingService.deleteRecord`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /accounting/practitioner/simple/records/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /accounting/practitioner/simple/records/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | Operación completada sin cuerpo de respuesta. | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | Operación completada correctamente. | `Promise<void>` | No |
+| 404 | Operación completada correctamente. | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/practitioner/simple/records/{id}"
+}
+```
+
+---
+
+## 53. PUT /accounting/practitioner/simple/records/{id}
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-practitioner`
+- **Nombre:** Editar un gasto, un activo o una deuda
+- **Operation ID:** `AccountingPractitionerSimpleController_updateRecord`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingPractitionerSimpleController.updateRecord](../../src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts)
+
+### Descripción de negocio
+
+Editar un gasto, un activo o una deuda. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /accounting/practitioner/simple/records/{id}` en `AccountingPractitionerSimpleController_updateRecord`. El controlador delega en `PractitionerSimpleAccountingService.updateRecord`. Valida el body como `SimpleRecordInputDto` y consume `application/json`. El tipo de retorno estático es `Promise<SimpleRecordDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SimpleRecordInputDto`; los campos opcionales se omiten.
+
+```http
+PUT /accounting/practitioner/simple/records/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "kind": "EXPENSE",
+  "date": "2026-07-31",
+  "accountId": "00000000-0000-4000-8000-000000000001",
+  "description": "Texto descriptivo de ejemplo",
+  "amount": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `kind` | Sí | `string` | valores: `EXPENSE`, `ASSET`, `DEBT` | Sin descripción específica en el contrato OpenAPI. | `EXPENSE` |
+| `date` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `accountId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `description` | Sí | `string` | longitud máxima 160 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `amount` | Sí | `string` | Sin restricción adicional declarada | Cadena decimal > 0, hasta dos decimales. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /accounting/practitioner/simple/records/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "kind": "EXPENSE",
+  "date": "2026-07-31",
+  "accountId": "00000000-0000-4000-8000-000000000001",
+  "description": "Texto descriptivo de ejemplo",
+  "amount": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SimpleRecordDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<SimpleRecordDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SimpleRecordDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SimpleRecordDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<SimpleRecordDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SimpleRecordDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SimpleRecordDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SimpleRecordDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SimpleRecordDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SimpleRecordDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SimpleRecordDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SimpleRecordDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "kind": {},
+  "date": "2026-07-31",
+  "accountId": "00000000-0000-4000-8000-000000000001",
+  "description": "Texto descriptivo de ejemplo",
+  "amount": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `kind` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof SIMPLE_RECORD_KINDS)[number] | `{}` |
+| `date` | Sí | `string` | formato `date` | `YYYY-MM-DD`. | `2026-07-31` |
+| `accountId` | Sí | `string` | formato `uuid` | El tipo: una cuenta de la clase que corresponde (gasto → EXPENSE, activo → ASSET, deuda → LIABILITY). | `00000000-0000-4000-8000-000000000001` |
+| `description` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `amount` | Sí | `string` | Sin restricción adicional declarada | Cadena decimal, siempre mayor a cero. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | message | Excepción explícita en src/modules/accounting/services/practitioner-simple-accounting.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/practitioner/simple/records/{id}"
+}
+```
+
+---
+
+## 54. GET /accounting/practitioner/simple/summary
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-practitioner`
+- **Nombre:** Pacientes atendidos, cobrado y esperado de las aseguradoras
+- **Operation ID:** `AccountingPractitionerSimpleController_summary`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingPractitionerSimpleController.summary](../../src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts)
+
+### Descripción de negocio
+
+`patientsSeen`: personas distintas con consulta atendida en el período. `collected`: consultas pagadas del período. `expectedFromInsurers`: a hoy, solicitudes enviadas sin dictamen (por lo facturado) más aprobadas sin pagar (por lo aprobado).
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /accounting/practitioner/simple/summary` en `AccountingPractitionerSimpleController_summary`. El controlador delega en `PractitionerSimpleAccountingService.summary`. No recibe body. El tipo de retorno estático es `Promise<SimplePractitionerSummaryDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `practiceId` | query | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `period` | query | No | `string` | valores: `month`, `year` | Sin descripción específica en OpenAPI. | `month` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /accounting/practitioner/simple/summary?practiceId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /accounting/practitioner/simple/summary?practiceId=00000000-0000-4000-8000-000000000001&period=month HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SimplePractitionerSummaryDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SimplePractitionerSummaryDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SimplePractitionerSummaryDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SimplePractitionerSummaryDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SimplePractitionerSummaryDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SimplePractitionerSummaryDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SimplePractitionerSummaryDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SimplePractitionerSummaryDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "period": {},
+  "from": "2026-07-31",
+  "to": "2026-07-31",
+  "patientsSeen": 1,
+  "consultations": 1,
+  "collected": "valor-ejemplo",
+  "expectedFromInsurers": "valor-ejemplo",
+  "pendingClaims": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `period` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof SIMPLE_SUMMARY_PERIODS)[number] | `{}` |
+| `from` | Sí | `string` | formato `date` | Primer día del período, `YYYY-MM-DD`. | `2026-07-31` |
+| `to` | Sí | `string` | formato `date` | Último día del período, `YYYY-MM-DD`. | `2026-07-31` |
+| `patientsSeen` | Sí | `number` | Sin restricción adicional declarada | Personas distintas con una consulta «Atendida» en el período. | `1` |
+| `consultations` | Sí | `number` | Sin restricción adicional declarada | Consultas atendidas: una persona puede venir dos veces. | `1` |
+| `collected` | Sí | `string` | Sin restricción adicional declarada | Consultas pagadas del período. Cadena decimal con dos decimales. | `valor-ejemplo` |
+| `expectedFromInsurers` | Sí | `string` | Sin restricción adicional declarada | A hoy: solicitudes enviadas sin dictamen (por lo facturado) más aprobadas sin pagar (por lo aprobado). No depende del período. | `valor-ejemplo` |
+| `pendingClaims` | Sí | `number` | Sin restricción adicional declarada | Cuántas solicitudes componen ese saldo. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/practitioner/simple/summary"
+}
+```
+
+---
+
+## 55. GET /accounting/practitioner/simple/transactions
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-practitioner`
+- **Nombre:** Transacciones debe/haber de una práctica
+- **Operation ID:** `AccountingPractitionerSimpleController_listTransactions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingPractitionerSimpleController.listTransactions](../../src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts)
+
+### Descripción de negocio
+
+Más recientes primero.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /accounting/practitioner/simple/transactions` en `AccountingPractitionerSimpleController_listTransactions`. El controlador delega en `PractitionerSimpleAccountingService.listTransactions`. No recibe body. El tipo de retorno estático es `Promise<SimpleTransactionsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `practiceId` | query | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /accounting/practitioner/simple/transactions?practiceId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /accounting/practitioner/simple/transactions?practiceId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SimpleTransactionsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SimpleTransactionsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SimpleTransactionsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SimpleTransactionsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SimpleTransactionsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SimpleTransactionsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SimpleTransactionsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SimpleTransactionsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "date": "2026-07-31",
+      "description": "Texto descriptivo de ejemplo",
+      "debitAccountId": "00000000-0000-4000-8000-000000000001",
+      "creditAccountId": "00000000-0000-4000-8000-000000000001",
+      "amount": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<SimpleTransactionDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","date":"2026-07-31","description":"Texto descriptivo de ejemplo","debitAccountId":"00000000-0000-4000-8000-000000000001","creditAccountId":"00000000-0000-4000-8000-000000000001","amount":"valor-ejemplo"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].date` | Sí | `string` | formato `date` | `YYYY-MM-DD`. | `2026-07-31` |
+| `items[].description` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `items[].debitAccountId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].creditAccountId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].amount` | Sí | `string` | Sin restricción adicional declarada | Cadena decimal, siempre mayor a cero. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/practitioner/simple/transactions"
+}
+```
+
+---
+
+## 56. POST /accounting/practitioner/simple/transactions
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-practitioner`
+- **Nombre:** Registrar una transacción debe/haber
+- **Operation ID:** `AccountingPractitionerSimpleController_createTransaction`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingPractitionerSimpleController.createTransaction](../../src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts)
+
+### Descripción de negocio
+
+Las cuentas del debe y del haber son distintas. No es un asiento del libro mayor.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /accounting/practitioner/simple/transactions` en `AccountingPractitionerSimpleController_createTransaction`. El controlador delega en `PractitionerSimpleAccountingService.createTransaction`. Valida el body como `CreateSimpleTransactionDto` y consume `application/json`. El tipo de retorno estático es `Promise<SimpleTransactionDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateSimpleTransactionDto`; los campos opcionales se omiten.
+
+```http
+POST /accounting/practitioner/simple/transactions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "date": "2026-07-31",
+  "description": "Texto descriptivo de ejemplo",
+  "debitAccountId": "00000000-0000-4000-8000-000000000001",
+  "creditAccountId": "00000000-0000-4000-8000-000000000001",
+  "amount": "valor-ejemplo",
+  "practiceId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `date` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `description` | Sí | `string` | longitud máxima 160 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `debitAccountId` | Sí | `string` | formato `uuid` | Cuenta del debe. | `00000000-0000-4000-8000-000000000001` |
+| `creditAccountId` | Sí | `string` | formato `uuid` | Cuenta del haber; distinta de la del debe. | `00000000-0000-4000-8000-000000000001` |
+| `amount` | Sí | `string` | Sin restricción adicional declarada | Cadena decimal > 0, hasta dos decimales. | `valor-ejemplo` |
+| `practiceId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /accounting/practitioner/simple/transactions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "date": "2026-07-31",
+  "description": "Texto descriptivo de ejemplo",
+  "debitAccountId": "00000000-0000-4000-8000-000000000001",
+  "creditAccountId": "00000000-0000-4000-8000-000000000001",
+  "amount": "valor-ejemplo",
+  "practiceId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<SimpleTransactionDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<SimpleTransactionDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SimpleTransactionDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SimpleTransactionDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SimpleTransactionDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SimpleTransactionDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SimpleTransactionDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SimpleTransactionDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SimpleTransactionDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SimpleTransactionDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SimpleTransactionDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "date": "2026-07-31",
+  "description": "Texto descriptivo de ejemplo",
+  "debitAccountId": "00000000-0000-4000-8000-000000000001",
+  "creditAccountId": "00000000-0000-4000-8000-000000000001",
+  "amount": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `date` | Sí | `string` | formato `date` | `YYYY-MM-DD`. | `2026-07-31` |
+| `description` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `debitAccountId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `creditAccountId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `amount` | Sí | `string` | Sin restricción adicional declarada | Cadena decimal, siempre mayor a cero. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | message | Excepción explícita en src/modules/accounting/services/practitioner-simple-accounting.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/practitioner/simple/transactions"
+}
+```
+
+---
+
+## 57. DELETE /accounting/practitioner/simple/transactions/{id}
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-practitioner`
+- **Nombre:** Borrar una transacción debe/haber
+- **Operation ID:** `AccountingPractitionerSimpleController_deleteTransaction`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingPractitionerSimpleController.deleteTransaction](../../src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts)
+
+### Descripción de negocio
+
+Borrar una transacción debe/haber. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /accounting/practitioner/simple/transactions/{id}` en `AccountingPractitionerSimpleController_deleteTransaction`. El controlador delega en `PractitionerSimpleAccountingService.deleteTransaction`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /accounting/practitioner/simple/transactions/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /accounting/practitioner/simple/transactions/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | Operación completada sin cuerpo de respuesta. | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | Operación completada correctamente. | `Promise<void>` | No |
+| 404 | Operación completada correctamente. | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/practitioner/simple/transactions/{id}"
+}
+```
+
+---
+
+## 58. PUT /accounting/practitioner/simple/transactions/{id}
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-practitioner`
+- **Nombre:** Editar una transacción debe/haber
+- **Operation ID:** `AccountingPractitionerSimpleController_updateTransaction`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingPractitionerSimpleController.updateTransaction](../../src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts)
+
+### Descripción de negocio
+
+Editar una transacción debe/haber. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /accounting/practitioner/simple/transactions/{id}` en `AccountingPractitionerSimpleController_updateTransaction`. El controlador delega en `PractitionerSimpleAccountingService.updateTransaction`. Valida el body como `SimpleTransactionInputDto` y consume `application/json`. El tipo de retorno estático es `Promise<SimpleTransactionDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SimpleTransactionInputDto`; los campos opcionales se omiten.
+
+```http
+PUT /accounting/practitioner/simple/transactions/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "date": "2026-07-31",
+  "description": "Texto descriptivo de ejemplo",
+  "debitAccountId": "00000000-0000-4000-8000-000000000001",
+  "creditAccountId": "00000000-0000-4000-8000-000000000001",
+  "amount": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `date` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `description` | Sí | `string` | longitud máxima 160 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `debitAccountId` | Sí | `string` | formato `uuid` | Cuenta del debe. | `00000000-0000-4000-8000-000000000001` |
+| `creditAccountId` | Sí | `string` | formato `uuid` | Cuenta del haber; distinta de la del debe. | `00000000-0000-4000-8000-000000000001` |
+| `amount` | Sí | `string` | Sin restricción adicional declarada | Cadena decimal > 0, hasta dos decimales. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /accounting/practitioner/simple/transactions/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "date": "2026-07-31",
+  "description": "Texto descriptivo de ejemplo",
+  "debitAccountId": "00000000-0000-4000-8000-000000000001",
+  "creditAccountId": "00000000-0000-4000-8000-000000000001",
+  "amount": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SimpleTransactionDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<SimpleTransactionDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SimpleTransactionDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SimpleTransactionDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<SimpleTransactionDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SimpleTransactionDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SimpleTransactionDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SimpleTransactionDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SimpleTransactionDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SimpleTransactionDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SimpleTransactionDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SimpleTransactionDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "date": "2026-07-31",
+  "description": "Texto descriptivo de ejemplo",
+  "debitAccountId": "00000000-0000-4000-8000-000000000001",
+  "creditAccountId": "00000000-0000-4000-8000-000000000001",
+  "amount": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `date` | Sí | `string` | formato `date` | `YYYY-MM-DD`. | `2026-07-31` |
+| `description` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `debitAccountId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `creditAccountId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `amount` | Sí | `string` | Sin restricción adicional declarada | Cadena decimal, siempre mayor a cero. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | message | Excepción explícita en src/modules/accounting/services/practitioner-simple-accounting.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/practitioner/simple/transactions/{id}"
+}
+```
+
+---
+
+## 59. GET /accounting/trial-balance
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -6479,6 +8330,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<TrialBalanceResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<TrialBalanceResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<TrialBalanceResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<TrialBalanceResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TrialBalanceResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6534,6 +8386,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | La práctica consultada pertenece a otra organización | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
 | 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se pudo verificar la vinculación del profesional con la práctica | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

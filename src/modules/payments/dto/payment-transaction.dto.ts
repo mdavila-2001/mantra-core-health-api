@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsIn,
+  IsISO8601,
   IsNumberString,
   IsOptional,
   IsString,
@@ -143,6 +144,19 @@ export class GatewayCallbackDto {
   @IsString()
   @MaxLength(500)
   signature?: string;
+
+  /**
+   * Instante en que el proveedor emitió el evento. Forma parte de los bytes
+   * firmados cuando viene; un endpoint con ventana de repetición lo exige.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Instante de emisión del evento (ISO-8601), firmado junto con el resto',
+    format: 'date-time',
+  })
+  @IsOptional()
+  @IsISO8601()
+  timestamp?: string;
 }
 
 /**

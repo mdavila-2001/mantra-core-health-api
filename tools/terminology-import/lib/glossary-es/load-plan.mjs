@@ -128,6 +128,16 @@ export const CODE_SYSTEMS = {
       },
     ]),
   ),
+  // Sin conceptos propios: sólo da fuente y versión a la evidencia de lactancia
+  // (TAREA-41 F4.3, `import-cima.mjs --safety`). La versión es la del paquete.
+  'nlm-lactmed': {
+    sourceCode: 'NLM_LACTMED',
+    sourceName: 'LactMed — Drugs and Lactation Database (NICHD/NLM)',
+    owner: 'National Institute of Child Health and Human Development / U.S. National Library of Medicine',
+    officialUrl: 'https://www.ncbi.nlm.nih.gov/books/NBK501922/',
+    name: 'LactMed — resúmenes de uso durante la lactancia',
+    version: null,
+  },
   'loinc-es': {
     sourceCode: 'REGENSTRIEF_LOINC_ES',
     sourceName: 'LOINC — variante lingüística en castellano (Regenstrief)',

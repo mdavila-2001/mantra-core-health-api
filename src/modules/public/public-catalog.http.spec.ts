@@ -33,6 +33,47 @@ function doubleBase(profiles: Record<string, Profile>) {
       const profile = profiles[params[0] as string];
       return profile ? [profile] : [];
     }
+    if (sql.includes('AS "siteName"')) {
+      return [
+        {
+          siteId: '33333333-3333-4333-8333-333333333331',
+          siteName: 'Norte',
+          pharmacyName: 'Farmacia Central',
+          addressLines: 'Av. Sintética 1',
+          city: 'Santa Cruz',
+          latitude: '-17.70',
+          longitude: '-63.18',
+          description: 'Lun a Sáb 08:00–22:00',
+          locationUrl: 'https://maps.example/norte',
+        },
+        {
+          siteId: '33333333-3333-4333-8333-333333333332',
+          siteName: 'Sur',
+          pharmacyName: 'Farmacia Central',
+          addressLines: null,
+          city: 'Santa Cruz',
+          latitude: null,
+          longitude: null,
+          description: null,
+          locationUrl: null,
+        },
+      ];
+    }
+    if (sql.includes('AS "searchText"')) {
+      return [
+        {
+          siteId: '33333333-3333-4333-8333-333333333332',
+          productId: '22222222-2222-4222-8222-222222222222',
+          genericName: 'Paracetamol',
+          brandName: null,
+          strengthText: '500 mg',
+          packageSizeText: null,
+          searchText: 'Paracetamol 500 mg',
+          price: '4.50',
+          currency: 'BOB',
+        },
+      ];
+    }
     if (sql.includes('FROM billing.service_catalog')) {
       return [
         {
@@ -193,5 +234,89 @@ describe('Fichas públicas por HTTP (M4 · H2)', () => {
         '/public/profiles/f/farmacia-central/products?cursor=no-es-un-cursor',
       )
       .expect(400);
+  });
+
+  describe('P37 — sucursales y receta', () => {
+    it('GET /public/profiles/f/:slug/branches sin token → 200 con las sedes', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/public/profiles/f/farmacia-central/branches')
+        .expect(200);
+
+      expect(res.body.items).toHaveLength(2);
+      expect(res.body.items[0]).toEqual({
+        id: '33333333-3333-4333-8333-333333333331',
+        slug: 'farmacia-central',
+        name: 'Farmacia Central · Norte',
+        siteName: 'Norte',
+        city: 'Santa Cruz',
+        addressText: 'Av. Sintética 1',
+        phone: null,
+        openingHours: null,
+        description: 'Lun a Sáb 08:00–22:00',
+        locationUrl: 'https://maps.example/norte',
+        location: { lat: -17.7, lng: -63.18 },
+        locationAccuracy: null,
+        isCurrent: false,
+      });
+      expect(res.body.items[1].location).toBeNull();
+    });
+
+    it('POST …/branch-availability → 200 (no 201), ordenado por el servidor y sin la receta en la URL', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/public/profiles/f/farmacia-central/branch-availability')
+        .send({ items: ['paracetamol'], lat: -17.7, lng: -63.18 })
+        .expect(200);
+
+      expect(res.body.count).toBe(2);
+      expect(res.body.items[0]).toMatchObject({
+        branch: { siteName: 'Sur' },
+        complete: true,
+        missing: [],
+        totalAmount: '4.50',
+        currency: 'BOB',
+        distanceKm: null,
+      });
+      expect(res.body.items[1]).toMatchObject({
+        branch: { siteName: 'Norte' },
+        complete: false,
+        missing: ['paracetamol'],
+        distanceKm: 0,
+      });
+    });
+
+    it('cuerpo inválido → 400: sin renglones, demasiados, uno larguísimo, una sola coordenada o una clave de más', async () => {
+      const post = (body: unknown) =>
+        request(app.getHttpServer())
+          .post('/public/profiles/f/farmacia-central/branch-availability')
+          .send(body as object);
+      await post({}).expect(400);
+      await post({ items: [] }).expect(400);
+      await post({
+        items: Array.from({ length: 21 }, (_, i) => `m${i}`),
+      }).expect(400);
+      await post({ items: ['x'.repeat(121)] }).expect(400);
+      await post({ items: [42] }).expect(400);
+      await post({ items: ['a'], lat: -17.7 }).expect(400);
+      await post({ items: ['a'], lat: 200, lng: 0 }).expect(400);
+      await post({ items: ['a'], patientId: 'x' }).expect(400);
+    });
+
+    it('la vieja lectura por GET con ?items= no existe (404): la receta no viaja en la URL', async () => {
+      await request(app.getHttpServer())
+        .get(
+          '/public/profiles/f/farmacia-central/branch-availability?items=paracetamol',
+        )
+        .expect(404);
+    });
+
+    it('una ficha que no es farmacia responde 404 en las dos rutas', async () => {
+      await request(app.getHttpServer())
+        .get('/public/profiles/f/clinica-norte/branches')
+        .expect(404);
+      await request(app.getHttpServer())
+        .post('/public/profiles/f/clinica-norte/branch-availability')
+        .send({ items: ['paracetamol'] })
+        .expect(404);
+    });
   });
 });

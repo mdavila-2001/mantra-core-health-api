@@ -143,6 +143,12 @@ services:
         limits:
           cpus: "0.5"
           memory: 256M
+    # Red coolify con alias estable: Traefik llega por ahí al link público
+    # (grafana.62.169.18.132.sslip.io, ruta en /data/coolify/proxy/dynamic/alovida-grafana.yaml).
+    networks:
+      monitoring:
+      coolify:
+        aliases: [alovida-grafana]
     healthcheck:
       test: ["CMD", "wget", "-q", "-O-", "http://localhost:3000/api/health"]
       interval: 30s

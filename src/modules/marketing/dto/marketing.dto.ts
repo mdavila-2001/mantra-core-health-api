@@ -12,6 +12,7 @@ import {
   IsString,
   IsUrl,
   IsUUID,
+  Max,
   MaxLength,
   Min,
   ValidateNested,
@@ -35,11 +36,17 @@ export type SegmentType = 'DYNAMIC' | 'STATIC';
 /** Cuerpo de `POST /marketing/segments` (UC-50-01). */
 export class CreateSegmentDto {
   /**
-   * Identificador asociado a tenant.
+   * Tenant del recurso. Se deriva del contexto autenticado: si se envía debe
+   * coincidir con el tenant activo, de lo contrario la solicitud se rechaza.
    */
-  @ApiProperty({ format: 'uuid' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Opcional: el tenant sale del contexto autenticado; si se envía debe coincidir con él',
+  })
+  @IsOptional()
   @IsUUID()
-  tenantId!: string;
+  tenantId?: string;
 
   /**
    * Valor de code mantenido por la instancia.
@@ -196,11 +203,17 @@ export type CampaignObjective = 'AWARENESS' | 'CONVERSION' | 'RETENTION';
 /** Cuerpo de `POST /marketing/campaigns` (UC-50-03). */
 export class CreateCampaignDto {
   /**
-   * Identificador asociado a tenant.
+   * Tenant del recurso. Se deriva del contexto autenticado: si se envía debe
+   * coincidir con el tenant activo, de lo contrario la solicitud se rechaza.
    */
-  @ApiProperty({ format: 'uuid' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Opcional: el tenant sale del contexto autenticado; si se envía debe coincidir con él',
+  })
+  @IsOptional()
   @IsUUID()
-  tenantId!: string;
+  tenantId?: string;
 
   /**
    * Valor de code mantenido por la instancia.
@@ -387,11 +400,17 @@ export class MaterializeMembersResponseDto {
 /** Cuerpo de `POST /marketing/content-templates/{code}/versions` (UC-50-05). */
 export class PublishTemplateVersionDto {
   /**
-   * Identificador asociado a tenant.
+   * Tenant del recurso. Se deriva del contexto autenticado: si se envía debe
+   * coincidir con el tenant activo, de lo contrario la solicitud se rechaza.
    */
-  @ApiProperty({ format: 'uuid' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Opcional: el tenant sale del contexto autenticado; si se envía debe coincidir con él',
+  })
+  @IsOptional()
   @IsUUID()
-  tenantId!: string;
+  tenantId?: string;
 
   /**
    * Valor de name mantenido por la instancia.
@@ -495,11 +514,17 @@ export type JourneyTrigger = 'SEGMENT' | 'EVENT';
 /** Cuerpo de `POST /marketing/journeys` (UC-50-06). */
 export class CreateJourneyDto {
   /**
-   * Identificador asociado a tenant.
+   * Tenant del recurso. Se deriva del contexto autenticado: si se envía debe
+   * coincidir con el tenant activo, de lo contrario la solicitud se rechaza.
    */
-  @ApiProperty({ format: 'uuid' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Opcional: el tenant sale del contexto autenticado; si se envía debe coincidir con él',
+  })
+  @IsOptional()
   @IsUUID()
-  tenantId!: string;
+  tenantId?: string;
 
   /**
    * Valor de code mantenido por la instancia.
@@ -968,9 +993,54 @@ export class TrackedLinkClickResponseDto {
    */
   @ApiPropertyOptional({
     format: 'uuid',
-    description: 'Touchpoint del click; ausente si no se identificó al miembro',
+    description:
+      'Touchpoint del click; ausente si el click no trae un token de destinatario válido',
   })
   touchpointId?: string;
+}
+
+/** Cuerpo de `POST /marketing/tracked-links/:id/recipient-tokens` (MKT-03). */
+export class IssueTrackedLinkTokenDto {
+  /**
+   * Tipo del destinatario al que se liga el token.
+   */
+  @ApiProperty({ enum: MEMBER_TYPES })
+  @IsIn(MEMBER_TYPES)
+  memberType!: MemberType;
+
+  /**
+   * Destinatario al que se liga el token; debe ser miembro de la campaña del enlace.
+   */
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  memberRefId!: string;
+
+  /**
+   * Vigencia del token en segundos (por defecto 7 días, máximo 30).
+   */
+  @ApiPropertyOptional({ minimum: 60, maximum: 2592000, default: 604800 })
+  @IsOptional()
+  @IsInt()
+  @Min(60)
+  @Max(2_592_000)
+  ttlSeconds?: number;
+}
+
+/** Respuesta de la emisión de un token de destinatario. */
+export class TrackedLinkTokenResponseDto {
+  /**
+   * Token opaco y firmado, ligado a un enlace y a un destinatario.
+   */
+  @ApiProperty({
+    description: 'Se agrega al enlace público como `?t=<token>`',
+  })
+  token!: string;
+
+  /**
+   * Momento en que el token deja de ser válido.
+   */
+  @ApiProperty({ type: String, format: 'date-time' })
+  expiresAt!: Date;
 }
 
 // ---------------------------------------------------------------------------

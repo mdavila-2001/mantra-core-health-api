@@ -856,6 +856,18 @@ export class PeriopIntraopRepository {
   }
 
   /**
+   * Estancia en recuperación por id, sin bloquear: sirve para resolver su caso
+   * (y con él su tenant) **antes** de bloquear la fila.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de la estancia.
+   * @returns La estancia, o `null` si no existe.
+   */
+  findPacuStayById(em: EntityManager, id: string): Promise<PacuStays | null> {
+    return em.findOne(PacuStays, { id });
+  }
+
+  /**
    * Obtiene find pacu stay for update.
    *
    * @param em - Contexto de persistencia o transacción activa.

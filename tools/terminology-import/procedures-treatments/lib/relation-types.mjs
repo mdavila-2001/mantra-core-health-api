@@ -11,6 +11,8 @@
 //   terminology-role    rol declarado por la terminología (NCIt)
 //   by-definition       eje del propio código (ICD-10-PCS Body Part, ICHI Target)
 //   investigational     ensayo clínico registrado: SIEMPRE «en estudio», nunca «indicado»
+//   collaborative-referenced  fuente colaborativa (Wikidata) con referencia citada; no oficial
+//   literature-indexing intervención y condición en la indexación MeSH de una revisión sistemática
 // =============================================================================
 
 export const RELATION_TYPES = {
@@ -118,6 +120,88 @@ export const RELATION_TYPES = {
     sourcePredicate: 'R180 Procedure_Has_Target_Disease',
     assertion: 'terminology-role',
     label: 'Enfermedad diana del procedimiento (rol NCIt)',
+  },
+
+  // --- ICD-10-PCS (procedimiento → sitio, por definición del código) -----------
+  // Un tipo por título literal del eje 4 de la tabla de CMS.
+  ...Object.fromEntries(
+    [
+      'Body Part',
+      'Body Region',
+      'Treatment Site',
+      'Body System / Region',
+      'Body System',
+    ].map((axis) => [
+      `icd10pcs:${axis}`,
+      {
+        kind: 'procedure-site',
+        sourcePredicate: `ICD-10-PCS axis 4 «${axis}»`,
+        assertion: 'by-definition',
+        label: `Eje «${axis}» del propio código ICD-10-PCS (tablas oficiales de CMS)`,
+      },
+    ]),
+  ),
+
+  // --- Wikidata (fuente colaborativa, solo con referencia real) ----------------
+  'wikidata:P924': {
+    kind: 'procedure-disease',
+    sourcePredicate: 'P924 possible treatment',
+    assertion: 'collaborative-referenced',
+    label:
+      'Tratamiento posible según Wikidata (fuente colaborativa, no oficial; declaración con referencia)',
+  },
+
+  // --- Revisiones Cochrane (indexación MeSH de NLM en MEDLINE) ----------------
+  'pubmed-cochrane:co-indexed': {
+    kind: 'procedure-disease',
+    sourcePredicate:
+      'MeSH de intervención y MeSH de condición con calificador terapéutico (therapy, surgery, rehabilitation, diet therapy, radiotherapy, prevention & control) en la misma revisión Cochrane indexada por NLM',
+    assertion: 'literature-indexing',
+    label:
+      'Evaluados en revisiones sistemáticas Cochrane (indexación MeSH de NLM); no implica eficacia ni indicación',
+  },
+
+  'pubmed-guideline:co-indexed': {
+    kind: 'procedure-disease',
+    sourcePredicate:
+      'MeSH de intervención y MeSH de condición con calificador terapéutico en la misma guía de práctica clínica indexada por NLM (tipo Guideline / Practice Guideline)',
+    assertion: 'literature-indexing',
+    label:
+      'Tratados en guías de práctica clínica (indexación MeSH de NLM); no implica recomendación: la guía puede aconsejarla o desaconsejarla',
+  },
+  'pubmed-rct:co-indexed': {
+    kind: 'procedure-disease',
+    sourcePredicate:
+      'MeSH de intervención y MeSH de condición con calificador terapéutico en el mismo ensayo controlado aleatorizado publicado e indexado por NLM',
+    assertion: 'investigational',
+    label:
+      'En estudio: ensayos controlados aleatorizados publicados (indexación MeSH de NLM); no implica indicación ni eficacia',
+  },
+  'pubmed-review:co-indexed': {
+    kind: 'procedure-disease',
+    sourcePredicate:
+      'MeSH de intervención y MeSH de condición con calificador terapéutico en la misma revisión sistemática o metaanálisis (fuera de Cochrane) indexado por NLM',
+    assertion: 'literature-indexing',
+    label:
+      'Evaluados en revisiones sistemáticas o metaanálisis (indexación MeSH de NLM); no implica eficacia ni indicación',
+  },
+  'pubmed-trial:co-indexed': {
+    kind: 'procedure-disease',
+    sourcePredicate:
+      'MeSH de intervención y MeSH de condición con calificador terapéutico en el mismo ensayo clínico no aleatorizado publicado e indexado por NLM',
+    assertion: 'investigational',
+    label:
+      'En estudio: ensayos clínicos no aleatorizados publicados (indexación MeSH de NLM); no implica indicación ni eficacia',
+  },
+
+  // --- ClinicalTrials.gov (procedimiento ↔ condición, solo en estudio) --------
+  'ctgov:investigational': {
+    kind: 'procedure-disease',
+    sourcePredicate:
+      'MeSH de intervención y MeSH de condición derivados por NLM para el mismo estudio intervencional',
+    assertion: 'investigational',
+    label:
+      'En estudio: registrados juntos en ensayos intervencionales de ClinicalTrials.gov (no implica indicación ni eficacia)',
   },
 };
 

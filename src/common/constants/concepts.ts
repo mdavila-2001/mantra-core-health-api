@@ -461,6 +461,11 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   // varias direcciones por persona vía `use_concept_id`; lo que faltaba era el
   // concepto, no la columna.
   ADDR_USE_WORK: def('common:addr-use:work', 'ADDR_WORK', 'Work address'),
+  // La libreta de direcciones del paciente (modelo v4.2.61): las ubicaciones
+  // que guarda además de su domicilio —«Casa de mi mamá», «Oficina»—, como en
+  // una app de pedidos, para los envíos. No es ni HOME ni WORK: el domicilio
+  // vigente sigue siendo uno solo y es el que usa la ficha.
+  ADDR_USE_SAVED: def('common:addr-use:saved', 'ADDR_SAVED', 'Saved address'),
   ADDR_TYPE_POSTAL: def('common:addr-type:postal', 'POSTAL', 'Postal'),
   COUNTRY_PE: def('common:country:pe', 'PE', 'Peru'),
   // ALoVida es una plataforma boliviana (SEGIP, catálogo de municipios del
@@ -594,6 +599,10 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'HOSPITAL',
     'Hospital',
   ),
+  // Clínica: establecimiento privado con internación, de menor escala que un
+  // hospital. Contrato compartido con el modelo y el front: el código es
+  // `CLINIC` y el concepto `directory:tenant-type:clinic`.
+  TENANT_TYPE_CLINIC: def('directory:tenant-type:clinic', 'CLINIC', 'Clinic'),
   TENANT_TYPE_MEDICAL_OFFICE: def(
     'directory:tenant-type:medical-office',
     'MEDICAL_OFFICE',
@@ -762,6 +771,108 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'MX_S_RL',
     'Sociedad de Responsabilidad Limitada (Mexico)',
   ),
+
+  /* Formas jurídicas bolivianas que faltaban (ampliación del 26/10/2026: el
+     cliente pidió «la máxima amplitud»). Además de las sociedades comerciales,
+     en Bolivia dan servicios de salud cooperativas, fundaciones, ONG, iglesias,
+     entidades y empresas públicas (Ley 466), organismos internacionales y el
+     profesional que factura con su NIT personal. Se agregan al final: los ids
+     son UUIDv5 de la clave, así que nada de lo ya persistido cambia. */
+  LEGAL_ENTITY_SAM: def(
+    'directory:legal-entity:sam',
+    'SAM',
+    'Mixed-capital corporation (S.A.M.)',
+  ),
+  LEGAL_ENTITY_ACCIDENTAL_ASSOCIATION: def(
+    'directory:legal-entity:accidental-association',
+    'ASOCIACION_ACCIDENTAL',
+    'Accidental association (joint venture)',
+  ),
+  LEGAL_ENTITY_CIVIL_PARTNERSHIP: def(
+    'directory:legal-entity:civil-partnership',
+    'SOCIEDAD_CIVIL',
+    'Civil partnership',
+  ),
+  LEGAL_ENTITY_INDEPENDENT_PROFESSIONAL: def(
+    'directory:legal-entity:independent-professional',
+    'PROFESIONAL_INDEPENDIENTE',
+    'Independent professional (natural person)',
+  ),
+  LEGAL_ENTITY_COOPERATIVE: def(
+    'directory:legal-entity:cooperative',
+    'COOPERATIVA',
+    'Cooperative',
+  ),
+  LEGAL_ENTITY_MUTUAL: def(
+    'directory:legal-entity:mutual',
+    'MUTUAL',
+    'Mutual society',
+  ),
+  LEGAL_ENTITY_SOCIAL_ENTERPRISE: def(
+    'directory:legal-entity:social-enterprise',
+    'EMPRESA_SOCIAL',
+    'Social enterprise',
+  ),
+  LEGAL_ENTITY_CIVIL_ASSOCIATION: def(
+    'directory:legal-entity:civil-association',
+    'ASOCIACION_CIVIL',
+    'Civil association',
+  ),
+  LEGAL_ENTITY_FOUNDATION: def(
+    'directory:legal-entity:foundation',
+    'FUNDACION',
+    'Foundation',
+  ),
+  LEGAL_ENTITY_NGO: def(
+    'directory:legal-entity:ngo',
+    'ONG',
+    'Non-governmental organization',
+  ),
+  LEGAL_ENTITY_RELIGIOUS: def(
+    'directory:legal-entity:religious-organization',
+    'ENTIDAD_RELIGIOSA',
+    'Religious organization',
+  ),
+  LEGAL_ENTITY_DEVELOPMENT_FINANCE: def(
+    'directory:legal-entity:development-finance-institution',
+    'IFD',
+    'Development finance institution',
+  ),
+  LEGAL_ENTITY_COMMUNITY_ORGANIZATION: def(
+    'directory:legal-entity:community-organization',
+    'ORGANIZACION_SOCIAL',
+    'Community or social organization',
+  ),
+  LEGAL_ENTITY_PUBLIC_ENTITY: def(
+    'directory:legal-entity:public-entity',
+    'ENTIDAD_PUBLICA',
+    'Public entity',
+  ),
+  LEGAL_ENTITY_STATE_ENTERPRISE: def(
+    'directory:legal-entity:state-enterprise',
+    'EMPRESA_ESTATAL',
+    'State-owned enterprise',
+  ),
+  LEGAL_ENTITY_MIXED_STATE_ENTERPRISE: def(
+    'directory:legal-entity:mixed-state-enterprise',
+    'EMPRESA_ESTATAL_MIXTA',
+    'Mixed state-owned enterprise',
+  ),
+  LEGAL_ENTITY_MIXED_ENTERPRISE: def(
+    'directory:legal-entity:mixed-enterprise',
+    'EMPRESA_MIXTA',
+    'Mixed enterprise',
+  ),
+  LEGAL_ENTITY_INTERGOVERNMENTAL_ENTERPRISE: def(
+    'directory:legal-entity:intergovernmental-enterprise',
+    'EMPRESA_ESTATAL_INTERGUBERNAMENTAL',
+    'Intergovernmental state enterprise',
+  ),
+  LEGAL_ENTITY_INTERNATIONAL_ORGANIZATION: def(
+    'directory:legal-entity:international-organization',
+    'ORGANISMO_INTERNACIONAL',
+    'International organization',
+  ),
   TENANT_ACTIVE: def(
     'directory:tenant-status:active',
     'TENANT_ACTIVE',
@@ -905,6 +1016,82 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'terminology:relationship:specialty',
     'REL_SPECIALTY',
     'Associated health specialty',
+  ),
+  // 2026-10-25 · TAREA-41 F1.1: relaciones de la red de conocimiento con
+  // evidencia (terminology.concept_relationship_evidence). Aditivas; la
+  // semántica es la de la tabla de tipos de la ficha. «Subclase de» NO se
+  // agrega: es `REL_IS_A`.
+  //  - DIAGNOSTIC_CRITERION: enfermedad → hallazgo que la norma exige.
+  //  - RED_FLAG: enfermedad o síntoma → signo de alarma.
+  //  - DIFFERENTIAL_DIAGNOSIS: enfermedad ↔ enfermedad a descartar.
+  //  - REQUIRED_TEST: enfermedad → estudio que la norma exige (por nivel).
+  //  - CONTRAINDICATED_IN: fármaco → enfermedad o estado.
+  //  - ADVERSE_EFFECT: fármaco → hallazgo.
+  //  - PREGNANCY_LACTATION_CAUTION: fármaco → estado (embarazo, lactancia).
+  //  - RISK_FACTOR: factor → enfermedad.
+  //  - COMPLICATION: enfermedad → enfermedad que puede complicarla.
+  //  - CAUSED_BY: enfermedad → agente o causa.
+  //  - REFERRAL_CRITERION: enfermedad → hallazgo que obliga a derivar.
+  //  - CARE_LEVEL: enfermedad → nivel de atención I, II o III.
+  REL_DIAGNOSTIC_CRITERION: def(
+    'terminology:relationship:diagnostic-criterion',
+    'REL_DIAGNOSTIC_CRITERION',
+    'Diagnostic criterion required by the standard',
+  ),
+  REL_RED_FLAG: def(
+    'terminology:relationship:red-flag',
+    'REL_RED_FLAG',
+    'Red flag sign',
+  ),
+  REL_DIFFERENTIAL_DIAGNOSIS: def(
+    'terminology:relationship:differential-diagnosis',
+    'REL_DIFFERENTIAL_DIAGNOSIS',
+    'Differential diagnosis',
+  ),
+  REL_REQUIRED_TEST: def(
+    'terminology:relationship:required-test',
+    'REL_REQUIRED_TEST',
+    'Diagnostic test required by the standard',
+  ),
+  REL_CONTRAINDICATED_IN: def(
+    'terminology:relationship:contraindicated-in',
+    'REL_CONTRAINDICATED_IN',
+    'Contraindicated in',
+  ),
+  REL_ADVERSE_EFFECT: def(
+    'terminology:relationship:adverse-effect',
+    'REL_ADVERSE_EFFECT',
+    'Adverse effect',
+  ),
+  REL_PREGNANCY_LACTATION_CAUTION: def(
+    'terminology:relationship:pregnancy-lactation-caution',
+    'REL_PREGNANCY_LACTATION_CAUTION',
+    'Pregnancy or lactation caution',
+  ),
+  REL_RISK_FACTOR: def(
+    'terminology:relationship:risk-factor',
+    'REL_RISK_FACTOR',
+    'Risk factor',
+  ),
+  REL_COMPLICATION: def(
+    'terminology:relationship:complication',
+    'REL_COMPLICATION',
+    'Complication',
+  ),
+  REL_CAUSED_BY: def(
+    'terminology:relationship:caused-by',
+    'REL_CAUSED_BY',
+    'Caused by',
+  ),
+  REL_REFERRAL_CRITERION: def(
+    'terminology:relationship:referral-criterion',
+    'REL_REFERRAL_CRITERION',
+    'Referral criterion',
+  ),
+  REL_CARE_LEVEL: def(
+    'terminology:relationship:care-level',
+    'REL_CARE_LEVEL',
+    'Level of care',
   ),
   VS_OP_IN: def('terminology:vs-operator:in', 'IN', 'In'),
   VS_OP_IS_A: def(

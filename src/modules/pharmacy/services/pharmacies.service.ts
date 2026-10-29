@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -13,6 +13,11 @@ import {
   PharmacyLicensesRepository,
 } from '../repositories';
 import { PHARM } from '../pharmacy.concepts';
+import { PharmacyCategoriesService } from './pharmacy-categories.service';
+import {
+  requireManagedPharmacy,
+  resolvePharmacyOwnerTenantId,
+} from './pharmacy-scope';
 import {
   CreatePharmacyDto,
   PharmacyResponseDto,
@@ -45,6 +50,9 @@ export class PharmaciesService {
     private readonly pharmaciesRepo: PharmaciesRepository,
     private readonly licensesRepo: PharmacyLicensesRepository,
     private readonly logger: PinoLogger,
+    // P47: las seis categorías de partida de la farmacia nueva. Opcional para
+    // que los dobles de prueba que no las ejercitan no tengan que armarlo.
+    @Optional() private readonly categories?: PharmacyCategoriesService,
   ) {
     this.logger.setContext(PharmaciesService.name);
   }
@@ -54,14 +62,15 @@ export class PharmaciesService {
     dto: CreatePharmacyDto,
     actor: AuthenticatedUser,
   ): Promise<PharmacyResponseDto> {
+    const tenantId = resolvePharmacyOwnerTenantId(dto.tenantId, actor);
     this.logger.info(
-      { operation: 'pharmacy.create', tenantId: dto.tenantId, code: dto.code },
+      { operation: 'pharmacy.create', tenantId, code: dto.code },
       'Creating pharmacy',
     );
     return this.em.transactional(async (tx) => {
       const clash = await this.pharmaciesRepo.findByTenantAndCode(
         tx,
-        dto.tenantId,
+        tenantId,
         dto.code,
       );
       if (clash) {
@@ -82,7 +91,7 @@ export class PharmaciesService {
       }
 
       const pharmacy = this.pharmaciesRepo.create(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         legalName: dto.legalName,
         tradeName: dto.tradeName,
@@ -114,6 +123,7 @@ export class PharmaciesService {
         actorUserId: actor.id,
       });
       await tx.flush();
+      await this.categories?.provisionDefaults(tx, pharmacy.id, actor.id);
 
       this.logger.info(
         {
@@ -151,11 +161,12 @@ export class PharmaciesService {
       'Verifying pharmacy license',
     );
     return this.em.transactional(async (tx) => {
-      const pharmacy = await this.pharmaciesRepo.findById(tx, pharmacyId);
-      if (!pharmacy)
-        throw new ResourceNotFoundException('Farmacia no encontrada', {
-          pharmacyId,
-        });
+      const pharmacy = await requireManagedPharmacy(
+        this.pharmaciesRepo,
+        tx,
+        pharmacyId,
+        actor,
+      );
 
       const license = await this.licensesRepo.findById(tx, licenseId);
       if (!license || license.pharmacyId !== pharmacyId) {

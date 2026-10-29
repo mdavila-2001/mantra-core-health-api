@@ -1,6 +1,8 @@
 ## Resumen
 
-<!-- Qué cambia y por qué. -->
+<!-- Qué cambia y por qué. El plan y la evidencia del trabajo van en este PR, no en archivos del repo.
+     Lo que quede sin hacer, a medias o bloqueado, y lo que encuentres de paso, va a un issue en el
+     repo que corresponde y se enlaza acá (hallazgos de seguridad: etiqueta `seguridad`). -->
 
 ## Casilla documental (obligatoria)
 

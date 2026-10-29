@@ -20,6 +20,8 @@ import { runWithTenant } from '../../../common';
  */
 
 const PRACTICE = 'prac-1';
+/** Actor de alcance total: las pruebas previas no ejercitan la vinculación. */
+const ADMIN = { id: 'u-admin', roles: ['SECURITY_ADMIN'] } as any;
 
 function build() {
   // `findOne` lo usa la comprobación de pertenencia de la práctica al tenant.
@@ -30,15 +32,20 @@ function build() {
     findTransactionById: mockFn(() => Promise.resolve(null)),
     findEntriesByTransaction: mockFn(() => Promise.resolve([])),
     findEntriesByTransactions: mockFn(() => Promise.resolve([])),
+    assignmentsForEntries: mockFn(() => Promise.resolve([])),
   };
   const accountsRepo = { findByPractice: mockFn(() => Promise.resolve([])) };
 
+  const practiceTenantLookup = {
+    findActivePracticeIdsForPractitioner: mockFn(() => Promise.resolve([])),
+  };
   const service = new LedgerReadService(
     em as any,
     journalRepo as any,
     accountsRepo as any,
+    practiceTenantLookup as any,
   );
-  return { service, journalRepo, accountsRepo, tx };
+  return { service, journalRepo, accountsRepo, tx, practiceTenantLookup };
 }
 
 /** Una cuenta con su naturaleza: es lo que da signo al saldo. */
@@ -102,7 +109,9 @@ describe('LedgerReadService', () => {
       d.tx.findOne.mockResolvedValue({ id: PRACTICE, tenantId: 'otro-tenant' });
 
       await expect(
-        runWithTenant('mi-tenant', () => d.service.chartOfAccounts(PRACTICE)),
+        runWithTenant('mi-tenant', () =>
+          d.service.chartOfAccounts(PRACTICE, ADMIN),
+        ),
       ).rejects.toBeInstanceOf(ForbiddenException);
 
       // Y no llegó a tocar los libros.
@@ -115,7 +124,7 @@ describe('LedgerReadService', () => {
       d.accountsRepo.findByPractice.mockResolvedValue([]);
 
       const res = await runWithTenant('mi-tenant', () =>
-        d.service.chartOfAccounts(PRACTICE),
+        d.service.chartOfAccounts(PRACTICE, ADMIN),
       );
 
       expect(res.count).toBe(0);
@@ -126,7 +135,7 @@ describe('LedgerReadService', () => {
       const d = build();
       d.accountsRepo.findByPractice.mockResolvedValue([]);
 
-      await d.service.chartOfAccounts(PRACTICE);
+      await d.service.chartOfAccounts(PRACTICE, ADMIN);
 
       expect(d.tx.findOne).not.toHaveBeenCalled();
       expect(d.accountsRepo.findByPractice).toHaveBeenCalled();
@@ -146,7 +155,7 @@ describe('LedgerReadService', () => {
         line('pagar', false, '100.00'),
       ]);
 
-      const res = await d.service.trialBalance({ practiceId: PRACTICE });
+      const res = await d.service.trialBalance({ practiceId: PRACTICE }, ADMIN);
 
       expect(res.balanced).toBe(true);
       expect(res.totalDebit).toBe('100.00');
@@ -169,7 +178,7 @@ describe('LedgerReadService', () => {
         line('pagar', false, '90.00'),
       ]);
 
-      const res = await d.service.trialBalance({ practiceId: PRACTICE });
+      const res = await d.service.trialBalance({ practiceId: PRACTICE }, ADMIN);
 
       expect(res.balanced).toBe(false);
       expect(res.totalDebit).toBe('100.00');
@@ -189,7 +198,7 @@ describe('LedgerReadService', () => {
         line('pagar', false, '250.00'),
       ]);
 
-      const res = await d.service.trialBalance({ practiceId: PRACTICE });
+      const res = await d.service.trialBalance({ practiceId: PRACTICE }, ADMIN);
       const bank = res.items.find((i) => i.accountId === 'banco');
       const pay = res.items.find((i) => i.accountId === 'pagar');
 
@@ -216,7 +225,7 @@ describe('LedgerReadService', () => {
         line('b', false, '0.30'),
       ]);
 
-      const res = await d.service.trialBalance({ practiceId: PRACTICE });
+      const res = await d.service.trialBalance({ practiceId: PRACTICE }, ADMIN);
 
       expect(res.totalDebit).toBe('0.30');
       expect(res.balanced).toBe(true);
@@ -226,7 +235,7 @@ describe('LedgerReadService', () => {
     it('agrega únicamente los asientos posteados', async () => {
       const d = build();
 
-      await d.service.trialBalance({ practiceId: PRACTICE });
+      await d.service.trialBalance({ practiceId: PRACTICE }, ADMIN);
 
       expect(d.journalRepo.findTransactions).toHaveBeenCalledWith(
         expect.anything(),
@@ -242,7 +251,7 @@ describe('LedgerReadService', () => {
         Array.from({ length: 10_000 }, (_, i) => ({ id: `t-${i}` })),
       );
 
-      const res = await d.service.trialBalance({ practiceId: PRACTICE });
+      const res = await d.service.trialBalance({ practiceId: PRACTICE }, ADMIN);
 
       expect(res.truncated).toBe(true);
     });
@@ -268,7 +277,7 @@ describe('LedgerReadService', () => {
         line('pagar', false, '12000.00'),
       ]);
 
-      const res = await d.service.trialBalance({ practiceId: PRACTICE });
+      const res = await d.service.trialBalance({ practiceId: PRACTICE }, ADMIN);
 
       expect(res.totalDebit).toBe('12000.00');
       expect(res.balanced).toBe(true);
@@ -288,7 +297,7 @@ describe('LedgerReadService', () => {
         convertedLine('gasto', true, '100.00', '696.00'),
       ]);
 
-      const res = await d.service.trialBalance({ practiceId: PRACTICE });
+      const res = await d.service.trialBalance({ practiceId: PRACTICE }, ADMIN);
 
       expect(res.totalDebit).toBe('696.00');
     });
@@ -298,7 +307,7 @@ describe('LedgerReadService', () => {
     it('no manda los filtros que no se pidieron', async () => {
       const d = build();
 
-      await d.service.listJournal({ practiceId: PRACTICE });
+      await d.service.listJournal({ practiceId: PRACTICE }, ADMIN);
 
       expect(d.journalRepo.findTransactions).toHaveBeenCalledWith(
         expect.anything(),
@@ -310,15 +319,48 @@ describe('LedgerReadService', () => {
     it('convierte la ventana a fechas', async () => {
       const d = build();
 
-      await d.service.listJournal({
-        practiceId: PRACTICE,
-        from: '2026-01-01',
-        to: '2026-01-31',
-      });
+      await d.service.listJournal(
+        {
+          practiceId: PRACTICE,
+          from: '2026-01-01',
+          to: '2026-01-31',
+        },
+        ADMIN,
+      );
 
       const filters = d.journalRepo.findTransactions.mock.calls[0][1];
       expect(filters.from).toBeInstanceOf(Date);
       expect(filters.to).toBeInstanceOf(Date);
+    });
+
+    it('publica el código del estado: un reversado no se lee como posteado', async () => {
+      const d = build();
+      d.journalRepo.findTransactions.mockResolvedValue([
+        {
+          id: 'd',
+          statusConceptId: ACCT.TXN_DRAFT,
+          transactionDate: new Date(),
+        },
+        {
+          id: 'r',
+          statusConceptId: ACCT.TXN_REVERSED,
+          transactionDate: new Date(),
+          postedAt: new Date(),
+        },
+        {
+          id: 'x',
+          statusConceptId: 'concepto-ajeno',
+          transactionDate: new Date(),
+        },
+      ]);
+
+      const res = await d.service.listJournal({ practiceId: PRACTICE }, ADMIN);
+
+      expect(res.items.map((i) => i.status)).toEqual([
+        'DRAFT',
+        'REVERSED',
+        null,
+      ]);
     });
   });
 
@@ -326,7 +368,9 @@ describe('LedgerReadService', () => {
     it('un asiento inexistente no se inventa', async () => {
       const d = build();
 
-      await expect(d.service.getJournalTransaction('t-404')).rejects.toThrow();
+      await expect(
+        d.service.getJournalTransaction('t-404', ADMIN),
+      ).rejects.toThrow();
     });
 
     it('devuelve el asiento con sus líneas', async () => {
@@ -342,10 +386,114 @@ describe('LedgerReadService', () => {
         line('pagar', false, '100.00'),
       ]);
 
-      const res = await d.service.getJournalTransaction('t-1');
+      const res = await d.service.getJournalTransaction('t-1', ADMIN);
 
       expect(res.lines).toHaveLength(2);
       expect(res.lines[0]?.amountBase).toBe('100.00');
+      expect(res.lines[0]?.assetId).toBeNull();
+      expect(res.status).toBe('POSTED');
     });
+
+    it('devuelve, por línea, el activo y el centro de beneficio imputados', async () => {
+      const d = build();
+      d.journalRepo.findTransactionById.mockResolvedValue({
+        id: 't-1',
+        practiceId: PRACTICE,
+        transactionDate: new Date('2026-01-31'),
+        statusConceptId: ACCT.TXN_DRAFT,
+      });
+      const debit = line('equipo', true, '50.00');
+      d.journalRepo.findEntriesByTransaction.mockResolvedValue([
+        debit,
+        line('caja', false, '50.00'),
+      ]);
+      d.journalRepo.assignmentsForEntries.mockResolvedValue([
+        { ledgerEntryId: debit.id, assetId: 'asset-1', profitCenterId: 'pc-1' },
+      ]);
+
+      const res = await d.service.getJournalTransaction('t-1', ADMIN);
+
+      expect(d.journalRepo.assignmentsForEntries).toHaveBeenCalledWith(d.tx, [
+        debit.id,
+        'l-caja-50.00',
+      ]);
+      expect(res.lines[0]).toMatchObject({
+        assetId: 'asset-1',
+        profitCenterId: 'pc-1',
+      });
+      expect(res.lines[1]).toMatchObject({
+        assetId: null,
+        profitCenterId: null,
+      });
+    });
+  });
+
+  /**
+   * Los médicos auto-registrados comparten el tenant `DEFAULT`, así que la
+   * pertenencia de la práctica al tenant no separa a uno de otro: lo hace la
+   * vinculación ACTIVE con la práctica. Medido contra la API real antes de
+   * este arreglo: la médica B leía el plan de cuentas, el diario, un asiento y
+   * el balance de la práctica de la médica A (las cuatro con 200).
+   */
+  describe('aislamiento entre profesionales del tenant compartido', () => {
+    const AJENA = {
+      id: 'u-b',
+      roles: ['PRACTITIONER'],
+      practitionerProfileId: 'hpp-b',
+    } as any;
+    const PROPIA = {
+      id: 'u-a',
+      roles: ['PRACTITIONER'],
+      practitionerProfileId: 'hpp-a',
+    } as any;
+
+    function pertenece(d: ReturnType<typeof build>) {
+      d.tx.findOne.mockResolvedValue({ id: PRACTICE, tenantId: 'mi-tenant' });
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockImplementation(
+        (hpp: string) => Promise.resolve(hpp === 'hpp-a' ? [PRACTICE] : []),
+      );
+      d.journalRepo.findTransactionById.mockResolvedValue({
+        id: 't-1',
+        practiceId: PRACTICE,
+      });
+    }
+
+    const lecturas: [
+      string,
+      (d: ReturnType<typeof build>, actor: any) => Promise<unknown>,
+    ][] = [
+      ['plan de cuentas', (d, a) => d.service.chartOfAccounts(PRACTICE, a)],
+      [
+        'libro diario',
+        (d, a) => d.service.listJournal({ practiceId: PRACTICE }, a),
+      ],
+      ['un asiento', (d, a) => d.service.getJournalTransaction('t-1', a)],
+      [
+        'balance de sumas y saldos',
+        (d, a) => d.service.trialBalance({ practiceId: PRACTICE }, a),
+      ],
+    ];
+
+    it.each(lecturas)(
+      '%s: un profesional sin vinculación con la práctica recibe 422',
+      async (_n, leer) => {
+        const d = build();
+        pertenece(d);
+        await expect(
+          runWithTenant('mi-tenant', () => leer(d, AJENA)),
+        ).rejects.toMatchObject({ status: 422 });
+      },
+    );
+
+    it.each(lecturas)(
+      '%s: el profesional vinculado la lee',
+      async (_n, leer) => {
+        const d = build();
+        pertenece(d);
+        await expect(
+          runWithTenant('mi-tenant', () => leer(d, PROPIA)),
+        ).resolves.toBeDefined();
+      },
+    );
   });
 });

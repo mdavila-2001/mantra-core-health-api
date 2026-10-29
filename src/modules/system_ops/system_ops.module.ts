@@ -21,6 +21,7 @@ import {
   BackupService,
   AssessmentService,
   DraftService,
+  RETENTION_DISPOSITION_EXECUTORS,
 } from './services';
 import {
   GovernanceRepository,
@@ -66,6 +67,11 @@ import {
     AssessmentRepository,
     DraftRepository,
     SystemOpsSecurityRepository,
+    // Adaptadores de disposición de retención por entidad registrada. Hoy ninguna
+    // entidad de negocio tiene uno (la identidad usa su camino especializado):
+    // el barrido rechaza lo que no tiene adaptador. Cada adaptador nuevo se
+    // añade aquí como `useClass` con `multi` o se concentra en esta lista.
+    { provide: RETENTION_DISPOSITION_EXECUTORS, useValue: [] },
     // Servicios
     GovernanceCatalogService,
     RetentionExecutionService,

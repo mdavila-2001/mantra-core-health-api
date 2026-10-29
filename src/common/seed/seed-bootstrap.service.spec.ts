@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { SeedBootstrapService } from './seed-bootstrap.service';
+import { SeedCoreState } from './seed-core.state';
 
 /** Los seeds de la cadena, en el orden en que el orquestador los corre. */
 /**
@@ -17,6 +18,7 @@ const STEPS = [
   'telemetryUxHeatmap',
   'glossary',
   'boGeography',
+  'adminDivisions',
   'legalEntityTypes',
   'affiliationCatalogs',
   'boOccupations',
@@ -33,6 +35,7 @@ const STEPS = [
   'clinicalRoles',
   'platformPermissions',
   'clinicalForms',
+  'boMedicalSpecialties',
   'bootstrapAdmin',
   'providerAccounts',
   'people',
@@ -58,7 +61,7 @@ function loggerFake() {
  *
  * @param fail - Nombres de los seeds que deben lanzar en esta corrida.
  */
-function build(fail: Step[] = []) {
+function build(fail: Step[] = [], coreState?: SeedCoreState) {
   const logger = loggerFake();
   const double = Object.fromEntries(
     STEPS.map((name) => [
@@ -82,6 +85,7 @@ function build(fail: Step[] = []) {
     double.telemetryUxHeatmap as never,
     double.glossary as never,
     double.boGeography as never,
+    double.adminDivisions as never,
     double.legalEntityTypes as never,
     double.affiliationCatalogs as never,
     double.boOccupations as never,
@@ -100,11 +104,13 @@ function build(fail: Step[] = []) {
     double.bootstrapAdmin as never,
     double.providerAccounts as never,
     double.clinicalForms as never,
+    double.boMedicalSpecialties as never,
     double.practiceDefaultServices as never,
     double.people as never,
     double.directoryNetworks as never,
     double.qaFlows as never,
     logger as never,
+    coreState,
   );
 
   return { service, dobles: double, logger };
@@ -119,6 +125,7 @@ const CONTENT: readonly Step[] = [
   'stickerPack',
   'vademecum',
   'clinicalForms',
+  'boMedicalSpecialties',
   'providerAccounts',
   'people',
   'directoryNetworks',
@@ -128,6 +135,47 @@ const CONTENT: readonly Step[] = [
 
 /** Los pasos de núcleo, que corren siempre que la cadena corra. */
 const CORE: readonly Step[] = STEPS.filter((name) => !CONTENT.includes(name));
+
+describe('SeedBootstrapService · estado de los seeds núcleo para /readiness (SEED-01)', () => {
+  it('un paso núcleo fallido queda registrado aunque el entorno no lo haga fatal', async () => {
+    const state = new SeedCoreState();
+    const { service } = build(['clinicalRoles'], state);
+
+    const summary = await service.run();
+
+    expect(summary.coreFailed).toEqual(['roles asistenciales']);
+    expect(state.failedSteps()).toEqual(summary.coreFailed);
+    expect(state.isComplete()).toBe(false);
+  });
+
+  it('un paso de contenido fallido no vuelve incompleto al núcleo', async () => {
+    const state = new SeedCoreState();
+    const { service } = build(['glossary'], state);
+
+    await service.run();
+
+    expect(state.isComplete()).toBe(true);
+  });
+
+  it('una corrida limpia borra el fallo de la anterior', async () => {
+    const state = new SeedCoreState();
+    state.record(['catálogo de conceptos']);
+    const { service } = build([], state);
+
+    await service.run();
+
+    expect(state.isComplete()).toBe(true);
+  });
+
+  it('si el catálogo de conceptos no queda disponible, el aborto también se registra', async () => {
+    const state = new SeedCoreState();
+    const { service } = build(['terminology'], state);
+
+    await service.run();
+
+    expect(state.failedSteps()).toEqual(['catálogo de conceptos']);
+  });
+});
 
 describe('SeedBootstrapService', () => {
   const environmentOriginal = process.env.SEED_ON_BOOT;
@@ -327,6 +375,9 @@ describe('SeedBootstrapService', () => {
         terms: 0,
         relationships: 0,
         orphanRelationships: 1,
+        // Artículos cuyo slug todavía no tiene concepto: se omiten, no se escriben.
+        articles: 0,
+        orphanArticles: 446,
       });
 
       const summary = await service.run();
@@ -349,6 +400,84 @@ describe('SeedBootstrapService', () => {
       );
       expect(step?.inserted).toBeNull();
       expect(step?.failed).toBe(false);
+    });
+  });
+  // SEED-01: un seed núcleo fallido no puede dejar que la API termine de arrancar.
+  describe('fallo de un seed núcleo (SEED-01)', () => {
+    const nodeEnvOriginal = process.env.NODE_ENV;
+    const fatalOriginal = process.env.SEED_CORE_FAILURE_FATAL;
+
+    afterEach(() => {
+      if (nodeEnvOriginal === undefined) delete process.env.NODE_ENV;
+      else process.env.NODE_ENV = nodeEnvOriginal;
+      if (fatalOriginal === undefined)
+        delete process.env.SEED_CORE_FAILURE_FATAL;
+      else process.env.SEED_CORE_FAILURE_FATAL = fatalOriginal;
+    });
+
+    it('todos los núcleo resuelven: el arranque termina y no hay coreFailed', async () => {
+      process.env.NODE_ENV = 'production';
+      const { service } = build();
+
+      await expect(service.onApplicationBootstrap()).resolves.toBeUndefined();
+      expect((await service.run()).coreFailed).toBeUndefined();
+    });
+
+    it('falla un seed de contenido: la aplicación sigue disponible, incluso en producción', async () => {
+      process.env.NODE_ENV = 'production';
+      const { service } = build(['glossary']);
+
+      await expect(service.onApplicationBootstrap()).resolves.toBeUndefined();
+    });
+
+    it('falla un núcleo en producción: relanza tras el resumen y no inicia HTTP', async () => {
+      process.env.NODE_ENV = 'production';
+      delete process.env.SEED_CORE_FAILURE_FATAL;
+      const { service, logger } = build(['messaging']);
+
+      await expect(service.onApplicationBootstrap()).rejects.toThrow(
+        'SYSTEM_SEED_CORE_INCOMPLETE',
+      );
+      // El resumen ya se registró antes de lanzar.
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: 'seed.summary',
+          coreFailed: ['mensajería'],
+        }),
+        expect.any(String),
+      );
+    });
+
+    it('falla el catálogo de conceptos en producción: también es fatal', async () => {
+      process.env.NODE_ENV = 'production';
+      const { service } = build(['terminology']);
+
+      await expect(service.onApplicationBootstrap()).rejects.toThrow(
+        'catálogo de conceptos',
+      );
+    });
+
+    it('fuera de producción no rompe el desarrollo local salvo opt-in explícito', async () => {
+      process.env.NODE_ENV = 'development';
+      delete process.env.SEED_CORE_FAILURE_FATAL;
+      await expect(
+        build(['messaging']).service.onApplicationBootstrap(),
+      ).resolves.toBeUndefined();
+
+      process.env.SEED_CORE_FAILURE_FATAL = 'true';
+      await expect(
+        build(['messaging']).service.onApplicationBootstrap(),
+      ).rejects.toThrow('SYSTEM_SEED_CORE_INCOMPLETE');
+    });
+
+    it('run() sigue devolviendo el resumen sin lanzar (lo usa yarn seed:boot)', async () => {
+      process.env.NODE_ENV = 'production';
+      const { service } = build(['messaging']);
+
+      const summary = await service.run();
+
+      expect(summary.failed).toBe(1);
+      expect(summary.coreFailed).toEqual(['mensajería']);
     });
   });
 });

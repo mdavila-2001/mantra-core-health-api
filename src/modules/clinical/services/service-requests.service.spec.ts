@@ -14,8 +14,11 @@ import {
   runWithTenant,
 } from '../../../common';
 import { CLIN } from '../clinical.concepts';
+import { DIAG } from '../../diagnostics/diagnostics.concepts';
 
 const actor = { id: 'user-1', roles: [] } as any;
+import { PerformerSelectionValidator } from './performer-selection.validator';
+import { PERFORMER_SELECTION_CONCEPTS } from '../performer-selection';
 
 const ENCOUNTER = { id: 'enc-1', patientProfileId: 'p1', tenantId: 't1' };
 
@@ -54,6 +57,19 @@ function build() {
   const formOrigin = {
     assertUsableOrigin: mockFn().mockResolvedValue(undefined),
   };
+  // Centros médicos: el validador real, con el lector de sedes controlado.
+  const sites = {
+    offersProcedureWithPrice: mockFn().mockResolvedValue(true),
+    isActivelyAffiliated: mockFn().mockResolvedValue(true),
+  };
+  const siteNames = {
+    namesFor: mockFn().mockResolvedValue(new Map([['site-1', 'Centro Norte']])),
+  };
+  // P40: las notas que motivan la orden. Por defecto, válidas.
+  const basedOnNotes = {
+    assertUsable: mockFn().mockResolvedValue(undefined),
+    link: mockFn(),
+  };
   const service = new ServiceRequestsService(
     em as any,
     serviceRequestsRepo as any,
@@ -64,8 +80,14 @@ function build() {
     outbox as any,
     clinicalNotifications as any,
     formOrigin as any,
+    new PerformerSelectionValidator(sites as any),
+    siteNames as any,
+    basedOnNotes as any,
   );
   return {
+    basedOnNotes,
+    sites,
+    siteNames,
     formOrigin,
     service,
     outbox,
@@ -212,6 +234,132 @@ describe('ServiceRequestsService (UC-08-05)', () => {
         d.service.create({ ...registration, formInstanceId: 'form-1' }, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(d.serviceRequestsRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('P40 · categoría textual y notas que motivan la orden', () => {
+    const registration = {
+      custodianTenantId: 't1',
+      patientProfileId: 'p1',
+      codeConceptId: 'code1',
+      encounterId: 'enc-1',
+    };
+
+    /** La orden que devuelve el repositorio, con la categoría que se guardó. */
+    function echo(d: ReturnType<typeof build>) {
+      d.serviceRequestsRepo.create.mockImplementation(
+        (_tx: unknown, data: any) => ({
+          id: 'sr1',
+          patientProfileId: 'p1',
+          statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE,
+          categoryConceptId: data.categoryConceptId,
+          createdAt: new Date(),
+        }),
+      );
+    }
+
+    it.each([
+      ['LAB', CLIN.SERVICE_REQUEST_CATEGORY_LAB],
+      ['IMAGING', DIAG.SERVICE_REQUEST_CATEGORY_IMAGING],
+      ['OTHER', CLIN.SERVICE_REQUEST_CATEGORY_OTHER],
+    ] as const)(
+      'category %s sola se guarda como su concepto y vuelve en la respuesta',
+      async (category, conceptId) => {
+        const d = build();
+        echo(d);
+        const res = await d.service.create(
+          { ...registration, category },
+          actor,
+        );
+        expect(
+          d.serviceRequestsRepo.create.mock.calls[0][1].categoryConceptId,
+        ).toBe(conceptId);
+        expect(res.category).toBe(category);
+      },
+    );
+
+    it('category con un categoryConceptId coherente guarda el concepto, que es el más preciso', async () => {
+      const d = build();
+      echo(d);
+      const res = await d.service.create(
+        {
+          ...registration,
+          category: 'OTHER',
+          categoryConceptId: CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE,
+        },
+        actor,
+      );
+      expect(
+        d.serviceRequestsRepo.create.mock.calls[0][1].categoryConceptId,
+      ).toBe(CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE);
+      expect(res.category).toBe('OTHER');
+    });
+
+    it('category que contradice categoryConceptId da 422 y no escribe nada', async () => {
+      const d = build();
+      const err = await d.service
+        .create(
+          {
+            ...registration,
+            category: 'IMAGING',
+            categoryConceptId: CLIN.SERVICE_REQUEST_CATEGORY_LAB,
+          },
+          actor,
+        )
+        .catch((e: unknown) => e);
+      expect(err).toBeInstanceOf(PreconditionFailedException);
+      expect((err as any).getResponse().reason).toBe(
+        'SERVICE_REQUEST_CATEGORY_MISMATCH',
+      );
+      expect(d.serviceRequestsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('sin category ni concepto, la orden queda sin clasificar', async () => {
+      const d = build();
+      echo(d);
+      const res = await d.service.create(registration, actor);
+      expect(res.category).toBeUndefined();
+      expect(res.basedOnNoteIds).toEqual([]);
+      expect(d.basedOnNotes.assertUsable).not.toHaveBeenCalled();
+      expect(d.basedOnNotes.link).not.toHaveBeenCalled();
+    });
+
+    it('valida las notas contra paciente y encuentro, las vincula en orden y las devuelve', async () => {
+      const d = build();
+      echo(d);
+      const res = await d.service.create(
+        { ...registration, basedOnNoteIds: ['n2', 'n1'] },
+        actor,
+      );
+      expect(d.basedOnNotes.assertUsable).toHaveBeenCalledWith(
+        d.tx,
+        ['n2', 'n1'],
+        'p1',
+        't1',
+        'enc-1',
+      );
+      expect(d.basedOnNotes.link).toHaveBeenCalledWith(
+        d.tx,
+        'sr1',
+        ['n2', 'n1'],
+        actor.id,
+      );
+      expect(res.basedOnNoteIds).toEqual(['n2', 'n1']);
+    });
+
+    it('una nota que no sirve (otro paciente) da 422 y no se crea la orden', async () => {
+      const d = build();
+      d.basedOnNotes.assertUsable.mockRejectedValue(
+        new PreconditionFailedException('nota ajena'),
+      );
+      await expect(
+        d.service.create(
+          { ...registration, basedOnNoteIds: ['n-otro'] },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.serviceRequestsRepo.create).not.toHaveBeenCalled();
+      expect(d.basedOnNotes.link).not.toHaveBeenCalled();
     });
   });
 
@@ -723,5 +871,157 @@ describe('ServiceRequestsService · MCH-027, el aviso de la orden', () => {
     );
     expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
     expect(d.clinicalNotifications.serviceRequestPlaced).not.toHaveBeenCalled();
+  });
+
+  describe('quién ejecuta la orden (centros médicos)', () => {
+    const base = (extra: Record<string, unknown> = {}): any => ({
+      custodianTenantId: 't1',
+      patientProfileId: 'p1',
+      encounterId: 'enc-1',
+      codeConceptId: 'proc-endoscopia',
+      requesterProfileId: 'doc-1',
+      ...extra,
+    });
+    const doctor = { id: 'u1', practitionerProfileId: 'doc-1' } as any;
+
+    /**
+     * Sistema bajo prueba que devuelve la orden creada tal como se pidió.
+     * @returns Resultado de build.
+     */
+    function ready() {
+      const d = build();
+      d.serviceRequestsRepo.create.mockImplementation(
+        (_tx: any, data: any) => ({
+          id: 'sr-1',
+          createdAt: new Date(),
+          patientProfileId: data.patientProfileId,
+          custodianTenantId: data.custodianTenantId,
+          statusConceptId: data.statusConceptId,
+          intentConceptId: data.intentConceptId,
+        }),
+      );
+      return d;
+    }
+
+    it('sin modo, la orden queda en PATIENT_CHOICE sin médico ni sede', async () => {
+      const d = ready();
+
+      const res = await d.service.create(base(), doctor);
+
+      expect(d.serviceRequestsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          performerSelectionConceptId:
+            PERFORMER_SELECTION_CONCEPTS.PATIENT_CHOICE,
+          performerPractitionerProfileId: undefined,
+          suggestedPracticeSiteId: undefined,
+        }),
+      );
+      expect(res).toMatchObject({
+        performerSelectionConceptId:
+          PERFORMER_SELECTION_CONCEPTS.PATIENT_CHOICE,
+        performerPractitionerProfileId: null,
+        suggestedPracticeSiteId: null,
+        suggestedPracticeSiteName: null,
+      });
+      expect(d.siteNames.namesFor).not.toHaveBeenCalled();
+    });
+
+    it('«lo hago yo»: persiste los tres campos y responde con el nombre de la sede', async () => {
+      const d = ready();
+
+      const res = await d.service.create(
+        base({
+          performerSelectionConceptId: PERFORMER_SELECTION_CONCEPTS.SELF,
+          performerPractitionerProfileId: 'doc-1',
+          suggestedPracticeSiteId: 'site-1',
+        }),
+        doctor,
+      );
+
+      expect(d.serviceRequestsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          performerSelectionConceptId: PERFORMER_SELECTION_CONCEPTS.SELF,
+          performerPractitionerProfileId: 'doc-1',
+          suggestedPracticeSiteId: 'site-1',
+        }),
+      );
+      expect(res).toMatchObject({
+        performerPractitionerProfileId: 'doc-1',
+        suggestedPracticeSiteId: 'site-1',
+        suggestedPracticeSiteName: 'Centro Norte',
+      });
+    });
+
+    it('«lo hago yo» sin el médico del solicitante da 422 y no persiste', async () => {
+      const d = ready();
+
+      await expect(
+        d.service.create(
+          base({
+            performerSelectionConceptId: PERFORMER_SELECTION_CONCEPTS.SELF,
+            performerPractitionerProfileId: 'otro',
+            suggestedPracticeSiteId: 'site-1',
+          }),
+          doctor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.serviceRequestsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('el solicitante sale de la sesión si el cuerpo no lo trae', async () => {
+      const d = ready();
+
+      await expect(
+        d.service.create(
+          base({
+            requesterProfileId: undefined,
+            performerSelectionConceptId: PERFORMER_SELECTION_CONCEPTS.SELF,
+            performerPractitionerProfileId: 'doc-1',
+            suggestedPracticeSiteId: 'site-1',
+          }),
+          doctor,
+        ),
+      ).resolves.toMatchObject({ performerPractitionerProfileId: 'doc-1' });
+    });
+
+    it('PATIENT_CHOICE con sede sugerida da 422', async () => {
+      const d = ready();
+
+      await expect(
+        d.service.create(base({ suggestedPracticeSiteId: 'site-1' }), doctor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.serviceRequestsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['ORGANIZATION', PERFORMER_SELECTION_CONCEPTS.ORGANIZATION, {}],
+      [
+        'SELF',
+        PERFORMER_SELECTION_CONCEPTS.SELF,
+        { performerPractitionerProfileId: 'doc-1' },
+      ],
+    ])(
+      'CI-4 (%s): performerTenantId queda tal como llegó, no se deriva de la sede',
+      async (_name, mode, extra) => {
+        for (const performerTenantId of [undefined, 'tenant-elegido']) {
+          const d = ready();
+
+          await d.service.create(
+            base({
+              performerSelectionConceptId: mode,
+              suggestedPracticeSiteId: 'site-1',
+              performerTenantId,
+              ...extra,
+            }),
+            doctor,
+          );
+
+          const saved = d.serviceRequestsRepo.create.mock.calls[0][1];
+          expect(saved.performerTenantId).toBe(performerTenantId);
+        }
+      },
+    );
   });
 });

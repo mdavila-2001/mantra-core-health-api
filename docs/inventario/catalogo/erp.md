@@ -10,7 +10,7 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [business_partner_bank_accounts](#business_partner_bank_accounts) | Registra cuentas bancarias de socios para procesar pagos y liquidaciones institucionales. | 17 | 7 | 3 | COINCIDE |
+| [business_partner_bank_accounts](#business_partner_bank_accounts) | Registra cuentas bancarias de socios para procesar pagos y liquidaciones institucionales. | 17 | 7 | 2 | COINCIDE |
 | [business_partner_relationships](#business_partner_relationships) | Relaciona socios de negocio para representar grupos, afiliaciones o vínculos comerciales. | 12 | 7 | 0 | COINCIDE |
 | [business_partner_roles](#business_partner_roles) | Asigna roles a socios de negocio para expresar si actúan como clientes, proveedores u otras partes. | 12 | 7 | 0 | COINCIDE |
 | [business_partner_tax_registrations](#business_partner_tax_registrations) | Conserva registros tributarios de socios para documentos de compra, venta y cumplimiento fiscal. | 13 | 6 | 0 | COINCIDE |
@@ -33,10 +33,10 @@
 | [contract_team_members](#contract_team_members) | Asigna responsables y participantes internos a contratos para coordinar gestión y cumplimiento. | 10 | 7 | 0 | COINCIDE |
 | [contract_terminations](#contract_terminations) | Documenta terminaciones de contratos, fechas y motivos para cerrar obligaciones y relaciones. | 17 | 9 | 1 | COINCIDE |
 | [contract_versions](#contract_versions) | Preserva versiones de contratos para reconstruir los términos vigentes en cada etapa. | 14 | 7 | 0 | COINCIDE |
-| [contracts](#contracts) | Representa contratos comerciales y de servicio que formalizan relaciones institucionales. | 33 | 21 | 9 | COINCIDE |
+| [contracts](#contracts) | Representa contratos comerciales y de servicio que formalizan relaciones institucionales. | 33 | 21 | 13 | COINCIDE |
 | [departments](#departments) | Define departamentos internos que organizan equipos y líneas de responsabilidad de una organización. | 13 | 8 | 0 | COINCIDE |
 | [employee_assignments](#employee_assignments) | Registra asignaciones de empleados a departamentos, sedes o proyectos para reflejar su ubicación operativa. | 15 | 9 | 0 | COINCIDE |
-| [employees](#employees) | Representa empleados de organizaciones sanitarias para administrar relaciones laborales y responsabilidades institucionales. | 16 | 9 | 2 | COINCIDE |
+| [employees](#employees) | Representa empleados de organizaciones sanitarias para administrar relaciones laborales y responsabilidades institucionales. | 16 | 9 | 3 | COINCIDE |
 | [employment_records](#employment_records) | Conserva relaciones y períodos de empleo de personas que trabajan en la organización sanitaria. | 19 | 12 | 0 | COINCIDE |
 | [enterprise_document_flow](#enterprise_document_flow) | Vincula documentos empresariales sucesivos para reconstruir la cadena entre pedido, entrega, factura y pago. | 12 | 8 | 0 | COINCIDE |
 | [goods_receipt_items](#goods_receipt_items) | Desglosa artículos y cantidades recibidas contra órdenes de compra. | 15 | 8 | 1 | COINCIDE |
@@ -45,16 +45,16 @@
 | [invoice_match_runs](#invoice_match_runs) | Registra conciliaciones de facturas con órdenes y recepciones para verificar coherencia antes del pago. | 13 | 9 | 1 | COINCIDE |
 | [lease_accounting_links](#lease_accounting_links) | Relaciona contratos de arrendamiento con activos y asientos contables correspondientes. | 16 | 11 | 0 | COINCIDE |
 | [lease_cash_flows](#lease_cash_flows) | Conserva flujos de efectivo futuros de arrendamientos para calcular compromisos financieros. | 15 | 9 | 0 | COINCIDE |
-| [lease_contracts](#lease_contracts) | Representa arrendamientos institucionales para administrar términos, pagos y tratamiento contable. | 16 | 8 | 0 | COINCIDE |
+| [lease_contracts](#lease_contracts) | Representa arrendamientos institucionales para administrar términos, pagos y tratamiento contable. | 16 | 8 | 1 | COINCIDE |
 | [lease_objects](#lease_objects) | Cataloga bienes arrendados para relacionarlos con contratos y valorizaciones. | 14 | 8 | 0 | COINCIDE |
 | [lease_valuations](#lease_valuations) | Registra valoraciones contables de arrendamientos para soportar reportes y cierres financieros. | 13 | 7 | 1 | COINCIDE |
 | [performance_reviews](#performance_reviews) | Conserva revisiones de desempeño de empleados para dar seguimiento a ciclos de evaluación laboral. | 14 | 6 | 0 | COINCIDE |
 | [positions](#positions) | Cataloga posiciones laborales para vincular empleados con puestos y estructura organizacional. | 15 | 8 | 0 | COINCIDE |
 | [projects](#projects) | Representa proyectos institucionales para planificar trabajo, recursos y compromisos. | 19 | 12 | 0 | COINCIDE |
-| [purchase_order_items](#purchase_order_items) | Detalla productos, servicios, cantidades y precios incluidos en órdenes de compra. | 27 | 18 | 2 | COINCIDE |
-| [purchase_orders](#purchase_orders) | Representa órdenes de compra emitidas a proveedores para adquirir recursos institucionales. | 20 | 16 | 5 | COINCIDE |
+| [purchase_order_items](#purchase_order_items) | Detalla productos, servicios, cantidades y precios incluidos en órdenes de compra. | 27 | 18 | 3 | COINCIDE |
+| [purchase_orders](#purchase_orders) | Representa órdenes de compra emitidas a proveedores para adquirir recursos institucionales. | 20 | 16 | 6 | COINCIDE |
 | [purchase_requisition_items](#purchase_requisition_items) | Detalla bienes y cantidades solicitadas para revisión y aprobación de compras. | 22 | 13 | 0 | COINCIDE |
-| [purchase_requisitions](#purchase_requisitions) | Registra solicitudes internas de compra de insumos, equipamiento o servicios. | 15 | 12 | 0 | COINCIDE |
+| [purchase_requisitions](#purchase_requisitions) | Registra solicitudes internas de compra de insumos, equipamiento o servicios. | 15 | 12 | 1 | COINCIDE |
 | [sales_order_items](#sales_order_items) | Desglosa productos o servicios incluidos en cada pedido para seguimiento de cumplimiento e ingreso. | 21 | 12 | 0 | COINCIDE |
 | [sales_orders](#sales_orders) | Representa pedidos de clientes u organizaciones para documentar servicios o productos comercializados. | 17 | 13 | 1 | COINCIDE |
 | [service_entry_items](#service_entry_items) | Detalla servicios prestados y aceptados dentro de una hoja de entrada de servicio. | 16 | 10 | 0 | COINCIDE |
@@ -690,7 +690,7 @@ Registra cuentas bancarias de socios para procesar pagos y liquidaciones institu
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_38_erp.puml: business_partner_bank_accounts`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_38_erp.puml` · **DDL:** `SQL/38_erp/02_tables.sql`
 - **Entidad del ORM:** `BusinessPartnerBankAccounts` — `src/modules/erp/entities/business_partner_bank_accounts.entity.ts`
-- **Resumen:** 17 columnas · 7 índices · 6 FK salientes · 0 entrantes · 3 operaciones
+- **Resumen:** 17 columnas · 7 índices · 6 FK salientes · 0 entrantes · 2 operaciones
 
 #### Columnas
 
@@ -748,7 +748,6 @@ Registra cuentas bancarias de socios para procesar pagos y liquidaciones institu
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /erp/business-partners | CREA | DIRECTA |
-| POST /erp/business-partners/{id}/bank-accounts/{accId}/verify | ACTUALIZA | POR_TIPO |
 | POST /erp/business-partners/{id}/bank-accounts/{accId}/verify | LEE | DIRECTA |
 
 #### Gobierno
@@ -1060,8 +1059,8 @@ Cataloga empresas y personas con las que la organización intercambia contratos,
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_business_partners_tenant_id_partner_number` | sí | tenant_id, partner_number | Garantiza que no se repita la combinación (tenant_id, partner_number) _(DOCUMENTO)_; Soporta la clave foránea fk_business_partners_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_business_partners_tenant_id` | no | tenant_id | Soporta la clave foránea fk_business_partners_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_business_partners_tenant_id_partner_number` | sí | tenant_id, partner_number | Garantiza que no se repita la combinación (tenant_id, partner_number) _(DOCUMENTO)_; Soporta la clave foránea fk_business_partners_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_business_partners_tenant_id` | no | tenant_id | Soporta la clave foránea fk_business_partners_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_business_partners_partner_category_concept_id` | no | partner_category_concept_id | Soporta la clave foránea fk_business_partners_partner_category_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_business_partners_country_concept_id` | no | country_concept_id | Soporta la clave foránea fk_business_partners_country_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_business_partners_linked_tenant_id` | no | linked_tenant_id | Soporta la clave foránea fk_business_partners_linked_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -2551,7 +2550,7 @@ Representa contratos comerciales y de servicio que formalizan relaciones institu
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_38_erp.puml: contracts`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_38_erp.puml` · **DDL:** `SQL/38_erp/02_tables.sql`
 - **Entidad del ORM:** `Contracts` — `src/modules/erp/entities/contracts.entity.ts`
-- **Resumen:** 33 columnas · 21 índices · 19 FK salientes · 34 entrantes · 9 operaciones
+- **Resumen:** 33 columnas · 21 índices · 19 FK salientes · 34 entrantes · 13 operaciones
 
 #### Columnas
 
@@ -2654,7 +2653,7 @@ Representa contratos comerciales y de servicio que formalizan relaciones institu
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `uq_contracts_contract_number` | sí | contract_number | Garantiza que no se repita la combinación (contract_number) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «contract_number», la primera columna del índice _(CONSULTA)_ |
-| `ix_contracts_tenant_id` | no | tenant_id | Soporta la clave foránea fk_contracts_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_contracts_tenant_id` | no | tenant_id | Soporta la clave foránea fk_contracts_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_contracts_contract_type_concept_id` | no | contract_type_concept_id | Soporta la clave foránea fk_contracts_contract_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_contracts_counterparty_type_concept_id` | no | counterparty_type_concept_id | Soporta la clave foránea fk_contracts_counterparty_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_contracts_renewal_type_concept_id` | no | renewal_type_concept_id | Soporta la clave foránea fk_contracts_renewal_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -2685,6 +2684,7 @@ Representa contratos comerciales y de servicio que formalizan relaciones institu
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /billing/bills | LEE | DIRECTA |
 | POST /erp/contracts | CREA | DIRECTA |
 | POST /erp/contracts | LEE | DIRECTA |
 | POST /erp/contracts/{id}/amendments | LEE | DIRECTA |
@@ -2694,6 +2694,9 @@ Representa contratos comerciales y de servicio que formalizan relaciones institu
 | POST /erp/contracts/{id}/renewals | LEE | DIRECTA |
 | POST /erp/contracts/{id}/terminations | ACTUALIZA | POR_TIPO |
 | POST /erp/contracts/{id}/terminations | LEE | DIRECTA |
+| POST /erp/lease-contracts/{id}/valuations | LEE | DIRECTA |
+| POST /erp/purchase-orders | LEE | DIRECTA |
+| POST /erp/sales-orders | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -2877,7 +2880,7 @@ Representa empleados de organizaciones sanitarias para administrar relaciones la
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_38_erp.puml: employees`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_38_erp.puml` · **DDL:** `SQL/38_erp/02_tables.sql`
 - **Entidad del ORM:** `Employees` — `src/modules/erp/entities/employees.entity.ts`
-- **Resumen:** 16 columnas · 9 índices · 9 FK salientes · 18 entrantes · 2 operaciones
+- **Resumen:** 16 columnas · 9 índices · 9 FK salientes · 18 entrantes · 3 operaciones
 
 #### Columnas
 
@@ -2951,6 +2954,7 @@ Representa empleados de organizaciones sanitarias para administrar relaciones la
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /erp/employees/{id}/time-off | LEE | DIRECTA |
+| POST /erp/employees/{id}/time-off/{reqId}/approve | LEE | DIRECTA |
 | POST /erp/employees/onboard | CREA | DIRECTA |
 
 #### Gobierno
@@ -3630,7 +3634,7 @@ Representa arrendamientos institucionales para administrar términos, pagos y tr
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_38_erp.puml: lease_contracts`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_38_erp.puml` · **DDL:** `SQL/38_erp/02_tables.sql`
 - **Entidad del ORM:** `LeaseContracts` — `src/modules/erp/entities/lease_contracts.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 7 FK salientes · 4 entrantes · 0 operaciones
+- **Resumen:** 16 columnas · 8 índices · 7 FK salientes · 4 entrantes · 1 operaciones
 
 #### Columnas
 
@@ -3690,7 +3694,9 @@ Representa arrendamientos institucionales para administrar términos, pagos y tr
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /erp/lease-contracts/{id}/valuations | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -4116,7 +4122,7 @@ Detalla productos, servicios, cantidades y precios incluidos en órdenes de comp
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_38_erp.puml: purchase_order_items`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_38_erp.puml` · **DDL:** `SQL/38_erp/02_tables.sql`
 - **Entidad del ORM:** `PurchaseOrderItems` — `src/modules/erp/entities/purchase_order_items.entity.ts`
-- **Resumen:** 27 columnas · 18 índices · 17 FK salientes · 6 entrantes · 2 operaciones
+- **Resumen:** 27 columnas · 18 índices · 17 FK salientes · 6 entrantes · 3 operaciones
 
 #### Columnas
 
@@ -4182,8 +4188,8 @@ Detalla productos, servicios, cantidades y precios incluidos en órdenes de comp
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_purchase_order_items_purchase_order_id_line_number` | sí | purchase_order_id, line_number | Garantiza que no se repita la combinación (purchase_order_id, line_number) _(DOCUMENTO)_; Soporta la clave foránea fk_purchase_order_items_purchase_order_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «purchase_order_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_purchase_order_items_purchase_order_id` | no | purchase_order_id | Soporta la clave foránea fk_purchase_order_items_purchase_order_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «purchase_order_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_purchase_order_items_purchase_order_id_line_number` | sí | purchase_order_id, line_number | Garantiza que no se repita la combinación (purchase_order_id, line_number) _(DOCUMENTO)_; Soporta la clave foránea fk_purchase_order_items_purchase_order_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «purchase_order_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_purchase_order_items_purchase_order_id` | no | purchase_order_id | Soporta la clave foránea fk_purchase_order_items_purchase_order_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «purchase_order_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_purchase_order_items_purchase_requisition_item_id` | no | purchase_requisition_item_id | Soporta la clave foránea fk_purchase_order_items_purchase_requisition_item_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_purchase_order_items_contract_line_item_id` | no | contract_line_item_id | Soporta la clave foránea fk_purchase_order_items_contract_line_item_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_purchase_order_items_item_type_concept_id` | no | item_type_concept_id | Soporta la clave foránea fk_purchase_order_items_item_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -4213,6 +4219,7 @@ Detalla productos, servicios, cantidades y precios incluidos en órdenes de comp
 |---|---|---|
 | POST /erp/bills/{billId}/invoice-match-runs | LEE | DIRECTA |
 | POST /erp/purchase-orders | CREA | DIRECTA |
+| POST /erp/purchase-orders/{id}/goods-receipts | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -4237,7 +4244,7 @@ Representa órdenes de compra emitidas a proveedores para adquirir recursos inst
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_38_erp.puml: purchase_orders`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_38_erp.puml` · **DDL:** `SQL/38_erp/02_tables.sql`
 - **Entidad del ORM:** `PurchaseOrders` — `src/modules/erp/entities/purchase_orders.entity.ts`
-- **Resumen:** 20 columnas · 16 índices · 13 FK salientes · 8 entrantes · 5 operaciones
+- **Resumen:** 20 columnas · 16 índices · 13 FK salientes · 8 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -4294,8 +4301,8 @@ Representa órdenes de compra emitidas a proveedores para adquirir recursos inst
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_purchase_orders_tenant_id_purchase_order_number` | sí | tenant_id, purchase_order_number | Garantiza que no se repita la combinación (tenant_id, purchase_order_number) _(DOCUMENTO)_; Soporta la clave foránea fk_purchase_orders_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_purchase_orders_tenant_id` | no | tenant_id | Soporta la clave foránea fk_purchase_orders_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `uq_purchase_orders_tenant_id_purchase_order_number` | sí | tenant_id, purchase_order_number | Garantiza que no se repita la combinación (tenant_id, purchase_order_number) _(DOCUMENTO)_; Soporta la clave foránea fk_purchase_orders_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_purchase_orders_tenant_id` | no | tenant_id | Soporta la clave foránea fk_purchase_orders_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_purchase_orders_supplier_business_partner_id` | no | supplier_business_partner_id | Soporta la clave foránea fk_purchase_orders_supplier_business_partner_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_purchase_orders_contract_id` | no | contract_id | Soporta la clave foránea fk_purchase_orders_contract_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_purchase_orders_purchase_requisition_id` | no | purchase_requisition_id | Soporta la clave foránea fk_purchase_orders_purchase_requisition_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -4321,6 +4328,7 @@ Representa órdenes de compra emitidas a proveedores para adquirir recursos inst
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /billing/bills | LEE | DIRECTA |
 | POST /erp/bills/{billId}/invoice-match-runs | LEE | DIRECTA |
 | POST /erp/purchase-orders | CREA | DIRECTA |
 | POST /erp/purchase-orders/{id}/goods-receipts | ACTUALIZA | POR_TIPO |
@@ -4448,7 +4456,7 @@ Registra solicitudes internas de compra de insumos, equipamiento o servicios.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_38_erp.puml: purchase_requisitions`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_38_erp.puml` · **DDL:** `SQL/38_erp/02_tables.sql`
 - **Entidad del ORM:** `PurchaseRequisitions` — `src/modules/erp/entities/purchase_requisitions.entity.ts`
-- **Resumen:** 15 columnas · 12 índices · 9 FK salientes · 2 entrantes · 0 operaciones
+- **Resumen:** 15 columnas · 12 índices · 9 FK salientes · 2 entrantes · 1 operaciones
 
 #### Columnas
 
@@ -4490,8 +4498,8 @@ Registra solicitudes internas de compra de insumos, equipamiento o servicios.
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_purchase_requisitions_tenant_id_requisition_number` | sí | tenant_id, requisition_number | Garantiza que no se repita la combinación (tenant_id, requisition_number) _(DOCUMENTO)_; Soporta la clave foránea fk_purchase_requisitions_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_purchase_requisitions_tenant_id` | no | tenant_id | Soporta la clave foránea fk_purchase_requisitions_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `uq_purchase_requisitions_tenant_id_requisition_number` | sí | tenant_id, requisition_number | Garantiza que no se repita la combinación (tenant_id, requisition_number) _(DOCUMENTO)_; Soporta la clave foránea fk_purchase_requisitions_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_purchase_requisitions_tenant_id` | no | tenant_id | Soporta la clave foránea fk_purchase_requisitions_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_purchase_requisitions_requester_employee_id` | no | requester_employee_id | Soporta la clave foránea fk_purchase_requisitions_requester_employee_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_purchase_requisitions_requesting_department_id` | no | requesting_department_id | Soporta la clave foránea fk_purchase_requisitions_requesting_department_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_purchase_requisitions_project_id` | no | project_id | Soporta la clave foránea fk_purchase_requisitions_project_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -4511,7 +4519,9 @@ Registra solicitudes internas de compra de insumos, equipamiento o servicios.
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /erp/purchase-orders | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -4941,7 +4951,7 @@ Gestiona solicitudes de licencia y ausencias del personal para coordinar capacid
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_time_off_requests_employee_id` | no | employee_id | Soporta la clave foránea fk_time_off_requests_employee_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «employee_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_time_off_requests_employee_id` | no | employee_id | Soporta la clave foránea fk_time_off_requests_employee_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «employee_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_time_off_requests_leave_type_concept_id` | no | leave_type_concept_id | Soporta la clave foránea fk_time_off_requests_leave_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_time_off_requests_approver_user_id` | no | approver_user_id | Soporta la clave foránea fk_time_off_requests_approver_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_time_off_requests_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_time_off_requests_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |

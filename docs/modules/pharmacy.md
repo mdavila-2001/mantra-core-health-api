@@ -9,7 +9,7 @@
 # Módulo `pharmacy`
 
 **Fuente:** [`src/modules/pharmacy/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/pharmacy/README.md)
-· 3 controllers · 10 services · 12 repositories · 9 entidades · 13 DTO
+· 3 controllers · 13 services · 15 repositories · 12 entidades · 16 DTO
 
 ---
 
@@ -28,13 +28,13 @@ mapeo de productos, retiro de catálogo y proyección al read-model.
   find src/modules/pharmacy -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **3 controllers, 22 rutas HTTP, 9 entidades y 10 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **3 controllers, 28 rutas HTTP, 11 entidades y 11 servicios** (P47, 2026-10-26: +categorías, inventario en lote; las cuentas de rutas incluyen las de lectura agregadas antes). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
 Importa (`DirectoryModule`).
 
-Entidades (`tableName`, 9 de 9 archivos `*.entity.ts`): `pharmacies`, `pharmacy_external_product_mappings`, `pharmacy_integration_connections`, `pharmacy_licenses`, `pharmacy_price_lists`, `pharmacy_product_identifiers`, `pharmacy_product_prices`, `pharmacy_products`, `pharmacy_sites`.
+Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `pharmacies`, `pharmacy_external_product_mappings`, `pharmacy_integration_connections`, `pharmacy_licenses`, `pharmacy_price_lists`, `pharmacy_product_categories`, `pharmacy_product_identifiers`, `pharmacy_product_images`, `pharmacy_product_prices`, `pharmacy_products`, `pharmacy_sites`.
 
 | Método y ruta | Acceso | Controller |
 | --- | --- | --- |
@@ -50,16 +50,21 @@ Entidades (`tableName`, 9 de 9 archivos `*.entity.ts`): `pharmacies`, `pharmacy_
 | `GET /pharmacy/sites/:siteId/prices` | sesión | `pharmacy-read` |
 | `POST /pharmacies` | SECURITY_ADMIN | `pharmacy` |
 | `POST /pharmacies/:pharmacyId/licenses/:licenseId/verify` | SECURITY_ADMIN | `pharmacy` |
-| `POST /pharmacies/:pharmacyId/sites` | SECURITY_ADMIN | `pharmacy` |
-| `POST /pharmacies/:pharmacyId/products` | SECURITY_ADMIN | `pharmacy` |
-| `PATCH /pharmacies/:pharmacyId/products/:productId` | SECURITY_ADMIN | `pharmacy` |
-| `DELETE /pharmacies/:pharmacyId/products/:productId` | SECURITY_ADMIN | `pharmacy` |
-| `POST /pharmacies/:pharmacyId/price-lists` | SECURITY_ADMIN | `pharmacy` |
-| `POST /pharmacies/:pharmacyId/price-lists/:priceListId/prices` | SECURITY_ADMIN | `pharmacy` |
-| `POST /pharmacies/:pharmacyId/price-lists/:priceListId/close` | SECURITY_ADMIN | `pharmacy` |
-| `POST /pharmacies/:pharmacyId/integration-connections` | SECURITY_ADMIN | `pharmacy` |
-| `POST /pharmacies/:pharmacyId/integration-connections/:connId/product-mappings` | SECURITY_ADMIN | `pharmacy` |
-| `POST /pharmacies/:pharmacyId/projections` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/sites` | SECURITY_ADMIN · PHARMACY_STAFF | `pharmacy` |
+| `GET /pharmacies/:pharmacyId/categories` | SECURITY_ADMIN · PHARMACY_STAFF | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/categories` | SECURITY_ADMIN · PHARMACY_STAFF | `pharmacy` |
+| `PATCH /pharmacies/:pharmacyId/categories/:categoryId` | SECURITY_ADMIN · PHARMACY_STAFF | `pharmacy` |
+| `DELETE /pharmacies/:pharmacyId/categories/:categoryId` | SECURITY_ADMIN · PHARMACY_STAFF | `pharmacy` |
+| `PATCH /pharmacies/:pharmacyId/inventory` | SECURITY_ADMIN · PHARMACY_STAFF | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/products` | SECURITY_ADMIN · PHARMACY_STAFF | `pharmacy` |
+| `PATCH /pharmacies/:pharmacyId/products/:productId` | SECURITY_ADMIN · PHARMACY_STAFF | `pharmacy` |
+| `DELETE /pharmacies/:pharmacyId/products/:productId` | SECURITY_ADMIN · PHARMACY_STAFF | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/price-lists` | SECURITY_ADMIN · PHARMACY_STAFF | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/price-lists/:priceListId/prices` | SECURITY_ADMIN · PHARMACY_STAFF | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/price-lists/:priceListId/close` | SECURITY_ADMIN · PHARMACY_STAFF | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/integration-connections` | SECURITY_ADMIN · PHARMACY_STAFF | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/integration-connections/:connId/product-mappings` | SECURITY_ADMIN · PHARMACY_STAFF | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/projections` | SECURITY_ADMIN · PHARMACY_STAFF | `pharmacy` |
 
 ## Endpoints (UC → ruta)
 
@@ -73,7 +78,9 @@ Entidades (`tableName`, 9 de 9 archivos `*.entity.ts`): `pharmacies`, `pharmacy_
 | UC-24-06 | `POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices` | Fijar/versionar precio |
 | UC-24-07 | `POST /pharmacies/{pharmacyId}/integration-connections` | Establecer conexión de integración |
 | UC-24-08 | `POST /pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings` | Mapear producto a código externo |
-| P47 §2 | `PATCH /pharmacies/{pharmacyId}/products/{productId}` | Editar marca, genérico, concentración, empaque y receta de un producto activo (`null` borra el dato) |
+| P47 §2-5 | `PATCH /pharmacies/{pharmacyId}/products/{productId}` | Editar datos descriptivos (no en uno del catálogo universal), precio, categoría, descripción, existencias o «hay / no hay», estado e imágenes (`null` borra lo que lo admite) |
+| P47 D7 | `PATCH /pharmacies/{pharmacyId}/inventory` | Existencias declaradas de varios productos, todo o nada |
+| P47 D8 | `GET\|POST /pharmacies/{pharmacyId}/categories`, `PATCH\|DELETE …/{categoryId}` | Categorías de la vitrina (409 con nombre repetido o con productos vivos) |
 | UC-24-09 | `DELETE /pharmacies/{pharmacyId}/products/{productId}` | Retirar (soft-delete) producto en cascada |
 | UC-24-10 | `POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close` | Cerrar/expirar lista de precios |
 | UC-24-11 | `POST /pharmacies/{pharmacyId}/projections` | Proyectar catálogo y precios a read-model |
@@ -85,7 +92,7 @@ Entidades (`tableName`, 9 de 9 archivos `*.entity.ts`): `pharmacies`, `pharmacy_
 | `GET /pharmacy/pharmacies` | Directorio de farmacias publicadas del tenant activo |
 | `GET /pharmacy/pharmacies/{id}` | Perfil de una farmacia: ficha y sedes con dirección y coordenadas |
 | `GET /pharmacy/sites?search=&lat=&lng=&limit=` | Sedes publicadas, sueltas, con distancia Haversine si hay origen (carril A) |
-| `GET /pharmacy/products?search=&conceptId=&pharmacyId=&limit=` | Búsqueda de productos por texto, medicamento del vademécum o farmacia (`pharmacyId`: carril A) |
+| `GET /pharmacy/products?search=&conceptId=&pharmacyId=&managed=&limit=` | Búsqueda de productos por texto, medicamento del vademécum o farmacia (`pharmacyId`: carril A); con `managed=true` el catálogo entero de una farmacia para su personal (P47) |
 | `GET /pharmacy/sites/{siteId}/prices?product=` | Precios públicos vigentes de una sede, con `requiresPrescription` por producto (carril A) |
 | `GET /pharmacy/catalog-products?search=&source=&atc=&limit=` | Catálogo universal de medicamentos (registros sanitarios oficiales): lo que una farmacia busca para dar de alta un producto |
 
@@ -123,9 +130,44 @@ fusionan**: cada una conserva su id de origen; el ancla común con la receta es 
 - La búsqueda lista también los registros no vigentes (`selectable: false`):
   esconderlos haría que «no está» y «está dado de baja» se vieran igual. No filtra
   por tenant: el registro sanitario es el mismo para todas las farmacias.
-- **No están en la API real:** edición (`PATCH`), precio por lista, imágenes y
-  descripción del producto; sólo existen en el simulador del front (P47), y las
-  dos últimas no tienen columna en el modelo.
+- Precio, categoría, descripción, existencias, estado e imágenes **sí** se
+  aceptan con `catalogProductId`: son de la farmacia, no del registro sanitario.
+
+## Catálogo que administra la farmacia (P47 §3-5, 2026-10-26)
+
+- **Estado:** `PUBLISHED` = `PHARM_PRODUCT_ACTIVE`, `DRAFT` = `PHARM_PRODUCT_DRAFT`,
+  `WITHDRAWN` = `PHARM_PRODUCT_RETIRED`. Toda lectura pública filtra por ACTIVE, así
+  que un borrador no sale en la búsqueda, precios de sede, disponibilidad ni P31.
+  `PATCH {status:'WITHDRAWN'}` retira con la misma cascada que el `DELETE`; un
+  retirado sólo acepta `status` PUBLISHED/DRAFT (si no, 422).
+- **Precio:** se versiona (UC-24-06) en la lista pública de mostrador `CATALOGO` de
+  la farmacia (toda la farmacia, BOB), que se crea con el primer precio bajo un
+  `SELECT … FOR UPDATE` de la farmacia. Llega como número o texto con ≤ 2 decimales
+  y se guarda `numeric` exacto; el mismo importe otra vez no versiona. `null` lo
+  supersede. La lectura sirve `unitPrice` (texto) + `currency`: el de `CATALOGO`, o
+  el menor de sus listas públicas de mostrador vigentes.
+- **Categoría:** `pharmacy_product_categories`, por farmacia, nombre único sin
+  mayúsculas ni tildes (`name_key`). Viaja **por nombre**; uno que no es de la
+  farmacia es 422. La FK del producto es **compuesta** `(pharmacy_id, categoría)`:
+  la base rechaza la de otra farmacia aunque se escriba por SQL. Las seis de
+  partida (mockup del cliente) las siembra el patch v4.2.55 y el alta de farmacia.
+- **Existencias declaradas:** `stock_quantity` (NULL = «sin conteo»),
+  `min_stock_quantity` (NULL = 5) y `out_of_stock_declared`. `inStock` deriva:
+  sin «no tengo» y, con conteo, > 0. No es el ledger de `pharmacy_inventory`, que no
+  se toca. Lo no vendible queda fuera de disponibilidad, precios de sede y del
+  pedido nuevo (`findSellableProductsByIds`). `stock` e `inStock` juntos: 422.
+- **Imágenes:** `pharmacy_product_images`, hasta 3, en orden. Una imagen nueva pasa
+  por `AttachableFileService.assertUsableBy` (viva, de tipo imagen, **subida por
+  quien edita**) y además tiene que ser categoría IMAGE; las que ya tenía se
+  conservan sin repreguntar.
+- **Lectura de gestión:** `GET /pharmacy/products?pharmacyId=&managed=true`, sólo su
+  personal (404 a cualquier otro): todo el catálogo con `status`, `stock`,
+  `minStock` e `imageFileIds`.
+- **Resumen:** números reales; el valor del inventario es Σ existencias × precio de
+  lo publicado con conteo, en centavos enteros; la actividad reciente se lee de
+  `audit.audit_log` (lo que `@Audited` selló con éxito en el tenant).
+- **Pendiente (fuera de P47 §3-5):** carga masiva del lado del servidor (§6),
+  registro sanitario (sin columna), vínculo del genérico tipeado con el vademécum.
 
 ## Entidades
 
@@ -156,8 +198,12 @@ fusionan**: cada una conserva su id de origen; el ancla común con la receta es 
 
 ## Permisos
 
-Todas las operaciones administrativas exigen rol `SECURITY_ADMIN` (guard global
-+ `@Roles`). La cara de lectura (`/pharmacy/*`) no exige rol: son lecturas
+Las operaciones sobre `/pharmacies/:pharmacyId/...` exigen `SECURITY_ADMIN` o
+`PHARMACY_STAFF` (rol de runtime que nace de una membresía activa en un tenant
+`PHARMACY`), y `PharmacyTenantScopeGuard` + `requireManagedPharmacy` acotan al
+personal a su propia farmacia (otra responde 404/403 sin distinguir). El alta de
+la farmacia y la verificación de licencias siguen siendo sólo de
+`SECURITY_ADMIN`. La cara de lectura (`/pharmacy/*`) no exige rol: son lecturas
 publicadas, y el filtro real es la publicación más el aislamiento por tenant
 que aplica el servicio — igual que el directorio de unidades diagnósticas.
 

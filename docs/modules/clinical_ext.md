@@ -9,7 +9,7 @@
 # Módulo `clinical_ext`
 
 **Fuente:** [`src/modules/clinical_ext/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/clinical_ext/README.md)
-· 8 controllers · 8 services · 12 repositories · 13 entidades · 9 DTO
+· 8 controllers · 9 services · 13 repositories · 13 entidades · 9 DTO
 
 ---
 
@@ -36,9 +36,9 @@ Entidades (`tableName`, 13 de 13 archivos `*.entity.ts`): `care_gaps`, `care_tea
 
 | Método y ruta | Acceso | Controller |
 | --- | --- | --- |
-| `POST /care-gaps/recompute` | sesión | `care-gaps` |
-| `PATCH /care-gaps/:id/close` | sesión | `care-gaps` |
-| `POST /patients/:id/immunization-plan/project` | sesión | `care-gaps` |
+| `POST /care-gaps/recompute` | CLINICIAN, PRACTITIONER | `care-gaps` |
+| `PATCH /care-gaps/:id/close` | CLINICIAN, PRACTITIONER | `care-gaps` |
+| `POST /patients/:id/immunization-plan/project` | CLINICIAN, PRACTITIONER | `care-gaps` |
 | `POST /immunization-schedules` | SECURITY_ADMIN | `care-gaps` |
 | `POST /care-teams` | CLINICIAN, PRACTITIONER | `care-teams` |
 | `PATCH /care-teams/:id/members/:memberId/set-responsible` | CLINICIAN, PRACTITIONER | `care-teams` |
@@ -52,7 +52,7 @@ Entidades (`tableName`, 13 de 13 archivos `*.entity.ts`): `care_gaps`, `care_tea
 | `PATCH /clinical-alerts/:id/acknowledge` | CLINICIAN, PRACTITIONER | `clinical-alerts` |
 | `PATCH /clinical-alerts/:id/override` | CLINICIAN, PRACTITIONER | `clinical-alerts` |
 | `POST /order-sets` | SECURITY_ADMIN | `order-sets` |
-| `POST /order-sets/:id/apply` | sesión | `order-sets` |
+| `POST /order-sets/:id/apply` | CLINICIAN, PRACTITIONER | `order-sets` |
 | `GET /prescription-favorites` | sesión | `prescription-favorites` |
 | `POST /prescription-favorites` | sesión | `prescription-favorites` |
 | `DELETE /prescription-favorites/:id` | sesión | `prescription-favorites` |
@@ -84,9 +84,9 @@ Entidades (`tableName`, 13 de 13 archivos `*.entity.ts`): `care_gaps`, `care_tea
 
 | Método y ruta | Acceso | Controller |
 | --- | --- | --- |
-| `POST /care-gaps/recompute` | sesión | `care-gaps` |
-| `PATCH /care-gaps/:id/close` | sesión | `care-gaps` |
-| `POST /patients/:id/immunization-plan/project` | sesión | `care-gaps` |
+| `POST /care-gaps/recompute` | CLINICIAN, PRACTITIONER | `care-gaps` |
+| `PATCH /care-gaps/:id/close` | CLINICIAN, PRACTITIONER | `care-gaps` |
+| `POST /patients/:id/immunization-plan/project` | CLINICIAN, PRACTITIONER | `care-gaps` |
 | `POST /immunization-schedules` | SECURITY_ADMIN | `care-gaps` |
 | `POST /care-teams` | CLINICIAN, PRACTITIONER | `care-teams` |
 | `PATCH /care-teams/:id/members/:memberId/set-responsible` | CLINICIAN, PRACTITIONER | `care-teams` |
@@ -100,7 +100,7 @@ Entidades (`tableName`, 13 de 13 archivos `*.entity.ts`): `care_gaps`, `care_tea
 | `PATCH /clinical-alerts/:id/acknowledge` | CLINICIAN, PRACTITIONER | `clinical-alerts` |
 | `PATCH /clinical-alerts/:id/override` | CLINICIAN, PRACTITIONER | `clinical-alerts` |
 | `POST /order-sets` | SECURITY_ADMIN | `order-sets` |
-| `POST /order-sets/:id/apply` | sesión | `order-sets` |
+| `POST /order-sets/:id/apply` | CLINICIAN, PRACTITIONER | `order-sets` |
 | `GET /prescription-favorites` | sesión | `prescription-favorites` |
 | `POST /prescription-favorites` | sesión | `prescription-favorites` |
 | `DELETE /prescription-favorites/:id` | sesión | `prescription-favorites` |
@@ -114,7 +114,7 @@ Entidades (`tableName`, 13 de 13 archivos `*.entity.ts`): `care_gaps`, `care_tea
 
 ## Autenticación y autorización actuales
 
-`JwtAuthGuard` y `TenantScopeGuard` se aplican globalmente; ninguna ruta de esta unidad tiene `@Public`. Los roles de la tabla son los declarados con `@Roles`. `ClinicalRecordAccessGuard` sólo aparece en las dos rutas CDS indicadas. Un rol clínico, por sí mismo, no verifica la relación del actor con cada paciente. El servicio de encuentros virtuales sí comprueba participación en el encuentro, y favoritos deriva el perfil profesional de la cuenta mediante `ProfileOwnershipService`. Las brechas de autorización por recurso están detalladas en la revisión, en especial CE-01 y AUTHZ-T02.
+`JwtAuthGuard` y `TenantScopeGuard` se aplican globalmente; ninguna ruta de esta unidad tiene `@Public`. Los roles de la tabla son los declarados con `@Roles`. `ClinicalRecordAccessGuard` sólo aparece en las dos rutas CDS indicadas. Un rol clínico, por sí mismo, no verifica la relación del actor con cada paciente: los servicios de equipos, referencias, alertas, brechas y order sets lo comprueban dentro del servicio con `ClinicalReadService` (`assertCanReadHistory` / `assertCanWriteHistory`) después de cargar la fila. Un recurso de otro tenant o de un paciente que el actor no atiende responde igual que uno inexistente: 404, mismo mensaje y `reason`, sin `details`. El tenant sale de `requireTenantId()`; el del cuerpo sólo se contrasta (403 `CLINICAL_EXT_TENANT_SCOPE_REQUIRED`). `PATCH /referrals/:id/respond` sólo lo atiende el destinatario (`targetProfileId` o, sin profesional, `targetTenantId`). El servicio de encuentros virtuales comprueba participación en el encuentro, y favoritos deriva el perfil profesional de la cuenta mediante `ProfileOwnershipService`.
 
 La columna «entrada» nombra el DTO de cuerpo cuando lo hay; `:id` y otros parámetros de ruta usan `ParseUUIDPipe`. Las respuestas son los DTO o entidades retornados por el controlador. En rutas con varios roles, se admite cualquiera de los indicados.
 
@@ -132,14 +132,14 @@ La columna «entrada» nombra el DTO de cuerpo cuando lo hay; `:id` y otros par�
 | `PATCH /clinical-alerts/:id/acknowledge` | `CLINICIAN`, `PRACTITIONER` | — | `ClinicalAlertResponseDto` |
 | `PATCH /clinical-alerts/:id/override` | `CLINICIAN`, `PRACTITIONER` | `OverrideAlertDto` | `ClinicalAlertResponseDto` |
 | `POST /order-sets` | `SECURITY_ADMIN` | `CreateOrderSetDto` | `OrderSetResponseDto` |
-| `POST /order-sets/:id/apply` | sólo guards globales | `ApplyOrderSetDto` | `ApplyOrderSetResponseDto` |
+| `POST /order-sets/:id/apply` | `CLINICIAN`, `PRACTITIONER` | `ApplyOrderSetDto` | `ApplyOrderSetResponseDto` |
 | `POST /referrals` | `CLINICIAN`, `PRACTITIONER` | `CreateReferralDto` | `ReferralResponseDto` |
 | `PATCH /referrals/:id/respond` | `CLINICIAN`, `PRACTITIONER` | `RespondReferralDto` | `StatusResultDto` |
 | `GET /referrals?patientProfileId=` | `CLINICIAN`, `PRACTITIONER` | query `patientProfileId` | `Referrals[]` |
 | `GET /referrals/me` | `PATIENT` | — | `Referrals[]` |
-| `POST /care-gaps/recompute` | sólo guards globales | `RecomputeCareGapsDto` | `RecomputeCareGapsResponseDto` |
-| `PATCH /care-gaps/:id/close` | sólo guards globales | `CloseCareGapDto` | `StatusResultDto` |
-| `POST /patients/:id/immunization-plan/project` | sólo guards globales | `ProjectImmunizationPlanDto` | `ImmunizationPlanResponseDto` |
+| `POST /care-gaps/recompute` | `CLINICIAN`, `PRACTITIONER` | `RecomputeCareGapsDto` | `RecomputeCareGapsResponseDto` |
+| `PATCH /care-gaps/:id/close` | `CLINICIAN`, `PRACTITIONER` | `CloseCareGapDto` | `StatusResultDto` |
+| `POST /patients/:id/immunization-plan/project` | `CLINICIAN`, `PRACTITIONER` | `ProjectImmunizationPlanDto` | `ImmunizationPlanResponseDto` |
 | `POST /immunization-schedules` | `SECURITY_ADMIN` | `CreateImmunizationScheduleDto` | `{ id }` |
 | `POST /virtual-encounters` | `CLINICIAN`, `PRACTITIONER` | `CreateVirtualEncounterDto` | `VirtualEncounterResponseDto` |
 | `PATCH /virtual-encounters/:id/join` | `CLINICIAN`, `PRACTITIONER`, `PATIENT` | — | `VirtualEncounterResponseDto` |
@@ -152,7 +152,7 @@ La columna «entrada» nombra el DTO de cuerpo cuando lo hay; `:id` y otros par�
 
 El schema `clinical_ext` contiene 13 tablas: `care_teams`, `care_team_members`, `cds_rules`, `clinical_alerts`, `drug_interactions`, `order_sets`, `order_set_items`, `referrals`, `care_gaps`, `immunization_schedules`, `virtual_encounters`, `reference_ranges` y `prescription_favorites`. El DDL versionado está en `database/SQL/18_clinical_ext`; las entidades están en `entities/`. Los servicios escriben mediante `EntityManager.transactional` y entregan el manager a repositorios sin estado. Las FK se representan como UUID planos. No se encontró publicación de evento/outbox dentro de los ocho servicios de esta unidad.
 
-Las dependencias externas incluyen perfiles de paciente y profesional, `clinical.encounters`, `clinical.service_requests`, terminología y `ProfileOwnershipService`. La aplicación de order sets crea solicitudes clínicas; la autorización y la consistencia entre paciente y encuentro son pendientes documentados como AUTHZ-T02 en el informe transversal.
+Las dependencias externas incluyen perfiles de paciente y profesional, `clinical.encounters`, `clinical.service_requests`, terminología y `ProfileOwnershipService`. La aplicación de order sets crea solicitudes clínicas: exige escritura sobre el paciente, un encuentro de ese paciente y del tenant activo, y toma el tenant custodio del encuentro.
 
 ## Semántica implementada
 
@@ -160,7 +160,7 @@ Las dependencias externas incluyen perfiles de paciente y profesional, `clinical
 - CDS: `publish` incrementa `version` y reemplaza la lógica en la misma fila. El endpoint llamado `rollback` retira la regla activa; **no restaura** un snapshot previo. La evaluación usa reglas activas y puede generar alertas.
 - Alerta: `active` pasa a `acknowledged` u `overridden`; el override de severidad alta exige motivo.
 - Referencia: el servicio evita duplicados con una lectura previa; `respond` acepta o rechaza sólo desde `requested`. `GET /referrals/me` deriva el perfil de paciente de la cuenta.
-- Brecha: recomputo/proyección buscan una brecha abierta antes de insertar; cierre requiere estado abierto. La proyección calcula `dueDate` desde `birthDate` enviado por el cliente.
+- Brecha: recomputo/proyección buscan una brecha abierta antes de insertar; cierre requiere estado abierto. La proyección calcula `dueDate` desde la fecha de nacimiento del perfil del paciente (fecha civil UTC); un `birthDate` del cuerpo sólo se contrasta y, si difiere, se rechaza con 422 `CARE_GAP_BIRTH_DATE_MISMATCH`. Las altas concurrentes de la misma brecha, referencia o sesión virtual se serializan con un cerrojo consultivo por clave lógica dentro de la transacción; el DDL no declara índices únicos para esas claves.
 - Encuentro virtual: creación para un encuentro, unión de participantes y finalización; el servicio verifica relación del actor con el encuentro.
 - Favorito: listado, creación y borrado vinculados al perfil profesional de la cuenta.
 

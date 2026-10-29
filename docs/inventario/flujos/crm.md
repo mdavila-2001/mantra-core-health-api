@@ -3,7 +3,7 @@
 # Flujos del módulo `crm`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 16 (15 con decisiones propias, 1 sin ellas)
+- **Operaciones:** 16 (14 con decisiones propias, 2 sin ellas)
 - Inventario de endpoints del módulo: [crm](../endpoints/crm.md)
 
 ## Proceso: CRM
@@ -26,18 +26,18 @@ _Fuente: `src/modules/crm/README.md:3`_
 | `ctrl:CrmController` | Operaciones de CrmController que el README no asigna a un caso de uso | POST /crm/accounts | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
 |  |  | GET /crm/accounts/{id}/360 | CRM_ADMIN · CRM_AGENT | BAJO | 3 |
 |  |  | POST /crm/accounts/{id}/team-members | CRM_ADMIN | MEDIO | 3 |
-|  |  | POST /crm/activities | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
-|  |  | POST /crm/cases | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
+|  |  | POST /crm/activities | CRM_ADMIN · CRM_AGENT | MEDIO | 7 |
+|  |  | POST /crm/cases | CRM_ADMIN · CRM_AGENT | MEDIO | 5 |
 |  |  | POST /crm/cases/{id}/comments | CRM_ADMIN · CRM_AGENT | MEDIO | 2 |
-|  |  | POST /crm/cases/{id}/resolve | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
-|  |  | PATCH /crm/cases/{id}/status | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
+|  |  | POST /crm/cases/{id}/resolve | CRM_ADMIN · CRM_AGENT | MEDIO | 2 |
+|  |  | PATCH /crm/cases/{id}/status | CRM_ADMIN · CRM_AGENT | MEDIO | 2 |
 |  |  | PATCH /crm/contacts/{id}/channels/{cid}/opt-in | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
 |  |  | POST /crm/leads | CRM_ADMIN · CRM_AGENT | MEDIO | 1 |
-|  |  | POST /crm/leads/{id}/convert | CRM_ADMIN · CRM_AGENT | MEDIO | 4 |
-|  |  | PATCH /crm/leads/{id}/qualify | CRM_ADMIN · CRM_AGENT | MEDIO | 2 |
+|  |  | POST /crm/leads/{id}/convert | CRM_ADMIN · CRM_AGENT | MEDIO | 6 |
+|  |  | PATCH /crm/leads/{id}/qualify | CRM_ADMIN · CRM_AGENT | BAJO | 1 |
 |  |  | POST /crm/opportunities/{id}/advance-stage | CRM_ADMIN · CRM_AGENT | MEDIO | 4 |
-|  |  | POST /crm/opportunities/{id}/lose | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
-|  |  | POST /crm/opportunities/{id}/win | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
+|  |  | POST /crm/opportunities/{id}/lose | CRM_ADMIN · CRM_AGENT | MEDIO | 2 |
+|  |  | POST /crm/opportunities/{id}/win | CRM_ADMIN · CRM_AGENT | MEDIO | 2 |
 |  |  | POST /crm/partnerships | CRM_ADMIN | MEDIO | 2 |
 
 ### Diagrama — etapas `ctrl:CrmController`
@@ -53,32 +53,34 @@ flowchart LR
   t8[("crm.crm_cases")]:::tabla
   t12[("crm.crm_notes")]:::tabla
   t13[("crm.crm_tasks")]:::tabla
-  t15[("crm.crm_case_status_history")]:::tabla
-  t17[("crm.crm_case_comments")]:::tabla
-  t21[("crm.contact_channel_endpoints")]:::tabla
-  t23[("crm.leads")]:::tabla
-  t25[("crm.opportunities")]:::tabla
-  t26[("crm.opportunity_stage_history")]:::tabla
-  t29[("crm.pipeline_stages")]:::tabla
-  t33[("crm.partnership_agreements")]:::tabla
-  t34[("crm.partnerships")]:::tabla
+  t16[("crm.crm_case_status_history")]:::tabla
+  t18[("crm.crm_case_comments")]:::tabla
+  t22[("crm.contact_channel_endpoints")]:::tabla
+  t24[("crm.leads")]:::tabla
+  t26[("crm.opportunities")]:::tabla
+  t27[("crm.opportunity_stage_history")]:::tabla
+  t28[("crm.pipeline_stages")]:::tabla
+  t29[("crm.pipelines")]:::tabla
+  t35[("crm.partnership_agreements")]:::tabla
+  t36[("crm.partnerships")]:::tabla
+  t14[("+1 tablas más")]
   subgraph s0["ctrl:CrmController · Operaciones de CrmController que el README no asigna a un…"]
     o1["POST /crm/accounts"]:::op
     o6["GET /crm/accounts/{id}/360"]:::op
     o9["POST /crm/accounts/{id}/team-members"]:::op
     o11["POST /crm/activities"]:::op
-    o14["POST /crm/cases"]:::op
-    o16["POST /crm/cases/{id}/comments"]:::op
-    o18["POST /crm/cases/{id}/resolve"]:::op
-    o19["PATCH /crm/cases/{id}/status"]:::op
-    o20["PATCH /crm/contacts/{id}/channels/{cid}/opt-in"]:::op
-    o22["POST /crm/leads"]:::op
-    o24["POST /crm/leads/{id}/convert"]:::op
-    o27["PATCH /crm/leads/{id}/qualify"]:::op
-    o28["POST /crm/opportunities/{id}/advance-stage"]:::op
-    o30["POST /crm/opportunities/{id}/lose"]:::op
-    o31["POST /crm/opportunities/{id}/win"]:::op
-    o32["POST /crm/partnerships"]:::op
+    o15["POST /crm/cases"]:::op
+    o17["POST /crm/cases/{id}/comments"]:::op
+    o19["POST /crm/cases/{id}/resolve"]:::op
+    o20["PATCH /crm/cases/{id}/status"]:::op
+    o21["PATCH /crm/contacts/{id}/channels/{cid}/opt-in"]:::op
+    o23["POST /crm/leads"]:::op
+    o25["POST /crm/leads/{id}/convert"]:::op
+    o30["PATCH /crm/leads/{id}/qualify"]:::op
+    o31["POST /crm/opportunities/{id}/advance-stage"]:::op
+    o32["POST /crm/opportunities/{id}/lose"]:::op
+    o33["POST /crm/opportunities/{id}/win"]:::op
+    o34["POST /crm/partnerships"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -93,54 +95,57 @@ flowchart LR
   o9 -->|"LEE"| t3
   o9 -->|"LEE"| t5
   a2 --> o11
+  o11 -->|"LEE"| t4
+  o11 -->|"LEE"| t5
   o11 -->|"CREA"| t7
+  o11 -->|"LEE"| t8
   o11 -->|"CREA"| t12
   o11 -->|"CREA"| t13
-  a2 --> o14
-  o14 -->|"CREA"| t15
-  o14 -->|"CREA"| t8
-  o14 -->|"LEE"| t8
-  a2 --> o16
-  o16 -->|"CREA"| t17
-  o16 -->|"LEE"| t8
-  a2 --> o18
-  o18 -->|"CREA"| t15
-  o18 -->|"ACTUALIZA"| t8
-  o18 -->|"LEE"| t8
+  o11 -.-> t14
+  a2 --> o15
+  o15 -->|"LEE"| t4
+  o15 -->|"LEE"| t5
+  o15 -->|"CREA"| t16
+  o15 -->|"CREA"| t8
+  o15 -->|"LEE"| t8
+  a2 --> o17
+  o17 -->|"CREA"| t18
+  o17 -->|"LEE"| t8
   a2 --> o19
-  o19 -->|"CREA"| t15
-  o19 -->|"ACTUALIZA"| t8
+  o19 -->|"CREA"| t16
   o19 -->|"LEE"| t8
   a2 --> o20
-  o20 -->|"ACTUALIZA"| t21
-  o20 -->|"LEE"| t21
-  o20 -->|"LEE"| t4
-  a2 --> o22
-  o22 -->|"CREA"| t23
-  a2 --> o24
-  o24 -->|"ACTUALIZA"| t23
-  o24 -->|"LEE"| t23
-  o24 -->|"CREA"| t25
-  o24 -->|"CREA"| t26
-  a2 --> o27
-  o27 -->|"ACTUALIZA"| t23
-  o27 -->|"LEE"| t23
-  a2 --> o28
-  o28 -->|"ACTUALIZA"| t25
-  o28 -->|"LEE"| t25
-  o28 -->|"CREA"| t26
-  o28 -->|"LEE"| t29
+  o20 -->|"CREA"| t16
+  o20 -->|"LEE"| t8
+  a2 --> o21
+  o21 -->|"ACTUALIZA"| t22
+  o21 -->|"LEE"| t22
+  o21 -->|"LEE"| t4
+  a2 --> o23
+  o23 -->|"CREA"| t24
+  a2 --> o25
+  o25 -->|"LEE"| t5
+  o25 -->|"LEE"| t24
+  o25 -->|"CREA"| t26
+  o25 -->|"CREA"| t27
+  o25 -->|"LEE"| t28
+  o25 -->|"LEE"| t29
   a2 --> o30
-  o30 -->|"ACTUALIZA"| t25
-  o30 -->|"LEE"| t25
-  o30 -->|"CREA"| t26
+  o30 -->|"LEE"| t24
   a2 --> o31
-  o31 -->|"ACTUALIZA"| t25
-  o31 -->|"LEE"| t25
-  o31 -->|"CREA"| t26
-  a10 --> o32
-  o32 -->|"CREA"| t33
-  o32 -->|"CREA"| t34
+  o31 -->|"LEE"| t26
+  o31 -->|"CREA"| t27
+  o31 -->|"LEE"| t28
+  o31 -->|"LEE"| t29
+  a2 --> o32
+  o32 -->|"LEE"| t26
+  o32 -->|"CREA"| t27
+  a2 --> o33
+  o33 -->|"LEE"| t26
+  o33 -->|"CREA"| t27
+  a10 --> o34
+  o34 -->|"CREA"| t35
+  o34 -->|"CREA"| t36
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -199,53 +204,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 2. GET /crm/accounts/{id}/360
-
-Vista 360 de la cuenta
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Cuenta no encontrada |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
-  n1 --> n2
-  n3["Llama a CrmServiceService.getAccount360"]:::llamada
-  n2 --> n3
-  n4["Llama a CrmSalesRepository.findAccountById"]:::llamada
-  n3 --> n4
-  n5[("LEE crm.crm_accounts")]:::efecto
-  n4 --> n5
-  n6{"!account"}:::decision
-  n5 --> n6
-  n7(["404 NOT_FOUND Cuenta no encontrada"]):::error
-  n6 -->|"sí"| n7
-  n8["Llama a CrmServiceRepository.findActivitiesByAccount"]:::llamada
-  n6 -->|"no"| n8
-  n9[("LEE crm.crm_activities")]:::efecto
-  n8 --> n9
-  n10["Llama a CrmServiceRepository.findCasesByAccount"]:::llamada
-  n9 --> n10
-  n11[("LEE crm.crm_cases")]:::efecto
-  n10 --> n11
-  n12(("200 Responde con éxito")):::ok
-  n11 --> n12
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 3. POST /crm/accounts/{id}/team-members
+#### 2. POST /crm/accounts/{id}/team-members
 
 Sumar un usuario al equipo de la cuenta
 
@@ -255,7 +214,6 @@ Sumar un usuario al equipo de la cuenta
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Cuenta no encontrada |
 | 409 | `CONFLICT` | ConflictException: El usuario ya pertenece al equipo de la cuenta |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -272,24 +230,20 @@ flowchart TD
   n4 --> n5
   n6[("LEE crm.crm_accounts")]:::efecto
   n5 --> n6
-  n7{"!account"}:::decision
+  n7["Llama a CrmSalesRepository.findTeamMember"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Cuenta no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a CrmSalesRepository.findTeamMember"]:::llamada
-  n7 -->|"no"| n9
-  n10[("LEE crm.account_team_members")]:::efecto
-  n9 --> n10
-  n11{"existing"}:::decision
-  n10 --> n11
-  n12(["409 CONFLICT El usuario ya pertenece al equipo de la cuenta"]):::error
-  n11 -->|"sí"| n12
-  n13["Llama a CrmSalesRepository.createTeamMember"]:::llamada
-  n11 -->|"no"| n13
-  n14[("CREA crm.account_team_members")]:::efecto
-  n13 --> n14
-  n15(("201 Responde con éxito")):::ok
-  n14 --> n15
+  n8[("LEE crm.account_team_members")]:::efecto
+  n7 --> n8
+  n9{"existing"}:::decision
+  n8 --> n9
+  n10(["409 CONFLICT El usuario ya pertenece al equipo de la cuenta"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a CrmSalesRepository.createTeamMember"]:::llamada
+  n9 -->|"no"| n11
+  n12[("CREA crm.account_team_members")]:::efecto
+  n11 --> n12
+  n13(("201 Responde con éxito")):::ok
+  n12 --> n13
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -298,7 +252,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. POST /crm/activities
+#### 3. POST /crm/activities
 
 Registrar una actividad y su subtipo
 
@@ -320,30 +274,58 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a CrmServiceRepository.createActivity"]:::llamada
+  n5["Llama a CrmServiceService.assertActivityReferences"]:::llamada
   n4 --> n5
-  n6[("CREA crm.crm_activities")]:::efecto
+  n6{"dto.crmAccountId"}:::decision
   n5 --> n6
-  n7{"dto.activityType === 'TASK'"}:::decision
-  n6 --> n7
-  n8["Llama a CrmServiceRepository.createTask"]:::llamada
-  n7 -->|"sí"| n8
-  n9[("CREA crm.crm_tasks")]:::efecto
+  n7["Llama a CrmSalesRepository.findAccountById"]:::llamada
+  n6 -->|"sí"| n7
+  n8[("LEE crm.crm_accounts")]:::efecto
+  n7 --> n8
+  n9{"dto.contactId"}:::decision
   n8 --> n9
-  n10{"dto.activityType === 'NOTE'"}:::decision
-  n7 -->|"no"| n10
-  n11{"!dto.bodyText"}:::decision
-  n10 -->|"sí"| n11
-  n12(["422 PRECONDITION_FAILED Una nota requiere `bodyText`"]):::error
-  n11 -->|"sí"| n12
-  n13["Llama a CrmServiceRepository.createNote"]:::llamada
-  n11 -->|"no"| n13
-  n14[("CREA crm.crm_notes")]:::efecto
+  n6 -->|"no"| n9
+  n10["Llama a CrmSalesRepository.findContactById"]:::llamada
+  n9 -->|"sí"| n10
+  n11[("LEE crm.contacts")]:::efecto
+  n10 --> n11
+  n12["Llama a CrmSalesRepository.findAccountById"]:::llamada
+  n11 --> n12
+  n9 -->|"no"| n12
+  n13[("LEE crm.crm_accounts")]:::efecto
+  n12 --> n13
+  n14["Llama a CrmSalesRepository.findOpportunityById"]:::llamada
   n13 --> n14
-  n15(("201 Responde con éxito")):::ok
-  n9 --> n15
+  n15[("LEE crm.opportunities")]:::efecto
   n14 --> n15
-  n10 -->|"no"| n15
+  n16["Llama a CrmServiceRepository.findCaseById"]:::llamada
+  n15 --> n16
+  n17[("LEE crm.crm_cases")]:::efecto
+  n16 --> n17
+  n18["Llama a CrmServiceRepository.createActivity"]:::llamada
+  n17 --> n18
+  n19[("CREA crm.crm_activities")]:::efecto
+  n18 --> n19
+  n20{"dto.activityType === 'TASK'"}:::decision
+  n19 --> n20
+  n21["Llama a CrmServiceRepository.createTask"]:::llamada
+  n20 -->|"sí"| n21
+  n22[("CREA crm.crm_tasks")]:::efecto
+  n21 --> n22
+  n23{"dto.activityType === 'NOTE'"}:::decision
+  n20 -->|"no"| n23
+  n24{"!dto.bodyText"}:::decision
+  n23 -->|"sí"| n24
+  n25(["422 PRECONDITION_FAILED Una nota requiere `bodyText`"]):::error
+  n24 -->|"sí"| n25
+  n26["Llama a CrmServiceRepository.createNote"]:::llamada
+  n24 -->|"no"| n26
+  n27[("CREA crm.crm_notes")]:::efecto
+  n26 --> n27
+  n28(("201 Responde con éxito")):::ok
+  n22 --> n28
+  n27 --> n28
+  n23 -->|"no"| n28
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -352,7 +334,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /crm/cases
+#### 4. POST /crm/cases
 
 Abrir un caso de servicio
 
@@ -382,16 +364,30 @@ flowchart TD
   n6 -->|"sí"| n7
   n8["Transacción: transactional(…)"]:::transaccion
   n6 -->|"no"| n8
-  n9["Llama a CrmServiceRepository.createCase"]:::llamada
+  n9{"dto.crmAccountId"}:::decision
   n8 --> n9
-  n10[("CREA crm.crm_cases")]:::efecto
-  n9 --> n10
-  n11["Llama a CrmServiceRepository.recordCaseStatusChange"]:::llamada
+  n10["Llama a CrmSalesRepository.findAccountById"]:::llamada
+  n9 -->|"sí"| n10
+  n11[("LEE crm.crm_accounts")]:::efecto
   n10 --> n11
-  n12[("CREA crm.crm_case_status_history")]:::efecto
+  n12{"dto.primaryContactId"}:::decision
   n11 --> n12
-  n13(("201 Responde con éxito")):::ok
-  n12 --> n13
+  n9 -->|"no"| n12
+  n13["Llama a CrmSalesRepository.findContactById"]:::llamada
+  n12 -->|"sí"| n13
+  n14[("LEE crm.contacts")]:::efecto
+  n13 --> n14
+  n15["Llama a CrmServiceRepository.createCase"]:::llamada
+  n14 --> n15
+  n12 -->|"no"| n15
+  n16[("CREA crm.crm_cases")]:::efecto
+  n15 --> n16
+  n17["Llama a CrmServiceRepository.recordCaseStatusChange"]:::llamada
+  n16 --> n17
+  n18[("CREA crm.crm_case_status_history")]:::efecto
+  n17 --> n18
+  n19(("201 Responde con éxito")):::ok
+  n18 --> n19
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -400,7 +396,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /crm/cases/{id}/comments
+#### 5. POST /crm/cases/{id}/comments
 
 Comentar el caso
 
@@ -410,7 +406,6 @@ Comentar el caso
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se comenta un caso cerrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -427,20 +422,16 @@ flowchart TD
   n4 --> n5
   n6[("LEE crm.crm_cases")]:::efecto
   n5 --> n6
-  n7{"!serviceCase"}:::decision
+  n7{"serviceCase.statusConceptId === CONCEPTS.CASE_CLOSED"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Caso no encontrado"]):::error
+  n8(["422 PRECONDITION_FAILED No se comenta un caso cerrado"]):::error
   n7 -->|"sí"| n8
-  n9{"serviceCase.statusConceptId === CONCEPTS.CASE_CLOSED"}:::decision
+  n9["Llama a CrmServiceRepository.createCaseComment"]:::llamada
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED No se comenta un caso cerrado"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a CrmServiceRepository.createCaseComment"]:::llamada
-  n9 -->|"no"| n11
-  n12[("CREA crm.crm_case_comments")]:::efecto
-  n11 --> n12
-  n13(("201 Responde con éxito")):::ok
-  n12 --> n13
+  n10[("CREA crm.crm_case_comments")]:::efecto
+  n9 --> n10
+  n11(("201 Responde con éxito")):::ok
+  n10 --> n11
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -449,7 +440,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /crm/cases/{id}/resolve
+#### 6. POST /crm/cases/{id}/resolve
 
 Resolver el caso
 
@@ -459,7 +450,6 @@ Resolver el caso
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso no encontrado |
 | 409 | `CONFLICT` | ConflictException: Un caso cerrado no se reabre por esta vía |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso ya está en ese estado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -477,31 +467,20 @@ flowchart TD
   n4 --> n5
   n6[("LEE crm.crm_cases")]:::efecto
   n5 --> n6
-  n7{"!serviceCase"}:::decision
+  n7{"serviceCase.statusConceptId === target"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Caso no encontrado"]):::error
+  n8(["422 PRECONDITION_FAILED El caso ya está en ese estado"]):::error
   n7 -->|"sí"| n8
-  n9{"serviceCase.statusConceptId === target"}:::decision
+  n9{"serviceCase.statusConceptId === CONCEPTS.CASE_CLOSED"}:::decision
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El caso ya está en ese estado"]):::error
+  n10(["409 CONFLICT Un caso cerrado no se reabre por esta vía"]):::error
   n9 -->|"sí"| n10
-  n11{"serviceCase.statusConceptId === CONCEPTS.CASE_CLOSED"}:::decision
+  n11["Llama a CrmServiceRepository.recordCaseStatusChange"]:::llamada
   n9 -->|"no"| n11
-  n12(["409 CONFLICT Un caso cerrado no se reabre por esta vía"]):::error
-  n11 -->|"sí"| n12
-  n13[("ACTUALIZA crm.crm_cases")]:::efecto
-  n11 -->|"no"| n13
-  n14{"CLOSING_STATES.includes(target)"}:::decision
-  n13 --> n14
-  n15[("ACTUALIZA crm.crm_cases")]:::efecto
-  n14 -->|"sí"| n15
-  n16["Llama a CrmServiceRepository.recordCaseStatusChange"]:::llamada
-  n15 --> n16
-  n14 -->|"no"| n16
-  n17[("CREA crm.crm_case_status_history")]:::efecto
-  n16 --> n17
-  n18(("200 Responde con éxito")):::ok
-  n17 --> n18
+  n12[("CREA crm.crm_case_status_history")]:::efecto
+  n11 --> n12
+  n13(("200 Responde con éxito")):::ok
+  n12 --> n13
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -510,7 +489,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. PATCH /crm/cases/{id}/status
+#### 7. PATCH /crm/cases/{id}/status
 
 Transicionar el estado del caso
 
@@ -520,7 +499,6 @@ Transicionar el estado del caso
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso no encontrado |
 | 409 | `CONFLICT` | ConflictException: Un caso cerrado no se reabre por esta vía |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso ya está en ese estado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -538,31 +516,20 @@ flowchart TD
   n4 --> n5
   n6[("LEE crm.crm_cases")]:::efecto
   n5 --> n6
-  n7{"!serviceCase"}:::decision
+  n7{"serviceCase.statusConceptId === target"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Caso no encontrado"]):::error
+  n8(["422 PRECONDITION_FAILED El caso ya está en ese estado"]):::error
   n7 -->|"sí"| n8
-  n9{"serviceCase.statusConceptId === target"}:::decision
+  n9{"serviceCase.statusConceptId === CONCEPTS.CASE_CLOSED"}:::decision
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El caso ya está en ese estado"]):::error
+  n10(["409 CONFLICT Un caso cerrado no se reabre por esta vía"]):::error
   n9 -->|"sí"| n10
-  n11{"serviceCase.statusConceptId === CONCEPTS.CASE_CLOSED"}:::decision
+  n11["Llama a CrmServiceRepository.recordCaseStatusChange"]:::llamada
   n9 -->|"no"| n11
-  n12(["409 CONFLICT Un caso cerrado no se reabre por esta vía"]):::error
-  n11 -->|"sí"| n12
-  n13[("ACTUALIZA crm.crm_cases")]:::efecto
-  n11 -->|"no"| n13
-  n14{"CLOSING_STATES.includes(target)"}:::decision
-  n13 --> n14
-  n15[("ACTUALIZA crm.crm_cases")]:::efecto
-  n14 -->|"sí"| n15
-  n16["Llama a CrmServiceRepository.recordCaseStatusChange"]:::llamada
-  n15 --> n16
-  n14 -->|"no"| n16
-  n17[("CREA crm.crm_case_status_history")]:::efecto
-  n16 --> n17
-  n18(("200 Responde con éxito")):::ok
-  n17 --> n18
+  n12[("CREA crm.crm_case_status_history")]:::efecto
+  n11 --> n12
+  n13(("200 Responde con éxito")):::ok
+  n12 --> n13
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -571,7 +538,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. PATCH /crm/contacts/{id}/channels/{cid}/opt-in
+#### 8. PATCH /crm/contacts/{id}/channels/{cid}/opt-in
 
 Registrar el consentimiento del canal de contacto
 
@@ -581,7 +548,6 @@ Registrar el consentimiento del canal de contacto
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Contacto no encontrado; ResourceNotFoundException: Canal de contacto no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El canal no pertenece a ese contacto |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -598,26 +564,34 @@ flowchart TD
   n4 --> n5
   n6[("LEE crm.contacts")]:::efecto
   n5 --> n6
-  n7{"!contact"}:::decision
+  n7["Llama a CrmSalesRepository.findChannelEndpointForUpdate"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Contacto no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a CrmSalesRepository.findChannelEndpointForUpdate"]:::llamada
-  n7 -->|"no"| n9
-  n10[("LEE crm.contact_channel_endpoints")]:::efecto
-  n9 --> n10
-  n11{"!endpoint"}:::decision
-  n10 --> n11
-  n12(["404 NOT_FOUND Canal de contacto no encontrado"]):::error
+  n8[("LEE crm.contact_channel_endpoints")]:::efecto
+  n7 --> n8
+  n9{"!endpoint"}:::decision
+  n8 --> n9
+  n10(["↩ (relanza el error capturado)"]):::error
+  n9 -->|"sí"| n10
+  n11{"endpoint.tenantId && endpoint.tenantId !== tenantId"}:::decision
+  n9 -->|"no"| n11
+  n12(["↩ (relanza el error capturado)"]):::error
   n11 -->|"sí"| n12
   n13{"endpoint.contactId !== contactId"}:::decision
   n11 -->|"no"| n13
-  n14(["422 PRECONDITION_FAILED El canal no pertenece a ese contacto"]):::error
+  n14["Llama a CrmSalesRepository.findContactById"]:::llamada
   n13 -->|"sí"| n14
-  n15[("ACTUALIZA crm.contact_channel_endpoints")]:::efecto
-  n13 -->|"no"| n15
-  n16(("200 Responde con éxito")):::ok
+  n15[("LEE crm.contacts")]:::efecto
+  n14 --> n15
+  n16{"!owner"}:::decision
   n15 --> n16
+  n17(["↩ (relanza el error capturado)"]):::error
+  n16 -->|"sí"| n17
+  n18(["422 PRECONDITION_FAILED El canal no pertenece a ese contacto"]):::error
+  n16 -->|"no"| n18
+  n19[("ACTUALIZA crm.contact_channel_endpoints")]:::efecto
+  n13 -->|"no"| n19
+  n20(("200 Responde con éxito")):::ok
+  n19 --> n20
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -626,7 +600,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /crm/leads/{id}/convert
+#### 9. POST /crm/leads/{id}/convert
 
 Convertir el lead en oportunidad
 
@@ -636,7 +610,6 @@ Convertir el lead en oportunidad
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Lead no encontrado |
 | 409 | `CONFLICT` | ConflictException: El lead ya fue convertido |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se convierte un lead calificado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -654,30 +627,47 @@ flowchart TD
   n4 --> n5
   n6[("LEE crm.leads")]:::efecto
   n5 --> n6
-  n7{"!lead"}:::decision
+  n7{"lead.leadStatusConceptId === CONCEPTS.LEAD_CONVERTED"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Lead no encontrado"]):::error
+  n8(["409 CONFLICT El lead ya fue convertido"]):::error
   n7 -->|"sí"| n8
-  n9{"lead.leadStatusConceptId === CONCEPTS.LEAD_CONVERTED"}:::decision
+  n9{"lead.leadStatusConceptId !== CONCEPTS.LEAD_QUALIFIED"}:::decision
   n7 -->|"no"| n9
-  n10(["409 CONFLICT El lead ya fue convertido"]):::error
+  n10(["422 PRECONDITION_FAILED Solo se convierte un lead calificado"]):::error
   n9 -->|"sí"| n10
-  n11{"lead.leadStatusConceptId !== CONCEPTS.LEAD_QUALIFIED"}:::decision
+  n11["Llama a CrmSalesRepository.findPipelineById"]:::llamada
   n9 -->|"no"| n11
-  n12(["422 PRECONDITION_FAILED Solo se convierte un lead calificado"]):::error
-  n11 -->|"sí"| n12
-  n13["Llama a CrmSalesRepository.createOpportunity"]:::llamada
-  n11 -->|"no"| n13
-  n14[("CREA crm.opportunities")]:::efecto
+  n12[("LEE crm.pipelines")]:::efecto
+  n11 --> n12
+  n13["Llama a CrmSalesRepository.findStageById"]:::llamada
+  n12 --> n13
+  n14[("LEE crm.pipeline_stages · LEE crm.pipelines")]:::efecto
   n13 --> n14
-  n15[("ACTUALIZA crm.leads · ACTUALIZA crm.leads · ACTUALIZA crm.leads")]:::efecto
+  n15{"!stage"}:::decision
   n14 --> n15
-  n16["Llama a CrmSalesRepository.recordStageChange"]:::llamada
-  n15 --> n16
-  n17[("CREA crm.opportunity_stage_history")]:::efecto
-  n16 --> n17
-  n18(("201 Responde con éxito")):::ok
-  n17 --> n18
+  n16(["↩ (relanza el error capturado)"]):::error
+  n15 -->|"sí"| n16
+  n17{"stage.pipelineId !== dto.pipelineId"}:::decision
+  n15 -->|"no"| n17
+  n18(["↩ (relanza el error capturado)"]):::error
+  n17 -->|"sí"| n18
+  n19{"dto.crmAccountId"}:::decision
+  n17 -->|"no"| n19
+  n20["Llama a CrmSalesRepository.findAccountById"]:::llamada
+  n19 -->|"sí"| n20
+  n21[("LEE crm.crm_accounts")]:::efecto
+  n20 --> n21
+  n22["Llama a CrmSalesRepository.createOpportunity"]:::llamada
+  n21 --> n22
+  n19 -->|"no"| n22
+  n23[("CREA crm.opportunities")]:::efecto
+  n22 --> n23
+  n24["Llama a CrmSalesRepository.recordStageChange"]:::llamada
+  n23 --> n24
+  n25[("CREA crm.opportunity_stage_history")]:::efecto
+  n24 --> n25
+  n26(("201 Responde con éxito")):::ok
+  n25 --> n26
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -686,7 +676,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. PATCH /crm/leads/{id}/qualify
+#### 10. PATCH /crm/leads/{id}/qualify
 
 Calificar o descartar el lead
 
@@ -696,7 +686,6 @@ Calificar o descartar el lead
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Lead no encontrado |
 | 409 | `CONFLICT` | ConflictException: El lead ya fue convertido |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -713,18 +702,12 @@ flowchart TD
   n4 --> n5
   n6[("LEE crm.leads")]:::efecto
   n5 --> n6
-  n7{"!lead"}:::decision
+  n7{"lead.leadStatusConceptId === CONCEPTS.LEAD_CONVERTED"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Lead no encontrado"]):::error
+  n8(["409 CONFLICT El lead ya fue convertido"]):::error
   n7 -->|"sí"| n8
-  n9{"lead.leadStatusConceptId === CONCEPTS.LEAD_CONVERTED"}:::decision
+  n9(("200 Responde con éxito")):::ok
   n7 -->|"no"| n9
-  n10(["409 CONFLICT El lead ya fue convertido"]):::error
-  n9 -->|"sí"| n10
-  n11[("ACTUALIZA crm.leads · ACTUALIZA crm.leads")]:::efecto
-  n9 -->|"no"| n11
-  n12(("200 Responde con éxito")):::ok
-  n11 --> n12
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -733,7 +716,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /crm/opportunities/{id}/advance-stage
+#### 11. POST /crm/opportunities/{id}/advance-stage
 
 Avanzar la oportunidad de etapa
 
@@ -743,7 +726,6 @@ Avanzar la oportunidad de etapa
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Oportunidad no encontrada; ResourceNotFoundException: Etapa no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La oportunidad ya está cerrada; PreconditionFailedException: La oportunidad ya está en esa etapa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -760,39 +742,32 @@ flowchart TD
   n4 --> n5
   n6[("LEE crm.opportunities")]:::efecto
   n5 --> n6
-  n7{"!opportunity"}:::decision
+  n7{"opportunity.statusConceptId !== CONCEPTS.OPPORTUNITY_OPEN"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Oportunidad no encontrada"]):::error
+  n8(["422 PRECONDITION_FAILED La oportunidad ya está cerrada"]):::error
   n7 -->|"sí"| n8
-  n9{"opportunity.statusConceptId !== CONCEPTS.OPPORTUNITY_OPEN"}:::decision
+  n9{"opportunity.stageId === dto.toStageId"}:::decision
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La oportunidad ya está cerrada"]):::error
+  n10(["422 PRECONDITION_FAILED La oportunidad ya está en esa etapa"]):::error
   n9 -->|"sí"| n10
-  n11{"opportunity.stageId === dto.toStageId"}:::decision
+  n11["Llama a CrmSalesRepository.findStageById"]:::llamada
   n9 -->|"no"| n11
-  n12(["422 PRECONDITION_FAILED La oportunidad ya está en esa etapa"]):::error
-  n11 -->|"sí"| n12
-  n13["Llama a CrmSalesRepository.findStageById"]:::llamada
-  n11 -->|"no"| n13
-  n14[("LEE crm.pipeline_stages")]:::efecto
-  n13 --> n14
-  n15{"!stage"}:::decision
-  n14 --> n15
-  n16(["404 NOT_FOUND Etapa no encontrada"]):::error
+  n12[("LEE crm.pipeline_stages · LEE crm.pipelines")]:::efecto
+  n11 --> n12
+  n13{"!stage"}:::decision
+  n12 --> n13
+  n14(["↩ (relanza el error capturado)"]):::error
+  n13 -->|"sí"| n14
+  n15{"stage.pipelineId !== opportunity.pipelineId"}:::decision
+  n13 -->|"no"| n15
+  n16(["↩ (relanza el error capturado)"]):::error
   n15 -->|"sí"| n16
-  n17[("ACTUALIZA crm.opportunities")]:::efecto
+  n17["Llama a CrmSalesRepository.recordStageChange"]:::llamada
   n15 -->|"no"| n17
-  n18{"stage.probabilityPercent !== undefined"}:::decision
+  n18[("CREA crm.opportunity_stage_history")]:::efecto
   n17 --> n18
-  n19[("ACTUALIZA crm.opportunities")]:::efecto
-  n18 -->|"sí"| n19
-  n20["Llama a CrmSalesRepository.recordStageChange"]:::llamada
-  n19 --> n20
-  n18 -->|"no"| n20
-  n21[("CREA crm.opportunity_stage_history")]:::efecto
-  n20 --> n21
-  n22(("200 Responde con éxito")):::ok
-  n21 --> n22
+  n19(("200 Responde con éxito")):::ok
+  n18 --> n19
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -801,7 +776,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /crm/opportunities/{id}/lose
+#### 12. POST /crm/opportunities/{id}/lose
 
 Marcar la oportunidad como perdida con su motivo
 
@@ -811,7 +786,6 @@ Marcar la oportunidad como perdida con su motivo
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Oportunidad no encontrada |
 | 409 | `CONFLICT` | ConflictException: La oportunidad ya está cerrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -830,32 +804,16 @@ flowchart TD
   n5 --> n6
   n7[("LEE crm.opportunities")]:::efecto
   n6 --> n7
-  n8{"!opportunity"}:::decision
+  n8{"opportunity.statusConceptId !== CONCEPTS.OPPORTUNITY_OPEN"}:::decision
   n7 --> n8
-  n9(["404 NOT_FOUND Oportunidad no encontrada"]):::error
+  n9(["409 CONFLICT La oportunidad ya está cerrada"]):::error
   n8 -->|"sí"| n9
-  n10{"opportunity.statusConceptId !== CONCEPTS.OPPORTUNITY_OPEN"}:::decision
+  n10["Llama a CrmSalesRepository.recordStageChange"]:::llamada
   n8 -->|"no"| n10
-  n11(["409 CONFLICT La oportunidad ya está cerrada"]):::error
-  n10 -->|"sí"| n11
-  n12[("ACTUALIZA crm.opportunities · ACTUALIZA crm.opportunities")]:::efecto
-  n10 -->|"no"| n12
-  n13{"won"}:::decision
-  n12 --> n13
-  n14[("ACTUALIZA crm.opportunities")]:::efecto
-  n13 -->|"sí"| n14
-  n15{"lostReasonConceptId"}:::decision
-  n14 --> n15
-  n13 -->|"no"| n15
-  n16[("ACTUALIZA crm.opportunities")]:::efecto
-  n15 -->|"sí"| n16
-  n17["Llama a CrmSalesRepository.recordStageChange"]:::llamada
-  n16 --> n17
-  n15 -->|"no"| n17
-  n18[("CREA crm.opportunity_stage_history")]:::efecto
-  n17 --> n18
-  n19(("200 Responde con éxito")):::ok
-  n18 --> n19
+  n11[("CREA crm.opportunity_stage_history")]:::efecto
+  n10 --> n11
+  n12(("200 Responde con éxito")):::ok
+  n11 --> n12
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -864,7 +822,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. POST /crm/opportunities/{id}/win
+#### 13. POST /crm/opportunities/{id}/win
 
 Marcar la oportunidad como ganada
 
@@ -874,7 +832,6 @@ Marcar la oportunidad como ganada
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Oportunidad no encontrada |
 | 409 | `CONFLICT` | ConflictException: La oportunidad ya está cerrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -893,32 +850,16 @@ flowchart TD
   n5 --> n6
   n7[("LEE crm.opportunities")]:::efecto
   n6 --> n7
-  n8{"!opportunity"}:::decision
+  n8{"opportunity.statusConceptId !== CONCEPTS.OPPORTUNITY_OPEN"}:::decision
   n7 --> n8
-  n9(["404 NOT_FOUND Oportunidad no encontrada"]):::error
+  n9(["409 CONFLICT La oportunidad ya está cerrada"]):::error
   n8 -->|"sí"| n9
-  n10{"opportunity.statusConceptId !== CONCEPTS.OPPORTUNITY_OPEN"}:::decision
+  n10["Llama a CrmSalesRepository.recordStageChange"]:::llamada
   n8 -->|"no"| n10
-  n11(["409 CONFLICT La oportunidad ya está cerrada"]):::error
-  n10 -->|"sí"| n11
-  n12[("ACTUALIZA crm.opportunities · ACTUALIZA crm.opportunities")]:::efecto
-  n10 -->|"no"| n12
-  n13{"won"}:::decision
-  n12 --> n13
-  n14[("ACTUALIZA crm.opportunities")]:::efecto
-  n13 -->|"sí"| n14
-  n15{"lostReasonConceptId"}:::decision
-  n14 --> n15
-  n13 -->|"no"| n15
-  n16[("ACTUALIZA crm.opportunities")]:::efecto
-  n15 -->|"sí"| n16
-  n17["Llama a CrmSalesRepository.recordStageChange"]:::llamada
-  n16 --> n17
-  n15 -->|"no"| n17
-  n18[("CREA crm.opportunity_stage_history")]:::efecto
-  n17 --> n18
-  n19(("200 Responde con éxito")):::ok
-  n18 --> n19
+  n11[("CREA crm.opportunity_stage_history")]:::efecto
+  n10 --> n11
+  n12(("200 Responde con éxito")):::ok
+  n11 --> n12
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -927,7 +868,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. POST /crm/partnerships
+#### 14. POST /crm/partnerships
 
 Registrar una alianza y su acuerdo marco
 
@@ -975,4 +916,5 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
+| GET /crm/accounts/{id}/360 | 200, 400, 401, 403, 429 | 3 |
 | POST /crm/leads | 201, 400, 401, 403, 429 | 1 |

@@ -256,6 +256,10 @@ CREATE INDEX IF NOT EXISTS "ix_service_requests_requester_profile_id" ON "clinic
 
 CREATE INDEX IF NOT EXISTS "ix_service_requests_performer_tenant_id" ON "clinical"."service_requests" ("performer_tenant_id");
 
+CREATE INDEX IF NOT EXISTS "ix_service_requests_performer_practitioner_profile_id" ON "clinical"."service_requests" ("performer_practitioner_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_service_requests_suggested_practice_site_id" ON "clinical"."service_requests" ("suggested_practice_site_id");
+
 CREATE INDEX IF NOT EXISTS "ix_service_requests_previous_diagnostic_report_id" ON "clinical"."service_requests" ("previous_diagnostic_report_id");
 
 CREATE INDEX IF NOT EXISTS "ix_service_requests_form_instance_id" ON "clinical"."service_requests" ("form_instance_id");
@@ -404,6 +408,42 @@ CREATE INDEX IF NOT EXISTS "ix_immunizations_custodian_tenant_id_status_concept_
 
 CREATE INDEX IF NOT EXISTS "ix_immunizations_patient_profile_id_updated_at" ON "clinical"."immunizations" ("custodian_tenant_id", "patient_profile_id", "updated_at" DESC);
 
+CREATE INDEX IF NOT EXISTS "ix_received_services_custodian_tenant_id" ON "clinical"."received_services" ("custodian_tenant_id");
+
+CREATE INDEX IF NOT EXISTS "ix_received_services_patient_profile_id" ON "clinical"."received_services" ("patient_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_received_services_encounter_id" ON "clinical"."received_services" ("encounter_id");
+
+CREATE INDEX IF NOT EXISTS "ix_received_services_service_type_concept_id" ON "clinical"."received_services" ("service_type_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_received_services_service_concept_id" ON "clinical"."received_services" ("service_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_received_services_status_concept_id" ON "clinical"."received_services" ("status_concept_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_received_services_source_procedure_id" ON "clinical"."received_services" ("source_procedure_id") WHERE source_procedure_id IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_received_services_source_immunization_id" ON "clinical"."received_services" ("source_immunization_id") WHERE source_immunization_id IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_received_services_procedure_case_id" ON "clinical"."received_services" ("procedure_case_id") WHERE procedure_case_id IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS "ix_received_services_service_catalog_id" ON "clinical"."received_services" ("service_catalog_id");
+
+CREATE INDEX IF NOT EXISTS "ix_received_services_invoice_line_id" ON "clinical"."received_services" ("invoice_line_id");
+
+CREATE INDEX IF NOT EXISTS "ix_received_services_insurance_claim_line_id" ON "clinical"."received_services" ("insurance_claim_line_id");
+
+CREATE INDEX IF NOT EXISTS "ix_received_services_performer_profile_id" ON "clinical"."received_services" ("performer_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_received_services_practice_site_id" ON "clinical"."received_services" ("practice_site_id");
+
+CREATE INDEX IF NOT EXISTS "ix_received_services_outcome_concept_id" ON "clinical"."received_services" ("outcome_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_received_services_created_by_user_id" ON "clinical"."received_services" ("created_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_received_services_updated_by_user_id" ON "clinical"."received_services" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_received_services_patient_performed_at" ON "clinical"."received_services" ("custodian_tenant_id", "patient_profile_id", "performed_at" DESC);
+
 CREATE INDEX IF NOT EXISTS "ix_appointments_patient_profile_id" ON "clinical"."appointments" ("patient_profile_id");
 
 CREATE INDEX IF NOT EXISTS "ix_appointments_practitioner_profile_id" ON "clinical"."appointments" ("practitioner_profile_id");
@@ -428,7 +468,7 @@ CREATE INDEX IF NOT EXISTS "ix_appointments_patient_profile_id_updated_at" ON "c
 
 CREATE INDEX IF NOT EXISTS "gist_appointments_effective_period" ON "clinical"."appointments" USING gist (tstzrange(start_at, end_at, '[)'));
 
--- TODO(predicado placeholder, definir funciones): CREATE INDEX IF NOT EXISTS "gist_appointments_practitioner_time" ON "clinical"."appointments" USING gist ("practitioner_profile_id", tstzrange(start_at, end_at, '[)')) WHERE status_concept_id IN (held_status(), confirmed_status());
+-- OMITIDO (predicado con función placeholder del modelo, sin definir en la base): CREATE INDEX IF NOT EXISTS "gist_appointments_practitioner_time" ON "clinical"."appointments" USING gist ("practitioner_profile_id", tstzrange(start_at, end_at, '[)')) WHERE status_concept_id IN (held_status(), confirmed_status());
 
 CREATE INDEX IF NOT EXISTS "ix_appointments_patient_start" ON "clinical"."appointments" ("patient_profile_id", "start_at" DESC);
 
@@ -467,6 +507,14 @@ CREATE INDEX IF NOT EXISTS "ix_observation_performers_performer_type_concept_id"
 CREATE INDEX IF NOT EXISTS "ix_observation_performers_performer_role_concept_id" ON "clinical"."observation_performers" ("performer_role_concept_id");
 
 CREATE INDEX IF NOT EXISTS "ix_observation_performers_created_by_user_id" ON "clinical"."observation_performers" ("created_by_user_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_service_request_notes_request_note" ON "clinical"."service_request_notes" ("service_request_id", "clinical_note_header_id");
+
+CREATE INDEX IF NOT EXISTS "ix_service_request_notes_service_request_id" ON "clinical"."service_request_notes" ("service_request_id");
+
+CREATE INDEX IF NOT EXISTS "ix_service_request_notes_clinical_note_header_id" ON "clinical"."service_request_notes" ("clinical_note_header_id");
+
+CREATE INDEX IF NOT EXISTS "ix_service_request_notes_created_by_user_id" ON "clinical"."service_request_notes" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_observation_reference_ranges_observation_id" ON "clinical"."observation_reference_ranges" ("observation_id");
 

@@ -167,6 +167,32 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       code: 'SR_CARDIO',
       display: 'Cardiac study category',
     },
+    /* P40 (carril C2): la orden de análisis clasifica en tres —laboratorio,
+       imagen y «otro»— y «otro» no tenía concepto: una orden que no era de
+       laboratorio ni de imagen sólo podía pedirse sin categoría, que la lectura
+       trata como «sin clasificar». Es el `category: 'OTHER'` del alta. */
+    SERVICE_REQUEST_CATEGORY_OTHER: {
+      code: 'SR_OTHER',
+      display: 'Other analysis category',
+    },
+
+    /* --- quién ejecuta la orden -------------------------------------------------
+       El médico recomienda, no impone: el paciente siempre puede elegir otro
+       centro. `SR_PERF_PATIENT_CHOICE` es el valor de toda orden que no declara
+       modo. Ninguno concede acceso a la orden: la custodia sigue en
+       `performer_tenant_id`, que la recomendación no llena. */
+    SERVICE_REQUEST_PERFORMER_SELF: {
+      code: 'SR_PERF_SELF',
+      display: 'Performed by the ordering practitioner',
+    },
+    SERVICE_REQUEST_PERFORMER_ORGANIZATION: {
+      code: 'SR_PERF_ORGANIZATION',
+      display: 'Performed at a recommended medical center',
+    },
+    SERVICE_REQUEST_PERFORMER_PATIENT_CHOICE: {
+      code: 'SR_PERF_PATIENT_CHOICE',
+      display: 'Performer chosen by the patient',
+    },
 
     /* --- qué se pide: el catálogo de estudios ---------------------------------
        `service_requests.code_concept_id` es NOT NULL y no tenía ni un concepto
@@ -625,6 +651,19 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       display: 'Immunization completed',
     },
 
+    // --- servicios recibidos (vs_received_service_type) ---------------------------
+    // Mismas claves y displays que `gen_seeds.py` (modelo, v4.2.49): ambos lados
+    // siembran por id, y el id sale de `clinical:<NOMBRE>`. Un tipo nuevo se agrega
+    // acá y en el value set del modelo, al final.
+    RECEIVED_SERVICE_INTERVENTION: {
+      code: 'RECEIVED_SERVICE_INTERVENTION',
+      display: 'Received service: medical intervention',
+    },
+    RECEIVED_SERVICE_VACCINATION: {
+      code: 'RECEIVED_SERVICE_VACCINATION',
+      display: 'Received service: vaccination',
+    },
+
     // --- appointments (referenciado por check-in) ------------------------------
     /**
      * Turno pedido por el paciente y todavía sin aceptar (FHIR `pending`).
@@ -872,8 +911,8 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
     MEDICATION_ALOPURINOL: { code: 'M04AA01', display: 'Alopurinol' },
 
     /* --- vía de administración ------------------------------------------------
-       Éstas sí son una enumeración cerrada de verdad, y las seis cubren la
-       práctica ambulatoria. Los códigos siguen la vía de administración de HL7
+       Éstas sí son una enumeración cerrada de verdad: las seis primeras cubren
+       la práctica ambulatoria y las que siguen, el resto. Los códigos siguen la vía de administración de HL7
        (`route-codes`). */
     MEDICATION_ROUTE_ORAL: { code: 'ROUTE_ORAL', display: 'Oral route' },
     MEDICATION_ROUTE_INTRAVENOUS: {
@@ -893,6 +932,64 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       code: 'ROUTE_INH',
       display: 'Inhalation route',
     },
+    // Las vías que completan la práctica más allá del consultorio: mucosas
+    // (sublingual, bucal, nasal, rectal, vaginal), órganos de los sentidos
+    // (oftálmica, ótica), piel (transdérmica, intradérmica, intralesional,
+    // infiltración local —la de la anestesia odontológica—), las de
+    // procedimiento (intraarticular, intratecal, epidural, intraósea) y la
+    // enteral por sonda. Mismo vocabulario que `route-codes` de HL7 (SNOMED CT).
+    MEDICATION_ROUTE_SUBLINGUAL: {
+      code: 'ROUTE_SL',
+      display: 'Sublingual route',
+    },
+    MEDICATION_ROUTE_BUCCAL: { code: 'ROUTE_BUCCAL', display: 'Buccal route' },
+    MEDICATION_ROUTE_NASAL: { code: 'ROUTE_NASAL', display: 'Nasal route' },
+    MEDICATION_ROUTE_RECTAL: { code: 'ROUTE_RECTAL', display: 'Rectal route' },
+    MEDICATION_ROUTE_VAGINAL: {
+      code: 'ROUTE_VAGINAL',
+      display: 'Vaginal route',
+    },
+    MEDICATION_ROUTE_OPHTHALMIC: {
+      code: 'ROUTE_OPHTHALMIC',
+      display: 'Ophthalmic route',
+    },
+    MEDICATION_ROUTE_OTIC: { code: 'ROUTE_OTIC', display: 'Otic route' },
+    MEDICATION_ROUTE_TRANSDERMAL: {
+      code: 'ROUTE_TRANSDERMAL',
+      display: 'Transdermal route',
+    },
+    MEDICATION_ROUTE_INTRADERMAL: {
+      code: 'ROUTE_ID',
+      display: 'Intradermal route',
+    },
+    MEDICATION_ROUTE_INTRALESIONAL: {
+      code: 'ROUTE_INTRALESIONAL',
+      display: 'Intralesional route',
+    },
+    MEDICATION_ROUTE_INFILTRATION: {
+      code: 'ROUTE_INFILTRATION',
+      display: 'Local infiltration route',
+    },
+    MEDICATION_ROUTE_INTRAARTICULAR: {
+      code: 'ROUTE_IA',
+      display: 'Intra-articular route',
+    },
+    MEDICATION_ROUTE_INTRATHECAL: {
+      code: 'ROUTE_IT',
+      display: 'Intrathecal route',
+    },
+    MEDICATION_ROUTE_EPIDURAL: {
+      code: 'ROUTE_EPIDURAL',
+      display: 'Epidural route',
+    },
+    MEDICATION_ROUTE_INTRAOSSEOUS: {
+      code: 'ROUTE_IO',
+      display: 'Intraosseous route',
+    },
+    MEDICATION_ROUTE_ENTERAL_TUBE: {
+      code: 'ROUTE_ENTERAL_TUBE',
+      display: 'Enteral route via feeding tube',
+    },
 
     /* --- unidad de la cantidad prescrita --------------------------------------
        Códigos UCUM, que es lo que el contrato de cantidad espera. Las de forma
@@ -904,6 +1001,43 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
     MEDICATION_UNIT_TABLET: { code: 'UNIT_{tablet}', display: 'Tablet' },
     MEDICATION_UNIT_CAPSULE: { code: 'UNIT_{capsule}', display: 'Capsule' },
     MEDICATION_UNIT_DROP: { code: 'UNIT_[drp]', display: 'Drop' },
+    // Las que faltaban para prescribir lo que de verdad se receta: el
+    // microgramo (levotiroxina, salbutamol), la unidad internacional (insulina,
+    // vitamina D, heparina), el miliequivalente (potasio, bicarbonato) y las
+    // formas farmacéuticas que se cuentan por pieza. Mismo criterio UCUM que
+    // las de arriba: magnitud cuando la hay, anotación entre llaves cuando no.
+    MEDICATION_UNIT_MICROGRAM: { code: 'UNIT_ug', display: 'Microgram' },
+    MEDICATION_UNIT_INTERNATIONAL_UNIT: {
+      code: 'UNIT_[iU]',
+      display: 'International unit',
+    },
+    MEDICATION_UNIT_MILLIEQUIVALENT: {
+      code: 'UNIT_meq',
+      display: 'Milliequivalent',
+    },
+    MEDICATION_UNIT_AMPOULE: { code: 'UNIT_{ampoule}', display: 'Ampoule' },
+    MEDICATION_UNIT_VIAL: { code: 'UNIT_{vial}', display: 'Vial' },
+    MEDICATION_UNIT_PREFILLED_SYRINGE: {
+      code: 'UNIT_{prefilled_syringe}',
+      display: 'Prefilled syringe',
+    },
+    MEDICATION_UNIT_SACHET: { code: 'UNIT_{sachet}', display: 'Sachet' },
+    MEDICATION_UNIT_SUPPOSITORY: {
+      code: 'UNIT_{suppository}',
+      display: 'Suppository',
+    },
+    MEDICATION_UNIT_PESSARY: {
+      code: 'UNIT_{pessary}',
+      display: 'Vaginal pessary',
+    },
+    MEDICATION_UNIT_PATCH: { code: 'UNIT_{patch}', display: 'Patch' },
+    MEDICATION_UNIT_PUFF: { code: 'UNIT_{puff}', display: 'Puff' },
+    MEDICATION_UNIT_APPLICATION: {
+      code: 'UNIT_{application}',
+      display: 'Application',
+    },
+    MEDICATION_UNIT_BOTTLE: { code: 'UNIT_{bottle}', display: 'Bottle' },
+    MEDICATION_UNIT_TUBE: { code: 'UNIT_{tube}', display: 'Tube' },
 
     /* --- nosología inicial del diagnóstico -------------------------------------
        ⚠️ CATÁLOGO INICIAL, NO UNA NOSOLOGÍA. Mismo criterio y mismas razones que

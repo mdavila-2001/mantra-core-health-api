@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   DeletionService,
   ProjectionDeliveryService,
@@ -61,6 +66,11 @@ export class CrossStoreAdminController {
   ) {}
 
   /** UC-62-01. */
+  @Audited({
+    action: 'PROJECTION_DEFINITION_REGISTERED',
+    entity: 'projection_definition',
+    entityId: 'result.id',
+  })
   @Post('projections/definitions')
   @Roles('DATA_GOVERNANCE_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -78,6 +88,11 @@ export class CrossStoreAdminController {
   }
 
   /** UC-62-04 (reproceso). */
+  @Audited({
+    action: 'PROJECTION_DEAD_LETTER_REPLAYED',
+    entity: 'projection_dead_letter',
+    entityId: 'param:id',
+  })
   @Post('projections/dead-letters/:id/replay')
   @Roles('DATA_GOVERNANCE_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -95,6 +110,11 @@ export class CrossStoreAdminController {
   }
 
   /** UC-62-05 + UC-62-06. */
+  @Audited({
+    action: 'STORE_RECONCILIATION_RUN',
+    entity: 'reconciliation_run',
+    entityId: 'result.id',
+  })
   @Post('reconciliation/runs')
   @Roles(
     'SYSTEM',
@@ -116,6 +136,11 @@ export class CrossStoreAdminController {
   }
 
   /** UC-62-07. */
+  @Audited({
+    action: 'PROJECTION_DRIFT_REPAIR_REQUESTED',
+    entity: 'projection_repair_job',
+    entityId: 'result.id',
+  })
   @Post('projections/drift/:id/repair-jobs')
   @Roles('DATA_GOVERNANCE_ADMIN', 'SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -133,6 +158,11 @@ export class CrossStoreAdminController {
   }
 
   /** UC-62-08. */
+  @Audited({
+    action: 'DATA_DELETION_REQUESTED',
+    entity: 'deletion_request',
+    entityId: 'result.id',
+  })
   @Post('deletion-requests')
   @Roles('PRIVACY_OFFICER', 'DPO', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -149,6 +179,11 @@ export class CrossStoreAdminController {
   }
 
   /** UC-62-11 (cierre). */
+  @Audited({
+    action: 'DATA_DELETION_REQUEST_CLOSED',
+    entity: 'deletion_request',
+    entityId: 'param:id',
+  })
   @Patch('deletion-requests/:id')
   @Roles('PRIVACY_OFFICER', 'DPO', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -166,6 +201,11 @@ export class CrossStoreAdminController {
   }
 
   /** UC-62-13. */
+  @Audited({
+    action: 'DATA_MOVEMENT_JOB_CREATED',
+    entity: 'data_movement_job',
+    entityId: 'result.id',
+  })
   @Post('data-movement-jobs')
   @Roles('DATA_GOVERNANCE_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -182,6 +222,11 @@ export class CrossStoreAdminController {
   }
 
   /** UC-62-14. */
+  @Audited({
+    action: 'DATA_ARCHIVE_JOB_CREATED',
+    entity: 'archive_job',
+    entityId: 'result.id',
+  })
   @Post('archive-jobs')
   @Roles('SYSTEM', 'DATA_GOVERNANCE_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)

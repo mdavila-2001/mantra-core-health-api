@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { CONCEPTS } from '../../../common';
+import { adminDivisionLineage } from '../../../common/seed/admin-divisions.catalog';
 import { AddressesRepository } from '../../common/repositories';
 import { PRAC } from '../../practice/practice.concepts';
 import {
@@ -11,7 +12,10 @@ import {
 import { siteCodeBase, uniqueCode } from '../../practice/site-code';
 import type { OwnSiteAddressDto } from '../../practice/dto';
 import { DUNIT } from '../diagnostic_units.concepts';
-import { findDiagnosticUnitModality } from '../diagnostic-unit-modalities';
+import {
+  findDiagnosticUnitModality,
+  resolveDiagnosticUnitType,
+} from '../diagnostic-unit-modalities';
 import {
   DiagnosticUnitsRepository,
   DiagnosticUnitSitesRepository,
@@ -58,6 +62,11 @@ export interface DiagnosticUnitProvisioningProfile {
     readonly timeZone?: string;
     readonly address?: OwnSiteAddressDto;
   };
+  /** Sucursales de un laboratorio; cada una es una sede más de la unidad. */
+  readonly branches?: readonly {
+    readonly name: string;
+    readonly address?: OwnSiteAddressDto;
+  }[];
 }
 
 /** Lo que dejó escrito {@link DiagnosticUnitProvisioningService.provision}. */
@@ -67,6 +76,8 @@ export interface ProvisionedDiagnosticUnit {
   readonly siteId: string;
   readonly addressId?: string;
   readonly offeringIds: readonly string[];
+  /** `practice_sites.id` de cada sucursal, en el orden declarado. */
+  readonly branchSiteIds: readonly string[];
 }
 
 /**
@@ -134,8 +145,7 @@ export class DiagnosticUnitProvisioningService {
       owner.tenantCode ??
       siteCodeBase(owner.legalName, 'UNIDAD');
     const unitName = profile.name ?? owner.legalName;
-    const unitTypeConceptId =
-      profile.diagnosticUnitTypeConceptId ?? DUNIT.UNIT_TYPE_IMAGING;
+    const unitTypeConceptId = resolveDiagnosticUnitType(profile);
     const isLaboratory = unitTypeConceptId === DUNIT.UNIT_TYPE_LABORATORY;
 
     // 1) La práctica propia de la unidad: nace ACTIVA con el owner de la
@@ -153,65 +163,18 @@ export class DiagnosticUnitProvisioningService {
     });
     await tx.flush();
 
-    // 2) Dirección opcional de la sede primaria. Misma lógica que
-    // `OwnSiteProvisioningService.provision`: una línea en blanco no es "sin
-    // dirección", es una fila vacía; si no queda nada tras recortar, la
-    // columna se deja sin valor en vez de guardar `''`.
-    let addressId: string | undefined;
-    const declaredAddress = profile.primarySite?.address;
-    if (declaredAddress) {
-      const lines = declaredAddress.lines
-        .map((line) => line.trim())
-        .filter((line) => line.length > 0);
-      const address = this.addressesRepo.create(tx, {
-        ownerTypeConceptId: CONCEPTS.OWNER_USER,
-        ownerId: owner.ownerUserId,
-        lines: lines.length > 0 ? lines.join('\n') : undefined,
-        city: declaredAddress.city,
-        municipalityConceptId: declaredAddress.municipalityConceptId,
-        administrativeAreaConceptId:
-          declaredAddress.administrativeAreaConceptId,
-        countryConceptId: CONCEPTS.COUNTRY_BO,
-        useConceptId: CONCEPTS.ADDR_USE_WORK,
-        typeConceptId: CONCEPTS.ADDR_TYPE_POSTAL,
-        latitude:
-          declaredAddress.latitude !== undefined
-            ? String(declaredAddress.latitude)
-            : undefined,
-        longitude:
-          declaredAddress.longitude !== undefined
-            ? String(declaredAddress.longitude)
-            : undefined,
-        actorUserId,
-      });
-      await tx.flush();
-      addressId = address.id;
-    }
-
-    // 3) La sede primaria de la práctica.
-    const siteName = profile.primarySite?.name ?? 'Sede central';
-    const siteCode = await uniqueCode(
-      siteCodeBase(siteName, 'SEDE'),
-      async (candidate) =>
-        (await this.sitesRepo.findByPracticeAndCode(
-          tx,
-          practice.id,
-          candidate,
-        )) !== null,
-    );
-    const site = this.sitesRepo.create(tx, {
-      practiceId: practice.id,
-      code: siteCode,
-      name: siteName,
-      siteTypeConceptId: PRAC.SITE_TYPE_OFFICE,
-      operationalStatusConceptId: PRAC.SITE_OP_PLANNED,
-      timeZone: profile.primarySite?.timeZone,
-      addressId,
-      managingTenantId: owner.tenantId,
-      statusConceptId: PRAC.SITE_ACTIVE,
+    // 2) y 3) Dirección opcional y sede primaria de la práctica.
+    const { site, addressId } = await this.createPracticeSite(
+      tx,
+      owner,
+      practice.id,
+      {
+        name: profile.primarySite?.name ?? 'Sede central',
+        timeZone: profile.primarySite?.timeZone,
+        address: profile.primarySite?.address,
+      },
       actorUserId,
-    });
-    await tx.flush();
+    );
 
     // 4) La unidad diagnóstica en sí, colgada de la práctica y su sede.
     const unit = this.unitsRepo.create(tx, {
@@ -240,6 +203,29 @@ export class DiagnosticUnitProvisioningService {
       actorUserId,
     });
     await tx.flush();
+
+    // 5b) Las sucursales declaradas: cada una es otra sede de la misma
+    // práctica y de la misma unidad. Solo laboratorios (el tenant-type-profile
+    // lo valida): su rol es el de punto de toma de muestras.
+    const branchSiteIds: string[] = [];
+    for (const branch of profile.branches ?? []) {
+      const { site: branchSite } = await this.createPracticeSite(
+        tx,
+        owner,
+        practice.id,
+        { name: branch.name, address: branch.address },
+        actorUserId,
+      );
+      this.unitSitesRepo.create(tx, {
+        diagnosticUnitId: unit.id,
+        practiceSiteId: branchSite.id,
+        siteRoleConceptId: DUNIT.SITE_ROLE_COLLECTION,
+        sampleCollectionAvailable: true,
+        actorUserId,
+      });
+      await tx.flush();
+      branchSiteIds.push(branchSite.id);
+    }
 
     // 6) Una oferta de estudio genérica por cada modalidad declarada: es de
     // ahí de donde el directorio público deriva hoy las modalidades que
@@ -276,6 +262,88 @@ export class DiagnosticUnitProvisioningService {
       siteId: site.id,
       addressId,
       offeringIds,
+      branchSiteIds,
     };
+  }
+
+  /**
+   * Crea la dirección opcional y la sede de práctica que cuelga de ella.
+   *
+   * Una línea en blanco no es «sin dirección», es una fila vacía; si no queda
+   * nada tras recortar, la columna se deja sin valor en vez de guardar `''`.
+   * Sirve a la sede primaria y a cada sucursal: es el mismo caso.
+   */
+  private async createPracticeSite(
+    tx: EntityManager,
+    owner: DiagnosticUnitOwner,
+    practiceId: string,
+    declared: {
+      readonly name: string;
+      readonly timeZone?: string;
+      readonly address?: OwnSiteAddressDto;
+    },
+    actorUserId: string,
+  ): Promise<{ site: { id: string }; addressId?: string }> {
+    let addressId: string | undefined;
+    const declaredAddress = declared.address;
+    if (declaredAddress) {
+      const lines = declaredAddress.lines
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0);
+      const address = this.addressesRepo.create(tx, {
+        ownerTypeConceptId: CONCEPTS.OWNER_USER,
+        ownerId: owner.ownerUserId,
+        lines: lines.length > 0 ? lines.join('\n') : undefined,
+        city: declaredAddress.city,
+        municipalityConceptId: declaredAddress.municipalityConceptId,
+        administrativeAreaConceptId:
+          declaredAddress.administrativeAreaConceptId,
+        // ADR-0028: la provincia sale del municipio y el distrito viaja aparte
+        // de las líneas, igual que en el consultorio propio.
+        administrativeArea2ConceptId: declaredAddress.municipalityConceptId
+          ? adminDivisionLineage(declaredAddress.municipalityConceptId)
+              ?.level2ConceptId
+          : undefined,
+        districtText: declaredAddress.district?.trim() || undefined,
+        countryConceptId: CONCEPTS.COUNTRY_BO,
+        useConceptId: CONCEPTS.ADDR_USE_WORK,
+        typeConceptId: CONCEPTS.ADDR_TYPE_POSTAL,
+        latitude:
+          declaredAddress.latitude !== undefined
+            ? String(declaredAddress.latitude)
+            : undefined,
+        longitude:
+          declaredAddress.longitude !== undefined
+            ? String(declaredAddress.longitude)
+            : undefined,
+        actorUserId,
+      });
+      await tx.flush();
+      addressId = address.id;
+    }
+
+    const siteCode = await uniqueCode(
+      siteCodeBase(declared.name, 'SEDE'),
+      async (candidate) =>
+        (await this.sitesRepo.findByPracticeAndCode(
+          tx,
+          practiceId,
+          candidate,
+        )) !== null,
+    );
+    const site = this.sitesRepo.create(tx, {
+      practiceId,
+      code: siteCode,
+      name: declared.name,
+      siteTypeConceptId: PRAC.SITE_TYPE_OFFICE,
+      operationalStatusConceptId: PRAC.SITE_OP_PLANNED,
+      timeZone: declared.timeZone,
+      addressId,
+      managingTenantId: owner.tenantId,
+      statusConceptId: PRAC.SITE_ACTIVE,
+      actorUserId,
+    });
+    await tx.flush();
+    return { site, addressId };
   }
 }

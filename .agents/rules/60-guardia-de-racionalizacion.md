@@ -12,11 +12,12 @@ Cuando reconozcas uno de estos pensamientos, aplicá la respuesta obligatoria **
 |---|---|
 | "El plan es exagerado para algo tan chico." | El tamaño no exime. Un trabajo chico es un hito con una microtarea, y se escribe igual: cuesta treinta segundos y es lo que lo hace auditable (regla 20). |
 | "Total es un cambio de una línea." | Una línea puede romper producción. La línea tiene su microtarea, su criterio de aceptación y su DoD, como cualquier otra. |
-| "El reporte lo escribo después." | "Después" es "nunca". El `REPORTE.md` se escribe al cerrar la sesión, terminada o no (regla 40). Si te quedás sin tiempo, el reporte es lo último que se saca, no lo primero. |
+| "El reporte lo escribo después." | "Después" es "nunca". El reporte va en la descripción del PR y se escribe al cerrar, terminado o no; lo que quedó sin hacer, a su issue (regla 40). Si te quedás sin tiempo, el reporte es lo último que se saca, no lo primero. |
 | "Esto lo marco hecho y lo termino mañana." | `HECHO` exige DoD ejecutado con salida pegada. Si falta, el estado es `A MEDIAS` con qué anda, qué no anda y qué falta exactamente. Marcarlo hecho es falsear el estado. |
 | "El usuario tiene apuro, salteo el proceso." | El apuro cambia la profundidad del trabajo, nunca la honestidad del estado. Entregá menos alcance bien declarado, no el mismo alcance mal verificado. |
-| "Lo del plan ya lo tengo en la cabeza." | Lo que está solo en la cabeza no sobrevive a un corte de sesión ni lo puede retomar otra persona. Va al archivo. |
-| "Actualizo el plan al final, ahora avanzo." | El `PLAN.md` es el estado. Desactualizado, miente. Se actualiza al abrir y al cerrar cada microtarea (regla 50). |
+| "Lo del plan ya lo tengo en la cabeza." | Lo que está solo en la cabeza no sobrevive a un corte de sesión ni lo puede retomar otra persona. Va al issue o al PR. |
+| "Actualizo el plan al final, ahora avanzo." | El plan (en el issue o en el PR) es el estado. Desactualizado, miente. Se actualiza al abrir y al cerrar cada microtarea (regla 50). |
+| "Dejo anotado lo que falta en un `.md` del repo." | El repo describe lo que existe, no lo que falta. Lo que falta va a un issue y el PR lo enlaza (regla 40). |
 
 ## Sobre la verificación
 
@@ -75,7 +76,7 @@ Si tu propio texto contiene alguna de estas, **frená y verificá** antes de seg
 > debería · seguramente · casi · en principio · asumo que · por lo general · creo que ya ·
 > es obvio · mínimo · rapidito · después lo veo · lo dejo listo para
 
-Ninguna de estas palabras puede aparecer en una afirmación de estado del `REPORTE.md`.
+Ninguna de estas palabras puede aparecer en una afirmación de estado del PR o de un issue.
 
 ## Regla de aplicación
 

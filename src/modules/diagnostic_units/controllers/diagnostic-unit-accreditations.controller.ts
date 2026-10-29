@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { DiagnosticUnitsService } from '../services';
 import { AccreditationResponseDto, RenewAccreditationDto } from '../dto';
 
@@ -28,6 +33,11 @@ export class DiagnosticUnitAccreditationsController {
   constructor(private readonly unitsService: DiagnosticUnitsService) {}
 
   /** UC-23-11. */
+  @Audited({
+    action: 'DIAGNOSTIC_UNIT_ACCREDITATION_RENEWED',
+    entity: 'diagnostic_unit_accreditation',
+    entityId: 'param:id',
+  })
   @Post(':id/renew')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

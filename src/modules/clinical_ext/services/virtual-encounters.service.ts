@@ -18,6 +18,8 @@ import {
 import { CEXT } from '../clinical_ext.concepts';
 import { EncountersRepository } from '../../clinical/repositories';
 import type { Encounters } from '../../clinical/entities';
+import { ClinicalExtErrorReason } from '../clinical_ext.error-reasons';
+import { lockLogicalKey } from './clinical-ext-access';
 import { CLIN } from '../../clinical/clinical.concepts';
 
 /**
@@ -58,6 +60,12 @@ export class VirtualEncountersService {
     return this.em.transactional(async (tx) => {
       await this.requireEncounterParticipant(tx, dto.encounterId, actor, false);
 
+      // El DDL no impide dos sesiones del mismo encuentro: se serializa a
+      // quien la crea para que el segundo vea la sesión del primero.
+      await lockLogicalKey(
+        tx,
+        `clinical_ext.virtual_encounter:${dto.encounterId}`,
+      );
       const existing = await this.encountersRepo.findByEncounter(
         tx,
         dto.encounterId,
@@ -68,6 +76,7 @@ export class VirtualEncountersService {
           {
             encounterId: dto.encounterId,
           },
+          ClinicalExtErrorReason.VIRTUAL_ENCOUNTER_ALREADY_EXISTS,
         );
       }
 

@@ -9,7 +9,7 @@
 # Módulo `ops_console`
 
 **Fuente:** [`src/modules/ops_console/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/ops_console/README.md)
-· 1 controllers · 2 services · 2 repositories · 0 entidades · 0 DTO
+· 1 controllers · 2 services · 2 repositories · 0 entidades · 1 DTO
 
 ---
 

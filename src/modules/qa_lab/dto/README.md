@@ -32,14 +32,14 @@ antes, porque el hash debe calcularse sobre el original—. Es el servicio quien
 
 ## DTO por área
 
-| Área | Entrada | Respuesta |
-| --- | --- | --- |
-| Entornos | `CreateEnvironmentDto` | `EnvironmentResponseDto` |
-| Casos | `CreateTestCaseDto` (+ `TestAssertionDto`), `PublishSuiteDto` | `TestCaseResponseDto`, `PublishSuiteResponseDto` |
-| Corridas | `CreateRunDto`, `ExecuteCaseDto` | `RunResponseDto`, `ExecuteCaseResponseDto`, `EvaluateResultResponseDto`, `FinalizeRunResponseDto` |
-| Evidencia | `AttachArtifactDto`, `LinkReleaseDto` | `ArtifactResponseDto`, `LinkReleaseResponseDto` |
-| Defectos | `RegisterDefectDto`, `TriageDefectDto` | `DefectResponseDto`, `TriageDefectResponseDto` |
-| Programación | `CreateTestScheduleDto` | `TestScheduleResponseDto` |
+| Área         | Entrada                                                       | Respuesta                                                                                         |
+| ------------ | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Entornos     | `CreateEnvironmentDto`                                        | `EnvironmentResponseDto`                                                                          |
+| Casos        | `CreateTestCaseDto` (+ `TestAssertionDto`), `PublishSuiteDto` | `TestCaseResponseDto`, `PublishSuiteResponseDto`                                                  |
+| Corridas     | `CreateRunDto`, `ExecuteCaseDto`                              | `RunResponseDto`, `ExecuteCaseResponseDto`, `EvaluateResultResponseDto`, `FinalizeRunResponseDto` |
+| Evidencia    | `AttachArtifactDto`, `LinkReleaseDto`                         | `ArtifactResponseDto`, `LinkReleaseResponseDto`                                                   |
+| Defectos     | `RegisterDefectDto`, `TriageDefectDto`                        | `DefectResponseDto`, `TriageDefectResponseDto`                                                    |
+| Programación | `CreateTestScheduleDto`                                       | `TestScheduleResponseDto`                                                                         |
 
 ## Respuestas con hash
 

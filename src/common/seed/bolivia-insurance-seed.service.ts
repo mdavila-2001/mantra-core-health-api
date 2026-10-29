@@ -13,6 +13,7 @@ import { INS } from '../../modules/insurance/domain/insurance.concepts';
 import { CONCEPTS, deterministicId } from '../constants/concepts';
 import {
   BOLIVIA_CARRIERS,
+  BOLIVIA_CURATED_CARRIERS,
   BOLIVIA_HEALTH_PLANS,
   BOLIVIA_PUBLIC_INSURERS,
   carrierId,
@@ -148,7 +149,7 @@ export class BoliviaInsuranceSeedService {
     }
   }
 
-  /** Privadas y públicas en una sola lista, que es como se siembran. */
+  /** Privadas (listado y curadas) y públicas en una sola lista, que es como se siembran. */
   private allCarriers(): {
     code: string;
     legalName: string;
@@ -163,6 +164,13 @@ export class BoliviaInsuranceSeedService {
         sigla: c.sigla,
         address: c.direccion,
         nit: c.nit,
+      })),
+      // Privadas reales que el listado del stakeholder no trae (curadas, sin
+      // NIT ni dirección inventados).
+      ...BOLIVIA_CURATED_CARRIERS.map((c) => ({
+        code: c.code,
+        legalName: c.razonSocial,
+        sigla: c.sigla,
       })),
       ...BOLIVIA_PUBLIC_INSURERS.map((c) => ({
         code: c.code,

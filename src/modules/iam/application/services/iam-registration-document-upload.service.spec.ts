@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { IamRegistrationDocumentUploadService } from './iam-registration-document-upload.service';
 import { FileCategory, FileSensitivity } from '../../../common/dto';
+import { CommonRegistrationFilesAdapter } from '../../infrastructure/adapters/common-registration-files.adapter';
 
 function build() {
   const fileUploadService = {
@@ -14,7 +15,7 @@ function build() {
   };
   const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
   const service = new IamRegistrationDocumentUploadService(
-    fileUploadService as never,
+    new CommonRegistrationFilesAdapter(fileUploadService as never, {} as never),
     logger as never,
   );
   return { service, fileUploadService };
@@ -114,5 +115,37 @@ describe('Precarga privada de firma y sello', () => {
     await expect(d.service.uploadSignatureImage(undefined)).rejects.toThrow(
       'formato inválido',
     );
+  });
+});
+
+describe('Precarga del logo del consultorio propio', () => {
+  it('usa IMAGE/NORMAL y los formatos del logo', async () => {
+    const d = build();
+    const file = {
+      originalname: 'logo.png',
+      mimetype: 'image/png',
+      buffer: Buffer.from('png'),
+    };
+    await d.service.uploadOwnSiteLogo(file);
+    expect(d.fileUploadService.uploadAnonymous).toHaveBeenCalledWith(
+      file,
+      { category: FileCategory.IMAGE, sensitivity: FileSensitivity.NORMAL },
+      {
+        allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+        operation: 'iam.auth.upload-registration-logo',
+      },
+    );
+  });
+
+  it('rechaza más de 2 MB antes de escribir', async () => {
+    const d = build();
+    await expect(
+      d.service.uploadOwnSiteLogo({
+        originalname: 'logo.png',
+        mimetype: 'image/png',
+        buffer: Buffer.alloc(2 * 1024 * 1024 + 1),
+      }),
+    ).rejects.toThrow('2 MB');
+    expect(d.fileUploadService.uploadAnonymous).not.toHaveBeenCalled();
   });
 });

@@ -5,7 +5,6 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -14,6 +13,7 @@ import {
   OpsImprovementsRepository,
 } from '../repositories';
 import { PlatformOpsErrorReason } from '../platform_ops.error-reasons';
+import { PlatformOpsScope } from './platform-ops-scope.service';
 import type { HealthIncidents } from '../entities';
 import {
   RecordHealthRunDto,
@@ -140,12 +140,14 @@ export class OpsIncidentsService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param incidentsRepo - Valor de incidents repo requerido por la operación.
    * @param improvementsRepo - Valor de improvements repo requerido por la operación.
+   * @param scope - Alcance de tenant: resuelve cada agregado dentro del tenant activo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly incidentsRepo: OpsIncidentsRepository,
     private readonly improvementsRepo: OpsImprovementsRepository,
+    private readonly scope: PlatformOpsScope,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(OpsIncidentsService.name);
@@ -166,19 +168,22 @@ export class OpsIncidentsService {
       'Recording health check run',
     );
 
+    const tenantId = this.scope.activeTenantId();
     return this.em.transactional(async (tx) => {
-      const check = await this.incidentsRepo.findHealthCheckById(
+      const foundCheck = await this.incidentsRepo.findHealthCheckById(
         tx,
         healthCheckId,
+        tenantId,
       );
-      if (!check) {
-        throw new ResourceNotFoundException(
-          'Health check no encontrado',
-          {
-            healthCheckId,
-          },
-          PlatformOpsErrorReason.HEALTH_CHECK_NOT_FOUND,
+      const check = this.scope.require(foundCheck, foundCheck?.tenantId);
+      // El despliegue que la corrida cita debe ser del mismo tenant.
+      if (dto.deploymentId) {
+        const deployment = await this.incidentsRepo.findDeploymentInTenant(
+          tx,
+          dto.deploymentId,
+          tenantId,
         );
+        this.scope.require(deployment, deployment?.tenantId);
       }
       if (check.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new PreconditionFailedException(
@@ -318,20 +323,17 @@ export class OpsIncidentsService {
       'Updating incident',
     );
 
+    const tenantId = this.scope.activeTenantId();
     return this.em.transactional(async (tx) => {
-      const incident = await this.incidentsRepo.findIncidentForUpdate(
+      const foundIncident = await this.incidentsRepo.findIncidentForUpdate(
         tx,
         incidentId,
+        tenantId,
       );
-      if (!incident) {
-        throw new ResourceNotFoundException(
-          'Incidente no encontrado',
-          {
-            incidentId,
-          },
-          PlatformOpsErrorReason.INCIDENT_NOT_FOUND,
-        );
-      }
+      const incident = this.scope.require(
+        foundIncident,
+        foundIncident?.tenantId,
+      );
       if (incident.statusConceptId === CONCEPTS.INCIDENT_RESOLVED) {
         throw new PreconditionFailedException(
           'El incidente ya está resuelto',
@@ -446,20 +448,17 @@ export class OpsIncidentsService {
 
     this.assertUniqueActionCodes(dto, incidentId);
 
+    const tenantId = this.scope.activeTenantId();
     return this.em.transactional(async (tx) => {
-      const incident = await this.incidentsRepo.findIncidentForUpdate(
+      const foundIncident = await this.incidentsRepo.findIncidentForUpdate(
         tx,
         incidentId,
+        tenantId,
       );
-      if (!incident) {
-        throw new ResourceNotFoundException(
-          'Incidente no encontrado',
-          {
-            incidentId,
-          },
-          PlatformOpsErrorReason.INCIDENT_NOT_FOUND,
-        );
-      }
+      const incident = this.scope.require(
+        foundIncident,
+        foundIncident?.tenantId,
+      );
       // Un postmortem sobre un incidente vivo describiría algo que aún cambia.
       if (incident.statusConceptId !== CONCEPTS.INCIDENT_RESOLVED) {
         throw new PreconditionFailedException(

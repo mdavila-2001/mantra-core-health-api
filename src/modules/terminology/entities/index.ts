@@ -5,6 +5,7 @@ export * from './code_systems.entity';
 export * from './concept_designations.entity';
 export * from './concept_maps.entity';
 export * from './concept_properties.entity';
+export * from './concept_relationship_evidence.entity';
 export * from './concept_relationships.entity';
 export * from './tenant_catalog_policies.entity';
 export * from './tenant_concept_config.entity';
