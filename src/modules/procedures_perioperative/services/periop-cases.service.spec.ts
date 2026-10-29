@@ -170,7 +170,7 @@ function build() {
   };
   const service = new PeriopCasesService(
     em as any,
-    casesRepo,
+    casesRepo as any,
     preopRepo as any,
     intraopRepo as any,
     credentialsRepo as any,

@@ -71,9 +71,9 @@ function caseLookupMock(): any {
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn() };
+  const tx: { flush: any; execute?: any } = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const preopRepo = {
+  const preopRepo: Record<string, any> = {
     createAssessment: mockFn(),
     findAssessmentByCase: mockFn(),
     createRiskScore: mockFn(),
@@ -125,7 +125,7 @@ function build() {
   };
   const service = new PeriopPreopService(
     em as any,
-    preopRepo,
+    preopRepo as any,
     casesRepo as any,
     serviceRequests as any,
     new PeriopReacceptanceService(casesRepo as any, outbox as any),
