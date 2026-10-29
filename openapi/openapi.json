@@ -105354,6 +105354,169 @@
         },
         "additionalProperties": false
       },
+      "MedicalDirectorDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Ana"
+          },
+          "middleName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Lucía"
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Rojas"
+          },
+          "motherLastName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Paz"
+          },
+          "professionalLicenseNumber": {
+            "type": "string",
+            "description": "Matrícula profesional del director médico",
+            "minLength": 3,
+            "maxLength": 50,
+            "example": "MAT-12345"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 320,
+            "example": "dir@clinica.bo"
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 30,
+            "example": "+591 70012345"
+          }
+        },
+        "required": [
+          "name",
+          "lastName",
+          "professionalLicenseNumber",
+          "email"
+        ],
+        "additionalProperties": false
+      },
+      "MedicalFacilityHeadquartersDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "default": "Casa central"
+          },
+          "addressLines": {
+            "minItems": 1,
+            "maxItems": 10,
+            "example": [
+              "Av. San Martín 123"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "latitude": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90,
+            "example": -17.78
+          },
+          "longitude": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180,
+            "example": -63.18
+          }
+        },
+        "required": [
+          "addressLines"
+        ],
+        "additionalProperties": false
+      },
+      "MedicalFacilitySiteDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "example": "Sucursal Equipetrol"
+          },
+          "addressLines": {
+            "minItems": 1,
+            "maxItems": 10,
+            "example": [
+              "Av. San Martín 123"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "latitude": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90,
+            "example": -17.78
+          },
+          "longitude": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180,
+            "example": -63.18
+          }
+        },
+        "required": [
+          "name",
+          "addressLines"
+        ],
+        "additionalProperties": false
+      },
+      "MedicalFacilityDto": {
+        "type": "object",
+        "properties": {
+          "taxIdentifierNumber": {
+            "type": "string",
+            "description": "NIT del establecimiento (número, sin el certificado)",
+            "pattern": "^[0-9][0-9-]{3,19}$",
+            "example": "1023456789"
+          },
+          "healthFacilityRegistrationNumber": {
+            "type": "string",
+            "description": "Número de registro del establecimiento ante la autoridad sanitaria (SEDES en Bolivia)",
+            "minLength": 3,
+            "maxLength": 50,
+            "pattern": "^[A-Za-z0-9./-]+$",
+            "example": "SEDES-SC-2020-0412"
+          },
+          "medicalDirector": {
+            "$ref": "#/components/schemas/MedicalDirectorDto"
+          },
+          "headquarters": {
+            "$ref": "#/components/schemas/MedicalFacilityHeadquartersDto"
+          },
+          "branches": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MedicalFacilitySiteDto"
+            }
+          }
+        },
+        "required": [
+          "taxIdentifierNumber",
+          "healthFacilityRegistrationNumber",
+          "medicalDirector"
+        ],
+        "additionalProperties": false
+      },
       "RegisterPharmacyBranchDto": {
         "type": "object",
         "properties": {
@@ -105523,6 +105686,14 @@
           },
           "diagnosticUnit": {
             "$ref": "#/components/schemas/DiagnosticUnitProfileDto"
+          },
+          "medicalFacility": {
+            "description": "Sólo para HOSPITAL, CLINIC, MEDICAL_OFFICE, NURSING y HEALTH_OTHER: NIT, registro sanitario, director médico, casa central y sucursales",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MedicalFacilityDto"
+              }
+            ]
           },
           "countryConceptId": {
             "type": "string",
