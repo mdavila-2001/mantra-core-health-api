@@ -10,6 +10,11 @@ export interface CreateSiteData {
    */
   practiceId: string;
   /**
+   * Tenant de la sede: el de su práctica. Las FK compuestas `(tenant_id, …)`
+   * del modelo garantizan en la base que coincide.
+   */
+  tenantId: string;
+  /**
    * Valor de code mantenido por la instancia.
    */
   code: string;
@@ -112,6 +117,7 @@ export class PracticeSitesRepository {
       PracticeSites,
       {
         practiceId: data.practiceId,
+        tenantId: data.tenantId,
         code: data.code,
         name: data.name,
         siteTypeConceptId: data.siteTypeConceptId,
