@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { EntityManager } from '@mikro-orm/postgresql';
+import { LockMode, type EntityManager } from '@mikro-orm/postgresql';
 import {
   InventoryReservations,
   InventoryReservationLines,
@@ -114,6 +114,21 @@ export class ReservationsRepository {
     id: string,
   ): Promise<InventoryReservations | null> {
     return em.findOne(InventoryReservations, { id });
+  }
+
+  /**
+   * La reserva bloqueada `FOR UPDATE` hasta el fin de la transacción: dos dispensas
+   * contra la misma reserva se serializan y la segunda la encuentra ya consumida.
+   */
+  findByIdForUpdate(
+    em: EntityManager,
+    id: string,
+  ): Promise<InventoryReservations | null> {
+    return em.findOne(
+      InventoryReservations,
+      { id },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
   }
 
   /** Reservas confirmadas cuyo `expires_at` ya venció (cola del worker). */

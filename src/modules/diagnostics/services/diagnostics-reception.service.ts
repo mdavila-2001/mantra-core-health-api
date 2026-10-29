@@ -16,6 +16,7 @@ import type {
   LabInboxPageDto,
   LabInboxQueryDto,
 } from '../dto';
+import { SampleCollectionPointsService } from '../../practice/services/sample-collection-points.service';
 import { toSpecimenDetail } from './specimen-detail.projection';
 
 /** Tope por defecto de la página. */
@@ -60,12 +61,14 @@ export class DiagnosticsReceptionService {
    * @param receptionRepo - Lecturas de la bandeja.
    * @param specimensRepo - Contenedores y custodia de los especímenes.
    * @param logger - Registro estructurado.
+   * @param collectionPoints - Nombre de los puntos de toma sugeridos (F5b).
    */
   constructor(
     private readonly em: EntityManager,
     private readonly receptionRepo: LabReceptionRepository,
     private readonly specimensRepo: SpecimensRepository,
     private readonly logger: PinoLogger,
+    private readonly collectionPoints: SampleCollectionPointsService,
   ) {
     this.logger.setContext(DiagnosticsReceptionService.name);
   }
@@ -113,6 +116,7 @@ export class DiagnosticsReceptionService {
         CLIN.SERVICE_REQUEST_ACTIVE,
         after,
         chunkSize,
+        query.collectionPointId,
       );
       if (batch.length === 0) {
         exhausted = true;
@@ -189,7 +193,7 @@ export class DiagnosticsReceptionService {
     if (page.length === 0) return [];
     const orderIds = page.map((order) => order.id);
 
-    const [specimens, studyNames, tenantNames] = await Promise.all([
+    const [specimens, studyNames, tenantNames, pointNames] = await Promise.all([
       this.receptionRepo.findSpecimensForServiceRequests(
         em,
         tenantId,
@@ -202,6 +206,12 @@ export class DiagnosticsReceptionService {
       this.receptionRepo.findTenantNames(
         em,
         page.map((order) => order.custodianTenantId),
+      ),
+      // Solo se nombran los puntos de este laboratorio: el de otra organización viaja sin nombre.
+      this.collectionPoints.namesIn(
+        em,
+        tenantId,
+        page.map((order) => order.suggestedCareSpaceId),
       ),
       this.loadLabels(em, labels, page),
     ]);
@@ -224,6 +234,11 @@ export class DiagnosticsReceptionService {
         priorityConceptId: order.priorityConceptId ?? null,
         statusConceptId: order.statusConceptId,
         requesterProfileId: order.requesterProfileId ?? null,
+        suggestedPracticeSiteId: order.suggestedPracticeSiteId ?? null,
+        suggestedCareSpaceId: order.suggestedCareSpaceId ?? null,
+        suggestedCareSpaceName: order.suggestedCareSpaceId
+          ? (pointNames.get(order.suggestedCareSpaceId) ?? null)
+          : null,
         requestingTenantId: order.custodianTenantId,
         requestingTenantName: tenantNames.get(order.custodianTenantId) ?? null,
         requestedAt: order.createdAt,

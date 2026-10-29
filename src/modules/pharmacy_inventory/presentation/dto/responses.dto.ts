@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /** Respuesta genérica con solo el id del recurso creado. */
 export class IdResponseDto {
@@ -188,4 +188,27 @@ export class StatusResultDto {
    */
   @ApiProperty()
   status!: string;
+}
+
+/** Respuesta al crear o reubicar una ubicación de inventario (F5c). */
+export class LocationResponseDto {
+  /** Identificador de la ubicación. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** Versión de la fila (`If-Match` de la próxima reubicación). */
+  @ApiPropertyOptional()
+  rowVersion?: number;
+
+  /** Tipo de ubicación (`SHELF` o `WARD_STOCK`). */
+  @ApiPropertyOptional({ enum: ['SHELF', 'WARD_STOCK'] })
+  locationType?: 'SHELF' | 'WARD_STOCK';
+
+  /** Espacio donde queda la ubicación. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  careSpaceId?: string;
+
+  /** Unidad dueña. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  clinicalUnitId?: string;
 }

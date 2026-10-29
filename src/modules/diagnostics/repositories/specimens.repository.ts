@@ -9,6 +9,7 @@ import {
   SpecimenContainers,
   SpecimenContainerEvents,
   LaboratoryWorkOrderTests,
+  SpecimenCollectionEvents,
 } from '../entities';
 import { createdBy } from '../../../common';
 
@@ -356,6 +357,40 @@ export class SpecimensRepository {
         specimenId: data.specimenId,
         sequenceNumber: data.sequenceNumber,
         statusConceptId: data.statusConceptId,
+        createdAt: new Date(),
+      },
+      { partial: true },
+    );
+  }
+
+  /**
+   * Registra el evento de toma de un espécimen (F5b), con la sede y el punto donde se
+   * tomó. El modelo exige el par: no hay punto sin sede (sin flush).
+   */
+  recordCollectionEvent(
+    em: EntityManager,
+    data: {
+      specimenId: string;
+      eventTypeConceptId: string;
+      occurredAt: Date;
+      collectorProfileId?: string;
+      collectionSiteId?: string;
+      collectionCareSpaceId?: string;
+      bodySiteConceptId?: string;
+      methodConceptId?: string;
+    },
+  ): SpecimenCollectionEvents {
+    return em.create(
+      SpecimenCollectionEvents,
+      {
+        specimenId: data.specimenId,
+        eventTypeConceptId: data.eventTypeConceptId,
+        occurredAt: data.occurredAt,
+        collectorProfileId: data.collectorProfileId,
+        collectionSiteId: data.collectionSiteId,
+        collectionCareSpaceId: data.collectionCareSpaceId,
+        bodySiteConceptId: data.bodySiteConceptId,
+        methodConceptId: data.methodConceptId,
         createdAt: new Date(),
       },
       { partial: true },

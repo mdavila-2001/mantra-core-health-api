@@ -15,6 +15,8 @@ import { AuthzModule } from '../authz/authz.module';
 // este contenedor y necesita `ClinicalReadService`, que `ClinicalModule` exporta
 // (mismo criterio que `chart` y `clinical_ext`).
 import { ClinicalModule } from '../clinical/clinical.module';
+// F5b: puntos de toma de muestras (estado operativo de los espacios).
+import { PracticeModule } from '../practice/practice.module';
 // Bytes de un archivo ya autorizado por contexto (`FileUploadService`); lo exporta
 // `CommonModule`. La descarga del resultado del titular (CL-40) lo necesita.
 import { CommonModule } from '../common/common.module';
@@ -30,6 +32,7 @@ import {
   DiagnosticsOrdersController,
   DiagnosticsPatientResultsController,
   DiagnosticsReceptionController,
+  DiagnosticsSamplePointsController,
 } from './controllers';
 import {
   DiagnosticsSpecimensService,
@@ -40,6 +43,7 @@ import {
   DiagnosticsOrdersService,
   DiagnosticsPatientResultsService,
   DiagnosticsReceptionService,
+  DiagnosticsSamplePointsService,
   DiagnosticsScopeService,
   DiagnosticsPatientAccessService,
 } from './services';
@@ -73,6 +77,7 @@ import {
     ProfilesModule,
     AuthzModule,
     ClinicalModule,
+    PracticeModule,
     CommonModule,
     DirectoryAuthorizationModule,
   ],
@@ -84,6 +89,7 @@ import {
     DiagnosticsOrdersController,
     DiagnosticsPatientResultsController,
     DiagnosticsReceptionController,
+    DiagnosticsSamplePointsController,
   ],
   providers: [
     // Repositorios
@@ -111,6 +117,7 @@ import {
     DiagnosticsOrdersService,
     DiagnosticsPatientResultsService,
     DiagnosticsReceptionService,
+    DiagnosticsSamplePointsService,
     // Alcance de tenant de los writes clínicos y política paciente–profesional.
     DiagnosticsScopeService,
     DiagnosticsPatientAccessService,

@@ -4,3 +4,6 @@ export * from './practitioner-delegates.service';
 export * from './access-requests.service';
 export * from './delegated-access-evaluation.service';
 export * from './delegation-scope.service';
+export * from './org-assignment-scope.service';
+export * from './org-assignment-read.service';
+export * from './delegated-access-events.service';

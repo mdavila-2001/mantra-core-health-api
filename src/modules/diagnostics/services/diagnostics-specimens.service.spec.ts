@@ -75,13 +75,25 @@ function build() {
     {} as any,
     refsRepo as any,
   );
+  const collectionPoints = {
+    assertCollectable: mockFn().mockResolvedValue(undefined),
+  };
   const raw = new DiagnosticsSpecimensService(
     em as any,
     repo,
     scope,
     logger as any,
+    collectionPoints as any,
   );
-  return { raw, service: inTenant(raw), tx, em, repo, refsRepo };
+  return {
+    raw,
+    service: inTenant(raw),
+    tx,
+    em,
+    repo,
+    refsRepo,
+    collectionPoints,
+  };
 }
 
 describe('DiagnosticsSpecimensService', () => {
@@ -705,6 +717,107 @@ describe('DiagnosticsSpecimensService', () => {
         d.service.recordCustodyEvent('c1', { specimenId: 's2' } as any, actor),
       );
       expect(d.repo.recordCustodyEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('F5b · punto de toma de la muestra', () => {
+    const registration = {
+      patientProfileId: 'p1',
+      custodianTenantId: T1,
+      specimenTypeConceptId: DIAG.SPECIMEN_TYPE_BLOOD_VENOUS,
+    };
+    const ready = () => {
+      const d = build();
+      d.repo.createSpecimen.mockReturnValue({
+        id: 's1',
+        statusConceptId: DIAG.SPECIMEN_COLLECTED,
+        collectedAt: new Date(),
+      });
+      d.repo.recordCollectionEvent = mockFn();
+      d.tx.execute = mockFn().mockResolvedValue([{ id: 'site-1' }]);
+      return d;
+    };
+
+    it('registra el evento de toma con la sede y el punto cuando son válidos', async () => {
+      const d = ready();
+      await d.service.createSpecimen(
+        {
+          ...registration,
+          collectionSiteId: 'site-1',
+          collectionCareSpaceId: 'box-1',
+        } as any,
+        actor,
+      );
+      expect(d.collectionPoints.assertCollectable).toHaveBeenCalledWith(
+        d.tx,
+        T1,
+        'site-1',
+        'box-1',
+      );
+      expect(d.repo.recordCollectionEvent).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          specimenId: 's1',
+          collectionSiteId: 'site-1',
+          collectionCareSpaceId: 'box-1',
+        }),
+      );
+    });
+
+    it('sin sede ni punto no se registra evento de toma', async () => {
+      const d = ready();
+      await d.service.createSpecimen(registration as any, actor);
+      expect(d.repo.recordCollectionEvent).not.toHaveBeenCalled();
+    });
+
+    it('un punto sin sede es 422 (el modelo exige el par) y no escribe', async () => {
+      const d = ready();
+      await expect(
+        d.service.createSpecimen(
+          { ...registration, collectionCareSpaceId: 'box-1' } as any,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        response: expect.objectContaining({
+          reason: 'COLLECTION_POINT_REQUIRES_SITE',
+        }),
+      });
+      expect(d.repo.createSpecimen).not.toHaveBeenCalled();
+    });
+
+    it('una sede que no es del tenant que toma la muestra es 404 y no escribe', async () => {
+      const d = ready();
+      d.tx.execute = mockFn().mockResolvedValue([]);
+      await expect(
+        d.service.createSpecimen(
+          { ...registration, collectionSiteId: 'site-ajena' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.tx.execute.mock.calls[0][1]).toEqual(['site-ajena', T1]);
+      expect(d.repo.createSpecimen).not.toHaveBeenCalled();
+    });
+
+    it('un punto que la sede no tiene (422) frena el alta', async () => {
+      const d = ready();
+      d.collectionPoints.assertCollectable.mockRejectedValue(
+        new PreconditionFailedException(
+          'x',
+          undefined,
+          'COLLECTION_POINT_INVALID',
+        ),
+      );
+      await expect(
+        d.service.createSpecimen(
+          {
+            ...registration,
+            collectionSiteId: 'site-1',
+            collectionCareSpaceId: 'otro',
+          } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.repo.createSpecimen).not.toHaveBeenCalled();
     });
   });
 });

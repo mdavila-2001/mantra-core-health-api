@@ -37,6 +37,10 @@ export interface CreateLocationData {
    * Identificador asociado a status concept.
    */
   statusConceptId: string;
+  /** Espacio donde queda la ubicación (F5c). */
+  careSpaceId?: string;
+  /** Unidad dueña de la ubicación (F5c). */
+  clinicalUnitId?: string;
   /**
    * Identificador asociado a actor user.
    */
@@ -76,6 +80,8 @@ export class LocationsRepository {
         temperatureZoneConceptId: data.temperatureZoneConceptId,
         controlledAccess: data.controlledAccess,
         statusConceptId: data.statusConceptId,
+        careSpaceId: data.careSpaceId,
+        clinicalUnitId: data.clinicalUnitId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

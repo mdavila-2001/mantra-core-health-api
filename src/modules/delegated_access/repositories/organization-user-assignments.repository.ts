@@ -84,19 +84,34 @@ export class OrganizationUserAssignmentsRepository {
     return em.findOne(OrganizationUserAssignments, { id });
   }
 
-  /** Asignación ACTIVA que solaparía el mismo rol+scope para la misma membresía. */
+  /**
+   * Asignación ACTIVA que repetiría el mismo rol, alcance **y objetivo** para la
+   * misma membresía (dos espacios distintos no se pisan).
+   */
   findActiveOverlap(
     em: EntityManager,
     tenantMembershipId: string,
     assignmentRoleConceptId: string,
     accessScopeConceptId: string,
     activeStatusConceptId: string,
+    targets: {
+      practiceId?: string | null;
+      practiceSiteId?: string | null;
+      clinicalUnitId?: string | null;
+      careSpaceId?: string | null;
+    } = {},
+    excludeId?: string,
   ): Promise<OrganizationUserAssignments | null> {
     return em.findOne(OrganizationUserAssignments, {
       tenantMembershipId,
       assignmentRoleConceptId,
       accessScopeConceptId,
       statusConceptId: activeStatusConceptId,
+      practiceId: targets.practiceId ?? null,
+      practiceSiteId: targets.practiceSiteId ?? null,
+      clinicalUnitId: targets.clinicalUnitId ?? null,
+      careSpaceId: targets.careSpaceId ?? null,
+      ...(excludeId ? { id: { $ne: excludeId } } : {}),
     });
   }
 

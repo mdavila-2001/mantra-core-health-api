@@ -214,4 +214,54 @@ describe('resolveDatabaseViolation', () => {
     ).toBeUndefined();
     expect(resolveDatabaseViolation({ sqlstate: '40001' })).toBeUndefined();
   });
+
+  it('F5: los CHECK del par (punto de toma ↔ sede, alcance ↔ objetivo) son 422 con su reason', () => {
+    const checks: Array<[string, string]> = [
+      [
+        'ck_service_requests_suggested_care_space_requires_site',
+        'COLLECTION_POINT_REQUIRES_SITE',
+      ],
+      [
+        'ck_specimen_collection_events_care_space_requires_site',
+        'COLLECTION_POINT_REQUIRES_SITE',
+      ],
+      [
+        'ck_org_user_assignments_scope_target',
+        'ASSIGNMENT_SCOPE_TARGET_REQUIRED',
+      ],
+    ];
+    for (const [constraint, reason] of checks) {
+      expect(
+        resolveDatabaseViolation({ sqlstate: '23514', constraint }),
+      ).toMatchObject({ status: HttpStatus.UNPROCESSABLE_ENTITY, reason });
+    }
+  });
+
+  it('F5: jefe de servicio único y botiquín único responden 409 con el reason del contrato', () => {
+    expect(
+      resolveDatabaseViolation({
+        sqlstate: '23P01',
+        constraint: 'ex_org_user_assignments_unit_head',
+      }),
+    ).toMatchObject({ status: 409, reason: 'UNIT_HEAD_ALREADY_ASSIGNED' });
+    expect(
+      resolveDatabaseViolation({
+        sqlstate: '23505',
+        constraint: 'ux_inventory_locations_ward_stock_unit',
+      }),
+    ).toMatchObject({ status: 409, reason: 'WARD_STOCK_ALREADY_EXISTS' });
+  });
+
+  it('F5: los triggers de coherencia de sede/tenant de F5 son 404 sin revelar el motivo', () => {
+    for (const message of [
+      'service_requests.suggested_care_space_id: el espacio no existe en la sede sugerida',
+      'specimen_collection_events.collection_care_space_id: el espacio no existe en la sede de la toma',
+      'inventory_locations.care_space_id: el espacio no existe en el tenant de la farmacia',
+      'organization_user_assignments.care_space_id: el espacio no existe en el tenant de la membresía',
+    ]) {
+      expect(
+        resolveDatabaseViolation({ sqlstate: '23503', message }),
+      ).toMatchObject({ status: 404, reason: CROSS_TENANT_REASON });
+    }
+  });
 });

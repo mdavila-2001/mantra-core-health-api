@@ -1,0 +1,138 @@
+asyncapi: 3.1.0
+info:
+  title: ALOVIDA Health API — Eventos de laboratorio, farmacia y acceso delegado por espacio (F5b, F5c, F5g)
+  version: '0.1.0'
+  description: >
+    Fragmento de eventos de dominio de las franjas F5b (puntos de toma de muestras), F5c (ubicación
+    del stock en un espacio) y F5g (alcance de las asignaciones de usuario). Se publican al outbox
+    transaccional (`messaging.domain_events`) DENTRO de la transacción de la mutación (INV-43): el
+    cambio y su evento se confirman juntos o ninguno. Este archivo es un fragmento: el integrador lo
+    fusiona en `asyncapi/asyncapi.yaml`; esta rama no edita ese archivo. Los payloads llevan ids,
+    códigos y versiones; nunca nombres de personas, datos clínicos ni existencias por paciente.
+  license:
+    name: UNLICENSED
+
+defaultContentType: application/json
+
+channels:
+  clinicalServiceRequestCollectionPoint:
+    address: clinical.service_request
+    description: >
+      Punto de toma de muestras sugerido en una orden de laboratorio. El envelope real es
+      `messaging.domain_events` (eventType, aggregateType, aggregateId, payloadJson).
+    messages:
+      CollectionPointSuggested:
+        $ref: '#/components/messages/CollectionPointSuggested'
+  pharmacyInventoryLocation:
+    address: pharmacy_inventory.location
+    description: Ubicación del stock de farmacia en un espacio clínico (depósito o botiquín de unidad).
+    messages:
+      InventoryLocationLocated:
+        $ref: '#/components/messages/InventoryLocationLocated'
+      InventoryLocationRelocated:
+        $ref: '#/components/messages/InventoryLocationRelocated'
+  delegatedAccessAssignment:
+    address: delegated_access.assignment
+    description: Cambios de alcance de las asignaciones de usuario de la organización.
+    messages:
+      AssignmentScopeChanged:
+        $ref: '#/components/messages/AssignmentScopeChanged'
+
+operations:
+  publishCollectionPointSuggested:
+    action: send
+    channel:
+      $ref: '#/channels/clinicalServiceRequestCollectionPoint'
+    summary: >
+      `ServiceRequestsService.create` publica el punto de toma (explícito o el primero disponible de la
+      sede) en la transacción del alta de la orden.
+  publishInventoryLocationEvent:
+    action: send
+    channel:
+      $ref: '#/channels/pharmacyInventoryLocation'
+    summary: >
+      `CreateInventoryLocationUseCase` publica `located` y `RelocateInventoryLocationUseCase` publica
+      `relocated` en la transacción que cambia la ubicación; la reubicación no mueve líneas del ledger.
+  publishAssignmentScopeChanged:
+    action: send
+    channel:
+      $ref: '#/channels/delegatedAccessAssignment'
+    summary: >
+      `OrgUserAssignmentsService` publica el alta, el cambio de alcance, de supervisor y la suspensión
+      de una asignación en la misma transacción que la escribe.
+
+components:
+  messages:
+    CollectionPointSuggested:
+      name: CollectionPointSuggested
+      title: clinical.service_request.collection_point_suggested
+      summary: 'La orden de laboratorio quedó con un punto de toma sugerido en la sede sugerida.'
+      payload:
+        type: object
+        required: [serviceRequestId, suggestedPracticeSiteId, suggestedCareSpaceId, source]
+        properties:
+          serviceRequestId: { type: string, format: uuid }
+          suggestedPracticeSiteId: { type: string, format: uuid }
+          suggestedCareSpaceId: { type: string, format: uuid }
+          source:
+            type: string
+            enum: [EXPLICIT, DEFAULT]
+            description: 'EXPLICIT: lo eligió quien pidió la orden. DEFAULT: el primer punto disponible de la sede.'
+    InventoryLocationLocated:
+      name: InventoryLocationLocated
+      title: pharmacy_inventory.location.located
+      summary: 'Una ubicación de inventario quedó ligada a un espacio o es el botiquín de una unidad.'
+      payload:
+        type: object
+        required: [locationId, tenantId, pharmacySiteId, practiceSiteId, locationType, rowVersion]
+        properties:
+          locationId: { type: string, format: uuid }
+          tenantId: { type: string, format: uuid }
+          pharmacySiteId: { type: string, format: uuid }
+          practiceSiteId: { type: string, format: uuid }
+          locationType: { type: string, enum: [SHELF, WARD_STOCK] }
+          careSpaceId: { type: [string, 'null'], format: uuid }
+          clinicalUnitId: { type: [string, 'null'], format: uuid }
+          rowVersion: { type: integer }
+    InventoryLocationRelocated:
+      name: InventoryLocationRelocated
+      title: pharmacy_inventory.location.relocated
+      summary: 'La ubicación cambió de espacio; el stock la siguió (ninguna línea del ledger se movió).'
+      payload:
+        type: object
+        required: [locationId, tenantId, pharmacySiteId, practiceSiteId, locationType, toCareSpaceId, rowVersion]
+        properties:
+          locationId: { type: string, format: uuid }
+          tenantId: { type: string, format: uuid }
+          pharmacySiteId: { type: string, format: uuid }
+          practiceSiteId: { type: string, format: uuid }
+          locationType: { type: string, enum: [SHELF, WARD_STOCK] }
+          clinicalUnitId: { type: [string, 'null'], format: uuid }
+          fromCareSpaceId: { type: [string, 'null'], format: uuid }
+          toCareSpaceId: { type: string, format: uuid }
+          rowVersion: { type: integer }
+    AssignmentScopeChanged:
+      name: AssignmentScopeChanged
+      title: delegated_access.assignment.scope_changed
+      summary: 'Una asignación de usuario cambió de alcance, de supervisor o de estado (o se creó).'
+      payload:
+        type: object
+        required: [assignmentId, tenantId, change, role, rowVersion, to]
+        properties:
+          assignmentId: { type: string, format: uuid }
+          tenantId: { type: string, format: uuid }
+          change: { type: string, enum: [CREATED, RETARGETED, SUPERVISOR_CHANGED, SUSPENDED] }
+          role: { type: string, example: HOUSEKEEPING }
+          rowVersion: { type: integer }
+          from: { $ref: '#/components/schemas/AssignmentScopeSnapshot' }
+          to: { $ref: '#/components/schemas/AssignmentScopeSnapshot' }
+  schemas:
+    AssignmentScopeSnapshot:
+      type: [object, 'null']
+      properties:
+        scope: { type: string, enum: [TENANT, PRACTICE, SITE, UNIT, SPACE] }
+        practiceId: { type: [string, 'null'], format: uuid }
+        practiceSiteId: { type: [string, 'null'], format: uuid }
+        clinicalUnitId: { type: [string, 'null'], format: uuid }
+        careSpaceId: { type: [string, 'null'], format: uuid }
+        status: { type: string, enum: [ACTIVE, SUSPENDED] }
