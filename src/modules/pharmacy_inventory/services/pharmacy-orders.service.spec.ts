@@ -1531,6 +1531,15 @@ describe('PharmacyOrdersService', () => {
         { id: 'admin', roles: ['SECURITY_ADMIN'] },
         [PHARMACY],
       ],
+      [
+        'personal con el rol concedido en otra organización',
+        {
+          id: 'user-otro',
+          roles: ['PHARMACY_STAFF'],
+          scopedRoles: { 'tenant-a': ['PHARMACY_STAFF'] },
+        },
+        [PHARMACY],
+      ],
     ])('%s recibe el mismo 404', async (_case, actor, pharmacies) => {
       const d = build();
       d.ordersRepo.findOrderById.mockResolvedValue(order());

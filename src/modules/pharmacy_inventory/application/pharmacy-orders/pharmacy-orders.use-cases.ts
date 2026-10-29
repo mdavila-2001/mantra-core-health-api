@@ -9,6 +9,7 @@ import {
   ResourceNotFoundException,
   deterministicId,
   requireTenantId,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../../common';
@@ -654,14 +655,21 @@ export class PharmacyOrdersUseCases {
     const isOwner =
       actor.patientProfileId !== undefined &&
       order.patientProfileId === actor.patientProfileId;
-    const isPharmacyStaff = actor.roles.includes(CHAT_STAFF_ROLE);
+    // El rol se evalúa con su ámbito (la regla del `RolesGuard`): un
+    // PHARMACY_STAFF concedido en otra organización no atiende en esta.
+    const tenantId = isOwner ? undefined : requireTenantId();
+    const isPharmacyStaff = roleAuthorizesInTenant(
+      actor,
+      CHAT_STAFF_ROLE,
+      tenantId,
+    );
     if (!isOwner && !isPharmacyStaff) throw orderNotFound(id);
 
     // El titular ve su pedido desde cualquier organización; el personal, sólo
     // si la farmacia del pedido es del tenant activo de su request.
     const [pharmacy] = await this.ordersRepo.findPharmaciesByIdsInTenant(
       em,
-      isOwner ? undefined : requireTenantId(),
+      tenantId,
       [order.pharmacyId],
     );
     if (!pharmacy) throw orderNotFound(id);
