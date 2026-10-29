@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
-import { SeedBootstrapService } from './seed-bootstrap.service';
+import { SeedBootstrapService, countInserted } from './seed-bootstrap.service';
 import { SeedCoreState } from './seed-core.state';
 
 /** Los seeds de la cadena, en el orden en que el orquestador los corre. */
@@ -38,6 +38,7 @@ const STEPS = [
   'boMedicalSpecialties',
   'bootstrapAdmin',
   'providerAccounts',
+  'insurerAccounts',
   'people',
   'directoryNetworks',
   'practiceDefaultServices',
@@ -62,7 +63,19 @@ function loggerFake() {
  *
  * @param fail - Nombres de los seeds que deben lanzar en esta corrida.
  */
-function build(fail: Step[] = [], coreState?: SeedCoreState) {
+function build(
+  fail: Step[] = [],
+  coreState?: SeedCoreState,
+  extras: {
+    padronOrganizations?: { run: jest.Mock<() => Promise<unknown>> };
+    padronOrgAdmins?: { run: jest.Mock<() => Promise<unknown>> };
+    searchIndex?: {
+      reindexAll: jest.Mock<
+        (opts?: { recreate?: boolean }) => Promise<unknown>
+      >;
+    };
+  } = {},
+) {
   const logger = loggerFake();
   const double = Object.fromEntries(
     STEPS.map((name) => [
@@ -104,6 +117,7 @@ function build(fail: Step[] = [], coreState?: SeedCoreState) {
     double.platformPermissions as never,
     double.bootstrapAdmin as never,
     double.providerAccounts as never,
+    double.insurerAccounts as never,
     double.clinicalForms as never,
     double.boMedicalSpecialties as never,
     double.practiceDefaultServices as never,
@@ -113,6 +127,9 @@ function build(fail: Step[] = [], coreState?: SeedCoreState) {
     double.admissionRequirements as never,
     logger as never,
     coreState,
+    extras.padronOrganizations as never,
+    extras.padronOrgAdmins as never,
+    extras.searchIndex as never,
   );
 
   return { service, dobles: double, logger };
@@ -129,6 +146,7 @@ const CONTENT: readonly Step[] = [
   'clinicalForms',
   'boMedicalSpecialties',
   'providerAccounts',
+  'insurerAccounts',
   'people',
   'directoryNetworks',
   'practiceDefaultServices',
@@ -480,6 +498,233 @@ describe('SeedBootstrapService', () => {
 
       expect(summary.failed).toBe(1);
       expect(summary.coreFailed).toEqual(['mensajería']);
+    });
+  });
+});
+
+describe('SeedBootstrapService · seed-cli --only y conteos por paso', () => {
+  const contentOriginal = process.env.SEED_CONTENT_ON_BOOT;
+  const reindexOriginal = process.env.SEED_SEARCH_REINDEX;
+
+  afterEach(() => {
+    if (contentOriginal === undefined) delete process.env.SEED_CONTENT_ON_BOOT;
+    else process.env.SEED_CONTENT_ON_BOOT = contentOriginal;
+    if (reindexOriginal === undefined) delete process.env.SEED_SEARCH_REINDEX;
+    else process.env.SEED_SEARCH_REINDEX = reindexOriginal;
+  });
+
+  const padron = () => ({
+    run: jest
+      .fn<() => Promise<unknown>>()
+      .mockResolvedValue({ created: 523, existing: 0 }),
+  });
+
+  it('corre únicamente los pasos pedidos, sin el catálogo si no se nombra', async () => {
+    const organizations = padron();
+    const { service, dobles: doubles } = build([], undefined, {
+      padronOrganizations: organizations,
+    });
+
+    const summary = await service.run({ only: ['padron-organizaciones'] });
+
+    expect(summary.steps.map((step) => step.name)).toEqual([
+      'organizaciones del padrón',
+    ]);
+    expect(organizations.run).toHaveBeenCalledTimes(1);
+    for (const name of STEPS) {
+      expect(doubles[name].run).not.toHaveBeenCalled();
+    }
+  });
+
+  it('acepta varios ids y el id del catálogo de conceptos', async () => {
+    const organizations = padron();
+    const { service, dobles: doubles } = build([], undefined, {
+      padronOrganizations: organizations,
+    });
+
+    const summary = await service.run({
+      only: [
+        'catalogo-de-conceptos',
+        'padron-organizaciones',
+        'padron-de-personas',
+      ],
+    });
+
+    expect(summary.steps.map((step) => step.name)).toEqual([
+      'catálogo de conceptos',
+      'padrón de personas',
+      'organizaciones del padrón',
+    ]);
+    expect(doubles.terminology.run).toHaveBeenCalledTimes(1);
+    expect(doubles.people.run).toHaveBeenCalledTimes(1);
+  });
+
+  it('un id desconocido falla nombrando los válidos y no corre nada', async () => {
+    const { service, dobles: doubles } = build();
+
+    await expect(service.run({ only: ['no-existe'] })).rejects.toThrow(
+      /desconocidos: no-existe.*catalogo-de-conceptos/,
+    );
+    expect(doubles.terminology.run).not.toHaveBeenCalled();
+  });
+
+  it('pedir un paso de contenido por id lo corre aunque el contenido esté apagado', async () => {
+    process.env.SEED_CONTENT_ON_BOOT = 'false';
+    const { service, dobles: doubles } = build();
+
+    const summary = await service.run({ only: ['padron-de-personas'] });
+
+    expect(doubles.people.run).toHaveBeenCalledTimes(1);
+    expect(summary.skippedContent).toBeUndefined();
+  });
+
+  it('pedir un paso opt-in por id lo habilita aunque su variable esté apagada; sin --only usa la suya', async () => {
+    const organizations = padron();
+    const admins = padron();
+    const { service, dobles: doubles } = build([], undefined, {
+      padronOrganizations: organizations,
+      padronOrgAdmins: admins,
+    });
+
+    await service.run({
+      only: [
+        'padron-organizaciones',
+        'padron-administradores',
+        'padron-de-personas',
+        'directorio-de-redes-de-aseguradoras',
+      ],
+    });
+
+    const argsOf = (mock: unknown) =>
+      (mock as jest.Mock<(...args: unknown[]) => unknown>).mock.calls;
+    expect(argsOf(organizations.run)).toEqual([[true]]);
+    expect(argsOf(admins.run)).toEqual([[undefined, true]]);
+    expect(argsOf(doubles.people.run)).toEqual([[true]]);
+    expect(argsOf(doubles.directoryNetworks.run)).toEqual([[true]]);
+
+    organizations.run.mockClear();
+    await service.run();
+    expect(argsOf(organizations.run)).toEqual([[undefined]]);
+  });
+
+  it('countInserted suma lo escrito y no lo que el paso solo encontró hecho', () => {
+    expect(
+      countInserted({
+        created: 3,
+        verified: 0,
+        showcases: 2,
+        existing: 500,
+        adopted: 20,
+        adoptedTypeMismatch: 4,
+        practitionersExisting: 9,
+        pendingForPapers: 17,
+        organizationMissing: 6,
+        skipped: 8,
+        orphanRelationships: 1,
+      }),
+    ).toBe(5);
+    expect(countInserted({ existing: 3 })).toBeNull();
+  });
+
+  it('el código de salida sigue el resumen: un paso pedido que falla cuenta como fallo', async () => {
+    const { service } = build(['people']);
+
+    const summary = await service.run({ only: ['padron-de-personas'] });
+
+    expect(summary.failed).toBe(1);
+  });
+
+  it('cada paso informa los contadores que devolvió, para comparar entornos', async () => {
+    const organizations = padron();
+    const { service } = build([], undefined, {
+      padronOrganizations: organizations,
+    });
+
+    const summary = await service.run({ only: ['padron-organizaciones'] });
+
+    expect(summary.steps[0].counts).toEqual({ created: 523, existing: 0 });
+  });
+
+  it('sin los servicios opcionales la cadena es la de siempre', async () => {
+    const { service } = build();
+
+    const summary = await service.run();
+
+    const names = summary.steps.map((step) => step.name);
+    expect(names).not.toContain('organizaciones del padrón');
+    expect(names).not.toContain('reindexado del buscador público');
+  });
+
+  describe('reindexado del buscador', () => {
+    const search = () => ({
+      reindexAll: jest
+        .fn<(opts?: { recreate?: boolean }) => Promise<unknown>>()
+        .mockResolvedValue({
+          indexed: 10,
+          total: 10,
+          confirmed: 10,
+          errors: false,
+        }),
+    });
+
+    it('apagado por defecto: el paso corre pero no toca el buscador', async () => {
+      delete process.env.SEED_SEARCH_REINDEX;
+      const searchIndex = search();
+      const { service } = build([], undefined, { searchIndex });
+
+      const summary = await service.run();
+
+      expect(searchIndex.reindexAll).not.toHaveBeenCalled();
+      const step = summary.steps.find(
+        (entry) => entry.name === 'reindexado del buscador público',
+      );
+      expect(step?.counts).toEqual({ skipped: 1 });
+    });
+
+    it('con SEED_SEARCH_REINDEX=true reindexa al final de la cadena', async () => {
+      process.env.SEED_SEARCH_REINDEX = 'true';
+      const searchIndex = search();
+      const { service } = build([], undefined, { searchIndex });
+
+      const summary = await service.run();
+
+      expect(searchIndex.reindexAll).toHaveBeenCalledWith({ recreate: false });
+      expect(summary.steps.at(-1)?.name).toBe(
+        'reindexado del buscador público',
+      );
+      expect(summary.steps.at(-1)?.counts).toEqual({
+        indexed: 10,
+        confirmed: 10,
+      });
+    });
+
+    it('pedido con --only reindexa aunque la variable esté apagada', async () => {
+      delete process.env.SEED_SEARCH_REINDEX;
+      const searchIndex = search();
+      const { service } = build([], undefined, { searchIndex });
+
+      await service.run({ only: ['reindex-buscador'] });
+
+      expect(searchIndex.reindexAll).toHaveBeenCalledTimes(1);
+    });
+
+    it('un reindexado con errores parciales falla el paso, no se traga', async () => {
+      process.env.SEED_SEARCH_REINDEX = 'true';
+      const searchIndex = {
+        reindexAll: jest
+          .fn<(opts?: { recreate?: boolean }) => Promise<unknown>>()
+          .mockResolvedValue({
+            indexed: 8,
+            total: 10,
+            confirmed: 8,
+            errors: true,
+          }),
+      };
+      const { service } = build([], undefined, { searchIndex });
+
+      const summary = await service.run({ only: ['reindex-buscador'] });
+
+      expect(summary.failed).toBe(1);
     });
   });
 });

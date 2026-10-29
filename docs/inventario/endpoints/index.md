@@ -2,11 +2,11 @@
 
 # Inventario de endpoints
 
-Se inventarían **1621 operaciones HTTP** en **72 módulos**: 1612 publicadas en el contrato OpenAPI y 9 que existen sólo en el código.
+Se inventarían **1627 operaciones HTTP** en **72 módulos**: 1618 publicadas en el contrato OpenAPI y 9 que existen sólo en el código.
 
-- Con al menos una tabla identificada: 1559
-- Riesgo ALTO 199 · MEDIO 898 · BAJO 524
-- Mencionadas por al menos una prueba: 935
+- Con al menos una tabla identificada: 1565
+- Riesgo ALTO 200 · MEDIO 899 · BAJO 528
+- Mencionadas por al menos una prueba: 940
 
 Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [README del inventario](../README.md).
 
@@ -20,12 +20,12 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `auth_providers` | 12 | 1 | [auth_providers.md](auth_providers.md) |
 | `authz` | 32 | 0 | [authz.md](authz.md) |
 | `automation` | 17 | 0 | [automation.md](automation.md) |
-| `billing` | 36 | 5 | [billing.md](billing.md) |
+| `billing` | 38 | 5 | [billing.md](billing.md) |
 | `chart` | 23 | 3 | [chart.md](chart.md) |
 | `clinical` | 42 | 1 | [clinical.md](clinical.md) |
 | `clinical_ext` | 32 | 2 | [clinical_ext.md](clinical_ext.md) |
 | `common` | 19 | 6 | [common.md](common.md) |
-| `community` | 102 | 29 | [community.md](community.md) |
+| `community` | 104 | 29 | [community.md](community.md) |
 | `consent` | 27 | 0 | [consent.md](consent.md) |
 | `content_packs` | 2 | 1 | [content_packs.md](content_packs.md) |
 | `crm` | 16 | 0 | [crm.md](crm.md) |
@@ -59,7 +59,7 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `payments` | 14 | 1 | [payments.md](payments.md) |
 | `pharma_lab` | 76 | 6 | [pharma_lab.md](pharma_lab.md) |
 | `pharmacy` | 33 | 3 | [pharmacy.md](pharmacy.md) |
-| `pharmacy_inventory` | 29 | 1 | [pharmacy_inventory.md](pharmacy_inventory.md) |
+| `pharmacy_inventory` | 30 | 2 | [pharmacy_inventory.md](pharmacy_inventory.md) |
 | `platform_ops` | 15 | 0 | [platform_ops.md](platform_ops.md) |
 | `polyglot_storage` | 15 | 0 | [polyglot_storage.md](polyglot_storage.md) |
 | `practice` | 37 | 4 | [practice.md](practice.md) |
@@ -75,7 +75,7 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `reporting` | 12 | 0 | [reporting.md](reporting.md) |
 | `scheduling` | 66 | 3 | [scheduling.md](scheduling.md) |
 | `search_platform` | 4 | 0 | [search_platform.md](search_platform.md) |
-| `surveys` | 17 | 2 | [surveys.md](surveys.md) |
+| `surveys` | 18 | 2 | [surveys.md](surveys.md) |
 | `system_context` | 13 | 0 | [system_context.md](system_context.md) |
 | `system_ops` | 24 | 1 | [system_ops.md](system_ops.md) |
 | `telemetry` | 25 | 8 | [telemetry.md](telemetry.md) |

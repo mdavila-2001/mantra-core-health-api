@@ -18,13 +18,13 @@ import { SessionValidator } from '../../src/common/auth/session-validator';
 import { TokenService } from '../../src/common/auth/token.service';
 import { AllExceptionsFilter } from '../../src/common/filters/all-exceptions.filter';
 import { INVENTARIO_DIR_ENV } from '../../src/modules/data_catalog/data_catalog.constants';
-import { InternalCatalogInventoryController } from '../../src/modules/data_catalog/controllers/internal-catalog.controller';
-import { InventoryRepository } from '../../src/modules/data_catalog/inventory/inventory.repository';
-import { CatalogInventoryRepository } from '../../src/modules/data_catalog/repositories/catalog-inventory.repository';
-import { CatalogRepository } from '../../src/modules/data_catalog/repositories/catalog.repository';
-import { CatalogClassificationService } from '../../src/modules/data_catalog/services/catalog-classification.service';
-import { CatalogScanService } from '../../src/modules/data_catalog/services/catalog-scan.service';
-import { InventoryImportService } from '../../src/modules/data_catalog/services/inventory-import.service';
+import { InternalCatalogInventoryController } from '../../src/modules/data_catalog/presentation/controllers/internal-catalog.controller';
+import { InventoryRepository } from '../../src/modules/data_catalog/infrastructure/repositories/inventory.repository';
+import { CatalogInventoryRepository } from '../../src/modules/data_catalog/infrastructure/repositories/catalog-inventory.repository';
+import { CatalogRepository } from '../../src/modules/data_catalog/infrastructure/repositories/catalog.repository';
+import { CatalogClassificationService } from '../../src/modules/data_catalog/application/catalog-classification.service';
+import { CatalogScanService } from '../../src/modules/data_catalog/application/catalog-scan.service';
+import { InventoryImportService } from '../../src/modules/data_catalog/application/inventory-import.service';
 import { TracingService } from '../../src/observability';
 
 /**

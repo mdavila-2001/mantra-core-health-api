@@ -5,6 +5,8 @@ import type { AuthenticatedUser } from '../../../../common';
 import { CommunityBookingChatService } from '../../../community/services';
 import type { BookingChatPort } from '../../application/ports/booking-chat.port';
 import { SchedulingNoticeRepository } from '../repositories/scheduling-notice.repository';
+import { bookingConfirmationChatText } from '../../domain/notices/chat-messages';
+import { loadAgendaNoticesEnv } from '../config/agenda-notices.env';
 
 /**
  * Puerto del chat de citas contra `community`: resuelve las dos cuentas de la
@@ -15,6 +17,8 @@ import { SchedulingNoticeRepository } from '../repositories/scheduling-notice.re
  */
 @Injectable()
 export class CommunityBookingChatAdapter implements BookingChatPort {
+  private readonly env = loadAgendaNoticesEnv();
+
   constructor(
     private readonly em: EntityManager,
     private readonly noticeRepo: SchedulingNoticeRepository,
@@ -49,7 +53,19 @@ export class CommunityBookingChatAdapter implements BookingChatPort {
             practitionerProfileId: actor.practitionerProfileId,
           },
           pacienteUserId,
-          texto: `Su cita con ${cita.resourceLabel} del ${cuando} quedó confirmada.`,
+          // Con emojis y el enlace a la cita: el frontend lo pinta como botón
+          // «Ir a la cita» para los dos lados del hilo.
+          texto: bookingConfirmationChatText(
+            {
+              bookingId: cita.bookingId,
+              resourceLabel: cita.resourceLabel,
+              when: cuando,
+              ...(cita.siteLabel === undefined
+                ? {}
+                : { siteLabel: cita.siteLabel }),
+            },
+            this.env.webAppBaseUrl,
+          ),
         },
         actor,
       );

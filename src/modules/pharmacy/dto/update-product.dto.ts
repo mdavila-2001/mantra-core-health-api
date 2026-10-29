@@ -117,8 +117,7 @@ export class UpdateProductDto {
   @ApiPropertyOptional({
     description:
       'Precio de venta en bolivianos (número o texto decimal, hasta 2 decimales); `null` lo quita. Se versiona en la lista pública `CATALOGO`.',
-    oneOf: [{ type: 'number' }, { type: 'string' }],
-    nullable: true,
+    oneOf: [{ type: 'number', nullable: true }, { type: 'string' }],
     example: 12.5,
   })
   @IsOptional()

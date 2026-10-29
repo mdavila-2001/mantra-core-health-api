@@ -1229,6 +1229,12 @@ const TENANT_ESCRIBE_EN: readonly { table: string; column: string }[] = [
   // El orden relativo a `tenant_affiliation_documents` es indiferente: la
   // recursión por FK borra al representante antes del corte de ciclos.
   { table: 'directory.tenant_legal_representatives', column: 'tenant_id' },
+  // Establecimiento médico declarado en el alta (HOSPITAL, CLINIC,
+  // MEDICAL_OFFICE, NURSING, HEALTH_OTHER): la fila del establecimiento y sus
+  // sedes declaradas cuelgan del tenant por FK. Las sedes primero, porque
+  // también apuntan al establecimiento.
+  { table: 'directory.tenant_medical_facility_sites', column: 'tenant_id' },
+  { table: 'directory.tenant_medical_facilities', column: 'tenant_id' },
   // Sucursales del alta (P51: las del laboratorio; P50: las de la farmacia):
   // `materializeProfile` y el alta de farmacia las crean en
   // `directory.branches` con FK al tenant; sin esta entrada el borrado del

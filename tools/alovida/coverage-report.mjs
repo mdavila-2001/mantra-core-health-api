@@ -56,7 +56,7 @@ const moduleOf = (p) => p.match(/modules\/([^/]+)\//)?.[1] ?? '';
  * el triage 2026-07). Ver comentario equivalente en `guardrails.mjs`.
  */
 const AUTHN_NON_ROLE_ALLOWLIST =
-  /modules\/(telemetry|community|common)\/controllers\/|modules\/identity_assurance\/controllers\/identity-self-service\.controller\.ts|modules\/audio_assets\/controllers\/audio-assets\.controller\.ts/;
+  /modules\/telemetry\/presentation\/controllers\/|modules\/(community|common)\/controllers\/|modules\/identity_assurance\/controllers\/identity-self-service\.controller\.ts|modules\/audio_assets\/presentation\/controllers\/audio-assets\.controller\.ts/;
 const GLOBAL_JWT_GUARD = (() => {
   try {
     const m = readFileSync(

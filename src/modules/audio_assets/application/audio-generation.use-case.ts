@@ -1,4 +1,4 @@
-import { Injectable, Optional } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import {
   StorageWorkerPublicationService,
   type RemotePublicationProof,
@@ -7,9 +7,12 @@ import { loadStorageEnv } from '../../../common/storage/storage.env';
 import { StorageLifecycleDenied } from '../../../common/storage/storage-lifecycle.protocol';
 import { ResourceNotFoundException } from '../../../common';
 import { loadAudioEnv } from '../audio.env';
-import { AudioValueCipherService } from '../infrastructure/audio-value-cipher.service';
-import { AudioAssetsRepository } from '../repositories/audio-assets.repository';
+import { AudioAssetsRepository } from '../infrastructure/repositories/audio-assets.repository';
 import { AudioBudgetPolicy } from './audio-budget.policy';
+import {
+  AUDIO_VALUE_CIPHER_PORT,
+  type AudioValueCipherPort,
+} from './ports/audio-value-cipher.port';
 
 export type PrepareAudioGenerationResult =
   | { action: 'SKIP_READY' }
@@ -34,7 +37,8 @@ export class AudioGenerationUseCase {
   constructor(
     private readonly repository: AudioAssetsRepository,
     private readonly budget: AudioBudgetPolicy,
-    private readonly cipher: AudioValueCipherService,
+    @Inject(AUDIO_VALUE_CIPHER_PORT)
+    private readonly cipher: AudioValueCipherPort,
     @Optional() private readonly publication?: StorageWorkerPublicationService,
   ) {}
 

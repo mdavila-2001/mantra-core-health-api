@@ -2,97 +2,97 @@
   "AdminPortalController_arbol": {
     "operacion": "GET /admin/portal/operaciones/:id/arbol",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_deriva": {
     "operacion": "GET /admin/portal/catalogo/deriva",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_detalleDeHallazgo": {
     "operacion": "GET /admin/portal/flujos/hallazgos/:id",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_detalleDeOperacion": {
     "operacion": "GET /admin/portal/operaciones/:id",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_detalleDeProceso": {
     "operacion": "GET /admin/portal/flujos/:codigo",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_fichaDeTabla": {
     "operacion": "GET /admin/portal/catalogo/tablas/:schema/:tabla",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_glosario": {
     "operacion": "GET /admin/portal/glosario",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_grafo": {
     "operacion": "GET /admin/portal/flujos/:codigo/grafo",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_hallazgos": {
     "operacion": "GET /admin/portal/flujos/hallazgos",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_linaje": {
     "operacion": "GET /admin/portal/linaje",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_linajeDeTabla": {
     "operacion": "GET /admin/portal/linaje/tablas/:schema/:tabla",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_listarOperaciones": {
     "operacion": "GET /admin/portal/operaciones",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_listarProcesos": {
     "operacion": "GET /admin/portal/flujos",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_listarTablas": {
     "operacion": "GET /admin/portal/catalogo/tablas",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_mapa": {
     "operacion": "GET /admin/portal/flujos/mapa",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_version": {
     "operacion": "GET /admin/portal/version",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AppController_getHello": {
@@ -176,19 +176,19 @@
   "TelemetryOnboardingAnalyticsController_getFunnelReport": {
     "operacion": "GET /admin/analytics/onboarding/funnel",
     "motivo": "Calcula el embudo sobre los eventos de alta que el proceso acumula en memoria (`events`); no consulta la base de datos.",
-    "fuente": "src/modules/telemetry/services/telemetry-onboarding-analytics.service.ts:19",
+    "fuente": "src/modules/telemetry/application/services/telemetry-onboarding-analytics.service.ts:19",
     "revision": "manual, 2026-10-25"
   },
   "TelemetryOnboardingAnalyticsController_getHeatmapReport": {
     "operacion": "GET /admin/analytics/onboarding/heatmap",
     "motivo": "Calcula el mapa de calor sobre los eventos de alta que el proceso acumula en memoria (`events`); no consulta la base de datos.",
-    "fuente": "src/modules/telemetry/services/telemetry-onboarding-analytics.service.ts:19",
+    "fuente": "src/modules/telemetry/application/services/telemetry-onboarding-analytics.service.ts:19",
     "revision": "manual, 2026-10-25"
   },
   "TelemetryOnboardingAnalyticsController_recordEvents": {
     "operacion": "POST /telemetry/onboarding-events",
     "motivo": "Los eventos del embudo de alta se acumulan sólo en la memoria del proceso (`events`); no hay fila en Postgres.",
-    "fuente": "src/modules/telemetry/services/telemetry-onboarding-analytics.service.ts:19",
+    "fuente": "src/modules/telemetry/application/services/telemetry-onboarding-analytics.service.ts:19",
     "revision": "manual, 2026-10-25"
   },
   "TerminologyImportTemplateController_descargarPlantilla": {

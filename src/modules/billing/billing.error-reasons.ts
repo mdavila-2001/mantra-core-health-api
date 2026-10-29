@@ -99,6 +99,9 @@ export enum BillingErrorReason {
   /** El servicio del catálogo referenciado no existe (actualización). */
   SERVICE_CATALOG_ITEM_NOT_FOUND = 'SERVICE_CATALOG_ITEM_NOT_FOUND',
 
+  /** El precio de un servicio es 0: alta o corrección rechazada con 422 (FAC-06). */
+  SERVICE_CATALOG_PRICE_NOT_POSITIVE = 'SERVICE_CATALOG_PRICE_NOT_POSITIVE',
+
   /** El servicio del catálogo no existe o no es visible para el tenant/práctica del actor. */
   SERVICE_CATALOG_ITEM_NOT_VISIBLE = 'SERVICE_CATALOG_ITEM_NOT_VISIBLE',
 

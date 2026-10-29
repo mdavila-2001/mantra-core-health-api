@@ -149,9 +149,7 @@ export const HOSPITAL_CLINIC_SCHEMA: SectorDocumentSchema = {
   nombre: 'Hospitales/Clínicas',
   raizComputarizada: 'facturaHospitalClinicaComputarizadaEnLinea',
   raizElectronica: 'facturaHospitalClinicaElectronicaEnLinea',
-  cabecera: header(17, [
-    field('modalidadServicio', integerType(1, 99)),
-  ]),
+  cabecera: header(17, [field('modalidadServicio', integerType(1, 99))]),
   detalle: PURCHASE_SALE_SCHEMA.detalle,
   detalleMaximo: PURCHASE_SALE_SCHEMA.detalleMaximo,
   activo: true,
