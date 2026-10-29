@@ -101,6 +101,7 @@ export class CreateTemplateUseCase {
       );
 
       const template = this.catalogRepo.createTemplate(tx, {
+        tenantId: resource.tenantId,
         resourceId,
         name: dto.name,
         validFrom: dto.validFrom ? new Date(dto.validFrom) : undefined,

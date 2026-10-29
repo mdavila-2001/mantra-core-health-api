@@ -174,12 +174,18 @@ export class CareSpaceOpsPortService implements CareSpaceOpsPort {
         lifecycleStatusConceptId: row.statusConceptId,
       });
     }
+    // Un bloqueo abierto termina en su fecha estimada para ventanas futuras; si esa fecha
+    // ya pasó (vencido) o no tiene, sigue bloqueando hasta que alguien lo cierre.
     const blocks = await tx.execute<Record<string, unknown>[]>(
       `select ${BLOCK_COLUMNS} from practice.care_space_blocks b
         where b.care_space_id = ? and b.tenant_id = ? and b.cancelled_at is null
-          and b.starts_at < ? and (b.ended_at is null or b.ended_at > ?)
+          and b.starts_at < ?
+          and (
+            coalesce(b.ended_at, case when b.expected_end_at > ? then b.expected_end_at end) is null
+            or coalesce(b.ended_at, case when b.expected_end_at > ? then b.expected_end_at end) > ?
+          )
         order by b.starts_at limit 1`,
-      [careSpaceId, tenantId, window.end, window.start],
+      [careSpaceId, tenantId, window.end, now, now, window.start],
     );
     if (blocks.length) {
       const block = toBlockRow(blocks[0]);

@@ -5,7 +5,7 @@ import {
   addDays,
   localDate,
 } from '../../src/modules/billing/domain/zoned-time';
-import { CARE_SPACE_OPS_PORT } from '../../src/modules/clinical/ports/care-space-ops.port';
+import { CARE_SPACE_OPS_PORT } from '../../src/modules/practice/services/care-space-ops.port';
 import { PERIOP } from '../../src/modules/procedures_perioperative/procedures_perioperative.concepts';
 import { CareSpaceOpsDouble } from '../doubles/care-space-ops.double';
 import { ATRIBUTOS_QUIROFANO } from './infra-f4.fixtures';

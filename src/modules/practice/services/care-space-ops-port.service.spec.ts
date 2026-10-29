@@ -187,7 +187,12 @@ describe('CareSpaceOpsPortService (el contrato que usan F3 y F4)', () => {
       const [sql, params] = d.tx.execute.mock.calls[0];
       expect(sql).toMatch(/cancelled_at is null/);
       expect(sql).toMatch(/b\.starts_at < \?/);
-      expect(params.slice(-2)).toEqual([ventana.end, ventana.start]);
+      // inicio < fin de la ventana, y el fin del bloqueo (real o estimado vigente) > inicio
+      expect(params[2]).toEqual(ventana.end);
+      expect(params[params.length - 1]).toEqual(ventana.start);
+      expect(sql).toMatch(
+        /coalesce\(b\.ended_at, case when b\.expected_end_at > \?/,
+      );
     });
 
     it('un espacio que no está activo no se reserva', async () => {

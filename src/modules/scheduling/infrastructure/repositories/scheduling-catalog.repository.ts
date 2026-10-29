@@ -126,6 +126,8 @@ export interface CreateBookingPolicyData {
  * Describe el contrato estructural de create template data.
  */
 export interface CreateTemplateData {
+  /** Tenant del recurso (columna `tenant_id` de la plantilla). */
+  tenantId: string;
   /**
    * Identificador asociado a resource.
    */
@@ -214,6 +216,8 @@ export interface CreateRuleData {
  * Describe el contrato estructural de create exception data.
  */
 export interface CreateExceptionData {
+  /** Tenant del recurso (columna `tenant_id` de la excepción). */
+  tenantId: string;
   /**
    * Identificador asociado a resource.
    */
@@ -406,6 +410,7 @@ export class SchedulingCatalogRepository {
     return em.create(
       ScheduleTemplates,
       {
+        tenantId: data.tenantId,
         resourceId: data.resourceId,
         name: data.name,
         serviceConceptId: data.serviceConceptId,
@@ -732,6 +737,7 @@ export class SchedulingCatalogRepository {
     return em.create(
       AvailabilityExceptions,
       {
+        tenantId: data.tenantId,
         resourceId: data.resourceId,
         exceptionTypeConceptId: data.exceptionTypeConceptId,
         startAt: data.startAt,

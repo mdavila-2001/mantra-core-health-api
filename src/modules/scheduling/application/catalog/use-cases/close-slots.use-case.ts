@@ -270,6 +270,7 @@ export class CloseSlotsUseCase {
       }
 
       const exception = this.catalogRepo.createException(tx, {
+        tenantId: resource.tenantId,
         resourceId,
         exceptionTypeConceptId: EXCEPTION_TYPE_CONCEPT[dto.exceptionType],
         startAt: from,

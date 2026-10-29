@@ -130,6 +130,7 @@ export class CreateExceptionUseCase {
       }
 
       const exception = this.catalogRepo.createException(tx, {
+        tenantId: resource.tenantId,
         resourceId,
         exceptionTypeConceptId: EXCEPTION_TYPE_CONCEPT[dto.exceptionType],
         startAt,
