@@ -1016,7 +1016,7 @@ describe('Catálogo de datos vivo /admin/catalog (DB real)', () => {
       const ok = await post(`/admin/catalog/objects/${objetoId}/evidence`, {
         kind: 'CODE_REFERENCE',
         reference:
-          'src/modules/data_catalog/repositories/catalog.repository.ts',
+          'src/modules/data_catalog/infrastructure/repositories/catalog.repository.ts',
         excerpt: 'insert into data_catalog.catalog_evidence_items',
       }).expect(201);
       expect(ok.body).toMatchObject({
