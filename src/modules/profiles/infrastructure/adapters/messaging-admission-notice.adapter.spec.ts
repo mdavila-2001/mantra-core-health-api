@@ -1,5 +1,12 @@
 import { jest } from '@jest/globals';
-import { PROF } from '../../profiles.concepts';
+import {
+  NOTIFICATION_CATEGORY_BY_CONCEPT,
+  NOTIFICATION_CATEGORY_CONCEPT,
+} from '../../../messaging/notifications.contract';
+import {
+  CRITICAL_ADMISSION_NOTICES,
+  type AdmissionNoticeKind,
+} from '../../application/ports/admission-notice.port';
 import { MessagingAdmissionNoticeAdapter } from './messaging-admission-notice.adapter';
 
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
@@ -46,10 +53,17 @@ describe('MessagingAdmissionNoticeAdapter', () => {
     );
     expect(inApp).toMatchObject({
       recipientUserId: 'u-doctor',
-      categoryConceptId: PROF.NOTICE_ADMISSION,
+      categoryConceptId: NOTIFICATION_CATEGORY_CONCEPT.ADMISSION,
       debounceKey: 'admission:adm-1:INFORMACION_REQUERIDA',
       relatedResourceId: 'adm-1',
     });
+    // La campana resuelve ese concepto a la categoría estable `ADMISSION`, no a null.
+    expect(NOTIFICATION_CATEGORY_BY_CONCEPT.get(inApp.categoryConceptId)).toBe(
+      'ADMISSION',
+    );
+    expect(NOTIFICATION_CATEGORY_BY_CONCEPT.get(email.categoryConceptId)).toBe(
+      'ADMISSION',
+    );
     expect(email).toMatchObject({
       debounceKey: 'admission:adm-1:INFORMACION_REQUERIDA:email',
       recipientAddress: 'dra@example.bo',
@@ -108,5 +122,46 @@ describe('MessagingAdmissionNoticeAdapter', () => {
     d.em.find.mockResolvedValue([]);
     await d.adapter.emit(NOTICE);
     expect(d.notifications.createRequest).toHaveBeenCalledTimes(1);
+  });
+
+  describe('avisos críticos: silenciar la categoría no los detiene', () => {
+    const ALL: AdmissionNoticeKind[] = [
+      'RECEIVED',
+      'INFO_REQUIRED',
+      'VERIFIED',
+      'REJECTED',
+      'SUSPENDED',
+      'REINSTATED',
+      'EXPIRED',
+      'ABANDONED',
+      'WITHDRAWN',
+    ];
+
+    it.each(ALL)(
+      '%s pide mandatory sólo si es crítico (in-app y correo)',
+      async (kind) => {
+        const d = build();
+        await d.adapter.emit({ ...NOTICE, kind });
+        const calls = d.notifications.createRequest.mock.calls as unknown[][];
+        expect(calls).toHaveLength(2);
+        for (const call of calls) {
+          expect(call[2]).toEqual({
+            mandatory: CRITICAL_ADMISSION_NOTICES.has(kind),
+          });
+        }
+      },
+    );
+
+    it('rechazo, suspensión, vencimiento, información pedida y abandono son críticos; lo informativo no', () => {
+      expect([...CRITICAL_ADMISSION_NOTICES].sort()).toEqual(
+        [
+          'ABANDONED',
+          'EXPIRED',
+          'INFO_REQUIRED',
+          'REJECTED',
+          'SUSPENDED',
+        ].sort(),
+      );
+    });
   });
 });

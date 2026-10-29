@@ -18,6 +18,31 @@ export type AdmissionNoticeKind =
   | 'ABANDONED'
   | 'WITHDRAWN';
 
+/**
+ * Los avisos que el profesional no puede silenciar con su preferencia de la
+ * categoría `ADMISSION`.
+ *
+ * Criterio: un aviso es crítico si **cambia lo que el profesional puede hacer**
+ * (rechazo, suspensión, vencimiento) o **corre contra un plazo** (información
+ * pedida: si no responde en la ventana la solicitud se abandona; abandono: la
+ * solicitud se cerró y hay que abrir otra). Los informativos —recibida,
+ * verificada, restablecida, retirada— se pueden silenciar: el estado siempre se
+ * lee, autenticado, en `GET /profiles/practitioners/me/admission`.
+ */
+export const CRITICAL_ADMISSION_NOTICES: ReadonlySet<AdmissionNoticeKind> =
+  new Set<AdmissionNoticeKind>([
+    'INFO_REQUIRED',
+    'REJECTED',
+    'SUSPENDED',
+    'EXPIRED',
+    'ABANDONED',
+  ]);
+
+/** ¿Este aviso se entrega aunque la categoría esté silenciada? */
+export function isCriticalAdmissionNotice(kind: AdmissionNoticeKind): boolean {
+  return CRITICAL_ADMISSION_NOTICES.has(kind);
+}
+
 /** Un aviso listo para emitir. */
 export interface AdmissionNotice {
   readonly kind: AdmissionNoticeKind;
