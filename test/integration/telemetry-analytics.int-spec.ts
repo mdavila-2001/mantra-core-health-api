@@ -5,8 +5,8 @@ import pg from 'pg';
 import { MikroORM } from '@mikro-orm/postgresql';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import * as entities from '../../src/modules/telemetry/entities';
-import { TelemetryAnalyticsRepository } from '../../src/modules/telemetry/repositories/telemetry-analytics.repository';
-import { TelemetryAnalyticsService } from '../../src/modules/telemetry/services/telemetry-analytics.service';
+import { TelemetryAnalyticsRepository } from '../../src/modules/telemetry/infrastructure/repositories/telemetry-analytics.repository';
+import { TelemetryAnalyticsService } from '../../src/modules/telemetry/application/services/telemetry-analytics.service';
 import { TELE } from '../../src/modules/telemetry/telemetry.concepts';
 
 /**
