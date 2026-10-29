@@ -233,6 +233,10 @@ Reglas que no se negocian:
 - **CV-20 ya no verifica** un título de una admisión abierta (412 `ADMISSION_VERIFY_VIA_REVIEW`);
   sólo rechaza, con las mismas puertas que `reviewItem`.
 - **Falla cerrado.** Sin requisitos aplicables nadie puede verificar.
+- **Frontera con M27** (`identity_manual_review_cases`): M27 decide si una matrícula coincide con el
+  registro de la autoridad; la admisión decide si el profesional queda habilitado. El efecto de M27
+  sólo deja una revisión de ese ítem (fuente `REGISTRO_MINSALUD`, caso como referencia) y nunca
+  escribe `PRACT_VERIF_*` ni concede el sello.
 - Configuración (`admissions.config.ts`): `ADMISSIONS_FOUR_EYES`, `ADMISSIONS_SECURITY_ADMIN_INHERITS`,
   `ADMISSIONS_SLA_BUSINESS_DAYS` (3), `ADMISSIONS_DEFAULT_VALIDITY_MONTHS` (36),
   `ADMISSIONS_INFO_WINDOW_DAYS` (30), `ADMISSIONS_MAX_RESUBMISSIONS` (3).
