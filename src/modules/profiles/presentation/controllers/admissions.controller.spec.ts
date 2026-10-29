@@ -93,7 +93,7 @@ describe('AdmissionsController · la API autoriza cada ruta', () => {
       expect(meta!.action).toMatch(/^[A-Z_]+$/);
     }
     expect(audited('documentUrl')).toMatchObject({
-      action: 'FILE_DOWNLOAD_URL_ISSUED',
+      action: 'ADMISSION_DOCUMENT_URL_ISSUED',
       entity: 'file',
     });
   });

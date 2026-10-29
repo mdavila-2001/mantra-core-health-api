@@ -1,19 +1,12 @@
 import { createHash } from 'node:crypto';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS } from '../../../../common';
 import {
-  Addresses,
-  ContactPoints,
-  Files,
-  FileVersions,
-  Identifiers,
-} from '../../../common/entities';
-import { CatalogConcepts } from '../../../terminology/entities';
-import {
-  PracticeSites,
-  PractitionerRoleAssignments,
-} from '../../../practice/entities';
+  ADMISSION_FOREIGN_READS_PORT,
+  type AdmissionFileFacts,
+  type AdmissionForeignReadsPort,
+} from '../ports/admission-foreign-reads.port';
 import {
   JurisdictionAuthorizations,
   Persons,
@@ -48,15 +41,7 @@ export interface LiveAdmissionEvidence {
   readonly professionGroup: ProfessionGroup;
 }
 
-/** Datos de un archivo que acompaña a una admisión. */
-export interface AdmissionFileFacts {
-  readonly id: string;
-  readonly name: string;
-  readonly mimeType: string;
-  readonly sizeBytes: number;
-  readonly uploadedAt: Date;
-  readonly contentHash?: string;
-}
+export type { AdmissionFileFacts };
 
 /** Punto GPS declarado. */
 export interface GpsPoint {
@@ -207,51 +192,25 @@ function toGps(lat?: string | null, lng?: string | null): GpsPoint | null {
  */
 @Injectable()
 export class PractitionerAdmissionEvidenceService {
+  constructor(
+    @Inject(ADMISSION_FOREIGN_READS_PORT)
+    private readonly foreign: AdmissionForeignReadsPort,
+  ) {}
+
   /** Resuelve el nombre legible de varios conceptos de catálogo. */
-  private async conceptNames(
+  private conceptNames(
     em: EntityManager,
     ids: ReadonlyArray<string | undefined | null>,
   ): Promise<Map<string, string>> {
-    const unique = [...new Set(ids.filter((id): id is string => !!id))];
-    if (unique.length === 0) return new Map();
-    const rows = await em.find(
-      CatalogConcepts,
-      { id: { $in: unique } },
-      { fields: ['id', 'display'] },
-    );
-    return new Map(rows.map((r) => [r.id, r.display]));
+    return this.foreign.conceptNames(em, ids);
   }
 
   /** Los datos de varios archivos (nombre, tipo, tamaño, fecha, huella). */
-  async fileFacts(
+  fileFacts(
     em: EntityManager,
     fileIds: ReadonlyArray<string | undefined | null>,
   ): Promise<Map<string, AdmissionFileFacts>> {
-    const ids = [...new Set(fileIds.filter((id): id is string => !!id))];
-    const result = new Map<string, AdmissionFileFacts>();
-    if (ids.length === 0) return result;
-    const files = await em.find(Files, { id: { $in: ids } });
-    const versionIds = files
-      .map((f) => f.currentVersionId)
-      .filter((id): id is string => !!id);
-    const versions = versionIds.length
-      ? await em.find(FileVersions, { id: { $in: versionIds } })
-      : [];
-    const versionById = new Map(versions.map((v) => [v.id, v]));
-    for (const file of files) {
-      const version = file.currentVersionId
-        ? versionById.get(file.currentVersionId)
-        : undefined;
-      result.set(file.id, {
-        id: file.id,
-        name: file.originalName ?? 'documento',
-        mimeType: version?.mimeType ?? 'application/octet-stream',
-        sizeBytes: version ? Number(version.sizeBytes) : 0,
-        uploadedAt: version?.uploadedAt ?? file.createdAt,
-        contentHash: version?.contentHash,
-      });
-    }
-    return result;
+    return this.foreign.fileFacts(em, fileIds);
   }
 
   /** Los ítems que hoy tiene el profesional y que la admisión revisa. */
@@ -268,10 +227,9 @@ export class PractitionerAdmissionEvidenceService {
           validTo: null,
         }),
         em.findOne(Persons, { id: practitionerProfileId }),
-        em.findOne(Identifiers, {
-          ownerId: practitionerProfileId,
-          typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
-        }),
+        this.foreign
+          .nationalIds(em, [practitionerProfileId])
+          .then((byOwner) => byOwner.get(practitionerProfileId)),
       ]);
 
     const fileIds = [
@@ -388,36 +346,13 @@ export class PractitionerAdmissionEvidenceService {
       gps: GpsPoint | null;
     }>
   > {
-    const roles = await em.find(PractitionerRoleAssignments, {
-      practitionerProfileId,
-    });
-    const siteIds = [
-      ...new Set(
-        roles.map((r) => r.practiceSiteId).filter((id): id is string => !!id),
-      ),
-    ];
-    if (siteIds.length === 0) return [];
-    const sites = await em.find(PracticeSites, { id: { $in: siteIds } });
-    const addressIds = sites
-      .map((s) => s.addressId)
-      .filter((id): id is string => !!id);
-    const addresses = addressIds.length
-      ? await em.find(Addresses, { id: { $in: addressIds } })
-      : [];
-    const addressById = new Map(addresses.map((a) => [a.id, a]));
-    return sites
-      .map((site) => {
-        const address = site.addressId
-          ? addressById.get(site.addressId)
-          : undefined;
-        return {
-          id: site.id,
-          name: site.name,
-          address: address?.lines ?? null,
-          gps: toGps(address?.latitude, address?.longitude),
-        };
-      })
-      .sort((a, b) => (a.id < b.id ? -1 : 1));
+    const sites = await this.foreign.practiceSites(em, practitionerProfileId);
+    return sites.map((site) => ({
+      id: site.id,
+      name: site.name,
+      address: site.address,
+      gps: toGps(site.latitude, site.longitude),
+    }));
   }
 
   /** Toma la foto del formulario tal como está hoy. */
@@ -429,12 +364,11 @@ export class PractitionerAdmissionEvidenceService {
   ): Promise<SubmittedForm> {
     const [person, identifier, contacts, addresses] = await Promise.all([
       em.findOne(Persons, { id: practitionerProfileId }),
-      em.findOne(Identifiers, {
-        ownerId: practitionerProfileId,
-        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
-      }),
-      em.find(ContactPoints, { ownerId: practitionerProfileId }),
-      em.find(Addresses, { ownerId: practitionerProfileId }),
+      this.foreign
+        .nationalIds(em, [practitionerProfileId])
+        .then((byOwner) => byOwner.get(practitionerProfileId)),
+      this.foreign.contactPoints(em, practitionerProfileId),
+      this.foreign.addresses(em, practitionerProfileId),
     ]);
     const licenses = await em.find(JurisdictionAuthorizations, {
       practitionerProfileId,

@@ -209,6 +209,7 @@ function build(options: { admission?: Record<string, any> | null } = {}) {
     ),
     ownOf: fn((_tx: unknown, a: any) => Promise.resolve({ id: a.id })),
     currentOf: fn().mockResolvedValue(current),
+    userExists: fn().mockResolvedValue(true),
   };
   const notices = { emit: fn().mockResolvedValue({ delivered: true }) };
   const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
@@ -504,7 +505,6 @@ describe('PractitionerAdmissionsService', () => {
 
     it('reasignar a otro revisor lo deja EN_REVISION con el nuevo asignado', async () => {
       const d = build();
-      d.tx.findOne.mockResolvedValue({ id: 'u-new' });
       await d.service.reassign('adm-1', 'u-new', 4, caller(APPROVER));
       expect(d.current.assignedToUserId).toBe('u-new');
       expect(d.events[0].eventTypeConceptId).toBe(
@@ -514,17 +514,21 @@ describe('PractitionerAdmissionsService', () => {
 
     it('no se reasigna a un usuario inexistente ni al propio solicitante', async () => {
       const d = build();
-      d.tx.findOne.mockResolvedValue(null);
+      d.read.userExists.mockResolvedValue(false);
       const e1 = await failure(
         d.service.reassign('adm-1', 'u-x', 4, caller(APPROVER)),
       );
       expect(reasonOf(e1)).toBe(ProfilesErrorReason.ADMISSION_ASSIGNEE_INVALID);
       const e = build();
-      e.tx.findOne.mockResolvedValue({ id: 'u-doctor' });
-      const e2 = await failure(
-        e.service.reassign('adm-1', 'u-doctor', 4, caller(APPROVER)),
-      );
-      expect(reasonOf(e2)).toBe(ProfilesErrorReason.ADMISSION_ASSIGNEE_INVALID);
+      // u-delegado también tiene un vínculo activo con el solicitante (S-6).
+      for (const applicant of ['u-doctor', 'u-delegado']) {
+        const e2 = await failure(
+          e.service.reassign('adm-1', applicant, 4, caller(APPROVER)),
+        );
+        expect(reasonOf(e2)).toBe(
+          ProfilesErrorReason.ADMISSION_ASSIGNEE_INVALID,
+        );
+      }
     });
   });
 

@@ -67,7 +67,7 @@ function build(files: string[] = ['f1', 'f2']) {
     originalName: 'título "final".pdf',
   };
   const filesService = {
-    downloadForAuthorizedContext: fn().mockResolvedValue(content),
+    downloadAuthorized: fn().mockResolvedValue(content),
   };
   const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
   const service = new PractitionerAdmissionDocumentsService(
@@ -111,9 +111,7 @@ describe('PractitionerAdmissionDocumentsService', () => {
       await expect(
         d.service.open('adm-1', 'f1', query(issued.url), DOCTOR, NOW),
       ).rejects.toBeInstanceOf(InsufficientRoleException);
-      expect(
-        d.filesService.downloadForAuthorizedContext,
-      ).not.toHaveBeenCalled();
+      expect(d.filesService.downloadAuthorized).not.toHaveBeenCalled();
     });
 
     it('el mismo usuario con rol revisa la admisión de OTRO profesional sin problema', async () => {
@@ -190,7 +188,7 @@ describe('PractitionerAdmissionDocumentsService', () => {
       disposition: 'inline',
       fileName: 'título "final".pdf',
     });
-    expect(d.filesService.downloadForAuthorizedContext).toHaveBeenCalledWith(
+    expect(d.filesService.downloadAuthorized).toHaveBeenCalledWith(
       'f1',
       'profiles.admission.document',
     );
@@ -206,7 +204,7 @@ describe('PractitionerAdmissionDocumentsService', () => {
     expect((error as any).reason).toBe(
       ProfilesErrorReason.ADMISSION_DOCUMENT_URL_INVALID,
     );
-    expect(d.filesService.downloadForAuthorizedContext).not.toHaveBeenCalled();
+    expect(d.filesService.downloadAuthorized).not.toHaveBeenCalled();
   });
 
   it('la firma está atada a la admisión y al archivo: no se reusa para otro', async () => {
@@ -220,7 +218,7 @@ describe('PractitionerAdmissionDocumentsService', () => {
         d.service.open(adm, file, query(issued.url), REVIEWER, NOW),
       ).rejects.toBeDefined();
     }
-    expect(d.filesService.downloadForAuthorizedContext).not.toHaveBeenCalled();
+    expect(d.filesService.downloadAuthorized).not.toHaveBeenCalled();
   });
 
   it('una firma alterada, ausente o mal formada se rechaza sin leer nada', async () => {
@@ -279,7 +277,7 @@ describe('PractitionerAdmissionDocumentsService', () => {
       'text/html',
       'application/javascript',
     ]) {
-      d.filesService.downloadForAuthorizedContext.mockResolvedValue({
+      d.filesService.downloadAuthorized.mockResolvedValue({
         ...d.content,
         mimeType,
       });
@@ -306,7 +304,7 @@ describe('PractitionerAdmissionDocumentsService', () => {
       'image/webp',
       'application/pdf',
     ]) {
-      d.filesService.downloadForAuthorizedContext.mockResolvedValue({
+      d.filesService.downloadAuthorized.mockResolvedValue({
         ...d.content,
         mimeType,
       });
@@ -326,8 +324,6 @@ describe('PractitionerAdmissionDocumentsService', () => {
         d.service.open('adm-1', f, query(issued.url), REVIEWER, NOW),
       ).resolves.toBeDefined();
     }
-    expect(d.filesService.downloadForAuthorizedContext).toHaveBeenCalledTimes(
-      60,
-    );
+    expect(d.filesService.downloadAuthorized).toHaveBeenCalledTimes(60);
   });
 });

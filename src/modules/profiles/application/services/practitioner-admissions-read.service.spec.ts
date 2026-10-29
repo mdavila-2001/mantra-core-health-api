@@ -137,6 +137,41 @@ function build(overrides: { data?: Map<unknown, unknown[]> } = {}) {
     requirementsOf: fn().mockResolvedValue([requirement('A')]),
     buildView: fn(),
   };
+  // Las lecturas de otros contextos entran por un puerto; este doble las sirve
+  // de `data`, así los casos siguen declarando usuarios, cédulas y conceptos.
+  const rows = (cls: unknown): any[] => (data.get(cls) ?? []) as any[];
+  const foreign = {
+    conceptNames: fn((_em: unknown, ids: Array<string | undefined | null>) =>
+      Promise.resolve(
+        new Map(
+          rows(CatalogConcepts)
+            .filter((r) => ids.includes(r.id))
+            .map((r) => [r.id, r.display]),
+        ),
+      ),
+    ),
+    userNames: fn((_em: unknown, ids: Array<string | undefined | null>) =>
+      Promise.resolve(
+        new Map(
+          rows(Users)
+            .filter((r) => ids.includes(r.id))
+            .map((r) => [r.id, r.displayName]),
+        ),
+      ),
+    ),
+    userExists: fn((_em: unknown, id: string) =>
+      Promise.resolve(rows(Users).some((r) => r.id === id)),
+    ),
+    nationalIds: fn((_em: unknown, ids: readonly string[]) =>
+      Promise.resolve(
+        new Map(
+          rows(Identifiers)
+            .filter((r) => ids.includes(r.ownerId))
+            .map((r) => [r.ownerId, r]),
+        ),
+      ),
+    ),
+  };
   const evidence = {
     fileFacts: fn().mockResolvedValue(new Map()),
     buildSnapshot: fn().mockResolvedValue({
@@ -157,6 +192,7 @@ function build(overrides: { data?: Map<unknown, unknown[]> } = {}) {
     accountLinksRepo as never,
     checklist as never,
     evidence as never,
+    foreign as never,
   );
   return {
     service,
@@ -168,6 +204,7 @@ function build(overrides: { data?: Map<unknown, unknown[]> } = {}) {
     accountLinksRepo,
     checklist,
     evidence,
+    foreign,
   };
 }
 

@@ -10,7 +10,6 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../../common';
-import { Users } from '../../../iam/entities';
 import {
   HealthPractitionerProfiles,
   JurisdictionAuthorizations,
@@ -308,15 +307,15 @@ export class PractitionerAdmissionsService {
       this.assertVersion(admission, expectedRowVersion);
       // ENVIADA: reasignar es asignar y tomar a la vez.
       if (status !== 'EN_REVISION') this.assertTransition('CLAIM', status);
-      const target = await tx.findOne(Users, { id: toUserId });
+      const targetExists = await this.read.userExists(tx, toUserId);
       const targetIsApplicant =
-        target !== null &&
+        targetExists &&
         (await this.accountLinksRepo.hasActiveLink(
           tx,
           admission.practitionerProfileId,
           toUserId,
         ));
-      if (!target || targetIsApplicant) {
+      if (!targetExists || targetIsApplicant) {
         throw new PreconditionFailedException(
           'El revisor indicado no existe o es el propio solicitante',
           {},

@@ -352,7 +352,7 @@ export class AdmissionsController {
   @HttpCode(HttpStatus.CREATED)
   @Header('Cache-Control', 'private, no-store')
   @Audited({
-    action: 'FILE_DOWNLOAD_URL_ISSUED',
+    action: 'ADMISSION_DOCUMENT_URL_ISSUED',
     entity: 'file',
     entityId: 'param:fileId',
   })
