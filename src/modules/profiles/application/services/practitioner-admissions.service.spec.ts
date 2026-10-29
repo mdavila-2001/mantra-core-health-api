@@ -21,7 +21,10 @@ import {
   type AdmissionStatusCode,
 } from '../../domain/admissions/admission-status';
 import { REASONS } from '../../domain/admissions/admission-vocabulary';
-import { PractitionerAdmissionsService } from './practitioner-admissions.service';
+import {
+  PractitionerAdmissionsService,
+  attestationOf,
+} from './practitioner-admissions.service';
 
 // Alias con tipado laxo: evita el 'never' que @jest/globals infiere para jest.fn() en ESM.
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
@@ -38,6 +41,8 @@ const DOCTOR = { id: 'u-doctor', roles: ['USER', 'PRACTITIONER'] } as never;
 const caller = (user: unknown) => ({ user }) as never;
 
 const NOW = new Date('2026-10-29T12:00:00.000Z');
+/** La declaración que el cliente manda al reenviar. */
+const ATTEST = { acceptedAt: NOW, textVersion: '2026-10' };
 
 type Row = {
   requirement: ChecklistRequirement;
@@ -1616,7 +1621,7 @@ describe('PractitionerAdmissionsService', () => {
           resubmissionCount: 1,
         }),
       });
-      await d.service.resubmit(DOCTOR, 'req-1');
+      await d.service.resubmit(DOCTOR, 'req-1', ATTEST);
       expect(d.current).toMatchObject({
         statusConceptId: ADMISSION_STATUS_CONCEPT.ENVIADA,
         resubmissionCount: 2,
@@ -1637,9 +1642,54 @@ describe('PractitionerAdmissionsService', () => {
       });
     });
 
+    it('persiste la atestación: cuándo se aceptó y qué versión del texto', async () => {
+      const d = build({ admission: admission('RECHAZADA') });
+      await d.service.resubmit(DOCTOR, 'req-1', ATTEST);
+      expect(d.current.attestedAt).toEqual(NOW);
+      expect(d.current.attestationTextVersion).toBe('2026-10');
+    });
+
+    it('una atestación nueva reemplaza a la del envío anterior', async () => {
+      const d = build({
+        admission: admission('RECHAZADA', {
+          attestedAt: new Date('2026-01-01T00:00:00Z'),
+          attestationTextVersion: '2026-01',
+        }),
+      });
+      await d.service.resubmit(DOCTOR, undefined, ATTEST);
+      expect(d.current.attestedAt).toEqual(NOW);
+      expect(d.current.attestationTextVersion).toBe('2026-10');
+    });
+
+    it('sin atestación no se reenvía: 412 ADMISSION_ATTESTATION_REQUIRED y no se mueve nada', async () => {
+      const d = build({
+        admission: admission('RECHAZADA', { resubmissionCount: 1 }),
+      });
+      const error = await failure(d.service.resubmit(DOCTOR, 'req-1'));
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect(reasonOf(error)).toBe(
+        ProfilesErrorReason.ADMISSION_ATTESTATION_REQUIRED,
+      );
+      expect(d.current).toMatchObject({
+        statusConceptId: ADMISSION_STATUS_CONCEPT.RECHAZADA,
+        resubmissionCount: 1,
+      });
+      expect(d.current.attestedAt).toBeUndefined();
+      expect(d.checklist.materialize).not.toHaveBeenCalled();
+      expect(d.events).toHaveLength(0);
+    });
+
+    it('quien no puede reenviar se entera primero de eso (422), no de la atestación', async () => {
+      const d = build({ admission: admission('VERIFICADA') });
+      const error = await failure(d.service.resubmit(DOCTOR));
+      expect(reasonOf(error)).toBe(
+        ProfilesErrorReason.ADMISSION_INVALID_TRANSITION,
+      );
+    });
+
     it('desde EXPIRADA invalida todo lo revisado (renovación)', async () => {
       const d = build({ admission: admission('EXPIRADA') });
-      await d.service.resubmit(DOCTOR);
+      await d.service.resubmit(DOCTOR, undefined, ATTEST);
       expect(d.checklist.materialize).toHaveBeenCalledWith(
         d.tx,
         d.current,
@@ -1651,7 +1701,9 @@ describe('PractitionerAdmissionsService', () => {
       'se puede reenviar desde %s',
       async (status) => {
         const d = build({ admission: admission(status) });
-        await expect(d.service.resubmit(DOCTOR)).resolves.toBeDefined();
+        await expect(
+          d.service.resubmit(DOCTOR, undefined, ATTEST),
+        ).resolves.toBeDefined();
       },
     );
 
@@ -1684,7 +1736,9 @@ describe('PractitionerAdmissionsService', () => {
       const d = build({
         admission: admission('RECHAZADA', { resubmissionCount: 4 }),
       });
-      await expect(d.service.resubmit(DOCTOR)).resolves.toBeDefined();
+      await expect(
+        d.service.resubmit(DOCTOR, undefined, ATTEST),
+      ).resolves.toBeDefined();
     });
 
     it('sin admisión propia: 404 (nadie lee ni mueve la de otro)', async () => {
@@ -1697,7 +1751,7 @@ describe('PractitionerAdmissionsService', () => {
 
     it('la admisión sobre la que se actúa sale de la sesión, no de un parámetro', async () => {
       const d = build({ admission: admission('RECHAZADA') });
-      await d.service.resubmit(DOCTOR);
+      await d.service.resubmit(DOCTOR, undefined, ATTEST);
       expect(d.read.currentOf).toHaveBeenCalledWith(d.tx, DOCTOR);
     });
 
@@ -2127,5 +2181,26 @@ describe('PractitionerAdmissionsService', () => {
         }),
       ).toBe(false);
     });
+  });
+});
+
+describe('attestationOf · de lo que declara el cliente a lo que se guarda', () => {
+  const at = new Date('2026-10-29T12:00:00.000Z');
+
+  it('attested true con versión: queda la hora del servidor y la versión recortada', () => {
+    expect(
+      attestationOf({ attested: true, attestationVersion: ' 2026-10 ' }, at),
+    ).toEqual({ acceptedAt: at, textVersion: '2026-10' });
+  });
+
+  it.each([
+    ['sin cuerpo', undefined],
+    ['cuerpo vacío', {}],
+    ['attested false', { attested: false, attestationVersion: '2026-10' }],
+    ['sin versión', { attested: true }],
+    ['versión en blanco', { attested: true, attestationVersion: '   ' }],
+    ['sin attested', { attestationVersion: '2026-10' }],
+  ])('%s: no hay atestación', (_name, body) => {
+    expect(attestationOf(body, at)).toBeUndefined();
   });
 });

@@ -109,6 +109,7 @@ function build(overrides: { data?: Map<unknown, unknown[]> } = {}) {
   const reviewsRepo = { findByAdmissions: fn().mockResolvedValue([]) };
   const accountLinksRepo = {
     findActiveByUser: fn().mockResolvedValue(null),
+    findSelfActiveByUser: fn().mockResolvedValue([]),
     findActiveByPerson: fn().mockResolvedValue(null),
     /** Vínculos activos persona-cuenta; una persona o una cuenta pueden tener varios. */
     links: [] as Array<{ userId: string; personId: string }>,
@@ -858,17 +859,18 @@ describe('PractitionerAdmissionsReadService · la vista del propio médico', () 
       .own({ id: 'u-x', roles: [] } as never)
       .catch((e: Error) => e);
     expect(error).toBeInstanceOf(ResourceNotFoundException);
-    expect(d.accountLinksRepo.findActiveByUser).toHaveBeenCalledWith(
+    expect(d.accountLinksRepo.findSelfActiveByUser).toHaveBeenCalledWith(
       expect.anything(),
       'u-x',
     );
+    expect(d.accountLinksRepo.findActiveByUser).not.toHaveBeenCalled();
   });
 
   it('lee sólo la admisión de la persona vinculada a SU cuenta', async () => {
     const d = build();
-    d.accountLinksRepo.findActiveByUser.mockResolvedValue({
-      personId: 'prac-me',
-    });
+    d.accountLinksRepo.findSelfActiveByUser.mockResolvedValue([
+      { personId: 'prac-me' },
+    ]);
     d.data.set(HealthPractitionerProfiles, [{ profileId: 'prac-me' }]);
     d.admissionsRepo.findCurrentByPractitioners.mockResolvedValue(new Map());
     await d.service
@@ -878,6 +880,116 @@ describe('PractitionerAdmissionsReadService · la vista del propio médico', () 
       expect.anything(),
       ['prac-me'],
     );
+  });
+
+  describe('«mi perfil» con varios vínculos (determinista y propio)', () => {
+    const me = { id: 'u-me', roles: [] } as never;
+
+    it('con varios vínculos propios gana el primero que devuelve el repositorio (el más reciente) con perfil profesional', async () => {
+      const d = build();
+      d.accountLinksRepo.findSelfActiveByUser.mockResolvedValue([
+        { personId: 'prac-new' },
+        { personId: 'prac-old' },
+      ]);
+      d.data.set(HealthPractitionerProfiles, [
+        { profileId: 'prac-old' },
+        { profileId: 'prac-new' },
+      ]);
+      expect(await d.service.ownPersonId(d.em as never, me)).toBe('prac-new');
+    });
+
+    it('el vínculo propio más reciente puede ser de paciente: se usa el más reciente que sea profesional', async () => {
+      const d = build();
+      d.accountLinksRepo.findSelfActiveByUser.mockResolvedValue([
+        { personId: 'pac-only' },
+        { personId: 'prac-1' },
+      ]);
+      d.data.set(HealthPractitionerProfiles, [{ profileId: 'prac-1' }]);
+      expect(await d.service.ownPersonId(d.em as never, me)).toBe('prac-1');
+    });
+
+    it('sin vínculo propio no hay admisión aunque exista un vínculo de otro tipo con un profesional', async () => {
+      const d = build();
+      // Un delegado o familiar activo con un profesional: `findActiveByUser` lo
+      // habría devuelto y la cuenta habría leído esa admisión como suya.
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'prac-ajeno',
+      });
+      d.accountLinksRepo.findSelfActiveByUser.mockResolvedValue([]);
+      d.data.set(HealthPractitionerProfiles, [{ profileId: 'prac-ajeno' }]);
+      expect(await d.service.ownPersonId(d.em as never, me)).toBeNull();
+      const error = await d.service.own(me).catch((e: Error) => e);
+      expect(error).toBeInstanceOf(ResourceNotFoundException);
+      expect(
+        d.admissionsRepo.findCurrentByPractitioners,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('vínculos propios sin perfil profesional: null', async () => {
+      const d = build();
+      d.accountLinksRepo.findSelfActiveByUser.mockResolvedValue([
+        { personId: 'pac-1' },
+      ]);
+      expect(await d.service.ownPersonId(d.em as never, me)).toBeNull();
+    });
+
+    it('lee la admisión de la persona elegida, no la de otro vínculo', async () => {
+      const d = build();
+      d.accountLinksRepo.findSelfActiveByUser.mockResolvedValue([
+        { personId: 'prac-new' },
+        { personId: 'prac-old' },
+      ]);
+      d.data.set(HealthPractitionerProfiles, [
+        { profileId: 'prac-old' },
+        { profileId: 'prac-new' },
+      ]);
+      await d.service.currentOf(d.em as never, me);
+      expect(d.admissionsRepo.findCurrentByPractitioners).toHaveBeenCalledWith(
+        expect.anything(),
+        ['prac-new'],
+      );
+    });
+  });
+
+  it('dice cuántos reenvíos usó, el tope y cuántos le quedan (con el tope configurable)', async () => {
+    const d = build();
+    d.checklist.buildView.mockResolvedValue(viewOf([]));
+    const own = await d.service.ownOf(
+      d.em as never,
+      admission('RECHAZADA', { resubmissionCount: 1 }) as never,
+    );
+    expect(own.resubmissions).toEqual({ used: 1, max: 3, remaining: 2 });
+    expect(own.resubmissionCount).toBe(1);
+    expect(own.canResubmit).toBe(true);
+    const agotado = await d.service.ownOf(
+      d.em as never,
+      admission('RECHAZADA', { resubmissionCount: 3 }) as never,
+    );
+    expect(agotado.resubmissions).toEqual({ used: 3, max: 3, remaining: 0 });
+    expect(agotado.canResubmit).toBe(false);
+    // Un tope que se bajó con reenvíos de más: nunca negativo.
+    const pasado = await d.service.ownOf(
+      d.em as never,
+      admission('RECHAZADA', { resubmissionCount: 5 }) as never,
+    );
+    expect(pasado.resubmissions.remaining).toBe(0);
+  });
+
+  it('el tope sale de ADMISSIONS_MAX_RESUBMISSIONS y canWithdraw lo decide el servidor', async () => {
+    process.env.ADMISSIONS_MAX_RESUBMISSIONS = '5';
+    try {
+      const d = build();
+      d.checklist.buildView.mockResolvedValue(viewOf([]));
+      const own = await d.service.ownOf(
+        d.em as never,
+        admission('ENVIADA', { resubmissionCount: 2 }) as never,
+      );
+      expect(own.resubmissions).toEqual({ used: 2, max: 5, remaining: 3 });
+      expect(own.canResubmit).toBe(false);
+      expect(own.canWithdraw).toBe(true);
+    } finally {
+      delete process.env.ADMISSIONS_MAX_RESUBMISSIONS;
+    }
   });
 
   it('no filtra nada del personal: ni nota interna ni el código reservado «sospecha de fraude»', async () => {

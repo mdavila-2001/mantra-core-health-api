@@ -1,4 +1,11 @@
-import { Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOkResponse,
@@ -11,8 +18,11 @@ import {
   type AuthenticatedUser,
 } from '../../../../common';
 import { PractitionerAdmissionsReadService } from '../../application/services/practitioner-admissions-read.service';
-import { PractitionerAdmissionsService } from '../../application/services/practitioner-admissions.service';
-import { OwnAdmissionDto } from '../dto/admissions.dto';
+import {
+  attestationOf,
+  PractitionerAdmissionsService,
+} from '../../application/services/practitioner-admissions.service';
+import { OwnAdmissionDto, ResubmitAdmissionDto } from '../dto/admissions.dto';
 import { RequestIdParam } from './admissions.controller';
 
 /**
@@ -52,14 +62,17 @@ export class OwnAdmissionController {
   @ApiOperation({
     summary: 'Reenviar mi solicitud',
     description:
-      'Sólo desde INFORMACION_REQUERIDA, RECHAZADA, EXPIRADA o ABANDONADA, con tope de reenvíos.',
+      'Sólo desde INFORMACION_REQUERIDA, RECHAZADA, EXPIRADA o ABANDONADA, con tope de reenvíos. ' +
+      'El cuerpo lleva la declaración: `{ attested: true, attestationVersion }`; sin ella, ' +
+      '412 ADMISSION_ATTESTATION_REQUIRED. El servidor guarda cuándo se aceptó y qué versión del texto.',
   })
   @ApiOkResponse({ type: OwnAdmissionDto })
   resubmit(
     @CurrentUser() actor: AuthenticatedUser,
+    @Body() body: ResubmitAdmissionDto,
     @RequestIdParam() requestId?: string,
   ): Promise<OwnAdmissionDto> {
-    return this.admissions.resubmit(actor, requestId);
+    return this.admissions.resubmit(actor, requestId, attestationOf(body));
   }
 
   @Post('withdraw')

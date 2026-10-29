@@ -132,6 +132,35 @@ export class PersonAccountLinksRepository {
     return count > 0;
   }
 
+  /**
+   * Los vínculos ACTIVOS **propios** (`SELF`) de una cuenta, del más reciente al
+   * más antiguo.
+   *
+   * Es lo que «mi perfil» necesita y `findActiveByUser` no da: éste devuelve
+   * una fila arbitraria entre todos los vínculos activos (delegado, familiar,
+   * segunda cuenta…) porque el índice único `uq_person_account_links_active_user`
+   * no está materializado. Acá sólo entran los del tipo propio y el orden es
+   * total y estable: `valid_from` descendente, luego `created_at` y por último
+   * el id, de modo que dos vínculos iguales nunca se desempatan al azar.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param userId - Cuenta autenticada.
+   */
+  findSelfActiveByUser(
+    em: EntityManager,
+    userId: string,
+  ): Promise<PersonAccountLinks[]> {
+    return em.find(
+      PersonAccountLinks,
+      {
+        userId,
+        statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+        linkTypeConceptId: PROF.ACCOUNT_LINK_SELF,
+      },
+      { orderBy: { validFrom: 'desc', createdAt: 'desc', id: 'desc' } },
+    );
+  }
+
   /** Todas las personas con las que la cuenta tiene un vínculo ACTIVO (no sólo «la» primera). */
   async findActivePersonIdsByUser(
     em: EntityManager,

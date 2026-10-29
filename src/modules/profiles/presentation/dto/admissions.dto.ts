@@ -28,6 +28,9 @@ import {
   type SourceTypeCode,
 } from '../../domain/admissions/admission-vocabulary';
 
+/** Largo máximo de la versión del texto de la declaración. */
+export const MAX_ATTESTATION_VERSION_LENGTH = 32;
+
 /** Tope de ítems nombrados en una petición de información. */
 export const MAX_INFO_REQUEST_ITEMS = 200;
 
@@ -422,6 +425,22 @@ export class OwnAdmissionItemDto {
   reasonCode!: string | null;
 }
 
+/** Cuántos reenvíos usó el solicitante y cuántos le quedan. */
+export class AdmissionResubmissionsDto {
+  @ApiProperty({ description: 'Reenvíos ya hechos.', minimum: 0 })
+  used!: number;
+  @ApiProperty({
+    description: 'Tope de reenvíos (`ADMISSIONS_MAX_RESUBMISSIONS`).',
+    minimum: 0,
+  })
+  max!: number;
+  @ApiProperty({
+    description: 'Reenvíos que quedan: `max - used`, nunca negativo.',
+    minimum: 0,
+  })
+  remaining!: number;
+}
+
 /** La admisión vista por su dueño. */
 export class OwnAdmissionDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
@@ -437,9 +456,51 @@ export class OwnAdmissionDto {
   @ApiPropertyOptional({ nullable: true, type: String }) validUntil!:
     string | null;
   @ApiProperty({ type: [OwnAdmissionItemDto] }) items!: OwnAdmissionItemDto[];
-  @ApiProperty() resubmissionCount!: number;
-  @ApiProperty() canResubmit!: boolean;
-  @ApiProperty() canWithdraw!: boolean;
+  @ApiProperty({
+    description: 'Reenvíos hechos (igual a `resubmissions.used`; se conserva).',
+  })
+  resubmissionCount!: number;
+  @ApiProperty({ type: AdmissionResubmissionsDto })
+  resubmissions!: AdmissionResubmissionsDto;
+  @ApiProperty({
+    description:
+      'El servidor decide: el estado admite reenviar y no se llegó al tope.',
+  })
+  canResubmit!: boolean;
+  @ApiProperty({
+    description:
+      'El servidor decide: sólo ENVIADA o INFORMACION_REQUERIDA se retiran.',
+  })
+  canWithdraw!: boolean;
+}
+
+/**
+ * `POST /profiles/practitioners/me/admission/resubmit`: la declaración que el
+ * solicitante acepta al reenviar.
+ *
+ * Los dos campos se validan de tipo acá y de contenido en el servicio: faltar o
+ * ser `false` no es un cuerpo malformado sino una precondición no cumplida
+ * (412 `ADMISSION_ATTESTATION_REQUIRED`). El momento de la aceptación lo pone
+ * el servidor, nunca el cliente.
+ */
+export class ResubmitAdmissionDto {
+  @ApiProperty({
+    description:
+      'Debe ser `true`: el solicitante acepta la declaración. Sin ella, 412 ADMISSION_ATTESTATION_REQUIRED.',
+  })
+  @IsOptional()
+  @IsBoolean()
+  attested?: boolean;
+
+  @ApiProperty({
+    description: 'Versión del texto de la declaración que se mostró.',
+    maxLength: MAX_ATTESTATION_VERSION_LENGTH,
+    example: '2026-10',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(MAX_ATTESTATION_VERSION_LENGTH)
+  attestationVersion?: string;
 }
 
 /** Resultado del barrido de vencimientos. */

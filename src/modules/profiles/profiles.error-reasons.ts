@@ -140,6 +140,8 @@ export enum ProfilesErrorReason {
   ADMISSION_DECISION_ITEMS_NOT_ACCEPTED = 'ADMISSION_DECISION_ITEMS_NOT_ACCEPTED',
   /** El solicitante llegó al tope de reenvíos. */
   ADMISSION_RESUBMISSION_LIMIT = 'ADMISSION_RESUBMISSION_LIMIT',
+  /** Reenviar exige aceptar la declaración (`attested: true` y su versión): faltó o fue `false`. */
+  ADMISSION_ATTESTATION_REQUIRED = 'ADMISSION_ATTESTATION_REQUIRED',
   /** La verificación ya venció: no se repone, se renueva. */
   ADMISSION_VALIDITY_LAPSED = 'ADMISSION_VALIDITY_LAPSED',
   /** El rol del actor no alcanza para esta acción de admisiones. */
