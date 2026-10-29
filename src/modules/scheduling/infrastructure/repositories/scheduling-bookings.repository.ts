@@ -463,19 +463,31 @@ export class SchedulingBookingsRepository {
    * él. La cita se cobró antes de atenderse, así que su cuenta por cobrar nació
    * sin encuentro; acá se completa, solo si todavía no tiene uno.
    *
+   * El `appointmentId` del check-in viaja en el cuerpo: la cita, y después la
+   * factura, tienen que ser **del mismo paciente y tenant** que el encuentro.
+   * Si no, no se liga nada (no es este método el que decide si el check-in es
+   * válido, pero tampoco cruza el cobro de un paciente con la atención de otro).
+   *
    * @param em - Transacción del check-in.
-   * @param appointmentId - La cita clínica del encuentro.
-   * @param encounterId - El encuentro recién abierto.
+   * @param encounter - El encuentro recién abierto: id, cita, paciente y tenant.
    * @returns Si alguna factura quedó ligada.
    */
   async linkPaymentInvoiceToEncounter(
     em: EntityManager,
-    appointmentId: string,
-    encounterId: string,
+    encounter: {
+      readonly id: string;
+      readonly appointmentId: string;
+      readonly patientProfileId: string;
+      readonly tenantId: string;
+    },
   ): Promise<boolean> {
     const booking = await em.findOne(
       AppointmentBookings,
-      { appointmentId },
+      {
+        appointmentId: encounter.appointmentId,
+        patientProfileId: encounter.patientProfileId,
+        tenantId: encounter.tenantId,
+      },
       { fields: ['id'] },
     );
     if (!booking) return false;
@@ -483,8 +495,14 @@ export class SchedulingBookingsRepository {
     if (!payment?.invoiceId) return false;
     const updated = await em.nativeUpdate(
       Invoices,
-      { id: payment.invoiceId, encounterId: null },
-      { encounterId },
+      {
+        id: payment.invoiceId,
+        // La factura no tiene tenant propio: la acota la cita (ya filtrada por
+        // tenant) y, además, el paciente.
+        patientProfileId: encounter.patientProfileId,
+        encounterId: null,
+      },
+      { encounterId: encounter.id },
     );
     return updated > 0;
   }
