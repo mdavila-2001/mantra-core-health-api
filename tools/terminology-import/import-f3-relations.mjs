@@ -25,7 +25,7 @@ import pg from 'pg';
 import { BUILD_DIR, ensureDir } from './lib/glossary-es/common.mjs';
 import { bulkLoadRelationships } from './lib/bulk-copy.mjs';
 import { CONCEPT, md5uuid } from './lib/glossary-es/load-plan.mjs';
-import { buildIdentity, parseMondoSssom } from './lib/glossary-es/identity.mjs';
+import { loadF3Identity, onlyExistingDiseases } from './lib/glossary-es/f3-identity-inputs.mjs';
 import { hpoPhenotypeConceptId, hpoaToRelationshipRows } from './lib/glossary-es/hpo.mjs';
 import { ORPHANET_SOURCE_TAG, orphanetToRelationshipRows, parseOrphanetProduct4, parseOrphanetReleaseDate } from './lib/glossary-es/orphanet.mjs';
 import { parseHpoa } from './symptoms/lib/annotations.mjs';
@@ -40,7 +40,6 @@ const OUT_DIR = ensureDir(resolve(opt('--out', join(BUILD_DIR, 'f3-out'))));
 const ONLY = opt('--only', null);
 const LOAD = flag('--load');
 const DRY_RUN = flag('--dry-run');
-const GLOSSARY_FILES = ['cie10es-diagnosticos'];
 
 const HPO_LICENSE = 'HPO license (uso libre con cita, sin modificar términos) — https://hpo.jax.org/license';
 
@@ -71,31 +70,6 @@ const read = (name) => {
   return path;
 };
 
-/** Identidad MONDO (misma construcción que `measure-sources.mjs`). */
-async function loadIdentity() {
-  const mondoTerms = new Map();
-  await readObo(read('mondo.obo'), (t) => {
-    if (t.id.startsWith('MONDO:')) mondoTerms.set(t.id, t);
-  });
-  const equivalences = [];
-  for (const t of mondoTerms.values()) {
-    if (t.obsolete) continue;
-    for (const x of t.xrefs) if (x.qualifiers?.includes('MONDO:equivalentTo')) equivalences.push({ mondo: t.id, curie: x.id, via: 'MONDO:equivalentTo' });
-  }
-  const sssom = parseMondoSssom(readFileSync(read('mondo.sssom.tsv'), 'utf8')).filter((e) => !mondoTerms.get(e.mondo)?.obsolete);
-  const glossaryIcd10Codes = new Set();
-  for (const name of GLOSSARY_FILES) {
-    const path = join(BUILD_DIR, 'ndjson', `${name}.ndjson`);
-    if (!existsSync(path)) continue;
-    for (const line of readFileSync(path, 'utf8').split('\n')) {
-      if (!line.trim()) continue;
-      const row = JSON.parse(line);
-      if (row.code) glossaryIcd10Codes.add(row.code);
-    }
-  }
-  return buildIdentity([...equivalences, ...sssom], { glossaryIcd10Codes });
-}
-
 async function liveHpoTerms() {
   const live = new Set();
   await readObo(read('hp.obo'), (t) => {
@@ -125,29 +99,6 @@ function buildBatches(identity, liveHp) {
   return batches;
 }
 
-/**
- * La identidad puede apuntar a una ficha del glosario que esta base no tiene
- * (p. ej. un código CIE-10-CM del glosario sin ficha cargada). No se crea nada:
- * esas enfermedades quedan sin resolver, con su propio motivo.
- */
-async function onlyExistingDiseases(client, identity) {
-  const wanted = [...new Set([...identity.groups.values()].map((g) => g.conceptId).filter(Boolean))];
-  const present = new Set();
-  const CHUNK = 20_000;
-  for (let i = 0; i < wanted.length; i += CHUNK) {
-    const { rows } = await client.query('SELECT id FROM terminology.catalog_concepts WHERE id = ANY($1::uuid[])', [wanted.slice(i, i + CHUNK)]);
-    for (const r of rows) present.add(r.id);
-  }
-  return {
-    ...identity,
-    resolve: (curie) => {
-      const found = identity.resolve(curie);
-      if (!found.conceptId || present.has(found.conceptId)) return found;
-      return { ...found, conceptId: null, reason: 'concept-not-in-database' };
-    },
-  };
-}
-
 async function main() {
   if (ONLY && !['hpo', 'orphanet'].includes(ONLY)) throw new Error(`--only acepta hpo u orphanet, no "${ONLY}".`);
   const client = LOAD ? new pg.Client(DB_CONFIG) : null;
@@ -160,7 +111,7 @@ async function main() {
 }
 
 async function run(client) {
-  const rawIdentity = await loadIdentity();
+  const rawIdentity = await loadF3Identity({ sourcesDir: SOURCES_DIR, buildDir: BUILD_DIR });
   const identity = client ? await onlyExistingDiseases(client, rawIdentity) : rawIdentity;
   const batches = buildBatches(identity, await liveHpoTerms());
   const summary = {
