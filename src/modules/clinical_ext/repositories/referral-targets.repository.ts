@@ -174,4 +174,62 @@ export class ReferralTargetsRepository {
       tradeName: row.tradeName ?? null,
     }));
   }
+
+  /**
+   * ¿Saldría este profesional en {@link searchPractitioners}? Misma regla de
+   * visibilidad, sin el filtro por nombre.
+   *
+   * @param em - Contexto de persistencia.
+   * @param profileId - `health_practitioner_profiles.profile_id`.
+   * @returns `true` sólo si tiene vitrina pública activa de profesional.
+   */
+  async isListablePractitioner(
+    em: EntityManager,
+    profileId: string,
+  ): Promise<boolean> {
+    const rows = await em.getConnection().execute<{ ok: number }[]>(
+      `SELECT 1 AS ok
+         FROM profiles.health_practitioner_profiles hp
+        WHERE hp.profile_id = ?
+          AND ${LISTABLE_PROFILE_SQL.replace('%TARGET%', 'hp.profile_id')}`,
+      [
+        profileId,
+        COMM.PROFILE_TARGET_PRACTITIONER,
+        COMM.PROFILE_VISIBILITY_PUBLIC,
+        CONCEPTS.STATE_ACTIVE,
+      ],
+      'all',
+    );
+    return rows.length > 0;
+  }
+
+  /**
+   * ¿Saldría esta organización en {@link searchOrganizations}? Tenant activo y
+   * vitrina pública activa de organización, sin el filtro por nombre.
+   *
+   * @param em - Contexto de persistencia.
+   * @param tenantId - `directory.tenants.id`.
+   * @returns `true` sólo si es un destino listable.
+   */
+  async isListableOrganization(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<boolean> {
+    const rows = await em.getConnection().execute<{ ok: number }[]>(
+      `SELECT 1 AS ok
+         FROM directory.tenants t
+        WHERE t.id = ?
+          AND t.status_concept_id = ?
+          AND ${LISTABLE_PROFILE_SQL.replace('%TARGET%', 't.id')}`,
+      [
+        tenantId,
+        CONCEPTS.TENANT_ACTIVE,
+        COMM.PROFILE_TARGET_ORGANIZATION,
+        COMM.PROFILE_VISIBILITY_PUBLIC,
+        CONCEPTS.STATE_ACTIVE,
+      ],
+      'all',
+    );
+    return rows.length > 0;
+  }
 }

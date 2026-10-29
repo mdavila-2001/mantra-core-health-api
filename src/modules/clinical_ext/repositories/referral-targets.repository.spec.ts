@@ -103,4 +103,56 @@ describe('ReferralTargetsRepository', () => {
       ]);
     });
   });
+
+  describe('isListablePractitioner (#1058)', () => {
+    it('aplica la misma regla de visibilidad que la búsqueda', async () => {
+      const d = build([{ ok: 1 }]);
+      await expect(d.repo.isListablePractitioner(d.em, 'hp-1')).resolves.toBe(
+        true,
+      );
+      const [sql, params] = d.execute.mock.calls[0];
+      expect(flat(sql)).toContain(
+        'EXISTS ( SELECT 1 FROM community.public_profiles pp WHERE pp.target_id = hp.profile_id AND pp.target_type_concept_id = ? AND pp.visibility_concept_id = ? AND pp.status_concept_id = ? )',
+      );
+      expect(params).toEqual([
+        'hp-1',
+        COMM.PROFILE_TARGET_PRACTITIONER,
+        COMM.PROFILE_VISIBILITY_PUBLIC,
+        CONCEPTS.STATE_ACTIVE,
+      ]);
+    });
+
+    it('sin fila (vitrina oculta, inactiva o inexistente) no es listable', async () => {
+      const d = build([]);
+      await expect(d.repo.isListablePractitioner(d.em, 'hp-1')).resolves.toBe(
+        false,
+      );
+    });
+  });
+
+  describe('isListableOrganization (#1058)', () => {
+    it('exige tenant ACTIVO y vitrina pública activa de organización', async () => {
+      const d = build([{ ok: 1 }]);
+      await expect(d.repo.isListableOrganization(d.em, 't1')).resolves.toBe(
+        true,
+      );
+      const [sql, params] = d.execute.mock.calls[0];
+      expect(flat(sql)).toContain('t.status_concept_id = ?');
+      expect(flat(sql)).toContain('pp.target_id = t.id');
+      expect(params).toEqual([
+        't1',
+        CONCEPTS.TENANT_ACTIVE,
+        COMM.PROFILE_TARGET_ORGANIZATION,
+        COMM.PROFILE_VISIBILITY_PUBLIC,
+        CONCEPTS.STATE_ACTIVE,
+      ]);
+    });
+
+    it('sin fila (perfil no público o tenant inactivo) no es listable', async () => {
+      const d = build([]);
+      await expect(d.repo.isListableOrganization(d.em, 't1')).resolves.toBe(
+        false,
+      );
+    });
+  });
 });

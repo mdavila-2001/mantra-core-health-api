@@ -105,6 +105,8 @@ function build() {
   const targetsRepo = {
     searchPractitioners: mockFn(() => Promise.resolve([])),
     searchOrganizations: mockFn(() => Promise.resolve([])),
+    isListablePractitioner: mockFn(() => Promise.resolve(true)),
+    isListableOrganization: mockFn(() => Promise.resolve(true)),
   };
   const offeringsRepo = {
     findOfferingOf: mockFn(() =>
@@ -1334,6 +1336,70 @@ describe('ReferralsService', () => {
         expect(res.items.map((item) => item.id)).toEqual(['svc-1']);
         expect(res.items[0].practiceName).toBe('Clínica Norte');
         expect(res.items[0].currency).toBeNull();
+        expect(d.targetsRepo.isListableOrganization).toHaveBeenCalledWith(
+          expect.anything(),
+          'ten-dest',
+        );
+      });
+
+      describe('sólo de destinos listables (#1058)', () => {
+        it('un profesional sin vitrina pública activa responde 404 y no lee su catálogo', async () => {
+          const d = build();
+          d.targetsRepo.isListablePractitioner.mockResolvedValue(false);
+          await expect(
+            d.service.listTargetServices({ targetProfileId: 'hp-oculto' }),
+          ).rejects.toBeInstanceOf(ResourceNotFoundException);
+          expect(d.targetsRepo.isListablePractitioner).toHaveBeenCalledWith(
+            expect.anything(),
+            'hp-oculto',
+          );
+          expect(d.offeringsRepo.listOfferings).not.toHaveBeenCalled();
+          expect(d.offeringsRepo.findCatalogItems).not.toHaveBeenCalled();
+        });
+
+        it('una organización no listable (perfil no público o tenant inactivo) responde 404 y no lee sus prácticas', async () => {
+          const d = build();
+          d.targetsRepo.isListableOrganization.mockResolvedValue(false);
+          await expect(
+            d.service.listTargetServices({ targetTenantId: 'ten-inactivo' }),
+          ).rejects.toBeInstanceOf(ResourceNotFoundException);
+          expect(d.practicesRepo.findByTenant).not.toHaveBeenCalled();
+          expect(d.serviceCatalogRepo.searchPage).not.toHaveBeenCalled();
+        });
+
+        it('con los dos parámetros basta que uno no sea listable para el 404', async () => {
+          const d = build();
+          d.targetsRepo.isListableOrganization.mockResolvedValue(false);
+          await expect(
+            d.service.listTargetServices({
+              targetProfileId: 'hp-2',
+              targetTenantId: 'ten-inactivo',
+            }),
+          ).rejects.toBeInstanceOf(ResourceNotFoundException);
+          expect(d.offeringsRepo.listOfferings).not.toHaveBeenCalled();
+        });
+
+        it('un profesional listable devuelve sus servicios', async () => {
+          const d = build();
+          d.offeringsRepo.listOfferings.mockResolvedValue([
+            { serviceCatalogId: 'svc-1' },
+          ]);
+          d.offeringsRepo.findCatalogItems.mockResolvedValue([activeService]);
+          d.practicesRepo.findById.mockResolvedValue({
+            id: 'pr-1',
+            tenantId: 'ten-dest',
+            name: 'Consultorio Sur',
+          });
+          const res = await d.service.listTargetServices({
+            targetProfileId: 'hp-2',
+          });
+          expect(d.targetsRepo.isListablePractitioner).toHaveBeenCalledWith(
+            expect.anything(),
+            'hp-2',
+          );
+          expect(d.targetsRepo.isListableOrganization).not.toHaveBeenCalled();
+          expect(res.items.map((item) => item.id)).toEqual(['svc-1']);
+        });
       });
     });
 
