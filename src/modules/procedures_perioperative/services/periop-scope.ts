@@ -173,3 +173,45 @@ export async function assertProcedureOfCasePatient(
     PERIOP_PROCEDURE_NOT_FOUND,
   );
 }
+
+/**
+ * Cómo informa el módulo «el paciente no existe en esta organización».
+ *
+ * Un paciente sin atención en el tenant activo responde con **exactamente**
+ * esto, igual que uno inexistente: sin `details` y con el mismo `reason`.
+ */
+export const PERIOP_PATIENT_NOT_FOUND: ResourceScopeFailure = {
+  message: 'Paciente no encontrado',
+  reason: ProceduresPerioperativeErrorReason.PATIENT_NOT_FOUND_IN_TENANT,
+};
+
+/**
+ * Exige que el paciente que manda el cliente exista y tenga atención en el
+ * tenant activo (#893). Sin esto, un `patientProfileId` ajeno quedaba ligado al
+ * caso quirúrgico o al registro odontológico de esta organización, y todo lo
+ * que después cuelga de ellos lo heredaba.
+ *
+ * @param casesRepo - Repositorio de casos.
+ * @param em - Contexto de persistencia o transacción activa.
+ * @param patientProfileId - Paciente citado por el cliente.
+ * @param tenantId - Tenant activo, del contexto verificado de la petición.
+ * @throws ResourceNotFoundException (`PATIENT_NOT_FOUND_IN_TENANT`) si no existe o no tiene atención en el tenant.
+ */
+export async function assertPatientInScope(
+  casesRepo: Pick<PeriopCasesRepository, 'patientHasCareInTenant'>,
+  em: EntityManager,
+  patientProfileId: string,
+  tenantId: string,
+): Promise<void> {
+  const inTenant = await casesRepo.patientHasCareInTenant(
+    em,
+    patientProfileId,
+    tenantId,
+  );
+  assertResourceInTenant(
+    inTenant ? patientProfileId : null,
+    inTenant ? tenantId : null,
+    tenantId,
+    PERIOP_PATIENT_NOT_FOUND,
+  );
+}

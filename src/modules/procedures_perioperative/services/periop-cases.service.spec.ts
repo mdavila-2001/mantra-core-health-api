@@ -104,6 +104,8 @@ function build() {
     countCasesMatching: mockFn().mockResolvedValue(0),
     findMilestonesByCase: mockFn().mockResolvedValue([]),
     findChargeItemsForUpdate: mockFn(),
+    // El paciente tiene atención en el tenant, salvo que el test diga otra cosa.
+    patientHasCareInTenant: mockFn().mockResolvedValue(true),
     // Procedimiento del paciente y tenant pedidos, salvo que el test diga otra cosa.
     findProcedureOfPatient: mockFn(
       (_tx: unknown, id: string, patientProfileId: string, tenantId: string) =>
@@ -274,6 +276,30 @@ describe('PeriopCasesService', () => {
         reason:
           ProceduresPerioperativeErrorReason.PROCEDURE_NOT_FOUND_FOR_CASE_PATIENT,
       });
+      expect(d.casesRepo.createCase).not.toHaveBeenCalled();
+    });
+
+    it('#893: un paciente sin atención en el tenant responde 404 uniforme y no crea nada', async () => {
+      const d = build();
+      wire(d);
+      // El repositorio no distingue «no existe» de «es de otro tenant»: los dos
+      // casos llegan acá como `false` y salen con el mismo 404.
+      d.casesRepo.patientHasCareInTenant.mockResolvedValue(false);
+
+      const err: any = await d.service
+        .scheduleCase(scheduleDto(), actor)
+        .catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(ResourceNotFoundException);
+      expect(err).toMatchObject({
+        reason: ProceduresPerioperativeErrorReason.PATIENT_NOT_FOUND_IN_TENANT,
+      });
+      expect(err.getResponse().details).toBeUndefined();
+      expect(d.casesRepo.patientHasCareInTenant).toHaveBeenCalledWith(
+        d.tx,
+        PATIENT,
+        TENANT,
+      );
       expect(d.casesRepo.createCase).not.toHaveBeenCalled();
     });
 
@@ -698,6 +724,31 @@ describe('PeriopCasesService', () => {
         patientChanged: true,
       });
       expect(surgicalCase.patientProfileId).toBe(NEW_PATIENT);
+    });
+
+    it('#893: no corrige el paciente a uno sin atención en el tenant del caso (404 uniforme)', async () => {
+      const d = build();
+      const surgicalCase = draftCase();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(surgicalCase);
+      d.casesRepo.findTeamByCase.mockResolvedValue([
+        {
+          practitionerProfileId: SURGEON,
+          teamRoleConceptId: CONCEPTS.TEAM_ROLE_SURGEON,
+        },
+      ]);
+      d.casesRepo.patientHasCareInTenant.mockResolvedValue(false);
+
+      await expect(
+        d.service.updateCase(CASE, { patientProfileId: NEW_PATIENT }, actor),
+      ).rejects.toMatchObject({
+        reason: ProceduresPerioperativeErrorReason.PATIENT_NOT_FOUND_IN_TENANT,
+      });
+      expect(d.casesRepo.patientHasCareInTenant).toHaveBeenCalledWith(
+        d.tx,
+        NEW_PATIENT,
+        TENANT_A,
+      );
+      expect(surgicalCase.patientProfileId).toBe(PATIENT);
     });
 
     it('rejects changing the patient once past DRAFT (ready for surgery)', async () => {
