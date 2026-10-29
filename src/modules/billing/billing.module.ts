@@ -44,7 +44,10 @@ import {
   PatientSpendingRepository,
 } from './repositories';
 import { SIAT_EMITTER_PORT } from './application/ports';
-import { SiatSimulatedAdapter, SiatRealAdapter } from './infrastructure/adapters';
+import {
+  SiatSimulatedAdapter,
+  SiatRealAdapter,
+} from './infrastructure/adapters';
 
 /**
  * Módulo Billing (17): facturación al paciente (CxC), cuentas por pagar (CxP),
