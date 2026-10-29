@@ -46,6 +46,7 @@ flowchart TB
 | `worker-qa_lab` | `qa_lab` | Ticks de laboratorio de calidad |
 | `worker-read_models` | `read_models` | Reconstrucción de proyecciones de lectura |
 | `worker-reporting` | `reporting` | Generación periódica de reportes |
+| `worker-practice` | `practice` | Aplica los bloqueos de espacios programados y avisa de los vencidos (`POST /internal/practice/blocks-tick`, infraestructura hospitalaria F2) |
 | `worker-scheduling` | `scheduling` | Expira holds (`UC-41-07`), promueve lista de espera (`UC-41-12`), despacha recordatorios (`UC-41-14`) |
 | `worker-tracking` | `tracking` | Ticks de seguimiento |
 | `worker-workflow` | `workflow` | Ticks del motor de workflow |

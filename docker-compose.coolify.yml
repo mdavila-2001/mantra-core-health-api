@@ -797,6 +797,10 @@ services:
     <<: *worker
     command: ["node", "dist/src/worker-messaging.js"]
 
+  worker-practice:
+    <<: *worker
+    command: ["node", "dist/src/worker-practice.js"]
+
   worker-scheduling:
     <<: *worker
     command: ["node", "dist/src/worker-scheduling.js"]

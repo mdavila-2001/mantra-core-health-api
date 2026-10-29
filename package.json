@@ -61,6 +61,8 @@
     "start:worker:qa_lab:dev": "nest start --watch --entryFile worker-qa_lab",
     "start:worker:community": "node dist/src/worker-community",
     "start:worker:community:dev": "nest start --watch --entryFile worker-community",
+    "start:worker:practice": "node dist/src/worker-practice",
+    "start:worker:practice:dev": "nest start --watch --entryFile worker-practice",
     "start:worker:read_models": "node dist/src/worker-read_models",
     "start:worker:read_models:dev": "nest start --watch --entryFile worker-read_models",
     "start:worker:reporting": "node dist/src/worker-reporting",

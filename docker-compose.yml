@@ -1078,6 +1078,28 @@ services:
     networks:
       - mantra-redesa-network
 
+  worker-practice:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-practice.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
   worker-scheduling:
     image: mantra-redesa-api:local
     build:

@@ -17,6 +17,24 @@ import {
   type FunctionFlags,
   type TypologyCode,
 } from '../infrastructure-catalog';
+import {
+  AVAILABILITY,
+  BLOCK_KINDS,
+  BLOCK_REASONS,
+  BLOCK_REASON_KINDS,
+  CLEANING_PRIORITIES,
+  CLEANING_STATUSES,
+  CLEANING_TRIGGERS,
+  CLEANING_TYPES,
+  HYGIENE,
+  ISOLATION,
+  OCCUPANCY,
+} from '../ops-catalog';
+import {
+  V2_BED_STATUS_LABELS,
+  V2_BED_STATUS_RULES,
+  V2_LOCAL_CODE_SYSTEM,
+} from '../domain/bed-status-v2';
 import { MAX_BATCH_SIZE } from './infrastructure-rules';
 import { InfrastructureRulesRepository } from '../repositories';
 import { ref } from './structure-mapper';
@@ -63,6 +81,31 @@ export interface InfrastructureCatalog {
   };
   /** Tope de filas por alta masiva o importación. */
   readonly limits: { maxBatchSize: number };
+  /** Disponibilidad (eje manual de F2). */
+  readonly availability: ConceptRef[];
+  /** Higiene (eje manual). */
+  readonly hygiene: ConceptRef[];
+  /** Aislamiento (eje manual). */
+  readonly isolation: ConceptRef[];
+  /** Ocupación (derivada, sólo lectura). */
+  readonly occupancy: ConceptRef[];
+  /** Tipos de bloqueo. */
+  readonly blockKinds: ConceptRef[];
+  /** Motivos de bloqueo con los tipos a los que aplican y si exigen texto. */
+  readonly blockReasons: (ConceptRef & {
+    kinds: string[];
+    requiresText: boolean;
+  })[];
+  readonly cleaningTypes: ConceptRef[];
+  readonly cleaningPriorities: ConceptRef[];
+  readonly cleaningStatuses: ConceptRef[];
+  readonly cleaningTriggers: ConceptRef[];
+  /** Resumen HL7 v2-0116 de los ejes: la tabla de reglas del contrato. */
+  readonly v2Map: {
+    codeSystemLocal: string;
+    codes: { code: string; label: string }[];
+    rules: { rule: number; code: string; when: string }[];
+  };
 }
 
 const list = (family: ConceptFamily): ConceptRef[] =>
@@ -159,6 +202,28 @@ export class InfrastructureCatalogService {
         capacityKind: list(REGULATORY.capacityKind),
       },
       limits: { maxBatchSize: MAX_BATCH_SIZE },
+      availability: list(AVAILABILITY),
+      hygiene: list(HYGIENE),
+      isolation: list(ISOLATION),
+      occupancy: list(OCCUPANCY),
+      blockKinds: list(BLOCK_KINDS),
+      blockReasons: BLOCK_REASONS.all().map((entry) => ({
+        ...ref(entry)!,
+        kinds: [...(BLOCK_REASON_KINDS[entry.code] ?? [])],
+        requiresText: entry.code === 'BLOCK_RSN_OTHER',
+      })),
+      cleaningTypes: list(CLEANING_TYPES),
+      cleaningPriorities: list(CLEANING_PRIORITIES),
+      cleaningStatuses: list(CLEANING_STATUSES),
+      cleaningTriggers: list(CLEANING_TRIGGERS),
+      v2Map: {
+        codeSystemLocal: V2_LOCAL_CODE_SYSTEM,
+        codes: Object.entries(V2_BED_STATUS_LABELS).map(([code, label]) => ({
+          code,
+          label,
+        })),
+        rules: V2_BED_STATUS_RULES.map((rule) => ({ ...rule })),
+      },
     };
   }
 }
