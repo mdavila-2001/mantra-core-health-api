@@ -25,6 +25,8 @@ import { CatalogConcepts } from '../../modules/terminology/entities';
 import { ValueSetsRepository } from '../../modules/terminology/repositories';
 import { MEDICAL_SPECIALTY_VALUE_SET } from '../../modules/profiles/application/services/medical-specialty-catalog.service';
 import { SPANISH_DESIGNATIONS } from './terminology-designations.es';
+import { demoGateSkip } from './demo-gate';
+import { PractitionerShowcaseSeed } from './practitioner-showcase-seed';
 import {
   syntheticBirthDate,
   syntheticEmail,
@@ -44,11 +46,13 @@ export interface DirectoryNetworksResult {
   sitesCreated: number;
   membershipsCreated: number;
   workplacesCreated: number;
+  /** Vitrinas públicas de médicos creadas en esta pasada. */
+  showcasesCreated: number;
   networksCreated: number;
   /** Especialidades del dataset que no mapean a `VS_MEDICAL_SPECIALTY`. */
   unmappedSpecialties: string[];
   failed: string[];
-  reason?: 'not-configured' | 'seed-actor-missing';
+  reason?: 'not-configured' | 'production-not-allowed' | 'seed-actor-missing';
 }
 
 interface Site {
@@ -108,13 +112,18 @@ export class DirectoryNetworksSeedService {
     private readonly insurance: InsuranceBackboneService,
     private readonly valueSets: ValueSetsRepository,
     private readonly logger: PinoLogger,
+    private readonly showcases: PractitionerShowcaseSeed,
   ) {
     this.logger.setContext(DirectoryNetworksSeedService.name);
   }
 
   async run(
     enabled = process.env.SEED_DIRECTORY_NETWORKS_ENABLED === 'true',
-    password = process.env.SEED_PEOPLE_PASSWORD,
+    // Contraseña compartida de las cuentas de demostración, con su mismo candado
+    // (`demo-gate.ts`): en producción no se crea ninguna cuenta.
+    password = process.env.SEED_DEMO_PASSWORD,
+    nodeEnv = process.env.NODE_ENV,
+    allowProduction = process.env.SEED_DEMO_ALLOW_PRODUCTION === 'true',
   ): Promise<DirectoryNetworksResult> {
     const result: DirectoryNetworksResult = {
       practitionersCreated: 0,
@@ -122,11 +131,16 @@ export class DirectoryNetworksSeedService {
       sitesCreated: 0,
       membershipsCreated: 0,
       workplacesCreated: 0,
+      showcasesCreated: 0,
       networksCreated: 0,
       unmappedSpecialties: [],
       failed: [],
     };
-    if (!enabled || !password) return { ...result, reason: 'not-configured' };
+    if (!enabled) return { ...result, reason: 'not-configured' };
+    const gate = demoGateSkip({ password, nodeEnv, allowProduction });
+    if (gate || !password) {
+      return { ...result, reason: gate ?? 'not-configured' };
+    }
 
     const em = this.orm.em.fork();
     if (!(await em.findOne(Users, { id: SEED_ACTOR_ID }))) {
@@ -230,6 +244,20 @@ export class DirectoryNetworksSeedService {
           result.workplacesCreated++;
         }
 
+        // La vitrina pública del médico, por el mismo caso de uso que su
+        // `PUT /community/profiles/me`, sin iniciar sesión como él.
+        if (
+          await this.showcases.ensure({
+            userId,
+            practitionerProfileId: profileId,
+            displayName: this.displayName(record),
+            email,
+            headline: record.especialidades[0],
+          })
+        ) {
+          result.showcasesCreated++;
+        }
+
         if (practiceId) {
           const first = record.sedes[0];
           for (const carrier of record.carriers) {
@@ -273,6 +301,7 @@ export class DirectoryNetworksSeedService {
         sites: result.sitesCreated,
         memberships: result.membershipsCreated,
         workplaces: result.workplacesCreated,
+        showcases: result.showcasesCreated,
         failed: result.failed.length,
         unmapped: result.unmappedSpecialties.length,
       },
@@ -310,6 +339,13 @@ export class DirectoryNetworksSeedService {
       }
     }
     return [...byKey.values()];
+  }
+
+  /** «APELLIDOS, NOMBRES» → «NOMBRES APELLIDOS»; sin coma, el nombre tal cual. */
+  private displayName(record: Sheet): string {
+    if (!record.nombre.includes(',')) return record.nombre;
+    const [surnames, names] = record.nombre.split(',').map((x) => x.trim());
+    return `${names} ${surnames}`.trim();
   }
 
   private email(record: Sheet): string {

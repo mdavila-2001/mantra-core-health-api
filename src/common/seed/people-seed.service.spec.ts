@@ -25,9 +25,13 @@ const PATIENTS = `# USUARIO PACIENTES 1
 
 function build() {
   const em = { fork: fn(() => ({ findOne: fn().mockResolvedValue(null) })) };
+  const showcases = { ensure: fn().mockResolvedValue(true) };
   const orm = { em };
   const practitionerRegistration = {
-    registerPractitioner: fn().mockResolvedValue({ userId: 'u-1' }),
+    registerPractitioner: fn().mockResolvedValue({
+      userId: 'u-1',
+      practitionerProfileId: 'p-1',
+    }),
   };
   const patientRegistration = {
     registerPatient: fn().mockResolvedValue({ userId: 'u-2' }),
@@ -38,11 +42,13 @@ function build() {
     practitionerRegistration as never,
     patientRegistration as never,
     logger as never,
+    showcases as never,
   );
   return {
     service,
     orm,
     em,
+    showcases,
     practitionerRegistration,
     patientRegistration,
     logger,
@@ -174,5 +180,110 @@ describe('PeopleSeedService', () => {
 
     expect(result.practitionersCreated).toBe(0);
     expect(result.skipped).toContainEqual(expect.stringContaining('boom'));
+  });
+
+  it('crea la vitrina pública de cada médico dado de alta', async () => {
+    const { service, showcases } = build();
+
+    const result = await service.run(true, '12345678', dir);
+
+    expect(result.showcasesCreated).toBe(1);
+    expect(showcases.ensure).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 'u-1',
+        practitionerProfileId: 'p-1',
+        displayName: 'XIOMARA CUELLAR JUSTINIANO',
+        headline: 'CIRUJANO ODONTOLOGO',
+      }),
+    );
+    // El correo que deriva el enlace público es el sintético, nunca uno real.
+    const [input] = showcases.ensure.mock.calls[0] as [{ email: string }];
+    expect(input.email).toMatch(/@alovida\.test$/);
+  });
+
+  it('una vitrina que ya existía no se cuenta como creada', async () => {
+    const { service, showcases } = build();
+    showcases.ensure.mockResolvedValue(false);
+
+    const result = await service.run(true, '12345678', dir);
+
+    expect(result.showcasesCreated).toBe(0);
+  });
+
+  it('si no resuelve el perfil profesional lo informa y no inventa la vitrina', async () => {
+    const { service, showcases, practitionerRegistration } = build();
+    practitionerRegistration.registerPractitioner.mockResolvedValue({
+      userId: 'u-1',
+    });
+
+    const result = await service.run(true, '12345678', dir);
+
+    expect(showcases.ensure).not.toHaveBeenCalled();
+    expect(result.skipped).toContainEqual(
+      expect.stringContaining('no se creó la vitrina'),
+    );
+  });
+
+  it('nunca toma del padrón cédula, nacimiento, celular, correo ni domicilio reales', async () => {
+    writeFileSync(
+      join(dir, 'USUARIO_MEDICOS_1.md'),
+      `| NUMERO | NOMBRE | APELLIDO PATERNO | MATRICULA MINISTERIO DE SALUD Y DEPORTES | CEDULA | FECHA NACIMIENTO | CELULAR | CORREO | DOMICILIO | OCUPACION |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | ANA | PEREZ | C-1 | 9988776 | 1970-02-03 | 71122334 | ana.real@gmail.com | CALLE REAL 12 | MEDICO |
+`,
+      'utf-8',
+    );
+    const { service, practitionerRegistration } = build();
+
+    await service.run(true, '12345678', dir);
+
+    const [dto] = practitionerRegistration.registerPractitioner.mock
+      .calls[0] as [Record<string, string>];
+    const serialized = JSON.stringify({ ...dto, password: undefined });
+    for (const real of [
+      '9988776',
+      '1970-02-03',
+      '71122334',
+      'gmail.com',
+      'CALLE REAL',
+    ]) {
+      expect(serialized).not.toContain(real);
+    }
+    expect(dto.email).toMatch(/@alovida\.test$/);
+  });
+
+  describe('candado de cuentas de demostración', () => {
+    it('en producción sin permiso explícito no crea cuentas', async () => {
+      const { service, practitionerRegistration, patientRegistration } =
+        build();
+
+      const result = await service.run(
+        true,
+        '12345678',
+        dir,
+        'production',
+        false,
+      );
+
+      expect(result.reason).toBe('production-not-allowed');
+      expect(
+        practitionerRegistration.registerPractitioner,
+      ).not.toHaveBeenCalled();
+      expect(patientRegistration.registerPatient).not.toHaveBeenCalled();
+    });
+
+    it('en producción con el permiso explícito sí las crea', async () => {
+      const { service } = build();
+
+      const result = await service.run(
+        true,
+        '12345678',
+        dir,
+        'production',
+        true,
+      );
+
+      expect(result.practitionersCreated).toBe(1);
+    });
   });
 });

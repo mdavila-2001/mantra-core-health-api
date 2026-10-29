@@ -14,7 +14,11 @@ import type {
   RegisterPractitionerDto,
   RegisterPatientDto,
 } from '../../modules/iam/presentation/dto';
+import { PersonAccountLinks } from '../../modules/profiles/entities';
+import { PROF } from '../../modules/profiles/profiles.concepts';
 import { tableRows, column, type MarkdownTableRow } from './markdown-table';
+import { demoGateSkip } from './demo-gate';
+import { PractitionerShowcaseSeed } from './practitioner-showcase-seed';
 import {
   syntheticNationalId,
   syntheticMobilePhone,
@@ -37,10 +41,20 @@ export interface PeopleSeedResult {
   practitionersExisting: number;
   patientsCreated: number;
   patientsExisting: number;
+  /** Vitrinas públicas de médicos creadas en esta pasada. */
+  showcasesCreated: number;
   /** Filas del padrón con nombre, que no alcanzaron a darse de alta. */
   skipped: string[];
   /** Por qué no se hizo nada, si se saltó todo el paso. */
-  reason?: 'not-configured' | 'source-not-found';
+  reason?: 'not-configured' | 'production-not-allowed' | 'source-not-found';
+}
+
+/** Cómo quedó el alta de un médico, con lo que la vitrina necesita. */
+interface PractitionerOutcome {
+  /** `created`, `existing` o el mensaje del error. */
+  outcome: string;
+  userId?: string;
+  practitionerProfileId?: string;
 }
 
 interface CommonCandidate {
@@ -94,28 +108,36 @@ export class PeopleSeedService {
     private readonly practitionerRegistration: IamPractitionerSelfRegistrationService,
     private readonly patientRegistration: IamPatientSelfRegistrationService,
     private readonly logger: PinoLogger,
+    private readonly showcases: PractitionerShowcaseSeed,
   ) {
     this.logger.setContext(PeopleSeedService.name);
   }
 
   async run(
     enabled = process.env.SEED_PEOPLE_ENABLED === 'true',
-    password = process.env.SEED_PEOPLE_PASSWORD,
+    // La contraseña es la compartida de las cuentas de demostración y pasa por
+    // el mismo candado que las demás (`demo-gate.ts`): en producción no se crean.
+    password = process.env.SEED_DEMO_PASSWORD,
     // Ruta del padrón. Sin valor, se resuelve MÁS ABAJO y sólo si el seed está
     // activo: como valor por defecto del parámetro se evaluaba SIEMPRE, y bajo
     // Jest en ESM (`test:integration`) `__dirname` no existe, así que cada
     // arranque del harness fallaba aunque `SEED_PEOPLE_ENABLED` estuviera apagado.
     sourceDir = process.env.SEED_PEOPLE_SOURCE_DIR,
+    nodeEnv = process.env.NODE_ENV,
+    allowProduction = process.env.SEED_DEMO_ALLOW_PRODUCTION === 'true',
   ): Promise<PeopleSeedResult> {
     const empty: PeopleSeedResult = {
       practitionersCreated: 0,
       practitionersExisting: 0,
       patientsCreated: 0,
       patientsExisting: 0,
+      showcasesCreated: 0,
       skipped: [],
     };
-    if (!enabled || !password) {
-      return { ...empty, reason: 'not-configured' };
+    if (!enabled) return { ...empty, reason: 'not-configured' };
+    const gate = demoGateSkip({ password, nodeEnv, allowProduction });
+    if (gate || !password) {
+      return { ...empty, reason: gate ?? 'not-configured' };
     }
 
     // `__dirname` en runtime es `dist/src/common/seed` (Nest compila a
@@ -190,9 +212,13 @@ export class PeopleSeedService {
       };
 
       const created = await this.registrationPractitioner(dto);
-      if (created === 'created') result.practitionersCreated++;
-      else if (created === 'existing') result.practitionersExisting++;
-      else result.skipped.push(`${DOCTORS_FILE}#${i}: ${created}`);
+      if (created.outcome === 'created') result.practitionersCreated++;
+      else if (created.outcome === 'existing') result.practitionersExisting++;
+      else {
+        result.skipped.push(`${DOCTORS_FILE}#${i}: ${created.outcome}`);
+        continue;
+      }
+      await this.ensureShowcase(created, dto, result);
     }
 
     for (const [i, row] of tableRows(textPatients).entries()) {
@@ -233,6 +259,7 @@ export class PeopleSeedService {
         practitionersExisting: result.practitionersExisting,
         patientsCreated: result.patientsCreated,
         patientsExisting: result.patientsExisting,
+        showcasesCreated: result.showcasesCreated,
         skippedCount: result.skipped.length,
       },
       'Padrón de personas sembrado',
@@ -284,22 +311,87 @@ export class PeopleSeedService {
     return existing !== null;
   }
 
-  /** Devuelve 'created', 'existing' o el mensaje del error si no se pudo dar de alta. */
+  /**
+   * Da de alta al médico y devuelve cómo quedó: `created`, `existing` o el
+   * mensaje del error si no se pudo, con las ids de cuenta y de perfil que la
+   * vitrina necesita.
+   */
   private async registrationPractitioner(
     dto: RegisterPractitionerDto,
-  ): Promise<string> {
-    if (await this.existsCredential(dto.email)) return 'existing';
+  ): Promise<PractitionerOutcome> {
+    const previous = await this.orm.em
+      .fork()
+      .findOne(AuthenticationCredentials, { externalSubject: dto.email });
+    if (previous) {
+      return { outcome: 'existing', ...(await this.idsOf(previous.userId)) };
+    }
     try {
-      await this.practitionerRegistration.registerPractitioner(dto);
-      return 'created';
+      const registered =
+        await this.practitionerRegistration.registerPractitioner(dto);
+      return {
+        outcome: 'created',
+        userId: registered.userId,
+        practitionerProfileId: registered.practitionerProfileId,
+      };
     } catch (error) {
-      if (error instanceof ConflictException) return 'existing';
+      if (error instanceof ConflictException) return { outcome: 'existing' };
       const message = error instanceof Error ? error.message : String(error);
       this.logger.warn(
         { operation: 'seed.people.practitioner', err: error },
         'No se pudo dar de alta un médico del padrón',
       );
-      return message;
+      return { outcome: message };
+    }
+  }
+
+  /** Cuenta y perfil profesional de un médico ya dado de alta. */
+  private async idsOf(
+    userId: string | undefined,
+  ): Promise<{ userId?: string; practitionerProfileId?: string }> {
+    if (!userId) return {};
+    const link = await this.orm.em.fork().findOne(PersonAccountLinks, {
+      userId,
+      statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+    });
+    return { userId, practitionerProfileId: link?.personId };
+  }
+
+  /**
+   * La vitrina pública del médico, para que el directorio lo muestre. Si no se
+   * pudo resolver su perfil profesional, lo deja dicho y sigue.
+   */
+  private async ensureShowcase(
+    outcome: PractitionerOutcome,
+    dto: RegisterPractitionerDto,
+    result: PeopleSeedResult,
+  ): Promise<void> {
+    if (!outcome.userId || !outcome.practitionerProfileId) {
+      result.skipped.push(
+        `${dto.email}: sin perfil profesional resuelto, no se creó la vitrina`,
+      );
+      return;
+    }
+    try {
+      const created = await this.showcases.ensure({
+        userId: outcome.userId,
+        practitionerProfileId: outcome.practitionerProfileId,
+        displayName: [
+          dto.name,
+          dto.middleName,
+          dto.lastName,
+          dto.motherLastName,
+        ]
+          .filter(Boolean)
+          .join(' '),
+        email: dto.email,
+        headline: dto.professionalTitle,
+      });
+      if (created) result.showcasesCreated++;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      result.skipped.push(
+        `${dto.email}: no se pudo crear la vitrina (${message})`,
+      );
     }
   }
 
