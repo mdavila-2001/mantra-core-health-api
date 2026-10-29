@@ -34,6 +34,9 @@ import { BoMedicalSpecialtiesSeedService } from './bo-medical-specialties-seed.s
 import { PracticeDefaultServicesSeedService } from './practice-default-services-seed.service';
 import { PeopleSeedService } from './people-seed.service';
 import { DirectoryNetworksSeedService } from './directory-networks-seed.service';
+import { PadronOrganizationsSeedService } from './padron-organizations-seed.service';
+import { PadronOrgAdminsSeedService } from './padron-org-admins-seed.service';
+import { CommunitySearchIndexService } from '../../modules/community/services';
 import { isCoreSeedFailureFatal, loadSeedBootEnv } from './seed-boot.env';
 import { SeedCoreState } from './seed-core.state';
 
@@ -47,6 +50,31 @@ export interface SeedStepResult {
   tookMs: number;
   /** Si el paso terminó con excepción. */
   failed: boolean;
+  /**
+   * Contadores que devolvió el seed, tal cual (creadas, existentes…). Sirven para
+   * comparar entornos paso a paso; vacío si el seed no devuelve contadores.
+   */
+  counts?: Record<string, number>;
+}
+
+/** Cómo se corre la cadena. */
+export interface SeedRunOptions {
+  /**
+   * Ids de los únicos pasos a correr (`seed-cli --only=<id>,<id>`). Sin él corre
+   * toda la cadena. Un paso pedido por id corre aunque `SEED_CONTENT_ON_BOOT`
+   * sea `false`: pedirlo es la decisión explícita.
+   */
+  readonly only?: readonly string[];
+}
+
+/** Nombre normalizado de un paso: minúsculas, sin acentos, con guiones. */
+export function seedStepSlug(name: string): string {
+  return name
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 /** Resumen de una corrida completa de la cadena. */
@@ -87,8 +115,21 @@ export interface SeedRunSummary {
  */
 type SeedStepKind = 'core' | 'content';
 
+/** Id del paso del catálogo de conceptos, que no está entre los dependientes. */
+const CATALOG_STEP_ID = 'catalogo-de-conceptos';
+
+/** Id con que se pide un paso por `--only`. */
+function stepId(step: { id?: string; name: string }): string {
+  return step.id ?? seedStepSlug(step.name);
+}
+
 /** Un paso de la cadena, con lo necesario para decidir si corre. */
 interface SeedStepDescriptor {
+  /**
+   * Identificador corto y estable para `seed-cli --only=<id>`. Sin él se usa el
+   * nombre normalizado (minúsculas, sin acentos, con guiones).
+   */
+  readonly id?: string;
   /** Nombre legible, el mismo que aparece en el log. */
   readonly name: string;
   /** Si el entorno puede saltearlo. */
@@ -128,6 +169,22 @@ export function countInserted(result: unknown): number | null {
   return numbers.reduce((total, value) => total + value, 0);
 }
 
+/**
+ * Los contadores numéricos de primer nivel que devolvió un seed, tal cual.
+ *
+ * @param result - Lo que devolvió el seed.
+ * @returns Los contadores, o `undefined` si no devolvió ninguno.
+ */
+export function seedCounts(
+  result: unknown,
+): Record<string, number> | undefined {
+  if (typeof result !== 'object' || result === null) return undefined;
+  const entries = Object.entries(result as Record<string, unknown>).filter(
+    (entry): entry is [string, number] => typeof entry[1] === 'number',
+  );
+  return entries.length > 0 ? Object.fromEntries(entries) : undefined;
+}
+
 /** Ejecuta los seeds estructurales en un orden explícito y determinista. */
 @Injectable()
 export class SeedBootstrapService implements OnApplicationBootstrap {
@@ -136,6 +193,9 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
 
   /** Si los pasos de contenido corren junto con los de núcleo. */
   private readonly contentOnBoot: boolean;
+
+  /** Si la corrida en curso pidió pasos concretos con `--only`. */
+  private onlyRequested = false;
 
   /**
    * Inicializa el orquestador.
@@ -182,6 +242,12 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param logger - Logger estructurado del arranque.
    * @param coreState - Dónde queda registrado qué paso núcleo falló, para que
    *   `/readiness` lo vea (SEED-01); opcional para quien arma el orquestador a mano.
+   * @param padronOrganizations - Organizaciones del padrón público de
+   *   establecimientos, opt-in por `SEED_PADRON_ORGANIZATIONS_ENABLED`.
+   * @param searchIndex - Buscador del directorio público, que se reindexa al
+   *   final cuando `SEED_SEARCH_REINDEX=true` o se pide con `--only`.
+   * @param padronOrgAdmins - Un administrador de demostración por organización,
+   *   opt-in por `SEED_PADRON_ORG_ADMINS_ENABLED` y tras el candado de demo.
    */
   constructor(
     private readonly terminology: TerminologySeedService,
@@ -216,6 +282,14 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly qaFlows: QaFlowsSeedService,
     private readonly logger: PinoLogger,
     @Optional() private readonly coreState?: SeedCoreState,
+    // Los pasos de la carga del padrón van al final y opcionales para no mover
+    // la posición de los demás; el módulo siempre los provee.
+    @Optional()
+    private readonly padronOrganizations?: PadronOrganizationsSeedService,
+    @Optional()
+    private readonly padronOrgAdmins?: PadronOrgAdminsSeedService,
+    @Optional()
+    private readonly searchIndex?: CommunitySearchIndexService,
   ) {
     this.logger.setContext(SeedBootstrapService.name);
     const environment = loadSeedBootEnv();
@@ -277,20 +351,25 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    *
    * @returns El resumen de la corrida, con un detalle por paso.
    */
-  async run(): Promise<SeedRunSummary> {
+  async run(options: SeedRunOptions = {}): Promise<SeedRunSummary> {
     const startup = Date.now();
     const steps: SeedStepResult[] = [];
+    const only = this.resolveOnly(options.only);
+    this.onlyRequested = only !== undefined;
 
     // El catálogo de conceptos no es un paso más: es la precondición de todos
     // los demás. Si falla, seguir sería sembrar contra FKs que no existen —y el
     // error real quedaría sepultado bajo una cascada de fallos derivados.
-    const catalog = await this.runStep('catálogo de conceptos', () =>
-      this.terminology.run(),
-    );
-    steps.push(catalog);
     const coreFailed: string[] = [];
+    const catalog =
+      !only || only.has(CATALOG_STEP_ID)
+        ? await this.runStep('catálogo de conceptos', () =>
+            this.terminology.run(),
+          )
+        : undefined;
+    if (catalog) steps.push(catalog);
 
-    if (catalog.failed) {
+    if (catalog?.failed) {
       coreFailed.push(catalog.name);
       const summary = this.summarize(steps, startup, 0, coreFailed);
       this.logger.error(
@@ -303,7 +382,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
 
     let skippedContent = 0;
     for (const step of this.dependentsSteps()) {
-      if (step.kind === 'content' && !this.contentOnBoot) {
+      if (only && !only.has(stepId(step))) continue;
+      if (step.kind === 'content' && !this.contentOnBoot && !only) {
         skippedContent += 1;
         this.logger.info(
           { event: 'seed.step.skipped', name: step.name },
@@ -318,6 +398,32 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     }
 
     return this.summarize(steps, startup, skippedContent, coreFailed);
+  }
+
+  /**
+   * Valida los ids de `--only` contra los pasos que existen.
+   *
+   * @param ids - Ids pedidos, o `undefined` para toda la cadena.
+   * @returns El conjunto de ids, o `undefined` si no se pidió ninguno.
+   * @throws Error si algún id no corresponde a un paso, nombrando los válidos.
+   */
+  private resolveOnly(
+    ids: readonly string[] | undefined,
+  ): ReadonlySet<string> | undefined {
+    const wanted = (ids ?? []).map((id) => id.trim()).filter(Boolean);
+    if (wanted.length === 0) return undefined;
+    const known = new Set([
+      CATALOG_STEP_ID,
+      ...this.dependentsSteps().map((step) => stepId(step)),
+    ]);
+    const unknown = wanted.filter((id) => !known.has(id));
+    if (unknown.length > 0) {
+      throw new Error(
+        `Pasos de siembra desconocidos: ${unknown.join(', ')}. ` +
+          `Pasos válidos: ${[...known].join(', ')}`,
+      );
+    }
+    return new Set(wanted);
   }
 
   /**
@@ -554,6 +660,35 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         kind: 'content',
         run: () => this.directoryNetworks.run(),
       },
+      // Después de las aseguradoras y de las redes, y antes del servicio por
+      // defecto de cada práctica: crea las organizaciones del padrón público
+      // (hospitales, clínicas, centros de salud, laboratorios, imágenes y
+      // farmacias) con el actor semilla como dueño. Opt-in por
+      // `SEED_PADRON_ORGANIZATIONS_ENABLED`; en producción es el único paso de
+      // la carga que corre, porque no crea cuentas.
+      ...(this.padronOrganizations
+        ? [
+            {
+              id: 'padron-organizaciones',
+              name: 'organizaciones del padrón',
+              kind: 'content' as const,
+              run: () => this.padronOrganizations!.run(),
+            },
+          ]
+        : []),
+      // Después de las organizaciones, a las que cuelga su cuenta de
+      // administrador. Es de demostración: pasa por el candado común y en
+      // producción no crea nada.
+      ...(this.padronOrgAdmins
+        ? [
+            {
+              id: 'padron-administradores',
+              name: 'administradores de organizaciones del padrón',
+              kind: 'content' as const,
+              run: () => this.padronOrgAdmins!.run(),
+            },
+          ]
+        : []),
       // El último, y no por importancia: es el único paso que siembra **sobre
       // filas de negocio que ya existen** —una por práctica— en vez de
       // materializar un catálogo. Corre después de todo lo demás para que, si
@@ -573,7 +708,42 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         kind: 'content',
         run: () => this.qaFlows.run(),
       },
+      // Al final de todo: proyecta al buscador los perfiles que los pasos
+      // anteriores acaban de crear. Opt-in (`SEED_SEARCH_REINDEX=true`) porque
+      // depende de que el buscador esté disponible; un entorno sin él sigue
+      // sirviendo desde la base. Pedido por `--only=reindex-buscador` corre
+      // siempre.
+      ...(this.searchIndex
+        ? [
+            {
+              id: 'reindex-buscador',
+              name: 'reindexado del buscador público',
+              kind: 'content' as const,
+              run: () => this.reindexSearch(),
+            },
+          ]
+        : []),
     ];
+  }
+
+  /**
+   * Reindexa el directorio público si el entorno lo pidió.
+   *
+   * Sin `SEED_SEARCH_REINDEX=true` (ni `--only`) no hace nada y lo dice en el
+   * contador `skipped`; con él, un fallo del buscador falla el paso (queda en el
+   * resumen y en el código de salida), no se traga.
+   */
+  private async reindexSearch(): Promise<Record<string, number>> {
+    if (process.env.SEED_SEARCH_REINDEX !== 'true' && !this.onlyRequested) {
+      return { skipped: 1 };
+    }
+    const outcome = await this.searchIndex!.reindexAll({ recreate: false });
+    if (outcome.errors) {
+      throw new Error(
+        `El reindexado dejó errores parciales: ${outcome.indexed} de ${outcome.total}`,
+      );
+    }
+    return { indexed: outcome.indexed, confirmed: outcome.confirmed };
   }
 
   /**
@@ -600,6 +770,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         inserted: countInserted(result),
         tookMs: Date.now() - from,
         failed: false,
+        ...(seedCounts(result) ? { counts: seedCounts(result) } : {}),
       };
       // `detail` lleva los contadores tal como los devolvió el seed, incluidos
       // los que `inserted` deja afuera: el agregado es para leer de un vistazo,

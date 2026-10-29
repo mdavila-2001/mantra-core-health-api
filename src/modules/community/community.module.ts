@@ -266,6 +266,10 @@ import {
     CommunityBookingChatService,
     // El pedido de farmacia abre el hilo paciente ↔ vitrina de la farmacia.
     CommunityOrderChatService,
+    // Los seeds crean la vitrina de un profesional por el mismo caso de uso que la API.
+    CommunitySocialService,
+    // El reindexado del buscador al final de la carga.
+    CommunitySearchIndexService,
   ],
 })
 export class CommunityModule {}
