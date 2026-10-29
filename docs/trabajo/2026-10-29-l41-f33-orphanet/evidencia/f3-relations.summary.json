@@ -1,0 +1,53 @@
+{
+  "generatedAt": "2026-10-29T18:13:48.284Z",
+  "loaded": false,
+  "dryRun": false,
+  "batches": [
+    {
+      "key": "hpo",
+      "version": "2026-09-02",
+      "rows": 151589,
+      "stats": {
+        "read": 286651,
+        "notPhenotypeAspect": 17745,
+        "skippedDatabase": 116471,
+        "diseaseUnresolved": 844,
+        "phenotypeUnresolved": 0,
+        "negated": 0,
+        "withFrequency": 99820,
+        "withRatio": 96237,
+        "frequencyProblems": {},
+        "onsetWithRange": 2724,
+        "onsetWithoutRange": 323,
+        "sexResolved": 0,
+        "sexUnresolved": 615,
+        "tierT2": 104467,
+        "tierT3": 47124,
+        "referenceCollisions": 6,
+        "exactDuplicates": 2,
+        "rows": 151589
+      },
+      "unresolvedDiseases": {
+        "no-mondo-group": 844
+      }
+    },
+    {
+      "key": "orphanet",
+      "version": "2026-06-23",
+      "rows": 115501,
+      "stats": {
+        "read": 116664,
+        "diseaseUnresolved": 1006,
+        "phenotypeUnresolved": 157,
+        "withFrequency": 115501,
+        "excluded": 730,
+        "unknownFrequencyLabels": {},
+        "rows": 115501
+      },
+      "unresolvedDiseases": {
+        "group-in-review": 197,
+        "no-mondo-group": 809
+      }
+    }
+  ]
+}
