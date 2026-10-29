@@ -16,6 +16,7 @@ import {
   InfrastructureAccessService,
   type InfraTarget,
 } from '../../../practice/services/infrastructure-access.service';
+import { strOrNull } from '../../../practice/services/ops-rows';
 import { spaceBelongsToUnit } from '../../../practice/services/space-unit-membership';
 import { PharmacyInventoryErrorReason as Reason } from '../../pharmacy_inventory.error-reasons';
 
@@ -163,8 +164,8 @@ export class StockPointAccessService {
           { functionCode: fn?.code ?? null },
         );
       }
-      const from = space.valid_from ? new Date(String(space.valid_from)) : null;
-      const to = space.valid_to ? new Date(String(space.valid_to)) : null;
+      const from = this.asDate(space.valid_from);
+      const to = this.asDate(space.valid_to);
       if (
         String(space.status_concept_id) !== PRAC.SPACE_ACTIVE ||
         (from && from.getTime() > now.getTime()) ||
@@ -208,6 +209,12 @@ export class StockPointAccessService {
       );
     }
     return { careSpaceId: spaceId, clinicalUnitId: unitId };
+  }
+
+  /** Fecha del driver (`Date` o texto ISO), o `null`. */
+  private asDate(value: unknown): Date | null {
+    if (value === null || value === undefined) return null;
+    return value instanceof Date ? value : new Date(strOrNull(value) ?? '');
   }
 
   private notAvailable(): ResourceNotFoundException {

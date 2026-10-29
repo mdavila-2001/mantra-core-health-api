@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { requireTenantId, type AuthenticatedUser } from '../../../../common';
+import { strOrNull } from '../../../practice/services/ops-rows';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
 import type {
   SpaceStockLocationView,
@@ -93,8 +94,8 @@ export class ReadSpaceStockUseCase {
       const list = byLocation.get(key) ?? [];
       list.push({
         productId: String(row.pharmacy_product_id),
-        productName: row.product_name ? String(row.product_name) : null,
-        lotNumber: row.lot_number ? String(row.lot_number) : null,
+        productName: strOrNull(row.product_name),
+        lotNumber: strOrNull(row.lot_number),
         expiresAt: row.expires_at
           ? new Date(row.expires_at as string).toISOString()
           : null,
@@ -131,7 +132,7 @@ export class ReadSpaceStockUseCase {
             code: String(row.space_code),
             name: String(row.space_name),
           },
-          clinicalUnit: row.unit_id
+          clinicalUnit: strOrNull(row.unit_id)
             ? {
                 id: String(row.unit_id),
                 code: String(row.unit_code),

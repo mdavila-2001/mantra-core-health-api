@@ -10,6 +10,7 @@ import { InsufficientRoleException } from '../../../common/errors/domain.excepti
 import type { StructureAccess } from '../../practice/services/structure-access.service';
 import { FUNCTIONS } from '../../practice/infrastructure-catalog';
 import { PRAC } from '../../practice/practice.concepts';
+import { strOrNull } from '../../practice/services/ops-rows';
 import { DelegatedAccessErrorReason } from '../delegated_access.error-reasons';
 import type {
   AssignmentCatalogView,
@@ -222,7 +223,7 @@ export class OrgAssignmentReadService {
       );
       return rows.map((r) => ({
         id: String(r.id),
-        code: r.code ? String(r.code) : null,
+        code: strOrNull(r.code),
         name: String(r.name),
         siteId: null,
         parentId: null,
@@ -243,7 +244,7 @@ export class OrgAssignmentReadService {
       );
       return rows.map((r) => ({
         id: String(r.id),
-        code: r.code ? String(r.code) : null,
+        code: strOrNull(r.code),
         name: String(r.name),
         siteId: String(r.id),
         parentId: null,
@@ -276,10 +277,10 @@ export class OrgAssignmentReadService {
       );
       return rows.map((r) => ({
         id: String(r.id),
-        code: r.code ? String(r.code) : null,
+        code: strOrNull(r.code),
         name: String(r.name),
         siteId: query.siteId!,
-        parentId: r.parent_unit_id ? String(r.parent_unit_id) : null,
+        parentId: strOrNull(r.parent_unit_id),
         functionCode: null,
       }));
     }
@@ -310,10 +311,10 @@ export class OrgAssignmentReadService {
     );
     return rows.map((r) => ({
       id: String(r.id),
-      code: r.code ? String(r.code) : null,
+      code: strOrNull(r.code),
       name: String(r.name),
       siteId: query.siteId!,
-      parentId: r.parent_space_id ? String(r.parent_space_id) : null,
+      parentId: strOrNull(r.parent_space_id),
       functionCode:
         FUNCTIONS.byConceptId(String(r.space_type_concept_id))?.code ?? null,
     }));

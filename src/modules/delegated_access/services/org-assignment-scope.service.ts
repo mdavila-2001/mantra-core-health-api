@@ -9,6 +9,7 @@ import {
 } from '../../../common';
 import { InsufficientRoleException } from '../../../common/errors/domain.exception';
 import { DIR } from '../../directory/directory.concepts';
+import { strOrNull } from '../../practice/services/ops-rows';
 import { spaceBelongsToUnit } from '../../practice/services/space-unit-membership';
 import {
   StructureAccessService,
@@ -265,7 +266,7 @@ export class OrgAssignmentScopeService {
     if (rows.length === 0) return { siteId: null, branchId: null };
     return {
       siteId: String(rows[0].site_id),
-      branchId: rows[0].branch_id ? String(rows[0].branch_id) : null,
+      branchId: strOrNull(rows[0].branch_id),
     };
   }
 
