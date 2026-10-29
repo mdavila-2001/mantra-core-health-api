@@ -13,6 +13,55 @@ describe('configuración de admisiones', () => {
       defaultValidityMonths: 36,
       infoWindowDays: 30,
       maxResubmissions: 3,
+      expireSweepEnabled: true,
+      expireSweepCron: '0 * * * *',
+    });
+  });
+
+  describe('barrido programado de vencimientos', () => {
+    it('por defecto está encendido y corre cada hora en punto, también en producción', () => {
+      for (const NODE_ENV of ['development', 'test', 'production']) {
+        const config = loadAdmissionsConfig(env({ NODE_ENV }));
+        expect(config.expireSweepEnabled).toBe(true);
+        expect(config.expireSweepCron).toBe('0 * * * *');
+      }
+    });
+
+    it('se apaga con ADMISSIONS_EXPIRE_SWEEP_ENABLED=false y la cadencia se cambia con ADMISSIONS_EXPIRE_SWEEP_CRON', () => {
+      const config = loadAdmissionsConfig(
+        env({
+          ADMISSIONS_EXPIRE_SWEEP_ENABLED: 'false',
+          ADMISSIONS_EXPIRE_SWEEP_CRON: ' */15 * * * * ',
+        }),
+      );
+      expect(config.expireSweepEnabled).toBe(false);
+      expect(config.expireSweepCron).toBe('*/15 * * * *');
+    });
+
+    it('un valor vacío o que no es true/false cae al default', () => {
+      const config = loadAdmissionsConfig(
+        env({
+          ADMISSIONS_EXPIRE_SWEEP_ENABLED: 'quizás',
+          ADMISSIONS_EXPIRE_SWEEP_CRON: '   ',
+        }),
+      );
+      expect(config.expireSweepEnabled).toBe(true);
+      expect(config.expireSweepCron).toBe('0 * * * *');
+    });
+
+    it('el esquema acepta vacíos y booleanos, y no valida el contenido de la expresión (lo hace el worker)', () => {
+      expect(
+        admissionsEnvSchema.validate({
+          ADMISSIONS_EXPIRE_SWEEP_ENABLED: 'false',
+          ADMISSIONS_EXPIRE_SWEEP_CRON: 'esto no es cron',
+        }).error,
+      ).toBeUndefined();
+      expect(
+        admissionsEnvSchema.validate({
+          ADMISSIONS_EXPIRE_SWEEP_ENABLED: '',
+          ADMISSIONS_EXPIRE_SWEEP_CRON: '',
+        }).error,
+      ).toBeUndefined();
     });
   });
 

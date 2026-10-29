@@ -16,6 +16,8 @@ import * as Joi from 'joi';
  * | `ADMISSIONS_DEFAULT_VALIDITY_MONTHS` | `36` | `36` | Vigencia de la verificación si ninguna matrícula declara su vencimiento. |
  * | `ADMISSIONS_INFO_WINDOW_DAYS` | `30` | `30` | Plazo del solicitante para responder a una petición de información; vencido, la solicitud pasa a ABANDONADA. |
  * | `ADMISSIONS_MAX_RESUBMISSIONS` | `3` | `3` | Reenvíos que puede hacer el solicitante. |
+ * | `ADMISSIONS_EXPIRE_SWEEP_ENABLED` | `true` | `true` | Enciende el barrido programado de vencimientos y abandonos (worker `profiles`). Apagado, nada vence ni se abandona solo: el barrido sólo corre si alguien llama a `POST /admissions/expire-sweep`. |
+ * | `ADMISSIONS_EXPIRE_SWEEP_CRON` | `0 * * * *` | `0 * * * *` | Cuándo corre el barrido (expresión cron; por defecto, cada hora en punto). Una expresión inválida no detiene el worker: se avisa y rige la de por defecto. |
  */
 export interface AdmissionsConfig {
   readonly fourEyes: boolean;
@@ -24,6 +26,8 @@ export interface AdmissionsConfig {
   readonly defaultValidityMonths: number;
   readonly infoWindowDays: number;
   readonly maxResubmissions: number;
+  readonly expireSweepEnabled: boolean;
+  readonly expireSweepCron: string;
 }
 
 /** Valores por defecto que no dependen del entorno. */
@@ -32,6 +36,9 @@ export const ADMISSIONS_DEFAULTS = {
   defaultValidityMonths: 36,
   infoWindowDays: 30,
   maxResubmissions: 3,
+  expireSweepEnabled: true,
+  /** Cada hora en punto: la vigencia se mide en meses, una hora de atraso no importa. */
+  expireSweepCron: '0 * * * *',
 } as const;
 
 /** Esquema de entorno, para que un valor mal escrito aborte el arranque. */
@@ -61,6 +68,14 @@ export const admissionsEnvSchema = Joi.object({
     .min(0)
     .max(20)
     .default(ADMISSIONS_DEFAULTS.maxResubmissions),
+  ADMISSIONS_EXPIRE_SWEEP_ENABLED: Joi.boolean()
+    .truthy('true')
+    .falsy('false')
+    .empty(''),
+  // El contenido de la expresión NO se valida acá: una mal escrita aborta el
+  // arranque de la API entera por un detalle del barrido. La valida el worker,
+  // que la ignora (y lo avisa) en vez de caerse.
+  ADMISSIONS_EXPIRE_SWEEP_CRON: Joi.string().trim().max(120).empty(''),
 });
 
 function positiveInt(
@@ -108,5 +123,12 @@ export function loadAdmissionsConfig(
       ADMISSIONS_DEFAULTS.maxResubmissions,
       true,
     ),
+    expireSweepEnabled: flag(
+      source.ADMISSIONS_EXPIRE_SWEEP_ENABLED,
+      ADMISSIONS_DEFAULTS.expireSweepEnabled,
+    ),
+    expireSweepCron:
+      source.ADMISSIONS_EXPIRE_SWEEP_CRON?.trim() ||
+      ADMISSIONS_DEFAULTS.expireSweepCron,
   };
 }

@@ -129,6 +129,10 @@ function build(options: { admission?: Record<string, any> | null } = {}) {
     flush: fn().mockResolvedValue(undefined),
     findOne: fn(),
     find: fn().mockResolvedValue([]),
+    // El cerrojo del barrido: una transacción propia con `pg_try_advisory_xact_lock`.
+    begin: fn().mockResolvedValue(undefined),
+    rollback: fn().mockResolvedValue(undefined),
+    execute: fn().mockResolvedValue([{ locked: true }]),
   };
   const em = {
     transactional: fn((work: (t: typeof tx) => unknown) =>
@@ -1576,7 +1580,7 @@ describe('PractitionerAdmissionsService', () => {
 
       const result = await d.service.expireSweep(caller(sweeper));
 
-      expect(result).toEqual({ expired: 1, abandoned: 1 });
+      expect(result).toEqual({ expired: 1, abandoned: 1, skipped: false });
       expect(vencida.statusConceptId).toBe(ADMISSION_STATUS_CONCEPT.EXPIRADA);
       expect(sinRespuesta.statusConceptId).toBe(
         ADMISSION_STATUS_CONCEPT.ABANDONADA,
@@ -1597,8 +1601,60 @@ describe('PractitionerAdmissionsService', () => {
     it('es idempotente: una segunda corrida no encuentra nada y no escribe', async () => {
       const d = build();
       const result = await d.service.expireSweep(caller(sweeper));
-      expect(result).toEqual({ expired: 0, abandoned: 0 });
+      expect(result).toEqual({ expired: 0, abandoned: 0, skipped: false });
       expect(d.events).toHaveLength(0);
+    });
+
+    describe('un solo nodo a la vez (cerrojo consultivo)', () => {
+      it('toma el cerrojo en su propia transacción y lo suelta al terminar', async () => {
+        const d = build();
+        await d.service.expireSweep(caller(sweeper));
+        expect(d.tx.begin).toHaveBeenCalledTimes(1);
+        expect(d.tx.execute).toHaveBeenCalledWith(
+          expect.stringContaining('pg_try_advisory_xact_lock'),
+          ['profiles.admissions.expire-sweep'],
+        );
+        expect(d.tx.rollback).toHaveBeenCalledTimes(1);
+        // Primero el cerrojo, después la búsqueda.
+        expect(d.tx.execute.mock.invocationCallOrder[0]).toBeLessThan(
+          d.admissionsRepo.findExpired.mock.invocationCallOrder[0],
+        );
+      });
+
+      it('si otro nodo tiene el barrido, no hace nada: ni busca, ni escribe, ni avisa', async () => {
+        const d = build();
+        d.tx.execute.mockResolvedValue([{ locked: false }]);
+        d.admissionsRepo.findExpired.mockResolvedValue([
+          admission('VERIFICADA', { id: 'a1' }),
+        ]);
+
+        const result = await d.service.expireSweep(caller(sweeper));
+
+        expect(result).toEqual({ expired: 0, abandoned: 0, skipped: true });
+        expect(d.admissionsRepo.findExpired).not.toHaveBeenCalled();
+        expect(d.admissionsRepo.findAbandoned).not.toHaveBeenCalled();
+        expect(d.projector.projectNotVerified).not.toHaveBeenCalled();
+        expect(d.events).toHaveLength(0);
+        expect(d.notices.emit).not.toHaveBeenCalled();
+        expect(d.tx.rollback).toHaveBeenCalledTimes(1);
+      });
+
+      it('si el barrido falla a mitad, suelta el cerrojo y propaga el error al llamador', async () => {
+        const d = build();
+        d.admissionsRepo.findExpired.mockRejectedValue(new Error('db caída'));
+        await expect(d.service.expireSweep(caller(sweeper))).rejects.toThrow(
+          'db caída',
+        );
+        expect(d.tx.rollback).toHaveBeenCalledTimes(1);
+      });
+
+      it('un fallo al soltar el cerrojo no tapa el resultado del barrido', async () => {
+        const d = build();
+        d.tx.rollback.mockRejectedValue(new Error('conexión cerrada'));
+        await expect(
+          d.service.expireSweep(caller(sweeper)),
+        ).resolves.toMatchObject({ skipped: false });
+      });
     });
 
     it('si entre la búsqueda y el bloqueo otro la resolvió, la saltea', async () => {

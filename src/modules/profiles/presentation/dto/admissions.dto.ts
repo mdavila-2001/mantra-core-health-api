@@ -513,6 +513,11 @@ export class AdmissionSweepResultDto {
     description: 'Solicitudes cerradas por falta de respuesta (a ABANDONADA).',
   })
   abandoned!: number;
+  @ApiProperty({
+    description:
+      '`true` si no corrió porque otro nodo tenía el barrido en curso (no es un error: repetir es inocuo).',
+  })
+  skipped!: boolean;
 }
 
 /** URL firmada de un documento de la solicitud. */
