@@ -7,10 +7,10 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | Concepto | Cantidad |
 |---|---|
 | Tablas en el DDL del modelo | 1230 |
-| Entidades del ORM | 1281 |
+| Entidades del ORM | 1283 |
 | Tablas del DDL con entidad | 1230 |
 | Tablas del DDL **sin** entidad | 0 |
-| Entidades del ORM **sin** tabla en el DDL | 51 |
+| Entidades del ORM **sin** tabla en el DDL | 53 |
 | Columnas del DDL ausentes en su entidad | 1 |
 | Columnas con nulabilidad divergente | 26 |
 | Columnas con tipo divergente | 0 |
@@ -33,6 +33,8 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | `data_catalog.catalog_process_step_operations` | CatalogProcessStepOperations | sólo en un parche: `SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
 | `data_catalog.catalog_process_steps` | CatalogProcessSteps | sólo en un parche: `SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
 | `data_catalog.catalog_processes` | CatalogProcesses | sólo en un parche: `SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
+| `directory.tenant_medical_facilities` | TenantMedicalFacilities | **en ninguna fuente de DDL del modelo** |
+| `directory.tenant_medical_facility_sites` | TenantMedicalFacilitySites | **en ninguna fuente de DDL del modelo** |
 | `organization_extensions.data_use_agreements` | DataUseAgreements | **en ninguna fuente de DDL del modelo** |
 | `payments.cash_registers` | CashRegisters | **en ninguna fuente de DDL del modelo** |
 | `pharmacy.pharmacy_on_call_shifts` | PharmacyOnCallShifts | **en ninguna fuente de DDL del modelo** |

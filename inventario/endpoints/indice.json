@@ -8153,7 +8153,7 @@
       "roles": [
         "SUPERADMIN"
       ],
-      "tablas": 60,
+      "tablas": 63,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -10814,7 +10814,7 @@
       "roles": [
         "SUPERADMIN"
       ],
-      "tablas": 14,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -10999,7 +10999,7 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 14,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -13554,9 +13554,9 @@
       "riesgo": "ALTO",
       "publica": true,
       "roles": [],
-      "tablas": 38,
+      "tablas": 40,
       "eventos": 0,
-      "pruebas": 23,
+      "pruebas": 24,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -14933,7 +14933,7 @@
       "riesgo": "BAJO",
       "publica": true,
       "roles": [],
-      "tablas": 3,
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"

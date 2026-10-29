@@ -14,7 +14,7 @@
     "indicesConParaQue": 7804,
     "paraQuePorTipo": {
       "DOCUMENTO": 8014,
-      "CONSULTA": 1483,
+      "CONSULTA": 1485,
       "ESTRUCTURAL": 17
     },
     "tablasConEntidad": 1230,
@@ -147,6 +147,24 @@
         "ddl": {
           "tipo": "PARCHE",
           "fuente": "SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql"
+        }
+      },
+      {
+        "tabla": "directory.tenant_medical_facilities",
+        "clase": "TenantMedicalFacilities",
+        "archivo": "src/modules/directory/entities/tenant_medical_facilities.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
+        "tabla": "directory.tenant_medical_facility_sites",
+        "clase": "TenantMedicalFacilitySites",
+        "archivo": "src/modules/directory/entities/tenant_medical_facility_sites.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
         }
       },
       {
@@ -4860,7 +4878,7 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 20,
       "indices": 12,
-      "operaciones": 177,
+      "operaciones": 180,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -6378,7 +6396,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 15,
       "indices": 10,
-      "operaciones": 192,
+      "operaciones": 193,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -6400,7 +6418,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 19,
       "indices": 13,
-      "operaciones": 137,
+      "operaciones": 138,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8050,7 +8068,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 16,
       "indices": 7,
-      "operaciones": 49,
+      "operaciones": 50,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8149,7 +8167,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 21,
       "indices": 8,
-      "operaciones": 59,
+      "operaciones": 60,
       "orm": "COINCIDE",
       "appendOnly": false
     },

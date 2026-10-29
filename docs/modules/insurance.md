@@ -105,6 +105,10 @@ Importa (leído de los `.module.ts`): `PracticeModule`, `DirectoryAuthorizationM
 | `POST /reconciliation-batches` | SECURITY_ADMIN | `reconciliation` |
 | `POST /reconciliation-batches/:id/items` | SECURITY_ADMIN | `reconciliation` |
 
+## Catálogo público de aseguradoras
+
+`GET /insurance-carrier-catalog` ofrece siempre los seguros públicos (seguridad social, SUS y cajas) y, de las aseguradoras privadas, solo las que tienen una cuenta registrada: `tenant_id` no nulo, tenant activo, una membresía OWNER o ADMIN vigente de un usuario activo con una credencial activa y sin vencer. Se resuelve con una sola consulta con `exists` (`insurance-catalog.service.ts`, `findPrivateWithAccount`). La forma de la respuesta no cambia.
+
 ## Liquidación al profesional (H8)
 
 Transparencia de exclusiones, desglose de liquidación y lotes periódicos de

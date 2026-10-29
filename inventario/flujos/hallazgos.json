@@ -1275,7 +1275,7 @@
         "metodo": "POST",
         "ruta": "/iam/auth/register-organization",
         "modulo": "iam",
-        "detalle": "CREA common.addresses, ACTUALIZA common.files, CREA diagnostic_units.diagnostic_study_offerings, CREA diagnostic_units.diagnostic_unit_sites, CREA diagnostic_units.diagnostic_units, CREA directory.branches, CREA directory.tenant_affiliation_documents, CREA directory.tenant_legal_representatives, CREA directory.tenant_memberships, CREA directory.tenants, CREA iam.authentication_credentials, CREA iam.email_verifications, CREA iam.security_events, CREA iam.user_global_roles, CREA iam.users, CREA insurance.insurance_brokers, CREA insurance.insurance_carriers, CREA messaging.notification_requests, CREA pharmacy.pharmacies, CREA pharmacy.pharmacy_product_categories, CREA pharmacy.pharmacy_sites, CREA practice.practice_sites, CREA practice.practices",
+        "detalle": "CREA common.addresses, ACTUALIZA common.files, CREA diagnostic_units.diagnostic_study_offerings, CREA diagnostic_units.diagnostic_unit_sites, CREA diagnostic_units.diagnostic_units, CREA directory.branches, CREA directory.tenant_affiliation_documents, CREA directory.tenant_legal_representatives, CREA directory.tenant_medical_facilities, CREA directory.tenant_medical_facility_sites, CREA directory.tenant_memberships, CREA directory.tenants, CREA iam.authentication_credentials, CREA iam.email_verifications, CREA iam.security_events, CREA iam.user_global_roles, CREA iam.users, CREA insurance.insurance_brokers, CREA insurance.insurance_carriers, CREA messaging.notification_requests, CREA pharmacy.pharmacies, CREA pharmacy.pharmacy_product_categories, CREA pharmacy.pharmacy_sites, CREA practice.practice_sites, CREA practice.practices",
         "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:134"
       },
       {
@@ -12199,7 +12199,7 @@
         "metodo": "POST",
         "ruta": "/admin/content-packs/{code}/apply",
         "modulo": "content_packs",
-        "detalle": "Error: El catálogo del glosario declara el slug \"{term.slug}\" más de una vez (src/common/seed/glossary-seed.service.ts:372) | Error: El directorio declara el código \"{facility.code}\" más de una vez (src/common/seed/bolivia-facilities-seed.service.ts:184) | Error: El catálogo geográfico declara la sigla \"{department.code}\" más de una vez (src/common/seed/bo-geography-seed.service.ts:247)",
+        "detalle": "Error: El catálogo del glosario declara el slug \"{term.slug}\" más de una vez (src/common/seed/glossary-seed.service.ts:372) | Error: El directorio declara el código \"{facility.code}\" más de una vez (src/common/seed/bolivia-facilities-seed.service.ts:187) | Error: El catálogo geográfico declara la sigla \"{department.code}\" más de una vez (src/common/seed/bo-geography-seed.service.ts:247)",
         "fuente": "src/modules/content_packs/content-packs.controller.ts:69"
       },
       {
