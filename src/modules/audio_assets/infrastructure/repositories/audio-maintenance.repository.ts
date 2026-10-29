@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { AudioAssets } from '../entities';
+import { AudioAssets } from '../../entities';
 
 @Injectable()
 export class AudioMaintenanceRepository {
