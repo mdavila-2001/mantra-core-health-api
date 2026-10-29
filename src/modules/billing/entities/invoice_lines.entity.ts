@@ -31,7 +31,7 @@ export class InvoiceLines {
     fieldName: 'insurance_claim_line_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → insurance.insurance_claim_lines
+  }) // FK → insurance.insurance_claim_lines (inferida)
   insuranceClaimLineId?: string;
 
   /**

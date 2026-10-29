@@ -15,7 +15,7 @@ export class Reimbursements {
   /**
    * Identificador asociado a claim.
    */
-  @Property({ fieldName: 'claim_id', type: 'uuid' }) // FK → insurance.insurance_claims
+  @Property({ fieldName: 'claim_id', type: 'uuid' }) // FK (destino no resuelto)
   claimId!: string;
 
   /**

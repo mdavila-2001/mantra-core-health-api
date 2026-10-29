@@ -91,4 +91,45 @@ export class EncounterLocations {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants (inferida)
+  tenantId!: string;
+
+  @Property({ fieldName: 'is_bed_assignment', type: 'boolean', default: false })
+  isBedAssignment!: boolean;
+
+  @Property({
+    fieldName: 'movement_type_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  movementTypeConceptId?: string;
+
+  @Property({
+    fieldName: 'previous_encounter_location_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK (destino no resuelto)
+  previousEncounterLocationId?: string;
+
+  @Property({
+    fieldName: 'end_reason_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  endReasonConceptId?: string;
+
+  @Property({
+    fieldName: 'bed_category_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  bedCategoryConceptId?: string;
+
+  @Property({
+    fieldName: 'placement_incident_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → clinical.placement_incidents (inferida)
+  placementIncidentId?: string;
 }

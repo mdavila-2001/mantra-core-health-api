@@ -17,7 +17,7 @@ export class QuotationInstallments {
   /**
    * Cotización dueña de la cuota.
    */
-  @Property({ fieldName: 'quotation_id', type: 'uuid' }) // FK → billing.quotations
+  @Property({ fieldName: 'quotation_id', type: 'uuid' }) // FK → billing.quotations (inferida)
   quotationId!: string;
 
   /**

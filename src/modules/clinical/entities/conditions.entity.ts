@@ -89,7 +89,7 @@ export class Conditions {
     fieldName: 'clinical_course_concept_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → terminology.catalog_concepts
+  }) // FK → terminology.catalog_concepts (inferida)
   clinicalCourseConceptId?: string;
 
   /**

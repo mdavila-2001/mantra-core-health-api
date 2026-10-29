@@ -12,11 +12,17 @@ export class ScheduleTemplates {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants (inferida)
+  tenantId!: string;
+
   /**
    * Identificador asociado a resource.
    */
   @Property({ fieldName: 'resource_id', type: 'uuid' }) // FK → scheduling.schedulable_resources
   resourceId!: string;
+
+  @Property({ fieldName: 'care_space_id', type: 'uuid', nullable: true }) // FK → practice.care_spaces (inferida)
+  careSpaceId?: string;
 
   /**
    * Identificador asociado a practitioner schedule.

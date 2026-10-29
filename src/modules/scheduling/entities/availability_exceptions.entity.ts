@@ -12,6 +12,9 @@ export class AvailabilityExceptions {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants (inferida)
+  tenantId!: string;
+
   /**
    * Identificador asociado a resource.
    */
@@ -47,6 +50,16 @@ export class AvailabilityExceptions {
    */
   @Property({ fieldName: 'is_available', type: 'boolean', nullable: true })
   isAvailable?: boolean;
+
+  @Property({
+    fieldName: 'source_kind_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  sourceKindConceptId?: string;
+
+  @Property({ fieldName: 'source_ref_id', type: 'uuid', nullable: true })
+  sourceRefId?: string;
 
   /**
    * Fecha y hora en que se creó el registro.

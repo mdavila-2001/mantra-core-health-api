@@ -147,7 +147,7 @@ export class MedicationRequests {
     fieldName: 'indication_condition_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → clinical.conditions
+  }) // FK (destino no resuelto)
   indicationConditionId?: string;
 
   /**
@@ -169,7 +169,7 @@ export class MedicationRequests {
    * P43: instancia (cerrada) del formulario médico de la que sale el registro.
    * Nula cuando se emite desde la historia del paciente, sin formulario.
    */
-  @Property({ fieldName: 'form_instance_id', type: 'uuid', nullable: true }) // FK → forms.form_instances
+  @Property({ fieldName: 'form_instance_id', type: 'uuid', nullable: true }) // FK → forms.form_instances (inferida)
   formInstanceId?: string;
 
   /**

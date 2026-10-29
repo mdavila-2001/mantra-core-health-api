@@ -42,6 +42,13 @@ export class SpecimenCollectionEvents {
   @Property({ fieldName: 'collection_site_id', type: 'uuid', nullable: true }) // FK → practice.practice_sites
   collectionSiteId?: string;
 
+  @Property({
+    fieldName: 'collection_care_space_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK (destino no resuelto)
+  collectionCareSpaceId?: string;
+
   /**
    * Identificador asociado a body site concept.
    */

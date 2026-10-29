@@ -85,4 +85,7 @@ export class CostCenters {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  @Property({ fieldName: 'clinical_unit_id', type: 'uuid', nullable: true }) // FK → practice.clinical_units (inferida)
+  clinicalUnitId?: string;
 }

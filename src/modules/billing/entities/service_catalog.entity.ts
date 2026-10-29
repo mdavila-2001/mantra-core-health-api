@@ -46,7 +46,7 @@ export class ServiceCatalog {
   /**
    * Identificador asociado a image file.
    */
-  @Property({ fieldName: 'image_file_id', type: 'uuid', nullable: true }) // FK → common.files
+  @Property({ fieldName: 'image_file_id', type: 'uuid', nullable: true }) // FK → common.files (inferida)
   imageFileId?: string;
 
   /**

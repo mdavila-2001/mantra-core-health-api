@@ -41,7 +41,7 @@ export class BookableSlots {
     fieldName: 'practitioner_service_offering_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → scheduling.practitioner_service_offerings
+  }) // FK → scheduling.practitioner_service_offerings (inferida)
   practitionerServiceOfferingId?: string;
 
   /**

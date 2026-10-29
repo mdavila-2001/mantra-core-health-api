@@ -51,7 +51,7 @@ export class BillingDocumentLinks {
   /**
    * Identificador asociado a claim.
    */
-  @Property({ fieldName: 'claim_id', type: 'uuid', nullable: true }) // FK → insurance.insurance_claims
+  @Property({ fieldName: 'claim_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
   claimId?: string;
 
   /**

@@ -76,6 +76,9 @@ export class Appointments {
   @Property({ fieldName: 'reason_text', columnType: 'text', nullable: true })
   reasonText?: string;
 
+  @Property({ fieldName: 'care_space_id', type: 'uuid', nullable: true }) // FK → practice.care_spaces (inferida)
+  careSpaceId?: string;
+
   /**
    * Fecha y hora en que se creó el registro.
    */

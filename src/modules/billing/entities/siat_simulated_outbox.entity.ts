@@ -6,7 +6,7 @@ export class SiatSimulatedOutbox {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'siat_invoice_id', type: 'uuid' }) // FK → billing.siat_simulated_invoices
+  @Property({ fieldName: 'siat_invoice_id', type: 'uuid' }) // FK (destino no resuelto)
   siatInvoiceId!: string;
 
   @Property({ fieldName: 'to_email', columnType: 'varchar(320)' })
@@ -18,8 +18,12 @@ export class SiatSimulatedOutbox {
   @Property({ columnType: 'varchar(24)' })
   status!: string;
 
-  @Property({ fieldName: 'siat_mode', columnType: 'varchar(12)', default: 'simulated' })
-  siatMode: 'simulated' | 'real' = 'simulated';
+  @Property({
+    fieldName: 'siat_mode',
+    columnType: 'varchar(12)',
+    default: 'simulated',
+  })
+  siatMode!: string;
 
   @Property({ fieldName: 'queued_at', columnType: 'timestamptz' })
   queuedAt!: Date;

@@ -87,4 +87,14 @@ export class OperatingRoomUtilizationEvents {
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
   createdAt!: Date;
+
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants (inferida)
+  tenantId!: string;
+
+  @Property({
+    fieldName: 'operating_room_block_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → procedures_perioperative.operating_room_blocks (inferida)
+  operatingRoomBlockId?: string;
 }

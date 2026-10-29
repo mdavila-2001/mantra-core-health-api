@@ -28,13 +28,13 @@ export class AppointmentPaymentStates {
   /**
    * Identificador asociado a tenant.
    */
-  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants (inferida)
   tenantId!: string;
 
   /**
    * Identificador asociado a appointment booking.
    */
-  @Property({ fieldName: 'appointment_booking_id', type: 'uuid' }) // FK → scheduling.appointment_bookings
+  @Property({ fieldName: 'appointment_booking_id', type: 'uuid' }) // FK → scheduling.appointment_bookings (inferida)
   appointmentBookingId!: string;
 
   /**
@@ -43,7 +43,7 @@ export class AppointmentPaymentStates {
    * Es una lista cerrada, así que es un concepto de terminología y jamás un
    * enum de TypeScript.
    */
-  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   statusConceptId!: string;
 
   /**
@@ -60,7 +60,7 @@ export class AppointmentPaymentStates {
   /**
    * Quién dejó la cita en este estado.
    */
-  @Property({ fieldName: 'marked_by_user_id', type: 'uuid' }) // FK → iam.users
+  @Property({ fieldName: 'marked_by_user_id', type: 'uuid' }) // FK → iam.users (inferida)
   markedByUserId!: string;
 
   /**
@@ -84,13 +84,13 @@ export class AppointmentPaymentStates {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 
   /**
    * Identificador asociado a updated by user.
    */
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   updatedByUserId?: string;
 
   /**

@@ -6,13 +6,13 @@ export class SiatSimulatedInvoices {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'invoice_id', type: 'uuid' }) // FK → billing.invoices
+  @Property({ fieldName: 'invoice_id', type: 'uuid' }) // FK → billing.invoices (inferida)
   invoiceId!: string;
 
   @Property({ fieldName: 'encounter_id', type: 'uuid', nullable: true })
   encounterId?: string;
 
-  @Property({ fieldName: 'practice_id', type: 'uuid' }) // FK → practice.practices
+  @Property({ fieldName: 'practice_id', type: 'uuid' }) // FK → practice.practices (inferida)
   practiceId!: string;
 
   @Property({ fieldName: 'patient_profile_id', type: 'uuid' })
@@ -63,8 +63,12 @@ export class SiatSimulatedInvoices {
   @Property({ type: 'boolean', default: true })
   simulated!: boolean;
 
-  @Property({ fieldName: 'siat_mode', columnType: 'varchar(12)', default: 'simulated' })
-  siatMode: 'simulated' | 'real' = 'simulated';
+  @Property({
+    fieldName: 'siat_mode',
+    columnType: 'varchar(12)',
+    default: 'simulated',
+  })
+  siatMode!: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
   createdAt!: Date;

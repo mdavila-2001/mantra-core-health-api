@@ -18,19 +18,19 @@ export class Quotations {
   /**
    * Identificador asociado a practice.
    */
-  @Property({ fieldName: 'practice_id', type: 'uuid' }) // FK → practice.practices
+  @Property({ fieldName: 'practice_id', type: 'uuid' }) // FK → practice.practices (inferida)
   practiceId!: string;
 
   /**
    * Identificador asociado a patient profile.
    */
-  @Property({ fieldName: 'patient_profile_id', type: 'uuid' }) // FK → profiles.patient_profiles
+  @Property({ fieldName: 'patient_profile_id', type: 'uuid' }) // FK → profiles.patient_profiles (inferida)
   patientProfileId!: string;
 
   /**
    * Identificador del profesional que arma la cotización.
    */
-  @Property({ fieldName: 'created_by_practitioner_profile_id', type: 'uuid' }) // FK → profiles.health_practitioner_profiles
+  @Property({ fieldName: 'created_by_practitioner_profile_id', type: 'uuid' }) // FK (destino no resuelto)
   createdByPractitionerProfileId!: string;
 
   /**
@@ -50,7 +50,7 @@ export class Quotations {
   /**
    * Servicio del catálogo cotizado.
    */
-  @Property({ fieldName: 'service_catalog_id', type: 'uuid' }) // FK → billing.service_catalog
+  @Property({ fieldName: 'service_catalog_id', type: 'uuid' }) // FK → billing.service_catalog (inferida)
   serviceCatalogId!: string;
 
   /**
@@ -69,7 +69,7 @@ export class Quotations {
   /**
    * Identificador asociado a currency concept.
    */
-  @Property({ fieldName: 'currency_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'currency_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
   currencyConceptId?: string;
 
   /**
@@ -99,7 +99,7 @@ export class Quotations {
   /**
    * Estado de la cotización (reusa los conceptos `STATE_*` de terminology).
    */
-  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   statusConceptId!: string;
 
   /**
@@ -117,13 +117,13 @@ export class Quotations {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 
   /**
    * Identificador asociado a updated by user.
    */
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   updatedByUserId?: string;
 
   /**

@@ -66,6 +66,19 @@ export class AuditLog {
   @Property({ fieldName: 'device_id', type: 'uuid', nullable: true }) // FK → iam.devices
   deviceId?: string;
 
+  @Property({ fieldName: 'session_id', type: 'uuid', nullable: true }) // FK → iam.sessions (inferida)
+  sessionId?: string;
+
+  @Property({ fieldName: 'correlation_id', type: 'uuid', nullable: true })
+  correlationId?: string;
+
+  @Property({
+    fieldName: 'actor_role_snapshot',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  actorRoleSnapshot?: string;
+
   /**
    * Valor de previous hash mantenido por la instancia.
    */

@@ -216,4 +216,32 @@ export class ProcedureCases {
 
   @Property({ fieldName: 'version_number', columnType: 'int', nullable: true })
   versionNumber?: number;
+
+  @Property({
+    fieldName: 'schedulable_resource_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → scheduling.schedulable_resources (inferida)
+  schedulableResourceId?: string;
+
+  @Property({
+    fieldName: 'operating_room_block_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → procedures_perioperative.operating_room_blocks (inferida)
+  operatingRoomBlockId?: string;
+
+  @Property({
+    fieldName: 'reserved_start_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  reservedStartAt?: Date;
+
+  @Property({
+    fieldName: 'reserved_end_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  reservedEndAt?: Date;
 }

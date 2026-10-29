@@ -19,7 +19,7 @@ export class PractitionerSimpleAccounts {
   /**
    * Identificador asociado a practice.
    */
-  @Property({ fieldName: 'practice_id', type: 'uuid' }) // FK → practice.practices
+  @Property({ fieldName: 'practice_id', type: 'uuid' }) // FK → practice.practices (inferida)
   practiceId!: string;
 
   /**
@@ -43,8 +43,8 @@ export class PractitionerSimpleAccounts {
   /**
    * Viene sembrada con la práctica: se renombra, no se borra.
    */
-  @Property({ type: 'boolean' })
-  seeded: boolean = false;
+  @Property({ type: 'boolean', default: false })
+  seeded!: boolean;
 
   /**
    * Fecha y hora en que se creó el registro.
@@ -61,13 +61,13 @@ export class PractitionerSimpleAccounts {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 
   /**
    * Identificador asociado a updated by user.
    */
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   updatedByUserId?: string;
 
   /**

@@ -181,4 +181,66 @@ export class CareSpaces {
     nullable: true,
   })
   validTo?: Date;
+
+  @Property({
+    fieldName: 'availability_reason_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  availabilityReasonConceptId?: string;
+
+  @Property({
+    fieldName: 'availability_expected_until',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  availabilityExpectedUntil?: Date;
+
+  @Property({
+    fieldName: 'availability_changed_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  availabilityChangedAt?: Date;
+
+  @Property({
+    fieldName: 'hygiene_status_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  hygieneStatusConceptId?: string;
+
+  @Property({
+    fieldName: 'hygiene_changed_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  hygieneChangedAt?: Date;
+
+  @Property({
+    fieldName: 'terminal_cleaning_required',
+    type: 'boolean',
+    default: false,
+  })
+  terminalCleaningRequired!: boolean;
+
+  @Property({ fieldName: 'isolation_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
+  isolationConceptId?: string;
+
+  @Property({
+    fieldName: 'isolation_organism_text',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  isolationOrganismText?: string;
+
+  @Property({
+    fieldName: 'isolation_changed_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  isolationChangedAt?: Date;
+
+  @Property({ fieldName: 'ops_version', columnType: 'int' })
+  opsVersion!: number;
 }

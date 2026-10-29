@@ -141,4 +141,46 @@ export class Encounters {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  @Property({
+    fieldName: 'level_of_care_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  levelOfCareConceptId?: string;
+
+  @Property({
+    fieldName: 'admission_source_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  admissionSourceConceptId?: string;
+
+  @Property({
+    fieldName: 'discharge_disposition_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  dischargeDispositionConceptId?: string;
+
+  @Property({
+    fieldName: 'isolation_precaution_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  isolationPrecautionConceptId?: string;
+
+  @Property({
+    fieldName: 'isolation_organism_text',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  isolationOrganismText?: string;
+
+  @Property({
+    fieldName: 'expected_discharge_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  expectedDischargeAt?: Date;
 }

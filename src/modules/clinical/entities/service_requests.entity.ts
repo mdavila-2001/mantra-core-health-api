@@ -93,6 +93,13 @@ export class ServiceRequests {
   }) // FK (destino no resuelto)
   suggestedPracticeSiteId?: string;
 
+  @Property({
+    fieldName: 'suggested_care_space_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK (destino no resuelto)
+  suggestedCareSpaceId?: string;
+
   /**
    * El informe diagnóstico previo que satisface este pedido (antiduplicación,
    * v4.2.17). Presente cuando el motor de duplicidad encontró un informe
@@ -103,7 +110,7 @@ export class ServiceRequests {
     fieldName: 'previous_diagnostic_report_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → clinical.diagnostic_reports
+  }) // FK (destino no resuelto)
   previousDiagnosticReportId?: string;
 
   /**
@@ -124,7 +131,7 @@ export class ServiceRequests {
    * P43: instancia (cerrada) del formulario médico de la que sale el registro.
    * Nula cuando se emite desde la historia del paciente, sin formulario.
    */
-  @Property({ fieldName: 'form_instance_id', type: 'uuid', nullable: true }) // FK → forms.form_instances
+  @Property({ fieldName: 'form_instance_id', type: 'uuid', nullable: true }) // FK → forms.form_instances (inferida)
   formInstanceId?: string;
 
   /**

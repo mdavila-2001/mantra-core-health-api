@@ -94,6 +94,27 @@ export class ImagingProcedureSteps {
   })
   protocolReference?: string;
 
+  @Property({
+    fieldName: 'scheduled_equipment_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK (destino no resuelto)
+  scheduledEquipmentId?: string;
+
+  @Property({
+    fieldName: 'scheduled_care_space_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK (destino no resuelto)
+  scheduledCareSpaceId?: string;
+
+  @Property({
+    fieldName: 'scheduled_start_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  scheduledStartAt?: Date;
+
   /**
    * Fecha y hora en que se creó el registro.
    */

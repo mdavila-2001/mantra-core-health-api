@@ -6,60 +6,60 @@ export class ReceivedServices {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'custodian_tenant_id', type: 'uuid' }) // FK → directory.tenants
+  @Property({ fieldName: 'custodian_tenant_id', type: 'uuid' }) // FK (destino no resuelto)
   custodianTenantId!: string;
 
-  @Property({ fieldName: 'patient_profile_id', type: 'uuid' }) // FK → profiles.patient_profiles
+  @Property({ fieldName: 'patient_profile_id', type: 'uuid' }) // FK → profiles.patient_profiles (inferida)
   patientProfileId!: string;
 
-  @Property({ fieldName: 'encounter_id', type: 'uuid', nullable: true }) // FK → clinical.encounters
+  @Property({ fieldName: 'encounter_id', type: 'uuid', nullable: true }) // FK → clinical.encounters (inferida)
   encounterId?: string;
 
-  @Property({ fieldName: 'service_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'service_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   serviceTypeConceptId!: string;
 
-  @Property({ fieldName: 'service_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'service_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   serviceConceptId!: string;
 
-  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   statusConceptId!: string;
 
-  @Property({ fieldName: 'source_procedure_id', type: 'uuid', nullable: true }) // FK → clinical.procedures
+  @Property({ fieldName: 'source_procedure_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
   sourceProcedureId?: string;
 
   @Property({
     fieldName: 'source_immunization_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → clinical.immunizations
+  }) // FK (destino no resuelto)
   sourceImmunizationId?: string;
 
-  @Property({ fieldName: 'procedure_case_id', type: 'uuid', nullable: true }) // FK → procedures_perioperative.procedure_cases
+  @Property({ fieldName: 'procedure_case_id', type: 'uuid', nullable: true }) // FK → procedures_perioperative.procedure_cases (inferida)
   procedureCaseId?: string;
 
-  @Property({ fieldName: 'service_catalog_id', type: 'uuid', nullable: true }) // FK → billing.service_catalog
+  @Property({ fieldName: 'service_catalog_id', type: 'uuid', nullable: true }) // FK → billing.service_catalog (inferida)
   serviceCatalogId?: string;
 
-  @Property({ fieldName: 'invoice_line_id', type: 'uuid', nullable: true }) // FK → billing.invoice_lines
+  @Property({ fieldName: 'invoice_line_id', type: 'uuid', nullable: true }) // FK → billing.invoice_lines (inferida)
   invoiceLineId?: string;
 
   @Property({
     fieldName: 'insurance_claim_line_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → insurance.insurance_claim_lines
+  }) // FK → insurance.insurance_claim_lines (inferida)
   insuranceClaimLineId?: string;
 
-  @Property({ fieldName: 'performer_profile_id', type: 'uuid', nullable: true }) // FK → profiles.health_practitioner_profiles
+  @Property({ fieldName: 'performer_profile_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
   performerProfileId?: string;
 
-  @Property({ fieldName: 'practice_site_id', type: 'uuid', nullable: true }) // FK → practice.practice_sites
+  @Property({ fieldName: 'practice_site_id', type: 'uuid', nullable: true }) // FK → practice.practice_sites (inferida)
   practiceSiteId?: string;
 
   @Property({ fieldName: 'performed_at', columnType: 'timestamptz' })
   performedAt!: Date;
 
-  @Property({ fieldName: 'outcome_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'outcome_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
   outcomeConceptId?: string;
 
   @Property({ fieldName: 'result_text', columnType: 'text', nullable: true })
@@ -71,10 +71,10 @@ export class ReceivedServices {
   @Property({ fieldName: 'updated_at', columnType: 'timestamptz' })
   updatedAt!: Date;
 
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   updatedByUserId?: string;
 
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })

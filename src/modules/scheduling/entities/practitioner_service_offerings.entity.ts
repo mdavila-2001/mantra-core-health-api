@@ -6,7 +6,7 @@ export class PractitionerServiceOfferings {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'practitioner_profile_id', type: 'uuid' }) // FK → profiles.health_practitioner_profiles
+  @Property({ fieldName: 'practitioner_profile_id', type: 'uuid' }) // FK (destino no resuelto)
   practitionerProfileId!: string;
 
   @Property({ fieldName: 'service_catalog_id', type: 'uuid' }) // FK → billing.service_catalog (inferida)
@@ -50,4 +50,11 @@ export class PractitionerServiceOfferings {
 
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  @Property({
+    fieldName: 'pre_visit_instructions',
+    columnType: 'text',
+    nullable: true,
+  })
+  preVisitInstructions?: string;
 }
