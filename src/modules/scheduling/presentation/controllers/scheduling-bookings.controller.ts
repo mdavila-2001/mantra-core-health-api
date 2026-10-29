@@ -39,6 +39,7 @@ import {
   AcceptBookingDto,
   RejectBookingDto,
   SetPaymentStateDto,
+  SetPaymentStateResponseDto,
   PaymentStateDto,
   UploadPaymentReceiptDto,
   RejectPaymentReceiptDto,
@@ -280,7 +281,7 @@ export class SchedulingBookingsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: SetPaymentStateDto,
     @CurrentUser() actor: AuthenticatedUser,
-  ): Promise<PaymentStateDto> {
+  ): Promise<SetPaymentStateResponseDto> {
     return this.bookingsService.setPaymentState(id, dto, actor);
   }
 

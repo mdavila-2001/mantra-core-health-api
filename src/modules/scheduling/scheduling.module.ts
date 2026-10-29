@@ -81,6 +81,7 @@ import { SurveysModule } from '../surveys/surveys.module';
 import * as profileEntities from '../profiles/entities';
 import {
   BookingAccess,
+  BookingBillingBridge,
   BookingChangeNotifier,
   BookingItemAssembler,
   BookingMaterializer,
@@ -133,6 +134,13 @@ import { SupportAdminNoticeAdapter } from './infrastructure/adapters/support-adm
 // Clase sin estado de `forms` (`EntityManager` por parámetro): se provee suelta,
 // sin importar `FormsModule` entero, mismo criterio que `AppointmentsRepository`.
 import { FormInstanceOriginValidator } from '../forms/services/form-instance-origin.validator';
+// FAC-01 — el pago de la agenda se asienta en facturación. Repositorios sin
+// estado de `billing` (`EntityManager` por parámetro), provistos sueltos: el
+// módulo de facturación no los exporta y no depende de la agenda.
+import { InvoicesRepository } from '../billing/repositories/invoices.repository';
+import { PaymentsReceivedRepository } from '../billing/repositories/payments-received.repository';
+import { BOOKING_BILLING_PORT } from './application/ports/booking-billing.port';
+import { BillingBookingAdapter } from './infrastructure/adapters/billing-booking.adapter';
 
 /**
  * Módulo de agenda: recursos, políticas, plantillas, slots, reservas con
@@ -289,6 +297,12 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
       provide: PAYMENT_RECEIPT_FILES_PORT,
       useExisting: CommonPaymentReceiptFilesAdapter,
     },
+    // FAC-01 · el pago de la cita crea su cuenta por cobrar y se le asigna.
+    InvoicesRepository,
+    PaymentsReceivedRepository,
+    BillingBookingAdapter,
+    { provide: BOOKING_BILLING_PORT, useExisting: BillingBookingAdapter },
+    BookingBillingBridge,
     // Catálogo de agenda: colaboradores compartidos y un caso de uso por operación.
     CatalogAccess,
     AgendaOverlapGuard,
