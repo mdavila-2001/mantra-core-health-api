@@ -442,6 +442,78 @@ describe('Infraestructura F5g · acceso delegado por espacio', () => {
       expect(after[0].n).toBe(before[0].n);
     });
 
+    it('el tenant sale del contexto del actor, no de la membresía que manda el cliente: A + membresía y nodos de B -> 404 y nada se crea', async () => {
+      // Todo es coherente con B entre sí (membresía, sede, unidad, espacio): si el tenant
+      // se derivara de la membresía, la validación pasaría. El actor es de A.
+      const before = await sql(
+        `select count(*)::int as n from delegated_access.organization_user_assignments
+          where tenant_membership_id = ? or care_space_id = ? or clinical_unit_id = ?
+             or practice_site_id = ?`,
+        [outsider.membershipId, spaceB, unitB, orgB.siteId],
+      );
+      for (const body of [
+        { role: 'NURSE', accessScope: 'SPACE', careSpaceId: spaceB },
+        { role: 'NURSE', accessScope: 'UNIT', clinicalUnitId: unitB },
+        { role: 'NURSE', accessScope: 'SITE', practiceSiteId: orgB.siteId },
+        { role: 'NURSE', accessScope: 'PRACTICE', practiceId: orgB.practiceId },
+        {
+          role: 'UNIT_HEAD',
+          accessScope: 'UNIT',
+          clinicalUnitId: unitB,
+        },
+      ]) {
+        // El dueño de A y también la plataforma con A en el contexto (que sí es
+        // administradora de todo tenant): ninguno puede crear en B desde el contexto A.
+        for (const who of [owner(orgA), as(ctx.adminToken, orgA.tenantId)]) {
+          const res = await http()
+            .post(assignUrl(outsider.membershipId))
+            .set(who)
+            .send(body);
+          expect(res.status).toBe(404);
+          expect(res.body.reason).toBe('DELEGATED_SCOPE_TARGET_NOT_FOUND');
+        }
+      }
+      const after = await sql(
+        `select count(*)::int as n from delegated_access.organization_user_assignments
+          where tenant_membership_id = ? or care_space_id = ? or clinical_unit_id = ?
+             or practice_site_id = ?`,
+        [outsider.membershipId, spaceB, unitB, orgB.siteId],
+      );
+      expect(after[0].n).toBe(before[0].n);
+    });
+
+    it('lo mismo al revés: una asignación de B no se lee, retarga ni suspende desde A, con o sin nodos', async () => {
+      const [theirs] = await sql(
+        `select id, care_space_id from delegated_access.organization_user_assignments
+          where tenant_membership_id = ? limit 1`,
+        [outsider.membershipId],
+      );
+      await http()
+        .get(`/org/user-assignments/${theirs.id}`)
+        .set(owner(orgA))
+        .expect(404);
+      await http()
+        .get(assignUrl(outsider.membershipId))
+        .set(owner(orgA))
+        .expect(404);
+      for (const body of [
+        { suspend: true },
+        { accessScope: 'SPACE', careSpaceId: spaceB },
+        { supervisorUserId: outsider.userId },
+      ]) {
+        await http()
+          .patch(`/org/user-assignments/${theirs.id}`)
+          .set(owner(orgA))
+          .send(body)
+          .expect(404);
+      }
+      const [still] = await sql(
+        `select status_concept_id from delegated_access.organization_user_assignments where id = ?`,
+        [theirs.id],
+      );
+      expect(still.status_concept_id).toBe(CONCEPTS.STATE_ACTIVE);
+    });
+
     it('el dueño de otro tenant no puede asignar sobre este: 404', async () => {
       await http()
         .post(assignUrl(nurse.membershipId))
