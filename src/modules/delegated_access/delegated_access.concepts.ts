@@ -182,4 +182,13 @@ export const { seeds: DELEGATED_ACCESS_CONCEPT_SEEDS, ids: DELEG } =
       display: 'Administrative suspension',
     },
     REASON_EXPIRED: { code: 'DA_RSN_EXPIRED', display: 'Expired by sweep' },
+
+    // --- infraestructura hospitalaria F2–F5: claves que el SQL del modelo escribe como
+    // literal UUID (uuid5 sobre «módulo:CLAVE»). No renombrar: ver
+    // `infrastructure-concept-keys.spec.ts`, que las compara contra el SQL vendoreado. ---
+    SCOPE_SPACE: { code: 'DA_SCOPE_SPACE', display: 'Space scope' },
+    ASSIGN_ROLE_UNIT_HEAD: {
+      code: 'DA_ASSIGN_UNIT_HEAD',
+      display: 'Unit head assignment',
+    },
   });

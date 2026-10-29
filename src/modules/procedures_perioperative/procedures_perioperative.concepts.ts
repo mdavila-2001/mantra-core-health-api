@@ -200,6 +200,27 @@ export const { seeds: PROCEDURES_PERIOPERATIVE_CONCEPT_SEEDS, ids: PERIOP } =
       display: 'Tooth 47 — lower right second molar',
     },
     TOOTH_48: { code: 'FDI_48', display: 'Tooth 48 — lower right third molar' },
+
+    // --- infraestructura hospitalaria F2–F5: claves que el SQL del modelo escribe como
+    // literal UUID (uuid5 sobre «módulo:CLAVE»). No renombrar: ver
+    // `infrastructure-concept-keys.spec.ts`, que las compara contra el SQL vendoreado. ---
+    ORB_ACTIVE: { code: 'ORB_ACTIVE', display: 'Bloque de quirófano activo' },
+    ORB_RELEASED: {
+      code: 'ORB_RELEASED',
+      display: 'Bloque de quirófano liberado',
+    },
+    ORB_CANCELLED: {
+      code: 'ORB_CANCELLED',
+      display: 'Bloque de quirófano cancelado',
+    },
+    ORB_OWNER_SERVICE: {
+      code: 'ORB_OWNER_SERVICE',
+      display: 'Bloque de quirófano asignado a un servicio',
+    },
+    ORB_OWNER_SURGEON: {
+      code: 'ORB_OWNER_SURGEON',
+      display: 'Bloque de quirófano asignado a un cirujano',
+    },
   });
 
 /**

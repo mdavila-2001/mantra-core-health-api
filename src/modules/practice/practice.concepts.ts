@@ -532,4 +532,17 @@ export const { seeds: PRACTICE_CONCEPT_SEEDS, ids: PRAC } =
       display: 'Uso compartido',
     },
     SPACE_UNIT_ROLE_LOAN: { code: 'SPACE_UNIT_ROLE_LOAN', display: 'Préstamo' },
+
+    // --- infraestructura hospitalaria F2–F5: claves que el SQL del modelo escribe como
+    // literal UUID (uuid5 sobre «módulo:CLAVE»). No renombrar: ver
+    // `infrastructure-concept-keys.spec.ts`, que las compara contra el SQL vendoreado. ---
+    HYG_CLEAN: { code: 'HYG_CLEAN', display: 'Higiene: limpio' },
+    ISO_NONE: { code: 'ISO_NONE', display: 'Sin aislamiento' },
+    BLOCK_MAINTENANCE: {
+      code: 'BLOCK_MAINTENANCE',
+      display: 'Bloqueo por mantenimiento',
+    },
+    CLN_PENDING: { code: 'CLN_PENDING', display: 'Limpieza pendiente' },
+    CLN_IN_PROGRESS: { code: 'CLN_IN_PROGRESS', display: 'Limpieza en curso' },
+    CLN_DONE: { code: 'CLN_DONE', display: 'Limpieza hecha' },
   });

@@ -112,5 +112,25 @@ export const { seeds: BILLING_CONCEPT_SEEDS, ids: BILL } = defineModuleConcepts(
       display: 'Insurance premium',
     },
     SPEND_OTHER: { code: 'SPEND_OTHER', display: 'Other health expenses' },
+
+    // --- infraestructura hospitalaria F2–F5: claves que el SQL del modelo escribe como
+    // literal UUID (uuid5 sobre «módulo:CLAVE»). No renombrar: ver
+    // `infrastructure-concept-keys.spec.ts`, que las compara contra el SQL vendoreado. ---
+    TARIFF_BED_DAY: { code: 'TARIFF_BED_DAY', display: 'Tarifa por cama-día' },
+    TARIFF_OR_TIME: {
+      code: 'TARIFF_OR_TIME',
+      display: 'Tarifa por tiempo de quirófano',
+    },
+    CHG_SRC_BED_DAY: {
+      code: 'BILL_CHG_SRC_BED_DAY',
+      display: 'Origen del cargo: cama-día',
+    },
+    CHG_SRC_OR_TIME: {
+      code: 'BILL_CHG_SRC_OR_TIME',
+      display: 'Origen del cargo: tiempo de quirófano',
+    },
+    CHG_PENDING: { code: 'BILL_CHG_PENDING', display: 'Cargo pendiente' },
+    CHG_INVOICED: { code: 'BILL_CHG_INVOICED', display: 'Cargo facturado' },
+    CHG_VOIDED: { code: 'BILL_CHG_VOIDED', display: 'Cargo anulado' },
   },
 );

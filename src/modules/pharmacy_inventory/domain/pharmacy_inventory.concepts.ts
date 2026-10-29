@@ -350,4 +350,12 @@ export const { seeds: PHARMACY_INVENTORY_CONCEPT_SEEDS, ids: PINV } =
 
     // --- Moneda por defecto ---
     CURRENCY_USD: { code: 'PINV_CURRENCY_USD', display: 'US Dollar' },
+
+    // --- infraestructura hospitalaria F2–F5: claves que el SQL del modelo escribe como
+    // literal UUID (uuid5 sobre «módulo:CLAVE»). No renombrar: ver
+    // `infrastructure-concept-keys.spec.ts`, que las compara contra el SQL vendoreado. ---
+    LOCATION_TYPE_WARD_STOCK: {
+      code: 'PINV_LOCATION_TYPE_WARD_STOCK',
+      display: 'Botiquín de unidad',
+    },
   });

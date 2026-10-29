@@ -1436,4 +1436,12 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       code: 'Z00.1',
       display: 'Control de salud de rutina del niño',
     },
+
+    // --- infraestructura hospitalaria F2–F5: claves que el SQL del modelo escribe como
+    // literal UUID (uuid5 sobre «módulo:CLAVE»). No renombrar: ver
+    // `infrastructure-concept-keys.spec.ts`, que las compara contra el SQL vendoreado. ---
+    LOCATION_RESERVED: {
+      code: 'LOC_RESERVED',
+      display: 'Encounter location reserved',
+    },
   });
