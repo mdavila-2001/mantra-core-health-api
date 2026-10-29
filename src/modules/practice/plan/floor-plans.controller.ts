@@ -288,6 +288,9 @@ export class FloorPlansController {
     res.setHeader('Content-Type', content.mimeType);
     res.setHeader('Content-Disposition', 'inline');
     res.setHeader('X-Content-Type-Options', 'nosniff');
+    // Defensa en profundidad: aunque el contenido es una imagen verificada por
+    // sus bytes, el navegador no ejecuta nada de esta respuesta.
+    res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
     // Privado: un plano es información de seguridad; nunca una caché compartida.
     res.setHeader('Cache-Control', `private, max-age=${content.expiresInSeconds}`);
     res.send(content.buffer);

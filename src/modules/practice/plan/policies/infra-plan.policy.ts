@@ -21,16 +21,19 @@ export type PlanAction =
   | 'plan.edit'
   | 'plan.history';
 
-/** Código de la asignación delegada → rol del plano. */
+/**
+ * Clave del concepto de la asignación delegada (`delegated_access:<CLAVE>`, que es
+ * lo que se guarda en `terminology.catalog_concepts.code`) → rol del plano.
+ */
 export const PLAN_ROLE_BY_ASSIGNMENT_CODE: Readonly<Record<string, PlanRole>> = {
-  DA_ASSIGN_NURSE: 'ENF',
-  DA_ASSIGN_NURSE_SUPERVISOR: 'ENF',
-  DA_ASSIGN_ADMISSION: 'ADM',
-  DA_ASSIGN_HOUSEKEEPING: 'LIM',
-  DA_ASSIGN_HOUSEKEEPING_SUPERVISOR: 'LIM',
-  DA_ASSIGN_MAINTENANCE: 'MAN',
-  DA_ASSIGN_OR_MANAGER: 'JQ',
-  DA_ASSIGN_BILLING: 'FAC',
+  'delegated_access:ASSIGN_ROLE_NURSE': 'ENF',
+  'delegated_access:ASSIGN_ROLE_NURSE_SUPERVISOR': 'ENF',
+  'delegated_access:ASSIGN_ROLE_ADMISSION': 'ADM',
+  'delegated_access:ASSIGN_ROLE_HOUSEKEEPING': 'LIM',
+  'delegated_access:ASSIGN_ROLE_HOUSEKEEPING_SUPERVISOR': 'LIM',
+  'delegated_access:ASSIGN_ROLE_MAINTENANCE': 'MAN',
+  'delegated_access:ASSIGN_ROLE_OR_MANAGER': 'JQ',
+  'delegated_access:ASSIGN_ROLE_BILLING': 'FAC',
 };
 
 /** Roles que ven el estado superpuesto (Facturación no: F2 le da «—»). */

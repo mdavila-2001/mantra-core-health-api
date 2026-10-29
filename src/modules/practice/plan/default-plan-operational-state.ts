@@ -84,12 +84,12 @@ export class DefaultPlanOperationalState implements PlanOperationalStatePort {
       request.practiceId,
     );
     const rows = await tx.execute<StateRow[]>(
-      `select cs.id, st.code as lifecycle_code, av.code as availability_code, rs.code as reason_code,
+      `select cs.id, regexp_replace(st.code, '^[a-z_]+:', '') as lifecycle_code, regexp_replace(av.code, '^[a-z_]+:', '') as availability_code, regexp_replace(rs.code, '^[a-z_]+:', '') as reason_code,
               blk.reason_text, ${isoTimestampSql('cs.availability_expected_until')} as expected_until,
               ${isoTimestampSql('coalesce(cs.availability_changed_at, cs.updated_at)')} as availability_since,
-              hy.code as hygiene_code, ${isoTimestampSql('coalesce(cs.hygiene_changed_at, cs.updated_at)')} as hygiene_since,
+              regexp_replace(hy.code, '^[a-z_]+:', '') as hygiene_code, ${isoTimestampSql('coalesce(cs.hygiene_changed_at, cs.updated_at)')} as hygiene_since,
               cs.terminal_cleaning_required as terminal_required,
-              iso.code as isolation_code, cs.isolation_organism_text as isolation_organism,
+              regexp_replace(iso.code, '^[a-z_]+:', '') as isolation_code, cs.isolation_organism_text as isolation_organism,
               ${isoTimestampSql('coalesce(cs.isolation_changed_at, cs.updated_at)')} as isolation_since,
               cs.ops_version, ${isoTimestampSql('cs.updated_at')} as last_event_at,
               loc.status_id as loc_status, ${isoTimestampSql('loc.period_start')} as loc_since,
@@ -253,7 +253,7 @@ export class DefaultPlanOperationalState implements PlanOperationalStatePort {
         expected_end_at: string | null;
       }[]
     >(
-      `select b.id, k.code as kind, r.code as reason_code, b.reason_text,
+      `select b.id, regexp_replace(k.code, '^[a-z_]+:', '') as kind, regexp_replace(r.code, '^[a-z_]+:', '') as reason_code, b.reason_text,
               ${isoTimestampSql('b.starts_at')} as starts_at, ${isoTimestampSql('b.expected_end_at')} as expected_end_at
          from practice.care_space_blocks b
          join terminology.catalog_concepts k on k.id = b.kind_concept_id
@@ -271,7 +271,7 @@ export class DefaultPlanOperationalState implements PlanOperationalStatePort {
         requested_at: string;
       }[]
     >(
-      `select co.id, t.code as type, s.code as status, p.code as priority, ${isoTimestampSql('co.requested_at')} as requested_at
+      `select co.id, regexp_replace(t.code, '^[a-z_]+:', '') as type, regexp_replace(s.code, '^[a-z_]+:', '') as status, regexp_replace(p.code, '^[a-z_]+:', '') as priority, ${isoTimestampSql('co.requested_at')} as requested_at
          from practice.cleaning_orders co
          join terminology.catalog_concepts t on t.id = co.cleaning_type_concept_id
          join terminology.catalog_concepts s on s.id = co.status_concept_id
@@ -334,7 +334,7 @@ export class DefaultPlanOperationalState implements PlanOperationalStatePort {
     if (spaceIds.length === 0) return out;
     const rows = await tx.execute<PatientRow[]>(
       `select distinct on (el.care_space_id) el.care_space_id, p.name, p.last_name, p.display_name,
-              sx.code as sex_code, extract(year from age(p.birth_date))::int as age_years
+              regexp_replace(sx.code, '^[a-z_]+:', '') as sex_code, extract(year from age(p.birth_date))::int as age_years
          from clinical.encounter_locations el
          join clinical.encounters e on e.id = el.encounter_id
          join profiles.persons p on p.id = e.patient_profile_id
@@ -376,7 +376,7 @@ export class DefaultPlanOperationalState implements PlanOperationalStatePort {
       }[]
     >(
       `select e.patient_profile_id, e.id as encounter_id, p.name, p.middle_name, p.last_name, p.mother_last_name,
-              p.display_name, sx.code as sex_code, extract(year from age(p.birth_date))::int as age_years,
+              p.display_name, regexp_replace(sx.code, '^[a-z_]+:', '') as sex_code, extract(year from age(p.birth_date))::int as age_years,
               ${isoTimestampSql('coalesce(e.start_at, el.period_start)')} as admitted_at,
               greatest(0, floor(extract(epoch from (now() - coalesce(e.start_at, el.period_start))) / 86400))::int as los_days,
               ${isoTimestampSql('e.expected_discharge_at')} as expected_discharge_at

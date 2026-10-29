@@ -176,6 +176,7 @@ export class FloorPlanLayoutService {
       if (include.has('elements') && !cursor) {
         elements = this.toElements(
           await this.layout.layoutElements(tx, plan.id, tenantId, bbox),
+          identity,
         );
       }
 
@@ -355,7 +356,13 @@ export class FloorPlanLayoutService {
     };
   }
 
-  private toElements(rows: readonly LayoutElementRow[]): PlanElementDTO[] {
+  private toElements(
+    rows: readonly LayoutElementRow[],
+    identity: 'ALL' | ReadonlySet<string>,
+  ): PlanElementDTO[] {
+    // Una puerta que une dos locales no revela cuáles si el actor no los ve.
+    const seen = (id: string | null): string | null =>
+      id && (identity === 'ALL' || identity.has(id)) ? id : null;
     const walls = new Map(rows.filter((r) => r.kind === 'WALL').map((r) => [r.id, r]));
     return rows.map((row): PlanElementDTO => {
       const host = row.hostElementId ? walls.get(row.hostElementId) : undefined;
@@ -377,8 +384,12 @@ export class FloorPlanLayoutService {
         ...(row.swingSide ? { swingSide: row.swingSide } : {}),
         ...(row.label ? { label: row.label } : {}),
         ...(row.verticalLinkCode ? { verticalLinkCode: row.verticalLinkCode } : {}),
-        ...(row.connectsSpaceAId ? { connectsSpaceAId: row.connectsSpaceAId } : {}),
-        ...(row.connectsSpaceBId ? { connectsSpaceBId: row.connectsSpaceBId } : {}),
+        ...(seen(row.connectsSpaceAId)
+          ? { connectsSpaceAId: row.connectsSpaceAId as string }
+          : {}),
+        ...(seen(row.connectsSpaceBId)
+          ? { connectsSpaceBId: row.connectsSpaceBId as string }
+          : {}),
         ...(row.bbox ? { bbox: row.bbox } : {}),
         ...(position ? { position } : {}),
       };
@@ -390,11 +401,11 @@ export class FloorPlanLayoutService {
     plan: PlanRow,
   ): Promise<ReturnType<PlanBackgroundUrlService['sign']> | null> {
     if (!plan.backgroundFileId) return null;
-    const rows = await tx.execute<{ current_version_id: string | null }[]>(
-      `select current_version_id from common.files where id = ?::uuid and tenant_id = ?::uuid`,
-      [plan.backgroundFileId, plan.tenantId],
+    const versionId = await this.plans.servableBackgroundVersion(
+      tx,
+      plan.backgroundFileId,
+      plan.tenantId,
     );
-    const versionId = rows[0]?.current_version_id;
     return versionId ? this.urls.sign(plan.id, versionId) : null;
   }
 }

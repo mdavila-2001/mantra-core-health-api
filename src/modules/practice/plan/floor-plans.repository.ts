@@ -8,6 +8,8 @@ import type {
 } from '../domain/plan-layout-validator';
 import type { Bbox, Pt } from '../domain/plan-geometry';
 import { PRAC } from '../practice.concepts';
+import { CONCEPTS } from '../../../common';
+import { BACKGROUND_RULES } from './floor-plan.constants';
 
 /** Array de PostgreSQL como texto (`{a,b}`) para `?::uuid[]`. */
 export function pgUuidArray(ids: readonly string[]): string {
@@ -483,6 +485,36 @@ export class FloorPlansRepository {
       version: rows[0]?.layout_version ?? 0,
       changedAt: rows[0]?.changed_at ?? null,
     };
+  }
+
+  /**
+   * Versión vigente del fondo **si sigue siendo servible**: archivo del tenant,
+   * no borrado, versión sin infectar y con un tipo declarado de la lista cerrada.
+   * Es el filtro barato para firmar la URL; el tipo REAL se verifica por contenido
+   * cada vez que se sirven los bytes (`FloorPlanBackgroundService.content`).
+   */
+  async servableBackgroundVersion(
+    tx: EntityManager,
+    fileId: string,
+    tenantId: string,
+  ): Promise<string | null> {
+    const rows = await tx.execute<{ version_id: string }[]>(
+      `select f.current_version_id as version_id
+         from common.files f
+         join common.file_versions v on v.id = f.current_version_id and v.file_id = f.id
+        where f.id = ?::uuid and f.tenant_id = ?::uuid and f.deleted_at is null
+          and f.lifecycle_status_concept_id <> ?::uuid
+          and v.malware_scan_status_concept_id <> ?::uuid
+          and v.mime_type = any(?::text[])`,
+      [
+        fileId,
+        tenantId,
+        CONCEPTS.FILE_DELETED,
+        CONCEPTS.SCAN_INFECTED,
+        `{${BACKGROUND_RULES.mimeTypes.join(',')}}`,
+      ],
+    );
+    return rows[0]?.version_id ?? null;
   }
 
   /** Valor de un ajuste de la práctica (`practice_settings`), o `undefined`. */

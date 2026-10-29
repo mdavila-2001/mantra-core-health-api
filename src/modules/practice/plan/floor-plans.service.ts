@@ -597,8 +597,19 @@ export class FloorPlansService {
     actor: AuthenticatedUser,
   ): Promise<{ issues: PlanValidationIssue[] }> {
     return this.em.transactional(async (tx) => {
-      const { plan } = await this.context.plan(tx, planId, actor);
-      return { issues: await this.layout.validate(tx, plan.id) };
+      const { tenantId, plan, viewer } = await this.context.plan(tx, planId, actor);
+      const issues = await this.layout.validate(tx, plan.id);
+      // El detalle de un problema (m² declarados, vecinos) es identidad del
+      // espacio: sólo se informa lo que el actor ve en el layout.
+      const visible = await this.viewers.resolveIds(tx, tenantId, viewer.identity);
+      if (visible === 'ALL') return { issues };
+      return {
+        issues: issues.filter(
+          (issue) =>
+            visible.has(issue.subjectId) &&
+            (!issue.otherId || visible.has(issue.otherId)),
+        ),
+      };
     });
   }
 
@@ -618,7 +629,10 @@ export class FloorPlansService {
     actor: AuthenticatedUser,
   ): Promise<{ items: UnplacedSpace[]; nextCursor: string | null }> {
     return this.em.transactional(async (tx) => {
-      const { plan } = await this.context.plan(tx, planId, actor);
+      const { tenantId, plan, viewer } = await this.context.plan(tx, planId, actor);
+      // La paleta sólo la usa el editor, y nunca lista lo que el actor no ve.
+      this.viewers.assertCanEdit(viewer);
+      const visible = await this.viewers.resolveIds(tx, tenantId, viewer.identity);
       let after: { depth: number; code: string } | undefined;
       if (cursor) {
         try {
@@ -652,6 +666,7 @@ export class FloorPlansService {
                               where p.care_space_id = u.parent_space_id and p.floor_plan_id = ?::uuid)) as parent_placed
            from practice.plan_unplaced_spaces(?::uuid) u
           where ${after ? '(u.depth, u.code) > (?, ?)' : 'true'}
+            ${visible === 'ALL' ? '' : 'and u.care_space_id = any(?::uuid[])'}
           order by u.depth, u.code
           limit ?`,
         [
@@ -659,6 +674,7 @@ export class FloorPlansService {
           plan.id,
           plan.id,
           ...(after ? [after.depth, after.code] : []),
+          ...(visible === 'ALL' ? [] : [pgUuidArray([...visible])]),
           limit + 1,
         ],
       );
@@ -954,11 +970,11 @@ export class FloorPlansService {
     plan: PlanRow,
   ): Promise<ReturnType<PlanBackgroundUrlService['sign']> | null> {
     if (!plan.backgroundFileId) return null;
-    const rows = await tx.execute<{ current_version_id: string | null }[]>(
-      `select current_version_id from common.files where id = ?::uuid and tenant_id = ?::uuid`,
-      [plan.backgroundFileId, plan.tenantId],
+    const versionId = await this.plans.servableBackgroundVersion(
+      tx,
+      plan.backgroundFileId,
+      plan.tenantId,
     );
-    const versionId = rows[0]?.current_version_id;
     return versionId ? this.urls.sign(plan.id, versionId) : null;
   }
 

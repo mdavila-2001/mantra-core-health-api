@@ -5,7 +5,7 @@ import {
   PreconditionFailedException,
   type AuthenticatedUser,
 } from '../../../common';
-import { sniffMimeType } from '../../../common/storage/upload-content-type';
+import { SEED } from '../../../common/constants/concepts';
 import { AUD } from '../../audit/audit.concepts';
 import { FilesRepository, FileVersionsRepository } from '../../common/repositories';
 import { FileUploadService } from '../../common/services';
@@ -22,7 +22,7 @@ import { FloorPlansRepository, type PlanRow } from './floor-plans.repository';
 import { PlanBackgroundUrlService } from './plan-background-url.service';
 import { planDbException, translatePlanDbError } from './plan-constraint-reasons';
 import { PlanEventsService } from './plan-events.service';
-import { readImageSize } from './plan-image';
+import { verifyBackgroundBytes } from './plan-background-guard';
 import { PlanViewerService } from './plan-viewer.service';
 
 /** Escala mínima y máxima aceptadas, en metros por píxel (descarta calibraciones absurdas). */
@@ -112,8 +112,25 @@ export class FloorPlanBackgroundService {
 
       // El archivo: del mismo tenant (si no, 404), vivo, imagen, sin infectar.
       const file = await this.files.findById(tx, dto.fileId);
-      if (!file || file.tenantId !== tenantId) {
+      if (!file) {
         throw practiceOutOfScope('Archivo no encontrado');
+      }
+      if (file.tenantId !== tenantId) {
+        // `POST /common/files/upload` deja TODO archivo en el tenant técnico
+        // (SEED), con su autor. Quien lo subió puede traerlo al tenant del
+        // lienzo, que es lo que exige la FK compuesta de la base (misma
+        // maniobra que `claimAnonymousUpload`). Cualquier otro caso, incluido
+        // un archivo de otro tenant real o subido por otra persona, es 404.
+        if (
+          file.tenantId !== SEED.tenantId ||
+          file.createdByUserId !== actor.id
+        ) {
+          throw practiceOutOfScope('Archivo no encontrado');
+        }
+        file.tenantId = tenantId;
+        file.updatedByUserId = actor.id;
+        file.updatedAt = new Date();
+        await tx.flush();
       }
       if (file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED) {
         throw this.fileInvalid('El archivo está borrado', 'DELETED');
@@ -139,30 +156,26 @@ export class FloorPlanBackgroundService {
           { maxBytes: limits.maxBytes },
         );
       }
-      const content = await this.uploads.downloadForAuthorizedContext(
+      // Se leen y verifican los bytes de ESTA versión (no «la vigente» de después):
+      // el tipo sale del contenido, nunca del MIME declarado.
+      const content = await this.uploads.downloadVersionForAuthorizedContext(
         file.id,
+        version.id,
         'practice.floor_plan.background.check',
       );
-      // Tipo real por los primeros bytes: lo declarado no cuenta.
-      const real = sniffMimeType(content.buffer);
-      if (!real || !(BACKGROUND_RULES.mimeTypes as readonly string[]).includes(real)) {
-        throw this.fileInvalid(
-          'El fondo debe ser una imagen PNG, JPEG o WebP (el SVG no se admite)',
-          'MIME',
-          { allowed: BACKGROUND_RULES.mimeTypes },
-        );
-      }
-      const size = readImageSize(content.buffer, real);
-      if (!size) {
-        throw this.fileInvalid('No se pudieron leer las dimensiones de la imagen', 'DIMENSIONS');
-      }
-      if (size.width > limits.maxPx || size.height > limits.maxPx) {
+      const verified = verifyBackgroundBytes(content.buffer);
+      if (
+        verified.width > limits.maxPx ||
+        verified.height > limits.maxPx
+      ) {
         throw this.fileInvalid(
           `La imagen no puede pasar de ${limits.maxPx} px por lado`,
           'TOO_LARGE_PX',
-          { maxPx: limits.maxPx, width: size.width, height: size.height },
+          { maxPx: limits.maxPx, width: verified.width, height: verified.height },
         );
       }
+      const size = { width: verified.width, height: verified.height };
+      const real = verified.mimeType;
 
       try {
         const ok = await this.plans.setBackground(
@@ -299,22 +312,40 @@ export class FloorPlanBackgroundService {
         [plan.backgroundFileId, plan.tenantId],
       );
       if (rows[0]?.current_version_id !== query.v) {
+        // Se reemplazó el archivo después de emitir la URL: la URL vieja no sirve.
         throw new PreconditionFailedException(
           'El fondo cambió; pedí el lienzo de nuevo para obtener la URL vigente',
           undefined,
           FloorPlanReason.BACKGROUND_URL_INVALID,
         );
       }
-      return plan.backgroundFileId;
+      const file = await this.files.findById(tx, plan.backgroundFileId);
+      const version = await this.versions.findById(tx, query.v);
+      if (
+        !file ||
+        file.tenantId !== plan.tenantId ||
+        file.deletedAt ||
+        file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED ||
+        !version ||
+        version.fileId !== file.id ||
+        version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED
+      ) {
+        throw this.fileInvalid('El archivo del fondo ya no está disponible', 'UNAVAILABLE');
+      }
+      return { fileId: plan.backgroundFileId, versionId: query.v };
     });
-    const content = await this.uploads.downloadForAuthorizedContext(
-      resolved,
+    // Bytes de la versión firmada (no de la vigente al momento de leer) y tipo
+    // REAL por contenido: si no es PNG/JPEG/WebP se rechaza, jamás se sirve con
+    // el MIME declarado.
+    const content = await this.uploads.downloadVersionForAuthorizedContext(
+      resolved.fileId,
+      resolved.versionId,
       'practice.floor_plan.background.content',
     );
-    const real = sniffMimeType(content.buffer);
+    const verified = verifyBackgroundBytes(content.buffer);
     return {
       buffer: content.buffer,
-      mimeType: real ?? content.mimeType,
+      mimeType: verified.mimeType,
       expiresInSeconds: Math.max(
         0,
         Number(query.exp) - Math.floor(Date.now() / 1000),

@@ -228,6 +228,14 @@ export class FloorPlanStateService {
         }
       }
 
+      // Los recuentos de un contenedor fuera del alcance de identidad del actor no
+      // se informan (ni su id): el contenedor es una silueta para él.
+      const identityScope = await this.viewers.resolveIds(tx, tenantId, viewer.identity);
+      if (identityScope !== 'ALL') {
+        for (const id of Object.keys(rollups)) {
+          if (!identityScope.has(id)) delete rollups[id];
+        }
+      }
       const spacesOut: Record<string, SpaceState> = {};
       for (const [spaceId, state] of states) {
         spacesOut[spaceId] = filterAxes(state, axes);
