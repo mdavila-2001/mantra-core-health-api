@@ -1,8 +1,4 @@
-from pathlib import Path
-import contextlib
-import io
 import json
-import os
 import sys
 import load_seeds
 
@@ -36,15 +32,5 @@ elif sys.argv[1] == 'restaurar-directorio':
         print('Perfiles institucionales originales restaurados:',len(originals))
     finally:
         conn.close()
-elif sys.argv[1] == 'cuentas':
-    import argon2
-    import seed_insurer_accounts
-    with contextlib.redirect_stdout(io.StringIO()):
-        accounts = seed_insurer_accounts.seed_accounts(password=cfg['DEMO_PASSWORD'])
-    path = Path('/output/aseguradoras.json')
-    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    with os.fdopen(fd, 'w') as f:
-        json.dump(accounts, f, ensure_ascii=False, indent=2)
-    print('Cuentas de aseguradoras preparadas:',len(accounts),'; acceso guardado localmente con permiso 600')
 else:
     raise SystemExit('Fase desconocida')

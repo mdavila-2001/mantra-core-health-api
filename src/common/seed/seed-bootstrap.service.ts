@@ -9,6 +9,7 @@ import { AuthzPlatformPermissionsSeedService } from './authz-platform-permission
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
 import { QaFlowsSeedService } from './qa-flows-seed.service';
 import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
+import { InsurerAccountsSeedService } from './insurer-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.service';
 import { TelemetryUxHeatmapSeedService } from './telemetry-ux-heatmap-seed.service';
@@ -208,6 +209,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly platformPermissions: AuthzPlatformPermissionsSeedService,
     private readonly bootstrapAdmin: BootstrapAdminSeedService,
     private readonly providerAccounts: ProviderAccountsSeedService,
+    private readonly insurerAccounts: InsurerAccountsSeedService,
     private readonly clinicalForms: ClinicalFormsSeedService,
     private readonly boMedicalSpecialties: BoMedicalSpecialtiesSeedService,
     private readonly practiceDefaultServices: PracticeDefaultServicesSeedService,
@@ -537,6 +539,13 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'cuentas de proveedores',
         kind: 'content',
         run: () => this.providerAccounts.run(),
+      },
+      // Después de `boliviaInsurance`: cada cuenta cuelga del tenant de su
+      // aseguradora. Mismo candado opt-in que las cuentas de proveedores.
+      {
+        name: 'cuentas de aseguradoras',
+        kind: 'content',
+        run: () => this.insurerAccounts.run(),
       },
       // H2 (carril M2 · MacBook, 2026-09-26): después de los roles de sistema
       // y del administrador de arranque, porque el alta de médico/paciente
