@@ -123,4 +123,18 @@ export enum AccountingErrorReason {
   SIMPLE_ACCOUNT_SEEDED = 'SIMPLE_ACCOUNT_SEEDED',
   /** La cuenta ya la usa algún registro o transacción. */
   SIMPLE_ACCOUNT_IN_USE = 'SIMPLE_ACCOUNT_IN_USE',
+
+  // --- F5f · centros de costo por unidad y activos ubicados en un espacio ---
+  /** El espacio del activo no es de la práctica del activo (422). */
+  INFRASTRUCTURE_SPACE_PRACTICE_MISMATCH = 'INFRASTRUCTURE_SPACE_PRACTICE_MISMATCH',
+  /** El activo de infraestructura no existe en el tenant del actor (404, el ajeno responde igual). */
+  INFRASTRUCTURE_ITEM_NOT_FOUND = 'INFRASTRUCTURE_ITEM_NOT_FOUND',
+  /** El espacio no existe en el tenant del actor (404, el ajeno responde igual). */
+  INFRASTRUCTURE_SPACE_NOT_FOUND = 'INFRASTRUCTURE_SPACE_NOT_FOUND',
+  /** La unidad clínica ya tiene un centro de costo activo (409). */
+  UNIT_ALREADY_HAS_COST_CENTER = 'UNIT_ALREADY_HAS_COST_CENTER',
+  /** La unidad clínica no existe en el tenant del actor (404, la ajena responde igual). */
+  COST_CENTER_UNIT_NOT_FOUND = 'COST_CENTER_UNIT_NOT_FOUND',
+  /** La unidad no es de la práctica del centro de costo (422). */
+  COST_CENTER_UNIT_PRACTICE_MISMATCH = 'COST_CENTER_UNIT_PRACTICE_MISMATCH',
 }

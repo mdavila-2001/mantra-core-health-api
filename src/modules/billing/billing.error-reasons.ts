@@ -184,4 +184,54 @@ export enum BillingErrorReason {
 
   /** `GET /patient-spending/me`: el rango pedido supera los tres años. */
   PATIENT_SPENDING_RANGE_TOO_LONG = 'PATIENT_SPENDING_RANGE_TOO_LONG',
+
+  // --- F5e · tarifas de espacio y cargos devengados (día-cama / quirófano por tiempo) ---
+
+  /** `POST /billing/space-tariffs`: ya hay una tarifa de esa clase vigente en el período. */
+  TARIFF_OVERLAP = 'TARIFF_OVERLAP',
+
+  /** El servicio de la tarifa no es del catálogo de la práctica de la tarifa. */
+  TARIFF_SERVICE_NOT_IN_PRACTICE = 'TARIFF_SERVICE_NOT_IN_PRACTICE',
+
+  /** La tarifa no existe en el tenant del actor (el ajeno responde igual). */
+  TARIFF_NOT_FOUND = 'TARIFF_NOT_FOUND',
+
+  /** La tarifa ya está cerrada o la fecha de cierre no es posterior a su inicio. */
+  TARIFF_CLOSE_INVALID = 'TARIFF_CLOSE_INVALID',
+
+  /** Los campos de la tarifa no son coherentes con su tipo (día-cama / quirófano). */
+  TARIFF_SHAPE_INVALID = 'TARIFF_SHAPE_INVALID',
+
+  /** La sala de la tarifa no existe en la práctica (el ajeno responde igual). */
+  TARIFF_SPACE_NOT_FOUND = 'TARIFF_SPACE_NOT_FOUND',
+
+  /** El cargo devengado no existe en el tenant del actor (el ajeno responde igual). */
+  CHARGE_CAPTURE_NOT_FOUND = 'CHARGE_CAPTURE_NOT_FOUND',
+
+  /** El cargo ya fue emitido en una factura (o está anulado): no se factura de nuevo. */
+  CHARGE_ALREADY_INVOICED = 'CHARGE_ALREADY_INVOICED',
+
+  /** El cargo no pertenece al paciente, la práctica o el encuentro de la factura. */
+  CHARGE_NOT_OF_INVOICE = 'CHARGE_NOT_OF_INVOICE',
+
+  /** El cargo no tiene tarifa vigente (sin precio): se configura la tarifa antes de facturar. */
+  CHARGE_WITHOUT_PRICE = 'CHARGE_WITHOUT_PRICE',
+
+  /** El cargo ya está anulado. */
+  CHARGE_ALREADY_VOIDED = 'CHARGE_ALREADY_VOIDED',
+
+  /** El motivo de la anulación es obligatorio. */
+  CHARGE_VOID_REASON_REQUIRED = 'CHARGE_VOID_REASON_REQUIRED',
+
+  /** `charge-items/post` de quirófano: el tiempo de sala lo devenga el sistema, no se carga a mano. */
+  ROOM_CHARGE_IS_AUTOMATIC = 'ROOM_CHARGE_IS_AUTOMATIC',
+
+  /** La fecha del job de día-cama no es un día válido o es futura. */
+  BED_DAY_DATE_INVALID = 'BED_DAY_DATE_INVALID',
+
+  /** La sede no tiene zona horaria configurable: no se sabe cuándo es medianoche. */
+  BED_DAY_TIME_ZONE_MISSING = 'BED_DAY_TIME_ZONE_MISSING',
+
+  /** El caso de quirófano no está completado o no tiene los tiempos de sala. */
+  OR_TIME_CASE_NOT_CHARGEABLE = 'OR_TIME_CASE_NOT_CHARGEABLE',
 }

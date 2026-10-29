@@ -21,6 +21,7 @@ import {
 } from '../repositories';
 import type { CareSpaceDetail } from '../dto/infrastructure.types';
 import { withVersionConflict } from '../http/row-version';
+import { CareSpaceCategoryPeriodsService } from './care-space-category-periods.service';
 import { CareSpaceReadService } from './care-space-read.service';
 import {
   MAX_BATCH_SIZE,
@@ -125,6 +126,7 @@ export class CareSpaceCreationService {
    * @param events - Outbox transaccional.
    * @param reader - Arma el detalle de respuesta.
    * @param logger - Logger.
+   * @param categoryPeriods - Períodos de categoría de cama (F5e).
    */
   constructor(
     private readonly em: EntityManager,
@@ -137,6 +139,7 @@ export class CareSpaceCreationService {
     private readonly events: StructureEventsService,
     private readonly reader: CareSpaceReadService,
     private readonly logger: PinoLogger,
+    private readonly categoryPeriods: CareSpaceCategoryPeriodsService,
   ) {
     this.logger.setContext(CareSpaceCreationService.name);
   }
@@ -731,6 +734,21 @@ export class CareSpaceCreationService {
       out[i] = { space };
     }
     await this.flushCreated(tx);
+
+    // F5e: una cama que nace con categoría abre su primer período de categoría
+    // (la facturación del día-cama cobra la categoría vigente en cada medianoche).
+    for (const i of order) {
+      const categoryConceptId = out[i].space.bedCategoryConceptId;
+      if (categoryConceptId) {
+        await this.categoryPeriods.open(tx, {
+          careSpaceId: out[i].space.id,
+          tenantId,
+          categoryConceptId,
+          at: now,
+          actorUserId: actor.id,
+        });
+      }
+    }
 
     for (const i of order) {
       const entry = out[i];

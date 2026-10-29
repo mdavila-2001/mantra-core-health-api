@@ -60,6 +60,7 @@ function build(siteOverrides: Record<string, unknown> = {}) {
     ),
   };
   const logger = { setContext: mockFn(), info: mockFn() };
+  const categoryPeriods = { open: mockFn().mockResolvedValue('period-1') };
   const service = new CareSpaceCreationService(
     em as any,
     context as any,
@@ -71,9 +72,11 @@ function build(siteOverrides: Record<string, unknown> = {}) {
     events as any,
     reader as any,
     logger as any,
+    categoryPeriods as any,
   );
   return {
     service,
+    categoryPeriods,
     tx,
     context,
     spacesRepo,
@@ -414,6 +417,29 @@ describe('CareSpaceCreationService.bulk', () => {
           s.statusConceptId === PRAC.SPACE_PLANNED && s.tenantId === TENANT_A,
       ),
     ).toBe(true);
+  });
+
+  it('F5e: cada cama con categoría abre su primer período de categoría en la misma transacción; sin categoría no abre ninguno', async () => {
+    const d = build();
+    d.spacesRepo.findByIdInTenant.mockResolvedValue(parentOf('LOC_FORM_ROOM'));
+    await d.service.bulk('s1', body(), actor, 'req-3');
+    expect(d.categoryPeriods.open).toHaveBeenCalledTimes(8);
+    expect(d.categoryPeriods.open).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        tenantId: TENANT_A,
+        categoryConceptId: d.created[0].bedCategoryConceptId,
+        careSpaceId: d.created[0].id,
+        actorUserId: actor.id,
+      }),
+    );
+
+    const sin = build();
+    sin.spacesRepo.findByIdInTenant.mockResolvedValue(
+      parentOf('LOC_FORM_BUILDING'),
+    );
+    await sin.service.create('s1', room({ parentSpaceId: 'parent-1' }), actor);
+    expect(sin.categoryPeriods.open).not.toHaveBeenCalled();
   });
 
   it('si un código choca no se crea ninguno (todo o nada)', async () => {
