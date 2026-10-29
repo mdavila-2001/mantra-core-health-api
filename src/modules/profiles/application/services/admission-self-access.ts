@@ -15,16 +15,22 @@ import { ProfilesErrorReason } from '../../profiles.error-reasons';
  * `ADMISSION_SELF_ACCESS`, **antes** de cualquier retorno idempotente.
  */
 export async function assertNotSelfAccess(
-  accountLinks: Pick<PersonAccountLinksRepository, 'findActiveByPerson'>,
+  accountLinks: Pick<PersonAccountLinksRepository, 'hasActiveLink'>,
   em: EntityManager,
   admission: { readonly practitionerProfileId: string },
   user: AuthenticatedUser,
 ): Promise<void> {
-  const link = await accountLinks.findActiveByPerson(
-    em,
-    admission.practitionerProfileId,
-  );
-  if (link?.userId === user.id) {
+  // El perfil profesional comparte id con su persona
+  // (`health_practitioner_profiles.profile_id`). Se pregunta por el par exacto
+  // (persona, cuenta) entre TODOS los vínculos activos: ni «el» vínculo de la
+  // persona ni «el» de la cuenta, que pueden ser varios.
+  if (
+    await accountLinks.hasActiveLink(
+      em,
+      admission.practitionerProfileId,
+      user.id,
+    )
+  ) {
     throw new InsufficientRoleException(
       'No puede consultar ni resolver su propia admisión por la vista del personal',
       {},
