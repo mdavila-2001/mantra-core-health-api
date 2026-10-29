@@ -11,7 +11,10 @@ import {
 import { resolveSecret } from '../../../../common/crypto/dev-secret';
 import { FileUploadService } from '../../../common/services';
 import { ProfilesErrorReason } from '../../profiles.error-reasons';
-import { PractitionerAdmissionsRepository } from '../../infrastructure/repositories';
+import {
+  PersonAccountLinksRepository,
+  PractitionerAdmissionsRepository,
+} from '../../infrastructure/repositories';
 import { PractitionerAdmissionEvidenceService } from './practitioner-admission-evidence.service';
 import type { AdmissionDocumentUrlDto } from '../../presentation/dto/admissions.dto';
 
@@ -62,6 +65,7 @@ export class PractitionerAdmissionDocumentsService {
   constructor(
     private readonly em: EntityManager,
     private readonly admissionsRepo: PractitionerAdmissionsRepository,
+    private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly evidence: PractitionerAdmissionEvidenceService,
     private readonly files: FileUploadService,
     private readonly logger: PinoLogger,
@@ -78,7 +82,7 @@ export class PractitionerAdmissionDocumentsService {
   ): Promise<AdmissionDocumentUrlDto> {
     this.assertAllowedRole(actor);
     const em = this.em.fork();
-    const facts = await this.assertFileBelongs(em, admissionId, fileId);
+    const facts = await this.assertFileBelongs(em, admissionId, fileId, actor);
     const expiry = now.getTime() + ADMISSION_DOCUMENT_URL_TTL_MS;
     const signature = this.sign(admissionId, fileId, actor.id, expiry);
     return {
@@ -114,7 +118,7 @@ export class PractitionerAdmissionDocumentsService {
       });
     }
     const em = this.em.fork();
-    const facts = await this.assertFileBelongs(em, admissionId, fileId);
+    const facts = await this.assertFileBelongs(em, admissionId, fileId, actor);
     const content = await this.files.downloadForAuthorizedContext(
       fileId,
       'profiles.admission.document',
@@ -148,6 +152,7 @@ export class PractitionerAdmissionDocumentsService {
     em: EntityManager,
     admissionId: string,
     fileId: string,
+    actor: AuthenticatedUser,
   ) {
     const admission = await this.admissionsRepo.findById(em, admissionId);
     const notFound = () =>
@@ -157,6 +162,15 @@ export class PractitionerAdmissionDocumentsService {
         ProfilesErrorReason.ADMISSION_DOCUMENT_NOT_FOUND,
       );
     if (!admission) throw notFound();
+    // El propio profesional no abre sus documentos por la vista del personal.
+    const ownLink = await this.accountLinksRepo.findActiveByUser(em, actor.id);
+    if (ownLink && ownLink.personId === admission.practitionerProfileId) {
+      throw new InsufficientRoleException(
+        'No puede abrir los documentos de su propia admisión por la vista del personal',
+        {},
+        ProfilesErrorReason.ADMISSION_SELF_ACCESS,
+      );
+    }
     const live = await this.evidence.collect(em, admission.practitionerProfileId);
     if (!live.items.some((item) => item.fileId === fileId)) {
       this.logger.warn(

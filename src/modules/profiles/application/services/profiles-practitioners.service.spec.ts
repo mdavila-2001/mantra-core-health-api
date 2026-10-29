@@ -3034,11 +3034,32 @@ describe('ProfilesPractitionersService', () => {
         ]),
       );
 
+      d.admissionsRead.verificationOf.mockResolvedValue(
+        new Map([
+          [
+            'per-1',
+            { status: 'VERIFIED', verifiedAt: '2026-10-01T00:00:00.000Z', validUntil: '2029-10-01' },
+          ],
+          ['per-2', { status: 'UNVERIFIED', verifiedAt: null, validUntil: null }],
+        ]) as never,
+      );
+
       const page = await d.service.listPractitioners({ limit: 50 });
 
       // El front no compara conceptos: el uuid del estado no viaja escrito en
-      // ningún cliente.
+      // ningún cliente. El check lo decide la admisión, no el estado del perfil.
       expect(page.items.map((i) => i.verified)).toEqual([true, false]);
+      expect(page.items[0].verification.status).toBe('VERIFIED');
+    });
+
+    it('un perfil que dice VERIFIED pero cuya admisión no está verificada NO muestra el check', async () => {
+      const d = build();
+      d.practitionersRepo.listPage.mockResolvedValue([row]);
+      d.personsRepo.findByIds.mockResolvedValue(
+        new Map([['per-1', { id: 'per-1', displayName: 'Dra. Verificada' }]]),
+      );
+      const page = await d.service.listPractitioners({ limit: 50 });
+      expect(page.items[0].verified).toBe(false);
     });
 
     it('con el bypass activo no filtra por verificación', async () => {

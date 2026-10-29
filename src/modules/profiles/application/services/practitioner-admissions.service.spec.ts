@@ -483,7 +483,7 @@ describe('PractitionerAdmissionsService', () => {
   describe('reviewItem', () => {
     function withReview(state: ReviewState = 'PENDING', requirementOver: Partial<ChecklistRequirement> = {}) {
       const d = build();
-      const target = item('c1', state, { rowVersion: 2 });
+      const target = item('c1', state, { rowVersion: 2, evidenceSha256: 'abc' });
       d.reviewsRepo.findByIdForUpdate.mockResolvedValue(target.review);
       d.checklist.requirementsOf.mockResolvedValue([requirement('A', requirementOver)]);
       d.evidence.collect.mockResolvedValue({
@@ -493,7 +493,7 @@ describe('PractitionerAdmissionsService', () => {
       return { d, review: target.review as Record<string, any> };
     }
     const review = (over: Record<string, unknown> = {}) =>
-      ({ decision: 'VERIFIED', sourceType: 'COLEGIO_MEDICO', expectedRowVersion: 2, ...over }) as never;
+      ({ decision: 'VERIFIED', sourceType: 'COLEGIO_MEDICO', expectedRowVersion: 2, evidenceSha256: 'abc', ...over }) as never;
 
     it('VERIFIED con fuente: queda verificado, con quién, cuándo, fuente y la huella de lo que vio', async () => {
       const { d, review: row } = withReview();
@@ -625,7 +625,7 @@ describe('PractitionerAdmissionsService', () => {
         items: [{ itemType: 'CREDENTIAL', itemId: 'c1', label: 'x', evidenceSha256: 'sin-archivo' }],
         professionGroup: 'MEDICO',
       });
-      await d.service.reviewItem('adm-1', 'rev-c1', review(), caller(REVIEWER));
+      await d.service.reviewItem('adm-1', 'rev-c1', review({ evidenceSha256: 'sin-archivo' }), caller(REVIEWER));
       expect(row.fileId).toBeUndefined();
       expect(row.evidenceSha256).toBe('sin-archivo');
     });
@@ -640,6 +640,81 @@ describe('PractitionerAdmissionsService', () => {
         caller(REVIEWER),
       );
       expect(row.reasonText).toBe(texto.trim());
+    });
+
+    // ── S-2 · TOCTOU: la huella que queda es la que el revisor vio ──
+    describe('S-2 · la evidencia cambió entre que el revisor la miró y decidió', () => {
+      it('VERIFIED con una huella que ya no es la viva: 409 ADMISSION_EVIDENCE_CHANGED y no se escribe nada', async () => {
+        const { d, review: row } = withReview();
+        const error = await failure(
+          d.service.reviewItem('adm-1', 'rev-c1', review({ evidenceSha256: 'la-que-vio-el-revisor' }), caller(REVIEWER)),
+        );
+        expect(error).toBeInstanceOf(ConcurrencyConflictException);
+        expect(reasonOf(error)).toBe(ProfilesErrorReason.ADMISSION_EVIDENCE_CHANGED);
+        expect((error as any).details ?? (error as any).getResponse?.().details).toMatchObject({
+          currentEvidenceSha256: 'abc',
+        });
+        expect(row.statusConceptId).toBe(PROF.ADMISSION_REVIEW_PENDING);
+        expect(row.evidenceSha256).toBe('abc');
+        expect(d.events).toHaveLength(0);
+        expect(d.tx.flush).not.toHaveBeenCalled();
+      });
+
+      it('VERIFIED sin huella: no se acepta (nunca se verifica «lo de hoy»)', async () => {
+        const { d, review: row } = withReview();
+        const error = await failure(
+          d.service.reviewItem('adm-1', 'rev-c1', review({ evidenceSha256: undefined }), caller(REVIEWER)),
+        );
+        expect(reasonOf(error)).toBe(ProfilesErrorReason.ADMISSION_EVIDENCE_CHANGED);
+        expect(row.statusConceptId).toBe(PROF.ADMISSION_REVIEW_PENDING);
+      });
+
+      it('VERIFIED de un ítem que el médico retiró (ya no hay evidencia viva): 409', async () => {
+        const { d } = withReview();
+        d.evidence.collect.mockResolvedValue({ items: [], professionGroup: 'MEDICO' });
+        const error = await failure(d.service.reviewItem('adm-1', 'rev-c1', review(), caller(REVIEWER)));
+        expect(reasonOf(error)).toBe(ProfilesErrorReason.ADMISSION_EVIDENCE_CHANGED);
+      });
+
+      it('REJECTED sin huella se acepta; con una huella vieja, 409', async () => {
+        const ok = withReview();
+        await ok.d.service.reviewItem(
+          'adm-1',
+          'rev-c1',
+          review({ decision: 'REJECTED', reason: 'Ilegible', sourceType: undefined, evidenceSha256: undefined }),
+          caller(REVIEWER),
+        );
+        expect(ok.review.statusConceptId).toBe(PROF.ADMISSION_REVIEW_REJECTED);
+
+        const bad = withReview();
+        const error = await failure(
+          bad.d.service.reviewItem(
+            'adm-1',
+            'rev-c1',
+            review({ decision: 'REJECTED', reason: 'Ilegible', sourceType: undefined, evidenceSha256: 'vieja' }),
+            caller(REVIEWER),
+          ),
+        );
+        expect(reasonOf(error)).toBe(ProfilesErrorReason.ADMISSION_EVIDENCE_CHANGED);
+      });
+
+      it('quien no tomó la revisión recibe 403 antes que 409: la huella viva no se le revela', async () => {
+        const { d } = withReview();
+        const error = await failure(
+          d.service.reviewItem('adm-1', 'rev-c1', review({ evidenceSha256: 'otra' }), caller(OTHER_REVIEWER)),
+        );
+        expect(reasonOf(error)).toBe(ProfilesErrorReason.ADMISSION_NOT_ASSIGNED_TO_ACTOR);
+      });
+
+      it('repetir una verificación cuando la evidencia cambió después NO responde «ya está»: 409', async () => {
+        const { d } = withReview('VERIFIED');
+        d.evidence.collect.mockResolvedValue({
+          items: [{ itemType: 'CREDENTIAL', itemId: 'c1', label: 'x', fileId: 'f2', evidenceSha256: 'nueva' }],
+          professionGroup: 'MEDICO',
+        });
+        const error = await failure(d.service.reviewItem('adm-1', 'rev-c1', review(), caller(REVIEWER)));
+        expect(reasonOf(error)).toBe(ProfilesErrorReason.ADMISSION_EVIDENCE_CHANGED);
+      });
     });
   });
 
@@ -716,6 +791,24 @@ describe('PractitionerAdmissionsService', () => {
       ]);
       expect(d.projector.projectVerified).not.toHaveBeenCalled();
       expect(d.current.statusConceptId).toBe(ADMISSION_STATUS_CONCEPT.EN_REVISION);
+    });
+
+    it('S-2 · un ítem verificado cuya evidencia cambió después (el checklist lo evalúa PENDIENTE) impide verificar', async () => {
+      const changed = { ...item('x1', 'PENDING', { evidenceSha256: 'vieja' }), evidenceChanged: true };
+      const d = verifiable([{ requirement: requirement('X'), items: [changed] }]);
+      const error = await failure(d.service.decide('adm-1', decision(), caller(APPROVER)));
+      expect(reasonOf(error)).toBe(ProfilesErrorReason.ADMISSION_CHECKLIST_INCOMPLETE);
+      expect((error as any).details.blockers.map((b: any) => `${b.requirementCode}:${b.reason}`)).toEqual(['X:PENDING']);
+      expect(d.projector.projectVerified).not.toHaveBeenCalled();
+    });
+
+    it('falla cerrado: sin catálogo de requisitos aplicables nadie puede verificar', async () => {
+      const d = build();
+      d.checklist.materialize.mockResolvedValue(viewOf([]));
+      d.reviewsRepo.findByAdmission.mockResolvedValue([{ reviewedByUserId: 'u-reviewer' }]);
+      const error = await failure(d.service.decide('adm-1', decision(), caller(APPROVER)));
+      expect(reasonOf(error)).toBe(ProfilesErrorReason.ADMISSION_CHECKLIST_INCOMPLETE);
+      expect(d.projector.projectVerified).not.toHaveBeenCalled();
     });
 
     it('un obligatorio RECHAZADO impide verificar el perfil (corrige el defecto de countInStateExcept)', async () => {
@@ -1039,6 +1132,28 @@ describe('PractitionerAdmissionsService', () => {
   });
 
   // ═══════════════════ ganchos heredados (CV-20 y M27) ══
+  // ═════════════════════════ S-3 · nadie actúa sobre su propia admisión ══
+  describe('S-3 · release, reassign y requestInfo sobre la propia admisión', () => {
+    const both = { id: 'u-doctor', roles: ['ADMISSIONS_REVIEWER', 'ADMISSIONS_APPROVER'] } as never;
+
+    it.each([
+      ['release', (d: ReturnType<typeof build>) => d.service.release('adm-1', 4, caller(both))],
+      ['reassign', (d: ReturnType<typeof build>) => d.service.reassign('adm-1', 'u-reviewer-2', 4, caller(both))],
+      [
+        'requestInfo',
+        (d: ReturnType<typeof build>) =>
+          d.service.requestInfo('adm-1', { expectedRowVersion: 4, reason: 'falta algo' } as never, caller(both)),
+      ],
+    ])('%s: 403 ADMISSION_SELF_REVIEW y no cambia nada', async (_name, run) => {
+      const d = build({ admission: admission('EN_REVISION', { assignedToUserId: 'u-doctor' }) });
+      const error = await failure(run(d));
+      expect(error).toBeInstanceOf(InsufficientRoleException);
+      expect(reasonOf(error)).toBe(ProfilesErrorReason.ADMISSION_SELF_REVIEW);
+      expect(d.events).toHaveLength(0);
+      expect(d.current.statusConceptId).toBe(ADMISSION_STATUS_CONCEPT.EN_REVISION);
+    });
+  });
+
   describe('caminos heredados', () => {
     function legacy(profileStatus: string, open: Record<string, any> | null) {
       const d = build({ admission: open });
@@ -1049,33 +1164,81 @@ describe('PractitionerAdmissionsService', () => {
       return { d, target };
     }
 
-    it('CV-20: la verificación del título queda como revisión del requisito y NO toca el perfil', async () => {
-      const { d, target } = legacy(PROF.PRACT_VERIF_PENDING, admission('ENVIADA'));
+    const taken = () => admission('EN_REVISION', { assignedToUserId: 'u-reviewer' });
+    const asReviewer = { id: 'u-reviewer', roles: ['ADMISSIONS_REVIEWER'] } as never;
+
+    it('CV-20: con la admisión tomada por el revisor, la verificación queda como revisión del requisito y NO toca el perfil', async () => {
+      const { d, target } = legacy(PROF.PRACT_VERIF_PENDING, taken());
       const recorded = await d.service.recordCredentialReview(d.tx as never, {
         credentialId: 'c1',
         practitionerProfileId: 'prac-1',
         decision: 'VERIFIED',
         verificationSourceUri: 'https://colegio.example/x',
-        actor: { id: 'u-secadmin', roles: ['SECURITY_ADMIN'] } as never,
+        actor: asReviewer,
       });
       expect(recorded).toBe(true);
       expect(target.review?.statusConceptId).toBe(PROF.ADMISSION_REVIEW_VERIFIED);
-      expect(target.review?.reviewedByUserId).toBe('u-secadmin');
+      expect(target.review?.reviewedByUserId).toBe('u-reviewer');
+      expect(d.events.at(-1)).toMatchObject({ actorRoleCode: 'ADMISSIONS_REVIEWER' });
       expect(d.projector.projectVerified).not.toHaveBeenCalled();
-      expect(d.current.statusConceptId).toBe(ADMISSION_STATUS_CONCEPT.ENVIADA);
+      expect(d.current.statusConceptId).toBe(ADMISSION_STATUS_CONCEPT.EN_REVISION);
     });
 
-    it('CV-20 de un pendiente sin admisión la abre (single path) y registra', async () => {
-      const { d } = legacy(PROF.PRACT_VERIF_PENDING, null);
-      const recorded = await d.service.recordCredentialReview(d.tx as never, {
-        credentialId: 'c1',
-        practitionerProfileId: 'prac-1',
-        decision: 'REJECTED',
-        reason: 'Ilegible',
-        actor: { id: 'u-secadmin', roles: ['SECURITY_ADMIN'] } as never,
+    describe('S-1 · el camino heredado pasa por las mismas puertas que reviewItem', () => {
+      const credentialByCv20 = (d: ReturnType<typeof build>, actor: unknown) =>
+        d.service.recordCredentialReview(d.tx as never, {
+          credentialId: 'c1',
+          practitionerProfileId: 'prac-1',
+          decision: 'VERIFIED',
+          verificationSourceUri: 'https://colegio.example/x',
+          actor: actor as never,
+        });
+
+      it('un SECURITY_ADMIN que es el propio profesional no verifica SU título: 403 ADMISSION_SELF_REVIEW', async () => {
+        const { d, target } = legacy(PROF.PRACT_VERIF_PENDING, taken());
+        // accountLinksRepo: el titular de prac-1 es la cuenta u-doctor.
+        const error = await failure(credentialByCv20(d, { id: 'u-doctor', roles: ['SECURITY_ADMIN'] }));
+        expect(error).toBeInstanceOf(InsufficientRoleException);
+        expect(reasonOf(error)).toBe(ProfilesErrorReason.ADMISSION_SELF_REVIEW);
+        expect(target.review?.statusConceptId).toBe(PROF.ADMISSION_REVIEW_PENDING);
+        expect(d.events).toHaveLength(0);
       });
-      expect(d.admissionsRepo.create).toHaveBeenCalled();
-      expect(recorded).toBe(true);
+
+      it('el propio profesional tampoco verifica su título cuando ya está verificado y no hay admisión abierta', async () => {
+        const { d } = legacy(PROF.PRACT_VERIF_VERIFIED, null);
+        const error = await failure(credentialByCv20(d, { id: 'u-doctor', roles: ['SECURITY_ADMIN'] }));
+        expect(reasonOf(error)).toBe(ProfilesErrorReason.ADMISSION_SELF_REVIEW);
+      });
+
+      it('un revisor que no tomó la admisión: 403 ADMISSION_NOT_ASSIGNED_TO_ACTOR', async () => {
+        const { d, target } = legacy(PROF.PRACT_VERIF_PENDING, taken());
+        const error = await failure(credentialByCv20(d, { id: 'u-reviewer-2', roles: ['ADMISSIONS_REVIEWER'] }));
+        expect(reasonOf(error)).toBe(ProfilesErrorReason.ADMISSION_NOT_ASSIGNED_TO_ACTOR);
+        expect(target.review?.statusConceptId).toBe(PROF.ADMISSION_REVIEW_PENDING);
+      });
+
+      it('admisión ENVIADA (nadie la tomó): 412 ADMISSION_INVALID_TRANSITION; el legado no se auto-asigna', async () => {
+        const { d, target } = legacy(PROF.PRACT_VERIF_PENDING, admission('ENVIADA'));
+        const error = await failure(credentialByCv20(d, asReviewer));
+        expect(error).toBeInstanceOf(PreconditionFailedException);
+        expect(reasonOf(error)).toBe(ProfilesErrorReason.ADMISSION_INVALID_TRANSITION);
+        expect(target.review?.statusConceptId).toBe(PROF.ADMISSION_REVIEW_PENDING);
+        expect(d.current.assignedToUserId).toBeUndefined();
+      });
+
+      it('sin rol de revisor de admisiones (SECURITY_ADMIN sin herencia): 403 ADMISSION_ROLE_REQUIRED', async () => {
+        process.env.ADMISSIONS_SECURITY_ADMIN_INHERITS = 'false';
+        const { d, target } = legacy(PROF.PRACT_VERIF_PENDING, admission('EN_REVISION', { assignedToUserId: 'u-secadmin' }));
+        const error = await failure(credentialByCv20(d, { id: 'u-secadmin', roles: ['SECURITY_ADMIN'] }));
+        expect(reasonOf(error)).toBe(ProfilesErrorReason.ADMISSION_ROLE_REQUIRED);
+        expect(target.review?.statusConceptId).toBe(PROF.ADMISSION_REVIEW_PENDING);
+      });
+
+      it('CV-20 de un pendiente sin admisión la abre pero, como nadie la tomó, falla 412 (la transacción del llamador revierte)', async () => {
+        const { d } = legacy(PROF.PRACT_VERIF_PENDING, null);
+        const error = await failure(credentialByCv20(d, asReviewer));
+        expect(reasonOf(error)).toBe(ProfilesErrorReason.ADMISSION_INVALID_TRANSITION);
+      });
     });
 
     it('CV-20 de un perfil ya verificado (o sin admisión) no registra nada', async () => {

@@ -7,6 +7,7 @@ import {
   encodeKeysetCursor,
   type AuthenticatedUser,
 } from '../../../../common';
+import { InsufficientRoleException } from '../../../../common/errors/domain.exception';
 import { badRequestWithReason } from '../../../../common/errors/reasoned-http-exceptions';
 import { SystemErrorReason } from '../../../../common/errors/system-error-reasons';
 import { Identifiers } from '../../../common/entities';
@@ -138,6 +139,8 @@ export class PractitionerAdmissionsReadService {
   ): Promise<AdmissionListDto> {
     const em = this.em.fork();
     const limit = query.limit ?? 25;
+    // Nadie ve su propia admisión en la bandeja ni en los conteos.
+    const ownLink = await this.accountLinksRepo.findActiveByUser(em, actor.id);
     const q = query.q?.trim();
     if (q !== undefined && q !== '' && q.length < 2) {
       throw badRequestWithReason(
@@ -153,6 +156,7 @@ export class PractitionerAdmissionsReadService {
         : undefined,
       ...this.assignmentFilter(query.assignedTo, actor),
       overdue: query.overdue === true ? true : undefined,
+      excludePractitionerProfileId: ownLink?.personId,
       q: q ? q : undefined,
       now,
     };
@@ -318,12 +322,34 @@ export class PractitionerAdmissionsReadService {
   /** El detalle de una admisión (404 si no existe). */
   async detail(
     id: string,
+    actor: AuthenticatedUser,
     now: Date = new Date(),
   ): Promise<AdmissionDetailDto> {
     const em = this.em.fork();
     const admission = await this.admissionsRepo.findById(em, id);
     if (!admission) throw notFound();
+    await this.assertNotSelfAccess(em, admission, actor);
     return this.detailOf(em, admission, now);
+  }
+
+  /**
+   * Quien además es el profesional de la admisión no la ve por la vista del
+   * personal (notas internas, quién revisó, datos de revisión): su caso lo ve
+   * sólo por `GET /profiles/practitioners/me/admission`.
+   */
+  async assertNotSelfAccess(
+    em: EntityManager,
+    admission: Pick<PractitionerAdmissions, 'practitionerProfileId'>,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
+    if (link && link.personId === admission.practitionerProfileId) {
+      throw new InsufficientRoleException(
+        'No puede consultar su propia admisión por la vista del personal',
+        {},
+        ProfilesErrorReason.ADMISSION_SELF_ACCESS,
+      );
+    }
   }
 
   /** Arma el detalle con el contexto de persistencia que se le pase (p. ej. la transacción). */
@@ -399,6 +425,7 @@ export class PractitionerAdmissionsReadService {
             reviewedBy: actorOf(review?.reviewedByUserId),
             reviewedAt: review?.reviewedAt?.toISOString() ?? null,
             evidenceChanged: item.evidenceChanged,
+            evidenceSha256: item.live.evidenceSha256,
             rowVersion: review?.rowVersion ?? null,
           };
         }),
@@ -425,6 +452,7 @@ export class PractitionerAdmissionsReadService {
           uploadedAt: (file?.uploadedAt ?? admission.submittedAt).toISOString(),
           pages: null,
           reviewState: item.state,
+          evidenceSha256: item.live.evidenceSha256,
         });
       }
     }

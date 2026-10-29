@@ -34,6 +34,8 @@ export interface AdmissionListFilters {
   readonly assignedToUserId?: string;
   readonly unassigned?: boolean;
   readonly overdue?: boolean;
+  /** Perfil que NO debe aparecer: el del propio llamador (nadie ve su admisión en la bandeja). */
+  readonly excludePractitionerProfileId?: string;
   /** Texto libre: nombre, cédula o matrícula. */
   readonly q?: string;
   readonly now: Date;
@@ -324,6 +326,10 @@ export class PractitionerAdmissionsRepository {
     }
     if (filters.unassigned) {
       clauses.push('a.assigned_to_user_id IS NULL');
+    }
+    if (filters.excludePractitionerProfileId) {
+      clauses.push('a.practitioner_profile_id <> ?::uuid');
+      params.push(filters.excludePractitionerProfileId);
     }
     if (filters.overdue) {
       // Vencida: pasó su plazo y la plataforma todavía le debe una respuesta.

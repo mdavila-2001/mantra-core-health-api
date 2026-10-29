@@ -65,6 +65,16 @@ describe('AdmissionsController · la API autoriza cada ruta', () => {
   });
 });
 
+describe('AdmissionsController.detail · S-3', () => {
+  it('pasa al servicio quién consulta, para que el profesional no vea su propia admisión', async () => {
+    const reads = { detail: fn().mockResolvedValue({ id: 'adm-1' }) };
+    const controller = new AdmissionsController({} as never, reads as never, {} as never);
+    const actor = { id: 'u-doctor', roles: ['ADMISSIONS_REVIEWER'] } as never;
+    await controller.detail('adm-1', actor);
+    expect(reads.detail).toHaveBeenCalledWith('adm-1', actor);
+  });
+});
+
 describe('OwnAdmissionController · el sujeto sale de la sesión', () => {
   it('las rutas me/* no declaran roles y están auditadas las que escriben', () => {
     for (const name of ['get', 'resubmit', 'withdraw']) {
