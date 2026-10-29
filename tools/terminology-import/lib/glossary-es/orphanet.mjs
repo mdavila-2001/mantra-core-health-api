@@ -41,7 +41,7 @@ export const ORPHANET_FREQUENCY_LABELS = Object.freeze({
 });
 
 const XML_ENTITIES = { '&lt;': '<', '&gt;': '>', '&amp;': '&', '&quot;': '"', '&apos;': "'" };
-const decodeXml = (text) => text.replace(/&(?:lt|gt|amp|quot|apos);/g, (m) => XML_ENTITIES[m]);
+export const decodeXml = (text) => text.replace(/&(?:lt|gt|amp|quot|apos);/g, (m) => XML_ENTITIES[m]);
 
 export function orphanetFrequency(label) {
   if (label === null || label === undefined) return null;
