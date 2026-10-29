@@ -19,7 +19,11 @@ import {
 } from './infrastructure.testing';
 
 function build(space: any) {
-  const tx = { flush: mockFn().mockResolvedValue(undefined) };
+  const tx = {
+    flush: mockFn().mockResolvedValue(undefined),
+    execute: mockFn().mockResolvedValue([]),
+    refresh: mockFn().mockResolvedValue(null),
+  };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const context = {
     space: mockFn().mockResolvedValue({
@@ -324,6 +328,58 @@ describe('CareSpaceLifecycleService.change', () => {
       d.service.change(space.id, 'activate', undefined, 2, actor),
     ).rejects.toBeInstanceOf(RowVersionMismatchException);
     expect(space.statusConceptId).toBe(PRAC.SPACE_PLANNED);
+  });
+});
+
+describe('CareSpaceLifecycleService.change · bloqueo de la fila', () => {
+  it('retire bloquea el subárbol (for update, por id) y relee el espacio ANTES de recolectar bloqueos', async () => {
+    const space = makeSpace();
+    const d = build(space);
+    const order: string[] = [];
+    d.tx.execute.mockImplementation(async (sql: string) => {
+      order.push(/for update/.test(sql) ? 'lock' : 'other');
+      return [];
+    });
+    d.tx.refresh.mockImplementation(async () => {
+      order.push('refresh');
+      return null;
+    });
+    d.registry.register({
+      kind: 'X',
+      collect: mockFn(async () => {
+        order.push('collect');
+        return null;
+      }),
+    } as any);
+    await d.service.change(space.id, 'retire', 'Cierre', 1, actor);
+    expect(order.slice(0, 3)).toEqual(['lock', 'refresh', 'collect']);
+    const [sql, params] = d.tx.execute.mock.calls[0];
+    expect(sql).toContain('order by cs.id for update');
+    expect(sql).toContain('recursive');
+    expect(params).toEqual([space.id, TENANT_A]);
+  });
+
+  it('suspend bloquea sólo la fila del espacio', async () => {
+    const space = makeSpace({ statusConceptId: PRAC.SPACE_ACTIVE });
+    const d = build(space);
+    await d.service.change(space.id, 'suspend', 'Obra', 1, actor);
+    const [sql, params] = d.tx.execute.mock.calls[0];
+    expect(sql).toContain('for update');
+    expect(sql).not.toContain('recursive');
+    expect(params).toEqual([space.id, TENANT_A]);
+  });
+
+  it('si tras el bloqueo la versión ya no es la esperada: 412 y no escribe', async () => {
+    const space = makeSpace();
+    const d = build(space);
+    d.tx.refresh.mockImplementation(async () => {
+      space.rowVersion = 5;
+      return null;
+    });
+    await expect(
+      d.service.change(space.id, 'activate', undefined, 1, actor),
+    ).rejects.toMatchObject({ status: 412 });
+    expect(d.tx.flush).not.toHaveBeenCalled();
   });
 });
 

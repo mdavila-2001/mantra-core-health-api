@@ -120,6 +120,12 @@ export class CareSpaceLifecycleService {
         actor,
         'write',
       );
+      // La fila se bloquea (`for update`) ANTES de leer el estado y de recolectar los
+      // bloqueos: quien cuelga algo del espacio —un activo, una tarifa, una cama— toma
+      // la misma fila `for share`, así que o ve el espacio vivo y la clausura espera y
+      // lo ve como bloqueo, o la clausura gana y esa escritura ve el espacio retirado.
+      // Después se relee la entidad: lo cargado antes del bloqueo puede estar viejo.
+      await this.lockForChange(tx, space, tenantId, action === 'retire');
       assertRowVersion(space.rowVersion, expectedVersion);
 
       const transition = SPACE_TRANSITIONS[action];
@@ -200,6 +206,30 @@ export class CareSpaceLifecycleService {
       });
       return (await this.reader.detailsOf(tx, [space]))[0];
     });
+  }
+
+  /**
+   * Bloquea el espacio (y, al clausurar, todo su subárbol, que es lo que mira
+   * `computeBlockers`) en la transacción y relee su estado. Las filas se toman en
+   * orden de id para que dos clausuras que se cruzan no se interbloqueen.
+   */
+  private async lockForChange(
+    tx: EntityManager,
+    space: CareSpaces,
+    tenantId: string,
+    subtree: boolean,
+  ): Promise<void> {
+    await tx.execute(
+      subtree
+        ? `${SUBTREE_CTE}
+           select cs.id from practice.care_spaces cs
+            where cs.id in (select id from sub) and cs.tenant_id = ?
+            order by cs.id for update`
+        : `select cs.id from practice.care_spaces cs
+            where cs.id = ? and cs.tenant_id = ? for update`,
+      [space.id, tenantId],
+    );
+    await tx.refresh(space);
   }
 
   /** Padre activo y datos que exige el perfil de la función (INV-10, `procesos/02` precondición 4). */

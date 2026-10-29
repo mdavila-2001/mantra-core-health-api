@@ -23,6 +23,7 @@ function build(unit = makeUnit()) {
   const tx = {
     flush: mockFn().mockResolvedValue(undefined),
     execute: mockFn().mockResolvedValue([]),
+    refresh: mockFn().mockResolvedValue(null),
   };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const context = {
@@ -194,6 +195,7 @@ describe('ClinicalUnitsService', () => {
   it('INV-12: con hijos, espacios o personal activos no se retira (409 UNIT_RETIRE_BLOCKED con próxima acción); sin ellos sí', async () => {
     const d = build();
     d.tx.execute
+      .mockResolvedValueOnce([]) // el bloqueo de la fila (for update)
       .mockResolvedValueOnce([{ id: 'hija-1' }])
       .mockResolvedValueOnce([{ id: 'sp-1' }, { id: 'sp-2' }])
       .mockResolvedValueOnce([{ id: 'rol-1' }]);
@@ -213,6 +215,7 @@ describe('ClinicalUnitsService', () => {
       expect.objectContaining({ kind: 'ACTIVE_UNIT_STAFF', count: 1 }),
     ]);
     expect(d.unit.statusConceptId).toBe(PRAC.UNIT_ACTIVE);
+    expect(d.tx.execute.mock.calls[0][0]).toContain('for update');
     const libre = build();
     await libre.service.lifecycle('u1', 'retire', 'Cierre', 1, actor);
     expect(libre.unit.statusConceptId).toBe(PRAC.UNIT_RETIRED);

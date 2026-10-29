@@ -246,6 +246,14 @@ export class ClinicalUnitsService {
         actor,
         'write',
       );
+      // Misma razón que en la clausura de espacios: se bloquea la fila antes de leer el
+      // estado y de recolectar los bloqueos (quien cuelga un centro de costo de la
+      // unidad la toma `for share`) y se relee la entidad.
+      await tx.execute(
+        `select id from practice.clinical_units where id = ? and tenant_id = ? for update`,
+        [unit.id, tenantId],
+      );
+      await tx.refresh(unit);
       assertRowVersion(unit.rowVersion, expectedVersion);
       const transition = UNIT_TRANSITIONS[action];
       if (!transition.from.includes(unit.statusConceptId)) {
