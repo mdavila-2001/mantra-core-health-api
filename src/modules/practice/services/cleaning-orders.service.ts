@@ -405,6 +405,7 @@ export class CleaningOrdersService {
           startedAt: now,
           startedByUserId: actor.id,
           assignedUserId: order.assignedUserId ?? actor.id,
+          ...this.escalation(order, space),
         },
         actor.id,
         now,
@@ -468,6 +469,7 @@ export class CleaningOrdersService {
           statusConceptId: PRAC.CLN_DONE,
           finishedAt: now,
           finishedByUserId: actor.id,
+          ...this.escalation(order, space),
         },
         actor.id,
         now,
@@ -526,7 +528,9 @@ export class CleaningOrdersService {
         order.cleaningTypeConceptId ===
         conceptIdOf(CLEANING_TYPES, 'CLEAN_TERMINAL');
       let actingRoles = grant.actingRoles;
-      if (isTerminal) {
+      // Con la bandera de limpieza terminal activa, inspeccionar es un acto de supervisor
+      // aunque la orden no sea terminal: sin ese permiso no se toca la bandera.
+      if (isTerminal || space.terminalCleaningRequired) {
         try {
           actingRoles = (
             await this.access.assertCan(
@@ -570,6 +574,15 @@ export class CleaningOrdersService {
           OpsErrorReason.INSPECTION_BY_CLEANER_NOT_ALLOWED,
         );
       }
+      // Una limpieza rutinaria no libera una cama que exige limpieza terminal (INV-28):
+      // aprobarla no apagaría la bandera, así que se rechaza con el motivo claro.
+      if (pass && space.terminalCleaningRequired && !isTerminal) {
+        throw new PreconditionFailedException(
+          'El espacio exige limpieza terminal: esta orden no lo es, no se aprueba',
+          { orderId: order.id, requiredType: 'CLEAN_TERMINAL' },
+          OpsErrorReason.TERMINAL_CLEANING_REQUIRED,
+        );
+      }
 
       const now = new Date();
       const next = await this.updateOrder(
@@ -609,7 +622,11 @@ export class CleaningOrdersService {
         await this.recorder.applyChange(
           tx,
           space,
-          { hygiene: { to: 'HYG_INSPECTED' }, terminalCleaningRequired: false },
+          {
+            hygiene: { to: 'HYG_INSPECTED' },
+            // Sólo una limpieza terminal inspeccionada por un supervisor apaga la bandera.
+            ...(isTerminal ? { terminalCleaningRequired: false } : {}),
+          },
           ctx,
         );
         await this.publish(
@@ -928,6 +945,21 @@ export class CleaningOrdersService {
       true,
     );
     return { order, space, grant, tenantId };
+  }
+
+  /**
+   * Si el espacio exige limpieza terminal y la orden abierta no lo es, la sube a
+   * terminal (INV-28): así la limpieza que se hace y se inspecciona es la correcta.
+   */
+  private escalation(
+    order: OrderRow,
+    space: SpaceOpsRow,
+  ): { cleaningTypeConceptId?: string } {
+    const terminalId = conceptIdOf(CLEANING_TYPES, 'CLEAN_TERMINAL');
+    return space.terminalCleaningRequired &&
+      order.cleaningTypeConceptId !== terminalId
+      ? { cleaningTypeConceptId: terminalId }
+      : {};
   }
 
   /** 409 si la orden no está en un estado desde el que se pueda pasar al destino. */

@@ -18,6 +18,7 @@ import { OpsErrorReason } from '../practice-ops.error-reasons';
 import { InfrastructureAccessService } from './infrastructure-access.service';
 import { decodeOffset, encodeOffset } from './cleaning-orders.service';
 import { placeholders } from './ops-rows';
+import { CLINICAL_TEXT_ROLES } from './ops-privacy';
 import { OpsStateService } from './ops-state';
 
 /** Resultado del tablero y el instante que va en `X-Data-As-Of`. */
@@ -96,12 +97,14 @@ export class BedBoardReadService {
       const v2Filter = this.parseV2(query.v2Codes);
       const functionIds = this.parseFunctions(query.functionCodes);
 
-      const [all, covered, clinicalCovered, tree] = await Promise.all([
-        this.state.loadSiteSpaces(tx, grant.tenantId, siteId),
-        this.access.coveredSpaceIds(tx, grant, grant.actingRoles),
-        this.access.coveredSpaceIds(tx, grant, ['NURSE', 'ADMISSION']),
-        this.state.treeOf(tx, siteId),
-      ]);
+      const [all, covered, clinicalCovered, textCovered, tree] =
+        await Promise.all([
+          this.state.loadSiteSpaces(tx, grant.tenantId, siteId),
+          this.access.coveredSpaceIds(tx, grant, grant.actingRoles),
+          this.access.coveredSpaceIds(tx, grant, ['NURSE', 'ADMISSION']),
+          this.access.coveredSpaceIds(tx, grant, CLINICAL_TEXT_ROLES),
+          this.state.treeOf(tx, siteId),
+        ]);
 
       const inSubtree = (id: string): boolean => {
         if (!query.parentSpaceId) return true;
@@ -133,6 +136,7 @@ export class BedBoardReadService {
         now,
         patientVisible: (id) =>
           clinicalCovered === null || clinicalCovered.has(id),
+        clinicalVisible: (id) => textCovered === null || textCovered.has(id),
       });
       const rowById = new Map(spaces.map((row) => [row.id, row]));
 

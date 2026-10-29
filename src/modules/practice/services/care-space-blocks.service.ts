@@ -36,6 +36,7 @@ import {
   str,
 } from './ops-rows';
 import { OpsStateService } from './ops-state';
+import { isClinicalText, visibleText } from './ops-privacy';
 import { ref } from './structure-mapper';
 
 /** Un bloqueo ya validado, listo para crear. */
@@ -87,13 +88,21 @@ export function toBlockView(
   block: BlockRow,
   availability: string,
   now: Date,
+  clinicalVisible = false,
 ): CareSpaceBlockView {
   return {
     id: block.id,
     careSpaceId: block.careSpaceId,
     kind: ref(BLOCK_KINDS.byConceptId(block.kindConceptId)),
     reason: ref(BLOCK_REASONS.byConceptId(block.reasonConceptId)),
-    reasonText: block.reasonText,
+    reasonText: visibleText(
+      block.reasonText,
+      isClinicalText(
+        null,
+        BLOCK_REASONS.byConceptId(block.reasonConceptId)?.code,
+      ),
+      clinicalVisible,
+    ),
     startsAt: block.startsAt.toISOString(),
     expectedEndAt: isoOrNull(block.expectedEndAt),
     endedAt: isoOrNull(block.endedAt),
@@ -317,7 +326,15 @@ export class CareSpaceBlocksService {
         kind,
         reasonCode:
           BLOCK_REASONS.byConceptId(block.reasonConceptId)?.code ?? null,
-        reasonText: block.reasonText,
+        // El outbox no lleva texto clínico (motivo «condición del paciente»).
+        reasonText: visibleText(
+          block.reasonText,
+          isClinicalText(
+            null,
+            BLOCK_REASONS.byConceptId(block.reasonConceptId)?.code,
+          ),
+          false,
+        ),
         startsAt: block.startsAt.toISOString(),
         expectedEndAt: isoOrNull(block.expectedEndAt),
         workOrderRef: block.workOrderRef,

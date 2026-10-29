@@ -25,6 +25,7 @@ import {
 } from '../ops-catalog';
 import type { CareSpaceOperationalState } from './care-space-ops.port';
 import { OPS_EVENTS, OpsEventsService } from './ops-events';
+import { isClinicalText, visibleText } from './ops-privacy';
 import type { SpaceOpsRow } from './ops-rows';
 import { OpsStateService } from './ops-state';
 import { STRUCTURE_HISTORY, structureSnapshot } from './structure-history';
@@ -355,7 +356,15 @@ export class OpsRecorder {
         v2Code,
         reasonCode:
           BLOCK_REASONS.byConceptId(spec.reasonConceptId)?.code ?? null,
-        reasonText: spec.reasonText ?? null,
+        // El outbox no lleva texto clínico: ni el motivo del aislamiento ni su organismo.
+        reasonText: visibleText(
+          spec.reasonText,
+          isClinicalText(
+            spec.axisCode,
+            BLOCK_REASONS.byConceptId(spec.reasonConceptId)?.code,
+          ),
+          false,
+        ),
         expectedUntil: spec.expectedUntil?.toISOString() ?? null,
         source: ctx.source,
         sourceRefId: ctx.sourceRefId ?? null,
@@ -389,7 +398,9 @@ export class OpsRecorder {
     await this.historyRepo.append(tx, STRUCTURE_HISTORY.space, row.id, {
       operationConceptId: AUD.OPERATION_UPDATE,
       dataSnapshot: {
+        // El organismo del aislamiento es dato clínico: no va a la historia genérica.
         ...structureSnapshot(entity),
+        isolationOrganismText: undefined,
         opsAction: ctx.action,
         actingRoles: ctx.actingRoles ?? [],
       },

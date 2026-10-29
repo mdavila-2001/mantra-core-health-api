@@ -35,6 +35,7 @@ import {
   str,
   strOrNull,
 } from './ops-rows';
+import { isClinicalText, visibleText } from './ops-privacy';
 import { ref } from './structure-mapper';
 
 /** Ocupación derivada de un espacio. */
@@ -146,6 +147,12 @@ function ageYears(birthDate: string | null, now: Date): number | null {
 export interface CellOptions {
   /** ¿Se muestran los datos del paciente de este espacio? (sólo Enfermería y Admisión). */
   readonly patientVisible: (careSpaceId: string) => boolean;
+  /**
+   * ¿Se muestra el texto clínico libre de este espacio (organismo del aislamiento,
+   * motivo «condición del paciente»)? Enfermería, Admisión y Control de infecciones
+   * sobre el espacio; Limpieza, Mantenimiento y las administraciones no.
+   */
+  readonly clinicalVisible: (careSpaceId: string) => boolean;
   /** Ahora (se fija afuera para que toda la respuesta use el mismo instante). */
   readonly now: Date;
   /** Configuración ya leída, si el llamador la tiene. */
@@ -444,7 +451,11 @@ export class OpsStateService {
         availability: {
           code: state.availability,
           reasonCode: state.availabilityReasonCode,
-          reasonText: blockTexts.get(row.id) ?? null,
+          reasonText: visibleText(
+            blockTexts.get(row.id),
+            isClinicalText(null, state.availabilityReasonCode),
+            options.clinicalVisible(row.id),
+          ),
           expectedUntil: isoOrNull(row.availabilityExpectedUntil),
           since: isoOrNull(row.availabilityChangedAt),
         },
@@ -455,7 +466,9 @@ export class OpsStateService {
         },
         isolation: {
           code: state.isolation,
-          organism: state.isolationOrganism,
+          organism: options.clinicalVisible(row.id)
+            ? state.isolationOrganism
+            : null,
           since: isoOrNull(row.isolationChangedAt),
         },
         occupancy: {

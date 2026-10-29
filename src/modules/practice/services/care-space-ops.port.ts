@@ -78,6 +78,10 @@ export interface CareSpaceOperationalState {
   readonly hygiene: HygieneCode;
   readonly terminalCleaningRequired: boolean;
   readonly isolation: IsolationCode;
+  /**
+   * Organismo del aislamiento: dato **clínico**. Sólo para reglas internas (F3, cohortes);
+   * quien lo exponga por HTTP lo filtra con `CLINICAL_TEXT_ROLES` (`ops-privacy.ts`).
+   */
   readonly isolationOrganism: string | null;
   /** Derivada de `encounter_locations`: nunca se escribe. */
   readonly occupancy: OccupancyCode;

@@ -65,6 +65,11 @@ import {
   str,
   strOrNull,
 } from './ops-rows';
+import {
+  CLINICAL_TEXT_ROLES,
+  isClinicalText,
+  visibleText,
+} from './ops-privacy';
 import { OpsStateService, isLifecycleActive } from './ops-state';
 import { practiceOutOfScope } from './practice-scope';
 import { ref } from './structure-mapper';
@@ -88,16 +93,6 @@ const KIND_OF_AVAILABILITY: Readonly<Record<string, BlockKindCode>> = {
   SPACE_OP_MAINTENANCE: 'BLOCK_MAINTENANCE',
   SPACE_OP_CLOSED: 'BLOCK_CLOSURE',
 };
-
-/** Roles que ven el texto libre de los motivos de aislamiento. */
-const CLINICAL_VIEWERS = [
-  'SUPERADMIN',
-  'ORG_ADMIN',
-  'BRANCH_ADMIN',
-  'NURSE',
-  'ADMISSION',
-  'INFECTION_CONTROL',
-] as const;
 
 /**
  * Operación de un espacio: disponibilidad (bloqueos y mantenimiento), higiene,
@@ -164,7 +159,12 @@ export class CareSpaceOpsService {
       return {
         cell,
         openBlocks: open.map((block) =>
-          toBlockView(block, cell.availability.code, now),
+          toBlockView(
+            block,
+            cell.availability.code,
+            now,
+            this.access.hasRole(grant, ...CLINICAL_TEXT_ROLES),
+          ),
         ),
         openCleaningOrder: orderRows.length
           ? toOrderView(toOrderRow(orderRows[0]), row.code, row.name, now)
@@ -197,7 +197,14 @@ export class CareSpaceOpsService {
         spaceId,
         query.includeEnded === 'true',
       );
-      return blocks.map((block) => toBlockView(block, availability, now));
+      return blocks.map((block) =>
+        toBlockView(
+          block,
+          availability,
+          now,
+          this.access.hasRole(grant, ...CLINICAL_TEXT_ROLES),
+        ),
+      );
     });
   }
 
@@ -252,7 +259,7 @@ export class CareSpaceOpsService {
           limit ?`,
         [...params, limit + 1],
       );
-      const clinical = this.access.hasRole(grant, ...CLINICAL_VIEWERS);
+      const clinical = this.access.hasRole(grant, ...CLINICAL_TEXT_ROLES);
       const page = rows.slice(0, limit);
       const items = page.map((raw) => {
         const axis = AXES.byConceptId(str(raw.axis_concept_id));
@@ -267,7 +274,9 @@ export class CareSpaceOpsService {
                   OCCUPANCY.byConceptId(id),
               )
             : null;
-        const hideText = !clinical && axis?.code === 'AXIS_ISOLATION';
+        const reasonEntry = BLOCK_REASONS.byConceptId(
+          strOrNull(raw.reason_concept_id),
+        );
         return {
           id: str(raw.id),
           careSpaceId: str(raw.care_space_id),
@@ -277,8 +286,11 @@ export class CareSpaceOpsService {
           reason: ref(
             BLOCK_REASONS.byConceptId(strOrNull(raw.reason_concept_id)),
           ),
-          reasonText:
-            hideText || raw.reason_text === null ? null : str(raw.reason_text),
+          reasonText: visibleText(
+            strOrNull(raw.reason_text),
+            isClinicalText(axis?.code, reasonEntry?.code),
+            clinical,
+          ),
           expectedUntil: isoOrNull(
             raw.expected_until ? new Date(str(raw.expected_until)) : null,
           ),
@@ -664,7 +676,7 @@ export class CareSpaceOpsService {
                   triggerCode: 'CLN_TRG_ISOLATION_END',
                   priorityCode: 'CLN_PRIO_ROUTINE',
                   terminal: true,
-                  note: reason ?? 'Fin del aislamiento',
+                  note: 'Fin del aislamiento',
                 },
                 { ...ctx, source: 'SRC_MANUAL' },
                 { isolation: none },
@@ -741,7 +753,12 @@ export class CareSpaceOpsService {
       const updated = done.result?.row ?? row;
       const [cell] = await this.cellsOf(tx, grant, [updated], now);
       return {
-        block: toBlockView(done.block, cell.availability.code, now),
+        block: toBlockView(
+          done.block,
+          cell.availability.code,
+          now,
+          this.access.hasRole(grant, ...CLINICAL_TEXT_ROLES),
+        ),
         cell,
         cleaningOrderId: done.cleaningOrderId,
       };
@@ -937,9 +954,11 @@ export class CareSpaceOpsService {
     now: Date,
   ): Promise<BedBoardCell[]> {
     const clinical = this.access.hasRole(grant, 'NURSE', 'ADMISSION');
+    const clinicalText = this.access.hasRole(grant, ...CLINICAL_TEXT_ROLES);
     return this.state.cells(tx, rows[0].practiceSiteId, rows, {
       now,
       patientVisible: () => clinical,
+      clinicalVisible: () => clinicalText,
     });
   }
 
