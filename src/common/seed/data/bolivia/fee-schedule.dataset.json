@@ -1,5 +1,12 @@
 {
   "_nota": "Aranceles médicos (UMA) y odontológicos (USD). El PDF de honorarios es escaneado: las filas con ocrSospechoso=true necesitan revisión humana antes de producción.",
+  "_procedencia": {
+    "modeloCommit": "3dc2f323b0f4c533c31430c64187baf6d63d6459",
+    "fuentes": {
+      "markdown_convertidos/Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md": "85c68678b19d382b25affa50cc71f076581a2602d89db605ac2b376bd0adb040",
+      "markdown_convertidos/LISTADO_ARANCEL_ODONTOLOGICO_2026_1.md": "6aded6ef0a76945eb270efb70306a2c061d4c1dc83533e62004136524b2b18b2"
+    }
+  },
   "datos": {
     "honorariosMedicos": [
       {
