@@ -30,6 +30,7 @@ function build() {
     findIncludedConceptIdsByValueSet: fn().mockResolvedValue([]),
   };
   const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
+  const showcases = { ensure: fn().mockResolvedValue(true) };
   const service = new DirectoryNetworksSeedService(
     orm as never,
     registration as never,
@@ -38,8 +39,9 @@ function build() {
     insurance as never,
     valueSets as never,
     logger as never,
+    showcases as never,
   );
-  return { service, em, registration, sites, insurance };
+  return { service, em, registration, sites, insurance, showcases };
 }
 
 describe('DirectoryNetworksSeedService', () => {
@@ -106,5 +108,26 @@ describe('DirectoryNetworksSeedService', () => {
       source_row: 1,
     });
     expect(s.address.lines).toEqual(['AV. X 123', 'Tel: 76322931 / 800101055']);
+  });
+
+  it('en producción sin permiso explícito no crea cuentas', async () => {
+    const { service, registration } = build();
+
+    const r = await service.run(true, '12345678', 'production', false);
+
+    expect(r.reason).toBe('production-not-allowed');
+    expect(registration.registerPractitioner).not.toHaveBeenCalled();
+  });
+
+  it('el nombre de la vitrina pasa de «APELLIDOS, NOMBRES» a «NOMBRES APELLIDOS»', () => {
+    const { service } = build();
+    const name = (service as any).displayName({
+      key: 'x',
+      nombre: 'ABASTO VEGA, ROSEMARY',
+    });
+    expect(name).toBe('ROSEMARY ABASTO VEGA');
+    expect(
+      (service as any).displayName({ key: 'y', nombre: 'Dra. Perez' }),
+    ).toBe('Dra. Perez');
   });
 });
