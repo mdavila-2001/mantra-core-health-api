@@ -138,7 +138,10 @@ export class PractitionerAdmissionsReadService {
     const em = this.em.fork();
     const limit = query.limit ?? 25;
     // Nadie ve su propia admisión en la bandeja ni en los conteos.
-    const ownLink = await this.accountLinksRepo.findActiveByUser(em, actor.id);
+    const ownPersonIds = await this.accountLinksRepo.findActivePersonIdsByUser(
+      em,
+      actor.id,
+    );
     const q = query.q?.trim();
     if (q !== undefined && q !== '' && q.length < 2) {
       throw badRequestWithReason(
@@ -154,7 +157,8 @@ export class PractitionerAdmissionsReadService {
         : undefined,
       ...this.assignmentFilter(query.assignedTo, actor),
       overdue: query.overdue === true ? true : undefined,
-      excludePractitionerProfileId: ownLink?.personId,
+      excludePractitionerProfileIds:
+        ownPersonIds.length > 0 ? ownPersonIds : undefined,
       q: q ? q : undefined,
       now,
     };

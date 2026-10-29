@@ -309,11 +309,14 @@ export class PractitionerAdmissionsService {
       // ENVIADA: reasignar es asignar y tomar a la vez.
       if (status !== 'EN_REVISION') this.assertTransition('CLAIM', status);
       const target = await tx.findOne(Users, { id: toUserId });
-      const ownerLink = await this.accountLinksRepo.findActiveByPerson(
-        tx,
-        admission.practitionerProfileId,
-      );
-      if (!target || ownerLink?.userId === toUserId) {
+      const targetIsApplicant =
+        target !== null &&
+        (await this.accountLinksRepo.hasActiveLink(
+          tx,
+          admission.practitionerProfileId,
+          toUserId,
+        ));
+      if (!target || targetIsApplicant) {
         throw new PreconditionFailedException(
           'El revisor indicado no existe o es el propio solicitante',
           {},

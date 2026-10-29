@@ -143,6 +143,11 @@ describe('IamPractitionerSelfRegistrationService', () => {
       assertIsAdministrativeArea: fn().mockResolvedValue(undefined),
     };
 
+    // v4.2.67: la solicitud de admisión nace en la misma transacción del alta.
+    const admissions = {
+      openForRegistration: fn().mockResolvedValue({ id: 'adm-1' }),
+    };
+
     const service = new IamPractitionerSelfRegistrationService(
       em as never,
       tokenService as never,
@@ -163,6 +168,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
         languages: languagesRepo,
         accountLinks: accountLinksRepo,
         administrativeAreas,
+        admissions,
       }),
       commonRecords({
         identifiers: identifiersRepo,
@@ -184,6 +190,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
     return {
       service,
       em,
+      admissions,
       effectiveRoles,
       specialtiesRepo,
       specialtyCatalog,
@@ -387,6 +394,57 @@ describe('IamPractitionerSelfRegistrationService', () => {
       await d.service.registerPractitioner(dto);
 
       expect(d.specialtiesRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('la solicitud de admisión nace con el alta (verificación del alta de doctor)', () => {
+    it('abre la admisión del perfil recién creado dentro de LA MISMA transacción, a nombre de la cuenta', async () => {
+      const d = build();
+      await d.service.registerPractitioner(dto);
+      expect(d.admissions.openForRegistration).toHaveBeenCalledTimes(1);
+      const [txUsed, data] = d.admissions.openForRegistration.mock.calls[0];
+      expect(txUsed).toBe(d.tx);
+      expect(data).toMatchObject({
+        practitionerProfileId: 'person-1',
+        actorUserId: 'user-1',
+      });
+      expect(data.attestation).toBeUndefined();
+    });
+
+    it('si no se puede abrir, el alta entera falla: no queda un profesional pendiente que nadie ve', async () => {
+      const d = build();
+      d.admissions.openForRegistration.mockRejectedValue(
+        new Error('base caída'),
+      );
+      await expect(d.service.registerPractitioner(dto)).rejects.toThrow(
+        'base caída',
+      );
+      // Lo que va después de la admisión (verificación del correo) no se alcanzó.
+      expect(d.emailVerificationsRepo.create).not.toHaveBeenCalled();
+      expect(d.notificationsService.createRequest).not.toHaveBeenCalled();
+    });
+
+    it('la atestación aceptada se guarda con la versión del texto que se aceptó', async () => {
+      const d = build();
+      await d.service.registerPractitioner({
+        ...dto,
+        attestationAccepted: true,
+        attestationTextVersion: 'v1',
+      } as RegisterPractitionerDto);
+      const [, data] = d.admissions.openForRegistration.mock.calls[0];
+      expect(data.attestation).toMatchObject({ textVersion: 'v1' });
+      expect(data.attestation.acceptedAt).toBeInstanceOf(Date);
+    });
+
+    it('aceptar la atestación sin decir qué texto se aceptó se rechaza antes de abrir nada', async () => {
+      const d = build();
+      await expect(
+        d.service.registerPractitioner({
+          ...dto,
+          attestationAccepted: true,
+        } as RegisterPractitionerDto),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.admissions.openForRegistration).not.toHaveBeenCalled();
     });
   });
 

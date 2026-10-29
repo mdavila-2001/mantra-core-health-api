@@ -165,8 +165,22 @@ function build(options: { admission?: Record<string, any> | null } = {}) {
     findByAdmission: fn().mockResolvedValue([]),
   };
   const accountLinksRepo = {
-    findActiveByPerson: fn().mockResolvedValue({ userId: 'u-doctor' }),
+    // Vínculos activos persona-cuenta: prac-1 tiene dos (delegado y titular) y el
+    // titular, u-doctor, es el SEGUNDO (S-6). Los tests lo cambian con `links`.
+    links: [
+      { personId: 'prac-1', userId: 'u-delegado' },
+      { personId: 'prac-1', userId: 'u-doctor' },
+    ] as Array<{ personId: string; userId: string }>,
+    hasActiveLink: fn(),
   };
+  accountLinksRepo.hasActiveLink.mockImplementation(
+    (_tx: unknown, personId: string, userId: string) =>
+      Promise.resolve(
+        accountLinksRepo.links.some(
+          (l) => l.personId === personId && l.userId === userId,
+        ),
+      ),
+  );
   const checklist = {
     requirementsOf: fn().mockResolvedValue([requirement('A')]),
     materialize: fn().mockResolvedValue(viewOf([])),
@@ -385,7 +399,8 @@ describe('PractitionerAdmissionsService', () => {
 
     it('nadie revisa su propia admisión (el médico que además es revisor)', async () => {
       const d = build({ admission: admission('ENVIADA') });
-      d.accountLinksRepo.findActiveByPerson.mockResolvedValue({
+      d.accountLinksRepo.links.push({
+        personId: 'prac-1',
         userId: 'u-reviewer',
       });
       const error = await failure(
@@ -1388,7 +1403,8 @@ describe('PractitionerAdmissionsService', () => {
       it('con o sin flag: nadie aprueba su propia admisión', async () => {
         process.env.ADMISSIONS_FOUR_EYES = 'false';
         const d = verifiable();
-        d.accountLinksRepo.findActiveByPerson.mockResolvedValue({
+        d.accountLinksRepo.links.push({
+          personId: 'prac-1',
           userId: 'u-approver',
         });
         const error = await failure(

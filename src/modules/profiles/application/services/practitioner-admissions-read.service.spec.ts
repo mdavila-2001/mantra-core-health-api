@@ -110,7 +110,29 @@ function build(overrides: { data?: Map<unknown, unknown[]> } = {}) {
   const accountLinksRepo = {
     findActiveByUser: fn().mockResolvedValue(null),
     findActiveByPerson: fn().mockResolvedValue(null),
+    /** Vínculos activos persona-cuenta; una persona o una cuenta pueden tener varios. */
+    links: [] as Array<{ userId: string; personId: string }>,
+    hasActiveLink: fn(),
+    findActivePersonIdsByUser: fn(),
   };
+  accountLinksRepo.hasActiveLink.mockImplementation(
+    (_em: unknown, personId: string, userId: string) =>
+      Promise.resolve(
+        accountLinksRepo.links.some(
+          (l) => l.personId === personId && l.userId === userId,
+        ),
+      ),
+  );
+  accountLinksRepo.findActivePersonIdsByUser.mockImplementation(
+    (_em: unknown, userId: string) =>
+      Promise.resolve([
+        ...new Set(
+          accountLinksRepo.links
+            .filter((l) => l.userId === userId)
+            .map((l) => l.personId),
+        ),
+      ]),
+  );
   const checklist = {
     requirementsOf: fn().mockResolvedValue([requirement('A')]),
     buildView: fn(),
@@ -959,17 +981,30 @@ describe('PractitionerAdmissionsReadService · estado visible de verificación',
   });
 });
 
-describe('PractitionerAdmissionsReadService · S-3 el profesional no ve su propia admisión por la vista del personal', () => {
+describe('PractitionerAdmissionsReadService · S-3 / S-6 el profesional no ve su propia admisión por la vista del personal', () => {
   const DOCTOR_REVIEWER = {
     id: 'u-doctor',
     roles: ['ADMISSIONS_REVIEWER'],
   } as never;
-  const OWN_LINK = { userId: 'u-doctor', personId: 'prac-1' };
+  const detailData = (d: ReturnType<typeof build>, personId: string) => {
+    d.data.set(Persons, [{ id: personId, name: 'Luis' }]);
+    for (const cls of [
+      Identifiers,
+      ProfessionalCredentials,
+      HealthPractitionerProfiles,
+      JurisdictionAuthorizations,
+      PractitionerSpecialties,
+      CatalogConcepts,
+    ]) {
+      d.data.set(cls, []);
+    }
+    d.checklist.buildView.mockResolvedValue(viewOf([]));
+  };
 
   it('detail: quien tiene rol de admisiones y es el titular de la admisión recibe 403 ADMISSION_SELF_ACCESS', async () => {
     const d = build();
     d.admissionsRepo.findById.mockResolvedValue(admission('EN_REVISION'));
-    d.accountLinksRepo.findActiveByPerson.mockResolvedValue(OWN_LINK);
+    d.accountLinksRepo.links.push({ userId: 'u-doctor', personId: 'prac-1' });
     const error = await d.service
       .detail('adm-1', DOCTOR_REVIEWER, NOW)
       .catch((e: Error) => e);
@@ -982,68 +1017,86 @@ describe('PractitionerAdmissionsReadService · S-3 el profesional no ve su propi
     expect(d.eventsRepo.findByAdmission).not.toHaveBeenCalled();
   });
 
+  it('S-6 · la persona tiene dos vínculos activos y el del llamador es el SEGUNDO: igual 403', async () => {
+    const d = build();
+    d.admissionsRepo.findById.mockResolvedValue(admission('EN_REVISION'));
+    d.accountLinksRepo.links.push(
+      { userId: 'u-delegado', personId: 'prac-1' },
+      { userId: 'u-doctor', personId: 'prac-1' },
+    );
+    const error = await d.service
+      .detail('adm-1', DOCTOR_REVIEWER, NOW)
+      .catch((e: Error) => e);
+    expect((error as any).reason).toBe(
+      ProfilesErrorReason.ADMISSION_SELF_ACCESS,
+    );
+  });
+
+  it('S-6 · la cuenta tiene vínculos con varias personas y la del medio es la admisión: 403', async () => {
+    const d = build();
+    d.admissionsRepo.findById.mockResolvedValue(admission('EN_REVISION'));
+    d.accountLinksRepo.links.push(
+      { userId: 'u-doctor', personId: 'paciente-x' },
+      { userId: 'u-doctor', personId: 'prac-1' },
+    );
+    const error = await d.service
+      .detail('adm-1', DOCTOR_REVIEWER, NOW)
+      .catch((e: Error) => e);
+    expect((error as any).reason).toBe(
+      ProfilesErrorReason.ADMISSION_SELF_ACCESS,
+    );
+  });
+
   it('detail: el mismo usuario con perfil de médico ve la admisión de OTRO profesional', async () => {
     const d = build();
     d.admissionsRepo.findById.mockResolvedValue(
       admission('EN_REVISION', { practitionerProfileId: 'prac-2' }),
     );
-    d.accountLinksRepo.findActiveByUser.mockResolvedValue(OWN_LINK);
-    d.checklist.buildView.mockResolvedValue(viewOf([]));
-    d.data.set(Persons, [{ id: 'prac-2', name: 'Luis' }]);
-    d.data.set(Identifiers, []);
-    d.data.set(ProfessionalCredentials, []);
-    d.data.set(HealthPractitionerProfiles, []);
-    d.data.set(JurisdictionAuthorizations, []);
-    d.data.set(PractitionerSpecialties, []);
-    d.data.set(CatalogConcepts, []);
+    d.accountLinksRepo.links.push({ userId: 'u-doctor', personId: 'prac-1' });
+    detailData(d, 'prac-2');
     const detail = await d.service.detail('adm-1', DOCTOR_REVIEWER, NOW);
     expect(detail.id).toBe('adm-1');
   });
 
-  it('detail: un revisor sin perfil de médico (sin vínculo de cuenta) lo ve normal', async () => {
+  it('detail: un revisor sin vínculo de cuenta lo ve normal; con vínculo a OTRA persona también', async () => {
     const d = build();
     d.admissionsRepo.findById.mockResolvedValue(admission('ENVIADA'));
-    d.accountLinksRepo.findActiveByUser.mockResolvedValue(null);
-    d.checklist.buildView.mockResolvedValue(viewOf([]));
-    d.data.set(Persons, [{ id: 'prac-1', name: 'Ana' }]);
-    for (const cls of [
-      Identifiers,
-      ProfessionalCredentials,
-      HealthPractitionerProfiles,
-      JurisdictionAuthorizations,
-      PractitionerSpecialties,
-      CatalogConcepts,
-    ]) {
-      d.data.set(cls, []);
-    }
+    detailData(d, 'prac-1');
+    await expect(d.service.detail('adm-1', ACTOR, NOW)).resolves.toBeDefined();
+    d.accountLinksRepo.links.push({
+      userId: 'u-rev',
+      personId: 'otra-persona',
+    });
     await expect(d.service.detail('adm-1', ACTOR, NOW)).resolves.toBeDefined();
   });
 
-  it('list: excluye del listado Y de los conteos la admisión del propio llamador', async () => {
+  it('list: excluye del listado Y de los conteos las admisiones de TODAS las personas de la cuenta', async () => {
     const d = build();
-    d.accountLinksRepo.findActiveByUser.mockResolvedValue(OWN_LINK);
+    d.accountLinksRepo.links.push(
+      { userId: 'u-doctor', personId: 'prac-1' },
+      { userId: 'u-doctor', personId: 'prac-7' },
+    );
     await d.service.list({}, DOCTOR_REVIEWER, NOW);
-    expect(d.admissionsRepo.listPage.mock.calls[0][1]).toMatchObject({
-      excludePractitionerProfileId: 'prac-1',
-    });
-    expect(d.admissionsRepo.countByStatus.mock.calls[0][1]).toMatchObject({
-      excludePractitionerProfileId: 'prac-1',
-    });
+    const expected = { excludePractitionerProfileIds: ['prac-1', 'prac-7'] };
+    expect(d.admissionsRepo.listPage.mock.calls[0][1]).toMatchObject(expected);
+    expect(d.admissionsRepo.countByStatus.mock.calls[0][1]).toMatchObject(
+      expected,
+    );
   });
 
   it('list: sin perfil propio no excluye nada', async () => {
     const d = build();
     await d.service.list({}, ACTOR, NOW);
     expect(
-      d.admissionsRepo.listPage.mock.calls[0][1].excludePractitionerProfileId,
+      d.admissionsRepo.listPage.mock.calls[0][1].excludePractitionerProfileIds,
     ).toBeUndefined();
   });
 
   it('assertNotSelfAccess sirve a los documentos y a cualquier otra lectura del personal', async () => {
     const d = build();
-    d.accountLinksRepo.findActiveByPerson.mockImplementation(
-      (_em: unknown, personId: string) =>
-        Promise.resolve(personId === 'prac-1' ? OWN_LINK : null),
+    d.accountLinksRepo.links.push(
+      { userId: 'u-otro', personId: 'prac-1' },
+      { userId: 'u-doctor', personId: 'prac-1' },
     );
     await expect(
       d.service.assertNotSelfAccess(

@@ -27,10 +27,11 @@ function build(files: string[] = ['f1', 'f2']) {
     ),
   };
   const accountLinksRepo = {
-    // 'u-doctor' es la cuenta del profesional prac-1 (además tiene rol de admisiones).
-    findActiveByPerson: fn((_em: unknown, personId: string) =>
+    // prac-1 tiene dos vínculos activos y la cuenta del médico es la SEGUNDA (S-6):
+    // el primero (u-delegado) no es quien consulta.
+    hasActiveLink: fn((_em: unknown, personId: string, userId: string) =>
       Promise.resolve(
-        personId === 'prac-1' ? { userId: 'u-doctor', personId } : null,
+        personId === 'prac-1' && ['u-delegado', 'u-doctor'].includes(userId),
       ),
     ),
   };
