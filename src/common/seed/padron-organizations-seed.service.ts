@@ -3,7 +3,7 @@ import { MikroORM, type EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 
 import { CONCEPTS, SEED, deterministicId } from '../constants/concepts';
-import { PreconditionFailedException } from '../errors/domain.exception';
+import { touch } from '../persistence/audit-fields';
 import { runWithTenant } from '../tenant/tenant-context';
 import { Addresses } from '../../modules/common/entities';
 import { AddressesService } from '../../modules/common/services';
@@ -23,6 +23,7 @@ import {
   boDepartmentConceptId,
   boMunicipalityConceptId,
 } from './bo-geography.catalog';
+import { demoGateSkip, loadDemoGateEnv } from './demo-gate';
 import { SEED_ACTOR_ID, ensureSeedActor } from './seed-actor';
 import facilitiesDataset from './data/bolivia/health-facilities.dataset.json';
 
@@ -102,10 +103,15 @@ export interface PadronOrganizationsResult {
   existing: number;
   /** Organizaciones de la carga anterior (`CARGA_*`) que se tomaron como propias. */
   adopted: number;
+  /**
+   * De las adoptadas, las que la carga anterior tipó distinto al padrón. Se
+   * adoptan igual y no se les cambia el tipo: es un aviso, no una acción.
+   */
+  adoptedTypeMismatch: number;
   /** Filas que no se crearon porque hay más de una candidata a adoptar. */
   ambiguous: string[];
-  /** Organizaciones que esta pasada verificó. */
-  verified: number;
+  /** Organizaciones que esta pasada dejó activas (sin verificar). */
+  activated: number;
   /** Fichas que quedan pendientes porque operar exige papeles que no están. */
   pendingForPapers: number;
   /** Vitrinas públicas completadas en esta pasada. */
@@ -208,15 +214,26 @@ function titleCase(text: string): string {
  * así que estas fichas no entregan acceso a nadie. La organización real las
  * reclama sumándose como miembro.
  *
- * ## Qué se verifica y qué no
+ * Las escrituras sobre organizaciones que no son del actor (membresías,
+ * vitrinas) funcionan porque `seed-cli` corre con el rol dueño de la base, que
+ * no pasa por RLS; un proceso con el rol de la API no podría hacerlas.
  *
- * Se verifica lo que `verify` acepta, con las mismas reglas en todos los
- * entornos. Las farmacias y los laboratorios necesitan papeles que el padrón no
- * trae: quedan pendientes, sin vitrina pública, salvo en un entorno de
- * demostración (`SEED_DEMO_ALLOW_PRODUCTION=true`), donde la vitrina existe para
- * que el directorio no salga vacío. Ninguna ficha se publica como una
- * declaración de la organización: la biografía dice que viene del padrón
- * público y no está verificada por ella.
+ * ## Qué se verifica y qué no: nada
+ *
+ * Este paso **no llama a `verify`**. Nadie comprobó estas organizaciones, así
+ * que ninguna recibe el sello de verificada: quedan `ACTIVE` y sin verificar,
+ * igual que las aseguradoras, con su vitrina proyectada y una leyenda que dice
+ * que la ficha viene del padrón público, que no está reclamada y que la
+ * organización no la verificó. Es la capa «entidades reales, fichas no
+ * reclamadas» de la decisión del carril. Las farmacias y los laboratorios
+ * necesitan papeles que el padrón no trae: quedan `PENDING`, sin vitrina,
+ * salvo en un entorno de demostración (candado común, `demo-gate.ts`), donde la
+ * vitrina existe para que el directorio no salga vacío.
+ *
+ * ## Qué no se toca
+ *
+ * Una organización adoptada de la carga anterior no se modifica en nada: ni
+ * estado, ni sello, ni dirección, ni vitrina.
  *
  * ## Qué no se inventa
  *
@@ -251,19 +268,20 @@ export class PadronOrganizationsSeedService {
    *
    * @param enabled - Interruptor del paso; apagado no hace nada.
    * @param demoShowcases - Si las fichas que necesitan papeles reciben vitrina
-   *   (solo en un entorno de demostración).
+   *   (solo en un entorno de demostración, por el candado común).
    * @returns Qué quedó hecho en esta pasada.
    */
   async run(
     enabled = process.env.SEED_PADRON_ORGANIZATIONS_ENABLED === 'true',
-    demoShowcases = process.env.SEED_DEMO_ALLOW_PRODUCTION === 'true',
+    demoShowcases = demoGateSkip(loadDemoGateEnv()) === undefined,
   ): Promise<PadronOrganizationsResult> {
     const result: PadronOrganizationsResult = {
       created: 0,
       existing: 0,
       adopted: 0,
+      adoptedTypeMismatch: 0,
       ambiguous: [],
-      verified: 0,
+      activated: 0,
       pendingForPapers: 0,
       showcases: 0,
       addresses: 0,
@@ -281,12 +299,14 @@ export class PadronOrganizationsSeedService {
     ).filter((row) => row.naturaleza !== NETWORK_OFFICE);
     const known = await this.knownState(em, facilities);
 
+    let attempted = 0;
     for (const row of facilities) {
       const kind = KIND_BY_TIPO[row.tipo];
       if (!kind) {
         result.skipped.push(`${row.code}: tipo ${row.tipo} sin clasificar`);
         continue;
       }
+      attempted++;
       try {
         await this.ensureOrganization(
           row,
@@ -299,7 +319,7 @@ export class PadronOrganizationsSeedService {
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         result.failed.push(`${row.code}: ${message}`);
-        this.logger.warn(
+        this.logger.error(
           {
             operation: 'seed.padron-organizations',
             code: row.code,
@@ -316,8 +336,9 @@ export class PadronOrganizationsSeedService {
         created: result.created,
         existing: result.existing,
         adopted: result.adopted,
+        adoptedTypeMismatch: result.adoptedTypeMismatch,
         ambiguous: result.ambiguous.length,
-        verified: result.verified,
+        activated: result.activated,
         pendingForPapers: result.pendingForPapers,
         showcases: result.showcases,
         addresses: result.addresses,
@@ -326,6 +347,14 @@ export class PadronOrganizationsSeedService {
       },
       'Organizaciones del padrón sembradas',
     );
+    // Una fila que falla es un dato o una regla puntual y no detiene a las
+    // demás; que fallen todas es una falla sistémica (base, actor, conceptos) y
+    // el paso tiene que salir como fallido, no como «0 creadas».
+    if (attempted > 0 && result.failed.length === attempted) {
+      throw new Error(
+        `Fallaron las ${attempted} organizaciones del padrón; la primera: ${result.failed[0]}`,
+      );
+    }
     return result;
   }
 
@@ -343,6 +372,7 @@ export class PadronOrganizationsSeedService {
     idByCode: Map<string, string>;
     ambiguous: Set<string>;
     fixedIds: Map<string, string>;
+    typeMismatch: Set<string>;
   }> {
     const fixedIds = new Map(
       facilities.map((row) => [row.code, padronTenantId(row.code)]),
@@ -366,31 +396,58 @@ export class PadronOrganizationsSeedService {
     }
 
     const ambiguous = new Set<string>();
+    const typeMismatch = new Set<string>();
     const legacy = await em.find(Tenants, {
       // `_` es comodín en LIKE: se escapa para que el prefijo sea literal.
       code: { $like: `${LEGACY_CODE_PREFIX.replace(/_/g, String.raw`\_`)}%` },
     });
+    const places = await this.legacyPlaces(em, legacy);
     const claimed = new Set<string>();
     for (const row of facilities) {
       if (idByCode.has(row.code)) continue;
       const kind = KIND_BY_TIPO[row.tipo];
       if (!kind) continue;
-      const wanted = normalizeName(row.nombre);
-      const typeConceptId = TENANT_TYPE_CONCEPT_BY_CODE[kind.tenantType];
-      const candidates = legacy.filter(
-        (t) =>
-          !claimed.has(t.id) &&
-          t.tenantTypeConceptId === typeConceptId &&
-          normalizeName(t.tradeName ?? t.legalName) === wanted,
-      );
+      const candidates = legacyCandidates(row, legacy, places, claimed);
       if (candidates.length === 1) {
-        idByCode.set(row.code, candidates[0].id);
-        claimed.add(candidates[0].id);
+        const [adopted] = candidates;
+        idByCode.set(row.code, adopted.id);
+        claimed.add(adopted.id);
+        if (
+          adopted.tenantTypeConceptId !==
+          TENANT_TYPE_CONCEPT_BY_CODE[kind.tenantType]
+        ) {
+          typeMismatch.add(row.code);
+        }
       } else if (candidates.length > 1) {
         ambiguous.add(row.code);
       }
     }
-    return { idByCode, ambiguous, fixedIds };
+    return { idByCode, ambiguous, fixedIds, typeMismatch };
+  }
+
+  /**
+   * Dónde está cada organización de la carga anterior: los nombres normalizados
+   * de su municipio y el concepto de municipio de sus direcciones. Una
+   * organización sin dirección no tiene entrada (su lugar se desconoce).
+   */
+  private async legacyPlaces(
+    em: EntityManager,
+    legacy: readonly Tenants[],
+  ): Promise<Map<string, Set<string>>> {
+    const places = new Map<string, Set<string>>();
+    if (legacy.length === 0) return places;
+    const addresses = await em.find(Addresses, {
+      ownerId: { $in: legacy.map((t) => t.id) },
+    });
+    for (const address of addresses) {
+      const tokens = places.get(address.ownerId) ?? new Set<string>();
+      if (address.city) tokens.add(normalizeName(address.city));
+      if (address.municipalityConceptId) {
+        tokens.add(address.municipalityConceptId);
+      }
+      if (tokens.size > 0) places.set(address.ownerId, tokens);
+    }
+    return places;
   }
 
   /**
@@ -402,19 +459,21 @@ export class PadronOrganizationsSeedService {
    * Antes de este paso, dev y test se cargaron con scripts que daban a cada
    * organización un código `CARGA_*`. Crear ahora las del padrón las duplicaría.
    * Por cada fila sin organización propia se busca una `CARGA_*` con el mismo
-   * nombre normalizado y el mismo tipo: si hay una sola, se la adopta (queda
-   * como la organización de esa fila, con el id que ya tiene); si hay más de
-   * una, no se elige ninguna ni se crea otra, y la fila se informa como
-   * ambigua. No se renombra, no se borra y no se cambia nada de la adoptada.
+   * nombre normalizado **en el mismo municipio**, sin exigir el mismo tipo (la
+   * carga anterior tipó algunas distinto): si hay una sola, se la adopta; si el
+   * tipo difiere, se adopta igual, no se le cambia y se cuenta en
+   * `adoptedTypeMismatch`. Con más de una candidata, el municipio desempata
+   * antes de declarar la fila ambigua; si aun así hay más de una, no se elige
+   * ninguna ni se crea otra. Una candidata sin dirección solo cuenta cuando
+   * ninguna otra está en el municipio de la fila. No se renombra, no se borra y
+   * no se cambia nada de la adoptada.
    */
   private async knownState(
     em: EntityManager,
     facilities: readonly PadronFacility[],
   ): Promise<KnownState> {
-    const { idByCode, ambiguous, fixedIds } = await this.resolveIds(
-      em,
-      facilities,
-    );
+    const { idByCode, ambiguous, fixedIds, typeMismatch } =
+      await this.resolveIds(em, facilities);
 
     const known = [...idByCode.values()];
     const tenants = await em.find(Tenants, { id: { $in: known } });
@@ -432,6 +491,7 @@ export class PadronOrganizationsSeedService {
           .filter(([code, id]) => id !== fixedIds.get(code))
           .map(([c]) => c),
       ),
+      typeMismatch,
       tenants: new Map(tenants.map((t) => [t.id, t.statusConceptId])),
       showcaseHeadlines: new Map(profiles.map((p) => [p.targetId, p.headline])),
       withAddress: new Set(withAddress.map((a) => a.ownerId)),
@@ -448,8 +508,15 @@ export class PadronOrganizationsSeedService {
   ): Promise<void> {
     if (known.ambiguous.has(row.code)) {
       result.ambiguous.push(
-        `${row.code}: más de una organización ${LEGACY_CODE_PREFIX}* con el mismo nombre y tipo`,
+        `${row.code}: más de una organización ${LEGACY_CODE_PREFIX}* en el mismo municipio con el mismo nombre`,
       );
+      return;
+    }
+    // Una adoptada se cuenta y no se toca: ni estado, ni sello, ni dirección,
+    // ni vitrina. Es de la carga anterior y este paso no la reescribe.
+    if (known.adopted.has(row.code)) {
+      result.adopted++;
+      if (known.typeMismatch.has(row.code)) result.adoptedTypeMismatch++;
       return;
     }
     const tenantId = known.idByCode.get(row.code) ?? padronTenantId(row.code);
@@ -478,8 +545,6 @@ export class PadronOrganizationsSeedService {
       status = DIR.TENANT_PENDING;
       known.tenants.set(tenantId, status);
       result.created++;
-    } else if (known.adopted.has(row.code)) {
-      result.adopted++;
     } else {
       result.existing++;
     }
@@ -493,38 +558,50 @@ export class PadronOrganizationsSeedService {
 
     if (kind.needsPapers) {
       result.pendingForPapers++;
-      if (!demoShowcases) return;
+      // Sin papeles no hay sello ni vitrina; solo la demostración la proyecta,
+      // con la ficha todavía pendiente.
+      if (!demoShowcases || status !== DIR.TENANT_PENDING) return;
       await this.completeShowcase(tenantId, row, kind, actor, known, result);
       return;
     }
 
     if (status === DIR.TENANT_PENDING) {
-      try {
-        await runWithTenant(SEED.tenantId, () =>
-          this.tenants.verify(tenantId, {}, actor),
-        );
-        known.tenants.set(tenantId, CONCEPTS.TENANT_ACTIVE);
-        // `verify` proyecta la vitrina: ya existe, solo falta completarla.
-        if (!known.showcaseHeadlines.has(tenantId)) {
-          known.showcaseHeadlines.set(tenantId, undefined);
-        }
-        result.verified++;
-      } catch (error) {
-        // Una regla de `verify` que no se cumple deja la ficha pendiente: es el
-        // estado honesto, no un fallo del paso.
-        if (!(error instanceof PreconditionFailedException)) throw error;
-        result.pendingForPapers++;
-        return;
-      }
+      await this.activate(tenantId, actor);
+      status = CONCEPTS.TENANT_ACTIVE;
+      known.tenants.set(tenantId, status);
+      result.activated++;
     }
+    // Solo una ficha activa se publica: una suspendida o cerrada no recibe vitrina.
+    if (status !== CONCEPTS.TENANT_ACTIVE) return;
     await this.completeShowcase(tenantId, row, kind, actor, known, result);
+  }
+
+  /**
+   * Deja activa, **sin verificar**, una ficha pendiente.
+   *
+   * `verify` haría las dos cosas (activar y poner el sello), y el sello afirma
+   * una comprobación que nadie hizo. Aquí solo cambia el estado; la verificación
+   * queda como la dejó el alta (`UNVERIFIED`), igual que las aseguradoras.
+   */
+  private async activate(
+    tenantId: string,
+    actor: { id: string },
+  ): Promise<void> {
+    await runWithTenant(SEED.tenantId, () =>
+      this.orm.em.fork().transactional(async (tx) => {
+        const tenant = await tx.findOneOrFail(Tenants, { id: tenantId });
+        if (tenant.statusConceptId !== DIR.TENANT_PENDING) return;
+        tenant.statusConceptId = CONCEPTS.TENANT_ACTIVE;
+        touch(tenant, actor.id);
+      }),
+    );
   }
 
   /**
    * Deja la vitrina de la ficha con titular y presentación, una sola vez.
    *
-   * Si la organización todavía no tiene vitrina (una ficha que no pasó por
-   * `verify`, o que otro proceso dejó activa sin proyectarla) la proyecta antes.
+   * Como el paso no llama a `verify` (que es quien proyecta la vitrina), la
+   * proyecta aquí, igual que las aseguradoras, y después la completa.
    */
   private async completeShowcase(
     tenantId: string,
@@ -555,7 +632,7 @@ export class PadronOrganizationsSeedService {
       row.municipio.replace(/\(.*?\)/g, '').trim(),
     );
     const lines = [
-      'Ficha del padrón público de establecimientos de salud. ' +
+      'Ficha del padrón público de establecimientos de salud, no reclamada. ' +
         'La información no fue verificada por la organización.',
       `Fuente: ${readableSource(row.source_file)}.`,
     ];
@@ -612,6 +689,39 @@ export class PadronOrganizationsSeedService {
   }
 }
 
+/**
+ * Las organizaciones de la carga anterior que pueden ser la de una fila: mismo
+ * nombre normalizado y mismo municipio. El tipo no cuenta.
+ *
+ * Con una candidata sin dirección y otra en el municipio de la fila gana la
+ * segunda; las que están en otro municipio no son candidatas.
+ */
+function legacyCandidates(
+  row: PadronFacility,
+  legacy: readonly Tenants[],
+  places: ReadonlyMap<string, ReadonlySet<string>>,
+  claimed: ReadonlySet<string>,
+): Tenants[] {
+  const wanted = normalizeName(row.nombre);
+  const byName = legacy.filter(
+    (t) =>
+      !claimed.has(t.id) &&
+      normalizeName(t.tradeName ?? t.legalName) === wanted,
+  );
+  const municipality = normalizeName(row.municipio);
+  const ine = SANTA_CRUZ_MUNICIPALITY_BY_NAME.get(municipality);
+  const here = byName.filter((t) => {
+    const tokens = places.get(t.id);
+    return (
+      tokens !== undefined &&
+      (tokens.has(municipality) ||
+        (ine !== undefined && tokens.has(boMunicipalityConceptId(ine))))
+    );
+  });
+  if (here.length > 0) return here;
+  return byName.filter((t) => !places.has(t.id));
+}
+
 /** Lo que ya existe en la base, leído una sola vez al empezar. */
 interface KnownState {
   /** Organización de cada fila (por código), la propia o la adoptada. */
@@ -620,6 +730,8 @@ interface KnownState {
   readonly adopted: Set<string>;
   /** Filas con más de una candidata a adoptar. */
   readonly ambiguous: Set<string>;
+  /** Filas adoptadas cuya organización la carga anterior tipó distinto. */
+  readonly typeMismatch: Set<string>;
   /** Estado de cada organización existente. */
   readonly tenants: Map<string, string>;
   /** Titular de la vitrina de cada organización que ya tiene una. */

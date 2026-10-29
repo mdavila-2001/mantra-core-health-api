@@ -54,9 +54,9 @@ export interface BoliviaFacilitiesResult {
  *
  * Las organizaciones que el directorio y los enlaces necesitan las crea aparte
  * `PadronOrganizationsSeedService` (opt-in), con el actor semilla como dueño y
- * sin sello de verificación que nadie haya respaldado: cada ficha dice que
- * viene del padrón público y que la organización no la verificó, hasta que la
- * reclame.
+ * sin sello de verificación que nadie haya respaldado: quedan activas y sin
+ * verificar, y cada ficha dice que viene del padrón público, que no está
+ * reclamada y que la organización no la verificó, hasta que la reclame.
  *
  * Lo que sí resuelve es lo que hoy no se puede: que el médico diga en qué
  * hospital está de turno y en qué clínica atiende, eligiendo de una lista de

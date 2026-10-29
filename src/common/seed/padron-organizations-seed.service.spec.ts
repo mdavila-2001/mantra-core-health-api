@@ -6,7 +6,7 @@ import {
   type PadronFacility,
 } from './padron-organizations-seed.service';
 import { SEED_ACTOR_ID } from './seed-actor';
-import { PreconditionFailedException } from '../errors/domain.exception';
+import { CONCEPTS } from '../constants/concepts';
 import { Tenants } from '../../modules/directory/entities';
 import { PublicProfiles } from '../../modules/community/entities';
 import { Addresses } from '../../modules/common/entities';
@@ -14,6 +14,10 @@ import {
   DIR,
   TENANT_TYPE_CONCEPT_BY_CODE,
 } from '../../modules/directory/directory.concepts';
+import {
+  BO_MUNICIPALITIES,
+  boMunicipalityConceptId,
+} from './bo-geography.catalog';
 import { COMM } from '../../modules/community/community.concepts';
 import facilitiesDataset from './data/bolivia/health-facilities.dataset.json';
 
@@ -21,6 +25,14 @@ const ALL = facilitiesDataset.datos as unknown as PadronFacility[];
 const PADRON = ALL.filter((row) => row.naturaleza !== 'RED_ASEGURADORA');
 const NEEDS_PAPERS = PADRON.filter(
   (row) => row.tipo === 'FARMACIA' || row.tipo === 'LABORATORIO',
+);
+
+/** Código del INE de cada municipio de Santa Cruz, por su nombre en mayúsculas. */
+const SANTA_CRUZ_INE_BY_NAME = new Map(
+  BO_MUNICIPALITIES.filter((m) => m.department === 'SC').map((m) => [
+    m.name.toUpperCase(),
+    m.ine,
+  ]),
 );
 
 interface Existing {
@@ -35,10 +47,21 @@ interface Existing {
     statusConceptId: string;
   }[];
   profiles?: { targetId: string; headline?: string }[];
-  addresses?: { ownerId: string }[];
+  addresses?: {
+    ownerId: string;
+    city?: string;
+    municipalityConceptId?: string;
+  }[];
 }
 
 function build(existing: Existing = {}) {
+  /** Las fichas que la activación pudo tocar, por id. */
+  const store = new Map<string, any>(
+    [...(existing.tenants ?? []), ...(existing.legacy ?? [])].map((t) => [
+      t.id,
+      { ...t },
+    ]),
+  );
   const em: any = {
     findOne: jest.fn(() => Promise.resolve({ id: SEED_ACTOR_ID })),
     find: jest.fn((entity: unknown, where: any) => {
@@ -57,11 +80,27 @@ function build(existing: Existing = {}) {
       }
       if (entity === PublicProfiles)
         return Promise.resolve(existing.profiles ?? []);
-      if (entity === Addresses)
-        return Promise.resolve(existing.addresses ?? []);
+      if (entity === Addresses) {
+        const owners: string[] | undefined = where?.ownerId?.$in;
+        return Promise.resolve(
+          (existing.addresses ?? []).filter(
+            (a) => !owners || owners.includes(a.ownerId),
+          ),
+        );
+      }
       return Promise.resolve([]);
     }),
     create: jest.fn(),
+    // La activación: cambia el estado de la ficha y nada más.
+    findOneOrFail: jest.fn((_entity: unknown, where: any) => {
+      if (!store.has(where.id)) {
+        store.set(where.id, {
+          id: where.id,
+          statusConceptId: DIR.TENANT_PENDING,
+        });
+      }
+      return Promise.resolve(store.get(where.id));
+    }),
     flush: jest.fn(() => Promise.resolve()),
     transactional: jest.fn((fn: (tx: unknown) => Promise<unknown>) => fn(em)),
     fork: () => em,
@@ -80,7 +119,12 @@ function build(existing: Existing = {}) {
       Promise.resolve('profile-1'),
     ),
   };
-  const logger = { setContext: jest.fn(), info: jest.fn(), warn: jest.fn() };
+  const logger = {
+    setContext: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
   const service = new PadronOrganizationsSeedService(
     orm as never,
     tenants as never,
@@ -88,7 +132,7 @@ function build(existing: Existing = {}) {
     projection as never,
     logger as never,
   );
-  return { service, em, tenants, addresses, projection };
+  return { service, em, tenants, addresses, projection, store, logger };
 }
 
 /** Argumentos de la i-ésima llamada de un doble. */
@@ -129,6 +173,25 @@ describe('PadronOrganizationsSeedService', () => {
     expect(fixedIds.ownerMembershipId).toBe(padronOwnerMembershipId(dto.code));
     // Ninguna escritura salvo la del actor semilla pasa por el EntityManager.
     expect(em.create).not.toHaveBeenCalled();
+    // Nadie comprobó estas organizaciones: el sello no se pone nunca.
+    expect(tenants.verify).not.toHaveBeenCalled();
+  });
+
+  it('deja activas, sin verificar y con vitrina, las fichas que no necesitan papeles', async () => {
+    const { service, tenants, projection, store } = build();
+
+    const result = await service.run(true, false);
+
+    const withoutPapers = PADRON.length - NEEDS_PAPERS.length;
+    expect(result.activated).toBe(withoutPapers);
+    expect(result.showcases).toBe(withoutPapers);
+    expect(projection.projectOrganization).toHaveBeenCalledTimes(withoutPapers);
+    expect(tenants.updatePublicProfile).toHaveBeenCalledTimes(withoutPapers);
+    const clinic = PADRON.find((r) => r.tipo === 'CLINICA_PRIVADA')!;
+    const card = store.get(padronTenantId(clinic.code));
+    expect(card.statusConceptId).toBe(CONCEPTS.TENANT_ACTIVE);
+    // El estado de verificación queda como lo dejó el alta.
+    expect(card.verificationStatusConceptId).toBeUndefined();
   });
 
   it('mapea cada clase de establecimiento a su tipo de organización', async () => {
@@ -175,9 +238,9 @@ describe('PadronOrganizationsSeedService', () => {
     expect(tenants.updatePublicProfile).not.toHaveBeenCalled();
   });
 
-  it('una ficha pendiente y ya existente se verifica en la pasada siguiente', async () => {
+  it('una ficha pendiente y ya existente se activa en la pasada siguiente, sin verificarla', async () => {
     const row = PADRON.find((r) => r.tipo === 'CLINICA_PRIVADA')!;
-    const { service, tenants } = build({
+    const { service, tenants, store } = build({
       tenants: [
         { id: padronTenantId(row.code), statusConceptId: DIR.TENANT_PENDING },
       ],
@@ -186,8 +249,28 @@ describe('PadronOrganizationsSeedService', () => {
     const result = await service.run(true, false);
 
     expect(result.existing).toBe(1);
-    expect(callsOf(tenants.verify).map(([id]) => id)).toContain(
-      padronTenantId(row.code),
+    expect(store.get(padronTenantId(row.code)).statusConceptId).toBe(
+      CONCEPTS.TENANT_ACTIVE,
+    );
+    expect(tenants.verify).not.toHaveBeenCalled();
+  });
+
+  it('una ficha suspendida no se reactiva ni recibe vitrina', async () => {
+    const row = PADRON.find((r) => r.tipo === 'CLINICA_PRIVADA')!;
+    const id = padronTenantId(row.code);
+    const { service, projection, tenants, store } = build({
+      tenants: [{ id, statusConceptId: 'suspended' }],
+    });
+
+    await service.run(true, false);
+
+    expect(store.get(id).statusConceptId).toBe('suspended');
+    const projected = callsOf(projection.projectOrganization).map(
+      ([, data]) => data.targetId,
+    );
+    expect(projected).not.toContain(id);
+    expect(callsOf(tenants.updatePublicProfile).map(([t]) => t)).not.toContain(
+      id,
     );
   });
 
@@ -205,7 +288,12 @@ describe('PadronOrganizationsSeedService', () => {
       expect(profiled.has(padronTenantId(row.code))).toBe(false);
     }
     expect(result.pendingForPapers).toBe(NEEDS_PAPERS.length);
-    expect(projection.projectOrganization).not.toHaveBeenCalled();
+    const projected = new Set(
+      callsOf(projection.projectOrganization).map(([, data]) => data.targetId),
+    );
+    for (const row of NEEDS_PAPERS) {
+      expect(projected.has(padronTenantId(row.code))).toBe(false);
+    }
   });
 
   it('en demostración, farmacias y laboratorios tienen vitrina pero siguen sin sello', async () => {
@@ -213,9 +301,13 @@ describe('PadronOrganizationsSeedService', () => {
 
     await service.run(true, true);
 
-    expect(projection.projectOrganization).toHaveBeenCalledTimes(
-      NEEDS_PAPERS.length,
+    const projected = new Set(
+      callsOf(projection.projectOrganization).map(([, data]) => data.targetId),
     );
+    expect(projected.size).toBe(PADRON.length);
+    for (const row of NEEDS_PAPERS) {
+      expect(projected.has(padronTenantId(row.code))).toBe(true);
+    }
     const verifiedIds = new Set(callsOf(tenants.verify).map(([id]) => id));
     for (const row of NEEDS_PAPERS) {
       expect(verifiedIds.has(padronTenantId(row.code))).toBe(false);
@@ -229,18 +321,6 @@ describe('PadronOrganizationsSeedService', () => {
     expect(call[1].tenantId).toBe(padronTenantId(pharmacy.code));
   });
 
-  it('una regla de verify que no se cumple deja la ficha pendiente, no fallida', async () => {
-    const { service, tenants } = build();
-    tenants.verify.mockImplementation(() =>
-      Promise.reject(new PreconditionFailedException('faltan papeles')),
-    );
-
-    const result = await service.run(true, false);
-
-    expect(result.failed).toEqual([]);
-    expect(result.verified).toBe(0);
-  });
-
   it('un error inesperado de una organización no detiene a las demás', async () => {
     const { service, tenants } = build();
     tenants.provision.mockImplementationOnce(() =>
@@ -252,6 +332,30 @@ describe('PadronOrganizationsSeedService', () => {
     expect(result.failed).toHaveLength(1);
     expect(result.failed[0]).toContain('boom');
     expect(result.created).toBe(522);
+  });
+
+  it('registra cada fila fallida con error y el conteo', async () => {
+    const { service, tenants, logger } = build();
+    tenants.provision.mockImplementationOnce(() =>
+      Promise.reject(new Error('boom')),
+    );
+
+    await service.run(true, false);
+
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    const summary = callsOf(logger.info as never).pop()![0];
+    expect(summary.failed).toBe(1);
+  });
+
+  it('si fallan todas las filas es una falla sistémica y el paso falla', async () => {
+    const { service, tenants } = build();
+    tenants.provision.mockImplementation(() =>
+      Promise.reject(new Error('sin base')),
+    );
+
+    await expect(service.run(true, false)).rejects.toThrow(
+      /Fallaron las 523.*sin base/,
+    );
   });
 
   it('la dirección lleva coordenadas solo cuando el dataset las trae y no son del centro de la ciudad', async () => {
@@ -297,42 +401,64 @@ describe('PadronOrganizationsSeedService', () => {
       tenantTypeConceptId: TENANT_TYPE_CONCEPT_BY_CODE.CLINIC,
       statusConceptId: 'active',
     });
+    const inMunicipality = (ownerId: string, city: string) => ({
+      ownerId,
+      city,
+    });
+    const created = (tenants: { provision: jest.Mock<any> }) =>
+      callsOf(tenants.provision).map(([dto]) => dto.code);
 
-    it('toma como propia una CARGA_* con el mismo nombre y tipo, sin crear un duplicado', async () => {
-      const { service, tenants, addresses } = build({
+    it('toma como propia una CARGA_* con el mismo nombre, sin crear un duplicado ni escribirle nada', async () => {
+      const { service, tenants, addresses, projection, store } = build({
         legacy: [legacyClinic('legacy-1', 'CARGA_CLINICA_001')],
       });
 
       const result = await service.run(true, false);
 
       expect(result.adopted).toBe(1);
+      expect(result.adoptedTypeMismatch).toBe(0);
       expect(result.created).toBe(522);
-      const created = callsOf(tenants.provision).map(([dto]) => dto.code);
-      expect(created).not.toContain(clinic.code);
-      // Las escrituras de la ficha apuntan a la organización adoptada.
+      expect(created(tenants)).not.toContain(clinic.code);
+      // Nada de la adoptada se reescribe: ni dirección, ni vitrina, ni estado.
       const owners = callsOf(addresses.create).map(([dto]) => dto.ownerId);
+      expect(owners).not.toContain('legacy-1');
       expect(owners).not.toContain(padronTenantId(clinic.code));
+      const projected = callsOf(projection.projectOrganization).map(
+        ([, data]) => data.targetId,
+      );
+      expect(projected).not.toContain('legacy-1');
+      const profiled = callsOf(tenants.updatePublicProfile).map(([id]) => id);
+      expect(profiled).not.toContain('legacy-1');
+      expect(store.get('legacy-1').statusConceptId).toBe('active');
     });
 
-    it('con más de una candidata no elige ninguna ni crea otra, y la informa', async () => {
-      const { service, tenants } = build({
-        legacy: [
-          legacyClinic('legacy-1', 'CARGA_CLINICA_001'),
-          legacyClinic('legacy-2', 'CARGA_CLINICA_002'),
-        ],
-      });
+    it.each(['active', DIR.TENANT_PENDING, 'suspended'])(
+      'una adoptada en estado %s no se verifica ni se reescribe',
+      async (status) => {
+        const { service, tenants, projection, store } = build({
+          legacy: [
+            {
+              ...legacyClinic('legacy-1', 'CARGA_CLINICA_001'),
+              statusConceptId: status,
+            },
+          ],
+        });
 
-      const result = await service.run(true, false);
+        await service.run(true, true);
 
-      expect(result.adopted).toBe(0);
-      expect(result.ambiguous).toHaveLength(1);
-      expect(result.ambiguous[0]).toContain(clinic.code);
-      const created = callsOf(tenants.provision).map(([dto]) => dto.code);
-      expect(created).not.toContain(clinic.code);
-    });
+        expect(tenants.verify).not.toHaveBeenCalled();
+        expect(store.get('legacy-1').statusConceptId).toBe(status);
+        const projected = callsOf(projection.projectOrganization).map(
+          ([, data]) => data.targetId,
+        );
+        expect(projected).not.toContain('legacy-1');
+        const profiled = callsOf(tenants.updatePublicProfile).map(([id]) => id);
+        expect(profiled).not.toContain('legacy-1');
+      },
+    );
 
-    it('un nombre igual con otro tipo no se adopta', async () => {
-      const { service, tenants } = build({
+    it('un nombre igual con otro tipo se adopta igual, sin cambiarle el tipo, y se cuenta', async () => {
+      const { service, tenants, store } = build({
         legacy: [
           {
             ...legacyClinic('legacy-1', 'CARGA_FARMACIA_001'),
@@ -343,19 +469,92 @@ describe('PadronOrganizationsSeedService', () => {
 
       const result = await service.run(true, false);
 
+      expect(result.adopted).toBe(1);
+      expect(result.adoptedTypeMismatch).toBe(1);
+      expect(result.created).toBe(522);
+      expect(created(tenants)).not.toContain(clinic.code);
+      expect(store.get('legacy-1').tenantTypeConceptId).toBe(
+        TENANT_TYPE_CONCEPT_BY_CODE.PHARMACY,
+      );
+    });
+
+    it('una candidata de otro municipio no se adopta', async () => {
+      const { service } = build({
+        legacy: [legacyClinic('legacy-1', 'CARGA_CLINICA_001')],
+        addresses: [inMunicipality('legacy-1', 'Un municipio lejano')],
+      });
+
+      const result = await service.run(true, false);
+
       expect(result.adopted).toBe(0);
       expect(result.created).toBe(523);
     });
 
-    it('no toca la organización adoptada: ni la renombra ni la verifica de nuevo', async () => {
+    it('con más de una candidata el municipio desempata', async () => {
       const { service, tenants } = build({
-        legacy: [legacyClinic('legacy-1', 'CARGA_CLINICA_001')],
+        legacy: [
+          legacyClinic('legacy-1', 'CARGA_CLINICA_001'),
+          legacyClinic('legacy-2', 'CARGA_CLINICA_002'),
+        ],
+        addresses: [
+          inMunicipality('legacy-1', 'Un municipio lejano'),
+          inMunicipality('legacy-2', clinic.municipio),
+        ],
       });
 
-      await service.run(true, false);
+      const result = await service.run(true, false);
 
-      const verified = callsOf(tenants.verify).map(([id]) => id);
-      expect(verified).not.toContain('legacy-1');
+      expect(result.adopted).toBe(1);
+      expect(result.ambiguous).toEqual([]);
+      expect(created(tenants)).not.toContain(clinic.code);
+    });
+
+    it('el municipio también se reconoce por su concepto de geografía', async () => {
+      const ine = SANTA_CRUZ_INE_BY_NAME.get(
+        clinic.municipio
+          .toUpperCase()
+          .replace(/\(.*?\)/g, '')
+          .trim(),
+      );
+      expect(ine).toBeDefined();
+      const { service } = build({
+        legacy: [
+          legacyClinic('legacy-1', 'CARGA_CLINICA_001'),
+          legacyClinic('legacy-2', 'CARGA_CLINICA_002'),
+        ],
+        addresses: [
+          inMunicipality('legacy-1', 'Un municipio lejano'),
+          {
+            ownerId: 'legacy-2',
+            municipalityConceptId: boMunicipalityConceptId(ine!),
+          },
+        ],
+      });
+
+      const result = await service.run(true, false);
+
+      expect(result.adopted).toBe(1);
+      expect(result.ambiguous).toEqual([]);
+    });
+
+    it('con más de una candidata en el mismo municipio no elige ninguna ni crea otra, y la informa', async () => {
+      const { service, tenants } = build({
+        legacy: [
+          legacyClinic('legacy-1', 'CARGA_CLINICA_001'),
+          legacyClinic('legacy-2', 'CARGA_CLINICA_002'),
+        ],
+        addresses: [
+          inMunicipality('legacy-1', clinic.municipio),
+          inMunicipality('legacy-2', clinic.municipio),
+        ],
+      });
+
+      const result = await service.run(true, false);
+
+      expect(result.adopted).toBe(0);
+      expect(result.ambiguous).toHaveLength(1);
+      expect(result.ambiguous[0]).toContain(clinic.code);
+      expect(created(tenants)).not.toContain(clinic.code);
     });
   });
 });
