@@ -13,8 +13,7 @@ export const ASSIGNMENT_ROLE_CONCEPT: Record<string, string> = {
   ASSISTANT: DELEG.ASSIGN_ROLE_ASSISTANT,
   NURSE: DELEG.ASSIGN_ROLE_NURSE,
   BILLING: DELEG.ASSIGN_ROLE_BILLING,
-  // Roles operativos de infraestructura hospitalaria (CONTRATO-F2-F5 §0.3): los lee
-  // `InfrastructureAccessService` con el alcance y el nodo de la fila.
+  // Roles operativos de la infraestructura hospitalaria (CONTRATO-F2-F5 §0.3).
   NURSE_SUPERVISOR: DELEG.ASSIGN_ROLE_NURSE_SUPERVISOR,
   ADMISSION: DELEG.ASSIGN_ROLE_ADMISSION,
   HOUSEKEEPING: DELEG.ASSIGN_ROLE_HOUSEKEEPING,
@@ -22,6 +21,7 @@ export const ASSIGNMENT_ROLE_CONCEPT: Record<string, string> = {
   MAINTENANCE: DELEG.ASSIGN_ROLE_MAINTENANCE,
   OR_MANAGER: DELEG.ASSIGN_ROLE_OR_MANAGER,
   INFECTION_CONTROL: DELEG.ASSIGN_ROLE_INFECTION_CONTROL,
+  UNIT_HEAD: DELEG.ASSIGN_ROLE_UNIT_HEAD,
 };
 
 export const ACCESS_SCOPE_CONCEPT: Record<string, string> = {
@@ -31,6 +31,18 @@ export const ACCESS_SCOPE_CONCEPT: Record<string, string> = {
   UNIT: DELEG.SCOPE_UNIT,
   SPACE: DELEG.SCOPE_SPACE,
 };
+
+/** Código de rol de asignación a partir de su concepto. */
+export const ASSIGNMENT_ROLE_BY_CONCEPT: Record<string, string> =
+  Object.fromEntries(
+    Object.entries(ASSIGNMENT_ROLE_CONCEPT).map(([code, id]) => [id, code]),
+  );
+
+/** Código de alcance a partir de su concepto. */
+export const ACCESS_SCOPE_BY_CONCEPT: Record<string, string> =
+  Object.fromEntries(
+    Object.entries(ACCESS_SCOPE_CONCEPT).map(([code, id]) => [id, code]),
+  );
 
 export const DELEGATE_TYPE_CONCEPT: Record<string, string> = {
   SECRETARY: DELEG.DELEGATE_TYPE_SECRETARY,

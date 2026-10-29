@@ -92,6 +92,30 @@ export class CreateSpecimenDto {
   @IsOptional()
   @IsUUID()
   collectorProfileId?: string;
+
+  /**
+   * Sede donde se tomó la muestra (F5b): debe ser del tenant que registra la toma.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Sede donde se tomó la muestra (practice.practice_sites del tenant del contexto)',
+  })
+  @IsOptional()
+  @IsUUID()
+  collectionSiteId?: string;
+
+  /**
+   * Punto de toma (F5b): espacio con función SAMPLE_COLLECTION de la sede de la toma.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Punto de toma de muestras. Exige collectionSiteId y debe ser un espacio SAMPLE_COLLECTION de esa sede',
+  })
+  @IsOptional()
+  @IsUUID()
+  collectionCareSpaceId?: string;
 }
 
 /** Cuerpo de `POST /diagnostics/accessions` (UC-20-01). */

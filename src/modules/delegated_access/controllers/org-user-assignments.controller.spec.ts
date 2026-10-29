@@ -17,8 +17,17 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  */
 function build() {
   const service = { createAssignment: mockFn(), updateAssignment: mockFn() };
-  const controller = new OrgUserAssignmentsController(service as any);
-  return { controller, service };
+  const reads = {
+    catalog: mockFn(),
+    targets: mockFn(),
+    listForMembership: mockFn(),
+    get: mockFn(),
+  };
+  const controller = new OrgUserAssignmentsController(
+    service as any,
+    reads as any,
+  );
+  return { controller, service, reads };
 }
 
 describe('OrgUserAssignmentsController', () => {
@@ -34,5 +43,18 @@ describe('OrgUserAssignmentsController', () => {
     const dto = { suspend: true };
     await d.controller.update('a1', dto, actor);
     expect(d.service.updateAssignment).toHaveBeenCalledWith('a1', dto, actor);
+  });
+
+  it('delegates the selectors and reads to the read service', async () => {
+    const d = build();
+    const query = { kind: 'site' } as any;
+    await d.controller.targets(query, actor);
+    expect(d.reads.targets).toHaveBeenCalledWith(query, actor);
+    await d.controller.list('m1', actor);
+    expect(d.reads.listForMembership).toHaveBeenCalledWith('m1', actor);
+    await d.controller.get('a1', actor);
+    expect(d.reads.get).toHaveBeenCalledWith('a1', actor);
+    d.controller.catalog();
+    expect(d.reads.catalog).toHaveBeenCalled();
   });
 });

@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import { runWithTenant } from '../../../../common';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
 import { allowAllScope } from '../scope/pharmacy-inventory-scope.testing';
 import { CreateInventoryLocationUseCase } from './create-inventory-location.use-case';
@@ -13,23 +14,35 @@ describe('CreateInventoryLocationUseCase', () => {
       create: jest.fn(() => ({ id: 'location-1' })),
     };
     const logger = { info: jest.fn() };
+    const access = {
+      practiceSiteOf: jest.fn(async () => 'practice-site-1'),
+      assertCanManage: jest.fn(async () => undefined),
+      resolve: jest.fn(async () => ({
+        careSpaceId: null,
+        clinicalUnitId: null,
+      })),
+    };
     const useCase = new CreateInventoryLocationUseCase(
       em as any,
       locations as any,
       allowAllScope(),
       logger as any,
+      access as any,
+      { located: jest.fn() } as any,
     );
 
     await expect(
-      useCase.execute(
-        'site-1',
-        {
-          code: 'SHELF-1',
-          name: 'Estante 1',
-          parentLocationId: 'parent-1',
-          controlledAccess: true,
-        } as any,
-        { id: 'user-1' } as any,
+      runWithTenant('tenant-1', () =>
+        useCase.execute(
+          'site-1',
+          {
+            code: 'SHELF-1',
+            name: 'Estante 1',
+            parentLocationId: 'parent-1',
+            controlledAccess: true,
+          } as any,
+          { id: 'user-1' } as any,
+        ),
       ),
     ).resolves.toEqual({ id: 'location-1' });
     expect(locations.create).toHaveBeenCalledWith(tx, {

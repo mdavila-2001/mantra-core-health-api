@@ -65,6 +65,7 @@ import {
   CareSpaceBlocksTickService,
   PracticeOpsRetireBlockersInitializer,
 } from './services';
+import { SampleCollectionPointsService } from './services/sample-collection-points.service';
 import { OpsSettingsReader } from './services/ops-settings';
 import { INFRA_POLICIES, InfraPolicyRegistry } from './policies/infra-policy';
 import { InfraF2PolicyInitializer } from './policies/infra-f2.policy';
@@ -253,6 +254,8 @@ import {
     { provide: CARE_SPACE_OPS_PORT, useExisting: CareSpaceOpsPortService },
     CareSpaceBlocksTickService,
     PracticeOpsRetireBlockersInitializer,
+    // F5b: puntos de toma de muestras.
+    SampleCollectionPointsService,
   ],
   // `scheduling` resuelve con esto la sede de cada recurso agendable: el dato
   // vive acá y no se duplica allá. `practice` no importa `scheduling`, así que
@@ -285,6 +288,11 @@ import {
     INFRA_POLICIES,
     InfraPolicyRegistry,
     InfrastructureAccessService,
+    // F5: el nivel del actor en la estructura (organización, sucursal) y el estado
+    // operativo de los espacios los consumen laboratorio, farmacia y acceso delegado.
+    StructureAccessService,
+    OpsStateService,
+    SampleCollectionPointsService,
   ],
 })
 export class PracticeModule {}

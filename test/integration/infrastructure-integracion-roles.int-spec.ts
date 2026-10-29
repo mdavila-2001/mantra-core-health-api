@@ -4,8 +4,10 @@ import { bootstrapTestApp, type TestContext } from './harness';
 import { DELEG } from '../../src/modules/delegated_access/delegated_access.concepts';
 import {
   as,
+  ROLE,
   createMember,
   createSpace,
+  createStaff,
   createUnit,
   loginMember,
   registerOrg,
@@ -33,7 +35,10 @@ describe('Infraestructura · asignación de roles operativos por la API', () => 
   let bedOther: string;
   let roomB: string;
 
-  const admin = () => bearer(ctx.adminToken);
+  const admin = () => ({
+    ...bearer(ctx.adminToken),
+    'X-Tenant-Id': orgA.tenantId,
+  });
   const assignUrl = (membershipId: string) =>
     `/org/${membershipId}/user-assignments`;
 
@@ -198,7 +203,7 @@ describe('Infraestructura · asignación de roles operativos por la API', () => 
           careSpaceId: roomB,
         })
         .expect(404);
-      expect(res.body.reason).toBe('DELEGATED_SCOPE_NODE_NOT_FOUND');
+      expect(res.body.reason).toBe('DELEGATED_SCOPE_TARGET_NOT_FOUND');
       const [count] = await sql(
         `select count(*)::int as n from delegated_access.organization_user_assignments
           where tenant_membership_id = ?`,
@@ -219,24 +224,37 @@ describe('Infraestructura · asignación de roles operativos por la API', () => 
           .set(admin())
           .send({ role: 'ADMISSION', accessScope })
           .expect(422);
-        expect(res.body.reason).toBe(
-          'DELEGATED_ASSIGNMENT_SCOPE_NODE_REQUIRED',
-        );
-        expect(res.body.details.requiredField).toBe(field);
+        expect(res.body.reason).toBe('ASSIGNMENT_SCOPE_TARGET_REQUIRED');
+        expect(res.body.details.scope).toBe(accessScope);
+        expect(field).toBeTruthy();
       }
     });
 
-    it('sin SECURITY_ADMIN no se asigna: el dueño de la organización recibe 403', async () => {
+    it('quien sólo opera (Enfermería de la sede) no asigna roles: 403 y nada se escribe', async () => {
+      const enf = await createStaff(
+        ctx,
+        orgA,
+        'enfa',
+        ROLE.NURSE,
+        { kind: 'SITE', siteId: orgA.siteId },
+        suffix,
+      );
       const member = await createMember(ctx, orgA, 'sinrol', suffix);
       await http()
         .post(assignUrl(member.membershipId))
-        .set(as(orgA.token, orgA.tenantId))
+        .set(as(enf.token, orgA.tenantId))
         .send({
           role: 'HOUSEKEEPING',
           accessScope: 'SITE',
           practiceSiteId: orgA.siteId,
         })
         .expect(403);
+      const [count] = await sql(
+        `select count(*)::int as n from delegated_access.organization_user_assignments
+          where tenant_membership_id = ?`,
+        [member.membershipId],
+      );
+      expect(count.n).toBe(0);
     });
 
     it('un rol que no existe es 400', async () => {

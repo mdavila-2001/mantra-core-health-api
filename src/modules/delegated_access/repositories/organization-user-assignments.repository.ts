@@ -84,34 +84,34 @@ export class OrganizationUserAssignmentsRepository {
     return em.findOne(OrganizationUserAssignments, { id });
   }
 
-  /** Asignación ACTIVA que solaparía el mismo rol+scope para la misma membresía. */
+  /**
+   * Asignación ACTIVA que repetiría el mismo rol, alcance **y objetivo** para la
+   * misma membresía (dos espacios distintos no se pisan).
+   */
   findActiveOverlap(
     em: EntityManager,
     tenantMembershipId: string,
     assignmentRoleConceptId: string,
     accessScopeConceptId: string,
     activeStatusConceptId: string,
-    node: {
-      practiceId?: string;
-      practiceSiteId?: string;
-      clinicalUnitId?: string;
-      careSpaceId?: string;
-      diagnosticUnitId?: string;
-      pharmacyId?: string;
+    targets: {
+      practiceId?: string | null;
+      practiceSiteId?: string | null;
+      clinicalUnitId?: string | null;
+      careSpaceId?: string | null;
     } = {},
+    excludeId?: string,
   ): Promise<OrganizationUserAssignments | null> {
-    // El mismo rol y alcance en otro nodo (otra unidad, otra cama) no es un solape.
     return em.findOne(OrganizationUserAssignments, {
       tenantMembershipId,
       assignmentRoleConceptId,
       accessScopeConceptId,
       statusConceptId: activeStatusConceptId,
-      practiceId: node.practiceId ?? null,
-      practiceSiteId: node.practiceSiteId ?? null,
-      clinicalUnitId: node.clinicalUnitId ?? null,
-      careSpaceId: node.careSpaceId ?? null,
-      diagnosticUnitId: node.diagnosticUnitId ?? null,
-      pharmacyId: node.pharmacyId ?? null,
+      practiceId: targets.practiceId ?? null,
+      practiceSiteId: targets.practiceSiteId ?? null,
+      clinicalUnitId: targets.clinicalUnitId ?? null,
+      careSpaceId: targets.careSpaceId ?? null,
+      ...(excludeId ? { id: { $ne: excludeId } } : {}),
     });
   }
 

@@ -21,7 +21,7 @@ import type {
   LocateInfrastructureItemDto,
 } from '../dto';
 
-/** Eventos de contabilidad ligados a la infraestructura (`asyncapi/fragments/f5fin.yaml`). */
+/** Eventos de contabilidad ligados a la infraestructura (`asyncapi/asyncapi.yaml`). */
 export const ACCOUNTING_INFRA_EVENTS = {
   /** Un activo de infraestructura quedó ubicado (o desubicado) en un espacio. */
   itemLocated: 'accounting.infrastructure_item.located',

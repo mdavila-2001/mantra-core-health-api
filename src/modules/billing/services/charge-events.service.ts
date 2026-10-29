@@ -4,7 +4,7 @@ import { OutboxService } from '../../messaging/services/outbox.service';
 
 /**
  * Eventos de las tarifas y los cargos devengados (CONTRATO-F2-F5 F5e;
- * `asyncapi/fragments/f5fin.yaml`).
+ * `asyncapi/asyncapi.yaml`).
  */
 export const CHARGE_EVENTS = {
   /** Se devengó un cargo (día-cama o quirófano por tiempo). */

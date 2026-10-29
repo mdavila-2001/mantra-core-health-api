@@ -236,6 +236,62 @@ channels:
       FloorPlanLayoutChanged:
         $ref: '#/components/messages/FloorPlanLayoutChanged'
 
+  # Facturación y contabilidad de infraestructura (F5e, F5f)
+  billingChargeCaptureEvents:
+    address: billing.charge_capture
+    description: >
+      Cargos devengados antes de facturar. El envelope real es `messaging.domain_events` (eventType,
+      aggregateType `charge_capture`, aggregateId, payloadJson).
+    messages:
+      ChargeCaptureCreated:
+        $ref: '#/components/messages/ChargeCaptureCreated'
+      ChargeCaptureTariffMissing:
+        $ref: '#/components/messages/ChargeCaptureTariffMissing'
+      ChargeCaptureVoided:
+        $ref: '#/components/messages/ChargeCaptureVoided'
+      ChargeCaptureInvoiced:
+        $ref: '#/components/messages/ChargeCaptureInvoiced'
+  billingSpaceTariffEvents:
+    address: billing.space_tariff
+    description: Tarifas de espacio versionadas con vigencia (aggregateType `space_tariff`).
+    messages:
+      SpaceTariffCreated:
+        $ref: '#/components/messages/SpaceTariffCreated'
+      SpaceTariffClosed:
+        $ref: '#/components/messages/SpaceTariffClosed'
+  accountingInfrastructureEvents:
+    address: accounting.infrastructure
+    description: Ubicación de activos en espacios y centro de costo por unidad clínica.
+    messages:
+      InfrastructureItemLocated:
+        $ref: '#/components/messages/InfrastructureItemLocated'
+      CostCenterUnitLinked:
+        $ref: '#/components/messages/CostCenterUnitLinked'
+
+  # Laboratorio, farmacia y acceso delegado (F5b, F5c, F5g)
+  clinicalServiceRequestCollectionPoint:
+    address: clinical.service_request
+    description: >
+      Punto de toma de muestras sugerido en una orden de laboratorio. El envelope real es
+      `messaging.domain_events` (eventType, aggregateType, aggregateId, payloadJson).
+    messages:
+      CollectionPointSuggested:
+        $ref: '#/components/messages/CollectionPointSuggested'
+  pharmacyInventoryLocation:
+    address: pharmacy_inventory.location
+    description: Ubicación del stock de farmacia en un espacio clínico (depósito o botiquín de unidad).
+    messages:
+      InventoryLocationLocated:
+        $ref: '#/components/messages/InventoryLocationLocated'
+      InventoryLocationRelocated:
+        $ref: '#/components/messages/InventoryLocationRelocated'
+  delegatedAccessAssignment:
+    address: delegated_access.assignment
+    description: Cambios de alcance de las asignaciones de usuario de la organización.
+    messages:
+      AssignmentScopeChanged:
+        $ref: '#/components/messages/AssignmentScopeChanged'
+
 operations:
   publishDomainEvent:
     action: send
@@ -337,6 +393,49 @@ operations:
     summary: >
       Los servicios del plano publican cada hecho con `PlanEventsService`
       (OutboxService.publishDomainEvent) en la transacción de la mutación.
+
+  # Facturación y contabilidad de infraestructura (F5e, F5f)
+  publishBillingChargeCaptureEvent:
+    action: send
+    channel:
+      $ref: '#/channels/billingChargeCaptureEvents'
+    summary: >
+      `BedDayChargesService` y `OrTimeChargesService` (devengo, actor nulo), `ChargeCapturesService`
+      (anulación) e `InvoicesService` (emisión) publican con `ChargeEventsService`
+      (OutboxService.publishDomainEvent) en la transacción de la mutación.
+  publishBillingSpaceTariffEvent:
+    action: send
+    channel:
+      $ref: '#/channels/billingSpaceTariffEvents'
+    summary: '`SpaceTariffsService` publica el alta y el cierre de cada tarifa.'
+  publishAccountingInfrastructureEvent:
+    action: send
+    channel:
+      $ref: '#/channels/accountingInfrastructureEvents'
+    summary: '`AccountingInfrastructureService` publica la ubicación del activo y el vínculo del centro de costo.'
+
+  # Laboratorio, farmacia y acceso delegado (F5b, F5c, F5g)
+  publishCollectionPointSuggested:
+    action: send
+    channel:
+      $ref: '#/channels/clinicalServiceRequestCollectionPoint'
+    summary: >
+      `ServiceRequestsService.create` publica el punto de toma (explícito o el primero disponible de la
+      sede) en la transacción del alta de la orden.
+  publishInventoryLocationEvent:
+    action: send
+    channel:
+      $ref: '#/channels/pharmacyInventoryLocation'
+    summary: >
+      `CreateInventoryLocationUseCase` publica `located` y `RelocateInventoryLocationUseCase` publica
+      `relocated` en la transacción que cambia la ubicación; la reubicación no mueve líneas del ledger.
+  publishAssignmentScopeChanged:
+    action: send
+    channel:
+      $ref: '#/channels/delegatedAccessAssignment'
+    summary: >
+      `OrgUserAssignmentsService` publica el alta, el cambio de alcance, de supervisor y la suspensión
+      de una asignación en la misma transacción que la escribe.
 
 components:
   messages:
@@ -2022,6 +2121,221 @@ components:
       x-event-type: practice.floor_plan.layout_changed
       x-aggregate-type: floor_plan
 
+
+    # Facturación y contabilidad de infraestructura (F5e, F5f)
+    ChargeCaptureCreated:
+      name: ChargeCaptureCreated
+      title: billing.charge_capture.created
+      summary: >
+        Se devengó un cargo `CHG_PENDING`: un día-cama (una medianoche ocupada, o el día mínimo de una
+        estancia sin medianoche) o el tiempo de quirófano de un caso completado. Idempotente por
+        `BEDDAY:<encuentro>:<fecha>` / `ORTIME:<caso>`: reaplicar el devengo no lo publica de nuevo.
+      payload:
+        type: object
+        required: [chargeCaptureId, encounterId, sourceKind, serviceDate, quantity]
+        properties:
+          chargeCaptureId: { type: string, format: uuid }
+          encounterId: { type: string, format: uuid }
+          sourceKind: { type: string, enum: [BED_DAY, OR_TIME] }
+          serviceDate: { type: string, format: date }
+          careSpaceId: { type: [string, 'null'], format: uuid, description: Cama o quirófano. }
+          bedCategoryConceptId: { type: [string, 'null'], format: uuid, description: 'Categoría de la cama en la medianoche (día-cama).' }
+          procedureCaseId: { type: [string, 'null'], format: uuid, description: Caso de quirófano (uso por tiempo). }
+          minutes: { type: [number, 'null'], description: Minutos de sala (uso por tiempo). }
+          timeSource: { type: [string, 'null'], enum: [ROOM_EVENTS, CASE_ACTUALS, null] }
+          quantity: { type: string, description: 'Días (1) o unidades de tiempo.' }
+          unitPrice: { type: [string, 'null'], description: 'Foto del precio; nulo si no había tarifa vigente.' }
+          minimumStay: { type: boolean, description: 'Día mínimo de una estancia sin medianoche.' }
+          tenantId: { type: string, format: uuid }
+          actorUserId: { type: [string, 'null'], format: uuid }
+          requestId: { type: [string, 'null'] }
+    ChargeCaptureTariffMissing:
+      name: ChargeCaptureTariffMissing
+      title: billing.charge_capture.tariff_missing
+      summary: >
+        Alerta de configuración: se devengó un cargo sin tarifa vigente. Queda pendiente sin precio (no se
+        inventa uno ni se usa otra tarifa) hasta que Facturación cree la tarifa; el siguiente devengo lo completa.
+      payload:
+        type: object
+        required: [chargeCaptureId, encounterId, serviceDate, tariffKind]
+        properties:
+          chargeCaptureId: { type: string, format: uuid }
+          encounterId: { type: string, format: uuid }
+          sourceKind: { type: string, enum: [BED_DAY, OR_TIME] }
+          serviceDate: { type: string, format: date }
+          careSpaceId: { type: [string, 'null'], format: uuid }
+          bedCategoryConceptId: { type: [string, 'null'], format: uuid }
+          tariffKind: { type: string, enum: [TARIFF_BED_DAY, TARIFF_OR_TIME] }
+          tenantId: { type: string, format: uuid }
+          actorUserId: { type: [string, 'null'], format: uuid }
+          requestId: { type: [string, 'null'] }
+    ChargeCaptureVoided:
+      name: ChargeCaptureVoided
+      title: billing.charge_capture.voided
+      summary: >
+        Se anuló un cargo, con motivo (que queda en la fila y en la historia, nunca en el evento). Un cargo
+        emitido no se edita: se anula. `origin` distingue la anulación de una persona de la corrección
+        automática de un cargo pendiente cuya noche la ocupación corregida ya no sustenta.
+      payload:
+        type: object
+        required: [chargeCaptureId, encounterId, serviceDate, previousStatus, origin]
+        properties:
+          chargeCaptureId: { type: string, format: uuid }
+          encounterId: { type: string, format: uuid }
+          sourceKind: { type: string, enum: [BED_DAY, OR_TIME] }
+          serviceDate: { type: string, format: date }
+          previousStatus: { type: string, enum: [PENDING, INVOICED] }
+          invoiceLineId: { type: [string, 'null'], format: uuid, description: 'Se conserva: la factura se corrige con nota de crédito.' }
+          origin: { type: string, enum: [MANUAL, OCCUPANCY_CORRECTION] }
+          tenantId: { type: string, format: uuid }
+          actorUserId: { type: [string, 'null'], format: uuid }
+          requestId: { type: [string, 'null'] }
+    ChargeCaptureInvoiced:
+      name: ChargeCaptureInvoiced
+      title: billing.charge_capture.invoiced
+      summary: 'Un cargo entró en una factura (`issue-from-encounter` con `chargeCaptureIds`), en la misma transacción que la factura.'
+      payload:
+        type: object
+        required: [chargeCaptureId, encounterId, serviceDate, invoiceId, invoiceLineId]
+        properties:
+          chargeCaptureId: { type: string, format: uuid }
+          encounterId: { type: string, format: uuid }
+          serviceDate: { type: string, format: date }
+          invoiceId: { type: string, format: uuid }
+          invoiceLineId: { type: string, format: uuid }
+          tenantId: { type: string, format: uuid }
+          actorUserId: { type: [string, 'null'], format: uuid }
+          requestId: { type: [string, 'null'] }
+    SpaceTariffCreated:
+      name: SpaceTariffCreated
+      title: billing.space_tariff.created
+      summary: 'Se creó una tarifa de día-cama (por categoría o propia de una sala) o de quirófano por tiempo.'
+      payload:
+        type: object
+        required: [spaceTariffId, practiceId, kind, validFrom]
+        properties:
+          spaceTariffId: { type: string, format: uuid }
+          practiceId: { type: string, format: uuid }
+          kind: { type: string, enum: [TARIFF_BED_DAY, TARIFF_OR_TIME] }
+          bedCategoryCode: { type: [string, 'null'], example: BED_CAT_ICU }
+          careSpaceId: { type: [string, 'null'], format: uuid }
+          validFrom: { type: string, format: date }
+          validTo: { type: [string, 'null'], format: date }
+          tenantId: { type: string, format: uuid }
+          actorUserId: { type: [string, 'null'], format: uuid }
+          requestId: { type: [string, 'null'] }
+    SpaceTariffClosed:
+      name: SpaceTariffClosed
+      title: billing.space_tariff.closed
+      summary: 'Se cerró la vigencia de una tarifa (no se edita ni se borra). No altera los cargos ya devengados.'
+      payload:
+        type: object
+        required: [spaceTariffId, practiceId, validTo]
+        properties:
+          spaceTariffId: { type: string, format: uuid }
+          practiceId: { type: string, format: uuid }
+          validTo: { type: string, format: date, description: Primer día en que ya no rige. }
+          tenantId: { type: string, format: uuid }
+          actorUserId: { type: [string, 'null'], format: uuid }
+          requestId: { type: [string, 'null'] }
+    InfrastructureItemLocated:
+      name: InfrastructureItemLocated
+      title: accounting.infrastructure_item.located
+      summary: 'Un activo de infraestructura quedó ubicado en un espacio de su práctica, o desubicado (`careSpaceId` nulo).'
+      payload:
+        type: object
+        required: [infrastructureItemId, practiceId, careSpaceId, previousCareSpaceId]
+        properties:
+          infrastructureItemId: { type: string, format: uuid }
+          practiceId: { type: string, format: uuid }
+          careSpaceId: { type: [string, 'null'], format: uuid }
+          previousCareSpaceId: { type: [string, 'null'], format: uuid }
+          tenantId: { type: string, format: uuid }
+          actorUserId: { type: [string, 'null'], format: uuid }
+          requestId: { type: [string, 'null'] }
+    CostCenterUnitLinked:
+      name: CostCenterUnitLinked
+      title: accounting.cost_center.unit_linked
+      summary: >
+        Un centro de costo quedó vinculado a una unidad clínica. A lo sumo un centro de costo activo por
+        unidad; los cargos devengados toman el centro de costo de la unidad dueña del espacio.
+      payload:
+        type: object
+        required: [costCenterId, practiceId, clinicalUnitId]
+        properties:
+          costCenterId: { type: string, format: uuid }
+          practiceId: { type: string, format: uuid }
+          clinicalUnitId: { type: string, format: uuid }
+          previousClinicalUnitId: { type: [string, 'null'], format: uuid }
+          tenantId: { type: string, format: uuid }
+          actorUserId: { type: [string, 'null'], format: uuid }
+          requestId: { type: [string, 'null'] }
+
+    # Laboratorio, farmacia y acceso delegado (F5b, F5c, F5g)
+    CollectionPointSuggested:
+      name: CollectionPointSuggested
+      title: clinical.service_request.collection_point_suggested
+      summary: 'La orden de laboratorio quedó con un punto de toma sugerido en la sede sugerida.'
+      payload:
+        type: object
+        required: [serviceRequestId, suggestedPracticeSiteId, suggestedCareSpaceId, source]
+        properties:
+          serviceRequestId: { type: string, format: uuid }
+          suggestedPracticeSiteId: { type: string, format: uuid }
+          suggestedCareSpaceId: { type: string, format: uuid }
+          source:
+            type: string
+            enum: [EXPLICIT, DEFAULT]
+            description: 'EXPLICIT: lo eligió quien pidió la orden. DEFAULT: el primer punto disponible de la sede.'
+    InventoryLocationLocated:
+      name: InventoryLocationLocated
+      title: pharmacy_inventory.location.located
+      summary: 'Una ubicación de inventario quedó ligada a un espacio o es el botiquín de una unidad.'
+      payload:
+        type: object
+        required: [locationId, tenantId, pharmacySiteId, practiceSiteId, locationType, rowVersion]
+        properties:
+          locationId: { type: string, format: uuid }
+          tenantId: { type: string, format: uuid }
+          pharmacySiteId: { type: string, format: uuid }
+          practiceSiteId: { type: string, format: uuid }
+          locationType: { type: string, enum: [SHELF, WARD_STOCK] }
+          careSpaceId: { type: [string, 'null'], format: uuid }
+          clinicalUnitId: { type: [string, 'null'], format: uuid }
+          rowVersion: { type: integer }
+    InventoryLocationRelocated:
+      name: InventoryLocationRelocated
+      title: pharmacy_inventory.location.relocated
+      summary: 'La ubicación cambió de espacio; el stock la siguió (ninguna línea del ledger se movió).'
+      payload:
+        type: object
+        required: [locationId, tenantId, pharmacySiteId, practiceSiteId, locationType, toCareSpaceId, rowVersion]
+        properties:
+          locationId: { type: string, format: uuid }
+          tenantId: { type: string, format: uuid }
+          pharmacySiteId: { type: string, format: uuid }
+          practiceSiteId: { type: string, format: uuid }
+          locationType: { type: string, enum: [SHELF, WARD_STOCK] }
+          clinicalUnitId: { type: [string, 'null'], format: uuid }
+          fromCareSpaceId: { type: [string, 'null'], format: uuid }
+          toCareSpaceId: { type: string, format: uuid }
+          rowVersion: { type: integer }
+    AssignmentScopeChanged:
+      name: AssignmentScopeChanged
+      title: delegated_access.assignment.scope_changed
+      summary: 'Una asignación de usuario cambió de alcance, de supervisor o de estado (o se creó).'
+      payload:
+        type: object
+        required: [assignmentId, tenantId, change, role, rowVersion, to]
+        properties:
+          assignmentId: { type: string, format: uuid }
+          tenantId: { type: string, format: uuid }
+          change: { type: string, enum: [CREATED, RETARGETED, SUPERVISOR_CHANGED, SUSPENDED] }
+          role: { type: string, example: HOUSEKEEPING }
+          rowVersion: { type: integer }
+          from: { $ref: '#/components/schemas/AssignmentScopeSnapshot' }
+          to: { $ref: '#/components/schemas/AssignmentScopeSnapshot' }
+
   schemas:
     DomainEventPayload:
       type: object
@@ -2069,3 +2383,14 @@ components:
         correlationId:
           type: string
           description: Es el `correlationId` de la petición HTTP que originó el cambio (el mismo que ven los errores).
+
+    # Laboratorio, farmacia y acceso delegado (F5b, F5c, F5g)
+    AssignmentScopeSnapshot:
+      type: [object, 'null']
+      properties:
+        scope: { type: string, enum: [TENANT, PRACTICE, SITE, UNIT, SPACE] }
+        practiceId: { type: [string, 'null'], format: uuid }
+        practiceSiteId: { type: [string, 'null'], format: uuid }
+        clinicalUnitId: { type: [string, 'null'], format: uuid }
+        careSpaceId: { type: [string, 'null'], format: uuid }
+        status: { type: string, enum: [ACTIVE, SUSPENDED] }

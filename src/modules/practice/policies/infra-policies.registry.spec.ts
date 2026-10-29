@@ -4,6 +4,7 @@ import {
 } from '../../clinical/policies/infra-f3.policy';
 import { infraF4RegistryPolicy } from '../../procedures_perioperative/policies/infra-f4.policy';
 import { INFRA_F5E_POLICY } from '../../billing/policies/infra-f5.policy';
+import { INFRA_F5C_POLICY } from '../../pharmacy_inventory/policies/infra-f5c.policy';
 import { infraPlanRegistryPolicy } from '../plan/policies/infra-plan.policy';
 import { INFRA_F2_POLICY } from './infra-f2.policy';
 import { InfraPolicyRegistry, type InfraRole } from './infra-policy';
@@ -30,6 +31,7 @@ const registry = (): InfraPolicyRegistry => {
   r.register(infraF4RegistryPolicy());
   r.register(infraPlanRegistryPolicy());
   r.register(INFRA_F5E_POLICY);
+  r.register(INFRA_F5C_POLICY);
   return r;
 };
 

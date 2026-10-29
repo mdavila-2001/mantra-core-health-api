@@ -65,6 +65,13 @@ function expectUniformNotFound(error: any): void {
   expect(error.details).toBeUndefined();
 }
 
+/** Autoridad de stock permisiva: este caso prueba el ámbito de la farmacia, no el de la estructura. */
+const stockAccess = () => ({
+  practiceSiteOf: mockFn(async () => 'practice-site-1'),
+  assertCanManage: mockFn(async () => undefined),
+  resolve: mockFn(async () => ({ careSpaceId: null, clinicalUnitId: null })),
+});
+
 describe('Ámbito del inventario por caso de uso (PINV-01 / PINV-02)', () => {
   describe('ubicaciones', () => {
     it('crea la ubicación en una sede de la farmacia del tenant', async () => {
@@ -75,6 +82,8 @@ describe('Ámbito del inventario por caso de uso (PINV-01 / PINV-02)', () => {
         locations as any,
         b.policy,
         b.logger as any,
+        stockAccess() as any,
+        { located: mockFn() } as any,
       );
 
       await expect(
@@ -96,6 +105,8 @@ describe('Ámbito del inventario por caso de uso (PINV-01 / PINV-02)', () => {
         locations as any,
         b.policy,
         b.logger as any,
+        stockAccess() as any,
+        { located: mockFn() } as any,
       );
 
       const foreignSite = await rejection(
@@ -798,6 +809,7 @@ describe('Ámbito del inventario por caso de uso (PINV-01 / PINV-02)', () => {
       };
       const reservations = {
         findById: mockFn(async () => reservation ?? null),
+        findByIdForUpdate: mockFn(async () => reservation ?? null),
         findLinesByReservation: mockFn(async () => []),
       };
       const position = {

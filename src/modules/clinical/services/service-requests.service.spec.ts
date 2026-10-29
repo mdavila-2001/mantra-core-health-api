@@ -70,6 +70,11 @@ function build() {
     assertUsable: mockFn().mockResolvedValue(undefined),
     link: mockFn(),
   };
+  const collectionPoints = {
+    assertSuggestable: mockFn().mockResolvedValue(undefined),
+    firstOffered: mockFn().mockResolvedValue(null),
+    nameOf: mockFn().mockResolvedValue(null),
+  };
   const service = new ServiceRequestsService(
     em as any,
     serviceRequestsRepo as any,
@@ -83,8 +88,10 @@ function build() {
     new PerformerSelectionValidator(sites as any),
     siteNames as any,
     basedOnNotes as any,
+    collectionPoints as any,
   );
   return {
+    collectionPoints,
     basedOnNotes,
     sites,
     siteNames,
@@ -1023,5 +1030,147 @@ describe('ServiceRequestsService · MCH-027, el aviso de la orden', () => {
         }
       },
     );
+  });
+
+  describe('F5b · punto de toma de muestras', () => {
+    const inTenant = <T>(work: () => T): T => runWithTenant('t1', work);
+    const base = {
+      custodianTenantId: 't1',
+      patientProfileId: 'p1',
+      codeConceptId: 'code1',
+      performerSelectionConceptId: PERFORMER_SELECTION_CONCEPTS.ORGANIZATION,
+      suggestedPracticeSiteId: 'site-1',
+    };
+    const created = () => ({
+      id: 'sr1',
+      patientProfileId: 'p1',
+      custodianTenantId: 't1',
+      statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE,
+      intentConceptId: CLIN.SERVICE_REQUEST_INTENT_ORDER,
+      createdAt: new Date(),
+    });
+
+    it('un punto explícito se valida contra la sede, se guarda, se nombra y se publica', async () => {
+      const d = build();
+      d.serviceRequestsRepo.create.mockReturnValue(created());
+      d.collectionPoints.nameOf.mockResolvedValue('Box 1');
+      const res = await inTenant(() =>
+        d.service.create({ ...base, suggestedCareSpaceId: 'point-1' }, actor),
+      );
+      expect(d.collectionPoints.assertSuggestable).toHaveBeenCalledWith(
+        d.tx,
+        'site-1',
+        'point-1',
+      );
+      expect(d.serviceRequestsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          suggestedPracticeSiteId: 'site-1',
+          suggestedCareSpaceId: 'point-1',
+        }),
+      );
+      expect(res).toMatchObject({
+        suggestedCareSpaceId: 'point-1',
+        suggestedCareSpaceName: 'Box 1',
+      });
+      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          eventType: 'clinical.service_request.collection_point_suggested',
+          payloadJson: {
+            serviceRequestId: 'sr1',
+            suggestedPracticeSiteId: 'site-1',
+            suggestedCareSpaceId: 'point-1',
+            source: 'EXPLICIT',
+          },
+        }),
+      );
+    });
+
+    it('un punto inválido para la sede (422) frena la orden y no escribe nada', async () => {
+      const d = build();
+      d.collectionPoints.assertSuggestable.mockRejectedValue(
+        new PreconditionFailedException(
+          'x',
+          undefined,
+          'COLLECTION_POINT_INVALID',
+        ),
+      );
+      await expect(
+        inTenant(() =>
+          d.service.create({ ...base, suggestedCareSpaceId: 'otro' }, actor),
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.serviceRequestsRepo.create).not.toHaveBeenCalled();
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    });
+
+    it('un punto sin sede sugerida es 422 COLLECTION_POINT_REQUIRES_SITE (el modelo exige el par)', async () => {
+      const d = build();
+      const failure = await inTenant(() =>
+        d.service.create(
+          {
+            custodianTenantId: 't1',
+            patientProfileId: 'p1',
+            codeConceptId: 'code1',
+            suggestedCareSpaceId: 'point-1',
+          },
+          actor,
+        ),
+      ).catch((e: unknown) => e);
+      // sin modo de ejecutor, «el paciente elige»: no hay sede y el punto no puede ir
+      expect(failure).toBeInstanceOf(PreconditionFailedException);
+      expect((failure as any).response.reason).toBe(
+        'COLLECTION_POINT_REQUIRES_SITE',
+      );
+      expect(d.serviceRequestsRepo.create).not.toHaveBeenCalled();
+      expect(d.collectionPoints.assertSuggestable).not.toHaveBeenCalled();
+    });
+
+    it('una orden de laboratorio con sede y sin punto sugiere el primero disponible', async () => {
+      const d = build();
+      d.serviceRequestsRepo.create.mockReturnValue(created());
+      d.collectionPoints.firstOffered.mockResolvedValue('point-9');
+      await inTenant(() =>
+        d.service.create(
+          { ...base, categoryConceptId: CLIN.SERVICE_REQUEST_CATEGORY_LAB },
+          actor,
+        ),
+      );
+      expect(d.serviceRequestsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ suggestedCareSpaceId: 'point-9' }),
+      );
+      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          payloadJson: expect.objectContaining({ source: 'DEFAULT' }),
+        }),
+      );
+    });
+
+    it('sin puntos modelados o fuera de laboratorio, la orden se crea sin punto ni evento', async () => {
+      const d = build();
+      d.serviceRequestsRepo.create.mockReturnValue(created());
+      d.collectionPoints.firstOffered.mockResolvedValue(null);
+      const lab = await inTenant(() =>
+        d.service.create(
+          { ...base, categoryConceptId: CLIN.SERVICE_REQUEST_CATEGORY_LAB },
+          actor,
+        ),
+      );
+      expect(lab.suggestedCareSpaceId).toBeNull();
+      d.collectionPoints.firstOffered.mockClear();
+      const other = await inTenant(() => d.service.create({ ...base }, actor));
+      expect(d.collectionPoints.firstOffered).not.toHaveBeenCalled();
+      expect(other.suggestedCareSpaceId).toBeNull();
+      expect(
+        d.outbox.publishDomainEvent.mock.calls.filter(
+          (c: any[]) =>
+            c[1].eventType ===
+            'clinical.service_request.collection_point_suggested',
+        ),
+      ).toHaveLength(0);
+    });
   });
 });

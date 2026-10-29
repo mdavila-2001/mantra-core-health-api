@@ -32,6 +32,10 @@ function build() {
   };
   const reservationsRepo = {
     findById: mockFn(),
+    // La dispensa bloquea la reserva; para la prueba es la misma lectura.
+    findByIdForUpdate: mockFn((...args: unknown[]) =>
+      reservationsRepo.findById(...args),
+    ),
     findLinesByReservation: mockFn(async () => []),
   };
   const stockRepo = {

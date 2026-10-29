@@ -31,7 +31,10 @@ describe('Infraestructura · visibilidad de los listados de quirófano por alcan
   let acotado: { token: string };
   let sede: { token: string };
 
-  const admin = () => bearer(ctx.adminToken);
+  const admin = () => ({
+    ...bearer(ctx.adminToken),
+    'X-Tenant-Id': org.tenantId,
+  });
   const actorF4 = (o: InfraOrg) => ({ ...o, userId: '' });
   const lp = (fecha: string, hhmm: string) => `${fecha}T${hhmm}:00-04:00`;
   const rango = {

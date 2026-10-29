@@ -1,7 +1,8 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsIn, IsOptional, IsUUID, IsDateString } from 'class-validator';
 
-const ROLES = [
+/** Roles de asignación: los administrativos de siempre y los operativos de la infraestructura hospitalaria. */
+export const ASSIGNMENT_ROLES = [
   'STAFF',
   'SECRETARY',
   'ASSISTANT',
@@ -14,8 +15,18 @@ const ROLES = [
   'MAINTENANCE',
   'OR_MANAGER',
   'INFECTION_CONTROL',
+  'UNIT_HEAD',
 ] as const;
-const SCOPES = ['TENANT', 'PRACTICE', 'SITE', 'UNIT', 'SPACE'] as const;
+/** Alcances de una asignación; cada uno exige su objetivo (sede, unidad, espacio…). */
+export const ASSIGNMENT_SCOPES = [
+  'TENANT',
+  'PRACTICE',
+  'SITE',
+  'UNIT',
+  'SPACE',
+] as const;
+const ROLES = ASSIGNMENT_ROLES;
+const SCOPES = ASSIGNMENT_SCOPES;
 
 /** Cuerpo de `POST /org/{tenant_membership_id}/user-assignments` (UC-29-01). */
 export class CreateOrgUserAssignmentDto {
@@ -72,7 +83,8 @@ export class CreateOrgUserAssignmentDto {
    * Identificador asociado a care space.
    */
   @ApiPropertyOptional({
-    description: 'Nodo de scope: care space',
+    description:
+      'Nodo de scope: espacio (alcance SPACE). Se elige con el selector de espacios, nunca a mano',
     format: 'uuid',
   })
   @IsOptional()

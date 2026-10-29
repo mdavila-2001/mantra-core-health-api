@@ -64,6 +64,10 @@ export interface CreateServiceRequestData {
    */
   suggestedPracticeSiteId?: string;
   /**
+   * Punto de toma de muestras sugerido (F5b); exige la sede sugerida.
+   */
+  suggestedCareSpaceId?: string;
+  /**
    * El informe diagnóstico previo que satisface este pedido, si el motor de
    * duplicidad encontró uno y el médico decidió (antiduplicación, v4.2.17).
    */
@@ -118,6 +122,7 @@ export class ServiceRequestsRepository {
         performerSelectionConceptId: data.performerSelectionConceptId,
         performerPractitionerProfileId: data.performerPractitionerProfileId,
         suggestedPracticeSiteId: data.suggestedPracticeSiteId,
+        suggestedCareSpaceId: data.suggestedCareSpaceId,
         previousDiagnosticReportId: data.previousDiagnosticReportId,
         duplicateOverrideReason: data.duplicateOverrideReason,
         ...createdBy(data.actorUserId),

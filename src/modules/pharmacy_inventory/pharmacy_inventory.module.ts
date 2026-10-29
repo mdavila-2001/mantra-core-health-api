@@ -3,6 +3,14 @@ import { InsurancePatientSettlementModule } from '../insurance/insurance-patient
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PharmacyModule } from '../pharmacy/pharmacy.module';
+// F5c: la sede de práctica y el evaluador de infraestructura (quién puede ubicar
+// stock en un espacio). `practice` no importa este módulo, no cierra ciclo.
+import { PracticeModule } from '../practice/practice.module';
+import { InfraF5cPolicyInitializer } from './policies/infra-f5c.policy';
+import { StockPointAccessService } from './application/inventory-locations/stock-point-access.service';
+import { InventoryLocationEvents } from './application/inventory-locations/inventory-location-events';
+import { RelocateInventoryLocationUseCase } from './application/inventory-locations/relocate-inventory-location.use-case';
+import { ReadSpaceStockUseCase } from './application/inventory-locations/read-space-stock.use-case';
 import { MessagingModule } from '../messaging/messaging.module';
 import { ProfilesModule } from '../profiles/profiles.module';
 // El chat del pedido (hilo paciente ↔ vitrina de la farmacia). No hay ciclo:
@@ -99,6 +107,7 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     // disponibilidad reutiliza sus filtros de publicación y precios en vez de
     // duplicarlos.
     PharmacyModule,
+    PracticeModule,
     // `OutboxService`: el pedido del paciente (FAR-E1) publica sus hechos
     // (enviado, cancelado, vencido) en la misma transacción del cambio.
     MessagingModule,
@@ -173,6 +182,11 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     OpenInventoryCountUseCase,
     ApproveInventoryCountUseCase,
     CreateInventoryLocationUseCase,
+    RelocateInventoryLocationUseCase,
+    ReadSpaceStockUseCase,
+    StockPointAccessService,
+    InventoryLocationEvents,
+    InfraF5cPolicyInitializer,
     CreateRecallHoldUseCase,
     ReleaseRecallHoldUseCase,
     ReserveInventoryUseCase,
