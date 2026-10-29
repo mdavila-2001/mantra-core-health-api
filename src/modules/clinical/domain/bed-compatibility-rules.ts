@@ -43,7 +43,8 @@ export interface CompatibilityViolation {
 export type AdministrativeGender = 'MALE' | 'FEMALE' | 'OTHER' | 'UNKNOWN';
 
 /** Grupo etario de una cama/habitación o de un paciente. */
-export type AgeClass = 'AGE_ANY' | 'AGE_ADULT' | 'AGE_PEDIATRIC' | 'AGE_NEONATAL';
+export type AgeClass =
+  'AGE_ANY' | 'AGE_ADULT' | 'AGE_PEDIATRIC' | 'AGE_NEONATAL';
 
 /** Umbrales de `infra.age_group_thresholds`. */
 export interface AgeThresholds {
@@ -158,7 +159,11 @@ export function ageClassOf(
 ): Exclude<AgeClass, 'AGE_ANY'> | null {
   if (!birthDate) return null;
   const born = parseDay(birthDate);
-  const today = Date.UTC(at.getUTCFullYear(), at.getUTCMonth(), at.getUTCDate());
+  const today = Date.UTC(
+    at.getUTCFullYear(),
+    at.getUTCMonth(),
+    at.getUTCDate(),
+  );
   const ageDays = Math.floor((today - born) / MS_PER_DAY);
   if (ageDays < thresholds.neonatalMaxDays) return 'AGE_NEONATAL';
   const birth = new Date(born);
@@ -238,7 +243,11 @@ export function evaluateCompatibility(
         ? 'La cama requiere limpieza terminal e inspección'
         : 'La cama no está limpia e inspeccionada',
     );
-  } else if (occupancyOk && ops.occupancy.code === 'OCC_FREE' && !ops.assignable) {
+  } else if (
+    occupancyOk &&
+    ops.occupancy.code === 'OCC_FREE' &&
+    !ops.assignable
+  ) {
     // Los ejes que F3 conoce están en orden pero la operación dice que no es
     // asignable: se respeta (falla cerrado) sin inventar el motivo.
     blocking('HYGIENE', 'La operación de camas no la declara asignable');
@@ -249,7 +258,9 @@ export function evaluateCompatibility(
     const attrs =
       target.bed.pressure !== null ? target.bed : (target.room ?? target.bed);
     const validated = attrs.hvacValidatedOn
-      ? Math.floor((parseDay(toDay(at)) - parseDay(attrs.hvacValidatedOn)) / MS_PER_DAY)
+      ? Math.floor(
+          (parseDay(toDay(at)) - parseDay(attrs.hvacValidatedOn)) / MS_PER_DAY,
+        )
       : null;
     const aiirOk =
       attrs.pressure === 'PRESSURE_NEGATIVE' &&
@@ -265,10 +276,13 @@ export function evaluateCompatibility(
   }
 
   // --- forzables: justificación + incidente ------------------------------
-  const sexLimits = [target.bed.sexRestriction, target.room?.sexRestriction]
-    .filter((value): value is string => !!value && value !== 'SEX_ANY');
+  const sexLimits = [
+    target.bed.sexRestriction,
+    target.room?.sexRestriction,
+  ].filter((value): value is string => !!value && value !== 'SEX_ANY');
   for (const limit of new Set(sexLimits)) {
-    const allowed: AdministrativeGender = limit === 'SEX_FEMALE' ? 'FEMALE' : 'MALE';
+    const allowed: AdministrativeGender =
+      limit === 'SEX_FEMALE' ? 'FEMALE' : 'MALE';
     if (patient.gender !== allowed) {
       overridable(
         'SEX',
@@ -280,7 +294,11 @@ export function evaluateCompatibility(
   }
   if (
     target.room &&
-    target.roomOccupants.some((other) => bothKnown(patient.gender, other.gender) && other.gender !== patient.gender)
+    target.roomOccupants.some(
+      (other) =>
+        bothKnown(patient.gender, other.gender) &&
+        other.gender !== patient.gender,
+    )
   ) {
     overridable(
       'SEX',
@@ -304,8 +322,10 @@ export function evaluateCompatibility(
   if (
     target.roomOccupants.some(
       (other) =>
-        hasPrecaution(other.isolationCode) !== hasPrecaution(encounter.isolationCode) ||
-        (hasPrecaution(other.isolationCode) && hasPrecaution(encounter.isolationCode)),
+        hasPrecaution(other.isolationCode) !==
+          hasPrecaution(encounter.isolationCode) ||
+        (hasPrecaution(other.isolationCode) &&
+          hasPrecaution(encounter.isolationCode)),
     )
   ) {
     overridable(
@@ -336,7 +356,9 @@ function toDay(at: Date): string {
  *
  * @param violations - Resultado de {@link evaluateCompatibility}.
  */
-export function splitViolations(violations: readonly CompatibilityViolation[]): {
+export function splitViolations(
+  violations: readonly CompatibilityViolation[],
+): {
   blocking: CompatibilityViolation[];
   overridable: CompatibilityViolation[];
 } {
