@@ -153,7 +153,7 @@ higiene y aislamiento) más la **ocupación, que se deriva** de
   espacio que nace activo (`activate:true`) o se activa por el ciclo de vida queda en
   `HYG_INSPECTED` (lista para usar) y es asignable al instante. Tras el egreso queda `HYG_DIRTY`.
 - **Eventos**: `practice.care_space.status_changed` (A20), `block_started|ended|cancelled|overdue` y
-  `practice.cleaning_order.*`; contrato en `asyncapi/fragments/f2.yaml`.
+  `practice.cleaning_order.*`; contrato en `asyncapi/asyncapi.yaml`.
 
 ## Permisos
 

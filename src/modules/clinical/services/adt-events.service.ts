@@ -3,7 +3,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { OutboxService } from '../../messaging/services/outbox.service';
 
 /**
- * Eventos de la internación (CONTRATO-F2-F5 F3.3; `asyncapi/fragments/f3.yaml`).
+ * Eventos de la internación (CONTRATO-F2-F5 F3.3; `asyncapi/asyncapi.yaml`).
  *
  * Los nombres HL7 entre paréntesis son el equivalente v2 del hecho. El estado de
  * la cama (`practice.care_space.status_changed`, A20) lo emite F2 por el puerto,

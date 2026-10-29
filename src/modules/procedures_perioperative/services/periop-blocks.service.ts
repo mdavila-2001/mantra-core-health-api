@@ -55,7 +55,7 @@ export const DEFAULT_OR_BLOCK_RELEASE_HOURS = 72;
 /** Zona horaria si la sede no declara una. */
 const FALLBACK_TIME_ZONE = 'America/La_Paz';
 
-/** Eventos que publica la gestión de bloques (`asyncapi/fragments/f4.yaml`). */
+/** Eventos que publica la gestión de bloques (`asyncapi/asyncapi.yaml`). */
 export const OR_BLOCK_EVENTS = {
   created: 'periop.or_block.created',
   released: 'periop.or_block.released',

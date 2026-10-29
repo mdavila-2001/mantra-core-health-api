@@ -30,7 +30,7 @@ import type {
   ResourceResponseDto,
 } from '../../../presentation/dto';
 
-/** Evento que se publica al ligar un recurso a un espacio (`asyncapi/fragments/f4.yaml`). */
+/** Evento que se publica al ligar un recurso a un espacio (`asyncapi/asyncapi.yaml`). */
 export const RESOURCE_LINKED_TO_SPACE_EVENT =
   'scheduling.resource.linked_to_space';
 

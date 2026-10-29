@@ -138,7 +138,7 @@ export const PLAN_SETTING_KEYS = {
   inspectionRequired: 'infra.inspection_required',
 } as const;
 
-/** Eventos de outbox (`asyncapi/fragments/plano.yaml`). */
+/** Eventos de outbox (`asyncapi/asyncapi.yaml`). */
 export const PLAN_EVENTS = {
   created: 'practice.floor_plan.created',
   updated: 'practice.floor_plan.updated',

@@ -20,7 +20,7 @@ export interface PlanEvent {
 /**
  * Publica los hechos del plano al outbox **dentro de la transacción de la
  * mutación** (INV-PL-15, INV-43): el cambio y su evento se confirman juntos o
- * ninguno. Documentados en `asyncapi/fragments/plano.yaml`.
+ * ninguno. Documentados en `asyncapi/asyncapi.yaml`.
  */
 @Injectable()
 export class PlanEventsService {

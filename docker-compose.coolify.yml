@@ -791,7 +791,9 @@ services:
   # WORKERS ESENCIALES
   # Mensajería entrega los correos (activación de cuenta incluida), y sin
   # planificación ni flujos de trabajo la agenda y los procesos clínicos no
-  # avanzan solos. Estos cuatro son los que se notan apagados el primer día.
+  # avanzan solos; practice (bloqueos de espacios), clinical (cierre del censo) y
+  # periop (liberación de bloques de quirófano) cierran sus plazos sin que nadie los pida.
+  # Son los que se notan apagados el primer día.
   # =======================================================================
   worker-messaging:
     <<: *worker
@@ -800,6 +802,14 @@ services:
   worker-practice:
     <<: *worker
     command: ["node", "dist/src/worker-practice.js"]
+
+  worker-clinical:
+    <<: *worker
+    command: ["node", "dist/src/worker-clinical.js"]
+
+  worker-periop:
+    <<: *worker
+    command: ["node", "dist/src/worker-periop.js"]
 
   worker-scheduling:
     <<: *worker

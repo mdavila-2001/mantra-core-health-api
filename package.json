@@ -53,6 +53,8 @@
     "start:worker:integrations:dev": "nest start --watch --entryFile worker-integrations",
     "start:worker:messaging": "node dist/src/worker-messaging",
     "start:worker:messaging:dev": "nest start --watch --entryFile worker-messaging",
+    "start:worker:periop": "node dist/src/worker-periop",
+    "start:worker:periop:dev": "nest start --watch --entryFile worker-periop",
     "start:worker:pharmacy_inventory": "node dist/src/worker-pharmacy_inventory",
     "start:worker:pharmacy_inventory:dev": "nest start --watch --entryFile worker-pharmacy_inventory",
     "start:worker:promotions": "node dist/src/worker-promotions",

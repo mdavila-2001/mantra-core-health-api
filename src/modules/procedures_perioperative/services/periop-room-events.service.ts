@@ -21,7 +21,7 @@ import type { RecordRoomEventDto, RoomEventCode } from '../dto';
 import { PeriopChecklistGateService } from './periop-checklist-gate.service';
 import { loadCaseForUpdateInScope } from './periop-scope';
 
-/** Evento que publica el registro de un hecho de sala (`asyncapi/fragments/f4.yaml`). */
+/** Evento que publica el registro de un hecho de sala (`asyncapi/asyncapi.yaml`). */
 export const ROOM_EVENT_RECORDED = 'periop.case.room_event_recorded';
 
 /** Orden obligatorio de los hechos de un caso en sala. */

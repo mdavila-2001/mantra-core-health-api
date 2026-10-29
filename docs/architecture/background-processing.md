@@ -34,6 +34,7 @@ flowchart TB
 | `worker-audio-assets` | `audio_assets` | Consume `audio-generation`: TTS, storage propio y confirmación idempotente |
 | `worker-automation` | `automation` | Ticks de reglas de automatización |
 | `worker-billing` | `billing` | Dunning (cobranza), facturación periódica |
+| `worker-clinical` | `clinical` | Cierra el censo diario de internación al pasar el corte más la gracia (`POST /internal/clinical/census-close-tick`, infraestructura hospitalaria F3) |
 | `worker-consent` | `consent` | Barrido de expiración de consentimientos (`UC-07-11`) |
 | `worker-cross_store_consistency` | `cross_store_consistency` | Reconciliación entre Postgres/Mongo/OpenSearch |
 | `worker-delegated_access` | `delegated_access` | Expiración de accesos delegados |
@@ -41,6 +42,7 @@ flowchart TB
 | `worker-identity_assurance` | `identity_assurance` | Ticks de verificación de identidad |
 | `worker-integrations` | `integrations` | Ticks de integraciones externas |
 | `worker-messaging` | `messaging` | Drena el outbox: reclama, despacha, registra acuse |
+| `worker-periop` | `periop` | Libera los bloques de quirófano cuyo plazo llegó y no tienen casos (`POST /internal/periop/or-blocks-release-tick`, infraestructura hospitalaria F4) |
 | `worker-pharmacy_inventory` | `pharmacy_inventory` | Barridos de inventario farmacéutico |
 | `worker-promotions` | `promotions` | Expiración/activación de promociones |
 | `worker-qa_lab` | `qa_lab` | Ticks de laboratorio de calidad |

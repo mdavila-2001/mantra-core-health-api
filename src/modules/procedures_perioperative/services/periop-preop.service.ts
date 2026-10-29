@@ -133,7 +133,7 @@ export const SEVERITY_CONCEPT: Readonly<Record<ClinicalSeverity, string>> = {
   CRITICAL: CONCEPTS.SEVERITY_CRITICAL,
 };
 
-/** Eventos del check-list (`asyncapi/fragments/f4.yaml`). */
+/** Eventos del check-list (`asyncapi/asyncapi.yaml`). */
 export const CHECKLIST_EVENTS = {
   created: 'periop.checklist.created',
   phaseCompleted: 'periop.checklist.phase_completed',

@@ -1,4 +1,5 @@
 asyncapi: 3.1.0
+
 info:
   title: ALOVIDA Health API — Eventos de dominio y colas
   version: "0.0.1"
@@ -80,6 +81,161 @@ channels:
       providerReceipt:
         $ref: '#/components/messages/ProviderReceipt'
 
+  # Estructura de infraestructura (F1)
+  practiceStructureEvents:
+    address: practice.structure
+    description: >
+      Hechos de la estructura de infraestructura. El envelope real es
+      `messaging.domain_events` (eventType, aggregateType, aggregateId, payloadJson);
+      aquí se describe el `payloadJson` de cada `eventType` dot.case.
+    messages:
+      CareSpaceCreated:
+        $ref: '#/components/messages/CareSpaceCreated'
+      CareSpaceUpdated:
+        $ref: '#/components/messages/CareSpaceUpdated'
+      CareSpaceMoved:
+        $ref: '#/components/messages/CareSpaceMoved'
+      CareSpaceLifecycleChanged:
+        $ref: '#/components/messages/CareSpaceLifecycleChanged'
+      ClinicalUnitCreated:
+        $ref: '#/components/messages/ClinicalUnitCreated'
+      ClinicalUnitUpdated:
+        $ref: '#/components/messages/ClinicalUnitUpdated'
+      ClinicalUnitLifecycleChanged:
+        $ref: '#/components/messages/ClinicalUnitLifecycleChanged'
+      SpaceUnitAssignmentCreated:
+        $ref: '#/components/messages/SpaceUnitAssignmentCreated'
+      SpaceUnitAssignmentClosed:
+        $ref: '#/components/messages/SpaceUnitAssignmentClosed'
+      SiteRegulatoryUpdated:
+        $ref: '#/components/messages/SiteRegulatoryUpdated'
+      SiteSnisVerified:
+        $ref: '#/components/messages/SiteSnisVerified'
+      SiteLicenseCreated:
+        $ref: '#/components/messages/SiteLicenseCreated'
+      SiteLicenseUpdated:
+        $ref: '#/components/messages/SiteLicenseUpdated'
+      SiteDeclaredCapacityRecorded:
+        $ref: '#/components/messages/SiteDeclaredCapacityRecorded'
+
+  # Operación de espacios: estados, bloqueos y limpieza (F2)
+  practiceOperationEvents:
+    address: practice.operation
+    description: >
+      Hechos de la operación de espacios. El envelope real es `messaging.domain_events`
+      (eventType, aggregateType, aggregateId, payloadJson); aquí se describe el
+      `payloadJson` de cada `eventType` dot.case.
+    messages:
+      CareSpaceStatusChanged:
+        $ref: '#/components/messages/CareSpaceStatusChanged'
+      CareSpaceBlockStarted:
+        $ref: '#/components/messages/CareSpaceBlockStarted'
+      CareSpaceBlockEnded:
+        $ref: '#/components/messages/CareSpaceBlockEnded'
+      CareSpaceBlockCancelled:
+        $ref: '#/components/messages/CareSpaceBlockCancelled'
+      CareSpaceBlockOverdue:
+        $ref: '#/components/messages/CareSpaceBlockOverdue'
+      CleaningOrderCreated:
+        $ref: '#/components/messages/CleaningOrderCreated'
+      CleaningOrderAssigned:
+        $ref: '#/components/messages/CleaningOrderAssigned'
+      CleaningOrderStarted:
+        $ref: '#/components/messages/CleaningOrderStarted'
+      CleaningOrderFinished:
+        $ref: '#/components/messages/CleaningOrderFinished'
+      CleaningOrderInspected:
+        $ref: '#/components/messages/CleaningOrderInspected'
+      CleaningOrderRejected:
+        $ref: '#/components/messages/CleaningOrderRejected'
+      CleaningOrderCancelled:
+        $ref: '#/components/messages/CleaningOrderCancelled'
+
+  # Internación y ADT (F3)
+  clinicalAdtEvents:
+    address: clinical.adt
+    description: >
+      Movimientos de internación. El envelope real es `messaging.domain_events` (eventType,
+      aggregateType, aggregateId, payloadJson); aquí se describe el `payloadJson` de cada `eventType`
+      dot.case.
+    messages:
+      AdtAdmitted:
+        $ref: '#/components/messages/AdtAdmitted'
+      AdtBedAssigned:
+        $ref: '#/components/messages/AdtBedAssigned'
+      AdtReservationCreated:
+        $ref: '#/components/messages/AdtReservationCreated'
+      AdtReservationCancelled:
+        $ref: '#/components/messages/AdtReservationCancelled'
+      AdtPlacementOverride:
+        $ref: '#/components/messages/AdtPlacementOverride'
+      AdtTransferred:
+        $ref: '#/components/messages/AdtTransferred'
+      AdtTransferCancelled:
+        $ref: '#/components/messages/AdtTransferCancelled'
+      AdtSwapped:
+        $ref: '#/components/messages/AdtSwapped'
+      AdtDischarged:
+        $ref: '#/components/messages/AdtDischarged'
+      AdtPlacementIncidentReviewed:
+        $ref: '#/components/messages/AdtPlacementIncidentReviewed'
+  clinicalCensusEvents:
+    address: clinical.census
+    description: >
+      Censo diario de internación. Alimenta los indicadores de cama (`procesos/12`) y el día-cama de
+      facturación (F5e).
+    messages:
+      CensusDayClosed:
+        $ref: '#/components/messages/CensusDayClosed'
+      CensusDayAdjusted:
+        $ref: '#/components/messages/CensusDayAdjusted'
+
+  # Quirófanos y perioperatorio (F4)
+  schedulingResourceEvents:
+    address: scheduling.resource
+    description: >
+      Hechos del catálogo de recursos agendables. El envelope real es
+      `messaging.domain_events`; aquí se describe el `payloadJson` de cada `eventType`.
+    messages:
+      ResourceLinkedToSpace:
+        $ref: '#/components/messages/ResourceLinkedToSpace'
+  periopOperatingRoomEvents:
+    address: periop.operating_room
+    description: >
+      Bloques de quirófano, check-list OMS y hechos de sala de un caso.
+    messages:
+      OrBlockCreated:
+        $ref: '#/components/messages/OrBlockCreated'
+      OrBlockReleased:
+        $ref: '#/components/messages/OrBlockReleased'
+      OrBlockCancelled:
+        $ref: '#/components/messages/OrBlockCancelled'
+      ChecklistCreated:
+        $ref: '#/components/messages/ChecklistCreated'
+      ChecklistPhaseCompleted:
+        $ref: '#/components/messages/ChecklistPhaseCompleted'
+      CaseRoomEventRecorded:
+        $ref: '#/components/messages/CaseRoomEventRecorded'
+
+  # Plano de planta (F1c)
+  practiceFloorPlanEvents:
+    address: practice.floor_plan
+    description: >
+      Hechos del plano de planta. El envelope real es `messaging.domain_events`
+      (eventType, aggregateType, aggregateId = id del lienzo, payloadJson); aquí se
+      describe el `payloadJson` de cada `eventType` dot.case.
+    messages:
+      FloorPlanCreated:
+        $ref: '#/components/messages/FloorPlanCreated'
+      FloorPlanUpdated:
+        $ref: '#/components/messages/FloorPlanUpdated'
+      FloorPlanLifecycleChanged:
+        $ref: '#/components/messages/FloorPlanLifecycleChanged'
+      FloorPlanBackgroundChanged:
+        $ref: '#/components/messages/FloorPlanBackgroundChanged'
+      FloorPlanLayoutChanged:
+        $ref: '#/components/messages/FloorPlanLayoutChanged'
+
 operations:
   publishDomainEvent:
     action: send
@@ -119,6 +275,68 @@ operations:
     channel:
       $ref: '#/channels/providerWebhookReceipt'
     summary: Un proveedor externo confirma el estado final de una notificación enviada.
+
+  # Estructura de infraestructura (F1)
+  publishPracticeStructureEvent:
+    action: send
+    channel:
+      $ref: '#/channels/practiceStructureEvents'
+    summary: >
+      Los servicios de estructura de `practice` publican cada hecho con
+      `StructureEventsService` (OutboxService.publishDomainEvent) en la transacción de la mutación.
+
+  # Operación de espacios: estados, bloqueos y limpieza (F2)
+  publishPracticeOperationEvent:
+    action: send
+    channel:
+      $ref: '#/channels/practiceOperationEvents'
+    summary: >
+      Los servicios de operación de `practice` publican cada hecho con `OpsEventsService`
+      (OutboxService.publishDomainEvent) en la transacción de la mutación. La clave de
+      idempotencia es `eventType:aggregateId:uniqueRef` (la fila A20, la versión de la
+      orden o la fecha estimada del bloqueo), así que reintentar no duplica.
+
+  # Internación y ADT (F3)
+  publishClinicalAdtEvent:
+    action: send
+    channel:
+      $ref: '#/channels/clinicalAdtEvents'
+    summary: >
+      `InpatientAdtService` publica cada movimiento con `AdtEventsService`
+      (OutboxService.publishDomainEvent) en la transacción de la mutación.
+  publishClinicalCensusEvent:
+    action: send
+    channel:
+      $ref: '#/channels/clinicalCensusEvents'
+    summary: >
+      `InpatientCensusService` publica el cierre y cada ajuste del censo en la transacción que los
+      escribe; el cierre programado lo dispara el worker `clinical` (`actorUserId` nulo).
+
+  # Quirófanos y perioperatorio (F4)
+  publishSchedulingResourceEvent:
+    action: send
+    channel:
+      $ref: '#/channels/schedulingResourceEvents'
+    summary: >
+      `SpaceResourceLinker` publica el alta de un recurso ligado a un espacio con
+      OutboxService.publishDomainEvent, en la transacción del alta.
+  publishPeriopOperatingRoomEvent:
+    action: send
+    channel:
+      $ref: '#/channels/periopOperatingRoomEvents'
+    summary: >
+      Los servicios de bloques, check-list y hechos de sala publican cada hecho con
+      OutboxService.publishDomainEvent en la transacción de la mutación (los tick de
+      liberación automática los publican con `automatic: true` y sin actor).
+
+  # Plano de planta (F1c)
+  publishPracticeFloorPlanEvent:
+    action: send
+    channel:
+      $ref: '#/channels/practiceFloorPlanEvents'
+    summary: >
+      Los servicios del plano publican cada hecho con `PlanEventsService`
+      (OutboxService.publishDomainEvent) en la transacción de la mutación.
 
 components:
   messages:
@@ -200,6 +418,1610 @@ components:
             type: string
             enum: [delivered, bounced]
 
+    # Estructura de infraestructura (F1)
+    CareSpaceCreated:
+      name: CareSpaceCreated
+      title: practice.care_space.created
+      summary: 'Un espacio físico se creó (alta individual, masiva o importación).'
+      payload:
+        type: object
+        required:
+          [careSpaceId, practiceSiteId, code, formCode, status, rowVersion]
+        properties:
+          careSpaceId:
+            type: string
+            format: uuid
+          practiceSiteId:
+            type: string
+            format: uuid
+          parentSpaceId:
+            type: [string, 'null']
+            format: uuid
+          code:
+            type: string
+          formCode:
+            type: string
+          status:
+            type: string
+            enum: [SPACE_ACTIVE, SPACE_PLANNED]
+          rowVersion:
+            type: integer
+      x-event-type: practice.care_space.created
+      x-aggregate-type: care_space
+    CareSpaceUpdated:
+      name: CareSpaceUpdated
+      title: practice.care_space.updated
+      summary: 'Cambiaron atributos de un espacio (PATCH).'
+      payload:
+        type: object
+        required: [careSpaceId, changedFields, rowVersion]
+        properties:
+          careSpaceId:
+            type: string
+            format: uuid
+          changedFields:
+            type: array
+            items:
+              type: string
+          rowVersion:
+            type: integer
+      x-event-type: practice.care_space.updated
+      x-aggregate-type: care_space
+    CareSpaceMoved:
+      name: CareSpaceMoved
+      title: practice.care_space.moved
+      summary: 'Un espacio (con su subárbol) cambió de padre.'
+      payload:
+        type: object
+        required: [careSpaceId, rowVersion]
+        properties:
+          careSpaceId:
+            type: string
+            format: uuid
+          fromParentSpaceId:
+            type: [string, 'null']
+            format: uuid
+          toParentSpaceId:
+            type: [string, 'null']
+            format: uuid
+          rowVersion:
+            type: integer
+      x-event-type: practice.care_space.moved
+      x-aggregate-type: care_space
+    CareSpaceLifecycleChanged:
+      name: CareSpaceLifecycleChanged
+      title: practice.care_space.lifecycle_changed
+      summary: 'Transición de ciclo de vida de un espacio (abrir, cerrar, clausurar…).'
+      payload:
+        type: object
+        required: [careSpaceId, action, from, to, rowVersion]
+        properties:
+          careSpaceId:
+            type: string
+            format: uuid
+          action:
+            type: string
+          from:
+            type: string
+          to:
+            type: string
+          reason:
+            type: [string, 'null']
+          rowVersion:
+            type: integer
+      x-event-type: practice.care_space.lifecycle_changed
+      x-aggregate-type: care_space
+    ClinicalUnitCreated:
+      name: ClinicalUnitCreated
+      title: practice.clinical_unit.created
+      summary: 'Se creó una unidad clínica.'
+      payload:
+        type: object
+        required: [clinicalUnitId, practiceSiteId, code, rowVersion]
+        properties:
+          clinicalUnitId:
+            type: string
+            format: uuid
+          practiceSiteId:
+            type: string
+            format: uuid
+          parentUnitId:
+            type: [string, 'null']
+            format: uuid
+          code:
+            type: string
+          rowVersion:
+            type: integer
+      x-event-type: practice.clinical_unit.created
+      x-aggregate-type: clinical_unit
+    ClinicalUnitUpdated:
+      name: ClinicalUnitUpdated
+      title: practice.clinical_unit.updated
+      summary: 'Cambiaron atributos de una unidad clínica.'
+      payload:
+        type: object
+        required: [clinicalUnitId, changedFields, rowVersion]
+        properties:
+          clinicalUnitId:
+            type: string
+            format: uuid
+          changedFields:
+            type: array
+            items:
+              type: string
+          rowVersion:
+            type: integer
+      x-event-type: practice.clinical_unit.updated
+      x-aggregate-type: clinical_unit
+    ClinicalUnitLifecycleChanged:
+      name: ClinicalUnitLifecycleChanged
+      title: practice.clinical_unit.lifecycle_changed
+      summary: 'Transición de ciclo de vida de una unidad clínica.'
+      payload:
+        type: object
+        required: [clinicalUnitId, action, from, to, rowVersion]
+        properties:
+          clinicalUnitId:
+            type: string
+            format: uuid
+          action:
+            type: string
+          from:
+            type: string
+          to:
+            type: string
+          reason:
+            type: [string, 'null']
+          rowVersion:
+            type: integer
+      x-event-type: practice.clinical_unit.lifecycle_changed
+      x-aggregate-type: clinical_unit
+    SpaceUnitAssignmentCreated:
+      name: SpaceUnitAssignmentCreated
+      title: practice.space_unit_assignment.created
+      summary: 'Se vinculó un espacio con una unidad clínica.'
+      payload:
+        type: object
+        required: [assignmentId, careSpaceId, clinicalUnitId, role]
+        properties:
+          assignmentId:
+            type: string
+            format: uuid
+          careSpaceId:
+            type: string
+            format: uuid
+          clinicalUnitId:
+            type: string
+            format: uuid
+          role:
+            type: string
+      x-event-type: practice.space_unit_assignment.created
+      x-aggregate-type: care_space
+    SpaceUnitAssignmentClosed:
+      name: SpaceUnitAssignmentClosed
+      title: practice.space_unit_assignment.closed
+      summary: 'Se cerró la vigencia de un vínculo espacio-unidad.'
+      payload:
+        type: object
+        required: [assignmentId, careSpaceId, clinicalUnitId]
+        properties:
+          assignmentId:
+            type: string
+            format: uuid
+          careSpaceId:
+            type: string
+            format: uuid
+          clinicalUnitId:
+            type: string
+            format: uuid
+      x-event-type: practice.space_unit_assignment.closed
+      x-aggregate-type: care_space
+    SiteRegulatoryUpdated:
+      name: SiteRegulatoryUpdated
+      title: practice.site.regulatory_updated
+      summary: 'Cambiaron los datos regulatorios de un establecimiento.'
+      payload:
+        type: object
+        required: [practiceSiteId, changedFields, rowVersion]
+        properties:
+          practiceSiteId:
+            type: string
+            format: uuid
+          changedFields:
+            type: array
+            items:
+              type: string
+          rowVersion:
+            type: integer
+      x-event-type: practice.site.regulatory_updated
+      x-aggregate-type: practice_site
+    SiteSnisVerified:
+      name: SiteSnisVerified
+      title: practice.site.snis_verified
+      summary: 'La plataforma verificó el código SNIS de un establecimiento. Sólo la plataforma emite este hecho.'
+      payload:
+        type: object
+        required: [practiceSiteId, snisCode]
+        properties:
+          practiceSiteId:
+            type: string
+            format: uuid
+          snisCode:
+            type: string
+      x-event-type: practice.site.snis_verified
+      x-aggregate-type: practice_site
+    SiteLicenseCreated:
+      name: SiteLicenseCreated
+      title: practice.site_license.created
+      summary: 'Se registró una habilitación sobre organization_extensions.facility_licenses.'
+      payload:
+        type: object
+        required: [licenseId, practiceSiteId, rowVersion]
+        properties:
+          licenseId:
+            type: string
+            format: uuid
+          practiceSiteId:
+            type: string
+            format: uuid
+          rowVersion:
+            type: integer
+      x-event-type: practice.site_license.created
+      x-aggregate-type: facility_license
+    SiteLicenseUpdated:
+      name: SiteLicenseUpdated
+      title: practice.site_license.updated
+      summary: 'Cambió una habilitación del establecimiento.'
+      payload:
+        type: object
+        required: [licenseId, practiceSiteId, changedFields, rowVersion]
+        properties:
+          licenseId:
+            type: string
+            format: uuid
+          practiceSiteId:
+            type: string
+            format: uuid
+          changedFields:
+            type: array
+            items:
+              type: string
+          rowVersion:
+            type: integer
+      x-event-type: practice.site_license.updated
+      x-aggregate-type: facility_license
+    SiteDeclaredCapacityRecorded:
+      name: SiteDeclaredCapacityRecorded
+      title: practice.site.declared_capacity_recorded
+      summary: 'Se agregó una capacidad declarada (no sobrescribe: la capacidad derivada se calcula, nunca se escribe).'
+      payload:
+        type: object
+        required: [practiceSiteId, declarationId, kindCode, quantity, asOf]
+        properties:
+          practiceSiteId:
+            type: string
+            format: uuid
+          declarationId:
+            type: string
+            format: uuid
+          kindCode:
+            type: string
+          quantity:
+            type: integer
+          asOf:
+            type: string
+            format: date
+      x-event-type: practice.site.declared_capacity_recorded
+      x-aggregate-type: practice_site
+
+    # Operación de espacios: estados, bloqueos y limpieza (F2)
+    CareSpaceStatusChanged:
+      name: CareSpaceStatusChanged
+      title: practice.care_space.status_changed
+      summary: 'Un eje de estado de un espacio cambió de valor (equivalente a ADT^A20 / NPU-1, NPU-2). Se publica uno por eje afectado, con el mismo `eventId` que la fila append-only.'
+      payload:
+        type: object
+        required: [careSpaceId, siteId, axis, to, v2Code, source, occurredAt, eventId]
+        properties:
+          careSpaceId:
+            type: string
+            format: uuid
+          siteId:
+            type: string
+            format: uuid
+          eventId:
+            type: string
+            format: uuid
+            description: Id de la fila append-only de `care_space_status_events`.
+          axis:
+            type: string
+            description: Eje que cambió.
+            enum: [AXIS_AVAILABILITY, AXIS_HYGIENE, AXIS_ISOLATION, AXIS_OCCUPANCY]
+          from:
+            type: [string, 'null']
+          to:
+            type: string
+          v2Code:
+            type: string
+            description: Resumen HL7 v2-0116 resultante (C, H, I, K, O, U; R es extensión local `urn:mantra:bed-status`).
+            enum: [C, H, I, K, O, U, R]
+          reasonCode:
+            type: [string, 'null']
+          reasonText:
+            type: [string, 'null']
+          expectedUntil:
+            type: [string, 'null']
+            format: date-time
+          source:
+            type: string
+            description: Origen del cambio.
+            enum: [SRC_MANUAL, SRC_ADT, SRC_CLEANING, SRC_BLOCK, SRC_ROOM_EVENT, SRC_SYSTEM]
+          sourceRefId:
+            type: [string, 'null']
+            format: uuid
+          occurredAt:
+            type: string
+            format: date-time
+          opsVersion:
+            type: integer
+          actingRoles:
+            type: array
+            items:
+              type: string
+            description: Roles con los que actuó quien hizo el cambio.
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+            description: Nulo cuando lo origina el sistema (worker, ADT automático).
+          requestId:
+            type: [string, 'null']
+            description: Id de correlación de la petición HTTP que originó el cambio.
+      x-event-type: practice.care_space.status_changed
+      x-aggregate-type: care_space
+    CareSpaceBlockStarted:
+      name: CareSpaceBlockStarted
+      title: practice.care_space.block_started
+      summary: 'Un bloqueo (clínico, administrativo, mantenimiento o cierre) empezó a regir en el espacio. Un bloqueo programado lo publica `blocks-tick` cuando llega su hora.'
+      payload:
+        type: object
+        required: [blockId, careSpaceId, siteId, kind, startsAt]
+        properties:
+          blockId:
+            type: string
+            format: uuid
+          careSpaceId:
+            type: string
+            format: uuid
+          siteId:
+            type: string
+            format: uuid
+          kind:
+            type: string
+            enum: [BLOCK_CLINICAL, BLOCK_ADMIN, BLOCK_MAINTENANCE, BLOCK_CLOSURE]
+          reasonCode:
+            type: [string, 'null']
+          reasonText:
+            type: [string, 'null']
+          startsAt:
+            type: string
+            format: date-time
+          expectedEndAt:
+            type: [string, 'null']
+            format: date-time
+          workOrderRef:
+            type: [string, 'null']
+          v2Code:
+            type: string
+            description: Resumen v2-0116 del espacio al empezar.
+          actingRoles:
+            type: array
+            items:
+              type: string
+            description: Roles con los que actuó quien hizo el cambio.
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+            description: Nulo cuando lo origina el sistema (worker, ADT automático).
+          requestId:
+            type: [string, 'null']
+            description: Id de correlación de la petición HTTP que originó el cambio.
+      x-event-type: practice.care_space.block_started
+      x-aggregate-type: care_space_block
+    CareSpaceBlockEnded:
+      name: CareSpaceBlockEnded
+      title: practice.care_space.block_ended
+      summary: 'Un bloqueo terminó y el espacio volvió a disponible. El fin de un mantenimiento abre una orden de limpieza (`cleaningOrderId`).'
+      payload:
+        type: object
+        required: [blockId, careSpaceId, siteId, kind, endedAt]
+        properties:
+          blockId:
+            type: string
+            format: uuid
+          careSpaceId:
+            type: string
+            format: uuid
+          siteId:
+            type: string
+            format: uuid
+          kind:
+            type: string
+            enum: [BLOCK_CLINICAL, BLOCK_ADMIN, BLOCK_MAINTENANCE, BLOCK_CLOSURE]
+          endedAt:
+            type: string
+            format: date-time
+          note:
+            type: [string, 'null']
+          cleaningOrderId:
+            type: [string, 'null']
+            format: uuid
+          actingRoles:
+            type: array
+            items:
+              type: string
+            description: Roles con los que actuó quien hizo el cambio.
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+            description: Nulo cuando lo origina el sistema (worker, ADT automático).
+          requestId:
+            type: [string, 'null']
+            description: Id de correlación de la petición HTTP que originó el cambio.
+      x-event-type: practice.care_space.block_ended
+      x-aggregate-type: care_space_block
+    CareSpaceBlockCancelled:
+      name: CareSpaceBlockCancelled
+      title: practice.care_space.block_cancelled
+      summary: 'Un bloqueo se canceló con motivo (programado o vigente).'
+      payload:
+        type: object
+        required: [blockId, careSpaceId, siteId, kind, cancelledAt, reason]
+        properties:
+          blockId:
+            type: string
+            format: uuid
+          careSpaceId:
+            type: string
+            format: uuid
+          siteId:
+            type: string
+            format: uuid
+          kind:
+            type: string
+            enum: [BLOCK_CLINICAL, BLOCK_ADMIN, BLOCK_MAINTENANCE, BLOCK_CLOSURE]
+          cancelledAt:
+            type: string
+            format: date-time
+          reason:
+            type: string
+          actingRoles:
+            type: array
+            items:
+              type: string
+            description: Roles con los que actuó quien hizo el cambio.
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+            description: Nulo cuando lo origina el sistema (worker, ADT automático).
+          requestId:
+            type: [string, 'null']
+            description: Id de correlación de la petición HTTP que originó el cambio.
+      x-event-type: practice.care_space.block_cancelled
+      x-aggregate-type: care_space_block
+    CareSpaceBlockOverdue:
+      name: CareSpaceBlockOverdue
+      title: practice.care_space.block_overdue
+      summary: 'Pasó la fecha estimada de fin y el bloqueo sigue abierto. Un aviso por bloqueo y fecha estimada (idempotente).'
+      payload:
+        type: object
+        required: [blockId, careSpaceId, kind, expectedEndAt, overdueMinutes]
+        properties:
+          blockId:
+            type: string
+            format: uuid
+          careSpaceId:
+            type: string
+            format: uuid
+          kind:
+            type: [string, 'null']
+          reasonCode:
+            type: [string, 'null']
+          startsAt:
+            type: string
+            format: date-time
+          expectedEndAt:
+            type: string
+            format: date-time
+          overdueMinutes:
+            type: integer
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+            description: Nulo cuando lo origina el sistema (worker, ADT automático).
+          requestId:
+            type: [string, 'null']
+            description: Id de correlación de la petición HTTP que originó el cambio.
+      x-event-type: practice.care_space.block_overdue
+      x-aggregate-type: care_space_block
+    CleaningOrderCreated:
+      name: CleaningOrderCreated
+      title: practice.cleaning_order.created
+      summary: 'Se abrió una orden de limpieza (egreso, traslado, manual, fin de aislamiento o de mantenimiento, recambio de quirófano, inspección rechazada).'
+      payload:
+        type: object
+        required: [cleaningOrderId, careSpaceId, siteId, status, rowVersion]
+        properties:
+          cleaningOrderId:
+            type: string
+            format: uuid
+          careSpaceId:
+            type: string
+            format: uuid
+          siteId:
+            type: string
+            format: uuid
+          type:
+            type: [string, 'null']
+            enum: [CLEAN_ROUTINE, CLEAN_DISCHARGE, CLEAN_TERMINAL, CLEAN_OR_TURNOVER, CLEAN_SPOT]
+          trigger:
+            type: [string, 'null']
+          priority:
+            type: [string, 'null']
+          status:
+            type: [string, 'null']
+            enum: [CLN_PENDING, CLN_IN_PROGRESS, CLN_DONE, CLN_INSPECTED, CLN_REJECTED, CLN_CANCELLED]
+          sourceRefId:
+            type: [string, 'null']
+            format: uuid
+          previousOrderId:
+            type: [string, 'null']
+            format: uuid
+          assignedUserId:
+            type: [string, 'null']
+            format: uuid
+          rowVersion:
+            type: integer
+          actingRoles:
+            type: array
+            items:
+              type: string
+            description: Roles con los que actuó quien hizo el cambio.
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+            description: Nulo cuando lo origina el sistema (worker, ADT automático).
+          requestId:
+            type: [string, 'null']
+            description: Id de correlación de la petición HTTP que originó el cambio.
+      x-event-type: practice.cleaning_order.created
+      x-aggregate-type: cleaning_order
+    CleaningOrderAssigned:
+      name: CleaningOrderAssigned
+      title: practice.cleaning_order.assigned
+      summary: 'Se asignó o desasignó la orden de limpieza.'
+      payload:
+        type: object
+        required: [cleaningOrderId, careSpaceId, siteId, status, rowVersion]
+        properties:
+          cleaningOrderId:
+            type: string
+            format: uuid
+          careSpaceId:
+            type: string
+            format: uuid
+          siteId:
+            type: string
+            format: uuid
+          type:
+            type: [string, 'null']
+            enum: [CLEAN_ROUTINE, CLEAN_DISCHARGE, CLEAN_TERMINAL, CLEAN_OR_TURNOVER, CLEAN_SPOT]
+          trigger:
+            type: [string, 'null']
+          priority:
+            type: [string, 'null']
+          status:
+            type: [string, 'null']
+            enum: [CLN_PENDING, CLN_IN_PROGRESS, CLN_DONE, CLN_INSPECTED, CLN_REJECTED, CLN_CANCELLED]
+          sourceRefId:
+            type: [string, 'null']
+            format: uuid
+          previousOrderId:
+            type: [string, 'null']
+            format: uuid
+          assignedUserId:
+            type: [string, 'null']
+            format: uuid
+          rowVersion:
+            type: integer
+          actingRoles:
+            type: array
+            items:
+              type: string
+            description: Roles con los que actuó quien hizo el cambio.
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+            description: Nulo cuando lo origina el sistema (worker, ADT automático).
+          requestId:
+            type: [string, 'null']
+            description: Id de correlación de la petición HTTP que originó el cambio.
+      x-event-type: practice.cleaning_order.assigned
+      x-aggregate-type: cleaning_order
+    CleaningOrderStarted:
+      name: CleaningOrderStarted
+      title: practice.cleaning_order.started
+      summary: 'Empezó la limpieza: el espacio pasa a «limpiando».'
+      payload:
+        type: object
+        required: [cleaningOrderId, careSpaceId, siteId, status, rowVersion]
+        properties:
+          cleaningOrderId:
+            type: string
+            format: uuid
+          careSpaceId:
+            type: string
+            format: uuid
+          siteId:
+            type: string
+            format: uuid
+          type:
+            type: [string, 'null']
+            enum: [CLEAN_ROUTINE, CLEAN_DISCHARGE, CLEAN_TERMINAL, CLEAN_OR_TURNOVER, CLEAN_SPOT]
+          trigger:
+            type: [string, 'null']
+          priority:
+            type: [string, 'null']
+          status:
+            type: [string, 'null']
+            enum: [CLN_PENDING, CLN_IN_PROGRESS, CLN_DONE, CLN_INSPECTED, CLN_REJECTED, CLN_CANCELLED]
+          sourceRefId:
+            type: [string, 'null']
+            format: uuid
+          previousOrderId:
+            type: [string, 'null']
+            format: uuid
+          assignedUserId:
+            type: [string, 'null']
+            format: uuid
+          rowVersion:
+            type: integer
+          actingRoles:
+            type: array
+            items:
+              type: string
+            description: Roles con los que actuó quien hizo el cambio.
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+            description: Nulo cuando lo origina el sistema (worker, ADT automático).
+          requestId:
+            type: [string, 'null']
+            description: Id de correlación de la petición HTTP que originó el cambio.
+      x-event-type: practice.cleaning_order.started
+      x-aggregate-type: cleaning_order
+    CleaningOrderFinished:
+      name: CleaningOrderFinished
+      title: practice.cleaning_order.finished
+      summary: 'Terminó la limpieza: el espacio queda limpio, a la espera de la inspección.'
+      payload:
+        type: object
+        required: [cleaningOrderId, careSpaceId, siteId, status, rowVersion]
+        properties:
+          cleaningOrderId:
+            type: string
+            format: uuid
+          careSpaceId:
+            type: string
+            format: uuid
+          siteId:
+            type: string
+            format: uuid
+          type:
+            type: [string, 'null']
+            enum: [CLEAN_ROUTINE, CLEAN_DISCHARGE, CLEAN_TERMINAL, CLEAN_OR_TURNOVER, CLEAN_SPOT]
+          trigger:
+            type: [string, 'null']
+          priority:
+            type: [string, 'null']
+          status:
+            type: [string, 'null']
+            enum: [CLN_PENDING, CLN_IN_PROGRESS, CLN_DONE, CLN_INSPECTED, CLN_REJECTED, CLN_CANCELLED]
+          sourceRefId:
+            type: [string, 'null']
+            format: uuid
+          previousOrderId:
+            type: [string, 'null']
+            format: uuid
+          assignedUserId:
+            type: [string, 'null']
+            format: uuid
+          rowVersion:
+            type: integer
+          actingRoles:
+            type: array
+            items:
+              type: string
+            description: Roles con los que actuó quien hizo el cambio.
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+            description: Nulo cuando lo origina el sistema (worker, ADT automático).
+          requestId:
+            type: [string, 'null']
+            description: Id de correlación de la petición HTTP que originó el cambio.
+      x-event-type: practice.cleaning_order.finished
+      x-aggregate-type: cleaning_order
+    CleaningOrderInspected:
+      name: CleaningOrderInspected
+      title: practice.cleaning_order.inspected
+      summary: 'La inspección aprobó la limpieza: el espacio queda inspeccionado.'
+      payload:
+        type: object
+        required: [cleaningOrderId, careSpaceId, siteId, status, rowVersion]
+        properties:
+          cleaningOrderId:
+            type: string
+            format: uuid
+          careSpaceId:
+            type: string
+            format: uuid
+          siteId:
+            type: string
+            format: uuid
+          type:
+            type: [string, 'null']
+            enum: [CLEAN_ROUTINE, CLEAN_DISCHARGE, CLEAN_TERMINAL, CLEAN_OR_TURNOVER, CLEAN_SPOT]
+          trigger:
+            type: [string, 'null']
+          priority:
+            type: [string, 'null']
+          status:
+            type: [string, 'null']
+            enum: [CLN_PENDING, CLN_IN_PROGRESS, CLN_DONE, CLN_INSPECTED, CLN_REJECTED, CLN_CANCELLED]
+          sourceRefId:
+            type: [string, 'null']
+            format: uuid
+          previousOrderId:
+            type: [string, 'null']
+            format: uuid
+          assignedUserId:
+            type: [string, 'null']
+            format: uuid
+          rowVersion:
+            type: integer
+          actingRoles:
+            type: array
+            items:
+              type: string
+            description: Roles con los que actuó quien hizo el cambio.
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+            description: Nulo cuando lo origina el sistema (worker, ADT automático).
+          requestId:
+            type: [string, 'null']
+            description: Id de correlación de la petición HTTP que originó el cambio.
+      x-event-type: practice.cleaning_order.inspected
+      x-aggregate-type: cleaning_order
+    CleaningOrderRejected:
+      name: CleaningOrderRejected
+      title: practice.cleaning_order.rejected
+      summary: 'La inspección rechazó la limpieza: el espacio queda sucio y se abre una orden nueva (`CLN_TRG_INSPECTION_FAILED`).'
+      payload:
+        type: object
+        required: [cleaningOrderId, careSpaceId, siteId, status, rowVersion]
+        properties:
+          cleaningOrderId:
+            type: string
+            format: uuid
+          careSpaceId:
+            type: string
+            format: uuid
+          siteId:
+            type: string
+            format: uuid
+          type:
+            type: [string, 'null']
+            enum: [CLEAN_ROUTINE, CLEAN_DISCHARGE, CLEAN_TERMINAL, CLEAN_OR_TURNOVER, CLEAN_SPOT]
+          trigger:
+            type: [string, 'null']
+          priority:
+            type: [string, 'null']
+          status:
+            type: [string, 'null']
+            enum: [CLN_PENDING, CLN_IN_PROGRESS, CLN_DONE, CLN_INSPECTED, CLN_REJECTED, CLN_CANCELLED]
+          sourceRefId:
+            type: [string, 'null']
+            format: uuid
+          previousOrderId:
+            type: [string, 'null']
+            format: uuid
+          assignedUserId:
+            type: [string, 'null']
+            format: uuid
+          rowVersion:
+            type: integer
+          actingRoles:
+            type: array
+            items:
+              type: string
+            description: Roles con los que actuó quien hizo el cambio.
+          reason:
+            type: [string, 'null']
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+            description: Nulo cuando lo origina el sistema (worker, ADT automático).
+          requestId:
+            type: [string, 'null']
+            description: Id de correlación de la petición HTTP que originó el cambio.
+      x-event-type: practice.cleaning_order.rejected
+      x-aggregate-type: cleaning_order
+    CleaningOrderCancelled:
+      name: CleaningOrderCancelled
+      title: practice.cleaning_order.cancelled
+      summary: 'Se canceló la orden de limpieza (o la superó un hecho nuevo, `reason: SUPERSEDED`).'
+      payload:
+        type: object
+        required: [cleaningOrderId, careSpaceId, siteId, status, rowVersion]
+        properties:
+          cleaningOrderId:
+            type: string
+            format: uuid
+          careSpaceId:
+            type: string
+            format: uuid
+          siteId:
+            type: string
+            format: uuid
+          type:
+            type: [string, 'null']
+            enum: [CLEAN_ROUTINE, CLEAN_DISCHARGE, CLEAN_TERMINAL, CLEAN_OR_TURNOVER, CLEAN_SPOT]
+          trigger:
+            type: [string, 'null']
+          priority:
+            type: [string, 'null']
+          status:
+            type: [string, 'null']
+            enum: [CLN_PENDING, CLN_IN_PROGRESS, CLN_DONE, CLN_INSPECTED, CLN_REJECTED, CLN_CANCELLED]
+          sourceRefId:
+            type: [string, 'null']
+            format: uuid
+          previousOrderId:
+            type: [string, 'null']
+            format: uuid
+          assignedUserId:
+            type: [string, 'null']
+            format: uuid
+          rowVersion:
+            type: integer
+          actingRoles:
+            type: array
+            items:
+              type: string
+            description: Roles con los que actuó quien hizo el cambio.
+          reason:
+            type: [string, 'null']
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+            description: Nulo cuando lo origina el sistema (worker, ADT automático).
+          requestId:
+            type: [string, 'null']
+            description: Id de correlación de la petición HTTP que originó el cambio.
+      x-event-type: practice.cleaning_order.cancelled
+      x-aggregate-type: cleaning_order
+
+    # Internación y ADT (F3)
+    AdtAdmitted:
+      name: AdtAdmitted
+      title: clinical.adt.admitted
+      summary: 'Ingreso del paciente (HL7 ADT^A01). Con cama asignada u ocupada en espera de cama.'
+      payload:
+        type: object
+        required: [encounterId, patientProfileId, practiceSiteId, admittedAt]
+        properties:
+          encounterId: { type: string, format: uuid }
+          patientProfileId: { type: string, format: uuid }
+          episodeId: { type: [string, 'null'], format: uuid }
+          practiceSiteId: { type: string, format: uuid }
+          encounterLocationId: { type: [string, 'null'], format: uuid }
+          careSpaceId: { type: [string, 'null'], format: uuid }
+          bedMode: { type: [string, 'null'], enum: [ASSIGN, RESERVE, null] }
+          levelOfCareCode: { type: string, example: LOC_CARE_GENERAL }
+          admissionSourceCode: { type: string, example: ADM_SRC_EMERGENCY }
+          admittedAt: { type: string, format: date-time }
+          incidentId: { type: [string, 'null'], format: uuid }
+          tenantId: { type: string, format: uuid }
+          actorUserId: { type: [string, 'null'], format: uuid }
+          requestId: { type: [string, 'null'] }
+    AdtBedAssigned:
+      name: AdtBedAssigned
+      title: clinical.adt.bed_assigned
+      summary: 'Se asignó una cama a un encuentro ya ingresado, o se convirtió su reserva (ADT^A01/A02).'
+      payload:
+        type: object
+        required: [encounterId, encounterLocationId, careSpaceId, mode, occurredAt]
+        properties:
+          encounterId: { type: string, format: uuid }
+          encounterLocationId: { type: string, format: uuid }
+          careSpaceId: { type: string, format: uuid }
+          mode: { type: string, enum: [ASSIGN] }
+          occurredAt: { type: string, format: date-time }
+          convertedReservationId: { type: [string, 'null'], format: uuid }
+          incidentId: { type: [string, 'null'], format: uuid }
+          tenantId: { type: string, format: uuid }
+          actorUserId: { type: [string, 'null'], format: uuid }
+          requestId: { type: [string, 'null'] }
+    AdtReservationCreated:
+      name: AdtReservationCreated
+      title: clinical.adt.reservation_created
+      summary: 'Una cama quedó reservada para un encuentro (ADT^A14/A15).'
+      payload:
+        type: object
+        required: [encounterId, encounterLocationId, careSpaceId, mode, occurredAt]
+        properties:
+          encounterId: { type: string, format: uuid }
+          encounterLocationId: { type: string, format: uuid }
+          careSpaceId: { type: string, format: uuid }
+          mode: { type: string, enum: [RESERVE] }
+          occurredAt: { type: string, format: date-time }
+          incidentId: { type: [string, 'null'], format: uuid }
+          tenantId: { type: string, format: uuid }
+          actorUserId: { type: [string, 'null'], format: uuid }
+          requestId: { type: [string, 'null'] }
+    AdtReservationCancelled:
+      name: AdtReservationCancelled
+      title: clinical.adt.reservation_cancelled
+      summary: 'Una reserva de cama se canceló (ADT^A11 parcial).'
+      payload:
+        type: object
+        required: [encounterId, encounterLocationId, careSpaceId]
+        properties:
+          encounterId: { type: string, format: uuid }
+          encounterLocationId: { type: string, format: uuid }
+          careSpaceId: { type: string, format: uuid }
+          reason: { type: string }
+          tenantId: { type: string, format: uuid }
+          actorUserId: { type: [string, 'null'], format: uuid }
+          requestId: { type: [string, 'null'] }
+    AdtPlacementOverride:
+      name: AdtPlacementOverride
+      title: clinical.adt.placement_override
+      summary: 'Se forzó la compatibilidad de una cama con justificación: se abrió un incidente de colocación.'
+      payload:
+        type: object
+        required: [incidentId, encounterId, careSpaceId, encounterLocationId]
+        properties:
+          incidentId: { type: string, format: uuid }
+          encounterId: { type: string, format: uuid }
+          careSpaceId: { type: string, format: uuid }
+          encounterLocationId: { type: string, format: uuid }
+          tenantId: { type: string, format: uuid }
+          actorUserId: { type: [string, 'null'], format: uuid }
+          requestId: { type: [string, 'null'] }
+    AdtTransferred:
+      name: AdtTransferred
+      title: clinical.adt.transferred
+      summary: 'Traslado entre camas (ADT^A02): PV1-3 la ubicación nueva, PV1-6 la previa. El origen queda sucio con su orden de limpieza.'
+      payload:
+        type: object
+        required:
+          [encounterId, fromLocationId, toLocationId, fromCareSpaceId, toCareSpaceId, previousEncounterLocationId, occurredAt, reasonCode, cleaningOrderId]
+        properties:
+          encounterId: { type: string, format: uuid }
+          fromLocationId: { type: string, format: uuid }
+          toLocationId: { type: string, format: uuid }
+          fromCareSpaceId: { type: string, format: uuid }
+          toCareSpaceId: { type: string, format: uuid }
+          previousEncounterLocationId: { type: string, format: uuid, description: 'PV1-6.' }
+          occurredAt: { type: string, format: date-time }
+          reasonCode: { type: string }
+          cleaningOrderId: { type: string, format: uuid }
+          terminalCleaning: { type: boolean }
+          incidentId: { type: [string, 'null'], format: uuid }
+          tenantId: { type: string, format: uuid }
+          actorUserId: { type: [string, 'null'], format: uuid }
+          requestId: { type: [string, 'null'] }
+    AdtTransferCancelled:
+      name: AdtTransferCancelled
+      title: clinical.adt.transfer_cancelled
+      summary: 'Un traslado se canceló y el paciente volvió a su cama previa (ADT^A12).'
+      payload:
+        type: object
+        required: [encounterId, cancelledLocationId, reopenedLocationId, fromCareSpaceId, toCareSpaceId]
+        properties:
+          encounterId: { type: string, format: uuid }
+          cancelledLocationId: { type: string, format: uuid }
+          reopenedLocationId: { type: string, format: uuid }
+          fromCareSpaceId: { type: string, format: uuid }
+          toCareSpaceId: { type: string, format: uuid }
+          reason: { type: string }
+          tenantId: { type: string, format: uuid }
+          actorUserId: { type: [string, 'null'], format: uuid }
+          requestId: { type: [string, 'null'] }
+    AdtSwapped:
+      name: AdtSwapped
+      title: clinical.adt.swapped
+      summary: 'Dos pacientes intercambiaron de cama en una sola transacción (ADT^A17).'
+      payload:
+        type: object
+        required: [encounterAId, encounterBId, closedLocationIds, openedLocationIds, careSpaceAId, careSpaceBId, occurredAt]
+        properties:
+          encounterAId: { type: string, format: uuid }
+          encounterBId: { type: string, format: uuid }
+          closedLocationIds: { type: array, items: { type: string, format: uuid }, minItems: 2, maxItems: 2 }
+          openedLocationIds: { type: array, items: { type: string, format: uuid }, minItems: 2, maxItems: 2 }
+          careSpaceAId: { type: string, format: uuid, description: 'Cama donde estaba A (ahora B).' }
+          careSpaceBId: { type: string, format: uuid, description: 'Cama donde estaba B (ahora A).' }
+          occurredAt: { type: string, format: date-time }
+          cleaningOrderIds: { type: array, items: { type: string, format: uuid }, description: 'Sólo con infra.swap_requires_cleaning=true.' }
+          incidentIds: { type: array, items: { type: string, format: uuid } }
+          tenantId: { type: string, format: uuid }
+          actorUserId: { type: [string, 'null'], format: uuid }
+          requestId: { type: [string, 'null'] }
+    AdtDischarged:
+      name: AdtDischarged
+      title: clinical.adt.discharged
+      summary: 'Egreso del paciente (ADT^A03). La cama queda sucia con su orden de limpieza (terminal con aislamiento o contaminación).'
+      payload:
+        type: object
+        required: [encounterId, dischargeDispositionCode, occurredAt]
+        properties:
+          encounterId: { type: string, format: uuid }
+          encounterLocationId: { type: [string, 'null'], format: uuid }
+          careSpaceId: { type: [string, 'null'], format: uuid }
+          dischargeDispositionCode: { type: string, example: DISP_HOME }
+          occurredAt: { type: string, format: date-time }
+          cleaningOrderId: { type: [string, 'null'], format: uuid }
+          episodeClosed: { type: boolean }
+          tenantId: { type: string, format: uuid }
+          actorUserId: { type: [string, 'null'], format: uuid }
+          requestId: { type: [string, 'null'] }
+    AdtPlacementIncidentReviewed:
+      name: AdtPlacementIncidentReviewed
+      title: clinical.adt.placement_incident_reviewed
+      summary: 'Un incidente de colocación se revisó o se cerró.'
+      payload:
+        type: object
+        required: [incidentId, encounterId, careSpaceId, status]
+        properties:
+          incidentId: { type: string, format: uuid }
+          encounterId: { type: string, format: uuid }
+          careSpaceId: { type: string, format: uuid }
+          status: { type: string, enum: [REVIEWED, CLOSED] }
+          tenantId: { type: string, format: uuid }
+          actorUserId: { type: [string, 'null'], format: uuid }
+          requestId: { type: [string, 'null'] }
+    CensusDayClosed:
+      name: CensusDayClosed
+      title: clinical.census_day.closed
+      summary: 'Se cerró (y selló) el censo de una unidad para un día. Inmutable desde este evento.'
+      payload:
+        type: object
+        required: [censusDayId, siteId, unitId, date, cutoffAt, contentHash]
+        properties:
+          censusDayId: { type: string, format: uuid }
+          siteId: { type: string, format: uuid }
+          unitId: { type: string, format: uuid }
+          date: { type: string, format: date }
+          cutoffAt: { type: string, format: date-time }
+          contentHash: { type: string, description: 'SHA-256 de los recuentos y las entradas.' }
+          closedBySystem: { type: boolean }
+          bedsAvailable: { type: integer }
+          patientDays: { type: integer }
+          admissions: { type: integer }
+          discharges: { type: integer }
+          tenantId: { type: string, format: uuid }
+          actorUserId: { type: [string, 'null'], format: uuid }
+          requestId: { type: [string, 'null'] }
+    CensusDayAdjusted:
+      name: CensusDayAdjusted
+      title: clinical.census_day.adjusted
+      summary: 'Se ajustó un número de un censo cerrado. El snapshot no cambia; el ajuste es una fila aparte.'
+      payload:
+        type: object
+        required: [censusDayId, adjustmentId, fieldCode, previousValue, newValue]
+        properties:
+          censusDayId: { type: string, format: uuid }
+          adjustmentId: { type: string, format: uuid }
+          siteId: { type: string, format: uuid }
+          unitId: { type: string, format: uuid }
+          date: { type: string, format: date }
+          fieldCode:
+            type: string
+            enum:
+              - beds_censable
+              - beds_available
+              - beds_blocked
+              - patients_at_cutoff
+              - admissions
+              - discharges
+              - deaths
+              - transfers_in
+              - transfers_out
+              - same_day_stays
+              - patient_days
+              - discharge_stay_days
+          previousValue: { type: integer }
+          newValue: { type: integer }
+          tenantId: { type: string, format: uuid }
+          actorUserId: { type: [string, 'null'], format: uuid }
+          requestId: { type: [string, 'null'] }
+
+    # Quirófanos y perioperatorio (F4)
+    ResourceLinkedToSpace:
+      name: ResourceLinkedToSpace
+      title: scheduling.resource.linked_to_space
+      summary: 'Un recurso agendable (quirófano) se creó ligado a un espacio físico.'
+      payload:
+        type: object
+        required: [resourceId, careSpaceId, siteId, practiceId, tenantId]
+        properties:
+          resourceId:
+            type: string
+            format: uuid
+          careSpaceId:
+            type: string
+            format: uuid
+          siteId:
+            type: string
+            format: uuid
+          practiceId:
+            type: string
+            format: uuid
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+    OrBlockCreated:
+      name: OrBlockCreated
+      title: periop.or_block.created
+      summary: 'Se creó un bloque de quirófano (o una serie semanal con sus instancias).'
+      payload:
+        type: object
+        required: [blockIds, operatingRoomId, practiceSiteId, ownerKind, count, tenantId]
+        properties:
+          seriesId:
+            type: [string, 'null']
+            format: uuid
+          blockIds:
+            type: array
+            items:
+              type: string
+              format: uuid
+          operatingRoomId:
+            type: string
+            format: uuid
+          practiceSiteId:
+            type: string
+            format: uuid
+          ownerKind:
+            type: string
+            enum: [SERVICE, SURGEON]
+          releaseHours:
+            type: integer
+          count:
+            type: integer
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+          requestId:
+            type: [string, 'null']
+            description: Correlación de la petición que originó el hecho.
+    OrBlockReleased:
+      name: OrBlockReleased
+      title: periop.or_block.released
+      summary: 'Un bloque liberó minutos a otros dueños (manual o por el tick de liberación).'
+      payload:
+        type: object
+        required: [blockId, operatingRoomId, releasedMinutes, automatic, tenantId]
+        properties:
+          blockId:
+            type: string
+            format: uuid
+          seriesId:
+            type: [string, 'null']
+            format: uuid
+          operatingRoomId:
+            type: string
+            format: uuid
+          releasedMinutes:
+            type: integer
+          automatic:
+            type: boolean
+          reasonText:
+            type: [string, 'null']
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+          requestId:
+            type: [string, 'null']
+            description: Correlación de la petición que originó el hecho.
+    OrBlockCancelled:
+      name: OrBlockCancelled
+      title: periop.or_block.cancelled
+      summary: 'Se canceló un bloque, o una serie desde una fecha (validTo).'
+      payload:
+        type: object
+        required: [blockIds, operatingRoomId, tenantId]
+        properties:
+          blockIds:
+            type: array
+            items:
+              type: string
+              format: uuid
+          seriesId:
+            type: [string, 'null']
+            format: uuid
+          operatingRoomId:
+            type: string
+            format: uuid
+          reasonText:
+            type: [string, 'null']
+          validTo:
+            type: [string, 'null']
+            format: date-time
+            description: Sólo en la cancelación de una serie.
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+          requestId:
+            type: [string, 'null']
+            description: Correlación de la petición que originó el hecho.
+    ChecklistCreated:
+      name: ChecklistCreated
+      title: periop.checklist.created
+      summary: 'Se abrió el check-list de seguridad quirúrgica OMS de un caso.'
+      payload:
+        type: object
+        required: [checklistId, procedureCaseId, checklistVersion, tenantId]
+        properties:
+          checklistId:
+            type: string
+            format: uuid
+          procedureCaseId:
+            type: string
+            format: uuid
+          checklistVersion:
+            type: string
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+          requestId:
+            type: [string, 'null']
+            description: Correlación de la petición que originó el hecho.
+    ChecklistPhaseCompleted:
+      name: ChecklistPhaseCompleted
+      title: periop.checklist.phase_completed
+      summary: 'Se completó una fase del check-list OMS (Sign In, Time Out o Sign Out).'
+      payload:
+        type: object
+        required: [checklistId, procedureCaseId, phase, completedAt, checklistCompleted, tenantId]
+        properties:
+          checklistId:
+            type: string
+            format: uuid
+          procedureCaseId:
+            type: string
+            format: uuid
+          phase:
+            type: string
+            enum: [SIGN_IN, TIME_OUT, SIGN_OUT]
+          completedAt:
+            type: [string, 'null']
+            format: date-time
+          checklistCompleted:
+            type: boolean
+          milestoneId:
+            type: [string, 'null']
+            format: uuid
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+          requestId:
+            type: [string, 'null']
+            description: Correlación de la petición que originó el hecho.
+    CaseRoomEventRecorded:
+      name: CaseRoomEventRecorded
+      title: periop.case.room_event_recorded
+      summary: 'Se registró un hecho de sala de un caso (entrada, anestesia, incisión, cierre, salida).'
+      payload:
+        type: object
+        required: [procedureCaseId, operatingRoomId, eventCode, occurredAt, utilizationEventId, tenantId]
+        properties:
+          procedureCaseId:
+            type: string
+            format: uuid
+          operatingRoomId:
+            type: string
+            format: uuid
+          operatingRoomBlockId:
+            type: [string, 'null']
+            format: uuid
+          eventCode:
+            type: string
+            enum: [PATIENT_IN_ROOM, ANESTHESIA_START, INCISION, CLOSURE, PATIENT_OUT_OF_ROOM]
+          occurredAt:
+            type: string
+            format: date-time
+          utilizationEventId:
+            type: string
+            format: uuid
+          milestoneId:
+            type: [string, 'null']
+            format: uuid
+          cleaningOrderId:
+            type: [string, 'null']
+            format: uuid
+          tenantId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: [string, 'null']
+            format: uuid
+          requestId:
+            type: [string, 'null']
+            description: Correlación de la petición que originó el hecho.
+
+    # Plano de planta (F1c)
+    FloorPlanCreated:
+      name: FloorPlanCreated
+      title: practice.floor_plan.created
+      summary: 'Se creó un lienzo (piso, planta o campus).'
+      payload:
+        type: object
+        required: [floorPlanId, tenantId, siteId, anchorSpaceId, layoutVersion]
+        properties:
+          floorPlanId:
+            type: string
+            format: uuid
+          tenantId:
+            type: string
+            format: uuid
+          siteId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: string
+            format: uuid
+          requestId:
+            type: [string, 'null']
+          supportReason:
+            type: string
+            description: Motivo declarado por el soporte de plataforma (solo si actuó soporte).
+          anchorSpaceId:
+            type: string
+            format: uuid
+          layoutVersion:
+            type: integer
+      x-event-type: practice.floor_plan.created
+      x-aggregate-type: floor_plan
+    FloorPlanUpdated:
+      name: FloorPlanUpdated
+      title: practice.floor_plan.updated
+      summary: 'Cambiaron atributos del lienzo (tamaño, grilla, escala, nombre).'
+      payload:
+        type: object
+        required: [floorPlanId, tenantId, siteId, anchorSpaceId, layoutVersion, rowVersion, changedFields]
+        properties:
+          floorPlanId:
+            type: string
+            format: uuid
+          tenantId:
+            type: string
+            format: uuid
+          siteId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: string
+            format: uuid
+          requestId:
+            type: [string, 'null']
+          supportReason:
+            type: string
+            description: Motivo declarado por el soporte de plataforma (solo si actuó soporte).
+          anchorSpaceId:
+            type: string
+            format: uuid
+          layoutVersion:
+            type: integer
+          rowVersion:
+            type: integer
+          changedFields:
+            type: array
+            items:
+              type: string
+      x-event-type: practice.floor_plan.updated
+      x-aggregate-type: floor_plan
+    FloorPlanLifecycleChanged:
+      name: FloorPlanLifecycleChanged
+      title: practice.floor_plan.lifecycle_changed
+      summary: 'Transición de ciclo de vida del lienzo (publicar, archivar, reabrir).'
+      payload:
+        type: object
+        required: [floorPlanId, tenantId, siteId, anchorSpaceId, layoutVersion, action, reason]
+        properties:
+          floorPlanId:
+            type: string
+            format: uuid
+          tenantId:
+            type: string
+            format: uuid
+          siteId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: string
+            format: uuid
+          requestId:
+            type: [string, 'null']
+          supportReason:
+            type: string
+            description: Motivo declarado por el soporte de plataforma (solo si actuó soporte).
+          anchorSpaceId:
+            type: string
+            format: uuid
+          layoutVersion:
+            type: integer
+          action:
+            type: string
+          reason:
+            type: string
+      x-event-type: practice.floor_plan.lifecycle_changed
+      x-aggregate-type: floor_plan
+    FloorPlanBackgroundChanged:
+      name: FloorPlanBackgroundChanged
+      title: practice.floor_plan.background_changed
+      summary: 'Se fijó o se quitó el fondo calibrado del lienzo.'
+      payload:
+        type: object
+        required: [floorPlanId, tenantId, siteId, anchorSpaceId, layoutVersion, change]
+        properties:
+          floorPlanId:
+            type: string
+            format: uuid
+          tenantId:
+            type: string
+            format: uuid
+          siteId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: string
+            format: uuid
+          requestId:
+            type: [string, 'null']
+          supportReason:
+            type: string
+            description: Motivo declarado por el soporte de plataforma (solo si actuó soporte).
+          anchorSpaceId:
+            type: string
+            format: uuid
+          layoutVersion:
+            type: integer
+          change:
+            type: string
+            enum: [SET, CLEARED]
+      x-event-type: practice.floor_plan.background_changed
+      x-aggregate-type: floor_plan
+    FloorPlanLayoutChanged:
+      name: FloorPlanLayoutChanged
+      title: practice.floor_plan.layout_changed
+      summary: 'Un guardado de layout (PATCH/PUT) se confirmó; un evento por lote.'
+      payload:
+        type: object
+        required: [floorPlanId, tenantId, siteId, fromVersion, toVersion, placedSpaceIds, movedSpaceIds, removedSpaceIds, truncated]
+        properties:
+          floorPlanId:
+            type: string
+            format: uuid
+          tenantId:
+            type: string
+            format: uuid
+          siteId:
+            type: string
+            format: uuid
+          actorUserId:
+            type: string
+            format: uuid
+          requestId:
+            type: [string, 'null']
+          supportReason:
+            type: string
+            description: Motivo declarado por el soporte de plataforma (solo si actuó soporte).
+          fromVersion:
+            type: integer
+          toVersion:
+            type: integer
+            description: La layoutVersion nueva (+1 por transacción).
+          placedSpaceIds:
+            type: array
+            description: Espacios que se ubicaron por primera vez en el lote.
+            maxItems: 200
+            items:
+              type: string
+              format: uuid
+          movedSpaceIds:
+            type: array
+            description: Espacios cuya ubicación cambió.
+            maxItems: 200
+            items:
+              type: string
+              format: uuid
+          removedSpaceIds:
+            type: array
+            description: Espacios retirados del plano.
+            maxItems: 200
+            items:
+              type: string
+              format: uuid
+          elementsAdded:
+            type: integer
+          elementsChanged:
+            type: integer
+          elementsRemoved:
+            type: integer
+          truncated:
+            type: boolean
+            description: true si alguna lista de ids superó el tope de 200 y se recortó.
+      x-event-type: practice.floor_plan.layout_changed
+      x-aggregate-type: floor_plan
+
   schemas:
     DomainEventPayload:
       type: object
@@ -224,3 +2046,26 @@ components:
             Sin JSON Schema validado por tipo de evento en código
             (Record<string, unknown> en TypeScript) — objeto genérico aquí a
             propósito, no se fabrica un schema por evento sin evidencia.
+
+    # Estructura de infraestructura (F1)
+    StructureEventEnvelope:
+      type: object
+      description: Campos del envelope que acompañan a todo evento de estructura.
+      required: [eventType, aggregateType, aggregateId, tenantId, actorUserId]
+      properties:
+        eventType:
+          type: string
+        aggregateType:
+          type: string
+        aggregateId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        actorUserId:
+          type: string
+          format: uuid
+        correlationId:
+          type: string
+          description: Es el `correlationId` de la petición HTTP que originó el cambio (el mismo que ven los errores).

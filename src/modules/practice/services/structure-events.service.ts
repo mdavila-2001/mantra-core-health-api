@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { OutboxService } from '../../messaging/services/outbox.service';
 
-/** Nombres de evento de la estructura (CONTRATO-F0-F1 §3, `asyncapi/fragments/f1.yaml`). */
+/** Nombres de evento de la estructura (CONTRATO-F0-F1 §3, `asyncapi/asyncapi.yaml`). */
 export const STRUCTURE_EVENTS = {
   spaceCreated: 'practice.care_space.created',
   spaceUpdated: 'practice.care_space.updated',

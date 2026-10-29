@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { OutboxService } from '../../messaging/services/outbox.service';
 
-/** Eventos de la operación de espacios (CONTRATO-F2-F5 §F2.3, `asyncapi/fragments/f2.yaml`). */
+/** Eventos de la operación de espacios (CONTRATO-F2-F5 §F2.3, `asyncapi/asyncapi.yaml`). */
 export const OPS_EVENTS = {
   /** Equivalente a `ADT^A20` / NPU-1, NPU-2: un eje cambió de valor. */
   statusChanged: 'practice.care_space.status_changed',
