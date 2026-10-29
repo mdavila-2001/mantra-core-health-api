@@ -684,17 +684,32 @@ export class PractitionerAdmissionsReadService {
     return map.get(personId) ?? null;
   }
 
-  /** El perfil profesional de la sesión (su `person_id`), o `null` si la cuenta no tiene. */
+  /**
+   * El perfil profesional de la sesión (su `person_id`), o `null` si la cuenta no tiene.
+   *
+   * «Mi perfil» es el de un vínculo propio (`SELF`) y ACTIVO de la cuenta: un
+   * vínculo de delegado o de familiar no hace de esa persona «yo». Si la cuenta
+   * tiene varios vínculos propios activos (el índice único del modelo no está
+   * materializado) gana el más reciente que tenga perfil profesional, con un
+   * orden total, así que la respuesta no depende del orden de las filas.
+   */
   async ownPersonId(
     em: EntityManager,
     actor: AuthenticatedUser,
   ): Promise<string | null> {
-    const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
-    if (!link) return null;
-    const practitioner = await em.findOne(HealthPractitionerProfiles, {
-      profileId: link.personId,
-    });
-    return practitioner ? link.personId : null;
+    const links = await this.accountLinksRepo.findSelfActiveByUser(
+      em,
+      actor.id,
+    );
+    if (links.length === 0) return null;
+    const personIds = [...new Set(links.map((link) => link.personId))];
+    const practitioners = await em.find(
+      HealthPractitionerProfiles,
+      { profileId: { $in: personIds } },
+      { fields: ['profileId'] },
+    );
+    const withProfile = new Set(practitioners.map((p) => p.profileId));
+    return personIds.find((id) => withProfile.has(id)) ?? null;
   }
 
   /** Lo que el dueño ve: estados, qué falta y los mensajes dirigidos a él; nada del personal. */
@@ -742,6 +757,14 @@ export class PractitionerAdmissionsReadService {
         : null,
       items,
       resubmissionCount: admission.resubmissionCount,
+      resubmissions: {
+        used: admission.resubmissionCount,
+        max: config.maxResubmissions,
+        remaining: Math.max(
+          0,
+          config.maxResubmissions - admission.resubmissionCount,
+        ),
+      },
       canResubmit:
         [
           'INFORMACION_REQUERIDA',

@@ -7,6 +7,7 @@ import {
 } from '../../../../common/audit-trail/audit-trail.decorators';
 import { IS_PUBLIC_KEY } from '../../../../common/auth/public.decorator';
 import { AdmissionsController } from './admissions.controller';
+import { ResubmitAdmissionDto } from '../dto/admissions.dto';
 import { OwnAdmissionController } from './own-admission.controller';
 
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
@@ -179,12 +180,50 @@ describe('OwnAdmissionController · el sujeto sale de la sesión', () => {
     );
     const actor = { id: 'u-me', roles: [] } as never;
     await controller.get(actor);
-    await controller.resubmit(actor, 'req-1');
+    await controller.resubmit(
+      actor,
+      { attested: true, attestationVersion: '2026-10' },
+      'req-1',
+    );
     await controller.withdraw(actor, 'req-2');
     expect(reads.own).toHaveBeenCalledWith(actor);
-    expect(admissions.resubmit).toHaveBeenCalledWith(actor, 'req-1');
+    expect(admissions.resubmit).toHaveBeenCalledWith(actor, 'req-1', {
+      acceptedAt: expect.any(Date),
+      textVersion: '2026-10',
+    });
     expect(admissions.withdraw).toHaveBeenCalledWith(actor, 'req-2');
     expect(OwnAdmissionController.prototype.get.length).toBe(1);
+  });
+
+  it('resubmit lee el cuerpo: sin declaración aceptada el servicio recibe undefined (no se inventa una)', async () => {
+    const admissions = { resubmit: fn().mockResolvedValue({}) };
+    const controller = new OwnAdmissionController(
+      {} as never,
+      admissions as never,
+    );
+    const actor = { id: 'u-me', roles: [] } as never;
+    for (const body of [
+      {},
+      { attested: false, attestationVersion: '2026-10' },
+      { attested: true },
+    ]) {
+      admissions.resubmit.mockClear();
+      await controller.resubmit(actor, body, 'req-1');
+      expect(admissions.resubmit).toHaveBeenCalledWith(
+        actor,
+        'req-1',
+        undefined,
+      );
+    }
+  });
+
+  it('el cuerpo de resubmit es el DTO validado (no un objeto suelto)', () => {
+    const types = Reflect.getMetadata(
+      'design:paramtypes',
+      ownProto,
+      'resubmit',
+    ) as unknown[];
+    expect(types[1]).toBe(ResubmitAdmissionDto);
   });
 });
 

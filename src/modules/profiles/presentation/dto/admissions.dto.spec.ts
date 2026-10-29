@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { ReviewAdmissionItemDto } from './admissions.dto';
+import { ResubmitAdmissionDto, ReviewAdmissionItemDto } from './admissions.dto';
 
 const HASH = 'a'.repeat(64);
 
@@ -63,5 +63,45 @@ describe('ReviewAdmissionItemDto · evidenceSha256 (S-2)', () => {
         }),
       ).toEqual(['evidenceSha256']);
     }
+  });
+});
+
+describe('ResubmitAdmissionDto · la declaración al reenviar', () => {
+  async function invalid(body: Record<string, unknown>): Promise<string[]> {
+    const errors = await validate(plainToInstance(ResubmitAdmissionDto, body), {
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    });
+    return errors.map((e) => e.property).sort();
+  }
+
+  it('el cuerpo que mandan web y móvil es válido', async () => {
+    expect(
+      await invalid({ attested: true, attestationVersion: '2026-10' }),
+    ).toEqual([]);
+  });
+
+  it('el contenido faltante lo decide el servicio (412), no el borde (400)', async () => {
+    expect(await invalid({})).toEqual([]);
+    expect(await invalid({ attested: false })).toEqual([]);
+  });
+
+  it.each([
+    ['attested como texto', { attested: 'true' }, ['attested']],
+    ['versión numérica', { attestationVersion: 2026 }, ['attestationVersion']],
+    [
+      'versión de 33 caracteres',
+      { attested: true, attestationVersion: 'v'.repeat(33) },
+      ['attestationVersion'],
+    ],
+    ['propiedad desconocida', { attested: true, sujeto: 'otro' }, ['sujeto']],
+  ])('%s se rechaza en el borde', async (_name, body, fields) => {
+    expect(await invalid(body)).toEqual(fields);
+  });
+
+  it('una versión de 32 caracteres cabe', async () => {
+    expect(
+      await invalid({ attested: true, attestationVersion: 'v'.repeat(32) }),
+    ).toEqual([]);
   });
 });

@@ -91,6 +91,24 @@ export interface AdmissionAttestation {
   readonly textVersion: string;
 }
 
+/**
+ * De lo que el cliente declara a la atestación que se guarda.
+ *
+ * Sólo vale `attested === true` con una versión de texto no vacía; todo lo
+ * demás (cuerpo ausente, `false`, versión en blanco) devuelve `undefined` y el
+ * reenvío responde 412 `ADMISSION_ATTESTATION_REQUIRED`. El instante de la
+ * aceptación es el del servidor.
+ */
+export function attestationOf(
+  declared:
+    { attested?: boolean; attestationVersion?: string } | null | undefined,
+  now: Date = new Date(),
+): AdmissionAttestation | undefined {
+  const version = declared?.attestationVersion?.trim();
+  if (declared?.attested !== true || !version) return undefined;
+  return { acceptedAt: now, textVersion: version };
+}
+
 /** Aviso pendiente de emitir cuando la transacción ya confirmó. */
 interface PendingNotice {
   readonly kind: AdmissionNoticeKind;
@@ -945,7 +963,13 @@ export class PractitionerAdmissionsService {
 
   // ═══════════════════════════════════════════════════ el médico ══
 
-  /** El médico reenvía su solicitud (INFORMACION_REQUERIDA/RECHAZADA/EXPIRADA/ABANDONADA a ENVIADA). */
+  /**
+   * El médico reenvía su solicitud (INFORMACION_REQUERIDA/RECHAZADA/EXPIRADA/ABANDONADA a ENVIADA).
+   *
+   * Exige la atestación (véase {@link attestationOf}): sin ella, 412
+   * `ADMISSION_ATTESTATION_REQUIRED`. Se guarda `attested_at` y la versión del
+   * texto, y reemplaza a la del envío anterior.
+   */
   async resubmit(
     actor: AuthenticatedUser,
     requestId?: string,
@@ -962,6 +986,16 @@ export class PractitionerAdmissionsService {
           'Llegó al tope de reenvíos de la solicitud',
           { maxResubmissions: config.maxResubmissions },
           ProfilesErrorReason.ADMISSION_RESUBMISSION_LIMIT,
+        );
+      }
+      // La declaración es condición del reenvío: sin ella no se mueve nada.
+      // Se pide después de las puertas de estado y de tope, así quien no puede
+      // reenviar de todos modos se entera primero de eso.
+      if (!attestation) {
+        throw new PreconditionFailedException(
+          'Debe aceptar la declaración para reenviar la solicitud',
+          { field: 'attested' },
+          ProfilesErrorReason.ADMISSION_ATTESTATION_REQUIRED,
         );
       }
       const now = new Date();
@@ -989,10 +1023,8 @@ export class PractitionerAdmissionsService {
         string,
         unknown
       >;
-      if (attestation) {
-        admission.attestedAt = attestation.acceptedAt;
-        admission.attestationTextVersion = attestation.textVersion;
-      }
+      admission.attestedAt = attestation.acceptedAt;
+      admission.attestationTextVersion = attestation.textVersion;
       this.appendEvent(tx, admission, 'RESUBMITTED', {
         fromStatus: status,
         toStatus: 'ENVIADA',
