@@ -43,7 +43,7 @@ import {
   ADMISSION_STATUS_CONCEPT,
   ADMISSION_STATUS_LABEL,
   admissionStatusCode,
-  visibleVerification,
+  visibleVerifications,
   type AdmissionStatusCode,
   type PractitionerVerificationView,
 } from '../../domain/admissions/admission-status';
@@ -796,24 +796,7 @@ export class PractitionerAdmissionsReadService {
       em,
       practitionerProfileIds,
     );
-    const result = new Map<string, PractitionerVerificationView>();
-    for (const id of practitionerProfileIds) {
-      const admission = current.get(id);
-      result.set(
-        id,
-        visibleVerification(
-          admission
-            ? {
-                status: admissionStatusCode(admission.statusConceptId),
-                decidedAt: admission.decidedAt,
-                validUntil: admission.validUntil,
-              }
-            : undefined,
-          now,
-        ),
-      );
-    }
-    return result;
+    return visibleVerifications(practitionerProfileIds, current, now);
   }
 
   // ─────────────────────────────────────────────────────────── auxiliares ──

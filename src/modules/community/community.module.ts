@@ -9,7 +9,16 @@ import { MessagingModule } from '../messaging/messaging.module';
 // El vínculo persona ↔ cuenta, para resolver a qué usuario avisarle. Se provee
 // el repositorio suelto y no se importa `ProfilesModule`, por lo mismo que hace
 // `clinical`: es una clase sin estado que recibe el `EntityManager`.
-import { PersonAccountLinksRepository } from '../profiles/infrastructure/repositories';
+import {
+  PersonAccountLinksRepository,
+  PractitionerAdmissionsRepository,
+} from '../profiles/infrastructure/repositories';
+// El sello de verificación del profesional que aparece junto al nombre de cada
+// participante de una conversación: la MISMA proyección que la Guía y el
+// buscador de profesionales (`verificationOf`), sin la lectura completa de
+// admisiones. Mismo motivo que arriba para proveerla suelta: sólo depende de
+// un repositorio sin estado.
+import { PractitionerVerificationReader } from '../profiles/application/services/practitioner-verification-reader.service';
 // El filtro por especialidad del directorio público valida contra el value set
 // `VS_MEDICAL_SPECIALTY` con **el mismo servicio** que el alta de profesional.
 // Se provee la clase suelta y no se importa `ProfilesModule` por el mismo
@@ -189,6 +198,8 @@ import {
     PublicSearchRepository,
     VerifiedBadgesRepository,
     PersonAccountLinksRepository,
+    PractitionerAdmissionsRepository,
+    PractitionerVerificationReader,
     // La regla de «qué uuid es una especialidad médica», compartida con el alta
     // de profesional. Ver la nota del import.
     MedicalSpecialtyCatalogService,

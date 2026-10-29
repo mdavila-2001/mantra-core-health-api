@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type, type TransformFnParams } from 'class-transformer';
+import { PractitionerVerificationDto } from '../../profiles/presentation/dto/practitioner-verification.dto';
 import {
   IsInt,
   IsOptional,
@@ -124,6 +125,17 @@ export class ConversationPeerDto {
   /** Su avatar público, o `null` si no subió ninguno. Misma regla que la ficha pública. */
   @ApiPropertyOptional({ nullable: true })
   avatarUrl?: string | null;
+
+  /**
+   * El sello de verificación del participante cuando es un profesional;
+   * `null` para pacientes, organizaciones y cualquier otro perfil.
+   *
+   * Es la misma forma y la misma proyección de la admisión que muestran la
+   * Guía y el buscador (`VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`,
+   * `EXPIRED`): el chat no interpreta el estado por su cuenta. Aditivo.
+   */
+  @ApiPropertyOptional({ type: PractitionerVerificationDto, nullable: true })
+  verification?: PractitionerVerificationDto | null;
 }
 
 /** Query validada de la búsqueda de contactos para chat. */
@@ -349,6 +361,14 @@ export class DirectMessagePageDto {
    */
   @ApiPropertyOptional({ type: DirectMessageDto, nullable: true })
   pinnedMessage?: DirectMessageDto | null;
+
+  /**
+   * Los demás participantes con su sello, como en la bandeja. Viaja sólo con la
+   * primera página (la cabecera del hilo se pinta al abrir y no en cada página
+   * de historia). Es el «detalle» de la conversación: no hay `GET :id`.
+   */
+  @ApiPropertyOptional({ type: [ConversationPeerDto] })
+  peers?: ConversationPeerDto[];
 }
 
 /** Lo que devuelve eliminar un mensaje (F4.5). */
