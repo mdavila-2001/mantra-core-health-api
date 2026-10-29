@@ -7,8 +7,8 @@ import {
   TestCases,
   TestAssertions,
   TestSchedules,
-} from '../entities';
-import { createdBy } from '../../../common';
+} from '../../entities';
+import { createdBy } from '../../../../common';
 
 /**
  * Describe el contrato estructural de create environment data.

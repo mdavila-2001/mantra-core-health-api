@@ -15,6 +15,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { InsufficientRoleException } from '../../../common/errors/domain.exception';
 import { AccountingErrorReason } from '../accounting.error-reasons';
 import {
   buildScope,
@@ -28,7 +29,7 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  * Construye el sistema bajo prueba con dependencias controladas.
  * @returns Resultado de build.
  */
-function build() {
+function build(ownOffice = false) {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const fiscalRepo = {
@@ -44,10 +45,17 @@ function build() {
   };
   const logger = { setContext: mockFn(), info: mockFn() };
   const { scope } = buildScope({ fiscalRepo });
+  const practices = { isOwnOffice: mockFn().mockResolvedValue(ownOffice) };
   const service = inTenant(
-    new FiscalService(em as any, fiscalRepo as any, scope, logger as any),
+    new FiscalService(
+      em as any,
+      fiscalRepo as any,
+      scope,
+      logger as any,
+      practices as any,
+    ),
   );
-  return { service, tx, fiscalRepo };
+  return { service, tx, fiscalRepo, practices };
 }
 
 describe('FiscalService', () => {
@@ -77,6 +85,75 @@ describe('FiscalService', () => {
       await expect(
         d.service.openFiscalYear(dto as any, actor),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+  });
+
+  describe('quién abre el ejercicio (S-8)', () => {
+    const dto = {
+      practiceId: 'p1',
+      code: 'FY2026',
+      startDate: '2026-01-01',
+      endDate: '2026-12-31',
+      periods: [
+        { code: '2026-01', startDate: '2026-01-01', endDate: '2026-01-31' },
+      ],
+    };
+    const practitioner = {
+      id: 'doc-1',
+      roles: ['USER', 'PRACTITIONER'],
+    } as any;
+
+    it.each(['SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'SUPERADMIN'])(
+      'la administración (%s) abre el ejercicio',
+      async (role) => {
+        const d = build();
+        const res = await d.service.openFiscalYear(dto, {
+          id: 'u1',
+          roles: [role],
+        } as any);
+        expect(res.status).toBe(ACCT.YEAR_OPEN);
+        expect(d.practices.isOwnOffice).not.toHaveBeenCalled();
+      },
+    );
+
+    it('el médico titular abre el ejercicio de su consultorio propio', async () => {
+      const d = build(true);
+      const res = await d.service.openFiscalYear(dto, practitioner);
+      expect(res.status).toBe(ACCT.YEAR_OPEN);
+      expect(d.practices.isOwnOffice).toHaveBeenCalledWith('p1', 'doc-1');
+    });
+
+    it('un médico sobre una práctica que no es su consultorio recibe 403 y no se escribe nada', async () => {
+      const d = build(false);
+      const error = await d.service.openFiscalYear(dto, practitioner).then(
+        () => null,
+        (e: unknown) => e,
+      );
+      expect(error).toBeInstanceOf(InsufficientRoleException);
+      const forbidden = error as InsufficientRoleException;
+      expect(forbidden.getStatus()).toBe(403);
+      expect(forbidden.reason).toBe(
+        AccountingErrorReason.FISCAL_YEAR_OPEN_NOT_ALLOWED,
+      );
+      expect(forbidden.message).toContain('médico titular');
+      expect(d.fiscalRepo.findYearByCode).not.toHaveBeenCalled();
+      expect(d.fiscalRepo.createYear).not.toHaveBeenCalled();
+    });
+
+    it('un actor sin rol de administración ni de médico recibe 403', async () => {
+      const d = build(true);
+      await expect(
+        d.service.openFiscalYear(dto, { id: 'p-1', roles: ['PATIENT'] } as any),
+      ).rejects.toBeInstanceOf(InsufficientRoleException);
+    });
+
+    it('otra organización sigue respondiendo 404 antes de mirar el rol', async () => {
+      const d = build(false);
+      await expectScopeNotFound(
+        d.service.openFiscalYear({ ...dto, practiceId: 'p-b' }, practitioner),
+        AccountingErrorReason.PRACTICE_NOT_FOUND,
+      );
+      expect(d.practices.isOwnOffice).not.toHaveBeenCalled();
     });
   });
 

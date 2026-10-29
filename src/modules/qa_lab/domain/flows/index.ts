@@ -1,4 +1,4 @@
-import type { FlowDefinition } from '../domain/flow-catalog';
+import type { FlowDefinition } from '../flow-catalog';
 import flow13 from './catalog/1.3.flow.json';
 import flow26 from './catalog/2.6.flow.json';
 import flow27 from './catalog/2.7.flow.json';

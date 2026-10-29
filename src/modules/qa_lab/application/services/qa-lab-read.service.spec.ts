@@ -13,14 +13,14 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
   runWithTenant,
-} from '../../../common';
-import { QaLabErrorReason } from '../qa_lab.error-reasons';
+} from '../../../../common';
+import { QaLabErrorReason } from '../../qa_lab.error-reasons';
 import {
   TestDefects,
   TestEnvironments,
   TestRuns,
   TestSuites,
-} from '../entities';
+} from '../../entities';
 
 const TENANT_A = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const SUITE = '11111111-1111-1111-1111-111111111111';

@@ -1,4 +1,4 @@
-import { PreconditionFailedException, runWithTenant } from '../../../common';
+import { PreconditionFailedException, runWithTenant } from '../../../../common';
 import { resolveQaScope } from './qa-scope';
 
 const TENANT_A = '11111111-1111-1111-1111-111111111111';

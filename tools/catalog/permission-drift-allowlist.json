@@ -607,6 +607,29 @@
       "routes": [
         "GET /billing/service-catalog/:id/image"
       ]
+    },
+    {
+      "reason": "Corrección del perfil profesional (P28): el servicio exige ser el titular del perfil (`assertOwnsPractitionerProfile`) o plataforma; cualquier otro actor recibe 403. Un `@Roles` global no distingue de quién es el perfil.",
+      "evidence": [
+        "src/modules/profiles/application/services/profiles-practitioners.service.ts#updatePractitionerProfile"
+      ],
+      "routes": [
+        "PATCH /profiles/practitioners/:profileId"
+      ]
+    },
+    {
+      "reason": "Documentos legales y requisitos de operación de una organización (P50/P51): autoriza el servicio por rol de plataforma con su ámbito (`roleAuthorizesInTenant`) o por membresía de esa organización (OWNER/ADMIN para completar documentos, pertenecer para leer los requisitos); en otro caso 403.",
+      "evidence": [
+        "src/modules/directory/services/tenant-document-completion.service.ts#complete",
+        "src/modules/directory/services/tenant-document-completion.service.ts#pharmacyReadiness",
+        "src/modules/directory/services/tenant-document-completion.service.ts#laboratoryReadiness",
+        "src/modules/directory/services/tenant-document-completion.service.ts#assertAuthorized"
+      ],
+      "routes": [
+        "POST /tenants/:tenantId/affiliation-documents",
+        "GET /tenants/:tenantId/laboratory-readiness",
+        "GET /tenants/:tenantId/pharmacy-readiness"
+      ]
     }
   ]
 }

@@ -5,6 +5,7 @@ import {
   IsBoolean,
   IsIn,
   IsInt,
+  IsNumber,
   Max,
   IsISO8601,
   IsOptional,
@@ -25,6 +26,7 @@ import type {
   BookingChannel,
 } from '../../domain/booking/booking-channels';
 import type { PaymentState } from '../../domain/booking/payment-state';
+import { BookingBillingLinkDto } from './booking-billing-link.dto';
 import type { PaymentReceiptStatus } from '../../domain/booking/payment-receipt';
 
 /** Canal por el que se originó la reserva. */
@@ -1119,6 +1121,21 @@ export class SetPaymentStateDto {
   @IsOptional()
   @IsBoolean()
   insuranceUsed?: boolean;
+
+  /**
+   * Lo recibido, en bolivianos (FAC-01, S-11). Solo con «Pagada» o «Parcialmente
+   * pagada». Con él, el pago llega a facturación: la primera vez crea la cuenta
+   * por cobrar de la cita y cada monto es un pago asignado a ella. Sin él, el
+   * estado se guarda y facturación no se toca (S-2). Mayor que 0, con hasta dos
+   * decimales y sin pasar el saldo de la cita: si no, 422.
+   */
+  @ApiPropertyOptional({
+    description: 'Monto recibido en Bs (> 0, hasta dos decimales)',
+    example: 150,
+  })
+  @IsOptional()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  amountReceived?: number;
 }
 
 /**
@@ -1151,6 +1168,19 @@ export class PaymentStateDto {
   /** Cuándo. */
   @ApiProperty({ format: 'date-time' })
   markedAt!: string;
+
+  /** Lo recibido por la cita, si llegó a facturación (CONTRATO §2). */
+  @ApiPropertyOptional({ nullable: true, type: Number, example: 150 })
+  amountPaid?: number | null;
+
+  @ApiPropertyOptional({ nullable: true, enum: ['BOB'] })
+  currencyCode?: 'BOB' | null;
+}
+
+/** Respuesta de `PUT /scheduling/bookings/{id}/payment-state`: el estado, y su facturación (FAC-01). */
+export class SetPaymentStateResponseDto extends PaymentStateDto {
+  @ApiProperty({ type: BookingBillingLinkDto })
+  billing!: BookingBillingLinkDto;
 }
 
 /** Las tres revisiones posibles de un comprobante. */
@@ -1288,4 +1318,8 @@ export class ConfirmPaymentReceiptResponseDto {
 
   @ApiProperty({ type: PaymentStateDto })
   paymentState!: PaymentStateDto;
+
+  /** La facturación del pago que confirma el comprobante (FAC-01). */
+  @ApiProperty({ type: BookingBillingLinkDto })
+  billing!: BookingBillingLinkDto;
 }

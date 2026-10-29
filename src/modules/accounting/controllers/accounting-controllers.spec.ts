@@ -8,6 +8,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
+import { ROLES_KEY } from '../../../common/auth/roles.decorator';
 import { AccountingFiscalController } from './accounting-fiscal.controller';
 import { AccountingAccrualController } from './accounting-accrual.controller';
 import { AccountingSubledgerController } from './accounting-subledger.controller';
@@ -25,6 +26,25 @@ describe('Accounting controllers (delegación)', () => {
     await c.lockPeriod('per1', { reason: 'x' }, actor);
     expect(svc.openFiscalYear).toHaveBeenCalledWith({ code: 'FY' }, actor);
     expect(svc.lockPeriod).toHaveBeenCalledWith('per1', { reason: 'x' }, actor);
+  });
+
+  it('Fiscal: abrir el ejercicio admite los roles de la lectura; bloquear un periodo sigue siendo de SECURITY_ADMIN (S-8)', () => {
+    const roles = (method: 'openFiscalYear' | 'lockPeriod'): string[] =>
+      Reflect.getMetadata(
+        ROLES_KEY,
+        (
+          AccountingFiscalController.prototype as never as Record<
+            string,
+            object
+          >
+        )[method],
+      );
+    expect(roles('openFiscalYear')).toEqual([
+      'SECURITY_ADMIN',
+      'ACCOUNTING_APPROVER',
+      'PRACTITIONER',
+    ]);
+    expect(roles('lockPeriod')).toEqual(['SECURITY_ADMIN']);
   });
 
   it('Accrual delega create (UC-16-06) y run (UC-16-07)', async () => {

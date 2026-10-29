@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { requireTenantId } from '../../../common';
-import { conceptCode } from '../../../common/constants/concept-code';
+import { requireTenantId } from '../../../../common';
+import { conceptCode } from '../../../../common/constants/concept-code';
 import { assertQaResource } from './qa-scope';
 import {
   AssertionResults,
@@ -12,7 +12,7 @@ import {
   TestEnvironments,
   TestRuns,
   TestSuites,
-} from '../entities';
+} from '../../entities';
 
 const iso = (date: Date | null | undefined) =>
   date ? date.toISOString() : null;

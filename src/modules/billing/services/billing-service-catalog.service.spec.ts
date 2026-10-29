@@ -11,10 +11,12 @@ import { BillingServiceCatalogService } from './billing-service-catalog.service'
 import {
   CONCEPTS,
   ConflictException,
+  PreconditionFailedException,
   ResourceNotFoundException,
   encodeKeysetCursor,
   runWithTenant,
 } from '../../../common';
+import { BillingErrorReason } from '../billing.error-reasons';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 /** Quien atiende: sin rol administrativo, con perfil profesional. */
@@ -294,6 +296,36 @@ describe('BillingServiceCatalogService', () => {
       });
     });
 
+    it.each(['0', '0.00', '0.0'])(
+      'un precio %s responde 422 «El precio tiene que ser mayor que 0» y no crea nada (FAC-06)',
+      async (price) => {
+        const d = build();
+        d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
+        const error = await d.service
+          .create(
+            {
+              practiceId: 'pr1',
+              code: 'CONS-01',
+              name: 'Consulta general',
+              defaultPrice: price,
+            },
+            actor,
+          )
+          .then(
+            () => null,
+            (e: unknown) => e,
+          );
+        expect(error).toBeInstanceOf(PreconditionFailedException);
+        const failed = error as PreconditionFailedException;
+        expect(failed.getStatus()).toBe(422);
+        expect(failed.message).toBe('El precio tiene que ser mayor que 0');
+        expect(failed.reason).toBe(
+          BillingErrorReason.SERVICE_CATALOG_PRICE_NOT_POSITIVE,
+        );
+        expect(d.serviceCatalogRepo.create).not.toHaveBeenCalled();
+      },
+    );
+
     it('rejects a duplicate code within the same practice', async () => {
       const d = build();
       d.serviceCatalogRepo.findByCode.mockResolvedValue(item);
@@ -377,6 +409,33 @@ describe('BillingServiceCatalogService', () => {
       expect(res.currencyCode).toBe('BOB');
       expect(row.updatedByUserId).toBe(doctor.id);
       expect(d.tx.flush).toHaveBeenCalled();
+    });
+
+    it('corregir el precio a 0.00 responde 422 y la fila queda como estaba (FAC-06)', async () => {
+      const d = build();
+      const row = catalogRow({ defaultPrice: '80.00' });
+      d.serviceCatalogRepo.findById.mockResolvedValue(row);
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+        ['pr1'],
+      );
+
+      await expect(
+        d.service.update('s1', { defaultPrice: '0.00' }, doctor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(row.defaultPrice).toBe('80.00');
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+
+    it('corregir solo el nombre de un servicio que vale 0.00 no choca con la regla', async () => {
+      const d = build();
+      const row = catalogRow({ defaultPrice: '0.00' });
+      d.serviceCatalogRepo.findById.mockResolvedValue(row);
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+        ['pr1'],
+      );
+
+      const res = await d.service.update('s1', { name: 'Otra' }, doctor);
+      expect(res.name).toBe('Otra');
     });
 
     it('conserva la moneda que la fila ya tenía', async () => {
