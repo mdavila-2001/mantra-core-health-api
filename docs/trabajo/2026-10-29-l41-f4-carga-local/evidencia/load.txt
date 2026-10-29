@@ -1,0 +1,44 @@
+antes: relaciones=394757 evidencias=274494
+== dry-run
+[bulk-copy] copy: 290 ms
+[bulk-copy] validate: 38 ms
+[bulk-copy] relationships: 3242 ms
+[bulk-copy] evidence: 2903 ms
+[bulk-copy] derived: 2542 ms
+[cima safety] {"batchId":"5095a176-ce2e-a0a5-bd5f-2a2bb88d73b0","dryRun":true,"read":71010,"relationships":{"inserted":52451,"updated":0},"evidence":{"inserted":71010,"updated":0},"derivedUpdated":52451,"checksum":"79ba34447245b17853d137e6b6fc9a3aa5134a32ab7a1e8f1e527bf645a8a86f","timingsMs":{"copy":290,"validate":38,"
+[bulk-copy] copy: 8 ms
+[bulk-copy] validate: 1 ms
+[bulk-copy] relationships: 20 ms
+[bulk-copy] evidence: 22 ms
+[bulk-copy] derived: 20 ms
+[lactmed safety] {"batchId":"0b8caa04-9fba-f2b3-304b-c3f6e43d42d5","dryRun":true,"read":588,"relationships":{"inserted":579,"updated":0},"evidence":{"inserted":588,"updated":0},"derivedUpdated":579,"checksum":"6c010cd95d434a74f943aad439971cce6db5f69dae1beb21016efa857375f9a1","timingsMs":{"copy":8,"validate":1,"relation
+[cima safety] interacciones NO cargadas (BLOCKED: sin value set de severidad con UNSPECIFIED); ver out/cima-interactions.csv
+== pasada1
+[bulk-copy] copy: 239 ms
+[bulk-copy] validate: 39 ms
+[bulk-copy] relationships: 931 ms
+[bulk-copy] evidence: 1482 ms
+[bulk-copy] derived: 1579 ms
+[cima safety] {"batchId":"33e98427-080b-f6c5-04d1-0ec134e9e263","dryRun":false,"read":71010,"relationships":{"inserted":52451,"updated":0},"evidence":{"inserted":71010,"updated":0},"derivedUpdated":52451,"checksum":"79ba34447245b17853d137e6b6fc9a3aa5134a32ab7a1e8f1e527bf645a8a86f","timingsMs":{"copy":239,"validate":39,
+[bulk-copy] copy: 9 ms
+[bulk-copy] validate: 1 ms
+[bulk-copy] relationships: 14 ms
+[bulk-copy] evidence: 17 ms
+[bulk-copy] derived: 19 ms
+[lactmed safety] {"batchId":"eb0eea5c-46c2-fdfb-65c9-18e27e40503e","dryRun":false,"read":588,"relationships":{"inserted":579,"updated":0},"evidence":{"inserted":588,"updated":0},"derivedUpdated":579,"checksum":"6c010cd95d434a74f943aad439971cce6db5f69dae1beb21016efa857375f9a1","timingsMs":{"copy":9,"validate":1,"relatio
+[cima safety] interacciones NO cargadas (BLOCKED: sin value set de severidad con UNSPECIFIED); ver out/cima-interactions.csv
+== pasada2
+[bulk-copy] copy: 346 ms
+[bulk-copy] validate: 40 ms
+[bulk-copy] relationships: 180 ms
+[bulk-copy] evidence: 433 ms
+[bulk-copy] derived: 378 ms
+[cima safety] {"batchId":"77e4c895-d199-421c-d55a-3748a1200bd2","dryRun":false,"read":71010,"relationships":{"inserted":0,"updated":0},"evidence":{"inserted":0,"updated":0},"derivedUpdated":0,"checksum":"79ba34447245b17853d137e6b6fc9a3aa5134a32ab7a1e8f1e527bf645a8a86f","timingsMs":{"copy":346,"validate":40,"relationshi
+[bulk-copy] copy: 6 ms
+[bulk-copy] validate: 1 ms
+[bulk-copy] relationships: 4 ms
+[bulk-copy] evidence: 9 ms
+[bulk-copy] derived: 10 ms
+[lactmed safety] {"batchId":"a84c0160-cca1-ff69-d83c-eb68b6f04a17","dryRun":false,"read":588,"relationships":{"inserted":0,"updated":0},"evidence":{"inserted":0,"updated":0},"derivedUpdated":0,"checksum":"6c010cd95d434a74f943aad439971cce6db5f69dae1beb21016efa857375f9a1","timingsMs":{"copy":6,"validate":1,"relationships
+[cima safety] interacciones NO cargadas (BLOCKED: sin value set de severidad con UNSPECIFIED); ver out/cima-interactions.csv
+despues: relaciones=447787 evidencias=346092 fks_no_validadas=0
