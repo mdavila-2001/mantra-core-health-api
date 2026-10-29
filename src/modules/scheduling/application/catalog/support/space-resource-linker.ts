@@ -22,6 +22,7 @@ import { SchedulingCatalogRepository } from '../../../infrastructure/repositorie
 import {
   CARE_SPACES_REF_TYPE,
   DEFAULT_SLOT_CAPACITY,
+  normalizeRefType,
   RESOURCE_TYPE_CONCEPT,
 } from '../../../domain/catalog/catalog-concepts';
 import type {
@@ -78,6 +79,11 @@ export class SpaceResourceLinker {
     actor: AuthenticatedUser,
   ): Promise<ResourceResponseDto> {
     const tenantId = requireTenantId();
+    // Quien llama ya decidió el camino con `normalizeRefType`; se vuelve a comprobar para
+    // que este vínculo nunca se use con otra cosa que un espacio.
+    if (normalizeRefType(dto.resourceRefType) !== CARE_SPACES_REF_TYPE) {
+      throw this.spaceNotFound();
+    }
     if (dto.tenantId !== tenantId) throw this.spaceNotFound();
     if (dto.resourceType !== 'ROOM') {
       throw new PreconditionFailedException(
