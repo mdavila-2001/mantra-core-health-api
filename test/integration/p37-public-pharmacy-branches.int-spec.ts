@@ -230,6 +230,8 @@ describe('P37 · sucursales públicas y receta (DB real)', () => {
     ]) {
       await insert('practice.practice_sites', {
         id: site,
+        // F1b: la sede lleva el tenant de su práctica (NOT NULL + FK compuesta).
+        tenant_id: practice === ids.practiceB ? ids.tenantB : ids.tenantA,
         practice_id: practice,
         branch_id: branch,
         address_id: address,

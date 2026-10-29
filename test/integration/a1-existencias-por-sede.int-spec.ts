@@ -157,6 +157,7 @@ describe('A1 · existencias por sede: lotes o catálogo (DB real)', () => {
     for (const ps of [ids.psLotes, ids.psDecl]) {
       await insert('practice.practice_sites', {
         id: ps,
+        tenant_id: ids.tenant,
         practice_id: ids.practice,
         code: `${mark}-${ps.slice(0, 6)}`,
         name: mark,

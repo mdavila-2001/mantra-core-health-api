@@ -263,6 +263,10 @@ export class CareSpacesRepository {
         validFrom: data.validFrom,
         operationalStatusConceptId: data.operationalStatusConceptId,
         statusConceptId: data.statusConceptId,
+        // F2: contador de versión del eje operativo (disponibilidad, higiene,
+        // aislamiento). NOT NULL sin valor por omisión en el DDL generado; el alta
+        // lo inicializa y sólo el flujo operativo (F2) lo incrementa.
+        opsVersion: 1,
         ...createdBy(data.actorUserId),
       },
       { partial: true },
