@@ -3,6 +3,7 @@ import {
   infraF3RegistryPolicy,
 } from '../../clinical/policies/infra-f3.policy';
 import { infraF4RegistryPolicy } from '../../procedures_perioperative/policies/infra-f4.policy';
+import { INFRA_F5E_POLICY } from '../../billing/policies/infra-f5.policy';
 import { infraPlanRegistryPolicy } from '../plan/policies/infra-plan.policy';
 import { INFRA_F2_POLICY } from './infra-f2.policy';
 import { InfraPolicyRegistry, type InfraRole } from './infra-policy';
@@ -28,6 +29,7 @@ const registry = (): InfraPolicyRegistry => {
   r.register(infraF3RegistryPolicy());
   r.register(infraF4RegistryPolicy());
   r.register(infraPlanRegistryPolicy());
+  r.register(INFRA_F5E_POLICY);
   return r;
 };
 
@@ -38,7 +40,13 @@ const rolesOf = (r: InfraPolicyRegistry, action: string): InfraRole[] => [
 describe('registro de políticas de infraestructura (F2, F3, F4 y plano)', () => {
   it('registra las cuatro políticas, cada una con sus acciones y sin pisarse', () => {
     const r = registry();
-    expect(r.all().map((p) => p.name)).toEqual(['F2', 'F3', 'F4', 'PLAN']);
+    expect(r.all().map((p) => p.name)).toEqual([
+      'F2',
+      'F3',
+      'F4',
+      'PLAN',
+      INFRA_F5E_POLICY.name,
+    ]);
     const seen = new Map<string, string>();
     for (const policy of r.all()) {
       for (const action of Object.keys(policy.rules)) {
@@ -50,6 +58,22 @@ describe('registro de políticas de infraestructura (F2, F3, F4 y plano)', () =>
     expect(r.rule('OR_BLOCK_MANAGE')).toBeDefined();
     expect(r.rule('plan.edit')).toBeDefined();
     expect(r.rule('infra.board.view')).toBeDefined();
+  });
+
+  it('la política de F5e (tarifas y cargos) está registrada y los cargos son de Facturación y estructura, no de piso', () => {
+    const r = registry();
+    expect(r.rule('infra.charge.invoice')?.roles).toEqual(['BILLING']);
+    for (const action of ['infra.charge.view', 'infra.charge.void']) {
+      const roles = rolesOf(r, action);
+      for (const forbidden of [
+        'NURSE',
+        'HOUSEKEEPING',
+        'MAINTENANCE',
+        'OR_MANAGER',
+      ] as const) {
+        expect(roles).not.toContain(forbidden);
+      }
+    }
   });
 
   it('el registro de F3 apunta a la misma tabla que lee AdtAccessService', () => {

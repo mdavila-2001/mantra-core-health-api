@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
+import {
+  CASE_COMPLETED_HOOK,
+  type CaseCompletedHook,
+} from '../ports/case-completed.hook';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -140,6 +144,9 @@ export class PeriopIntraopService {
     private readonly receivedServices: ReceivedServicesProjector,
     private readonly logger: PinoLogger,
     private readonly gate: PeriopChecklistGateService,
+    @Optional()
+    @Inject(CASE_COMPLETED_HOOK)
+    private readonly completedHook?: CaseCompletedHook,
   ) {
     this.logger.setContext(PeriopIntraopService.name);
   }
@@ -605,7 +612,8 @@ export class PeriopIntraopService {
       'Signing operative report',
     );
 
-    return this.em.transactional(async (tx) => {
+    let completedNow = false;
+    const response = await this.em.transactional(async (tx) => {
       // El caso primero: el informe se resuelve dentro de un caso del tenant activo.
       const surgicalCase = await loadCaseForUpdateInScope(
         this.casesRepo,
@@ -677,6 +685,7 @@ export class PeriopIntraopService {
           statusConceptId: CONCEPTS.MILESTONE_REACHED,
         });
         touch(surgicalCase, actor.id);
+        completedNow = true;
         // El cierre del caso es la intervención realizada: entra a «Servicios
         // recibidos» en esta misma transacción. El flush previo va porque las FK de
         // la tabla son columnas, no relaciones, y el ORM no ordena los inserts.
@@ -695,6 +704,29 @@ export class PeriopIntraopService {
         caseStatusConceptId: surgicalCase.statusConceptId,
       };
     });
+    if (completedNow) await this.notifyCompleted(caseId);
+    return response;
+  }
+
+  /**
+   * Avisa al gancho de caso completado (devengo del tiempo de quirófano). Corre ya
+   * confirmado el cierre clínico y fuera de su transacción; si falla, se registra con
+   * ids y el cierre sigue siendo válido: el job de Facturación recoge el caso.
+   */
+  private async notifyCompleted(caseId: string): Promise<void> {
+    if (!this.completedHook) return;
+    try {
+      await this.completedHook.onCaseCompleted(caseId);
+    } catch (error) {
+      this.logger.error(
+        {
+          operation: 'periop.case.completed_hook',
+          caseId,
+          errorName: error instanceof Error ? error.name : 'UnknownError',
+        },
+        'Case completed hook failed; clinical close is unaffected',
+      );
+    }
   }
 
   /** UC-53-12: admitir al paciente en recuperación. */

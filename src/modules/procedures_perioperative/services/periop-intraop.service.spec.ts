@@ -139,7 +139,12 @@ function build() {
   const receivedServices = {
     projectCompletedCase: mockFn().mockResolvedValue(undefined),
   };
-  const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const logger = {
+    setContext: mockFn(),
+    info: mockFn(),
+    warn: mockFn(),
+    error: mockFn(),
+  };
   // La compuerta del check-list OMS tiene su propio spec; acá se comprueba cuándo se llama.
   const gate = { assertPhase: mockFn().mockResolvedValue(undefined) };
   const service = new PeriopIntraopService(
@@ -154,6 +159,7 @@ function build() {
   return {
     service: inTenant(service, TENANT_A),
     raw: service,
+    em,
     gate,
     tx,
     intraopRepo,
@@ -725,6 +731,87 @@ describe('PeriopIntraopService', () => {
       await d.service.signReport(CASE, REPORT, { signatureId: PROFILE }, actor);
 
       expect(d.receivedServices.projectCompletedCase).not.toHaveBeenCalled();
+    });
+
+    describe('gancho de caso completado (devengo del quirófano)', () => {
+      const sign = async (hook: any, status?: string) => {
+        const d = build();
+        (d.raw as any).completedHook = hook;
+        d.intraopRepo.findReportForUpdate.mockResolvedValue({
+          id: REPORT,
+          procedureCaseId: CASE,
+          statusConceptId: CONCEPTS.OPERATIVE_REPORT_DRAFT,
+        });
+        d.casesRepo.findCaseForUpdate.mockResolvedValue(
+          caseInProgress(status ? { statusConceptId: status } : {}),
+        );
+        return d;
+      };
+      const run = (d: any) =>
+        d.service.signReport(CASE, REPORT, { signatureId: PROFILE }, actor);
+
+      it('al cerrar el caso avisa una vez, con el caso, después de confirmar la transacción', async () => {
+        const order: string[] = [];
+        const hook = {
+          onCaseCompleted: mockFn(async () => {
+            order.push('hook');
+          }),
+        };
+        const d = await sign(hook);
+        d.em.transactional.mockImplementation(async (cb: any) => {
+          const out = await cb(d.tx);
+          order.push('commit');
+          return out;
+        });
+        await run(d);
+        expect(hook.onCaseCompleted).toHaveBeenCalledTimes(1);
+        expect(hook.onCaseCompleted).toHaveBeenCalledWith(CASE);
+        expect(order).toEqual(['commit', 'hook']);
+      });
+
+      it('si el gancho falla, el cierre clínico sigue siendo válido y el fallo se registra sin datos clínicos', async () => {
+        const hook = {
+          onCaseCompleted: mockFn().mockRejectedValue(
+            new Error('facturación caída'),
+          ),
+        };
+        const d = await sign(hook);
+        const res = await run(d);
+        expect(res).toMatchObject({
+          statusConceptId: CONCEPTS.OPERATIVE_REPORT_SIGNED,
+          caseStatusConceptId: CONCEPTS.CASE_COMPLETED,
+        });
+        expect(d.logger.error).toHaveBeenCalledWith(
+          expect.objectContaining({
+            operation: 'periop.case.completed_hook',
+            caseId: CASE,
+            errorName: 'Error',
+          }),
+          expect.any(String),
+        );
+        expect(JSON.stringify(d.logger.error.mock.calls)).not.toContain(
+          'facturación caída',
+        );
+      });
+
+      it('un caso que ya estaba completado no vuelve a avisar', async () => {
+        const hook = { onCaseCompleted: mockFn() };
+        const d = await sign(hook, CONCEPTS.CASE_COMPLETED);
+        await run(d);
+        expect(hook.onCaseCompleted).not.toHaveBeenCalled();
+      });
+
+      it('si la firma falla (ya firmado) no avisa', async () => {
+        const hook = { onCaseCompleted: mockFn() };
+        const d = await sign(hook);
+        d.intraopRepo.findReportForUpdate.mockResolvedValue({
+          id: REPORT,
+          procedureCaseId: CASE,
+          statusConceptId: CONCEPTS.OPERATIVE_REPORT_SIGNED,
+        });
+        await expect(run(d)).rejects.toMatchObject({ status: 409 });
+        expect(hook.onCaseCompleted).not.toHaveBeenCalled();
+      });
     });
 
     it('rejects signing twice', async () => {

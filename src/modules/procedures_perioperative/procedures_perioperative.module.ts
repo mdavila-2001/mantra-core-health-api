@@ -40,6 +40,9 @@ import { ClinicalModule } from '../clinical/clinical.module';
 // este módulo, así que la dependencia va en un solo sentido.
 import { PracticeModule } from '../practice/practice.module';
 import { PeriopAccessModule } from './policies/periop-access.module';
+import { BillingModule } from '../billing/billing.module';
+import { CASE_COMPLETED_HOOK } from './ports/case-completed.hook';
+import { OrTimeBillingHook } from './services/or-time-billing.hook';
 import { InfraF4PolicyInitializer } from './policies/infra-f4.policy';
 import { PractitionerScopeService } from './policies/practitioner-scope.service';
 import { PractitionerRefsInterceptor } from './policies/practitioner-refs.interceptor';
@@ -60,6 +63,8 @@ import { PractitionerRefsInterceptor } from './policies/practitioner-refs.interc
     ClinicalModule,
     PracticeModule,
     PeriopAccessModule,
+    // Devengo del tiempo de quirófano al completarse un caso (F5e).
+    BillingModule,
   ],
   controllers: [
     PeriopController,
@@ -92,6 +97,8 @@ import { PractitionerRefsInterceptor } from './policies/practitioner-refs.interc
     PeriopRetireBlockersInitializer,
     // Alta de la política de F4 en el registro de políticas de infraestructura.
     InfraF4PolicyInitializer,
+    OrTimeBillingHook,
+    { provide: CASE_COMPLETED_HOOK, useExisting: OrTimeBillingHook },
     // F4: todo id de profesional del cuerpo debe ser de la organización activa.
     PractitionerScopeService,
     PractitionerRefsInterceptor,

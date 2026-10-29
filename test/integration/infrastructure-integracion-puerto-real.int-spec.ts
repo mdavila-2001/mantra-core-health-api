@@ -429,6 +429,19 @@ describe('Infraestructura · F2 con F3 y F4 por el puerto real (sin doble)', () 
       const dia = '2026-10-20';
       const lp = (fecha: string, hhmm: string) => `${fecha}T${hhmm}:00-04:00`;
 
+      // El cargo cuelga del encuentro del paciente: el caso se liga a uno (fixture SQL).
+      const encuentro = randomUUID();
+      await sql(
+        `insert into clinical.encounters
+           (id, patient_profile_id, tenant_id, status_concept_id, start_at, created_at, updated_at)
+         values (?, ?, ?, ?, now() - interval '1 day', now(), now())`,
+        [
+          encuentro,
+          ctx.patientSubtypeId,
+          orgF4.tenantId,
+          CONCEPTS.STATE_ACTIVE,
+        ],
+      );
       const creado = await httpF4(ctx)
         .post('/procedure-cases')
         .set(como(jefe))
@@ -440,6 +453,7 @@ describe('Infraestructura · F2 con F3 y F4 por el puerto real (sin doble)', () 
           primarySurgeonProfileId: medico.hpid,
           surgicalSpecialtyConceptId: CONCEPTS.TEAM_ROLE_SURGEON,
           operatingRoomId: qx.id,
+          encounterId: encuentro,
           scheduledStartAt: lp('2030-11-04', '08:00'),
           scheduledEndAt: lp('2030-11-04', '10:00'),
         })
@@ -511,6 +525,48 @@ describe('Infraestructura · F2 con F3 y F4 por el puerto real (sin doble)', () 
       expect(
         await outbox('practice.cleaning_order.created', orders[0].id),
       ).toHaveLength(1);
+      // F4 → facturación: firmar el reporte completa el caso y devenga el tiempo de
+      // quirófano en el acto (el hook), sin esperar al job periódico.
+      const antes = await sql(
+        `select 1 from billing.charge_captures where idempotency_key = ?`,
+        [`ORTIME:${casoId}`],
+      );
+      expect(antes).toHaveLength(0);
+      const firmaId = randomUUID();
+      await ctx.orm.em.fork().transactional(async (tx) => {
+        await tx.execute('set local session_replication_role = replica');
+        await tx.execute(
+          `insert into chart.clinical_note_signatures
+             (id, clinical_note_version_id, signer_profile_id, signature_type_concept_id, signed_at)
+           values (?, ?, ?, ?, now())`,
+          [firmaId, randomUUID(), medico.hpid, CONCEPTS.STATE_ACTIVE],
+        );
+      });
+      const reporte = await httpF4(ctx)
+        .post(`/procedure-cases/${casoId}/operative-reports`)
+        .set(como(jefe))
+        .send({
+          procedureCodeConceptId: CONCEPTS.STATE_ACTIVE,
+          authorProfileId: medico.hpid,
+          procedureDescription: 'Procedimiento de prueba',
+          disposition: 'PACU',
+        })
+        .expect(201);
+      const firmado = await httpF4(ctx)
+        .post(
+          `/procedure-cases/${casoId}/operative-reports/${reporte.body.id}/sign`,
+        )
+        .set(como(jefe))
+        .send({ signatureId: firmaId })
+        .expect(200);
+      expect(firmado.body.caseStatusConceptId).toBe(CONCEPTS.CASE_COMPLETED);
+      const cargos = await sql(
+        `select tenant_id, status_concept_id from billing.charge_captures where idempotency_key = ?`,
+        [`ORTIME:${casoId}`],
+      );
+      expect(cargos).toHaveLength(1);
+      expect(cargos[0].tenant_id).toBe(orgF4.tenantId);
+
       // la orden es del tenant de la sala, no de otro
       const [tenant] = await sql(
         'select tenant_id from practice.cleaning_orders where id = ?',
