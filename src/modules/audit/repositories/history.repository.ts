@@ -9,6 +9,9 @@ import {
   MedicationRequestsHistory,
   AppointmentBookingsHistory,
   ConditionsHistory,
+  PracticeSitesHistory,
+  ClinicalUnitsHistory,
+  CareSpacesHistory,
 } from '../entities';
 
 /** Datos para sellar una revisión en una tabla `*_history` (write-side). */
@@ -127,6 +130,24 @@ const HISTORY_REGISTRY: Record<string, HistoryBinding> = {
   conditions: {
     entity: ConditionsHistory,
     sourceField: 'conditionId',
+    revisionField: 'revisionNo',
+  },
+  // F0 de infraestructura hospitalaria: la estructura física de `practice`
+  // (sede, unidad clínica, espacio de atención) versiona sus altas y bajas.
+  // Las tres entidades ya existían en el modelo; nada las escribía.
+  practice_sites: {
+    entity: PracticeSitesHistory,
+    sourceField: 'practiceSiteId',
+    revisionField: 'revisionNo',
+  },
+  clinical_units: {
+    entity: ClinicalUnitsHistory,
+    sourceField: 'clinicalUnitId',
+    revisionField: 'revisionNo',
+  },
+  care_spaces: {
+    entity: CareSpacesHistory,
+    sourceField: 'careSpaceId',
     revisionField: 'revisionNo',
   },
 };

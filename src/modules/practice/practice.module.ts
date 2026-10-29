@@ -37,6 +37,15 @@ import {
   PracticeOrganizationReadRepository,
 } from './repositories';
 import { ServiceCatalogRepository } from '../billing/repositories';
+// F0 infraestructura hospitalaria: la estructura (sede, unidad, espacio) se
+// autoriza con la regla de organización —OWNER/ADMIN del tenant o plataforma—
+// que vive en `DirectoryAuthorizationModule`, y versiona en `audit.*_history`
+// con el `HistoryRepository` que exporta `AuditModule`. Ninguno de los dos
+// importa `practice`, así que no cierran ciclo. `BranchesRepository` es una
+// clase sin estado (recibe el `em`): se registra suelta, como el catálogo.
+import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
+import { AuditModule } from '../audit/audit.module';
+import { BranchesRepository } from '../directory/repositories/branches.repository';
 import { AddressesRepository } from '../common/repositories';
 // ALV-005/006: `PractitionerSitesService.createOwnSite` necesita saber de
 // quién es la sesión (`ProfileOwnershipService`); `OwnSiteProvisioningService`
@@ -57,7 +66,11 @@ import {
  * ajustes e inventario. Implementa UC-14-01..12 (más un bootstrap de práctica).
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    DirectoryAuthorizationModule,
+    AuditModule,
+  ],
   controllers: [
     PracticesController,
     SitesController,
@@ -86,6 +99,7 @@ import {
     // e importarlo cerraría el ciclo. El repositorio no guarda estado —recibe el
     // `em` en cada llamada—, así que una segunda instancia es la misma cosa.
     ServiceCatalogRepository,
+    BranchesRepository,
     AddressesRepository,
     PersonAccountLinksRepository,
     HealthPractitionerProfilesRepository,

@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Roles,
   requireTenantId,
@@ -40,9 +41,20 @@ export class SitesController {
     private readonly sitesService: PracticeSitesService,
   ) {}
 
-  /** UC-14-04. */
+  /**
+   * UC-14-04.
+   *
+   * Sin `@Roles`: el dueño de una organización entra con rol global `USER` y
+   * su poder es la membresía OWNER/ADMIN. La autorización la hace el servicio
+   * (`TenantAdministrationService.assertCanAdminister`), y una sede de otro
+   * tenant responde 404.
+   */
+  @Audited({
+    action: 'CLINICAL_UNIT_CREATED',
+    entity: 'clinical_unit',
+    entityId: 'result.id',
+  })
   @Post(':siteId/clinical-units')
-  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear una unidad clínica jerárquica' })
   createClinicalUnit(
@@ -50,7 +62,12 @@ export class SitesController {
     @Body() dto: CreateClinicalUnitDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ClinicalUnitResponseDto> {
-    return this.structureService.createClinicalUnit(siteId, dto, actor);
+    return this.structureService.createClinicalUnit(
+      siteId,
+      dto,
+      actor,
+      requireTenantId(),
+    );
   }
 
   /**
@@ -77,9 +94,13 @@ export class SitesController {
     return this.sitesService.listCareSpaces(siteId, requireTenantId());
   }
 
-  /** UC-14-05. */
+  /** UC-14-05. Misma autorización que `createClinicalUnit`. */
+  @Audited({
+    action: 'CARE_SPACE_CREATED',
+    entity: 'care_space',
+    entityId: 'result.id',
+  })
   @Post(':siteId/care-spaces')
-  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Crear un espacio de atención bajo una unidad/sitio',
@@ -89,6 +110,11 @@ export class SitesController {
     @Body() dto: CreateCareSpaceDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<CareSpaceResponseDto> {
-    return this.structureService.createCareSpace(siteId, dto, actor);
+    return this.structureService.createCareSpace(
+      siteId,
+      dto,
+      actor,
+      requireTenantId(),
+    );
   }
 }

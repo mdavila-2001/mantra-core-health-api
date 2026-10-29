@@ -70,17 +70,27 @@ describe('PracticesController', () => {
   it('delegates createSite (UC-14-01)', async () => {
     const d = build();
     const dto = { code: 'S', name: 'N' };
-    await d.controller.createSite('p1', dto, actor);
-    expect(d.sitesService.createSite).toHaveBeenCalledWith('p1', dto, actor);
+    await runWithTenant('tenant-1', () =>
+      d.controller.createSite('p1', dto, actor),
+    );
+    expect(d.sitesService.createSite).toHaveBeenCalledWith(
+      'p1',
+      dto,
+      actor,
+      'tenant-1',
+    );
   });
 
   it('delegates decommissionSite (UC-14-12)', async () => {
     const d = build();
-    await d.controller.decommissionSite('p1', 's1', actor);
+    await runWithTenant('tenant-1', () =>
+      d.controller.decommissionSite('p1', 's1', actor),
+    );
     expect(d.sitesService.decommissionSite).toHaveBeenCalledWith(
       'p1',
       's1',
       actor,
+      'tenant-1',
     );
   });
 
@@ -185,18 +195,39 @@ describe('SitesController', () => {
       structureService as any,
       sitesService as any,
     );
-    await controller.createClinicalUnit('s1', { code: 'U', name: 'N' }, actor);
+    await runWithTenant('tenant-1', () =>
+      controller.createClinicalUnit('s1', { code: 'U', name: 'N' }, actor),
+    );
     expect(structureService.createClinicalUnit).toHaveBeenCalledWith(
       's1',
       { code: 'U', name: 'N' },
       actor,
+      'tenant-1',
     );
-    await controller.createCareSpace('s1', { code: 'C', name: 'N' }, actor);
+    await runWithTenant('tenant-1', () =>
+      controller.createCareSpace('s1', { code: 'C', name: 'N' }, actor),
+    );
     expect(structureService.createCareSpace).toHaveBeenCalledWith(
       's1',
       { code: 'C', name: 'N' },
       actor,
+      'tenant-1',
     );
+  });
+
+  it('sin tenant activo las escrituras de estructura fallan cerradas', () => {
+    const structureService = {
+      createClinicalUnit: mockFn(),
+      createCareSpace: mockFn(),
+    };
+    const controller = new SitesController(
+      structureService as any,
+      { listCareSpaces: mockFn() } as any,
+    );
+    expect(() =>
+      controller.createCareSpace('s1', { code: 'C', name: 'N' }, actor),
+    ).toThrow();
+    expect(structureService.createCareSpace).not.toHaveBeenCalled();
   });
 });
 

@@ -23,6 +23,10 @@ import {
   CareSpaceResponseDto,
   HealthcareServiceResponseDto,
 } from '../dto';
+import { TenantAdministrationService } from '../../directory/services/tenant-administration.service';
+import { HistoryRepository } from '../../audit/repositories';
+import { AUD } from '../../audit/audit.concepts';
+import { STRUCTURE_HISTORY, structureSnapshot } from './structure-history';
 
 /**
  * Estructura clínica bajo un sitio: unidades jerárquicas (UC-14-04), espacios de
@@ -40,6 +44,8 @@ export class ClinicalStructureService {
    * @param spacesRepo - Valor de spaces repo requerido por la operación.
    * @param servicesRepo - Valor de services repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
+   * @param tenantAdmin - Regla de quién administra una organización (OWNER/ADMIN o plataforma).
+   * @param historyRepo - Versionado append-only en `audit.*_history`.
    */
   constructor(
     private readonly em: EntityManager,
@@ -49,8 +55,32 @@ export class ClinicalStructureService {
     private readonly spacesRepo: CareSpacesRepository,
     private readonly servicesRepo: HealthcareServicesRepository,
     private readonly logger: PinoLogger,
+    private readonly tenantAdmin: TenantAdministrationService,
+    private readonly historyRepo: HistoryRepository,
   ) {
     this.logger.setContext(ClinicalStructureService.name);
+  }
+
+  /**
+   * Sede del tenant activo, o 404.
+   *
+   * La sede no guarda el tenant: lo hereda de su práctica. Una sede de otra
+   * organización responde lo mismo que una inexistente, para no confirmar que
+   * el id existe.
+   */
+  private async requireSiteInTenant(
+    tx: EntityManager,
+    siteId: string,
+    tenantId: string,
+  ) {
+    const site = await this.sitesRepo.findById(tx, siteId);
+    if (!site)
+      throw new ResourceNotFoundException('Sitio no encontrado', { siteId });
+    const practice = await this.practicesRepo.findById(tx, site.practiceId);
+    if (!practice || practice.tenantId !== tenantId) {
+      throw new ResourceNotFoundException('Sitio no encontrado', { siteId });
+    }
+    return site;
   }
 
   /** UC-14-04: crea una unidad clínica (opcionalmente jerárquica) bajo un sitio activo. */
@@ -58,15 +88,15 @@ export class ClinicalStructureService {
     siteId: string,
     dto: CreateClinicalUnitDto,
     actor: AuthenticatedUser,
+    tenantId: string,
   ): Promise<ClinicalUnitResponseDto> {
     this.logger.info(
       { operation: 'practice.unit.create', siteId },
       'Creating clinical unit',
     );
     return this.em.transactional(async (tx) => {
-      const site = await this.sitesRepo.findById(tx, siteId);
-      if (!site)
-        throw new ResourceNotFoundException('Sitio no encontrado', { siteId });
+      const site = await this.requireSiteInTenant(tx, siteId, tenantId);
+      await this.tenantAdmin.assertCanAdminister(tx, tenantId, actor);
       if (site.statusConceptId !== PRAC.SITE_ACTIVE) {
         throw new PreconditionFailedException('El sitio no está activo', {
           siteId,
@@ -111,6 +141,12 @@ export class ClinicalStructureService {
         actorUserId: actor.id,
       });
       await tx.flush();
+      await this.historyRepo.append(tx, STRUCTURE_HISTORY.unit, unit.id, {
+        operationConceptId: AUD.OPERATION_INSERT,
+        dataSnapshot: structureSnapshot(unit),
+        changedByUserId: actor.id,
+      });
+      await tx.flush();
       return {
         id: unit.id,
         practiceSiteId: unit.practiceSiteId,
@@ -126,15 +162,15 @@ export class ClinicalStructureService {
     siteId: string,
     dto: CreateCareSpaceDto,
     actor: AuthenticatedUser,
+    tenantId: string,
   ): Promise<CareSpaceResponseDto> {
     this.logger.info(
       { operation: 'practice.space.create', siteId },
       'Creating care space',
     );
     return this.em.transactional(async (tx) => {
-      const site = await this.sitesRepo.findById(tx, siteId);
-      if (!site)
-        throw new ResourceNotFoundException('Sitio no encontrado', { siteId });
+      const site = await this.requireSiteInTenant(tx, siteId, tenantId);
+      await this.tenantAdmin.assertCanAdminister(tx, tenantId, actor);
       if (site.statusConceptId !== PRAC.SITE_ACTIVE) {
         throw new PreconditionFailedException('El sitio no está activo', {
           siteId,
@@ -190,6 +226,12 @@ export class ClinicalStructureService {
         operationalStatusConceptId: PRAC.SPACE_OP_AVAILABLE,
         statusConceptId: PRAC.SPACE_ACTIVE,
         actorUserId: actor.id,
+      });
+      await tx.flush();
+      await this.historyRepo.append(tx, STRUCTURE_HISTORY.space, space.id, {
+        operationConceptId: AUD.OPERATION_INSERT,
+        dataSnapshot: structureSnapshot(space),
+        changedByUserId: actor.id,
       });
       await tx.flush();
       return {
