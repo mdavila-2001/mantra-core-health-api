@@ -32,7 +32,7 @@ _Fuente: `src/modules/iam/README.md:3`_
 |  |  | POST /iam/auth/login | Público (sin sesión) | ALTO | 23 |
 |  |  | POST /iam/auth/logout | Cualquier sesión válida | ALTO | 4 |
 |  |  | POST /iam/auth/logout-all | Cualquier sesión válida | ALTO | 4 |
-|  |  | POST /iam/auth/register-organization | Público (sin sesión) | ALTO | 38 |
+|  |  | POST /iam/auth/register-organization | Público (sin sesión) | ALTO | 40 |
 |  |  | POST /iam/auth/register-patient | Público (sin sesión) | ALTO | 21 |
 |  |  | POST /iam/auth/register-practitioner | Público (sin sesión) | ALTO | 45 |
 |  |  | POST /iam/auth/resend-verification | Público (sin sesión) | ALTO | 9 |
@@ -104,7 +104,7 @@ flowchart LR
   t14[("+1 tablas más")]
   t18[("+5 tablas más")]
   t26[("+17 tablas más")]
-  t35[("+32 tablas más")]
+  t35[("+34 tablas más")]
   t38[("+15 tablas más")]
   t40[("+39 tablas más")]
   t44[("+3 tablas más")]
@@ -872,7 +872,7 @@ Registrar una organización con su cuenta owner
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 409 | `CONFLICT` | ConflictException: El código de organización ya existe; ConflictException: Ya existe una cuenta con ese correo |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un tenant de tipo PAYER exige el bloque `payer`; PreconditionFailedException: Un tenant de tipo BROKER exige el bloque `broker`; PreconditionFailedException: Un tenant de tipo {tenantType} exige país y jurisdicción; PreconditionFailedException: El tipo societario pertenece al derecho de {entry!.countryIso} y no coincide con el país declarado; PreconditionFailedException: El bloque `payer` sólo corresponde a un tenant de tipo PAYER; PreconditionFailedException: El bloque `broker` sólo corresponde a un tenant de tipo BROKER; PreconditionFailedException: El bloque `pharmacy` sólo corresponde a un tenant de tipo PHARMACY; PreconditionFailedException: El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER; PreconditionFailedException: El tipo de unidad diagnóstica declarado no es válido; PreconditionFailedException: Las sucursales sólo se declaran en una unidad de laboratorio clínico; PreconditionFailedException: Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas; PreconditionFailedException: Los conceptos declarados no existen en el catálogo de terminología |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un tenant de tipo PAYER exige el bloque `payer`; PreconditionFailedException: Un tenant de tipo BROKER exige el bloque `broker`; PreconditionFailedException: Un tenant de tipo {tenantType} exige país y jurisdicción; PreconditionFailedException: El tipo societario pertenece al derecho de {entry!.countryIso} y no coincide con el país declarado; PreconditionFailedException: El bloque `payer` sólo corresponde a un tenant de tipo PAYER; PreconditionFailedException: El bloque `broker` sólo corresponde a un tenant de tipo BROKER; PreconditionFailedException: El bloque `pharmacy` sólo corresponde a un tenant de tipo PHARMACY; PreconditionFailedException: El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER; PreconditionFailedException: El bloque `medicalFacility` sólo corresponde a un tenant de tipo {MEDICAL_FACILITY_TENANT_TYPES.join(', ')}; PreconditionFailedException: El tipo de unidad diagnóstica declarado no es válido; PreconditionFailedException: Las sucursales sólo se declaran en una unidad de laboratorio clínico; PreconditionFailedException: Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas; PreconditionFailedException: Los conceptos declarados no existen en el catálogo de terminología |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -946,63 +946,70 @@ flowchart TD
   n31 -->|"no"| n33
   n34(["422 PRECONDITION_FAILED El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER"]):::error
   n33 -->|"sí"| n34
-  n35{"input.diagnosticUnit"}:::decision
+  n35{"input.medicalFacility"}:::decision
   n33 -->|"no"| n35
-  n36{"unitTypeConceptId !== undefined && !DIAGNOSTIC_UNIT_TYPE_CONCEPTS.has(unitTypeConceptId)"}:::decision
+  n36{"!MEDICAL_FACILITY_TENANT_TYPES.includes(tenantType)"}:::decision
   n35 -->|"sí"| n36
-  n37(["422 PRECONDITION_FAILED El tipo de unidad diagnóstica declarado no es válido"]):::error
+  n37(["422 PRECONDITION_FAILED El bloque `medicalFacility` sólo corresponde a un tenant de tipo {MEDICAL_FACILITY_TE…"]):::error
   n36 -->|"sí"| n37
-  n38{"(input.diagnosticUnit.branches?.length ?? 0) › 0 && resolvedUnitTypeConceptId !== DUNIT.UNIT_TYPE_LABORATORY"}:::decision
+  n38{"input.diagnosticUnit"}:::decision
   n36 -->|"no"| n38
-  n39(["422 PRECONDITION_FAILED Las sucursales sólo se declaran en una unidad de laboratorio clínico"]):::error
+  n35 -->|"no"| n38
+  n39{"unitTypeConceptId !== undefined && !DIAGNOSTIC_UNIT_TYPE_CONCEPTS.has(unitTypeConceptId)"}:::decision
   n38 -->|"sí"| n39
-  n40{"invalidModalities.length › 0"}:::decision
-  n38 -->|"no"| n40
-  n41(["422 PRECONDITION_FAILED Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas"]):::error
-  n40 -->|"sí"| n41
-  n42["Llama a DirectoryRegistrationAdapter.assertConceptsExist"]:::llamada
-  n40 -->|"no"| n42
-  n35 -->|"no"| n42
-  n43["Llama a TenantTypeProfileService.assertConceptsExist"]:::llamada
-  n42 --> n43
-  n44{"unknown.length › 0"}:::decision
-  n43 --> n44
-  n45(["422 PRECONDITION_FAILED Los conceptos declarados no existen en el catálogo de terminología"]):::error
-  n44 -->|"sí"| n45
-  n46["Llama a UsersRepository.create"]:::llamada
-  n44 -->|"no"| n46
-  n47[("CREA iam.users")]:::efecto
+  n40(["422 PRECONDITION_FAILED El tipo de unidad diagnóstica declarado no es válido"]):::error
+  n39 -->|"sí"| n40
+  n41{"(input.diagnosticUnit.branches?.length ?? 0) › 0 && resolvedUnitTypeConceptId !== DUNIT.UNIT_TYPE_LABORATORY"}:::decision
+  n39 -->|"no"| n41
+  n42(["422 PRECONDITION_FAILED Las sucursales sólo se declaran en una unidad de laboratorio clínico"]):::error
+  n41 -->|"sí"| n42
+  n43{"invalidModalities.length › 0"}:::decision
+  n41 -->|"no"| n43
+  n44(["422 PRECONDITION_FAILED Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas"]):::error
+  n43 -->|"sí"| n44
+  n45["Llama a DirectoryRegistrationAdapter.assertConceptsExist"]:::llamada
+  n43 -->|"no"| n45
+  n38 -->|"no"| n45
+  n46["Llama a TenantTypeProfileService.assertConceptsExist"]:::llamada
+  n45 --> n46
+  n47{"unknown.length › 0"}:::decision
   n46 --> n47
-  n48["Llama a CredentialsRepository.createPassword"]:::llamada
-  n47 --> n48
-  n49[("CREA iam.authentication_credentials")]:::efecto
-  n48 --> n49
-  n50["Llama a UserGlobalRolesRepository.create"]:::llamada
+  n48(["422 PRECONDITION_FAILED Los conceptos declarados no existen en el catálogo de terminología"]):::error
+  n47 -->|"sí"| n48
+  n49["Llama a UsersRepository.create"]:::llamada
+  n47 -->|"no"| n49
+  n50[("CREA iam.users")]:::efecto
   n49 --> n50
-  n51[("CREA iam.user_global_roles")]:::efecto
+  n51["Llama a CredentialsRepository.createPassword"]:::llamada
   n50 --> n51
-  n52["Llama a DirectoryRegistrationAdapter.createTenant"]:::llamada
+  n52[("CREA iam.authentication_credentials")]:::efecto
   n51 --> n52
-  n53["Llama a TenantsRepository.create"]:::llamada
+  n53["Llama a UserGlobalRolesRepository.create"]:::llamada
   n52 --> n53
-  n54[("CREA directory.tenants")]:::efecto
+  n54[("CREA iam.user_global_roles")]:::efecto
   n53 --> n54
-  n55["Llama a DirectoryRegistrationAdapter.createTenantMembership"]:::llamada
+  n55["Llama a DirectoryRegistrationAdapter.createTenant"]:::llamada
   n54 --> n55
-  n56["Llama a TenantMembershipsRepository.create"]:::llamada
+  n56["Llama a TenantsRepository.create"]:::llamada
   n55 --> n56
-  n57[("CREA directory.tenant_memberships")]:::efecto
+  n57[("CREA directory.tenants")]:::efecto
   n56 --> n57
-  n58["Llama a EmailVerificationsRepository.create"]:::llamada
+  n58["Llama a DirectoryRegistrationAdapter.createTenantMembership"]:::llamada
   n57 --> n58
-  n59[("CREA iam.email_verifications")]:::efecto
+  n59["Llama a TenantMembershipsRepository.create"]:::llamada
   n58 --> n59
-  n60["Llama a SecurityEventsRepository.record"]:::llamada
+  n60[("CREA directory.tenant_memberships")]:::efecto
   n59 --> n60
-  n61[("CREA iam.security_events")]:::efecto
+  n61["Llama a EmailVerificationsRepository.create"]:::llamada
   n60 --> n61
-  n62(("201 Responde con éxito")):::ok
+  n62[("CREA iam.email_verifications")]:::efecto
   n61 --> n62
+  n63["Llama a SecurityEventsRepository.record"]:::llamada
+  n62 --> n63
+  n64[("CREA iam.security_events")]:::efecto
+  n63 --> n64
+  n65(("201 Responde con éxito")):::ok
+  n64 --> n65
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

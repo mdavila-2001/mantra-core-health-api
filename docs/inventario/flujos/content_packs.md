@@ -24,7 +24,7 @@ _Fuente: `src/modules/content_packs/README.md:3`_
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
 | `ctrl:ContentPacksController` | Operaciones de ContentPacksController que el README no asigna a un caso de uso | GET /admin/content-packs | SUPERADMIN | BAJO | 0 |
-|  |  | POST /admin/content-packs/{code}/apply | SUPERADMIN | ALTO | 60 |
+|  |  | POST /admin/content-packs/{code}/apply | SUPERADMIN | ALTO | 63 |
 
 ### Diagrama — etapas `ctrl:ContentPacksController`
 
@@ -34,7 +34,7 @@ flowchart LR
   t4[("authz.roles")]:::tabla
   t5[("authz.user_role_assignments")]:::tabla
   t6[("chart.specialty_chart_templates")]:::tabla
-  t7[("+54 tablas más")]
+  t7[("+57 tablas más")]
   subgraph s0["ctrl:ContentPacksController · Operaciones de ContentPacksController que el READ…"]
     o1["GET /admin/content-packs"]:::op
     o3["POST /admin/content-packs/{code}/apply"]:::op

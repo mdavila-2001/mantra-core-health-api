@@ -33,7 +33,7 @@
 | [procedure_case_status_history](#procedure_case_status_history) | Preserva cambios de estado de los casos para reconstruir su evolución operativa y perioperatoria. | 10 | 7 | 9 | COINCIDE |
 | [procedure_case_team_members](#procedure_case_team_members) | Identifica integrantes del equipo asignado a un caso de procedimiento para conservar sus roles y participación. | 14 | 7 | 13 | COINCIDE |
 | [procedure_cases](#procedure_cases) | Agrupa el caso perioperatorio de un paciente desde su solicitud y programación hasta la intervención y seguimiento. | 27 | 20 | 15 | COINCIDE |
-| [procedure_charge_items](#procedure_charge_items) | Asocia conceptos facturables con procedimientos para trasladar cargos del acto médico al ciclo administrativo correspondiente. | 16 | 9 | 3 | COINCIDE |
+| [procedure_charge_items](#procedure_charge_items) | Asocia conceptos facturables con procedimientos para trasladar cargos del acto médico al ciclo administrativo correspondiente. | 16 | 9 | 4 | COINCIDE |
 | [procedure_complications](#procedure_complications) | Documenta complicaciones asociadas a procedimientos para dar seguimiento a eventos clínicos adversos o no previstos. | 13 | 9 | 1 | COINCIDE |
 | [procedure_devices](#procedure_devices) | Registra dispositivos utilizados en procedimientos para conservar trazabilidad del equipamiento clínico relevante. | 11 | 5 | 1 | COINCIDE |
 | [procedure_implants](#procedure_implants) | Vincula implantes con procedimientos para documentar qué dispositivo implantable fue utilizado y en qué intervención. | 16 | 10 | 2 | COINCIDE |
@@ -2252,7 +2252,7 @@ Asocia conceptos facturables con procedimientos para trasladar cargos del acto m
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml: procedure_charge_items`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml` · **DDL:** `SQL/53_procedures_perioperative/02_tables.sql`
 - **Entidad del ORM:** `ProcedureChargeItems` — `src/modules/procedures_perioperative/entities/procedure_charge_items.entity.ts`
-- **Resumen:** 16 columnas · 9 índices · 9 FK salientes · 0 entrantes · 3 operaciones
+- **Resumen:** 16 columnas · 9 índices · 9 FK salientes · 0 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -2307,6 +2307,7 @@ Asocia conceptos facturables con procedimientos para trasladar cargos del acto m
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /patient-spending/me | LEE | POR_SQL |
 | GET /clinical/patients/{patientProfileId}/received-services | LEE | DIRECTA |
 | POST /procedure-cases/{id}/charge-items/post | CREA | DIRECTA |
 | POST /procedure-cases/{id}/charge-items/post | LEE | DIRECTA |

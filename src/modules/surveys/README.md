@@ -78,6 +78,36 @@ por dominio propio.
 | `GET /surveys/me/invitations` | autenticado con perfil de paciente | Mis cuestionarios |
 | `GET /surveys/me/invitations/:id` | autenticado con perfil de paciente | Abre el cuestionario a responder |
 | `POST /surveys/me/invitations/:id/responses` | autenticado con perfil de paciente | Responde |
+| `GET /surveys/insights` | `PRACTITIONER` `CLINICIAN` | Resumen agregado de las encuestas del profesional (ver abajo) |
+
+### Resumen del profesional (`GET /surveys/insights`) y su privacidad
+
+Devuelve, en agregado, `totals` (emitidos, respondidos, tasa), `nps`, `byQuestion`
+(promedio y distribución por pregunta o dimensión, con `n`), `trend`,
+`safetyAlerts` y `comments`, más `privacy: { minCohort, suppressed }`. Alcance: el
+tenant activo y el profesional de la sesión; sus plantillas y las de sistema
+(sin dueño profesional) emitidas por sus atenciones. Nunca incluye
+`patient_profile_id`, `appointment_booking_id` ni la hora de un envío. La
+dimensión de una pregunta de la encuesta base se deriva de su enunciado
+(`survey-dimensions.ts`), no de una columna.
+
+Reglas que evitan identificar a un paciente (`insights.constants.ts`):
+
+- **Cohorte mínima de 5.** Con menos de 5 respondidas en el alcance filtrado sólo
+  salen `totals` y `privacy.suppressed = true`. Una pregunta con menos de 5
+  respuestas, el NPS con menos de 5 y los puntos de tendencia con menos de 5
+  respondidos se suprimen o se funden con el siguiente; lo suprimido no alimenta
+  ningún total (NPS, alertas, tendencia).
+- **Periodo en meses calendario.** `from` es el primer día de un mes, `to` el
+  último día de un mes, hasta 12 meses; cualquier hora o día suelto responde 400.
+- **Comentarios** sólo si hay al menos 5 en el alcance; salen únicamente con el
+  texto (sin día, mes ni hora), máximo 20, en un orden estable por hash y no
+  cronológico.
+
+Límite conocido: sin ruido añadido, comparar resúmenes de ventanas casi iguales
+o del mismo periodo con y sin `serviceId` puede acotar el aporte de pocas
+respuestas. La cohorte mínima y las ventanas por mes lo reducen; no lo eliminan.
+Es un riesgo residual aceptado.
 
 ## Entidades (schema `surveys`)
 
@@ -85,6 +115,27 @@ por dominio propio.
 `survey_invitations`, `survey_responses`, `survey_answers`.
 
 ## Reglas de negocio destacadas
+
+- **Hay una encuesta base del sistema, y es de todos.** ALOVIDA define en código
+  (`surveys.base-definitions.ts`, constante versionada) dos instrumentos: la de
+  *consulta* (9 preguntas; las 8 primeras obligatorias, el comentario final libre y
+  opcional) y la de *servicio* (7 preguntas, todas opcionales). Se materializan de
+  forma perezosa e idempotente en cada tenant, con ids deterministas
+  (`SurveysSystemTemplatesService.ensureSystemTemplate`): una plantilla sin
+  profesional dueño (dueño tipado `SYSTEM_BASE_CONSULTATION` / `SYSTEM_BASE_SERVICE`,
+  `owner_id` = tenant) y su asignación de sistema (`TARGET_SYSTEM_BASE`). Ningún
+  profesional la modifica, publica, desactiva ni asigna: 403
+  `SURVEY_SYSTEM_TEMPLATE_IMMUTABLE`.
+- **Una invitación por reserva completada.** Lleva las preguntas base primero y,
+  detrás, las de la encuesta del profesional que atendió
+  (`survey_invitations.extension_survey_version_id`). Cada pregunta que ve el paciente
+  trae `source`: `SYSTEM` o `PRACTITIONER`. El envío se valida contra la unión.
+- **Las preguntas del profesional son siempre opcionales.** El servidor guarda
+  `required = false` en el alta y la edición, y al responder una invitación base no
+  exige las de la extensión aunque una versión anterior las guardara obligatorias.
+- **El médico no lee las respuestas del sistema una por una.**
+  `GET /surveys/templates/:id/responses` devuelve sólo las respuestas a sus preguntas
+  (y omite las respuestas en las que no contestó ninguna suya).
 
 - **Publicar congela.** Las preguntas solo se agregan a la versión en borrador.
   Corregir el instrumento es publicar la versión siguiente, no editar la vigente:
@@ -94,17 +145,22 @@ por dominio propio.
 - **Solo responde quien tuvo atención completada.** La invitación se emite contra
   una `scheduling.appointment_bookings` en `BOOKING_COMPLETED`; sin invitación no
   hay forma de responder. Es la regla que ALOVIDA fija explícitamente.
-- **Emisión secuencialmente idempotente.** El servicio detecta una invitación ya
-  emitida por `(reserva, versión)`, pero el DDL no impone la unicidad: dos
-  solicitudes concurrentes pueden duplicarla.
+- **Emisión idempotente, también bajo concurrencia.** El servicio bloquea la reserva
+  y detecta lo ya emitido (la base se reconoce por su plantilla de sistema, de la
+  versión que sea); además la base lo respalda con el índice único
+  `uq_survey_invitations_booking_version` `(reserva, versión)` (v4249): perder la
+  carrera responde como emisión previa, no como error.
 - **Ventana congelada al emitir.** `expires_at` se deriva de
   `response_window_days` en el momento de la emisión; cambiar el plazo después no
   mueve una ventana ya prometida.
 - **Envío único y atómico.** Todas las obligatorias o ninguna; una invitación
   respondida no admite un segundo envío.
 - **`value[x]` exclusivo en servicio**, igual que `forms.field_values`: el
-  servicio normaliza una única columna `value_*` por fila. La base no tiene un
-  `CHECK` de respaldo.
+  servicio normaliza una única columna `value_*` por fila, y la base lo respalda con
+  `ck_survey_answers_single_value` (v4249). Qué columna corresponde a cada tipo de
+  respuesta sigue siendo regla del servicio.
+- **Un texto en blanco en una pregunta opcional es «no contestó».** Se ignora (no
+  se valida ni se guarda); en una obligatoria sigue siendo 422.
 - **Desactivar ≠ borrar.** Corta las emisiones nuevas; lo ya emitido sigue siendo
   contestable y lo ya respondido, legible.
 
@@ -146,12 +202,16 @@ vistas de paciente de M41 scheduling.
 
 ## Notas de integración
 
-### 1. La emisión es un comando explícito
+### 1. La emisión es automática y también un comando
 
-La invitación se emite con `POST /surveys/invitations`; el cierre de la cita en
-`scheduling` no la dispara. `SurveysAssignmentsService.issueForBooking` es
-idempotente y seguro de llamar desde ese cierre sin guardas extra del lado de
-`scheduling`.
+Al completarse una reserva, `scheduling` avisa por su puerto `BOOKING_COMPLETED_PORT`
+(adaptador `SurveysBookingCompletedAdapter`) **después de confirmar la transacción de
+cierre**; un fallo se registra y nunca revierte el cierre. El mismo
+`SurveysAssignmentsService.issueForBooking` es el que atiende
+`POST /surveys/invitations`, que sirve para reintentar: es idempotente. Una reserva sin
+oferta de servicio (`practitionerServiceOfferingId` nulo) es una consulta; con oferta,
+un servicio. `SurveysModule` no importa `SchedulingModule` (sólo lee sus entidades), así
+que no hay ciclo.
 
 ### 2. Claim `pid` expuesto en `AuthenticatedUser` — cambio en contrato compartido
 
@@ -160,13 +220,25 @@ ningún servicio podía saber de qué paciente era la sesión. Se agregó
 `AuthenticatedUser.patientProfileId` de forma **aditiva**: nada que dependa del
 contrato anterior cambia de comportamiento.
 
-### 3. Asignación por tipo de atención rechazada
+### 3. A qué se puede asociar una encuesta
 
-El modelo admite asignar por `CARE_TYPE` porque ALOVIDA lo pide, pero ni
-`scheduling.appointment_bookings` ni `scheduling.bookable_slots` llevan
-referencia al tipo de atención (solo `service_concept_id`). Una asignación así
-nunca emitiría nada, así que **se rechaza al crearla**, con el motivo explícito,
-en vez de aceptarla y fallar en silencio.
+- `SERVICE`: `targetId` es `billing.service_catalog.id` (la identidad canónica del
+  servicio). Debe existir, ser de una práctica del tenant y estar ofrecido por el
+  profesional (`practitioner_service_offerings`). La reserva lo trae en
+  `service_snapshot.serviceCatalogId`. Los servicios asociables son los de
+  `GET /scheduling/service-offerings` (`serviceCatalogId` + `serviceName`).
+- `CARE_TYPE`: la reserva no lleva «tipo de atención» (solo `service_concept_id`), así
+  que el único tipo que se puede resolver es *consulta* (reserva sin oferta de
+  servicio): «todas mis consultas», `targetId` = `SURVEYS.CARE_TYPE_CONSULTATION` (se
+  puede omitir). Cualquier otro tipo se rechaza al crear (422), con el motivo explícito.
+- `APPOINTMENT`: una reserva del tenant atendida por el profesional.
+
+Una asignación sólo reparte la encuesta del profesional que atendió la reserva. Si
+aplican varias, la más específica (cita > servicio > tipo de atención) viaja dentro de
+la invitación base y las demás salen como invitaciones sueltas.
+
+La creación automática de una «Satisfacción — <servicio>» por servicio nuevo (FT-31) se
+retiró: la encuesta base la reemplaza. Las que ya existen no se borraron.
 
 ### 4. Sin indicadores agregados ni exportación anonimizada
 
@@ -174,3 +246,21 @@ ALOVIDA los pide (`DOC-ENC-008`, `DOC-ENC-009`), pero publicar un agregado exige
 el umbral mínimo de participantes (decisión **D-13**), que no está definido: *«se
 puede modelar la encuesta sin el umbral, pero no se puede publicar ningún
 agregado sin él»*. El módulo no los ofrece.
+
+## Runbook: reservas completadas sin invitación
+
+La emisión automática no reintenta: si falla (base caída, conceptos sin sembrar), el
+cierre de la atención queda bien y se registra un `error` de
+`SurveysBookingCompletedAdapter` con `bookingId`, `tenantId` y `reason`. No hay
+barrido automático ni endpoint de listado.
+
+1. Listar las reservas completadas del tenant sin ninguna invitación:
+   `SurveysAssignmentsService.listCompletedBookingsWithoutInvitation(limit)` (más
+   recientes primero; consulta interna, hay que invocarla desde un script o consola
+   con el contexto del tenant).
+2. Reemitir cada una con `POST /surveys/invitations {appointmentBookingId}`. Es
+   idempotente y, para un profesional, exige haber atendido la reserva (la
+   administración de agenda emite sobre cualquiera).
+3. Si el fallo fue por conceptos sin sembrar o por la columna
+   `extension_survey_version_id` ausente, corregirlo antes (sembrar conceptos /
+   aplicar `2026-10-28_v4267_surveys_encuesta_base.sql`).
