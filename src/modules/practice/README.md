@@ -114,6 +114,44 @@ SCHEDULING_ADMIN, | `sites` |
 - **Cascada (UC-14-12)**: sitio→RETIRED/CLOSED, unidades→RETIRED,
   espacios→RETIRED/CLOSED, servicios→SUSPENDED, roles→ENDED (`valid_to`=hoy).
 
+## Operación de espacios (infraestructura hospitalaria F2)
+
+El estado operativo de una cama, habitación o sala son **tres ejes manuales
+ortogonales** en `care_spaces` (disponibilidad en `operational_status_concept_id`,
+higiene y aislamiento) más la **ocupación, que se deriva** de
+`clinical.encounter_locations` y nunca se escribe. El resumen HL7 v2-0116
+(`domain/bed-status-v2.ts`, primera regla que aplica) y «asignable» son funciones puras.
+
+| Método y ruta | Qué hace |
+| --- | --- |
+| `GET /sites/:siteId/bed-board` | Tablero por unidad con recuentos derivados, `generatedAt`, `lastEventAt` y `X-Data-As-Of` |
+| `GET /care-spaces/:id/operational-state` · `status-events` · `blocks` | Ficha operativa, historial A20 paginado y bloqueos |
+| `POST /care-spaces/:id/availability` (`If-Match-Ops`) | Bloquear, desbloquear, mantenimiento (con fecha estimada), cerrar, reabrir |
+| `POST /care-space-blocks/:id/end` · `cancel` | Terminar o cancelar un bloqueo; el fin de un mantenimiento abre una limpieza |
+| `POST /care-spaces/:id/hygiene` · `isolation` (`If-Match-Ops`) | Marcar sucia o contaminada; marcar o levantar el aislamiento |
+| `GET/POST /sites/:siteId/cleaning-orders` · `POST /cleaning-orders/:id/{assign,start,finish,inspect,cancel}` (`If-Match`) | Cola y máquina de la orden de limpieza |
+| `POST /internal/practice/blocks-tick` (SYSTEM) | Aplica los bloqueos programados y avisa de los vencidos |
+
+- **Versiones**: `ops_version` (`If-Match-Ops`, 412 `OPS_VERSION_MISMATCH`) es independiente de
+  `row_version`: los ejes se escriben con SQL directo y compare-and-set, sin mover `row_version`.
+- **Quién puede qué**: `InfrastructureAccessService.assertCan` resuelve tenant → sucursal →
+  unidad/espacio. Otro tenant o un espacio fuera del alcance es 404; con alcance pero sin el rol de
+  la acción, 403 `INFRA_ACTION_NOT_ALLOWED` con `details.requiredRoles`. Cada franja declara sus
+  acciones en `policies/infra-<franja>.policy.ts` y las registra en `INFRA_POLICIES`.
+- **Texto clínico**: el organismo del aislamiento y el motivo «condición del paciente» solo viajan a
+  Enfermería, Admisión y Control de infecciones sobre el espacio (`services/ops-privacy.ts`); el
+  outbox nunca los lleva. El paciente (iniciales, sexo, edad) solo viaja a Enfermería y Admisión.
+- **Limpieza terminal**: tras contaminación o aislamiento la orden es terminal y solo una inspección
+  PASS de un supervisor sobre una orden terminal apaga `terminal_cleaning_required`.
+- **Puerto**: `CARE_SPACE_OPS_PORT` (`services/care-space-ops.port.ts`) lo llaman ADT y quirófano
+  dentro de su transacción: estado operativo, `markDirtyFromSource`, `recordOccupancyChange`,
+  `assertBookable`.
+- **Configuración** (`practice_settings`): `infra.inspection_required` (por omisión `true`),
+  `infra.hvac_validation_max_days` (365), `infra.aiir_min_air_changes` y
+  `infra.cleaning_due_minutes` (opcionales).
+- **Eventos**: `practice.care_space.status_changed` (A20), `block_started|ended|cancelled|overdue` y
+  `practice.cleaning_order.*`; contrato en `asyncapi/fragments/f2.yaml`.
+
 ## Permisos
 
 Guard global de auth; todos los endpoints exigen `@Roles('SECURITY_ADMIN')`.
