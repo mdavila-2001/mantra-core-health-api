@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { AdminCatalogController } from '../../modules/data_catalog/controllers/admin-catalog.controller';
 import { OpsConsoleController } from '../../modules/ops_console/presentation/controllers/ops-console.controller';
-import { QaLabReadController } from '../../modules/qa_lab/controllers/qa-lab-read.controller';
+import { QaLabReadController } from '../../modules/qa_lab/presentation/controllers/qa-lab-read.controller';
 import { RouteIndexService, normalizeTemplate } from './route-index.service';
 
 type Ctor = new (...args: never[]) => object;

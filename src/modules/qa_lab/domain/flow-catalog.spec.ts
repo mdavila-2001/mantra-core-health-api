@@ -1,7 +1,7 @@
 import { describe, it, expect } from '@jest/globals';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { FLOW_CATALOG } from '../flows';
+import { FLOW_CATALOG } from './flows';
 import {
   branchCaseCode,
   casesOf,
@@ -14,7 +14,10 @@ import {
   type FlowNode,
 } from './flow-catalog';
 
-const CATALOG_DIR = join(process.cwd(), 'src/modules/qa_lab/flows/catalog');
+const CATALOG_DIR = join(
+  process.cwd(),
+  'src/modules/qa_lab/domain/flows/catalog',
+);
 const OPENAPI = JSON.parse(
   readFileSync(join(process.cwd(), 'openapi/openapi.json'), 'utf8'),
 ) as { paths: Record<string, Record<string, unknown>> };
