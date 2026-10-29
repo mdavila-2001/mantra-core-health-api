@@ -45,15 +45,18 @@ export interface BoliviaFacilitiesResult {
  * Materializa el directorio de establecimientos de salud de Santa Cruz como el
  * conjunto de valores `VS_BO_HEALTH_FACILITY`.
  *
- * ## Por qué es un conjunto de valores y no organizaciones
+ * ## Por qué es un conjunto de valores
  *
- * Porque es una **lista de consulta**, no un padrón de clientes. El registro de
- * procesos describe con detalle cómo se da de alta una organización de verdad
- * —razón social, forma societaria, NIT, SEPREC, licencia de funcionamiento,
- * certificado del SEDES, poder del representante legal, GPS de cada sucursal—
- * y ninguna de esas quinientas tres pasó por ahí. Crearlas como
- * `directory.tenants` las daría por registradas sin que nadie las registrara, y
- * dejaría el alta real sin trabajo que hacer.
+ * Porque es una **lista de consulta**: no pasó por el alta de una organización
+ * de verdad —razón social, forma societaria, NIT, SEPREC, licencia de
+ * funcionamiento, certificado del SEDES, poder del representante legal, GPS de
+ * cada sucursal—. Eso no cambia: este paso solo materializa la lista.
+ *
+ * Las organizaciones que el directorio y los enlaces necesitan las crea aparte
+ * `PadronOrganizationsSeedService` (opt-in), con el actor semilla como dueño y
+ * sin sello de verificación que nadie haya respaldado: cada ficha dice que
+ * viene del padrón público y que la organización no la verificó, hasta que la
+ * reclame.
  *
  * Lo que sí resuelve es lo que hoy no se puede: que el médico diga en qué
  * hospital está de turno y en qué clínica atiende, eligiendo de una lista de

@@ -111,6 +111,21 @@ describe('DirectoryMembershipsService', () => {
     });
   });
 
+  describe('invite con id fijo', () => {
+    it('un proceso interno puede fijar el id de la membresía', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(null);
+      d.membershipsRepo.create.mockReturnValue(activeMembership());
+
+      await d.service.invite('t1', { userId: 'u1' }, actor, 'fijo-m1');
+
+      expect(d.membershipsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ id: 'fijo-m1' }),
+      );
+    });
+  });
+
   describe('assignBranch (UC-04-06)', () => {
     it('throws when the membership is missing', async () => {
       const d = build();
