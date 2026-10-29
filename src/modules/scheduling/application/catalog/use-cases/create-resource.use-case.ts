@@ -1,5 +1,6 @@
 import { CONCEPTS, type AuthenticatedUser } from '../../../../../common';
 import { CatalogAccess } from '../support/catalog-access';
+import { SpaceResourceLinker } from '../support/space-resource-linker';
 import {
   CreateResourceDto,
   ResourceResponseDto,
@@ -8,6 +9,7 @@ import {
   DEFAULT_SLOT_CAPACITY,
   RESOURCE_TYPE_CONCEPT,
   canonicalRefType,
+  refersToCareSpace,
 } from '../../../domain/catalog/catalog-concepts';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
@@ -22,6 +24,7 @@ export class CreateResourceUseCase {
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly access: CatalogAccess,
     private readonly logger: PinoLogger,
+    private readonly spaceLinker: SpaceResourceLinker,
   ) {
     this.logger.setContext(CreateResourceUseCase.name);
   }
@@ -31,6 +34,15 @@ export class CreateResourceUseCase {
     dto: CreateResourceDto,
     actor: AuthenticatedUser,
   ): Promise<ResourceResponseDto> {
+    // Un recurso que apunta a un espacio de infraestructura no es «la agenda de un
+    // profesional»: quién puede ligarlo lo decide la política del espacio (organización,
+    // sucursal, jefe de quirófano), no el rol de administrador de agenda ni el vínculo de
+    // afiliación. Ver `SpaceResourceLinker`.
+    if (refersToCareSpace(dto.resourceRefType)) {
+      return this.em.transactional((tx) =>
+        this.spaceLinker.link(tx, dto, actor),
+      );
+    }
     this.access.assertMayCreateResource(dto, actor);
     await this.access.assertAffiliationWithOrganization(dto.tenantId, actor);
     this.logger.info(

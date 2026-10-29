@@ -175,7 +175,13 @@ export class SchedulingController {
   // `assertActorResource`) y que el tenant sea uno de los suyos. Sin esta
   // apertura, un profesional recién registrado no tenía forma de volverse
   // reservable: el asistente de alta de agenda moría con 403 en el primer paso.
-  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  //
+  // Sin `@Roles` (F4/R0): con `resourceRefType: 'care_spaces'` el recurso se liga a un
+  // espacio y quién puede hacerlo no es un rol global sino la política del espacio
+  // (administrador de la organización o de la sucursal, jefe de quirófano), que decide
+  // `SpaceResourceLinker` con 404/403 propios. Para cualquier otro recurso sigue vigente
+  // el control de `CatalogAccess.assertMayCreateResource` (administrador de agenda o
+  // profesional sobre su propio perfil), que responde 403 igual que antes.
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Dar de alta un recurso agendable' })
   createResource(

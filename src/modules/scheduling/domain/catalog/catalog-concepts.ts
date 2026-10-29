@@ -183,7 +183,20 @@ export const MAX_SLOTS_PER_RUN = 2000;
  */
 export const TABLE_ALIAS: Readonly<Record<string, string>> = {
   practitioner_profiles: 'health_practitioner_profiles',
+  'practice.care_spaces': 'care_spaces',
 };
+
+/**
+ * `resourceRefType` canónico de un recurso que apunta a un espacio de infraestructura
+ * (`practice.care_spaces`). Un recurso así lleva además la FK real `care_space_id`
+ * (R0 de F4, INV-40) y se crea por otro camino que el resto: ver `SpaceResourceLinker`.
+ */
+export const CARE_SPACES_REF_TYPE = 'care_spaces';
+
+/** ¿El recurso que se pide apunta a un espacio de infraestructura? */
+export function refersToCareSpace(refType: string): boolean {
+  return canonicalRefType(refType) === CARE_SPACES_REF_TYPE;
+}
 
 export function canonicalRefType(refType: string): string {
   return TABLE_ALIAS[refType] ?? refType;

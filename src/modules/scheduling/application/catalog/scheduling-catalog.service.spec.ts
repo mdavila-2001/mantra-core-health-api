@@ -191,7 +191,13 @@ describe('SchedulingCatalogService', () => {
       );
     });
 
-    /** Una sala no es un alias de nada: lo que no está en la tabla no se toca. */
+    /**
+     * Un equipo no es un alias de nada: lo que no está en la tabla no se toca.
+     *
+     * (Antes esta prueba usaba `care_spaces`; desde R0 de F4 una referencia a un espacio ya
+     * no es una referencia libre —INV-40— y se crea por `SpaceResourceLinker`, con sus
+     * propias pruebas en `space-resource-linker.spec.ts`.)
+     */
     it('deja intactos los tipos que no son alias', async () => {
       const d = buildCatalog();
       d.catalogRepo.createResource.mockReturnValue({ id: 'res-1' });
@@ -199,15 +205,15 @@ describe('SchedulingCatalogService', () => {
       await d.service.createResource(
         {
           ...base,
-          resourceType: 'ROOM',
-          resourceRefType: 'care_spaces',
+          resourceType: 'EQUIPMENT',
+          resourceRefType: 'diagnostic_equipment',
         } as never,
         actor as never,
       );
 
       expect(d.catalogRepo.createResource).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ resourceRefType: 'care_spaces' }),
+        expect.objectContaining({ resourceRefType: 'diagnostic_equipment' }),
       );
     });
   });
