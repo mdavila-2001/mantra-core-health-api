@@ -1,7 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { Procedures } from '../../clinical/entities';
+import {
+  Appointments,
+  CareEpisodes,
+  Encounters,
+  Procedures,
+  ServiceRequests,
+} from '../../clinical/entities';
+import { PatientProfiles } from '../../profiles/entities';
+import { AppointmentBookings } from '../../scheduling/entities';
 import {
   ProcedureCases,
   ProcedureCaseStatusHistory,
@@ -211,6 +219,50 @@ export class PeriopCasesRepository {
       custodianTenantId === undefined ? { id } : { id, custodianTenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
+  }
+
+  /**
+   * ¿El paciente existe y tiene atención en el tenant?
+   *
+   * El padrón de pacientes es único para toda la plataforma: el perfil no
+   * guarda tenant. La pertenencia se prueba con la atención que el tenant ya
+   * le dio o le tiene agendada: un encuentro, un episodio de atención, un turno,
+   * una reserva o una solicitud de servicio (como custodio o como ejecutor).
+   * Un paciente sin nada de eso en el tenant es, para este módulo, inexistente.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileId - Paciente citado por el cliente.
+   * @param tenantId - Tenant activo.
+   * @returns `true` si el perfil existe y tiene atención en el tenant.
+   */
+  async patientHasCareInTenant(
+    em: EntityManager,
+    patientProfileId: string,
+    tenantId: string,
+  ): Promise<boolean> {
+    if (
+      (await em.count(PatientProfiles, { profileId: patientProfileId })) === 0
+    )
+      return false;
+    const checks: Array<() => Promise<number>> = [
+      () => em.count(Encounters, { patientProfileId, tenantId }),
+      () => em.count(CareEpisodes, { patientProfileId, tenantId }),
+      () => em.count(Appointments, { patientProfileId, tenantId }),
+      () => em.count(AppointmentBookings, { patientProfileId, tenantId }),
+      () =>
+        em.count(ServiceRequests, {
+          patientProfileId,
+          $or: [
+            { custodianTenantId: tenantId },
+            { performerTenantId: tenantId },
+          ],
+        }),
+    ];
+    // En serie y con corte: la primera huella alcanza.
+    for (const check of checks) {
+      if ((await check()) > 0) return true;
+    }
+    return false;
   }
 
   /**

@@ -9,9 +9,14 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { PeriopDentalService } from './periop-dental.service';
-import { PreconditionFailedException } from '../../../common';
+import {
+  PreconditionFailedException,
+  ResourceNotFoundException,
+  runWithTenant,
+} from '../../../common';
 import { CLIN } from '../../clinical/clinical.concepts';
 import { PERIOP } from '../procedures_perioperative.concepts';
+import { ProceduresPerioperativeErrorReason } from '../procedures_perioperative.error-reasons';
 
 const actor = {
   id: 'user-1',
@@ -48,14 +53,37 @@ function build() {
     projectProcedure: mockFn().mockResolvedValue(undefined),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new PeriopDentalService(
+  // El paciente tiene atención en el tenant, salvo que el test diga otra cosa.
+  const casesRepo = {
+    patientHasCareInTenant: mockFn().mockResolvedValue(true),
+  };
+  const raw = new PeriopDentalService(
     em as any,
     dentalRepo as any,
+    casesRepo as any,
     receivedServices as any,
     auditTrail as any,
     logger as any,
   );
-  return { service, tx, dentalRepo, auditTrail, receivedServices, logger };
+  // Cada llamada corre con TENANT como tenant activo, como la deja el interceptor.
+  const service = new Proxy(raw, {
+    get(target, property, receiver) {
+      const value = Reflect.get(target, property, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(TENANT, () => value.apply(target, args));
+    },
+  });
+  return {
+    service,
+    em,
+    tx,
+    dentalRepo,
+    casesRepo,
+    auditTrail,
+    receivedServices,
+    logger,
+  };
 }
 
 /**
@@ -224,6 +252,46 @@ describe('PeriopDentalService', () => {
           tenantId: TENANT,
         }),
       );
+    });
+  });
+
+  describe('#893: paciente sin atención en el tenant', () => {
+    it('el alta responde 404 uniforme y no escribe nada', async () => {
+      const d = build();
+      d.casesRepo.patientHasCareInTenant.mockResolvedValue(false);
+
+      const err: any = await d.service
+        .record(dto(), TENANT, actor as any)
+        .catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(ResourceNotFoundException);
+      expect(err).toMatchObject({
+        reason: ProceduresPerioperativeErrorReason.PATIENT_NOT_FOUND_IN_TENANT,
+      });
+      expect(err.getResponse().details).toBeUndefined();
+      expect(d.casesRepo.patientHasCareInTenant).toHaveBeenCalledWith(
+        d.tx,
+        PATIENT,
+        TENANT,
+      );
+      expect(d.dentalRepo.createProcedure).not.toHaveBeenCalled();
+    });
+
+    it('el histórico responde el mismo 404 y no lee nada', async () => {
+      const d = build();
+      d.casesRepo.patientHasCareInTenant.mockResolvedValue(false);
+
+      await expect(
+        d.service.listByPatient({ patientProfileId: PATIENT } as any),
+      ).rejects.toMatchObject({
+        reason: ProceduresPerioperativeErrorReason.PATIENT_NOT_FOUND_IN_TENANT,
+      });
+      expect(d.casesRepo.patientHasCareInTenant).toHaveBeenCalledWith(
+        d.em,
+        PATIENT,
+        TENANT,
+      );
+      expect(d.dentalRepo.findByPatient).not.toHaveBeenCalled();
     });
   });
 

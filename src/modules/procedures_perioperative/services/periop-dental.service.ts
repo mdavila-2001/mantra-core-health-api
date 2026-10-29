@@ -3,12 +3,14 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   PreconditionFailedException,
+  requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
 import { AuditTrailService } from '../../audit/services';
 import { CLIN } from '../../clinical/clinical.concepts';
 import { ReceivedServicesProjector } from '../../clinical/services';
-import { PeriopDentalRepository } from '../repositories';
+import { PeriopCasesRepository, PeriopDentalRepository } from '../repositories';
+import { assertPatientInScope } from './periop-scope';
 import { ProceduresPerioperativeErrorReason } from '../procedures_perioperative.error-reasons';
 import {
   DENTAL_PROCEDURE_CODE_KEYS,
@@ -62,12 +64,14 @@ export class PeriopDentalService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param dentalRepo - Valor de dental repo requerido por la operación.
+   * @param casesRepo - Prueba que el paciente tiene atención en el tenant.
    * @param auditTrail - Valor de audit trail requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly dentalRepo: PeriopDentalRepository,
+    private readonly casesRepo: PeriopCasesRepository,
     private readonly receivedServices: ReceivedServicesProjector,
     private readonly auditTrail: AuditTrailService,
     private readonly logger: PinoLogger,
@@ -129,6 +133,13 @@ export class PeriopDentalService {
     );
 
     return this.em.transactional(async (tx) => {
+      // Un paciente sin atención en este tenant responde como inexistente (#893).
+      await assertPatientInScope(
+        this.casesRepo,
+        tx,
+        dto.patientProfileId,
+        tenantId,
+      );
       const procedure = this.dentalRepo.createProcedure(tx, {
         custodianTenantId: tenantId,
         patientProfileId: dto.patientProfileId,
@@ -199,6 +210,14 @@ export class PeriopDentalService {
   async listByPatient(
     query: ListDentalProceduresQueryDto,
   ): Promise<DentalProcedureListDto> {
+    // El histórico de un paciente sin atención en este tenant no se lee: 404
+    // igual que uno inexistente (#893).
+    await assertPatientInScope(
+      this.casesRepo,
+      this.em,
+      query.patientProfileId,
+      requireTenantId(),
+    );
     const limit = query.limit ?? DEFAULT_LIMIT;
     const category = PERIOP.DENTAL_PROCEDURE_CATEGORY;
 

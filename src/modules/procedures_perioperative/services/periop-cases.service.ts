@@ -61,6 +61,7 @@ import type { ProcedureCases } from '../entities';
 import { PERIOP } from '../procedures_perioperative.concepts';
 import {
   assertCaseInScope,
+  assertPatientInScope,
   assertProcedureOfCasePatient,
   loadCaseForUpdateInScope,
   periopCaseNotFound,
@@ -270,6 +271,14 @@ export class PeriopCasesService {
     const custodianTenantId = requireTenantId();
 
     return this.em.transactional(async (tx) => {
+      // El paciente también lo manda el cliente: sin atención en este tenant
+      // responde como inexistente (#893).
+      await assertPatientInScope(
+        this.casesRepo,
+        tx,
+        dto.patientProfileId,
+        custodianTenantId,
+      );
       // El procedimiento principal lo manda el cliente: se cruza con el paciente
       // del caso y el tenant antes de enlazarlo (404 uniforme si no es suyo).
       if (dto.primaryProcedureId) {
@@ -456,6 +465,12 @@ export class PeriopCasesService {
             ProceduresPerioperativeErrorReason.PATIENT_CHANGE_BLOCKED_BY_DEPENDENCIES,
           );
         }
+        await assertPatientInScope(
+          this.casesRepo,
+          tx,
+          dto.patientProfileId,
+          surgicalCase.custodianTenantId,
+        );
         surgicalCase.patientProfileId = dto.patientProfileId;
         patientChanged = true;
         relevantChanges.push('patientProfileId');
