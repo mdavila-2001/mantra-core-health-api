@@ -77,6 +77,7 @@ function memoryRepo() {
         accounts.filter((a) => a.practiceId === practiceId && a.seeded).length,
     ),
     createAccount: mockFn(make(accounts)),
+    lockAccountsOf: mockFn(async () => undefined),
     // Mismo contrato que el real: `ON CONFLICT (practice_id, code) DO NOTHING`.
     seedAccounts: mockFn(
       async (
@@ -530,6 +531,21 @@ describe('PractitionerSimpleAccountingService (P49)', () => {
         .filter((a) => a.accountClass === 'EXPENSE')
         .map((a) => a.code);
       expect(codes.slice(-2)).toEqual(['5.9', '5.10']);
+    });
+
+    it('el alta toma el lock de la práctica antes de leer las cuentas y calcular el código', async () => {
+      const ctx = build();
+      await ctx.service.createAccount(
+        { practiceId: PRACTICE, name: 'Capacitación', accountClass: 'EXPENSE' },
+        actor,
+      );
+      expect(ctx.repo.lockAccountsOf).toHaveBeenCalledWith(
+        expect.anything(),
+        PRACTICE,
+      );
+      expect(ctx.repo.lockAccountsOf.mock.invocationCallOrder[0]).toBeLessThan(
+        ctx.repo.listAccounts.mock.invocationCallOrder[0],
+      );
     });
 
     it('crea una cuenta propia, no sembrada, con el código siguiente de su clase', async () => {

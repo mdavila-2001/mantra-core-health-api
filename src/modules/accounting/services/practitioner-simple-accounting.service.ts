@@ -316,6 +316,9 @@ export class PractitionerSimpleAccountingService {
     const accountClass = this.validClass(dto.accountClass);
     const em = this.em.fork();
     return em.transactional(async (tx) => {
+      // El código sale de leer-y-sumar: se serializa por práctica para que dos
+      // altas simultáneas no calculen el mismo.
+      await this.repo.lockAccountsOf(tx, dto.practiceId);
       await this.ensureGeneralAccounts(tx, dto.practiceId, actor.id);
       const all = await this.repo.listAccounts(tx, dto.practiceId);
       this.assertNameFree(all, accountClass, name, undefined);

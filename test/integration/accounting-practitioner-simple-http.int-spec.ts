@@ -714,4 +714,48 @@ describe('Contabilidad simple del doctor · HTTP real (JWT + RolesGuard)', () =>
       distintos: 26,
     });
   });
+
+  it('altas de cuenta concurrentes de la misma clase: todas responden 201 y cada una recibe un código distinto', async () => {
+    const nueva = await crearPractica(medicoA.tenantId, 'altas');
+    await vincular(medicoA.hpid, nueva);
+    // Siembra previa: aquí se prueba el cálculo del código, no la siembra.
+    await http()
+      .get(`${base}/accounts`)
+      .query({ practiceId: nueva })
+      .set(como(medicoA))
+      .expect(200);
+
+    const altas = 8;
+    const respuestas = await Promise.all(
+      Array.from({ length: altas }, (_, i) =>
+        http()
+          .post(`${base}/accounts`)
+          .set(como(medicoA))
+          .send({
+            practiceId: nueva,
+            name: `Gasto concurrente ${i}`,
+            accountClass: 'EXPENSE',
+          }),
+      ),
+    );
+
+    expect(respuestas.map((r) => r.status)).toEqual(Array(altas).fill(201));
+    const codigos = respuestas.map((r) => r.body.code as string);
+    expect(new Set(codigos).size).toBe(altas);
+
+    const filas = await sql<{ code: string; name: string }>(
+      `select code, name from accounting.practitioner_simple_accounts
+        where practice_id = ? and seeded = false`,
+      [nueva],
+    );
+    expect(filas).toHaveLength(altas);
+    expect(new Set(filas.map((f) => f.code)).size).toBe(altas);
+    // Las 26 generales siguen intactas.
+    const [{ n }] = await sql<{ n: string }>(
+      `select count(*)::text as n from accounting.practitioner_simple_accounts
+        where practice_id = ? and seeded = true`,
+      [nueva],
+    );
+    expect(Number(n)).toBe(26);
+  });
 });
