@@ -15,6 +15,7 @@ import {
   ResourceNotFoundException,
 } from '../../../../common';
 import { commonRecords } from './iam-registration.testing';
+import { IamErrorReason } from '../../iam.error-reasons';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] };
 
@@ -27,7 +28,8 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const usersRepo = { findById: mockFn(), create: mockFn() };
   const credentialsRepo = {
-    findActivePasswordBySubject: mockFn(),
+    findLivePasswordByEmail: mockFn(),
+    lockEmailForRegistration: mockFn().mockResolvedValue(undefined),
     createPassword: mockFn(),
     revokeAllForUser: mockFn().mockResolvedValue(0),
   };
@@ -79,7 +81,7 @@ describe('IamUsersService', () => {
   describe('createUser (UC-01-01)', () => {
     it('creates user, flushes parent before children and records the grant', async () => {
       const d = build();
-      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue(null);
+      d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue(null);
       const created = {
         id: 'u1',
         displayName: 'Ada',
@@ -112,7 +114,7 @@ describe('IamUsersService', () => {
 
     it('rejects when the email already has an active password credential', async () => {
       const d = build();
-      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+      d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue({
         id: 'c1',
       });
 
@@ -122,6 +124,41 @@ describe('IamUsersService', () => {
           actor as any,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.usersRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('el mismo correo con otras mayúsculas también choca, bajo el cerrojo (#1000)', async () => {
+      const d = build();
+      d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue({
+        id: 'c1',
+      });
+
+      const error = await d.service
+        .createUser(
+          { displayName: 'Ada', email: 'ADA@X.IO', password: 'password123' },
+          actor as any,
+        )
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(ConflictException);
+      expect((error as ConflictException).getResponse()).toEqual(
+        expect.objectContaining({
+          reason: IamErrorReason.EMAIL_HAS_ACTIVE_PASSWORD_CREDENTIAL,
+        }),
+      );
+      expect(d.credentialsRepo.lockEmailForRegistration).toHaveBeenCalledWith(
+        d.tx,
+        'ADA@X.IO',
+      );
+      expect(d.credentialsRepo.findLivePasswordByEmail).toHaveBeenCalledWith(
+        d.tx,
+        'ADA@X.IO',
+      );
+      expect(
+        d.credentialsRepo.lockEmailForRegistration.mock.invocationCallOrder[0],
+      ).toBeLessThan(
+        d.credentialsRepo.findLivePasswordByEmail.mock.invocationCallOrder[0],
+      );
       expect(d.usersRepo.create).not.toHaveBeenCalled();
     });
   });
