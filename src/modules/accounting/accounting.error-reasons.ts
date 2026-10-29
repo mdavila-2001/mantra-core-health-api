@@ -12,6 +12,11 @@ export enum AccountingErrorReason {
   FISCAL_PERIOD_NOT_FOUND = 'FISCAL_PERIOD_NOT_FOUND',
   /** El periodo existe pero no está en estado ABIERTO (no admite nuevos asientos). */
   FISCAL_PERIOD_NOT_OPEN = 'FISCAL_PERIOD_NOT_OPEN',
+  /**
+   * El actor no administra la práctica ni es el médico titular de su consultorio
+   * propio: no puede abrirle el ejercicio fiscal (S-8).
+   */
+  FISCAL_YEAR_OPEN_NOT_ALLOWED = 'FISCAL_YEAR_OPEN_NOT_ALLOWED',
 
   // --- Pertenencia profesional↔práctica (Carril 18, varios servicios) ---
   /** El actor no tiene `practitionerProfileId` en el JWT. */
