@@ -9,6 +9,9 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { CommunityMessageNotificationsService } from './community-message-notifications.service';
+import { CommunityOrganizationStaffService } from './community-organization-staff.service';
+import { COMM } from '../community.concepts';
+import { DIR } from '../../directory/directory.concepts';
 
 const CONVERSATION = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
 const SENDER = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
@@ -23,6 +26,9 @@ const ACCOUNT = 'dddddddd-dddd-dddd-dddd-dddddddddddd';
 function build() {
   const em: any = {};
   em.fork = mockFn(() => em);
+  // `directory.tenants`: por defecto el target de una vitrina de organización
+  // es un tenant; el caso SupportAdmin lo apaga.
+  em.count = mockFn(async () => 1);
   const notifications = {
     emitInApp: mockFn(() => Promise.resolve({ suppressed: false })),
   };
@@ -44,14 +50,27 @@ function build() {
     warn: mockFn(),
     error: mockFn(),
   };
+  const membershipsRepo = {
+    findByTenantAndStatus: mockFn(() => Promise.resolve([])),
+    findActiveByUserTenant: mockFn(() => Promise.resolve(null)),
+  };
   const service = new CommunityMessageNotificationsService(
     em,
     notifications as any,
     profilesRepo as any,
     accountLinks as any,
     logger as any,
+    new CommunityOrganizationStaffService(membershipsRepo as any),
   );
-  return { service, notifications, profilesRepo, accountLinks, logger };
+  return {
+    em,
+    service,
+    notifications,
+    profilesRepo,
+    accountLinks,
+    logger,
+    membershipsRepo,
+  };
 }
 
 describe('CommunityMessageNotificationsService · enganche P2 → P1', () => {
@@ -122,5 +141,88 @@ describe('CommunityMessageNotificationsService · enganche P2 → P1', () => {
       d.service.newMessage(CONVERSATION, SENDER, [RECIPIENT], 'user-1'),
     ).resolves.toBeUndefined();
     expect(d.logger.error).toHaveBeenCalled();
+  });
+  describe('vitrina de organización (farmacia)', () => {
+    const PHARMACY_TENANT = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee';
+
+    function asPharmacy(d: ReturnType<typeof build>) {
+      d.profilesRepo.findById.mockImplementation((_em: any, id: string) =>
+        Promise.resolve(
+          id === SENDER
+            ? { id, displayName: 'Juan Paciente', targetId: 'persona-a' }
+            : {
+                id,
+                displayName: 'Farmacia Central',
+                targetId: PHARMACY_TENANT,
+                targetTypeConceptId: COMM.PROFILE_TARGET_PHARMACY,
+                // Quien verificó el tenant: NO es quien atiende la bandeja.
+                createdByUserId: 'admin-de-plataforma',
+              },
+        ),
+      );
+      d.membershipsRepo.findByTenantAndStatus.mockResolvedValue([
+        { userId: 'staff-1', tenantRoleConceptId: DIR.ROLE_STAFF },
+        { userId: 'owner-1', tenantRoleConceptId: DIR.ROLE_OWNER },
+        { userId: 'medico-1', tenantRoleConceptId: DIR.ROLE_PRACTITIONER },
+      ]);
+    }
+
+    it('avisa a cada miembro activo que atiende la bandeja, nunca al creador', async () => {
+      const d = build();
+      asPharmacy(d);
+
+      await d.service.newMessage(CONVERSATION, SENDER, [RECIPIENT], 'user-1');
+
+      expect(d.membershipsRepo.findByTenantAndStatus).toHaveBeenCalledWith(
+        expect.anything(),
+        PHARMACY_TENANT,
+        DIR.MEMBERSHIP_ACTIVE,
+      );
+      const recipients = d.notifications.emitInApp.mock.calls.map(
+        (call: any[]) => call[0].recipientUserId,
+      );
+      expect(recipients.sort()).toEqual(['owner-1', 'staff-1']);
+      expect(recipients).not.toContain('admin-de-plataforma');
+      expect(d.accountLinks.findActiveByPerson).not.toHaveBeenCalled();
+    });
+
+    it('no se avisa a sí mismo quien escribió atendiendo la bandeja', async () => {
+      const d = build();
+      asPharmacy(d);
+
+      await d.service.newMessage(CONVERSATION, SENDER, [RECIPIENT], 'staff-1');
+
+      const recipients = d.notifications.emitInApp.mock.calls.map(
+        (call: any[]) => call[0].recipientUserId,
+      );
+      expect(recipients).toEqual(['owner-1']);
+    });
+
+    it('una vitrina de organización que no es de un tenant (SupportAdmin) avisa como siempre', async () => {
+      const d = build();
+      d.em.count.mockResolvedValue(0);
+      d.accountLinks.findActiveByPerson.mockResolvedValue(null);
+      d.profilesRepo.findById.mockImplementation((_em: any, id: string) =>
+        Promise.resolve(
+          id === SENDER
+            ? { id, displayName: 'Juan Paciente', targetId: 'persona-a' }
+            : {
+                id,
+                displayName: 'SupportAdmin',
+                targetId: 'cuenta-support-admin',
+                targetTypeConceptId: COMM.PROFILE_TARGET_ORGANIZATION,
+                createdByUserId: 'cuenta-support-admin',
+              },
+        ),
+      );
+
+      await d.service.newMessage(CONVERSATION, SENDER, [RECIPIENT], 'user-1');
+
+      const recipients = d.notifications.emitInApp.mock.calls.map(
+        (call: any[]) => call[0].recipientUserId,
+      );
+      expect(recipients).toEqual(['cuenta-support-admin']);
+      expect(d.membershipsRepo.findByTenantAndStatus).not.toHaveBeenCalled();
+    });
   });
 });
