@@ -1,3 +1,4 @@
+import { PractitionerVerificationDto } from './practitioner-verification.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /**
@@ -74,8 +75,18 @@ export class PractitionerListItemDto {
    * dibuja como sello — la guía lista el padrón entero, y esto distingue a
    * quien además probó lo que declara.
    */
-  @ApiProperty({ description: 'Si la matrícula fue verificada' })
+  @ApiProperty({
+    description:
+      'Si la matrícula fue verificada. Equivale a `verification.status === "VERIFIED"`: ' +
+      'una verificación vencida o suspendida ya no cuenta.',
+  })
   verified!: boolean;
+
+  /**
+   * Estado visible de verificación (admisión vigente), aditivo.
+   */
+  @ApiProperty({ type: PractitionerVerificationDto })
+  verification!: PractitionerVerificationDto;
 
   /**
    * Si declara tomar pacientes nuevos.

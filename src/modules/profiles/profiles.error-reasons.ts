@@ -110,4 +110,42 @@ export enum ProfilesErrorReason {
   AFFILIATION_REQUEST_ALREADY_DECIDED = 'AFFILIATION_REQUEST_ALREADY_DECIDED',
   /** Sólo se puede revocar un vínculo que esté actualmente aprobado. */
   AFFILIATION_NOT_APPROVED = 'AFFILIATION_NOT_APPROVED',
+
+  // --- Admisiones de profesionales (practitioner-admissions.service.ts) ----
+  /** La admisión pedida no existe (o no es del sujeto que la pide). */
+  ADMISSION_NOT_FOUND = 'ADMISSION_NOT_FOUND',
+  /** La acción no es válida desde el estado actual de la admisión. */
+  ADMISSION_INVALID_TRANSITION = 'ADMISSION_INVALID_TRANSITION',
+  /** Otra persona modificó la admisión (o el ítem): `row_version` distinto. */
+  ADMISSION_STALE = 'ADMISSION_STALE',
+  /** La acción exige un motivo y no vino. */
+  ADMISSION_REASON_REQUIRED = 'ADMISSION_REASON_REQUIRED',
+  /** Verificar un ítem exige declarar la fuente consultada. */
+  ADMISSION_ITEM_REQUIRES_SOURCE = 'ADMISSION_ITEM_REQUIRES_SOURCE',
+  /** El checklist tiene requisitos obligatorios sin verificar o rechazados. */
+  ADMISSION_CHECKLIST_INCOMPLETE = 'ADMISSION_CHECKLIST_INCOMPLETE',
+  /** Cuatro ojos: quien resuelve no puede ser quien revisó la admisión. */
+  ADMISSION_FOUR_EYES_REQUIRED = 'ADMISSION_FOUR_EYES_REQUIRED',
+  /** Nadie revisa ni aprueba su propia admisión. */
+  ADMISSION_SELF_REVIEW = 'ADMISSION_SELF_REVIEW',
+  /** Sólo quien tomó la revisión puede actuar sobre sus ítems. */
+  ADMISSION_NOT_ASSIGNED_TO_ACTOR = 'ADMISSION_NOT_ASSIGNED_TO_ACTOR',
+  /** El ítem pedido no existe en esta admisión. */
+  ADMISSION_ITEM_NOT_FOUND = 'ADMISSION_ITEM_NOT_FOUND',
+  /** La resolución no recibe ítems: el servidor los deriva de las revisiones. */
+  ADMISSION_DECISION_ITEMS_NOT_ACCEPTED = 'ADMISSION_DECISION_ITEMS_NOT_ACCEPTED',
+  /** El solicitante llegó al tope de reenvíos. */
+  ADMISSION_RESUBMISSION_LIMIT = 'ADMISSION_RESUBMISSION_LIMIT',
+  /** La verificación ya venció: no se repone, se renueva. */
+  ADMISSION_VALIDITY_LAPSED = 'ADMISSION_VALIDITY_LAPSED',
+  /** El rol del actor no alcanza para esta acción de admisiones. */
+  ADMISSION_ROLE_REQUIRED = 'ADMISSION_ROLE_REQUIRED',
+  /** El documento no pertenece a esta admisión (o no existe). */
+  ADMISSION_DOCUMENT_NOT_FOUND = 'ADMISSION_DOCUMENT_NOT_FOUND',
+  /** La URL firmada del documento no es válida para este actor o admisión. */
+  ADMISSION_DOCUMENT_URL_INVALID = 'ADMISSION_DOCUMENT_URL_INVALID',
+  /** El revisor al que se reasigna no existe o es el propio solicitante. */
+  ADMISSION_ASSIGNEE_INVALID = 'ADMISSION_ASSIGNEE_INVALID',
+  /** La cuenta no tiene perfil profesional: no hay admisión que consultar. */
+  ADMISSION_WITHOUT_PRACTITIONER = 'ADMISSION_WITHOUT_PRACTITIONER',
 }
