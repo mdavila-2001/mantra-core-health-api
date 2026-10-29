@@ -204,6 +204,27 @@ export class ReferralTargetsRepository {
   }
 
   /**
+   * ¿Está activo el tenant? Es lo que se exige a la organización cuando el
+   * destino es un profesional: la búsqueda lo devuelve con el tenant de su
+   * práctica principal, que no necesita vitrina de organización.
+   *
+   * @param em - Contexto de persistencia.
+   * @param tenantId - `directory.tenants.id`.
+   * @returns `true` sólo si el tenant existe y está activo.
+   */
+  async isActiveTenant(em: EntityManager, tenantId: string): Promise<boolean> {
+    const rows = await em.getConnection().execute<{ ok: number }[]>(
+      `SELECT 1 AS ok
+         FROM directory.tenants t
+        WHERE t.id = ?
+          AND t.status_concept_id = ?`,
+      [tenantId, CONCEPTS.TENANT_ACTIVE],
+      'all',
+    );
+    return rows.length > 0;
+  }
+
+  /**
    * ¿Saldría esta organización en {@link searchOrganizations}? Tenant activo y
    * vitrina pública activa de organización, sin el filtro por nombre.
    *

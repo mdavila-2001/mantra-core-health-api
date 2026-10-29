@@ -898,9 +898,14 @@ export class ReferralsService {
       targetProfileId
         ? this.targetsRepo.isListablePractitioner(em, targetProfileId)
         : Promise.resolve(true),
-      targetTenantId
-        ? this.targetsRepo.isListableOrganization(em, targetTenantId)
-        : Promise.resolve(true),
+      // Con profesional, el tenant acota sus servicios a esa organización:
+      // basta con que esté activo, sin vitrina propia (así sale en la
+      // búsqueda de destinos). Sin profesional, el destino es la organización.
+      !targetTenantId
+        ? Promise.resolve(true)
+        : targetProfileId
+          ? this.targetsRepo.isActiveTenant(em, targetTenantId)
+          : this.targetsRepo.isListableOrganization(em, targetTenantId),
     ]);
     if (!profileListable || !tenantListable) {
       throw new ResourceNotFoundException('Destino no encontrado', {

@@ -130,6 +130,22 @@ describe('ReferralTargetsRepository', () => {
     });
   });
 
+  describe('isActiveTenant (#1058)', () => {
+    it('sólo mira el estado del tenant, sin vitrina', async () => {
+      const d = build([{ ok: 1 }]);
+      await expect(d.repo.isActiveTenant(d.em, 't1')).resolves.toBe(true);
+      const [sql, params] = d.execute.mock.calls[0];
+      expect(flat(sql)).toContain('t.status_concept_id = ?');
+      expect(flat(sql)).not.toContain('public_profiles');
+      expect(params).toEqual(['t1', CONCEPTS.TENANT_ACTIVE]);
+    });
+
+    it('sin fila (inexistente o inactivo) es false', async () => {
+      const d = build([]);
+      await expect(d.repo.isActiveTenant(d.em, 't1')).resolves.toBe(false);
+    });
+  });
+
   describe('isListableOrganization (#1058)', () => {
     it('exige tenant ACTIVO y vitrina pública activa de organización', async () => {
       const d = build([{ ok: 1 }]);

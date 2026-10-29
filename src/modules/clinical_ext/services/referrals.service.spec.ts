@@ -107,6 +107,7 @@ function build() {
     searchOrganizations: mockFn(() => Promise.resolve([])),
     isListablePractitioner: mockFn(() => Promise.resolve(true)),
     isListableOrganization: mockFn(() => Promise.resolve(true)),
+    isActiveTenant: mockFn(() => Promise.resolve(true)),
   };
   const offeringsRepo = {
     findOfferingOf: mockFn(() =>
@@ -1367,13 +1368,49 @@ describe('ReferralsService', () => {
           expect(d.serviceCatalogRepo.searchPage).not.toHaveBeenCalled();
         });
 
-        it('con los dos parámetros basta que uno no sea listable para el 404', async () => {
+        it('con profesional y tenant, un tenant inactivo responde 404', async () => {
           const d = build();
-          d.targetsRepo.isListableOrganization.mockResolvedValue(false);
+          d.targetsRepo.isActiveTenant.mockResolvedValue(false);
           await expect(
             d.service.listTargetServices({
               targetProfileId: 'hp-2',
               targetTenantId: 'ten-inactivo',
+            }),
+          ).rejects.toBeInstanceOf(ResourceNotFoundException);
+          expect(d.offeringsRepo.listOfferings).not.toHaveBeenCalled();
+        });
+
+        it('con profesional y tenant, la organización no necesita vitrina propia', async () => {
+          const d = build();
+          d.targetsRepo.isListableOrganization.mockResolvedValue(false);
+          d.offeringsRepo.listOfferings.mockResolvedValue([
+            { serviceCatalogId: 'svc-1' },
+          ]);
+          d.offeringsRepo.findCatalogItems.mockResolvedValue([activeService]);
+          d.practicesRepo.findById.mockResolvedValue({
+            id: 'pr-1',
+            tenantId: 'ten-dest',
+            name: 'Consultorio Sur',
+          });
+          const res = await d.service.listTargetServices({
+            targetProfileId: 'hp-2',
+            targetTenantId: 'ten-dest',
+          });
+          expect(d.targetsRepo.isActiveTenant).toHaveBeenCalledWith(
+            expect.anything(),
+            'ten-dest',
+          );
+          expect(d.targetsRepo.isListableOrganization).not.toHaveBeenCalled();
+          expect(res.items.map((item) => item.id)).toEqual(['svc-1']);
+        });
+
+        it('con profesional y tenant, un profesional no listable responde 404', async () => {
+          const d = build();
+          d.targetsRepo.isListablePractitioner.mockResolvedValue(false);
+          await expect(
+            d.service.listTargetServices({
+              targetProfileId: 'hp-oculto',
+              targetTenantId: 'ten-dest',
             }),
           ).rejects.toBeInstanceOf(ResourceNotFoundException);
           expect(d.offeringsRepo.listOfferings).not.toHaveBeenCalled();
