@@ -91,6 +91,12 @@ import { CommunityModule } from '../community/community.module';
 import { AdmissionsController } from './presentation/controllers/admissions.controller';
 import { OwnAdmissionController } from './presentation/controllers/own-admission.controller';
 import { ADMISSION_NOTICE_PORT } from './application/ports/admission-notice.port';
+import { ADMISSION_FOREIGN_READS_PORT } from './application/ports/admission-foreign-reads.port';
+import { ADMISSION_FILES_PORT } from './application/ports/admission-files.port';
+import { PUBLIC_VERIFICATION_SEAL_PORT } from './application/ports/public-verification-seal.port';
+import { AdmissionForeignReadsAdapter } from './infrastructure/adapters/admission-foreign-reads.adapter';
+import { AdmissionFilesAdapter } from './infrastructure/adapters/admission-files.adapter';
+import { CommunityVerificationSealAdapter } from './infrastructure/adapters/community-verification-seal.adapter';
 import { MessagingAdmissionNoticeAdapter } from './infrastructure/adapters/messaging-admission-notice.adapter';
 import { PractitionerAdmissionsService } from './application/services/practitioner-admissions.service';
 import { PractitionerAdmissionsReadService } from './application/services/practitioner-admissions-read.service';
@@ -227,6 +233,15 @@ import { PractitionerVerificationProjector } from './application/services/practi
     {
       provide: ADMISSION_NOTICE_PORT,
       useClass: MessagingAdmissionNoticeAdapter,
+    },
+    {
+      provide: ADMISSION_FOREIGN_READS_PORT,
+      useClass: AdmissionForeignReadsAdapter,
+    },
+    { provide: ADMISSION_FILES_PORT, useClass: AdmissionFilesAdapter },
+    {
+      provide: PUBLIC_VERIFICATION_SEAL_PORT,
+      useClass: CommunityVerificationSealAdapter,
     },
     PractitionerAdmissionEvidenceService,
     PractitionerAdmissionChecklistService,

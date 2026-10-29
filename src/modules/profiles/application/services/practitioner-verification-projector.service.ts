@@ -2,13 +2,15 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { touch } from '../../../../common';
-import { COMM } from '../../../community/community.concepts';
-import { CommunityVerificationService } from '../../../community/services';
 import {
   HealthPractitionerProfilesRepository,
   PersonAccountLinksRepository,
 } from '../../infrastructure/repositories';
 import { PROF } from '../../profiles.concepts';
+import {
+  PUBLIC_VERIFICATION_SEAL_PORT,
+  type PublicVerificationSealPort,
+} from '../ports/public-verification-seal.port';
 import {
   PRACTITIONER_CONTEXT_PORT,
   type PractitionerContextPort,
@@ -47,7 +49,8 @@ export class PractitionerVerificationProjector {
   constructor(
     private readonly practitionersRepo: HealthPractitionerProfilesRepository,
     private readonly accountLinksRepo: PersonAccountLinksRepository,
-    private readonly verification: CommunityVerificationService,
+    @Inject(PUBLIC_VERIFICATION_SEAL_PORT)
+    private readonly seal: PublicVerificationSealPort,
     @Inject(PRACTITIONER_CONTEXT_PORT)
     private readonly practitionerContext: PractitionerContextPort,
     private readonly logger: PinoLogger,
@@ -110,9 +113,8 @@ export class PractitionerVerificationProjector {
       }
     }
 
-    await this.verification.applyVerified(tx, {
-      targetId: practitionerProfileId,
-      methodConceptId: COMM.BADGE_METHOD_MANUAL_ADMIN,
+    await this.seal.grant(tx, {
+      practitionerProfileId,
       actorUserId,
       evidenceRef: `admission:${admissionId}`,
       validTo,
@@ -149,12 +151,7 @@ export class PractitionerVerificationProjector {
       practitioner.acceptsNewPatients = false;
       touch(practitioner, actorUserId);
     }
-    await this.verification.applyRevoked(
-      tx,
-      practitionerProfileId,
-      actorUserId,
-      badgeReason,
-    );
+    await this.seal.revoke(tx, practitionerProfileId, actorUserId, badgeReason);
     return { projected: true, roleGranted: false };
   }
 }

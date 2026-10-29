@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import { GoneException, Injectable } from '@nestjs/common';
+import { GoneException, Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { InsufficientRoleException } from '../../../../common/errors/domain.exception';
@@ -9,7 +9,10 @@ import {
   type AuthenticatedUser,
 } from '../../../../common';
 import { resolveSecret } from '../../../../common/crypto/dev-secret';
-import { FileUploadService } from '../../../common/services';
+import {
+  ADMISSION_FILES_PORT,
+  type AdmissionFilesPort,
+} from '../ports/admission-files.port';
 import { assertNotSelfAccess } from './admission-self-access';
 import { ProfilesErrorReason } from '../../profiles.error-reasons';
 import {
@@ -50,7 +53,7 @@ function documentSecret(): string {
 /**
  * Documentos de una admisión: el revisor los abre por una URL firmada, atada a
  * su usuario y a la admisión, de vida corta y con cada emisión auditada
- * (`FILE_DOWNLOAD_URL_ISSUED`).
+ * (`ADMISSION_DOCUMENT_URL_ISSUED`).
  *
  * ## Por qué no se usa `GET /common/files/:id/content`
  *
@@ -68,7 +71,8 @@ export class PractitionerAdmissionDocumentsService {
     private readonly admissionsRepo: PractitionerAdmissionsRepository,
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly evidence: PractitionerAdmissionEvidenceService,
-    private readonly files: FileUploadService,
+    @Inject(ADMISSION_FILES_PORT)
+    private readonly files: AdmissionFilesPort,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PractitionerAdmissionDocumentsService.name);
@@ -126,7 +130,7 @@ export class PractitionerAdmissionDocumentsService {
     }
     const em = this.em.fork();
     const facts = await this.assertFileBelongs(em, admissionId, fileId, actor);
-    const content = await this.files.downloadForAuthorizedContext(
+    const content = await this.files.downloadAuthorized(
       fileId,
       'profiles.admission.document',
     );

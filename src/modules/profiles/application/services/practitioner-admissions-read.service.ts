@@ -1,7 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import {
-  CONCEPTS,
   ResourceNotFoundException,
   decodeKeysetCursor,
   encodeKeysetCursor,
@@ -10,9 +9,6 @@ import {
 import { assertNotSelfAccess } from './admission-self-access';
 import { badRequestWithReason } from '../../../../common/errors/reasoned-http-exceptions';
 import { SystemErrorReason } from '../../../../common/errors/system-error-reasons';
-import { Identifiers } from '../../../common/entities';
-import { Users } from '../../../iam/entities';
-import { CatalogConcepts } from '../../../terminology/entities';
 import {
   HealthPractitionerProfiles,
   JurisdictionAuthorizations,
@@ -24,6 +20,10 @@ import {
 } from '../../entities';
 import type { PractitionerAdmissionReviews } from '../../entities';
 import { PROF } from '../../profiles.concepts';
+import {
+  ADMISSION_FOREIGN_READS_PORT,
+  type AdmissionForeignReadsPort,
+} from '../ports/admission-foreign-reads.port';
 import { ProfilesErrorReason } from '../../profiles.error-reasons';
 import {
   PersonAccountLinksRepository,
@@ -125,6 +125,8 @@ export class PractitionerAdmissionsReadService {
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly checklist: PractitionerAdmissionChecklistService,
     private readonly evidence: PractitionerAdmissionEvidenceService,
+    @Inject(ADMISSION_FOREIGN_READS_PORT)
+    private readonly foreign: AdmissionForeignReadsPort,
   ) {}
 
   // ───────────────────────────────────────────────────────────── bandeja ──
@@ -794,18 +796,16 @@ export class PractitionerAdmissionsReadService {
   // ─────────────────────────────────────────────────────────── auxiliares ──
 
   /** Nombres de cuentas (revisores, actores). */
-  async userNames(
+  userNames(
     em: EntityManager,
     ids: ReadonlyArray<string | undefined | null>,
   ): Promise<Map<string, string>> {
-    const unique = [...new Set(ids.filter((id): id is string => !!id))];
-    if (unique.length === 0) return new Map();
-    const users = await em.find(
-      Users,
-      { id: { $in: unique } },
-      { fields: ['id', 'displayName'] },
-    );
-    return new Map(users.map((u) => [u.id, u.displayName]));
+    return this.foreign.userNames(em, ids);
+  }
+
+  /** ¿Existe esa cuenta? (para reasignar una revisión). */
+  userExists(em: EntityManager, userId: string): Promise<boolean> {
+    return this.foreign.userExists(em, userId);
   }
 
   private async practitionerBasics(
@@ -816,10 +816,7 @@ export class PractitionerAdmissionsReadService {
     if (ids.length === 0) return result;
     const [persons, identifiers, credentials, profiles] = await Promise.all([
       em.find(Persons, { id: { $in: [...ids] } }),
-      em.find(Identifiers, {
-        ownerId: { $in: [...ids] },
-        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
-      }),
+      this.foreign.nationalIds(em, ids),
       em.find(ProfessionalCredentials, {
         practitionerProfileId: { $in: [...ids] },
       }),
@@ -849,25 +846,17 @@ export class PractitionerAdmissionsReadService {
       result.set(person.id, {
         fullName,
         profession,
-        nationalId:
-          identifiers.find((i) => i.ownerId === person.id)?.value ?? null,
+        nationalId: identifiers.get(person.id)?.value ?? null,
       });
     }
     return result;
   }
 
-  private async conceptDisplay(
+  private conceptDisplay(
     em: EntityManager,
     ids: ReadonlyArray<string | undefined | null>,
   ): Promise<Map<string, string>> {
-    const unique = [...new Set(ids.filter((id): id is string => !!id))];
-    if (unique.length === 0) return new Map();
-    const rows = await em.find(
-      CatalogConcepts,
-      { id: { $in: unique } },
-      { fields: ['id', 'display'] },
-    );
-    return new Map(rows.map((r) => [r.id, r.display]));
+    return this.foreign.conceptNames(em, ids);
   }
 
   private async professionGroups(
