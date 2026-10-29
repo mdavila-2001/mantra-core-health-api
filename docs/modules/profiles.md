@@ -217,7 +217,7 @@ checklist de requisitos por tipo (`admission_requirements`), una revisión por
 | `POST /admissions/:id/claim`, `release`, `reassign`, `request-info` | revisor / aprobador | Tomar, soltar, pasar y pedir información |
 | `POST /admissions/:id/items/:itemId/review` | revisor asignado | VERIFIED (exige fuente y `evidenceSha256`), REJECTED, INFO_REQUIRED |
 | `POST /admissions/:id/decision`, `suspend`, `reinstate` | aprobador | Resolver (cuatro ojos configurable), suspender, reponer |
-| `GET /admissions/:id/documents/:fileId/url` y `.../content` | revisor, aprobador | URL firmada de 2 min atada a usuario+admisión+archivo, auditada |
+| `POST /admissions/:id/documents/:fileId/download-url` y `GET .../content` | revisor, aprobador | URL firmada de 2 min atada a usuario+admisión+archivo, auditada |
 | `GET /profiles/practitioners/me/admission`, `POST .../resubmit`, `.../withdraw` | el propio profesional | Su caso, sin notas internas ni revisor |
 | `POST /admissions/expire-sweep` | `SYSTEM`, `SECURITY_ADMIN` | Baja vencidas y abandona sin respuesta |
 
