@@ -16,21 +16,14 @@ import {
   InfrastructureAccessService,
   type InfraTarget,
 } from '../../../practice/services/infrastructure-access.service';
-import { strOrNull } from '../../../practice/services/ops-rows';
+import { strOrNull } from '../../domain/row-text';
 import { spaceBelongsToUnit } from '../../../practice/services/space-unit-membership';
 import { PharmacyInventoryErrorReason as Reason } from '../../pharmacy_inventory.error-reasons';
-
-/** Lo que el cuerpo dice sobre dónde queda la ubicación. */
-export interface StockPointInput {
-  readonly careSpaceId?: string | null;
-  readonly clinicalUnitId?: string | null;
-}
-
-/** El punto de stock ya resuelto en el tenant. */
-export interface ResolvedStockPoint {
-  readonly careSpaceId: string | null;
-  readonly clinicalUnitId: string | null;
-}
+import type {
+  ResolvedStockPoint,
+  StockPointAccessPort,
+  StockPointInput,
+} from '../../application/ports/stock-point-access.port';
 
 /** El 404 uniforme del módulo para lo que no existe o es ajeno. */
 const NOT_AVAILABLE = 'Recurso de farmacia no disponible';
@@ -50,7 +43,7 @@ const NOT_AVAILABLE = 'Recurso de farmacia no disponible';
  *   `stockPoint` (422 `SPACE_NOT_STOCK_POINT`) y ambos están activos.
  */
 @Injectable()
-export class StockPointAccessService {
+export class PracticeStockPointAccessAdapter implements StockPointAccessPort {
   /**
    * @param infra - Evaluador único de «quién puede qué sobre qué espacio».
    */

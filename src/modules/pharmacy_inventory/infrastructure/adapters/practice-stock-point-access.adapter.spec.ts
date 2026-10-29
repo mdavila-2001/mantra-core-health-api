@@ -6,7 +6,7 @@ import {
 import { FUNCTIONS } from '../../../practice/infrastructure-catalog';
 import { PRAC } from '../../../practice/practice.concepts';
 import { PharmacyInventoryErrorReason as R } from '../../pharmacy_inventory.error-reasons';
-import { StockPointAccessService } from './stock-point-access.service';
+import { PracticeStockPointAccessAdapter } from './practice-stock-point-access.adapter';
 
 const TENANT = 'tenant-1';
 const PRACTICE_SITE = 'practice-site-1';
@@ -39,9 +39,9 @@ const unit = (over: Record<string, unknown> = {}) => ({
   ...over,
 });
 
-describe('StockPointAccessService', () => {
+describe('PracticeStockPointAccessAdapter', () => {
   const infra = { assertCan: (jest.fn as any)() };
-  const service = new StockPointAccessService(infra as any);
+  const service = new PracticeStockPointAccessAdapter(infra as any);
   beforeEach(() => infra.assertCan.mockReset());
 
   describe('autoridad', () => {

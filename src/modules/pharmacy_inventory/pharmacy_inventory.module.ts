@@ -7,7 +7,8 @@ import { PharmacyModule } from '../pharmacy/pharmacy.module';
 // stock en un espacio). `practice` no importa este módulo, no cierra ciclo.
 import { PracticeModule } from '../practice/practice.module';
 import { InfraF5cPolicyInitializer } from './policies/infra-f5c.policy';
-import { StockPointAccessService } from './application/inventory-locations/stock-point-access.service';
+import { STOCK_POINT_ACCESS_PORT } from './application/ports/stock-point-access.port';
+import { PracticeStockPointAccessAdapter } from './infrastructure/adapters/practice-stock-point-access.adapter';
 import { InventoryLocationEvents } from './application/inventory-locations/inventory-location-events';
 import { RelocateInventoryLocationUseCase } from './application/inventory-locations/relocate-inventory-location.use-case';
 import { ReadSpaceStockUseCase } from './application/inventory-locations/read-space-stock.use-case';
@@ -184,7 +185,11 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     CreateInventoryLocationUseCase,
     RelocateInventoryLocationUseCase,
     ReadSpaceStockUseCase,
-    StockPointAccessService,
+    PracticeStockPointAccessAdapter,
+    {
+      provide: STOCK_POINT_ACCESS_PORT,
+      useExisting: PracticeStockPointAccessAdapter,
+    },
     InventoryLocationEvents,
     InfraF5cPolicyInitializer,
     CreateRecallHoldUseCase,

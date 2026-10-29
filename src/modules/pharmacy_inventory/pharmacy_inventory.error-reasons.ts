@@ -28,6 +28,10 @@ export enum PharmacyInventoryErrorReason {
   STOCK_POINT_UNIT_NOT_ACTIVE = 'STOCK_POINT_UNIT_NOT_ACTIVE',
   /** El espacio no pertenece a la unidad indicada. */
   STOCK_POINT_UNIT_MISMATCH = 'STOCK_POINT_UNIT_MISMATCH',
+  /** 412: el `If-Match` no coincide con la `rowVersion` vigente de la ubicación. */
+  ROW_VERSION_MISMATCH = 'ROW_VERSION_MISMATCH',
+  /** 428/400: falta el `If-Match` o no es una `rowVersion` numérica. */
+  IF_MATCH_REQUIRED = 'IF_MATCH_REQUIRED',
   /** Un botiquín de piso se crea para una unidad: falta `clinicalUnitId`. */
   WARD_STOCK_UNIT_REQUIRED = 'WARD_STOCK_UNIT_REQUIRED',
   /** La unidad ya tiene su botiquín de piso vigente. */

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -7,7 +7,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../../common';
-import { RowVersionMismatchException } from '../../../practice/http/row-version';
+import { RowVersionMismatchException } from '../../domain/row-version';
 import { LocationsRepository } from '../../infrastructure/repositories';
 import type { RelocateLocationDto } from '../../presentation/dto/relocate-location.dto';
 import type { LocationResponseDto } from '../../presentation/dto/responses.dto';
@@ -15,7 +15,10 @@ import { PINV } from '../../domain/pharmacy_inventory.concepts';
 import { PharmacyInventoryErrorReason as Reason } from '../../pharmacy_inventory.error-reasons';
 import { PharmacyInventoryScopePolicy } from '../scope/pharmacy-inventory-scope.policy';
 import { InventoryLocationEvents } from './inventory-location-events';
-import { StockPointAccessService } from './stock-point-access.service';
+import {
+  STOCK_POINT_ACCESS_PORT,
+  type StockPointAccessPort,
+} from '../ports/stock-point-access.port';
 
 /**
  * Reubica una ubicación de inventario en otro espacio (CONTRATO-F2-F5 F5c).
@@ -32,7 +35,8 @@ export class RelocateInventoryLocationUseCase {
     private readonly locations: LocationsRepository,
     private readonly scope: PharmacyInventoryScopePolicy,
     private readonly logger: PinoLogger,
-    private readonly access: StockPointAccessService,
+    @Inject(STOCK_POINT_ACCESS_PORT)
+    private readonly access: StockPointAccessPort,
     private readonly events: InventoryLocationEvents,
   ) {}
 

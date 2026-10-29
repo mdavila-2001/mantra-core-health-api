@@ -28,7 +28,7 @@ import {
   InventoryCountService,
   InventoryRecallService,
 } from '../../services';
-import { IfMatch } from '../../../practice/http/request-decorators';
+import { IfMatch } from '../http/if-match.decorator';
 import {
   RelocateLocationDto,
   LocationResponseDto,
@@ -75,7 +75,7 @@ export class PharmacyInventoryController {
   /**
    * Alta de ubicación de inventario. Sin `@Roles` global: la autoridad es el personal de
    * farmacia del tenant o la administración (organización, sucursal) de la sede de
-   * práctica de la farmacia (`StockPointAccessService`).
+   * práctica de la farmacia (`StockPointAccessPort`).
    */
   @Audited({
     action: 'INVENTORY_LOCATION_CREATED',
