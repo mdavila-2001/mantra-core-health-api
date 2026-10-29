@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import type { AuthenticatedUser } from '../../common';
+import type { AuthenticatedUser } from '../../../common';
 import type {
   ResolveAudioAssetInput,
   ResolveAudioAssetResult,
-} from './application/resolve-audio-asset.use-case';
-import { ResolveAudioAssetUseCase } from './application/resolve-audio-asset.use-case';
+} from './resolve-audio-asset.use-case';
+import { ResolveAudioAssetUseCase } from './resolve-audio-asset.use-case';
 
 /** Puerto estable para que onboarding/otros dominios no dependan de la infraestructura TTS. */
 @Injectable()

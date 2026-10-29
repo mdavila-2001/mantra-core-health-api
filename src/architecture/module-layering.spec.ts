@@ -20,6 +20,7 @@ export const MIGRATED_MODULES: readonly string[] = [
   'iam',
   'ops_console',
   'billing',
+  'audio_assets',
 ];
 
 const MODULES_DIR = join(process.cwd(), 'src', 'modules');

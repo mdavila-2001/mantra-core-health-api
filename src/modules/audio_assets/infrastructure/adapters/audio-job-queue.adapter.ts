@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import type { AuthenticatedUser } from '../../../common';
-import { QueuesService } from '../../messaging/services/queues.service';
-import { loadAudioEnv } from '../audio.env';
+import type { AuthenticatedUser } from '../../../../common';
+import type { AudioJobQueuePort } from '../../application/ports/audio-job-queue.port';
+import { QueuesService } from '../../../messaging/services/queues.service';
+import { loadAudioEnv } from '../../audio.env';
 import {
   AUDIO_GENERATION_JOB_TYPE,
   AUDIO_GENERATION_QUEUE,
-} from '../domain/audio-queue.constants';
+} from '../../domain/audio-queue.constants';
 
 @Injectable()
-export class AudioJobQueueAdapter {
+export class AudioJobQueueAdapter implements AudioJobQueuePort {
   private readonly env = loadAudioEnv();
   constructor(private readonly queues: QueuesService) {}
 

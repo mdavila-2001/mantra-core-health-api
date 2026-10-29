@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { metrics } from '@opentelemetry/api';
+import type { AudioMetricsPort } from '../../application/ports/audio-metrics.port';
 
 /** Métricas low-cardinality del pipeline TTS; nunca etiqueta usuario, texto ni assetId. */
 @Injectable()
-export class AudioMetricsService {
+export class AudioMetricsService implements AudioMetricsPort {
   private readonly meter = metrics.getMeter('mantra.audio-assets');
   private readonly generatedCounter = this.meter.createCounter(
     'audio_assets_generated_total',
