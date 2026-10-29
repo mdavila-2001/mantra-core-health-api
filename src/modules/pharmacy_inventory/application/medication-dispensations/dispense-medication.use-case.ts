@@ -19,6 +19,10 @@ import {
   MovementResponseDto,
 } from '../../presentation/dto';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
+import type {
+  InventoryReservationLines,
+  InventoryReservations,
+} from '../../entities';
 import { ORDER_STATUS_IDS } from '../../domain/order-status-ids';
 import { PharmacyInventoryScopePolicy } from '../scope/pharmacy-inventory-scope.policy';
 
@@ -103,6 +107,7 @@ export class DispenseMedicationUseCase {
         dto.patientProfileId,
         dto.medicationRequestId,
       );
+      let reservationRow: InventoryReservations | null = null;
       // Las líneas que salen de un botiquín de piso se rigen por `available_quantity`.
       const wardStock = new Set<string>();
       for (const line of dto.lines) {
@@ -118,10 +123,13 @@ export class DispenseMedicationUseCase {
       }
 
       if (dto.inventoryReservationId) {
-        const reservation = await this.reservationsRepo.findById(
+        // Bloqueada hasta el fin de la transacción: dos dispensas contra la misma
+        // reserva se serializan y la segunda la encuentra ya consumida.
+        const reservation = await this.reservationsRepo.findByIdForUpdate(
           tx,
           dto.inventoryReservationId,
         );
+        reservationRow = reservation;
         // La reserva debe ser de esta farmacia y de esta sede.
         if (
           !reservation ||
@@ -158,20 +166,39 @@ export class DispenseMedicationUseCase {
       const lineIds: string[] = [];
       const ledgerEntryIds: string[] = [];
 
+      // Una línea de botiquín de piso sólo se exime de `available_quantity` hasta lo que
+      // una reserva activa, de esta ubicación, producto y lote, todavía tiene reservado.
+      const strictReservation =
+        reservationRow && wardStock.size > 0
+          ? await this.loadStrictReservation(tx, reservationRow)
+          : null;
+      const consumed = new Map<string, number>();
+
       for (const line of dto.lines) {
         const position = await this.stockRepo.findByKeyForUpdate(tx, {
           inventoryLocationId: line.inventoryLocationId,
           pharmacyProductId: line.pharmacyProductId,
           inventoryLotId: line.inventoryLotId,
         });
-        // Botiquín de piso sin reserva que lo respalde: no se dispensa lo que está
-        // reservado para otro ni en cuarentena. Con reserva rige la regla de siempre
-        // (la reserva se libera al dispensar), sin debilitarla.
+        // Botiquín de piso: no se dispensa lo que está reservado para otro ni en
+        // cuarentena. Una reserva activa que respalda esta línea exime sólo hasta lo que
+        // le queda reservado; el resto se somete a lo disponible.
+        const isWard = wardStock.has(line.inventoryLocationId);
+        let covered = 0;
+        let coveringLine: InventoryReservationLines | undefined;
+        if (isWard && strictReservation) {
+          coveringLine = this.coveringLine(strictReservation, line, consumed);
+          covered = Math.min(
+            line.dispensedQuantity,
+            num(coveringLine.reservedQuantity) -
+              num(coveringLine.fulfilledQuantity) -
+              (consumed.get(coveringLine.id) ?? 0),
+          );
+        }
         if (
-          wardStock.has(line.inventoryLocationId) &&
-          !dto.inventoryReservationId &&
+          isWard &&
           (!position ||
-            num(position.availableQuantity) < line.dispensedQuantity)
+            num(position.availableQuantity) < line.dispensedQuantity - covered)
         ) {
           throw new ConflictException(
             'El botiquín no tiene stock disponible suficiente',
@@ -220,6 +247,7 @@ export class DispenseMedicationUseCase {
           ledgerSequence: sequence,
           movementTypeConceptId: PINV.MV_DISPENSE,
           quantityDelta: String(-line.dispensedQuantity),
+          ...(coveringLine ? { reservationDelta: String(-covered) } : {}),
           sourceId: dispensation.id,
           recordedByUserId: actor.id,
         });
@@ -228,14 +256,43 @@ export class DispenseMedicationUseCase {
         position.onHandQuantity = String(
           num(position.onHandQuantity) - line.dispensedQuantity,
         );
-        // Si la reserva cubría este lote, se libera al dispensar.
-        if (
+        if (coveringLine) {
+          // Sólo se libera lo que la reserva tenía: ni más, ni de otra posición.
+          position.reservedQuantity = String(
+            Math.max(num(position.reservedQuantity) - covered, 0),
+          );
+          consumed.set(
+            coveringLine.id,
+            (consumed.get(coveringLine.id) ?? 0) + covered,
+          );
+        } else if (
+          // Si la reserva cubría este lote, se libera al dispensar.
           dto.inventoryReservationId &&
           num(position.reservedQuantity) >= line.dispensedQuantity
         ) {
           position.reservedQuantity = String(
             num(position.reservedQuantity) - line.dispensedQuantity,
           );
+          // En una dispensa mixta (botiquín y otra ubicación) la línea de la reserva
+          // que cubría esta posición también se consume.
+          const legacy = strictReservation?.lines.find(
+            (rl) =>
+              rl.inventoryLocationId === line.inventoryLocationId &&
+              rl.pharmacyProductId === line.pharmacyProductId &&
+              (rl.inventoryLotId ?? null) === (line.inventoryLotId ?? null),
+          );
+          if (legacy) {
+            consumed.set(
+              legacy.id,
+              (consumed.get(legacy.id) ?? 0) +
+                Math.min(
+                  line.dispensedQuantity,
+                  num(legacy.reservedQuantity) -
+                    num(legacy.fulfilledQuantity) -
+                    (consumed.get(legacy.id) ?? 0),
+                ),
+            );
+          }
         }
         position.availableQuantity = recompute(
           position.onHandQuantity,
@@ -246,28 +303,105 @@ export class DispenseMedicationUseCase {
         position.updatedAt = new Date();
       }
 
-      if (dto.inventoryReservationId) {
-        const reservation = await this.reservationsRepo.findById(
-          tx,
-          dto.inventoryReservationId,
-        );
-        if (reservation) {
-          reservation.reservationStatusConceptId = PINV.RESERVATION_FULFILLED;
-          touch(reservation, actor.id);
-          const rlines = await this.reservationsRepo.findLinesByReservation(
-            tx,
-            reservation.id,
-          );
-          for (const rl of rlines) {
+      if (dto.inventoryReservationId && reservationRow) {
+        const reservation = reservationRow;
+        const rlines = strictReservation
+          ? strictReservation.lines
+          : await this.reservationsRepo.findLinesByReservation(
+              tx,
+              reservation.id,
+            );
+        let allFulfilled = true;
+        for (const rl of rlines) {
+          const used = consumed.get(rl.id);
+          if (strictReservation) {
+            // Con líneas de botiquín, cada línea de la reserva se consume por lo que se dispensó.
+            if (used !== undefined) {
+              rl.fulfilledQuantity = String(num(rl.fulfilledQuantity) + used);
+              if (num(rl.fulfilledQuantity) >= num(rl.reservedQuantity)) {
+                rl.statusConceptId = PINV.RES_LINE_FULFILLED;
+              }
+              touch(rl, actor.id);
+            }
+            if (rl.statusConceptId !== PINV.RES_LINE_FULFILLED) {
+              allFulfilled = false;
+            }
+          } else {
             rl.fulfilledQuantity = rl.reservedQuantity;
             rl.statusConceptId = PINV.RES_LINE_FULFILLED;
             touch(rl, actor.id);
           }
+        }
+        if (!strictReservation || allFulfilled) {
+          reservation.reservationStatusConceptId = PINV.RESERVATION_FULFILLED;
+          touch(reservation, actor.id);
         }
       }
       await tx.flush();
 
       return { id: dispensation.id, lineIds, ledgerEntryIds };
     });
+  }
+
+  /**
+   * La reserva ya bloqueada, validada como respaldo de líneas de botiquín: activa
+   * (`CONFIRMED`) y no vencida. Su pertenencia a la farmacia y a la sede se comprobó antes.
+   *
+   * @throws ConflictException (409 `RESERVATION_NOT_APPLICABLE`) si cancelada, vencida o consumida.
+   */
+  private async loadStrictReservation(
+    tx: EntityManager,
+    reservation: InventoryReservations,
+  ): Promise<{ lines: InventoryReservationLines[] }> {
+    if (
+      reservation.reservationStatusConceptId !== PINV.RESERVATION_CONFIRMED ||
+      reservation.expiresAt.getTime() <= Date.now()
+    ) {
+      throw this.notApplicable();
+    }
+    return {
+      lines: await this.reservationsRepo.findLinesByReservation(
+        tx,
+        reservation.id,
+      ),
+    };
+  }
+
+  /**
+   * La línea de la reserva que respalda esta línea de dispensa: misma ubicación,
+   * producto y lote, vigente y con algo todavía reservado.
+   *
+   * @throws ConflictException (409 `RESERVATION_NOT_APPLICABLE`) si no hay ninguna.
+   */
+  private coveringLine(
+    reservation: { lines: InventoryReservationLines[] },
+    line: {
+      inventoryLocationId: string;
+      pharmacyProductId: string;
+      inventoryLotId?: string;
+    },
+    consumed: ReadonlyMap<string, number>,
+  ): InventoryReservationLines {
+    const found = reservation.lines.find(
+      (rl) =>
+        rl.inventoryLocationId === line.inventoryLocationId &&
+        rl.pharmacyProductId === line.pharmacyProductId &&
+        (rl.inventoryLotId ?? null) === (line.inventoryLotId ?? null) &&
+        rl.statusConceptId === PINV.RES_LINE_CONFIRMED &&
+        num(rl.reservedQuantity) -
+          num(rl.fulfilledQuantity) -
+          (consumed.get(rl.id) ?? 0) >
+          0,
+    );
+    if (!found) throw this.notApplicable();
+    return found;
+  }
+
+  private notApplicable(): ConflictException {
+    return new ConflictException(
+      'La reserva no respalda esta dispensa',
+      undefined,
+      PharmacyInventoryErrorReason.RESERVATION_NOT_APPLICABLE,
+    );
   }
 }

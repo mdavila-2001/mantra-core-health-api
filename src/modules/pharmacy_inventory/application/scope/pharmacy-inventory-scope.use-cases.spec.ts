@@ -809,6 +809,7 @@ describe('Ámbito del inventario por caso de uso (PINV-01 / PINV-02)', () => {
       };
       const reservations = {
         findById: mockFn(async () => reservation ?? null),
+        findByIdForUpdate: mockFn(async () => reservation ?? null),
         findLinesByReservation: mockFn(async () => []),
       };
       const position = {

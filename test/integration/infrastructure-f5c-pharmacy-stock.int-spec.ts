@@ -1,8 +1,13 @@
 import { randomUUID } from 'node:crypto';
-import { TokenService } from '../../src/common';
+import { jest } from '@jest/globals';
+import { TokenService, runWithTenant } from '../../src/common';
+import { PharmacyInventoryScopePolicy } from '../../src/modules/pharmacy_inventory/application/scope/pharmacy-inventory-scope.policy';
+import { DispenseMedicationUseCase } from '../../src/modules/pharmacy_inventory/application/medication-dispensations/dispense-medication.use-case';
+import { ReserveInventoryUseCase } from '../../src/modules/pharmacy_inventory/application/inventory-reservations/reserve-inventory.use-case';
 import { PHARM } from '../../src/modules/pharmacy/pharmacy.concepts';
 import { PINV } from '../../src/modules/pharmacy_inventory/domain/pharmacy_inventory.concepts';
 import {
+  TEST_ADMIN_ID,
   bootstrapTestApp,
   ensureTestSession,
   type TestContext,
@@ -10,6 +15,7 @@ import {
 import {
   ROLE,
   as,
+  createPatient,
   createSpace,
   createStaff,
   createUnit,
@@ -772,6 +778,220 @@ describe('Infraestructura F5c · farmacia e inventario', () => {
         [ward.id, product],
       );
       expect(pos).toEqual({ on_hand: 8, reserved: 8 });
+    });
+  });
+
+  // -------------------------------- dispensa del botiquín respaldada por una reserva
+  describe('la reserva sólo exime del disponible hasta lo reservado', () => {
+    let admin: any;
+    let patient: string;
+    let ward: string;
+    let product: string;
+    let other: string;
+
+    const inA = <T>(work: () => Promise<T>): Promise<T> =>
+      runWithTenant(orgA.tenantId, work);
+    const reserve = async (location: string, productId: string, qty: number) =>
+      (
+        await inA(() =>
+          ctx.app.get(ReserveInventoryUseCase).execute(
+            pharmacyA,
+            {
+              pharmacySiteId: pharmacySiteA,
+              lines: [
+                {
+                  inventoryLocationId: location,
+                  pharmacyProductId: productId,
+                  requestedQuantity: qty,
+                },
+              ],
+            } as any,
+            admin,
+          ),
+        )
+      ).id;
+    const dispense = (
+      location: string,
+      productId: string,
+      qty: number,
+      reservationId?: string,
+      tenant: () => string = () => orgA.tenantId,
+    ) =>
+      runWithTenant(tenant(), () =>
+        ctx.app.get(DispenseMedicationUseCase).execute(
+          pharmacyA,
+          {
+            pharmacySiteId: pharmacySiteA,
+            patientProfileId: patient,
+            inventoryReservationId: reservationId,
+            lines: [
+              {
+                inventoryLocationId: location,
+                pharmacyProductId: productId,
+                dispensedQuantity: qty,
+              },
+            ],
+          } as any,
+          admin,
+        ),
+      );
+    const position = async (location: string, productId: string) =>
+      (
+        await sql(
+          `select on_hand_quantity::float as on_hand, reserved_quantity::float as reserved,
+                  available_quantity::float as available
+             from pharmacy_inventory.inventory_stock_positions
+            where inventory_location_id = ? and pharmacy_product_id = ?`,
+          [location, productId],
+        )
+      )[0];
+
+    beforeAll(async () => {
+      admin = {
+        id: TEST_ADMIN_ID,
+        roles: ['SECURITY_ADMIN'],
+        tenantIds: [orgA.tenantId],
+      };
+      patient = await createPatient(ctx, {
+        name: 'Paciente sintético F5C',
+        gender: 'FEMALE',
+        birthDate: '1990-01-01',
+      });
+      // La relación paciente–farmacia es de otra regla (PINV-02) y tiene sus propias
+      // pruebas; aquí el foco es la reserva, así que se la deja pasar.
+      jest
+        .spyOn(
+          ctx.app.get(PharmacyInventoryScopePolicy),
+          'requirePatientContext',
+        )
+        .mockResolvedValue(undefined);
+      const wardSpace = await mkSpace(
+        orgA,
+        'SPACE_FN_NURSE_STATION',
+        'Estación 2',
+        {},
+      );
+      const unit = await activeUnit(orgA, `UN-R-${suffix}`);
+      await sql(
+        `update practice.care_spaces set clinical_unit_id = ? where id = ?`,
+        [unit, wardSpace],
+      );
+      ward = (
+        await create(owner(orgA), pharmacySiteA, {
+          locationTypeCode: 'WARD_STOCK',
+          clinicalUnitId: unit,
+          careSpaceId: wardSpace,
+        }).expect(201)
+      ).body.id;
+      product = await stock(pharmacyA, ward, { onHand: 10, reserved: 0 });
+      other = await stock(pharmacyA, ward, { onHand: 10, reserved: 0 });
+    });
+
+    it('sin reserva, un botiquín sin disponible suficiente rechaza (409) y no toca el stock', async () => {
+      const before = await position(ward, product);
+      await expect(dispense(ward, product, 11)).rejects.toMatchObject({
+        response: expect.objectContaining({
+          reason: 'INSUFFICIENT_AVAILABLE_STOCK',
+        }),
+      });
+      expect(await position(ward, product)).toEqual(before);
+    });
+
+    it('un id de reserva cualquiera (inexistente o de otro tenant) no exime: 404 uniforme', async () => {
+      const before = await position(ward, product);
+      const missing = await dispense(ward, product, 1, randomUUID()).catch(
+        (e) => e,
+      );
+      expect(missing.getStatus()).toBe(404);
+      // una reserva de otra organización: se crea en B por SQL
+      const foreignReservation = randomUUID();
+      await sql(
+        `insert into pharmacy_inventory.inventory_reservations
+           (id, pharmacy_id, pharmacy_site_id, reservation_status_concept_id, expires_at, created_at, updated_at)
+         values (?, ?, ?, ?, now() + interval '1 hour', now(), now())`,
+        [
+          foreignReservation,
+          randomUUID(),
+          pharmacySiteB,
+          PINV.RESERVATION_CONFIRMED,
+        ],
+      ).catch(() => undefined);
+      const foreign = await dispense(
+        ward,
+        product,
+        1,
+        foreignReservation,
+      ).catch((e) => e);
+      expect(foreign.getStatus()).toBe(404);
+      expect(foreign.response.reason).toBe(missing.response.reason);
+      expect(await position(ward, product)).toEqual(before);
+    });
+
+    it('reserva cancelada, consumida, de otro producto o con cantidad insuficiente: rechazada sin tocar el stock', async () => {
+      const cancelled = await reserve(ward, product, 2);
+      await sql(
+        `update pharmacy_inventory.inventory_reservations set reservation_status_concept_id = ? where id = ?`,
+        [PINV.RESERVATION_CANCELLED, cancelled],
+      );
+      const forOther = await reserve(ward, other, 2);
+      const before = await position(ward, product);
+      const rejected = await Promise.all([
+        dispense(ward, product, 1, cancelled).catch((e) => e),
+        dispense(ward, product, 1, forOther).catch((e) => e),
+      ]);
+      for (const failure of rejected) {
+        expect(failure.getStatus()).toBe(409);
+        expect(failure.response.reason).toBe('RESERVATION_NOT_APPLICABLE');
+      }
+      // el stock del producto reservado por la cancelada sigue como estaba
+      expect(await position(ward, product)).toEqual(before);
+    });
+
+    it('una reserva válida dispensa hasta lo reservado y queda consumida: no se reutiliza', async () => {
+      const id = await reserve(ward, product, 3);
+      const before = await position(ward, product);
+      await dispense(ward, product, 3, id);
+      const after = await position(ward, product);
+      expect(after.on_hand).toBe(before.on_hand - 3);
+      expect(after.reserved).toBe(before.reserved - 3);
+      const [res] = await sql(
+        `select reservation_status_concept_id from pharmacy_inventory.inventory_reservations where id = ?`,
+        [id],
+      );
+      expect(res.reservation_status_concept_id).toBe(
+        PINV.RESERVATION_FULFILLED,
+      );
+      const reuse = await dispense(ward, product, 1, id).catch((e) => e);
+      expect(reuse.response.reason).toBe('RESERVATION_NOT_APPLICABLE');
+      expect(await position(ward, product)).toEqual(after);
+    });
+
+    it('carrera real: varias dispensas contra la misma reserva, una gana y las otras no consumen nada', async () => {
+      const id = await reserve(ward, product, 4);
+      const before = await position(ward, product);
+      const results = await Promise.allSettled(
+        Array.from({ length: 6 }, () => dispense(ward, product, 4, id)),
+      );
+      const won = results.filter((r) => r.status === 'fulfilled');
+      const lost = results.filter(
+        (r): r is PromiseRejectedResult => r.status === 'rejected',
+      );
+      expect(won).toHaveLength(1);
+      expect(lost).toHaveLength(5);
+      for (const failure of lost) {
+        expect(failure.reason.response.reason).toBe(
+          'RESERVATION_NOT_APPLICABLE',
+        );
+      }
+      const after = await position(ward, product);
+      expect(after.on_hand).toBe(before.on_hand - 4);
+      expect(after.reserved).toBe(before.reserved - 4);
+      const [line] = await sql(
+        `select fulfilled_quantity::float as fulfilled from pharmacy_inventory.inventory_reservation_lines
+          where inventory_reservation_id = ?`,
+        [id],
+      );
+      expect(line.fulfilled).toBe(4);
     });
   });
 });

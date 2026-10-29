@@ -94,7 +94,16 @@ describe('botiquín de piso · available_quantity', () => {
         createLine: mockFn(() => ({ id: 'dl1' })),
         findByIdempotencyKey: mockFn(),
       };
+      const reservationRow = {
+        id: 'res-1',
+        pharmacyId: 'pharmacy-1',
+        pharmacySiteId: 'site-1',
+        reservationStatusConceptId: PINV.RESERVATION_CONFIRMED,
+        expiresAt: new Date(Date.now() + 3_600_000),
+        updatedAt: new Date(),
+      };
       const reservations = {
+        findByIdForUpdate: mockFn(async () => reservationRow),
         findById: mockFn(async () => ({
           id: 'res-1',
           pharmacyId: 'pharmacy-1',
@@ -141,15 +150,16 @@ describe('botiquín de piso · available_quantity', () => {
       );
     });
 
-    it('con la reserva que lo respalda rige la regla de siempre (no se debilita)', async () => {
-      // 10 en mano alcanzan para 5: la reserva se libera al dispensar.
-      await expect(
-        build(PINV.LOCATION_TYPE_WARD_STOCK).execute(
-          'pharmacy-1',
-          dto({ inventoryReservationId: 'res-1' }),
-          actor,
-        ),
-      ).resolves.toMatchObject({ id: 'disp1' });
+    it('una reserva que no tiene una línea para esta ubicación y producto no exime: 409', async () => {
+      // El id de una reserva cualquiera ya no salta la regla de disponible; los casos
+      // con reserva válida están en `ward-stock-reservation.spec.ts`.
+      const failure = await build(PINV.LOCATION_TYPE_WARD_STOCK)
+        .execute('pharmacy-1', dto({ inventoryReservationId: 'res-1' }), actor)
+        .catch((e: unknown) => e);
+      expect(failure).toBeInstanceOf(ConflictException);
+      expect((failure as any).response.reason).toBe(
+        R.RESERVATION_NOT_APPLICABLE,
+      );
     });
 
     it('desde un estante la dispensa conserva su regla (stock en mano)', async () => {

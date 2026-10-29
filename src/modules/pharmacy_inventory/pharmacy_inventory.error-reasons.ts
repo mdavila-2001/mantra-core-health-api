@@ -38,4 +38,6 @@ export enum PharmacyInventoryErrorReason {
   LOCATION_TYPE_INVALID = 'LOCATION_TYPE_INVALID',
   /** El botiquín no tiene `available_quantity` suficiente (las reservas no se rompen). */
   INSUFFICIENT_AVAILABLE_STOCK = 'INSUFFICIENT_AVAILABLE_STOCK',
+  /** La reserva indicada no respalda esta dispensa (no está activa, venció, se consumió o no tiene una línea igual). */
+  RESERVATION_NOT_APPLICABLE = 'RESERVATION_NOT_APPLICABLE',
 }
