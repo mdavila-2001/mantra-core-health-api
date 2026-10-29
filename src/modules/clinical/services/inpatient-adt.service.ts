@@ -37,7 +37,10 @@ import type {
   TransferDto,
 } from '../dto/adt.dto';
 import { Encounters } from '../entities';
-import { INFRA_F3_ACTIONS } from '../policies/infra-f3.policy';
+import {
+  INFRA_F3_ACTIONS,
+  type InfraF3Action,
+} from '../policies/infra-f3.policy';
 import {
   CARE_SPACE_OPS_PORT,
   type CareSpaceOperationalState,
@@ -456,11 +459,33 @@ export class InpatientAdtService {
       const tenantId = requireTenantId();
       const peek = await this.repo.findEncounter(tx, encounterId);
       if (!peek || peek.tenantId !== tenantId) throw this.notFound();
+      // Autoridad sobre la ubicación ACTUAL del encuentro antes de escribir nada:
+      // tener alcance sobre la cama destino no basta para tocar a un paciente ajeno.
+      await this.authorizeCurrent(
+        tx,
+        encounterId,
+        actor,
+        INFRA_F3_ACTIONS.ASSIGN_BED,
+      );
       const scope = await this.access.forSpace(tx, dto.careSpaceId, actor);
       this.access.assertCan(scope, INFRA_F3_ACTIONS.ASSIGN_BED);
 
       const encounter = await this.lockInpatient(tx, encounterId, tenantId);
       assertRowVersion(encounter.rowVersion, expectedVersion);
+      // Con el encuentro bloqueado la ubicación actual ya no puede cambiar.
+      const origin = await this.authorizeCurrent(
+        tx,
+        encounterId,
+        actor,
+        INFRA_F3_ACTIONS.ASSIGN_BED,
+      );
+      if (origin.location.practiceSiteId !== scope.siteId) {
+        throw new PreconditionFailedException(
+          'La cama es de otro establecimiento que el encuentro',
+          undefined,
+          ClinicalErrorReason.BED_SITE_MISMATCH,
+        );
+      }
       const at = this.occurredAt(dto.occurredAt, encounter.startAt);
 
       const locked = await this.repo.lockSpaces(tx, [dto.careSpaceId]);
@@ -602,6 +627,12 @@ export class InpatientAdtService {
       const tenantId = requireTenantId();
       const peek = await this.repo.findEncounter(tx, encounterId);
       if (!peek || peek.tenantId !== tenantId) throw this.notFound();
+      await this.authorizeCurrent(
+        tx,
+        encounterId,
+        actor,
+        INFRA_F3_ACTIONS.TRANSFER,
+      );
       const toScope = await this.access.forSpace(tx, dto.toCareSpaceId, actor);
       this.access.assertCan(toScope, INFRA_F3_ACTIONS.TRANSFER);
 
@@ -783,6 +814,10 @@ export class InpatientAdtService {
       for (const id of [dto.encounterAId, dto.encounterBId]) {
         const peek = await this.repo.findEncounter(tx, id);
         if (!peek || peek.tenantId !== tenantId) throw this.notFound();
+      }
+      // Alcance sobre AMBOS extremos antes de bloquear o escribir nada.
+      for (const id of [dto.encounterAId, dto.encounterBId]) {
+        await this.authorizeCurrent(tx, id, actor, INFRA_F3_ACTIONS.TRANSFER);
       }
       const locked = await this.repo.lockEncounters(tx, [
         dto.encounterAId,
@@ -1086,15 +1121,23 @@ export class InpatientAdtService {
       const tenantId = requireTenantId();
       const peek = await this.repo.findEncounter(tx, encounterId);
       if (!peek || peek.tenantId !== tenantId) throw this.notFound();
-      const anyLocation = await this.repo.anyLocation(tx, encounterId);
-      if (!anyLocation) throw this.notFound();
-      const scope = anyLocation.careSpaceId
-        ? await this.access.forSpace(tx, anyLocation.careSpaceId, actor)
-        : await this.access.forSite(tx, anyLocation.practiceSiteId, actor);
-      this.access.assertCan(scope, INFRA_F3_ACTIONS.DISCHARGE);
+      // La autoridad sale de la cama activa (o de la sede si espera cama): jamás
+      // de una reserva ni de una ubicación cancelada.
+      await this.authorizeCurrent(
+        tx,
+        encounterId,
+        actor,
+        INFRA_F3_ACTIONS.DISCHARGE,
+      );
 
       const encounter = await this.lockInpatient(tx, encounterId, tenantId);
       assertRowVersion(encounter.rowVersion, expectedVersion);
+      await this.authorizeCurrent(
+        tx,
+        encounterId,
+        actor,
+        INFRA_F3_ACTIONS.DISCHARGE,
+      );
 
       if (!dto.dischargeDispositionCode?.trim()) {
         throw new PreconditionFailedException(
@@ -1297,6 +1340,11 @@ export class InpatientAdtService {
           true,
         );
         if (!previous?.careSpaceId) throw this.notFound();
+        // Reabrir el origen toca esa cama: se exige alcance también sobre ella.
+        this.access.assertCan(
+          await this.access.forSpace(tx, previous.careSpaceId, actor),
+          INFRA_F3_ACTIONS.CANCEL,
+        );
         await this.repo.lockSpaces(tx, [
           previous.careSpaceId,
           location.careSpaceId!,
@@ -1728,6 +1776,31 @@ export class InpatientAdtService {
       firstRevision: operation === 'INSERT',
     });
     await tx.flush();
+  }
+
+  /**
+   * Alcance del actor sobre la ubicación **autoritativa** del encuentro (cama
+   * activa o, si espera cama, su sede) y exigencia de la acción ahí. Un encuentro
+   * sin ubicación autoritativa responde 404 uniforme.
+   *
+   * @param tx - Transacción.
+   * @param encounterId - Encuentro.
+   * @param actor - Quien opera.
+   * @param action - Acción que exige.
+   */
+  private async authorizeCurrent(
+    tx: EntityManager,
+    encounterId: string,
+    actor: AuthenticatedUser,
+    action: InfraF3Action,
+  ) {
+    // `historical`: un encuentro ya egresado conserva la autoridad de su última
+    // ocupación, para que el rechazo sea el de estado (409) y no un 404 engañoso.
+    const current = await this.access.forEncounter(tx, encounterId, actor, {
+      historical: true,
+    });
+    this.access.assertCan(current.scope, action);
+    return current;
   }
 
   /** Bloquea el encuentro y exige que sea una internación en curso. */

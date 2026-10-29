@@ -36,7 +36,7 @@ const long = 'Justificación clínica de al menos veinte caracteres.';
 
 function build() {
   // La política real: no se mockea, es lo que decide el 403.
-  const access = new AdtAccessService({} as any);
+  const access = new AdtAccessService({} as any, {} as any);
   const service = new BedCompatibilityService(
     {} as any,
     {} as any,

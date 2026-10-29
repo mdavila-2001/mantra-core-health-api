@@ -55,7 +55,6 @@ function build() {
     findEncounter: fn().mockResolvedValue(encounterRow()),
     lockEncounter: fn().mockResolvedValue(encounterRow()),
     lockEncounters: fn(),
-    anyLocation: fn().mockResolvedValue(location()),
     currentBed: fn().mockResolvedValue(location()),
     reservations: fn().mockResolvedValue([]),
     lockSpaces: fn().mockResolvedValue(new Map()),
@@ -68,6 +67,10 @@ function build() {
       tenantId: TENANT,
       siteId: 'site-1',
       practiceId: 'p',
+    }),
+    forEncounter: fn().mockResolvedValue({
+      scope: { tenantId: TENANT, siteId: 'site-1', practiceId: 'p' },
+      location: location(),
     }),
     assertCan: fn(),
   };
@@ -330,5 +333,143 @@ describe('InpatientAdtService · reglas que no necesitan la base', () => {
       details: { why: 'CLEANING_NOT_REVERTIBLE' },
     });
     expect(d.repo.closeLocation).not.toHaveBeenCalled();
+  });
+
+  describe('autoridad sobre la ubicación actual del encuentro', () => {
+    const notAllowed = () => {
+      const err: any = new Error('INFRA_ACTION_NOT_ALLOWED');
+      err.status = 403;
+      err.reason = 'INFRA_ACTION_NOT_ALLOWED';
+      return err;
+    };
+
+    it('egreso, asignación y traslado exigen la acción sobre la ubicación actual ANTES de bloquear o escribir', async () => {
+      const calls: [string, (s: InpatientAdtService) => Promise<unknown>][] = [
+        [
+          'DISCHARGE',
+          (s) =>
+            s.discharge(
+              'enc-1',
+              {
+                dischargeDispositionCode: 'DISP_HOME',
+                occurredAt: new Date().toISOString(),
+              } as any,
+              3,
+              actor,
+            ),
+        ],
+        [
+          'ASSIGN_BED',
+          (s) =>
+            s.assignBed(
+              'enc-1',
+              { careSpaceId: 'b2', mode: 'ASSIGN' } as any,
+              3,
+              actor,
+            ),
+        ],
+        [
+          'TRANSFER',
+          (s) =>
+            s.transfer(
+              'enc-1',
+              { toCareSpaceId: 'b2', reasonCode: 'XX' } as any,
+              3,
+              actor,
+            ),
+        ],
+      ];
+      for (const [, call] of calls) {
+        const d = build();
+        d.access.assertCan.mockImplementation(() => {
+          throw notAllowed();
+        });
+        await expect(run(() => call(d.service))).rejects.toMatchObject({
+          status: 403,
+        });
+        expect(d.access.forEncounter).toHaveBeenCalled();
+        expect(d.repo.lockEncounter).not.toHaveBeenCalled();
+        expect(d.repo.closeLocation).not.toHaveBeenCalled();
+      }
+    });
+
+    it('un encuentro sin ubicación autoritativa (sólo reservas) responde 404 y no se opera', async () => {
+      const calls: ((s: InpatientAdtService) => Promise<unknown>)[] = [
+        (s) =>
+          s.discharge(
+            'enc-1',
+            { dischargeDispositionCode: 'DISP_HOME' } as any,
+            3,
+            actor,
+          ),
+        (s) =>
+          s.assignBed(
+            'enc-1',
+            { careSpaceId: 'b2', mode: 'RESERVE' } as any,
+            3,
+            actor,
+          ),
+        (s) =>
+          s.transfer(
+            'enc-1',
+            { toCareSpaceId: 'b2', reasonCode: 'XX' } as any,
+            3,
+            actor,
+          ),
+      ];
+      for (const call of calls) {
+        const d = build();
+        const missing: any = new Error('fuera de alcance');
+        missing.status = 404;
+        d.access.forEncounter.mockRejectedValue(missing);
+        await expect(run(() => call(d.service))).rejects.toMatchObject({
+          status: 404,
+        });
+        expect(d.repo.lockEncounter).not.toHaveBeenCalled();
+      }
+    });
+
+    it('asignar una cama de otra sede que la del encuentro ⇒ 422 BED_SITE_MISMATCH sin escribir', async () => {
+      const d = build();
+      d.access.forSpace.mockResolvedValue({
+        tenantId: TENANT,
+        siteId: 'otra-sede',
+        practiceId: 'p',
+      });
+      await expect(
+        run(() =>
+          d.service.assignBed(
+            'enc-1',
+            { careSpaceId: 'b2', mode: 'ASSIGN' } as any,
+            3,
+            actor,
+          ),
+        ),
+      ).rejects.toMatchObject({ reason: 'BED_SITE_MISMATCH' });
+      expect(d.repo.lockSpaces).not.toHaveBeenCalled();
+      expect(d.repo.closeLocation).not.toHaveBeenCalled();
+    });
+
+    it('el intercambio exige alcance sobre los dos encuentros antes de bloquearlos', async () => {
+      const d = build();
+      d.access.forEncounter
+        .mockResolvedValueOnce({
+          scope: { tenantId: TENANT, siteId: 'site-1', practiceId: 'p' },
+          location: location(),
+        })
+        .mockRejectedValueOnce(
+          Object.assign(new Error('fuera de alcance'), { status: 404 }),
+        );
+      await expect(
+        run(() =>
+          d.service.swap(
+            { encounterAId: 'a', encounterBId: 'b', reasonText: 'x' } as any,
+            actor,
+          ),
+        ),
+      ).rejects.toMatchObject({ status: 404 });
+      expect(d.access.forEncounter).toHaveBeenCalledTimes(2);
+      expect(d.repo.lockEncounters).not.toHaveBeenCalled();
+    });
   });
 });

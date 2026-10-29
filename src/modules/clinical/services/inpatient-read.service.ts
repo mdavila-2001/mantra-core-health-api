@@ -244,11 +244,11 @@ export class InpatientReadService {
       const tenantId = requireTenantId();
       const encounter = await this.repo.findEncounter(tx, encounterId);
       if (!encounter || encounter.tenantId !== tenantId) throw this.notFound();
-      const last = await this.repo.anyLocation(tx, encounterId);
-      if (!last) throw this.notFound();
-      const scope = last.careSpaceId
-        ? await this.access.forSpace(tx, last.careSpaceId, actor)
-        : await this.access.forSite(tx, last.practiceSiteId, actor);
+      // Autoridad: cama activa o sede de espera; si ya egresó, su última ocupación.
+      // Nunca una reserva o una fila cancelada, que otro actor pudo crear.
+      const { scope } = await this.access.forEncounter(tx, encounterId, actor, {
+        historical: true,
+      });
       this.access.assertCan(scope, INFRA_F3_ACTIONS.INPATIENT_VIEW);
 
       const [header] = await tx.execute<
