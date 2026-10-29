@@ -35,6 +35,8 @@ import {
   ClinicalPrescriptionsController,
   ClinicalPrescriptionsPublicController,
   ClinicalPrescriptionExpiryController,
+  ClinicalAdtController,
+  ClinicalCensusController,
 } from './controllers';
 import { ClinicalRecordAccessGuard } from './guards';
 import {
@@ -68,6 +70,15 @@ import {
   PerformerSiteReader,
   SuggestedSiteNamesReader,
   ServiceRequestNotesService,
+  AdtAccessService,
+  AdtEventsService,
+  AdtSettingsService,
+  BedCompatibilityService,
+  InpatientAdtService,
+  InpatientReadService,
+  InpatientCensusService,
+  InpatientIndicatorsService,
+  ClinicalRetireBlockersInitializer,
 } from './services';
 import { PerformerSiteDbReader } from './services/performer-site-db.reader';
 import {
@@ -156,6 +167,20 @@ import { DataAccessLogRepository } from '../audit/repositories';
 // La comprobación vive en `forms` y es una clase sin estado por `EntityManager`:
 // se provee suelta, sin importar `FormsModule` entero, igual que el resto.
 import { FormInstanceOriginValidator } from '../forms/services/form-instance-origin.validator';
+// F3 de infraestructura (internación / ADT). `practice` expone el registro de
+// bloqueos de clausura y el puerto de operación de camas es suyo (F2): `practice`
+// no importa `clinical`, así que no hay ciclo. La política de F3 reutiliza el
+// nivel de acceso a la estructura (`StructureAccessService`) y sus dos
+// colaboradores sin estado.
+import { PracticeModule } from '../practice/practice.module';
+import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
+import { StructureAccessService } from '../practice/services/structure-access.service';
+import { BranchMembershipsRepository } from '../directory/repositories/branch-memberships.repository';
+import {
+  CARE_SPACE_OPS_PORT,
+  UnavailableCareSpaceOps,
+} from './ports/care-space-ops.port';
+import { AdtRepository } from './repositories/adt.repository';
 
 /**
  * Módulo Clinical (08): registro clínico nuclear, órdenes y logística del
@@ -171,6 +196,8 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     CommonModule,
     AuthzModule,
     TerminologyModule,
+    PracticeModule,
+    DirectoryAuthorizationModule,
   ],
   controllers: [
     ClinicalEncountersController,
@@ -191,6 +218,10 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     // PAC-REC-002: `POST /clinical/internal/prescription-expiry-notices` (SYSTEM), el
     // disparador que llama el worker de `messaging`.
     ClinicalPrescriptionExpiryController,
+    // F3 de infraestructura: ingreso/traslado/intercambio/egreso, censo diario e
+    // indicadores de cama.
+    ClinicalAdtController,
+    ClinicalCensusController,
   ],
   providers: [
     // Repositorios
@@ -262,6 +293,24 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     ClinicalRecordAccessGuard,
     PrescriptionPdfService,
     DuplicateStudyDetector,
+    // --- Internación / ADT (F3) ---
+    AdtRepository,
+    StructureAccessService,
+    BranchMembershipsRepository,
+    AdtAccessService,
+    AdtEventsService,
+    AdtSettingsService,
+    BedCompatibilityService,
+    InpatientAdtService,
+    InpatientReadService,
+    InpatientCensusService,
+    InpatientIndicatorsService,
+    ClinicalRetireBlockersInitializer,
+    // Puerto de operación de camas (CONTRATO-F2-F5 F2.3). Hasta que `practice`
+    // publique su implementación, el proveedor por omisión falla cerrado (503):
+    // una cama cuyo estado no se puede leer no se asigna. El integrador lo
+    // reemplaza por el servicio de F2; las pruebas, por el doble de `test/doubles`.
+    { provide: CARE_SPACE_OPS_PORT, useClass: UnavailableCareSpaceOps },
   ],
   // `procedures_perioperative` los usa para que el caso quirúrgico pueda dejar
   // su diagnóstico y su procedimiento en la historia sin escribir estas tablas:
