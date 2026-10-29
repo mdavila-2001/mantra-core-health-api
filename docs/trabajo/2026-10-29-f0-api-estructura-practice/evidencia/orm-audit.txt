@@ -1,0 +1,35 @@
+{
+  "entidadesBoveda": 1331,
+  "conjuntosDeIndicesBoveda": 1220,
+  "entidadesMapeadas": 1265,
+  "entidadesFaltantes": 0,
+  "entidadesSobrantes": 79,
+  "columnasFaltantes": 0,
+  "columnasSobrantes": 97,
+  "tiposDivergentes": 0,
+  "obligatoriedadDivergente": 23,
+  "vistasNoMaterializadas": 78,
+  "indicesDeclarados": 7733,
+  "indicesEnCatalogo": 7676,
+  "fkDeclaradas": 6621,
+  "fkEnCatalogo": 6621
+}
+
+Informe completo: fidelity-audit.json
+EXIT=0
+resumen antes : {"entidadesBoveda": 1331, "conjuntosDeIndicesBoveda": 1220, "entidadesMapeadas": 1265, "entidadesFaltantes": 0, "entidadesSobrantes": 79, "columnasFaltantes": 0, "columnasSobrantes": 84, "tiposDivergentes": 0, "obligatoriedadDivergente": 23, "vistasNoMaterializadas": 78, "indicesDeclarados": 7733, "indicesEnCatalogo": 7676, "fkDeclaradas": 6621, "fkEnCatalogo": 6621}
+resumen despues: {"entidadesBoveda": 1331, "conjuntosDeIndicesBoveda": 1220, "entidadesMapeadas": 1265, "entidadesFaltantes": 0, "entidadesSobrantes": 79, "columnasFaltantes": 0, "columnasSobrantes": 97, "tiposDivergentes": 0, "obligatoriedadDivergente": 23, "vistasNoMaterializadas": 78, "indicesDeclarados": 7733, "indicesEnCatalogo": 7676, "fkDeclaradas": 6621, "fkEnCatalogo": 6621}
+columnasSobrantes nuevas (vault sin estas columnas; el modelo .puml/SQL si las tiene):
+  directory.branch_memberships workday_concept_id
+  directory.branch_memberships responsible_user_id
+  directory.tenant_memberships workday_concept_id
+  directory.tenant_memberships responsible_user_id
+  practice.care_spaces prep_minutes
+  practice.care_spaces cleanup_minutes
+  practice.clinical_units responsible_user_id
+  practice.healthcare_services service_catalog_id
+  practice.practice_sites logo_file_id
+  procedures_perioperative.procedure_case_team_members accepted_version_number
+  procedures_perioperative.procedure_cases prep_minutes
+  procedures_perioperative.procedure_cases cleanup_minutes
+  procedures_perioperative.procedure_cases version_number
