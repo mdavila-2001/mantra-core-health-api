@@ -27,6 +27,7 @@ export function profilesRegistration(
     | 'contactPoints'
     | 'administrativeAreas'
     | 'specialtyCatalog'
+    | 'admissions'
   >,
 ): ProfilesRegistrationAdapter {
   const pick = (key: keyof typeof d): never => (d[key] ?? blank()) as never;
@@ -45,6 +46,10 @@ export function profilesRegistration(
     pick('contactPoints'),
     pick('administrativeAreas'),
     pick('specialtyCatalog'),
+    // v4.2.67: la solicitud de admisión nace en la misma transacción del alta.
+    (d.admissions ?? {
+      openForRegistration: () => Promise.resolve({}),
+    }) as never,
   );
 }
 
