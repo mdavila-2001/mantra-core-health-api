@@ -14,7 +14,12 @@ import type {
   RegisterPractitionerDto,
   RegisterPatientDto,
 } from '../../modules/iam/presentation/dto';
-import { PersonAccountLinks } from '../../modules/profiles/entities';
+import {
+  JurisdictionAuthorizations,
+  PatientProfiles,
+  PersonAccountLinks,
+  Persons,
+} from '../../modules/profiles/entities';
 import { PROF } from '../../modules/profiles/profiles.concepts';
 import { tableRows, column, type MarkdownTableRow } from './markdown-table';
 import { demoGateSkip } from './demo-gate';
@@ -39,8 +44,15 @@ const PATIENTS_FILE = 'USUARIO_PACIENTES_1.md';
 export interface PeopleSeedResult {
   practitionersCreated: number;
   practitionersExisting: number;
+  /**
+   * Médicos de una carga anterior que se tomaron como propios: misma matrícula
+   * del Ministerio y mismo nombre, aunque su cuenta tenga otro correo.
+   */
+  practitionersAdopted: number;
   patientsCreated: number;
   patientsExisting: number;
+  /** Pacientes de una carga anterior tomados como propios por su nombre completo. */
+  patientsAdopted: number;
   /** Vitrinas públicas de médicos creadas en esta pasada. */
   showcasesCreated: number;
   /** Filas del padrón con nombre, que no alcanzaron a darse de alta. */
@@ -55,6 +67,30 @@ interface PractitionerOutcome {
   outcome: string;
   userId?: string;
   practitionerProfileId?: string;
+}
+
+/** Nombre completo normalizado: la clave con que se reconoce a una persona ya cargada. */
+function nameKey(person: {
+  name?: string;
+  middleName?: string;
+  lastName?: string;
+  motherLastName?: string;
+}): string {
+  return [
+    person.name,
+    person.middleName,
+    person.lastName,
+    person.motherLastName,
+  ]
+    .map((part) =>
+      (part ?? '')
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toUpperCase()
+        .replace(/\s+/g, ' ')
+        .trim(),
+    )
+    .join('|');
 }
 
 interface CommonCandidate {
@@ -129,8 +165,10 @@ export class PeopleSeedService {
     const empty: PeopleSeedResult = {
       practitionersCreated: 0,
       practitionersExisting: 0,
+      practitionersAdopted: 0,
       patientsCreated: 0,
       patientsExisting: 0,
+      patientsAdopted: 0,
       showcasesCreated: 0,
       skipped: [],
     };
@@ -178,6 +216,7 @@ export class PeopleSeedService {
     }
 
     const result: PeopleSeedResult = { ...empty };
+    this.patientPool = undefined;
 
     for (const [i, row] of tableRows(textDoctors).entries()) {
       const candidate = this.commonCandidate(row, DOCTORS_FILE, i);
@@ -214,11 +253,20 @@ export class PeopleSeedService {
       const created = await this.registrationPractitioner(dto);
       if (created.outcome === 'created') result.practitionersCreated++;
       else if (created.outcome === 'existing') result.practitionersExisting++;
+      else if (created.outcome === 'adopted') result.practitionersAdopted++;
       else {
         result.skipped.push(`${DOCTORS_FILE}#${i}: ${created.outcome}`);
         continue;
       }
       await this.ensureShowcase(created, dto, result);
+    }
+
+    // Las cédulas sintéticas de todo el archivo: quien entra con una de ellas ya
+    // es una fila de este paso, no una cuenta de una carga anterior.
+    const ownSubjects = new Set<string>();
+    for (const [i, row] of tableRows(textPatients).entries()) {
+      const candidate = this.commonCandidate(row, PATIENTS_FILE, i);
+      if (candidate) ownSubjects.add(syntheticNationalId(candidate.key));
     }
 
     for (const [i, row] of tableRows(textPatients).entries()) {
@@ -246,9 +294,10 @@ export class PeopleSeedService {
         occupationFreeText: occupation ? occupation.slice(0, 120) : undefined,
       };
 
-      const created = await this.registrationPatient(dto);
+      const created = await this.registrationPatient(dto, ownSubjects);
       if (created === 'created') result.patientsCreated++;
       else if (created === 'existing') result.patientsExisting++;
+      else if (created === 'adopted') result.patientsAdopted++;
       else result.skipped.push(`${PATIENTS_FILE}#${i}: ${created}`);
     }
 
@@ -257,8 +306,10 @@ export class PeopleSeedService {
         operation: 'seed.people',
         practitionersCreated: result.practitionersCreated,
         practitionersExisting: result.practitionersExisting,
+        practitionersAdopted: result.practitionersAdopted,
         patientsCreated: result.patientsCreated,
         patientsExisting: result.patientsExisting,
+        patientsAdopted: result.patientsAdopted,
         showcasesCreated: result.showcasesCreated,
         skippedCount: result.skipped.length,
       },
@@ -325,6 +376,8 @@ export class PeopleSeedService {
     if (previous) {
       return { outcome: 'existing', ...(await this.idsOf(previous.userId)) };
     }
+    const adopted = await this.adoptPractitioner(dto);
+    if (adopted) return adopted;
     try {
       const registered =
         await this.practitionerRegistration.registerPractitioner(dto);
@@ -342,6 +395,46 @@ export class PeopleSeedService {
       );
       return { outcome: message };
     }
+  }
+
+  /**
+   * Reconoce a un médico de una carga anterior: misma matrícula del Ministerio
+   * y mismo nombre completo. Dev y test se cargaron con otro generador de
+   * correos, así que su cuenta no se encuentra por el correo sintético; la
+   * matrícula es la credencial profesional y no cambia.
+   *
+   * @returns El médico adoptado (`adopted`), un aviso si la matrícula y el
+   *   nombre coinciden con más de una persona (no se crea otro), o `undefined`
+   *   si no hay ninguno.
+   */
+  private async adoptPractitioner(
+    dto: RegisterPractitionerDto,
+  ): Promise<PractitionerOutcome | undefined> {
+    const em = this.orm.em.fork();
+    const licenses = await em.find(JurisdictionAuthorizations, {
+      licenseNumber: dto.licenseNumber,
+    });
+    if (licenses.length === 0) return undefined;
+    const persons = await em.find(Persons, {
+      id: { $in: [...new Set(licenses.map((l) => l.practitionerProfileId))] },
+    });
+    const wanted = nameKey(dto);
+    const same = persons.filter((person) => nameKey(person) === wanted);
+    if (same.length === 0) return undefined;
+    if (same.length > 1) {
+      return {
+        outcome: `la matrícula ${dto.licenseNumber} y el nombre coinciden con más de una persona: no se crea otra`,
+      };
+    }
+    const link = await em.findOne(PersonAccountLinks, {
+      personId: same[0].id,
+      statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+    });
+    return {
+      outcome: 'adopted',
+      userId: link?.userId,
+      practitionerProfileId: same[0].id,
+    };
   }
 
   /** Cuenta y perfil profesional de un médico ya dado de alta. */
@@ -395,9 +488,77 @@ export class PeopleSeedService {
     }
   }
 
-  /** Devuelve 'created', 'existing' o el mensaje del error si no se pudo dar de alta. */
-  private async registrationPatient(dto: RegisterPatientDto): Promise<string> {
+  /**
+   * Pacientes de una carga anterior aún sin reclamar por una fila, por nombre
+   * completo normalizado → cuántos quedan. Se carga una vez por corrida.
+   */
+  private patientPool?: Map<string, number>;
+
+  /**
+   * Los pacientes con cuenta que no son de este paso: sin los que entran con la
+   * cédula sintética de alguna fila. Un paciente es la persona de un perfil de
+   * paciente con un vínculo de cuenta activo.
+   */
+  private async loadPatientPool(
+    ownSubjects: ReadonlySet<string>,
+  ): Promise<Map<string, number>> {
+    const em = this.orm.em.fork();
+    const profiles = await em.find(PatientProfiles, {});
+    const personIds = profiles.map((p) => p.profileId);
+    if (personIds.length === 0) return new Map();
+    const persons = await em.find(Persons, { id: { $in: personIds } });
+    const links = await em.find(PersonAccountLinks, {
+      personId: { $in: personIds },
+      statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+    });
+    const credentials = await em.find(AuthenticationCredentials, {
+      userId: { $in: links.map((l) => l.userId) },
+    });
+    const ownUsers = new Set(
+      credentials
+        .filter((c) => ownSubjects.has(c.externalSubject ?? ''))
+        .map((c) => c.userId),
+    );
+    const adoptable = new Set(
+      links.filter((l) => !ownUsers.has(l.userId)).map((l) => l.personId),
+    );
+    const pool = new Map<string, number>();
+    for (const person of persons) {
+      if (!adoptable.has(person.id)) continue;
+      const key = nameKey(person);
+      pool.set(key, (pool.get(key) ?? 0) + 1);
+    }
+    return pool;
+  }
+
+  /**
+   * Reconoce a un paciente de una carga anterior por su nombre completo.
+   *
+   * Es lo único estable: la cédula y el correo de esas cuentas se reemplazaron
+   * por otros valores inventados. Cada persona ya cargada responde por una sola
+   * fila (el conteo baja al adoptarla), así que dos filas con el mismo nombre
+   * no se funden en una. No distingue por municipio: el perfil de paciente no
+   * lo guarda donde el paso pueda leerlo de forma fiable.
+   */
+  private async adoptPatient(
+    dto: RegisterPatientDto,
+    ownSubjects: ReadonlySet<string>,
+  ): Promise<boolean> {
+    this.patientPool ??= await this.loadPatientPool(ownSubjects);
+    const key = nameKey(dto);
+    const left = this.patientPool.get(key) ?? 0;
+    if (left === 0) return false;
+    this.patientPool.set(key, left - 1);
+    return true;
+  }
+
+  /** Devuelve 'created', 'existing', 'adopted' o el mensaje del error si no se pudo dar de alta. */
+  private async registrationPatient(
+    dto: RegisterPatientDto,
+    ownSubjects: ReadonlySet<string>,
+  ): Promise<string> {
     if (await this.existsCredential(dto.nationalId)) return 'existing';
+    if (await this.adoptPatient(dto, ownSubjects)) return 'adopted';
     try {
       await this.patientRegistration.registerPatient(dto);
       return 'created';

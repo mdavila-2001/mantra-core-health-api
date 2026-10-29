@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { MikroORM } from '@mikro-orm/postgresql';
+import { MikroORM, type EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 
 import { deterministicId, SEED } from '../constants/concepts';
@@ -7,6 +7,7 @@ import { runWithTenant } from '../tenant/tenant-context';
 import { AuthenticationCredentials } from '../../modules/iam/entities';
 import { IamUsersService } from '../../modules/iam/application/services';
 import { TenantMemberships } from '../../modules/directory/entities';
+import { DIR } from '../../modules/directory/directory.concepts';
 import { DirectoryMembershipsService } from '../../modules/directory/services';
 import {
   BOLIVIA_CARRIERS,
@@ -35,6 +36,12 @@ export interface PadronOrgAdminsResult {
   created: number;
   /** Cuentas que ya estaban. */
   existing: number;
+  /**
+   * Organizaciones que ya tenían un administrador de demostración (una cuenta
+   * `@alovida.test` con membresía `ADMIN` activa) de una carga anterior, y por
+   * eso no recibieron otro.
+   */
+  adopted: number;
   /** Membresías ADMIN creadas. */
   memberships: number;
   /** Organizaciones que todavía no existen: su administrador espera al paso de organizaciones. */
@@ -125,6 +132,7 @@ export class PadronOrgAdminsSeedService {
     const result: PadronOrgAdminsResult = {
       created: 0,
       existing: 0,
+      adopted: 0,
       memberships: 0,
       organizationMissing: 0,
       failed: [],
@@ -144,11 +152,13 @@ export class PadronOrgAdminsSeedService {
     await ensureSeedActor(em);
     const actor = { id: SEED_ACTOR_ID, roles: ['SECURITY_ADMIN'] };
 
+    let attempted = 0;
     for (const target of await this.targets()) {
       if (!target.tenantId) {
         result.organizationMissing++;
         continue;
       }
+      attempted++;
       try {
         await this.ensureAdmin(
           target,
@@ -160,7 +170,7 @@ export class PadronOrgAdminsSeedService {
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         result.failed.push(`${target.slug}: ${message}`);
-        this.logger.warn(
+        this.logger.error(
           {
             operation: 'seed.padron-org-admins',
             slug: target.slug,
@@ -176,12 +186,20 @@ export class PadronOrgAdminsSeedService {
         operation: 'seed.padron-org-admins',
         created: result.created,
         existing: result.existing,
+        adopted: result.adopted,
         memberships: result.memberships,
         organizationMissing: result.organizationMissing,
         failed: result.failed.length,
       },
       'Administradores de organizaciones sembrados',
     );
+    // Una cuenta que falla es puntual y no detiene a las demás; que fallen
+    // todas es una falla sistémica y el paso tiene que salir como fallido.
+    if (attempted > 0 && result.failed.length === attempted) {
+      throw new Error(
+        `Fallaron las ${attempted} cuentas de administrador; la primera: ${result.failed[0]}`,
+      );
+    }
     return result;
   }
 
@@ -211,6 +229,27 @@ export class PadronOrgAdminsSeedService {
     return [...fromPadron, ...fromInsurers];
   }
 
+  /**
+   * Si la organización ya tiene un administrador de demostración: una
+   * membresía `ADMIN` activa cuyo usuario entra con un correo `@alovida.test`.
+   */
+  private async hasDemoAdmin(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<boolean> {
+    const admins = await em.find(TenantMemberships, {
+      tenantId,
+      tenantRoleConceptId: DIR.ROLE_ADMIN,
+      statusConceptId: DIR.MEMBERSHIP_ACTIVE,
+    });
+    if (admins.length === 0) return false;
+    const demo = await em.find(AuthenticationCredentials, {
+      userId: { $in: admins.map((m) => m.userId) },
+      externalSubject: { $ilike: `%@${DEMO_EMAIL_DOMAIN}` },
+    });
+    return demo.length > 0;
+  }
+
   private async ensureAdmin(
     target: AdminTarget,
     tenantId: string,
@@ -224,6 +263,13 @@ export class PadronOrgAdminsSeedService {
     const credential = await em.findOne(AuthenticationCredentials, {
       externalSubject: email,
     });
+    // Dev y test se cargaron con scripts que dejaron sus propios administradores
+    // y después se les cambió el correo: la cuenta sintética no existe, pero la
+    // organización ya tiene un administrador de demostración. No se crea otro.
+    if (!credential && (await this.hasDemoAdmin(em, tenantId))) {
+      result.adopted++;
+      return;
+    }
     let userId = credential?.userId;
     if (userId) {
       result.existing++;

@@ -21,6 +21,11 @@ const OPEN: DemoGateEnv = {
 interface Existing {
   credentials?: string[];
   memberships?: boolean;
+  /**
+   * Organizaciones con un administrador de una carga anterior: su membresía
+   * ADMIN activa y el correo con que ese usuario entra.
+   */
+  legacyAdmins?: { tenantIds: string[]; email: string };
 }
 
 function build(existing: Existing = {}) {
@@ -38,6 +43,24 @@ function build(existing: Existing = {}) {
       }
       // El actor semilla.
       return Promise.resolve({ id: SEED_ACTOR_ID });
+    }),
+    find: jest.fn((entity: unknown, where: any) => {
+      const legacy = existing.legacyAdmins;
+      if (!legacy) return Promise.resolve([]);
+      if (entity === TenantMemberships) {
+        return Promise.resolve(
+          legacy.tenantIds.includes(where.tenantId)
+            ? [{ userId: 'legacy-admin' }]
+            : [],
+        );
+      }
+      if (entity === AuthenticationCredentials) {
+        const suffix = String(where.externalSubject.$ilike).replace('%', '');
+        return Promise.resolve(
+          legacy.email.endsWith(suffix) ? [{ userId: 'legacy-admin' }] : [],
+        );
+      }
+      return Promise.resolve([]);
     }),
     create: jest.fn(),
     flush: jest.fn(() => Promise.resolve()),
@@ -64,7 +87,12 @@ function build(existing: Existing = {}) {
       }),
     ),
   };
-  const logger = { setContext: jest.fn(), info: jest.fn(), warn: jest.fn() };
+  const logger = {
+    setContext: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
   const service = new PadronOrgAdminsSeedService(
     orm as never,
     users as never,
@@ -72,7 +100,7 @@ function build(existing: Existing = {}) {
     organizations as never,
     logger as never,
   );
-  return { service, em, users, memberships, organizations };
+  return { service, em, users, memberships, organizations, logger };
 }
 
 const calls = (mock: jest.Mock<(...args: any[]) => any>): any[][] =>
@@ -212,5 +240,63 @@ describe('PadronOrgAdminsSeedService', () => {
 
     expect(result.failed).toHaveLength(1);
     expect(result.created).toBe(93);
+  });
+
+  it('registra la cuenta fallida con error', async () => {
+    const { service, users, logger } = build();
+    users.createUser.mockImplementationOnce(() =>
+      Promise.reject(new Error('boom')),
+    );
+
+    await service.run(OPEN, true);
+
+    expect(logger.error).toHaveBeenCalledTimes(1);
+  });
+
+  it('si fallan todas las cuentas es una falla sistémica y el paso falla', async () => {
+    const { service, users } = build();
+    users.createUser.mockImplementation(() =>
+      Promise.reject(new Error('sin base')),
+    );
+
+    await expect(service.run(OPEN, true)).rejects.toThrow(
+      /Fallaron las 94.*sin base/,
+    );
+  });
+
+  describe('adopción de los administradores de una carga anterior', () => {
+    const clinic = padronFacilities().find(
+      (r) => r.tipo === 'CLINICA_PRIVADA',
+    )!;
+
+    it('una organización con un administrador @alovida.test no recibe otro', async () => {
+      const { service, users, memberships } = build({
+        legacyAdmins: {
+          tenantIds: [padronTenantId(clinic.code)],
+          email: 'admin.clinica@alovida.test',
+        },
+      });
+
+      const result = await service.run(OPEN, true);
+
+      expect(result.adopted).toBe(1);
+      expect(result.created).toBe(93);
+      expect(users.createUser).toHaveBeenCalledTimes(93);
+      expect(memberships.invite).toHaveBeenCalledTimes(93);
+    });
+
+    it('un administrador con un correo que no es de pruebas no cuenta como adoptado', async () => {
+      const { service, users } = build({
+        legacyAdmins: {
+          tenantIds: [padronTenantId(clinic.code)],
+          email: 'alguien@persona-real.com',
+        },
+      });
+
+      const result = await service.run(OPEN, true);
+
+      expect(result.adopted).toBe(0);
+      expect(users.createUser).toHaveBeenCalledTimes(94);
+    });
   });
 });
