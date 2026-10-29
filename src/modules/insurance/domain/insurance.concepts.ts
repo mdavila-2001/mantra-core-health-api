@@ -200,6 +200,24 @@ export const { seeds: INSURANCE_CONCEPT_SEEDS, ids: INS } =
       code: 'DISPUTE_REASON_UNDERPAID',
       display: 'Motivo: pago insuficiente',
     },
+    // Objeción del paciente a un cobro (carril 16, REQ-16-032). Mientras esté
+    // abierta, el cobro de esa factura queda en pausa.
+    DISPUTE_TYPE_PATIENT_OBJECTION: {
+      code: 'DISPUTE_TYPE_PATIENT_OBJECTION',
+      display: 'Tipo: objeción del paciente',
+    },
+    DISPUTE_REASON_CHARGE_AMOUNT: {
+      code: 'DISPUTE_REASON_CHARGE_AMOUNT',
+      display: 'Motivo: el importe cobrado no coincide',
+    },
+    DISPUTE_REASON_SERVICE_NOT_RECEIVED: {
+      code: 'DISPUTE_REASON_SERVICE_NOT_RECEIVED',
+      display: 'Motivo: servicio no recibido',
+    },
+    DISPUTE_REASON_NOT_INFORMED: {
+      code: 'DISPUTE_REASON_NOT_INFORMED',
+      display: 'Motivo: cobro no informado previamente',
+    },
     PARTY_PROVIDER: { code: 'PARTY_PROVIDER', display: 'Parte: prestador' },
     PARTY_PATIENT: { code: 'PARTY_PATIENT', display: 'Parte: paciente' },
     APPEAL_LEVEL_FIRST: {

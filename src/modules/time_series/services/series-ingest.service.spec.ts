@@ -9,6 +9,8 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { SeriesIngestService } from './series-ingest.service';
+import { TimeSeriesErrorReason } from '../time_series.error-reasons';
+import { DomainException, ErrorCode, runWithTenant } from '../../../common';
 
 const actor = { id: 'user-1', roles: ['INGEST_GATEWAY'] } as any;
 const TENANT_ID = '11111111-1111-1111-1111-111111111111';
@@ -37,15 +39,17 @@ function build() {
   const outbox = {
     publishDomainEvent: mockFn(async () => ({ duplicate: false })),
   };
+  const locationConsent = { assertAllowed: mockFn(async () => undefined) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new SeriesIngestService(
     em as any,
     ingestRepo as any,
     outbox as any,
+    locationConsent as any,
     logger as any,
   );
-  return { service, em, tx, ingestRepo, outbox, logger };
+  return { service, em, tx, ingestRepo, outbox, locationConsent, logger };
 }
 
 describe('SeriesIngestService', () => {
@@ -279,21 +283,43 @@ describe('SeriesIngestService', () => {
           latitude: 40.4,
           longitude: -3.7,
         },
+        {
+          time: '2026-01-01T00:05:00.000Z',
+          subjectType: 'courier',
+          subjectId: DEVICE_ID,
+          latitude: 40.5,
+          longitude: -3.7,
+        },
       ],
     } as any;
 
-    it('inserta el ping', async () => {
+    /** Ingesta dentro del contexto del tenant, como lo deja el interceptor. */
+    const ingest = (d: ReturnType<typeof build>, dto = DTO) =>
+      runWithTenant(TENANT_ID, () =>
+        d.service.batchIngestLocationPings(dto, actor),
+      );
+
+    it('inserta los pings tras autorizar el consentimiento', async () => {
       const d = build();
 
-      const result = await d.service.batchIngestLocationPings(DTO, actor);
+      const result = await ingest(d);
 
-      expect(result.rowsIngested).toBe(1);
+      expect(result.rowsIngested).toBe(2);
+      expect(d.locationConsent.assertAllowed).toHaveBeenCalledWith(d.tx, {
+        tenantId: TENANT_ID,
+        consentId: '77777777-7777-7777-7777-777777777777',
+        subjectIds: [DEVICE_ID],
+        capturedFrom: new Date('2026-01-01T00:00:00.000Z'),
+        capturedTo: new Date('2026-01-01T00:05:00.000Z'),
+        now: expect.any(Date),
+      });
+      expect(d.ingestRepo.createLocationPing).toHaveBeenCalledTimes(2);
     });
 
     it('el consentimiento viaja en el evento publicado', async () => {
       const d = build();
 
-      await d.service.batchIngestLocationPings(DTO, actor);
+      await ingest(d);
 
       expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
         d.tx,
@@ -304,6 +330,56 @@ describe('SeriesIngestService', () => {
           }),
         }),
       );
+    });
+
+    it('el tenant sale del contexto y no del cuerpo', async () => {
+      const d = build();
+      const OTHER = '99999999-9999-9999-9999-999999999999';
+
+      await ingest(d, { ...DTO, tenantId: OTHER });
+
+      expect(d.locationConsent.assertAllowed).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: TENANT_ID }),
+      );
+      expect(d.ingestRepo.createLocationPing).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: TENANT_ID }),
+      );
+    });
+
+    it('sin tenant en el contexto exige uno y no consulta ni inserta nada', async () => {
+      const d = build();
+
+      await expect(
+        d.service.batchIngestLocationPings(DTO, actor),
+      ).rejects.toMatchObject({ status: 422 });
+
+      expect(d.locationConsent.assertAllowed).not.toHaveBeenCalled();
+      expect(d.ingestRepo.createLocationPing).not.toHaveBeenCalled();
+    });
+
+    it('consentimiento rechazado: no se persiste coordenada, métrica ni evento', async () => {
+      const d = build();
+      d.locationConsent.assertAllowed.mockRejectedValue(
+        new DomainException(
+          403,
+          ErrorCode.FORBIDDEN,
+          'no válido',
+          undefined,
+          TimeSeriesErrorReason.LOCATION_CONSENT_INVALID,
+        ),
+      );
+
+      await expect(ingest(d)).rejects.toMatchObject({
+        status: 403,
+        code: 'FORBIDDEN',
+        reason: 'TIME_SERIES_LOCATION_CONSENT_INVALID',
+      });
+
+      expect(d.ingestRepo.createLocationPing).not.toHaveBeenCalled();
+      expect(d.ingestRepo.createPipelineMetric).not.toHaveBeenCalled();
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
     });
   });
 

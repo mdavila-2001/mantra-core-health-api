@@ -1,4 +1,8 @@
-import { Injectable, type OnApplicationBootstrap } from '@nestjs/common';
+import {
+  Injectable,
+  Optional,
+  type OnApplicationBootstrap,
+} from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { AuthzClinicalRolesSeedService } from './authz-clinical-roles-seed.service';
 import { AuthzPlatformPermissionsSeedService } from './authz-platform-permissions-seed.service';
@@ -10,6 +14,7 @@ import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.servi
 import { TelemetryUxHeatmapSeedService } from './telemetry-ux-heatmap-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
+import { AdminDivisionsSeedService } from './admin-divisions-seed.service';
 import { LegalEntityTypesSeedService } from './legal-entity-types-seed.service';
 import { AffiliationCatalogsSeedService } from './affiliation-catalogs-seed.service';
 import { BoEmployersSeedService } from './bo-employers-seed.service';
@@ -25,10 +30,12 @@ import { StickerPackSeedService } from './sticker-pack-seed.service';
 import { VademecumSeedService } from './vademecum-seed.service';
 import { TerminologySeedService } from './terminology-seed.service';
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
+import { BoMedicalSpecialtiesSeedService } from './bo-medical-specialties-seed.service';
 import { PracticeDefaultServicesSeedService } from './practice-default-services-seed.service';
 import { PeopleSeedService } from './people-seed.service';
 import { DirectoryNetworksSeedService } from './directory-networks-seed.service';
-import { loadSeedBootEnv } from './seed-boot.env';
+import { isCoreSeedFailureFatal, loadSeedBootEnv } from './seed-boot.env';
+import { SeedCoreState } from './seed-core.state';
 
 /** Resultado de un paso de la cadena, ya medido. */
 export interface SeedStepResult {
@@ -61,6 +68,13 @@ export interface SeedRunSummary {
    * normal: quien lo lea con el contenido encendido ve exactamente lo de antes.
    */
   skippedContent?: number;
+  /**
+   * Nombres de los pasos `core` que fallaron (SEED-01).
+   *
+   * Opcional por la misma razón que `skippedContent`: sólo aparece cuando hay
+   * algo que decir. Su presencia es lo que vuelve fatal el arranque.
+   */
+  coreFailed?: string[];
 }
 
 /**
@@ -131,6 +145,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param patientPortalProxy - Alcance y base legal del apoderamiento de portal.
    * @param glossary - Taxonomía y catálogo curado del glosario médico.
    * @param boGeography - Departamentos de Bolivia (`VS_BO_DEPARTMENT`).
+   * @param adminDivisions - Divisiones administrativas de todo país con
+   *   catálogo (`VS_ADMIN_DIVISION`, ADR-0028).
    * @param legalEntityTypes - País y categoría canónica de cada forma societaria
    *   del diccionario internacional (subtarea 1.1).
    * @param affiliationCatalogs - Documentos de afiliación, autoridad emisora,
@@ -153,6 +169,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param platformPermissions - Permisos de sistema en `authz.permissions`.
    * @param bootstrapAdmin - Primer `SECURITY_ADMIN`, si el entorno lo pide.
    * @param clinicalForms - Catálogo de formularios clínicos estándar.
+   * @param boMedicalSpecialties - Especialidades y subespecialidades que se
+   *   suman a `VS_MEDICAL_SPECIALTY` (médicas, quirúrgicas y odontológicas).
    * @param practiceDefaultServices - «Cita médica» en las prácticas que nacieron
    *   sin catálogo.
    * @param people - Cuentas del padrón (H2, carril M2 · MacBook), sintéticas y
@@ -162,6 +180,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param qaFlows - Suites de `qa_lab` generadas desde el catálogo de flujos,
    *   opt-in por `SEED_QA_FLOWS`.
    * @param logger - Logger estructurado del arranque.
+   * @param coreState - Dónde queda registrado qué paso núcleo falló, para que
+   *   `/readiness` lo vea (SEED-01); opcional para quien arma el orquestador a mano.
    */
   constructor(
     private readonly terminology: TerminologySeedService,
@@ -170,6 +190,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly telemetryUxHeatmap: TelemetryUxHeatmapSeedService,
     private readonly glossary: GlossarySeedService,
     private readonly boGeography: BoGeographySeedService,
+    private readonly adminDivisions: AdminDivisionsSeedService,
     private readonly legalEntityTypes: LegalEntityTypesSeedService,
     private readonly affiliationCatalogs: AffiliationCatalogsSeedService,
     private readonly boOccupations: BoOccupationsSeedService,
@@ -188,11 +209,13 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly bootstrapAdmin: BootstrapAdminSeedService,
     private readonly providerAccounts: ProviderAccountsSeedService,
     private readonly clinicalForms: ClinicalFormsSeedService,
+    private readonly boMedicalSpecialties: BoMedicalSpecialtiesSeedService,
     private readonly practiceDefaultServices: PracticeDefaultServicesSeedService,
     private readonly people: PeopleSeedService,
     private readonly directoryNetworks: DirectoryNetworksSeedService,
     private readonly qaFlows: QaFlowsSeedService,
     private readonly logger: PinoLogger,
+    @Optional() private readonly coreState?: SeedCoreState,
   ) {
     this.logger.setContext(SeedBootstrapService.name);
     const environment = loadSeedBootEnv();
@@ -219,7 +242,30 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
       return;
     }
 
-    await this.run();
+    const summary = await this.run();
+    this.assertCoreSeedsComplete(summary);
+  }
+
+  /**
+   * SEED-01 · un paso `core` fallido no puede dejar que la API quede en pie.
+   *
+   * Sin el catálogo de conceptos, los roles o los departamentos, el proceso
+   * atiende HTTP pero toda escritura que dependa de ellos viola una FK NOT NULL.
+   * Se lanza **después** del resumen (ya registrado por `summarize`), así que el
+   * motivo queda en el log y `app.listen` no llega a ejecutarse.
+   *
+   * Es fatal siempre en `NODE_ENV=production` y, fuera de producción, sólo con
+   * `SEED_CORE_FAILURE_FATAL=true`: un desarrollador con una base a medio sembrar
+   * conserva su flujo local. Un fallo de contenido nunca es fatal; para degradarlo
+   * de forma explícita está `SEED_CONTENT_ON_BOOT=false`.
+   */
+  private assertCoreSeedsComplete(summary: SeedRunSummary): void {
+    if (!summary.coreFailed?.length) return;
+    if (!isCoreSeedFailureFatal()) return;
+    throw new Error(
+      'SYSTEM_SEED_CORE_INCOMPLETE: fallaron seeds núcleo: ' +
+        summary.coreFailed.join(', '),
+    );
   }
 
   /**
@@ -242,9 +288,11 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
       this.terminology.run(),
     );
     steps.push(catalog);
+    const coreFailed: string[] = [];
 
     if (catalog.failed) {
-      const summary = this.summarize(steps, startup);
+      coreFailed.push(catalog.name);
+      const summary = this.summarize(steps, startup, 0, coreFailed);
       this.logger.error(
         { event: 'seed.aborted', ...summary },
         'Seeds estructurales omitidos: el catálogo de terminología no quedó ' +
@@ -264,10 +312,12 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         );
         continue;
       }
-      steps.push(await this.runStep(step.name, step.run));
+      const result = await this.runStep(step.name, step.run);
+      steps.push(result);
+      if (result.failed && step.kind === 'core') coreFailed.push(step.name);
     }
 
-    return this.summarize(steps, startup, skippedContent);
+    return this.summarize(steps, startup, skippedContent, coreFailed);
   }
 
   /**
@@ -325,6 +375,14 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'departamentos de Bolivia',
         kind: 'core',
         run: () => this.boGeography.run(),
+      },
+      // El árbol multipaís (ADR-0028) apunta a los departamentos y municipios
+      // del paso anterior: va inmediatamente después. Es núcleo porque las
+      // direcciones deducen de acá la provincia del municipio.
+      {
+        name: 'divisiones administrativas',
+        kind: 'core',
+        run: () => this.adminDivisions.run(),
       },
       // Va justo después del catálogo de conceptos: sólo depende de que los 21
       // conceptos de `LEGAL_ENTITY_TYPES` ya existan (los materializa el paso
@@ -454,6 +512,17 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         kind: 'content',
         run: () => this.clinicalForms.run(),
       },
+      // Después de los formularios y no antes: en una base sin el paquete del
+      // modelo es ese paso quien publica `VS_MEDICAL_SPECIALTY`, y éste sólo
+      // suma miembros a un conjunto que ya existe. Antes del directorio de
+      // redes, que mapea las especialidades de los médicos por nombre contra
+      // el conjunto. Contenido: sin él el alta sigue funcionando con las del
+      // modelo.
+      {
+        name: 'especialidades médicas ampliadas',
+        kind: 'content',
+        run: () => this.boMedicalSpecialties.run(),
+      },
       // Va el último a propósito: el alta del administrador referencia conceptos
       // de estado y el tenant por defecto, que los sembra el catálogo.
       {
@@ -561,14 +630,19 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param steps - Los pasos ya medidos.
    * @param startup - Marca de tiempo del inicio de la cadena.
    * @param skippedContent - Pasos de contenido que el entorno salteó.
+   * @param coreFailed - Nombres de los pasos `core` que fallaron.
    * @returns El resumen agregado.
    */
   private summarize(
     steps: SeedStepResult[],
     startup: number,
     skippedContent = 0,
+    coreFailed: readonly string[] = [],
   ): SeedRunSummary {
     const failed = steps.filter((step) => step.failed).length;
+    // SEED-01: la readiness lee esto; un fallo núcleo tolerado fuera de producción
+    // no puede quedar invisible para ella.
+    this.coreState?.record(coreFailed);
     const summary: SeedRunSummary = {
       ok: steps.length - failed,
       failed,
@@ -578,6 +652,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
       // Solo cuando hubo salteados: con el contenido encendido el resumen
       // conserva exactamente la forma que tenía antes de que el flag existiera.
       ...(skippedContent > 0 ? { skippedContent } : {}),
+      ...(coreFailed.length > 0 ? { coreFailed: [...coreFailed] } : {}),
     };
 
     const line =

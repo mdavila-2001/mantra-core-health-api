@@ -159,7 +159,6 @@ Registrar un agente recolector gobernado
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 409 | `CONFLICT` | ConflictException: Ya existe un agente con ese código |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -169,22 +168,28 @@ flowchart TD
   n1 --> n2
   n3["Llama a ContextCollectionService.createAgent"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a ContextCollectionService.resolvingUniqueRace"]:::llamada
   n3 --> n4
-  n5["Llama a HealthContextRepository.findAgentByCode"]:::llamada
+  n5["Intenta"]:::intento
   n4 --> n5
-  n6[("LEE health_context.context_agents")]:::efecto
-  n5 --> n6
-  n7{"duplicate"}:::decision
-  n6 --> n7
-  n8(["409 CONFLICT Ya existe un agente con ese código"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a HealthContextRepository.createAgent"]:::llamada
-  n7 -->|"no"| n9
-  n10[("CREA health_context.context_agents")]:::efecto
+  n6(["↩ (relanza el error capturado)"]):::error
+  n5 -->|"si falla"| n6
+  n7["Transacción: transactional(…)"]:::transaccion
+  n5 --> n7
+  n8["Llama a HealthContextRepository.findAgentByCode"]:::llamada
+  n7 --> n8
+  n9[("LEE health_context.context_agents")]:::efecto
+  n8 --> n9
+  n10{"duplicate"}:::decision
   n9 --> n10
-  n11(("201 Responde con éxito")):::ok
-  n10 --> n11
+  n11(["↩ (relanza el error capturado)"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a HealthContextRepository.createAgent"]:::llamada
+  n10 -->|"no"| n12
+  n13[("CREA health_context.context_agents")]:::efecto
+  n12 --> n13
+  n14(("201 Responde con éxito")):::ok
+  n13 --> n14
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -204,7 +209,8 @@ Disparar una corrida de recolección
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Programación no encontrada; ResourceNotFoundException: Agente no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La programación no está activa; PreconditionFailedException: La corrida necesita agente y país, o una programación de la que salgan; PreconditionFailedException: El agente no está activo |
+| 409 | `CONFLICT` | ConflictException: No se pudo resolver la corrida de esa clave de idempotencia |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La programación no está activa; PreconditionFailedException: El agente y el país de la corrida deben coincidir con los de la programación; PreconditionFailedException: La corrida necesita agente y país, o una programación de la que salgan; PreconditionFailedException: El agente no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -214,54 +220,74 @@ flowchart TD
   n1 --> n2
   n3["Llama a ContextCollectionService.startCollectionRun"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a ContextCollectionService.resolvingUniqueRace"]:::llamada
   n3 --> n4
-  n5["Llama a HealthContextRepository.findRunByIdempotencyKey"]:::llamada
+  n5["Intenta"]:::intento
   n4 --> n5
-  n6[("LEE health_context.context_collection_runs")]:::efecto
-  n5 --> n6
-  n7{"dto.scheduleId"}:::decision
-  n6 --> n7
-  n8["Llama a HealthContextRepository.findScheduleForUpdate"]:::llamada
-  n7 -->|"sí"| n8
-  n9[("LEE health_context.country_context_schedules")]:::efecto
+  n6(["↩ (relanza el error capturado)"]):::error
+  n5 -->|"si falla"| n6
+  n7["Transacción: transactional(…)"]:::transaccion
+  n5 --> n7
+  n8["Llama a HealthContextRepository.findRunByIdempotencyKey"]:::llamada
+  n7 --> n8
+  n9[("LEE health_context.context_collection_runs")]:::efecto
   n8 --> n9
-  n10{"!schedule"}:::decision
+  n10{"dto.scheduleId"}:::decision
   n9 --> n10
-  n11(["404 NOT_FOUND Programación no encontrada"]):::error
+  n11["Llama a HealthContextRepository.findScheduleForUpdate"]:::llamada
   n10 -->|"sí"| n11
-  n12{"schedule.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
-  n10 -->|"no"| n12
-  n13(["422 PRECONDITION_FAILED La programación no está activa"]):::error
-  n12 -->|"sí"| n13
-  n14{"dto.nextRunAt"}:::decision
-  n12 -->|"no"| n14
-  n15[("ACTUALIZA health_context.country_context_schedules")]:::efecto
-  n14 -->|"sí"| n15
-  n16{"!agentId || !countryConceptId"}:::decision
-  n15 --> n16
-  n14 -->|"no"| n16
-  n7 -->|"no"| n16
-  n17(["422 PRECONDITION_FAILED La corrida necesita agente y país, o una programación de la que salgan"]):::error
-  n16 -->|"sí"| n17
-  n18["Llama a HealthContextRepository.findAgentById"]:::llamada
-  n16 -->|"no"| n18
-  n19[("LEE health_context.context_agents")]:::efecto
-  n18 --> n19
-  n20{"!agent"}:::decision
-  n19 --> n20
-  n21(["404 NOT_FOUND Agente no encontrado"]):::error
-  n20 -->|"sí"| n21
-  n22{"agent.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
-  n20 -->|"no"| n22
-  n23(["422 PRECONDITION_FAILED El agente no está activo"]):::error
-  n22 -->|"sí"| n23
-  n24["Llama a HealthContextRepository.createCollectionRun"]:::llamada
-  n22 -->|"no"| n24
-  n25[("CREA health_context.context_collection_runs")]:::efecto
+  n12[("LEE health_context.country_context_schedules")]:::efecto
+  n11 --> n12
+  n13{"!schedule"}:::decision
+  n12 --> n13
+  n14(["404 NOT_FOUND Programación no encontrada"]):::error
+  n13 -->|"sí"| n14
+  n15{"schedule.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n13 -->|"no"| n15
+  n16(["422 PRECONDITION_FAILED La programación no está activa"]):::error
+  n15 -->|"sí"| n16
+  n17{"(dto.agentId !== undefined && dto.agentId !== schedule.agentId) || (dto.countryConceptId !== undefined && dto…"}:::decision
+  n15 -->|"no"| n17
+  n18(["422 PRECONDITION_FAILED El agente y el país de la corrida deben coincidir con los de la programación"]):::error
+  n17 -->|"sí"| n18
+  n19{"dto.nextRunAt"}:::decision
+  n17 -->|"no"| n19
+  n20[("ACTUALIZA health_context.country_context_schedules")]:::efecto
+  n19 -->|"sí"| n20
+  n21{"!agentId || !countryConceptId"}:::decision
+  n20 --> n21
+  n19 -->|"no"| n21
+  n10 -->|"no"| n21
+  n22(["422 PRECONDITION_FAILED La corrida necesita agente y país, o una programación de la que salgan"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a HealthContextRepository.findAgentById"]:::llamada
+  n21 -->|"no"| n23
+  n24[("LEE health_context.context_agents")]:::efecto
+  n23 --> n24
+  n25{"!agent"}:::decision
   n24 --> n25
-  n26(("201 Responde con éxito")):::ok
-  n25 --> n26
+  n26(["404 NOT_FOUND Agente no encontrado"]):::error
+  n25 -->|"sí"| n26
+  n27{"agent.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n25 -->|"no"| n27
+  n28(["422 PRECONDITION_FAILED El agente no está activo"]):::error
+  n27 -->|"sí"| n28
+  n29["Llama a HealthContextRepository.createCollectionRun"]:::llamada
+  n27 -->|"no"| n29
+  n30[("CREA health_context.context_collection_runs")]:::efecto
+  n29 --> n30
+  n31["Llama a ContextCollectionService.resolveIdempotencyRace"]:::llamada
+  n30 --> n31
+  n32["Llama a HealthContextRepository.findRunByIdempotencyKey"]:::llamada
+  n31 --> n32
+  n33[("LEE health_context.context_collection_runs")]:::efecto
+  n32 --> n33
+  n34{"!winner"}:::decision
+  n33 --> n34
+  n35(["409 CONFLICT No se pudo resolver la corrida de esa clave de idempotencia"]):::error
+  n34 -->|"sí"| n35
+  n36(("201 Responde con éxito")):::ok
+  n34 -->|"no"| n36
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -349,7 +375,7 @@ Registrar una observación inmutable de fuente
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida no encontrada; ResourceNotFoundException: Fuente no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La corrida ya no está en curso; PreconditionFailedException: La fuente no está activa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La corrida ya no está en curso; PreconditionFailedException: La fuente no está activa; PreconditionFailedException: La fuente no es elegible para esta observación |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -385,25 +411,28 @@ flowchart TD
   n13 -->|"no"| n15
   n16(["422 PRECONDITION_FAILED La fuente no está activa"]):::error
   n15 -->|"sí"| n16
-  n17["Llama a HealthContextRepository.findObservationByHash"]:::llamada
+  n17["Llama a ContextCollectionService.assertSourceEligible"]:::llamada
   n15 -->|"no"| n17
-  n18[("LEE health_context.context_source_observations")]:::efecto
+  n18(["422 PRECONDITION_FAILED La fuente no es elegible para esta observación"]):::error
   n17 --> n18
-  n19["Llama a HealthContextRepository.createObservation"]:::llamada
-  n18 --> n19
-  n20[("CREA health_context.context_source_observations")]:::efecto
+  n19["Llama a HealthContextRepository.findObservationByHash"]:::llamada
+  n20[("LEE health_context.context_source_observations")]:::efecto
   n19 --> n20
-  n21[("ACTUALIZA health_context.context_collection_runs")]:::efecto
+  n21["Llama a HealthContextRepository.createObservation"]:::llamada
   n20 --> n21
-  n22{"dto.status === 'ACCEPTED'"}:::decision
+  n22[("CREA health_context.context_source_observations")]:::efecto
   n21 --> n22
   n23[("ACTUALIZA health_context.context_collection_runs")]:::efecto
-  n22 -->|"sí"| n23
-  n24[("ACTUALIZA health_context.context_collection_runs")]:::efecto
-  n22 -->|"no"| n24
-  n25(("201 Responde con éxito")):::ok
-  n23 --> n25
-  n24 --> n25
+  n22 --> n23
+  n24{"dto.status === 'ACCEPTED'"}:::decision
+  n23 --> n24
+  n25[("ACTUALIZA health_context.context_collection_runs")]:::efecto
+  n24 -->|"sí"| n25
+  n26[("ACTUALIZA health_context.context_collection_runs")]:::efecto
+  n24 -->|"no"| n26
+  n27(("201 Responde con éxito")):::ok
+  n25 --> n27
+  n26 --> n27
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -422,7 +451,6 @@ Crear el contexto de salud de un país
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 409 | `CONFLICT` | ConflictException: Ya existe ese contexto para el país y el dominio |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -432,22 +460,30 @@ flowchart TD
   n1 --> n2
   n3["Llama a CountryContextService.createContext"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Intenta"]:::intento
   n3 --> n4
-  n5["Llama a HealthContextRepository.findContextByKey"]:::llamada
+  n5["Transacción: transactional(…)"]:::transaccion
   n4 --> n5
-  n6[("LEE health_context.country_health_contexts")]:::efecto
+  n6["Llama a HealthContextRepository.findContextByKey"]:::llamada
   n5 --> n6
-  n7{"duplicate"}:::decision
+  n7[("LEE health_context.country_health_contexts")]:::efecto
   n6 --> n7
-  n8(["409 CONFLICT Ya existe ese contexto para el país y el dominio"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a HealthContextRepository.createContext"]:::llamada
-  n7 -->|"no"| n9
-  n10[("CREA health_context.country_health_contexts")]:::efecto
-  n9 --> n10
-  n11(("201 Responde con éxito")):::ok
+  n8{"duplicate"}:::decision
+  n7 --> n8
+  n9(["↩ (relanza el error capturado)"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a HealthContextRepository.createContext"]:::llamada
+  n8 -->|"no"| n10
+  n11[("CREA health_context.country_health_contexts")]:::efecto
   n10 --> n11
+  n12{"error instanceof UniqueConstraintViolationException"}:::decision
+  n4 -->|"si falla"| n12
+  n13(["↩ (relanza el error capturado)"]):::error
+  n12 -->|"sí"| n13
+  n14(["↩ (relanza el error capturado)"]):::error
+  n12 -->|"no"| n14
+  n15(("201 Responde con éxito")):::ok
+  n11 --> n15
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -745,7 +781,6 @@ Registrar una fuente de contexto de salud
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 409 | `CONFLICT` | ConflictException: Ya existe una fuente con ese código |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -755,22 +790,28 @@ flowchart TD
   n1 --> n2
   n3["Llama a ContextCollectionService.createSource"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a ContextCollectionService.resolvingUniqueRace"]:::llamada
   n3 --> n4
-  n5["Llama a HealthContextRepository.findSourceByCode"]:::llamada
+  n5["Intenta"]:::intento
   n4 --> n5
-  n6[("LEE health_context.health_context_sources")]:::efecto
-  n5 --> n6
-  n7{"duplicate"}:::decision
-  n6 --> n7
-  n8(["409 CONFLICT Ya existe una fuente con ese código"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a HealthContextRepository.createSource"]:::llamada
-  n7 -->|"no"| n9
-  n10[("CREA health_context.health_context_sources")]:::efecto
+  n6(["↩ (relanza el error capturado)"]):::error
+  n5 -->|"si falla"| n6
+  n7["Transacción: transactional(…)"]:::transaccion
+  n5 --> n7
+  n8["Llama a HealthContextRepository.findSourceByCode"]:::llamada
+  n7 --> n8
+  n9[("LEE health_context.health_context_sources")]:::efecto
+  n8 --> n9
+  n10{"duplicate"}:::decision
   n9 --> n10
-  n11(("201 Responde con éxito")):::ok
-  n10 --> n11
+  n11(["↩ (relanza el error capturado)"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a HealthContextRepository.createSource"]:::llamada
+  n10 -->|"no"| n12
+  n13[("CREA health_context.health_context_sources")]:::efecto
+  n12 --> n13
+  n14(("201 Responde con éxito")):::ok
+  n13 --> n14
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

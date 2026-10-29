@@ -75,6 +75,56 @@ describe('TenantAdministrationService', () => {
     expect(membershipsRepo.findActiveByUserTenant).not.toHaveBeenCalled();
   });
 
+  describe('administersByMembership (sin atajo de plataforma)', () => {
+    it('es verdadero para el OWNER y el ADMIN activos del tenant', async () => {
+      for (const role of [DIR.ROLE_OWNER, DIR.ROLE_ADMIN]) {
+        const { service, tx, membershipsRepo } = build({
+          tenantRoleConceptId: role,
+        });
+
+        await expect(
+          service.administersByMembership(tx, 'tenant-1', {
+            id: 'u1',
+            roles: ['USER'],
+          }),
+        ).resolves.toBe(true);
+        expect(membershipsRepo.findActiveByUserTenant).toHaveBeenCalled();
+      }
+    });
+
+    it('es falso para el STAFF y para quien no pertenece al tenant', async () => {
+      const staff = build({ tenantRoleConceptId: DIR.ROLE_STAFF });
+      const stranger = build(null);
+
+      await expect(
+        staff.service.administersByMembership(staff.tx, 'tenant-1', {
+          id: 'u1',
+          roles: [],
+        }),
+      ).resolves.toBe(false);
+      await expect(
+        stranger.service.administersByMembership(stranger.tx, 'tenant-1', {
+          id: 'u1',
+          roles: [],
+        }),
+      ).resolves.toBe(false);
+    });
+
+    it('un rol de plataforma no alcanza: `canAdminister` sí lo deja pasar, esta consulta no', async () => {
+      // `isPlatform` no mira `scopedRoles`; por eso quien necesita respetar el ámbito de un rol
+      // acotado a otro tenant pregunta sólo por la membresía.
+      const { service, tx } = build(null);
+      const platform = { id: 'u1', roles: ['SECURITY_ADMIN'] };
+
+      await expect(
+        service.canAdminister(tx, 'tenant-1', platform),
+      ).resolves.toBe(true);
+      await expect(
+        service.administersByMembership(tx, 'tenant-1', platform),
+      ).resolves.toBe(false);
+    });
+  });
+
   describe('assertCanChangeOwnership (escalón de dueños)', () => {
     it('deja pasar al OWNER del tenant', async () => {
       const { service, tx } = build({ tenantRoleConceptId: DIR.ROLE_OWNER });

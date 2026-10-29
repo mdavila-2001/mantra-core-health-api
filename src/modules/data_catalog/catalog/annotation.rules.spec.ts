@@ -40,11 +40,11 @@ describe('applyPatch', () => {
     const next = applyPatch(completa(), {
       consumers: ['a', 'b'],
       openQuestions: [{ field: 'rowGrain', question: '¿?' }],
-      sensitivity: 'PHI',
+      sensitivity: 'PHI_SENSITIVE',
     });
     expect(next.consumers).toEqual(['a', 'b']);
     expect(next.openQuestions).toHaveLength(1);
-    expect(next.sensitivity).toBe('PHI');
+    expect(next.sensitivity).toBe('PHI_SENSITIVE');
   });
 });
 
@@ -133,6 +133,16 @@ describe('reviewVerdict', () => {
     ).toMatchObject({ ok: false, kind: 'STALE_REVISION' });
   });
 
+  it('una ficha AUTO_DETECTED no se revisa: nadie la envió a revisión', () => {
+    expect(
+      reviewVerdict(
+        { ...estado, reviewStatus: 'AUTO_DETECTED' },
+        aprobar,
+        'revisor',
+      ),
+    ).toMatchObject({ ok: false, kind: 'NOT_IN_REVIEW' });
+  });
+
   it('sólo se revisa una ficha en revisión', () => {
     expect(
       reviewVerdict({ ...estado, reviewStatus: 'DRAFT' }, aprobar, 'revisor'),
@@ -189,5 +199,34 @@ describe('reviewVerdict', () => {
         'revisor',
       ),
     ).toEqual({ ok: true });
+  });
+});
+
+describe('submissionViolations de una columna', () => {
+  it('pide su definición, no el propósito ni el grano de fila', () => {
+    const vacia = applyPatch(EMPTY_CONTENT, {});
+    expect(submissionViolations(vacia, 'COLUMN').map((v) => v.field)).toEqual([
+      'definition',
+    ]);
+  });
+
+  it('la definición puede declararse como pregunta abierta', () => {
+    const conPregunta = applyPatch(EMPTY_CONTENT, {
+      openQuestions: [{ field: 'definition', question: '¿Qué guarda?' }],
+    });
+    expect(submissionViolations(conPregunta, 'COLUMN')).toEqual([]);
+  });
+
+  it('una definición que explica pasa; el relleno no', () => {
+    const buena = applyPatch(EMPTY_CONTENT, {
+      definition: 'Código del documento de identidad emitido por el SEGIP.',
+    });
+    expect(submissionViolations(buena, 'COLUMN')).toEqual([]);
+    const relleno = applyPatch(EMPTY_CONTENT, {
+      definition: 'Esta tabla guarda los datos del paciente en esta columna',
+    });
+    expect(submissionViolations(relleno, 'COLUMN')[0]?.reason).toBe(
+      'FILLER_TEXT',
+    );
   });
 });

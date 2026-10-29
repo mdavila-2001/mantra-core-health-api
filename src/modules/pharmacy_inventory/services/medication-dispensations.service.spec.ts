@@ -11,6 +11,7 @@ import { MedicationDispensationsService } from '../application/medication-dispen
 import { DispenseMedicationUseCase } from '../application/medication-dispensations/dispense-medication.use-case';
 import { ReverseMedicationDispensationUseCase } from '../application/medication-dispensations/reverse-medication-dispensation.use-case';
 import { PINV } from '../domain/pharmacy_inventory.concepts';
+import { allowAllScope } from '../application/scope/pharmacy-inventory-scope.testing';
 import { PreconditionFailedException } from '../../../common';
 
 const actor = { id: 'pharm-1', roles: ['PHARMACIST'] } as any;
@@ -44,12 +45,14 @@ function build() {
     findEntryIdsBySource: mockFn(async () => []),
   };
   const logger = { setContext: mockFn(), info: mockFn() };
+  const scope = allowAllScope();
   const dispense = new DispenseMedicationUseCase(
     em as any,
     dispensationsRepo,
     reservationsRepo as any,
     stockRepo as any,
     ledgerRepo,
+    scope,
     logger as any,
   );
   const reverse = new ReverseMedicationDispensationUseCase(
@@ -58,6 +61,7 @@ function build() {
     reservationsRepo as any,
     stockRepo as any,
     ledgerRepo,
+    scope,
     logger as any,
   );
   const service = new MedicationDispensationsService(
@@ -72,6 +76,7 @@ function build() {
     reservationsRepo,
     stockRepo,
     ledgerRepo,
+    scope,
   };
 }
 
@@ -113,6 +118,8 @@ describe('MedicationDispensationsService', () => {
     // su entrega exige el codigo de retiro y acumula por linea (FAR-E3).
     d.reservationsRepo.findById.mockResolvedValue({
       id: 'res-order',
+      pharmacyId: 'ph1',
+      pharmacySiteId: 's1',
       reservationStatusConceptId: PINV.ORDER_LISTO_PARA_RETIRO,
     });
 

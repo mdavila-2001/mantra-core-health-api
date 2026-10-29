@@ -5,6 +5,8 @@ import { Roles } from '../../modules/authz/entities';
 import { AUTHZ } from '../../modules/authz/authz.concepts';
 import { CLINICAL_ROLE_SEED } from '../../modules/authz/authz.seed';
 import { AUTHZ_BUSINESS_ROLE_SEED } from '../../modules/authz/authz.business-roles.seed';
+import { AUTHZ_PLATFORM_ROLE_SEED } from '../../modules/authz/authz.platform-roles.seed';
+import { DATA_CATALOG_ROLE_SEED } from '../../modules/data_catalog/data_catalog.roles';
 import { PHARMA_LAB_ROLE_SEED } from '../../modules/pharma_lab/pharma_lab.roles';
 import { SCHEDULING_ROLE_SEED } from '../../modules/scheduling/infrastructure/seed/scheduling.roles';
 import { CONCEPTS } from '../constants/concepts';
@@ -18,11 +20,13 @@ import { CONCEPTS } from '../constants/concepts';
  * `module-concepts.ts`: que dos carriles puedan añadir roles en paralelo sin
  * editar el mismo archivo.
  */
-const SYSTEM_ROLE_SEED = [
+export const SYSTEM_ROLE_SEED = [
   ...CLINICAL_ROLE_SEED,
   ...AUTHZ_BUSINESS_ROLE_SEED,
+  ...AUTHZ_PLATFORM_ROLE_SEED,
   ...PHARMA_LAB_ROLE_SEED,
   ...SCHEDULING_ROLE_SEED,
+  ...DATA_CATALOG_ROLE_SEED,
 ];
 
 /** Rol base declarado en la semilla → concepto de `authz`. */

@@ -48,6 +48,8 @@ import {
 } from '../../../infrastructure/repositories';
 import { SchedulingProfessionalTimeService } from '../../professional-time/scheduling-professional-time.service';
 import { operatesAnyAgenda } from '../../../domain/booking/agenda-actors';
+import { startsInTelemedicineBand } from '../../../domain/catalog/telemedicine-band';
+import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** AG-2 · La cita puntual: el doctor asigna, el paciente se entera. */
 @Injectable()
@@ -195,6 +197,14 @@ export class CreateDirectAppointmentUseCase {
       throw new ForbiddenException(
         'Un profesional solo puede asignar citas en su propia agenda.',
       );
+    }
+
+    // v4.2.61 · La telemedicina se habilita POR FRANJA del horario de
+    // atención y por defecto está apagada: una cita por TELECONSULTA sólo se
+    // acepta si empieza dentro de una franja publicada que la tenga activa.
+    // Presencial y domicilio no cambian.
+    if (dto.channel === 'TELECONSULTA') {
+      await this.assertTelemedicineEnabled(tx, resource, startAt);
     }
 
     // P42 · La reconsulta: sus cuatro rechazos corren SÓLO cuando viene
@@ -460,5 +470,51 @@ export class CreateDirectAppointmentUseCase {
       );
     }
     return { origin: originBooking, originEncounterId: originEncounterId };
+  }
+
+  /**
+   * Rechaza con 422 `TELEMEDICINE_NOT_ENABLED` si `startAt` no cae en una
+   * franja publicada del recurso con la telemedicina habilitada.
+   *
+   * Las franjas son horas de pared de la sede: se evalúan en la zona del
+   * recurso (sin zona, UTC), igual que al generar cupos.
+   */
+  private async assertTelemedicineEnabled(
+    tx: EntityManager,
+    resource: { id: string; timeZone?: string | null },
+    startAt: Date,
+  ): Promise<void> {
+    const templates = (
+      await this.catalogRepo.findTemplatesByResource(tx, resource.id)
+    ).filter(
+      (template) => template.statusConceptId === CONCEPTS.TEMPLATE_PUBLISHED,
+    );
+    const byId = new Map(templates.map((template) => [template.id, template]));
+    const rules = await this.catalogRepo.findRulesByTemplates(tx, [
+      ...byId.keys(),
+    ]);
+    // Sólo cuentan las franjas de plantillas publicadas: una franja de un
+    // horario retirado no habilita nada aunque la tuviera activa.
+    const bands = rules.flatMap((rule) => {
+      const template = byId.get(rule.scheduleTemplateId);
+      if (!template) return [];
+      return [
+        {
+          dayOfWeek: rule.dayOfWeek,
+          startTime: rule.startTime,
+          endTime: rule.endTime,
+          telemedicineEnabled: rule.telemedicineEnabled === true,
+          validFrom: template.validFrom ?? null,
+          validTo: template.validTo ?? null,
+        },
+      ];
+    });
+    if (!startsInTelemedicineBand(startAt, bands, resource.timeZone ?? 'UTC')) {
+      throw new PreconditionFailedException(
+        'Ese horario no atiende por telemedicina. Habilítela en la franja de su horario de atención o elija otra modalidad.',
+        { resourceId: resource.id, startAt: startAt.toISOString() },
+        SchedulingErrorReason.TELEMEDICINE_NOT_ENABLED,
+      );
+    }
   }
 }

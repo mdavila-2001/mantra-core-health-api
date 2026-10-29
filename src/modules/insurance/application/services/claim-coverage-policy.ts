@@ -9,6 +9,7 @@ import {
   InsuranceClaimLines,
   InsuranceClaims,
   InsurancePlanBenefits,
+  PatientCoverages,
   PriorAuthorizationDeterminations,
   PriorAuthorizationItems,
   PriorAuthorizationRequests,
@@ -37,6 +38,7 @@ export const CLAIM_COVERAGE_REASON = {
   PRIOR_AUTH_EXPIRED: 'PRIOR_AUTHORIZATION_EXPIRED',
   PRIOR_AUTH_AMOUNT_EXCEEDED: 'PRIOR_AUTHORIZATION_AMOUNT_EXCEEDED',
   PATIENT_SHARE_MISMATCH: 'PATIENT_SHARE_MISMATCH',
+  COVERAGE_PLAN_MISMATCH: 'COVERAGE_PLAN_MISMATCH',
 } as const;
 
 /** Lo que el cobro declara de cada línea. */
@@ -70,6 +72,51 @@ export interface EvaluatedClaimLine {
   readonly insurerAmount: string;
 }
 
+/** Estado de la aprobación previa tal como lo muestra la cotización. */
+export type PriorAuthorizationQuoteStatus =
+  | 'NOT_REQUIRED'
+  | 'APPROVED'
+  | 'MISSING'
+  | 'PENDING'
+  | 'DENIED'
+  | 'EXPIRED'
+  | 'MISMATCH'
+  | 'AMOUNT_EXCEEDED';
+
+/**
+ * Línea cotizada (carril 16, REQ-16-026): lo mismo que `EvaluatedClaimLine`,
+ * pero un rechazo no se lanza, se informa en `reason` y `message`.
+ *
+ * Los importes son `null` cuando no se pueden calcular (servicio sin beneficio
+ * vigente, beneficio sin condiciones o monto inválido). Si sólo falla la
+ * aprobación previa, el reparto sí se informa.
+ */
+export interface QuotedCoverageLine {
+  readonly lineSequence: number;
+  readonly benefitId: string | null;
+  readonly coveragePercent: string | null;
+  readonly copayAmount: string | null;
+  /** Informativo: el propietario dejó el deducible fuera del cálculo. */
+  readonly deductibleAmount: string | null;
+  readonly requiresPriorAuthorization: boolean;
+  readonly priorAuthorizationStatus: PriorAuthorizationQuoteStatus | null;
+  readonly patientAmount: string | null;
+  readonly insurerAmount: string | null;
+  readonly reason: string | null;
+  readonly message: string | null;
+}
+
+const PRIOR_AUTH_STATUS_BY_REASON: Readonly<
+  Record<string, PriorAuthorizationQuoteStatus>
+> = {
+  [CLAIM_COVERAGE_REASON.PRIOR_AUTH_REQUIRED]: 'MISSING',
+  [CLAIM_COVERAGE_REASON.PRIOR_AUTH_MISMATCH]: 'MISMATCH',
+  [CLAIM_COVERAGE_REASON.PRIOR_AUTH_PENDING]: 'PENDING',
+  [CLAIM_COVERAGE_REASON.PRIOR_AUTH_DENIED]: 'DENIED',
+  [CLAIM_COVERAGE_REASON.PRIOR_AUTH_EXPIRED]: 'EXPIRED',
+  [CLAIM_COVERAGE_REASON.PRIOR_AUTH_AMOUNT_EXCEEDED]: 'AMOUNT_EXCEEDED',
+};
+
 /**
  * Contrasta un cobro con el plan del paciente (carril 16, REQ-16-023 a 025).
  *
@@ -97,6 +144,7 @@ export class ClaimCoveragePolicy {
     tx: EntityManager,
     claim: ClaimToEvaluate,
   ): Promise<EvaluatedClaimLine[]> {
+    await this.assertCoverageOfPlan(tx, claim);
     const evaluated: EvaluatedClaimLine[] = [];
     // Lo que este mismo cobro ya cargó contra cada ítem de la aprobación: dos
     // líneas no pueden repartirse un tope que cada una por separado no supera.
@@ -104,7 +152,13 @@ export class ClaimCoveragePolicy {
     for (const line of claim.lines) {
       const benefit = await this.benefitFor(tx, claim, line);
       if (benefit.requiresPriorAuthorization) {
-        await this.assertPriorAuthorization(tx, claim, line, billedInThisClaim);
+        await this.assertPriorAuthorization(
+          tx,
+          claim,
+          line,
+          billedInThisClaim,
+          true,
+        );
       }
       const split = this.split(line, benefit);
       if (
@@ -132,6 +186,122 @@ export class ClaimCoveragePolicy {
       });
     }
     return evaluated;
+  }
+
+  /**
+   * Cotiza una línea sin efectos: no bloquea la aprobación previa y no lanza.
+   *
+   * Corre las mismas reglas que `evaluate` (beneficio vigente, reparto y
+   * aprobación previa) y el mismo orden de precedencia entre rechazos; cada
+   * rechazo tipificado se devuelve en `reason`/`message`. La parte del paciente
+   * que declare el cliente no se contrasta: la cotización sólo informa.
+   *
+   * @param em - Contexto de lectura; no hace falta una transacción.
+   * @param claim - Cobro que se quiere cotizar.
+   * @param line - Línea a cotizar.
+   * @param billedInThisClaim - Acumulado por aprobación de las líneas anteriores.
+   * @returns La línea con su reparto y, si corresponde, el motivo del rechazo.
+   */
+  async quoteLine(
+    em: EntityManager,
+    claim: ClaimToEvaluate,
+    line: ClaimLineToEvaluate,
+    billedInThisClaim: Map<string, string>,
+  ): Promise<QuotedCoverageLine> {
+    let benefit: InsurancePlanBenefits;
+    try {
+      await this.assertCoverageOfPlan(em, claim);
+      benefit = await this.benefitFor(em, claim, line);
+    } catch (error) {
+      const rejection = asRejection(error);
+      return {
+        lineSequence: line.lineSequence,
+        benefitId: null,
+        coveragePercent: null,
+        copayAmount: null,
+        deductibleAmount: null,
+        requiresPriorAuthorization: false,
+        priorAuthorizationStatus: null,
+        patientAmount: null,
+        insurerAmount: null,
+        reason: rejection.reason,
+        message: rejection.message,
+      };
+    }
+
+    const requiresPriorAuthorization = Boolean(
+      benefit.requiresPriorAuthorization,
+    );
+    let split: { patientAmount: string; insurerAmount: string } | null = null;
+    let splitRejection: QuoteRejection | null = null;
+    try {
+      split = this.split(line, benefit);
+    } catch (error) {
+      splitRejection = asRejection(error);
+    }
+
+    let priorAuthorizationStatus: PriorAuthorizationQuoteStatus =
+      'NOT_REQUIRED';
+    let priorAuthorizationRejection: QuoteRejection | null = null;
+    if (requiresPriorAuthorization) {
+      try {
+        await this.assertPriorAuthorization(
+          em,
+          claim,
+          line,
+          billedInThisClaim,
+          false,
+        );
+        priorAuthorizationStatus = 'APPROVED';
+      } catch (error) {
+        priorAuthorizationRejection = asRejection(error);
+        priorAuthorizationStatus =
+          PRIOR_AUTH_STATUS_BY_REASON[priorAuthorizationRejection.reason] ??
+          'MISMATCH';
+      }
+    }
+
+    // Misma precedencia que `evaluate`: la aprobación previa se rechaza antes
+    // que el reparto.
+    const rejection = priorAuthorizationRejection ?? splitRejection;
+    return {
+      lineSequence: line.lineSequence,
+      benefitId: benefit.id,
+      coveragePercent: benefit.coveragePercent ?? null,
+      copayAmount: benefit.copayAmount ?? null,
+      deductibleAmount: benefit.deductibleAmount ?? null,
+      requiresPriorAuthorization,
+      priorAuthorizationStatus,
+      patientAmount: split?.patientAmount ?? null,
+      insurerAmount: split?.insurerAmount ?? null,
+      reason: rejection?.reason ?? null,
+      message: rejection?.message ?? null,
+    };
+  }
+
+  /**
+   * La cobertura existe y es de este plan.
+   *
+   * La política no confía en que quien la llama haya emparejado bien el plan y
+   * la cobertura: los beneficios que reparten el monto salen de `planId`, y la
+   * aprobación previa se ata a `patientCoverageId`. Si fueran de planes
+   * distintos, el reparto se calcularía con las condiciones de un plan ajeno al
+   * paciente (y a la cadena aseguradora → organización que lo respalda). El
+   * paciente no se compara aparte: lo fija la cobertura, que es suya.
+   */
+  private async assertCoverageOfPlan(
+    tx: EntityManager,
+    claim: ClaimToEvaluate,
+  ): Promise<void> {
+    const coverage = await tx.findOne(PatientCoverages, {
+      id: claim.patientCoverageId,
+    });
+    if (!coverage || coverage.insurancePlanId !== claim.planId) {
+      throw new PreconditionFailedException(
+        'La cobertura del paciente no corresponde al plan del cobro',
+        { reason: CLAIM_COVERAGE_REASON.COVERAGE_PLAN_MISMATCH },
+      );
+    }
   }
 
   /** El único beneficio vigente del plan para el servicio de la línea. */
@@ -204,12 +374,14 @@ export class ClaimCoveragePolicy {
    * en otros reclamos activos y en las líneas anteriores de este mismo cobro. La
    * fila de la aprobación se bloquea (`FOR UPDATE`) hasta el fin de la
    * transacción, así dos cobros simultáneos no pueden gastar el mismo saldo.
+   * Con `lock = false` (cotización) sólo se lee: no hay transacción que bloquee.
    */
   private async assertPriorAuthorization(
     tx: EntityManager,
     claim: ClaimToEvaluate,
     line: ClaimLineToEvaluate,
     billedInThisClaim: Map<string, string>,
+    lock: boolean,
   ): Promise<void> {
     if (!claim.priorAuthorizationRequestId) {
       throw reject(
@@ -221,7 +393,7 @@ export class ClaimCoveragePolicy {
     const request = await tx.findOne(
       PriorAuthorizationRequests,
       { id: claim.priorAuthorizationRequestId },
-      { lockMode: LockMode.PESSIMISTIC_WRITE },
+      lock ? { lockMode: LockMode.PESSIMISTIC_WRITE } : undefined,
     );
     if (
       !request ||
@@ -386,4 +558,24 @@ function reject(
     lineSequence: line.lineSequence,
     ...extra,
   });
+}
+
+/** Rechazo tipificado capturado por la cotización. */
+interface QuoteRejection {
+  readonly reason: string;
+  readonly message: string;
+}
+
+/**
+ * Convierte el 422 tipificado de la política en datos. Todo lo que no sea un
+ * rechazo de negocio con motivo (un fallo de la base, por ejemplo) se relanza.
+ */
+function asRejection(error: unknown): QuoteRejection {
+  if (error instanceof PreconditionFailedException) {
+    const reason = error.details?.reason;
+    if (typeof reason === 'string') {
+      return { reason, message: error.message };
+    }
+  }
+  throw error;
 }

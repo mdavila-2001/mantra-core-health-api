@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../../common';
 import { PharmacyProcurementService } from '../../services';
 import {
   CreateSupplierDto,
@@ -35,6 +40,11 @@ export class PharmacyProcurementController {
   constructor(private readonly procurement: PharmacyProcurementService) {}
 
   /** Bootstrap: alta de proveedor. */
+  @Audited({
+    action: 'PHARMACY_SUPPLIER_CREATED',
+    entity: 'pharmacy_supplier',
+    entityId: 'result.id',
+  })
   @Post(':pharmacyId/suppliers')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -48,6 +58,11 @@ export class PharmacyProcurementController {
   }
 
   /** UC-25-01: emitir orden de compra. */
+  @Audited({
+    action: 'PHARMACY_PURCHASE_ORDER_CREATED',
+    entity: 'pharmacy_purchase_order',
+    entityId: 'result.id',
+  })
   @Post(':pharmacyId/purchase-orders')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -63,6 +78,11 @@ export class PharmacyProcurementController {
   }
 
   /** UC-25-02: recepción de mercancía por lote. */
+  @Audited({
+    action: 'PHARMACY_GOODS_RECEIVED',
+    entity: 'pharmacy_goods_receipt',
+    entityId: 'result.id',
+  })
   @Post(':pharmacyId/goods-receipts')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

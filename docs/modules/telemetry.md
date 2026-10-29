@@ -9,7 +9,7 @@
 # Módulo `telemetry`
 
 **Fuente:** [`src/modules/telemetry/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/telemetry/README.md)
-· 4 controllers · 5 services · 15 repositories · 14 entidades · 12 DTO
+· 5 controllers · 6 services · 16 repositories · 14 entidades · 12 DTO
 
 ---
 

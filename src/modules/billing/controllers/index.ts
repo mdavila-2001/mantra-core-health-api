@@ -3,3 +3,4 @@ export * from './billing-payables.controller';
 export * from './billing-operations.controller';
 export * from './billing-service-catalog.controller';
 export * from './billing-simulated.controller';
+export * from './patient-spending.controller';

@@ -173,12 +173,11 @@ export class RetrievalRepository {
   findSessionForUpdate(
     em: EntityManager,
     id: string,
+    tenantId?: string,
   ): Promise<RetrievalSessions | null> {
-    return em.findOne(
-      RetrievalSessions,
-      { id },
-      { lockMode: LockMode.PESSIMISTIC_WRITE },
-    );
+    return em.findOne(RetrievalSessions, tenantId ? { id, tenantId } : { id }, {
+      lockMode: LockMode.PESSIMISTIC_WRITE,
+    });
   }
 
   /**

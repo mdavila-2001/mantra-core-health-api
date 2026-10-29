@@ -17,4 +17,4 @@ graphify-out/
 
 # Artículos del glosario serializados por el front (scripts/glossary-articulos-alovida.mjs):
 # una cadena JSON por término, que Prettier no puede ni debe repartir.
-src/common/seed/glossary-articles.generated.ts
+src/common/seed/data/glossary/glossary-articles.json

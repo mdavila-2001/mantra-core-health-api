@@ -115,6 +115,18 @@ export class AuthzGrantsService {
           AuthzErrorReason.ROLE_ASSIGNMENT_ROLE_NOT_ASSIGNABLE,
         );
       }
+      // Un rol de ámbito global se asigna SIN tenant, sede ni consultorio: con tenant, el código
+      // entra a `scopedRoles` del token y deja de autorizar en las rutas `@TenantAgnostic` (403).
+      if (
+        role.scopeConceptId === AUTHZ.SCOPE_GLOBAL &&
+        (dto.tenantId || dto.branchId || dto.practiceId)
+      ) {
+        throw new PreconditionFailedException(
+          'Un rol de ámbito global se asigna sin tenant, sede ni consultorio',
+          { roleId: role.id, roleCode: role.code },
+          AuthzErrorReason.ROLE_ASSIGNMENT_GLOBAL_ROLE_WITH_SCOPE,
+        );
+      }
       if (dto.validFrom && dto.validTo && dto.validFrom >= dto.validTo) {
         throw new PreconditionFailedException(
           'validFrom debe ser anterior a validTo',

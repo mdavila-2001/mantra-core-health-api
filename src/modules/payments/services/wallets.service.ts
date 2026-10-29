@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { touch, type AuthenticatedUser } from '../../../common';
 import { PaymentsWalletsRepository } from '../repositories';
+import { addAmounts, roundAmount } from './payment-money';
 
 /** Petición de acreditar saldo a una billetera (contrato entre dominios). */
 export interface CreditWalletInput {
@@ -43,11 +44,6 @@ export class WalletsService {
    * @param walletsRepo - Repositorio de billeteras y su ledger.
    */
   constructor(private readonly walletsRepo: PaymentsWalletsRepository) {}
-
-  /** Redondeo monetario a 2 decimales para el saldo. */
-  private round(value: number): string {
-    return (Math.round(value * 100) / 100).toFixed(2);
-  }
 
   /**
    * Acredita `amount` a la billetera del propietario en la moneda dada, dentro de
@@ -91,8 +87,10 @@ export class WalletsService {
       });
     }
 
-    const balanceAfter = this.round(
-      Number(wallet.availableBalance ?? '0') + Number(input.amount),
+    // Saldo = saldo + abono, exacto y a 2 decimales: con `Number`, 0.10 + 0.20
+    // y los saldos grandes acumulaban ruido de coma flotante.
+    const balanceAfter = roundAmount(
+      addAmounts([wallet.availableBalance ?? '0', input.amount]),
     );
     const entry = this.walletsRepo.createWalletLedgerEntry(tx, {
       walletId: wallet.id,

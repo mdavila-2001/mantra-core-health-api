@@ -56,7 +56,7 @@ const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const COUNTRY_RE = /^[A-Z]{2}$/;
 const REGISTRY_ID_RE = /^[a-z][a-z0-9-]*:\S/;
 const SYSTEM_RE =
-  /^(?:fda-product-code|emdn|gmdn|gmdn-pt|jmdn|cnd|[a-z]{2}:[a-z0-9-]+)$/;
+  /^(?:fda-product-code|emdn|gmdn|gmdn-pt|jmdn|cnd|(?:[a-z]{2}|who):[a-z0-9-]+)$/;
 
 /** Límite por archivo .gz (GitHub rechaza > 100 MB; la regla común es < 50 MB). */
 export const MAX_GZ_BYTES = 45 * 1024 * 1024;

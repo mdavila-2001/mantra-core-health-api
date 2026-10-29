@@ -10,7 +10,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { PlatformTenantOptional } from '../../../../common/tenant/platform-tenant-optional.decorator';
-import { CurrentUser, type AuthenticatedUser } from '../../../../common';
+import {
+  Audited,
+  CurrentUser,
+  type AuthenticatedUser,
+} from '../../../../common';
 import {
   InsurerPatientConversationDto,
   InsurerPatientConversationResponseDto,
@@ -28,6 +32,10 @@ import { InsurerPatientsService } from '../../application/services/insurer-patie
 export class InsurerPatientsController {
   constructor(private readonly service: InsurerPatientsService) {}
 
+  @Audited({
+    action: 'INSURER_PATIENTS_SEARCHED',
+    entity: 'patient_coverage',
+  })
   @Post('search')
   @HttpCode(200)
   @Header('Cache-Control', 'private, no-store')
@@ -63,6 +71,10 @@ export class InsurerPatientsController {
     return this.service.options(actor);
   }
 
+  @Audited({
+    action: 'INSURER_PATIENT_CONVERSATION_OPENED',
+    entity: 'patient_coverage',
+  })
   @Post('conversation')
   @HttpCode(200)
   @Header('Cache-Control', 'private, no-store')

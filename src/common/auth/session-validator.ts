@@ -1,7 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS, SEED } from '../constants/concepts';
 import type { JwtPayload } from './jwt-payload.interface';
+import { unauthorizedWithReason } from '../errors/reasoned-http-exceptions';
+import { SystemErrorReason } from '../errors/system-error-reasons';
 
 /**
  * Comprueba contra `iam.sessions` que el access token siga respaldado por una
@@ -28,7 +30,7 @@ export class SessionValidator {
    * Lanza si la sesión del token no está activa.
    *
    * @param payload - Claims ya verificados (firma, expiración y tipo).
-   * @throws UnauthorizedException si la sesión fue revocada, venció, es de otro
+   * @throws UnauthorizedException (`SESSION_REQUIRED`/`SESSION_INACTIVE`) si la sesión fue revocada, venció, es de otro
    *   usuario o la cuenta no está activa.
    */
   async assertActive(payload: JwtPayload): Promise<void> {
@@ -39,7 +41,10 @@ export class SessionValidator {
     if (payload.sub === SEED.systemWorkerUserId) return;
 
     if (!payload.sid) {
-      throw new UnauthorizedException('Token sin sesión');
+      throw unauthorizedWithReason(
+        'Token sin sesión',
+        SystemErrorReason.SESSION_REQUIRED,
+      );
     }
 
     const rows = await this.em.getConnection().execute<unknown[]>(
@@ -54,7 +59,10 @@ export class SessionValidator {
       [payload.sid, payload.sub, CONCEPTS.STATE_ACTIVE, CONCEPTS.USER_ACTIVE],
     );
     if (rows.length === 0) {
-      throw new UnauthorizedException('La sesión ya no está activa');
+      throw unauthorizedWithReason(
+        'La sesión ya no está activa',
+        SystemErrorReason.SESSION_INACTIVE,
+      );
     }
   }
 }

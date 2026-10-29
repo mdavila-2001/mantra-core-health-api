@@ -86,7 +86,8 @@ export class CareTeamsController {
   @ApiOperation({ summary: 'Listar equipos de cuidado de un paciente' })
   listByPatient(
     @Query('patientProfileId', ParseUUIDPipe) patientProfileId: string,
+    @CurrentUser() actor: AuthenticatedUser,
   ) {
-    return this.careTeamsService.listByPatient(patientProfileId);
+    return this.careTeamsService.listByPatient(patientProfileId, actor);
   }
 }

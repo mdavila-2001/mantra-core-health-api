@@ -5,6 +5,7 @@ import {
   CONCEPTS,
   ResourceNotFoundException,
   decodeKeysetCursor,
+  getCurrentTenantId,
   encodeKeysetCursor,
   touch,
   type AuthenticatedUser,
@@ -97,6 +98,16 @@ export class CommunityGroupWallService {
         dto.authorProfileId,
       );
       this.access.assertCanPost(access);
+
+      // API#837 · DOC-SOC-010: una aseguradora no inicia debates. Una
+      // publicación raíz abre un debate; responder a una existente es
+      // participar, que la fuente no le prohíbe.
+      if (!dto.parentCommentId)
+        await this.access.assertOrganizationMayStartForums(
+          tx,
+          getCurrentTenantId(),
+          'START_DEBATE',
+        );
 
       const author = await this.profilesRepo.findById(tx, dto.authorProfileId);
       if (!author)

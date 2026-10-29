@@ -4,10 +4,10 @@ Capa HTTP. Validan, autorizan y delegan; la transacción vive en el servicio.
 
 ## Rutas
 
-| Controlador | Endpoints |
-| --- | --- |
-| `LoyaltyController` | 8 sobre `loyalty/programs`, `loyalty/memberships`, `loyalty/jobs`, `referral-programs` y `referrals` |
-| `PromotionsController` | 6 sobre `promotions`, `coupons`, `redemptions` y `checkout` |
+| Controlador            | Endpoints                                                                                            |
+| ---------------------- | ---------------------------------------------------------------------------------------------------- |
+| `LoyaltyController`    | 8 sobre `loyalty/programs`, `loyalty/memberships`, `loyalty/jobs`, `referral-programs` y `referrals` |
+| `PromotionsController` | 6 sobre `promotions`, `coupons`, `redemptions` y `checkout`                                          |
 
 Ninguno declara prefijo en `@Controller()`: los casos de uso cuelgan de raíces distintas
 (`/loyalty`, `/promotions`, `/coupons`, `/redemptions`, `/checkout`, `/referral-programs`), así que

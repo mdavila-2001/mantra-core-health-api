@@ -113,6 +113,12 @@
     "fuente": "src/modules/authz/services/authz-pdp.service.ts:128",
     "revision": "manual, 2026-10-21"
   },
+  "BillingSimulatedController_catalogs": {
+    "operacion": "GET /billing/simulated/catalogs",
+    "motivo": "Devuelve los catálogos paramétricos del SIAT simulado, que viven en constantes del código (`SIMULATED_CATALOGS` y los mensajes del SIAT); no consulta la base de datos.",
+    "fuente": "src/modules/billing/services/billing-simulated.service.ts:226",
+    "revision": "manual, 2026-10-25"
+  },
   "DataSourcesController_dataSources": {
     "operacion": "GET /health/data-sources",
     "motivo": "Consulta el estado del registro de conexiones y las reglas de enrutamiento, en memoria.",
@@ -130,6 +136,24 @@
     "motivo": "Devuelve catálogos que viven en constantes del código (códigos, piezas, cuadrantes).",
     "fuente": "src/modules/procedures_perioperative/services/periop-dental.service.ts:252",
     "revision": "manual, 2026-10-21"
+  },
+  "IamOnboardingDraftsController_deleteDraft": {
+    "operacion": "DELETE /iam/onboarding-drafts/{formType}/{draftId}",
+    "motivo": "El borrador de alta vive sólo en la memoria del proceso (un `Map` con vigencia de 30 días); no hay fila en Postgres.",
+    "fuente": "src/modules/iam/application/services/iam-onboarding-drafts.service.ts:19",
+    "revision": "manual, 2026-10-25"
+  },
+  "IamOnboardingDraftsController_getDraft": {
+    "operacion": "GET /iam/onboarding-drafts/{formType}/{draftId}",
+    "motivo": "El borrador de alta vive sólo en la memoria del proceso (un `Map` con vigencia de 30 días); no hay fila en Postgres.",
+    "fuente": "src/modules/iam/application/services/iam-onboarding-drafts.service.ts:19",
+    "revision": "manual, 2026-10-25"
+  },
+  "IamOnboardingDraftsController_saveDraft": {
+    "operacion": "PUT /iam/onboarding-drafts/{formType}/{draftId}",
+    "motivo": "El borrador de alta vive sólo en la memoria del proceso (un `Map` con vigencia de 30 días); no hay fila en Postgres.",
+    "fuente": "src/modules/iam/application/services/iam-onboarding-drafts.service.ts:19",
+    "revision": "manual, 2026-10-25"
   },
   "SchedulingController_listActivityTypes": {
     "operacion": "GET /scheduling/activity-types",
@@ -149,6 +173,30 @@
     "fuente": "src/modules/time_series/services/series-query.service.ts:122",
     "revision": "manual, 2026-10-21"
   },
+  "TelemetryOnboardingAnalyticsController_getFunnelReport": {
+    "operacion": "GET /admin/analytics/onboarding/funnel",
+    "motivo": "Calcula el embudo sobre los eventos de alta que el proceso acumula en memoria (`events`); no consulta la base de datos.",
+    "fuente": "src/modules/telemetry/services/telemetry-onboarding-analytics.service.ts:19",
+    "revision": "manual, 2026-10-25"
+  },
+  "TelemetryOnboardingAnalyticsController_getHeatmapReport": {
+    "operacion": "GET /admin/analytics/onboarding/heatmap",
+    "motivo": "Calcula el mapa de calor sobre los eventos de alta que el proceso acumula en memoria (`events`); no consulta la base de datos.",
+    "fuente": "src/modules/telemetry/services/telemetry-onboarding-analytics.service.ts:19",
+    "revision": "manual, 2026-10-25"
+  },
+  "TelemetryOnboardingAnalyticsController_recordEvents": {
+    "operacion": "POST /telemetry/onboarding-events",
+    "motivo": "Los eventos del embudo de alta se acumulan sólo en la memoria del proceso (`events`); no hay fila en Postgres.",
+    "fuente": "src/modules/telemetry/services/telemetry-onboarding-analytics.service.ts:19",
+    "revision": "manual, 2026-10-25"
+  },
+  "TerminologyImportTemplateController_descargarPlantilla": {
+    "operacion": "GET /terminology/import-template",
+    "motivo": "Arma la plantilla en memoria a partir de la definición del perfil de importación y la devuelve como archivo; no consulta la base de datos.",
+    "fuente": "src/modules/terminology/services/import-template.service.ts:79",
+    "revision": "manual, 2026-10-25"
+  },
   "TimescaleAdminController_configureHypertable": {
     "operacion": "POST /ts/admin/hypertables",
     "motivo": "Convierte en hypertable la tabla que indica la petición (`dto.table`); el nombre no se conoce antes de ejecutar.",
@@ -160,5 +208,11 @@
     "motivo": "Modifica la hypertable que indica la ruta (`{table}`); el nombre no se conoce antes de ejecutar.",
     "fuente": "src/modules/time_series/services/timescale-admin.service.ts:122",
     "revision": "manual, 2026-10-21"
+  },
+  "WebPushController_config": {
+    "operacion": "GET /notifications/web-push/config",
+    "motivo": "Devuelve la clave pública VAPID que el servicio leyó de la configuración al arrancar; no consulta la base de datos.",
+    "fuente": "src/modules/messaging/services/web-push.service.ts:102",
+    "revision": "manual, 2026-10-25"
   }
 }

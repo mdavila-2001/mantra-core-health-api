@@ -4,6 +4,10 @@ import {
   PreconditionFailedException,
 } from '../../../../common';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
+import {
+  allowAllScope,
+  SCOPE_PHARMACY_ID,
+} from '../scope/pharmacy-inventory-scope.testing';
 import { ApproveInventoryCountUseCase } from './approve-inventory-count.use-case';
 import { OpenInventoryCountUseCase } from './open-inventory-count.use-case';
 
@@ -15,7 +19,6 @@ describe('Inventory count use cases', () => {
     const em = {
       transactional: jest.fn(async (work: (tx: any) => unknown) => work(tx)),
     };
-    const locations = { findById: jest.fn(async () => ({ id: 'loc-1' })) };
     const positions = {
       findByKey: jest
         .fn<(...args: any[]) => Promise<any>>()
@@ -33,8 +36,8 @@ describe('Inventory count use cases', () => {
     const useCase = new OpenInventoryCountUseCase(
       em as any,
       sessions as any,
-      locations as any,
       positions as any,
+      allowAllScope(),
       logger as any,
     );
 
@@ -88,8 +91,8 @@ describe('Inventory count use cases', () => {
     const useCase = new OpenInventoryCountUseCase(
       em as any,
       sessions as any,
-      { findById: jest.fn(async () => ({ id: 'loc-1' })) } as any,
       {} as any,
+      allowAllScope(),
       logger as any,
     );
 
@@ -166,6 +169,7 @@ describe('Inventory count use cases', () => {
       sessions as any,
       stock as any,
       ledger as any,
+      allowAllScope(),
       logger as any,
     );
 
@@ -185,15 +189,26 @@ describe('Inventory count use cases', () => {
       lineIds: ['line-1', 'line-2'],
       adjustments: 2,
     });
+    // PINV-02: el asiento lleva la farmacia verdadera (la de la sede) y la
+    // sede, no la sede en el lugar de la farmacia.
+    expect(ledger.nextSequence).toHaveBeenCalledWith(tx, SCOPE_PHARMACY_ID);
     expect(ledger.append).toHaveBeenNthCalledWith(
       1,
       tx,
-      expect.objectContaining({ quantityDelta: '2' }),
+      expect.objectContaining({
+        quantityDelta: '2',
+        pharmacyId: SCOPE_PHARMACY_ID,
+        pharmacySiteId: 'site-1',
+      }),
     );
     expect(ledger.append).toHaveBeenNthCalledWith(
       2,
       tx,
-      expect.objectContaining({ quantityDelta: '-2' }),
+      expect.objectContaining({
+        quantityDelta: '-2',
+        pharmacyId: SCOPE_PHARMACY_ID,
+        pharmacySiteId: 'site-1',
+      }),
     );
     expect(
       [...positions.values()].map((position) => position.onHandQuantity),
@@ -222,6 +237,7 @@ describe('Inventory count use cases', () => {
       } as any,
       {} as any,
       {} as any,
+      allowAllScope(),
       logger as any,
     );
 

@@ -9,7 +9,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { Audited, CurrentUser, type AuthenticatedUser } from '../../../common';
 import { SurveysResponsesService } from '../services';
 import {
   IdResponseDto,
@@ -58,6 +58,11 @@ export class SurveysPatientController {
   }
 
   /** Envía la respuesta. Una sola vez y completa. */
+  @Audited({
+    action: 'SURVEY_RESPONSE_SUBMITTED',
+    entity: 'survey_response',
+    entityId: 'result.id',
+  })
   @Post(':id/responses')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Responder el cuestionario' })

@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   CreateVisitSurveyDto,
   CreatedResourceDto,
@@ -39,6 +44,11 @@ export class VisitSurveysController {
   constructor(private readonly service: VisitSurveysService) {}
 
   /** UC-17-27. */
+  @Audited({
+    action: 'VISIT_SURVEY_CREATED',
+    entity: 'visit_survey',
+    entityId: 'result.id',
+  })
   @Post('labs/:pharmaLabId')
   @HttpCode(HttpStatus.CREATED)
   @Roles('PHARMA_LAB_ADMIN', 'PLATFORM_ADMIN')
@@ -62,6 +72,11 @@ export class VisitSurveysController {
   }
 
   /** Cierre de una encuesta. */
+  @Audited({
+    action: 'VISIT_SURVEY_CLOSED',
+    entity: 'visit_survey',
+    entityId: 'param:surveyId',
+  })
   @Post('labs/:pharmaLabId/:surveyId/close')
   @Roles('PHARMA_LAB_ADMIN', 'PLATFORM_ADMIN')
   @ApiOperation({ summary: 'Cerrar una encuesta' })
@@ -117,6 +132,11 @@ export class VisitSurveysController {
   }
 
   /** UC-17-28. */
+  @Audited({
+    action: 'VISIT_SURVEY_ANSWERED',
+    entity: 'visit_survey_response',
+    entityId: 'param:responseId',
+  })
   @Post('responses/:responseId')
   @Roles('PRACTITIONER', 'CLINICIAN')
   @ApiOperation({ summary: 'Responder la encuesta de la visita' })

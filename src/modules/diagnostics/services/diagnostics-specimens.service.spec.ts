@@ -18,6 +18,18 @@ import {
   ResourceNotFoundException,
   PreconditionFailedException,
 } from '../../../common';
+import { DiagnosticsScopeService } from './diagnostics-scope.service';
+import { T1, T2, expectNotAvailable, inTenant } from './diagnostics.testing';
+
+/** Espécimen de T1 del paciente `p1`. */
+const ownSpecimen = (patch: Record<string, unknown> = {}) => ({
+  id: 's1',
+  patientProfileId: 'p1',
+  custodianTenantId: T1,
+  statusConceptId: DIAG.SPECIMEN_COLLECTED,
+  updatedAt: new Date(),
+  ...patch,
+});
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -51,20 +63,32 @@ function build() {
     findContainersBySpecimenIds: mockFn().mockResolvedValue([]),
     findCustodyEventsBySpecimenIds: mockFn().mockResolvedValue([]),
   };
+  const refsRepo = {
+    findEncounter: mockFn(),
+    findServiceRequest: mockFn(),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new DiagnosticsSpecimensService(
+  const scope = new DiagnosticsScopeService(
+    repo as any,
+    {} as any,
+    {} as any,
+    {} as any,
+    refsRepo as any,
+  );
+  const raw = new DiagnosticsSpecimensService(
     em as any,
     repo,
+    scope,
     logger as any,
   );
-  return { service, tx, em, repo };
+  return { raw, service: inTenant(raw), tx, em, repo, refsRepo };
 }
 
 describe('DiagnosticsSpecimensService', () => {
   describe('catálogos de tipo de espécimen y de contenedor', () => {
     const registration = (specimenTypeConceptId: string) => ({
       patientProfileId: 'p1',
-      custodianTenantId: 't1',
+      custodianTenantId: T1,
       specimenTypeConceptId,
     });
 
@@ -83,7 +107,7 @@ describe('DiagnosticsSpecimensService', () => {
 
     it('correcto: un tipo del catálogo `specimen-container-type` crea el contenedor', async () => {
       const d = build();
-      d.repo.findSpecimen.mockResolvedValue({ id: 's1' });
+      d.repo.findSpecimen.mockResolvedValue(ownSpecimen());
       d.repo.createContainer.mockReturnValue({
         id: 'c1',
         statusConceptId: DIAG.CONTAINER_ACTIVE,
@@ -102,7 +126,7 @@ describe('DiagnosticsSpecimensService', () => {
     it('límite: el primero y el último de cada catálogo se aceptan', async () => {
       const d = build();
       d.repo.createSpecimen.mockReturnValue({ id: 's1' });
-      d.repo.findSpecimen.mockResolvedValue({ id: 's1' });
+      d.repo.findSpecimen.mockResolvedValue(ownSpecimen());
       d.repo.createContainer.mockReturnValue({ id: 'c1' });
       for (const type of [
         SPECIMEN_TYPE_CONCEPTS[0],
@@ -175,7 +199,7 @@ describe('DiagnosticsSpecimensService', () => {
       const res = await d.service.createSpecimen(
         {
           patientProfileId: 'p1',
-          custodianTenantId: 't1',
+          custodianTenantId: T1,
           specimenTypeConceptId: DIAG.SPECIMEN_TYPE_BLOOD_VENOUS,
         },
         actor,
@@ -193,7 +217,7 @@ describe('DiagnosticsSpecimensService', () => {
         d.service.accession(
           {
             patientProfileId: 'p1',
-            custodianTenantId: 't1',
+            custodianTenantId: T1,
             specimenIds: ['x'],
           } as any,
           actor,
@@ -203,11 +227,7 @@ describe('DiagnosticsSpecimensService', () => {
 
     it('accessions, marks specimen received and records custody', async () => {
       const d = build();
-      const specimen = {
-        id: 's1',
-        statusConceptId: DIAG.SPECIMEN_COLLECTED,
-        custodianTenantId: 't1',
-      };
+      const specimen = ownSpecimen();
       d.repo.findSpecimen.mockResolvedValue(specimen);
       d.repo.createAccession.mockReturnValue({
         id: 'a1',
@@ -218,7 +238,7 @@ describe('DiagnosticsSpecimensService', () => {
       const res = await d.service.accession(
         {
           patientProfileId: 'p1',
-          custodianTenantId: 't1',
+          custodianTenantId: T1,
           specimenIds: ['s1'],
         },
         actor,
@@ -235,15 +255,14 @@ describe('DiagnosticsSpecimensService', () => {
 
     it('refuses to accession a rejected specimen (precondition)', async () => {
       const d = build();
-      d.repo.findSpecimen.mockResolvedValue({
-        id: 's1',
-        statusConceptId: DIAG.SPECIMEN_REJECTED,
-      });
+      d.repo.findSpecimen.mockResolvedValue(
+        ownSpecimen({ statusConceptId: DIAG.SPECIMEN_REJECTED }),
+      );
       await expect(
         d.service.accession(
           {
             patientProfileId: 'p1',
-            custodianTenantId: 't1',
+            custodianTenantId: T1,
             specimenIds: ['s1'],
           } as any,
           actor,
@@ -263,7 +282,9 @@ describe('DiagnosticsSpecimensService', () => {
 
     it('rejects specimen and cancels dependent tests', async () => {
       const d = build();
-      const specimen = { id: 's1', statusConceptId: DIAG.SPECIMEN_RECEIVED };
+      const specimen = ownSpecimen({
+        statusConceptId: DIAG.SPECIMEN_RECEIVED,
+      });
       d.repo.findSpecimen.mockResolvedValue(specimen);
       d.repo.recordRejection.mockReturnValue({ id: 'rej1' });
 
@@ -298,8 +319,13 @@ describe('DiagnosticsSpecimensService', () => {
 
     it('records container + custody events and updates status', async () => {
       const d = build();
-      const container = { id: 'c1', statusConceptId: DIAG.CONTAINER_ACTIVE };
+      const container = {
+        id: 'c1',
+        specimenId: 's1',
+        statusConceptId: DIAG.CONTAINER_ACTIVE,
+      };
       d.repo.findContainer.mockResolvedValue(container);
+      d.repo.findSpecimen.mockResolvedValue(ownSpecimen());
       d.repo.recordCustodyEvent.mockReturnValue({ id: 'cust1' });
 
       const res = await d.service.recordCustodyEvent(
@@ -424,6 +450,261 @@ describe('DiagnosticsSpecimensService', () => {
       await expect(d.service.getSpecimen('s1', 't2')).rejects.toBeInstanceOf(
         ResourceNotFoundException,
       );
+    });
+  });
+
+  describe('alcance de tenant (DIAG-01)', () => {
+    const registration = {
+      patientProfileId: 'p1',
+      specimenTypeConceptId: DIAG.SPECIMEN_TYPE_BLOOD_VENOUS,
+    } as any;
+
+    it('crea el espécimen en el tenant del contexto aunque el cuerpo no lo declare', async () => {
+      const d = build();
+      d.repo.createSpecimen.mockReturnValue({
+        id: 's1',
+        statusConceptId: DIAG.SPECIMEN_COLLECTED,
+      });
+      await d.service.createSpecimen(registration, actor);
+      expect(d.repo.createSpecimen).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ custodianTenantId: T1 }),
+      );
+    });
+
+    it('rechaza un custodianTenantId del cuerpo distinto del activo y no escribe', async () => {
+      const d = build();
+      await expectNotAvailable(
+        d.service.createSpecimen(
+          { ...registration, custodianTenantId: T2 },
+          actor,
+        ),
+      );
+      expect(d.repo.createSpecimen).not.toHaveBeenCalled();
+    });
+
+    it('un encuentro de T2 no se enlaza al espécimen de T1', async () => {
+      const d = build();
+      d.refsRepo.findEncounter.mockResolvedValue({
+        id: 'enc2',
+        tenantId: T2,
+        patientProfileId: 'p1',
+      });
+      await expectNotAvailable(
+        d.service.createSpecimen(
+          { ...registration, encounterId: 'enc2' },
+          actor,
+        ),
+      );
+      expect(d.repo.createSpecimen).not.toHaveBeenCalled();
+    });
+
+    it('una orden de T1 de otro paciente no se enlaza al espécimen', async () => {
+      const d = build();
+      d.refsRepo.findServiceRequest.mockResolvedValue({
+        id: 'sr1',
+        custodianTenantId: T1,
+        patientProfileId: 'otro-paciente',
+      });
+      await expectNotAvailable(
+        d.service.createSpecimen(
+          { ...registration, serviceRequestId: 'sr1' },
+          actor,
+        ),
+      );
+      expect(d.repo.createSpecimen).not.toHaveBeenCalled();
+    });
+
+    it('límite: acesión con especímenes válidos de T1 crea una sola acesión en T1', async () => {
+      const d = build();
+      d.repo.findSpecimen.mockImplementation((_tx: unknown, id: string) =>
+        Promise.resolve(ownSpecimen({ id })),
+      );
+      d.repo.createAccession.mockReturnValue({
+        id: 'a1',
+        statusConceptId: DIAG.ACCESSION_RECEIVED,
+      });
+      d.repo.addAccessionSpecimen.mockReturnValue({ id: 'as' });
+      await d.service.accession(
+        { patientProfileId: 'p1', specimenIds: ['s1', 's2'] } as any,
+        actor,
+      );
+      expect(d.repo.createAccession).toHaveBeenCalledTimes(1);
+      expect(d.repo.createAccession).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ custodianTenantId: T1 }),
+      );
+    });
+
+    it('un lote que mezcla un espécimen de T2 se rechaza entero sin escribir', async () => {
+      const d = build();
+      d.repo.findSpecimen.mockImplementation((_tx: unknown, id: string) =>
+        Promise.resolve(
+          ownSpecimen({
+            id,
+            custodianTenantId: id === 's2' ? T2 : T1,
+          }),
+        ),
+      );
+      await expectNotAvailable(
+        d.service.accession(
+          { patientProfileId: 'p1', specimenIds: ['s1', 's2'] } as any,
+          actor,
+        ),
+      );
+      expect(d.repo.createAccession).not.toHaveBeenCalled();
+      expect(d.repo.recordCustodyEvent).not.toHaveBeenCalled();
+    });
+
+    it('un espécimen de otro paciente no entra en la acesión', async () => {
+      const d = build();
+      d.repo.findSpecimen.mockResolvedValue(
+        ownSpecimen({ patientProfileId: 'otro-paciente' }),
+      );
+      await expectNotAvailable(
+        d.service.accession(
+          { patientProfileId: 'p1', specimenIds: ['s1'] } as any,
+          actor,
+        ),
+      );
+      expect(d.repo.createAccession).not.toHaveBeenCalled();
+    });
+
+    it('acesión con tenant del cuerpo distinto del activo no escribe', async () => {
+      const d = build();
+      await expectNotAvailable(
+        d.service.accession(
+          {
+            patientProfileId: 'p1',
+            custodianTenantId: T2,
+            specimenIds: ['s1'],
+          } as any,
+          actor,
+        ),
+      );
+      expect(d.repo.createAccession).not.toHaveBeenCalled();
+    });
+
+    it('rechazar un espécimen de T2 no cambia su estado ni cancela pruebas', async () => {
+      const d = build();
+      const specimen = ownSpecimen({
+        id: 'sB',
+        custodianTenantId: T2,
+        statusConceptId: DIAG.SPECIMEN_RECEIVED,
+      });
+      d.repo.findSpecimen.mockResolvedValue(specimen);
+      await expectNotAvailable(d.service.reject('sB', {} as any, actor));
+      expect(specimen.statusConceptId).toBe(DIAG.SPECIMEN_RECEIVED);
+      expect(d.repo.recordRejection).not.toHaveBeenCalled();
+      expect(d.repo.cancelTestsForSpecimen).not.toHaveBeenCalled();
+    });
+
+    it('la orden de recolección de otro tenant no se acepta al rechazar', async () => {
+      const d = build();
+      d.repo.findSpecimen.mockResolvedValue(ownSpecimen());
+      d.refsRepo.findServiceRequest.mockResolvedValue({
+        id: 'srB',
+        custodianTenantId: T2,
+        patientProfileId: 'p1',
+      });
+      await expectNotAvailable(
+        d.service.reject(
+          's1',
+          { recollectionServiceRequestId: 'srB' } as any,
+          actor,
+        ),
+      );
+      expect(d.repo.recordRejection).not.toHaveBeenCalled();
+    });
+
+    it('un espécimen ajeno responde igual que uno inexistente', async () => {
+      const ajeno = build();
+      ajeno.repo.findSpecimen.mockResolvedValue(
+        ownSpecimen({ custodianTenantId: T2 }),
+      );
+      const inexistente = build();
+      inexistente.repo.findSpecimen.mockResolvedValue(null);
+      const a = await expectNotAvailable(
+        ajeno.service.reject('s1', {} as any, actor),
+      );
+      const b = await expectNotAvailable(
+        inexistente.service.reject('s1', {} as any, actor),
+      );
+      expect(a.getResponse()).toEqual(b.getResponse());
+    });
+
+    it('crear un contenedor sobre un espécimen de T2 no escribe', async () => {
+      const d = build();
+      d.repo.findSpecimen.mockResolvedValue(
+        ownSpecimen({ custodianTenantId: T2 }),
+      );
+      await expectNotAvailable(
+        d.service.createContainer(
+          's1',
+          {
+            containerIdentifier: 'T',
+            containerTypeConceptId: DIAG.CONTAINER_TYPE_TUBE_LAVENDER_EDTA,
+          },
+          actor,
+        ),
+      );
+      expect(d.repo.createContainer).not.toHaveBeenCalled();
+    });
+
+    it('un contenedor padre de otro espécimen no se acepta', async () => {
+      const d = build();
+      d.repo.findSpecimen.mockResolvedValue(ownSpecimen());
+      d.repo.findContainer.mockResolvedValue({
+        id: 'cp',
+        specimenId: 'otro-espécimen',
+      });
+      await expectNotAvailable(
+        d.service.createContainer(
+          's1',
+          {
+            containerIdentifier: 'T',
+            containerTypeConceptId: DIAG.CONTAINER_TYPE_TUBE_LAVENDER_EDTA,
+            parentContainerId: 'cp',
+          } as any,
+          actor,
+        ),
+      );
+      expect(d.repo.createContainer).not.toHaveBeenCalled();
+    });
+
+    it('un traslado sobre un contenedor de T2 conserva su estado', async () => {
+      const d = build();
+      const container = {
+        id: 'cB',
+        specimenId: 'sB',
+        statusConceptId: DIAG.CONTAINER_ACTIVE,
+      };
+      d.repo.findContainer.mockResolvedValue(container);
+      d.repo.findSpecimen.mockResolvedValue(
+        ownSpecimen({ id: 'sB', custodianTenantId: T2 }),
+      );
+      await expectNotAvailable(
+        d.service.recordCustodyEvent('cB', { specimenId: 'sB' } as any, actor),
+      );
+      expect(container.statusConceptId).toBe(DIAG.CONTAINER_ACTIVE);
+      expect(d.repo.recordCustodyEvent).not.toHaveBeenCalled();
+      expect(d.repo.recordContainerEvent).not.toHaveBeenCalled();
+    });
+
+    it('un traslado con el espécimen de otro contenedor no escribe custodia', async () => {
+      const d = build();
+      d.repo.findContainer.mockResolvedValue({
+        id: 'c1',
+        specimenId: 's1',
+        statusConceptId: DIAG.CONTAINER_ACTIVE,
+      });
+      d.repo.findSpecimen.mockImplementation((_tx: unknown, id: string) =>
+        Promise.resolve(ownSpecimen({ id })),
+      );
+      await expectNotAvailable(
+        d.service.recordCustodyEvent('c1', { specimenId: 's2' } as any, actor),
+      );
+      expect(d.repo.recordCustodyEvent).not.toHaveBeenCalled();
     });
   });
 });

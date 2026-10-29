@@ -6,12 +6,17 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { QaCatalogRepository, QaRunsRepository } from '../repositories';
 import { TestAssertions } from '../entities';
+import {
+  assertQaResource,
+  qaOutOfScope,
+  resolveQaScope,
+  sameQaOwner,
+} from './qa-scope';
 import {
   evaluateAssertion,
   type AssertionDefinition,
@@ -149,6 +154,7 @@ export class QaRunsService {
     dto: CreateRunDto,
     actor: AuthenticatedUser,
   ): Promise<RunResponseDto> {
+    const scope = resolveQaScope(actor);
     this.logger.info(
       {
         operation: 'qa.run.create',
@@ -159,26 +165,26 @@ export class QaRunsService {
     );
 
     return this.em.transactional(async (tx) => {
-      const suite = await this.catalogRepo.findSuiteForUpdate(tx, dto.suiteId);
-      if (!suite) {
-        throw new ResourceNotFoundException('Suite no encontrada', {
-          suiteId: dto.suiteId,
-        });
-      }
+      // El tenant va en la consulta que bloquea: no se toca una suite ajena.
+      const suite = assertQaResource(
+        await this.catalogRepo.findSuiteForUpdate(tx, dto.suiteId, scope),
+        scope,
+        'Suite no encontrada',
+      );
       if (suite.stateConceptId !== CONCEPTS.SUITE_ACTIVE) {
         throw new PreconditionFailedException('La suite no está publicada', {
           suiteId: dto.suiteId,
         });
       }
 
-      const environment = await this.catalogRepo.findEnvironmentById(
-        tx,
-        dto.environmentId,
+      // El entorno cuelga de la suite: debe ser del mismo tenant.
+      const environment = assertQaResource(
+        await this.catalogRepo.findEnvironmentById(tx, dto.environmentId),
+        scope,
+        'Entorno no encontrado',
       );
-      if (!environment) {
-        throw new ResourceNotFoundException('Entorno no encontrado', {
-          environmentId: dto.environmentId,
-        });
+      if (!sameQaOwner(environment, suite)) {
+        throw qaOutOfScope('Entorno no encontrado');
       }
       if (environment.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new PreconditionFailedException('El entorno no está activo', {
@@ -222,7 +228,8 @@ export class QaRunsService {
       const run = this.runsRepo.createRun(tx, {
         suiteId: dto.suiteId,
         environmentId: dto.environmentId,
-        tenantId: dto.tenantId ?? suite.tenantId,
+        // El tenant de la corrida es el de la suite ya acotada, no el del cuerpo.
+        tenantId: suite.tenantId,
         runNumber,
         triggerConceptId: TRIGGER_CONCEPT[dto.trigger],
         triggeredByUserId: actor.id,
@@ -252,16 +259,18 @@ export class QaRunsService {
     dto: ExecuteCaseDto,
     actor: AuthenticatedUser,
   ): Promise<ExecuteCaseResponseDto> {
+    const scope = resolveQaScope(actor);
     this.logger.info(
       { operation: 'qa.case.execute', runId, caseId },
       'Capturing test case execution',
     );
 
     return this.em.transactional(async (tx) => {
-      const run = await this.runsRepo.findRunForUpdate(tx, runId);
-      if (!run) {
-        throw new ResourceNotFoundException('Corrida no encontrada', { runId });
-      }
+      const run = assertQaResource(
+        await this.runsRepo.findRunForUpdate(tx, runId, scope),
+        scope,
+        'Corrida no encontrada',
+      );
       if (
         run.statusConceptId === CONCEPTS.RUN_PASSED ||
         run.statusConceptId === CONCEPTS.RUN_FAILED_STATUS
@@ -271,9 +280,16 @@ export class QaRunsService {
 
       const testCase = await this.catalogRepo.findCaseById(tx, caseId);
       if (!testCase) {
-        throw new ResourceNotFoundException('Caso no encontrado', { caseId });
+        throw qaOutOfScope('Caso no encontrado');
       }
       if (testCase.suiteId !== run.suiteId) {
+        // Sólo se revela «es de otra suite» si esa suite es del tenant activo;
+        // un caso de otro tenant es, para este actor, un caso inexistente.
+        assertQaResource(
+          await this.catalogRepo.findSuiteById(tx, testCase.suiteId),
+          scope,
+          'Caso no encontrado',
+        );
         throw new PreconditionFailedException(
           'El caso pertenece a otra suite',
           { runId, caseId },
@@ -371,17 +387,26 @@ export class QaRunsService {
     actor: AuthenticatedUser,
     observed?: ObservedResponse,
   ): Promise<EvaluateResultResponseDto> {
+    const scope = resolveQaScope(actor);
     this.logger.info(
       { operation: 'qa.result.evaluate', resultId },
       'Evaluating case assertions',
     );
 
     return this.em.transactional(async (tx) => {
+      // El resultado no lleva tenant: su alcance es el de su corrida. Se
+      // comprueba antes de bloquear el resultado.
+      const preloaded = await this.runsRepo.findCaseResultById(tx, resultId);
+      assertQaResource(
+        preloaded
+          ? await this.runsRepo.findRunById(tx, preloaded.testRunId)
+          : null,
+        scope,
+        'Resultado no encontrado',
+      );
       const result = await this.runsRepo.findCaseResultForUpdate(tx, resultId);
       if (!result) {
-        throw new ResourceNotFoundException('Resultado no encontrado', {
-          resultId,
-        });
+        throw qaOutOfScope('Resultado no encontrado');
       }
 
       const alreadyEvaluated = await this.runsRepo.countAssertionResults(
@@ -476,16 +501,18 @@ export class QaRunsService {
     runId: string,
     actor: AuthenticatedUser,
   ): Promise<FinalizeRunResponseDto> {
+    const scope = resolveQaScope(actor);
     this.logger.info(
       { operation: 'qa.run.finalize', runId },
       'Finalizing test run',
     );
 
     return this.em.transactional(async (tx) => {
-      const run = await this.runsRepo.findRunForUpdate(tx, runId);
-      if (!run) {
-        throw new ResourceNotFoundException('Corrida no encontrada', { runId });
-      }
+      const run = assertQaResource(
+        await this.runsRepo.findRunForUpdate(tx, runId, scope),
+        scope,
+        'Corrida no encontrada',
+      );
       if (
         run.statusConceptId === CONCEPTS.RUN_PASSED ||
         run.statusConceptId === CONCEPTS.RUN_FAILED_STATUS
@@ -550,6 +577,7 @@ export class QaRunsService {
     dto: AttachArtifactDto,
     actor: AuthenticatedUser,
   ): Promise<ArtifactResponseDto> {
+    const scope = resolveQaScope(actor);
     this.logger.info(
       {
         operation: 'qa.artifact.attach',
@@ -560,10 +588,11 @@ export class QaRunsService {
     );
 
     return this.em.transactional(async (tx) => {
-      const run = await this.runsRepo.findRunById(tx, runId);
-      if (!run) {
-        throw new ResourceNotFoundException('Corrida no encontrada', { runId });
-      }
+      assertQaResource(
+        await this.runsRepo.findRunById(tx, runId),
+        scope,
+        'Corrida no encontrada',
+      );
 
       if (dto.testCaseResultId) {
         const result = await this.runsRepo.findCaseResultById(
@@ -571,11 +600,16 @@ export class QaRunsService {
           dto.testCaseResultId,
         );
         if (!result) {
-          throw new ResourceNotFoundException('Resultado no encontrado', {
-            testCaseResultId: dto.testCaseResultId,
-          });
+          throw qaOutOfScope('Resultado no encontrado');
         }
         if (result.testRunId !== runId) {
+          // Sólo se revela «es de otra corrida» si esa corrida es del tenant
+          // activo; el resultado de otro tenant es, para este actor, inexistente.
+          assertQaResource(
+            await this.runsRepo.findRunById(tx, result.testRunId),
+            scope,
+            'Resultado no encontrado',
+          );
           throw new PreconditionFailedException(
             'El resultado pertenece a otra corrida',
             {
@@ -612,17 +646,41 @@ export class QaRunsService {
     dto: RegisterDefectDto,
     actor: AuthenticatedUser,
   ): Promise<DefectResponseDto> {
+    const scope = resolveQaScope(actor);
     this.logger.info(
       { operation: 'qa.defect.register', testCaseId: dto.testCaseId },
       'Registering test defect',
     );
 
     return this.em.transactional(async (tx) => {
+      // El caso no lleva tenant: su alcance es el de su suite.
       const testCase = await this.catalogRepo.findCaseById(tx, dto.testCaseId);
-      if (!testCase) {
-        throw new ResourceNotFoundException('Caso no encontrado', {
-          testCaseId: dto.testCaseId,
-        });
+      const suite = assertQaResource(
+        testCase
+          ? await this.catalogRepo.findSuiteById(tx, testCase.suiteId)
+          : null,
+        scope,
+        'Caso no encontrado',
+      );
+
+      // El resultado que se enlaza debe ser de este caso y de una corrida del
+      // alcance del actor.
+      if (dto.testCaseResultId) {
+        const linked = await this.runsRepo.findCaseResultById(
+          tx,
+          dto.testCaseResultId,
+        );
+        assertQaResource(
+          linked ? await this.runsRepo.findRunById(tx, linked.testRunId) : null,
+          scope,
+          'Resultado no encontrado',
+        );
+        if (linked?.testCaseId !== dto.testCaseId) {
+          throw new PreconditionFailedException(
+            'El resultado pertenece a otro caso',
+            { testCaseId: dto.testCaseId },
+          );
+        }
       }
 
       const existing = await this.runsRepo.findDefectBySignatureForUpdate(
@@ -657,7 +715,8 @@ export class QaRunsService {
 
       const defectNumber = await this.nextDefectNumber(tx);
       const defect = this.runsRepo.createDefect(tx, {
-        tenantId: dto.tenantId,
+        // El tenant del defecto es el de la suite ya acotada, no el del cuerpo.
+        tenantId: suite.tenantId,
         testCaseId: dto.testCaseId,
         testCaseResultId: dto.testCaseResultId,
         defectNumber,
@@ -687,18 +746,18 @@ export class QaRunsService {
     dto: TriageDefectDto,
     actor: AuthenticatedUser,
   ): Promise<TriageDefectResponseDto> {
+    const scope = resolveQaScope(actor);
     this.logger.info(
       { operation: 'qa.defect.triage', defectId, status: dto.status },
       'Triaging test defect',
     );
 
     return this.em.transactional(async (tx) => {
-      const defect = await this.runsRepo.findDefectForUpdate(tx, defectId);
-      if (!defect) {
-        throw new ResourceNotFoundException('Defecto no encontrado', {
-          defectId,
-        });
-      }
+      const defect = assertQaResource(
+        await this.runsRepo.findDefectForUpdate(tx, defectId, scope),
+        scope,
+        'Defecto no encontrado',
+      );
 
       const current = this.statusNameOf(defect.statusConceptId);
       if (!current) {
@@ -764,16 +823,18 @@ export class QaRunsService {
     dto: LinkReleaseDto,
     actor: AuthenticatedUser,
   ): Promise<LinkReleaseResponseDto> {
+    const scope = resolveQaScope(actor);
     this.logger.info(
       { operation: 'qa.run.link-release', runId, gitRef: dto.gitRef },
       'Linking run evidence to release',
     );
 
     return this.em.transactional(async (tx) => {
-      const run = await this.runsRepo.findRunForUpdate(tx, runId);
-      if (!run) {
-        throw new ResourceNotFoundException('Corrida no encontrada', { runId });
-      }
+      const run = assertQaResource(
+        await this.runsRepo.findRunForUpdate(tx, runId, scope),
+        scope,
+        'Corrida no encontrada',
+      );
       if (run.statusConceptId !== CONCEPTS.RUN_PASSED) {
         throw new PreconditionFailedException(
           'Sólo una corrida que pasó puede respaldar un release',

@@ -497,12 +497,17 @@ export class EducationCatalogRepository {
     );
   }
 
-  /** Instructor ya registrado para ese perfil profesional: el alta es un upsert. */
+  /**
+   * Instructor ya registrado en el tenant para ese perfil profesional: el alta
+   * es un upsert. Se acota al tenant porque la ficha de otra organización no es
+   * reutilizable: vincularla al curso mezclaría datos entre tenants.
+   */
   findInstructorByProfile(
     em: EntityManager,
     practitionerProfileId: string,
+    tenantId: string,
   ): Promise<Instructors | null> {
-    return em.findOne(Instructors, { practitionerProfileId });
+    return em.findOne(Instructors, { practitionerProfileId, tenantId });
   }
 
   /**
@@ -642,6 +647,11 @@ export class EducationCatalogRepository {
     code: string,
   ): Promise<CourseCohorts | null> {
     return em.findOne(CourseCohorts, { courseId, code });
+  }
+
+  /** Cohorte por id, sin bloqueo: sirve para comprobar su curso antes de bloquearla. */
+  findCohortById(em: EntityManager, id: string): Promise<CourseCohorts | null> {
+    return em.findOne(CourseCohorts, { id });
   }
 
   /** La capacidad se comprueba bajo bloqueo: dos inscripciones a la vez la desbordarían. */

@@ -32,7 +32,7 @@ _Fuente: `src/modules/terminology/README.md:3`_
 |  |  | POST /terminology/concepts/{conceptId}/$deprecate | SECURITY_ADMIN | MEDIO | 4 |
 |  |  | POST /terminology/concepts/{conceptId}/designations | SECURITY_ADMIN | MEDIO | 5 |
 |  |  | GET /terminology/concepts/{conceptId}/glossary-article | Cualquier sesión válida | BAJO | 1 |
-|  |  | GET /terminology/concepts/{conceptId}/glossary-neighborhood | Cualquier sesión válida | BAJO | 7 |
+|  |  | GET /terminology/concepts/{conceptId}/glossary-neighborhood | Cualquier sesión válida | BAJO | 8 |
 |  |  | POST /terminology/concepts/{conceptId}/properties | SECURITY_ADMIN | MEDIO | 4 |
 |  |  | POST /terminology/concepts/{conceptId}/relationships | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | GET /terminology/concepts/glossary-graph | Cualquier sesión válida | BAJO | 7 |
@@ -55,7 +55,7 @@ _Fuente: `src/modules/terminology/README.md:3`_
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
   a10(["Cualquier sesión válida"]):::actor
-  a40(["Público (sin sesión)"]):::actor
+  a41(["Público (sin sesión)"]):::actor
   t3[("terminology.code_systems")]:::tabla
   t5[("terminology.terminology_sources")]:::tabla
   t7[("terminology.code_system_versions")]:::tabla
@@ -65,12 +65,13 @@ flowchart LR
   t14[("terminology.concept_relationships")]:::tabla
   t15[("terminology.value_set_members")]:::tabla
   t16[("terminology.value_set_versions")]:::tabla
-  t31[("terminology.concept_maps")]:::tabla
-  t36[("terminology.tenant_catalog_policies")]:::tabla
-  t37[("terminology.tenant_concept_config")]:::tabla
-  t41[("terminology.value_sets")]:::tabla
-  t43[("terminology.value_set_rules")]:::tabla
-  t48[("terminology.catalog_import_batches")]:::tabla
+  t24[("terminology.concept_relationship_evidence")]:::tabla
+  t32[("terminology.concept_maps")]:::tabla
+  t37[("terminology.tenant_catalog_policies")]:::tabla
+  t38[("terminology.tenant_concept_config")]:::tabla
+  t42[("terminology.value_sets")]:::tabla
+  t44[("terminology.value_set_rules")]:::tabla
+  t49[("terminology.catalog_import_batches")]:::tabla
   subgraph s0["ctrl:TerminologyCodeSystemsController · Operaciones de TerminologyCodeSystemsCo…"]
     o1["GET /terminology/code-systems"]:::op
     o4["POST /terminology/code-systems"]:::op
@@ -79,8 +80,8 @@ flowchart LR
   end
   t17[("+1 tablas más")]
   t19[("+1 tablas más")]
-  t24[("+1 tablas más")]
-  t28[("+1 tablas más")]
+  t25[("+2 tablas más")]
+  t29[("+1 tablas más")]
   subgraph s1["ctrl:TerminologyConceptsController · Operaciones de TerminologyConceptsControll…"]
     o9["GET /terminology/concepts"]:::op
     o18["GET /terminology/concepts/{conceptId}"]:::op
@@ -88,34 +89,34 @@ flowchart LR
     o21["POST /terminology/concepts/{conceptId}/designations"]:::op
     o22["GET /terminology/concepts/{conceptId}/glossary-article"]:::op
     o23["GET /terminology/concepts/{conceptId}/glossary-neighborhood"]:::op
-    o25["POST /terminology/concepts/{conceptId}/properties"]:::op
-    o26["POST /terminology/concepts/{conceptId}/relationships"]:::op
-    o27["GET /terminology/concepts/glossary-graph"]:::op
+    o26["POST /terminology/concepts/{conceptId}/properties"]:::op
+    o27["POST /terminology/concepts/{conceptId}/relationships"]:::op
+    o28["GET /terminology/concepts/glossary-graph"]:::op
   end
-  t33[("+4 tablas más")]
+  t34[("+4 tablas más")]
   subgraph s2["ctrl:TerminologyFhirController · Operaciones de TerminologyFhirController que e…"]
-    o29["GET /terminology/CodeSystem/$lookup"]:::op
-    o30["POST /terminology/ConceptMap/$translate"]:::op
-    o32["POST /terminology/ValueSet/{id}/$expand"]:::op
+    o30["GET /terminology/CodeSystem/$lookup"]:::op
+    o31["POST /terminology/ConceptMap/$translate"]:::op
+    o33["POST /terminology/ValueSet/{id}/$expand"]:::op
   end
   subgraph s3["ctrl:TerminologyImportTemplateController · Operaciones de TerminologyImportTemp…"]
-    o34["GET /terminology/import-template"]:::op
+    o35["GET /terminology/import-template"]:::op
   end
-  t38[("+2 tablas más")]
+  t39[("+2 tablas más")]
   subgraph s4["ctrl:TerminologyTenantCatalogController · Operaciones de TerminologyTenantCatal…"]
-    o35["PUT /terminology/tenants/{tenantId}/catalog-policies"]:::op
+    o36["PUT /terminology/tenants/{tenantId}/catalog-policies"]:::op
   end
   subgraph s5["ctrl:TerminologyValueSetsController · Operaciones de TerminologyValueSetsContro…"]
-    o39["GET /terminology/value-sets"]:::op
-    o42["POST /terminology/value-sets"]:::op
-    o44["GET /terminology/value-sets/{id}/$expand"]:::op
-    o45["GET /terminology/value-sets/$glossary-facets"]:::op
+    o40["GET /terminology/value-sets"]:::op
+    o43["POST /terminology/value-sets"]:::op
+    o45["GET /terminology/value-sets/{id}/$expand"]:::op
+    o46["GET /terminology/value-sets/$glossary-facets"]:::op
   end
-  t49[("+1 tablas más")]
+  t50[("+1 tablas más")]
   subgraph s6["ctrl:TerminologyVersionsController · Operaciones de TerminologyVersionsControll…"]
-    o46["POST /terminology/versions/{versionId}/import"]:::op
-    o47["POST /terminology/versions/{versionId}/import-file"]:::op
-    o50["POST /terminology/versions/{versionId}/publish"]:::op
+    o47["POST /terminology/versions/{versionId}/import"]:::op
+    o48["POST /terminology/versions/{versionId}/import-file"]:::op
+    o51["POST /terminology/versions/{versionId}/publish"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -163,93 +164,93 @@ flowchart LR
   o23 -->|"LEE"| t11
   o23 -->|"LEE"| t12
   o23 -->|"LEE"| t13
+  o23 -->|"LEE"| t24
   o23 -->|"LEE"| t14
   o23 -->|"LEE"| t15
-  o23 -->|"LEE"| t16
-  o23 -.-> t24
-  a2 --> o25
-  o25 -->|"LEE"| t11
-  o25 -->|"ACTUALIZA"| t13
-  o25 -->|"CREA"| t13
-  o25 -->|"LEE"| t13
+  o23 -.-> t25
   a2 --> o26
   o26 -->|"LEE"| t11
-  o26 -->|"CREA"| t14
-  o26 -->|"LEE"| t14
-  a10 --> o27
+  o26 -->|"ACTUALIZA"| t13
+  o26 -->|"CREA"| t13
+  o26 -->|"LEE"| t13
+  a2 --> o27
   o27 -->|"LEE"| t11
-  o27 -->|"LEE"| t12
-  o27 -->|"LEE"| t13
+  o27 -->|"CREA"| t14
   o27 -->|"LEE"| t14
-  o27 -->|"LEE"| t15
-  o27 -->|"LEE"| t16
-  o27 -.-> t28
-  a10 --> o29
-  o29 -->|"LEE"| t11
-  o29 -->|"LEE"| t7
-  o29 -->|"LEE"| t3
-  o29 -->|"LEE"| t12
-  o29 -->|"LEE"| t13
+  a10 --> o28
+  o28 -->|"LEE"| t11
+  o28 -->|"LEE"| t12
+  o28 -->|"LEE"| t13
+  o28 -->|"LEE"| t14
+  o28 -->|"LEE"| t15
+  o28 -->|"LEE"| t16
+  o28 -.-> t29
   a10 --> o30
   o30 -->|"LEE"| t11
-  o30 -->|"ACTUALIZA"| t31
-  o30 -->|"CREA"| t31
-  o30 -->|"LEE"| t31
-  a2 --> o32
-  o32 -->|"LEE"| t11
-  o32 -->|"LEE"| t7
-  o32 -->|"LEE"| t13
-  o32 -->|"LEE"| t14
-  o32 -->|"BORRA"| t15
-  o32 -->|"CREA"| t15
-  o32 -.-> t33
-  a2 --> o34
+  o30 -->|"LEE"| t7
+  o30 -->|"LEE"| t3
+  o30 -->|"LEE"| t12
+  o30 -->|"LEE"| t13
+  a10 --> o31
+  o31 -->|"LEE"| t11
+  o31 -->|"ACTUALIZA"| t32
+  o31 -->|"CREA"| t32
+  o31 -->|"LEE"| t32
+  a2 --> o33
+  o33 -->|"LEE"| t11
+  o33 -->|"LEE"| t7
+  o33 -->|"LEE"| t13
+  o33 -->|"LEE"| t14
+  o33 -->|"BORRA"| t15
+  o33 -->|"CREA"| t15
+  o33 -.-> t34
   a2 --> o35
-  o35 -->|"LEE"| t11
-  o35 -->|"ACTUALIZA"| t36
-  o35 -->|"CREA"| t36
-  o35 -->|"LEE"| t36
-  o35 -->|"ACTUALIZA"| t37
-  o35 -->|"CREA"| t37
-  o35 -.-> t38
-  a40 --> o39
-  o39 -->|"LEE"| t15
-  o39 -->|"LEE"| t16
-  o39 -->|"LEE"| t41
-  a2 --> o42
-  o42 -->|"CREA"| t43
-  o42 -->|"CREA"| t16
-  o42 -->|"CREA"| t41
-  o42 -->|"LEE"| t41
-  a40 --> o44
-  o44 -->|"LEE"| t11
-  o44 -->|"LEE"| t13
-  o44 -->|"LEE"| t15
-  o44 -->|"LEE"| t16
-  o44 -->|"LEE"| t41
-  a40 --> o45
+  a2 --> o36
+  o36 -->|"LEE"| t11
+  o36 -->|"ACTUALIZA"| t37
+  o36 -->|"CREA"| t37
+  o36 -->|"LEE"| t37
+  o36 -->|"ACTUALIZA"| t38
+  o36 -->|"CREA"| t38
+  o36 -.-> t39
+  a41 --> o40
+  o40 -->|"LEE"| t15
+  o40 -->|"LEE"| t16
+  o40 -->|"LEE"| t42
+  a2 --> o43
+  o43 -->|"CREA"| t44
+  o43 -->|"CREA"| t16
+  o43 -->|"CREA"| t42
+  o43 -->|"LEE"| t42
+  a41 --> o45
   o45 -->|"LEE"| t11
-  o45 -->|"LEE"| t12
+  o45 -->|"LEE"| t13
   o45 -->|"LEE"| t15
   o45 -->|"LEE"| t16
-  o45 -->|"LEE"| t41
-  a2 --> o46
-  o46 -->|"CREA"| t11
+  o45 -->|"LEE"| t42
+  a41 --> o46
   o46 -->|"LEE"| t11
-  o46 -->|"LEE"| t7
+  o46 -->|"LEE"| t12
+  o46 -->|"LEE"| t15
+  o46 -->|"LEE"| t16
+  o46 -->|"LEE"| t42
   a2 --> o47
   o47 -->|"CREA"| t11
   o47 -->|"LEE"| t11
-  o47 -->|"CREA"| t48
-  o47 -->|"ACTUALIZA"| t48
-  o47 -->|"LEE"| t48
   o47 -->|"LEE"| t7
-  o47 -.-> t49
-  a2 --> o50
-  o50 -->|"ACTUALIZA"| t11
-  o50 -->|"LEE"| t11
-  o50 -->|"ACTUALIZA"| t7
-  o50 -->|"LEE"| t7
+  a2 --> o48
+  o48 -->|"CREA"| t11
+  o48 -->|"LEE"| t11
+  o48 -->|"CREA"| t49
+  o48 -->|"ACTUALIZA"| t49
+  o48 -->|"LEE"| t49
+  o48 -->|"LEE"| t7
+  o48 -.-> t50
+  a2 --> o51
+  o51 -->|"ACTUALIZA"| t11
+  o51 -->|"LEE"| t11
+  o51 -->|"ACTUALIZA"| t7
+  o51 -->|"LEE"| t7
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -445,7 +446,7 @@ UC-03-09: cura o consulta un mapeo entre conceptos
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Curar un mapeo exige un rol de terminología |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Concepto origen no encontrado; ResourceNotFoundException: Concepto destino no encontrado; ResourceNotFoundException: El mapeo dejó de existir durante el curado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Curar un mapeo exige declarar la equivalencia; PreconditionFailedException: Un concepto no puede mapearse a sí mismo; PreconditionFailedException: Los conceptos del mapeo tienen que estar activos |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -459,76 +460,80 @@ flowchart TD
   n2 --> n3
   n4["Llama a ConceptMapsService.curate"]:::llamada
   n3 --> n4
-  n5{"!dto.equivalence"}:::decision
+  n5{"!actor.roles.some((role) =› CURATOR_ROLES.includes(role))"}:::decision
   n4 --> n5
-  n6(["422 PRECONDITION_FAILED Curar un mapeo exige declarar la equivalencia"]):::error
+  n6(["403 FORBIDDEN Curar un mapeo exige un rol de terminología"]):::error
   n5 -->|"sí"| n6
-  n7{"targetConceptId === dto.sourceConceptId"}:::decision
+  n7{"!dto.equivalence"}:::decision
   n5 -->|"no"| n7
-  n8(["422 PRECONDITION_FAILED Un concepto no puede mapearse a sí mismo"]):::error
+  n8(["422 PRECONDITION_FAILED Curar un mapeo exige declarar la equivalencia"]):::error
   n7 -->|"sí"| n8
-  n9["Transacción: transactional(…)"]:::transaccion
+  n9{"targetConceptId === dto.sourceConceptId"}:::decision
   n7 -->|"no"| n9
-  n10["Llama a CatalogConceptsRepository.findById"]:::llamada
-  n9 --> n10
-  n11[("LEE terminology.catalog_concepts")]:::efecto
-  n10 --> n11
-  n12{"!source"}:::decision
+  n10(["422 PRECONDITION_FAILED Un concepto no puede mapearse a sí mismo"]):::error
+  n9 -->|"sí"| n10
+  n11["Transacción: transactional(…)"]:::transaccion
+  n9 -->|"no"| n11
+  n12["Llama a CatalogConceptsRepository.findById"]:::llamada
   n11 --> n12
-  n13(["404 NOT_FOUND Concepto origen no encontrado"]):::error
-  n12 -->|"sí"| n13
-  n14["Llama a CatalogConceptsRepository.findById"]:::llamada
-  n12 -->|"no"| n14
-  n15[("LEE terminology.catalog_concepts")]:::efecto
-  n14 --> n15
-  n16{"!target"}:::decision
-  n15 --> n16
-  n17(["404 NOT_FOUND Concepto destino no encontrado"]):::error
-  n16 -->|"sí"| n17
-  n18["Repite: por cada const [concept, field] de [ [source, 'sourceConceptId'], [target, 'targetCo…"]:::bucle
-  n16 -->|"no"| n18
-  n19{"concept.stateConceptId !== CONCEPTS.TERM_ACTIVE"}:::decision
-  n18 -->|"cada elemento"| n19
-  n20(["422 PRECONDITION_FAILED Los conceptos del mapeo tienen que estar activos"]):::error
-  n19 -->|"sí"| n20
-  n21["Llama a ConceptMapsRepository.findEquivalent"]:::llamada
-  n19 -->|"no"| n21
-  n18 -->|"al terminar"| n21
-  n22[("LEE terminology.concept_maps")]:::efecto
-  n21 --> n22
-  n23{"duplicate"}:::decision
-  n22 --> n23
-  n24["Llama a ConceptMapsRepository.findByIdForUpdate"]:::llamada
-  n23 -->|"sí"| n24
-  n25[("LEE terminology.concept_maps")]:::efecto
+  n13[("LEE terminology.catalog_concepts")]:::efecto
+  n12 --> n13
+  n14{"!source"}:::decision
+  n13 --> n14
+  n15(["404 NOT_FOUND Concepto origen no encontrado"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a CatalogConceptsRepository.findById"]:::llamada
+  n14 -->|"no"| n16
+  n17[("LEE terminology.catalog_concepts")]:::efecto
+  n16 --> n17
+  n18{"!target"}:::decision
+  n17 --> n18
+  n19(["404 NOT_FOUND Concepto destino no encontrado"]):::error
+  n18 -->|"sí"| n19
+  n20["Repite: por cada const [concept, field] de [ [source, 'sourceConceptId'], [target, 'targetCo…"]:::bucle
+  n18 -->|"no"| n20
+  n21{"concept.stateConceptId !== CONCEPTS.TERM_ACTIVE"}:::decision
+  n20 -->|"cada elemento"| n21
+  n22(["422 PRECONDITION_FAILED Los conceptos del mapeo tienen que estar activos"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a ConceptMapsRepository.findEquivalent"]:::llamada
+  n21 -->|"no"| n23
+  n20 -->|"al terminar"| n23
+  n24[("LEE terminology.concept_maps")]:::efecto
+  n23 --> n24
+  n25{"duplicate"}:::decision
   n24 --> n25
-  n26{"!locked"}:::decision
-  n25 --> n26
-  n27(["404 NOT_FOUND El mapeo dejó de existir durante el curado"]):::error
-  n26 -->|"sí"| n27
-  n28[("ACTUALIZA terminology.concept_maps · ACTUALIZA terminology.concept_maps")]:::efecto
-  n26 -->|"no"| n28
-  n29["Llama a ConceptMapsRepository.create"]:::llamada
-  n23 -->|"no"| n29
-  n30[("CREA terminology.concept_maps")]:::efecto
-  n29 --> n30
-  n31["Llama a ConceptMapsService.lookup"]:::llamada
-  n28 --> n31
-  n30 --> n31
-  n32["Llama a CatalogConceptsRepository.findById"]:::llamada
+  n26["Llama a ConceptMapsRepository.findByIdForUpdate"]:::llamada
+  n25 -->|"sí"| n26
+  n27[("LEE terminology.concept_maps")]:::efecto
+  n26 --> n27
+  n28{"!locked"}:::decision
+  n27 --> n28
+  n29(["404 NOT_FOUND El mapeo dejó de existir durante el curado"]):::error
+  n28 -->|"sí"| n29
+  n30[("ACTUALIZA terminology.concept_maps · ACTUALIZA terminology.concept_maps")]:::efecto
+  n28 -->|"no"| n30
+  n31["Llama a ConceptMapsRepository.create"]:::llamada
+  n25 -->|"no"| n31
+  n32[("CREA terminology.concept_maps")]:::efecto
   n31 --> n32
-  n33[("LEE terminology.catalog_concepts")]:::efecto
+  n33["Llama a ConceptMapsService.lookup"]:::llamada
+  n30 --> n33
   n32 --> n33
-  n34{"!source"}:::decision
+  n34["Llama a CatalogConceptsRepository.findById"]:::llamada
   n33 --> n34
-  n35(["404 NOT_FOUND Concepto origen no encontrado"]):::error
-  n34 -->|"sí"| n35
-  n36["Llama a ConceptMapsRepository.findTranslations"]:::llamada
-  n34 -->|"no"| n36
-  n37[("LEE terminology.concept_maps")]:::efecto
-  n36 --> n37
-  n38(("200 Responde con éxito")):::ok
-  n37 --> n38
+  n35[("LEE terminology.catalog_concepts")]:::efecto
+  n34 --> n35
+  n36{"!source"}:::decision
+  n35 --> n36
+  n37(["404 NOT_FOUND Concepto origen no encontrado"]):::error
+  n36 -->|"sí"| n37
+  n38["Llama a ConceptMapsRepository.findTranslations"]:::llamada
+  n36 -->|"no"| n38
+  n39[("LEE terminology.concept_maps")]:::efecto
+  n38 --> n39
+  n40(("200 Responde con éxito")):::ok
+  n39 --> n40
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1070,8 +1075,18 @@ flowchart TD
   n45 --> n46
   n47[("LEE terminology.value_set_members · LEE terminology.value_set_versions · LEE terminology.value_sets")]:::efecto
   n46 --> n47
-  n48(("200 Responde con éxito")):::ok
+  n48["Llama a ConceptsService.resolveNeighborEvidence"]:::llamada
   n47 --> n48
+  n49["Llama a CatalogConceptsRepository.findByIds"]:::llamada
+  n48 --> n49
+  n50[("LEE terminology.catalog_concepts")]:::efecto
+  n49 --> n50
+  n51["Llama a ConceptRelationshipsRepository.findEvidenceSummaries"]:::llamada
+  n50 --> n51
+  n52[("LEE terminology.concept_relationship_evidence · LEE terminology.catalog_concepts")]:::efecto
+  n51 --> n52
+  n53(("200 Responde con éxito")):::ok
+  n52 --> n53
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

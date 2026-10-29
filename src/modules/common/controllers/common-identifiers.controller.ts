@@ -1,11 +1,17 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser } from '../../../common';
+import { Audited, CurrentUser, Roles } from '../../../common';
 import type { AuthenticatedUser } from '../../../common';
 import { IdentifiersService } from '../services';
 import { CreateIdentifierDto, IdentifierResponseDto } from '../dto';
 
-/** Endpoints de identificadores oficiales del módulo Common. */
+/**
+ * Endpoints de identificadores oficiales del módulo Common.
+ *
+ * El alta recibe `ownerType` y `ownerId` del cuerpo y el servicio no comprueba de quién es el
+ * dueño: un identificador oficial (documento, matrícula) de otra persona no lo puede escribir
+ * cualquier sesión, así que la ruta es administrativa.
+ */
 @ApiTags('common/identifiers')
 @ApiBearerAuth()
 @Controller('common/identifiers')
@@ -18,7 +24,13 @@ export class CommonIdentifiersController {
   constructor(private readonly identifiersService: IdentifiersService) {}
 
   /** UC-02-01: registra un identificador oficial. */
+  @Audited({
+    action: 'IDENTIFIER_CREATED',
+    entity: 'identifier',
+    entityId: 'result.id',
+  })
   @Post()
+  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar un identificador oficial (UC-02-01)' })
   create(

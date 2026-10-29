@@ -80,6 +80,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<QuotationResponseDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<QuotationResponseDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<QuotationResponseDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<QuotationResponseDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `QuotationResponseDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -126,6 +127,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 404 | `NOT_FOUND` | PATIENT_NOT_AVAILABLE.message | Excepción explícita en src/modules/quotations/services/quotations.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -267,6 +270,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<QuotationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<QuotationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<QuotationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<QuotationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `QuotationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -332,6 +336,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Servicio no encontrado en el catálogo | Excepción explícita en src/modules/quotations/services/quotations.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Se requiere un perfil profesional para crear una cotización | Excepción explícita en src/modules/quotations/services/quotations.service.ts |
@@ -419,6 +424,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<QuotationResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<QuotationResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<QuotationResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<QuotationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `QuotationResponseDto`. Ejemplo completo derivado de ese DTO:
 

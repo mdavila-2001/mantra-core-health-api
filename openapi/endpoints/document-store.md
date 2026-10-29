@@ -47,7 +47,7 @@ NestJS resuelve `GET /document-store/collections/{collection}/documents` en `Doc
 | `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
 | `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
 | `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
-| `tenantId` | query | Sí | `string` | formato `uuid` | Tenant cuyos documentos se listan | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | query | No | `string` | formato `uuid` | Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404 | `00000000-0000-4000-8000-000000000001` |
 | `documentType` | query | No | `string` | Sin restricción adicional declarada | Filtrar por clasificación de documento | `valor-ejemplo` |
 
 ### Payload mínimo aceptable
@@ -55,7 +55,7 @@ NestJS resuelve `GET /document-store/collections/{collection}/documents` en `Doc
 La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
 
 ```http
-GET /document-store/collections/valor-ejemplo/documents?tenantId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+GET /document-store/collections/valor-ejemplo/documents HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -63,6 +63,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `STORAGE_ADMIN`, `PLATFORM_ADMIN`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -89,6 +90,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PageResponseDto<DocumentResponseDto>>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PageResponseDto<DocumentResponseDto>>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PageResponseDto<DocumentResponseDto>>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PageResponseDto<DocumentResponseDto>>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PageResponseDto<DocumentResponseDto>`. Ejemplo completo derivado de ese DTO:
 
@@ -144,7 +146,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: STORAGE_ADMIN, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -198,7 +200,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "documentType": "fhir_bundle_raw",
   "payload": {
     "clave": "valor"
@@ -216,7 +217,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | Sí | `string` | formato `uuid` | Tenant propietario del documento | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404 | `00000000-0000-4000-8000-000000000001` |
 | `documentType` | Sí | `string` | longitud mínima 1; patrón runtime `DOCUMENT_TYPE_RE` | Tipo/clasificación del documento (p. ej. fhir_bundle_raw) | `fhir_bundle_raw` |
 | `payload` | Sí | `object` | Sin restricción adicional declarada | Contenido flexible del documento (JSON/semiestructurado) | `{"clave":"valor"}` |
 
@@ -253,6 +254,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DocumentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DocumentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DocumentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DocumentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DocumentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -336,14 +338,14 @@ NestJS resuelve `DELETE /document-store/collections/{collection}/documents/{id}`
 |---|---|:---:|---|---|---|---|
 | `collection` | path | Sí | `string` | Sin restricción adicional declarada | Colección lógica de documentos | `valor-ejemplo` |
 | `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `tenantId` | query | Sí | `string` | formato `uuid` | Tenant propietario del documento | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | query | No | `string` | formato `uuid` | Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404 | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload mínimo aceptable
 
 La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
 
 ```http
-DELETE /document-store/collections/valor-ejemplo/documents/00000000-0000-4000-8000-000000000001?tenantId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+DELETE /document-store/collections/valor-ejemplo/documents/00000000-0000-4000-8000-000000000001 HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -380,6 +382,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<DocumentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DocumentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DocumentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DocumentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DocumentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -420,7 +423,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: STORAGE_ADMIN, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Documento no encontrado | Excepción explícita en src/modules/document_store/services/document-store.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -463,14 +465,14 @@ NestJS resuelve `GET /document-store/collections/{collection}/documents/{id}` en
 |---|---|:---:|---|---|---|---|
 | `collection` | path | Sí | `string` | Sin restricción adicional declarada | Colección lógica de documentos | `valor-ejemplo` |
 | `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `tenantId` | query | Sí | `string` | formato `uuid` | Tenant propietario del documento | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | query | No | `string` | formato `uuid` | Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404 | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload mínimo aceptable
 
 La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
 
 ```http
-GET /document-store/collections/valor-ejemplo/documents/00000000-0000-4000-8000-000000000001?tenantId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+GET /document-store/collections/valor-ejemplo/documents/00000000-0000-4000-8000-000000000001 HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -478,6 +480,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `STORAGE_ADMIN`, `PLATFORM_ADMIN`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -504,6 +507,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<DocumentResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<DocumentResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<DocumentResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<DocumentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DocumentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -543,8 +547,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Documento no encontrado | Excepción explícita en src/modules/document_store/services/document-store.service.ts |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: STORAGE_ADMIN, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -599,7 +602,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "expectedVersion": 1
 }
 ```
@@ -614,7 +616,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | Sí | `string` | formato `uuid` | Tenant propietario del documento | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404 | `00000000-0000-4000-8000-000000000001` |
 | `expectedVersion` | Sí | `number` | mínimo 1 | Versión que el cliente cree vigente (concurrencia optimista) | `1` |
 | `payload` | No | `object` | Sin restricción adicional declarada | Nuevo contenido flexible del documento | `{"clave":"valor"}` |
 | `documentType` | No | `string` | patrón runtime `DOCUMENT_TYPE_RE` | Nueva clasificación del documento | `valor-ejemplo` |
@@ -653,6 +655,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DocumentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DocumentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DocumentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DocumentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DocumentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -693,7 +696,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: STORAGE_ADMIN, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Documento no encontrado | Excepción explícita en src/modules/document_store/services/document-store.service.ts |
 | 409 | `CONCURRENCY_CONFLICT` | La versión del documento ha cambiado | Excepción explícita en src/modules/document_store/services/document-store.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Nada que actualizar: indica payload y/o documentType | Excepción explícita en src/modules/document_store/services/document-store.service.ts |

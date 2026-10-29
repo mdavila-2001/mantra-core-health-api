@@ -9,7 +9,7 @@
 # Módulo `identity_assurance`
 
 **Fuente:** [`src/modules/identity_assurance/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/identity_assurance/README.md)
-· 8 controllers · 11 services · 10 repositories · 11 entidades · 17 DTO
+· 8 controllers · 12 services · 10 repositories · 11 entidades · 17 DTO
 
 ---
 

@@ -67,6 +67,14 @@ export interface SmokeCase {
   /** `true` (por defecto) envía el token de admin; `false` no manda auth. */
   auth?: boolean;
   /**
+   * `true` envía `X-Tenant-Id` con el tenant semilla (`SmokeCtx.tenantId`).
+   *
+   * El admin del smoke es `SUPERADMIN`: su tenant sale del encabezado, no del token. Sin él, la
+   * petición corre sin tenant y toda ruta que exige uno responde 422 `TENANT_REQUIRED` (alcance de
+   * tenant del núcleo). Lo aplica `enTenantSemilla` del registro a los módulos con datos de tenant.
+   */
+  tenantScoped?: boolean;
+  /**
    * Token con el que actuar, si no es el de admin.
    *
    * El recorrido de un paciente no se puede ejercer con el token de administrador: los endpoints

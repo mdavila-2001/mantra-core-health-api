@@ -13,6 +13,9 @@ export {
   TemplateDetailDto,
   TemplateListDto,
   RetireTemplateResponseDto,
+  RetireTemplateQueryDto,
+  AffectedBookingDto,
+  TemplateLiveBookingsResponseDto,
   ReactivateTemplateResponseDto,
   AvailabilityExceptionDto,
   AvailabilityExceptionListDto,
@@ -50,6 +53,14 @@ export {
   PaymentStateDto,
   PAYMENT_STATES,
   type PaymentState,
+  UploadPaymentReceiptDto,
+  RejectPaymentReceiptDto,
+  PaymentReceiptActorDto,
+  PaymentReceiptDto,
+  ConfirmPaymentReceiptResponseDto,
+  PAYMENT_RECEIPT_STATUSES,
+  MIN_RECEIPT_REJECTION_LENGTH,
+  MAX_RECEIPT_TEXT_LENGTH,
   RequestBookingInfoDto,
   ProposeScheduleDto,
   ProposeScheduleResponseDto,
@@ -132,3 +143,5 @@ export {
 } from './scheduling-walk-in.dto';
 
 export * from './scheduling-service-offerings.dto';
+
+export * from './scheduling-flexible.dto';

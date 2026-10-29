@@ -26,7 +26,13 @@ import {
   sha256File,
   writeJson,
 } from './lib/common.mjs';
-import { BLOCKED_SOURCES, GITHUB_SOURCES } from './lib/sources.mjs';
+import {
+  BLOCKED_SOURCES,
+  GITHUB_SOURCES,
+  OFFICIAL_URL_SOURCES,
+  SPARQL_SOURCES,
+} from './lib/sources.mjs';
+import { P924_SPARQL } from './lib/sources/wikidata.mjs';
 
 const args = process.argv.slice(2);
 const probeOnly = args.includes('--probe');
@@ -106,6 +112,48 @@ function fetchSource(key, spec) {
         bytes: statSync(dest).size,
       };
     }
+  } else if (spec.kind === 'url') {
+    // Archivo oficial publicado por el editor en su propio sitio: se fija por
+    // sha256 y por la fecha `Last-Modified` que declara el servidor.
+    for (const [name, url] of Object.entries(spec.files)) {
+      const dest = join(dir, name);
+      const headers = curl(['--fail', '-L', '-sI', url]);
+      const lastModified =
+        headers.match(/^last-modified:\s*(.+)$/im)?.[1]?.trim() ?? null;
+      curl(['--fail', '-L', '-o', dest, url]);
+      pin = { lastModified };
+      files[name] = {
+        url,
+        fileUrl: url,
+        lastModified,
+        sha256: sha256File(dest),
+        bytes: statSync(dest).size,
+      };
+    }
+  } else if (spec.kind === 'sparql') {
+    // Wikidata no versiona: la versión es la fecha de la consulta, y se guarda la consulta exacta.
+    const dest = join(dir, spec.file);
+    curl([
+      '--fail',
+      '-G',
+      spec.endpoint,
+      '--data-urlencode',
+      `query=${spec.query}`,
+      '-H',
+      'Accept: application/sparql-results+json',
+      '-H',
+      'User-Agent: AloVida-ProceduresImporter/1.0 (Mantra Core Health; terminology import)',
+      '-o',
+      dest,
+    ]);
+    pin = { queriedAt: retrievedAt };
+    files[spec.file] = {
+      url: spec.endpoint,
+      fileUrl: spec.endpoint,
+      query: spec.query,
+      sha256: sha256File(dest),
+      bytes: statSync(dest).size,
+    };
   } else {
     throw new Error(`Tipo de fuente desconocido: ${spec.kind}`);
   }
@@ -124,7 +172,9 @@ function fetchSource(key, spec) {
   console.log(
     `[fetch] ${key}: ${Object.entries(files)
       .map(([n, f]) => `${n} ${f.bytes} B sha256=${f.sha256.slice(0, 12)}…`)
-      .join(', ')} (${pin.commit ?? pin.tag})`,
+      .join(
+        ', ',
+      )} (${pin.commit ?? pin.tag ?? pin.lastModified ?? pin.queriedAt})`,
   );
   return meta;
 }
@@ -159,9 +209,14 @@ function probe() {
 }
 
 if (!probeOnly) {
-  const keys = wanted.length ? wanted : Object.keys(GITHUB_SOURCES);
+  const ALL = {
+    ...GITHUB_SOURCES,
+    ...OFFICIAL_URL_SOURCES,
+    'wikidata-p924': { ...SPARQL_SOURCES['wikidata-p924'], query: P924_SPARQL },
+  };
+  const keys = wanted.length ? wanted : Object.keys(ALL);
   for (const key of keys) {
-    const spec = GITHUB_SOURCES[key];
+    const spec = ALL[key];
     if (!spec)
       throw new Error(
         `Fuente no registrada o no descargable desde este entorno: ${key}`,

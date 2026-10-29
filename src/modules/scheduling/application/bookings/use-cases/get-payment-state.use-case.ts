@@ -21,17 +21,18 @@ export class GetPaymentStateUseCase {
    * Devuelve `null` cuando **nadie lo marcó todavía**, que no es lo mismo que
    * «pendiente de pago»: pendiente es una afirmación que alguien firmó, y la
    * ausencia de fila es que del pago aún no se dijo nada.
+   *
+   * Corre en una transacción porque `loadForOperation` carga la cita con
+   * `FOR UPDATE`: fuera de una, MikroORM la rechaza y la lectura respondía 500.
    */
   async execute(
     bookingId: string,
     actor: AuthenticatedUser,
   ): Promise<PaymentStateDto | null> {
-    const booking = await this.access.loadForOperation(
-      this.em,
-      bookingId,
-      actor,
-    );
-    const row = await this.bookingsRepo.findPaymentState(this.em, booking.id);
-    return row ? projectPaymentState(row) : null;
+    return this.em.transactional(async (tx) => {
+      const booking = await this.access.loadForOperation(tx, bookingId, actor);
+      const row = await this.bookingsRepo.findPaymentState(tx, booking.id);
+      return row ? projectPaymentState(row) : null;
+    });
   }
 }

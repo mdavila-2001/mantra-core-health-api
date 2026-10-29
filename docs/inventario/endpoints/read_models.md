@@ -5,7 +5,7 @@
 - **Bloque:** Auditoría y Reporting (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 - **Operaciones:** 15 (15 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 1 · MEDIO 9 · BAJO 5
-- **Tablas distintas que tocan:** 13
+- **Tablas distintas que tocan:** 35
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/read-models.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -13,8 +13,8 @@
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
 | 1 | POST | `/portals/{portalCode}/routes/{routeCode}/views` | Publicar el contrato de una vista de página | MEDIO | 12 | SECURITY_ADMIN |
-| 2 | GET | `/portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions` | Derivar available_actions_json (estado + permiso + purpose) | BAJO | 4 | sesión (sin roles) |
-| 3 | GET | `/portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data` | Servir el read model al frontend (consent-aware, masking heredado) | BAJO | 6 | sesión (sin roles) |
+| 2 | GET | `/portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions` | Derivar available_actions_json (estado + permiso + purpose) | BAJO | 25 | sesión (sin roles) |
+| 3 | GET | `/portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data` | Servir el read model al frontend (consent-aware, masking heredado) | BAJO | 30 | sesión (sin roles) |
 | 4 | GET | `/public/{slug}` | Servir una proyección pública por slug | BAJO | 1 | pública |
 | 5 | GET | `/public/directory` | Servir el directorio público (solo campos aprobados) | BAJO | 1 | pública |
 | 6 | POST | `/read-models/{definitionId}/backfill` | Backfill inicial de una nueva materialized view | MEDIO | 2 | SECURITY_ADMIN |
@@ -37,28 +37,28 @@
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FrontendViewsController.publishViewContract` — `src/modules/read_models/controllers/frontend-views.controller.ts:42`
+- **Implementación:** `FrontendViewsController.publishViewContract` — `src/modules/read_models/controllers/frontend-views.controller.ts:53`
 
 ### Qué es y para qué sirve (negocio)
 
 Publicar el contrato de una vista de página. Caso de uso UC-30-02: Publicar contrato de vista (upsert portal/route + view + hijos). Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:84`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`POST /portals/{portalCode}/routes/{routeCode}/views` la atiende `FrontendViewsController.publishViewContract` (src/modules/read_models/controllers/frontend-views.controller.ts:42). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PublishViewContractDto` (50 campos, 13 obligatorios). Delega en `FrontendViewsService.publishViewContract`. Crea filas en read_models.frontend_page_views, read_models.frontend_routes, read_models.frontend_view_actions, read_models.frontend_view_fields, read_models.frontend_view_kpis, read_models.frontend_view_sort_options, read_models.frontend_view_states, read_models.portal_surfaces. Lee read_models.frontend_page_views, read_models.frontend_routes, read_models.portal_surfaces, read_models.read_model_definitions.
+`POST /portals/{portalCode}/routes/{routeCode}/views` la atiende `FrontendViewsController.publishViewContract` (src/modules/read_models/controllers/frontend-views.controller.ts:53). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PublishViewContractDto` (50 campos, 13 obligatorios). Delega en `FrontendViewsService.publishViewContract`. Crea filas en read_models.frontend_page_views, read_models.frontend_routes, read_models.frontend_view_actions, read_models.frontend_view_fields, read_models.frontend_view_kpis, read_models.frontend_view_sort_options, read_models.frontend_view_states, read_models.portal_surfaces. Lee read_models.frontend_page_views, read_models.frontend_routes, read_models.portal_surfaces, read_models.read_model_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/frontend-views.controller.ts:42` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/frontend-views.controller.ts:53` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -68,11 +68,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 | `read_models.frontend_page_views` | LEE | LEE | DIRECTA | FrontendViewsController.publishViewContract → FrontendViewsService.publishViewContract → FrontendPageViewsRepository.findByRouteAndCode | `src/modules/read_models/repositories/frontend-page-views.repository.ts:97` |
 | `read_models.frontend_routes` | ESCRIBE | CREA | DIRECTA | FrontendViewsController.publishViewContract → FrontendViewsService.publishViewContract → FrontendRoutesRepository.create | `src/modules/read_models/repositories/frontend-routes.repository.ts:98` |
 | `read_models.frontend_routes` | LEE | LEE | DIRECTA | FrontendViewsController.publishViewContract → FrontendViewsService.publishViewContract → FrontendRoutesRepository.findBySurfaceAndCode | `src/modules/read_models/repositories/frontend-routes.repository.ts:86` |
-| `read_models.frontend_view_actions` | ESCRIBE | CREA | DIRECTA | FrontendViewsController.publishViewContract → FrontendViewsService.publishViewContract → FrontendViewChildrenRepository.createAction | `src/modules/read_models/repositories/frontend-view-children.repository.ts:465` |
-| `read_models.frontend_view_fields` | ESCRIBE | CREA | DIRECTA | FrontendViewsController.publishViewContract → FrontendViewsService.publishViewContract → FrontendViewChildrenRepository.createField | `src/modules/read_models/repositories/frontend-view-children.repository.ts:414` |
-| `read_models.frontend_view_kpis` | ESCRIBE | CREA | DIRECTA | FrontendViewsController.publishViewContract → FrontendViewsService.publishViewContract → FrontendViewChildrenRepository.createKpi | `src/modules/read_models/repositories/frontend-view-children.repository.ts:481` |
-| `read_models.frontend_view_sort_options` | ESCRIBE | CREA | DIRECTA | FrontendViewsController.publishViewContract → FrontendViewsService.publishViewContract → FrontendViewChildrenRepository.createSortOption | `src/modules/read_models/repositories/frontend-view-children.repository.ts:449` |
-| `read_models.frontend_view_states` | ESCRIBE | CREA | DIRECTA | FrontendViewsController.publishViewContract → FrontendViewsService.publishViewContract → FrontendViewChildrenRepository.createState | `src/modules/read_models/repositories/frontend-view-children.repository.ts:497` |
+| `read_models.frontend_view_actions` | ESCRIBE | CREA | DIRECTA | FrontendViewsController.publishViewContract → FrontendViewsService.publishViewContract → FrontendViewChildrenRepository.createAction | `src/modules/read_models/repositories/frontend-view-children.repository.ts:501` |
+| `read_models.frontend_view_fields` | ESCRIBE | CREA | DIRECTA | FrontendViewsController.publishViewContract → FrontendViewsService.publishViewContract → FrontendViewChildrenRepository.createField | `src/modules/read_models/repositories/frontend-view-children.repository.ts:450` |
+| `read_models.frontend_view_kpis` | ESCRIBE | CREA | DIRECTA | FrontendViewsController.publishViewContract → FrontendViewsService.publishViewContract → FrontendViewChildrenRepository.createKpi | `src/modules/read_models/repositories/frontend-view-children.repository.ts:517` |
+| `read_models.frontend_view_sort_options` | ESCRIBE | CREA | DIRECTA | FrontendViewsController.publishViewContract → FrontendViewsService.publishViewContract → FrontendViewChildrenRepository.createSortOption | `src/modules/read_models/repositories/frontend-view-children.repository.ts:485` |
+| `read_models.frontend_view_states` | ESCRIBE | CREA | DIRECTA | FrontendViewsController.publishViewContract → FrontendViewsService.publishViewContract → FrontendViewChildrenRepository.createState | `src/modules/read_models/repositories/frontend-view-children.repository.ts:533` |
 | `read_models.portal_surfaces` | ESCRIBE | CREA | DIRECTA | FrontendViewsController.publishViewContract → FrontendViewsService.publishViewContract → PortalSurfacesRepository.create | `src/modules/read_models/repositories/portal-surfaces.repository.ts:76` |
 | `read_models.portal_surfaces` | LEE | LEE | DIRECTA | FrontendViewsController.publishViewContract → FrontendViewsService.publishViewContract → PortalSurfacesRepository.findByCode | `src/modules/read_models/repositories/portal-surfaces.repository.ts:64` |
 | `read_models.read_model_definitions` | LEE | LEE | DIRECTA | FrontendViewsController.publishViewContract → FrontendViewsService.publishViewContract → ReadModelDefinitionsRepository.findById | `src/modules/read_models/repositories/read-model-definitions.repository.ts:99` |
@@ -284,35 +284,58 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FrontendViewsController.deriveActions` — `src/modules/read_models/controllers/frontend-views.controller.ts:71`
+- **Implementación:** `FrontendViewsController.deriveActions` — `src/modules/read_models/controllers/frontend-views.controller.ts:113`
 
 ### Qué es y para qué sirve (negocio)
 
 Derivar available_actions_json (estado + permiso + purpose). Caso de uso UC-30-11: Derivar available_actions_json (estado + permiso). Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:93`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions` la atiende `FrontendViewsController.deriveActions` (src/modules/read_models/controllers/frontend-views.controller.ts:71). Exige sesión; el controlador no declara roles. Delega en `FrontendViewsService.deriveAvailableActions`. Lee read_models.frontend_page_views, read_models.frontend_routes, read_models.frontend_view_actions, read_models.portal_surfaces.
+`GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions` la atiende `FrontendViewsController.deriveActions` (src/modules/read_models/controllers/frontend-views.controller.ts:113). Exige sesión; el controlador no declara roles. Delega en `FrontendViewsService.deriveAvailableActions`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 17 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/read_models/controllers/frontend-views.controller.ts:71` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/read_models/controllers/frontend-views.controller.ts:113` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_QUERY | purposeOfUse (obligatorio) | `contrato (parameters)` |
+| PARAMETRO_QUERY | patientProfileId (obligatorio) | `contrato (parameters)` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `read_models.frontend_page_views` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → FrontendViewsService.resolveView → FrontendPageViewsRepository.findByRouteAndCode | `src/modules/read_models/repositories/frontend-page-views.repository.ts:97` |
-| `read_models.frontend_routes` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → FrontendViewsService.resolveView → FrontendRoutesRepository.findBySurfaceAndCode | `src/modules/read_models/repositories/frontend-routes.repository.ts:86` |
-| `read_models.frontend_view_actions` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → FrontendViewChildrenRepository.listActions | `src/modules/read_models/repositories/frontend-view-children.repository.ts:398` |
-| `read_models.portal_surfaces` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → FrontendViewsService.resolveView → PortalSurfacesRepository.findByCode | `src/modules/read_models/repositories/portal-surfaces.repository.ts:64` |
+| `authz.access_policies` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → AuthzViewPermissionGate.holds | `src/modules/read_models/services/view-access.adapters.ts:128` |
+| `authz.roles` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → AuthzViewPermissionGate.holds | `src/modules/read_models/services/view-access.adapters.ts:104` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → AuthzViewPermissionGate.holds | `src/modules/read_models/services/view-access.adapters.ts:139` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → AuthzViewPermissionGate.holds → AuthzEffectiveRolesService.scopedAssignmentsForUser → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `read_models.frontend_page_views` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → FrontendViewsService.resolveContract → FrontendPageViewsRepository.findByRouteAndCode | `src/modules/read_models/repositories/frontend-page-views.repository.ts:97` |
+| `read_models.frontend_routes` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → FrontendViewsService.resolveContract → FrontendRoutesRepository.findBySurfaceAndCode | `src/modules/read_models/repositories/frontend-routes.repository.ts:86` |
+| `read_models.frontend_view_actions` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → FrontendViewChildrenRepository.listActions | `src/modules/read_models/repositories/frontend-view-children.repository.ts:434` |
+| `read_models.portal_surfaces` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → FrontendViewsService.resolveContract → PortalSurfacesRepository.findByCode | `src/modules/read_models/repositories/portal-surfaces.repository.ts:64` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → TerminologyViewAudienceGate.isInAudience | `src/modules/read_models/services/view-access.adapters.ts:191` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → TerminologyViewAudienceGate.isInAudience | `src/modules/read_models/services/view-access.adapters.ts:185` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | FrontendViewsController.deriveActions → FrontendViewsService.deriveAvailableActions → ViewContractAuthorizer.authorizeView → TerminologyViewAudienceGate.isInAudience | `src/modules/read_models/services/view-access.adapters.ts:180` |
 
 ### Parámetros
 
@@ -321,6 +344,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 | `portalCode` | path | Sí | `string` | — |
 | `routeCode` | path | Sí | `string` | — |
 | `viewCode` | path | Sí | `string` | — |
+| `purposeOfUse` | query | Sí | `string` | — |
+| `patientProfileId` | query | Sí | `string` | — |
 
 ### Cuerpo
 
@@ -340,9 +365,9 @@ La operación no recibe cuerpo.
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Portal no encontrado; ResourceNotFoundException: Ruta no encontrada; ResourceNotFoundException: Vista no encontrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/read_models.md).
@@ -351,7 +376,7 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/read_models/controllers/frontend-views.controller.spec.ts:57` |
+| CONTROLADOR | `src/modules/read_models/controllers/frontend-views.controller.spec.ts:91` |
 
 ### Flujos
 
@@ -366,37 +391,61 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FrontendViewsController.serveData` — `src/modules/read_models/controllers/frontend-views.controller.ts:56`
+- **Implementación:** `FrontendViewsController.serveData` — `src/modules/read_models/controllers/frontend-views.controller.ts:72`
 
 ### Qué es y para qué sirve (negocio)
 
 Servir el read model al frontend (consent-aware, masking heredado). Caso de uso UC-30-05: Devuelve contrato, masking y staleness; actualmente data queda vacío. Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:87`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data` la atiende `FrontendViewsController.serveData` (src/modules/read_models/controllers/frontend-views.controller.ts:56). Exige sesión; el controlador no declara roles. Delega en `FrontendViewsService.serveData`. Lee read_models.frontend_page_views, read_models.frontend_routes, read_models.frontend_view_actions, read_models.frontend_view_fields, read_models.portal_surfaces, read_models.read_model_refresh_runs.
+`GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data` la atiende `FrontendViewsController.serveData` (src/modules/read_models/controllers/frontend-views.controller.ts:72). Exige sesión; el controlador no declara roles. Delega en `FrontendViewsService.serveData`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 22 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/read_models/controllers/frontend-views.controller.ts:56` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/read_models/controllers/frontend-views.controller.ts:72` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `read_models.frontend_page_views` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → FrontendViewsService.resolveView → FrontendPageViewsRepository.findByRouteAndCode | `src/modules/read_models/repositories/frontend-page-views.repository.ts:97` |
-| `read_models.frontend_routes` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → FrontendViewsService.resolveView → FrontendRoutesRepository.findBySurfaceAndCode | `src/modules/read_models/repositories/frontend-routes.repository.ts:86` |
-| `read_models.frontend_view_actions` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → FrontendViewChildrenRepository.listActions | `src/modules/read_models/repositories/frontend-view-children.repository.ts:398` |
+| `authz.access_policies` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → AuthzViewPermissionGate.holds | `src/modules/read_models/services/view-access.adapters.ts:128` |
+| `authz.roles` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → AuthzViewPermissionGate.holds | `src/modules/read_models/services/view-access.adapters.ts:104` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → AuthzViewPermissionGate.holds | `src/modules/read_models/services/view-access.adapters.ts:139` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → AuthzViewPermissionGate.holds → AuthzEffectiveRolesService.scopedAssignmentsForUser → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `read_models.frontend_page_views` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → FrontendViewsService.resolveContract → FrontendPageViewsRepository.findByRouteAndCode | `src/modules/read_models/repositories/frontend-page-views.repository.ts:97` |
+| `read_models.frontend_routes` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → FrontendViewsService.resolveContract → FrontendRoutesRepository.findBySurfaceAndCode | `src/modules/read_models/repositories/frontend-routes.repository.ts:86` |
+| `read_models.frontend_view_actions` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → FrontendViewChildrenRepository.listActions | `src/modules/read_models/repositories/frontend-view-children.repository.ts:434` |
 | `read_models.frontend_view_fields` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → FrontendViewChildrenRepository.listFields | `src/modules/read_models/repositories/frontend-view-children.repository.ts:380` |
-| `read_models.portal_surfaces` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → FrontendViewsService.resolveView → PortalSurfacesRepository.findByCode | `src/modules/read_models/repositories/portal-surfaces.repository.ts:64` |
+| `read_models.frontend_view_filters` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → FrontendViewChildrenRepository.listFilters | `src/modules/read_models/repositories/frontend-view-children.repository.ts:398` |
+| `read_models.frontend_view_sort_options` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → FrontendViewChildrenRepository.listSortOptions | `src/modules/read_models/repositories/frontend-view-children.repository.ts:416` |
+| `read_models.portal_surfaces` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → FrontendViewsService.resolveContract → PortalSurfacesRepository.findByCode | `src/modules/read_models/repositories/portal-surfaces.repository.ts:64` |
+| `read_models.read_model_definitions` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ReadModelDefinitionsRepository.findById | `src/modules/read_models/repositories/read-model-definitions.repository.ts:99` |
 | `read_models.read_model_refresh_runs` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ReadModelRefreshRunsRepository.findLatestByDefinition | `src/modules/read_models/repositories/read-model-refresh-runs.repository.ts:56` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → ClinicalViewPatientAccess.canAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → TerminologyViewAudienceGate.isInAudience | `src/modules/read_models/services/view-access.adapters.ts:191` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → TerminologyViewAudienceGate.isInAudience | `src/modules/read_models/services/view-access.adapters.ts:185` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | FrontendViewsController.serveData → FrontendViewsService.serveData → ViewContractAuthorizer.authorizeView → TerminologyViewAudienceGate.isInAudience | `src/modules/read_models/services/view-access.adapters.ts:180` |
 
 ### Parámetros
 
@@ -405,6 +454,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 | `portalCode` | path | Sí | `string` | — |
 | `routeCode` | path | Sí | `string` | — |
 | `viewCode` | path | Sí | `string` | — |
+| `patientProfileId` | query | No | `desconocido` | Paciente de las vistas con contexto de paciente |
+| `purposeOfUse` | query | No | `desconocido` | Propósito de uso (concepto) que la ruta exige |
+| `sort` | query | No | `desconocido` | Código de orden |
+| `limit` | query | No | `desconocido` | Se recorta al máximo de página de la definición |
+| `cursor` | query | No | `desconocido` | — |
 
 ### Cuerpo
 
@@ -439,7 +493,7 @@ La operación no recibe cuerpo.
 | 200 | — | Éxito |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Portal no encontrado; ResourceNotFoundException: Ruta no encontrada; ResourceNotFoundException: Vista no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La proyección no está disponible |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/read_models.md).
@@ -469,7 +523,7 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 
 Servir una proyección pública por slug. Caso de uso UC-30-10: Proyecciones públicas (sin PHI, sin sesión). Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:92`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -480,7 +534,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/read_models/controllers/public-projections.controller.ts:35` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -542,7 +596,7 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 
 Servir el directorio público (solo campos aprobados). Caso de uso UC-30-10: Proyecciones públicas (sin PHI, sin sesión). Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:92`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -553,7 +607,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/read_models/controllers/public-projections.controller.ts:22` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -603,27 +657,27 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReadModelDefinitionsController.backfill` — `src/modules/read_models/controllers/read-model-definitions.controller.ts:99`
+- **Implementación:** `ReadModelDefinitionsController.backfill` — `src/modules/read_models/controllers/read-model-definitions.controller.ts:119`
 
 ### Qué es y para qué sirve (negocio)
 
 Backfill inicial de una nueva materialized view. Caso de uso UC-30-04: Backfill inicial (FULL) de la MV. Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:86`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`POST /read-models/{definitionId}/backfill` la atiende `ReadModelDefinitionsController.backfill` (src/modules/read_models/controllers/read-model-definitions.controller.ts:99). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `ReadModelDefinitionsService.backfill`. Crea filas en read_models.read_model_refresh_runs. Lee read_models.read_model_definitions.
+`POST /read-models/{definitionId}/backfill` la atiende `ReadModelDefinitionsController.backfill` (src/modules/read_models/controllers/read-model-definitions.controller.ts:119). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `ReadModelDefinitionsService.backfill`. Crea filas en read_models.read_model_refresh_runs. Lee read_models.read_model_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:99` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: definitionId | `src/modules/read_models/controllers/read-model-definitions.controller.ts:99` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:119` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: definitionId | `src/modules/read_models/controllers/read-model-definitions.controller.ts:119` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -688,27 +742,27 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReadModelDefinitionsController.invalidate` — `src/modules/read_models/controllers/read-model-definitions.controller.ts:111`
+- **Implementación:** `ReadModelDefinitionsController.invalidate` — `src/modules/read_models/controllers/read-model-definitions.controller.ts:136`
 
 ### Qué es y para qué sirve (negocio)
 
 Invalidar y recomputar el read model tras cambio upstream. Caso de uso UC-30-06: Invalidar y recomputar tras cambio upstream. Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:88`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`POST /read-models/{definitionId}/invalidate` la atiende `ReadModelDefinitionsController.invalidate` (src/modules/read_models/controllers/read-model-definitions.controller.ts:111). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `ReadModelDefinitionsService.invalidate`. Crea filas en read_models.read_model_refresh_runs. Lee read_models.read_model_definitions.
+`POST /read-models/{definitionId}/invalidate` la atiende `ReadModelDefinitionsController.invalidate` (src/modules/read_models/controllers/read-model-definitions.controller.ts:136). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `ReadModelDefinitionsService.invalidate`. Crea filas en read_models.read_model_refresh_runs. Lee read_models.read_model_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:111` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: definitionId | `src/modules/read_models/controllers/read-model-definitions.controller.ts:111` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:136` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: definitionId | `src/modules/read_models/controllers/read-model-definitions.controller.ts:136` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -773,27 +827,27 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReadModelDefinitionsController.reconcile` — `src/modules/read_models/controllers/read-model-definitions.controller.ts:129`
+- **Implementación:** `ReadModelDefinitionsController.reconcile` — `src/modules/read_models/controllers/read-model-definitions.controller.ts:159`
 
 ### Qué es y para qué sirve (negocio)
 
 Reconciliar read model divergente contra la fuente canónica. Caso de uso UC-30-07: Reconciliar la MV divergente (result REPAIRED). Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:89`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`POST /read-models/{definitionId}/reconcile` la atiende `ReadModelDefinitionsController.reconcile` (src/modules/read_models/controllers/read-model-definitions.controller.ts:129). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `ReadModelDefinitionsService.reconcile`. Crea filas en read_models.read_model_refresh_runs. Lee read_models.read_model_definitions.
+`POST /read-models/{definitionId}/reconcile` la atiende `ReadModelDefinitionsController.reconcile` (src/modules/read_models/controllers/read-model-definitions.controller.ts:159). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `ReadModelDefinitionsService.reconcile`. Crea filas en read_models.read_model_refresh_runs. Lee read_models.read_model_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:129` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: definitionId | `src/modules/read_models/controllers/read-model-definitions.controller.ts:129` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:159` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: definitionId | `src/modules/read_models/controllers/read-model-definitions.controller.ts:159` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -858,27 +912,27 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReadModelDefinitionsController.refresh` — `src/modules/read_models/controllers/read-model-definitions.controller.ts:85`
+- **Implementación:** `ReadModelDefinitionsController.refresh` — `src/modules/read_models/controllers/read-model-definitions.controller.ts:100`
 
 ### Qué es y para qué sirve (negocio)
 
 Refrescar la materialized view (REFRESH CONCURRENTLY, manual). Caso de uso UC-30-03: Refresh manual de la MV (REFRESH CONCURRENTLY). Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:85`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`POST /read-models/{definitionId}/refresh` la atiende `ReadModelDefinitionsController.refresh` (src/modules/read_models/controllers/read-model-definitions.controller.ts:85). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `ReadModelDefinitionsService.refresh`. Crea filas en read_models.read_model_refresh_runs. Lee read_models.read_model_definitions.
+`POST /read-models/{definitionId}/refresh` la atiende `ReadModelDefinitionsController.refresh` (src/modules/read_models/controllers/read-model-definitions.controller.ts:100). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `ReadModelDefinitionsService.refresh`. Crea filas en read_models.read_model_refresh_runs. Lee read_models.read_model_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:85` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: definitionId | `src/modules/read_models/controllers/read-model-definitions.controller.ts:85` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:100` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: definitionId | `src/modules/read_models/controllers/read-model-definitions.controller.ts:100` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -943,28 +997,28 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReadModelDefinitionsController.createDefinition` — `src/modules/read_models/controllers/read-model-definitions.controller.ts:41`
+- **Implementación:** `ReadModelDefinitionsController.createDefinition` — `src/modules/read_models/controllers/read-model-definitions.controller.ts:46`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar y publicar un contrato de read model versionado. Caso de uso UC-30-01: Registrar y publicar un contrato versionado + dependencias upstream. Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:83`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`POST /read-models/definitions` la atiende `ReadModelDefinitionsController.createDefinition` (src/modules/read_models/controllers/read-model-definitions.controller.ts:41). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateReadModelDefinitionDto` (21 campos, 7 obligatorios). Delega en `ReadModelDefinitionsService.createDefinition`. Crea filas en read_models.read_model_definitions, read_models.read_model_dependencies. Lee read_models.read_model_definitions.
+`POST /read-models/definitions` la atiende `ReadModelDefinitionsController.createDefinition` (src/modules/read_models/controllers/read-model-definitions.controller.ts:46). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateReadModelDefinitionDto` (21 campos, 7 obligatorios). Delega en `ReadModelDefinitionsService.createDefinition`. Crea filas en read_models.read_model_definitions, read_models.read_model_dependencies. Lee read_models.read_model_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:41` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:46` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1099,27 +1153,27 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReadModelDefinitionsController.retire` — `src/modules/read_models/controllers/read-model-definitions.controller.ts:155`
+- **Implementación:** `ReadModelDefinitionsController.retire` — `src/modules/read_models/controllers/read-model-definitions.controller.ts:195`
 
 ### Qué es y para qué sirve (negocio)
 
 Retirar una versión de read model (guarda de FK). Caso de uso UC-30-13: Deprecar (ACTIVE→DEPRECATED) y retirar (guarda de FK). Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:60`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:95`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`DELETE /read-models/definitions/{id}` la atiende `ReadModelDefinitionsController.retire` (src/modules/read_models/controllers/read-model-definitions.controller.ts:155). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `ReadModelDefinitionsService.retire`. Actualiza read_models.read_model_definitions. Lee read_models.frontend_page_views, read_models.read_model_definitions.
+`DELETE /read-models/definitions/{id}` la atiende `ReadModelDefinitionsController.retire` (src/modules/read_models/controllers/read-model-definitions.controller.ts:195). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `ReadModelDefinitionsService.retire`. Actualiza read_models.read_model_definitions. Lee read_models.frontend_page_views, read_models.read_model_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:155` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/read_models/controllers/read-model-definitions.controller.ts:155` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:195` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/read_models/controllers/read-model-definitions.controller.ts:195` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1179,27 +1233,27 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReadModelDefinitionsController.deprecate` — `src/modules/read_models/controllers/read-model-definitions.controller.ts:143`
+- **Implementación:** `ReadModelDefinitionsController.deprecate` — `src/modules/read_models/controllers/read-model-definitions.controller.ts:178`
 
 ### Qué es y para qué sirve (negocio)
 
 Deprecar una versión de read model. Caso de uso UC-30-13: Deprecar (ACTIVE→DEPRECATED) y retirar (guarda de FK). Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:60`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:95`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`POST /read-models/definitions/{id}/deprecate` la atiende `ReadModelDefinitionsController.deprecate` (src/modules/read_models/controllers/read-model-definitions.controller.ts:143). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `ReadModelDefinitionsService.deprecate`. Actualiza read_models.read_model_definitions. Lee read_models.read_model_definitions.
+`POST /read-models/definitions/{id}/deprecate` la atiende `ReadModelDefinitionsController.deprecate` (src/modules/read_models/controllers/read-model-definitions.controller.ts:178). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `ReadModelDefinitionsService.deprecate`. Actualiza read_models.read_model_definitions. Lee read_models.read_model_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:143` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/read_models/controllers/read-model-definitions.controller.ts:143` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:178` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/read_models/controllers/read-model-definitions.controller.ts:178` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1258,28 +1312,28 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReadModelDefinitionsController.createVersion` — `src/modules/read_models/controllers/read-model-definitions.controller.ts:55`
+- **Implementación:** `ReadModelDefinitionsController.createVersion` — `src/modules/read_models/controllers/read-model-definitions.controller.ts:65`
 
 ### Qué es y para qué sirve (negocio)
 
 Versionar el esquema de un read model. Caso de uso UC-30-08: Nueva versión N+1 en DRAFT (anterior sigue ACTIVE). Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:90`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`POST /read-models/definitions/{schema}/{object}/versions` la atiende `ReadModelDefinitionsController.createVersion` (src/modules/read_models/controllers/read-model-definitions.controller.ts:55). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateReadModelVersionDto` (12 campos, 5 obligatorios). Delega en `ReadModelDefinitionsService.createVersion`. Crea filas en read_models.read_model_definitions, read_models.read_model_dependencies. Lee read_models.read_model_definitions.
+`POST /read-models/definitions/{schema}/{object}/versions` la atiende `ReadModelDefinitionsController.createVersion` (src/modules/read_models/controllers/read-model-definitions.controller.ts:65). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateReadModelVersionDto` (12 campos, 5 obligatorios). Delega en `ReadModelDefinitionsService.createVersion`. Crea filas en read_models.read_model_definitions, read_models.read_model_dependencies. Lee read_models.read_model_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:55` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:65` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1400,26 +1454,26 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReadModelDefinitionsController.health` — `src/modules/read_models/controllers/read-model-definitions.controller.ts:75`
+- **Implementación:** `ReadModelDefinitionsController.health` — `src/modules/read_models/controllers/read-model-definitions.controller.ts:90`
 
 ### Qué es y para qué sirve (negocio)
 
 Detectar y reportar staleness/degradación de las MV. Caso de uso UC-30-12: Detectar staleness/degradación de las MV. Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:94`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`GET /read-models/health` la atiende `ReadModelDefinitionsController.health` (src/modules/read_models/controllers/read-model-definitions.controller.ts:75). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `ReadModelDefinitionsService.health`. Lee read_models.read_model_definitions, read_models.read_model_refresh_runs.
+`GET /read-models/health` la atiende `ReadModelDefinitionsController.health` (src/modules/read_models/controllers/read-model-definitions.controller.ts:90). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `ReadModelDefinitionsService.health`. Lee read_models.read_model_definitions, read_models.read_model_refresh_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:75` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:90` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1475,29 +1529,29 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FrontendViewsController.upsertPreferences` — `src/modules/read_models/controllers/frontend-views.controller.ts:92`
+- **Implementación:** `FrontendViewsController.upsertPreferences` — `src/modules/read_models/controllers/frontend-views.controller.ts:139`
 
 ### Qué es y para qué sirve (negocio)
 
 Guardar preferencias de vista del usuario. Caso de uso UC-30-09: Preferencias de vista (validadas contra el allow-list). Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:91`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`PUT /views/{frontendPageViewId}/preferences` la atiende `FrontendViewsController.upsertPreferences` (src/modules/read_models/controllers/frontend-views.controller.ts:92). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpsertViewPreferencesDto` (7 campos, 0 obligatorios). Delega en `FrontendViewsService.upsertPreferences`. Crea filas en read_models.user_view_preferences. Actualiza read_models.user_view_preferences. Lee read_models.frontend_page_views, read_models.frontend_view_fields, read_models.user_view_preferences.
+`PUT /views/{frontendPageViewId}/preferences` la atiende `FrontendViewsController.upsertPreferences` (src/modules/read_models/controllers/frontend-views.controller.ts:139). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpsertViewPreferencesDto` (7 campos, 0 obligatorios). Delega en `FrontendViewsService.upsertPreferences`. Crea filas en read_models.user_view_preferences. Actualiza read_models.user_view_preferences. Lee read_models.frontend_page_views, read_models.frontend_view_fields, read_models.user_view_preferences.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/read_models/controllers/frontend-views.controller.ts:92` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: frontendPageViewId | `src/modules/read_models/controllers/frontend-views.controller.ts:92` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/read_models/controllers/frontend-views.controller.ts:139` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: frontendPageViewId | `src/modules/read_models/controllers/frontend-views.controller.ts:139` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1505,7 +1559,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|---|---|---|
 | `read_models.frontend_page_views` | LEE | LEE | DIRECTA | FrontendViewsController.upsertPreferences → FrontendViewsService.upsertPreferences → FrontendPageViewsRepository.findById | `src/modules/read_models/repositories/frontend-page-views.repository.ts:81` |
 | `read_models.frontend_view_fields` | LEE | LEE | DIRECTA | FrontendViewsController.upsertPreferences → FrontendViewsService.upsertPreferences → FrontendViewChildrenRepository.listFields | `src/modules/read_models/repositories/frontend-view-children.repository.ts:380` |
-| `read_models.user_view_preferences` | ESCRIBE | ACTUALIZA | POR_TIPO | FrontendViewsController.upsertPreferences → FrontendViewsService.upsertPreferences | `src/modules/read_models/services/frontend-views.service.ts:373` |
+| `read_models.user_view_preferences` | ESCRIBE | ACTUALIZA | POR_TIPO | FrontendViewsController.upsertPreferences → FrontendViewsService.upsertPreferences | `src/modules/read_models/services/frontend-views.service.ts:488` |
 | `read_models.user_view_preferences` | ESCRIBE | CREA | DIRECTA | FrontendViewsController.upsertPreferences → FrontendViewsService.upsertPreferences → UserViewPreferencesRepository.create | `src/modules/read_models/repositories/user-view-preferences.repository.ts:85` |
 | `read_models.user_view_preferences` | LEE | LEE | DIRECTA | FrontendViewsController.upsertPreferences → FrontendViewsService.upsertPreferences → UserViewPreferencesRepository.findByUserAndView | `src/modules/read_models/repositories/user-view-preferences.repository.ts:70` |
 
@@ -1580,7 +1634,7 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/read_models/controllers/frontend-views.controller.spec.ts:70` |
+| CONTROLADOR | `src/modules/read_models/controllers/frontend-views.controller.spec.ts:105` |
 
 ### Flujos
 

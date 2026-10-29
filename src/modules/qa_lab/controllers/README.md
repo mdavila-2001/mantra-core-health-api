@@ -11,12 +11,12 @@ Un único controlador (`QaLabController`, prefijo `qa`) con 12 endpoints sobre `
 
 `JwtAuthGuard` global + `@Roles(...)`:
 
-| Rol | Alcance |
-| --- | --- |
-| `QA_ADMIN` | Todo el módulo |
-| `QA_ENGINEER` | Casos, publicación, corridas, evidencia y triage |
-| `SYSTEM` | Captura de ejecución, evaluación, cierre y registro de defectos |
-| `RELEASE_MANAGER` | Enlazar evidencia a un release |
+| Rol               | Alcance                                                         |
+| ----------------- | --------------------------------------------------------------- |
+| `QA_ADMIN`        | Todo el módulo                                                  |
+| `QA_ENGINEER`     | Casos, publicación, corridas, evidencia y triage                |
+| `SYSTEM`          | Captura de ejecución, evaluación, cierre y registro de defectos |
+| `RELEASE_MANAGER` | Enlazar evidencia a un release                                  |
 
 Es deliberado que sólo `QA_ADMIN` registre entornos: declarar un entorno como seguro para capturar
 payloads decide si datos reales pueden acabar guardados, y esa no es una decisión de quien escribe

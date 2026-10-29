@@ -14,20 +14,20 @@
 |---|---|---|---|---|---|---|
 | 1 | POST | `/vector-rag/collections` | Crear una colección vectorial con su vínculo de tenant | MEDIO | 9 | RAG_COLLECTION_ADMIN, PLATFORM_ADMIN |
 | 2 | POST | `/vector-rag/collections/{id}/embedding-jobs` | Encolar un job de embedding | MEDIO | 5 | RAG_COLLECTION_ADMIN, PLATFORM_ADMIN |
-| 3 | PUT | `/vector-rag/collections/{id}/lifecycle` | Sellar o deprecar la colección | MEDIO | 7 | AI_GOVERNANCE_OFFICER, RAG_COLLECTION_ADMIN, PLATFORM_ADMIN |
-| 4 | POST | `/vector-rag/collections/{id}/re-embed` | Migrar la colección a un modelo nuevo | MEDIO | 11 | AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN |
+| 3 | PUT | `/vector-rag/collections/{id}/lifecycle` | Sellar o deprecar la colección | MEDIO | 6 | AI_GOVERNANCE_OFFICER, RAG_COLLECTION_ADMIN, PLATFORM_ADMIN |
+| 4 | POST | `/vector-rag/collections/{id}/re-embed` | Migrar la colección a un modelo nuevo | MEDIO | 10 | AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN |
 | 5 | POST | `/vector-rag/collections/{id}/reconciliation` | Reconciliar el manifiesto canónico contra el vectorial | MEDIO | 8 | SYSTEM, RECONCILIATION_WORKER, PLATFORM_ADMIN |
-| 6 | POST | `/vector-rag/deletion-jobs` | Propagar el borrado de la fuente a los embeddings | ALTO | 10 | PRIVACY_OFFICER, DPO, SYSTEM, PLATFORM_ADMIN |
-| 7 | POST | `/vector-rag/embedding-jobs/{id}/run` | Ejecutar un lote del job de embedding | MEDIO | 13 | SYSTEM, EMBEDDING_WORKER, PLATFORM_ADMIN |
+| 6 | POST | `/vector-rag/deletion-jobs` | Propagar el borrado de la fuente a los embeddings | ALTO | 12 | PRIVACY_OFFICER, DPO, SYSTEM, PLATFORM_ADMIN |
+| 7 | POST | `/vector-rag/embedding-jobs/{id}/run` | Ejecutar un lote del job de embedding | MEDIO | 12 | SYSTEM, EMBEDDING_WORKER, PLATFORM_ADMIN |
 | 8 | GET | `/vector-rag/embedding-jobs/pending` | Listar jobs de embedding en cola | BAJO | 1 | SYSTEM, EMBEDDING_WORKER, PLATFORM_ADMIN |
 | 9 | POST | `/vector-rag/embedding-model-versions` | Registrar y aprobar una versión de modelo de embedding | MEDIO | 5 | AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN |
 | 10 | POST | `/vector-rag/embedding-model-versions/{id}/retire` | Retirar una versión de modelo | MEDIO | 7 | AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN |
 | 11 | POST | `/vector-rag/rag-access-policies` | Definir una política de acceso RAG | MEDIO | 2 | PRIVACY_OFFICER, DPO, PLATFORM_ADMIN |
-| 12 | PUT | `/vector-rag/rag-access-policies/{id}/publish` | Publicar la política y reenlazar colecciones | MEDIO | 7 | PRIVACY_OFFICER, DPO, PLATFORM_ADMIN |
+| 12 | PUT | `/vector-rag/rag-access-policies/{id}/publish` | Publicar la política y reenlazar colecciones | MEDIO | 5 | PRIVACY_OFFICER, DPO, PLATFORM_ADMIN |
 | 13 | POST | `/vector-rag/retrieval-sessions` | Abrir una sesión de retrieval gobernada por consentimiento | MEDIO | 7 | CLINICIAN, AGENT_RUNTIME, SYSTEM, PLATFORM_ADMIN |
-| 14 | POST | `/vector-rag/retrieval-sessions/{id}/evidence` | Materializar la evidencia citable | MEDIO | 9 | SYSTEM, RETRIEVAL_WORKER, PLATFORM_ADMIN |
-| 15 | POST | `/vector-rag/retrieval-sessions/{id}/feedback` | Capturar feedback de la sesión | MEDIO | 6 | CLINICIAN, AGENT_RUNTIME, PLATFORM_ADMIN |
-| 16 | POST | `/vector-rag/retrieval-sessions/{id}/search` | Ranquear los candidatos y filtrarlos por consentimiento y etiquetas | MEDIO | 10 | SYSTEM, RETRIEVAL_WORKER, PLATFORM_ADMIN |
+| 14 | POST | `/vector-rag/retrieval-sessions/{id}/evidence` | Materializar la evidencia citable | MEDIO | 8 | SYSTEM, RETRIEVAL_WORKER, PLATFORM_ADMIN |
+| 15 | POST | `/vector-rag/retrieval-sessions/{id}/feedback` | Capturar feedback de la sesión | MEDIO | 5 | CLINICIAN, AGENT_RUNTIME, PLATFORM_ADMIN |
+| 16 | POST | `/vector-rag/retrieval-sessions/{id}/search` | Ranquear los candidatos y filtrarlos por consentimiento y etiquetas | MEDIO | 9 | SYSTEM, RETRIEVAL_WORKER, PLATFORM_ADMIN |
 
 ---
 
@@ -38,7 +38,7 @@
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VectorGovernanceController.createCollection` — `src/modules/vector_rag/controllers/vector-governance.controller.ts:91`
+- **Implementación:** `VectorGovernanceController.createCollection` — `src/modules/vector_rag/controllers/vector-governance.controller.ts:106`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -48,28 +48,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 
 ### Cómo se atiende (sistema)
 
-`POST /vector-rag/collections` la atiende `VectorGovernanceController.createCollection` (src/modules/vector_rag/controllers/vector-governance.controller.ts:91). Exige sesión con alguno de los roles RAG_COLLECTION_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `CreateCollectionDto` (8 campos, 5 obligatorios). Delega en `VectorGovernanceService.createCollection`. Crea filas en messaging.domain_events, messaging.outbox_messages, vector_rag.vector_collections, vector_rag.vector_tenant_bindings. Lee messaging.outbox_messages, vector_rag.embedding_model_versions, vector_rag.rag_access_policies, vector_rag.vector_collections, vector_rag.vector_tenant_bindings. Publica VectorCollectionProvisioned.
+`POST /vector-rag/collections` la atiende `VectorGovernanceController.createCollection` (src/modules/vector_rag/controllers/vector-governance.controller.ts:106). Exige sesión con alguno de los roles RAG_COLLECTION_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `CreateCollectionDto` (8 campos, 5 obligatorios). Delega en `VectorGovernanceService.createCollection`. Crea filas en messaging.domain_events, messaging.outbox_messages, vector_rag.vector_collections, vector_rag.vector_tenant_bindings. Lee messaging.outbox_messages, vector_rag.embedding_model_versions, vector_rag.rag_access_policies, vector_rag.vector_collections, vector_rag.vector_tenant_bindings. Publica VectorCollectionProvisioned.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: RAG_COLLECTION_ADMIN, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:91` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: RAG_COLLECTION_ADMIN, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:106` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.createCollection → VectorGovernanceService.createCollection → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.createCollection → VectorGovernanceService.createCollection → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorGovernanceController.createCollection → VectorGovernanceService.createCollection → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.createCollection → VectorGovernanceService.createCollection → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorGovernanceController.createCollection → VectorGovernanceService.createCollection → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `vector_rag.embedding_model_versions` | LEE | LEE | DIRECTA | VectorGovernanceController.createCollection → VectorGovernanceService.createCollection → VectorCatalogRepository.findModelVersionForUpdate | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:214` |
-| `vector_rag.rag_access_policies` | LEE | LEE | DIRECTA | VectorGovernanceController.createCollection → VectorGovernanceService.createCollection → VectorCatalogRepository.findPolicyById | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:426` |
+| `vector_rag.rag_access_policies` | LEE | LEE | DIRECTA | VectorGovernanceController.createCollection → VectorGovernanceService.createCollection → VectorCatalogRepository.findPolicyById | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:427` |
 | `vector_rag.vector_collections` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.createCollection → VectorGovernanceService.createCollection → VectorCatalogRepository.createCollection | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:256` |
 | `vector_rag.vector_collections` | LEE | LEE | DIRECTA | VectorGovernanceController.createCollection → VectorGovernanceService.createCollection → VectorCatalogRepository.findCollectionByCode | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:310` |
 | `vector_rag.vector_tenant_bindings` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.createCollection → VectorGovernanceService.createCollection → VectorCatalogRepository.createBinding | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:367` |
@@ -79,7 +79,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `VectorCollectionProvisioned` | `src/modules/vector_rag/services/vector-governance.service.ts:237` |
+| Evento de dominio | `VectorCollectionProvisioned` | `src/modules/vector_rag/services/vector-governance.service.ts:247` |
 
 ### Cuerpo — DTO `CreateCollectionDto` · `application/json`
 
@@ -142,7 +142,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión de modelo no encontrada.; ResourceNotFoundException: Política de acceso RAG no encontrada. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión de modelo no encontrada. |
 | 409 | `CONFLICT` | ConflictException: Ya existe una colección con ese código para el tenant.; ConflictException: El namespace ya está en uso por otro vínculo. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El modelo está retirado; no se pueden crear colecciones nuevas sobre él.; PreconditionFailedException: El modelo no está aprobado para datos de paciente. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -166,7 +166,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VectorGovernanceController.queueEmbeddingJob` — `src/modules/vector_rag/controllers/vector-governance.controller.ts:140`
+- **Implementación:** `VectorGovernanceController.queueEmbeddingJob` — `src/modules/vector_rag/controllers/vector-governance.controller.ts:170`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -176,37 +176,37 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 
 ### Cómo se atiende (sistema)
 
-`POST /vector-rag/collections/{id}/embedding-jobs` la atiende `VectorGovernanceController.queueEmbeddingJob` (src/modules/vector_rag/controllers/vector-governance.controller.ts:140). Exige sesión con alguno de los roles RAG_COLLECTION_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `QueueEmbeddingJobDto` (3 campos, 2 obligatorios). Delega en `EmbeddingPipelineService.queueEmbeddingJob`. Crea filas en messaging.domain_events, messaging.outbox_messages, vector_rag.embedding_jobs. Lee messaging.outbox_messages, vector_rag.vector_collections. Publica EmbeddingJobQueued.
+`POST /vector-rag/collections/{id}/embedding-jobs` la atiende `VectorGovernanceController.queueEmbeddingJob` (src/modules/vector_rag/controllers/vector-governance.controller.ts:170). Exige sesión con alguno de los roles RAG_COLLECTION_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `QueueEmbeddingJobDto` (3 campos, 2 obligatorios). Delega en `EmbeddingPipelineService.queueEmbeddingJob`. Crea filas en messaging.domain_events, messaging.outbox_messages, vector_rag.embedding_jobs. Lee messaging.outbox_messages, vector_rag.vector_collections. Publica EmbeddingJobQueued.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: RAG_COLLECTION_ADMIN, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:140` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: RAG_COLLECTION_ADMIN, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:170` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CABECERA | idempotency-key (obligatoria) | `contrato (parameters)` |
 | CABECERA | Idempotency-Key (opcional) | `contrato (parameters)` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-governance.controller.ts:140` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-governance.controller.ts:170` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.queueEmbeddingJob → EmbeddingPipelineService.queueEmbeddingJob → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.queueEmbeddingJob → EmbeddingPipelineService.queueEmbeddingJob → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorGovernanceController.queueEmbeddingJob → EmbeddingPipelineService.queueEmbeddingJob → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
-| `vector_rag.embedding_jobs` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.queueEmbeddingJob → EmbeddingPipelineService.queueEmbeddingJob → VectorCatalogRepository.createJob | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:459` |
-| `vector_rag.vector_collections` | LEE | LEE | DIRECTA | VectorGovernanceController.queueEmbeddingJob → EmbeddingPipelineService.queueEmbeddingJob → VectorCatalogRepository.findCollectionById | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:276` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.queueEmbeddingJob → EmbeddingPipelineService.queueEmbeddingJob → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorGovernanceController.queueEmbeddingJob → EmbeddingPipelineService.queueEmbeddingJob → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `vector_rag.embedding_jobs` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.queueEmbeddingJob → EmbeddingPipelineService.queueEmbeddingJob → VectorCatalogRepository.createJob | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:460` |
+| `vector_rag.vector_collections` | LEE | LEE | DIRECTA | VectorGovernanceController.queueEmbeddingJob → EmbeddingPipelineService.queueEmbeddingJob → VectorCatalogRepository.findCollectionById | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:277` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `EmbeddingJobQueued` | `src/modules/vector_rag/services/embedding-pipeline.service.ts:105` |
+| Evento de dominio | `EmbeddingJobQueued` | `src/modules/vector_rag/services/embedding-pipeline.service.ts:107` |
 
 ### Parámetros
 
@@ -263,7 +263,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Colección no encontrada. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La colección no está activa; no admite jobs de embedding. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -286,7 +285,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VectorGovernanceController.updateCollectionLifecycle` — `src/modules/vector_rag/controllers/vector-governance.controller.ts:185`
+- **Implementación:** `VectorGovernanceController.updateCollectionLifecycle` — `src/modules/vector_rag/controllers/vector-governance.controller.ts:225`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -296,37 +295,36 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PUT /vector-rag/collections/{id}/lifecycle` la atiende `VectorGovernanceController.updateCollectionLifecycle` (src/modules/vector_rag/controllers/vector-governance.controller.ts:185). Exige sesión con alguno de los roles AI_GOVERNANCE_OFFICER, RAG_COLLECTION_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `UpdateCollectionLifecycleDto` (1 campo, 1 obligatorio). Delega en `VectorGovernanceService.updateCollectionLifecycle`. Crea filas en messaging.domain_events, messaging.outbox_messages. Actualiza vector_rag.vector_collections, vector_rag.vector_tenant_bindings. Lee messaging.outbox_messages, vector_rag.vector_collections, vector_rag.vector_tenant_bindings. Publica VectorCollectionSealed.
+`PUT /vector-rag/collections/{id}/lifecycle` la atiende `VectorGovernanceController.updateCollectionLifecycle` (src/modules/vector_rag/controllers/vector-governance.controller.ts:225). Exige sesión con alguno de los roles AI_GOVERNANCE_OFFICER, RAG_COLLECTION_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `UpdateCollectionLifecycleDto` (1 campo, 1 obligatorio). Delega en `VectorGovernanceService.updateCollectionLifecycle`. Crea filas en messaging.domain_events, messaging.outbox_messages. Actualiza vector_rag.vector_tenant_bindings. Lee messaging.outbox_messages, vector_rag.vector_collections, vector_rag.vector_tenant_bindings. Publica VectorCollectionSealed.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AI_GOVERNANCE_OFFICER, RAG_COLLECTION_ADMIN, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:185` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-governance.controller.ts:185` |
+| ROL | Alguno de: AI_GOVERNANCE_OFFICER, RAG_COLLECTION_ADMIN, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:225` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-governance.controller.ts:225` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.updateCollectionLifecycle → VectorGovernanceService.updateCollectionLifecycle → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.updateCollectionLifecycle → VectorGovernanceService.updateCollectionLifecycle → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorGovernanceController.updateCollectionLifecycle → VectorGovernanceService.updateCollectionLifecycle → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
-| `vector_rag.vector_collections` | ESCRIBE | ACTUALIZA | POR_TIPO | VectorGovernanceController.updateCollectionLifecycle → VectorGovernanceService.updateCollectionLifecycle | `src/modules/vector_rag/services/vector-governance.service.ts:527` |
-| `vector_rag.vector_collections` | LEE | LEE | DIRECTA | VectorGovernanceController.updateCollectionLifecycle → VectorGovernanceService.updateCollectionLifecycle → VectorCatalogRepository.findCollectionForUpdate | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:290` |
-| `vector_rag.vector_tenant_bindings` | ESCRIBE | ACTUALIZA | POR_TIPO | VectorGovernanceController.updateCollectionLifecycle → VectorGovernanceService.updateCollectionLifecycle | `src/modules/vector_rag/services/vector-governance.service.ts:538` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.updateCollectionLifecycle → VectorGovernanceService.updateCollectionLifecycle → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorGovernanceController.updateCollectionLifecycle → VectorGovernanceService.updateCollectionLifecycle → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `vector_rag.vector_collections` | LEE | LEE | DIRECTA | VectorGovernanceController.updateCollectionLifecycle → VectorGovernanceService.updateCollectionLifecycle → VectorCatalogRepository.findCollectionForUpdate | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:292` |
+| `vector_rag.vector_tenant_bindings` | ESCRIBE | ACTUALIZA | POR_TIPO | VectorGovernanceController.updateCollectionLifecycle → VectorGovernanceService.updateCollectionLifecycle | `src/modules/vector_rag/services/vector-governance.service.ts:549` |
 | `vector_rag.vector_tenant_bindings` | LEE | LEE | DIRECTA | VectorGovernanceController.updateCollectionLifecycle → VectorGovernanceService.updateCollectionLifecycle → VectorCatalogRepository.findBindingsByCollectionForUpdate | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:395` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `VectorCollectionSealed` | `src/modules/vector_rag/services/vector-governance.service.ts:543` |
+| Evento de dominio | `VectorCollectionSealed` | `src/modules/vector_rag/services/vector-governance.service.ts:554` |
 
 ### Parámetros
 
@@ -374,7 +372,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Colección no encontrada. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/vector_rag.md).
@@ -396,7 +393,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VectorGovernanceController.reEmbedCollection` — `src/modules/vector_rag/controllers/vector-governance.controller.ts:168`
+- **Implementación:** `VectorGovernanceController.reEmbedCollection` — `src/modules/vector_rag/controllers/vector-governance.controller.ts:203`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -406,41 +403,40 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 
 ### Cómo se atiende (sistema)
 
-`POST /vector-rag/collections/{id}/re-embed` la atiende `VectorGovernanceController.reEmbedCollection` (src/modules/vector_rag/controllers/vector-governance.controller.ts:168). Exige sesión con alguno de los roles AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `ReEmbedCollectionDto` (2 campos, 1 obligatorio). Delega en `EmbeddingPipelineService.reEmbedCollection`. Crea filas en messaging.domain_events, messaging.outbox_messages, vector_rag.embedding_jobs. Actualiza vector_rag.vector_collections, vector_rag.vector_embeddings. Lee messaging.outbox_messages, vector_rag.embedding_model_versions, vector_rag.vector_chunks, vector_rag.vector_collections, vector_rag.vector_documents, vector_rag.vector_embeddings. Publica CollectionReEmbedRequested.
+`POST /vector-rag/collections/{id}/re-embed` la atiende `VectorGovernanceController.reEmbedCollection` (src/modules/vector_rag/controllers/vector-governance.controller.ts:203). Exige sesión con alguno de los roles AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `ReEmbedCollectionDto` (2 campos, 1 obligatorio). Delega en `EmbeddingPipelineService.reEmbedCollection`. Crea filas en messaging.domain_events, messaging.outbox_messages, vector_rag.embedding_jobs. Actualiza vector_rag.vector_embeddings. Lee messaging.outbox_messages, vector_rag.embedding_model_versions, vector_rag.vector_chunks, vector_rag.vector_collections, vector_rag.vector_documents, vector_rag.vector_embeddings. Publica CollectionReEmbedRequested.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:168` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-governance.controller.ts:168` |
+| ROL | Alguno de: AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:203` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-governance.controller.ts:203` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.reEmbedCollection → EmbeddingPipelineService.reEmbedCollection → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.reEmbedCollection → EmbeddingPipelineService.reEmbedCollection → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorGovernanceController.reEmbedCollection → EmbeddingPipelineService.reEmbedCollection → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
-| `vector_rag.embedding_jobs` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.reEmbedCollection → EmbeddingPipelineService.reEmbedCollection → VectorCatalogRepository.createJob | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:459` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.reEmbedCollection → EmbeddingPipelineService.reEmbedCollection → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorGovernanceController.reEmbedCollection → EmbeddingPipelineService.reEmbedCollection → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `vector_rag.embedding_jobs` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.reEmbedCollection → EmbeddingPipelineService.reEmbedCollection → VectorCatalogRepository.createJob | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:460` |
 | `vector_rag.embedding_model_versions` | LEE | LEE | DIRECTA | VectorGovernanceController.reEmbedCollection → EmbeddingPipelineService.reEmbedCollection → VectorCatalogRepository.findModelVersionForUpdate | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:214` |
-| `vector_rag.vector_chunks` | LEE | LEE | DIRECTA | VectorGovernanceController.reEmbedCollection → EmbeddingPipelineService.reEmbedCollection → VectorCorpusRepository.findChunksByDocuments | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:286` |
-| `vector_rag.vector_collections` | ESCRIBE | ACTUALIZA | POR_TIPO | VectorGovernanceController.reEmbedCollection → EmbeddingPipelineService.reEmbedCollection | `src/modules/vector_rag/services/embedding-pipeline.service.ts:451` |
-| `vector_rag.vector_collections` | LEE | LEE | DIRECTA | VectorGovernanceController.reEmbedCollection → EmbeddingPipelineService.reEmbedCollection → VectorCatalogRepository.findCollectionForUpdate | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:290` |
-| `vector_rag.vector_documents` | LEE | LEE | DIRECTA | VectorGovernanceController.reEmbedCollection → EmbeddingPipelineService.reEmbedCollection → VectorCorpusRepository.findActiveDocumentsByCollection | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:216` |
-| `vector_rag.vector_embeddings` | ESCRIBE | ACTUALIZA | POR_TIPO | VectorGovernanceController.reEmbedCollection → EmbeddingPipelineService.reEmbedCollection | `src/modules/vector_rag/services/embedding-pipeline.service.ts:446` |
-| `vector_rag.vector_embeddings` | LEE | LEE | DIRECTA | VectorGovernanceController.reEmbedCollection → EmbeddingPipelineService.reEmbedCollection → VectorCorpusRepository.findEmbeddingsByChunksAndModelForUpdate | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:344` |
+| `vector_rag.vector_chunks` | LEE | LEE | DIRECTA | VectorGovernanceController.reEmbedCollection → EmbeddingPipelineService.reEmbedCollection → VectorCorpusRepository.findChunksByDocuments | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:331` |
+| `vector_rag.vector_collections` | LEE | LEE | DIRECTA | VectorGovernanceController.reEmbedCollection → EmbeddingPipelineService.reEmbedCollection → VectorCatalogRepository.findCollectionForUpdate | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:292` |
+| `vector_rag.vector_documents` | LEE | LEE | DIRECTA | VectorGovernanceController.reEmbedCollection → EmbeddingPipelineService.reEmbedCollection → VectorCorpusRepository.findActiveDocumentsByCollection | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:261` |
+| `vector_rag.vector_embeddings` | ESCRIBE | ACTUALIZA | POR_TIPO | VectorGovernanceController.reEmbedCollection → EmbeddingPipelineService.reEmbedCollection | `src/modules/vector_rag/services/embedding-pipeline.service.ts:451` |
+| `vector_rag.vector_embeddings` | LEE | LEE | DIRECTA | VectorGovernanceController.reEmbedCollection → EmbeddingPipelineService.reEmbedCollection → VectorCorpusRepository.findEmbeddingsByChunksAndModelForUpdate | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:389` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `CollectionReEmbedRequested` | `src/modules/vector_rag/services/embedding-pipeline.service.ts:465` |
+| Evento de dominio | `CollectionReEmbedRequested` | `src/modules/vector_rag/services/embedding-pipeline.service.ts:470` |
 
 ### Parámetros
 
@@ -491,7 +487,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Colección no encontrada.; ResourceNotFoundException: Versión de modelo no encontrada. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión de modelo no encontrada. |
 | 409 | `CONFLICT` | ConflictException: La colección ya usa esa versión de modelo. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La colección no está activa.; PreconditionFailedException: El modelo de destino está retirado.; PreconditionFailedException: El modelo de destino no está aprobado para datos de paciente. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -515,7 +511,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VectorRuntimeController.reconcileCollection` — `src/modules/vector_rag/controllers/vector-runtime.controller.ts:178`
+- **Implementación:** `VectorRuntimeController.reconcileCollection` — `src/modules/vector_rag/controllers/vector-runtime.controller.ts:210`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -525,39 +521,39 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 
 ### Cómo se atiende (sistema)
 
-`POST /vector-rag/collections/{id}/reconciliation` la atiende `VectorRuntimeController.reconcileCollection` (src/modules/vector_rag/controllers/vector-runtime.controller.ts:178). Exige sesión con alguno de los roles SYSTEM, RECONCILIATION_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `ReconcileCollectionDto` (3 campos, 2 obligatorios). Delega en `VectorMaintenanceService.reconcileCollection`. Crea filas en messaging.domain_events, messaging.outbox_messages, vector_rag.embedding_jobs, vector_rag.vector_deletion_jobs, vector_rag.vector_reconciliation_runs. Lee messaging.outbox_messages, vector_rag.vector_collections, vector_rag.vector_documents. Publica VectorReconciliationCompleted, DriftDetected.
+`POST /vector-rag/collections/{id}/reconciliation` la atiende `VectorRuntimeController.reconcileCollection` (src/modules/vector_rag/controllers/vector-runtime.controller.ts:210). Exige sesión con alguno de los roles SYSTEM, RECONCILIATION_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `ReconcileCollectionDto` (3 campos, 2 obligatorios). Delega en `VectorMaintenanceService.reconcileCollection`. Crea filas en messaging.domain_events, messaging.outbox_messages, vector_rag.embedding_jobs, vector_rag.vector_deletion_jobs, vector_rag.vector_reconciliation_runs. Lee messaging.outbox_messages, vector_rag.vector_collections, vector_rag.vector_documents. Publica VectorReconciliationCompleted, DriftDetected.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, RECONCILIATION_WORKER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:178` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:178` |
+| ROL | Alguno de: SYSTEM, RECONCILIATION_WORKER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:210` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:210` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.reconcileCollection → VectorMaintenanceService.reconcileCollection → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.reconcileCollection → VectorMaintenanceService.reconcileCollection → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorRuntimeController.reconcileCollection → VectorMaintenanceService.reconcileCollection → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
-| `vector_rag.embedding_jobs` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.reconcileCollection → VectorMaintenanceService.reconcileCollection → VectorCatalogRepository.createJob | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:459` |
-| `vector_rag.vector_collections` | LEE | LEE | DIRECTA | VectorRuntimeController.reconcileCollection → VectorMaintenanceService.reconcileCollection → VectorCatalogRepository.findCollectionById | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:276` |
-| `vector_rag.vector_deletion_jobs` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.reconcileCollection → VectorMaintenanceService.reconcileCollection → VectorCorpusRepository.createDeletionJob | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:402` |
-| `vector_rag.vector_documents` | LEE | LEE | DIRECTA | VectorRuntimeController.reconcileCollection → VectorMaintenanceService.reconcileCollection → VectorCorpusRepository.findActiveDocumentsByCollection | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:216` |
-| `vector_rag.vector_reconciliation_runs` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.reconcileCollection → VectorMaintenanceService.reconcileCollection → VectorCorpusRepository.createReconciliationRun | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:481` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.reconcileCollection → VectorMaintenanceService.reconcileCollection → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorRuntimeController.reconcileCollection → VectorMaintenanceService.reconcileCollection → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `vector_rag.embedding_jobs` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.reconcileCollection → VectorMaintenanceService.reconcileCollection → VectorCatalogRepository.createJob | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:460` |
+| `vector_rag.vector_collections` | LEE | LEE | DIRECTA | VectorRuntimeController.reconcileCollection → VectorMaintenanceService.reconcileCollection → VectorCatalogRepository.findCollectionById | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:277` |
+| `vector_rag.vector_deletion_jobs` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.reconcileCollection → VectorMaintenanceService.reconcileCollection → VectorCorpusRepository.createDeletionJob | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:447` |
+| `vector_rag.vector_documents` | LEE | LEE | DIRECTA | VectorRuntimeController.reconcileCollection → VectorMaintenanceService.reconcileCollection → VectorCorpusRepository.findActiveDocumentsByCollection | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:261` |
+| `vector_rag.vector_reconciliation_runs` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.reconcileCollection → VectorMaintenanceService.reconcileCollection → VectorCorpusRepository.createReconciliationRun | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:526` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `VectorReconciliationCompleted` | `src/modules/vector_rag/services/vector-maintenance.service.ts:276` |
-| Evento de dominio | `DriftDetected` | `src/modules/vector_rag/services/vector-maintenance.service.ts:292` |
+| Evento de dominio | `VectorReconciliationCompleted` | `src/modules/vector_rag/services/vector-maintenance.service.ts:307` |
+| Evento de dominio | `DriftDetected` | `src/modules/vector_rag/services/vector-maintenance.service.ts:323` |
 
 ### Parámetros
 
@@ -618,7 +614,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Colección no encontrada. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/vector_rag.md).
@@ -640,7 +635,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VectorRuntimeController.propagateDeletion` — `src/modules/vector_rag/controllers/vector-runtime.controller.ts:162`
+- **Implementación:** `VectorRuntimeController.propagateDeletion` — `src/modules/vector_rag/controllers/vector-runtime.controller.ts:189`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -650,39 +645,41 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 
 ### Cómo se atiende (sistema)
 
-`POST /vector-rag/deletion-jobs` la atiende `VectorRuntimeController.propagateDeletion` (src/modules/vector_rag/controllers/vector-runtime.controller.ts:162). Exige sesión con alguno de los roles PRIVACY_OFFICER, DPO, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `PropagateDeletionDto` (5 campos, 2 obligatorios). Delega en `VectorMaintenanceService.propagateDeletion`. Crea filas en messaging.domain_events, messaging.outbox_messages, vector_rag.vector_deletion_jobs. Actualiza vector_rag.vector_deletion_jobs. Borra de vector_rag.vector_chunks, vector_rag.vector_documents, vector_rag.vector_embeddings. Lee messaging.outbox_messages, vector_rag.vector_chunks, vector_rag.vector_documents. Publica VectorEmbeddingsPurged.
+`POST /vector-rag/deletion-jobs` la atiende `VectorRuntimeController.propagateDeletion` (src/modules/vector_rag/controllers/vector-runtime.controller.ts:189). Exige sesión con alguno de los roles PRIVACY_OFFICER, DPO, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `PropagateDeletionDto` (5 campos, 2 obligatorios). Delega en `VectorMaintenanceService.propagateDeletion`. Crea filas en messaging.domain_events, messaging.outbox_messages, vector_rag.vector_deletion_jobs. Actualiza vector_rag.vector_deletion_jobs. Borra de vector_rag.vector_chunks, vector_rag.vector_documents, vector_rag.vector_embeddings. Lee messaging.outbox_messages, vector_rag.vector_chunks, vector_rag.vector_collections, vector_rag.vector_deletion_jobs, vector_rag.vector_documents. Publica VectorEmbeddingsPurged.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRIVACY_OFFICER, DPO, SYSTEM, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:162` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: PRIVACY_OFFICER, DPO, SYSTEM, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:189` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.propagateDeletion → VectorMaintenanceService.propagateDeletion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.propagateDeletion → VectorMaintenanceService.propagateDeletion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorRuntimeController.propagateDeletion → VectorMaintenanceService.propagateDeletion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
-| `vector_rag.vector_chunks` | BORRA | BORRA | DIRECTA | VectorRuntimeController.propagateDeletion → VectorMaintenanceService.propagateDeletion → VectorCorpusRepository.deleteChunks | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:298` |
-| `vector_rag.vector_chunks` | LEE | LEE | DIRECTA | VectorRuntimeController.propagateDeletion → VectorMaintenanceService.propagateDeletion → VectorCorpusRepository.findChunksByDocuments | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:286` |
-| `vector_rag.vector_deletion_jobs` | ESCRIBE | ACTUALIZA | POR_TIPO | VectorRuntimeController.propagateDeletion → VectorMaintenanceService.propagateDeletion | `src/modules/vector_rag/services/vector-maintenance.service.ts:118` |
-| `vector_rag.vector_deletion_jobs` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.propagateDeletion → VectorMaintenanceService.propagateDeletion → VectorCorpusRepository.createDeletionJob | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:402` |
-| `vector_rag.vector_documents` | BORRA | BORRA | DIRECTA | VectorRuntimeController.propagateDeletion → VectorMaintenanceService.propagateDeletion → VectorCorpusRepository.deleteDocuments | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:232` |
-| `vector_rag.vector_documents` | LEE | LEE | DIRECTA | VectorRuntimeController.propagateDeletion → VectorMaintenanceService.propagateDeletion → VectorCorpusRepository.findDocumentsForDeletion | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:204` |
-| `vector_rag.vector_embeddings` | BORRA | BORRA | DIRECTA | VectorRuntimeController.propagateDeletion → VectorMaintenanceService.propagateDeletion → VectorCorpusRepository.deleteEmbeddingsByChunks | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:363` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.propagateDeletion → VectorMaintenanceService.propagateDeletion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorRuntimeController.propagateDeletion → VectorMaintenanceService.propagateDeletion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `vector_rag.vector_chunks` | BORRA | BORRA | DIRECTA | VectorRuntimeController.propagateDeletion → VectorMaintenanceService.propagateDeletion → VectorCorpusRepository.deleteChunks | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:343` |
+| `vector_rag.vector_chunks` | LEE | LEE | DIRECTA | VectorRuntimeController.propagateDeletion → VectorMaintenanceService.propagateDeletion → VectorCorpusRepository.findChunksByDocuments | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:331` |
+| `vector_rag.vector_collections` | LEE | LEE | DIRECTA | VectorRuntimeController.propagateDeletion → VectorMaintenanceService.propagateDeletion → VectorCorpusRepository.findDocumentsForDeletion | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:208` |
+| `vector_rag.vector_deletion_jobs` | ESCRIBE | ACTUALIZA | POR_TIPO | VectorRuntimeController.propagateDeletion → VectorMaintenanceService.propagateDeletion | `src/modules/vector_rag/services/vector-maintenance.service.ts:148` |
+| `vector_rag.vector_deletion_jobs` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.propagateDeletion → VectorMaintenanceService.propagateDeletion → VectorCorpusRepository.createDeletionJob | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:447` |
+| `vector_rag.vector_deletion_jobs` | LEE | LEE | DIRECTA | VectorRuntimeController.propagateDeletion → VectorMaintenanceService.propagateDeletion → VectorCorpusRepository.hasPriorDeletionJob | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:252` |
+| `vector_rag.vector_documents` | BORRA | BORRA | DIRECTA | VectorRuntimeController.propagateDeletion → VectorMaintenanceService.propagateDeletion → VectorCorpusRepository.deleteDocuments | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:277` |
+| `vector_rag.vector_documents` | LEE | LEE | DIRECTA | VectorRuntimeController.propagateDeletion → VectorMaintenanceService.propagateDeletion → VectorCorpusRepository.findDocumentsForDeletion | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:221` |
+| `vector_rag.vector_embeddings` | BORRA | BORRA | DIRECTA | VectorRuntimeController.propagateDeletion → VectorMaintenanceService.propagateDeletion → VectorCorpusRepository.deleteEmbeddingsByChunks | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:408` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `VectorEmbeddingsPurged` | `src/modules/vector_rag/services/vector-maintenance.service.ts:122` |
+| Evento de dominio | `VectorEmbeddingsPurged` | `src/modules/vector_rag/services/vector-maintenance.service.ts:152` |
 
 ### Cuerpo — DTO `PropagateDeletionDto` · `application/json`
 
@@ -736,6 +733,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Referencia de borrado no encontrada. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Hay que declarar qué se borra: un documento fuente o un paciente. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -758,7 +756,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VectorRuntimeController.runEmbeddingJob` — `src/modules/vector_rag/controllers/vector-runtime.controller.ts:77`
+- **Implementación:** `VectorRuntimeController.runEmbeddingJob` — `src/modules/vector_rag/controllers/vector-runtime.controller.ts:79`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -768,43 +766,42 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 
 ### Cómo se atiende (sistema)
 
-`POST /vector-rag/embedding-jobs/{id}/run` la atiende `VectorRuntimeController.runEmbeddingJob` (src/modules/vector_rag/controllers/vector-runtime.controller.ts:77). Exige sesión con alguno de los roles SYSTEM, EMBEDDING_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `RunEmbeddingJobDto` (23 campos, 0 obligatorios). Delega en `EmbeddingPipelineService.runEmbeddingJob`. Crea filas en messaging.domain_events, messaging.outbox_messages, vector_rag.vector_chunks, vector_rag.vector_documents, vector_rag.vector_embeddings. Actualiza vector_rag.embedding_jobs. Lee messaging.outbox_messages, vector_rag.embedding_jobs, vector_rag.embedding_model_versions, vector_rag.vector_chunks, vector_rag.vector_collections, vector_rag.vector_documents, vector_rag.vector_embeddings. Publica EmbeddingJobCompleted.
+`POST /vector-rag/embedding-jobs/{id}/run` la atiende `VectorRuntimeController.runEmbeddingJob` (src/modules/vector_rag/controllers/vector-runtime.controller.ts:79). Exige sesión con alguno de los roles SYSTEM, EMBEDDING_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `RunEmbeddingJobDto` (23 campos, 0 obligatorios). Delega en `EmbeddingPipelineService.runEmbeddingJob`. Crea filas en messaging.domain_events, messaging.outbox_messages, vector_rag.vector_chunks, vector_rag.vector_documents, vector_rag.vector_embeddings. Lee messaging.outbox_messages, vector_rag.embedding_jobs, vector_rag.embedding_model_versions, vector_rag.vector_chunks, vector_rag.vector_collections, vector_rag.vector_documents, vector_rag.vector_embeddings. Publica EmbeddingJobCompleted.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, EMBEDDING_WORKER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:77` |
+| ROL | Alguno de: SYSTEM, EMBEDDING_WORKER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:79` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:79` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
-| `vector_rag.embedding_jobs` | ESCRIBE | ACTUALIZA | POR_TIPO | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob | `src/modules/vector_rag/services/embedding-pipeline.service.ts:204` |
-| `vector_rag.embedding_jobs` | LEE | LEE | DIRECTA | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob → VectorCatalogRepository.findJobForUpdate | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:493` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `vector_rag.embedding_jobs` | LEE | LEE | DIRECTA | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob → VectorCatalogRepository.findJobForUpdate | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:495` |
 | `vector_rag.embedding_model_versions` | LEE | LEE | DIRECTA | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob → VectorCatalogRepository.findModelVersionById | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:202` |
-| `vector_rag.vector_chunks` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob → VectorCorpusRepository.createChunk | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:245` |
-| `vector_rag.vector_chunks` | LEE | LEE | DIRECTA | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob → VectorCorpusRepository.findChunkByHash | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:271` |
-| `vector_rag.vector_collections` | LEE | LEE | DIRECTA | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob → VectorCatalogRepository.findCollectionById | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:276` |
-| `vector_rag.vector_documents` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob → VectorCorpusRepository.createDocument | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:160` |
-| `vector_rag.vector_documents` | LEE | LEE | DIRECTA | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob → VectorCorpusRepository.findDocument | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:145` |
-| `vector_rag.vector_embeddings` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob → VectorCorpusRepository.createEmbedding | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:330` |
-| `vector_rag.vector_embeddings` | LEE | LEE | DIRECTA | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob → VectorCorpusRepository.findEmbedding | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:313` |
+| `vector_rag.vector_chunks` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob → VectorCorpusRepository.createChunk | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:290` |
+| `vector_rag.vector_chunks` | LEE | LEE | DIRECTA | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob → VectorCorpusRepository.findChunkByHash | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:316` |
+| `vector_rag.vector_collections` | LEE | LEE | DIRECTA | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob → VectorCatalogRepository.findCollectionById | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:277` |
+| `vector_rag.vector_documents` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob → VectorCorpusRepository.createDocument | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:161` |
+| `vector_rag.vector_documents` | LEE | LEE | DIRECTA | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob → VectorCorpusRepository.findDocument | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:146` |
+| `vector_rag.vector_embeddings` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob → VectorCorpusRepository.createEmbedding | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:375` |
+| `vector_rag.vector_embeddings` | LEE | LEE | DIRECTA | VectorRuntimeController.runEmbeddingJob → EmbeddingPipelineService.runEmbeddingJob → VectorCorpusRepository.findEmbedding | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:358` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `EmbeddingJobCompleted` | `src/modules/vector_rag/services/embedding-pipeline.service.ts:319` |
+| Evento de dominio | `EmbeddingJobCompleted` | `src/modules/vector_rag/services/embedding-pipeline.service.ts:323` |
 
 ### Parámetros
 
@@ -907,7 +904,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Job de embedding no encontrado.; ResourceNotFoundException: Colección no encontrada.; ResourceNotFoundException: Versión de modelo no encontrada. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión de modelo no encontrada. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El job ya no está en cola ni en ejecución.; PreconditionFailedException: El modelo de la colección está retirado; el job no puede seguir.; PreconditionFailedException: La colección no admite datos de paciente y el documento los declara. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -930,7 +927,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VectorRuntimeController.listQueuedJobs` — `src/modules/vector_rag/controllers/vector-runtime.controller.ts:67`
+- **Implementación:** `VectorRuntimeController.listQueuedJobs` — `src/modules/vector_rag/controllers/vector-runtime.controller.ts:68`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -940,23 +937,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /vector-rag/embedding-jobs/pending` la atiende `VectorRuntimeController.listQueuedJobs` (src/modules/vector_rag/controllers/vector-runtime.controller.ts:67). Exige sesión con alguno de los roles SYSTEM, EMBEDDING_WORKER, PLATFORM_ADMIN. Delega en `EmbeddingPipelineService.listQueuedJobs`. Lee vector_rag.embedding_jobs.
+`GET /vector-rag/embedding-jobs/pending` la atiende `VectorRuntimeController.listQueuedJobs` (src/modules/vector_rag/controllers/vector-runtime.controller.ts:68). Exige sesión con alguno de los roles SYSTEM, EMBEDDING_WORKER, PLATFORM_ADMIN. Delega en `EmbeddingPipelineService.listQueuedJobs`. Lee vector_rag.embedding_jobs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, EMBEDDING_WORKER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SYSTEM, EMBEDDING_WORKER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:68` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `vector_rag.embedding_jobs` | LEE | LEE | DIRECTA | VectorRuntimeController.listQueuedJobs → EmbeddingPipelineService.listQueuedJobs → VectorCatalogRepository.findQueuedJobs | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:533` |
+| `vector_rag.embedding_jobs` | LEE | LEE | DIRECTA | VectorRuntimeController.listQueuedJobs → EmbeddingPipelineService.listQueuedJobs → VectorCatalogRepository.findQueuedJobs | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:534` |
 
 ### Parámetros
 
@@ -1006,7 +1003,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VectorGovernanceController.registerModelVersion` — `src/modules/vector_rag/controllers/vector-governance.controller.ts:58`
+- **Implementación:** `VectorGovernanceController.registerModelVersion` — `src/modules/vector_rag/controllers/vector-governance.controller.ts:63`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1016,26 +1013,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 
 ### Cómo se atiende (sistema)
 
-`POST /vector-rag/embedding-model-versions` la atiende `VectorGovernanceController.registerModelVersion` (src/modules/vector_rag/controllers/vector-governance.controller.ts:58). Exige sesión con alguno de los roles AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `RegisterModelVersionDto` (7 campos, 6 obligatorios). Delega en `VectorGovernanceService.registerModelVersion`. Crea filas en messaging.domain_events, messaging.outbox_messages, vector_rag.embedding_model_versions. Lee messaging.outbox_messages, vector_rag.embedding_model_versions. Publica EmbeddingModelVersionApproved.
+`POST /vector-rag/embedding-model-versions` la atiende `VectorGovernanceController.registerModelVersion` (src/modules/vector_rag/controllers/vector-governance.controller.ts:63). Exige sesión con alguno de los roles AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `RegisterModelVersionDto` (7 campos, 6 obligatorios). Delega en `VectorGovernanceService.registerModelVersion`. Crea filas en messaging.domain_events, messaging.outbox_messages, vector_rag.embedding_model_versions. Lee messaging.outbox_messages, vector_rag.embedding_model_versions. Publica EmbeddingModelVersionApproved.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:58` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:63` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.registerModelVersion → VectorGovernanceService.registerModelVersion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.registerModelVersion → VectorGovernanceService.registerModelVersion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorGovernanceController.registerModelVersion → VectorGovernanceService.registerModelVersion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.registerModelVersion → VectorGovernanceService.registerModelVersion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorGovernanceController.registerModelVersion → VectorGovernanceService.registerModelVersion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `vector_rag.embedding_model_versions` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.registerModelVersion → VectorGovernanceService.registerModelVersion → VectorCatalogRepository.createModelVersion | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:188` |
 | `vector_rag.embedding_model_versions` | LEE | LEE | DIRECTA | VectorGovernanceController.registerModelVersion → VectorGovernanceService.registerModelVersion → VectorCatalogRepository.findModelVersion | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:236` |
 
@@ -1043,7 +1040,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `EmbeddingModelVersionApproved` | `src/modules/vector_rag/services/vector-governance.service.ts:93` |
+| Evento de dominio | `EmbeddingModelVersionApproved` | `src/modules/vector_rag/services/vector-governance.service.ts:98` |
 
 ### Cuerpo — DTO `RegisterModelVersionDto` · `application/json`
 
@@ -1128,7 +1125,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VectorGovernanceController.retireModelVersion` — `src/modules/vector_rag/controllers/vector-governance.controller.ts:74`
+- **Implementación:** `VectorGovernanceController.retireModelVersion` — `src/modules/vector_rag/controllers/vector-governance.controller.ts:84`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1138,29 +1135,29 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /vector-rag/embedding-model-versions/{id}/retire` la atiende `VectorGovernanceController.retireModelVersion` (src/modules/vector_rag/controllers/vector-governance.controller.ts:74). Exige sesión con alguno de los roles AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `RetireModelVersionDto` (1 campo, 0 obligatorios). Delega en `VectorGovernanceService.retireModelVersion`. Crea filas en messaging.domain_events, messaging.outbox_messages. Actualiza vector_rag.embedding_model_versions. Lee messaging.outbox_messages, vector_rag.embedding_jobs, vector_rag.embedding_model_versions, vector_rag.vector_collections. Publica EmbeddingModelRetired.
+`POST /vector-rag/embedding-model-versions/{id}/retire` la atiende `VectorGovernanceController.retireModelVersion` (src/modules/vector_rag/controllers/vector-governance.controller.ts:84). Exige sesión con alguno de los roles AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `RetireModelVersionDto` (1 campo, 0 obligatorios). Delega en `VectorGovernanceService.retireModelVersion`. Crea filas en messaging.domain_events, messaging.outbox_messages. Actualiza vector_rag.embedding_model_versions. Lee messaging.outbox_messages, vector_rag.embedding_jobs, vector_rag.embedding_model_versions, vector_rag.vector_collections. Publica EmbeddingModelRetired.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:74` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-governance.controller.ts:74` |
+| ROL | Alguno de: AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:84` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-governance.controller.ts:84` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.retireModelVersion → VectorGovernanceService.retireModelVersion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.retireModelVersion → VectorGovernanceService.retireModelVersion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorGovernanceController.retireModelVersion → VectorGovernanceService.retireModelVersion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
-| `vector_rag.embedding_jobs` | LEE | LEE | DIRECTA | VectorGovernanceController.retireModelVersion → VectorGovernanceService.retireModelVersion → VectorCatalogRepository.findActiveJobsByCollection | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:546` |
-| `vector_rag.embedding_model_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | VectorGovernanceController.retireModelVersion → VectorGovernanceService.retireModelVersion | `src/modules/vector_rag/services/vector-governance.service.ts:459` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.retireModelVersion → VectorGovernanceService.retireModelVersion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorGovernanceController.retireModelVersion → VectorGovernanceService.retireModelVersion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `vector_rag.embedding_jobs` | LEE | LEE | DIRECTA | VectorGovernanceController.retireModelVersion → VectorGovernanceService.retireModelVersion → VectorCatalogRepository.findActiveJobsByCollection | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:547` |
+| `vector_rag.embedding_model_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | VectorGovernanceController.retireModelVersion → VectorGovernanceService.retireModelVersion | `src/modules/vector_rag/services/vector-governance.service.ts:469` |
 | `vector_rag.embedding_model_versions` | LEE | LEE | DIRECTA | VectorGovernanceController.retireModelVersion → VectorGovernanceService.retireModelVersion → VectorCatalogRepository.findModelVersionForUpdate | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:214` |
 | `vector_rag.vector_collections` | LEE | LEE | DIRECTA | VectorGovernanceController.retireModelVersion → VectorGovernanceService.retireModelVersion → VectorCatalogRepository.findCollectionsByModel | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:330` |
 
@@ -1168,7 +1165,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `EmbeddingModelRetired` | `src/modules/vector_rag/services/vector-governance.service.ts:461` |
+| Evento de dominio | `EmbeddingModelRetired` | `src/modules/vector_rag/services/vector-governance.service.ts:471` |
 
 ### Parámetros
 
@@ -1242,7 +1239,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VectorGovernanceController.defineRagPolicy` — `src/modules/vector_rag/controllers/vector-governance.controller.ts:107`
+- **Implementación:** `VectorGovernanceController.defineRagPolicy` — `src/modules/vector_rag/controllers/vector-governance.controller.ts:127`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1252,25 +1249,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 
 ### Cómo se atiende (sistema)
 
-`POST /vector-rag/rag-access-policies` la atiende `VectorGovernanceController.defineRagPolicy` (src/modules/vector_rag/controllers/vector-governance.controller.ts:107). Exige sesión con alguno de los roles PRIVACY_OFFICER, DPO, PLATFORM_ADMIN. Valida el cuerpo como `DefineRagPolicyDto` (8 campos, 5 obligatorios). Delega en `VectorGovernanceService.defineRagPolicy`. Crea filas en vector_rag.rag_access_policies. Lee vector_rag.rag_access_policies.
+`POST /vector-rag/rag-access-policies` la atiende `VectorGovernanceController.defineRagPolicy` (src/modules/vector_rag/controllers/vector-governance.controller.ts:127). Exige sesión con alguno de los roles PRIVACY_OFFICER, DPO, PLATFORM_ADMIN. Valida el cuerpo como `DefineRagPolicyDto` (8 campos, 5 obligatorios). Delega en `VectorGovernanceService.defineRagPolicy`. Crea filas en vector_rag.rag_access_policies. Lee vector_rag.rag_access_policies.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRIVACY_OFFICER, DPO, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:107` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: PRIVACY_OFFICER, DPO, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:127` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `vector_rag.rag_access_policies` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.defineRagPolicy → VectorGovernanceService.defineRagPolicy → VectorCatalogRepository.createPolicy | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:412` |
-| `vector_rag.rag_access_policies` | LEE | LEE | DIRECTA | VectorGovernanceController.defineRagPolicy → VectorGovernanceService.defineRagPolicy → VectorCatalogRepository.findPolicyByCodeForUpdate | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:442` |
+| `vector_rag.rag_access_policies` | LEE | LEE | DIRECTA | VectorGovernanceController.defineRagPolicy → VectorGovernanceService.defineRagPolicy → VectorCatalogRepository.findPolicyByCodeForUpdate | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:443` |
 
 ### Cuerpo — DTO `DefineRagPolicyDto` · `application/json`
 
@@ -1366,7 +1363,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VectorGovernanceController.publishRagPolicy` — `src/modules/vector_rag/controllers/vector-governance.controller.ts:123`
+- **Implementación:** `VectorGovernanceController.publishRagPolicy` — `src/modules/vector_rag/controllers/vector-governance.controller.ts:148`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1376,37 +1373,35 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PUT /vector-rag/rag-access-policies/{id}/publish` la atiende `VectorGovernanceController.publishRagPolicy` (src/modules/vector_rag/controllers/vector-governance.controller.ts:123). Exige sesión con alguno de los roles PRIVACY_OFFICER, DPO, PLATFORM_ADMIN. Valida el cuerpo como `PublishRagPolicyDto` (1 campo, 0 obligatorios). Delega en `VectorGovernanceService.publishRagPolicy`. Crea filas en messaging.domain_events, messaging.outbox_messages. Actualiza vector_rag.rag_access_policies, vector_rag.vector_collections. Lee messaging.outbox_messages, vector_rag.rag_access_policies, vector_rag.vector_collections. Publica RagAccessPolicyPublished.
+`PUT /vector-rag/rag-access-policies/{id}/publish` la atiende `VectorGovernanceController.publishRagPolicy` (src/modules/vector_rag/controllers/vector-governance.controller.ts:148). Exige sesión con alguno de los roles PRIVACY_OFFICER, DPO, PLATFORM_ADMIN. Valida el cuerpo como `PublishRagPolicyDto` (1 campo, 0 obligatorios). Delega en `VectorGovernanceService.publishRagPolicy`. Crea filas en messaging.domain_events, messaging.outbox_messages. Lee messaging.outbox_messages, vector_rag.rag_access_policies, vector_rag.vector_collections. Publica RagAccessPolicyPublished.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRIVACY_OFFICER, DPO, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:123` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-governance.controller.ts:123` |
+| ROL | Alguno de: PRIVACY_OFFICER, DPO, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:148` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-governance.controller.ts:148` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.publishRagPolicy → VectorGovernanceService.publishRagPolicy → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.publishRagPolicy → VectorGovernanceService.publishRagPolicy → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorGovernanceController.publishRagPolicy → VectorGovernanceService.publishRagPolicy → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
-| `vector_rag.rag_access_policies` | ESCRIBE | ACTUALIZA | POR_TIPO | VectorGovernanceController.publishRagPolicy → VectorGovernanceService.publishRagPolicy | `src/modules/vector_rag/services/vector-governance.service.ts:348` |
-| `vector_rag.rag_access_policies` | LEE | LEE | DIRECTA | VectorGovernanceController.publishRagPolicy → VectorGovernanceService.publishRagPolicy → VectorCatalogRepository.findPolicyById | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:426` |
-| `vector_rag.vector_collections` | ESCRIBE | ACTUALIZA | POR_TIPO | VectorGovernanceController.publishRagPolicy → VectorGovernanceService.publishRagPolicy | `src/modules/vector_rag/services/vector-governance.service.ts:367` |
-| `vector_rag.vector_collections` | LEE | LEE | DIRECTA | VectorGovernanceController.publishRagPolicy → VectorGovernanceService.publishRagPolicy → VectorCatalogRepository.findCollectionForUpdate | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:290` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorGovernanceController.publishRagPolicy → VectorGovernanceService.publishRagPolicy → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorGovernanceController.publishRagPolicy → VectorGovernanceService.publishRagPolicy → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `vector_rag.rag_access_policies` | LEE | LEE | DIRECTA | VectorGovernanceController.publishRagPolicy → VectorGovernanceService.publishRagPolicy → VectorCatalogRepository.findPolicyById | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:427` |
+| `vector_rag.vector_collections` | LEE | LEE | DIRECTA | VectorGovernanceController.publishRagPolicy → VectorGovernanceService.publishRagPolicy → VectorCatalogRepository.findCollectionForUpdate | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:292` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `RagAccessPolicyPublished` | `src/modules/vector_rag/services/vector-governance.service.ts:371` |
+| Evento de dominio | `RagAccessPolicyPublished` | `src/modules/vector_rag/services/vector-governance.service.ts:381` |
 
 ### Parámetros
 
@@ -1455,8 +1450,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Política de acceso RAG no encontrada.; ResourceNotFoundException: Colección no encontrada. |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La colección pertenece a otro tenant que la política. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/vector_rag.md).
@@ -1478,7 +1471,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VectorRuntimeController.openSession` — `src/modules/vector_rag/controllers/vector-runtime.controller.ts:94`
+- **Implementación:** `VectorRuntimeController.openSession` — `src/modules/vector_rag/controllers/vector-runtime.controller.ts:101`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1488,36 +1481,36 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 
 ### Cómo se atiende (sistema)
 
-`POST /vector-rag/retrieval-sessions` la atiende `VectorRuntimeController.openSession` (src/modules/vector_rag/controllers/vector-runtime.controller.ts:94). Exige sesión con alguno de los roles CLINICIAN, AGENT_RUNTIME, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `OpenRetrievalSessionDto` (7 campos, 4 obligatorios). Delega en `RetrievalService.openSession`. Crea filas en messaging.domain_events, messaging.outbox_messages, vector_rag.retrieval_sessions. Lee messaging.outbox_messages, vector_rag.rag_access_policies, vector_rag.retrieval_sessions, vector_rag.vector_collections. Publica RetrievalSessionOpened.
+`POST /vector-rag/retrieval-sessions` la atiende `VectorRuntimeController.openSession` (src/modules/vector_rag/controllers/vector-runtime.controller.ts:101). Exige sesión con alguno de los roles CLINICIAN, AGENT_RUNTIME, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `OpenRetrievalSessionDto` (7 campos, 4 obligatorios). Delega en `RetrievalService.openSession`. Crea filas en messaging.domain_events, messaging.outbox_messages, vector_rag.retrieval_sessions. Lee messaging.outbox_messages, vector_rag.rag_access_policies, vector_rag.retrieval_sessions, vector_rag.vector_collections. Publica RetrievalSessionOpened.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, AGENT_RUNTIME, SYSTEM, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:94` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: CLINICIAN, AGENT_RUNTIME, SYSTEM, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:101` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.openSession → RetrievalService.openSession → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.openSession → RetrievalService.openSession → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorRuntimeController.openSession → RetrievalService.openSession → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
-| `vector_rag.rag_access_policies` | LEE | LEE | DIRECTA | VectorRuntimeController.openSession → RetrievalService.openSession → RetrievalService.requirePublishedPolicy → VectorCatalogRepository.findPolicyById | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:426` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.openSession → RetrievalService.openSession → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorRuntimeController.openSession → RetrievalService.openSession → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `vector_rag.rag_access_policies` | LEE | LEE | DIRECTA | VectorRuntimeController.openSession → RetrievalService.openSession → RetrievalService.requirePublishedPolicy → VectorCatalogRepository.findPolicyById | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:427` |
 | `vector_rag.retrieval_sessions` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.openSession → RetrievalService.openSession → RetrievalRepository.createSession | `src/modules/vector_rag/repositories/retrieval.repository.ts:145` |
-| `vector_rag.retrieval_sessions` | LEE | LEE | DIRECTA | VectorRuntimeController.openSession → RetrievalService.openSession → RetrievalRepository.findOpenSessionByHash | `src/modules/vector_rag/repositories/retrieval.repository.ts:196` |
-| `vector_rag.vector_collections` | LEE | LEE | DIRECTA | VectorRuntimeController.openSession → RetrievalService.openSession → VectorCatalogRepository.findCollectionById | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:276` |
+| `vector_rag.retrieval_sessions` | LEE | LEE | DIRECTA | VectorRuntimeController.openSession → RetrievalService.openSession → RetrievalRepository.findOpenSessionByHash | `src/modules/vector_rag/repositories/retrieval.repository.ts:195` |
+| `vector_rag.vector_collections` | LEE | LEE | DIRECTA | VectorRuntimeController.openSession → RetrievalService.openSession → VectorCatalogRepository.findCollectionById | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:277` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `RetrievalSessionOpened` | `src/modules/vector_rag/services/retrieval.service.ts:156` |
+| Evento de dominio | `RetrievalSessionOpened` | `src/modules/vector_rag/services/retrieval.service.ts:161` |
 
 ### Cuerpo — DTO `OpenRetrievalSessionDto` · `application/json`
 
@@ -1575,7 +1568,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Colección no encontrada.; ResourceNotFoundException: Política de acceso RAG no encontrada. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La colección está deprecada.; PreconditionFailedException: La colección no tiene política de acceso RAG; no se puede consultar.; PreconditionFailedException: La política de acceso RAG no está publicada.; PreconditionFailedException: La política no admite ese tipo de principal.; PreconditionFailedException: La política no admite ese propósito de uso.; PreconditionFailedException: La política exige declarar el paciente sobre el que se consulta.; PreconditionFailedException: La política exige una directiva de consentimiento vigente. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1598,7 +1590,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VectorRuntimeController.materializeEvidence` — `src/modules/vector_rag/controllers/vector-runtime.controller.ts:128`
+- **Implementación:** `VectorRuntimeController.materializeEvidence` — `src/modules/vector_rag/controllers/vector-runtime.controller.ts:145`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1608,39 +1600,38 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 
 ### Cómo se atiende (sistema)
 
-`POST /vector-rag/retrieval-sessions/{id}/evidence` la atiende `VectorRuntimeController.materializeEvidence` (src/modules/vector_rag/controllers/vector-runtime.controller.ts:128). Exige sesión con alguno de los roles SYSTEM, RETRIEVAL_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `MaterializeEvidenceDto` (4 campos, 3 obligatorios). Delega en `RetrievalService.materializeEvidence`. Crea filas en messaging.domain_events, messaging.outbox_messages, vector_rag.retrieval_evidence. Actualiza vector_rag.retrieval_sessions. Lee messaging.outbox_messages, vector_rag.retrieval_candidates, vector_rag.retrieval_sessions, vector_rag.vector_chunks, vector_rag.vector_documents. Publica RetrievalEvidenceMaterialized.
+`POST /vector-rag/retrieval-sessions/{id}/evidence` la atiende `VectorRuntimeController.materializeEvidence` (src/modules/vector_rag/controllers/vector-runtime.controller.ts:145). Exige sesión con alguno de los roles SYSTEM, RETRIEVAL_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `MaterializeEvidenceDto` (4 campos, 3 obligatorios). Delega en `RetrievalService.materializeEvidence`. Crea filas en messaging.domain_events, messaging.outbox_messages, vector_rag.retrieval_evidence. Lee messaging.outbox_messages, vector_rag.retrieval_candidates, vector_rag.retrieval_sessions, vector_rag.vector_chunks, vector_rag.vector_documents. Publica RetrievalEvidenceMaterialized.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, RETRIEVAL_WORKER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:128` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:128` |
+| ROL | Alguno de: SYSTEM, RETRIEVAL_WORKER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:145` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:145` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.materializeEvidence → RetrievalService.materializeEvidence → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.materializeEvidence → RetrievalService.materializeEvidence → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorRuntimeController.materializeEvidence → RetrievalService.materializeEvidence → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
-| `vector_rag.retrieval_candidates` | LEE | LEE | DIRECTA | VectorRuntimeController.materializeEvidence → RetrievalService.materializeEvidence → RetrievalRepository.findSelectedCandidates | `src/modules/vector_rag/repositories/retrieval.repository.ts:244` |
-| `vector_rag.retrieval_evidence` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.materializeEvidence → RetrievalService.materializeEvidence → RetrievalRepository.createEvidence | `src/modules/vector_rag/repositories/retrieval.repository.ts:268` |
-| `vector_rag.retrieval_sessions` | ESCRIBE | ACTUALIZA | POR_TIPO | VectorRuntimeController.materializeEvidence → RetrievalService.materializeEvidence | `src/modules/vector_rag/services/retrieval.service.ts:437` |
-| `vector_rag.retrieval_sessions` | LEE | LEE | DIRECTA | VectorRuntimeController.materializeEvidence → RetrievalService.materializeEvidence → RetrievalRepository.findSessionForUpdate | `src/modules/vector_rag/repositories/retrieval.repository.ts:177` |
-| `vector_rag.vector_chunks` | LEE | LEE | DIRECTA | VectorRuntimeController.materializeEvidence → RetrievalService.materializeEvidence → VectorCorpusRepository.findChunkById | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:262` |
-| `vector_rag.vector_documents` | LEE | LEE | DIRECTA | VectorRuntimeController.materializeEvidence → RetrievalService.materializeEvidence → VectorCorpusRepository.findDocumentById | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:178` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.materializeEvidence → RetrievalService.materializeEvidence → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorRuntimeController.materializeEvidence → RetrievalService.materializeEvidence → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `vector_rag.retrieval_candidates` | LEE | LEE | DIRECTA | VectorRuntimeController.materializeEvidence → RetrievalService.materializeEvidence → RetrievalRepository.findSelectedCandidates | `src/modules/vector_rag/repositories/retrieval.repository.ts:243` |
+| `vector_rag.retrieval_evidence` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.materializeEvidence → RetrievalService.materializeEvidence → RetrievalRepository.createEvidence | `src/modules/vector_rag/repositories/retrieval.repository.ts:267` |
+| `vector_rag.retrieval_sessions` | LEE | LEE | DIRECTA | VectorRuntimeController.materializeEvidence → RetrievalService.materializeEvidence → RetrievalRepository.findSessionForUpdate | `src/modules/vector_rag/repositories/retrieval.repository.ts:178` |
+| `vector_rag.vector_chunks` | LEE | LEE | DIRECTA | VectorRuntimeController.materializeEvidence → RetrievalService.materializeEvidence → VectorCorpusRepository.findChunkById | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:307` |
+| `vector_rag.vector_documents` | LEE | LEE | DIRECTA | VectorRuntimeController.materializeEvidence → RetrievalService.materializeEvidence → VectorCorpusRepository.findDocumentById | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:179` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `RetrievalEvidenceMaterialized` | `src/modules/vector_rag/services/retrieval.service.ts:440` |
+| Evento de dominio | `RetrievalEvidenceMaterialized` | `src/modules/vector_rag/services/retrieval.service.ts:441` |
 
 ### Parámetros
 
@@ -1702,7 +1693,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión de retrieval no encontrada. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión tiene que estar ranqueada para materializar evidencia.; PreconditionFailedException: La sesión no tiene ningún candidato seleccionado y autorizado que citar.; PreconditionFailedException: Se intenta citar un chunk que no quedó seleccionado y autorizado. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1725,7 +1715,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VectorRuntimeController.captureFeedback` — `src/modules/vector_rag/controllers/vector-runtime.controller.ts:145`
+- **Implementación:** `VectorRuntimeController.captureFeedback` — `src/modules/vector_rag/controllers/vector-runtime.controller.ts:167`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1735,37 +1725,36 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 
 ### Cómo se atiende (sistema)
 
-`POST /vector-rag/retrieval-sessions/{id}/feedback` la atiende `VectorRuntimeController.captureFeedback` (src/modules/vector_rag/controllers/vector-runtime.controller.ts:145). Exige sesión con alguno de los roles CLINICIAN, AGENT_RUNTIME, PLATFORM_ADMIN. Valida el cuerpo como `CaptureFeedbackDto` (4 campos, 1 obligatorio). Delega en `RetrievalService.captureFeedback`. Crea filas en messaging.domain_events, messaging.outbox_messages, vector_rag.retrieval_feedback_events. Actualiza vector_rag.retrieval_sessions. Lee messaging.outbox_messages, vector_rag.retrieval_sessions. Publica RetrievalFeedbackCaptured, RetrievalSafetyIssueRaised.
+`POST /vector-rag/retrieval-sessions/{id}/feedback` la atiende `VectorRuntimeController.captureFeedback` (src/modules/vector_rag/controllers/vector-runtime.controller.ts:167). Exige sesión con alguno de los roles CLINICIAN, AGENT_RUNTIME, PLATFORM_ADMIN. Valida el cuerpo como `CaptureFeedbackDto` (4 campos, 1 obligatorio). Delega en `RetrievalService.captureFeedback`. Crea filas en messaging.domain_events, messaging.outbox_messages, vector_rag.retrieval_feedback_events. Lee messaging.outbox_messages, vector_rag.retrieval_sessions. Publica RetrievalFeedbackCaptured, RetrievalSafetyIssueRaised.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, AGENT_RUNTIME, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:145` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:145` |
+| ROL | Alguno de: CLINICIAN, AGENT_RUNTIME, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:167` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:167` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.captureFeedback → RetrievalService.captureFeedback → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.captureFeedback → RetrievalService.captureFeedback → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorRuntimeController.captureFeedback → RetrievalService.captureFeedback → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
-| `vector_rag.retrieval_feedback_events` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.captureFeedback → RetrievalService.captureFeedback → RetrievalRepository.createFeedback | `src/modules/vector_rag/repositories/retrieval.repository.ts:327` |
-| `vector_rag.retrieval_sessions` | ESCRIBE | ACTUALIZA | POR_TIPO | VectorRuntimeController.captureFeedback → RetrievalService.captureFeedback | `src/modules/vector_rag/services/retrieval.service.ts:507` |
-| `vector_rag.retrieval_sessions` | LEE | LEE | DIRECTA | VectorRuntimeController.captureFeedback → RetrievalService.captureFeedback → RetrievalRepository.findSessionForUpdate | `src/modules/vector_rag/repositories/retrieval.repository.ts:177` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.captureFeedback → RetrievalService.captureFeedback → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorRuntimeController.captureFeedback → RetrievalService.captureFeedback → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `vector_rag.retrieval_feedback_events` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.captureFeedback → RetrievalService.captureFeedback → RetrievalRepository.createFeedback | `src/modules/vector_rag/repositories/retrieval.repository.ts:326` |
+| `vector_rag.retrieval_sessions` | LEE | LEE | DIRECTA | VectorRuntimeController.captureFeedback → RetrievalService.captureFeedback → RetrievalRepository.findSessionForUpdate | `src/modules/vector_rag/repositories/retrieval.repository.ts:178` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `RetrievalFeedbackCaptured` | `src/modules/vector_rag/services/retrieval.service.ts:510` |
-| Evento de dominio | `RetrievalSafetyIssueRaised` | `src/modules/vector_rag/services/retrieval.service.ts:524` |
+| Evento de dominio | `RetrievalFeedbackCaptured` | `src/modules/vector_rag/services/retrieval.service.ts:526` |
+| Evento de dominio | `RetrievalSafetyIssueRaised` | `src/modules/vector_rag/services/retrieval.service.ts:540` |
 
 ### Parámetros
 
@@ -1842,7 +1831,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VectorRuntimeController.rankCandidates` — `src/modules/vector_rag/controllers/vector-runtime.controller.ts:110`
+- **Implementación:** `VectorRuntimeController.rankCandidates` — `src/modules/vector_rag/controllers/vector-runtime.controller.ts:122`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1852,40 +1841,39 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 
 ### Cómo se atiende (sistema)
 
-`POST /vector-rag/retrieval-sessions/{id}/search` la atiende `VectorRuntimeController.rankCandidates` (src/modules/vector_rag/controllers/vector-runtime.controller.ts:110). Exige sesión con alguno de los roles SYSTEM, RETRIEVAL_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `RankCandidatesDto` (6 campos, 3 obligatorios). Delega en `RetrievalService.rankCandidates`. Crea filas en messaging.domain_events, messaging.outbox_messages, vector_rag.retrieval_candidates. Actualiza vector_rag.retrieval_sessions. Lee messaging.outbox_messages, vector_rag.rag_access_policies, vector_rag.retrieval_sessions, vector_rag.vector_chunks, vector_rag.vector_collections, vector_rag.vector_documents. Publica RetrievalCandidatesRanked.
+`POST /vector-rag/retrieval-sessions/{id}/search` la atiende `VectorRuntimeController.rankCandidates` (src/modules/vector_rag/controllers/vector-runtime.controller.ts:122). Exige sesión con alguno de los roles SYSTEM, RETRIEVAL_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `RankCandidatesDto` (6 campos, 3 obligatorios). Delega en `RetrievalService.rankCandidates`. Crea filas en messaging.domain_events, messaging.outbox_messages, vector_rag.retrieval_candidates. Lee messaging.outbox_messages, vector_rag.rag_access_policies, vector_rag.retrieval_sessions, vector_rag.vector_chunks, vector_rag.vector_collections, vector_rag.vector_documents. Publica RetrievalCandidatesRanked.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, RETRIEVAL_WORKER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:110` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:110` |
+| ROL | Alguno de: SYSTEM, RETRIEVAL_WORKER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:122` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:122` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.rankCandidates → RetrievalService.rankCandidates → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.rankCandidates → RetrievalService.rankCandidates → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorRuntimeController.rankCandidates → RetrievalService.rankCandidates → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
-| `vector_rag.rag_access_policies` | LEE | LEE | DIRECTA | VectorRuntimeController.rankCandidates → RetrievalService.rankCandidates → RetrievalService.requirePublishedPolicy → VectorCatalogRepository.findPolicyById | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:426` |
-| `vector_rag.retrieval_candidates` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.rankCandidates → RetrievalService.rankCandidates → RetrievalRepository.createCandidate | `src/modules/vector_rag/repositories/retrieval.repository.ts:217` |
-| `vector_rag.retrieval_sessions` | ESCRIBE | ACTUALIZA | POR_TIPO | VectorRuntimeController.rankCandidates → RetrievalService.rankCandidates | `src/modules/vector_rag/services/retrieval.service.ts:323` |
-| `vector_rag.retrieval_sessions` | LEE | LEE | DIRECTA | VectorRuntimeController.rankCandidates → RetrievalService.rankCandidates → RetrievalRepository.findSessionForUpdate | `src/modules/vector_rag/repositories/retrieval.repository.ts:177` |
-| `vector_rag.vector_chunks` | LEE | LEE | DIRECTA | VectorRuntimeController.rankCandidates → RetrievalService.rankCandidates → VectorCorpusRepository.findChunkById | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:262` |
-| `vector_rag.vector_collections` | LEE | LEE | DIRECTA | VectorRuntimeController.rankCandidates → RetrievalService.rankCandidates → VectorCatalogRepository.findCollectionById | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:276` |
-| `vector_rag.vector_documents` | LEE | LEE | DIRECTA | VectorRuntimeController.rankCandidates → RetrievalService.rankCandidates → VectorCorpusRepository.findDocumentById | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:178` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.rankCandidates → RetrievalService.rankCandidates → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | VectorRuntimeController.rankCandidates → RetrievalService.rankCandidates → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `vector_rag.rag_access_policies` | LEE | LEE | DIRECTA | VectorRuntimeController.rankCandidates → RetrievalService.rankCandidates → RetrievalService.requirePublishedPolicy → VectorCatalogRepository.findPolicyById | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:427` |
+| `vector_rag.retrieval_candidates` | ESCRIBE | CREA | DIRECTA | VectorRuntimeController.rankCandidates → RetrievalService.rankCandidates → RetrievalRepository.createCandidate | `src/modules/vector_rag/repositories/retrieval.repository.ts:216` |
+| `vector_rag.retrieval_sessions` | LEE | LEE | DIRECTA | VectorRuntimeController.rankCandidates → RetrievalService.rankCandidates → RetrievalRepository.findSessionForUpdate | `src/modules/vector_rag/repositories/retrieval.repository.ts:178` |
+| `vector_rag.vector_chunks` | LEE | LEE | DIRECTA | VectorRuntimeController.rankCandidates → RetrievalService.rankCandidates → VectorCorpusRepository.findChunkById | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:307` |
+| `vector_rag.vector_collections` | LEE | LEE | DIRECTA | VectorRuntimeController.rankCandidates → RetrievalService.rankCandidates → VectorCatalogRepository.findCollectionById | `src/modules/vector_rag/repositories/vector-catalog.repository.ts:277` |
+| `vector_rag.vector_documents` | LEE | LEE | DIRECTA | VectorRuntimeController.rankCandidates → RetrievalService.rankCandidates → VectorCorpusRepository.findDocumentById | `src/modules/vector_rag/repositories/vector-corpus.repository.ts:179` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `RetrievalCandidatesRanked` | `src/modules/vector_rag/services/retrieval.service.ts:325` |
+| Evento de dominio | `RetrievalCandidatesRanked` | `src/modules/vector_rag/services/retrieval.service.ts:326` |
 
 ### Parámetros
 
@@ -1956,7 +1944,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión de retrieval no encontrada.; ResourceNotFoundException: Chunk candidato no encontrado.; ResourceNotFoundException: Documento del chunk no encontrado.; ResourceNotFoundException: Política de acceso RAG no encontrada. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Chunk candidato no encontrado. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión ya no está abierta.; PreconditionFailedException: La colección no tiene política de acceso RAG; no se puede consultar.; PreconditionFailedException: La política de acceso RAG no está publicada. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 

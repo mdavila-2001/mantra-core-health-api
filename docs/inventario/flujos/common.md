@@ -23,9 +23,9 @@ _Fuente: `src/modules/common/README.md:3`_
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
-| `ctrl:CommonAddressesController` | Operaciones de CommonAddressesController que el README no asigna a un caso de uso | POST /common/addresses | Cualquier sesión válida | ALTO | 1 |
-| `ctrl:CommonContactPointsController` | Operaciones de CommonContactPointsController que el README no asigna a un caso de uso | POST /common/contact-points | Cualquier sesión válida | ALTO | 1 |
-|  |  | POST /common/contact-points/{id}/verify | Cualquier sesión válida | ALTO | 2 |
+| `ctrl:CommonAddressesController` | Operaciones de CommonAddressesController que el README no asigna a un caso de uso | POST /common/addresses | SECURITY_ADMIN | MEDIO | 1 |
+| `ctrl:CommonContactPointsController` | Operaciones de CommonContactPointsController que el README no asigna a un caso de uso | POST /common/contact-points | SECURITY_ADMIN | MEDIO | 1 |
+|  |  | POST /common/contact-points/{id}/verify | SECURITY_ADMIN | MEDIO | 2 |
 | `ctrl:CommonFilesController` | Operaciones de CommonFilesController que el README no asigna a un caso de uso | POST /common/files | Cualquier sesión válida | ALTO | 3 |
 |  |  | DELETE /common/files/{id} | Cualquier sesión válida | ALTO | 4 |
 |  |  | GET /common/files/{id}/content | Cualquier sesión válida | BAJO | 2 |
@@ -35,7 +35,7 @@ _Fuente: `src/modules/common/README.md:3`_
 |  |  | POST /common/files/{id}/versions/{vid}/derivatives | Cualquier sesión válida | ALTO | 5 |
 |  |  | GET /common/files/links | Cualquier sesión válida | BAJO | 3 |
 |  |  | POST /common/files/upload | Cualquier sesión válida | ALTO | 6 |
-| `ctrl:CommonIdentifiersController` | Operaciones de CommonIdentifiersController que el README no asigna a un caso de uso | POST /common/identifiers | Cualquier sesión válida | ALTO | 2 |
+| `ctrl:CommonIdentifiersController` | Operaciones de CommonIdentifiersController que el README no asigna a un caso de uso | POST /common/identifiers | SECURITY_ADMIN | MEDIO | 2 |
 | `ctrl:InternalFilesController` | Operaciones de InternalFilesController que el README no asigna a un caso de uso | POST /internal/files/versions/{vid}/scan-result | SYSTEM · SECURITY_ADMIN | MEDIO | 2 |
 |  |  | GET /internal/files/versions/pending-scan | SYSTEM · SECURITY_ADMIN | BAJO | 1 |
 | `ctrl:InternalStorageLifecycleController` | Operaciones de InternalStorageLifecycleController que el README no asigna a un caso de uso | POST /internal/storage-lifecycle/audio/{assetId}/abort | SYSTEM | MEDIO | 3 |
@@ -47,19 +47,20 @@ _Fuente: `src/modules/common/README.md:3`_
 
 ```mermaid
 flowchart LR
-  a2(["Cualquier sesión válida"]):::actor
-  a25(["SYSTEM · SECURITY_ADMIN"]):::actor
-  a28(["SYSTEM"]):::actor
+  a2(["SECURITY_ADMIN"]):::actor
+  a8(["Cualquier sesión válida"]):::actor
+  a26(["SYSTEM · SECURITY_ADMIN"]):::actor
+  a29(["SYSTEM"]):::actor
   t3[("common.addresses")]:::tabla
   t5[("common.contact_points")]:::tabla
-  t8[("common.file_versions")]:::tabla
-  t9[("common.files")]:::tabla
-  t10[("messaging.queued_jobs")]:::tabla
-  t15[("common.file_links")]:::tabla
-  t18[("common.file_derivatives")]:::tabla
-  t21[("messaging.message_queues")]:::tabla
-  t23[("common.identifiers")]:::tabla
-  t29[("audio_assets.audio_assets")]:::tabla
+  t9[("common.file_versions")]:::tabla
+  t10[("common.files")]:::tabla
+  t11[("messaging.queued_jobs")]:::tabla
+  t16[("common.file_links")]:::tabla
+  t19[("common.file_derivatives")]:::tabla
+  t22[("messaging.message_queues")]:::tabla
+  t24[("common.identifiers")]:::tabla
+  t30[("audio_assets.audio_assets")]:::tabla
   subgraph s0["ctrl:CommonAddressesController · Operaciones de CommonAddressesController que e…"]
     o1["POST /common/addresses"]:::op
   end
@@ -69,27 +70,27 @@ flowchart LR
   end
   subgraph s2["ctrl:CommonFilesController · Operaciones de CommonFilesController que el README…"]
     o7["POST /common/files"]:::op
-    o11["DELETE /common/files/{id}"]:::op
-    o12["GET /common/files/{id}/content"]:::op
-    o13["POST /common/files/{id}/download-url"]:::op
-    o14["POST /common/files/{id}/links"]:::op
-    o16["POST /common/files/{id}/versions"]:::op
-    o17["POST /common/files/{id}/versions/{vid}/derivatives"]:::op
-    o19["GET /common/files/links"]:::op
-    o20["POST /common/files/upload"]:::op
+    o12["DELETE /common/files/{id}"]:::op
+    o13["GET /common/files/{id}/content"]:::op
+    o14["POST /common/files/{id}/download-url"]:::op
+    o15["POST /common/files/{id}/links"]:::op
+    o17["POST /common/files/{id}/versions"]:::op
+    o18["POST /common/files/{id}/versions/{vid}/derivatives"]:::op
+    o20["GET /common/files/links"]:::op
+    o21["POST /common/files/upload"]:::op
   end
   subgraph s3["ctrl:CommonIdentifiersController · Operaciones de CommonIdentifiersController q…"]
-    o22["POST /common/identifiers"]:::op
+    o23["POST /common/identifiers"]:::op
   end
   subgraph s4["ctrl:InternalFilesController · Operaciones de InternalFilesController que el RE…"]
-    o24["POST /internal/files/versions/{vid}/scan-result"]:::op
-    o26["GET /internal/files/versions/pending-scan"]:::op
+    o25["POST /internal/files/versions/{vid}/scan-result"]:::op
+    o27["GET /internal/files/versions/pending-scan"]:::op
   end
   subgraph s5["ctrl:InternalStorageLifecycleController · Operaciones de InternalStorageLifecyc…"]
-    o27["POST /internal/storage-lifecycle/audio/{assetId}/abort"]:::op
-    o30["POST /internal/storage-lifecycle/audio/{assetId}/begin"]:::op
-    o31["POST /internal/storage-lifecycle/audio/{assetId}/dispatch"]:::op
-    o32["POST /internal/storage-lifecycle/recover"]:::op
+    o28["POST /internal/storage-lifecycle/audio/{assetId}/abort"]:::op
+    o31["POST /internal/storage-lifecycle/audio/{assetId}/begin"]:::op
+    o32["POST /internal/storage-lifecycle/audio/{assetId}/dispatch"]:::op
+    o33["POST /internal/storage-lifecycle/recover"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -98,74 +99,74 @@ flowchart LR
   a2 --> o6
   o6 -->|"ACTUALIZA"| t5
   o6 -->|"LEE"| t5
-  a2 --> o7
-  o7 -->|"CREA"| t8
+  a8 --> o7
   o7 -->|"CREA"| t9
-  o7 -->|"LEE"| t10
-  a2 --> o11
-  o11 -->|"LEE"| t8
-  o11 -->|"ACTUALIZA"| t9
-  o11 -->|"LEE"| t9
-  o11 -->|"LEE"| t10
-  a2 --> o12
-  o12 -->|"LEE"| t8
+  o7 -->|"CREA"| t10
+  o7 -->|"LEE"| t11
+  a8 --> o12
   o12 -->|"LEE"| t9
-  a2 --> o13
-  o13 -->|"LEE"| t8
+  o12 -->|"ACTUALIZA"| t10
+  o12 -->|"LEE"| t10
+  o12 -->|"LEE"| t11
+  a8 --> o13
   o13 -->|"LEE"| t9
-  a2 --> o14
-  o14 -->|"CREA"| t15
-  o14 -->|"LEE"| t8
+  o13 -->|"LEE"| t10
+  a8 --> o14
   o14 -->|"LEE"| t9
   o14 -->|"LEE"| t10
-  a2 --> o16
-  o16 -->|"CREA"| t8
-  o16 -->|"LEE"| t8
-  o16 -->|"ACTUALIZA"| t9
-  o16 -->|"LEE"| t9
-  o16 -->|"LEE"| t10
-  a2 --> o17
-  o17 -->|"CREA"| t18
-  o17 -->|"CREA"| t8
-  o17 -->|"LEE"| t8
+  a8 --> o15
+  o15 -->|"CREA"| t16
+  o15 -->|"LEE"| t9
+  o15 -->|"LEE"| t10
+  o15 -->|"LEE"| t11
+  a8 --> o17
+  o17 -->|"CREA"| t9
   o17 -->|"LEE"| t9
+  o17 -->|"ACTUALIZA"| t10
   o17 -->|"LEE"| t10
-  a2 --> o19
-  o19 -->|"LEE"| t15
-  o19 -->|"LEE"| t8
-  o19 -->|"LEE"| t9
-  a2 --> o20
-  o20 -->|"CREA"| t8
-  o20 -->|"CREA"| t9
-  o20 -->|"LEE"| t21
-  o20 -->|"CREA"| t10
-  o20 -->|"ACTUALIZA"| t10
+  o17 -->|"LEE"| t11
+  a8 --> o18
+  o18 -->|"CREA"| t19
+  o18 -->|"CREA"| t9
+  o18 -->|"LEE"| t9
+  o18 -->|"LEE"| t10
+  o18 -->|"LEE"| t11
+  a8 --> o20
+  o20 -->|"LEE"| t16
+  o20 -->|"LEE"| t9
   o20 -->|"LEE"| t10
-  a2 --> o22
-  o22 -->|"CREA"| t23
-  o22 -->|"LEE"| t23
-  a25 --> o24
-  o24 -->|"ACTUALIZA"| t8
-  o24 -->|"LEE"| t8
-  a25 --> o26
-  o26 -->|"LEE"| t8
-  a28 --> o27
-  o27 -->|"LEE"| t29
-  o27 -->|"ACTUALIZA"| t10
-  o27 -->|"LEE"| t10
-  a28 --> o30
-  o30 -->|"LEE"| t29
-  o30 -->|"LEE"| t21
-  o30 -->|"CREA"| t10
-  o30 -->|"ACTUALIZA"| t10
-  o30 -->|"LEE"| t10
-  a28 --> o31
-  o31 -->|"LEE"| t29
-  o31 -->|"ACTUALIZA"| t10
-  o31 -->|"LEE"| t10
-  a28 --> o32
-  o32 -->|"ACTUALIZA"| t10
-  o32 -->|"LEE"| t10
+  a8 --> o21
+  o21 -->|"CREA"| t9
+  o21 -->|"CREA"| t10
+  o21 -->|"LEE"| t22
+  o21 -->|"CREA"| t11
+  o21 -->|"ACTUALIZA"| t11
+  o21 -->|"LEE"| t11
+  a2 --> o23
+  o23 -->|"CREA"| t24
+  o23 -->|"LEE"| t24
+  a26 --> o25
+  o25 -->|"ACTUALIZA"| t9
+  o25 -->|"LEE"| t9
+  a26 --> o27
+  o27 -->|"LEE"| t9
+  a29 --> o28
+  o28 -->|"LEE"| t30
+  o28 -->|"ACTUALIZA"| t11
+  o28 -->|"LEE"| t11
+  a29 --> o31
+  o31 -->|"LEE"| t30
+  o31 -->|"LEE"| t22
+  o31 -->|"CREA"| t11
+  o31 -->|"ACTUALIZA"| t11
+  o31 -->|"LEE"| t11
+  a29 --> o32
+  o32 -->|"LEE"| t30
+  o32 -->|"ACTUALIZA"| t11
+  o32 -->|"LEE"| t11
+  a29 --> o33
+  o33 -->|"ACTUALIZA"| t11
+  o33 -->|"LEE"| t11
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -394,7 +395,7 @@ Borrar lógicamente un archivo (UC-02-10)
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No tiene permiso para modificar este archivo |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido; ResourceNotFoundException: Archivo no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El archivo está bajo retención legal y no puede borrarse |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -515,14 +516,21 @@ flowchart TD
   n53 --> n54
   n55(["404 NOT_FOUND Archivo no encontrado"]):::error
   n54 -->|"sí"| n55
-  n56{"file.legalHoldUntil && file.legalHoldUntil.getTime() › Date.now()"}:::decision
+  n56["Llama a FilesService.assertCanMutateFile"]:::llamada
   n54 -->|"no"| n56
-  n57(["422 PRECONDITION_FAILED El archivo está bajo retención legal y no puede borrarse"]):::error
-  n56 -->|"sí"| n57
-  n58[("ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files")]:::efecto
-  n56 -->|"no"| n58
-  n59(("200 Responde con éxito")):::ok
-  n58 --> n59
+  n57{"!canActorReadOwnFile(file, actor)"}:::decision
+  n56 --> n57
+  n58(["404 NOT_FOUND Archivo no encontrado"]):::error
+  n57 -->|"sí"| n58
+  n59(["403 FORBIDDEN No tiene permiso para modificar este archivo"]):::error
+  n57 -->|"no"| n59
+  n60{"file.legalHoldUntil && file.legalHoldUntil.getTime() › Date.now()"}:::decision
+  n61(["422 PRECONDITION_FAILED El archivo está bajo retención legal y no puede borrarse"]):::error
+  n60 -->|"sí"| n61
+  n62[("ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files")]:::efecto
+  n60 -->|"no"| n62
+  n63(("200 Responde con éxito")):::ok
+  n62 --> n63
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -545,7 +553,7 @@ Descargar el contenido vigente de un archivo
 | 410 | — | GoneException: {{ // Sin `code` propio el filtro global lo dejaba como INTE…} |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | Error: FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3; Error: S3 object body is empty |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.SERVICE_UNAVAILABLE}; Error: S3 object body is empty |
 
 ```mermaid
 flowchart TD
@@ -640,7 +648,7 @@ flowchart TD
   n44 --> n45
   n46{"!this.env.s3.bucket"}:::decision
   n45 --> n46
-  n47(["500 INTERNAL FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3"]):::error
+  n47(["500 INTERNAL {HttpStatus.SERVICE_UNAVAILABLE}"]):::error
   n46 -->|"sí"| n47
   n48["Llama a S3FileStorageAdapter.parseOwnedKey"]:::llamada
   n46 -->|"no"| n48
@@ -746,7 +754,7 @@ Vincular un archivo a un propietario (UC-02-08)
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No tiene permiso para modificar este archivo |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido; ResourceNotFoundException: Archivo no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: {identity.reasonCode}; StorageLifecycleDenied: TRANSACTION_REQUIRED; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: PURGE_IN_FLIGHT; StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: INTENT_ENVELOPE_UNKNOWN; StorageLifecycleDenied: PRODUCER_OR_PURGE_IN_FLIGHT |
@@ -866,12 +874,19 @@ flowchart TD
   n53 --> n54
   n55(["404 NOT_FOUND Archivo no encontrado"]):::error
   n54 -->|"sí"| n55
-  n56["Llama a FileLinksRepository.create"]:::llamada
+  n56["Llama a FilesService.assertCanMutateFile"]:::llamada
   n54 -->|"no"| n56
-  n57[("CREA common.file_links")]:::efecto
+  n57{"!canActorReadOwnFile(file, actor)"}:::decision
   n56 --> n57
-  n58(("201 Responde con éxito")):::ok
-  n57 --> n58
+  n58(["404 NOT_FOUND Archivo no encontrado"]):::error
+  n57 -->|"sí"| n58
+  n59(["403 FORBIDDEN No tiene permiso para modificar este archivo"]):::error
+  n57 -->|"no"| n59
+  n60["Llama a FileLinksRepository.create"]:::llamada
+  n61[("CREA common.file_links")]:::efecto
+  n60 --> n61
+  n62(("201 Responde con éxito")):::ok
+  n61 --> n62
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -889,7 +904,7 @@ Añadir una versión a un archivo (UC-02-06)
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No tiene permiso para modificar este archivo |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido; ResourceNotFoundException: Archivo no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: {identity.reasonCode}; StorageLifecycleDenied: TRANSACTION_REQUIRED; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: PURGE_IN_FLIGHT; StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: INTENT_ENVELOPE_UNKNOWN; StorageLifecycleDenied: PRODUCER_OR_PURGE_IN_FLIGHT; StorageLifecycleDenied: REFERENCE_OBJECT_UNPROVEN; StorageLifecycleDenied: STORE_RECEIPT_UNKNOWN; StorageLifecycleDenied: RESERVATION_MISSING; StorageLifecycleDenied: RESERVATION_OWNER_MISMATCH; StorageLifecycleDenied: PUBLICATION_IDENTITY_CHANGED; StorageLifecycleDenied: REFERENCE_METADATA_MISMATCH |
@@ -1060,8 +1075,8 @@ Generar un derivado de una versión (UC-02-07)
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido; ResourceNotFoundException: Versión de archivo no encontrada |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No tiene permiso para modificar este archivo |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido; ResourceNotFoundException: Archivo no encontrado; ResourceNotFoundException: Versión de archivo no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se pueden generar derivados de versiones con escaneo limpio |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: {identity.reasonCode}; StorageLifecycleDenied: TRANSACTION_REQUIRED; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: PURGE_IN_FLIGHT; StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: INTENT_ENVELOPE_UNKNOWN; StorageLifecycleDenied: PRODUCER_OR_PURGE_IN_FLIGHT; StorageLifecycleDenied: REFERENCE_OBJECT_UNPROVEN; StorageLifecycleDenied: STORE_RECEIPT_UNKNOWN; StorageLifecycleDenied: RESERVATION_MISSING; StorageLifecycleDenied: RESERVATION_OWNER_MISMATCH; StorageLifecycleDenied: PUBLICATION_IDENTITY_CHANGED; StorageLifecycleDenied: REFERENCE_METADATA_MISMATCH |
@@ -1289,7 +1304,7 @@ Subir el contenido de un archivo (multipart)
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se recibió contenido en el campo "file"; PreconditionFailedException: El archivo excede el tamaño máximo permitido; PreconditionFailedException: El contenido no corresponde a ningún formato de archivo permitido; PreconditionFailedException: El formato del archivo no está permitido para esta categoría |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: REMOTE_STATE_UNKNOWN; StorageLifecycleDenied: ADAPTER_DID_NOT_CONSUME_PERMIT; StorageLifecycleDenied: PUBLICATION_RESULT_REQUIRES_RELOAD; StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED; Error: FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3; StorageLifecycleDenied: REFERENCE_OBJECT_UNPROVEN; StorageLifecycleDenied: REFERENCE_METADATA_MISMATCH |
+| 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: REMOTE_STATE_UNKNOWN; StorageLifecycleDenied: ADAPTER_DID_NOT_CONSUME_PERMIT; StorageLifecycleDenied: PUBLICATION_RESULT_REQUIRES_RELOAD; StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED; DomainException: {HttpStatus.SERVICE_UNAVAILABLE}; StorageLifecycleDenied: REFERENCE_OBJECT_UNPROVEN; StorageLifecycleDenied: REFERENCE_METADATA_MISMATCH |
 
 ```mermaid
 flowchart TD
@@ -1369,7 +1384,7 @@ flowchart TD
   n35 --> n36
   n37{"!this.env.s3.bucket"}:::decision
   n36 --> n37
-  n38(["500 INTERNAL FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3"]):::error
+  n38(["500 INTERNAL {HttpStatus.SERVICE_UNAVAILABLE}"]):::error
   n37 -->|"sí"| n38
   n39{"this.env.lifecycleBinding"}:::decision
   n37 -->|"no"| n39

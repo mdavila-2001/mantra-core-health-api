@@ -5,7 +5,6 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
 import { OutboxService } from '../../messaging/services';
@@ -14,6 +13,15 @@ import {
   LakehouseCatalogRepository,
   ResearchRepository,
 } from '../repositories';
+import {
+  activeLakehouseTenant,
+  assertLakehouseFound,
+  assertLakehouseResourceInScope,
+  assertLakehouseResourceInTenant,
+  lakehouseOutsideTenant,
+  lakehouseSweepScope,
+  requireFields,
+} from '../lakehouse.tenant-scope';
 import {
   APPROVABLE_RELEASE_STATUSES,
   CLOSEABLE_RELEASE_STATUSES,
@@ -92,9 +100,11 @@ export class ResearchReleaseService {
       },
       'Creating de-identification profile',
     );
+    // El perfil pertenece al tenant del contexto; el del cuerpo no es autoridad.
+    const tenantId = activeLakehouseTenant(dto.tenantId);
     return this.em.transactional(async (tx) => {
       const profile = this.dataReleaseRepo.createDeidProfile(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         name: dto.name,
         methodologyConceptId: dto.methodologyConceptId,
@@ -128,6 +138,10 @@ export class ResearchReleaseService {
     dto: DefineCohortDto,
     actor: AuthenticatedUser,
   ): Promise<CohortResponseDto> {
+    const tenantId = activeLakehouseTenant(dto.tenantId);
+    // La cohorte necesita criterio de inclusión: la tabla lo exige y no hay
+    // un criterio por defecto.
+    requireFields(dto, ['inclusionExpression'], 'definir la cohorte');
     return this.em.transactional(async (tx) => {
       const approvedFrom = new Date(dto.approvedFrom);
       const approvedTo = new Date(dto.approvedTo);
@@ -144,18 +158,43 @@ export class ResearchReleaseService {
         );
       }
 
-      let project = await this.researchRepo.findProjectForUpdate(tx, projectId);
+      // El perfil de de-identificación de la cohorte debe ser del tenant.
+      assertLakehouseResourceInTenant(
+        await this.dataReleaseRepo.findDeidProfileById(
+          tx,
+          dto.deidentificationProfileId,
+        ),
+        tenantId,
+        'Perfil de de-identificación no encontrado.',
+      );
+
+      // El upsert por id no puede colisionar con el proyecto de otro tenant ni
+      // confirmar que existe: un id ajeno responde igual que uno inexistente.
+      const occupied = await this.researchRepo.findProjectByIdAnyTenant(
+        tx,
+        projectId,
+      );
+      if (occupied && occupied.tenantId !== tenantId) {
+        throw lakehouseOutsideTenant(
+          'Proyecto de investigación no encontrado.',
+        );
+      }
+      let project = await this.researchRepo.findProjectForUpdate(
+        tx,
+        tenantId,
+        projectId,
+      );
       if (!project) {
         const byCode = await this.researchRepo.findProjectByCode(
           tx,
-          dto.tenantId,
+          tenantId,
           dto.projectCode,
         );
         if (byCode) {
           throw new ConflictException(
             'Ya existe un proyecto con ese código para el tenant, con otro identificador.',
             {
-              tenantId: dto.tenantId,
+              tenantId,
               code: dto.projectCode,
               existingId: byCode.id,
             },
@@ -163,7 +202,7 @@ export class ResearchReleaseService {
         }
         project = this.researchRepo.createProject(tx, {
           id: projectId,
-          tenantId: dto.tenantId,
+          tenantId,
           code: dto.projectCode,
           title: dto.title,
           protocolReference: dto.protocolReference,
@@ -174,12 +213,9 @@ export class ResearchReleaseService {
           state: 'approved',
         });
       } else {
-        if (
-          project.code !== dto.projectCode ||
-          project.tenantId !== dto.tenantId
-        ) {
+        if (project.code !== dto.projectCode) {
           throw new ConflictException(
-            'El proyecto existente tiene otro código o pertenece a otro tenant.',
+            'El proyecto existente tiene otro código.',
             { projectId, code: project.code },
           );
         }
@@ -221,7 +257,7 @@ export class ResearchReleaseService {
       });
 
       await this.outbox.publishDomainEvent(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         eventType: 'CohortDefined',
         aggregateType: 'lakehouse.cohort_definitions',
         aggregateId: cohort.id,
@@ -268,19 +304,19 @@ export class ResearchReleaseService {
     dto: RequestDatasetReleaseDto,
     actor: AuthenticatedUser,
   ): Promise<ReleaseRequestResponseDto> {
+    const tenantId = activeLakehouseTenant(dto.tenantId);
     return this.em.transactional(async (tx) => {
-      const project = await this.researchRepo.findProjectById(
-        tx,
-        dto.researchProjectId,
+      // Proyecto, cohorte y versión de producto deben ser del mismo tenant que
+      // la solicitud: una solicitud no puede referenciar datos de otra organización.
+      const project = assertLakehouseResourceInTenant(
+        await this.researchRepo.findProjectById(
+          tx,
+          tenantId,
+          dto.researchProjectId,
+        ),
+        tenantId,
+        'Proyecto de investigación no encontrado.',
       );
-      if (!project) {
-        throw new ResourceNotFoundException(
-          'Proyecto de investigación no encontrado.',
-          {
-            researchProjectId: dto.researchProjectId,
-          },
-        );
-      }
       if (project.state !== 'approved') {
         throw new PreconditionFailedException('El proyecto no está aprobado.', {
           researchProjectId: project.id,
@@ -303,12 +339,7 @@ export class ResearchReleaseService {
         dto.cohortDefinitionId,
       );
       if (!cohort || cohort.researchProjectId !== project.id) {
-        throw new ResourceNotFoundException(
-          'La cohorte no pertenece a ese proyecto.',
-          {
-            cohortDefinitionId: dto.cohortDefinitionId,
-          },
-        );
+        throw lakehouseOutsideTenant('La cohorte no pertenece a ese proyecto.');
       }
       if (cohort.state !== 'active') {
         throw new PreconditionFailedException('La cohorte no está activa.', {
@@ -316,21 +347,18 @@ export class ResearchReleaseService {
         });
       }
 
-      const productVersion = await this.catalogRepo.findProductVersionById(
-        tx,
-        dto.dataProductVersionId,
+      const productVersion = assertLakehouseFound(
+        await this.catalogRepo.findProductVersionInTenant(
+          tx,
+          tenantId,
+          dto.dataProductVersionId,
+        ),
+        'Versión de producto no encontrada.',
       );
-      if (!productVersion) {
-        throw new ResourceNotFoundException(
-          'Versión de producto no encontrada.',
-          {
-            dataProductVersionId: dto.dataProductVersionId,
-          },
-        );
-      }
 
       const product = await this.catalogRepo.findProductForUpdate(
         tx,
+        tenantId,
         productVersion.dataProductId,
       );
       if (product?.containsPhi && !cohort.deidentificationProfileId) {
@@ -344,7 +372,7 @@ export class ResearchReleaseService {
       }
 
       const request = this.researchRepo.createReleaseRequest(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         researchProjectId: project.id,
         dataProductVersionId: dto.dataProductVersionId,
         cohortDefinitionId: cohort.id,
@@ -354,7 +382,7 @@ export class ResearchReleaseService {
       });
 
       await this.outbox.publishDomainEvent(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         eventType: 'DatasetReleaseRequested',
         aggregateType: 'lakehouse.dataset_release_requests',
         aggregateId: request.id,
@@ -399,17 +427,19 @@ export class ResearchReleaseService {
     dto: ApproveDatasetReleaseDto,
     actor: AuthenticatedUser,
   ): Promise<ReleaseManifestResponseDto> {
+    const tenantId = activeLakehouseTenant();
     return this.em.transactional(async (tx) => {
-      const request = await this.researchRepo.findReleaseRequestForUpdate(
-        tx,
-        requestId,
+      // Aprobar materializa un acceso temporal a datos: la solicitud debe ser
+      // del tenant del aprobador, y se bloquea sólo si lo es.
+      const request = assertLakehouseResourceInTenant(
+        await this.researchRepo.findReleaseRequestForUpdate(
+          tx,
+          tenantId,
+          requestId,
+        ),
+        tenantId,
+        'Solicitud de release no encontrada.',
       );
-      if (!request) {
-        throw new ResourceNotFoundException(
-          'Solicitud de release no encontrada.',
-          { requestId },
-        );
-      }
 
       const existingManifest =
         await this.researchRepo.findManifestByRequestForUpdate(tx, requestId);
@@ -435,18 +465,15 @@ export class ResearchReleaseService {
         );
       }
 
-      const project = await this.researchRepo.findProjectById(
-        tx,
-        request.researchProjectId,
+      const project = assertLakehouseResourceInTenant(
+        await this.researchRepo.findProjectById(
+          tx,
+          tenantId,
+          request.researchProjectId,
+        ),
+        tenantId,
+        'Proyecto de investigación no encontrado.',
       );
-      if (!project) {
-        throw new ResourceNotFoundException(
-          'Proyecto de investigación no encontrado.',
-          {
-            researchProjectId: request.researchProjectId,
-          },
-        );
-      }
       const now = new Date();
       if (project.approvedTo <= now) {
         throw new PreconditionFailedException(
@@ -465,6 +492,14 @@ export class ResearchReleaseService {
           { cohortDefinitionId: request.cohortDefinitionId },
         );
       }
+
+      // El manifiesto apunta al objeto de-identificado y a su esquema: la
+      // tabla los exige y no hay valores por defecto.
+      requireFields(
+        dto,
+        ['objectManifestId', 'schemaVersion'],
+        'materializar el manifiesto',
+      );
 
       const ttlDays = dto.ttlDays ?? DEFAULT_RELEASE_TTL_DAYS;
       const proposedExpiry = new Date(
@@ -551,17 +586,19 @@ export class ResearchReleaseService {
     dto: RevokeDatasetReleaseDto,
     actor: AuthenticatedUser,
   ): Promise<RevokeReleaseResponseDto> {
+    // Con tenant en el contexto sólo cierra solicitudes de ese tenant; el
+    // worker `SYSTEM` sin tenant cierra los vencidos de cualquier organización.
+    const scope = lakehouseSweepScope(actor);
     return this.em.transactional(async (tx) => {
-      const request = await this.researchRepo.findReleaseRequestForUpdate(
-        tx,
-        requestId,
+      const request = assertLakehouseResourceInScope(
+        await this.researchRepo.findReleaseRequestForUpdate(
+          tx,
+          scope,
+          requestId,
+        ),
+        scope,
+        'Solicitud de release no encontrada.',
       );
-      if (!request) {
-        throw new ResourceNotFoundException(
-          'Solicitud de release no encontrada.',
-          { requestId },
-        );
-      }
 
       if (
         !(CLOSEABLE_RELEASE_STATUSES as readonly string[]).includes(
@@ -618,13 +655,28 @@ export class ResearchReleaseService {
    * worker" — esta es la consulta de descubrimiento que le faltaba.
    */
   async listExpiredReleases(
+    actor: AuthenticatedUser,
     limit = DEFAULT_EXPIRED_RELEASES_BATCH,
   ): Promise<PendingExpiredReleasesResponseDto> {
+    // Con tenant en el contexto sólo lista los vencidos de ese tenant; el
+    // barrido de todas las organizaciones es exclusivo del worker `SYSTEM`.
+    const scope = lakehouseSweepScope(actor);
+    const requestIds =
+      scope === undefined
+        ? undefined
+        : await this.researchRepo.findOpenRequestIds(
+            this.em,
+            scope,
+            CLOSEABLE_RELEASE_STATUSES,
+          );
+    if (requestIds?.length === 0) return { releases: [] };
+
     const now = new Date();
     const manifests = await this.researchRepo.findExpiredManifests(
       this.em,
       now,
       limit,
+      requestIds,
     );
 
     const releases: ExpiredReleaseSummaryDto[] = [];

@@ -24,17 +24,20 @@ export class LakehouseRuntimeRepository {
   // --- Definiciones y corridas (UC-63-05) ---
 
   /**
-   * Obtiene find definition by id.
+   * Definición de transformación del tenant activo; una ajena cuenta como
+   * inexistente.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param id - Identificador de id.
-   * @returns Resultado de find definition by id conforme al contrato `Promise<TransformationDefinitions | null>`.
+   * @param tenantId - Tenant activo del actor.
+   * @param id - Identificador de la definición.
+   * @returns La definición o `null`.
    */
   findDefinitionById(
     em: EntityManager,
+    tenantId: string,
     id: string,
   ): Promise<TransformationDefinitions | null> {
-    return em.findOne(TransformationDefinitions, { id });
+    return em.findOne(TransformationDefinitions, { id, tenantId });
   }
 
   /**
@@ -99,17 +102,19 @@ export class LakehouseRuntimeRepository {
   }
 
   /**
-   * Obtiene find run by id.
+   * Corrida de transformación del tenant activo.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param id - Identificador de id.
-   * @returns Resultado de find run by id conforme al contrato `Promise<TransformationRuns | null>`.
+   * @param tenantId - Tenant activo del actor.
+   * @param id - Identificador de la corrida.
+   * @returns La corrida o `null`.
    */
   findRunById(
     em: EntityManager,
+    tenantId: string,
     id: string,
   ): Promise<TransformationRuns | null> {
-    return em.findOne(TransformationRuns, { id });
+    return em.findOne(TransformationRuns, { id, tenantId });
   }
 
   // --- Particiones (UC-63-05, 07, 08) ---

@@ -238,6 +238,56 @@ jobs:
       - name: Guardrails ALOVIDA — antipatrones prohibidos por las reglas canónicas
         run: yarn alovida:guardrails
 
+      # El inventario (`inventario/`, `docs/inventario/`) se genera desde el código Y
+      # desde el repo del modelo (propósito, dominio y tablas de cada módulo), así que
+      # verificarlo exige tener el modelo al lado. El repo es público: no hace falta
+      # token. Va fijado a un commit y no a `dev`: el inventario versionado es función
+      # del código de este PR y de ese commit del modelo, y un cambio ajeno del modelo
+      # no debe poner en rojo un PR que no lo toca. Subirlo = regenerar el inventario
+      # (`yarn inventario:endpoints`, `:flujos` y `:catalogo` con
+      # MODEL_ROOT y FRONT_ROOT) y cambiar este SHA en el mismo PR.
+      - name: Modelo de datos — insumo del inventario (commit fijado)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: mantra-core-technologies/mantra-core-health-model
+          ref: 33c01919039ea98cc8bbb9e2d6b91d3bffc7b359
+          path: _modelo
+          persist-credentials: false
+
+      # El frontend aporta su glosario y su inventario de clientes HTTP (solo esos dos
+      # archivos: sparse-checkout). Mismo criterio: commit fijado. Sin él, el inventario
+      # regenerado diría «sin dato» donde el versionado trae el cruce, y no coincidiría.
+      - name: Frontend — glosario e inventario de clientes (commit fijado)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: mdavila-2001/mantra-core-health
+          ref: 4afab7a30e6d48077078e7b9b38c88ee2f59b69b
+          path: _frontend
+          persist-credentials: false
+          sparse-checkout: |
+            docs/business/glossary.md
+            docs/reports/generated/api-inventory.md
+          sparse-checkout-cone-mode: false
+
+      # Regenerar el inventario con los generadores del repo y comparar con lo
+      # versionado: un endpoint, un flujo o una tabla del catálogo que cambió sin que
+      # el inventario viaje en el mismo PR deja el paso en rojo, y dice cuál.
+      - name: Inventario al día — lo versionado coincide con el código y el modelo
+        env:
+          MODEL_ROOT: ${{ github.workspace }}/_modelo
+          FRONT_ROOT: ${{ github.workspace }}/_frontend
+        run: yarn inventario:verificar
+
+      # Las pruebas de los generadores del inventario (121+ casos: árboles de decisión,
+      # máquinas de estado, requerimientos, catálogo) corren contra el código real y el
+      # modelo fijado arriba. Bloquean: una expectativa que el código dejó atrás se
+      # actualiza en el mismo PR que mueve el código.
+      - name: Pruebas del inventario
+        env:
+          MODEL_ROOT: ${{ github.workspace }}/_modelo
+          FRONT_ROOT: ${{ github.workspace }}/_frontend
+        run: yarn inventario:test
+
       # El DDL canónico se edita en `../SQL`, fuera del repositorio, y el
       # despliegue monta la copia versionada de `database/`. Aquí solo se clona
       # este repositorio, así que no hay con qué comparar: lo que se comprueba
@@ -294,6 +344,39 @@ jobs:
           JWT_SECRET: ci-only-secret-not-a-real-credential
           MFA_ENCRYPTION_KEY: ci-only-secret-not-a-real-credential
         run: node tools/openapi/generate-openapi.mjs
+
+      # Deriva de permisos (`computePermissionDrift`, la misma lógica de la consola
+      # `GET /admin/catalog/permission-drift`): lo que las rutas exigen con `@Roles`
+      # contra lo que la API siembra. Es un trinquete: la deriva que ya existe está en
+      # `tools/catalog/permission-drift-allowlist.json` y no bloquea; una ruta
+      # autenticada nueva sin `@Roles`, o un rol nuevo que nadie siembra, sí. Una
+      # excepción que dejó de hacer falta también falla, para que la lista sólo se
+      # encoja. Arranca AppModule, igual que el paso anterior: mismo entorno.
+      - name: Deriva de permisos — sin rutas ni roles nuevos fuera de la lista
+        env:
+          DB_HOST: localhost
+          DB_PORT: "5432"
+          DB_USER: mantra
+          DB_PASSWORD: mantra
+          DB_NAME: mantra_redesa_health
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: "5432"
+          POSTGRES_USER: mantra
+          POSTGRES_PASSWORD: mantra
+          POSTGRES_DB: mantra_redesa_health
+          MONGODB_URI: mongodb://localhost:27017/mantra_redesa_health_document_store
+          MONGO_DB: mantra_redesa_health_document_store
+          REDIS_HOST: localhost
+          REDIS_PORT: "6379"
+          OPENSEARCH_NODE: http://localhost:9200
+          MINIO_ENDPOINT: localhost
+          MINIO_PORT: "9000"
+          MINIO_ACCESS_KEY: mantra
+          MINIO_SECRET_KEY: mantra12345678
+          MINIO_BUCKET: mantra-redesa-health-files-ci
+          JWT_SECRET: ci-only-secret-not-a-real-credential
+          MFA_ENCRYPTION_KEY: ci-only-secret-not-a-real-credential
+        run: yarn catalog:permission-drift
 
       # El Postgres de `services:` arranca vacío, y nada lo llenaba: "Generar
       # contrato" corre con ORM_SCHEMA_SYNC=off (tools/openapi/generate-openapi.mjs
@@ -403,6 +486,10 @@ jobs:
           MINIO_BUCKET: mantra-redesa-health-files-ci
           JWT_SECRET: ci-only-secret-not-a-real-credential
           MFA_ENCRYPTION_KEY: ci-only-secret-not-a-real-credential
+          # El Postgres de `services:` es efímero aunque se llame como el de
+          # desarrollo; sin esto `lane16-patient-invoice-flow` se niega a correr
+          # (deja historial de sólo inserción: ver test/integration/disposable-database.ts).
+          ALLOW_PERMANENT_TEST_RESIDUE: "yes"
         run: yarn test:integration --ci
 
       - name: Generar documentación detallada de endpoints
@@ -473,8 +560,10 @@ jobs:
             docs/data \
             docs/postman
 
-      - name: Cobertura documental — sin marcadores pendientes, sin páginas vacías, sin módulos sin documentar
-        run: yarn docs:coverage
+      - name: Cobertura documental — sin marcadores pendientes, sin páginas vacías, sin módulos sin documentar, sin planes ni pendientes
+        run: |
+          yarn docs:coverage:test
+          yarn docs:coverage
 
       - name: Enlaces internos — sin enlaces rotos, sin páginas huérfanas
         run: yarn docs:links

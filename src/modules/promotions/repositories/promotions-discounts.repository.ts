@@ -559,6 +559,17 @@ export class PromotionsDiscountsRepository {
   }
 
   /**
+   * Redención por id, sin bloquear: sirve para resolver su promoción (y con
+   * ella su tenant) **antes** de bloquear la fila.
+   */
+  findRedemptionById(
+    em: EntityManager,
+    id: string,
+  ): Promise<Redemptions | null> {
+    return em.findOne(Redemptions, { id });
+  }
+
+  /**
    * Obtiene find redemption for update.
    *
    * @param em - Contexto de persistencia o transacción activa.
