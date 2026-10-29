@@ -5,13 +5,14 @@ import { CONCEPTS, SEED, type AuthenticatedUser } from '../../../../common';
 import { MESSAGING_SEED } from '../../../../common/seed/messaging-seed.service';
 import { ContactPoints } from '../../../common/entities';
 import { NotificationsService } from '../../../messaging/services';
-import { PROF } from '../../profiles.concepts';
+import { NOTIFICATION_CATEGORY_CONCEPT } from '../../../messaging/notifications.contract';
 import { PersonAccountLinksRepository } from '../repositories';
-import type {
-  AdmissionNotice,
-  AdmissionNoticeKind,
-  AdmissionNoticePort,
-  AdmissionNoticeResult,
+import {
+  isCriticalAdmissionNotice,
+  type AdmissionNotice,
+  type AdmissionNoticeKind,
+  type AdmissionNoticePort,
+  type AdmissionNoticeResult,
 } from '../../application/ports/admission-notice.port';
 
 /** Título corto, lo que se lee en la campana sin abrir nada. */
@@ -26,6 +27,9 @@ const SUBJECT: Readonly<Record<AdmissionNoticeKind, string>> = {
   ABANDONED: 'Su solicitud de verificación se cerró por falta de respuesta',
   WITHDRAWN: 'Retiró su solicitud de verificación',
 };
+
+/** La categoría `ADMISSION`: lo que el destinatario puede silenciar (salvo lo crítico). */
+const CATEGORY = NOTIFICATION_CATEGORY_CONCEPT.ADMISSION;
 
 /** Menor número, más urgente: lo que cambia lo que puede hacer va primero. */
 const PRIORITY: Readonly<Record<AdmissionNoticeKind, number>> = {
@@ -109,7 +113,7 @@ export class MessagingAdmissionNoticeAdapter implements AdmissionNoticePort {
         channelId: MESSAGING_SEED.inAppChannelId,
         recipientUserId: link.userId,
         tenantId: SEED.tenantId,
-        categoryConceptId: PROF.NOTICE_ADMISSION,
+        categoryConceptId: CATEGORY,
         priority: PRIORITY[notice.kind],
         payloadJson: {
           kind: `ADMISSION_${notice.kind}`,
@@ -123,6 +127,7 @@ export class MessagingAdmissionNoticeAdapter implements AdmissionNoticePort {
         relatedResourceId: notice.admissionId,
       },
       actor,
+      { mandatory: isCriticalAdmissionNotice(notice.kind) },
     );
     if (request.suppressed) {
       return {
@@ -181,7 +186,7 @@ export class MessagingAdmissionNoticeAdapter implements AdmissionNoticePort {
           recipientUserId: userId,
           recipientAddress: address,
           tenantId: SEED.tenantId,
-          categoryConceptId: PROF.NOTICE_ADMISSION,
+          categoryConceptId: CATEGORY,
           priority: PRIORITY[notice.kind],
           payloadJson: { subject: SUBJECT[notice.kind], bodyText },
           debounceKey: `${debounceKey}:email`,
@@ -189,6 +194,7 @@ export class MessagingAdmissionNoticeAdapter implements AdmissionNoticePort {
           relatedResourceId: notice.admissionId,
         },
         actor,
+        { mandatory: isCriticalAdmissionNotice(notice.kind) },
       );
     } catch (error) {
       this.logger.warn(
