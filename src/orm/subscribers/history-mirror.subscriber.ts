@@ -50,6 +50,11 @@ const EXPLICITLY_WIRED_SOURCES = new Set([
   'practice.practice_sites',
   'practice.clinical_units',
   'practice.care_spaces',
+  // Los bloques de quirófano y sus series (F4) los versiona `PeriopBlocksService` con
+  // `HistoryRepository.append` en la misma transacción: sin esta entrada el espejo dejaba
+  // DOS revisiones por cambio.
+  'procedures_perioperative.operating_room_blocks',
+  'procedures_perioperative.operating_room_block_series',
 ]);
 
 /**
