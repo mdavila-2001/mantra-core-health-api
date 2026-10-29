@@ -395,8 +395,8 @@
     {
       "reason": "Telemetría del titular: eventos, contextos, consentimientos y recorridos se atan al usuario de la sesión (`assertOwned*`, `consent.userId !== actor.id` responde 404 uniforme).",
       "evidence": [
-        "src/modules/telemetry/services/telemetry-events.service.ts#assertOwnedJourney",
-        "src/modules/telemetry/services/telemetry-consent.service.ts#withdrawConsent"
+        "src/modules/telemetry/application/services/telemetry-events.service.ts#assertOwnedJourney",
+        "src/modules/telemetry/application/services/telemetry-consent.service.ts#withdrawConsent"
       ],
       "routes": [
         "GET /telemetry/tracking-consents/me",

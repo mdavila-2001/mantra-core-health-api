@@ -20,6 +20,7 @@ export const MIGRATED_MODULES: readonly string[] = [
   'iam',
   'ops_console',
   'billing',
+  'telemetry',
 ];
 
 const MODULES_DIR = join(process.cwd(), 'src', 'modules');
