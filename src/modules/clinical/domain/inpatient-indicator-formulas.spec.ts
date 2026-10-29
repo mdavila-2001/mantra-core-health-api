@@ -41,13 +41,64 @@ const day = (over: Partial<CensusCounts>): CensusCounts => ({
  *   cruzan el borde del período: la prueba cruzada sólo vale sin pacientes que lo crucen)
  */
 const WEEK: CensusCounts[] = [
-  day({ beds_censable: 10, beds_available: 10, beds_blocked: 0, patient_days: 6, admissions: 1, discharges: 1, discharge_stay_days: 4 }),
-  day({ beds_censable: 10, beds_available: 10, beds_blocked: 0, patient_days: 7, admissions: 1 }),
-  day({ beds_censable: 10, beds_available: 9, beds_blocked: 1, patient_days: 7, admissions: 1, discharges: 2, discharge_stay_days: 8 }),
-  day({ beds_censable: 10, beds_available: 9, beds_blocked: 1, patient_days: 8, admissions: 2, discharges: 1, discharge_stay_days: 2 }),
-  day({ beds_censable: 10, beds_available: 10, beds_blocked: 0, patient_days: 8, admissions: 1, discharges: 1, discharge_stay_days: 6 }),
-  day({ beds_censable: 10, beds_available: 10, beds_blocked: 0, patient_days: 7 }),
-  day({ beds_censable: 10, beds_available: 10, beds_blocked: 0, patient_days: 7, admissions: 1, discharges: 1, discharge_stay_days: 4 }),
+  day({
+    beds_censable: 10,
+    beds_available: 10,
+    beds_blocked: 0,
+    patient_days: 6,
+    admissions: 1,
+    discharges: 1,
+    discharge_stay_days: 4,
+  }),
+  day({
+    beds_censable: 10,
+    beds_available: 10,
+    beds_blocked: 0,
+    patient_days: 7,
+    admissions: 1,
+  }),
+  day({
+    beds_censable: 10,
+    beds_available: 9,
+    beds_blocked: 1,
+    patient_days: 7,
+    admissions: 1,
+    discharges: 2,
+    discharge_stay_days: 8,
+  }),
+  day({
+    beds_censable: 10,
+    beds_available: 9,
+    beds_blocked: 1,
+    patient_days: 8,
+    admissions: 2,
+    discharges: 1,
+    discharge_stay_days: 2,
+  }),
+  day({
+    beds_censable: 10,
+    beds_available: 10,
+    beds_blocked: 0,
+    patient_days: 8,
+    admissions: 1,
+    discharges: 1,
+    discharge_stay_days: 6,
+  }),
+  day({
+    beds_censable: 10,
+    beds_available: 10,
+    beds_blocked: 0,
+    patient_days: 7,
+  }),
+  day({
+    beds_censable: 10,
+    beds_available: 10,
+    beds_blocked: 0,
+    patient_days: 7,
+    admissions: 1,
+    discharges: 1,
+    discharge_stay_days: 4,
+  }),
 ];
 
 describe('computeIndicators', () => {
@@ -68,9 +119,19 @@ describe('computeIndicators', () => {
   it('prueba cruzada: ocupación ≈ ALOS × giro ÷ días × 100 cuando los días-paciente son los días de estancia de los egresos', () => {
     // Sin pacientes que crucen los bordes: DP == Σ días de estancia de los egresos.
     const closed = [
-      day({ beds_available: 10, patient_days: 5, discharges: 1, discharge_stay_days: 8 }),
+      day({
+        beds_available: 10,
+        patient_days: 5,
+        discharges: 1,
+        discharge_stay_days: 8,
+      }),
       day({ beds_available: 10, patient_days: 5 }),
-      day({ beds_available: 10, patient_days: 6, discharges: 2, discharge_stay_days: 12 }),
+      day({
+        beds_available: 10,
+        patient_days: 6,
+        discharges: 2,
+        discharge_stay_days: 12,
+      }),
       day({ beds_available: 10, patient_days: 4 }),
     ];
     const r = computeIndicators(closed, 4, []);
@@ -96,7 +157,11 @@ describe('computeIndicators', () => {
   });
 
   it('sin egresos no hay estancia, giro ni intervalo (null, no 0 ni NaN)', () => {
-    const r = computeIndicators([day({ beds_available: 10, patient_days: 5 })], 1, []);
+    const r = computeIndicators(
+      [day({ beds_available: 10, patient_days: 5 })],
+      1,
+      [],
+    );
     expect(r.alos).toBeNull();
     expect(r.turnoverInterval).toBeNull();
     expect(r.bedTurnover).toBe(0);

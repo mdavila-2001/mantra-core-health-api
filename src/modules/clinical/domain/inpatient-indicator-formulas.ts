@@ -66,7 +66,10 @@ const ratio = (num: number, den: number): number | null =>
  * @param sorted - Valores ordenados de menor a mayor.
  * @param p - Fracción entre 0 y 1.
  */
-export function percentile(sorted: readonly number[], p: number): number | null {
+export function percentile(
+  sorted: readonly number[],
+  p: number,
+): number | null {
   if (sorted.length === 0) return null;
   const rank = (sorted.length - 1) * p;
   const low = Math.floor(rank);

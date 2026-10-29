@@ -241,7 +241,10 @@ export function computeCensus(input: CensusInput): CensusResult {
       counts.patients_at_cutoff += 1;
       entry('PRESENT', location, cutoff);
     }
-    if (location.movement === 'ADT_ADMIT' && inDay(location.periodStart, dayStart, cutoff)) {
+    if (
+      location.movement === 'ADT_ADMIT' &&
+      inDay(location.periodStart, dayStart, cutoff)
+    ) {
       counts.admissions += 1;
       entry('ADMITTED', location, location.periodStart);
     }
