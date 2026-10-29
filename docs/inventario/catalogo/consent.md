@@ -10,8 +10,8 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [consent_events](#consent_events) | Mantiene la secuencia de eventos de consentimiento para reconstruir otorgamientos, cambios y revocaciones. | 10 | 7 | 14 | COINCIDE |
-| [consent_evidence](#consent_evidence) | Vincula evidencia que respalda la obtención de un consentimiento y su contexto probatorio. | 11 | 7 | 1 | COINCIDE |
+| [consent_events](#consent_events) | Mantiene la secuencia de eventos de consentimiento para reconstruir otorgamientos, cambios y revocaciones. | 10 | 7 | 15 | COINCIDE |
+| [consent_evidence](#consent_evidence) | Vincula evidencia que respalda la obtención de un consentimiento y su contexto probatorio. | 11 | 7 | 6 | COINCIDE |
 | [consent_provisions](#consent_provisions) | Desglosa un consentimiento en disposiciones específicas para representar alcances diferenciados dentro de una autorización. | 17 | 12 | 8 | COINCIDE |
 | [consents](#consents) | Conserva el estado de consentimiento de un titular respecto de una finalidad, para apoyar la habilitación o bloqueo de usos de datos. | 20 | 15 | 22 | COINCIDE |
 | [hipaa_authorizations](#hipaa_authorizations) | Registra autorizaciones de divulgación estructuradas según el modelo de autorización HIPAA contemplado por el sistema. | 17 | 9 | 5 | COINCIDE |
@@ -19,7 +19,7 @@
 | [privacy_restrictions](#privacy_restrictions) | Representa restricciones de privacidad que deben considerarse al acceder o utilizar información de una persona. | 16 | 11 | 8 | COINCIDE |
 | [processing_legal_bases](#processing_legal_bases) | Registra las bases legales asociadas a finalidades de tratamiento y aporta contexto a la autorización de operaciones con datos de salud. | 16 | 11 | 5 | COINCIDE |
 | [processing_purposes](#processing_purposes) | Define finalidades de tratamiento para que el sistema médico pueda relacionar cada uso de datos con un propósito identificable. | 13 | 7 | 8 | COINCIDE |
-| [treatment_informed_consents](#treatment_informed_consents) | Conserva consentimientos informados vinculados a tratamientos para documentar el acto de autorización asistencial. | 17 | 12 | 4 | COINCIDE |
+| [treatment_informed_consents](#treatment_informed_consents) | Conserva consentimientos informados vinculados a tratamientos para documentar el acto de autorización asistencial. | 17 | 12 | 13 | DIVERGE |
 
 ## Diagrama entidad-relación
 
@@ -111,7 +111,7 @@ Mantiene la secuencia de eventos de consentimiento para reconstruir otorgamiento
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_07_consent.puml: consent_events`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_07_consent.puml` · **DDL:** `SQL/07_consent/02_tables.sql`
 - **Entidad del ORM:** `ConsentEvents` — `src/modules/consent/entities/consent_events.entity.ts`
-- **Resumen:** 10 columnas · 7 índices · 6 FK salientes · 0 entrantes · 14 operaciones
+- **Resumen:** 10 columnas · 7 índices · 6 FK salientes · 0 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -169,6 +169,7 @@ Mantiene la secuencia de eventos de consentimiento para reconstruir otorgamiento
 | POST /consent/practitioner-access-requests/{id}/decision | CREA | DIRECTA |
 | POST /consent/privacy-restrictions | CREA | DIRECTA |
 | POST /consent/treatment-informed-consents | CREA | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | CREA | DIRECTA |
 
 #### Gobierno
 
@@ -193,7 +194,7 @@ Vincula evidencia que respalda la obtención de un consentimiento y su contexto 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_07_consent.puml: consent_evidence`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_07_consent.puml` · **DDL:** `SQL/07_consent/02_tables.sql`
 - **Entidad del ORM:** `ConsentEvidence` — `src/modules/consent/entities/consent_evidence.entity.ts`
-- **Resumen:** 11 columnas · 7 índices · 6 FK salientes · 0 entrantes · 1 operaciones
+- **Resumen:** 11 columnas · 7 índices · 6 FK salientes · 0 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -226,19 +227,24 @@ Vincula evidencia que respalda la obtención de un consentimiento y su contexto 
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_consent_evidence_subject_type_concept_id` | no | subject_type_concept_id | Soporta la clave foránea fk_consent_evidence_subject_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_consent_evidence_subject_type_concept_id` | no | subject_type_concept_id | Soporta la clave foránea fk_consent_evidence_subject_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «subject_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_consent_evidence_evidence_type_concept_id` | no | evidence_type_concept_id | Soporta la clave foránea fk_consent_evidence_evidence_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_consent_evidence_document_file_id` | no | document_file_id | Soporta la clave foránea fk_consent_evidence_document_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_consent_evidence_signature_id` | no | signature_id | Soporta la clave foránea fk_consent_evidence_signature_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_consent_evidence_captured_channel_concept_id` | no | captured_channel_concept_id | Soporta la clave foránea fk_consent_evidence_captured_channel_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_consent_evidence_recorded_by_user_id` | no | recorded_by_user_id | Soporta la clave foránea fk_consent_evidence_recorded_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `brin_consent_evidence_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
+| `brin_consent_evidence_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «recorded_at», la primera columna del índice _(CONSULTA)_ |
 
 #### Operaciones que la tocan
 
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /consent/consent-evidence | CREA | DIRECTA |
+| GET /consent/treatment-informed-consents | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents/{id} | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents/{id}/evidence | CREA | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -913,13 +919,13 @@ Conserva consentimientos informados vinculados a tratamientos para documentar el
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_07_consent.puml: treatment_informed_consents`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_07_consent.puml` · **DDL:** `SQL/07_consent/02_tables.sql`
 - **Entidad del ORM:** `TreatmentInformedConsents` — `src/modules/consent/entities/treatment_informed_consents.entity.ts`
-- **Resumen:** 17 columnas · 12 índices · 10 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 17 columnas · 12 índices · 10 FK salientes · 0 entrantes · 13 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/consent/entities/treatment_informed_consents.entity.ts:12`)_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/consent/entities/treatment_informed_consents.entity.ts:18`)_ | coincide |
 | 2 | `patient_profile_id` | `uuid` | Clave foránea → profiles.patient_profiles.profile_id; Obligatoria | _sin dato_ | coincide |
 | 3 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
 | 4 | `encounter_id` | `uuid` | Clave foránea → clinical.encounters.id; Obligatoria | _sin dato_ | coincide |
@@ -931,11 +937,11 @@ Conserva consentimientos informados vinculados a tratamientos para documentar el
 | 10 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 11 | `signed_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 12 | `withdrawn_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
-| 13 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/consent/entities/treatment_informed_consents.entity.ts:100`)_ | coincide |
-| 14 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/consent/entities/treatment_informed_consents.entity.ts:106`)_ | coincide |
+| 13 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/consent/entities/treatment_informed_consents.entity.ts:358`)_ | coincide |
+| 14 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/consent/entities/treatment_informed_consents.entity.ts:364`)_ | coincide |
 | 15 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 16 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 17 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/consent/entities/treatment_informed_consents.entity.ts:124`)_ | coincide |
+| 17 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/consent/entities/treatment_informed_consents.entity.ts:382`)_ | coincide |
 
 #### Relaciones
 
@@ -956,7 +962,7 @@ Conserva consentimientos informados vinculados a tratamientos para documentar el
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_treatment_informed_consents_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_treatment_informed_consents_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_treatment_informed_consents_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_treatment_informed_consents_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_treatment_informed_consents_tenant_id` | no | tenant_id | Soporta la clave foránea fk_treatment_informed_consents_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_treatment_informed_consents_encounter_id` | no | encounter_id | Soporta la clave foránea fk_treatment_informed_consents_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «encounter_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_treatment_informed_consents_procedure_code_concept_id` | no | procedure_code_concept_id | Soporta la clave foránea fk_treatment_informed_consents_procedure_code_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -975,8 +981,17 @@ Conserva consentimientos informados vinculados a tratamientos para documentar el
 |---|---|---|
 | GET /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
 | POST /consent/encounters/{encounterId}/informed-consent | CREA | DIRECTA |
+| POST /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
 | GET /consent/me/treatment-informed-consents | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents | LEE | DIRECTA |
 | POST /consent/treatment-informed-consents | CREA | DIRECTA |
+| POST /consent/treatment-informed-consents | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents/{id} | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents/{id}/evidence | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | ACTUALIZA | POR_TIPO |
+| PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | ACTUALIZA | POR_TIPO |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | LEE | DIRECTA |
 
 #### Gobierno
 

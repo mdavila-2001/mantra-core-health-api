@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1612 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1612 requests en 146 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1618 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1618 requests en 146 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -18431,7 +18431,7 @@
       ]
     },
     {
-      "name": "billing (35)",
+      "name": "billing (37)",
       "item": [
         {
           "name": "billing-operations",
@@ -19547,6 +19547,55 @@
               ]
             },
             {
+              "name": "GET /billing/service-catalog/procedure-specialties/mine · Listar las especialidades del arancel que corresponden al médico",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/billing/service-catalog/procedure-specialties/mine",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "billing",
+                    "service-catalog",
+                    "procedure-specialties",
+                    "mine"
+                  ]
+                },
+                "description": "Listar las especialidades del arancel que corresponden al médico. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /billing/service-catalog/procedure-specialties/mine`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `BillingServiceCatalogController_listMyProcedureSpecialties`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.procedureSpecialties || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('procedureSpecialtyId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "GET /billing/service-catalog/procedures · Listar el nomenclador de procedimientos (arancel de referencia)",
               "request": {
                 "method": "GET",
@@ -19578,7 +19627,7 @@
                     {
                       "key": "q",
                       "value": "q-ejemplo",
-                      "description": "Texto a buscar en el nombre del procedimiento",
+                      "description": "Palabras a buscar (todas deben aparecer), sin distinguir tildes ni mayúsculas, en el nombre, el código, el grupo o la especialidad",
                       "disabled": true
                     },
                     {
@@ -19673,6 +19722,66 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.serviceCatalogId);",
                       "  if (id) pm.environment.set('serviceCatalogId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /billing/service-catalog/import-procedures · Importar en lote procedimientos del arancel al catálogo",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/billing/service-catalog/import-procedures",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "billing",
+                    "service-catalog",
+                    "import-procedures"
+                  ]
+                },
+                "description": "Crea en el catálogo de la práctica todos los procedimientos del arancel que cumplan el filtro (especialidades, códigos y/o texto, combinados con Y; al menos uno). Idempotente: salta los códigos que la práctica ya tiene. Tope de 5000 coincidencias (400 si lo excede).\n\n`POST /billing/service-catalog/import-procedures`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `BillingServiceCatalogController_importProcedures`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"practiceId\": \"{{practiceId}}\",\n  \"specialties\": [\n    \"Cardiología\"\n  ],\n  \"codes\": [\n    \"procedure:bo:BO_ARM_AUDITORIA_MEDICA_I_GENERAL\"\n  ],\n  \"q\": \"q-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{importProcedureId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.importProcedureId);",
+                      "  if (id) pm.environment.set('importProcedureId', id);",
                       "}"
                     ]
                   }
@@ -26415,7 +26524,7 @@
       ]
     },
     {
-      "name": "community (68)",
+      "name": "community (69)",
       "item": [
         {
           "name": "community-groups",
@@ -29005,7 +29114,7 @@
                 "description": "Publicar una review verificada de servicio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /community/profiles/{profileId}/reviews`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `CommunityReviewsController_publishReview`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"verifiedEncounterId\": \"<verifiedEncounterId: uuid existente>\",\n  \"overallRating\": 1,\n  \"reviewText\": \"reviewText-ejemplo\",\n  \"displayMode\": \"REAL_NAME\",\n  \"dimensions\": [\n    {\n      \"dimension\": \"COMMUNICATION\",\n      \"score\": 1\n    }\n  ]\n}",
+                  "raw": "{\n  \"verifiedEncounterId\": \"<verifiedEncounterId: uuid existente>\",\n  \"overallRating\": 1,\n  \"reviewText\": \"reviewText-ejemplo\",\n  \"displayMode\": \"ANONYMOUS\",\n  \"dimensions\": [\n    {\n      \"dimension\": \"COMMUNICATION\",\n      \"score\": 1\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -29483,6 +29592,55 @@
                       "  const list = Array.isArray(body) ? body : (body.stats || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('statId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /community/profiles/organization-showcases/me · Vitrinas de organización que la sesión puede atender en el chat",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/community/profiles/organization-showcases/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "community",
+                    "profiles",
+                    "organization-showcases",
+                    "me"
+                  ]
+                },
+                "description": "Vitrinas de organización que la sesión puede atender en el chat. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /community/profiles/organization-showcases/me`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `CommunitySocialController_listOwnOrganizationShowcases`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.organizationShowcases || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('organizationShowcaseId', first.id);",
                       "}"
                     ]
                   }
@@ -64023,8 +64181,64 @@
       ]
     },
     {
-      "name": "patients (2)",
+      "name": "patients (3)",
       "item": [
+        {
+          "name": "GET /patients/me/reviewable-care · Consultar si una atención recibida se puede calificar",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patients/me/reviewable-care?appointmentBookingId=<appointmentBookingId: uuid existente>",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patients",
+                "me",
+                "reviewable-care"
+              ],
+              "query": [
+                {
+                  "key": "appointmentBookingId",
+                  "value": "<appointmentBookingId: uuid existente>",
+                  "description": "Reserva de la atención recibida (la misma de la encuesta)",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": "Parte de la reserva (la misma de la encuesta) y devuelve el encuentro que respalda la reseña pública, el nombre público del profesional, y `alreadyReviewed` / `canReview`. Una reserva ajena o inexistente responde 404 igual.\n\n`GET /patients/me/reviewable-care`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `PatientReviewsController_getReviewableCare`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.patients || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('patientId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
         {
           "name": "POST /patients/me/reviews · Calificar una atención recibida",
           "request": {
@@ -64055,7 +64269,7 @@
             "description": "El destinatario sale del encuentro declarado: no hace falta conocer el identificador de la vitrina del profesional.\n\n`POST /patients/me/reviews`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `PatientReviewsController_publishOwnReview`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"verifiedEncounterId\": \"<verifiedEncounterId: uuid existente>\",\n  \"overallRating\": 1,\n  \"reviewText\": \"reviewText-ejemplo\",\n  \"displayMode\": \"REAL_NAME\",\n  \"dimensions\": [\n    {\n      \"dimension\": \"COMMUNICATION\",\n      \"score\": 1\n    }\n  ]\n}",
+              "raw": "{\n  \"verifiedEncounterId\": \"<verifiedEncounterId: uuid existente>\",\n  \"overallRating\": 1,\n  \"reviewText\": \"reviewText-ejemplo\",\n  \"displayMode\": \"ANONYMOUS\",\n  \"dimensions\": [\n    {\n      \"dimension\": \"COMMUNICATION\",\n      \"score\": 1\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -69426,7 +69640,7 @@
       ]
     },
     {
-      "name": "pharmacy (33)",
+      "name": "pharmacy (34)",
       "item": [
         {
           "name": "pharmacy-directory",
@@ -71146,6 +71360,61 @@
                     }
                   }
                 }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{orderId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.orderId);",
+                      "  if (id) pm.environment.set('orderId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /pharmacy/orders/{id}/conversation · Abrir el chat del pedido con la farmacia",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/pharmacy/orders/:id/conversation",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pharmacy",
+                    "orders",
+                    ":id",
+                    "conversation"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{orderId}}",
+                      "description": "Identificador de ruta · variable `{{orderId}}`"
+                    }
+                  ]
+                },
+                "description": "Idempotente: devuelve el mismo hilo directo entre el paciente titular y la vitrina pública de la farmacia. Lo piden el titular o el personal (PHARMACY_STAFF con membresía activa) de la farmacia del pedido; cualquier tercero recibe 404. 422 con reason ORGANIZATION_CHAT_PROFILE_UNAVAILABLE (farmacia sin vitrina activa/verificada), PATIENT_CHAT_PROFILE_MISSING (paciente sin perfil comunitario; no se crea) o bloqueo entre perfiles.\n\n`POST /pharmacy/orders/{id}/conversation`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `PharmacyOrdersController_openConversation`"
               },
               "response": [],
               "event": [
@@ -91229,7 +91498,7 @@
       ]
     },
     {
-      "name": "surveys (17)",
+      "name": "surveys (18)",
       "item": [
         {
           "name": "surveys-assignments",
@@ -91346,6 +91615,78 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.invitationId);",
                       "  if (id) pm.environment.set('invitationId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "surveys-insights",
+          "item": [
+            {
+              "name": "GET /surveys/insights · Resumen general de mis encuestas (agregado, sin pacientes)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/surveys/insights",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "surveys",
+                    "insights"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-08-01",
+                      "description": "Primer día de un mes (YYYY-MM-01, UTC). Cualquier otro día, o una hora, se rechaza con 400. Se filtra por la fecha de emisión del cuestionario. Sin valor: 11 meses antes del mes de `to` (ventana de 12 meses).",
+                      "disabled": true
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-10-31",
+                      "description": "Último día de un mes (p. ej. 2026-10-31, UTC). Cualquier otro día, o una hora, se rechaza con 400. No puede ser anterior a `from` y el periodo no puede pasar de 12 meses. Sin valor: el último día del mes en curso.",
+                      "disabled": true
+                    },
+                    {
+                      "key": "serviceId",
+                      "value": "{{serviceId}}",
+                      "description": "Acota el resumen a los cuestionarios emitidos por atenciones de este servicio del catálogo.",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Totales, tasa de respuesta, NPS, promedio y distribución por pregunta, tendencia, alertas de seguridad y comentarios abiertos (texto y día). Incluye las encuestas propias y las de sistema emitidas por las atenciones del profesional.\n\n`GET /surveys/insights`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `SurveysInsightsController_getInsights`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.insights || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('insightId', first.id);",
                       "}"
                     ]
                   }

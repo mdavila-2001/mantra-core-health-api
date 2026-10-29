@@ -60,7 +60,7 @@
 | 46 | GET | `/insurance/campaigns/my-benefits` | Campañas vigentes de mi aseguradora, para el afiliado autenticado | ALTO | 12 | sesión (sin roles) |
 | 47 | GET | `/insurance/campaigns/patient/{patientProfileId}` | Campañas vigentes de la aseguradora del afiliado (sólo el titular) | ALTO | 12 | sesión (sin roles) |
 | 48 | GET | `/insurance/my-claims` | Solicitudes de seguro propias, con su dictamen vigente | BAJO | 19 | sesión (sin roles) |
-| 49 | POST | `/insurance/patients/conversation` | Abrir o reutilizar la conversación interna con un paciente autorizado | ALTO | 15 | sesión (sin roles) |
+| 49 | POST | `/insurance/patients/conversation` | Abrir o reutilizar la conversación interna con un paciente autorizado | ALTO | 16 | sesión (sin roles) |
 | 50 | GET | `/insurance/patients/options` | Aseguradoras disponibles en el alcance autorizado | BAJO | 2 | sesión (sin roles) |
 | 51 | POST | `/insurance/patients/search` | Consultar directorio de pacientes autorizado | ALTO | 13 | sesión (sin roles) |
 | 52 | GET | `/insurance/portability/certificates/{certificateId}/json` | Descargar el certificado de portabilidad en JSON interoperable | ALTO | 9 | sesión (sin roles) |
@@ -5778,7 +5778,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /insurance/patients/conversation` la atiende `InsurerPatientsController.openConversation` (src/modules/insurance/presentation/controllers/insurer-patients.controller.ts:74). Exige sesión; el controlador no declara roles. Valida el cuerpo como `InsurerPatientConversationDto` (2 campos, 2 obligatorios). Delega en `InsurerPatientsService.openConversation`. Crea filas en audit.data_access_log, community.conversation_participants, community.conversations. Lee common.contact_points, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, iam.users, insurance.insurance_carriers y 4 más.
+`POST /insurance/patients/conversation` la atiende `InsurerPatientsController.openConversation` (src/modules/insurance/presentation/controllers/insurer-patients.controller.ts:74). Exige sesión; el controlador no declara roles. Valida el cuerpo como `InsurerPatientConversationDto` (2 campos, 2 obligatorios). Delega en `InsurerPatientsService.openConversation`. Crea filas en audit.data_access_log, community.conversation_participants, community.conversations. Lee common.contact_points, community.conversation_participants, community.conversations, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, iam.users y 5 más.
 
 ### Requerimientos
 
@@ -5804,6 +5804,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `community.public_profiles` | LEE | LEE | DIRECTA | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → PatientDirectoryAdapter.createConversation → CommunityMessagingService.createConversation → CommunityMessagingService.createDirectConversation → PublicProfilesRepository.findById | `src/modules/community/repositories/public-profiles.repository.ts:123` |
 | `community.user_blocks` | LEE | LEE | DIRECTA | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → PatientDirectoryAdapter.createConversation → CommunityMessagingService.createConversation → CommunityMessagingService.createDirectConversation → BlocksRepository.existsBetween | `src/modules/community/repositories/blocks.repository.ts:58` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → InsurerPatientsService.resolveScope → InsurerContextService.resolve → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `directory.tenants` | LEE | LEE | DIRECTA | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → PatientDirectoryAdapter.createConversation → CommunityMessagingService.createConversation → CommunityMessagingService.createDirectConversation → CommunityOrganizationStaffService.isTenantBacked | `src/modules/community/services/community-organization-staff.service.ts:111` |
 | `iam.users` | LEE | LEE | POR_SQL | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation | `src/modules/insurance/application/services/insurer-patients.service.ts:428` |
 | `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → InsurerPatientsService.resolveScope → InsurerContextService.resolve → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
 | `profiles.patient_profiles` | LEE | LEE | POR_SQL | InsurerPatientsController.openConversation → InsurerPatientsService.openConversation → InsurerPatientsService.readPeople | `src/modules/insurance/application/services/insurer-patients.service.ts:220` |
@@ -5851,7 +5852,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {accessDenied}; ForbiddenException: {ACCESS_DENIED} |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {accessDenied}; ForbiddenException: {ACCESS_DENIED}; ForbiddenException: Una organización no inicia conversaciones por este canal |
 | 404 | `NOT_FOUND` | NotFoundException: Paciente no disponible |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La mensajería no está disponible para estos perfiles; PreconditionFailedException: Las conversaciones grupales se crean desde el flujo de grupos; PreconditionFailedException: Los participantes de una conversación deben ser distintos; PreconditionFailedException: Una conversación directa requiere exactamente dos participantes; PreconditionFailedException: La persona no está disponible para iniciar una conversación; PreconditionFailedException: No se puede iniciar una conversación entre perfiles bloqueados |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |

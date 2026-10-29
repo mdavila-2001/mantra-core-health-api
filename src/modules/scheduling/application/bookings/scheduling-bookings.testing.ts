@@ -1,3 +1,4 @@
+import type { BookingCompletedPort } from '../ports/booking-completed.port';
 import { AuditBookingHistoryAdapter } from '../../infrastructure/adapters/audit-booking-history.adapter';
 import { ClinicalAppointmentsAdapter } from '../../infrastructure/adapters/clinical-appointments.adapter';
 import { FormsOriginAdapter } from '../../infrastructure/adapters/forms-origin.adapter';
@@ -56,6 +57,8 @@ export interface BookingsServiceDoubles {
   representation: any;
   formOrigin: any;
   serviceAgenda: any;
+  /** Receptor del cierre de la atención; por omisión no hace nada. */
+  bookingCompleted?: BookingCompletedPort;
 }
 
 /**
@@ -199,6 +202,7 @@ export function createBookingsService(d: BookingsServiceDoubles) {
       transitions,
       serviceSlots,
       clinicalSync,
+      d.bookingCompleted ?? { onBookingCompleted: async () => undefined },
       d.logger,
     ),
     new CheckInBookingUseCase(d.em, d.bookingsRepo, transitions, d.logger),
