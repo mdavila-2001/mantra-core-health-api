@@ -78,12 +78,16 @@ function build() {
   const collectionPoints = {
     assertCollectable: mockFn().mockResolvedValue(undefined),
   };
+  const practitioners = {
+    assertInTenant: mockFn().mockResolvedValue(undefined),
+  };
   const raw = new DiagnosticsSpecimensService(
     em as any,
     repo,
     scope,
     logger as any,
     collectionPoints as any,
+    practitioners as any,
   );
   return {
     raw,
@@ -93,6 +97,7 @@ function build() {
     repo,
     refsRepo,
     collectionPoints,
+    practitioners,
   };
 }
 
@@ -818,6 +823,83 @@ describe('DiagnosticsSpecimensService', () => {
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(d.repo.createSpecimen).not.toHaveBeenCalled();
+    });
+  });
+  describe('perfiles de profesional que manda el cliente', () => {
+    const registration = {
+      patientProfileId: 'p1',
+      custodianTenantId: T1,
+      specimenTypeConceptId: DIAG.SPECIMEN_TYPE_BLOOD_VENOUS,
+    };
+    const notInTenant = () =>
+      new PreconditionFailedException(
+        'El profesional indicado no pertenece a esta organización',
+        { fields: ['collectorProfileId'] },
+        'PRACTITIONER_NOT_IN_TENANT',
+      );
+
+    it('el colector se valida contra el tenant del contexto antes de escribir', async () => {
+      const d = build();
+      d.repo.createSpecimen.mockReturnValue({
+        id: 's1',
+        statusConceptId: DIAG.SPECIMEN_COLLECTED,
+        collectedAt: new Date(),
+      });
+      await d.service.createSpecimen(
+        { ...registration, collectorProfileId: 'prof-1' } as any,
+        actor,
+      );
+      expect(d.practitioners.assertInTenant).toHaveBeenCalledWith(d.tx, T1, [
+        { field: 'collectorProfileId', profileId: 'prof-1' },
+      ]);
+    });
+
+    it('un colector ajeno o inexistente es 422 PRACTITIONER_NOT_IN_TENANT y no escribe', async () => {
+      const d = build();
+      d.practitioners.assertInTenant.mockRejectedValue(notInTenant());
+      await expect(
+        d.service.createSpecimen(
+          { ...registration, collectorProfileId: 'prof-ajeno' } as any,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        response: expect.objectContaining({
+          reason: 'PRACTITIONER_NOT_IN_TENANT',
+        }),
+      });
+      expect(d.repo.createSpecimen).not.toHaveBeenCalled();
+    });
+
+    it('sin colector no se consulta la pertenencia', async () => {
+      const d = build();
+      d.repo.createSpecimen.mockReturnValue({
+        id: 's1',
+        statusConceptId: DIAG.SPECIMEN_COLLECTED,
+        collectedAt: new Date(),
+      });
+      await d.service.createSpecimen(registration as any, actor);
+      expect(d.practitioners.assertInTenant).not.toHaveBeenCalled();
+    });
+
+    it('quien rechaza el espécimen se valida igual: ajeno → 422 y no registra el rechazo', async () => {
+      const d = build();
+      d.repo.findSpecimen.mockResolvedValue(ownSpecimen());
+      d.practitioners.assertInTenant.mockRejectedValue(notInTenant());
+      await expect(
+        d.service.reject(
+          's1',
+          {
+            rejectionReasonConceptId: DIAG.REJECTION_REASON_QUALITY,
+            rejectedByProfileId: 'prof-ajeno',
+          } as any,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        response: expect.objectContaining({
+          reason: 'PRACTITIONER_NOT_IN_TENANT',
+        }),
+      });
+      expect(d.repo.recordRejection).not.toHaveBeenCalled();
     });
   });
 });

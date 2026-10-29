@@ -4,6 +4,7 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ResourceNotFoundException,
   PreconditionFailedException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -11,6 +12,7 @@ import { SpecimensRepository } from '../repositories';
 import { SampleCollectionPointsService } from '../../practice/services/sample-collection-points.service';
 import { CollectionPointErrorReason } from '../../practice/practice-collection.error-reasons';
 import { practiceOutOfScope } from '../../practice/services/practice-scope';
+import { PractitionerScopeService } from '../../procedures_perioperative/policies/practitioner-scope.service';
 import { DiagnosticsScopeService } from './diagnostics-scope.service';
 import { DIAG } from '../diagnostics.concepts';
 import { DiagnosticsErrorReason } from '../diagnostics.error-reasons';
@@ -59,6 +61,7 @@ export class DiagnosticsSpecimensService {
     private readonly scope: DiagnosticsScopeService,
     private readonly logger: PinoLogger,
     private readonly collectionPoints: SampleCollectionPointsService,
+    private readonly practitioners: PractitionerScopeService,
   ) {
     this.logger.setContext(DiagnosticsSpecimensService.name);
   }
@@ -84,6 +87,13 @@ export class DiagnosticsSpecimensService {
       );
     }
     return this.em.transactional(async (tx) => {
+      // El profesional que recolecta lo manda el cliente: tiene que ser de la organización
+      // del contexto. Inexistente y ajeno responden igual (422 `PRACTITIONER_NOT_IN_TENANT`).
+      if (dto.collectorProfileId) {
+        await this.practitioners.assertInTenant(tx, custodianTenantId, [
+          { field: 'collectorProfileId', profileId: dto.collectorProfileId },
+        ]);
+      }
       // F5b: la sede de la toma es del tenant que registra la muestra (404 si no) y el
       // punto, un espacio SAMPLE_COLLECTION de esa sede (422).
       if (dto.collectionSiteId) {
@@ -244,6 +254,12 @@ export class DiagnosticsSpecimensService {
     );
     return this.em.transactional(async (tx) => {
       const specimen = await this.scope.specimen(tx, specimenId);
+      // Quien rechaza es un perfil profesional que manda el cliente: de la organización activa.
+      if (dto.rejectedByProfileId) {
+        await this.practitioners.assertInTenant(tx, requireTenantId(), [
+          { field: 'rejectedByProfileId', profileId: dto.rejectedByProfileId },
+        ]);
+      }
       if (dto.recollectionServiceRequestId) {
         await this.scope.serviceRequest(
           tx,
