@@ -5,13 +5,14 @@ import {
   createHash,
   randomBytes,
 } from 'node:crypto';
-import { loadAudioEnv } from '../audio.env';
+import type { AudioValueCipherPort } from '../../application/ports/audio-value-cipher.port';
+import { loadAudioEnv } from '../../audio.env';
 
 const VERSION = 'v1';
 
 /** Cifra el texto renderizado para que PII validada nunca quede en claro en PostgreSQL. */
 @Injectable()
-export class AudioValueCipherService {
+export class AudioValueCipherService implements AudioValueCipherPort {
   private readonly key = createHash('sha256')
     .update(loadAudioEnv().dataKey, 'utf8')
     .digest();

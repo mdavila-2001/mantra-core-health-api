@@ -20,6 +20,7 @@ export const MIGRATED_MODULES: readonly string[] = [
   'iam',
   'ops_console',
   'billing',
+  'audio_assets',
   'telemetry',
 ];
 

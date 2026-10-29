@@ -1,15 +1,15 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { randomUUID } from 'node:crypto';
-import { StorageLifecycleDenied } from '../../../common/storage/storage-lifecycle.protocol';
+import { StorageLifecycleDenied } from '../../../../common/storage/storage-lifecycle.protocol';
 import {
   isKnownPhysicalIdentity,
   samePhysicalObject,
-} from '../../../common/storage/physical-object-identity';
+} from '../../../../common/storage/physical-object-identity';
 import type {
   AudioDynamicField,
   AudioSynthesisProfile,
-} from '../domain/audio.types';
-import { AudioAssets, AudioTemplates } from '../entities';
+} from '../../domain/audio.types';
+import { AudioAssets, AudioTemplates } from '../../entities';
 import type { MarkAudioAssetReadyInput } from './audio-assets.repository.types';
 
 export function listEnabledAudioTemplates(

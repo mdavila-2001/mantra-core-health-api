@@ -1,20 +1,20 @@
 import { Injectable, Optional } from '@nestjs/common';
-import { StoragePublicationService } from '../../../common/storage/storage-publication.service';
-import { StorageLifecycleDenied } from '../../../common/storage/storage-lifecycle.protocol';
-import { loadStorageEnv } from '../../../common/storage/storage.env';
+import { StoragePublicationService } from '../../../../common/storage/storage-publication.service';
+import { StorageLifecycleDenied } from '../../../../common/storage/storage-lifecycle.protocol';
+import { loadStorageEnv } from '../../../../common/storage/storage.env';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { randomUUID } from 'node:crypto';
 import type {
   AudioAssetStatus,
   AudioDynamicField,
   AudioSynthesisProfile,
-} from '../domain/audio.types';
+} from '../../domain/audio.types';
 import {
   AudioAssets,
   AudioGenerationEvents,
   AudioGenerationUsage,
   AudioTemplates,
-} from '../entities';
+} from '../../entities';
 import {
   countQueuedAudioJobsByActorSince,
   findReusableReadyAudioAsset,

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import type { RemotePublicationProof } from '../../../common/storage/storage-worker-publication.service';
+import type { RemotePublicationProof } from '../../../../common/storage/storage-worker-publication.service';
 import {
   IsArray,
   IsBoolean,
