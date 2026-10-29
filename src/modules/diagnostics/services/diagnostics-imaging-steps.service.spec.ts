@@ -409,6 +409,84 @@ describe('DiagnosticsImagingStepsService.worklist', () => {
     expect(d.patientAccess.assertCanReadPatient).toHaveBeenCalledTimes(2);
   });
 
+  it('la decisión de operador es por SALA de la fila: un equipo reubicado con pasos en dos salas no hereda la decisión de la primera', async () => {
+    const OTHER_ROOM = '50000000-0000-4000-8000-000000000005';
+    const d = build({
+      [WL]: [
+        row({
+          step_id: 'vieja',
+          patient_profile_id: 'pa',
+          scheduled_care_space_id: OTHER_ROOM,
+        }),
+        row({
+          step_id: 'nueva',
+          patient_profile_id: 'pb',
+          scheduled_care_space_id: SPACE,
+        }),
+        row({
+          step_id: 'nueva2',
+          patient_profile_id: 'pc',
+          scheduled_care_space_id: SPACE,
+        }),
+        row({
+          step_id: 'sin-sala',
+          patient_profile_id: 'pd',
+          scheduled_care_space_id: null,
+        }),
+      ],
+    });
+    // Opera la sala nueva y no la vieja (el orden de las filas pone primero la vieja).
+    d.infra.assertCan.mockImplementation(
+      async (_a: any, _x: string, t: any) => {
+        if (t.careSpaceId !== SPACE) throw denied();
+        return {};
+      },
+    );
+    d.patientAccess.assertCanReadPatient.mockRejectedValue(denied());
+    const res = await d.service.worklist({ equipmentId: EQUIPMENT }, clinician);
+    expect(res.items.map((i) => i.stepId)).toEqual(['nueva', 'nueva2']);
+    // Una decisión por sala (la fila sin sala no pregunta), no por equipo ni por fila.
+    expect(
+      d.infra.assertCan.mock.calls.map((c: any[]) => c[2].careSpaceId),
+    ).toEqual([OTHER_ROOM, SPACE]);
+    // Lo que no opera cae a la relación con el paciente: los de la sala vieja y sin sala se ocultan.
+    expect(d.patientAccess.assertCanReadPatient).toHaveBeenCalledWith(
+      'pa',
+      clinician,
+    );
+    expect(d.patientAccess.assertCanReadPatient).toHaveBeenCalledWith(
+      'pd',
+      clinician,
+    );
+  });
+
+  it('y al revés: operar la sala vieja no abre las filas de la nueva', async () => {
+    const OTHER_ROOM = '50000000-0000-4000-8000-000000000005';
+    const d = build({
+      [WL]: [
+        row({
+          step_id: 'a',
+          patient_profile_id: 'pa',
+          scheduled_care_space_id: SPACE,
+        }),
+        row({
+          step_id: 'b',
+          patient_profile_id: 'pb',
+          scheduled_care_space_id: OTHER_ROOM,
+        }),
+      ],
+    });
+    d.infra.assertCan.mockImplementation(
+      async (_a: any, _x: string, t: any) => {
+        if (t.careSpaceId !== SPACE) throw denied();
+        return {};
+      },
+    );
+    d.patientAccess.assertCanReadPatient.mockRejectedValue(denied());
+    const res = await d.service.worklist({ equipmentId: EQUIPMENT }, clinician);
+    expect(res.items.map((i) => i.stepId)).toEqual(['a']);
+  });
+
   it('un rol con la estación a la vista pero sin la acción (403 de la política) tampoco ve pacientes ajenos', async () => {
     const d = build({ [WL]: [row({ patient_profile_id: 'ajeno' })] });
     d.infra.assertCan.mockRejectedValue(
