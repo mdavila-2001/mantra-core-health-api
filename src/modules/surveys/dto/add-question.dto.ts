@@ -44,10 +44,13 @@ export class AddQuestionDto {
   answerType!: AnswerTypeCode;
 
   /**
-   * Valor de required mantenido por la instancia.
+   * Se acepta por compatibilidad, pero el servidor lo ignora: las preguntas del
+   * profesional son siempre opcionales. Las obligatorias son las de la encuesta
+   * base del sistema.
    */
   @ApiPropertyOptional({
-    description: 'Si responderla es obligatorio para poder enviar',
+    description:
+      'Se ignora: las preguntas del profesional son siempre opcionales (`required` queda en false)',
     default: false,
   })
   @IsOptional()

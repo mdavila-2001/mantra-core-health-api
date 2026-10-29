@@ -24,7 +24,7 @@ _Fuente: `src/modules/directory/README.md:3`_
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
 | `ctrl:AdminTenantsController` | Operaciones de AdminTenantsController que el README no asigna a un caso de uso | GET /admin/tenants | SUPERADMIN · SECURITY_ADMIN | BAJO | 1 |
-|  |  | POST /admin/tenants | SUPERADMIN | MEDIO | 14 |
+|  |  | POST /admin/tenants | SUPERADMIN | MEDIO | 16 |
 |  |  | PUT /admin/tenants/{tenantId}/public-profile | SUPERADMIN · SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /admin/tenants/{tenantId}/suspend | SUPERADMIN | MEDIO | 6 |
 |  |  | POST /admin/tenants/{tenantId}/verification | SECURITY_ADMIN | MEDIO | 16 |
@@ -38,7 +38,7 @@ _Fuente: `src/modules/directory/README.md:3`_
 |  |  | POST /tenants/{tenantId}/branches | Cualquier sesión válida | ALTO | 4 |
 |  |  | PATCH /tenants/{tenantId}/branches/{branchId} | Cualquier sesión válida | ALTO | 3 |
 |  |  | GET /tenants/{tenantId}/child-tenants | Cualquier sesión válida | BAJO | 2 |
-|  |  | POST /tenants/{tenantId}/child-tenants | SECURITY_ADMIN | MEDIO | 14 |
+|  |  | POST /tenants/{tenantId}/child-tenants | SECURITY_ADMIN | MEDIO | 16 |
 |  |  | GET /tenants/{tenantId}/laboratory-readiness | Cualquier sesión válida | BAJO | 11 |
 |  |  | GET /tenants/{tenantId}/memberships | Cualquier sesión válida | BAJO | 2 |
 |  |  | POST /tenants/{tenantId}/memberships | Cualquier sesión válida | ALTO | 2 |
@@ -56,64 +56,65 @@ _Fuente: `src/modules/directory/README.md:3`_
 flowchart LR
   a2(["SUPERADMIN · SECURITY_ADMIN"]):::actor
   a5(["SUPERADMIN"]):::actor
-  a17(["SECURITY_ADMIN"]):::actor
-  a21(["Cualquier sesión válida"]):::actor
+  a18(["SECURITY_ADMIN"]):::actor
+  a22(["Cualquier sesión válida"]):::actor
   t3[("directory.tenants")]:::tabla
   t6[("common.addresses")]:::tabla
   t7[("diagnostic_units.diagnostic_study_offerings")]:::tabla
   t8[("diagnostic_units.diagnostic_unit_sites")]:::tabla
   t9[("diagnostic_units.diagnostic_units")]:::tabla
   t10[("directory.branches")]:::tabla
-  t11[("directory.tenant_memberships")]:::tabla
+  t11[("directory.tenant_medical_facilities")]:::tabla
   t14[("community.public_profiles")]:::tabla
-  t18[("directory.tenant_affiliation_documents")]:::tabla
-  t23[("common.file_versions")]:::tabla
-  t24[("common.files")]:::tabla
-  t29[("insurance.insurance_carriers")]:::tabla
-  t31[("directory.tenant_legal_representatives")]:::tabla
-  t40[("pharmacy.pharmacies")]:::tabla
-  t45[("directory.branch_memberships")]:::tabla
-  t53[("common.contact_points")]:::tabla
-  t54[("common.identifiers")]:::tabla
-  t12[("+8 tablas más")]
-  t19[("+10 tablas más")]
+  t16[("directory.tenant_memberships")]:::tabla
+  t19[("directory.tenant_affiliation_documents")]:::tabla
+  t24[("common.file_versions")]:::tabla
+  t25[("common.files")]:::tabla
+  t30[("insurance.insurance_carriers")]:::tabla
+  t32[("directory.tenant_legal_representatives")]:::tabla
+  t41[("pharmacy.pharmacies")]:::tabla
+  t46[("directory.branch_memberships")]:::tabla
+  t54[("common.contact_points")]:::tabla
+  t55[("common.identifiers")]:::tabla
+  t12[("+10 tablas más")]
+  t20[("+10 tablas más")]
   subgraph s0["ctrl:AdminTenantsController · Operaciones de AdminTenantsController que el READ…"]
     o1["GET /admin/tenants"]:::op
     o4["POST /admin/tenants"]:::op
     o13["PUT /admin/tenants/{tenantId}/public-profile"]:::op
     o15["POST /admin/tenants/{tenantId}/suspend"]:::op
-    o16["POST /admin/tenants/{tenantId}/verification"]:::op
+    o17["POST /admin/tenants/{tenantId}/verification"]:::op
   end
-  t25[("+1 tablas más")]
+  t26[("+1 tablas más")]
   subgraph s1["ctrl:OrganizationLogoController · Operaciones de OrganizationLogoController que…"]
-    o20["GET /tenants/{tenantId}/logo"]:::op
-    o22["PUT /tenants/{tenantId}/logo"]:::op
-    o26["GET /tenants/{tenantId}/logo/content"]:::op
+    o21["GET /tenants/{tenantId}/logo"]:::op
+    o23["PUT /tenants/{tenantId}/logo"]:::op
+    o27["GET /tenants/{tenantId}/logo/content"]:::op
   end
-  t32[("+7 tablas más")]
-  t38[("+8 tablas más")]
-  t41[("+5 tablas más")]
-  t51[("+5 tablas más")]
-  t55[("+7 tablas más")]
+  t33[("+7 tablas más")]
+  t39[("+10 tablas más")]
+  t42[("+5 tablas más")]
+  t52[("+5 tablas más")]
+  t56[("+7 tablas más")]
   subgraph s2["ctrl:TenantsController · Operaciones de TenantsController que el README no asig…"]
-    o27["GET /tenants/{tenantId}"]:::op
-    o28["PATCH /tenants/{tenantId}"]:::op
-    o30["POST /tenants/{tenantId}/affiliation-documents"]:::op
-    o33["GET /tenants/{tenantId}/branches"]:::op
-    o34["POST /tenants/{tenantId}/branches"]:::op
-    o35["PATCH /tenants/{tenantId}/branches/{branchId}"]:::op
-    o36["GET /tenants/{tenantId}/child-tenants"]:::op
-    o37["POST /tenants/{tenantId}/child-tenants"]:::op
-    o39["GET /tenants/{tenantId}/laboratory-readiness"]:::op
-    o42["GET /tenants/{tenantId}/memberships"]:::op
-    o43["POST /tenants/{tenantId}/memberships"]:::op
-    o44["GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments"]:::op
-    o46["POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments"]:::op
-    o47["POST /tenants/{tenantId}/memberships/{membershipId}/offboard"]:::op
-    o48["PATCH /tenants/{tenantId}/memberships/{membershipId}/role"]:::op
-    o49["POST /tenants/{tenantId}/memberships/{membershipId}/transfer"]:::op
-    o50["GET /tenants/{tenantId}/pharmacy-readiness"]:::op
-    o52["GET /tenants/me"]:::op
+    o28["GET /tenants/{tenantId}"]:::op
+    o29["PATCH /tenants/{tenantId}"]:::op
+    o31["POST /tenants/{tenantId}/affiliation-documents"]:::op
+    o34["GET /tenants/{tenantId}/branches"]:::op
+    o35["POST /tenants/{tenantId}/branches"]:::op
+    o36["PATCH /tenants/{tenantId}/branches/{branchId}"]:::op
+    o37["GET /tenants/{tenantId}/child-tenants"]:::op
+    o38["POST /tenants/{tenantId}/child-tenants"]:::op
+    o40["GET /tenants/{tenantId}/laboratory-readiness"]:::op
+    o43["GET /tenants/{tenantId}/memberships"]:::op
+    o44["POST /tenants/{tenantId}/memberships"]:::op
+    o45["GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments"]:::op
+    o47["POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments"]:::op
+    o48["POST /tenants/{tenantId}/memberships/{membershipId}/offboard"]:::op
+    o49["PATCH /tenants/{tenantId}/memberships/{membershipId}/role"]:::op
+    o50["POST /tenants/{tenantId}/memberships/{membershipId}/transfer"]:::op
+    o51["GET /tenants/{tenantId}/pharmacy-readiness"]:::op
+    o53["GET /tenants/me"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -132,132 +133,132 @@ flowchart LR
   a5 --> o15
   o15 -->|"ACTUALIZA"| t10
   o15 -->|"LEE"| t10
-  o15 -->|"ACTUALIZA"| t11
-  o15 -->|"LEE"| t11
+  o15 -->|"ACTUALIZA"| t16
+  o15 -->|"LEE"| t16
   o15 -->|"ACTUALIZA"| t3
   o15 -->|"LEE"| t3
-  a17 --> o16
-  o16 -->|"LEE"| t6
-  o16 -->|"ACTUALIZA"| t14
-  o16 -->|"CREA"| t14
-  o16 -->|"LEE"| t14
-  o16 -->|"LEE"| t9
-  o16 -->|"ACTUALIZA"| t18
-  o16 -.-> t19
-  a21 --> o20
-  o20 -->|"LEE"| t14
-  o20 -->|"LEE"| t11
-  o20 -->|"LEE"| t3
-  a21 --> o22
-  o22 -->|"LEE"| t23
-  o22 -->|"LEE"| t24
-  o22 -->|"ACTUALIZA"| t14
-  o22 -->|"CREA"| t14
-  o22 -->|"LEE"| t14
-  o22 -->|"LEE"| t11
-  o22 -.-> t25
-  a21 --> o26
-  o26 -->|"LEE"| t23
-  o26 -->|"LEE"| t24
-  o26 -->|"LEE"| t14
-  o26 -->|"LEE"| t11
-  o26 -->|"LEE"| t3
-  a21 --> o27
-  o27 -->|"LEE"| t11
+  a18 --> o17
+  o17 -->|"LEE"| t6
+  o17 -->|"ACTUALIZA"| t14
+  o17 -->|"CREA"| t14
+  o17 -->|"LEE"| t14
+  o17 -->|"LEE"| t9
+  o17 -->|"ACTUALIZA"| t19
+  o17 -.-> t20
+  a22 --> o21
+  o21 -->|"LEE"| t14
+  o21 -->|"LEE"| t16
+  o21 -->|"LEE"| t3
+  a22 --> o23
+  o23 -->|"LEE"| t24
+  o23 -->|"LEE"| t25
+  o23 -->|"ACTUALIZA"| t14
+  o23 -->|"CREA"| t14
+  o23 -->|"LEE"| t14
+  o23 -->|"LEE"| t16
+  o23 -.-> t26
+  a22 --> o27
+  o27 -->|"LEE"| t24
+  o27 -->|"LEE"| t25
+  o27 -->|"LEE"| t14
+  o27 -->|"LEE"| t16
   o27 -->|"LEE"| t3
-  a21 --> o28
-  o28 -->|"LEE"| t11
-  o28 -->|"ACTUALIZA"| t3
+  a22 --> o28
+  o28 -->|"LEE"| t16
   o28 -->|"LEE"| t3
-  o28 -->|"ACTUALIZA"| t29
-  o28 -->|"LEE"| t29
-  a21 --> o30
-  o30 -->|"LEE"| t23
-  o30 -->|"ACTUALIZA"| t24
-  o30 -->|"LEE"| t24
-  o30 -->|"CREA"| t18
-  o30 -->|"LEE"| t18
-  o30 -->|"LEE"| t31
-  o30 -.-> t32
-  a21 --> o33
-  o33 -->|"LEE"| t10
-  o33 -->|"LEE"| t11
-  o33 -->|"LEE"| t3
-  a21 --> o34
-  o34 -->|"CREA"| t10
+  a22 --> o29
+  o29 -->|"LEE"| t16
+  o29 -->|"ACTUALIZA"| t3
+  o29 -->|"LEE"| t3
+  o29 -->|"ACTUALIZA"| t30
+  o29 -->|"LEE"| t30
+  a22 --> o31
+  o31 -->|"LEE"| t24
+  o31 -->|"ACTUALIZA"| t25
+  o31 -->|"LEE"| t25
+  o31 -->|"CREA"| t19
+  o31 -->|"LEE"| t19
+  o31 -->|"LEE"| t32
+  o31 -.-> t33
+  a22 --> o34
   o34 -->|"LEE"| t10
-  o34 -->|"LEE"| t11
+  o34 -->|"LEE"| t16
   o34 -->|"LEE"| t3
-  a21 --> o35
-  o35 -->|"ACTUALIZA"| t10
+  a22 --> o35
+  o35 -->|"CREA"| t10
   o35 -->|"LEE"| t10
-  o35 -->|"LEE"| t11
-  a21 --> o36
-  o36 -->|"LEE"| t11
-  o36 -->|"LEE"| t3
-  a17 --> o37
-  o37 -->|"CREA"| t6
-  o37 -->|"CREA"| t7
-  o37 -->|"CREA"| t8
-  o37 -->|"CREA"| t9
-  o37 -->|"CREA"| t10
-  o37 -->|"CREA"| t11
-  o37 -.-> t38
-  a21 --> o39
-  o39 -->|"LEE"| t6
-  o39 -->|"LEE"| t9
-  o39 -->|"LEE"| t18
-  o39 -->|"LEE"| t11
-  o39 -->|"LEE"| t3
-  o39 -->|"LEE"| t40
-  o39 -.-> t41
-  a21 --> o42
-  o42 -->|"LEE"| t11
-  o42 -->|"LEE"| t3
-  a21 --> o43
-  o43 -->|"CREA"| t11
-  o43 -->|"LEE"| t11
-  a21 --> o44
-  o44 -->|"LEE"| t45
-  o44 -->|"LEE"| t11
-  o44 -->|"LEE"| t3
-  a21 --> o46
-  o46 -->|"CREA"| t45
-  o46 -->|"LEE"| t45
-  o46 -->|"LEE"| t10
-  o46 -->|"ACTUALIZA"| t11
-  o46 -->|"LEE"| t11
-  a21 --> o47
-  o47 -->|"ACTUALIZA"| t45
-  o47 -->|"LEE"| t45
-  o47 -->|"ACTUALIZA"| t11
-  o47 -->|"LEE"| t11
-  a21 --> o48
-  o48 -->|"ACTUALIZA"| t11
-  o48 -->|"LEE"| t11
-  a21 --> o49
-  o49 -->|"ACTUALIZA"| t45
-  o49 -->|"CREA"| t45
-  o49 -->|"LEE"| t45
-  o49 -->|"LEE"| t10
-  o49 -->|"ACTUALIZA"| t11
-  o49 -->|"LEE"| t11
-  a21 --> o50
-  o50 -->|"LEE"| t6
-  o50 -->|"LEE"| t9
-  o50 -->|"LEE"| t18
-  o50 -->|"LEE"| t11
-  o50 -->|"LEE"| t3
-  o50 -->|"LEE"| t40
-  o50 -.-> t51
-  a21 --> o52
-  o52 -->|"LEE"| t6
-  o52 -->|"LEE"| t53
-  o52 -->|"LEE"| t54
-  o52 -->|"LEE"| t18
-  o52 -->|"LEE"| t31
-  o52 -->|"LEE"| t11
-  o52 -.-> t55
+  o35 -->|"LEE"| t16
+  o35 -->|"LEE"| t3
+  a22 --> o36
+  o36 -->|"ACTUALIZA"| t10
+  o36 -->|"LEE"| t10
+  o36 -->|"LEE"| t16
+  a22 --> o37
+  o37 -->|"LEE"| t16
+  o37 -->|"LEE"| t3
+  a18 --> o38
+  o38 -->|"CREA"| t6
+  o38 -->|"CREA"| t7
+  o38 -->|"CREA"| t8
+  o38 -->|"CREA"| t9
+  o38 -->|"CREA"| t10
+  o38 -->|"CREA"| t11
+  o38 -.-> t39
+  a22 --> o40
+  o40 -->|"LEE"| t6
+  o40 -->|"LEE"| t9
+  o40 -->|"LEE"| t19
+  o40 -->|"LEE"| t16
+  o40 -->|"LEE"| t3
+  o40 -->|"LEE"| t41
+  o40 -.-> t42
+  a22 --> o43
+  o43 -->|"LEE"| t16
+  o43 -->|"LEE"| t3
+  a22 --> o44
+  o44 -->|"CREA"| t16
+  o44 -->|"LEE"| t16
+  a22 --> o45
+  o45 -->|"LEE"| t46
+  o45 -->|"LEE"| t16
+  o45 -->|"LEE"| t3
+  a22 --> o47
+  o47 -->|"CREA"| t46
+  o47 -->|"LEE"| t46
+  o47 -->|"LEE"| t10
+  o47 -->|"ACTUALIZA"| t16
+  o47 -->|"LEE"| t16
+  a22 --> o48
+  o48 -->|"ACTUALIZA"| t46
+  o48 -->|"LEE"| t46
+  o48 -->|"ACTUALIZA"| t16
+  o48 -->|"LEE"| t16
+  a22 --> o49
+  o49 -->|"ACTUALIZA"| t16
+  o49 -->|"LEE"| t16
+  a22 --> o50
+  o50 -->|"ACTUALIZA"| t46
+  o50 -->|"CREA"| t46
+  o50 -->|"LEE"| t46
+  o50 -->|"LEE"| t10
+  o50 -->|"ACTUALIZA"| t16
+  o50 -->|"LEE"| t16
+  a22 --> o51
+  o51 -->|"LEE"| t6
+  o51 -->|"LEE"| t9
+  o51 -->|"LEE"| t19
+  o51 -->|"LEE"| t16
+  o51 -->|"LEE"| t3
+  o51 -->|"LEE"| t41
+  o51 -.-> t52
+  a22 --> o53
+  o53 -->|"LEE"| t6
+  o53 -->|"LEE"| t54
+  o53 -->|"LEE"| t55
+  o53 -->|"LEE"| t19
+  o53 -->|"LEE"| t32
+  o53 -->|"LEE"| t16
+  o53 -.-> t56
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -281,7 +282,7 @@ Aprovisionar un tenant raíz con su membership owner
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: El código de tenant ya existe |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un tenant de tipo PAYER exige el bloque `payer`; PreconditionFailedException: Un tenant de tipo BROKER exige el bloque `broker`; PreconditionFailedException: Un tenant de tipo {tenantType} exige país y jurisdicción; PreconditionFailedException: El tipo societario pertenece al derecho de {entry!.countryIso} y no coincide con el país declarado; PreconditionFailedException: El bloque `payer` sólo corresponde a un tenant de tipo PAYER; PreconditionFailedException: El bloque `broker` sólo corresponde a un tenant de tipo BROKER; PreconditionFailedException: El bloque `pharmacy` sólo corresponde a un tenant de tipo PHARMACY; PreconditionFailedException: El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER; PreconditionFailedException: El tipo de unidad diagnóstica declarado no es válido; PreconditionFailedException: Las sucursales sólo se declaran en una unidad de laboratorio clínico; PreconditionFailedException: Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas; PreconditionFailedException: Los conceptos declarados no existen en el catálogo de terminología |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un tenant de tipo PAYER exige el bloque `payer`; PreconditionFailedException: Un tenant de tipo BROKER exige el bloque `broker`; PreconditionFailedException: Un tenant de tipo {tenantType} exige país y jurisdicción; PreconditionFailedException: El tipo societario pertenece al derecho de {entry!.countryIso} y no coincide con el país declarado; PreconditionFailedException: El bloque `payer` sólo corresponde a un tenant de tipo PAYER; PreconditionFailedException: El bloque `broker` sólo corresponde a un tenant de tipo BROKER; PreconditionFailedException: El bloque `pharmacy` sólo corresponde a un tenant de tipo PHARMACY; PreconditionFailedException: El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER; PreconditionFailedException: El bloque `medicalFacility` sólo corresponde a un tenant de tipo {MEDICAL_FACILITY_TENANT_TYPES.join(', ')}; PreconditionFailedException: Un establecimiento admite hasta {MEDICAL_FACILITY_MAX_BRANCHES} sucursales; PreconditionFailedException: La latitud y la longitud de una sede van juntas o no van; PreconditionFailedException: El tipo de unidad diagnóstica declarado no es válido; PreconditionFailedException: Las sucursales sólo se declaran en una unidad de laboratorio clínico; PreconditionFailedException: Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas; PreconditionFailedException: Los conceptos declarados no existen en el catálogo de terminología |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -341,101 +342,99 @@ flowchart TD
   n24 -->|"no"| n26
   n27(["422 PRECONDITION_FAILED El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER"]):::error
   n26 -->|"sí"| n27
-  n28{"input.diagnosticUnit"}:::decision
+  n28{"input.medicalFacility"}:::decision
   n26 -->|"no"| n28
-  n29{"unitTypeConceptId !== undefined && !DIAGNOSTIC_UNIT_TYPE_CONCEPTS.has(unitTypeConceptId)"}:::decision
+  n29{"!MEDICAL_FACILITY_TENANT_TYPES.includes(tenantType)"}:::decision
   n28 -->|"sí"| n29
-  n30(["422 PRECONDITION_FAILED El tipo de unidad diagnóstica declarado no es válido"]):::error
+  n30(["422 PRECONDITION_FAILED El bloque `medicalFacility` sólo corresponde a un tenant de tipo {MEDICAL_FACILITY_TE…"]):::error
   n29 -->|"sí"| n30
-  n31{"(input.diagnosticUnit.branches?.length ?? 0) › 0 && resolvedUnitTypeConceptId !== DUNIT.UNIT_TYPE_LABORATORY"}:::decision
+  n31["Llama a TenantTypeProfileService.assertMedicalFacilityCoherence"]:::llamada
   n29 -->|"no"| n31
-  n32(["422 PRECONDITION_FAILED Las sucursales sólo se declaran en una unidad de laboratorio clínico"]):::error
-  n31 -->|"sí"| n32
-  n33{"invalidModalities.length › 0"}:::decision
-  n31 -->|"no"| n33
-  n34(["422 PRECONDITION_FAILED Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas"]):::error
-  n33 -->|"sí"| n34
-  n35["Llama a TenantTypeProfileService.assertConceptsExist"]:::llamada
-  n33 -->|"no"| n35
-  n28 -->|"no"| n35
-  n36["Llama a CatalogConceptsRepository.findByIds"]:::llamada
-  n35 --> n36
-  n37[("LEE terminology.catalog_concepts")]:::efecto
-  n36 --> n37
-  n38{"unknown.length › 0"}:::decision
-  n37 --> n38
-  n39(["422 PRECONDITION_FAILED Los conceptos declarados no existen en el catálogo de terminología"]):::error
-  n38 -->|"sí"| n39
-  n40["Llama a TenantsRepository.create"]:::llamada
-  n38 -->|"no"| n40
-  n41[("CREA directory.tenants")]:::efecto
-  n40 --> n41
-  n42["Llama a TenantTypeProfileService.materializeProfile"]:::llamada
-  n41 --> n42
-  n43{"input.tenantType === 'PAYER' && input.payer"}:::decision
-  n42 --> n43
-  n44["Llama a CatalogRepository.createCarrier"]:::llamada
-  n43 -->|"sí"| n44
-  n45[("CREA insurance.insurance_carriers")]:::efecto
+  n32{"branches.length › MEDICAL_FACILITY_MAX_BRANCHES"}:::decision
+  n31 --> n32
+  n33(["422 PRECONDITION_FAILED Un establecimiento admite hasta {MEDICAL_FACILITY_MAX_BRANCHES} sucursales"]):::error
+  n32 -->|"sí"| n33
+  n34{"halfPoint"}:::decision
+  n32 -->|"no"| n34
+  n35(["422 PRECONDITION_FAILED La latitud y la longitud de una sede van juntas o no van"]):::error
+  n34 -->|"sí"| n35
+  n36{"input.diagnosticUnit"}:::decision
+  n34 -->|"no"| n36
+  n28 -->|"no"| n36
+  n37{"unitTypeConceptId !== undefined && !DIAGNOSTIC_UNIT_TYPE_CONCEPTS.has(unitTypeConceptId)"}:::decision
+  n36 -->|"sí"| n37
+  n38(["422 PRECONDITION_FAILED El tipo de unidad diagnóstica declarado no es válido"]):::error
+  n37 -->|"sí"| n38
+  n39{"(input.diagnosticUnit.branches?.length ?? 0) › 0 && resolvedUnitTypeConceptId !== DUNIT.UNIT_TYPE_LABORATORY"}:::decision
+  n37 -->|"no"| n39
+  n40(["422 PRECONDITION_FAILED Las sucursales sólo se declaran en una unidad de laboratorio clínico"]):::error
+  n39 -->|"sí"| n40
+  n41{"invalidModalities.length › 0"}:::decision
+  n39 -->|"no"| n41
+  n42(["422 PRECONDITION_FAILED Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas"]):::error
+  n41 -->|"sí"| n42
+  n43["Llama a TenantTypeProfileService.assertConceptsExist"]:::llamada
+  n41 -->|"no"| n43
+  n36 -->|"no"| n43
+  n44["Llama a CatalogConceptsRepository.findByIds"]:::llamada
+  n43 --> n44
+  n45[("LEE terminology.catalog_concepts")]:::efecto
   n44 --> n45
-  n46["Llama a TenantTypeProfileService.materializePayerHeadquarters"]:::llamada
+  n46{"unknown.length › 0"}:::decision
   n45 --> n46
-  n47["Llama a AddressesRepository.create"]:::llamada
-  n46 --> n47
-  n48[("CREA common.addresses")]:::efecto
-  n47 --> n48
-  n49{"input.tenantType === 'BROKER' && input.broker"}:::decision
+  n47(["422 PRECONDITION_FAILED Los conceptos declarados no existen en el catálogo de terminología"]):::error
+  n46 -->|"sí"| n47
+  n48["Llama a TenantsRepository.create"]:::llamada
+  n46 -->|"no"| n48
+  n49[("CREA directory.tenants")]:::efecto
   n48 --> n49
-  n43 -->|"no"| n49
-  n50["Llama a CatalogRepository.createBroker"]:::llamada
-  n49 -->|"sí"| n50
-  n51[("CREA insurance.insurance_brokers")]:::efecto
+  n50["Llama a TenantTypeProfileService.materializeProfile"]:::llamada
+  n49 --> n50
+  n51{"input.tenantType === 'PAYER' && input.payer"}:::decision
   n50 --> n51
-  n52{"input.tenantType === 'DIAGNOSTIC_CENTER' && input.diagnosticUnit"}:::decision
-  n51 --> n52
-  n49 -->|"no"| n52
-  n53["Llama a DiagnosticUnitProvisioningService.provision"]:::llamada
-  n52 -->|"sí"| n53
-  n54["Llama a PracticesRepository.create"]:::llamada
+  n52["Llama a CatalogRepository.createCarrier"]:::llamada
+  n51 -->|"sí"| n52
+  n53[("CREA insurance.insurance_carriers")]:::efecto
+  n52 --> n53
+  n54["Llama a TenantTypeProfileService.materializePayerHeadquarters"]:::llamada
   n53 --> n54
-  n55[("CREA practice.practices")]:::efecto
+  n55["Llama a AddressesRepository.create"]:::llamada
   n54 --> n55
-  n56["Llama a DiagnosticUnitsRepository.create"]:::llamada
+  n56[("CREA common.addresses")]:::efecto
   n55 --> n56
-  n57[("CREA diagnostic_units.diagnostic_units")]:::efecto
+  n57{"input.tenantType === 'BROKER' && input.broker"}:::decision
   n56 --> n57
-  n58["Llama a DiagnosticUnitSitesRepository.create"]:::llamada
-  n57 --> n58
-  n59[("CREA diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n51 -->|"no"| n57
+  n58["Llama a CatalogRepository.createBroker"]:::llamada
+  n57 -->|"sí"| n58
+  n59[("CREA insurance.insurance_brokers")]:::efecto
   n58 --> n59
-  n60["Repite: por cada const branch de profile.branches ?? []"]:::bucle
+  n60{"input.tenantType === 'DIAGNOSTIC_CENTER' && input.diagnosticUnit"}:::decision
   n59 --> n60
-  n61["Llama a DiagnosticUnitSitesRepository.create"]:::llamada
-  n60 -->|"cada elemento"| n61
-  n62[("CREA diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n57 -->|"no"| n60
+  n61["Llama a DiagnosticUnitProvisioningService.provision"]:::llamada
+  n60 -->|"sí"| n61
+  n62["Llama a PracticesRepository.create"]:::llamada
   n61 --> n62
-  n63["Repite: por cada const conceptId de profile.modalityConceptIds ?? []"]:::bucle
+  n63[("CREA practice.practices")]:::efecto
   n62 --> n63
-  n60 -->|"al terminar"| n63
-  n64["Llama a DiagnosticStudyOfferingsRepository.create"]:::llamada
-  n63 -->|"cada elemento"| n64
-  n65[("CREA diagnostic_units.diagnostic_study_offerings")]:::efecto
+  n64["Llama a DiagnosticUnitsRepository.create"]:::llamada
+  n63 --> n64
+  n65[("CREA diagnostic_units.diagnostic_units")]:::efecto
   n64 --> n65
-  n66{"resolveDiagnosticUnitType(input.diagnosticUnit) === DUNIT.UNIT_TYPE_LABORATORY"}:::decision
+  n66["Llama a DiagnosticUnitSitesRepository.create"]:::llamada
   n65 --> n66
-  n63 -->|"al terminar"| n66
-  n67["Llama a TenantTypeProfileService.registerLaboratoryBranches"]:::llamada
-  n66 -->|"sí"| n67
-  n68["Llama a BranchesRepository.create"]:::llamada
+  n67[("CREA diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n66 --> n67
+  n68["Repite: por cada const branch de profile.branches ?? []"]:::bucle
   n67 --> n68
-  n69[("CREA directory.branches")]:::efecto
-  n68 --> n69
-  n70["Llama a TenantMembershipsRepository.create"]:::llamada
+  n69["Llama a DiagnosticUnitSitesRepository.create"]:::llamada
+  n68 -->|"cada elemento"| n69
+  n70[("CREA diagnostic_units.diagnostic_unit_sites")]:::efecto
   n69 --> n70
-  n66 -->|"no"| n70
-  n52 -->|"no"| n70
-  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n71["… el resto del árbol (3 nodos) está en el JSON del inventario"]:::corte
   n70 --> n71
+  n68 -->|"al terminar"| n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1304,7 +1303,7 @@ Crear una organización hija / sub-tenant
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Tenant padre no encontrado |
 | 409 | `CONFLICT` | ConflictException: El código de tenant ya existe |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El tenant padre no está activo; PreconditionFailedException: Un tenant de tipo PAYER exige el bloque `payer`; PreconditionFailedException: Un tenant de tipo BROKER exige el bloque `broker`; PreconditionFailedException: Un tenant de tipo {tenantType} exige país y jurisdicción; PreconditionFailedException: El tipo societario pertenece al derecho de {entry!.countryIso} y no coincide con el país declarado; PreconditionFailedException: El bloque `payer` sólo corresponde a un tenant de tipo PAYER; PreconditionFailedException: El bloque `broker` sólo corresponde a un tenant de tipo BROKER; PreconditionFailedException: El bloque `pharmacy` sólo corresponde a un tenant de tipo PHARMACY; PreconditionFailedException: El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER; PreconditionFailedException: El tipo de unidad diagnóstica declarado no es válido; PreconditionFailedException: Las sucursales sólo se declaran en una unidad de laboratorio clínico; PreconditionFailedException: Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas; PreconditionFailedException: Los conceptos declarados no existen en el catálogo de terminología |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El tenant padre no está activo; PreconditionFailedException: Un tenant de tipo PAYER exige el bloque `payer`; PreconditionFailedException: Un tenant de tipo BROKER exige el bloque `broker`; PreconditionFailedException: Un tenant de tipo {tenantType} exige país y jurisdicción; PreconditionFailedException: El tipo societario pertenece al derecho de {entry!.countryIso} y no coincide con el país declarado; PreconditionFailedException: El bloque `payer` sólo corresponde a un tenant de tipo PAYER; PreconditionFailedException: El bloque `broker` sólo corresponde a un tenant de tipo BROKER; PreconditionFailedException: El bloque `pharmacy` sólo corresponde a un tenant de tipo PHARMACY; PreconditionFailedException: El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER; PreconditionFailedException: El bloque `medicalFacility` sólo corresponde a un tenant de tipo {MEDICAL_FACILITY_TENANT_TYPES.join(', ')}; PreconditionFailedException: Un establecimiento admite hasta {MEDICAL_FACILITY_MAX_BRANCHES} sucursales; PreconditionFailedException: La latitud y la longitud de una sede van juntas o no van; PreconditionFailedException: El tipo de unidad diagnóstica declarado no es válido; PreconditionFailedException: Las sucursales sólo se declaran en una unidad de laboratorio clínico; PreconditionFailedException: Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas; PreconditionFailedException: Los conceptos declarados no existen en el catálogo de terminología |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1376,84 +1375,84 @@ flowchart TD
   n30 -->|"no"| n32
   n33(["422 PRECONDITION_FAILED El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER"]):::error
   n32 -->|"sí"| n33
-  n34{"input.diagnosticUnit"}:::decision
+  n34{"input.medicalFacility"}:::decision
   n32 -->|"no"| n34
-  n35{"unitTypeConceptId !== undefined && !DIAGNOSTIC_UNIT_TYPE_CONCEPTS.has(unitTypeConceptId)"}:::decision
+  n35{"!MEDICAL_FACILITY_TENANT_TYPES.includes(tenantType)"}:::decision
   n34 -->|"sí"| n35
-  n36(["422 PRECONDITION_FAILED El tipo de unidad diagnóstica declarado no es válido"]):::error
+  n36(["422 PRECONDITION_FAILED El bloque `medicalFacility` sólo corresponde a un tenant de tipo {MEDICAL_FACILITY_TE…"]):::error
   n35 -->|"sí"| n36
-  n37{"(input.diagnosticUnit.branches?.length ?? 0) › 0 && resolvedUnitTypeConceptId !== DUNIT.UNIT_TYPE_LABORATORY"}:::decision
+  n37["Llama a TenantTypeProfileService.assertMedicalFacilityCoherence"]:::llamada
   n35 -->|"no"| n37
-  n38(["422 PRECONDITION_FAILED Las sucursales sólo se declaran en una unidad de laboratorio clínico"]):::error
-  n37 -->|"sí"| n38
-  n39{"invalidModalities.length › 0"}:::decision
-  n37 -->|"no"| n39
-  n40(["422 PRECONDITION_FAILED Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas"]):::error
-  n39 -->|"sí"| n40
-  n41["Llama a TenantTypeProfileService.assertConceptsExist"]:::llamada
-  n39 -->|"no"| n41
-  n34 -->|"no"| n41
-  n42["Llama a CatalogConceptsRepository.findByIds"]:::llamada
-  n41 --> n42
-  n43[("LEE terminology.catalog_concepts")]:::efecto
-  n42 --> n43
-  n44{"unknown.length › 0"}:::decision
-  n43 --> n44
-  n45(["422 PRECONDITION_FAILED Los conceptos declarados no existen en el catálogo de terminología"]):::error
-  n44 -->|"sí"| n45
-  n46["Llama a TenantsRepository.create"]:::llamada
-  n44 -->|"no"| n46
-  n47[("CREA directory.tenants")]:::efecto
-  n46 --> n47
-  n48["Llama a TenantTypeProfileService.materializeProfile"]:::llamada
-  n47 --> n48
-  n49{"input.tenantType === 'PAYER' && input.payer"}:::decision
-  n48 --> n49
-  n50["Llama a CatalogRepository.createCarrier"]:::llamada
-  n49 -->|"sí"| n50
-  n51[("CREA insurance.insurance_carriers")]:::efecto
+  n38{"branches.length › MEDICAL_FACILITY_MAX_BRANCHES"}:::decision
+  n37 --> n38
+  n39(["422 PRECONDITION_FAILED Un establecimiento admite hasta {MEDICAL_FACILITY_MAX_BRANCHES} sucursales"]):::error
+  n38 -->|"sí"| n39
+  n40{"halfPoint"}:::decision
+  n38 -->|"no"| n40
+  n41(["422 PRECONDITION_FAILED La latitud y la longitud de una sede van juntas o no van"]):::error
+  n40 -->|"sí"| n41
+  n42{"input.diagnosticUnit"}:::decision
+  n40 -->|"no"| n42
+  n34 -->|"no"| n42
+  n43{"unitTypeConceptId !== undefined && !DIAGNOSTIC_UNIT_TYPE_CONCEPTS.has(unitTypeConceptId)"}:::decision
+  n42 -->|"sí"| n43
+  n44(["422 PRECONDITION_FAILED El tipo de unidad diagnóstica declarado no es válido"]):::error
+  n43 -->|"sí"| n44
+  n45{"(input.diagnosticUnit.branches?.length ?? 0) › 0 && resolvedUnitTypeConceptId !== DUNIT.UNIT_TYPE_LABORATORY"}:::decision
+  n43 -->|"no"| n45
+  n46(["422 PRECONDITION_FAILED Las sucursales sólo se declaran en una unidad de laboratorio clínico"]):::error
+  n45 -->|"sí"| n46
+  n47{"invalidModalities.length › 0"}:::decision
+  n45 -->|"no"| n47
+  n48(["422 PRECONDITION_FAILED Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas"]):::error
+  n47 -->|"sí"| n48
+  n49["Llama a TenantTypeProfileService.assertConceptsExist"]:::llamada
+  n47 -->|"no"| n49
+  n42 -->|"no"| n49
+  n50["Llama a CatalogConceptsRepository.findByIds"]:::llamada
+  n49 --> n50
+  n51[("LEE terminology.catalog_concepts")]:::efecto
   n50 --> n51
-  n52["Llama a TenantTypeProfileService.materializePayerHeadquarters"]:::llamada
+  n52{"unknown.length › 0"}:::decision
   n51 --> n52
-  n53["Llama a AddressesRepository.create"]:::llamada
-  n52 --> n53
-  n54[("CREA common.addresses")]:::efecto
-  n53 --> n54
-  n55{"input.tenantType === 'BROKER' && input.broker"}:::decision
+  n53(["422 PRECONDITION_FAILED Los conceptos declarados no existen en el catálogo de terminología"]):::error
+  n52 -->|"sí"| n53
+  n54["Llama a TenantsRepository.create"]:::llamada
+  n52 -->|"no"| n54
+  n55[("CREA directory.tenants")]:::efecto
   n54 --> n55
-  n49 -->|"no"| n55
-  n56["Llama a CatalogRepository.createBroker"]:::llamada
-  n55 -->|"sí"| n56
-  n57[("CREA insurance.insurance_brokers")]:::efecto
+  n56["Llama a TenantTypeProfileService.materializeProfile"]:::llamada
+  n55 --> n56
+  n57{"input.tenantType === 'PAYER' && input.payer"}:::decision
   n56 --> n57
-  n58{"input.tenantType === 'DIAGNOSTIC_CENTER' && input.diagnosticUnit"}:::decision
-  n57 --> n58
-  n55 -->|"no"| n58
-  n59["Llama a DiagnosticUnitProvisioningService.provision"]:::llamada
-  n58 -->|"sí"| n59
-  n60["Llama a PracticesRepository.create"]:::llamada
+  n58["Llama a CatalogRepository.createCarrier"]:::llamada
+  n57 -->|"sí"| n58
+  n59[("CREA insurance.insurance_carriers")]:::efecto
+  n58 --> n59
+  n60["Llama a TenantTypeProfileService.materializePayerHeadquarters"]:::llamada
   n59 --> n60
-  n61[("CREA practice.practices")]:::efecto
+  n61["Llama a AddressesRepository.create"]:::llamada
   n60 --> n61
-  n62["Llama a DiagnosticUnitsRepository.create"]:::llamada
+  n62[("CREA common.addresses")]:::efecto
   n61 --> n62
-  n63[("CREA diagnostic_units.diagnostic_units")]:::efecto
+  n63{"input.tenantType === 'BROKER' && input.broker"}:::decision
   n62 --> n63
-  n64["Llama a DiagnosticUnitSitesRepository.create"]:::llamada
-  n63 --> n64
-  n65[("CREA diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n57 -->|"no"| n63
+  n64["Llama a CatalogRepository.createBroker"]:::llamada
+  n63 -->|"sí"| n64
+  n65[("CREA insurance.insurance_brokers")]:::efecto
   n64 --> n65
-  n66["Repite: por cada const branch de profile.branches ?? []"]:::bucle
+  n66{"input.tenantType === 'DIAGNOSTIC_CENTER' && input.diagnosticUnit"}:::decision
   n65 --> n66
-  n67["Llama a DiagnosticUnitSitesRepository.create"]:::llamada
-  n66 -->|"cada elemento"| n67
-  n68[("CREA diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n63 -->|"no"| n66
+  n67["Llama a DiagnosticUnitProvisioningService.provision"]:::llamada
+  n66 -->|"sí"| n67
+  n68["Llama a PracticesRepository.create"]:::llamada
   n67 --> n68
-  n69["Repite: por cada const conceptId de profile.modalityConceptIds ?? []"]:::bucle
+  n69[("CREA practice.practices")]:::efecto
   n68 --> n69
-  n66 -->|"al terminar"| n69
-  n70["Llama a DiagnosticStudyOfferingsRepository.create"]:::llamada
-  n69 -->|"cada elemento"| n70
+  n70["Llama a DiagnosticUnitsRepository.create"]:::llamada
+  n69 --> n70
   n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
   n70 --> n71
   classDef acceso fill:#eef,stroke:#66a

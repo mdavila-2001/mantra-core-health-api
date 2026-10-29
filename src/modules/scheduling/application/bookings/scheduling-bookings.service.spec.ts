@@ -192,7 +192,13 @@ function build() {
     retract: mockFn().mockResolvedValue(0),
     offeringOfSlot: mockFn().mockResolvedValue(null),
   };
+  // F3: el cierre de la atención avisa a `surveys` (por su puerto). Por omisión
+  // no hay nada que hacer.
+  const bookingCompleted = {
+    onBookingCompleted: mockFn().mockResolvedValue(undefined),
+  };
   const service = createBookingsService({
+    bookingCompleted,
     em,
     bookingsRepo,
     catalogRepo,
@@ -219,6 +225,8 @@ function build() {
       searchBookings(...args),
     )) as typeof service.searchBookings;
   return {
+    em,
+    bookingCompleted,
     searchIn: (tenantId: string, ...args: Parameters<typeof searchBookings>) =>
       runWithTenant(tenantId, () => searchBookings(...args)),
     searchWithoutTenant: searchBookings,
@@ -3036,6 +3044,50 @@ describe('SchedulingBookingsService', () => {
       expect(clinicalAppointment.statusConceptId).toBe(
         CLIN.APPOINTMENT_FULFILLED,
       );
+    });
+
+    it('completar avisa a las encuestas DESPUÉS de confirmar la transacción y con el actor', async () => {
+      const d = build();
+      const booking = {
+        ...farFutureConfirmedBooking(),
+        statusConceptId: SCHED.BOOKING_IN_PROGRESS,
+      };
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(booking);
+      d.appointmentsRepo.findById.mockResolvedValue({
+        id: 'appt-1',
+        statusConceptId: CLIN.APPOINTMENT_BOOKED,
+      });
+      let committed = false;
+      d.em.transactional.mockImplementation(async (cb: any) => {
+        const result = await cb(d.tx);
+        committed = true;
+        return result;
+      });
+      const committedWhenNotified: boolean[] = [];
+      d.bookingCompleted.onBookingCompleted.mockImplementation(async () => {
+        committedWhenNotified.push(committed);
+      });
+
+      await d.service.complete('booking-1', actor);
+
+      expect(d.bookingCompleted.onBookingCompleted).toHaveBeenCalledTimes(1);
+      expect(d.bookingCompleted.onBookingCompleted).toHaveBeenCalledWith(
+        'booking-1',
+        actor,
+      );
+      expect(committedWhenNotified).toEqual([true]);
+    });
+
+    it('si la transición no es válida no avisa a las encuestas', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        farFutureConfirmedBooking(),
+      );
+
+      await expect(
+        d.service.complete('booking-1', actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.bookingCompleted.onBookingCompleted).not.toHaveBeenCalled();
     });
 
     it('no se completa una que nunca empezó', async () => {

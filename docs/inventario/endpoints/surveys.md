@@ -3,32 +3,33 @@
 # Endpoints del módulo `surveys`
 
 - **Bloque:** —
-- **Operaciones:** 17 (17 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 2 · MEDIO 9 · BAJO 6
-- **Tablas distintas que tocan:** 9
+- **Operaciones:** 18 (18 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 2 · MEDIO 9 · BAJO 7
+- **Tablas distintas que tocan:** 14
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/surveys.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | POST | `/surveys/assignments` | Asociar una encuesta a una consulta o servicio | MEDIO | 4 | PRACTITIONER, CLINICIAN |
-| 2 | POST | `/surveys/invitations` | Emitir los cuestionarios de una atención completada | MEDIO | 7 | PRACTITIONER, CLINICIAN |
-| 3 | GET | `/surveys/me/invitations` | Ver mis cuestionarios | BAJO | 3 | sesión (sin roles) |
-| 4 | GET | `/surveys/me/invitations/{id}` | Abrir un cuestionario para responderlo | BAJO | 4 | sesión (sin roles) |
-| 5 | POST | `/surveys/me/invitations/{id}/responses` | Responder el cuestionario | ALTO | 5 | sesión (sin roles) |
-| 6 | GET | `/surveys/templates` | Listar mis encuestas | BAJO | 3 | PRACTITIONER, CLINICIAN |
-| 7 | POST | `/surveys/templates` | Crear una encuesta para pacientes | MEDIO | 2 | PRACTITIONER, CLINICIAN |
-| 8 | GET | `/surveys/templates/{id}` | Ver una encuesta y su cuestionario | BAJO | 3 | PRACTITIONER, CLINICIAN |
-| 9 | PATCH | `/surveys/templates/{id}` | Corregir título, consigna y plazo del borrador | MEDIO | 4 | PRACTITIONER, CLINICIAN |
-| 10 | POST | `/surveys/templates/{id}/deactivate` | Desactivar la encuesta | MEDIO | 2 | PRACTITIONER, CLINICIAN |
-| 11 | POST | `/surveys/templates/{id}/questions` | Configurar una pregunta y su tipo de respuesta | MEDIO | 4 | PRACTITIONER, CLINICIAN |
-| 12 | DELETE | `/surveys/templates/{id}/questions/{questionId}` | Quitar una pregunta del borrador | ALTO | 4 | PRACTITIONER, CLINICIAN |
-| 13 | PATCH | `/surveys/templates/{id}/questions/{questionId}` | Corregir una pregunta del borrador | MEDIO | 4 | PRACTITIONER, CLINICIAN |
-| 14 | PUT | `/surveys/templates/{id}/questions/order` | Reordenar el cuestionario del borrador | BAJO | 3 | PRACTITIONER, CLINICIAN |
-| 15 | GET | `/surveys/templates/{id}/responses` | Revisar las respuestas de los pacientes | BAJO | 6 | PRACTITIONER, CLINICIAN |
-| 16 | POST | `/surveys/templates/{id}/versions` | Abrir una versión nueva del cuestionario | MEDIO | 3 | PRACTITIONER, CLINICIAN |
-| 17 | POST | `/surveys/templates/{id}/versions/{versionNumber}/publish` | Publicar la encuesta y configurar su vigencia | MEDIO | 5 | PRACTITIONER, CLINICIAN |
+| 1 | POST | `/surveys/assignments` | Asociar una encuesta a una consulta o servicio | MEDIO | 10 | PRACTITIONER, CLINICIAN |
+| 2 | GET | `/surveys/insights` | Resumen general de mis encuestas (agregado, sin pacientes) | BAJO | 11 | PRACTITIONER, CLINICIAN |
+| 3 | POST | `/surveys/invitations` | Emitir los cuestionarios de una atención completada | MEDIO | 16 | PRACTITIONER, CLINICIAN |
+| 4 | GET | `/surveys/me/invitations` | Ver mis cuestionarios | BAJO | 9 | sesión (sin roles) |
+| 5 | GET | `/surveys/me/invitations/{id}` | Abrir un cuestionario para responderlo | BAJO | 10 | sesión (sin roles) |
+| 6 | POST | `/surveys/me/invitations/{id}/responses` | Responder el cuestionario | ALTO | 5 | sesión (sin roles) |
+| 7 | GET | `/surveys/templates` | Listar mis encuestas | BAJO | 3 | PRACTITIONER, CLINICIAN |
+| 8 | POST | `/surveys/templates` | Crear una encuesta para pacientes | MEDIO | 2 | PRACTITIONER, CLINICIAN |
+| 9 | GET | `/surveys/templates/{id}` | Ver una encuesta y su cuestionario | BAJO | 5 | PRACTITIONER, CLINICIAN |
+| 10 | PATCH | `/surveys/templates/{id}` | Corregir título, consigna y plazo del borrador | MEDIO | 4 | PRACTITIONER, CLINICIAN |
+| 11 | POST | `/surveys/templates/{id}/deactivate` | Desactivar la encuesta | MEDIO | 2 | PRACTITIONER, CLINICIAN |
+| 12 | POST | `/surveys/templates/{id}/questions` | Configurar una pregunta y su tipo de respuesta | MEDIO | 4 | PRACTITIONER, CLINICIAN |
+| 13 | DELETE | `/surveys/templates/{id}/questions/{questionId}` | Quitar una pregunta del borrador | ALTO | 4 | PRACTITIONER, CLINICIAN |
+| 14 | PATCH | `/surveys/templates/{id}/questions/{questionId}` | Corregir una pregunta del borrador | MEDIO | 4 | PRACTITIONER, CLINICIAN |
+| 15 | PUT | `/surveys/templates/{id}/questions/order` | Reordenar el cuestionario del borrador | BAJO | 3 | PRACTITIONER, CLINICIAN |
+| 16 | GET | `/surveys/templates/{id}/responses` | Revisar las respuestas de los pacientes | BAJO | 6 | PRACTITIONER, CLINICIAN |
+| 17 | POST | `/surveys/templates/{id}/versions` | Abrir una versión nueva del cuestionario | MEDIO | 3 | PRACTITIONER, CLINICIAN |
+| 18 | POST | `/surveys/templates/{id}/versions/{versionNumber}/publish` | Publicar la encuesta y configurar su vigencia | MEDIO | 5 | PRACTITIONER, CLINICIAN |
 
 ---
 
@@ -45,11 +46,11 @@
 
 Asociar una encuesta a una consulta o servicio. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
 
 ### Cómo se atiende (sistema)
 
-`POST /surveys/assignments` la atiende `SurveysAssignmentsController.createAssignment` (src/modules/surveys/controllers/surveys-assignments.controller.ts:37). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `SurveysCreateAssignmentDto` (3 campos, 3 obligatorios). Delega en `SurveysAssignmentsService.createAssignment`. Crea filas en surveys.survey_assignments. Lee surveys.survey_assignments, surveys.survey_templates, surveys.survey_versions.
+`POST /surveys/assignments` la atiende `SurveysAssignmentsController.createAssignment` (src/modules/surveys/controllers/surveys-assignments.controller.ts:37). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `SurveysCreateAssignmentDto` (3 campos, 2 obligatorios). Delega en `SurveysAssignmentsService.createAssignment`. Crea filas en surveys.survey_assignments. Lee billing.service_catalog, practice.practices, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.practitioner_service_offerings, scheduling.schedulable_resources, surveys.survey_assignments, surveys.survey_templates y 1 más.
 
 ### Requerimientos
 
@@ -66,26 +67,31 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_assignments` | ESCRIBE | CREA | DIRECTA | SurveysAssignmentsController.createAssignment → SurveysAssignmentsService.createAssignment → AssignmentsRepository.create | `src/modules/surveys/repositories/assignments.repository.ts:119` |
-| `surveys.survey_assignments` | LEE | LEE | DIRECTA | SurveysAssignmentsController.createAssignment → SurveysAssignmentsService.createAssignment → AssignmentsRepository.findActiveDuplicate | `src/modules/surveys/repositories/assignments.repository.ts:63` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysAssignmentsController.createAssignment → SurveysAssignmentsService.createAssignment → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysAssignmentsController.createAssignment → SurveysAssignmentsService.createAssignment → TemplatesRepository.findVersionById | `src/modules/surveys/repositories/templates.repository.ts:197` |
+| `billing.service_catalog` | LEE | LEE | DIRECTA | SurveysAssignmentsController.createAssignment → SurveysAssignmentsService.createAssignment → SurveysAssignmentsService.assertTargetUsable → TargetsRepository.findServiceCatalog | `src/modules/surveys/repositories/targets.repository.ts:111` |
+| `practice.practices` | LEE | LEE | DIRECTA | SurveysAssignmentsController.createAssignment → SurveysAssignmentsService.createAssignment → SurveysAssignmentsService.assertTargetUsable → TargetsRepository.findTenantOfPractice | `src/modules/surveys/repositories/targets.repository.ts:141` |
+| `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SurveysAssignmentsController.createAssignment → SurveysAssignmentsService.createAssignment → SurveysAssignmentsService.assertTargetUsable → TargetsRepository.findBooking | `src/modules/surveys/repositories/targets.repository.ts:33` |
+| `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SurveysAssignmentsController.createAssignment → SurveysAssignmentsService.createAssignment → SurveysAssignmentsService.assertTargetUsable → TargetsRepository.findPractitionerOfBooking | `src/modules/surveys/repositories/targets.repository.ts:170` |
+| `scheduling.practitioner_service_offerings` | LEE | LEE | DIRECTA | SurveysAssignmentsController.createAssignment → SurveysAssignmentsService.createAssignment → SurveysAssignmentsService.assertTargetUsable → TargetsRepository.findOfferingOf | `src/modules/surveys/repositories/targets.repository.ts:94` |
+| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SurveysAssignmentsController.createAssignment → SurveysAssignmentsService.createAssignment → SurveysAssignmentsService.assertTargetUsable → TargetsRepository.findPractitionerOfBooking | `src/modules/surveys/repositories/targets.repository.ts:176` |
+| `surveys.survey_assignments` | ESCRIBE | CREA | DIRECTA | SurveysAssignmentsController.createAssignment → SurveysAssignmentsService.createAssignment → AssignmentsRepository.create | `src/modules/surveys/repositories/assignments.repository.ts:143` |
+| `surveys.survey_assignments` | LEE | LEE | DIRECTA | SurveysAssignmentsController.createAssignment → SurveysAssignmentsService.createAssignment → AssignmentsRepository.findActiveDuplicate | `src/modules/surveys/repositories/assignments.repository.ts:67` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysAssignmentsController.createAssignment → SurveysAssignmentsService.createAssignment → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:143` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysAssignmentsController.createAssignment → SurveysAssignmentsService.createAssignment → TemplatesRepository.findVersionById | `src/modules/surveys/repositories/templates.repository.ts:227` |
 
 ### Cuerpo — DTO `SurveysCreateAssignmentDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
 | `surveyVersionId` | `string` | Sí | formato uuid | — | Versión publicada que se reparte | sin fuente |
-| `targetType` | `string` | Sí | valores: APPOINTMENT, SERVICE, CARE_TYPE | — | Qué se evalúa: la reserva, el servicio o el tipo de atención | sin fuente |
-| `targetId` | `string` | Sí | formato uuid | — | Identificador de la cosa evaluada, según `targetType` | sin fuente |
+| `targetType` | `string` | Sí | valores: APPOINTMENT, SERVICE, CARE_TYPE | — | Qué se evalúa: la reserva, el servicio o el tipo de atención. `CARE_TYPE` sólo admite «todas mis consultas» | sin fuente |
+| `targetId` | `string` | No | formato uuid | — | Identificador de la cosa evaluada, según `targetType`: la reserva (`APPOINTMENT`) o el servicio del catálogo, `billing.service_catalog.id` (`SERVICE`). Con `CARE_TYPE` se puede omitir: es «todas mis consultas» (`a0038828-6e68-55c5-aa59-d4c747035db6`), el único tipo de atención admitido. | sin fuente |
 
 **Payload mínimo** (sólo los obligatorios):
 
 ```json
 {
   "surveyVersionId": "00000000-0000-4000-8000-000000000001",
-  "targetType": "APPOINTMENT",
-  "targetId": "00000000-0000-4000-8000-000000000001"
+  "targetType": "APPOINTMENT"
 }
 ```
 
@@ -105,7 +111,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:10` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:16` |
 
 ### Respuestas posibles
 
@@ -116,7 +122,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: Ya existe una asignación activa de esa versión a ese destino |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El modelo de agenda no lleva tipo de atención en la reserva: asigná la encuesta por servicio o por cita concreta |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El único tipo de atención que se puede asociar es «consulta»: asigne la encuesta por servicio, por cita concreta o a todas sus consultas; PreconditionFailedException: Usted no ofrece ese servicio: declárelo en sus servicios antes de asociarle una encuesta |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/surveys.md).
@@ -131,7 +137,127 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 2. POST /surveys/invitations
+## 2. GET /surveys/insights
+
+- **Origen:** CONTRATO
+- **Nombre:** Resumen general de mis encuestas (agregado, sin pacientes)
+- **Bloque:** —
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `SurveysInsightsController.getInsights` — `src/modules/surveys/controllers/surveys-insights.controller.ts:27`
+
+### Qué es y para qué sirve (negocio)
+
+Resumen general de mis encuestas (agregado, sin pacientes). Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
+
+### Cómo se atiende (sistema)
+
+`GET /surveys/insights` la atiende `SurveysInsightsController.getInsights` (src/modules/surveys/controllers/surveys-insights.controller.ts:27). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `SurveysInsightsService.getInsights`. Lee scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.practitioner_service_offerings, scheduling.schedulable_resources, surveys.survey_answers, surveys.survey_assignments, surveys.survey_invitations, surveys.survey_questions y 3 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/surveys/controllers/surveys-insights.controller.ts:27` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | SurveysInsightsController.getInsights → SurveysInsightsService.getInsights → InsightsRepository.countInvitationsByBucket → InsightsRepository.buildScope | `src/modules/surveys/repositories/insights.repository.ts:347` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | SurveysInsightsController.getInsights → SurveysInsightsService.getInsights → InsightsRepository.countInvitationsByBucket → InsightsRepository.buildScope | `src/modules/surveys/repositories/insights.repository.ts:367` |
+| `scheduling.practitioner_service_offerings` | LEE | LEE | POR_SQL | SurveysInsightsController.getInsights → SurveysInsightsService.getInsights → InsightsRepository.countInvitationsByBucket → InsightsRepository.buildScope | `src/modules/surveys/repositories/insights.repository.ts:347` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | SurveysInsightsController.getInsights → SurveysInsightsService.getInsights → InsightsRepository.countInvitationsByBucket → InsightsRepository.buildScope | `src/modules/surveys/repositories/insights.repository.ts:367` |
+| `surveys.survey_answers` | LEE | LEE | POR_SQL | SurveysInsightsController.getInsights → SurveysInsightsService.getInsights → InsightsRepository.countAnswersByQuestion | `src/modules/surveys/repositories/insights.repository.ts:183` |
+| `surveys.survey_assignments` | LEE | LEE | POR_SQL | SurveysInsightsController.getInsights → SurveysInsightsService.getInsights → InsightsRepository.countInvitationsByBucket → InsightsRepository.buildScope | `src/modules/surveys/repositories/insights.repository.ts:347` |
+| `surveys.survey_invitations` | LEE | LEE | POR_SQL | SurveysInsightsController.getInsights → SurveysInsightsService.getInsights → InsightsRepository.countInvitationsByBucket → InsightsRepository.buildScope | `src/modules/surveys/repositories/insights.repository.ts:367` |
+| `surveys.survey_questions` | LEE | LEE | POR_SQL | SurveysInsightsController.getInsights → SurveysInsightsService.getInsights → InsightsRepository.countAnswersByQuestion | `src/modules/surveys/repositories/insights.repository.ts:183` |
+| `surveys.survey_responses` | LEE | LEE | POR_SQL | SurveysInsightsController.getInsights → SurveysInsightsService.getInsights → InsightsRepository.countAnswersByQuestion | `src/modules/surveys/repositories/insights.repository.ts:183` |
+| `surveys.survey_templates` | LEE | LEE | POR_SQL | SurveysInsightsController.getInsights → SurveysInsightsService.getInsights → InsightsRepository.countAnswersByQuestion | `src/modules/surveys/repositories/insights.repository.ts:183` |
+| `surveys.survey_versions` | LEE | LEE | POR_SQL | SurveysInsightsController.getInsights → SurveysInsightsService.getInsights → InsightsRepository.countAnswersByQuestion | `src/modules/surveys/repositories/insights.repository.ts:183` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `from` | query | No | `string` | Primer día de un mes (YYYY-MM-01, UTC). Cualquier otro día, o una hora, se rechaza con 400. Se filtra por la fecha de emisión del cuestionario. Sin valor: 11 meses antes del mes de `to` (ventana de 12 meses). |
+| `to` | query | No | `string` | Último día de un mes (p. ej. 2026-10-31, UTC). Cualquier otro día, o una hora, se rechaza con 400. No puede ser anterior a `from` y el periodo no puede pasar de 12 meses. Sin valor: el último día del mes en curso. |
+| `serviceId` | query | No | `string` | Acota el resumen a los cuestionarios emitidos por atenciones de este servicio del catálogo. |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<SurveyInsightsDto>` · DTO `SurveyInsightsDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `totals` | `InsightsTotalsDto` | Sí | — | — | Emitidos, respondidos y tasa. Siempre presente. | `src/modules/surveys/dto/insights.dto.ts:245` |
+| `totals.issued` | `number` | Sí | — | — | Cuestionarios emitidos en el periodo | `src/modules/surveys/dto/insights.dto.ts:55` |
+| `totals.answered` | `number` | Sí | — | — | De los emitidos, cuántos fueron respondidos | `src/modules/surveys/dto/insights.dto.ts:59` |
+| `totals.responseRate` | `number` | Sí | admite null | — | Tasa de respuesta como fracción entre 0 y 1 (0.62 = 62 %). `null` si no se emitió ninguno. | `src/modules/surveys/dto/insights.dto.ts:68` |
+| `privacy` | `InsightsPrivacyDto` | Sí | — | — | Umbral de privacidad aplicado. Siempre presente. | `src/modules/surveys/dto/insights.dto.ts:249` |
+| `privacy.minCohort` | `number` | Sí | — | — | Respondidas necesarias para mostrar cálculos. | `src/modules/surveys/dto/insights.dto.ts:224` |
+| `privacy.suppressed` | `boolean` | Sí | — | — | `true` si el alcance filtrado tiene menos respondidas que `minCohort`: sólo vienen `totals` y `privacy`; el resto de los campos no se envía. | `src/modules/surveys/dto/insights.dto.ts:231` |
+| `nps` | `InsightsNpsDto` | No | — | — | NPS de la pregunta de recomendación. Ausente si `privacy.suppressed`. | `src/modules/surveys/dto/insights.dto.ts:253` |
+| `nps.value` | `number` | No | admite null | — | %(9-10) − %(0-6), de −100 a 100 con un decimal. `null` si nadie respondió la pregunta. | `src/modules/surveys/dto/insights.dto.ts:80` |
+| `nps.promoters` | `number` | No | — | — | Respuestas 9-10. | `src/modules/surveys/dto/insights.dto.ts:84` |
+| `nps.passives` | `number` | No | — | — | Respuestas 7-8. | `src/modules/surveys/dto/insights.dto.ts:88` |
+| `nps.detractors` | `number` | No | — | — | Respuestas 0-6. | `src/modules/surveys/dto/insights.dto.ts:92` |
+| `nps.n` | `number` | No | — | — | Respuestas que sostienen el cálculo. | `src/modules/surveys/dto/insights.dto.ts:96` |
+| `nps.suppressed` | `boolean` | No | — | — | true si hay menos de ${MIN_COHORT} respuestas: no se calcula | `src/modules/surveys/dto/insights.dto.ts:105` |
+| `byQuestion` | `array<InsightsQuestionDto>` | No | — | — | Una entrada por pregunta (o dimensión), con su `n`. Ausente si suprimido. | `src/modules/surveys/dto/insights.dto.ts:257` |
+| `byQuestion[].questionId` | `string` | No | formato uuid | — | Una pregunta representativa del grupo (la más reciente). No es estable entre versiones: sirve de clave de lista, no para consultar una pregunta. | `src/modules/surveys/dto/insights.dto.ts:137` |
+| `byQuestion[].text` | `string` | No | — | — | Enunciado de la pregunta representativa. | `src/modules/surveys/dto/insights.dto.ts:141` |
+| `byQuestion[].dimension` | `string` | No | admite null | — | Dimensión de la encuesta base, o `null` si es una pregunta propia. | `src/modules/surveys/dto/insights.dto.ts:145` |
+| `byQuestion[].answerType` | `string` | No | valores: TEXT, SCALE, BOOLEAN, SINGLE_CHOICE, MULTIPLE_CHOICE | — | Tipo de respuesta. | `src/modules/surveys/dto/insights.dto.ts:149` |
+| `byQuestion[].n` | `number` | No | — | — | Respuestas contadas. Siempre presente; 0 si nadie respondió. | `src/modules/surveys/dto/insights.dto.ts:153` |
+| `byQuestion[].suppressed` | `boolean` | No | — | — | true si n < ${MIN_COHORT}: sin promedio, distribución ni opciones | `src/modules/surveys/dto/insights.dto.ts:162` |
+| `byQuestion[].average` | `number` | No | — | — | Sólo SCALE no suprimida | `src/modules/surveys/dto/insights.dto.ts:166` |
+| `byQuestion[].distribution` | `array<InsightsScaleBucketDto>` | No | — | — | Distribución por valor, de `scaleMin` a `scaleMax` con ceros incluidos. Vacía en las preguntas que no son SCALE. | `src/modules/surveys/dto/insights.dto.ts:173` |
+| `byQuestion[].distribution[].value` | `number` | No | — | — | Valor de la escala. | `src/modules/surveys/dto/insights.dto.ts:112` |
+| `byQuestion[].distribution[].count` | `number` | No | — | — | Respuestas con ese valor. | `src/modules/surveys/dto/insights.dto.ts:116` |
+| `byQuestion[].optionCounts` | `array<InsightsOptionCountDto>` | No | — | — | Veces que se eligió cada opción. Sólo SINGLE_CHOICE, MULTIPLE_CHOICE y BOOLEAN (`Sí` / `No`). | `src/modules/surveys/dto/insights.dto.ts:180` |
+| `byQuestion[].optionCounts[].option` | `string` | No | — | — | Texto de la opción. | `src/modules/surveys/dto/insights.dto.ts:123` |
+| `byQuestion[].optionCounts[].count` | `number` | No | — | — | Veces elegida. | `src/modules/surveys/dto/insights.dto.ts:127` |
+| `trend` | `array<InsightsTrendPointDto>` | No | — | — | Tendencia por tramos de fecha de emisión. Ausente si suprimido. | `src/modules/surveys/dto/insights.dto.ts:261` |
+| `trend[].period` | `string` | No | — | — | Primer día del tramo (`YYYY-MM-DD`, UTC). Los tramos con menos de respondidos se funden con el siguiente: ningún punto muestra una respuesta suelta. | `src/modules/surveys/dto/insights.dto.ts:191` |
+| `trend[].answered` | `number` | No | — | — | Cuestionarios respondidos, de los emitidos en ese tramo. | `src/modules/surveys/dto/insights.dto.ts:195` |
+| `trend[].average` | `number` | No | — | — | Promedio de satisfacción del tramo, sólo si lo sostienen al menos respuestas. Sale de la pregunta de satisfacción global; si el resumen no tiene ninguna, del promedio de las preguntas de escala 1-5. | `src/modules/surveys/dto/insights.dto.ts:203` |
+| `trendGranularity` | `string` | No | valores: DAY, WEEK, MONTH | — | Granularidad de `trend`, según la amplitud del periodo. Ausente si suprimido. | `src/modules/surveys/dto/insights.dto.ts:265` |
+| `safetyAlerts` | `InsightsSafetyAlertsDto` | No | — | — | Alertas de seguridad. Ausente si suprimido. | `src/modules/surveys/dto/insights.dto.ts:269` |
+| `safetyAlerts.n` | `number` | No | — | — | Respuestas «Sí, y deseo que ALOVIDA me contacte…». | `src/modules/surveys/dto/insights.dto.ts:210` |
+| `comments` | `array<InsightsCommentDto>` | No | — | — | Comentarios abiertos (tope 20) en un orden estable que no es cronológico. Vacío si en el alcance hay menos de . Ausente si suprimido. | `src/modules/surveys/dto/insights.dto.ts:276` |
+| `comments[].text` | `string` | No | — | — | Texto del comentario. | `src/modules/surveys/dto/insights.dto.ts:217` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | BadRequestException: to debe ser el último día de un mes (por ejemplo 2026-10-31); BadRequestException: from debe ser el primer día de un mes (por ejemplo 2026-10-01); BadRequestException: El inicio del periodo debe ser anterior o igual a su fin; BadRequestException: El periodo no puede superar {MAX_RANGE_MONTHS} meses |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Solo un profesional puede ver el resumen de sus encuestas |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/surveys.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Surveys — Cuestionarios y encuestas de satisfacción — etapa `ctrl:SurveysInsightsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 3. POST /surveys/invitations
 
 - **Origen:** CONTRATO
 - **Nombre:** Emitir los cuestionarios de una atención completada
@@ -144,11 +270,11 @@ _Ninguna prueba existente menciona esta operación._
 
 Emitir los cuestionarios de una atención completada. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
 
 ### Cómo se atiende (sistema)
 
-`POST /surveys/invitations` la atiende `SurveysAssignmentsController.issueInvitations` (src/modules/surveys/controllers/surveys-assignments.controller.ts:55). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `IssueInvitationsDto` (1 campo, 1 obligatorio). Delega en `SurveysAssignmentsService.issueForBooking`. Crea filas en surveys.survey_invitations. Lee scheduling.appointment_bookings, scheduling.bookable_slots, surveys.survey_assignments, surveys.survey_invitations, surveys.survey_templates, surveys.survey_versions.
+`POST /surveys/invitations` la atiende `SurveysAssignmentsController.issueInvitations` (src/modules/surveys/controllers/surveys-assignments.controller.ts:55). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `IssueInvitationsDto` (1 campo, 1 obligatorio). Delega en `SurveysAssignmentsService.issueForBooking`. Crea filas en surveys.survey_assignments, surveys.survey_invitations, surveys.survey_questions, surveys.survey_templates, surveys.survey_versions. Actualiza surveys.survey_templates, surveys.survey_versions. Lee scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.practitioner_service_offerings, scheduling.schedulable_resources, surveys.survey_assignments, surveys.survey_invitations, surveys.survey_questions, surveys.survey_templates y 1 más.
 
 ### Requerimientos
 
@@ -165,13 +291,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking | `src/modules/surveys/services/surveys-assignments.service.ts:187` |
-| `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.resolveTargets | `src/modules/surveys/services/surveys-assignments.service.ts:311` |
-| `surveys.survey_assignments` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → AssignmentsRepository.listActiveByTargets | `src/modules/surveys/repositories/assignments.repository.ts:89` |
-| `surveys.survey_invitations` | ESCRIBE | CREA | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → InvitationsRepository.create | `src/modules/surveys/repositories/invitations.repository.ts:150` |
-| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → InvitationsRepository.listByBooking | `src/modules/surveys/repositories/invitations.repository.ts:121` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → TemplatesRepository.findVersionById | `src/modules/surveys/repositories/templates.repository.ts:197` |
+| `scheduling.appointment_bookings` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue | `src/modules/surveys/services/surveys-assignments.service.ts:319` |
+| `scheduling.bookable_slots` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → SurveysAssignmentsService.resolveTargets | `src/modules/surveys/services/surveys-assignments.service.ts:698` |
+| `scheduling.practitioner_service_offerings` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → SurveysAssignmentsService.resolveTargets → SurveysAssignmentsService.resolveServiceCatalogId → TargetsRepository.findOffering | `src/modules/surveys/repositories/targets.repository.ts:78` |
+| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → SurveysAssignmentsService.resolveTargets → TargetsRepository.findPractitionerOfBooking | `src/modules/surveys/repositories/targets.repository.ts:176` |
+| `surveys.survey_assignments` | ESCRIBE | CREA | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.materialize → AssignmentsRepository.create | `src/modules/surveys/repositories/assignments.repository.ts:143` |
+| `surveys.survey_assignments` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → AssignmentsRepository.listActiveByTargets | `src/modules/surveys/repositories/assignments.repository.ts:93` |
+| `surveys.survey_invitations` | ESCRIBE | CREA | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → InvitationsRepository.create | `src/modules/surveys/repositories/invitations.repository.ts:203` |
+| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → InvitationsRepository.listByBooking | `src/modules/surveys/repositories/invitations.repository.ts:156` |
+| `surveys.survey_questions` | ESCRIBE | CREA | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.materialize → TemplatesRepository.createQuestion | `src/modules/surveys/repositories/templates.repository.ts:365` |
+| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.read → TemplatesRepository.countQuestions | `src/modules/surveys/repositories/templates.repository.ts:324` |
+| `surveys.survey_templates` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.materialize | `src/modules/surveys/services/surveys-system-templates.service.ts:211` |
+| `surveys.survey_templates` | ESCRIBE | CREA | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.materialize → TemplatesRepository.createTemplate | `src/modules/surveys/repositories/templates.repository.ts:209` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → SurveysAssignmentsService.practitionerCandidates → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:143` |
+| `surveys.survey_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.materialize | `src/modules/surveys/services/surveys-system-templates.service.ts:222` |
+| `surveys.survey_versions` | ESCRIBE | CREA | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.materialize → TemplatesRepository.createVersion | `src/modules/surveys/repositories/templates.repository.ts:291` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → SurveysAssignmentsService.hasInvitationOfTemplate → TemplatesRepository.findVersionById | `src/modules/surveys/repositories/templates.repository.ts:227` |
 
 ### Cuerpo — DTO `IssueInvitationsDto` · `application/json`
 
@@ -201,8 +336,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `ids` | `array<string>` | Sí | formato uuid | — | Valor de ids mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:181` |
-| `alreadyIssued` | `number` | Sí | — | — | Invitaciones que ya existían para esa reserva y no se duplicaron | `src/modules/surveys/dto/responses.dto.ts:190` |
+| `ids` | `array<string>` | Sí | formato uuid | — | Valor de ids mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:235` |
+| `alreadyIssued` | `number` | Sí | — | — | Invitaciones que ya existían para esa reserva y no se duplicaron | `src/modules/surveys/dto/responses.dto.ts:244` |
 
 ### Respuestas posibles
 
@@ -212,7 +347,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Reserva no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se emiten cuestionarios sobre una atención completada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: La encuesta base {kind} del tenant no quedó materializada (plantilla {ids.templateId}) |
 
 El árbol de decisión completo está en [flujos](../flujos/surveys.md).
 
@@ -226,7 +364,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 3. GET /surveys/me/invitations
+## 4. GET /surveys/me/invitations
 
 - **Origen:** CONTRATO
 - **Nombre:** Ver mis cuestionarios
@@ -239,11 +377,11 @@ _Ninguna prueba existente menciona esta operación._
 
 Ver mis cuestionarios. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
 
 ### Cómo se atiende (sistema)
 
-`GET /surveys/me/invitations` la atiende `SurveysPatientController.listMyInvitations` (src/modules/surveys/controllers/surveys-patient.controller.ts:42). Exige sesión; el controlador no declara roles. Delega en `SurveysResponsesService.listMyInvitations`. Lee surveys.survey_invitations, surveys.survey_templates, surveys.survey_versions.
+`GET /surveys/me/invitations` la atiende `SurveysPatientController.listMyInvitations` (src/modules/surveys/controllers/surveys-patient.controller.ts:42). Exige sesión; el controlador no declara roles. Delega en `SurveysResponsesService.listMyInvitations`. Lee billing.service_catalog, profiles.persons, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.practitioner_service_offerings, scheduling.schedulable_resources, surveys.survey_invitations, surveys.survey_templates y 1 más.
 
 ### Requerimientos
 
@@ -258,9 +396,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → SurveysResponsesService.listInvitationsOf → InvitationsRepository.listByPatient | `src/modules/surveys/repositories/invitations.repository.ts:100` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → SurveysResponsesService.loadTemplateOfInvitation → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → SurveysResponsesService.loadTemplateOfInvitation → TemplatesRepository.findVersionById | `src/modules/surveys/repositories/templates.repository.ts:197` |
+| `billing.service_catalog` | LEE | LEE | POR_SQL | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `scheduling.practitioner_service_offerings` | LEE | LEE | POR_SQL | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → SurveysResponsesService.listInvitationsOf → InvitationsRepository.listByPatient | `src/modules/surveys/repositories/invitations.repository.ts:135` |
+| `surveys.survey_templates` | LEE | LEE | POR_SQL | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `surveys.survey_versions` | LEE | LEE | POR_SQL | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
 
 ### Cuerpo
 
@@ -270,14 +414,18 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:199` |
-| `title` | `string` | Sí | — | — | Título del cuestionario | `src/modules/surveys/dto/responses.dto.ts:205` |
-| `description` | `string` | No | — | — | Consigna | `src/modules/surveys/dto/responses.dto.ts:211` |
-| `status` | `string` | Sí | valores: PENDING, ANSWERED, EXPIRED | — | Estado de la invitación | `src/modules/surveys/dto/responses.dto.ts:220` |
-| `issuedAt` | `string` | Sí | formato date-time | — | Valor de issued at mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:226` |
-| `expiresAt` | `string` | Sí | formato date-time | — | Valor de expires at mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:232` |
-| `answeredAt` | `string` | No | formato date-time | — | Valor de answered at mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:238` |
-| `appointmentBookingId` | `string` | Sí | formato uuid | — | Atención que la originó | `src/modules/surveys/dto/responses.dto.ts:244` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:253` |
+| `title` | `string` | Sí | — | — | Título del cuestionario | `src/modules/surveys/dto/responses.dto.ts:259` |
+| `description` | `string` | No | — | — | Consigna | `src/modules/surveys/dto/responses.dto.ts:265` |
+| `status` | `string` | Sí | valores: PENDING, ANSWERED, EXPIRED | — | Estado de la invitación | `src/modules/surveys/dto/responses.dto.ts:274` |
+| `issuedAt` | `string` | Sí | formato date-time | — | Valor de issued at mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:280` |
+| `expiresAt` | `string` | Sí | formato date-time | — | Valor de expires at mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:286` |
+| `answeredAt` | `string` | No | formato date-time | — | Valor de answered at mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:292` |
+| `appointmentBookingId` | `string` | Sí | formato uuid | — | Atención que la originó | `src/modules/surveys/dto/responses.dto.ts:298` |
+| `kind` | `string` | No | valores: CONSULTATION, SERVICE | — | Tipo de atención: SERVICE si la reserva fue de un servicio ofrecido, CONSULTATION si fue una consulta | `src/modules/surveys/dto/responses.dto.ts:308` |
+| `serviceName` | `string` | No | admite null | — | Servicio reservado; null en una consulta | `src/modules/surveys/dto/responses.dto.ts:318` |
+| `practitionerDisplayName` | `string` | No | admite null | — | Profesional que atendió; null si no se pudo determinar | `src/modules/surveys/dto/responses.dto.ts:328` |
+| `attendedAt` | `string` | No | formato date-time; admite null | — | Fecha y hora de la atención de la reserva | `src/modules/surveys/dto/responses.dto.ts:339` |
 
 ### Respuestas posibles
 
@@ -300,7 +448,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 4. GET /surveys/me/invitations/{id}
+## 5. GET /surveys/me/invitations/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Abrir un cuestionario para responderlo
@@ -313,11 +461,11 @@ _Ninguna prueba existente menciona esta operación._
 
 Abrir un cuestionario para responderlo. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
 
 ### Cómo se atiende (sistema)
 
-`GET /surveys/me/invitations/{id}` la atiende `SurveysPatientController.getMyQuestionnaire` (src/modules/surveys/controllers/surveys-patient.controller.ts:51). Exige sesión; el controlador no declara roles. Delega en `SurveysResponsesService.getMyQuestionnaire`. Lee surveys.survey_invitations, surveys.survey_questions, surveys.survey_templates, surveys.survey_versions.
+`GET /surveys/me/invitations/{id}` la atiende `SurveysPatientController.getMyQuestionnaire` (src/modules/surveys/controllers/surveys-patient.controller.ts:51). Exige sesión; el controlador no declara roles. Delega en `SurveysResponsesService.getMyQuestionnaire`. Lee billing.service_catalog, profiles.persons, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.practitioner_service_offerings, scheduling.schedulable_resources, surveys.survey_invitations, surveys.survey_questions y 2 más.
 
 ### Requerimientos
 
@@ -333,10 +481,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → SurveysResponsesService.loadOwnInvitation → InvitationsRepository.findByIdForUpdate | `src/modules/surveys/repositories/invitations.repository.ts:76` |
-| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:261` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → SurveysResponsesService.loadTemplateOfInvitation → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → SurveysResponsesService.loadTemplateOfInvitation → TemplatesRepository.findVersionById | `src/modules/surveys/repositories/templates.repository.ts:197` |
+| `billing.service_catalog` | LEE | LEE | POR_SQL | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `scheduling.practitioner_service_offerings` | LEE | LEE | POR_SQL | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → SurveysResponsesService.loadOwnInvitation → InvitationsRepository.findByIdForUpdate | `src/modules/surveys/repositories/invitations.repository.ts:111` |
+| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → SurveysResponsesService.loadQuestionnaire → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:309` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → SurveysResponsesService.loadTemplateOfInvitation → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:143` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → SurveysResponsesService.loadTemplateOfInvitation → TemplatesRepository.findVersionById | `src/modules/surveys/repositories/templates.repository.ts:227` |
 
 ### Parámetros
 
@@ -352,15 +506,16 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `questions` | `array<QuestionDto>` | Sí | — | — | Valor de questions mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:253` |
-| `questions[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:49` |
-| `questions[].position` | `number` | Sí | — | — | Posición dentro del cuestionario | `src/modules/surveys/dto/responses.dto.ts:55` |
-| `questions[].questionText` | `string` | Sí | — | — | Enunciado | `src/modules/surveys/dto/responses.dto.ts:61` |
-| `questions[].answerType` | `string` | Sí | valores: TEXT, SCALE, BOOLEAN, SINGLE_CHOICE, MULTIPLE_CHOICE | — | Valor de answer type mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:67` |
-| `questions[].required` | `boolean` | Sí | — | — | Si es obligatoria | `src/modules/surveys/dto/responses.dto.ts:73` |
-| `questions[].options` | `array<string>` | No | — | — | Opciones de elección | `src/modules/surveys/dto/responses.dto.ts:79` |
-| `questions[].scaleMin` | `number` | No | — | — | Mínimo de la escala | `src/modules/surveys/dto/responses.dto.ts:85` |
-| `questions[].scaleMax` | `number` | No | — | — | Máximo de la escala | `src/modules/surveys/dto/responses.dto.ts:91` |
+| `questions` | `array<QuestionDto>` | Sí | — | — | Valor de questions mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:348` |
+| `questions[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:55` |
+| `questions[].position` | `number` | Sí | — | — | Posición dentro del cuestionario | `src/modules/surveys/dto/responses.dto.ts:61` |
+| `questions[].questionText` | `string` | Sí | — | — | Enunciado | `src/modules/surveys/dto/responses.dto.ts:67` |
+| `questions[].answerType` | `string` | Sí | valores: TEXT, SCALE, BOOLEAN, SINGLE_CHOICE, MULTIPLE_CHOICE | — | Valor de answer type mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:73` |
+| `questions[].required` | `boolean` | Sí | — | — | Si es obligatoria | `src/modules/surveys/dto/responses.dto.ts:79` |
+| `questions[].source` | `string` | No | valores: SYSTEM, PRACTITIONER | — | SYSTEM: pregunta base de ALOVIDA. PRACTITIONER: pregunta de la encuesta del profesional (siempre opcional). Sólo la informa la lectura del paciente. | `src/modules/surveys/dto/responses.dto.ts:90` |
+| `questions[].options` | `array<string>` | No | — | — | Opciones de elección | `src/modules/surveys/dto/responses.dto.ts:96` |
+| `questions[].scaleMin` | `number` | No | — | — | Mínimo de la escala | `src/modules/surveys/dto/responses.dto.ts:102` |
+| `questions[].scaleMax` | `number` | No | — | — | Máximo de la escala | `src/modules/surveys/dto/responses.dto.ts:108` |
 
 ### Respuestas posibles
 
@@ -385,7 +540,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 5. POST /surveys/me/invitations/{id}/responses
+## 6. POST /surveys/me/invitations/{id}/responses
 
 - **Origen:** CONTRATO
 - **Nombre:** Responder el cuestionario
@@ -398,7 +553,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Responder el cuestionario. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
 
 ### Cómo se atiende (sistema)
 
@@ -421,9 +576,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `surveys.survey_answers` | ESCRIBE | CREA | DIRECTA | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse → ResponsesRepository.createAnswer | `src/modules/surveys/repositories/responses.repository.ts:144` |
-| `surveys.survey_invitations` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse | `src/modules/surveys/services/surveys-responses.service.ts:158` |
-| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse → SurveysResponsesService.loadOwnInvitation → InvitationsRepository.findByIdForUpdate | `src/modules/surveys/repositories/invitations.repository.ts:76` |
-| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:261` |
+| `surveys.survey_invitations` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse | `src/modules/surveys/services/surveys-responses.service.ts:212` |
+| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse → SurveysResponsesService.loadOwnInvitation → InvitationsRepository.findByIdForUpdate | `src/modules/surveys/repositories/invitations.repository.ts:111` |
+| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse → SurveysResponsesService.loadQuestionnaire → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:309` |
 | `surveys.survey_responses` | ESCRIBE | CREA | DIRECTA | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse → ResponsesRepository.createResponse | `src/modules/surveys/repositories/responses.repository.ts:128` |
 
 ### Parámetros
@@ -479,7 +634,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:10` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:16` |
 
 ### Respuestas posibles
 
@@ -505,7 +660,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 6. GET /surveys/templates
+## 7. GET /surveys/templates
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar mis encuestas
@@ -518,7 +673,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Listar mis encuestas. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
 
 ### Cómo se atiende (sistema)
 
@@ -537,9 +692,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.listTemplates → SurveysTemplatesService.listTemplates → TemplatesRepository.countQuestions | `src/modules/surveys/repositories/templates.repository.ts:276` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.listTemplates → SurveysTemplatesService.listTemplates → TemplatesRepository.listTemplatesByOwner | `src/modules/surveys/repositories/templates.repository.ts:163` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.listTemplates → SurveysTemplatesService.listTemplates → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:211` |
+| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.listTemplates → SurveysTemplatesService.listTemplates → TemplatesRepository.countQuestions | `src/modules/surveys/repositories/templates.repository.ts:324` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.listTemplates → SurveysTemplatesService.listTemplates → TemplatesRepository.listTemplatesByOwner | `src/modules/surveys/repositories/templates.repository.ts:193` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.listTemplates → SurveysTemplatesService.listTemplates → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:241` |
 
 ### Cuerpo
 
@@ -549,13 +704,13 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:100` |
-| `title` | `string` | Sí | — | — | Título del instrumento | `src/modules/surveys/dto/responses.dto.ts:106` |
-| `description` | `string` | No | — | — | Consigna para el paciente | `src/modules/surveys/dto/responses.dto.ts:112` |
-| `status` | `string` | Sí | valores: DRAFT, ACTIVE, INACTIVE | — | Estado de la plantilla | `src/modules/surveys/dto/responses.dto.ts:121` |
-| `latestVersionNumber` | `number` | Sí | — | — | Número de la última versión | `src/modules/surveys/dto/responses.dto.ts:127` |
-| `published` | `boolean` | Sí | — | — | Si tiene al menos una versión publicada | `src/modules/surveys/dto/responses.dto.ts:133` |
-| `questionCount` | `number` | Sí | — | — | Preguntas de la última versión | `src/modules/surveys/dto/responses.dto.ts:139` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:117` |
+| `title` | `string` | Sí | — | — | Título del instrumento | `src/modules/surveys/dto/responses.dto.ts:123` |
+| `description` | `string` | No | — | — | Consigna para el paciente | `src/modules/surveys/dto/responses.dto.ts:129` |
+| `status` | `string` | Sí | valores: DRAFT, ACTIVE, INACTIVE | — | Estado de la plantilla | `src/modules/surveys/dto/responses.dto.ts:138` |
+| `latestVersionNumber` | `number` | Sí | — | — | Número de la última versión | `src/modules/surveys/dto/responses.dto.ts:144` |
+| `published` | `boolean` | Sí | — | — | Si tiene al menos una versión publicada | `src/modules/surveys/dto/responses.dto.ts:150` |
+| `questionCount` | `number` | Sí | — | — | Preguntas de la última versión | `src/modules/surveys/dto/responses.dto.ts:156` |
 
 ### Respuestas posibles
 
@@ -579,7 +734,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 7. POST /surveys/templates
+## 8. POST /surveys/templates
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear una encuesta para pacientes
@@ -592,7 +747,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Crear una encuesta para pacientes. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
 
 ### Cómo se atiende (sistema)
 
@@ -613,8 +768,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_templates` | ESCRIBE | CREA | DIRECTA | SurveysTemplatesController.createTemplate → SurveysTemplatesService.createTemplate → TemplatesRepository.createTemplate | `src/modules/surveys/repositories/templates.repository.ts:179` |
-| `surveys.survey_versions` | ESCRIBE | CREA | DIRECTA | SurveysTemplatesController.createTemplate → SurveysTemplatesService.createTemplate → TemplatesRepository.createVersion | `src/modules/surveys/repositories/templates.repository.ts:243` |
+| `surveys.survey_templates` | ESCRIBE | CREA | DIRECTA | SurveysTemplatesController.createTemplate → SurveysTemplatesService.createTemplate → TemplatesRepository.createTemplate | `src/modules/surveys/repositories/templates.repository.ts:209` |
+| `surveys.survey_versions` | ESCRIBE | CREA | DIRECTA | SurveysTemplatesController.createTemplate → SurveysTemplatesService.createTemplate → TemplatesRepository.createVersion | `src/modules/surveys/repositories/templates.repository.ts:291` |
 
 ### Cuerpo — DTO `CreateTemplateDto` · `application/json`
 
@@ -650,9 +805,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:28` |
-| `versionId` | `string` | Sí | formato uuid | — | Versión 1 (borrador) creada | `src/modules/surveys/dto/responses.dto.ts:34` |
-| `versionNumber` | `number` | Sí | — | — | Número de la versión creada | `src/modules/surveys/dto/responses.dto.ts:40` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:34` |
+| `versionId` | `string` | Sí | formato uuid | — | Versión 1 (borrador) creada | `src/modules/surveys/dto/responses.dto.ts:40` |
+| `versionNumber` | `number` | Sí | — | — | Número de la versión creada | `src/modules/surveys/dto/responses.dto.ts:46` |
 
 ### Respuestas posibles
 
@@ -677,7 +832,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 8. GET /surveys/templates/{id}
+## 9. GET /surveys/templates/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Ver una encuesta y su cuestionario
@@ -690,11 +845,11 @@ _Ninguna prueba existente menciona esta operación._
 
 Ver una encuesta y su cuestionario. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
 
 ### Cómo se atiende (sistema)
 
-`GET /surveys/templates/{id}` la atiende `SurveysTemplatesController.getTemplate` (src/modules/surveys/controllers/surveys-templates.controller.ts:87). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `SurveysTemplatesService.getTemplate`. Lee surveys.survey_questions, surveys.survey_templates, surveys.survey_versions.
+`GET /surveys/templates/{id}` la atiende `SurveysTemplatesController.getTemplate` (src/modules/surveys/controllers/surveys-templates.controller.ts:87). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `SurveysTemplatesService.getTemplate`. Lee billing.service_catalog, surveys.survey_assignments, surveys.survey_questions, surveys.survey_templates, surveys.survey_versions.
 
 ### Requerimientos
 
@@ -710,9 +865,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.getTemplate → SurveysTemplatesService.getTemplate → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:261` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.getTemplate → SurveysTemplatesService.getTemplate → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.getTemplate → SurveysTemplatesService.getTemplate → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:211` |
+| `billing.service_catalog` | LEE | LEE | DIRECTA | SurveysTemplatesController.getTemplate → SurveysTemplatesService.getTemplate → SurveysTemplatesService.listAssignments → TargetsRepository.findServiceNames | `src/modules/surveys/repositories/targets.repository.ts:126` |
+| `surveys.survey_assignments` | LEE | LEE | DIRECTA | SurveysTemplatesController.getTemplate → SurveysTemplatesService.getTemplate → SurveysTemplatesService.listAssignments → AssignmentsRepository.listActiveByVersions | `src/modules/surveys/repositories/assignments.repository.ts:113` |
+| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.getTemplate → SurveysTemplatesService.getTemplate → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:309` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.getTemplate → SurveysTemplatesService.getTemplate → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:143` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.getTemplate → SurveysTemplatesService.getTemplate → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:241` |
 
 ### Parámetros
 
@@ -728,19 +885,26 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `latestVersionId` | `string` | Sí | formato uuid | — | Última versión | `src/modules/surveys/dto/responses.dto.ts:148` |
-| `responseWindowDays` | `number` | Sí | — | — | Días de plazo para responder | `src/modules/surveys/dto/responses.dto.ts:154` |
-| `effectiveFrom` | `string` | No | formato date-time | — | Valor de effective from mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:160` |
-| `effectiveTo` | `string` | No | formato date-time | — | Valor de effective to mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:166` |
-| `questions` | `array<QuestionDto>` | Sí | — | — | Valor de questions mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:172` |
-| `questions[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:49` |
-| `questions[].position` | `number` | Sí | — | — | Posición dentro del cuestionario | `src/modules/surveys/dto/responses.dto.ts:55` |
-| `questions[].questionText` | `string` | Sí | — | — | Enunciado | `src/modules/surveys/dto/responses.dto.ts:61` |
-| `questions[].answerType` | `string` | Sí | valores: TEXT, SCALE, BOOLEAN, SINGLE_CHOICE, MULTIPLE_CHOICE | — | Valor de answer type mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:67` |
-| `questions[].required` | `boolean` | Sí | — | — | Si es obligatoria | `src/modules/surveys/dto/responses.dto.ts:73` |
-| `questions[].options` | `array<string>` | No | — | — | Opciones de elección | `src/modules/surveys/dto/responses.dto.ts:79` |
-| `questions[].scaleMin` | `number` | No | — | — | Mínimo de la escala | `src/modules/surveys/dto/responses.dto.ts:85` |
-| `questions[].scaleMax` | `number` | No | — | — | Máximo de la escala | `src/modules/surveys/dto/responses.dto.ts:91` |
+| `latestVersionId` | `string` | Sí | formato uuid | — | Última versión | `src/modules/surveys/dto/responses.dto.ts:194` |
+| `responseWindowDays` | `number` | Sí | — | — | Días de plazo para responder | `src/modules/surveys/dto/responses.dto.ts:200` |
+| `effectiveFrom` | `string` | No | formato date-time | — | Valor de effective from mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:206` |
+| `effectiveTo` | `string` | No | formato date-time | — | Valor de effective to mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:212` |
+| `questions` | `array<QuestionDto>` | Sí | — | — | Valor de questions mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:218` |
+| `questions[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:55` |
+| `questions[].position` | `number` | Sí | — | — | Posición dentro del cuestionario | `src/modules/surveys/dto/responses.dto.ts:61` |
+| `questions[].questionText` | `string` | Sí | — | — | Enunciado | `src/modules/surveys/dto/responses.dto.ts:67` |
+| `questions[].answerType` | `string` | Sí | valores: TEXT, SCALE, BOOLEAN, SINGLE_CHOICE, MULTIPLE_CHOICE | — | Valor de answer type mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:73` |
+| `questions[].required` | `boolean` | Sí | — | — | Si es obligatoria | `src/modules/surveys/dto/responses.dto.ts:79` |
+| `questions[].source` | `string` | No | valores: SYSTEM, PRACTITIONER | — | SYSTEM: pregunta base de ALOVIDA. PRACTITIONER: pregunta de la encuesta del profesional (siempre opcional). Sólo la informa la lectura del paciente. | `src/modules/surveys/dto/responses.dto.ts:90` |
+| `questions[].options` | `array<string>` | No | — | — | Opciones de elección | `src/modules/surveys/dto/responses.dto.ts:96` |
+| `questions[].scaleMin` | `number` | No | — | — | Mínimo de la escala | `src/modules/surveys/dto/responses.dto.ts:102` |
+| `questions[].scaleMax` | `number` | No | — | — | Máximo de la escala | `src/modules/surveys/dto/responses.dto.ts:108` |
+| `assignments` | `array<TemplateAssignmentDto>` | No | — | — | Asociaciones activas de la encuesta, de cualquiera de sus versiones. Si una misma cosa está asociada a dos versiones se informa la más alta, que es la que se reparte. Sólo en plantillas del profesional. | `src/modules/surveys/dto/responses.dto.ts:226` |
+| `assignments[].id` | `string` | No | formato uuid | — | Identificador de la asignación. | `src/modules/surveys/dto/responses.dto.ts:163` |
+| `assignments[].targetType` | `string` | No | valores: APPOINTMENT, SERVICE, CARE_TYPE | — | Qué se evalúa. | `src/modules/surveys/dto/responses.dto.ts:167` |
+| `assignments[].targetId` | `string` | No | formato uuid | — | La reserva (`APPOINTMENT`), el servicio del catálogo, `billing.service_catalog.id` (`SERVICE`), o el tipo de atención «consulta» (`CARE_TYPE`). | `src/modules/surveys/dto/responses.dto.ts:174` |
+| `assignments[].targetName` | `string` | No | admite null | — | Nombre del servicio del catálogo cuando `targetType` es `SERVICE`; ausente en el resto. | `src/modules/surveys/dto/responses.dto.ts:181` |
+| `assignments[].active` | `boolean` | No | — | — | Siempre `true`: sólo se informan las activas. | `src/modules/surveys/dto/responses.dto.ts:185` |
 
 ### Respuestas posibles
 
@@ -766,7 +930,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 9. PATCH /surveys/templates/{id}
+## 10. PATCH /surveys/templates/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Corregir título, consigna y plazo del borrador
@@ -779,7 +943,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Corregir título, consigna y plazo del borrador. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
 
 ### Cómo se atiende (sistema)
 
@@ -801,10 +965,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_templates` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.updateTemplate → SurveysTemplatesService.updateTemplate | `src/modules/surveys/services/surveys-templates.service.ts:267` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.updateTemplate → SurveysTemplatesService.updateTemplate → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
-| `surveys.survey_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.updateTemplate → SurveysTemplatesService.updateTemplate | `src/modules/surveys/services/surveys-templates.service.ts:275` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.updateTemplate → SurveysTemplatesService.updateTemplate → SurveysTemplatesService.loadDraftVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:211` |
+| `surveys.survey_templates` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.updateTemplate → SurveysTemplatesService.updateTemplate | `src/modules/surveys/services/surveys-templates.service.ts:278` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.updateTemplate → SurveysTemplatesService.updateTemplate → SurveysTemplatesService.loadMutableTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:143` |
+| `surveys.survey_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.updateTemplate → SurveysTemplatesService.updateTemplate | `src/modules/surveys/services/surveys-templates.service.ts:286` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.updateTemplate → SurveysTemplatesService.updateTemplate → SurveysTemplatesService.loadDraftVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:241` |
 
 ### Parámetros
 
@@ -842,7 +1006,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/surveys/dto/responses.dto.ts:19` |
+| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/surveys/dto/responses.dto.ts:25` |
 
 ### Respuestas posibles
 
@@ -868,7 +1032,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 10. POST /surveys/templates/{id}/deactivate
+## 11. POST /surveys/templates/{id}/deactivate
 
 - **Origen:** CONTRATO
 - **Nombre:** Desactivar la encuesta
@@ -881,7 +1045,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Desactivar la encuesta. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
 
 ### Cómo se atiende (sistema)
 
@@ -901,8 +1065,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_templates` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.deactivateTemplate → SurveysTemplatesService.deactivateTemplate | `src/modules/surveys/services/surveys-templates.service.ts:503` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.deactivateTemplate → SurveysTemplatesService.deactivateTemplate → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
+| `surveys.survey_templates` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.deactivateTemplate → SurveysTemplatesService.deactivateTemplate | `src/modules/surveys/services/surveys-templates.service.ts:515` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.deactivateTemplate → SurveysTemplatesService.deactivateTemplate → SurveysTemplatesService.loadMutableTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:143` |
 
 ### Parámetros
 
@@ -918,7 +1082,7 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/surveys/dto/responses.dto.ts:19` |
+| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/surveys/dto/responses.dto.ts:25` |
 
 ### Respuestas posibles
 
@@ -945,7 +1109,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 11. POST /surveys/templates/{id}/questions
+## 12. POST /surveys/templates/{id}/questions
 
 - **Origen:** CONTRATO
 - **Nombre:** Configurar una pregunta y su tipo de respuesta
@@ -958,7 +1122,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Configurar una pregunta y su tipo de respuesta. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
 
 ### Cómo se atiende (sistema)
 
@@ -980,10 +1144,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_questions` | ESCRIBE | CREA | DIRECTA | SurveysTemplatesController.addQuestion → SurveysTemplatesService.addQuestion → TemplatesRepository.createQuestion | `src/modules/surveys/repositories/templates.repository.ts:317` |
-| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.addQuestion → SurveysTemplatesService.addQuestion → TemplatesRepository.countQuestions | `src/modules/surveys/repositories/templates.repository.ts:276` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.addQuestion → SurveysTemplatesService.addQuestion → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.addQuestion → SurveysTemplatesService.addQuestion → SurveysTemplatesService.loadDraftVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:211` |
+| `surveys.survey_questions` | ESCRIBE | CREA | DIRECTA | SurveysTemplatesController.addQuestion → SurveysTemplatesService.addQuestion → TemplatesRepository.createQuestion | `src/modules/surveys/repositories/templates.repository.ts:365` |
+| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.addQuestion → SurveysTemplatesService.addQuestion → TemplatesRepository.countQuestions | `src/modules/surveys/repositories/templates.repository.ts:324` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.addQuestion → SurveysTemplatesService.addQuestion → SurveysTemplatesService.loadMutableTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:143` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.addQuestion → SurveysTemplatesService.addQuestion → SurveysTemplatesService.loadDraftVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:241` |
 
 ### Parámetros
 
@@ -997,10 +1161,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|---|
 | `questionText` | `string` | Sí | longitud mínima 1; longitud máxima 500 | `@IsString()` `@MinLength(1)` `@MaxLength(500)` | Enunciado de la pregunta | `src/modules/surveys/dto/add-question.dto.ts:34` |
 | `answerType` | `string` | Sí | valores: TEXT, SCALE, BOOLEAN, SINGLE_CHOICE, MULTIPLE_CHOICE | `@IsIn(ANSWER_TYPE_CODES as readonly string[])` | Tipo de respuesta esperado | `src/modules/surveys/dto/add-question.dto.ts:44` |
-| `required` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Si responderla es obligatorio para poder enviar | `src/modules/surveys/dto/add-question.dto.ts:55` |
-| `options` | `array<string>` | No | longitud máxima 200; mínimo 2 elemento(s); máximo 20 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMinSize(2)` `@ArrayMaxSize(20)` `@IsString({ each: true })` `@MaxLength(200, { each: true })` | Opciones. Obligatorias en SINGLE_CHOICE / MULTIPLE_CHOICE, prohibidas en el resto. | `src/modules/surveys/dto/add-question.dto.ts:71` |
-| `scaleMin` | `number` | No | mínimo 0; máximo 100 | `@IsOptional()` `@IsInt()` `@Min(0)` `@Max(100)` | Mínimo de la escala. Solo para SCALE. | `src/modules/surveys/dto/add-question.dto.ts:84` |
-| `scaleMax` | `number` | No | mínimo 1; máximo 100 | `@IsOptional()` `@IsInt()` `@Min(1)` `@Max(100)` | Máximo de la escala. Solo para SCALE. | `src/modules/surveys/dto/add-question.dto.ts:97` |
+| `required` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Se ignora: las preguntas del profesional son siempre opcionales (`required` queda en false) | `src/modules/surveys/dto/add-question.dto.ts:58` |
+| `options` | `array<string>` | No | longitud máxima 200; mínimo 2 elemento(s); máximo 20 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMinSize(2)` `@ArrayMaxSize(20)` `@IsString({ each: true })` `@MaxLength(200, { each: true })` | Opciones. Obligatorias en SINGLE_CHOICE / MULTIPLE_CHOICE, prohibidas en el resto. | `src/modules/surveys/dto/add-question.dto.ts:74` |
+| `scaleMin` | `number` | No | mínimo 0; máximo 100 | `@IsOptional()` `@IsInt()` `@Min(0)` `@Max(100)` | Mínimo de la escala. Solo para SCALE. | `src/modules/surveys/dto/add-question.dto.ts:87` |
+| `scaleMax` | `number` | No | mínimo 1; máximo 100 | `@IsOptional()` `@IsInt()` `@Min(1)` `@Max(100)` | Máximo de la escala. Solo para SCALE. | `src/modules/surveys/dto/add-question.dto.ts:100` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1033,14 +1197,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:49` |
-| `position` | `number` | Sí | — | — | Posición dentro del cuestionario | `src/modules/surveys/dto/responses.dto.ts:55` |
-| `questionText` | `string` | Sí | — | — | Enunciado | `src/modules/surveys/dto/responses.dto.ts:61` |
-| `answerType` | `string` | Sí | valores: TEXT, SCALE, BOOLEAN, SINGLE_CHOICE, MULTIPLE_CHOICE | — | Valor de answer type mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:67` |
-| `required` | `boolean` | Sí | — | — | Si es obligatoria | `src/modules/surveys/dto/responses.dto.ts:73` |
-| `options` | `array<string>` | No | — | — | Opciones de elección | `src/modules/surveys/dto/responses.dto.ts:79` |
-| `scaleMin` | `number` | No | — | — | Mínimo de la escala | `src/modules/surveys/dto/responses.dto.ts:85` |
-| `scaleMax` | `number` | No | — | — | Máximo de la escala | `src/modules/surveys/dto/responses.dto.ts:91` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:55` |
+| `position` | `number` | Sí | — | — | Posición dentro del cuestionario | `src/modules/surveys/dto/responses.dto.ts:61` |
+| `questionText` | `string` | Sí | — | — | Enunciado | `src/modules/surveys/dto/responses.dto.ts:67` |
+| `answerType` | `string` | Sí | valores: TEXT, SCALE, BOOLEAN, SINGLE_CHOICE, MULTIPLE_CHOICE | — | Valor de answer type mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:73` |
+| `required` | `boolean` | Sí | — | — | Si es obligatoria | `src/modules/surveys/dto/responses.dto.ts:79` |
+| `source` | `string` | No | valores: SYSTEM, PRACTITIONER | — | SYSTEM: pregunta base de ALOVIDA. PRACTITIONER: pregunta de la encuesta del profesional (siempre opcional). Sólo la informa la lectura del paciente. | `src/modules/surveys/dto/responses.dto.ts:90` |
+| `options` | `array<string>` | No | — | — | Opciones de elección | `src/modules/surveys/dto/responses.dto.ts:96` |
+| `scaleMin` | `number` | No | — | — | Mínimo de la escala | `src/modules/surveys/dto/responses.dto.ts:102` |
+| `scaleMax` | `number` | No | — | — | Máximo de la escala | `src/modules/surveys/dto/responses.dto.ts:108` |
 
 ### Respuestas posibles
 
@@ -1066,7 +1231,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 12. DELETE /surveys/templates/{id}/questions/{questionId}
+## 13. DELETE /surveys/templates/{id}/questions/{questionId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Quitar una pregunta del borrador
@@ -1079,7 +1244,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Quitar una pregunta del borrador. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
 
 ### Cómo se atiende (sistema)
 
@@ -1099,10 +1264,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_questions` | BORRA | BORRA | POR_TIPO | SurveysTemplatesController.deleteQuestion → SurveysTemplatesService.deleteQuestion → TemplatesRepository.removeQuestion | `src/modules/surveys/repositories/templates.repository.ts:305` |
-| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.deleteQuestion → SurveysTemplatesService.deleteQuestion → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:261` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.deleteQuestion → SurveysTemplatesService.deleteQuestion → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.deleteQuestion → SurveysTemplatesService.deleteQuestion → SurveysTemplatesService.loadDraftVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:211` |
+| `surveys.survey_questions` | BORRA | BORRA | POR_TIPO | SurveysTemplatesController.deleteQuestion → SurveysTemplatesService.deleteQuestion → TemplatesRepository.removeQuestion | `src/modules/surveys/repositories/templates.repository.ts:353` |
+| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.deleteQuestion → SurveysTemplatesService.deleteQuestion → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:309` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.deleteQuestion → SurveysTemplatesService.deleteQuestion → SurveysTemplatesService.loadMutableTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:143` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.deleteQuestion → SurveysTemplatesService.deleteQuestion → SurveysTemplatesService.loadDraftVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:241` |
 
 ### Parámetros
 
@@ -1119,7 +1284,7 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/surveys/dto/responses.dto.ts:19` |
+| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/surveys/dto/responses.dto.ts:25` |
 
 ### Respuestas posibles
 
@@ -1145,7 +1310,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 13. PATCH /surveys/templates/{id}/questions/{questionId}
+## 14. PATCH /surveys/templates/{id}/questions/{questionId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Corregir una pregunta del borrador
@@ -1158,7 +1323,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Corregir una pregunta del borrador. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
 
 ### Cómo se atiende (sistema)
 
@@ -1180,10 +1345,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_questions` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.updateQuestion → SurveysTemplatesService.updateQuestion | `src/modules/surveys/services/surveys-templates.service.ts:329` |
-| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.updateQuestion → SurveysTemplatesService.updateQuestion → SurveysTemplatesService.loadDraftQuestion → TemplatesRepository.findQuestionById | `src/modules/surveys/repositories/templates.repository.ts:291` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.updateQuestion → SurveysTemplatesService.updateQuestion → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.updateQuestion → SurveysTemplatesService.updateQuestion → SurveysTemplatesService.loadDraftVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:211` |
+| `surveys.survey_questions` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.updateQuestion → SurveysTemplatesService.updateQuestion | `src/modules/surveys/services/surveys-templates.service.ts:340` |
+| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.updateQuestion → SurveysTemplatesService.updateQuestion → SurveysTemplatesService.loadDraftQuestion → TemplatesRepository.findQuestionById | `src/modules/surveys/repositories/templates.repository.ts:339` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.updateQuestion → SurveysTemplatesService.updateQuestion → SurveysTemplatesService.loadMutableTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:143` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.updateQuestion → SurveysTemplatesService.updateQuestion → SurveysTemplatesService.loadDraftVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:241` |
 
 ### Parámetros
 
@@ -1198,10 +1363,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|---|
 | `questionText` | `string` | No | longitud mínima 1; longitud máxima 500 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(500)` | Enunciado de la pregunta | `src/modules/surveys/dto/update-question.dto.ts:38` |
 | `answerType` | `string` | No | valores: TEXT, SCALE, BOOLEAN, SINGLE_CHOICE, MULTIPLE_CHOICE | `@IsOptional()` `@IsIn(ANSWER_TYPE_CODES as readonly string[])` | Tipo de respuesta esperado | `src/modules/surveys/dto/update-question.dto.ts:49` |
-| `required` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Si responderla es obligatorio | `src/modules/surveys/dto/update-question.dto.ts:57` |
-| `options` | `array<string>` | No | longitud máxima 200; mínimo 2 elemento(s); máximo 20 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMinSize(2)` `@ArrayMaxSize(20)` `@IsString({ each: true })` `@MaxLength(200, { each: true })` | Opciones, enteras. Reemplazan a las anteriores. | `src/modules/surveys/dto/update-question.dto.ts:72` |
-| `scaleMin` | `number` | No | mínimo 0; máximo 100 | `@IsOptional()` `@IsInt()` `@Min(0)` `@Max(100)` | Mínimo de la escala. Solo para SCALE. | `src/modules/surveys/dto/update-question.dto.ts:82` |
-| `scaleMax` | `number` | No | mínimo 1; máximo 100 | `@IsOptional()` `@IsInt()` `@Min(1)` `@Max(100)` | Máximo de la escala. Solo para SCALE. | `src/modules/surveys/dto/update-question.dto.ts:92` |
+| `required` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Se ignora: las preguntas del profesional son siempre opcionales (`required` queda en false) | `src/modules/surveys/dto/update-question.dto.ts:61` |
+| `options` | `array<string>` | No | longitud máxima 200; mínimo 2 elemento(s); máximo 20 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMinSize(2)` `@ArrayMaxSize(20)` `@IsString({ each: true })` `@MaxLength(200, { each: true })` | Opciones, enteras. Reemplazan a las anteriores. | `src/modules/surveys/dto/update-question.dto.ts:76` |
+| `scaleMin` | `number` | No | mínimo 0; máximo 100 | `@IsOptional()` `@IsInt()` `@Min(0)` `@Max(100)` | Mínimo de la escala. Solo para SCALE. | `src/modules/surveys/dto/update-question.dto.ts:86` |
+| `scaleMax` | `number` | No | mínimo 1; máximo 100 | `@IsOptional()` `@IsInt()` `@Min(1)` `@Max(100)` | Máximo de la escala. Solo para SCALE. | `src/modules/surveys/dto/update-question.dto.ts:96` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1231,7 +1396,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/surveys/dto/responses.dto.ts:19` |
+| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/surveys/dto/responses.dto.ts:25` |
 
 ### Respuestas posibles
 
@@ -1257,7 +1422,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 14. PUT /surveys/templates/{id}/questions/order
+## 15. PUT /surveys/templates/{id}/questions/order
 
 - **Origen:** CONTRATO
 - **Nombre:** Reordenar el cuestionario del borrador
@@ -1270,7 +1435,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Reordenar el cuestionario del borrador. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
 
 ### Cómo se atiende (sistema)
 
@@ -1292,9 +1457,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.reorderQuestions → SurveysTemplatesService.reorderQuestions → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:261` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.reorderQuestions → SurveysTemplatesService.reorderQuestions → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.reorderQuestions → SurveysTemplatesService.reorderQuestions → SurveysTemplatesService.loadDraftVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:211` |
+| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.reorderQuestions → SurveysTemplatesService.reorderQuestions → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:309` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.reorderQuestions → SurveysTemplatesService.reorderQuestions → SurveysTemplatesService.loadMutableTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:143` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.reorderQuestions → SurveysTemplatesService.reorderQuestions → SurveysTemplatesService.loadDraftVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:241` |
 
 ### Parámetros
 
@@ -1334,7 +1499,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/surveys/dto/responses.dto.ts:19` |
+| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/surveys/dto/responses.dto.ts:25` |
 
 ### Respuestas posibles
 
@@ -1360,7 +1525,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 15. GET /surveys/templates/{id}/responses
+## 16. GET /surveys/templates/{id}/responses
 
 - **Origen:** CONTRATO
 - **Nombre:** Revisar las respuestas de los pacientes
@@ -1373,7 +1538,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Revisar las respuestas de los pacientes. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
 
 ### Cómo se atiende (sistema)
 
@@ -1394,11 +1559,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `surveys.survey_answers` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → ResponsesRepository.listAnswers | `src/modules/surveys/repositories/responses.repository.ts:114` |
-| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → InvitationsRepository.listByVersions | `src/modules/surveys/repositories/invitations.repository.ts:136` |
-| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:261` |
+| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → InvitationsRepository.listByVersions | `src/modules/surveys/repositories/invitations.repository.ts:171` |
+| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:309` |
 | `surveys.survey_responses` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → ResponsesRepository.listByInvitations | `src/modules/surveys/repositories/responses.repository.ts:95` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → SurveysResponsesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:211` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → SurveysResponsesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:143` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:241` |
 
 ### Parámetros
 
@@ -1414,18 +1579,17 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:315` |
-| `invitationId` | `string` | Sí | formato uuid | — | Identificador asociado a invitation. | `src/modules/surveys/dto/responses.dto.ts:321` |
-| `appointmentBookingId` | `string` | Sí | formato uuid | — | Identificador asociado a appointment booking. | `src/modules/surveys/dto/responses.dto.ts:327` |
-| `submittedAt` | `string` | Sí | formato date-time | — | Valor de submitted at mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:333` |
-| `answers` | `array<AnswerDto>` | Sí | — | — | Valor de answers mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:339` |
-| `answers[].questionId` | `string` | Sí | formato uuid | — | Identificador asociado a question. | `src/modules/surveys/dto/responses.dto.ts:262` |
-| `answers[].questionText` | `string` | Sí | — | — | Enunciado, para no tener que reunirlo aparte | `src/modules/surveys/dto/responses.dto.ts:268` |
-| `answers[].answerType` | `string` | Sí | valores: TEXT, SCALE, BOOLEAN, SINGLE_CHOICE, MULTIPLE_CHOICE | — | Valor de answer type mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:274` |
-| `answers[].valueText` | `string` | No | — | — | Valor de value text mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:280` |
-| `answers[].valueNumber` | `number` | No | — | — | Valor de value number mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:286` |
-| `answers[].valueBoolean` | `boolean` | No | — | — | Valor de value boolean mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:292` |
-| `answers[].valueChoices` | `array<string>` | No | — | — | Valor de value choices mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:298` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:414` |
+| `invitationId` | `string` | Sí | formato uuid | — | Identificador asociado a invitation. | `src/modules/surveys/dto/responses.dto.ts:420` |
+| `submittedAt` | `string` | Sí | formato date-time | — | Día en que se envió la respuesta, redondeado a la medianoche UTC (sin hora, para preservar el anonimato) | `src/modules/surveys/dto/responses.dto.ts:430` |
+| `answers` | `array<AnswerDto>` | Sí | — | — | Valor de answers mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:436` |
+| `answers[].questionId` | `string` | Sí | formato uuid | — | Identificador asociado a question. | `src/modules/surveys/dto/responses.dto.ts:357` |
+| `answers[].questionText` | `string` | Sí | — | — | Enunciado, para no tener que reunirlo aparte | `src/modules/surveys/dto/responses.dto.ts:363` |
+| `answers[].answerType` | `string` | Sí | valores: TEXT, SCALE, BOOLEAN, SINGLE_CHOICE, MULTIPLE_CHOICE | — | Valor de answer type mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:369` |
+| `answers[].valueText` | `string` | No | — | — | Valor de value text mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:375` |
+| `answers[].valueNumber` | `number` | No | — | — | Valor de value number mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:381` |
+| `answers[].valueBoolean` | `boolean` | No | — | — | Valor de value boolean mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:387` |
+| `answers[].valueChoices` | `array<string>` | No | — | — | Valor de value choices mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:393` |
 
 ### Respuestas posibles
 
@@ -1450,7 +1614,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 16. POST /surveys/templates/{id}/versions
+## 17. POST /surveys/templates/{id}/versions
 
 - **Origen:** CONTRATO
 - **Nombre:** Abrir una versión nueva del cuestionario
@@ -1463,7 +1627,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Abrir una versión nueva del cuestionario. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
 
 ### Cómo se atiende (sistema)
 
@@ -1483,9 +1647,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.createNextVersion → SurveysTemplatesService.createNextVersion → TemplatesRepository.lockTemplate | `src/modules/surveys/repositories/templates.repository.ts:126` |
-| `surveys.survey_versions` | ESCRIBE | CREA | DIRECTA | SurveysTemplatesController.createNextVersion → SurveysTemplatesService.createNextVersion → TemplatesRepository.createVersion | `src/modules/surveys/repositories/templates.repository.ts:243` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.createNextVersion → SurveysTemplatesService.createNextVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:211` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.createNextVersion → SurveysTemplatesService.createNextVersion → TemplatesRepository.lockTemplate | `src/modules/surveys/repositories/templates.repository.ts:156` |
+| `surveys.survey_versions` | ESCRIBE | CREA | DIRECTA | SurveysTemplatesController.createNextVersion → SurveysTemplatesService.createNextVersion → TemplatesRepository.createVersion | `src/modules/surveys/repositories/templates.repository.ts:291` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.createNextVersion → SurveysTemplatesService.createNextVersion → TemplatesRepository.findLatestVersion | `src/modules/surveys/repositories/templates.repository.ts:241` |
 
 ### Parámetros
 
@@ -1501,9 +1665,9 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:28` |
-| `versionId` | `string` | Sí | formato uuid | — | Versión 1 (borrador) creada | `src/modules/surveys/dto/responses.dto.ts:34` |
-| `versionNumber` | `number` | Sí | — | — | Número de la versión creada | `src/modules/surveys/dto/responses.dto.ts:40` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:34` |
+| `versionId` | `string` | Sí | formato uuid | — | Versión 1 (borrador) creada | `src/modules/surveys/dto/responses.dto.ts:40` |
+| `versionNumber` | `number` | Sí | — | — | Número de la versión creada | `src/modules/surveys/dto/responses.dto.ts:46` |
 
 ### Respuestas posibles
 
@@ -1530,7 +1694,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 17. POST /surveys/templates/{id}/versions/{versionNumber}/publish
+## 18. POST /surveys/templates/{id}/versions/{versionNumber}/publish
 
 - **Origen:** CONTRATO
 - **Nombre:** Publicar la encuesta y configurar su vigencia
@@ -1543,7 +1707,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Publicar la encuesta y configurar su vigencia. Dentro del módulo (descripción del modelo, en inglés): «The practitioner asks the patient how the visit went.»
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:20`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_65_surveys.puml:18`)
 
 ### Cómo se atiende (sistema)
 
@@ -1565,11 +1729,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.publishVersion → SurveysTemplatesService.publishVersion → TemplatesRepository.countQuestions | `src/modules/surveys/repositories/templates.repository.ts:276` |
-| `surveys.survey_templates` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.publishVersion → SurveysTemplatesService.publishVersion | `src/modules/surveys/services/surveys-templates.service.ts:473` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.publishVersion → SurveysTemplatesService.publishVersion → SurveysTemplatesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:113` |
-| `surveys.survey_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.publishVersion → SurveysTemplatesService.publishVersion | `src/modules/surveys/services/surveys-templates.service.ts:467` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.publishVersion → SurveysTemplatesService.publishVersion → TemplatesRepository.findVersionByNumber | `src/modules/surveys/repositories/templates.repository.ts:231` |
+| `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.publishVersion → SurveysTemplatesService.publishVersion → TemplatesRepository.countQuestions | `src/modules/surveys/repositories/templates.repository.ts:324` |
+| `surveys.survey_templates` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.publishVersion → SurveysTemplatesService.publishVersion | `src/modules/surveys/services/surveys-templates.service.ts:485` |
+| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.publishVersion → SurveysTemplatesService.publishVersion → SurveysTemplatesService.loadMutableTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:143` |
+| `surveys.survey_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysTemplatesController.publishVersion → SurveysTemplatesService.publishVersion | `src/modules/surveys/services/surveys-templates.service.ts:479` |
+| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysTemplatesController.publishVersion → SurveysTemplatesService.publishVersion → TemplatesRepository.findVersionByNumber | `src/modules/surveys/repositories/templates.repository.ts:279` |
 
 ### Parámetros
 
@@ -1606,7 +1770,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/surveys/dto/responses.dto.ts:19` |
+| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/surveys/dto/responses.dto.ts:25` |
 
 ### Respuestas posibles
 

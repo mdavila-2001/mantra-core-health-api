@@ -208,8 +208,7 @@ export function matchTariffSpecialties(
  *
  * El alcance (`assertRegistrationCanRegister`: la administración en cualquier
  * práctica, un profesional sólo en su consultorio propio, 404 en cualquier
- * otra) y la encuesta de satisfacción automática de FT-31. El resultado de
- * cada fila es el que daría `POST /billing/service-catalog`: `name` = nombre del
+ * otra). El resultado de cada fila es el que daría `POST /billing/service-catalog`: `name` = nombre del
  * procedimiento, `code` = código del arancel, `serviceConceptId` = concepto
  * del arancel (por donde cruzan seguros y reembolsos), `defaultPrice` = precio de
  * referencia, activo. Como en el alta individual, no se declara moneda: el
@@ -223,7 +222,7 @@ export class ProcedureImportService {
    *
    * @param em - Contexto de persistencia.
    * @param serviceCatalogRepo - Catálogo de servicios de la práctica.
-   * @param catalog - Alcance y encuesta automática del alta individual.
+   * @param catalog - Alcance del alta individual.
    * @param logger - Logger estructurado.
    */
   constructor(
@@ -340,7 +339,7 @@ export class ProcedureImportService {
 
       const pending = rows.filter((row) => !existing.has(row.code));
       for (let i = 0; i < pending.length; i += INSERT_CHUNK) {
-        const items = pending.slice(i, i + INSERT_CHUNK).map((row) =>
+        for (const row of pending.slice(i, i + INSERT_CHUNK)) {
           this.serviceCatalogRepo.create(tx, {
             practiceId: dto.practiceId,
             code: row.code,
@@ -349,10 +348,9 @@ export class ProcedureImportService {
             defaultPrice: toDefaultPrice(row.referencePrice),
             isActive: true,
             actorUserId: actor.id,
-          }),
-        );
+          });
+        }
         await tx.flush();
-        await this.catalog.attachDefaultSatisfactionSurveys(tx, items, actor);
       }
       return pending.length;
     });
