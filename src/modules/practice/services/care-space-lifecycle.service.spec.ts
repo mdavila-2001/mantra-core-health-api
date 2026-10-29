@@ -4,6 +4,7 @@ import {
 } from '../../../common';
 import { FORMS, FUNCTIONS } from '../infrastructure-catalog';
 import { RowVersionMismatchException } from '../http/row-version';
+import { conceptIdOf, HYGIENE } from '../ops-catalog';
 import { PRAC } from '../practice.concepts';
 import { PracticeErrorReason } from '../practice.error-reasons';
 import { CareSpaceLifecycleService } from './care-space-lifecycle.service';
@@ -99,6 +100,67 @@ describe('CareSpaceLifecycleService.change', () => {
       expect.objectContaining({
         payload: expect.objectContaining({ reason: 'Fumigación' }),
       }),
+    );
+  });
+
+  it('F2: activate deja la higiene lista para usar si nadie la tocó; reactivate conserva la que tenía', async () => {
+    const nuevo = makeSpace();
+    await build(nuevo).service.change(
+      nuevo.id,
+      'activate',
+      undefined,
+      1,
+      actor,
+    );
+    expect(nuevo.hygieneStatusConceptId).toBe(
+      conceptIdOf(HYGIENE, 'HYG_INSPECTED'),
+    );
+    expect(nuevo.hygieneChangedAt).toBeInstanceOf(Date);
+
+    // backfill del patch: HYG_CLEAN sin fecha de cambio = nadie la tocó
+    const backfill = makeSpace({
+      hygieneStatusConceptId: conceptIdOf(HYGIENE, 'HYG_CLEAN'),
+    });
+    await build(backfill).service.change(
+      backfill.id,
+      'activate',
+      undefined,
+      1,
+      actor,
+    );
+    expect(backfill.hygieneStatusConceptId).toBe(
+      conceptIdOf(HYGIENE, 'HYG_INSPECTED'),
+    );
+
+    const sucio = makeSpace({
+      statusConceptId: PRAC.SPACE_SUSPENDED,
+      hygieneStatusConceptId: conceptIdOf(HYGIENE, 'HYG_DIRTY'),
+      hygieneChangedAt: new Date('2026-10-01T00:00:00Z'),
+    });
+    await build(sucio).service.change(
+      sucio.id,
+      'reactivate',
+      undefined,
+      1,
+      actor,
+    );
+    expect(sucio.hygieneStatusConceptId).toBe(
+      conceptIdOf(HYGIENE, 'HYG_DIRTY'),
+    );
+
+    const operado = makeSpace({
+      hygieneStatusConceptId: conceptIdOf(HYGIENE, 'HYG_CLEAN'),
+      hygieneChangedAt: new Date('2026-10-01T00:00:00Z'),
+    });
+    await build(operado).service.change(
+      operado.id,
+      'activate',
+      undefined,
+      1,
+      actor,
+    );
+    expect(operado.hygieneStatusConceptId).toBe(
+      conceptIdOf(HYGIENE, 'HYG_CLEAN'),
     );
   });
 

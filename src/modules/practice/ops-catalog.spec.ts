@@ -10,9 +10,11 @@ import {
   CLEANING_TRANSITIONS,
   CLEANING_TRIGGERS,
   CLEANING_TYPES,
+  INITIAL_HYGIENE,
   KIND_TO_AVAILABILITY,
   axisCodes,
   hasOperationalState,
+  hygieneUntouched,
   occupancyCode,
 } from './ops-catalog';
 
@@ -84,16 +86,23 @@ describe('familias de conceptos de la operación', () => {
     expect(CLEANING_TRANSITIONS.finish.from).toEqual(['CLN_IN_PROGRESS']);
   });
 
-  it('un eje sin escribir vale su valor por omisión (disponible, limpio, sin aislamiento, libre)', () => {
+  it('un eje sin escribir vale su valor por omisión (disponible, lista para usar, sin aislamiento, libre)', () => {
     expect(axisCodes({})).toEqual({
       availability: 'SPACE_OP_AVAILABLE',
-      hygiene: 'HYG_CLEAN',
+      hygiene: 'HYG_INSPECTED',
       isolation: 'ISO_NONE',
     });
     expect(occupancyCode(undefined)).toBe('OCC_FREE');
     expect(axisCodes({ hygieneStatusConceptId: PRAC.HYG_DIRTY }).hygiene).toBe(
       'HYG_DIRTY',
     );
+  });
+
+  it('la higiene inicial es la inspeccionada y la higiene sin operaciones se detecta por su fecha', () => {
+    expect(INITIAL_HYGIENE).toBe('HYG_INSPECTED');
+    expect(hygieneUntouched({})).toBe(true);
+    expect(hygieneUntouched({ hygieneChangedAt: null })).toBe(true);
+    expect(hygieneUntouched({ hygieneChangedAt: new Date() })).toBe(false);
   });
 
   it('los contenedores de la estructura no tienen estado operativo; camas, habitaciones, áreas y espacios sin forma sí', () => {

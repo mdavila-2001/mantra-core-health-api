@@ -29,6 +29,13 @@ export interface CreateCareSpaceData {
    * Identificador asociado a operational status concept.
    */
   operationalStatusConceptId: string;
+  /**
+   * Higiene inicial. Un espacio que nace ACTIVO la trae «lista para usar»
+   * (F2); uno planificado no la tiene hasta activarse.
+   */
+  hygieneStatusConceptId?: string;
+  /** Instante en que se fijó la higiene inicial. */
+  hygieneChangedAt?: Date;
   /** Forma del espacio (`LOC_FORM_*`). */
   formConceptId?: string;
   /**
@@ -262,6 +269,8 @@ export class CareSpacesRepository {
         gln: data.gln,
         validFrom: data.validFrom,
         operationalStatusConceptId: data.operationalStatusConceptId,
+        hygieneStatusConceptId: data.hygieneStatusConceptId,
+        hygieneChangedAt: data.hygieneChangedAt,
         statusConceptId: data.statusConceptId,
         // F2: contador de versión del eje operativo (disponibilidad, higiene,
         // aislamiento). NOT NULL sin valor por omisión en el DDL generado; el alta

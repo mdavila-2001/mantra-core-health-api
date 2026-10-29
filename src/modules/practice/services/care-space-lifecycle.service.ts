@@ -17,6 +17,12 @@ import {
   type LifecycleAction,
 } from '../infrastructure-catalog';
 import { PRAC } from '../practice.concepts';
+import {
+  conceptIdOf,
+  HYGIENE,
+  hygieneUntouched,
+  INITIAL_HYGIENE,
+} from '../ops-catalog';
 import { PracticeErrorReason } from '../practice.error-reasons';
 import { CareSpacesRepository } from '../repositories';
 import type { CareSpaceDetail, RetireCheck } from '../dto/infrastructure.types';
@@ -153,7 +159,16 @@ export class CareSpaceLifecycleService {
       const from = space.statusConceptId;
       const now = new Date();
       space.statusConceptId = transition.to;
-      if (action === 'activate') space.validFrom = space.validFrom ?? now;
+      if (action === 'activate') {
+        space.validFrom = space.validFrom ?? now;
+        // F2: al activarse queda lista para usar. Si la higiene sigue como la dejó
+        // el alta o el backfill (sin operación que la haya tocado), se fija; una
+        // `reactivate` conserva la que tenía (puede estar sucia).
+        if (hygieneUntouched(space)) {
+          space.hygieneStatusConceptId = conceptIdOf(HYGIENE, INITIAL_HYGIENE);
+          space.hygieneChangedAt = now;
+        }
+      }
       if (action === 'retire') space.validTo = now;
       touch(space, actor.id, now);
       await withVersionConflict(() => mapReferenceViolation(() => tx.flush()));

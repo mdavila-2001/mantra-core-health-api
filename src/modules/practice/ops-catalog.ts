@@ -36,6 +36,27 @@ export const HYGIENE = new ConceptFamily('HYG_', [
   'HYG_CONTAMINATED',
 ]);
 
+/**
+ * Higiene con la que nace un espacio al activarse (y la que se asume si el eje
+ * nunca se escribió): «lista para usar». Un espacio recién activado no se ensució
+ * nunca, así que no hay nada que limpiar ni que inspeccionar. `infra.inspection_required`
+ * gobierna sólo lo que pasa DESPUÉS de una orden de limpieza (CONTRATO-F2-F5 §F2.2:
+ * `HYG_CLEAN` exige inspección; `HYG_INSPECTED` ya es asignable).
+ */
+export const INITIAL_HYGIENE: HygieneCode = 'HYG_INSPECTED';
+
+/**
+ * ¿El eje de higiene sigue como lo dejó el alta o el backfill, sin que ninguna
+ * operación lo haya tocado? Sin `hygiene_changed_at` se desconoce desde cuándo.
+ *
+ * @param row - Higiene y fecha de cambio de la fila.
+ */
+export function hygieneUntouched(row: {
+  hygieneChangedAt?: Date | null;
+}): boolean {
+  return !row.hygieneChangedAt;
+}
+
 /** Aislamiento. */
 export const ISOLATION = new ConceptFamily('ISO_', [
   'ISO_NONE',
@@ -242,7 +263,7 @@ export function axisCodes(ids: AxisIds): {
       ids.operationalStatusConceptId,
       'SPACE_OP_AVAILABLE',
     ),
-    hygiene: codeOf(HYGIENE, ids.hygieneStatusConceptId, 'HYG_CLEAN'),
+    hygiene: codeOf(HYGIENE, ids.hygieneStatusConceptId, INITIAL_HYGIENE),
     isolation: codeOf(ISOLATION, ids.isolationConceptId, 'ISO_NONE'),
   };
 }

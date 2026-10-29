@@ -4,6 +4,7 @@ import {
   ResourceNotFoundException,
 } from '../../../common';
 import { FORMS, FUNCTIONS, REGULATORY } from '../infrastructure-catalog';
+import { conceptIdOf, HYGIENE } from '../ops-catalog';
 import { PRAC } from '../practice.concepts';
 import { PracticeErrorReason } from '../practice.error-reasons';
 import {
@@ -160,6 +161,29 @@ describe('CareSpaceCreationService.create', () => {
         validFrom: expect.any(Date),
       }),
     );
+  });
+
+  it('F2: un espacio que nace activo nace con la higiene lista para usar; uno planificado, sin higiene', async () => {
+    const d = build();
+    d.spacesRepo.findByIdInTenant.mockResolvedValue(
+      parentOf('LOC_FORM_BUILDING'),
+    );
+    await d.service.create(
+      's1',
+      room({ parentSpaceId: 'parent-1', activate: true }),
+      actor,
+    );
+    expect(d.spacesRepo.create).toHaveBeenLastCalledWith(
+      d.tx,
+      expect.objectContaining({
+        hygieneStatusConceptId: conceptIdOf(HYGIENE, 'HYG_INSPECTED'),
+        hygieneChangedAt: expect.any(Date),
+      }),
+    );
+    await d.service.create('s1', room({ parentSpaceId: 'parent-1' }), actor);
+    const planificado = d.spacesRepo.create.mock.calls.at(-1)?.[1];
+    expect(planificado.hygieneStatusConceptId).toBeUndefined();
+    expect(planificado.hygieneChangedAt).toBeUndefined();
   });
 
   it('activate:true con padre planificado o con datos que el perfil exige: 422 y no crea', async () => {

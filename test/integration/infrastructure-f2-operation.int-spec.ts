@@ -2463,25 +2463,170 @@ describe('Infraestructura F2 · operación de espacios', () => {
   });
 
   // ---------------------------------------------------- configuración infra.*
-  describe('configuración por establecimiento (practice_settings)', () => {
-    it('infra.inspection_required=false vuelve asignable la cama limpia sin inspección; es dato, no constante', async () => {
-      const cama = ids['CAMA-301-B'];
-      const exige = (await estado(nurse, cama).expect(200)).body.cell;
-      expect(exige.hygiene.code).toBe('HYG_CLEAN');
-      expect(exige.v2Code).toBe('H');
-      expect(exige.assignable).toBe(false);
-      await filas(
-        `insert into practice.practice_settings (id, practice_id, setting_key, value_json, created_at, updated_at)
-         values (?, ?, 'infra.inspection_required', 'false'::jsonb, now(), now())`,
-        [randomUUID(), orgA.practiceId],
-      );
-      const noExige = (await estado(nurse, cama).expect(200)).body.cell;
-      expect(noExige.v2Code).toBe('U');
-      expect(noExige.assignable).toBe(true);
+  describe('higiene inicial y ciclo tras el egreso (practice_settings)', () => {
+    const ajuste = async (valor: boolean | null) => {
       await filas(
         `delete from practice.practice_settings where practice_id = ? and setting_key = 'infra.inspection_required'`,
         [orgA.practiceId],
       );
+      if (valor === null) return;
+      await filas(
+        `insert into practice.practice_settings (id, practice_id, setting_key, value_json, created_at, updated_at)
+         values (?, ?, 'infra.inspection_required', ?::jsonb, now(), now())`,
+        [randomUUID(), orgA.practiceId, JSON.stringify(valor)],
+      );
+    };
+    const orden = async (spaceId: string) => {
+      const [o] = await filas(
+        `select id, row_version from practice.cleaning_orders
+          where care_space_id = ? order by created_at desc limit 1`,
+        [spaceId],
+      );
+      return o;
+    };
+    const accion = async (
+      actor: Actor,
+      spaceId: string,
+      que: 'start' | 'finish' | 'inspect',
+      body: object = {},
+    ) => {
+      const o = await orden(spaceId);
+      return http()
+        .post(`/cleaning-orders/${o.id}/${que}`)
+        .set(como(actor))
+        .set(ifMatch(o.row_version))
+        .send(body);
+    };
+    /** El egreso de F3 marca la cama sucia por el puerto, dentro de su transacción. */
+    const egreso = (spaceId: string) =>
+      runWithTenant(orgA.tenantId, () =>
+        ctx.orm.em.fork().transactional((tx) =>
+          ctx.app
+            .get<CareSpaceOpsPort>(CARE_SPACE_OPS_PORT)
+            .markDirtyFromSource(tx, spaceId, {
+              trigger: 'DISCHARGE',
+              sourceRefId: randomUUID(),
+              terminal: false,
+              actor: { id: nurse.userId },
+            }),
+        ),
+      );
+    const celda = async (spaceId: string) =>
+      (await estado(nurse, spaceId).expect(200)).body.cell;
+
+    afterEach(async () => {
+      await ajuste(null);
+    });
+
+    it('una cama recién activada nace limpia, inspeccionada y asignable con el ajuste por omisión (inspección obligatoria)', async () => {
+      await ajuste(null);
+      const nueva = await cama('CAMA-NUEVA-1', ids['HAB-301']);
+      const c = await celda(nueva);
+      expect(c).toMatchObject({
+        lifecycle: { code: 'SPACE_ACTIVE' },
+        availability: { code: 'SPACE_OP_AVAILABLE' },
+        hygiene: { code: 'HYG_INSPECTED', terminalRequired: false },
+        v2Code: 'U',
+        assignable: true,
+      });
+      // y con el ajuste explícito también: la inspección no rige el estado de partida
+      await ajuste(true);
+      expect((await celda(nueva)).assignable).toBe(true);
+      // el alta no es un cambio de estado: ningún evento A20 de higiene
+      expect(await evento(nueva, 'AXIS_HYGIENE')).toHaveLength(0);
+    });
+
+    it('un espacio planificado no es asignable y al activarse por el ciclo de vida queda asignable', async () => {
+      const plan = (
+        await http()
+          .post(`/sites/${orgA.siteId}/care-spaces`)
+          .set(como(orgA))
+          .send({
+            code: `CAMA-PLAN-${sufijo}`,
+            name: 'Cama planificada',
+            formCode: 'LOC_FORM_BED',
+            functionCode: 'SPACE_FN_BED_STANDARD',
+            parentSpaceId: ids['HAB-301'],
+            bedCategoryCode: 'BED_CAT_PRIVATE',
+            censable: true,
+          })
+          .expect(201)
+      ).body;
+      await http()
+        .post(`/care-spaces/${plan.id}/unit-assignments`)
+        .set(como(orgA))
+        .send({ clinicalUnitId: unidades.MED, roleCode: 'OWNER' })
+        .expect(201);
+      expect((await celda(plan.id)).assignable).toBe(false);
+      const [{ row_version: version }] = await filas(
+        'select row_version from practice.care_spaces where id = ?',
+        [plan.id],
+      );
+      await http()
+        .post(`/care-spaces/${plan.id}/lifecycle`)
+        .set(como(orgA))
+        .set(ifMatch(version))
+        .send({ action: 'activate' })
+        .expect(200);
+      expect(await celda(plan.id)).toMatchObject({
+        hygiene: { code: 'HYG_INSPECTED' },
+        assignable: true,
+      });
+    });
+
+    it('tras el egreso queda sucia y no asignable; con inspección obligatoria hace falta limpiar Y inspeccionar', async () => {
+      await ajuste(null);
+      const id = await cama('CAMA-NUEVA-2', ids['HAB-301']);
+      expect((await celda(id)).assignable).toBe(true);
+      await egreso(id);
+      expect(await celda(id)).toMatchObject({
+        hygiene: { code: 'HYG_DIRTY' },
+        v2Code: 'H',
+        assignable: false,
+      });
+      await accion(cleaner, id, 'start').then((r) =>
+        expect(r.status).toBe(200),
+      );
+      expect((await celda(id)).assignable).toBe(false);
+      await accion(cleaner, id, 'finish', { note: 'ok' }).then((r) =>
+        expect(r.status).toBe(200),
+      );
+      // limpia pero sin inspeccionar: sigue sin ser asignable
+      expect(await celda(id)).toMatchObject({
+        hygiene: { code: 'HYG_CLEAN' },
+        v2Code: 'H',
+        assignable: false,
+      });
+      await accion(nurseSup, id, 'inspect', { result: 'PASS' }).then((r) =>
+        expect(r.status).toBe(200),
+      );
+      expect(await celda(id)).toMatchObject({
+        hygiene: { code: 'HYG_INSPECTED' },
+        v2Code: 'U',
+        assignable: true,
+      });
+    });
+
+    it('con infra.inspection_required=false, limpiar basta para volver a ser asignable; es dato, no constante', async () => {
+      await ajuste(false);
+      const id = await cama('CAMA-NUEVA-3', ids['HAB-301']);
+      expect((await celda(id)).assignable).toBe(true);
+      await egreso(id);
+      expect((await celda(id)).assignable).toBe(false);
+      await accion(cleaner, id, 'start').then((r) =>
+        expect(r.status).toBe(200),
+      );
+      await accion(cleaner, id, 'finish').then((r) =>
+        expect(r.status).toBe(200),
+      );
+      expect(await celda(id)).toMatchObject({
+        hygiene: { code: 'HYG_CLEAN' },
+        v2Code: 'U',
+        assignable: true,
+      });
+      // la misma cama vuelve a exigir inspección si el ajuste se enciende
+      await ajuste(true);
+      expect(await celda(id)).toMatchObject({ v2Code: 'H', assignable: false });
     });
   });
 });
