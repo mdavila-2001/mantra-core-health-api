@@ -5,6 +5,7 @@ import { NotificationDeliveryJob } from './notification-delivery.job';
 import { PrescriptionExpiryNoticeJob } from './prescription-expiry-notice.job';
 import { MockProviderWiringService } from './mock-provider-wiring.service';
 import { GoogleProviderWiringService } from './google-provider-wiring.service';
+import { EmailRecipientGuardWiringService } from './email-recipient-guard-wiring.service';
 
 export { registerQueueJobHandler } from './queue.job';
 export { NotificationDeliveryJob } from './notification-delivery.job';
@@ -18,6 +19,9 @@ export { NotificationDeliveryJob } from './notification-delivery.job';
  * `MockProviderWiringService` a propósito: `OnModuleInit` corre en el orden
  * de este array, así que si ambos proveedores están configurados a la vez,
  * el real (Google) gana y pisa el adapter que dejó el mock.
+ *
+ * `EmailRecipientGuardWiringService` va el último: decora el adapter ganador
+ * con la guarda opt-in de dominios de destinatario.
  */
 @Module({
   providers: [
@@ -27,6 +31,7 @@ export { NotificationDeliveryJob } from './notification-delivery.job';
     PrescriptionExpiryNoticeJob,
     MockProviderWiringService,
     GoogleProviderWiringService,
+    EmailRecipientGuardWiringService,
   ],
 })
 export class MessagingWorkerModule {}
