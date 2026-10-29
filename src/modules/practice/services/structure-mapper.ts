@@ -11,9 +11,9 @@ import {
   REGULATORY,
   SPACE_LIFECYCLE,
   UNIT_LIFECYCLE,
-  practiceConcept,
   type ConceptEntry,
 } from '../infrastructure-catalog';
+import { AVAILABILITY } from '../ops-catalog';
 import { PRAC } from '../practice.concepts';
 import type {
   CareSpaceNode,
@@ -23,12 +23,9 @@ import type {
   SpaceUnitAssignmentView,
 } from '../dto/infrastructure.types';
 
-/** Estados operativos conocidos hoy (los demás ejes llegan con F2). */
+/** Estados de disponibilidad (F2 sumó bloqueada, bloqueada administrativa y mantenimiento). */
 const OPERATIONAL = new Map<string, ConceptEntry>(
-  ['SPACE_OP_AVAILABLE', 'SPACE_OP_CLOSED'].map((code) => {
-    const entry = practiceConcept(code);
-    return [entry.id, entry];
-  }),
+  AVAILABILITY.all().map((entry) => [entry.id, entry]),
 );
 
 /** `{code, display}` de una entrada, o `null`. */

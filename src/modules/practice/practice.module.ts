@@ -16,6 +16,8 @@ import {
   SiteInfrastructureController,
   SiteLicensesController,
   InfrastructureCatalogController,
+  CareSpaceOpsController,
+  PracticeInternalController,
 } from './controllers';
 import {
   PracticeSitesService,
@@ -49,7 +51,22 @@ import {
   RetireBlockerRegistry,
   PracticeRetireBlockersInitializer,
   RETIRE_BLOCKER_PROVIDERS,
+  CARE_SPACE_OPS_PORT,
+  InfrastructureAccessService,
+  OpsEventsService,
+  OpsStateService,
+  OpsRecorder,
+  CleaningOrdersService,
+  CareSpaceBlocksService,
+  CareSpaceOpsService,
+  BedBoardReadService,
+  CareSpaceOpsPortService,
+  CareSpaceBlocksTickService,
+  PracticeOpsRetireBlockersInitializer,
 } from './services';
+import { OpsSettingsReader } from './services/ops-settings';
+import { INFRA_POLICIES, InfraPolicyRegistry } from './policies/infra-policy';
+import { InfraF2PolicyInitializer } from './policies/infra-f2.policy';
 import {
   PracticesRepository,
   PracticeSitesRepository,
@@ -133,6 +150,8 @@ import {
     SiteInfrastructureController,
     SiteLicensesController,
     InfrastructureCatalogController,
+    CareSpaceOpsController,
+    PracticeInternalController,
   ],
   providers: [
     // Repositorios
@@ -207,6 +226,23 @@ import {
     RetireBlockerRegistry,
     { provide: RETIRE_BLOCKER_PROVIDERS, useExisting: RetireBlockerRegistry },
     PracticeRetireBlockersInitializer,
+    // Infraestructura hospitalaria F2: operación de espacios.
+    InfraPolicyRegistry,
+    { provide: INFRA_POLICIES, useExisting: InfraPolicyRegistry },
+    InfraF2PolicyInitializer,
+    InfrastructureAccessService,
+    OpsSettingsReader,
+    OpsEventsService,
+    OpsStateService,
+    OpsRecorder,
+    CleaningOrdersService,
+    CareSpaceBlocksService,
+    CareSpaceOpsService,
+    BedBoardReadService,
+    CareSpaceOpsPortService,
+    { provide: CARE_SPACE_OPS_PORT, useExisting: CareSpaceOpsPortService },
+    CareSpaceBlocksTickService,
+    PracticeOpsRetireBlockersInitializer,
   ],
   // `scheduling` resuelve con esto la sede de cada recurso agendable: el dato
   // vive acá y no se duplica allá. `practice` no importa `scheduling`, así que
@@ -233,6 +269,12 @@ import {
     // (stock, equipos, reservas…) se registra acá sin editar `practice`.
     RETIRE_BLOCKER_PROVIDERS,
     RetireBlockerRegistry,
+    // F2: F3 (ADT) y F4 (quirófano) programan contra el puerto; cada franja
+    // registra su política de roles en `INFRA_POLICIES` y autoriza con el evaluador.
+    CARE_SPACE_OPS_PORT,
+    INFRA_POLICIES,
+    InfraPolicyRegistry,
+    InfrastructureAccessService,
   ],
 })
 export class PracticeModule {}

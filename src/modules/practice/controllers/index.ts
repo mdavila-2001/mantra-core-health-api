@@ -12,3 +12,5 @@ export * from './clinical-units.controller';
 export * from './site-infrastructure.controller';
 export * from './site-licenses.controller';
 export * from './infrastructure-catalog.controller';
+export * from './care-space-ops.controller';
+export * from './practice-internal.controller';
