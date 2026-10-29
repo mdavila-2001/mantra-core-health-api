@@ -8,6 +8,9 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { SpecimensRepository } from '../repositories';
+import { SampleCollectionPointsService } from '../../practice/services/sample-collection-points.service';
+import { CollectionPointErrorReason } from '../../practice/practice-collection.error-reasons';
+import { practiceOutOfScope } from '../../practice/services/practice-scope';
 import { DiagnosticsScopeService } from './diagnostics-scope.service';
 import { DIAG } from '../diagnostics.concepts';
 import { DiagnosticsErrorReason } from '../diagnostics.error-reasons';
@@ -55,6 +58,7 @@ export class DiagnosticsSpecimensService {
     private readonly repo: SpecimensRepository,
     private readonly scope: DiagnosticsScopeService,
     private readonly logger: PinoLogger,
+    private readonly collectionPoints: SampleCollectionPointsService,
   ) {
     this.logger.setContext(DiagnosticsSpecimensService.name);
   }
@@ -71,7 +75,32 @@ export class DiagnosticsSpecimensService {
     // Antes de abrir la transacción: es un error del cliente, no del estado.
     assertSpecimenTypeInCatalog(dto.specimenTypeConceptId);
     const custodianTenantId = this.scope.activeTenantFor(dto.custodianTenantId);
+    // El modelo exige el par: no hay punto de toma sin la sede de la toma.
+    if (dto.collectionCareSpaceId && !dto.collectionSiteId) {
+      throw new PreconditionFailedException(
+        'El punto de toma exige la sede de la toma',
+        undefined,
+        CollectionPointErrorReason.COLLECTION_POINT_REQUIRES_SITE,
+      );
+    }
     return this.em.transactional(async (tx) => {
+      // F5b: la sede de la toma es del tenant que registra la muestra (404 si no) y el
+      // punto, un espacio SAMPLE_COLLECTION de esa sede (422).
+      if (dto.collectionSiteId) {
+        const sites = await tx.execute<{ id: string }[]>(
+          `select id from practice.practice_sites where id = ? and tenant_id = ?`,
+          [dto.collectionSiteId, custodianTenantId],
+        );
+        if (sites.length === 0) throw practiceOutOfScope('Sitio no encontrado');
+        if (dto.collectionCareSpaceId) {
+          await this.collectionPoints.assertCollectable(
+            tx,
+            custodianTenantId,
+            dto.collectionSiteId,
+            dto.collectionCareSpaceId,
+          );
+        }
+      }
       if (dto.encounterId) {
         await this.scope.encounter(tx, dto.encounterId, dto.patientProfileId);
       }
@@ -96,6 +125,20 @@ export class DiagnosticsSpecimensService {
         actorUserId: actor.id,
       });
       await tx.flush();
+      if (dto.collectionSiteId) {
+        // Después del flush del espécimen: el vínculo no es una relación del ORM.
+        this.repo.recordCollectionEvent(tx, {
+          specimenId: specimen.id,
+          eventTypeConceptId: DIAG.SPECIMEN_COLLECTED,
+          occurredAt: specimen.collectedAt ?? new Date(),
+          collectorProfileId: dto.collectorProfileId,
+          collectionSiteId: dto.collectionSiteId,
+          collectionCareSpaceId: dto.collectionCareSpaceId,
+          bodySiteConceptId: dto.bodySiteConceptId,
+          methodConceptId: dto.collectionMethodConceptId,
+        });
+        await tx.flush();
+      }
       return { id: specimen.id, status: specimen.statusConceptId };
     });
   }

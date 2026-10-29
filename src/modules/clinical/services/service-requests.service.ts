@@ -30,6 +30,8 @@ import { DiagnosticStudyOfferings } from '../../diagnostic_units/entities';
 // P43: la orden puede declarar de qué formulario médico cerrado sale.
 import { FormInstanceOriginValidator } from '../../forms/services/form-instance-origin.validator';
 import { PerformerSelectionValidator } from './performer-selection.validator';
+import { SampleCollectionPointsService } from '../../practice/services/sample-collection-points.service';
+import { CollectionPointErrorReason } from '../../practice/practice-collection.error-reasons';
 import { SuggestedSiteNamesReader } from './suggested-site-names.reader';
 import { ServiceRequestNotesService } from './service-request-notes.service';
 import {
@@ -70,6 +72,7 @@ export class ServiceRequestsService {
    * @param performerSelection - Reglas del modo de ejecutor (centros médicos).
    * @param siteNames - Nombre de la sede sugerida, para el paciente.
    * @param basedOnNotes - Notas que motivan la orden (P40).
+   * @param collectionPoints - Puntos de toma de muestras de la sede sugerida (F5b).
    */
   constructor(
     private readonly em: EntityManager,
@@ -84,6 +87,7 @@ export class ServiceRequestsService {
     private readonly performerSelection: PerformerSelectionValidator,
     private readonly siteNames: SuggestedSiteNamesReader,
     private readonly basedOnNotes: ServiceRequestNotesService,
+    private readonly collectionPoints: SampleCollectionPointsService,
   ) {
     this.logger.setContext(ServiceRequestsService.name);
   }
@@ -297,6 +301,14 @@ export class ServiceRequestsService {
           dto.requesterProfileId ?? actor.practitionerProfileId,
       });
 
+      // F5b: el punto de toma se decide con la sede ya validada, antes de escribir.
+      const point = await this.resolveCollectionPoint(
+        tx,
+        dto.suggestedCareSpaceId,
+        performer.suggestedPracticeSiteId,
+        categoryConceptId,
+      );
+
       const decision = await this.resolveDuplicateDecision(tx, dto, options);
 
       const sr = this.serviceRequestsRepo.create(tx, {
@@ -317,6 +329,7 @@ export class ServiceRequestsService {
         performerPractitionerProfileId:
           performer.performerPractitionerProfileId ?? undefined,
         suggestedPracticeSiteId: performer.suggestedPracticeSiteId ?? undefined,
+        suggestedCareSpaceId: point?.careSpaceId,
         previousDiagnosticReportId: decision.previousDiagnosticReportId,
         duplicateOverrideReason: decision.duplicateOverrideReason,
         actorUserId: actor.id,
@@ -366,6 +379,24 @@ export class ServiceRequestsService {
       });
       await tx.flush();
 
+      if (point) {
+        // F5b: sólo ids. El nombre del punto no viaja en el outbox.
+        await this.outbox.publishDomainEvent(tx, {
+          tenantId: sr.custodianTenantId,
+          eventType: 'clinical.service_request.collection_point_suggested',
+          aggregateType: 'clinical.service_requests',
+          aggregateId: sr.id,
+          payloadJson: {
+            serviceRequestId: sr.id,
+            suggestedPracticeSiteId: performer.suggestedPracticeSiteId,
+            suggestedCareSpaceId: point.careSpaceId,
+            source: point.source,
+          },
+          actorUserId: actor.id,
+        });
+        await tx.flush();
+      }
+
       // Y la campana del paciente, dentro de la transacción (ver
       // `ClinicalNotificationsService.serviceRequestPlaced`). Una orden que se
       // resolvió reutilizando un informe previo no le pide nada al paciente:
@@ -397,9 +428,48 @@ export class ServiceRequestsService {
               ])
             ).get(performer.suggestedPracticeSiteId) ?? null)
           : null,
+        suggestedCareSpaceId: point?.careSpaceId ?? null,
+        suggestedCareSpaceName: point
+          ? await this.collectionPoints.nameOf(tx, point.careSpaceId)
+          : null,
         createdAt: sr.createdAt,
       };
     });
+  }
+
+  /**
+   * F5b: el punto de toma de la orden.
+   *
+   * - Con `suggestedCareSpaceId`: exige la sede sugerida (el modelo exige el par) y que el
+   *   espacio sea un punto de toma que esa sede ofrece (422 `COLLECTION_POINT_INVALID`).
+   * - Sin él, en una orden de laboratorio con sede: el primer punto disponible de la sede, o
+   *   ninguno si la sede no tiene puntos modelados (la orden se crea igual).
+   *
+   * La sede puede ser de otra organización (flujo «en este centro»): el par lo autoriza
+   * esta validación, y la sede ya pasó la regla de ofrecer el procedimiento con precio.
+   */
+  private async resolveCollectionPoint(
+    tx: EntityManager,
+    requested: string | undefined,
+    siteId: string | null,
+    categoryConceptId: string | undefined,
+  ): Promise<{ careSpaceId: string; source: 'EXPLICIT' | 'DEFAULT' } | null> {
+    if (requested !== undefined) {
+      if (!siteId) {
+        throw new PreconditionFailedException(
+          'El punto de toma exige la sede sugerida',
+          undefined,
+          CollectionPointErrorReason.COLLECTION_POINT_REQUIRES_SITE,
+        );
+      }
+      await this.collectionPoints.assertSuggestable(tx, siteId, requested);
+      return { careSpaceId: requested, source: 'EXPLICIT' };
+    }
+    if (siteId && analysisCategoryOf(categoryConceptId) === 'LAB') {
+      const first = await this.collectionPoints.firstOffered(tx, siteId);
+      if (first) return { careSpaceId: first, source: 'DEFAULT' };
+    }
+    return null;
   }
 
   /**

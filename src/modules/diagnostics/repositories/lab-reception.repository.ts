@@ -61,12 +61,15 @@ export class LabReceptionRepository {
     statusConceptId: string,
     after: InboxAfterKey | undefined,
     limit: number,
+    collectionPointId?: string,
   ): Promise<ServiceRequests[]> {
     const where: Record<string, unknown> = {
       performerTenantId,
       categoryConceptId: { $in: [...categoryConceptIds] },
       statusConceptId,
     };
+    // F5b: el filtro solo recorta lo que ya es de este laboratorio (performer_tenant_id).
+    if (collectionPointId) where.suggestedCareSpaceId = collectionPointId;
     if (after) {
       where.$or = [
         { createdAt: { $gt: after.createdAt } },

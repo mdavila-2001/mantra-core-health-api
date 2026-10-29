@@ -4,6 +4,7 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  IsUUID,
   Max,
   MaxLength,
   Min,
@@ -58,6 +59,15 @@ export class LabInboxQueryDto {
   @MinLength(2)
   @MaxLength(80)
   patientQuery?: string;
+
+  /**
+   * Punto de toma (F5b): solo las órdenes que sugieren ese punto. Un id que no es
+   * de un punto de este laboratorio no devuelve nada.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  collectionPointId?: string;
 }
 
 /** Una orden de la bandeja de recepción. */
@@ -95,6 +105,21 @@ export class LabInboxItemDto {
   /** Profesional que pidió el estudio, si consta. */
   @ApiProperty({ type: String, format: 'uuid', nullable: true })
   requesterProfileId!: string | null;
+
+  /** Sede sugerida de la orden, si la hay. */
+  @ApiProperty({ type: String, format: 'uuid', nullable: true })
+  suggestedPracticeSiteId!: string | null;
+
+  /** Punto de toma sugerido (F5b), si la orden lo trae. */
+  @ApiProperty({ type: String, format: 'uuid', nullable: true })
+  suggestedCareSpaceId!: string | null;
+
+  /**
+   * Nombre del punto de toma sugerido. Solo se nombra si el punto es de este
+   * laboratorio; el de otra organización viaja sin nombre.
+   */
+  @ApiProperty({ type: String, nullable: true })
+  suggestedCareSpaceName!: string | null;
 
   /** Organización que emitió la orden (su custodio). */
   @ApiProperty({ format: 'uuid' }) requestingTenantId!: string;

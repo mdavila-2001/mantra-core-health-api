@@ -129,6 +129,7 @@ function build(
     receptionRepo as any,
     specimensRepo as any,
     logger as any,
+    { namesIn: async () => new Map() } as any,
   );
   return { service, receptionRepo, logger };
 }
