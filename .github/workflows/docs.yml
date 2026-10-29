@@ -147,6 +147,10 @@ jobs:
           # El token no queda guardado en .git/config del workspace, que en un
           # runner propio persiste entre jobs.
           persist-credentials: false
+          # Historial completo: `agenda-mensajeria-relacion` (H2.S1.M1) verifica
+          # con `git merge-base --is-ancestor` un commit de septiembre, que en un
+          # clon superficial no es alcanzable.
+          fetch-depth: 0
 
       # Corepack ANTES de `setup-node`, y no después: `cache: yarn` hace que la
       # acción invoque `yarn cache dir` durante su propio paso, y el yarn global

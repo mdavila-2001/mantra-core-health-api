@@ -1,5 +1,5 @@
-import { PracticeAccessService } from '../../src/modules/practice/services/practice-access.service';
-import { PracticeTenantLookupService } from '../../src/modules/practice/services/practice-tenant-lookup.service';
+import { PracticeAccessService } from './practice-access.service';
+import { PracticeTenantLookupService } from './practice-tenant-lookup.service';
 
 /** Una vinculación tal como la guarda `practice.practitioner_role_assignments`. */
 export interface AssignmentRow {
