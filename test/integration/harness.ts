@@ -189,6 +189,11 @@ export async function bootstrapTestApp(
      * puerto.
      */
     realtime?: boolean;
+    /**
+     * Sustitutos de proveedores por token (puertos hacia franjas que aún no se integran).
+     * Se declaran en la prueba que los usa; el resto de la aplicación es la real.
+     */
+    overrideProviders?: ReadonlyArray<{ token: unknown; value: unknown }>;
   } = {},
 ): Promise<TestContext> {
   process.env.ORM_SCHEMA_SYNC = process.env.ORM_SCHEMA_SYNC ?? 'off';
@@ -213,6 +218,9 @@ export async function bootstrapTestApp(
     builder.overrideProvider(HttpDispatcherService).useValue({
       post: opts.httpDispatch,
     });
+  }
+  for (const o of opts.overrideProviders ?? []) {
+    builder.overrideProvider(o.token as never).useValue(o.value);
   }
   const moduleRef = await builder.compile();
 
