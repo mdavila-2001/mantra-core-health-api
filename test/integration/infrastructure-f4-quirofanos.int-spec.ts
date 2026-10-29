@@ -28,9 +28,8 @@ import {
  * organización → 404) y por rol (403). Las reglas del contrato (F4.5) se demuestran con
  * datos persistidos y vistos por SQL, y la concurrencia con dos peticiones simultáneas.
  *
- * Los dobles: ninguno para la API, la base ni el outbox. Sólo el puerto de operación de
- * espacios de F2 (`CareSpaceOpsPort`), que no existe en esta rama, se reemplaza donde el
- * flujo completo necesita ver la orden de limpieza (`CARE_SPACE_OPS_PORT`).
+ * Sin dobles: la API, la base, el outbox y el puerto de operación de espacios de F2
+ * (`CARE_SPACE_OPS_PORT`, la implementación real de `practice`) son los reales.
  */
 describe('Infraestructura F4 · quirófanos', () => {
   let ctx: TestContext;

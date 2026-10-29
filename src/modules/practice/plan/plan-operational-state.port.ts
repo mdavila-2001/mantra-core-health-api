@@ -5,11 +5,11 @@ import type { SpaceState } from './floor-plan.types';
  * Puerto del estado operativo que el plano colorea (CONTRATO-PLANO §3.6).
  *
  * El plano **no** reimplementa la operación de camas (F2) ni la ocupación (F3):
- * las lee a través de esta interfaz fina. La implementación por defecto
- * ({@link DefaultPlanOperationalState}) lee las columnas de F2 de
- * `practice.care_spaces` y `clinical.encounter_locations`; cuando F2 tenga su
- * lector del tablero (`bed-board-read.service`), se reemplaza el proveedor del
- * token {@link PLAN_OPERATIONAL_STATE} sin tocar nada del plano.
+ * las lee a través de esta interfaz fina. La implementación
+ * ({@link DefaultPlanOperationalState}) arma las celdas con `OpsStateService`
+ * (F2) a partir de `practice.care_spaces` y `clinical.encounter_locations`;
+ * reemplazar el proveedor del token {@link PLAN_OPERATIONAL_STATE} no toca nada
+ * del plano.
  */
 export const PLAN_OPERATIONAL_STATE = 'PLAN_OPERATIONAL_STATE';
 

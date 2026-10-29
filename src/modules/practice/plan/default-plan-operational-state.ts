@@ -45,7 +45,7 @@ export function initialsOf(
  * órdenes de limpieza. Los códigos salen del catálogo de conceptos, no de
  * constantes de F2: el plano no depende de que sus claves ya estén declaradas.
  *
- * Es el reemplazable: F2 provee su adaptador del tablero con el mismo token.
+ * Es el reemplazable: otro adaptador puede proveer el mismo token.
  */
 @Injectable()
 export class DefaultPlanOperationalState implements PlanOperationalStatePort {

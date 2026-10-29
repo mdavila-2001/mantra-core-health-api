@@ -115,13 +115,54 @@ export class OperatingRoomAccessService {
     action: InfraF4Action,
     target: OperatingRoomTarget,
   ): Promise<boolean> {
+    if (await this.grantedBroadly(tx, actor, action, target.site)) return true;
+    return this.holdsDelegated(tx, actor, action, target);
+  }
+
+  /**
+   * Los quirófanos de una lista que el actor puede ver con la acción. Una asignación
+   * delegada acotada a un espacio o a una unidad abre la lectura **de la sede** (para
+   * poder entrar), pero no la de los demás quirófanos: el listado se recorta a lo que su
+   * alcance contiene. Quien lo tiene por estructura o por un rol global ve todos.
+   *
+   * @param tx - Transacción activa.
+   * @param actor - Quien lee.
+   * @param action - Acción de lectura de la política.
+   * @param site - Sede de la lista.
+   * @param rooms - Quirófanos candidatos (de la sede y del tenant).
+   * @returns Los que el actor ve, en el mismo orden.
+   */
+  async visibleRooms(
+    tx: EntityManager,
+    actor: AuthenticatedUser,
+    action: InfraF4Action,
+    site: PracticeSites,
+    rooms: readonly CareSpaces[],
+  ): Promise<CareSpaces[]> {
+    if (await this.grantedBroadly(tx, actor, action, site)) return [...rooms];
+    const visible: CareSpaces[] = [];
+    for (const space of rooms) {
+      if (await this.holdsDelegated(tx, actor, action, { site, space })) {
+        visible.push(space);
+      }
+    }
+    return visible;
+  }
+
+  /** Concedida por estructura (plataforma, organización, sucursal) o por un rol global. */
+  private async grantedBroadly(
+    tx: EntityManager,
+    actor: AuthenticatedUser,
+    action: InfraF4Action,
+    site: PracticeSites,
+  ): Promise<boolean> {
     const tenantId = requireTenantId();
     const rule = INFRA_F4_POLICY[action];
     const access = await this.structure.resolve(tx, tenantId, actor);
 
     if (
       rule.structureAdmin &&
-      this.structure.canSee(access, target.site) &&
+      this.structure.canSee(access, site) &&
       (access.level === 'PLATFORM' ||
         access.level === 'ORG' ||
         access.level === 'BRANCH_ADMIN')
@@ -135,24 +176,17 @@ export class OperatingRoomAccessService {
       // (el jefe de quirófano de un tenant opera todos sus bloques quirúrgicos).
       return access.level !== 'NONE' || actor.roles.includes('SUPERADMIN');
     }
-    for (const key of rule.delegatedRoleKeys) {
-      const roleConceptId = delegatedRoleConceptId(key);
-      const held = target.space
-        ? await this.scope.holdsRoleOverSpace(tx, {
-            userId: actor.id,
-            tenantId,
-            roleConceptId,
-            careSpaceId: target.space.id,
-          })
-        : await this.scope.holdsRoleInSite(tx, {
-            userId: actor.id,
-            tenantId,
-            roleConceptId,
-            siteId: target.site.id,
-          });
-      if (held) return true;
-    }
     return false;
+  }
+
+  /** Concedida por una asignación delegada vigente cuyo alcance contiene el objetivo. */
+  private holdsDelegated(
+    tx: EntityManager,
+    actor: AuthenticatedUser,
+    action: InfraF4Action,
+    target: OperatingRoomTarget,
+  ): Promise<boolean> {
+    return this.holdsAnyDelegated(tx, actor, requireTenantId(), action, target);
   }
 
   /**

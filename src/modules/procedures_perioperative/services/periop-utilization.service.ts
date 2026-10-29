@@ -157,12 +157,18 @@ export class PeriopUtilizationService {
     );
     const groupBy = query.groupBy ?? 'room';
 
-    const rooms = await this.em.find(CareSpaces, {
-      tenantId,
-      practiceSiteId: siteId,
-      spaceTypeConceptId: PRAC.SPACE_FN_OPERATING_ROOM,
-      ...(query.operatingRoomId ? { id: query.operatingRoomId } : {}),
-    });
+    const rooms = await this.access.visibleRooms(
+      this.em,
+      actor,
+      'OR_UTILIZATION_VIEW',
+      site,
+      await this.em.find(CareSpaces, {
+        tenantId,
+        practiceSiteId: siteId,
+        spaceTypeConceptId: PRAC.SPACE_FN_OPERATING_ROOM,
+        ...(query.operatingRoomId ? { id: query.operatingRoomId } : {}),
+      }),
+    );
     if (query.operatingRoomId && rooms.length === 0)
       throw operatingRoomNotFound();
     const roomIds = rooms.map((r) => r.id);

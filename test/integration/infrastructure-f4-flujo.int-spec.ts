@@ -22,9 +22,9 @@ import {
  *   sala → cierre del caso (reporte firmado) → utilización, con recarga desde la base en
  *   cada paso que cambia algo.
  *
- * El único doble es el puerto de operación de espacios de F2 (`CARE_SPACE_OPS_PORT`), que
- * no existe en esta rama: registra las llamadas y devuelve una orden de limpieza conocida.
- * Todo lo demás —API, base, outbox, historia— es el real.
+ * El único doble es el puerto de operación de espacios de F2 (`CARE_SPACE_OPS_PORT`): registra
+ * las llamadas y devuelve una orden de limpieza conocida (con el puerto real, la orden se
+ * prueba en infrastructure-integracion-puerto-real). Todo lo demás —API, base, outbox, historia— es el real.
  *
  * Fixture etiquetada: la firma electrónica (`chart.clinical_note_signatures`) pertenece al
  * módulo clínico, ajeno a F4; se inserta por SQL con las FK relajadas sólo para esa fila.

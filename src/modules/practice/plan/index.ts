@@ -23,9 +23,9 @@ export const FLOOR_PLAN_CONTROLLERS = [
 /**
  * Proveedores del plano de planta (F1c), para registrar en `PracticeModule`.
  *
- * El estado operativo entra por el token {@link PLAN_OPERATIONAL_STATE}: F2
- * puede reemplazar `DefaultPlanOperationalState` por su lector del tablero sin
- * tocar el resto del plano.
+ * El estado operativo entra por el token {@link PLAN_OPERATIONAL_STATE}: otro
+ * lector puede reemplazar `DefaultPlanOperationalState` sin tocar el resto del
+ * plano.
  */
 export const FLOOR_PLAN_PROVIDERS = [
   FloorPlansRepository,

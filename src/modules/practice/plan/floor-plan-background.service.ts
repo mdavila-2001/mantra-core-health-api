@@ -126,7 +126,7 @@ export class FloorPlanBackgroundService {
         throw practiceOutOfScope('Archivo no encontrado');
       }
       if (file.tenantId !== tenantId) {
-        // `POST /common/files/upload` deja TODO archivo en el tenant técnico
+        // `POST /common/files/upload` deja cada archivo en el tenant técnico
         // (SEED), con su autor. Quien lo subió puede traerlo al tenant del
         // lienzo, que es lo que exige la FK compuesta de la base (misma
         // maniobra que `claimAnonymousUpload`). Cualquier otro caso, incluido

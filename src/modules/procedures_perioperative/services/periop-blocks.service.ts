@@ -389,7 +389,11 @@ export class PeriopBlocksService {
       siteId,
       tenantId,
       query.operatingRoomId,
+      { actor, site },
     );
+    if (query.operatingRoomId && roomIds.length === 0) {
+      throw operatingRoomNotFound();
+    }
     const blocks = await this.repo.list(this.em, tenantId, {
       roomIds,
       from,
@@ -432,14 +436,20 @@ export class PeriopBlocksService {
     const from = day.toJSDate();
     const to = day.plus({ days: 1 }).toJSDate();
 
-    const spaces = await this.em.find(
-      CareSpaces,
-      {
-        tenantId,
-        practiceSiteId: siteId,
-        spaceTypeConceptId: this.operatingRoomFunction(),
-      },
-      { orderBy: { code: 'ASC' } },
+    const spaces = await this.access.visibleRooms(
+      this.em,
+      actor,
+      'OR_SCHEDULE_VIEW',
+      site,
+      await this.em.find(
+        CareSpaces,
+        {
+          tenantId,
+          practiceSiteId: siteId,
+          spaceTypeConceptId: this.operatingRoomFunction(),
+        },
+        { orderBy: { code: 'ASC' } },
+      ),
     );
     const resources = spaces.length
       ? await this.em.find(SchedulableResources, {
@@ -1085,10 +1095,12 @@ export class PeriopBlocksService {
       : DEFAULT_OR_BLOCK_RELEASE_HOURS;
   }
 
+  /** Quirófanos de la sede que el actor ve con la lectura de agenda (alcance incluido). */
   private async siteRoomIds(
     siteId: string,
     tenantId: string,
-    onlyRoomId?: string,
+    onlyRoomId: string | undefined,
+    viewer: { actor: AuthenticatedUser; site: PracticeSites },
   ): Promise<string[]> {
     const spaces = await this.em.find(CareSpaces, {
       tenantId,
@@ -1096,7 +1108,14 @@ export class PeriopBlocksService {
       spaceTypeConceptId: this.operatingRoomFunction(),
       ...(onlyRoomId ? { id: onlyRoomId } : {}),
     });
-    return spaces.map((s) => s.id);
+    const visible = await this.access.visibleRooms(
+      this.em,
+      viewer.actor,
+      'OR_SCHEDULE_VIEW',
+      viewer.site,
+      spaces,
+    );
+    return visible.map((s) => s.id);
   }
 
   private operatingRoomFunction(): string {

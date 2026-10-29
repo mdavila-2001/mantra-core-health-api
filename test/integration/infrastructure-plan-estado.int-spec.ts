@@ -61,7 +61,7 @@ describe('Infraestructura F1c · plano · estado y tarjeta del paciente', () => 
       .get(`/care-spaces/${spaceId}/plan-card`)
       .set(como(who === 'dueno' ? org.token : users[who].token, org.tenantId));
 
-  /** Un paciente ingresado en una cama (fixture SQL: F3 aún no expone el ADT en esta rama). */
+  /** Un paciente ingresado en una cama (fixture SQL: el ADT real se prueba en infrastructure-f3-adt). */
   async function ingresar(
     bedId: string,
     name: string,
