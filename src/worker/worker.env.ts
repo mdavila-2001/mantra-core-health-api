@@ -26,6 +26,7 @@ import 'dotenv/config';
 
 import * as Joi from 'joi';
 import { SEED } from '../common/constants/concepts';
+import { parseAllowedRecipientDomains } from './jobs/messaging/email-recipient-domain-guard';
 
 /**
  * Esquema de entorno compartido por los 17 procesos worker
@@ -171,6 +172,14 @@ export const workerEnvSchema = Joi.object({
   GOOGLE_OAUTH_REFRESH_TOKEN: Joi.string().allow('').default(''),
   /** Buzón remitente real (debe ser la misma cuenta que otorgó el consentimiento OAuth2). */
   GOOGLE_SENDER_EMAIL: Joi.string().allow('').default(''),
+  /**
+   * Guarda opt-in para dev/test: dominios (separados por coma, p. ej.
+   * `alovida.test`) a los que el canal EMAIL puede entregar. Comparación
+   * exacta del dominio, sin distinguir mayúsculas; los subdominios no entran
+   * salvo que se listen. Lo demás se suprime sin llamar al proveedor (ver
+   * `email-recipient-domain-guard.ts`). Vacía = producción, sin restricción.
+   */
+  EMAIL_ALLOWED_RECIPIENT_DOMAINS: Joi.string().allow('').default(''),
 }).unknown(true);
 
 /**
@@ -199,6 +208,8 @@ export interface WorkerEnv {
   googleOAuthClientSecret: string;
   googleOAuthRefreshToken: string;
   googleSenderEmail: string;
+  /** Dominios a los que se permite entregar correo; vacío = sin restricción. */
+  emailAllowedRecipientDomains: string[];
 }
 
 /**
@@ -271,6 +282,9 @@ export function loadWorkerEnv(): WorkerEnv {
     googleOAuthClientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET ?? '',
     googleOAuthRefreshToken: process.env.GOOGLE_OAUTH_REFRESH_TOKEN ?? '',
     googleSenderEmail: process.env.GOOGLE_SENDER_EMAIL ?? '',
+    emailAllowedRecipientDomains: parseAllowedRecipientDomains(
+      process.env.EMAIL_ALLOWED_RECIPIENT_DOMAINS,
+    ),
   };
 }
 

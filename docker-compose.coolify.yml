@@ -278,6 +278,14 @@ x-app-env: &app-env
   GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET:-}
   GOOGLE_OAUTH_REFRESH_TOKEN: ${GOOGLE_OAUTH_REFRESH_TOKEN:-}
   GOOGLE_SENDER_EMAIL: ${GOOGLE_SENDER_EMAIL:-}
+  # Guarda de destinatarios para dev/test. Lista de dominios separada por comas
+  # (p. ej. `alovida.test`): el canal EMAIL solo entrega a esos dominios
+  # (comparación exacta, sin distinguir mayúsculas; subdominios solo si se
+  # listan) y suprime el resto sin llamar al proveedor. VACÍA = sin
+  # restricción, que es lo que corresponde en producción. La lee
+  # `worker-messaging`, que es quien envía; la API la recibe por compartir el
+  # bloque y la ignora.
+  EMAIL_ALLOWED_RECIPIENT_DOMAINS: ${EMAIL_ALLOWED_RECIPIENT_DOMAINS:-}
 
   # --- Audio / TTS --------------------------------------------------------
   # El único subsistema que puede COSTAR DINERO por ejecución, y por eso lleva
