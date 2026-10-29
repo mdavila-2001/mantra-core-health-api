@@ -1,6 +1,5 @@
 import { randomUUID } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
-import type { EntityData } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { AUD } from '../../audit/audit.concepts';
 import { HistoryRepository } from '../../audit/repositories';
@@ -243,16 +242,13 @@ export class OpsRecorder {
       ...patch,
       opsVersion: row.opsVersion + 1,
     };
-    const affected = await tx.nativeUpdate(
-      CareSpaces,
-      { id: row.id, opsVersion: row.opsVersion },
-      {
-        ...(patch as EntityData<CareSpaces>),
-        opsVersion: next.opsVersion,
-        updatedAt: now,
-        updatedByUserId: ctx.actorUserId ?? undefined,
-      },
-    );
+    const applied = await this.updateRow(tx, row, {
+      ...(patch as Record<string, unknown>),
+      ops_version: next.opsVersion,
+      updated_at: now,
+      updated_by_user_id: ctx.actorUserId,
+    });
+    const affected = applied ? 1 : 0;
     if (affected === 0) throw new OpsVersionMismatchException();
 
     const state = await this.state.stateOf(tx, next, now);
@@ -286,11 +282,11 @@ export class OpsRecorder {
   ): Promise<RecordedEvent | null> {
     if (from === to) return null;
     const now = ctx.now ?? new Date();
-    const affected = await tx.nativeUpdate(
-      CareSpaces,
-      { id: row.id, opsVersion: row.opsVersion },
-      { opsVersion: row.opsVersion + 1, updatedAt: now },
-    );
+    const applied = await this.updateRow(tx, row, {
+      ops_version: row.opsVersion + 1,
+      updated_at: now,
+    });
+    const affected = applied ? 1 : 0;
     if (affected === 0) throw new OpsVersionMismatchException();
     const next: SpaceOpsRow = { ...row, opsVersion: row.opsVersion + 1 };
     const state = await this.state.stateOf(tx, next, now, to);
@@ -308,6 +304,48 @@ export class OpsRecorder {
       ctx,
       now,
     );
+  }
+
+  /**
+   * `UPDATE` de las columnas operativas con compare-and-set sobre `ops_version`.
+   *
+   * Es SQL directo a propósito: el `nativeUpdate` del ORM sube `row_version` en todo
+   * `UPDATE` de una entidad versionada, y la operación de camas no debe moverla (la
+   * edición de estructura usa `If-Match` sobre `row_version`; CONTRATO-F2-F5 §F2.1).
+   *
+   * @returns `true` si la fila seguía en la versión operativa leída.
+   */
+  private async updateRow(
+    tx: EntityManager,
+    row: SpaceOpsRow,
+    columns: Record<string, unknown>,
+  ): Promise<boolean> {
+    const names: Record<string, string> = {
+      operationalStatusConceptId: 'operational_status_concept_id',
+      availabilityReasonConceptId: 'availability_reason_concept_id',
+      availabilityExpectedUntil: 'availability_expected_until',
+      availabilityChangedAt: 'availability_changed_at',
+      hygieneStatusConceptId: 'hygiene_status_concept_id',
+      hygieneChangedAt: 'hygiene_changed_at',
+      terminalCleaningRequired: 'terminal_cleaning_required',
+      isolationConceptId: 'isolation_concept_id',
+      isolationOrganismText: 'isolation_organism_text',
+      isolationChangedAt: 'isolation_changed_at',
+    };
+    const entries = Object.entries(columns)
+      .filter(([, value]) => value !== undefined)
+      .map(([key, value]) => [names[key] ?? key, value] as const);
+    const updated = await tx.execute<{ id: string }[]>(
+      `update practice.care_spaces set ${entries.map(([c]) => `${c} = ?`).join(', ')}
+        where id = ? and tenant_id = ? and ops_version = ? returning id`,
+      [
+        ...entries.map(([, value]) => value),
+        row.id,
+        row.tenantId,
+        row.opsVersion,
+      ],
+    );
+    return updated.length > 0;
   }
 
   /** Inserta el evento A20 y publica `practice.care_space.status_changed`. */

@@ -70,6 +70,8 @@ export interface SpaceOpsRow {
   readonly isolationOrganismText: string | null;
   readonly isolationChangedAt: Date | null;
   readonly opsVersion: number;
+  /** Versión de estructura: la operación la conserva, no la sube. */
+  readonly rowVersion: number;
   readonly pressureConceptId: string | null;
   readonly airChangesPerHour: number | null;
   /** `YYYY-MM-DD`. */
@@ -82,7 +84,7 @@ export const SPACE_OPS_COLUMNS = `cs.id, cs.tenant_id, cs.practice_site_id, cs.p
   cs.valid_from, cs.valid_to, cs.operational_status_concept_id,
   cs.availability_reason_concept_id, cs.availability_expected_until, cs.availability_changed_at,
   cs.hygiene_status_concept_id, cs.hygiene_changed_at, cs.terminal_cleaning_required,
-  cs.isolation_concept_id, cs.isolation_organism_text, cs.isolation_changed_at, cs.ops_version,
+  cs.isolation_concept_id, cs.isolation_organism_text, cs.isolation_changed_at, cs.ops_version, cs.row_version,
   cs.pressure_concept_id, cs.air_changes_per_hour, to_char(cs.hvac_validated_on, 'YYYY-MM-DD') as hvac_validated_on`;
 
 /** Mapea una fila cruda a {@link SpaceOpsRow}. */
@@ -111,6 +113,7 @@ export function toSpaceOpsRow(raw: Record<string, unknown>): SpaceOpsRow {
     isolationOrganismText: text(raw.isolation_organism_text),
     isolationChangedAt: date(raw.isolation_changed_at),
     opsVersion: Number(raw.ops_version),
+    rowVersion: Number(raw.row_version),
     pressureConceptId: text(raw.pressure_concept_id),
     airChangesPerHour: int(raw.air_changes_per_hour),
     hvacValidatedOn: text(raw.hvac_validated_on),
