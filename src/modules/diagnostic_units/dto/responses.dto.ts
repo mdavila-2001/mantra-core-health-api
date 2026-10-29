@@ -175,6 +175,53 @@ export class EquipmentResponseDto {
     format: 'uuid',
   })
   operationalStatus!: string;
+
+  /** Sala donde está el equipo (F5a); ausente si no está ubicado. */
+  @ApiProperty({ format: 'uuid', required: false })
+  careSpaceId?: string;
+
+  /** AE Title DICOM (F5a); ausente si no tiene. */
+  @ApiProperty({ required: false, maxLength: 16 })
+  aeTitle?: string;
+
+  /** Nombre de la estación (0040,0010); ausente si no tiene. */
+  @ApiProperty({ required: false, maxLength: 16 })
+  stationName?: string;
+
+  /**
+   * Reservas futuras que el cambio de estado dejó en pie por haberse reconocido
+   * (`acknowledgeConflicts`): hay que reprogramarlas, cada una con su próxima acción.
+   */
+  @ApiProperty({ required: false, type: 'array', items: { type: 'object' } })
+  conflicts?: {
+    kind: 'BOOKING';
+    id: string;
+    startsAt: string;
+    nextAction: string;
+  }[];
+}
+
+/** Estación DICOM del equipo para la Modality Worklist (F5a). */
+export class MwlStationDto {
+  /** Id del equipo. */
+  @ApiProperty({ format: 'uuid' })
+  equipmentId!: string;
+
+  /** Scheduled Station AE Title (0040,0001); `null` si el equipo no tiene AE Title. */
+  @ApiProperty({ nullable: true, type: String })
+  scheduledStationAETitle!: string | null;
+
+  /** Scheduled Station Name (0040,0010); `null` si no tiene. */
+  @ApiProperty({ nullable: true, type: String })
+  scheduledStationName!: string | null;
+
+  /** Scheduled Procedure Step Location (0040,0011): el código de la sala; `null` si no está ubicado. */
+  @ApiProperty({ nullable: true, type: String })
+  spsLocation!: string | null;
+
+  /** Sala donde está el equipo. */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  careSpaceId!: string | null;
 }
 
 /** Respuesta tras registrar/renovar una acreditación. */
