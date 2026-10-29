@@ -629,10 +629,11 @@
       ]
     },
     {
-      "reason": "Corrección del perfil profesional por `:profileId`: `ProfileOwnershipService.assertOwnsPractitionerProfile` exige ser el titular del perfil o SECURITY_ADMIN/SUPERADMIN (403 a un colega). Un `@Roles` de plataforma dejaría fuera al titular.",
+      "reason": "Corrección del perfil profesional por `:profileId`: `ProfileOwnershipService.assertOwnsPractitionerProfile` exige ser el titular del perfil o tener SECURITY_ADMIN/SUPERADMIN **global** (un rol concedido dentro de una organización no cuenta: `isPlatform` lo evalúa con `roleAuthorizesInTenant` sin tenant); a cualquier otro, 403. Un `@Roles` de plataforma dejaría fuera al titular.",
       "evidence": [
         "src/modules/profiles/application/services/profiles-practitioners.service.ts#updatePractitionerProfile",
-        "src/modules/profiles/application/services/profile-ownership.service.ts#assertOwnsPractitionerProfile"
+        "src/modules/profiles/application/services/profile-ownership.service.ts#assertOwnsPractitionerProfile",
+        "src/modules/profiles/application/services/profile-ownership.service.ts#isPlatform"
       ],
       "routes": [
         "PATCH /profiles/practitioners/:profileId"

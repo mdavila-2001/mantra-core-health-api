@@ -8,6 +8,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
   deterministicId,
+  getCurrentTenantId,
   requireTenantId,
   roleAuthorizesInTenant,
   touch,
@@ -643,12 +644,13 @@ export class PharmacyOrdersUseCases {
       actor.patientProfileId !== undefined &&
       order.patientProfileId === actor.patientProfileId;
     // El rol se evalúa con su ámbito (la regla del `RolesGuard`): un
-    // PHARMACY_STAFF concedido en otra organización no atiende en esta.
-    const tenantId = isOwner ? undefined : requireTenantId();
+    // PHARMACY_STAFF concedido en otra organización no atiende en esta. El
+    // tenant se lee sin exigirlo: exigirlo antes del 404 diría a un tercero
+    // sin tenant si el pedido existe.
     const isPharmacyStaff = roleAuthorizesInTenant(
       actor,
       CHAT_STAFF_ROLE,
-      tenantId,
+      getCurrentTenantId(),
     );
     if (!isOwner && !isPharmacyStaff) throw orderNotFound(id);
 
@@ -656,7 +658,7 @@ export class PharmacyOrdersUseCases {
     // si la farmacia del pedido es del tenant activo de su request.
     const [pharmacy] = await this.ordersRepo.findPharmaciesByIdsInTenant(
       em,
-      tenantId,
+      isOwner ? undefined : requireTenantId(),
       [order.pharmacyId],
     );
     if (!pharmacy) throw orderNotFound(id);

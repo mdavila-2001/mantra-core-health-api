@@ -1203,6 +1203,20 @@ describe('PharmacyOrdersService', () => {
       expect(d.orderChat.openOrderConversation).not.toHaveBeenCalled();
     });
 
+    it('un tercero sin tenant recibe 404 y no un 412 que confirme el pedido', async () => {
+      const d = build();
+      d.ordersRepo.findOrderById.mockResolvedValue(order());
+
+      await expect(
+        d.service.openConversation('order-1', {
+          id: 'user-2',
+          roles: ['PATIENT'],
+          patientProfileId: 'pat-2',
+        } as any),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.ordersRepo.findPharmaciesByIdsInTenant).not.toHaveBeenCalled();
+    });
+
     it('un pedido inexistente responde 404', async () => {
       const d = build();
 
