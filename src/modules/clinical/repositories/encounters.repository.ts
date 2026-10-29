@@ -106,6 +106,11 @@ export interface CreateLocationData {
    */
   encounterId: string;
   /**
+   * Tenant del encuentro: `encounter_locations.tenant_id` es NOT NULL desde el
+   * modelo de F3 (la base lo completaría, pero el ORM exige el valor al insertar).
+   */
+  tenantId: string;
+  /**
    * Identificador asociado a practice site.
    */
   practiceSiteId: string;
@@ -238,6 +243,7 @@ export class EncountersRepository {
       EncounterLocations,
       {
         encounterId: data.encounterId,
+        tenantId: data.tenantId,
         practiceSiteId: data.practiceSiteId,
         clinicalUnitId: data.clinicalUnitId,
         careSpaceId: data.careSpaceId,

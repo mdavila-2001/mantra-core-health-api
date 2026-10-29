@@ -19,6 +19,7 @@ import {
 } from '../dto';
 import { Encounters } from '../entities';
 import { CLIN } from '../clinical.concepts';
+import { PRAC } from '../../practice/practice.concepts';
 import { ClinicalNotificationsService } from './clinical-notifications.service';
 import { EncounterSealService } from './encounter-seal.service';
 import { ClinicalReadService } from './clinical-read.service';
@@ -173,6 +174,10 @@ export class EncountersService {
         }
       }
 
+      if (dto.location?.careSpaceId) {
+        await this.assertNotABed(tx, dto.location.careSpaceId, dto.tenantId);
+      }
+
       const now = new Date();
       const encounter = this.encountersRepo.create(tx, {
         patientProfileId: dto.patientProfileId,
@@ -210,6 +215,7 @@ export class EncountersService {
       if (dto.location) {
         const location = this.encountersRepo.createLocation(tx, {
           encounterId: encounter.id,
+          tenantId: dto.tenantId,
           practiceSiteId: dto.location.practiceSiteId,
           clinicalUnitId: dto.location.clinicalUnitId,
           careSpaceId: dto.location.careSpaceId,
@@ -250,6 +256,34 @@ export class EncountersService {
       actor,
     );
     return response;
+  }
+
+  /**
+   * Las camas sólo se ocupan por ADT (F3): un check-in no puede ubicar al
+   * paciente en una cama. Un espacio que no existe o es de otro tenant sigue su
+   * camino de siempre (la FK responde); no se confirma que exista.
+   *
+   * @param tx - Transacción del check-in.
+   * @param careSpaceId - Espacio pedido en `location`.
+   * @param tenantId - Tenant del check-in.
+   * @throws PreconditionFailedException (422 `BED_ASSIGNMENT_REQUIRES_ADT`).
+   */
+  private async assertNotABed(
+    tx: EntityManager,
+    careSpaceId: string,
+    tenantId: string,
+  ): Promise<void> {
+    const rows = await tx.execute<{ form: string | null }[]>(
+      'select form_concept_id as form from practice.care_spaces where id = ? and tenant_id = ?',
+      [careSpaceId, tenantId],
+    );
+    if (rows[0]?.form === PRAC.LOC_FORM_BED) {
+      throw new PreconditionFailedException(
+        'Una cama se ocupa con el ingreso o el traslado de internación, no con el check-in',
+        { careSpaceId },
+        ClinicalErrorReason.BED_ASSIGNMENT_REQUIRES_ADT,
+      );
+    }
   }
 
   /**
@@ -402,47 +436,7 @@ export class EncountersService {
         );
       }
 
-      const now = new Date();
-      encounter.statusConceptId = CLIN.ENCOUNTER_FINISHED;
-      encounter.endAt = now;
-      touch(encounter, actor.id);
-
-      const participants = await this.encountersRepo.findActiveParticipants(
-        tx,
-        encounterId,
-        CLIN.PARTICIPANT_ACTIVE,
-      );
-      for (const p of participants) {
-        p.periodEnd = now;
-        p.statusConceptId = CLIN.PARTICIPANT_COMPLETED;
-        touch(p, actor.id);
-      }
-
-      const locations = await this.encountersRepo.findActiveLocations(
-        tx,
-        encounterId,
-        CLIN.LOCATION_ACTIVE,
-      );
-      for (const l of locations) {
-        l.periodEnd = now;
-        l.locationStatusConceptId = CLIN.LOCATION_COMPLETED;
-        touch(l, actor.id);
-      }
-
-      encounter.contentHash = await this.seal.computeHash(tx, encounter);
-      encounter.sealedAt = now;
-
-      await tx.flush();
-
-      this.logger.info(
-        { operation: 'clinical.encounter.close', encounterId },
-        'Encounter closed',
-      );
-      return this.toResponse(
-        encounter,
-        participants.map((p) => p.id),
-        locations.map((l) => l.id),
-      );
+      return this.finalize(tx, encounter, new Date(), actor);
     });
 
     // Carril P1: «tu consulta está disponible». Fuera de la transacción por lo
@@ -454,5 +448,100 @@ export class EncountersService {
       actor.id,
     );
     return closed;
+  }
+
+  /**
+   * Cierre del encuentro de internación por egreso (F3), **dentro de la
+   * transacción del ADT**.
+   *
+   * Reutiliza el mismo cierre que {@link close} (estado, fin, participantes y
+   * ubicaciones vigentes, sello SHA-256) pero no pide el acceso de escritura a la
+   * historia: el egreso lo registran Enfermería y Admisión, y su permiso lo decide
+   * la política de F3 antes de llegar acá. El `If-Match` y el alcance ya se
+   * comprobaron sobre el encuentro bloqueado.
+   *
+   * @param tx - Transacción del egreso.
+   * @param encounterId - Encuentro de internación en curso.
+   * @param input - Fin real del encuentro y disposición.
+   * @param actor - Quien registra el egreso.
+   * @returns El encuentro cerrado.
+   * @throws PreconditionFailedException (422 `ENCOUNTER_NOT_IN_PROGRESS`) si ya no está en curso.
+   */
+  async completeForDischarge(
+    tx: EntityManager,
+    encounterId: string,
+    input: { endAt: Date; dischargeDispositionConceptId: string },
+    actor: AuthenticatedUser,
+  ): Promise<EncounterResponseDto> {
+    const encounter = await this.encountersRepo.findById(tx, encounterId);
+    if (!encounter) {
+      throw new ResourceNotFoundException(
+        'Encuentro no encontrado',
+        { encounterId },
+        ClinicalErrorReason.ENCOUNTER_NOT_FOUND,
+      );
+    }
+    if (encounter.statusConceptId !== CLIN.ENCOUNTER_IN_PROGRESS) {
+      throw new PreconditionFailedException(
+        'El encuentro no está en curso',
+        { encounterId, status: encounter.statusConceptId },
+        ClinicalErrorReason.ENCOUNTER_NOT_IN_PROGRESS,
+      );
+    }
+    encounter.dischargeDispositionConceptId =
+      input.dischargeDispositionConceptId;
+    return this.finalize(tx, encounter, input.endAt, actor);
+  }
+
+  /**
+   * Cierra el encuentro: estado, fin, participantes y ubicaciones vigentes y
+   * sello. Es el cuerpo común de {@link close} y {@link completeForDischarge}.
+   */
+  private async finalize(
+    tx: EntityManager,
+    encounter: Encounters,
+    endAt: Date,
+    actor: AuthenticatedUser,
+  ): Promise<EncounterResponseDto> {
+    encounter.statusConceptId = CLIN.ENCOUNTER_FINISHED;
+    encounter.endAt = endAt;
+    touch(encounter, actor.id);
+
+    const participants = await this.encountersRepo.findActiveParticipants(
+      tx,
+      encounter.id,
+      CLIN.PARTICIPANT_ACTIVE,
+    );
+    for (const p of participants) {
+      p.periodEnd = endAt;
+      p.statusConceptId = CLIN.PARTICIPANT_COMPLETED;
+      touch(p, actor.id);
+    }
+
+    const locations = await this.encountersRepo.findActiveLocations(
+      tx,
+      encounter.id,
+      CLIN.LOCATION_ACTIVE,
+    );
+    for (const l of locations) {
+      l.periodEnd = endAt;
+      l.locationStatusConceptId = CLIN.LOCATION_COMPLETED;
+      touch(l, actor.id);
+    }
+
+    encounter.contentHash = await this.seal.computeHash(tx, encounter);
+    encounter.sealedAt = endAt;
+
+    await tx.flush();
+
+    this.logger.info(
+      { operation: 'clinical.encounter.close', encounterId: encounter.id },
+      'Encounter closed',
+    );
+    return this.toResponse(
+      encounter,
+      participants.map((p) => p.id),
+      locations.map((l) => l.id),
+    );
   }
 }
