@@ -125,6 +125,9 @@ interface SourceInput {
   readonly verificationSourceUri?: string;
 }
 
+/** Clave del cerrojo del barrido: el mismo texto en todos los nodos. */
+const SWEEP_LOCK_KEY = 'profiles.admissions.expire-sweep';
+
 const NOT_BLANK = (value: string | undefined): value is string =>
   value !== undefined && value.trim() !== '';
 
@@ -879,6 +882,38 @@ export class PractitionerAdmissionsService {
     caller: AdmissionCaller,
     limit = 200,
   ): Promise<AdmissionSweepResultDto> {
+    // Un solo barrido a la vez, en todo el despliegue. Cada admisión ya se baja
+    // con `FOR UPDATE` y se vuelve a comprobar (dos barridos no la bajan dos
+    // veces), así que el cerrojo no protege el dato sino el trabajo: dos nodos
+    // no recorren las mismas filas a la vez ni duplican avisos en cola. Es un
+    // bloqueo consultivo de transacción tomado en una transacción PROPIA que no
+    // escribe nada y se suelta al terminar (también si el proceso muere: la
+    // base lo libera con la conexión). El trabajo de cada admisión corre en sus
+    // propias transacciones, como antes.
+    const guard = this.em.fork();
+    await guard.begin();
+    try {
+      const lock = await guard.execute<{ locked: boolean }[]>(
+        'select pg_try_advisory_xact_lock(hashtext(?)) as locked',
+        [SWEEP_LOCK_KEY],
+      );
+      if (!lock[0]?.locked) {
+        this.logger.info(
+          { operation: 'profiles.admission.expire-sweep', skipped: true },
+          'Admissions sweep skipped: another node holds the lock',
+        );
+        return { expired: 0, abandoned: 0, skipped: true };
+      }
+      return await this.sweepLocked(caller, limit);
+    } finally {
+      await guard.rollback().catch(() => undefined);
+    }
+  }
+
+  private async sweepLocked(
+    caller: AdmissionCaller,
+    limit: number,
+  ): Promise<AdmissionSweepResultDto> {
     const role = caller.user.roles.includes('SYSTEM')
       ? 'SYSTEM'
       : 'SECURITY_ADMIN';
@@ -958,7 +993,7 @@ export class PractitionerAdmissionsService {
       );
     }
     await this.emit(notices);
-    return { expired, abandoned };
+    return { expired, abandoned, skipped: false };
   }
 
   // ═══════════════════════════════════════════════════ el médico ══

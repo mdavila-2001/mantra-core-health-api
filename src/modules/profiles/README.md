@@ -204,7 +204,7 @@ checklist de requisitos por tipo (`admission_requirements`), una revisión por
 | `POST /admissions/:id/decision`, `suspend`, `reinstate` | aprobador | Resolver (cuatro ojos configurable), suspender, reponer |
 | `POST /admissions/:id/documents/:fileId/download-url` y `GET .../content` | revisor, aprobador | URL firmada de 2 min atada a usuario+admisión+archivo, auditada |
 | `GET /profiles/practitioners/me/admission`, `POST .../resubmit`, `.../withdraw` | el propio profesional | Su caso, sin notas internas ni revisor |
-| `POST /admissions/expire-sweep` | `SYSTEM`, `SECURITY_ADMIN` | Baja vencidas y abandona sin respuesta |
+| `POST /admissions/expire-sweep` | `SYSTEM`, `SECURITY_ADMIN` | Baja vencidas y abandona sin respuesta; un cerrojo consultivo deja correr un solo barrido (`skipped: true` si otro nodo lo tiene). Lo dispara cada hora el worker `profiles` (`ADMISSIONS_EXPIRE_SWEEP_ENABLED` / `ADMISSIONS_EXPIRE_SWEEP_CRON`) |
 
 Reglas que no se negocian:
 
