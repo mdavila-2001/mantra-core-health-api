@@ -182,7 +182,7 @@ export const BUILT_IN_RETIRE_BLOCKERS: readonly RetireBlockerProvider[] = [
       sample(
         context,
         'INVENTORY_LOCATION',
-        'Transferir el stock a otra ubicación de inventario',
+        'Transferir el stock o reubicar el depósito',
         `select l.id from pharmacy_inventory.inventory_locations l
            join sub on l.care_space_id = sub.id
           where exists (

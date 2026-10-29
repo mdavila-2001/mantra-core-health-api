@@ -1,19 +1,26 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   Audited,
   CurrentUser,
   Roles,
   type AuthenticatedUser,
 } from '../../../../common';
+import type { SpaceStockView } from '../dto/space-stock.types';
 import {
   InventoryLocationsService,
   InventoryReservationsService,
@@ -21,7 +28,10 @@ import {
   InventoryCountService,
   InventoryRecallService,
 } from '../../services';
+import { IfMatch } from '../../../practice/http/request-decorators';
 import {
+  RelocateLocationDto,
+  LocationResponseDto,
   CreateLocationDto,
   CreateReservationDto,
   CreateTransferDto,
@@ -62,22 +72,70 @@ export class PharmacyInventoryController {
     private readonly recalls: InventoryRecallService,
   ) {}
 
-  /** Bootstrap: alta de ubicación de inventario. */
+  /**
+   * Alta de ubicación de inventario. Sin `@Roles` global: la autoridad es el personal de
+   * farmacia del tenant o la administración (organización, sucursal) de la sede de
+   * práctica de la farmacia (`StockPointAccessService`).
+   */
   @Audited({
     action: 'INVENTORY_LOCATION_CREATED',
     entity: 'inventory_location',
     entityId: 'result.id',
   })
   @Post(':siteId/inventory-locations')
-  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Crear una ubicación de inventario' })
+  @ApiOperation({
+    summary:
+      'Crear una ubicación de inventario (estante, depósito en un espacio o botiquín de una unidad)',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Sede, espacio o unidad de otro tenant o fuera de la sucursal',
+  })
+  @ApiResponse({ status: 409, description: '`WARD_STOCK_ALREADY_EXISTS`' })
+  @ApiResponse({
+    status: 422,
+    description: '`STOCK_POINT_SITE_MISMATCH`, `SPACE_NOT_STOCK_POINT`…',
+  })
   createLocation(
     @Param('siteId', ParseUUIDPipe) siteId: string,
     @Body() dto: CreateLocationDto,
     @CurrentUser() actor: AuthenticatedUser,
-  ): Promise<IdResponseDto> {
+  ): Promise<LocationResponseDto> {
     return this.locations.create(siteId, dto, actor);
+  }
+
+  /** F5c: el stock sigue a la ubicación; sólo cambia su espacio. */
+  @Audited({
+    action: 'INVENTORY_LOCATION_RELOCATED',
+    entity: 'inventory_location',
+    entityId: 'param:id',
+  })
+  @Post('inventory-locations/:id/relocate')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Reubicar una ubicación de inventario en otro espacio (el stock la sigue)',
+  })
+  relocateLocation(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: RelocateLocationDto,
+    @IfMatch() expectedRowVersion: number,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<LocationResponseDto> {
+    return this.locations.relocate(id, dto, expectedRowVersion, actor);
+  }
+
+  /** F5c: pestaña «Stock» de la ficha de espacio (solo lectura). */
+  @Get('care-spaces/:id/inventory-locations')
+  @ApiOperation({
+    summary: 'Ubicaciones de inventario de un espacio y sus existencias',
+  })
+  spaceStock(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<SpaceStockView> {
+    return this.locations.spaceStock(id, actor);
   }
 
   /** UC-25-04: reservar stock. */

@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
+  IsIn,
   IsOptional,
   IsString,
   IsUUID,
@@ -43,4 +44,38 @@ export class CreateLocationDto {
   @IsOptional()
   @IsBoolean()
   controlledAccess?: boolean;
+
+  /**
+   * Espacio donde queda la ubicación (F5c). Se elige del árbol de la sede, nunca a mano.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Espacio de la ubicación: del tenant, de la misma sede que la farmacia y con perfil de punto de stock',
+  })
+  @IsOptional()
+  @IsUUID()
+  careSpaceId?: string;
+
+  /**
+   * Unidad dueña de la ubicación (F5c): obligatoria para el botiquín de piso.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Unidad clínica dueña (un botiquín vigente por unidad)',
+  })
+  @IsOptional()
+  @IsUUID()
+  clinicalUnitId?: string;
+
+  /**
+   * Tipo de ubicación (F5c). Sin él se crea un estante, como siempre.
+   */
+  @ApiPropertyOptional({
+    enum: ['SHELF', 'WARD_STOCK'],
+    description: 'Tipo de ubicación; `WARD_STOCK` es el botiquín de una unidad',
+  })
+  @IsOptional()
+  @IsIn(['SHELF', 'WARD_STOCK'])
+  locationTypeCode?: 'SHELF' | 'WARD_STOCK';
 }

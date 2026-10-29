@@ -3,9 +3,11 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { randomUUID } from 'node:crypto';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  ConflictException,
   PreconditionFailedException,
   type AuthenticatedUser,
 } from '../../../../common';
+import { PharmacyInventoryErrorReason } from '../../pharmacy_inventory.error-reasons';
 import {
   StockPositionsRepository,
   LedgerRepository,
@@ -83,6 +85,18 @@ export class TransferInventoryUseCase {
         inventoryLotId: dto.inventoryLotId,
       });
       if (!fromPosition || num(fromPosition.availableQuantity) < dto.quantity) {
+        // Un botiquín de piso no cede lo que está reservado o en cuarentena: 409 propio
+        // (F5c). El resto de las ubicaciones conserva su regla de siempre.
+        if (from.locationTypeConceptId === PINV.LOCATION_TYPE_WARD_STOCK) {
+          throw new ConflictException(
+            'El botiquín no tiene stock disponible suficiente',
+            {
+              available: fromPosition ? num(fromPosition.availableQuantity) : 0,
+              requested: dto.quantity,
+            },
+            PharmacyInventoryErrorReason.INSUFFICIENT_AVAILABLE_STOCK,
+          );
+        }
         throw new PreconditionFailedException(
           'Stock disponible insuficiente en origen',
           {

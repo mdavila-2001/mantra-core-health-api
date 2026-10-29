@@ -2,10 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  ConflictException,
   PreconditionFailedException,
   touch,
   type AuthenticatedUser,
 } from '../../../../common';
+import { PharmacyInventoryErrorReason } from '../../pharmacy_inventory.error-reasons';
 import {
   DispensationsRepository,
   ReservationsRepository,
@@ -101,8 +103,18 @@ export class DispenseMedicationUseCase {
         dto.patientProfileId,
         dto.medicationRequestId,
       );
+      // Las líneas que salen de un botiquín de piso se rigen por `available_quantity`.
+      const wardStock = new Set<string>();
       for (const line of dto.lines) {
         await this.scope.requireStockKey(tx, site, line);
+        const location = await this.scope.requireLocation(
+          tx,
+          site,
+          line.inventoryLocationId,
+        );
+        if (location.locationTypeConceptId === PINV.LOCATION_TYPE_WARD_STOCK) {
+          wardStock.add(line.inventoryLocationId);
+        }
       }
 
       if (dto.inventoryReservationId) {
@@ -152,6 +164,25 @@ export class DispenseMedicationUseCase {
           pharmacyProductId: line.pharmacyProductId,
           inventoryLotId: line.inventoryLotId,
         });
+        // Botiquín de piso sin reserva que lo respalde: no se dispensa lo que está
+        // reservado para otro ni en cuarentena. Con reserva rige la regla de siempre
+        // (la reserva se libera al dispensar), sin debilitarla.
+        if (
+          wardStock.has(line.inventoryLocationId) &&
+          !dto.inventoryReservationId &&
+          (!position ||
+            num(position.availableQuantity) < line.dispensedQuantity)
+        ) {
+          throw new ConflictException(
+            'El botiquín no tiene stock disponible suficiente',
+            {
+              productId: line.pharmacyProductId,
+              available: position ? num(position.availableQuantity) : 0,
+              requested: line.dispensedQuantity,
+            },
+            PharmacyInventoryErrorReason.INSUFFICIENT_AVAILABLE_STOCK,
+          );
+        }
         if (
           !position ||
           num(position.onHandQuantity) < line.dispensedQuantity

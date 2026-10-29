@@ -9,6 +9,7 @@ import {
 } from '../../../common';
 import { InsufficientRoleException } from '../../../common/errors/domain.exception';
 import { DIR } from '../../directory/directory.concepts';
+import { spaceBelongsToUnit } from '../../practice/services/space-unit-membership';
 import {
   StructureAccessService,
   type StructureAccess,
@@ -207,7 +208,7 @@ export class OrgAssignmentScopeService {
       throw this.mismatch(scope, 'La práctica no es la de la sede indicada');
     }
     if (unit && space) {
-      const linked = await this.spaceBelongsToUnit(
+      const linked = await spaceBelongsToUnit(
         tx,
         String(space.id),
         String(unit.id),
@@ -470,35 +471,5 @@ export class OrgAssignmentScopeService {
     const rows = await tx.execute<Record<string, unknown>[]>(sql, params);
     if (rows.length === 0) throw this.notFound();
     return rows[0];
-  }
-
-  /** ¿Cuelga el espacio (o un ancestro) de la unidad o de una unidad hija? */
-  private async spaceBelongsToUnit(
-    tx: EntityManager,
-    spaceId: string,
-    unitId: string,
-  ): Promise<boolean> {
-    const rows = await tx.execute<{ ok: number }[]>(
-      `with recursive anc(id, parent_space_id) as (
-         select id, parent_space_id from practice.care_spaces where id = ?
-         union all
-         select p.id, p.parent_space_id from practice.care_spaces p join anc on p.id = anc.parent_space_id
-       ),
-       unit_down(id) as (
-         select id from practice.clinical_units where id = ?
-         union
-         select c.id from practice.clinical_units c join unit_down d on c.parent_unit_id = d.id
-       )
-       select 1 as ok from anc
-        where exists (select 1 from practice.care_spaces cs
-                       where cs.id = anc.id and cs.clinical_unit_id in (select id from unit_down))
-           or exists (select 1 from practice.space_unit_assignments sua
-                       where sua.care_space_id = anc.id
-                         and sua.clinical_unit_id in (select id from unit_down)
-                         and (sua.valid_to is null or sua.valid_to > now()))
-        limit 1`,
-      [spaceId, unitId],
-    );
-    return rows.length > 0;
   }
 }
