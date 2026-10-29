@@ -5,6 +5,7 @@ import {
   CONCEPTS,
   CONCEPT_DEFS,
   ConflictException,
+  PreconditionFailedException,
   ResourceNotFoundException,
   decodeKeysetCursor,
   encodeKeysetCursor,
@@ -62,6 +63,25 @@ const CURRENCY_CODE_BY_CONCEPT: Readonly<Record<string, string>> =
  * — cada presupuesto lleva el precio propio que puso el profesional, nunca
  * `defaultPrice` a ciegas.
  */
+/**
+ * Un precio en 0 no se acepta al dar de alta ni al corregir un servicio: la
+ * cita se cobraría en 0,00 (FAC-06). Un negativo ya lo rechaza el DTO con 400;
+ * acá solo llega un importe no negativo con hasta dos decimales. Lo que crea
+ * el sistema («Cita médica» en `0.00` al dar de alta una práctica) no pasa por
+ * este servicio y sigue igual.
+ *
+ * @param price - Importe validado por el DTO, como texto.
+ * @throws PreconditionFailedException (422) si el importe es 0.
+ */
+function assertPricePositive(price: string): void {
+  if (Number(price) > 0) return;
+  throw new PreconditionFailedException(
+    'El precio tiene que ser mayor que 0',
+    { defaultPrice: price },
+    BillingErrorReason.SERVICE_CATALOG_PRICE_NOT_POSITIVE,
+  );
+}
+
 @Injectable()
 export class BillingServiceCatalogService {
   /**
@@ -250,6 +270,7 @@ export class BillingServiceCatalogService {
       'Creating service catalog item',
     );
     await this.assertRegistrationCanRegister(actor, dto.practiceId);
+    assertPricePositive(dto.defaultPrice);
     if (dto.imageFileId !== undefined) {
       await this.assertImageUsable(dto.imageFileId, actor);
     }
@@ -406,6 +427,7 @@ export class BillingServiceCatalogService {
         item.termsText = terms === '' ? undefined : terms;
       }
       if (dto.defaultPrice !== undefined) {
+        assertPricePositive(dto.defaultPrice);
         item.defaultPrice = dto.defaultPrice;
         // Un importe sin moneda no es un precio. La fila puede venir de un alta
         // que no la declaró: la primera edición la fija, y el boliviano es la

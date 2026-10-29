@@ -114,6 +114,13 @@ ACTIVE vigente. `GET /practices` filtra con ella y `GET /practices/:practiceId/o
 responde 404 —igual que ante una práctica inexistente o de otro tenant— cuando no se cumple.
 Contabilidad usa el mismo criterio (`practiceAccessScope`) y lo traduce a sus propios 422.
 
+Abrir el ejercicio fiscal (`POST /accounting/fiscal-years`) es más estricto que verlo: lo hacen la
+administración (`SECURITY_ADMIN` o `ACCOUNTING_APPROVER`; `SUPERADMIN` por comodín) o el
+`PRACTITIONER` titular de su consultorio propio (`PracticeTenantLookupService.isOwnOffice`: práctica
+de tipo `OFFICE` con él como administrador). Un médico que atiende en una práctica que no es suya
+recibe 403 (`FISCAL_YEAR_OPEN_NOT_ALLOWED`); una práctica de otra organización sigue respondiendo
+404, antes de mirar el rol.
+
 ## Convención de mutaciones sin política explícita
 
 El analizador `tools/alovida/coverage-report.mjs` (regla `ORPHAN_ENDPOINT`) exige que todo endpoint
