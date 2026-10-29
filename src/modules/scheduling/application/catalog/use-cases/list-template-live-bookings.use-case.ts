@@ -3,10 +3,13 @@ import {
   type AuthenticatedUser,
 } from '../../../../../common';
 import { BlockedBookingsCanceller } from '../support/blocked-bookings-canceller';
-import { CareSpaceTemplateGuard } from '../support/care-space-template-guard';
+import {
+  CARE_SPACE_TEMPLATE_GUARD_PORT,
+  type CareSpaceTemplateGuardPort,
+} from '../../ports/care-space-template-guard.port';
 import { CatalogAccess } from '../support/catalog-access';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
 import { TemplateLiveBookingsResponseDto } from '../../../presentation/dto';
 
@@ -25,7 +28,8 @@ export class ListTemplateLiveBookingsUseCase {
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly access: CatalogAccess,
     private readonly blockedBookings: BlockedBookingsCanceller,
-    private readonly careSpaces: CareSpaceTemplateGuard,
+    @Inject(CARE_SPACE_TEMPLATE_GUARD_PORT)
+    private readonly careSpaces: CareSpaceTemplateGuardPort,
   ) {}
 
   async execute(

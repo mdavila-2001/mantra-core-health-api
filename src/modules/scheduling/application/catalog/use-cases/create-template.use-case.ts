@@ -1,5 +1,8 @@
 import { AgendaOverlapGuard } from '../support/agenda-overlap-guard';
-import { CareSpaceTemplateGuard } from '../support/care-space-template-guard';
+import {
+  CARE_SPACE_TEMPLATE_GUARD_PORT,
+  type CareSpaceTemplateGuardPort,
+} from '../../ports/care-space-template-guard.port';
 import {
   CONCEPTS,
   PreconditionFailedException,
@@ -17,7 +20,7 @@ import {
   bandMode,
 } from '../../../domain/catalog/catalog-concepts';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
 import { assertFirstSlotFits } from '../support/assert-first-slot-fits';
@@ -33,7 +36,8 @@ export class CreateTemplateUseCase {
     private readonly access: CatalogAccess,
     private readonly overlapGuard: AgendaOverlapGuard,
     private readonly logger: PinoLogger,
-    private readonly careSpaces: CareSpaceTemplateGuard,
+    @Inject(CARE_SPACE_TEMPLATE_GUARD_PORT)
+    private readonly careSpaces: CareSpaceTemplateGuardPort,
   ) {
     this.logger.setContext(CreateTemplateUseCase.name);
   }
@@ -128,10 +132,9 @@ export class CreateTemplateUseCase {
       }
 
       const template = this.catalogRepo.createTemplate(tx, {
-        tenantId: resource.tenantId,
-        resourceId,
         // El tenant sale del recurso ya acotado al contexto, nunca del cuerpo.
         tenantId: resource.tenantId,
+        resourceId,
         careSpaceId: space?.id,
         name: dto.name,
         validFrom: dto.validFrom ? new Date(dto.validFrom) : undefined,

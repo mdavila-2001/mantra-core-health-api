@@ -1,14 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { requireTenantId, type AuthenticatedUser } from '../../../../common';
-import { strOrNull } from '../../../practice/services/ops-rows';
+import { strOrNull } from '../../domain/row-text';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
 import type {
   SpaceStockLocationView,
   SpaceStockPositionView,
   SpaceStockView,
 } from '../../presentation/dto/space-stock.types';
-import { StockPointAccessService } from './stock-point-access.service';
+import {
+  STOCK_POINT_ACCESS_PORT,
+  type StockPointAccessPort,
+} from '../ports/stock-point-access.port';
 
 /** Tope de ubicaciones de una respuesta. */
 const MAX_LOCATIONS = 200;
@@ -27,7 +30,8 @@ const num = (value: unknown): number => Number(value ?? 0);
 export class ReadSpaceStockUseCase {
   constructor(
     private readonly em: EntityManager,
-    private readonly access: StockPointAccessService,
+    @Inject(STOCK_POINT_ACCESS_PORT)
+    private readonly access: StockPointAccessPort,
   ) {}
 
   /**

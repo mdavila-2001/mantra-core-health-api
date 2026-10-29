@@ -1,4 +1,4 @@
-import { PreconditionFailedException } from '../../../common';
+import { PreconditionFailedException } from '../../../common/errors/domain.exception';
 import { BillingErrorReason } from '../billing.error-reasons';
 
 /**

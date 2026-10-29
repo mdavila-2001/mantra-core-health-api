@@ -4,7 +4,7 @@ import {
   PreconditionFailedException,
   runWithTenant,
 } from '../../../../common';
-import { RowVersionMismatchException } from '../../../practice/http/row-version';
+import { RowVersionMismatchException } from '../../domain/row-version';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
 import { PharmacyInventoryErrorReason as R } from '../../pharmacy_inventory.error-reasons';
 import { allowAllScope } from '../scope/pharmacy-inventory-scope.testing';

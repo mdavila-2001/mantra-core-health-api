@@ -1,11 +1,11 @@
 import { jest } from '@jest/globals';
-import { CONCEPTS } from '../../../../../common';
-import { CLIN } from '../../../../clinical/clinical.concepts';
-import { InsufficientRoleException } from '../../../../../common/errors/domain.exception';
-import { ResourceNotFoundException } from '../../../../../common';
-import { PRAC } from '../../../../practice/practice.concepts';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
-import { CareSpaceAppointmentResolver } from './care-space-appointment-resolver';
+import { CONCEPTS } from '../../../../common';
+import { CLIN } from '../../../clinical/clinical.concepts';
+import { InsufficientRoleException } from '../../../../common/errors/domain.exception';
+import { ResourceNotFoundException } from '../../../../common';
+import { PRAC } from '../../../practice/practice.concepts';
+import { SchedulingErrorReason } from '../../scheduling.error-reasons';
+import { PracticeCareSpaceAppointmentResolverAdapter } from './practice-care-space-appointment-resolver.adapter';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
@@ -66,7 +66,7 @@ function build(
     }),
   };
   const infra = { assertCan: mockFn().mockResolvedValue(undefined) };
-  const resolver = new CareSpaceAppointmentResolver(
+  const resolver = new PracticeCareSpaceAppointmentResolverAdapter(
     state as any,
     ops as any,
     catalogRepo as any,

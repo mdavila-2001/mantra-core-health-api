@@ -1,9 +1,9 @@
 import { jest } from '@jest/globals';
-import { CONCEPTS, ResourceNotFoundException } from '../../../../../common';
-import { runWithTenant } from '../../../../../common/tenant/tenant-context';
-import { PRAC } from '../../../../practice/practice.concepts';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
-import { CareSpaceTemplateGuard } from './care-space-template-guard';
+import { CONCEPTS, ResourceNotFoundException } from '../../../../common';
+import { runWithTenant } from '../../../../common/tenant/tenant-context';
+import { PRAC } from '../../../practice/practice.concepts';
+import { SchedulingErrorReason } from '../../scheduling.error-reasons';
+import { PracticeCareSpaceTemplateGuardAdapter } from './practice-care-space-template-guard.adapter';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
@@ -62,7 +62,7 @@ function build(
       return [];
     }),
   };
-  const guard = new CareSpaceTemplateGuard(
+  const guard = new PracticeCareSpaceTemplateGuardAdapter(
     state as any,
     infra as any,
     catalogRepo as any,
@@ -73,7 +73,7 @@ function build(
   return { guard, state, infra, catalogRepo, outbox, tx, inTenant };
 }
 
-describe('CareSpaceTemplateGuard · el recurso es del tenant del contexto', () => {
+describe('PracticeCareSpaceTemplateGuardAdapter · el recurso es del tenant del contexto', () => {
   it('sin tenant en el contexto no hay contra qué comparar y no se exige', () => {
     const { guard } = build();
     expect(() =>
@@ -98,7 +98,7 @@ describe('CareSpaceTemplateGuard · el recurso es del tenant del contexto', () =
   });
 });
 
-describe('CareSpaceTemplateGuard.assertMayManageBound · editar un horario que ya ocupa un espacio', () => {
+describe('PracticeCareSpaceTemplateGuardAdapter.assertMayManageBound · editar un horario que ya ocupa un espacio', () => {
   const OTHER_SPACE = '77777777-7777-4777-8777-777777777777';
 
   it('SCHEDULING_ADMIN del tenant puede, sin pasar por la política del espacio', async () => {
@@ -239,7 +239,7 @@ describe('CareSpaceTemplateGuard.assertMayManageBound · editar un horario que y
   });
 });
 
-describe('CareSpaceTemplateGuard.attach', () => {
+describe('PracticeCareSpaceTemplateGuardAdapter.attach', () => {
   it('el coordinador de agendas del tenant ata un consultorio activo de la misma práctica', async () => {
     const d = build();
     const res = await d.inTenant(() =>
@@ -395,7 +395,7 @@ describe('CareSpaceTemplateGuard.attach', () => {
   });
 });
 
-describe('CareSpaceTemplateGuard.assertNoOverlap', () => {
+describe('PracticeCareSpaceTemplateGuardAdapter.assertNoOverlap', () => {
   const NOW = new Date('2026-11-02T12:00:00.000Z');
   const other = (
     from: string,
@@ -484,7 +484,7 @@ describe('CareSpaceTemplateGuard.assertNoOverlap', () => {
   });
 });
 
-describe('CareSpaceTemplateGuard.assertReactivable y announce', () => {
+describe('PracticeCareSpaceTemplateGuardAdapter.assertReactivable y announce', () => {
   it('una plantilla sin espacio no se vuelve a comprobar', async () => {
     const d = build();
     await d.inTenant(() =>

@@ -5,8 +5,14 @@ import {
   type AuthenticatedUser,
 } from '../../../../../common';
 import { CatalogAccess } from '../support/catalog-access';
-import { CareSpaceTemplateGuard } from '../support/care-space-template-guard';
-import { CareSpaceSlotSync } from '../support/care-space-slot-sync';
+import {
+  CARE_SPACE_TEMPLATE_GUARD_PORT,
+  type CareSpaceTemplateGuardPort,
+} from '../../ports/care-space-template-guard.port';
+import {
+  CARE_SPACE_SLOT_SYNC_PORT,
+  type CareSpaceSlotSyncPort,
+} from '../../ports/care-space-slot-sync.port';
 import {
   windowTouches,
   type TimeWindow,
@@ -21,7 +27,7 @@ import {
   GenerateSlotsDto,
   GenerateSlotsResponseDto,
 } from '../../../presentation/dto';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PRACTITIONER_PROFILE_TABLES } from '../../../domain/resource/practitioner-profile-tables';
 import { PinoLogger } from 'nestjs-pino';
 import { SCHED } from '../../../domain/scheduling.concepts';
@@ -42,8 +48,10 @@ export class GenerateSlotsUseCase {
     private readonly professionalTime: SchedulingProfessionalTimeService,
     private readonly access: CatalogAccess,
     private readonly logger: PinoLogger,
-    private readonly careSpaces: CareSpaceTemplateGuard,
-    private readonly slotSync: CareSpaceSlotSync,
+    @Inject(CARE_SPACE_TEMPLATE_GUARD_PORT)
+    private readonly careSpaces: CareSpaceTemplateGuardPort,
+    @Inject(CARE_SPACE_SLOT_SYNC_PORT)
+    private readonly slotSync: CareSpaceSlotSyncPort,
   ) {
     this.logger.setContext(GenerateSlotsUseCase.name);
   }

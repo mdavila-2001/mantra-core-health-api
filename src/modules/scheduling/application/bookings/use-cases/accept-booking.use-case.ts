@@ -8,14 +8,17 @@ import { BookingChangeNotifier } from '../support/booking-change-notifier';
 import { BookingTransitionRecorder } from '../support/booking-transition-recorder';
 import { CLIN } from '../../../../clinical/clinical.concepts';
 import { ClinicalAppointmentSync } from '../support/clinical-appointment-sync';
-import { CareSpaceAppointmentResolver } from '../support/care-space-appointment-resolver';
+import {
+  CARE_SPACE_APPOINTMENT_RESOLVER_PORT,
+  type CareSpaceAppointmentResolverPort,
+} from '../../ports/care-space-appointment-resolver.port';
 import {
   DEFAULT_REMINDER_OFFSETS,
   DISPLACED_REASON,
 } from '../../../domain/booking/booking-defaults';
 import { DisplacedRequestsCanceller } from '../support/displaced-requests-canceller';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PRACTITIONER_PROFILE_TABLES } from '../../../domain/resource/practitioner-profile-tables';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -38,7 +41,8 @@ export class AcceptBookingUseCase {
     private readonly displaced: DisplacedRequestsCanceller,
     private readonly notifier: BookingChangeNotifier,
     private readonly logger: PinoLogger,
-    private readonly spaces: CareSpaceAppointmentResolver,
+    @Inject(CARE_SPACE_APPOINTMENT_RESOLVER_PORT)
+    private readonly spaces: CareSpaceAppointmentResolverPort,
   ) {
     this.logger.setContext(AcceptBookingUseCase.name);
   }

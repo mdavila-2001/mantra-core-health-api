@@ -1,12 +1,10 @@
 import { jest } from '@jest/globals';
-import { CONCEPTS } from '../../../../../common';
-import { runWithTenant } from '../../../../../common/tenant/tenant-context';
-import { PRAC } from '../../../../practice/practice.concepts';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
-import {
-  RESOURCE_LINKED_TO_SPACE_EVENT,
-  SpaceResourceLinker,
-} from './space-resource-linker';
+import { CONCEPTS } from '../../../../common';
+import { runWithTenant } from '../../../../common/tenant/tenant-context';
+import { PRAC } from '../../../practice/practice.concepts';
+import { SchedulingErrorReason } from '../../scheduling.error-reasons';
+import { RESOURCE_LINKED_TO_SPACE_EVENT } from '../../domain/catalog/agenda-events';
+import { PracticeSpaceResourceLinkerAdapter } from './practice-space-resource-linker.adapter';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
@@ -49,7 +47,7 @@ function build(loaded: unknown = room()) {
   const outbox = {
     publishDomainEvent: mockFn().mockResolvedValue({ duplicate: false }),
   };
-  const linker = new SpaceResourceLinker(
+  const linker = new PracticeSpaceResourceLinkerAdapter(
     access as any,
     catalogRepo as any,
     outbox as any,
@@ -59,7 +57,7 @@ function build(loaded: unknown = room()) {
   return { run, tx, access, catalogRepo, outbox };
 }
 
-describe('SpaceResourceLinker (R0 · F4)', () => {
+describe('PracticeSpaceResourceLinkerAdapter (R0 · F4)', () => {
   it('liga el recurso al quirófano activo: FK real, tipo canónico y evento en la misma transacción', async () => {
     const d = build();
     const res = await d.run(dto());

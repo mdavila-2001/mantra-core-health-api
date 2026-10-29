@@ -1,13 +1,9 @@
 import { SchedulingCatalogService } from './scheduling-catalog.service';
-import {
-  AgendaOverlapGuard,
-  CareSpaceSlotSync,
-  CareSpaceTemplateGuard,
-  CatalogAccess,
-  EquipmentResourceLinker,
-  SlotMoveNotifier,
-  type SpaceResourceLinker,
-} from './support';
+import type { CareSpaceSlotSyncPort } from '../ports/care-space-slot-sync.port';
+import type { CareSpaceTemplateGuardPort } from '../ports/care-space-template-guard.port';
+import type { EquipmentResourceLinkerPort } from '../ports/equipment-resource-linker.port';
+import type { SpaceResourceLinkerPort } from '../ports/space-resource-linker.port';
+import { AgendaOverlapGuard, CatalogAccess, SlotMoveNotifier } from './support';
 import { BlockedBookingsCanceller } from './support/blocked-bookings-canceller';
 import { CloseSlotsUseCase } from './use-cases/close-slots.use-case';
 import { ListTemplateLiveBookingsUseCase } from './use-cases/list-template-live-bookings.use-case';
@@ -54,8 +50,8 @@ export interface CatalogServiceDoubles {
   careSpaces?: any;
   /** Cierre y reapertura de cupos por espacio o equipo (F5d), simulado. */
   slotSync?: any;
-  /** Outbox, simulado. */
-  outbox?: any;
+  /** Publicador de hechos de dominio (outbox), simulado. */
+  events?: any;
 }
 
 /**
@@ -82,13 +78,13 @@ export function createCatalogService(d: CatalogServiceDoubles) {
     assertNoOverlap: async () => undefined,
     assertReactivable: async () => undefined,
     announce: async () => undefined,
-  }) as CareSpaceTemplateGuard;
+  }) as CareSpaceTemplateGuardPort;
   const slotSync = (d.slotSync ?? {
     unavailableWindows: async () => [],
     coveredSlotIds: async () => new Set<string>(),
-  }) as CareSpaceSlotSync;
-  const outbox = d.outbox ?? {
-    publishDomainEvent: async () => ({ duplicate: false }),
+  }) as CareSpaceSlotSyncPort;
+  const events = d.events ?? {
+    publish: async () => undefined,
   };
   const noticeRepo = {
     findDisplayNameForProfile: async () => null,
@@ -111,8 +107,8 @@ export function createCatalogService(d: CatalogServiceDoubles) {
       catalogRepo,
       access,
       logger,
-      d.spaceLinker ?? ({} as SpaceResourceLinker),
-      (d.equipmentLinker ?? {}) as EquipmentResourceLinker,
+      d.spaceLinker ?? ({} as SpaceResourceLinkerPort),
+      (d.equipmentLinker ?? {}) as EquipmentResourceLinkerPort,
     ),
     new CreateBookingPolicyUseCase(em, catalogRepo, access, logger),
     new CreateTemplateUseCase(
@@ -166,7 +162,7 @@ export function createCatalogService(d: CatalogServiceDoubles) {
       blockedBookings,
       logger,
       careSpaces,
-      outbox,
+      events,
     ),
     new UpdateExceptionUseCase(em, catalogRepo, access, logger, careSpaces),
     new RemoveExceptionUseCase(em, catalogRepo, access, logger, careSpaces),

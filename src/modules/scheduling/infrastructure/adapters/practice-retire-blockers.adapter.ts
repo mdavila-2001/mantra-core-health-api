@@ -1,14 +1,14 @@
 import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
-import { CONCEPTS } from '../../../../../common';
-import { CLIN } from '../../../../clinical/clinical.concepts';
-import type { RetireBlocker } from '../../../../practice/dto/infrastructure.types';
+import { CONCEPTS } from '../../../../common';
+import { CLIN } from '../../../clinical/clinical.concepts';
+import type { RetireBlocker } from '../../../practice/dto/infrastructure.types';
 import {
   RETIRE_BLOCKER_PROVIDERS,
   RETIRE_SAMPLE_SIZE,
   type RetireBlockerContext,
   type RetireBlockerProvider,
   type RetireBlockerRegistry,
-} from '../../../../practice/services/retire-blockers';
+} from '../../../practice/services/retire-blockers';
 
 /** Ejecuta la consulta sobre el subárbol y arma el bloqueo con ejemplos. */
 async function sample(

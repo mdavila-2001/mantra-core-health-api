@@ -1,17 +1,19 @@
 import { jest } from '@jest/globals';
-import { CONCEPTS } from '../../../../../common';
-import { DUNIT } from '../../../../diagnostic_units/diagnostic_units.concepts';
-import { PRAC } from '../../../../practice/practice.concepts';
-import { CareSpaceBlockListenerRegistry } from '../../../../practice/services/care-space-block-listeners';
-import { OPEN_ENDED_BLOCK_END } from '../../../domain/catalog/care-space-agenda';
-import { SCHED } from '../../../domain/scheduling.concepts';
+import { CONCEPTS } from '../../../../common';
+import { DUNIT } from '../../../diagnostic_units/diagnostic_units.concepts';
+import { PRAC } from '../../../practice/practice.concepts';
+import { CareSpaceBlockListenerRegistry } from '../../../practice/services/care-space-block-listeners';
+import { OPEN_ENDED_BLOCK_END } from '../../domain/catalog/care-space-agenda';
+import { SCHED } from '../../domain/scheduling.concepts';
 import {
   AVAILABILITY_EXCEPTION_CREATED_EVENT,
   AVAILABILITY_EXCEPTION_ENDED_EVENT,
   CARE_SPACE_BLOCK_EXCEPTION_REASON,
+} from '../../domain/catalog/agenda-events';
+import {
   CareSpaceBlockAgendaListener,
-  CareSpaceSlotSync,
-} from './care-space-slot-sync';
+  PracticeCareSpaceSlotSyncAdapter,
+} from './practice-care-space-slot-sync.adapter';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
@@ -28,11 +30,11 @@ function build(rowsBySql: (sql: string) => unknown[] = () => []) {
     execute: mockFn(async (sql: string) => rowsBySql(sql)),
     insert: mockFn().mockResolvedValue(undefined),
   };
-  const sync = new CareSpaceSlotSync(outbox as any);
+  const sync = new PracticeCareSpaceSlotSyncAdapter(outbox as any);
   return { sync, tx, outbox };
 }
 
-describe('CareSpaceSlotSync.closeCovered / reopenUncovered', () => {
+describe('PracticeCareSpaceSlotSyncAdapter.closeCovered / reopenUncovered', () => {
   it('cierra los cupos libres, intactos y futuros del espacio como «cerrados por la fuente», saltando los bloqueados por otra transacción', async () => {
     const d = build(() => [{ id: 's1' }, { id: 's2' }]);
     const closed = await d.sync.closeCovered(
@@ -102,7 +104,7 @@ describe('CareSpaceSlotSync.closeCovered / reopenUncovered', () => {
   });
 });
 
-describe('CareSpaceSlotSync.coveredSlotIds', () => {
+describe('PracticeCareSpaceSlotSyncAdapter.coveredSlotIds', () => {
   it('sin cupos no consulta', async () => {
     const d = build();
     expect(await d.sync.coveredSlotIds(d.tx as any, [])).toEqual(new Set());
@@ -116,7 +118,7 @@ describe('CareSpaceSlotSync.coveredSlotIds', () => {
   });
 });
 
-describe('CareSpaceSlotSync.createSourceExceptions', () => {
+describe('PracticeCareSpaceSlotSyncAdapter.createSourceExceptions', () => {
   const input = {
     tenantId: TENANT,
     source: 'CARE_SPACE_BLOCK' as const,
@@ -176,7 +178,7 @@ describe('CareSpaceSlotSync.createSourceExceptions', () => {
   });
 });
 
-describe('CareSpaceSlotSync.endSourceExceptions', () => {
+describe('PracticeCareSpaceSlotSyncAdapter.endSourceExceptions', () => {
   it('acorta las que ya habían empezado y borra las que nunca llegaron a regir', async () => {
     const rows = [
       {
@@ -201,7 +203,9 @@ describe('CareSpaceSlotSync.endSourceExceptions', () => {
       actorUserId: 'u1',
     });
     expect(n).toBe(2);
-    const sqls = d.tx.execute.mock.calls.map((c: any[]) => c[0] as string);
+    const sqls: string[] = d.tx.execute.mock.calls.map(
+      (c: any[]) => c[0] as string,
+    );
     expect(sqls.some((q) => q.includes('set end_at = ?'))).toBe(true);
     expect(
       sqls.some((q) =>
@@ -250,7 +254,7 @@ describe('CareSpaceSlotSync.endSourceExceptions', () => {
   });
 });
 
-describe('CareSpaceSlotSync.unavailableWindows', () => {
+describe('PracticeCareSpaceSlotSyncAdapter.unavailableWindows', () => {
   it('un bloqueo abierto del espacio vale hasta que alguien lo termine', async () => {
     const d = build((sql) =>
       sql.includes('care_space_blocks')

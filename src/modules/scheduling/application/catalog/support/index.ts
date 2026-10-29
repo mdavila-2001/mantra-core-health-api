@@ -14,11 +14,3 @@ export type {
 } from './blocked-bookings-canceller';
 export { CatalogAccess } from './catalog-access';
 export { SlotMoveNotifier } from './slot-move-notifier';
-export { SpaceResourceLinker } from './space-resource-linker';
-export { AgendaRetireBlockersInitializer } from './agenda-retire-blockers';
-export {
-  CareSpaceSlotSync,
-  CareSpaceBlockAgendaListener,
-} from './care-space-slot-sync';
-export { CareSpaceTemplateGuard } from './care-space-template-guard';
-export { EquipmentResourceLinker } from './equipment-resource-linker';

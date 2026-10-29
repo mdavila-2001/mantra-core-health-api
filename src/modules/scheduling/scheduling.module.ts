@@ -88,7 +88,6 @@ import {
   BookingItemAssembler,
   BookingMaterializer,
   BookingTransitionRecorder,
-  CareSpaceAppointmentResolver,
   ClinicalAppointmentSync,
   DisplacedRequestsCanceller,
   PaymentReceiptAccess,
@@ -98,17 +97,27 @@ import {
 import { bookingUseCases } from './application/bookings/use-cases';
 import {
   AgendaOverlapGuard,
-  AgendaRetireBlockersInitializer,
-  CareSpaceBlockAgendaListener,
-  CareSpaceSlotSync,
-  CareSpaceTemplateGuard,
   CatalogAccess,
-  EquipmentResourceLinker,
-  SpaceResourceLinker,
   BlockedBookingsCanceller,
   SlotMoveNotifier,
 } from './application/catalog/support';
 import { InfraF5AgendaPolicyInitializer } from './policies/infra-f5agenda.policy';
+import { CARE_SPACE_APPOINTMENT_RESOLVER_PORT } from './application/ports/care-space-appointment-resolver.port';
+import { CARE_SPACE_SLOT_SYNC_PORT } from './application/ports/care-space-slot-sync.port';
+import { CARE_SPACE_TEMPLATE_GUARD_PORT } from './application/ports/care-space-template-guard.port';
+import { DOMAIN_EVENT_PUBLISHER_PORT } from './application/ports/domain-event-publisher.port';
+import { EQUIPMENT_RESOURCE_LINKER_PORT } from './application/ports/equipment-resource-linker.port';
+import { SPACE_RESOURCE_LINKER_PORT } from './application/ports/space-resource-linker.port';
+import { DiagnosticEquipmentResourceLinkerAdapter } from './infrastructure/adapters/diagnostic-equipment-resource-linker.adapter';
+import { MessagingDomainEventAdapter } from './infrastructure/adapters/messaging-domain-event.adapter';
+import { PracticeCareSpaceAppointmentResolverAdapter } from './infrastructure/adapters/practice-care-space-appointment-resolver.adapter';
+import {
+  CareSpaceBlockAgendaListener,
+  PracticeCareSpaceSlotSyncAdapter,
+} from './infrastructure/adapters/practice-care-space-slot-sync.adapter';
+import { PracticeCareSpaceTemplateGuardAdapter } from './infrastructure/adapters/practice-care-space-template-guard.adapter';
+import { AgendaRetireBlockersInitializer } from './infrastructure/adapters/practice-retire-blockers.adapter';
+import { PracticeSpaceResourceLinkerAdapter } from './infrastructure/adapters/practice-space-resource-linker.adapter';
 import { catalogUseCases } from './application/catalog/use-cases';
 import { BOOKING_HISTORY_PORT } from './application/ports/booking-history.port';
 import { CLINICAL_APPOINTMENTS_PORT } from './application/ports/clinical-appointments.port';
@@ -279,7 +288,11 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     ServiceSlotLifecycle,
     ClinicalAppointmentSync,
     // F5d · el espacio donde ocurre cada cita, su disponibilidad y su doble reserva.
-    CareSpaceAppointmentResolver,
+    PracticeCareSpaceAppointmentResolverAdapter,
+    {
+      provide: CARE_SPACE_APPOINTMENT_RESOLVER_PORT,
+      useExisting: PracticeCareSpaceAppointmentResolverAdapter,
+    },
     SlotPolicyResolver,
     BookingMaterializer,
     DisplacedRequestsCanceller,
@@ -296,14 +309,35 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     },
     // Catálogo de agenda: colaboradores compartidos y un caso de uso por operación.
     CatalogAccess,
-    SpaceResourceLinker,
+    PracticeSpaceResourceLinkerAdapter,
+    {
+      provide: SPACE_RESOURCE_LINKER_PORT,
+      useExisting: PracticeSpaceResourceLinkerAdapter,
+    },
     // F5a/F5d · agenda por espacio y por equipo: reglas de la plantilla con espacio, cierre y
     // reapertura de cupos al bloquearse el espacio o el equipo, recurso del equipo, política y
     // bloqueos de clausura de la agenda.
-    CareSpaceTemplateGuard,
-    CareSpaceSlotSync,
+    PracticeCareSpaceTemplateGuardAdapter,
+    {
+      provide: CARE_SPACE_TEMPLATE_GUARD_PORT,
+      useExisting: PracticeCareSpaceTemplateGuardAdapter,
+    },
+    PracticeCareSpaceSlotSyncAdapter,
+    {
+      provide: CARE_SPACE_SLOT_SYNC_PORT,
+      useExisting: PracticeCareSpaceSlotSyncAdapter,
+    },
     CareSpaceBlockAgendaListener,
-    EquipmentResourceLinker,
+    DiagnosticEquipmentResourceLinkerAdapter,
+    {
+      provide: EQUIPMENT_RESOURCE_LINKER_PORT,
+      useExisting: DiagnosticEquipmentResourceLinkerAdapter,
+    },
+    MessagingDomainEventAdapter,
+    {
+      provide: DOMAIN_EVENT_PUBLISHER_PORT,
+      useExisting: MessagingDomainEventAdapter,
+    },
     DiagnosticEquipmentAgendaAdapter,
     InfraF5AgendaPolicyInitializer,
     AgendaRetireBlockersInitializer,

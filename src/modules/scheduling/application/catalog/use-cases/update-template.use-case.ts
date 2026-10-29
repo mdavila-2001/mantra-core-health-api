@@ -6,14 +6,17 @@ import {
   type AuthenticatedUser,
 } from '../../../../../common';
 import { CatalogAccess } from '../support/catalog-access';
-import { CareSpaceTemplateGuard } from '../support/care-space-template-guard';
+import {
+  CARE_SPACE_TEMPLATE_GUARD_PORT,
+  type CareSpaceTemplateGuardPort,
+} from '../../ports/care-space-template-guard.port';
 import {
   DEFAULT_SLOT_CAPACITY,
   DEFAULT_SLOT_MINUTES,
   bandMode,
 } from '../../../domain/catalog/catalog-concepts';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
 import {
@@ -32,7 +35,8 @@ export class UpdateTemplateUseCase {
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly access: CatalogAccess,
     private readonly logger: PinoLogger,
-    private readonly careSpaces: CareSpaceTemplateGuard,
+    @Inject(CARE_SPACE_TEMPLATE_GUARD_PORT)
+    private readonly careSpaces: CareSpaceTemplateGuardPort,
   ) {
     this.logger.setContext(UpdateTemplateUseCase.name);
   }

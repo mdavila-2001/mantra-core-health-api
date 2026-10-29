@@ -7,32 +7,30 @@ import {
   ResourceNotFoundException,
   requireTenantId,
   type AuthenticatedUser,
-} from '../../../../../common';
-import { OutboxService } from '../../../../messaging/services/outbox.service';
-import { OperatingRoomAccessService } from '../../../../procedures_perioperative/policies/operating-room-access.service';
+} from '../../../../common';
+import { OutboxService } from '../../../messaging/services/outbox.service';
+import { OperatingRoomAccessService } from '../../../procedures_perioperative/policies/operating-room-access.service';
 import {
   FUNCTIONS,
   FUNCTION_PROFILES,
   type FunctionCode,
-} from '../../../../practice/infrastructure-catalog';
-import { PRAC } from '../../../../practice/practice.concepts';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
-import { SchedulableResources } from '../../../entities';
-import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
+} from '../../../practice/infrastructure-catalog';
+import { PRAC } from '../../../practice/practice.concepts';
+import { RESOURCE_LINKED_TO_SPACE_EVENT } from '../../domain/catalog/agenda-events';
+import type { SpaceResourceLinkerPort } from '../../application/ports/space-resource-linker.port';
+import { SchedulingErrorReason } from '../../scheduling.error-reasons';
+import { SchedulableResources } from '../../entities';
+import { SchedulingCatalogRepository } from '../repositories';
 import {
   CARE_SPACES_REF_TYPE,
   DEFAULT_SLOT_CAPACITY,
   normalizeRefType,
   RESOURCE_TYPE_CONCEPT,
-} from '../../../domain/catalog/catalog-concepts';
+} from '../../domain/catalog/catalog-concepts';
 import type {
   CreateResourceDto,
   ResourceResponseDto,
-} from '../../../presentation/dto';
-
-/** Evento que se publica al ligar un recurso a un espacio (`asyncapi/asyncapi.yaml`). */
-export const RESOURCE_LINKED_TO_SPACE_EVENT =
-  'scheduling.resource.linked_to_space';
+} from '../../presentation/dto';
 
 /**
  * Vincula un recurso agendable a un espacio de infraestructura (R0 de F4, INV-40).
@@ -53,7 +51,7 @@ export const RESOURCE_LINKED_TO_SPACE_EVENT =
  * `resource_ref_id` el mismo espacio, como exige `ck_schedulable_resources_care_space_ref`.
  */
 @Injectable()
-export class SpaceResourceLinker {
+export class PracticeSpaceResourceLinkerAdapter implements SpaceResourceLinkerPort {
   /**
    * @param access - Evaluador de la política de quirófanos/espacios.
    * @param catalogRepo - Repositorio del catálogo de agenda.

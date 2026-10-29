@@ -9,10 +9,13 @@ import {
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../../../common';
-import { CareSpaceTemplateGuard } from '../support/care-space-template-guard';
+import {
+  CARE_SPACE_TEMPLATE_GUARD_PORT,
+  type CareSpaceTemplateGuardPort,
+} from '../../ports/care-space-template-guard.port';
 import { CatalogAccess } from '../support/catalog-access';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { MAX_BOOKINGS_IN_NOTICE } from '../../../domain/catalog/catalog-concepts';
 import { PinoLogger } from 'nestjs-pino';
 import { RetireTemplateResponseDto } from '../../../presentation/dto';
@@ -37,7 +40,8 @@ export class RetireTemplateUseCase {
     private readonly access: CatalogAccess,
     private readonly blockedBookings: BlockedBookingsCanceller,
     private readonly logger: PinoLogger,
-    private readonly careSpaces: CareSpaceTemplateGuard,
+    @Inject(CARE_SPACE_TEMPLATE_GUARD_PORT)
+    private readonly careSpaces: CareSpaceTemplateGuardPort,
   ) {
     this.logger.setContext(RetireTemplateUseCase.name);
   }

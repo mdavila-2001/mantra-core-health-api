@@ -10,7 +10,7 @@ import {
  * Enfermería de lectura sobre el botiquín de su unidad).
  *
  * El personal de farmacia (rol global `PHARMACY_STAFF`) no es un rol de
- * infraestructura: lo reconoce `StockPointAccessService` antes de consultar esta
+ * infraestructura: lo reconoce `StockPointAccessPort` antes de consultar esta
  * política, que cubre a quienes llegan por la estructura (plataforma, organización,
  * sucursal) o por una asignación operativa (enfermería).
  */
