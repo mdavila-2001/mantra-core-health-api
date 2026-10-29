@@ -13,9 +13,11 @@ import type {
  * transacción** (`tx`): la cama que queda sucia y su orden de limpieza se
  * confirman juntas con el egreso, o ninguna (INV-34).
  *
- * Contrato congelado: F3 y F4 programan contra esta interfaz con un doble de
- * prueba; F2 la implementa en `CareSpaceOpsPortService`. Se inyecta con el token
- * {@link CARE_SPACE_OPS_PORT}, que `PracticeModule` exporta.
+ * Es la **única** definición del puerto: `clinical` (ADT) y
+ * `procedures_perioperative` (quirófanos) la importan de acá y reciben la
+ * implementación real, `CareSpaceOpsPortService`, por el token
+ * {@link CARE_SPACE_OPS_PORT}, que `PracticeModule` exporta. Las pruebas de
+ * franja sustituyen el token por un doble con `overrideProviders`.
  *
  * Los métodos **no autorizan**: quien los llama ya autorizó su propia operación
  * (el egreso, la salida del paciente del quirófano). Sí exigen que el espacio sea
@@ -116,6 +118,14 @@ export interface OccupancyChangeInput {
   readonly requestId?: string | null;
 }
 
+/** Entrada de {@link CareSpaceOpsPort.revertDirtyFromSource}. */
+export interface RevertDirtyInput {
+  /** Hecho que originó la orden que se deshace (la ubicación de origen del traslado). */
+  readonly sourceRefId: string;
+  readonly actor?: OpsActorRef;
+  readonly requestId?: string | null;
+}
+
 /** Ventana pedida por una reserva o una cirugía. */
 export interface BookingWindow {
   readonly start: Date;
@@ -146,6 +156,20 @@ export interface CareSpaceOpsPort {
     careSpaceId: string,
     input: MarkDirtyInput,
   ): Promise<{ cleaningOrderId: string }>;
+
+  /**
+   * Deshace el ensuciado de un hecho de origen que luego se cancela (un traslado
+   * cancelado, A12): cancela su orden de limpieza si nadie la empezó y devuelve la
+   * higiene a lo que era.
+   *
+   * @returns `reverted: false` si no hay una orden `PENDING` de ese hecho (la
+   *   limpieza ya empezó, terminó o la orden era de otro hecho): no se deshace.
+   */
+  revertDirtyFromSource(
+    tx: EntityManager,
+    careSpaceId: string,
+    input: RevertDirtyInput,
+  ): Promise<{ reverted: boolean }>;
 
   /**
    * Registra el cambio de ocupación como evento A20 del eje OCCUPANCY (la

@@ -42,8 +42,6 @@ import { PracticeModule } from '../practice/practice.module';
 import { PeriopAccessModule } from './policies/periop-access.module';
 import { PractitionerScopeService } from './policies/practitioner-scope.service';
 import { PractitionerRefsInterceptor } from './policies/practitioner-refs.interceptor';
-import { CARE_SPACE_OPS_PORT } from './ports/care-space-ops.port';
-import { DirectReadCareSpaceOps } from './ports/direct-read-care-space-ops';
 
 /**
  * Módulo perioperatorio: programación del caso quirúrgico, valoración y
@@ -94,10 +92,6 @@ import { DirectReadCareSpaceOps } from './ports/direct-read-care-space-ops';
     // F4: todo id de profesional del cuerpo debe ser de la organización activa.
     PractitionerScopeService,
     PractitionerRefsInterceptor,
-    // Puerto de operación de espacios (F2). Hasta que F2 lo enlace, la lectura directa de
-    // ciclo de vida y bloqueos; el integrador lo reemplaza por `useExisting` hacia el
-    // servicio de `practice` que implemente `CareSpaceOpsPort`.
-    { provide: CARE_SPACE_OPS_PORT, useClass: DirectReadCareSpaceOps },
   ],
 })
 export class ProceduresPerioperativeModule {}

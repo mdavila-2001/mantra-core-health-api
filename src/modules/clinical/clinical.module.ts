@@ -176,10 +176,6 @@ import { PracticeModule } from '../practice/practice.module';
 import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
 import { StructureAccessService } from '../practice/services/structure-access.service';
 import { BranchMembershipsRepository } from '../directory/repositories/branch-memberships.repository';
-import {
-  CARE_SPACE_OPS_PORT,
-  UnavailableCareSpaceOps,
-} from './ports/care-space-ops.port';
 import { AdtRepository } from './repositories/adt.repository';
 
 /**
@@ -306,11 +302,6 @@ import { AdtRepository } from './repositories/adt.repository';
     InpatientCensusService,
     InpatientIndicatorsService,
     ClinicalRetireBlockersInitializer,
-    // Puerto de operación de camas (CONTRATO-F2-F5 F2.3). Hasta que `practice`
-    // publique su implementación, el proveedor por omisión falla cerrado (503):
-    // una cama cuyo estado no se puede leer no se asigna. El integrador lo
-    // reemplaza por el servicio de F2; las pruebas, por el doble de `test/doubles`.
-    { provide: CARE_SPACE_OPS_PORT, useClass: UnavailableCareSpaceOps },
   ],
   // `procedures_perioperative` los usa para que el caso quirúrgico pueda dejar
   // su diagnóstico y su procedimiento en la historia sin escribir estas tablas:

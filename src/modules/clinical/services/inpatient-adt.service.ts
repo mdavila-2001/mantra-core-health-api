@@ -41,12 +41,12 @@ import {
   INFRA_F3_ACTIONS,
   type InfraF3Action,
 } from '../policies/infra-f3.policy';
+import type { OccupancyCode } from '../../practice/domain/bed-status-v2';
 import {
   CARE_SPACE_OPS_PORT,
-  type CareSpaceOperationalState,
   type CareSpaceOpsPort,
-  type OccupancyCode,
-} from '../ports/care-space-ops.port';
+} from '../../practice/services/care-space-ops.port';
+import { toBedOpsView, type BedOpsView } from '../domain/bed-ops-view';
 import {
   AdtRepository,
   type AdtEncounterRow,
@@ -65,14 +65,14 @@ export interface AdmissionResult {
   episodeId: string | null;
   encounterId: string;
   encounterLocationId?: string;
-  cell?: CareSpaceOperationalState;
+  cell?: BedOpsView;
   incidentId?: string;
 }
 
 /** Resultado de asignar o reservar una cama. */
 export interface BedAssignmentResult {
   encounterLocationId: string;
-  cell: CareSpaceOperationalState;
+  cell: BedOpsView;
   incidentId?: string;
 }
 
@@ -81,7 +81,7 @@ export interface TransferResult {
   fromLocationId: string;
   toLocationId: string;
   cleaningOrderId: string;
-  cell: CareSpaceOperationalState;
+  cell: BedOpsView;
   incidentId?: string;
 }
 
@@ -421,9 +421,7 @@ export class InpatientAdtService {
         episodeId,
         encounterId: encounterRow.id,
         encounterLocationId: location?.id,
-        cell: space
-          ? await this.ops.getOperationalState(tx, space.id)
-          : undefined,
+        cell: space ? await this.bedState(tx, space.id) : undefined,
         incidentId: incidentId ?? undefined,
       } satisfies AdmissionResult;
     });
@@ -596,7 +594,7 @@ export class InpatientAdtService {
       }
       return {
         encounterLocationId: placed.location.id,
-        cell: await this.ops.getOperationalState(tx, space.id),
+        cell: await this.bedState(tx, space.id),
         incidentId: placed.incidentId ?? undefined,
       };
     });
@@ -679,7 +677,7 @@ export class InpatientAdtService {
 
       const reservations = await this.repo.reservations(tx, encounter.id);
       const own = reservations.find((r) => r.careSpaceId === to.id);
-      const originState = await this.ops.getOperationalState(tx, from.id);
+      const originState = await this.bedState(tx, from.id);
       const terminal = this.needsTerminalCleaning(encounter, originState);
 
       // 1) cierra el origen; 2) abre el destino. Con las restricciones inmediatas
@@ -777,7 +775,7 @@ export class InpatientAdtService {
         fromLocationId: origin.id,
         toLocationId: placed.location.id,
         cleaningOrderId,
-        cell: await this.ops.getOperationalState(tx, to.id),
+        cell: await this.bedState(tx, to.id),
         incidentId: placed.incidentId ?? undefined,
       };
     });
@@ -883,8 +881,8 @@ export class InpatientAdtService {
       );
 
       const settings = await this.settings.forPractice(tx, scopeA.practiceId);
-      const stateA = await this.ops.getOperationalState(tx, bedA.id);
-      const stateB = await this.ops.getOperationalState(tx, bedB.id);
+      const stateA = await this.bedState(tx, bedA.id);
+      const stateB = await this.bedState(tx, bedB.id);
 
       await tx.execute(`set constraints ${CONSTRAINTS_DEFERRABLE} deferred`);
       for (const old of [locA, locB]) {
@@ -1017,6 +1015,14 @@ export class InpatientAdtService {
         ),
       };
     });
+  }
+
+  /** Estado operativo de la cama por ejes, tal como lo leen las reglas y el contrato HTTP. */
+  private async bedState(
+    tx: EntityManager,
+    careSpaceId: string,
+  ): Promise<BedOpsView> {
+    return toBedOpsView(await this.ops.getOperationalState(tx, careSpaceId));
   }
 
   private async evaluateSwapSide(
@@ -1162,7 +1168,7 @@ export class InpatientAdtService {
         const locked = await this.repo.lockSpaces(tx, [bed.careSpaceId]);
         const space = locked.get(bed.careSpaceId)!;
         careSpaceId = space.id;
-        const state = await this.ops.getOperationalState(tx, space.id);
+        const state = await this.bedState(tx, space.id);
         const terminal = this.needsTerminalCleaning(encounter, state);
         await this.repo.closeLocation(
           tx,
@@ -1349,10 +1355,7 @@ export class InpatientAdtService {
           previous.careSpaceId,
           location.careSpaceId!,
         ]);
-        const state = await this.ops.getOperationalState(
-          tx,
-          previous.careSpaceId,
-        );
+        const state = await this.bedState(tx, previous.careSpaceId);
         const taken = await this.repo.otherClaimOnBed(
           tx,
           previous.careSpaceId,
@@ -1367,8 +1370,6 @@ export class InpatientAdtService {
           );
         if (taken || state.occupancy.code !== 'OCC_FREE')
           throw unavailable('OCCUPIED');
-        if (!this.ops.revertDirtyFromSource)
-          throw unavailable('CLEANING_NOT_REVERTIBLE');
         const reverted = await this.ops.revertDirtyFromSource(
           tx,
           previous.careSpaceId,
@@ -1835,7 +1836,7 @@ export class InpatientAdtService {
   /** Limpieza terminal: aislamiento del encuentro o de la cama, o cama contaminada. */
   private needsTerminalCleaning(
     encounter: AdtEncounterRow,
-    bed: CareSpaceOperationalState,
+    bed: BedOpsView,
   ): boolean {
     const hasPrecaution =
       !!encounter.isolationPrecautionConceptId &&

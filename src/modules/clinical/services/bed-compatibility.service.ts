@@ -23,9 +23,9 @@ import { BedCompatibilityDto, type AdtOverrideDto } from '../dto/adt.dto';
 import { INFRA_F3_ACTIONS } from '../policies/infra-f3.policy';
 import {
   CARE_SPACE_OPS_PORT,
-  type CareSpaceOperationalState,
   type CareSpaceOpsPort,
-} from '../ports/care-space-ops.port';
+} from '../../practice/services/care-space-ops.port';
+import { toBedOpsView, type BedOpsView } from '../domain/bed-ops-view';
 import {
   AdtRepository,
   isolationCodeOf,
@@ -45,7 +45,7 @@ export interface BedEvaluation {
   /** La cama. */
   readonly space: AdtSpaceRow;
   /** Estado operativo que dio el puerto. */
-  readonly ops: CareSpaceOperationalState;
+  readonly ops: BedOpsView;
 }
 
 /** Contexto de una evaluación. */
@@ -152,7 +152,9 @@ export class BedCompatibilityService {
     const occupants = room
       ? await this.repo.roomOccupants(tx, room.id, input.excludeEncounterIds)
       : [];
-    const ops = await this.ops.getOperationalState(tx, input.space.id);
+    const ops = toBedOpsView(
+      await this.ops.getOperationalState(tx, input.space.id),
+    );
     const config: CompatibilityConfig = {
       ageThresholds: settings.ageThresholds,
       inspectionRequired: settings.inspectionRequired,

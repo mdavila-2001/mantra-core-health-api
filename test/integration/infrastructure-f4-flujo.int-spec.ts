@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { bootstrapTestApp, type TestContext } from './harness';
 import { CONCEPTS } from '../../src/common';
-import { CARE_SPACE_OPS_PORT } from '../../src/modules/procedures_perioperative/ports/care-space-ops.port';
+import { CARE_SPACE_OPS_PORT } from '../../src/modules/practice/services/care-space-ops.port';
 import {
   como,
   crearMiembro,
@@ -61,7 +61,9 @@ describe('Infraestructura F4 · flujo completo del quirófano', () => {
 
   beforeAll(async () => {
     ctx = await bootstrapTestApp({
-      overrideProviders: [{ token: CARE_SPACE_OPS_PORT, useValue: puertoDoble }],
+      overrideProviders: [
+        { token: CARE_SPACE_OPS_PORT, useValue: puertoDoble },
+      ],
     });
     paciente = ctx.patientSubtypeId;
     await registrarOrg(ctx, orgA, 'A', sufijo);

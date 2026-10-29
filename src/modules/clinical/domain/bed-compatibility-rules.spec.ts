@@ -1,4 +1,4 @@
-import type { CareSpaceOperationalState } from '../ports/care-space-ops.port';
+import type { BedOpsView } from './bed-ops-view';
 import {
   ageClassOf,
   evaluateCompatibility,
@@ -32,7 +32,7 @@ const readyOps = (
     occupancy: 'OCC_FREE' | 'OCC_RESERVED' | 'OCC_OCCUPIED';
     assignable: boolean;
   }> = {},
-): CareSpaceOperationalState => ({
+): BedOpsView => ({
   careSpaceId: 'bed-1',
   lifecycle: { code: over.lifecycle ?? 'SPACE_ACTIVE' },
   availability: { code: over.availability ?? 'SPACE_OP_AVAILABLE' },

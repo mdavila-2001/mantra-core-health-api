@@ -78,6 +78,7 @@ function build() {
     getOperationalState: fn(),
     markDirtyFromSource: fn(),
     recordOccupancyChange: fn(),
+    revertDirtyFromSource: fn(),
   };
   const encounters = { completeForDischarge: fn() };
   const service = new InpatientAdtService(
@@ -294,7 +295,7 @@ describe('InpatientAdtService · reglas que no necesitan la base', () => {
     });
   });
 
-  it('A12 sin la reversión opcional del puerto falla cerrado: PREVIOUS_BED_NO_LONGER_AVAILABLE', async () => {
+  it('A12 con la limpieza de la cama previa ya empezada (el puerto no la revierte) falla cerrado: PREVIOUS_BED_NO_LONGER_AVAILABLE', async () => {
     const d = build();
     const previous = location({
       id: 'loc-0',
@@ -323,14 +324,16 @@ describe('InpatientAdtService · reglas que no necesitan la base', () => {
     });
     (d.service as any).repo.otherClaimOnBed = fn().mockResolvedValue(false);
     d.ops.getOperationalState.mockResolvedValue({
-      occupancy: { code: 'OCC_FREE' },
+      careSpaceId: 'bed-0',
+      occupancy: 'OCC_FREE',
     });
+    d.ops.revertDirtyFromSource.mockResolvedValue({ reverted: false });
     await expect(
       run(() => d.service.cancelLocation('loc-1', { reasonText: 'x' }, actor)),
     ).rejects.toMatchObject({
       status: 409,
       reason: 'PREVIOUS_BED_NO_LONGER_AVAILABLE',
-      details: { why: 'CLEANING_NOT_REVERTIBLE' },
+      details: { why: 'CLEANING_STARTED' },
     });
     expect(d.repo.closeLocation).not.toHaveBeenCalled();
   });

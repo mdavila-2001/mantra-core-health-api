@@ -16,11 +16,27 @@ import {
 } from '../policies/operating-room-access.service';
 import {
   CARE_SPACE_OPS_PORT,
-  SPACE_NOT_BOOKABLE,
   type CareSpaceOpsPort,
-} from '../ports/care-space-ops.port';
+} from '../../practice/services/care-space-ops.port';
+import { OpsErrorReason } from '../../practice/practice-ops.error-reasons';
 import type { Interval } from '../domain/or-window';
 import { ProceduresPerioperativeErrorReason as Reason } from '../procedures_perioperative.error-reasons';
+
+/**
+ * El bloqueo que impidió reservar, a partir de los `details` de `SPACE_NOT_BOOKABLE`
+ * del puerto de operación de espacios; `null` si el impedimento no fue un bloqueo
+ * (ciclo de vida, disponibilidad cerrada sin fila de bloqueo).
+ */
+function blockOf(details: unknown): Record<string, unknown> | null {
+  const d = (details ?? {}) as Record<string, unknown>;
+  if (typeof d.blockId !== 'string') return null;
+  return {
+    id: d.blockId,
+    kind: d.blockKind ?? null,
+    startsAt: d.blockStartsAt ?? null,
+    expectedEndAt: d.blockExpectedEndAt ?? null,
+  };
+}
 
 /** Una sala validada para reservar. */
 export interface BookableRoom {
@@ -130,12 +146,12 @@ export class PeriopOperatingRoomService {
     } catch (error) {
       if (
         error instanceof DomainException &&
-        error.reason === SPACE_NOT_BOOKABLE
+        error.reason === OpsErrorReason.SPACE_NOT_BOOKABLE
       ) {
         throw this.notAvailable(
           input.operatingRoomId,
           'BLOCKED',
-          (error.details as { block?: unknown } | undefined)?.block ?? null,
+          blockOf(error.details),
         );
       }
       throw error;

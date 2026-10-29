@@ -96,8 +96,6 @@ export enum ClinicalErrorReason {
   ADT_RESOURCE_OUT_OF_SCOPE = 'ADT_RESOURCE_OUT_OF_SCOPE',
   /** El actor no tiene el rol operativo que exige la acción sobre ese alcance (403). */
   INFRA_ACTION_NOT_ALLOWED = 'INFRA_ACTION_NOT_ALLOWED',
-  /** La operación de camas (puerto de F2) no está disponible: falla cerrado (503). */
-  CARE_SPACE_OPS_UNAVAILABLE = 'CARE_SPACE_OPS_UNAVAILABLE',
   /** Las camas sólo se ocupan por ADT: el check-in no acepta una cama (422). */
   BED_ASSIGNMENT_REQUIRES_ADT = 'BED_ASSIGNMENT_REQUIRES_ADT',
   /** El paciente ya tiene otra internación en curso (409). */

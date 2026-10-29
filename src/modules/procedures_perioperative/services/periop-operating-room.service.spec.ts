@@ -2,7 +2,7 @@ import { jest } from '@jest/globals';
 import { CONCEPTS, PreconditionFailedException } from '../../../common';
 import { runWithTenant } from '../../../common/tenant/tenant-context';
 import { PRAC } from '../../practice/practice.concepts';
-import { SPACE_NOT_BOOKABLE } from '../ports/care-space-ops.port';
+import { OpsErrorReason } from '../../practice/practice-ops.error-reasons';
 import { ProceduresPerioperativeErrorReason as Reason } from '../procedures_perioperative.error-reasons';
 import { PeriopOperatingRoomService } from './periop-operating-room.service';
 
@@ -131,14 +131,31 @@ describe('PeriopOperatingRoomService · validaciones 1 a 5 de scheduleCase', () 
 
   it('4 · la sala en mantenimiento (assertBookable del puerto) → 422 OPERATING_ROOM_NOT_AVAILABLE con details.block', async () => {
     const d = build();
-    const block = { id: 'blk', kindConceptId: 'mantenimiento' };
     d.ops.assertBookable.mockRejectedValue(
-      new PreconditionFailedException('no', { block }, SPACE_NOT_BOOKABLE),
+      new PreconditionFailedException(
+        'no',
+        {
+          reason: 'BLOCK',
+          blockId: 'blk',
+          blockKind: 'BLOCK_MAINTENANCE',
+          blockStartsAt: '2030-01-07T10:00:00.000Z',
+          blockExpectedEndAt: null,
+        },
+        OpsErrorReason.SPACE_NOT_BOOKABLE,
+      ),
     );
     await expect(d.book()).rejects.toMatchObject({
       status: 422,
       reason: Reason.OPERATING_ROOM_NOT_AVAILABLE,
-      details: { cause: 'BLOCKED', block },
+      details: {
+        cause: 'BLOCKED',
+        block: {
+          id: 'blk',
+          kind: 'BLOCK_MAINTENANCE',
+          startsAt: '2030-01-07T10:00:00.000Z',
+          expectedEndAt: null,
+        },
+      },
     });
   });
 

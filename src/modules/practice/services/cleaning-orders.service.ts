@@ -12,6 +12,7 @@ import { AUD } from '../../audit/audit.concepts';
 import { HistoryRepository } from '../../audit/repositories';
 import { DIR } from '../../directory/directory.concepts';
 import { TenantMembershipsRepository } from '../../directory/repositories';
+import type { HygieneCode } from '../domain/bed-status-v2';
 import type {
   CleaningOrderPage,
   CleaningOrderView,
@@ -30,11 +31,13 @@ import {
   RowVersionMismatchException,
 } from '../http/row-version';
 import {
+  AXES,
   CLEANING_PRIORITIES,
   CLEANING_STATUSES,
   CLEANING_TRANSITIONS,
   CLEANING_TRIGGERS,
   CLEANING_TYPES,
+  HYGIENE,
   INSPECTION_RESULTS,
   conceptIdOf,
   hasOperationalState,
@@ -912,6 +915,82 @@ export class CleaningOrdersService {
       ctx.actingRoles,
     );
     return { order, result, created: true, escalated: false };
+  }
+
+  /**
+   * Deshace la orden de limpieza que dejó un hecho de origen (un traslado que luego
+   * se cancela) y devuelve la higiene al valor que tenía antes de ensuciarla.
+   *
+   * Sólo revierte una orden **que nadie empezó** (`PENDING`): una limpieza en curso
+   * o terminada ya es trabajo hecho y no se deshace. La higiene anterior sale del
+   * evento A20 que escribió el ensuciado (eje HYGIENE, mismo `source_ref_id`).
+   *
+   * @param tx - Transacción del llamador.
+   * @param row - El espacio, cargado en esta transacción con bloqueo.
+   * @param sourceRefId - Hecho que originó la orden (la ubicación de origen del traslado).
+   * @param ctx - Quién, con qué origen.
+   * @returns `reverted: false` si no hay una orden `PENDING` de ese hecho.
+   */
+  async revertBySource(
+    tx: EntityManager,
+    row: SpaceOpsRow,
+    sourceRefId: string,
+    ctx: OpsContext,
+  ): Promise<{ reverted: boolean }> {
+    const now = ctx.now ?? new Date();
+    const rows = await tx.execute<Record<string, unknown>[]>(
+      `select ${ORDER_COLUMNS} from practice.cleaning_orders o
+        where o.care_space_id = ? and o.tenant_id = ? and o.source_ref_id = ?
+          and o.status_concept_id = ?
+        for update`,
+      [row.id, row.tenantId, sourceRefId, PRAC.CLN_PENDING],
+    );
+    if (rows.length === 0) return { reverted: false };
+    const order = toOrderRow(rows[0]);
+    const previous = await tx.execute<{ from_concept_id: string | null }[]>(
+      `select e.from_concept_id
+         from practice.care_space_status_events e
+        where e.care_space_id = ? and e.tenant_id = ? and e.source_ref_id = ?
+          and e.axis_concept_id = ?
+        order by e.occurred_at desc, e.created_at desc
+        limit 1`,
+      [row.id, row.tenantId, sourceRefId, conceptIdOf(AXES, 'AXIS_HYGIENE')],
+    );
+    const previousCode = HYGIENE.byConceptId(previous[0]?.from_concept_id)
+      ?.code as HygieneCode | undefined;
+    const cancelled = await this.updateOrder(
+      tx,
+      order,
+      { statusConceptId: PRAC.CLN_CANCELLED, cancelReason: 'SOURCE_REVERTED' },
+      ctx.actorUserId,
+      now,
+    );
+    await this.historyOf(
+      tx,
+      cancelled,
+      ctx.actorUserId,
+      row.tenantId,
+      'revert-source',
+    );
+    await this.recorder.applyChange(
+      tx,
+      row,
+      {
+        hygiene: { to: previousCode ?? 'HYG_CLEAN', reasonText: null },
+        terminalCleaningRequired: false,
+      },
+      ctx,
+    );
+    await this.publish(
+      tx,
+      OPS_EVENTS.cleaningCancelled,
+      cancelled,
+      ctx.actorUserId,
+      ctx.requestId,
+      ctx.actingRoles,
+      { reason: 'SOURCE_REVERTED' },
+    );
+    return { reverted: true };
   }
 
   // --------------------------------------------------------------- auxiliares

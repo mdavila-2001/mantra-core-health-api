@@ -15,6 +15,7 @@ import {
   type CareSpaceOpsPort,
   type MarkDirtyInput,
   type OccupancyChangeInput,
+  type RevertDirtyInput,
 } from './care-space-ops.port';
 import { CleaningOrdersService } from './cleaning-orders.service';
 import { OpsRecorder, type OpsContext } from './ops-recorder';
@@ -93,6 +94,23 @@ export class CareSpaceOpsPortService implements CareSpaceOpsPort {
       ctx,
     );
     return { cleaningOrderId: opened.order.id };
+  }
+
+  async revertDirtyFromSource(
+    tx: EntityManager,
+    careSpaceId: string,
+    input: RevertDirtyInput,
+  ): Promise<{ reverted: boolean }> {
+    const tenantId = requireTenantId();
+    const row = await this.state.loadSpace(tx, tenantId, careSpaceId, true);
+    return this.cleaning.revertBySource(tx, row, input.sourceRefId, {
+      tenantId,
+      actorUserId: opsActorUserId(input.actor),
+      requestId: input.requestId,
+      source: 'SRC_ADT',
+      sourceRefId: input.sourceRefId,
+      action: 'REVERT_DIRTY_FROM_SOURCE',
+    });
   }
 
   async recordOccupancyChange(

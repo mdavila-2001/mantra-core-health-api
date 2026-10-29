@@ -1,14 +1,15 @@
 import { randomUUID } from 'node:crypto';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { CLIN } from '../../src/modules/clinical/clinical.concepts';
+import type { OccupancyCode } from '../../src/modules/practice/domain/bed-status-v2';
 import type {
+  BookingWindow,
   CareSpaceOperationalState,
-  CareSpaceOpsContext,
   CareSpaceOpsPort,
   MarkDirtyInput,
   OccupancyChangeInput,
-  OccupancyCode,
-} from '../../src/modules/clinical/ports/care-space-ops.port';
+  RevertDirtyInput,
+} from '../../src/modules/practice/services/care-space-ops.port';
 import { PRAC } from '../../src/modules/practice/practice.concepts';
 
 /** Una llamada registrada al puerto. */
@@ -17,7 +18,8 @@ export interface DoubleCall {
     | 'getOperationalState'
     | 'markDirtyFromSource'
     | 'recordOccupancyChange'
-    | 'revertDirtyFromSource';
+    | 'revertDirtyFromSource'
+    | 'assertBookable';
   readonly careSpaceId: string;
   readonly input?: unknown;
 }
@@ -120,9 +122,16 @@ export class CareSpaceOpsDouble implements CareSpaceOpsPort {
   ): Promise<CareSpaceOperationalState> {
     this.calls.push({ method: 'getOperationalState', careSpaceId });
     const rows = await tx.execute<
-      { status: string; op: string | null; occ: string | null }[]
+      {
+        tenant: string;
+        site: string;
+        status: string;
+        op: string | null;
+        occ: string | null;
+      }[]
     >(
-      `select cs.status_concept_id as status, cs.operational_status_concept_id as op,
+      `select cs.tenant_id as tenant, cs.practice_site_id as site,
+              cs.status_concept_id as status, cs.operational_status_concept_id as op,
               (select el.location_status_concept_id
                  from clinical.encounter_locations el
                 where el.care_space_id = cs.id and el.is_bed_assignment
@@ -147,8 +156,7 @@ export class CareSpaceOpsDouble implements CareSpaceOpsPort {
       code: 'HYG_CLEAN',
       terminal: false,
     };
-    const lifecycle =
-      row?.status === PRAC.SPACE_ACTIVE ? 'SPACE_ACTIVE' : 'SPACE_NOT_ACTIVE';
+    const lifecycleActive = row?.status === PRAC.SPACE_ACTIVE;
     const availability =
       !row?.op || row.op === PRAC.SPACE_OP_AVAILABLE
         ? 'SPACE_OP_AVAILABLE'
@@ -157,19 +165,29 @@ export class CareSpaceOpsDouble implements CareSpaceOpsPort {
       !hygiene.terminal &&
       (hygiene.code === 'HYG_INSPECTED' || hygiene.code === 'HYG_CLEAN');
     const assignable =
-      lifecycle === 'SPACE_ACTIVE' &&
+      lifecycleActive &&
       availability === 'SPACE_OP_AVAILABLE' &&
       occupancy === 'OCC_FREE' &&
       hygieneOk;
+    const open = this.openOrderOf(careSpaceId);
     const state: CareSpaceOperationalState = {
       careSpaceId,
-      lifecycle: { code: lifecycle },
-      availability: { code: availability },
-      hygiene: { code: hygiene.code, terminalRequired: hygiene.terminal },
-      isolation: { code: this.isolation.get(careSpaceId) ?? 'ISO_NONE' },
-      occupancy: { code: occupancy },
+      tenantId: row?.tenant ?? '',
+      practiceSiteId: row?.site ?? '',
+      lifecycleActive,
+      availability,
+      availabilityReasonCode: null,
+      availabilityExpectedUntil: null,
+      hygiene: hygiene.code as CareSpaceOperationalState['hygiene'],
+      terminalCleaningRequired: hygiene.terminal,
+      isolation: (this.isolation.get(careSpaceId) ??
+        'ISO_NONE') as CareSpaceOperationalState['isolation'],
+      isolationOrganism: null,
+      occupancy,
       v2Code: occupancy === 'OCC_OCCUPIED' ? 'O' : assignable ? 'U' : 'H',
       assignable,
+      openCleaningOrderId: open?.id ?? null,
+      opsVersion: 1,
     };
     return { ...state, ...(this.lies.get(careSpaceId) ?? {}) };
   }
@@ -189,6 +207,7 @@ export class CareSpaceOpsDouble implements CareSpaceOpsPort {
         requestId: input.requestId,
       },
     });
+    const sourceRefId = input.sourceRefId ?? '';
     if (this.failNextMarkDirty) {
       const error = this.failNextMarkDirty;
       this.failNextMarkDirty = null;
@@ -208,7 +227,7 @@ export class CareSpaceOpsDouble implements CareSpaceOpsPort {
       careSpaceId,
       trigger: input.trigger,
       terminal: input.terminal,
-      sourceRefId: input.sourceRefId,
+      sourceRefId,
       status: 'PENDING',
     };
     this.orders.push(order);
@@ -235,7 +254,7 @@ export class CareSpaceOpsDouble implements CareSpaceOpsPort {
   async revertDirtyFromSource(
     _tx: EntityManager,
     careSpaceId: string,
-    input: CareSpaceOpsContext & { readonly sourceRefId: string },
+    input: RevertDirtyInput,
   ): Promise<{ reverted: boolean }> {
     this.calls.push({
       method: 'revertDirtyFromSource',
@@ -258,5 +277,17 @@ export class CareSpaceOpsDouble implements CareSpaceOpsPort {
       },
     );
     return { reverted: true };
+  }
+
+  async assertBookable(
+    _tx: EntityManager,
+    careSpaceId: string,
+    window: BookingWindow,
+  ): Promise<void> {
+    this.calls.push({
+      method: 'assertBookable',
+      careSpaceId,
+      input: { start: window.start, end: window.end },
+    });
   }
 }

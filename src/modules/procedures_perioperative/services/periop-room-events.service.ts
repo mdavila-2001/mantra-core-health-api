@@ -11,7 +11,7 @@ import { OutboxService } from '../../messaging/services/outbox.service';
 import {
   CARE_SPACE_OPS_PORT,
   type CareSpaceOpsPort,
-} from '../ports/care-space-ops.port';
+} from '../../practice/services/care-space-ops.port';
 import type { OmsPhase } from '../domain/oms-checklist';
 import { OperatingRoomUtilizationEvents } from '../entities';
 import { PeriopCasesRepository } from '../repositories';

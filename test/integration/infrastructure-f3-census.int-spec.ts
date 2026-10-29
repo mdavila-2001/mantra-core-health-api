@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { CONCEPTS, SEED, TokenService } from '../../src/common';
 import { CLIN } from '../../src/modules/clinical/clinical.concepts';
 import { localDate } from '../../src/modules/clinical/domain/census-calculation';
-import { CARE_SPACE_OPS_PORT } from '../../src/modules/clinical/ports/care-space-ops.port';
+import { CARE_SPACE_OPS_PORT } from '../../src/modules/practice/services/care-space-ops.port';
 import { PRAC } from '../../src/modules/practice/practice.concepts';
 import { CareSpaceOpsDouble } from '../doubles/care-space-ops.double';
 import {

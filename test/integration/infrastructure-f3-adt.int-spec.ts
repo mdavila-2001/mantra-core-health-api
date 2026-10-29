@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { CLIN } from '../../src/modules/clinical/clinical.concepts';
-import { CARE_SPACE_OPS_PORT } from '../../src/modules/clinical/ports/care-space-ops.port';
+import { CARE_SPACE_OPS_PORT } from '../../src/modules/practice/services/care-space-ops.port';
 import { CareSpaceOpsDouble } from '../doubles/care-space-ops.double';
 import { bootstrapTestApp, type TestContext } from './harness';
 import {
@@ -330,8 +330,7 @@ describe('Infraestructura F3 · internación / ADT', () => {
       expect(res.body.details.encounterId).toBe(first.encounterId);
       // y la cama quedó libre
       expect(
-        (await double.getOperationalState(ctx.orm.em.fork(), bedId)).occupancy
-          .code,
+        (await double.getOperationalState(ctx.orm.em.fork(), bedId)).occupancy,
       ).toBe('OCC_FREE');
     });
 
@@ -993,7 +992,7 @@ describe('Infraestructura F3 · internación / ADT', () => {
         .expect(200);
       expect(
         (await double.getOperationalState(ctx.orm.em.fork(), to.bedId))
-          .occupancy.code,
+          .occupancy,
       ).toBe('OCC_RESERVED');
       await http()
         .post(`/clinical/encounters/${out.encounterId}/transfer`)
@@ -1061,8 +1060,8 @@ describe('Infraestructura F3 · internación / ADT', () => {
       // las camas siguen ocupadas: nadie las dejó sucias
       expect(double.callsTo('markDirtyFromSource')).toHaveLength(0);
       expect(
-        (await double.getOperationalState(ctx.orm.em.fork(), a.bedId)).occupancy
-          .code,
+        (await double.getOperationalState(ctx.orm.em.fork(), a.bedId))
+          .occupancy,
       ).toBe('OCC_OCCUPIED');
       expect(await events('clinical.adt.swapped', ea.encounterId)).toHaveLength(
         1,
@@ -1225,8 +1224,8 @@ describe('Infraestructura F3 · internación / ADT', () => {
         trigger: 'DISCHARGE',
       });
       expect(
-        (await double.getOperationalState(ctx.orm.em.fork(), bedId)).hygiene
-          .terminalRequired,
+        (await double.getOperationalState(ctx.orm.em.fork(), bedId))
+          .terminalCleaningRequired,
       ).toBe(true);
     });
 
@@ -1605,7 +1604,7 @@ describe('Infraestructura F3 · internación / ADT', () => {
     it('la base es la red: si el pre-chequeo se equivoca (estado falso de «libre»), el EXCLUDE responde 409 BED_DOUBLE_OCCUPANCY', async () => {
       const { bedId } = await newBed();
       await admit(await man(), bedId);
-      double.lie(bedId, { occupancy: { code: 'OCC_FREE' }, assignable: true });
+      double.lie(bedId, { occupancy: 'OCC_FREE', assignable: true });
       const intruso = await man('Intruso Falso');
       const res = await http()
         .post('/clinical/admissions')

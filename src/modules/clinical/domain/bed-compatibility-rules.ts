@@ -1,4 +1,4 @@
-import type { CareSpaceOperationalState } from '../ports/care-space-ops.port';
+import type { BedOpsView } from './bed-ops-view';
 
 /** Reglas de compatibilidad (CONTRATO-F2-F5 F3.2). */
 export type CompatibilityRule =
@@ -112,7 +112,7 @@ export interface BedFacts {
   /** Otros pacientes de la misma habitación. */
   readonly roomOccupants: readonly RoomOccupant[];
   /** Estado operativo que da F2. */
-  readonly ops: CareSpaceOperationalState;
+  readonly ops: BedOpsView;
   /**
    * La reserva o la ocupación actual no impide la colocación: es de este
    * encuentro (convierte su reserva) o de su compañero de intercambio.
