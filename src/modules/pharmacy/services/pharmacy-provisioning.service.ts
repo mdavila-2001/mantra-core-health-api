@@ -243,6 +243,7 @@ export class PharmacyProvisioningService {
 
     const practiceSite = this.practiceSitesRepo.create(tx, {
       practiceId,
+      tenantId: owner.tenantId,
       code,
       name: declared.name,
       siteTypeConceptId: PRAC.SITE_TYPE_OFFICE,

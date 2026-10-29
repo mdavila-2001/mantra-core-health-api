@@ -153,6 +153,7 @@ export class OwnSiteProvisioningService {
     const code = await this.uniqueSiteCode(tx, practice.id, dto.name);
     const site = this.sitesRepo.create(tx, {
       practiceId: practice.id,
+      tenantId: owner.tenantId,
       code,
       name: dto.name,
       siteTypeConceptId: PRAC.SITE_TYPE_OFFICE,

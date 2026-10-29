@@ -333,6 +333,7 @@ export class DiagnosticUnitProvisioningService {
     );
     const site = this.sitesRepo.create(tx, {
       practiceId,
+      tenantId: owner.tenantId,
       code: siteCode,
       name: declared.name,
       siteTypeConceptId: PRAC.SITE_TYPE_OFFICE,

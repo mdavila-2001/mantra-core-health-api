@@ -158,6 +158,7 @@ export class OrganizationPracticeProvisioningService {
       );
       const site = this.sitesRepo.create(tx, {
         practiceId: practice.id,
+        tenantId,
         code: siteCode,
         name: dto.site.name,
         siteTypeConceptId: PRAC.SITE_TYPE_OFFICE,

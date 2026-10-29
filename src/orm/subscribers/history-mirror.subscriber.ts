@@ -42,6 +42,14 @@ const EXPLICITLY_WIRED_SOURCES = new Set([
   // único servicio que escribe `clinical.conditions`. Sin esta entrada cada
   // cambio dejaba DOS revisiones (la del servicio y la del espejo).
   'clinical.conditions',
+  // La estructura de infraestructura (sede, unidad, espacio) la versionan los
+  // servicios de `practice` con `HistoryRepository.append`, en la misma transacción
+  // de cada mutación (F0/F1, con prueba de integración). Desde el modelo F1b esas
+  // tres historias tienen FK propia al agregado y el espejo las resuelve: sin esta
+  // entrada cada cambio dejaba DOS revisiones (la del servicio y la del espejo).
+  'practice.practice_sites',
+  'practice.clinical_units',
+  'practice.care_spaces',
 ]);
 
 /**

@@ -20,6 +20,19 @@ export interface AppendHistoryData {
   dataSnapshot: unknown;
   changedByUserId?: string;
   changeReasonConceptId?: string;
+  /**
+   * Tenant del agregado, para las historias que lo llevan (`audit.practice_sites_history`,
+   * `clinical_units_history`, `care_spaces_history`). La base lo completa desde el origen
+   * si no llega (trigger `structure_history_fill_tenant`), pero mandarlo evita depender
+   * de ese trigger y deja la intención explícita.
+   */
+  tenantId?: string;
+  /**
+   * Es la primera revisión del agregado (alta): no hay revisión previa que cerrar ni que
+   * contar, así que se omiten las dos consultas y se sella el correlativo 1. Importa en
+   * las altas masivas, donde cada fila pagaba dos consultas de más.
+   */
+  firstRevision?: boolean;
 }
 
 /** Una revisión de la línea de tiempo de un registro (proyección de lectura). */
@@ -185,13 +198,16 @@ export class HistoryRepository {
     const sourceFilter = {
       [binding.sourceField]: id,
     } as FilterQuery<HistoryEntity>;
-    const prev = await em.find(binding.entity, {
-      ...sourceFilter,
-      validTo: null,
-    });
-    for (const row of prev) row.validTo = now;
+    let revisionNo = 1;
+    if (!data.firstRevision) {
+      const prev = await em.find(binding.entity, {
+        ...sourceFilter,
+        validTo: null,
+      });
+      for (const row of prev) row.validTo = now;
 
-    const revisionNo = (await em.count(binding.entity, sourceFilter)) + 1;
+      revisionNo = (await em.count(binding.entity, sourceFilter)) + 1;
+    }
 
     const historyData: EntityData<HistoryEntity> & Record<string, unknown> = {
       operationConceptId: data.operationConceptId,
@@ -203,6 +219,7 @@ export class HistoryRepository {
     };
     historyData[binding.sourceField] = id;
     historyData[binding.revisionField] = revisionNo;
+    if (data.tenantId !== undefined) historyData.tenantId = data.tenantId;
     em.create(binding.entity, historyData, { partial: true });
   }
 

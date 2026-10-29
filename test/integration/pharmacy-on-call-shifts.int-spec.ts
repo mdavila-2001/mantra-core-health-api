@@ -108,11 +108,18 @@ describe('P34 · farmacias 24 h y de turno · HTTP real', () => {
       [addressId, practiceSiteId],
     );
     await sql(
-      `insert into practice.practice_sites (id, practice_id, code, name, site_type_concept_id,
+      `insert into practice.practice_sites (id, tenant_id, practice_id, code, name, site_type_concept_id,
               time_zone, address_id, status_concept_id, created_at, updated_at)
-       select ?, ?, ?, ?, site_type_concept_id, 'America/La_Paz', ?, status_concept_id, now(), now()
+       select ?, ?, ?, ?, ?, site_type_concept_id, 'America/La_Paz', ?, status_concept_id, now(), now()
          from practice.practice_sites limit 1`,
-      [practiceSiteId, practiceId, `${mark}-${etiqueta}`, 'Sede', addressId],
+      [
+        practiceSiteId,
+        tenantId,
+        practiceId,
+        `${mark}-${etiqueta}`,
+        'Sede',
+        addressId,
+      ],
     );
     await sql(
       `insert into community.public_profiles (id, tenant_id, target_type_concept_id, target_id,
