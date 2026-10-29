@@ -8,23 +8,23 @@
 | Módulo | Controllers | Services | Repositories | Entidades | DTO |
 |---|---:|---:|---:|---:|---:|
 | [`insurance`](insurance.md) | 19 | 28 | 14 | 31 | 23 |
-| [`community`](community.md) | 14 | 34 | 19 | 41 | 33 |
+| [`community`](community.md) | 14 | 36 | 19 | 41 | 33 |
 | [`pharma_lab`](pharma_lab.md) | 12 | 13 | 10 | 31 | 11 |
 | [`clinical`](clinical.md) | 11 | 21 | 18 | 25 | 18 |
 | [`consent`](consent.md) | 11 | 12 | 10 | 10 | 17 |
 | [`accounting`](accounting.md) | 10 | 12 | 10 | 45 | 13 |
 | [`authz`](authz.md) | 9 | 12 | 16 | 15 | 21 |
 | [`practice`](practice.md) | 9 | 15 | 12 | 11 | 21 |
+| [`profiles`](profiles.md) | 9 | 19 | 17 | 24 | 34 |
 | [`clinical_ext`](clinical_ext.md) | 8 | 9 | 13 | 13 | 9 |
 | [`identity_assurance`](identity_assurance.md) | 8 | 12 | 10 | 11 | 17 |
 | [`scheduling`](scheduling.md) | 8 | 16 | 8 | 19 | 9 |
 | [`system_ops`](system_ops.md) | 8 | 8 | 8 | 30 | 10 |
 | [`chart`](chart.md) | 7 | 9 | 4 | 11 | 6 |
 | [`diagnostics`](diagnostics.md) | 7 | 10 | 8 | 36 | 9 |
-| [`profiles`](profiles.md) | 7 | 13 | 15 | 20 | 32 |
 | [`terminology`](terminology.md) | 7 | 9 | 9 | 16 | 19 |
 | [`audit`](audit.md) | 6 | 8 | 9 | 131 | 11 |
-| [`billing`](billing.md) | 6 | 14 | 12 | 24 | 15 |
+| [`billing`](billing.md) | 6 | 15 | 12 | 24 | 16 |
 | [`common`](common.md) | 6 | 6 | 7 | 7 | 5 |
 | [`forms`](forms.md) | 6 | 6 | 6 | 16 | 17 |
 | [`pharmacy_inventory`](pharmacy_inventory.md) | 6 | 11 | 17 | 21 | 17 |
@@ -78,4 +78,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **294** | **477** | **441** | **1281** | **545** |
+| **Total** | **296** | **486** | **443** | **1285** | **548** |
