@@ -63,9 +63,14 @@ export const admissionsEnvSchema = Joi.object({
     .default(ADMISSIONS_DEFAULTS.maxResubmissions),
 });
 
-function positiveInt(value: string | undefined, fallback: number, allowZero = false): number {
+function positiveInt(
+  value: string | undefined,
+  fallback: number,
+  allowZero = false,
+): number {
   const parsed = Number(value);
-  if (value === undefined || value === '' || !Number.isInteger(parsed)) return fallback;
+  if (value === undefined || value === '' || !Number.isInteger(parsed))
+    return fallback;
   return parsed > 0 || (allowZero && parsed === 0) ? parsed : fallback;
 }
 

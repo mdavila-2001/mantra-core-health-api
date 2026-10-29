@@ -920,7 +920,10 @@ describe('ProfilesPractitionersService', () => {
       expect(credential.rejectionReasonText).toBe('Documento ilegible');
       expect(d.admissions.recordCredentialReview).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ decision: 'REJECTED', reason: '  Documento ilegible ' }),
+        expect.objectContaining({
+          decision: 'REJECTED',
+          reason: '  Documento ilegible ',
+        }),
       );
     });
   });
@@ -3038,9 +3041,16 @@ describe('ProfilesPractitionersService', () => {
         new Map([
           [
             'per-1',
-            { status: 'VERIFIED', verifiedAt: '2026-10-01T00:00:00.000Z', validUntil: '2029-10-01' },
+            {
+              status: 'VERIFIED',
+              verifiedAt: '2026-10-01T00:00:00.000Z',
+              validUntil: '2029-10-01',
+            },
           ],
-          ['per-2', { status: 'UNVERIFIED', verifiedAt: null, validUntil: null }],
+          [
+            'per-2',
+            { status: 'UNVERIFIED', verifiedAt: null, validUntil: null },
+          ],
         ]) as never,
       );
 

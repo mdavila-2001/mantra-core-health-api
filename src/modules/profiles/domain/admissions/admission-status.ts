@@ -148,11 +148,7 @@ export function profileVerificationFor(status: AdmissionStatusCode): string {
 
 /** Lo que el front pinta junto al nombre del profesional. */
 export type PractitionerVerificationStatus =
-  | 'VERIFIED'
-  | 'IN_REVIEW'
-  | 'UNVERIFIED'
-  | 'SUSPENDED'
-  | 'EXPIRED';
+  'VERIFIED' | 'IN_REVIEW' | 'UNVERIFIED' | 'SUSPENDED' | 'EXPIRED';
 
 /** Objeto aditivo `verification` de los DTO de profesional. */
 export interface PractitionerVerificationView {

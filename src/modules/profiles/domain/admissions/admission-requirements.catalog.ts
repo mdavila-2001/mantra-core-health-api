@@ -2,7 +2,8 @@ import { PROF } from '../../profiles.concepts';
 import { deterministicId } from '../../../../common/constants/concepts';
 
 /** Clase de ficha que revisa un requisito. */
-export type AdmissionItemType = 'LICENSE' | 'CREDENTIAL' | 'SPECIALTY' | 'PROFILE';
+export type AdmissionItemType =
+  'LICENSE' | 'CREDENTIAL' | 'SPECIALTY' | 'PROFILE';
 
 /** Cómo se presenta la evidencia de un requisito. */
 export type AdmissionEvidenceKind = 'DOCUMENT' | 'DATA';
@@ -60,7 +61,8 @@ export const PRACTITIONER_ONBOARDING_REQUIREMENTS: readonly AdmissionRequirement
   [
     {
       code: 'CI',
-      label: 'Cédula de identidad (con terminación del departamento de emisión)',
+      label:
+        'Cédula de identidad (con terminación del departamento de emisión)',
       description:
         'Número de la cédula y su terminación (SC, LP, CB…). Se compara con el documento de identidad del profesional.',
       itemType: 'PROFILE',

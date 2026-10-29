@@ -146,7 +146,14 @@ export class MessagingAdmissionNoticeAdapter implements AdmissionNoticePort {
       actor,
     );
 
-    await this.enqueueEmail(em, notice, link.userId, debounceKey, bodyText, actor);
+    await this.enqueueEmail(
+      em,
+      notice,
+      link.userId,
+      debounceKey,
+      bodyText,
+      actor,
+    );
     return { delivered: delivery.inAppNotificationId !== undefined };
   }
 

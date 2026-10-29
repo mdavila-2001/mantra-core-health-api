@@ -83,7 +83,9 @@ describe('proyección sobre el perfil', () => {
   it('sólo VERIFICADA es verificado; ENVIADA equivale a PRACT_VERIF_PENDING', () => {
     for (const code of ADMISSION_STATUS_CODES) {
       expect(profileVerificationFor(code)).toBe(
-        code === 'VERIFICADA' ? PROF.PRACT_VERIF_VERIFIED : PROF.PRACT_VERIF_PENDING,
+        code === 'VERIFICADA'
+          ? PROF.PRACT_VERIF_VERIFIED
+          : PROF.PRACT_VERIF_PENDING,
       );
     }
   });
@@ -104,12 +106,13 @@ describe('estado visible de verificación (el check)', () => {
     });
   });
 
-  it.each<AdmissionStatusCode>(['ENVIADA', 'EN_REVISION', 'INFORMACION_REQUERIDA'])(
-    '%s se ve «en proceso»',
-    (status) => {
-      expect(visibleVerification({ status }, NOW).status).toBe('IN_REVIEW');
-    },
-  );
+  it.each<AdmissionStatusCode>([
+    'ENVIADA',
+    'EN_REVISION',
+    'INFORMACION_REQUERIDA',
+  ])('%s se ve «en proceso»', (status) => {
+    expect(visibleVerification({ status }, NOW).status).toBe('IN_REVIEW');
+  });
 
   it.each<AdmissionStatusCode>(['RECHAZADA', 'RETIRADA', 'ABANDONADA'])(
     '%s no muestra nada',
@@ -130,9 +133,9 @@ describe('estado visible de verificación (el check)', () => {
   it('el último día de vigencia todavía vale (fin de día en La Paz, inclusive)', () => {
     // 29/10 23:59 en La Paz es 30/10 03:59 UTC.
     const lastMinute = new Date('2026-10-30T03:59:00.000Z');
-    expect(visibleVerification(verificada('2026-10-29'), lastMinute).status).toBe(
-      'VERIFIED',
-    );
+    expect(
+      visibleVerification(verificada('2026-10-29'), lastMinute).status,
+    ).toBe('VERIFIED');
   });
 
   it('pasado el fin de día de La Paz la verificación vence aunque el barrido no corrió', () => {
@@ -146,6 +149,8 @@ describe('estado visible de verificación (el check)', () => {
     expect(visibleVerification({ status: 'SUSPENDIDA' }, NOW).status).toBe(
       'SUSPENDED',
     );
-    expect(visibleVerification({ status: 'EXPIRADA' }, NOW).status).toBe('EXPIRED');
+    expect(visibleVerification({ status: 'EXPIRADA' }, NOW).status).toBe(
+      'EXPIRED',
+    );
   });
 });

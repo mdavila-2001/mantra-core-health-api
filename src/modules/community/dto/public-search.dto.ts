@@ -471,7 +471,8 @@ export class PublicDirectoryProfileDto {
 
   @ApiProperty({
     type: PractitionerVerificationDto,
-    description: 'El mismo sello en la forma `verification`, derivado de `verifiedBadge`.',
+    description:
+      'El mismo sello en la forma `verification`, derivado de `verifiedBadge`.',
   })
   verification!: PractitionerVerificationDto;
 

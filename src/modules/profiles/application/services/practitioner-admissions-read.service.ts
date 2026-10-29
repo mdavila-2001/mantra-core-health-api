@@ -7,7 +7,7 @@ import {
   encodeKeysetCursor,
   type AuthenticatedUser,
 } from '../../../../common';
-import { InsufficientRoleException } from '../../../../common/errors/domain.exception';
+import { assertNotSelfAccess } from './admission-self-access';
 import { badRequestWithReason } from '../../../../common/errors/reasoned-http-exceptions';
 import { SystemErrorReason } from '../../../../common/errors/system-error-reasons';
 import { Identifiers } from '../../../common/entities';
@@ -36,8 +36,6 @@ import {
 import {
   applicableRequirements,
   evaluateChecklist,
-  type ChecklistRequirement,
-  type ReviewState,
 } from '../../domain/admissions/admission-checklist';
 import { ADMISSION_ITEM_CONCEPT } from '../../domain/admissions/admission-requirements.catalog';
 import {
@@ -50,8 +48,6 @@ import {
   type PractitionerVerificationView,
 } from '../../domain/admissions/admission-status';
 import {
-  REASONS,
-  SOURCE_TYPES,
   applicantVisibleReason,
   eventCodeOf,
   reasonCodeOf,
@@ -99,7 +95,9 @@ export const ONBOARDING_TYPE = {
 const SLA_RUNNING: readonly AdmissionStatusCode[] = ['ENVIADA', 'EN_REVISION'];
 
 /** Enmascara una cédula: deja sólo los últimos tres caracteres. */
-export function maskNationalId(value: string | null | undefined): string | null {
+export function maskNationalId(
+  value: string | null | undefined,
+): string | null {
   if (!value) return null;
   const trimmed = value.trim();
   if (trimmed.length <= 3) return '***';
@@ -173,14 +171,22 @@ export class PractitionerAdmissionsReadService {
       after = { dueAtIso: key.d, id: key.i };
     }
 
-    const rows = await this.admissionsRepo.listPage(em, filters, after, limit + 1);
+    const rows = await this.admissionsRepo.listPage(
+      em,
+      filters,
+      after,
+      limit + 1,
+    );
     const hasMore = rows.length > limit;
     const page = hasMore ? rows.slice(0, limit) : rows;
     const last = page.at(-1);
 
     const [counts, summaries] = await Promise.all([
       // Los conteos son las pestañas: se calculan con todos los filtros MENOS el estado.
-      this.admissionsRepo.countByStatus(em, { ...filters, statusConceptId: undefined }),
+      this.admissionsRepo.countByStatus(em, {
+        ...filters,
+        statusConceptId: undefined,
+      }),
       this.summaries(em, page, now),
     ]);
     const countsByCode: Record<string, number> = {};
@@ -190,7 +196,9 @@ export class PractitionerAdmissionsReadService {
     return {
       items: summaries,
       nextCursor:
-        hasMore && last ? encodeKeysetCursor({ d: last.dueAtIso, i: last.id }) : null,
+        hasMore && last
+          ? encodeKeysetCursor({ d: last.dueAtIso, i: last.id })
+          : null,
       counts: countsByCode,
     };
   }
@@ -202,7 +210,11 @@ export class PractitionerAdmissionsReadService {
     if (!assignedTo) return {};
     if (assignedTo === 'me') return { assignedToUserId: actor.id };
     if (assignedTo === 'none') return { unassigned: true };
-    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(assignedTo)) {
+    if (
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        assignedTo,
+      )
+    ) {
       throw badRequestWithReason(
         'assignedTo debe ser un uuid, `me` o `none`',
         SystemErrorReason.MALFORMED_VALUE,
@@ -229,7 +241,10 @@ export class PractitionerAdmissionsReadService {
       ),
     ]);
     const reqById = new Map(requirements.map((r) => [r.id, r]));
-    const reviewsByAdmission = new Map<string, PractitionerAdmissionReviews[]>();
+    const reviewsByAdmission = new Map<
+      string,
+      PractitionerAdmissionReviews[]
+    >();
     for (const review of reviews) {
       const list = reviewsByAdmission.get(review.admissionId) ?? [];
       list.push(review);
@@ -262,7 +277,11 @@ export class PractitionerAdmissionsReadService {
         );
       } else {
         // Sin revisiones materializadas (admisión del backfill): se calcula en vivo.
-        const live = await this.liveSummary(em, row.id, row.practitionerProfileId);
+        const live = await this.liveSummary(
+          em,
+          row.id,
+          row.practitionerProfileId,
+        );
         requirementsSummary = live.requirementsSummary;
         itemsSummary = live.itemsSummary;
       }
@@ -281,7 +300,9 @@ export class PractitionerAdmissionsReadService {
         requirementsSummary,
         submittedAt: row.submittedAt.toISOString(),
         dueAt: row.dueAt.toISOString(),
-        overdue: SLA_RUNNING.includes(statusCode) && row.dueAt.getTime() < now.getTime(),
+        overdue:
+          SLA_RUNNING.includes(statusCode) &&
+          row.dueAt.getTime() < now.getTime(),
         assignedTo: row.assignedToUserId
           ? {
               id: row.assignedToUserId,
@@ -337,19 +358,12 @@ export class PractitionerAdmissionsReadService {
    * personal (notas internas, quién revisó, datos de revisión): su caso lo ve
    * sólo por `GET /profiles/practitioners/me/admission`.
    */
-  async assertNotSelfAccess(
+  assertNotSelfAccess(
     em: EntityManager,
     admission: Pick<PractitionerAdmissions, 'practitionerProfileId'>,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
-    if (link && link.personId === admission.practitionerProfileId) {
-      throw new InsufficientRoleException(
-        'No puede consultar su propia admisión por la vista del personal',
-        {},
-        ProfilesErrorReason.ADMISSION_SELF_ACCESS,
-      );
-    }
+    return assertNotSelfAccess(this.accountLinksRepo, em, admission, actor);
   }
 
   /** Arma el detalle con el contexto de persistencia que se le pase (p. ej. la transacción). */
@@ -359,7 +373,8 @@ export class PractitionerAdmissionsReadService {
     now: Date = new Date(),
     preloadedView?: ChecklistView,
   ): Promise<AdmissionDetailDto> {
-    const view = preloadedView ?? (await this.checklist.buildView(em, admission));
+    const view =
+      preloadedView ?? (await this.checklist.buildView(em, admission));
     const events = await this.eventsRepo.findByAdmission(em, admission.id);
     const requirementRows = view.evaluation.rows;
     const requirementCodeById = new Map(
@@ -381,7 +396,8 @@ export class PractitionerAdmissionsReadService {
       id ? { id, name: names.get(id) ?? 'Usuario' } : null;
 
     // El formulario enviado: la foto si existe; si no, lectura viva (marcada).
-    const snapshot = admission.submittedSnapshot as unknown as SubmittedForm | undefined;
+    const snapshot = admission.submittedSnapshot as unknown as
+      SubmittedForm | undefined;
     const form: SubmittedForm =
       snapshot ??
       (await this.evidence.buildSnapshot(
@@ -391,8 +407,8 @@ export class PractitionerAdmissionsReadService {
         view.live.professionGroup,
       ));
 
-    const requirements: AdmissionChecklistRequirementDto[] = requirementRows.map(
-      ({ requirement, items, evaluation }) => ({
+    const requirements: AdmissionChecklistRequirementDto[] =
+      requirementRows.map(({ requirement, items, evaluation }) => ({
         code: requirement.code,
         label: requirement.label,
         description: requirement.description ?? null,
@@ -429,15 +445,18 @@ export class PractitionerAdmissionsReadService {
             rowVersion: review?.rowVersion ?? null,
           };
         }),
-      }),
-    );
+      }));
 
     // Documentos: todos los archivos de la solicitud, en orden estable (orden del
     // requisito, luego por id del ítem).
     const documents: AdmissionDocumentDto[] = [];
     for (const { requirement, items } of requirementRows) {
       const ordered = [...items].sort((a, b) =>
-        a.live.itemId < b.live.itemId ? -1 : a.live.itemId > b.live.itemId ? 1 : 0,
+        a.live.itemId < b.live.itemId
+          ? -1
+          : a.live.itemId > b.live.itemId
+            ? 1
+            : 0,
       );
       for (const item of ordered) {
         if (!item.live.fileId) continue;
@@ -463,7 +482,9 @@ export class PractitionerAdmissionsReadService {
       id: admission.practitionerProfileId,
       fullName: base?.fullName ?? 'Sin nombre',
       profession: base?.profession ?? null,
-      maskedNationalId: maskNationalId(base?.nationalId ?? form.personal.nationalId),
+      maskedNationalId: maskNationalId(
+        base?.nationalId ?? form.personal.nationalId,
+      ),
       nationalId: form.personal.nationalId,
       nationalIdIssuer: form.personal.nationalIdIssuer,
       birthDate: form.personal.birthDate,
@@ -491,7 +512,8 @@ export class PractitionerAdmissionsReadService {
     ]);
     const reqCodeForItem = (itemId: string): string => {
       for (const row of requirementRows) {
-        if (row.items.some((i) => i.live.itemId === itemId)) return row.requirement.code;
+        if (row.items.some((i) => i.live.itemId === itemId))
+          return row.requirement.code;
       }
       return 'SIN_REQUISITO';
     };
@@ -528,7 +550,14 @@ export class PractitionerAdmissionsReadService {
       supportingCredentialId: s.supportingCredentialId ?? null,
     }));
 
-    const summary = await this.summaryBase(em, admission, base, view, names, now);
+    const summary = await this.summaryBase(
+      em,
+      admission,
+      base,
+      view,
+      names,
+      now,
+    );
     return {
       ...summary,
       practitioner: detailPractitioner,
@@ -542,7 +571,9 @@ export class PractitionerAdmissionsReadService {
       decisionReasonCode:
         reasonCodeOf(admission.decisionReasonCodeConceptId) ?? null,
       internalNote: admission.internalNote ?? null,
-      validUntil: admission.validUntil ? toDateOnly(admission.validUntil) : null,
+      validUntil: admission.validUntil
+        ? toDateOnly(admission.validUntil)
+        : null,
       resubmissionCount: admission.resubmissionCount,
       attestedAt: admission.attestedAt?.toISOString() ?? null,
       fourEyesRequired: loadAdmissionsConfig().fourEyes,
@@ -614,7 +645,10 @@ export class PractitionerAdmissionsReadService {
       reasonCode: reasonCodeOf(event.reasonCodeConceptId) ?? null,
       reasonText: event.reasonText ?? null,
       actor: event.actorUserId
-        ? { id: event.actorUserId, name: names.get(event.actorUserId) ?? 'Usuario' }
+        ? {
+            id: event.actorUserId,
+            name: names.get(event.actorUserId) ?? 'Usuario',
+          }
         : null,
       actorRole: event.actorRoleCode ?? null,
       occurredAt: event.occurredAt.toISOString(),
@@ -638,7 +672,9 @@ export class PractitionerAdmissionsReadService {
   ): Promise<PractitionerAdmissions | null> {
     const personId = await this.ownPersonId(em, actor);
     if (!personId) return null;
-    const map = await this.admissionsRepo.findCurrentByPractitioners(em, [personId]);
+    const map = await this.admissionsRepo.findCurrentByPractitioners(em, [
+      personId,
+    ]);
     return map.get(personId) ?? null;
   }
 
@@ -665,7 +701,9 @@ export class PractitionerAdmissionsReadService {
     const config = loadAdmissionsConfig();
     const items = view.evaluation.rows.flatMap(({ items }) =>
       items.map((item) => {
-        const code = applicantVisibleReason(reasonCodeOf(item.review?.reasonCodeConceptId));
+        const code = applicantVisibleReason(
+          reasonCodeOf(item.review?.reasonCodeConceptId),
+        );
         return {
           type: item.live.itemType,
           id: item.live.itemId,
@@ -675,7 +713,10 @@ export class PractitionerAdmissionsReadService {
             item.state === 'REJECTED' || item.state === 'INFO_REQUIRED'
               ? (item.review?.reasonText ?? null)
               : null,
-          reasonCode: item.state === 'PENDING' || item.state === 'VERIFIED' ? null : (code ?? null),
+          reasonCode:
+            item.state === 'PENDING' || item.state === 'VERIFIED'
+              ? null
+              : (code ?? null),
         };
       }),
     );
@@ -690,14 +731,21 @@ export class PractitionerAdmissionsReadService {
         statusCode === 'RECHAZADA' || statusCode === 'SUSPENDIDA'
           ? (admission.decisionReasonText ?? null)
           : null,
-      validUntil: admission.validUntil ? toDateOnly(admission.validUntil) : null,
+      validUntil: admission.validUntil
+        ? toDateOnly(admission.validUntil)
+        : null,
       items,
       resubmissionCount: admission.resubmissionCount,
       canResubmit:
-        ['INFORMACION_REQUERIDA', 'RECHAZADA', 'EXPIRADA', 'ABANDONADA'].includes(
-          statusCode,
-        ) && admission.resubmissionCount < config.maxResubmissions,
-      canWithdraw: statusCode === 'ENVIADA' || statusCode === 'INFORMACION_REQUERIDA',
+        [
+          'INFORMACION_REQUERIDA',
+          'RECHAZADA',
+          'EXPIRADA',
+          'ABANDONADA',
+        ].includes(statusCode) &&
+        admission.resubmissionCount < config.maxResubmissions,
+      canWithdraw:
+        statusCode === 'ENVIADA' || statusCode === 'INFORMACION_REQUERIDA',
     };
   }
 
@@ -786,7 +834,10 @@ export class PractitionerAdmissionsReadService {
         'Sin nombre';
       const profession =
         credentials
-          .filter((c) => c.practitionerProfileId === person.id && c.professionConceptId)
+          .filter(
+            (c) =>
+              c.practitionerProfileId === person.id && c.professionConceptId,
+          )
           .map((c) => names.get(c.professionConceptId as string))
           .find((n): n is string => !!n) ??
         profiles.find((p) => p.profileId === person.id)?.professionalTitle ??
@@ -794,7 +845,8 @@ export class PractitionerAdmissionsReadService {
       result.set(person.id, {
         fullName,
         profession,
-        nationalId: identifiers.find((i) => i.ownerId === person.id)?.value ?? null,
+        nationalId:
+          identifiers.find((i) => i.ownerId === person.id)?.value ?? null,
       });
     }
     return result;

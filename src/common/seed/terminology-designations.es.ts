@@ -954,8 +954,7 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     PROF.ADMISSION_STATUS_EXPIRED,
     {
       display: 'Expirada',
-      definition:
-        'La vigencia de una verificación venció; hay que renovarla.',
+      definition: 'La vigencia de una verificación venció; hay que renovarla.',
     },
   ],
   [
@@ -978,104 +977,91 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     PROF.ADMISSION_EVENT_CREATED,
     {
       display: 'Solicitud creada',
-      definition:
-        'Se registró la solicitud de admisión.',
+      definition: 'Se registró la solicitud de admisión.',
     },
   ],
   [
     PROF.ADMISSION_EVENT_CLAIMED,
     {
       display: 'Revisión tomada',
-      definition:
-        'Un revisor tomó la solicitud.',
+      definition: 'Un revisor tomó la solicitud.',
     },
   ],
   [
     PROF.ADMISSION_EVENT_INFO_REQUESTED,
     {
       display: 'Información pedida',
-      definition:
-        'El revisor pidió información al solicitante.',
+      definition: 'El revisor pidió información al solicitante.',
     },
   ],
   [
     PROF.ADMISSION_EVENT_RESUBMITTED,
     {
       display: 'Solicitud reenviada',
-      definition:
-        'El solicitante reenvió su solicitud.',
+      definition: 'El solicitante reenvió su solicitud.',
     },
   ],
   [
     PROF.ADMISSION_EVENT_ITEM_VERIFIED,
     {
       display: 'Ítem verificado',
-      definition:
-        'Se verificó un requisito de la solicitud.',
+      definition: 'Se verificó un requisito de la solicitud.',
     },
   ],
   [
     PROF.ADMISSION_EVENT_ITEM_REJECTED,
     {
       display: 'Ítem rechazado',
-      definition:
-        'Se rechazó un requisito de la solicitud.',
+      definition: 'Se rechazó un requisito de la solicitud.',
     },
   ],
   [
     PROF.ADMISSION_EVENT_ITEM_INFO_REQUIRED,
     {
       display: 'Información de un ítem',
-      definition:
-        'Se pidió información sobre un requisito puntual.',
+      definition: 'Se pidió información sobre un requisito puntual.',
     },
   ],
   [
     PROF.ADMISSION_EVENT_VERIFIED,
     {
       display: 'Solicitud verificada',
-      definition:
-        'Se resolvió la solicitud como verificada.',
+      definition: 'Se resolvió la solicitud como verificada.',
     },
   ],
   [
     PROF.ADMISSION_EVENT_REJECTED,
     {
       display: 'Solicitud rechazada',
-      definition:
-        'Se resolvió la solicitud como rechazada.',
+      definition: 'Se resolvió la solicitud como rechazada.',
     },
   ],
   [
     PROF.ADMISSION_EVENT_SUSPENDED,
     {
       display: 'Verificación suspendida',
-      definition:
-        'Se suspendió una verificación vigente.',
+      definition: 'Se suspendió una verificación vigente.',
     },
   ],
   [
     PROF.ADMISSION_EVENT_REINSTATED,
     {
       display: 'Verificación repuesta',
-      definition:
-        'Se repuso una verificación suspendida.',
+      definition: 'Se repuso una verificación suspendida.',
     },
   ],
   [
     PROF.ADMISSION_EVENT_EXPIRED,
     {
       display: 'Verificación vencida',
-      definition:
-        'La vigencia de la verificación venció.',
+      definition: 'La vigencia de la verificación venció.',
     },
   ],
   [
     PROF.ADMISSION_EVENT_WITHDRAWN,
     {
       display: 'Solicitud retirada',
-      definition:
-        'El solicitante retiró su solicitud.',
+      definition: 'El solicitante retiró su solicitud.',
     },
   ],
   [
@@ -1090,16 +1076,14 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     PROF.ADMISSION_EVENT_RELEASED,
     {
       display: 'Revisión soltada',
-      definition:
-        'El revisor soltó la solicitud para que otro la tome.',
+      definition: 'El revisor soltó la solicitud para que otro la tome.',
     },
   ],
   [
     PROF.ADMISSION_EVENT_REASSIGNED,
     {
       display: 'Revisión reasignada',
-      definition:
-        'La solicitud pasó a otro revisor.',
+      definition: 'La solicitud pasó a otro revisor.',
     },
   ],
   [
@@ -1130,80 +1114,70 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     PROF.ADMISSION_ITEM_SPECIALTY,
     {
       display: 'Especialidad declarada',
-      definition:
-        'Una especialidad que el profesional declaró ejercer.',
+      definition: 'Una especialidad que el profesional declaró ejercer.',
     },
   ],
   [
     PROF.ADMISSION_ITEM_PROFILE,
     {
       display: 'Dato del perfil',
-      definition:
-        'Un dato del perfil que se comprueba: cédula, consultorios.',
+      definition: 'Un dato del perfil que se comprueba: cédula, consultorios.',
     },
   ],
   [
     PROF.ADMISSION_REVIEW_PENDING,
     {
       display: 'Pendiente',
-      definition:
-        'Todavía nadie revisó este ítem.',
+      definition: 'Todavía nadie revisó este ítem.',
     },
   ],
   [
     PROF.ADMISSION_REVIEW_VERIFIED,
     {
       display: 'Verificado',
-      definition:
-        'El revisor comprobó este ítem.',
+      definition: 'El revisor comprobó este ítem.',
     },
   ],
   [
     PROF.ADMISSION_REVIEW_REJECTED,
     {
       display: 'Rechazado',
-      definition:
-        'El revisor no pudo comprobar este ítem.',
+      definition: 'El revisor no pudo comprobar este ítem.',
     },
   ],
   [
     PROF.ADMISSION_REVIEW_INFO_REQUIRED,
     {
       display: 'Información requerida',
-      definition:
-        'El revisor necesita algo más sobre este ítem.',
+      definition: 'El revisor necesita algo más sobre este ítem.',
     },
   ],
   [
     PROF.ADMISSION_EVIDENCE_DOCUMENT,
     {
       display: 'Documento',
-      definition:
-        'La evidencia es un archivo que sube el solicitante.',
+      definition: 'La evidencia es un archivo que sube el solicitante.',
     },
   ],
   [
     PROF.ADMISSION_EVIDENCE_DATA,
     {
       display: 'Dato',
-      definition:
-        'La evidencia es un dato declarado en el formulario.',
+      definition: 'La evidencia es un dato declarado en el formulario.',
     },
   ],
   [
     PROF.ADMISSION_METHOD_MANUAL,
     {
       display: 'Revisión manual',
-      definition:
-        'Una persona de la plataforma lo comprueba.',
+      definition: 'Una persona de la plataforma lo comprueba.',
     },
   ],
   [
     PROF.ADMISSION_METHOD_AUTHORITY_CHECK,
     {
       display: 'Consulta a la autoridad',
-      definition:
-        'Se comprueba contra la autoridad emisora.',
+      definition: 'Se comprueba contra la autoridad emisora.',
     },
   ],
   [
@@ -1218,112 +1192,91 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     PROF.ADMISSION_SOURCE_MEDICAL_COLLEGE,
     {
       display: 'Colegio Médico',
-      definition:
-        'Se consultó al Colegio Médico.',
+      definition: 'Se consultó al Colegio Médico.',
     },
   ],
   [
     PROF.ADMISSION_SOURCE_DENTAL_COLLEGE,
     {
       display: 'Colegio de Odontólogos',
-      definition:
-        'Se consultó al Colegio de Odontólogos.',
+      definition: 'Se consultó al Colegio de Odontólogos.',
     },
   ],
   [
     PROF.ADMISSION_SOURCE_SEDES,
     {
       display: 'SEDES',
-      definition:
-        'Se consultó al Servicio Departamental de Salud.',
+      definition: 'Se consultó al Servicio Departamental de Salud.',
     },
   ],
   [
     PROF.ADMISSION_SOURCE_SEGIP,
     {
       display: 'SEGIP',
-      definition:
-        'Se contrastó con el SEGIP.',
+      definition: 'Se contrastó con el SEGIP.',
     },
   ],
   [
     PROF.ADMISSION_SOURCE_SUBMITTED_DOCUMENT,
     {
       display: 'Documento aportado',
-      definition:
-        'Se contrastó con el documento que aportó el solicitante.',
+      definition: 'Se contrastó con el documento que aportó el solicitante.',
     },
   ],
   [
     PROF.ADMISSION_SOURCE_OTHER,
     {
       display: 'Otra fuente',
-      definition:
-        'Se consultó otra fuente, descrita en la referencia.',
+      definition: 'Se consultó otra fuente, descrita en la referencia.',
     },
   ],
   [
     PROF.ADMISSION_REASON_ILLEGIBLE,
     {
       display: 'Documento ilegible',
-      definition:
-        'No se puede leer el documento.',
+      definition: 'No se puede leer el documento.',
     },
   ],
   [
     PROF.ADMISSION_REASON_EXPIRED,
     {
       display: 'Documento vencido',
-      definition:
-        'El documento está vencido.',
+      definition: 'El documento está vencido.',
     },
   ],
   [
     PROF.ADMISSION_REASON_NAME_MISMATCH,
     {
       display: 'El nombre no coincide',
-      definition:
-        'El nombre del documento no coincide con el del solicitante.',
+      definition: 'El nombre del documento no coincide con el del solicitante.',
     },
   ],
   [
     PROF.ADMISSION_REASON_NOT_IN_REGISTRY,
     {
       display: 'No figura en el registro',
-      definition:
-        'No se encontró en el registro consultado.',
+      definition: 'No se encontró en el registro consultado.',
     },
   ],
   [
     PROF.ADMISSION_REASON_INCOMPLETE,
     {
       display: 'Documento incompleto',
-      definition:
-        'Faltan páginas o datos.',
+      definition: 'Faltan páginas o datos.',
     },
   ],
   [
     PROF.ADMISSION_REASON_SUSPECTED_FRAUD,
     {
       display: 'Sospecha de fraude',
-      definition:
-        'Sólo para el personal: nunca se muestra al solicitante.',
+      definition: 'Sólo para el personal: nunca se muestra al solicitante.',
     },
   ],
   [
     PROF.ADMISSION_REASON_OTHER,
     {
       display: 'Otro motivo',
-      definition:
-        'Otro motivo, descrito en el texto.',
-    },
-  ],
-  [
-    PROF.NOTICE_ADMISSION,
-    {
-      display: 'Aviso de verificación',
-      definition:
-        'Categoría de los avisos que recibe el profesional durante la verificación de su alta.',
+      definition: 'Otro motivo, descrito en el texto.',
     },
   ],
   [

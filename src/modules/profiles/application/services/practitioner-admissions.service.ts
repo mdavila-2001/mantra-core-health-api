@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { assertNotSelfAccess } from './admission-self-access';
 import { InsufficientRoleException } from '../../../../common/errors/domain.exception';
 import {
   ConcurrencyConflictException,
@@ -26,7 +27,10 @@ import {
   REVIEW_STATE_CONCEPT,
   reviewStateOf,
 } from '../../infrastructure/repositories';
-import { ONBOARDING_TYPE, PractitionerAdmissionsReadService } from './practitioner-admissions-read.service';
+import {
+  ONBOARDING_TYPE,
+  PractitionerAdmissionsReadService,
+} from './practitioner-admissions-read.service';
 import {
   NULL,
   PractitionerAdmissionChecklistService,
@@ -222,13 +226,21 @@ export class PractitionerAdmissionsService {
       const admission = await this.loadLocked(tx, id);
       await this.assertNotOwnAdmission(tx, admission, caller.user);
       const status = admissionStatusCode(admission.statusConceptId);
-      if (status === 'EN_REVISION' && admission.assignedToUserId === caller.user.id) {
+      if (
+        status === 'EN_REVISION' &&
+        admission.assignedToUserId === caller.user.id
+      ) {
         return this.read.detailOf(tx, admission);
       }
       this.assertVersion(admission, expectedRowVersion);
       this.assertTransition('CLAIM', status);
       const now = new Date();
-      this.admissionsRepo.setStatus(admission, 'EN_REVISION', caller.user.id, now);
+      this.admissionsRepo.setStatus(
+        admission,
+        'EN_REVISION',
+        caller.user.id,
+        now,
+      );
       admission.assignedToUserId = caller.user.id;
       this.appendEvent(tx, admission, 'CLAIMED', {
         fromStatus: status,
@@ -310,7 +322,12 @@ export class PractitionerAdmissionsService {
       }
       const now = new Date();
       if (status === 'ENVIADA') {
-        this.admissionsRepo.setStatus(admission, 'EN_REVISION', caller.user.id, now);
+        this.admissionsRepo.setStatus(
+          admission,
+          'EN_REVISION',
+          caller.user.id,
+          now,
+        );
       } else {
         touch(admission, caller.user.id, now);
       }
@@ -324,7 +341,9 @@ export class PractitionerAdmissionsService {
         reasonText: `Asignada a ${toUserId}`,
         now,
       });
-      await this.checklist.materialize(tx, admission, { actorUserId: caller.user.id });
+      await this.checklist.materialize(tx, admission, {
+        actorUserId: caller.user.id,
+      });
       await tx.flush();
       return this.read.detailOf(tx, admission, now);
     });
@@ -357,7 +376,11 @@ export class PractitionerAdmissionsService {
       const wanted = new Set((dto.items ?? []).map((i) => `${i.type}:${i.id}`));
       for (const row of view.evaluation.rows) {
         for (const item of row.items) {
-          if (!item.review || !wanted.has(`${item.live.itemType}:${item.live.itemId}`)) continue;
+          if (
+            !item.review ||
+            !wanted.has(`${item.live.itemType}:${item.live.itemId}`)
+          )
+            continue;
           this.applyReview(item.review, 'INFO_REQUIRED', caller.user.id, now, {
             reason,
             reasonCode: dto.reasonCode ?? 'OTRO',
@@ -375,9 +398,16 @@ export class PractitionerAdmissionsService {
           });
         }
       }
-      this.admissionsRepo.setStatus(admission, 'INFORMACION_REQUERIDA', caller.user.id, now);
+      this.admissionsRepo.setStatus(
+        admission,
+        'INFORMACION_REQUERIDA',
+        caller.user.id,
+        now,
+      );
       admission.infoRequestedText = reason;
-      admission.infoDueAt = new Date(now.getTime() + config.infoWindowDays * 86_400_000);
+      admission.infoDueAt = new Date(
+        now.getTime() + config.infoWindowDays * 86_400_000,
+      );
       this.appendEvent(tx, admission, 'INFO_REQUESTED', {
         fromStatus: status,
         toStatus: 'INFORMACION_REQUERIDA',
@@ -389,7 +419,9 @@ export class PractitionerAdmissionsService {
         now,
       });
       await tx.flush();
-      notices.push(this.notice('INFO_REQUIRED', admission, 'INFORMACION_REQUERIDA'));
+      notices.push(
+        this.notice('INFO_REQUIRED', admission, 'INFORMACION_REQUERIDA'),
+      );
       return this.read.detailOf(tx, admission, now);
     });
     await this.emit(notices);
@@ -432,9 +464,9 @@ export class PractitionerAdmissionsService {
       const status = admissionStatusCode(admission.statusConceptId);
       await this.assertNotOwnAdmission(tx, admission, caller.user);
 
-      const live = (await this.evidence.collect(tx, admission.practitionerProfileId)).items.find(
-        (i) => i.itemId === review.itemId,
-      );
+      const live = (
+        await this.evidence.collect(tx, admission.practitionerProfileId)
+      ).items.find((i) => i.itemId === review.itemId);
 
       // Idempotencia: repetir la misma revisión no escribe ni duplica el evento.
       const recorded = reviewStateOf(review.statusConceptId);
@@ -474,7 +506,10 @@ export class PractitionerAdmissionsService {
       }
 
       const requirement = (
-        await this.checklist.requirementsOf(tx, admission.admissionTypeConceptId)
+        await this.checklist.requirementsOf(
+          tx,
+          admission.admissionTypeConceptId,
+        )
       ).find((r) => r.id === review.requirementId);
       const now = new Date();
       const input = this.sourceOf(dto, now);
@@ -497,7 +532,8 @@ export class PractitionerAdmissionsService {
       }
       this.applyReview(review, dto.decision, caller.user.id, now, {
         reason: dto.reason?.trim(),
-        reasonCode: dto.reasonCode ?? (dto.decision === 'VERIFIED' ? undefined : 'OTRO'),
+        reasonCode:
+          dto.reasonCode ?? (dto.decision === 'VERIFIED' ? undefined : 'OTRO'),
         internalNote: dto.internalNote?.trim(),
         source: input.source,
       });
@@ -516,8 +552,10 @@ export class PractitionerAdmissionsService {
         itemId: review.itemId,
         verificationSourceUri:
           review.verificationSourceUri ?? review.sourceRef ?? undefined,
-        reasonCode: dto.decision === 'VERIFIED' ? undefined : (dto.reasonCode ?? 'OTRO'),
-        reasonText: dto.decision === 'VERIFIED' ? undefined : dto.reason?.trim(),
+        reasonCode:
+          dto.decision === 'VERIFIED' ? undefined : (dto.reasonCode ?? 'OTRO'),
+        reasonText:
+          dto.decision === 'VERIFIED' ? undefined : dto.reason?.trim(),
         now,
       });
       await tx.flush();
@@ -550,8 +588,10 @@ export class PractitionerAdmissionsService {
     const detail = await this.em.transactional(async (tx) => {
       const role = this.roleFor(caller.user, 'APPROVER');
       const admission = await this.loadLocked(tx, id);
+      await this.assertNotOwnAdmission(tx, admission, caller.user);
       const status = admissionStatusCode(admission.statusConceptId);
-      const action: AdmissionAction = dto.decision === 'VERIFIED' ? 'VERIFY' : 'REJECT';
+      const action: AdmissionAction =
+        dto.decision === 'VERIFIED' ? 'VERIFY' : 'REJECT';
       const target = targetStatus(action);
 
       // Idempotencia: la misma resolución sobre una admisión ya resuelta es un 200.
@@ -559,11 +599,15 @@ export class PractitionerAdmissionsService {
 
       this.assertVersion(admission, dto.expectedRowVersion);
       this.assertTransition(action, status);
-      await this.assertNotOwnAdmission(tx, admission, caller.user);
 
       const config = loadAdmissionsConfig();
       const reviews = await this.reviewsRepo.findByAdmission(tx, admission.id);
-      const waived = this.assertFourEyes(admission, reviews, caller.user, config.fourEyes);
+      const waived = this.assertFourEyes(
+        admission,
+        reviews,
+        caller.user,
+        config.fourEyes,
+      );
 
       const now = new Date();
       const view = await this.checklist.materialize(tx, admission, {
@@ -580,7 +624,12 @@ export class PractitionerAdmissionsService {
             ProfilesErrorReason.ADMISSION_CHECKLIST_INCOMPLETE,
           );
         }
-        validUntilDate = await this.computeValidUntil(tx, view, now, config.defaultValidityMonths);
+        validUntilDate = await this.computeValidUntil(
+          tx,
+          view,
+          now,
+          config.defaultValidityMonths,
+        );
       } else if (!NOT_BLANK(reason)) {
         throw reasonRequired();
       }
@@ -592,18 +641,31 @@ export class PractitionerAdmissionsService {
           if (!review) continue;
           if (item.state === 'VERIFIED') {
             if (dto.decision === 'VERIFIED') {
-              await this.checklist.applyEntityDecision(tx, item.live, 'VERIFIED', {
-                actorUserId: caller.user.id,
-                at: review.reviewedAt ?? now,
-                sourceRef: review.verificationSourceUri ?? review.sourceRef ?? undefined,
-              });
+              await this.checklist.applyEntityDecision(
+                tx,
+                item.live,
+                'VERIFIED',
+                {
+                  actorUserId: caller.user.id,
+                  at: review.reviewedAt ?? now,
+                  sourceRef:
+                    review.verificationSourceUri ??
+                    review.sourceRef ??
+                    undefined,
+                },
+              );
             }
           } else if (item.state === 'REJECTED') {
-            await this.checklist.applyEntityDecision(tx, item.live, 'REJECTED', {
-              actorUserId: caller.user.id,
-              at: review.reviewedAt ?? now,
-              reasonText: review.reasonText ?? undefined,
-            });
+            await this.checklist.applyEntityDecision(
+              tx,
+              item.live,
+              'REJECTED',
+              {
+                actorUserId: caller.user.id,
+                at: review.reviewedAt ?? now,
+                reasonText: review.reasonText ?? undefined,
+              },
+            );
           }
         }
       }
@@ -615,7 +677,9 @@ export class PractitionerAdmissionsService {
       admission.decisionReasonCodeConceptId = dto.reasonCode
         ? REASONS[dto.reasonCode].concept
         : NULL;
-      admission.internalNote = NOT_BLANK(dto.internalNote) ? dto.internalNote.trim() : NULL;
+      admission.internalNote = NOT_BLANK(dto.internalNote)
+        ? dto.internalNote.trim()
+        : NULL;
       admission.fourEyesWaived = waived;
       admission.infoRequestedText = NULL;
       admission.infoDueAt = NULL;
@@ -636,19 +700,28 @@ export class PractitionerAdmissionsService {
           caller.user.id,
         );
       }
-      this.appendEvent(tx, admission, dto.decision === 'VERIFIED' ? 'VERIFIED' : 'REJECTED', {
-        fromStatus: status,
-        toStatus: target,
-        actorUserId: caller.user.id,
-        role,
-        requestId: caller.requestId,
-        reasonCode: dto.reasonCode,
-        reasonText: NOT_BLANK(reason) ? reason : undefined,
-        now,
-      });
+      this.appendEvent(
+        tx,
+        admission,
+        dto.decision === 'VERIFIED' ? 'VERIFIED' : 'REJECTED',
+        {
+          fromStatus: status,
+          toStatus: target,
+          actorUserId: caller.user.id,
+          role,
+          requestId: caller.requestId,
+          reasonCode: dto.reasonCode,
+          reasonText: NOT_BLANK(reason) ? reason : undefined,
+          now,
+        },
+      );
       await tx.flush();
       notices.push(
-        this.notice(dto.decision === 'VERIFIED' ? 'VERIFIED' : 'REJECTED', admission, target),
+        this.notice(
+          dto.decision === 'VERIFIED' ? 'VERIFIED' : 'REJECTED',
+          admission,
+          target,
+        ),
       );
       return this.read.detailOf(tx, admission, now);
     });
@@ -666,23 +739,34 @@ export class PractitionerAdmissionsService {
     const detail = await this.em.transactional(async (tx) => {
       const role = this.roleFor(caller.user, 'APPROVER');
       const admission = await this.loadLocked(tx, id);
+      await this.assertNotOwnAdmission(tx, admission, caller.user);
       const status = admissionStatusCode(admission.statusConceptId);
       if (status === 'SUSPENDIDA') return this.read.detailOf(tx, admission);
       this.assertVersion(admission, dto.expectedRowVersion);
       this.assertTransition('SUSPEND', status);
       const reason = dto.reason?.trim();
       if (!NOT_BLANK(reason)) throw reasonRequired();
-      await this.assertNotOwnAdmission(tx, admission, caller.user);
       const now = new Date();
-      this.admissionsRepo.setStatus(admission, 'SUSPENDIDA', caller.user.id, now);
+      this.admissionsRepo.setStatus(
+        admission,
+        'SUSPENDIDA',
+        caller.user.id,
+        now,
+      );
       admission.decidedAt = now;
       admission.decidedByUserId = caller.user.id;
       admission.decisionReasonText = reason;
       admission.decisionReasonCodeConceptId = dto.reasonCode
         ? REASONS[dto.reasonCode].concept
         : NULL;
-      admission.internalNote = NOT_BLANK(dto.internalNote) ? dto.internalNote.trim() : NULL;
-      await this.projector.projectNotVerified(tx, admission.practitionerProfileId, caller.user.id);
+      admission.internalNote = NOT_BLANK(dto.internalNote)
+        ? dto.internalNote.trim()
+        : NULL;
+      await this.projector.projectNotVerified(
+        tx,
+        admission.practitionerProfileId,
+        caller.user.id,
+      );
       this.appendEvent(tx, admission, 'SUSPENDED', {
         fromStatus: status,
         toStatus: 'SUSPENDIDA',
@@ -711,13 +795,13 @@ export class PractitionerAdmissionsService {
     const detail = await this.em.transactional(async (tx) => {
       const role = this.roleFor(caller.user, 'APPROVER');
       const admission = await this.loadLocked(tx, id);
+      await this.assertNotOwnAdmission(tx, admission, caller.user);
       const status = admissionStatusCode(admission.statusConceptId);
       if (status === 'VERIFICADA') return this.read.detailOf(tx, admission);
       this.assertVersion(admission, dto.expectedRowVersion);
       this.assertTransition('REINSTATE', status);
       const reason = dto.reason?.trim();
       if (!NOT_BLANK(reason)) throw reasonRequired();
-      await this.assertNotOwnAdmission(tx, admission, caller.user);
       const now = new Date();
       // Una verificación vencida no se repone: se renueva.
       if (
@@ -730,7 +814,12 @@ export class PractitionerAdmissionsService {
           ProfilesErrorReason.ADMISSION_VALIDITY_LAPSED,
         );
       }
-      this.admissionsRepo.setStatus(admission, 'VERIFICADA', caller.user.id, now);
+      this.admissionsRepo.setStatus(
+        admission,
+        'VERIFICADA',
+        caller.user.id,
+        now,
+      );
       admission.decidedAt = now;
       admission.decidedByUserId = caller.user.id;
       admission.decisionReasonText = reason;
@@ -770,11 +859,17 @@ export class PractitionerAdmissionsService {
     caller: AdmissionCaller,
     limit = 200,
   ): Promise<AdmissionSweepResultDto> {
-    const role = caller.user.roles.includes('SYSTEM') ? 'SYSTEM' : 'SECURITY_ADMIN';
+    const role = caller.user.roles.includes('SYSTEM')
+      ? 'SYSTEM'
+      : 'SECURITY_ADMIN';
     const now = new Date();
     const notices: PendingNotice[] = [];
-    const expiredIds = (await this.admissionsRepo.findExpired(this.em.fork(), now, limit)).map((a) => a.id);
-    const abandonedIds = (await this.admissionsRepo.findAbandoned(this.em.fork(), now, limit)).map((a) => a.id);
+    const expiredIds = (
+      await this.admissionsRepo.findExpired(this.em.fork(), now, limit)
+    ).map((a) => a.id);
+    const abandonedIds = (
+      await this.admissionsRepo.findAbandoned(this.em.fork(), now, limit)
+    ).map((a) => a.id);
 
     let expired = 0;
     for (const id of expiredIds) {
@@ -783,7 +878,12 @@ export class PractitionerAdmissionsService {
         if (!admission) return;
         const status = admissionStatusCode(admission.statusConceptId);
         if (!canTransition('EXPIRE', status)) return;
-        this.admissionsRepo.setStatus(admission, 'EXPIRADA', caller.user.id, now);
+        this.admissionsRepo.setStatus(
+          admission,
+          'EXPIRADA',
+          caller.user.id,
+          now,
+        );
         await this.projector.projectNotVerified(
           tx,
           admission.practitionerProfileId,
@@ -811,7 +911,12 @@ export class PractitionerAdmissionsService {
         if (!admission) return;
         const status = admissionStatusCode(admission.statusConceptId);
         if (!canTransition('ABANDON', status)) return;
-        this.admissionsRepo.setStatus(admission, 'ABANDONADA', caller.user.id, now);
+        this.admissionsRepo.setStatus(
+          admission,
+          'ABANDONADA',
+          caller.user.id,
+          now,
+        );
         this.appendEvent(tx, admission, 'ABANDONED', {
           fromStatus: status,
           toStatus: 'ABANDONADA',
@@ -878,7 +983,10 @@ export class PractitionerAdmissionsService {
       admission.infoDueAt = NULL;
       admission.decisionReasonText = NULL;
       admission.decisionReasonCodeConceptId = NULL;
-      admission.submittedSnapshot = snapshot as unknown as Record<string, unknown>;
+      admission.submittedSnapshot = snapshot as unknown as Record<
+        string,
+        unknown
+      >;
       if (attestation) {
         admission.attestedAt = attestation.acceptedAt;
         admission.attestationTextVersion = attestation.textVersion;
@@ -900,7 +1008,10 @@ export class PractitionerAdmissionsService {
   }
 
   /** El médico retira su solicitud (ENVIADA/INFORMACION_REQUERIDA a RETIRADA). */
-  async withdraw(actor: AuthenticatedUser, requestId?: string): Promise<OwnAdmissionDto> {
+  async withdraw(
+    actor: AuthenticatedUser,
+    requestId?: string,
+  ): Promise<OwnAdmissionDto> {
     const notices: PendingNotice[] = [];
     const dto = await this.em.transactional(async (tx) => {
       const admission = await this.ownLocked(tx, actor);
@@ -962,7 +1073,9 @@ export class PractitionerAdmissionsService {
       practitionerProfileId: input.practitionerProfileId,
       state: input.decision,
       actorUserId: input.actor.id,
-      role: input.actor.roles.includes('SECURITY_ADMIN') ? 'SECURITY_ADMIN' : 'SYSTEM',
+      role: input.actor.roles.includes('SECURITY_ADMIN')
+        ? 'SECURITY_ADMIN'
+        : 'SYSTEM',
       sourceType: 'OTRO',
       sourceRef: source,
       verificationSourceUri: source,
@@ -1027,7 +1140,8 @@ export class PractitionerAdmissionsService {
       const profile = await tx.findOne(HealthPractitionerProfiles, {
         profileId: input.practitionerProfileId,
       });
-      if (profile?.verificationStatusConceptId !== PROF.PRACT_VERIF_PENDING) return false;
+      if (profile?.verificationStatusConceptId !== PROF.PRACT_VERIF_PENDING)
+        return false;
       admission = await this.openForRegistration(tx, {
         practitionerProfileId: input.practitionerProfileId,
         actorUserId: input.actorUserId,
@@ -1039,6 +1153,17 @@ export class PractitionerAdmissionsService {
     if (input.gate) {
       role = this.roleFor(input.gate, 'REVIEWER');
       await this.assertNotOwnAdmission(tx, admission, input.gate);
+      // VERIFIED no entra por acá: el revisor tiene que ver la evidencia (huella)
+      // que verifica, y eso sólo lo garantiza `reviewItem`. El camino heredado
+      // queda para rechazar.
+      if (input.state === 'VERIFIED') {
+        throw new PreconditionFailedException(
+          'Un título de una admisión abierta se verifica desde la revisión de la admisión ' +
+            '(POST /admissions/:id/items/:itemId/review), con la huella de lo que se vio',
+          { admissionId: admission.id },
+          ProfilesErrorReason.ADMISSION_VERIFY_VIA_REVIEW,
+        );
+      }
       if (status !== 'EN_REVISION') {
         throw new PreconditionFailedException(
           'La admisión no está en revisión: tómela antes de verificar sus títulos',
@@ -1057,16 +1182,22 @@ export class PractitionerAdmissionsService {
         // La huella que queda es la que el revisor tiene delante en este instante.
         item.review.evidenceSha256 = item.live.evidenceSha256;
         item.review.fileId = item.live.fileId;
-        this.applyReview(item.review, input.state, input.actorUserId, input.now, {
-          reason: input.reason,
-          reasonCode: input.state === 'REJECTED' ? 'OTRO' : undefined,
-          source: {
-            sourceType: input.sourceType,
-            sourceRef: input.sourceRef,
-            verificationSourceUri: input.verificationSourceUri,
-            sourceConsultedAt: input.now,
+        this.applyReview(
+          item.review,
+          input.state,
+          input.actorUserId,
+          input.now,
+          {
+            reason: input.reason,
+            reasonCode: input.state === 'REJECTED' ? 'OTRO' : undefined,
+            source: {
+              sourceType: input.sourceType,
+              sourceRef: input.sourceRef,
+              verificationSourceUri: input.verificationSourceUri,
+              sourceConsultedAt: input.now,
+            },
           },
-        });
+        );
         this.appendEvent(
           tx,
           admission,
@@ -1077,7 +1208,8 @@ export class PractitionerAdmissionsService {
             requirementId: row.requirement.id,
             itemType: item.live.itemType,
             itemId: item.live.itemId,
-            verificationSourceUri: input.verificationSourceUri ?? input.sourceRef,
+            verificationSourceUri:
+              input.verificationSourceUri ?? input.sourceRef,
             reasonCode: input.state === 'REJECTED' ? 'OTRO' : undefined,
             reasonText: input.reason,
             now: input.now,
@@ -1124,11 +1256,17 @@ export class PractitionerAdmissionsService {
     return this.loadLocked(tx, current.id);
   }
 
-  private assertVersion(admission: PractitionerAdmissions, expected: number): void {
+  private assertVersion(
+    admission: PractitionerAdmissions,
+    expected: number,
+  ): void {
     if (admission.rowVersion !== expected) throw stale(admission.rowVersion);
   }
 
-  private assertTransition(action: AdmissionAction, from: AdmissionStatusCode): void {
+  private assertTransition(
+    action: AdmissionAction,
+    from: AdmissionStatusCode,
+  ): void {
     if (!canTransition(action, from)) {
       throw new PreconditionFailedException(
         `La acción no es válida desde el estado ${from}`,
@@ -1138,7 +1276,10 @@ export class PractitionerAdmissionsService {
     }
   }
 
-  private assertAssignee(admission: PractitionerAdmissions, user: AuthenticatedUser): void {
+  private assertAssignee(
+    admission: PractitionerAdmissions,
+    user: AuthenticatedUser,
+  ): void {
     if (admission.assignedToUserId !== user.id) {
       throw new InsufficientRoleException(
         'Sólo quien tomó la revisión puede actuar sobre sus ítems',
@@ -1149,22 +1290,12 @@ export class PractitionerAdmissionsService {
   }
 
   /** Nadie revisa ni aprueba su propia admisión (un administrador que además es médico). */
-  private async assertNotOwnAdmission(
+  private assertNotOwnAdmission(
     tx: EntityManager,
     admission: Pick<PractitionerAdmissions, 'practitionerProfileId'>,
     user: AuthenticatedUser,
   ): Promise<void> {
-    const link = await this.accountLinksRepo.findActiveByPerson(
-      tx,
-      admission.practitionerProfileId,
-    );
-    if (link?.userId === user.id) {
-      throw new InsufficientRoleException(
-        'No puede revisar ni resolver su propia admisión',
-        {},
-        ProfilesErrorReason.ADMISSION_SELF_REVIEW,
-      );
-    }
+    return assertNotSelfAccess(this.accountLinksRepo, tx, admission, user);
   }
 
   /**
@@ -1202,12 +1333,19 @@ export class PractitionerAdmissionsService {
    * (por defecto no en producción): allí los roles `ADMISSIONS_*` se asignan
    * explícitamente.
    */
-  private roleFor(user: AuthenticatedUser, level: 'REVIEWER' | 'APPROVER'): string {
+  private roleFor(
+    user: AuthenticatedUser,
+    level: 'REVIEWER' | 'APPROVER',
+  ): string {
     const roles = user.roles;
     if (roles.includes('SUPERADMIN')) return 'SUPERADMIN';
-    const explicit = level === 'REVIEWER' ? 'ADMISSIONS_REVIEWER' : 'ADMISSIONS_APPROVER';
+    const explicit =
+      level === 'REVIEWER' ? 'ADMISSIONS_REVIEWER' : 'ADMISSIONS_APPROVER';
     if (roles.includes(explicit)) return explicit;
-    if (roles.includes('SECURITY_ADMIN') && loadAdmissionsConfig().securityAdminInherits) {
+    if (
+      roles.includes('SECURITY_ADMIN') &&
+      loadAdmissionsConfig().securityAdminInherits
+    ) {
       return 'SECURITY_ADMIN';
     }
     throw new InsufficientRoleException(
@@ -1239,7 +1377,10 @@ export class PractitionerAdmissionsService {
     let consulted = now;
     if (dto.sourceConsultedAt) {
       const parsed = new Date(dto.sourceConsultedAt);
-      if (Number.isNaN(parsed.getTime()) || parsed.getTime() > now.getTime() + 5 * 60_000) {
+      if (
+        Number.isNaN(parsed.getTime()) ||
+        parsed.getTime() > now.getTime() + 5 * 60_000
+      ) {
         throw new PreconditionFailedException(
           'La fecha de consulta de la fuente no puede ser futura',
           {},
@@ -1276,14 +1417,19 @@ export class PractitionerAdmissionsService {
     review.reviewedByUserId = actorUserId;
     review.reviewedAt = now;
     review.reasonText = NOT_BLANK(detail.reason) ? detail.reason : NULL;
-    review.reasonCodeConceptId = detail.reasonCode ? REASONS[detail.reasonCode].concept : NULL;
-    review.internalNote = NOT_BLANK(detail.internalNote) ? detail.internalNote : NULL;
+    review.reasonCodeConceptId = detail.reasonCode
+      ? REASONS[detail.reasonCode].concept
+      : NULL;
+    review.internalNote = NOT_BLANK(detail.internalNote)
+      ? detail.internalNote
+      : NULL;
     if (state === 'VERIFIED' && detail.source) {
       review.sourceTypeConceptId = detail.source.sourceType
         ? SOURCE_TYPES[detail.source.sourceType].concept
         : NULL;
       review.sourceRef = detail.source.sourceRef ?? NULL;
-      review.verificationSourceUri = detail.source.verificationSourceUri ?? NULL;
+      review.verificationSourceUri =
+        detail.source.verificationSourceUri ?? NULL;
       review.sourceConsultedAt = detail.source.sourceConsultedAt;
     } else if (state !== 'VERIFIED') {
       review.sourceTypeConceptId = NULL;
@@ -1325,7 +1471,9 @@ export class PractitionerAdmissionsService {
       );
     }
     if (dates.length > 0) return [...dates].sort()[0];
-    return toDateOnly(addMonthsUtc(new Date(`${today}T00:00:00.000Z`), defaultMonths));
+    return toDateOnly(
+      addMonthsUtc(new Date(`${today}T00:00:00.000Z`), defaultMonths),
+    );
   }
 
   private appendEvent(
@@ -1350,17 +1498,28 @@ export class PractitionerAdmissionsService {
     this.eventsRepo.append(tx, {
       admissionId: admission.id,
       eventTypeConceptId: EVENT_TYPES[code],
-      fromStatusConceptId: data.fromStatus ? ADMISSION_STATUS_CONCEPT[data.fromStatus] : undefined,
-      toStatusConceptId: data.toStatus ? ADMISSION_STATUS_CONCEPT[data.toStatus] : undefined,
-      itemTypeConceptId: data.itemType ? ADMISSION_ITEM_CONCEPT[data.itemType] : undefined,
+      fromStatusConceptId: data.fromStatus
+        ? ADMISSION_STATUS_CONCEPT[data.fromStatus]
+        : undefined,
+      toStatusConceptId: data.toStatus
+        ? ADMISSION_STATUS_CONCEPT[data.toStatus]
+        : undefined,
+      itemTypeConceptId: data.itemType
+        ? ADMISSION_ITEM_CONCEPT[data.itemType]
+        : undefined,
       itemId: data.itemId,
       requirementId: data.requirementId,
       verificationSourceUri: data.verificationSourceUri,
-      reasonCodeConceptId: data.reasonCode ? REASONS[data.reasonCode].concept : undefined,
+      reasonCodeConceptId: data.reasonCode
+        ? REASONS[data.reasonCode].concept
+        : undefined,
       reasonText: data.reasonText,
       actorUserId: data.actorUserId,
       actorRoleCode: data.role,
-      requestId: data.requestId && UUID_RE.test(data.requestId) ? data.requestId : undefined,
+      requestId:
+        data.requestId && UUID_RE.test(data.requestId)
+          ? data.requestId
+          : undefined,
       occurredAt: data.now,
     });
   }
@@ -1385,7 +1544,11 @@ export class PractitionerAdmissionsService {
         await this.notices.emit(notice);
       } catch (error) {
         this.logger.warn(
-          { operation: 'profiles.admission.notice', kind: notice.kind, err: error },
+          {
+            operation: 'profiles.admission.notice',
+            kind: notice.kind,
+            err: error,
+          },
           'Admission notice failed; the decision stands',
         );
       }
@@ -1401,7 +1564,8 @@ interface AppliedSource {
   sourceConsultedAt: Date;
 }
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function reasonRequired(): PreconditionFailedException {
   return new PreconditionFailedException(
@@ -1418,4 +1582,3 @@ function stale(currentRowVersion: number): ConcurrencyConflictException {
     ProfilesErrorReason.ADMISSION_STALE,
   );
 }
-

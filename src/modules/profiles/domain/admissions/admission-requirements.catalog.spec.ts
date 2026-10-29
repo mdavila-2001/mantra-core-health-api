@@ -40,9 +40,9 @@ describe('catálogo ALTA_DE_DOCTOR (proceso 2.1)', () => {
   });
 
   it('obligatorios: CI, matrícula, título universitario y registro del colegio', () => {
-    const obligatorios = PRACTITIONER_ONBOARDING_REQUIREMENTS.filter((r) => r.required).map(
-      (r) => r.code,
-    );
+    const obligatorios = PRACTITIONER_ONBOARDING_REQUIREMENTS.filter(
+      (r) => r.required,
+    ).map((r) => r.code);
     expect(obligatorios).toEqual([
       'CI',
       'MATRICULA_MSALUD',
@@ -80,7 +80,9 @@ describe('catálogo ALTA_DE_DOCTOR (proceso 2.1)', () => {
   });
 
   it('el colegio se acota por profesión: uno por grupo', () => {
-    expect(porCodigo.get('REGISTRO_COLEGIO_MEDICO')?.professionGroup).toBe('MEDICO');
+    expect(porCodigo.get('REGISTRO_COLEGIO_MEDICO')?.professionGroup).toBe(
+      'MEDICO',
+    );
     expect(porCodigo.get('REGISTRO_COLEGIO_ODONTOLOGOS')?.professionGroup).toBe(
       'ODONTOLOGO',
     );
@@ -121,7 +123,12 @@ describe('correspondencia ítem ↔ requisito', () => {
   });
 
   it('ida y vuelta de la clase de ítem', () => {
-    for (const type of ['LICENSE', 'CREDENTIAL', 'SPECIALTY', 'PROFILE'] as const) {
+    for (const type of [
+      'LICENSE',
+      'CREDENTIAL',
+      'SPECIALTY',
+      'PROFILE',
+    ] as const) {
       expect(admissionItemTypeOf(ADMISSION_ITEM_CONCEPT[type])).toBe(type);
     }
     expect(admissionItemTypeOf('x')).toBeUndefined();
@@ -138,7 +145,9 @@ describe('resolveProfessionGroup', () => {
 
   it('los auxiliares de odontología no son odontólogos', () => {
     expect(
-      resolveProfessionGroup(['Dentistas auxiliares y ayudantes de odontología']),
+      resolveProfessionGroup([
+        'Dentistas auxiliares y ayudantes de odontología',
+      ]),
     ).toBe('MEDICO');
   });
 

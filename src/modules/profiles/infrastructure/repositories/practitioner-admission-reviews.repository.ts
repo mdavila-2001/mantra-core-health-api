@@ -60,8 +60,7 @@ export function toChecklistRequirement(
     required: row.isRequired,
     requiresSourceUri: row.requiresSourceUri,
     professionGroup: (row.appliesToProfessionGroup ?? undefined) as
-      | ProfessionGroup
-      | undefined,
+      ProfessionGroup | undefined,
     minItems: row.minItems ?? undefined,
     maxItems: row.maxItems ?? undefined,
     sortOrder: row.sortOrder,

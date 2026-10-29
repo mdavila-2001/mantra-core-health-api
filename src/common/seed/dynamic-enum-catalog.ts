@@ -571,7 +571,8 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
   {
     code: 'admission-item-type',
     name: 'Clase de ítem de la admisión',
-    description: 'Qué ficha revisa un requisito: matrícula, título, especialidad o dato del perfil.',
+    description:
+      'Qué ficha revisa un requisito: matrícula, título, especialidad o dato del perfil.',
     concepts: [
       PROF.ADMISSION_ITEM_LICENSE,
       PROF.ADMISSION_ITEM_CREDENTIAL,
@@ -586,7 +587,8 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
   {
     code: 'admission-review-status',
     name: 'Estado de la revisión de un ítem',
-    description: 'Estado vigente de un requisito o ítem dentro de una admisión.',
+    description:
+      'Estado vigente de un requisito o ítem dentro de una admisión.',
     concepts: [
       PROF.ADMISSION_REVIEW_PENDING,
       PROF.ADMISSION_REVIEW_VERIFIED,
@@ -607,14 +609,18 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     code: 'admission-verification-method',
     name: 'Método de verificación',
     description: 'Cómo se comprueba un requisito.',
-    concepts: [PROF.ADMISSION_METHOD_MANUAL, PROF.ADMISSION_METHOD_AUTHORITY_CHECK],
+    concepts: [
+      PROF.ADMISSION_METHOD_MANUAL,
+      PROF.ADMISSION_METHOD_AUTHORITY_CHECK,
+    ],
     defaultConceptId: PROF.ADMISSION_METHOD_MANUAL,
     targets: ['profiles.admission_requirements.verification_method_concept_id'],
   },
   {
     code: 'admission-source-type',
     name: 'Fuente consultada al verificar',
-    description: 'Contra qué se verificó un ítem (tipo; la referencia va aparte).',
+    description:
+      'Contra qué se verificó un ítem (tipo; la referencia va aparte).',
     concepts: [
       PROF.ADMISSION_SOURCE_MINSALUD_REGISTRY,
       PROF.ADMISSION_SOURCE_MEDICAL_COLLEGE,
@@ -629,7 +635,8 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
   {
     code: 'admission-reason',
     name: 'Motivo de una resolución de admisión',
-    description: 'Motivo estructurado de un rechazo, una suspensión o una petición de información.',
+    description:
+      'Motivo estructurado de un rechazo, una suspensión o una petición de información.',
     concepts: [
       PROF.ADMISSION_REASON_ILLEGIBLE,
       PROF.ADMISSION_REASON_EXPIRED,
