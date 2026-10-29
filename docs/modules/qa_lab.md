@@ -181,7 +181,7 @@ Los recursos de QA y su evidencia cargados por UUID no se acotan al tenant activ
 ## Catálogo de flujos (2026-10-17)
 
 `GET /admin/qa/flows` y `GET /admin/qa/flows/:flowId` leen los recorridos del usuario declarados en
-`flows/catalog/*.flow.json` (ver `flows/README.md`) y los cruzan con dos cosas vivas: las rutas que la API
+`domain/flows/catalog/*.flow.json` (ver `domain/flows/README.md`) y los cruzan con dos cosas vivas: las rutas que la API
 monta ahora (`contract: DECLARED | MISSING`, sin atender el nombre del parámetro) y lo que `qa_lab` sabe de la
 suite `FLOW-<id>` (casos sembrados, deriva respecto del artefacto y último veredicto por rama). Son sólo
 lectura, con los mismos roles que el resto del laboratorio, y no devuelven cuerpos ni cabeceras de los casos.

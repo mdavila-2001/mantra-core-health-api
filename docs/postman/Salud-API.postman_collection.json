@@ -81917,14 +81917,7 @@
               "name": "GET /public/pharmacies/open-now · Farmacias abiertas ahora: 24 h o de turno vigente",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "X-Tenant-Id",
-                    "value": "{{tenantId}}",
-                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                    "disabled": false
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{baseUrl}}/public/pharmacies/open-now",
                   "host": [
@@ -81974,7 +81967,10 @@
                     }
                   ]
                 },
-                "description": "Farmacias abiertas ahora: 24 h o de turno vigente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /public/pharmacies/open-now`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `PharmacyPublicController_openNow`"
+                "description": "Farmacias abiertas ahora: 24 h o de turno vigente. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /public/pharmacies/open-now`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 429, 500, 504\n\noperationId: `PharmacyPublicController_openNow`",
+                "auth": {
+                  "type": "noauth"
+                }
               },
               "response": [],
               "event": [
@@ -82084,12 +82080,6 @@
                   {
                     "key": "Content-Type",
                     "value": "application/json"
-                  },
-                  {
-                    "key": "X-Tenant-Id",
-                    "value": "{{tenantId}}",
-                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                    "disabled": false
                   }
                 ],
                 "url": {
@@ -82112,7 +82102,7 @@
                     }
                   ]
                 },
-                "description": "Sin sesión. Cuerpo { items: string[] (1-20, texto libre), lat?, lng? }. Sólo cuenta lo que está en stock; un agotado es faltante. Orden del servidor: primero las completas, después la más cercana en línea recta. No guarda nada. Un slug inexistente, oculto o de otro tipo responde 404.\n\n`POST /public/profiles/f/{slug}/branch-availability`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PublicCatalogController_pharmacyBranchAvailability`",
+                "description": "Sin sesión. Cuerpo { items: string[] (1-20, texto libre), lat?, lng? }. Sólo cuenta lo que está en stock; un agotado es faltante. Orden del servidor: primero las completas, después la más cercana en línea recta. No guarda nada. Un slug inexistente, oculto o de otro tipo responde 404.\n\n`POST /public/profiles/f/{slug}/branch-availability`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PublicCatalogController_pharmacyBranchAvailability`",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"items\": [\n    \"Paracetamol 500 mg\",\n    \"Losartán\"\n  ],\n  \"lat\": -17.78,\n  \"lng\": -63.18\n}",
@@ -82121,6 +82111,9 @@
                       "language": "json"
                     }
                   }
+                },
+                "auth": {
+                  "type": "noauth"
                 }
               },
               "response": [],
@@ -82149,14 +82142,7 @@
               "name": "GET /public/profiles/f/{slug}/branches · Sucursales de una farmacia, desde su ficha pública",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "X-Tenant-Id",
-                    "value": "{{tenantId}}",
-                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                    "disabled": false
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{baseUrl}}/public/profiles/f/:slug/branches",
                   "host": [
@@ -82177,7 +82163,10 @@
                     }
                   ]
                 },
-                "description": "Sin sesión. Sedes activas de las farmacias activas y verificadas del tenant dueño de la ficha, por ciudad y nombre, con su punto si lo tiene. Un slug inexistente, oculto o de otro tipo responde 404.\n\n`GET /public/profiles/f/{slug}/branches`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `PublicCatalogController_pharmacyBranches`"
+                "description": "Sin sesión. Sedes activas de las farmacias activas y verificadas del tenant dueño de la ficha, por ciudad y nombre, con su punto si lo tiene. Un slug inexistente, oculto o de otro tipo responde 404.\n\n`GET /public/profiles/f/{slug}/branches`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 429, 500, 504\n\noperationId: `PublicCatalogController_pharmacyBranches`",
+                "auth": {
+                  "type": "noauth"
+                }
               },
               "response": [],
               "event": [

@@ -8,16 +8,16 @@ import { MikroORM } from '@mikro-orm/postgresql';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import * as qaLabEntities from '../../src/modules/qa_lab/entities';
 import * as qaExecutionEntities from '../../src/modules/qa_execution/entities';
-import { QaRunsService } from '../../src/modules/qa_lab/services/qa-runs.service';
+import { QaRunsService } from '../../src/modules/qa_lab/application/services/qa-runs.service';
 import {
   QaCatalogRepository,
   QaRunsRepository,
-} from '../../src/modules/qa_lab/repositories';
+} from '../../src/modules/qa_lab/infrastructure/repositories';
 import { QaExecutionService } from '../../src/modules/qa_execution/services/qa-execution.service';
 import { GuardedHttpClient } from '../../src/modules/qa_execution/infrastructure/guarded-http.client';
 import { QaFlowsSeedService } from '../../src/common/seed/qa-flows-seed.service';
-import { QaFlowsService } from '../../src/modules/qa_lab/services/qa-flows.service';
-import { FLOW_CATALOG } from '../../src/modules/qa_lab/flows';
+import { QaFlowsService } from '../../src/modules/qa_lab/application/services/qa-flows.service';
+import { FLOW_CATALOG } from '../../src/modules/qa_lab/domain/flows';
 import {
   casesOf,
   suiteCode,

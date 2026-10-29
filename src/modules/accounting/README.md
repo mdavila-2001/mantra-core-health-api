@@ -33,7 +33,7 @@ Importa (`accounting.module.ts`): `AuditModule`, `PracticeModule`, `BillingModul
 | `GET /accounting/assets` | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `accounting-cockpit` |
 | `GET /accounting/accrual-objects` | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `accounting-cockpit` |
 | `POST /accounting/exchange-rates` | SYSTEM | `accounting-exchange-rate` |
-| `POST /accounting/fiscal-years` | SECURITY_ADMIN | `accounting-fiscal` |
+| `POST /accounting/fiscal-years` | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER (el servicio exige administrar la práctica o ser el médico titular de su consultorio propio) | `accounting-fiscal` |
 | `POST /accounting/fiscal-periods/:id/lock` | SECURITY_ADMIN | `accounting-fiscal` |
 | `GET /accounting/accounts` | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `accounting-ledger` |
 | `GET /accounting/trial-balance` | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `accounting-ledger` |

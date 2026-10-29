@@ -20,7 +20,10 @@ import type {
 export class SiatSimulatedAdapter implements ISiatEmitterPort {
   readonly siatMode = 'simulated' as const;
 
-  async resolveIssuer(practiceId: string, legalName: string): Promise<SiatIssuerProfile> {
+  async resolveIssuer(
+    practiceId: string,
+    legalName: string,
+  ): Promise<SiatIssuerProfile> {
     const view = simulatedIssuer({ practiceId, legalName });
     return {
       nit: view.nit,
@@ -72,8 +75,9 @@ export class SiatSimulatedAdapter implements ISiatEmitterPort {
       transaccion: raw.transaccion,
       codigoEstado: raw.codigoEstado,
       codigoDescripcion:
-        SIAT_STATUS_DESCRIPTION[status as keyof typeof SIAT_STATUS_DESCRIPTION] ??
-        raw.codigoDescripcion,
+        SIAT_STATUS_DESCRIPTION[
+          status as keyof typeof SIAT_STATUS_DESCRIPTION
+        ] ?? raw.codigoDescripcion,
       codigoRecepcion: raw.codigoRecepcion,
       mensajesList: raw.mensajesList.map((m) => ({
         codigo: m.codigo,
@@ -96,8 +100,9 @@ export class SiatSimulatedAdapter implements ISiatEmitterPort {
       transaccion: raw.transaccion,
       codigoEstado: raw.codigoEstado,
       codigoDescripcion:
-        SIAT_STATUS_DESCRIPTION[status as keyof typeof SIAT_STATUS_DESCRIPTION] ??
-        raw.codigoDescripcion,
+        SIAT_STATUS_DESCRIPTION[
+          status as keyof typeof SIAT_STATUS_DESCRIPTION
+        ] ?? raw.codigoDescripcion,
       codigoRecepcion: null,
       mensajesList: [],
       siatMode: 'simulated',

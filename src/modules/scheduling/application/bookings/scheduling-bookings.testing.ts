@@ -1,4 +1,6 @@
+import type { BookingBillingPort } from '../ports/booking-billing.port';
 import type { BookingCompletedPort } from '../ports/booking-completed.port';
+import { createFakeBookingBilling } from './booking-billing.testing';
 import { AuditBookingHistoryAdapter } from '../../infrastructure/adapters/audit-booking-history.adapter';
 import { ClinicalAppointmentsAdapter } from '../../infrastructure/adapters/clinical-appointments.adapter';
 import { FormsOriginAdapter } from '../../infrastructure/adapters/forms-origin.adapter';
@@ -7,6 +9,7 @@ import { ProfilesPatientRepresentationAdapter } from '../../infrastructure/adapt
 import { SchedulingBookingsService } from './scheduling-bookings.service';
 import {
   BookingAccess,
+  BookingBillingBridge,
   BookingChangeNotifier,
   BookingItemAssembler,
   BookingMaterializer,
@@ -57,6 +60,8 @@ export interface BookingsServiceDoubles {
   representation: any;
   formOrigin: any;
   serviceAgenda: any;
+  /** Facturación; por omisión, una en memoria sin precios (FAC-01). */
+  billing?: BookingBillingPort;
   /** Receptor del cierre de la atención; por omisión no hace nada. */
   bookingCompleted?: BookingCompletedPort;
 }
@@ -101,6 +106,11 @@ export function createBookingsService(d: BookingsServiceDoubles) {
     d.catalogRepo,
   );
   const clinicalSync = new ClinicalAppointmentSync(clinical);
+  const billing = new BookingBillingBridge(
+    d.billing ?? createFakeBookingBilling(),
+    d.catalogRepo,
+    clinical,
+  );
   const slotPolicy = new SlotPolicyResolver(d.catalogRepo);
   const materializer = new BookingMaterializer(
     d.em,
@@ -166,8 +176,15 @@ export function createBookingsService(d: BookingsServiceDoubles) {
     ),
     cancelBooking,
     new RejectBookingUseCase(cancelBooking, d.logger),
-    new SetPaymentStateUseCase(d.em, d.bookingsRepo, access, history, d.logger),
-    new GetPaymentStateUseCase(d.em, d.bookingsRepo, access),
+    new SetPaymentStateUseCase(
+      d.em,
+      d.bookingsRepo,
+      access,
+      history,
+      billing,
+      d.logger,
+    ),
+    new GetPaymentStateUseCase(d.em, d.bookingsRepo, access, billing),
     new AcceptBookingUseCase(
       d.em,
       d.bookingsRepo,
@@ -216,6 +233,7 @@ export function createBookingsService(d: BookingsServiceDoubles) {
       insurance,
       representation,
       assembler,
+      billing,
     ),
     new GetBookingUseCase(
       d.em,
