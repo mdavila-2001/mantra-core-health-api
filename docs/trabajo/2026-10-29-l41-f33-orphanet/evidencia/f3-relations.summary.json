@@ -1,50 +1,52 @@
 {
-  "generatedAt": "2026-10-29T18:13:48.284Z",
-  "loaded": false,
+  "generatedAt": "2026-10-29T18:45:59.588Z",
+  "loaded": true,
   "dryRun": false,
   "batches": [
     {
       "key": "hpo",
       "version": "2026-09-02",
-      "rows": 151589,
+      "rows": 149252,
       "stats": {
         "read": 286651,
         "notPhenotypeAspect": 17745,
         "skippedDatabase": 116471,
-        "diseaseUnresolved": 844,
+        "diseaseUnresolved": 3181,
         "phenotypeUnresolved": 0,
         "negated": 0,
-        "withFrequency": 99820,
-        "withRatio": 96237,
+        "withFrequency": 98815,
+        "withRatio": 95437,
         "frequencyProblems": {},
-        "onsetWithRange": 2724,
-        "onsetWithoutRange": 323,
+        "onsetWithRange": 2659,
+        "onsetWithoutRange": 320,
         "sexResolved": 0,
-        "sexUnresolved": 615,
-        "tierT2": 104467,
-        "tierT3": 47124,
+        "sexUnresolved": 607,
+        "tierT2": 103389,
+        "tierT3": 45865,
         "referenceCollisions": 6,
         "exactDuplicates": 2,
-        "rows": 151589
+        "rows": 149252
       },
       "unresolvedDiseases": {
-        "no-mondo-group": 844
+        "no-mondo-group": 844,
+        "concept-not-in-database": 2337
       }
     },
     {
       "key": "orphanet",
       "version": "2026-06-23",
-      "rows": 115501,
+      "rows": 109861,
       "stats": {
         "read": 116664,
-        "diseaseUnresolved": 1006,
-        "phenotypeUnresolved": 157,
-        "withFrequency": 115501,
-        "excluded": 730,
+        "diseaseUnresolved": 6652,
+        "phenotypeUnresolved": 151,
+        "withFrequency": 109861,
+        "excluded": 705,
         "unknownFrequencyLabels": {},
-        "rows": 115501
+        "rows": 109861
       },
       "unresolvedDiseases": {
+        "concept-not-in-database": 5646,
         "group-in-review": 197,
         "no-mondo-group": 809
       }
