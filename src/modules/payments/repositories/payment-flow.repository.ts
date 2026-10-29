@@ -460,4 +460,28 @@ export class PaymentFlowRepository {
       ],
     });
   }
+
+  /** Sesiones de checkout ligadas a una intención, bloqueadas para cerrarlas. */
+  findCheckoutSessionsByIntentForUpdate(
+    em: EntityManager,
+    paymentIntentId: string,
+  ): Promise<PaymentCheckoutSessions[]> {
+    return em.find(
+      PaymentCheckoutSessions,
+      { paymentIntentId },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  /** Deuda por id, bloqueada: el webhook de la pasarela ya conoce el tenant por la intención. */
+  findDebtByIdForUpdate(
+    em: EntityManager,
+    id: string,
+  ): Promise<PaymentDebts | null> {
+    return em.findOne(
+      PaymentDebts,
+      { id },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
 }

@@ -38,7 +38,7 @@
 | [`organization_extensions`](organization_extensions.md) | 4 | 4 | 6 | 6 | 8 |
 | [`data_catalog`](data_catalog.md) | 3 | 7 | 3 | 13 | 4 |
 | [`directory`](directory.md) | 3 | 10 | 5 | 7 | 20 |
-| [`payments`](payments.md) | 3 | 5 | 6 | 53 | 4 |
+| [`payments`](payments.md) | 4 | 7 | 6 | 53 | 5 |
 | [`pharmacy`](pharmacy.md) | 3 | 10 | 13 | 9 | 13 |
 | [`polyglot_storage`](polyglot_storage.md) | 3 | 3 | 4 | 20 | 1 |
 | [`qa_lab`](qa_lab.md) | 3 | 4 | 2 | 13 | 1 |
