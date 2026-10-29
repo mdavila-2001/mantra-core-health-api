@@ -1,5 +1,6 @@
 import { mockFn } from '../../practice/services/infrastructure.testing';
 import { BILL } from '../billing.concepts';
+import { ChargeAccrualSupport } from './charge-accrual.support';
 import { BedDayChargesService } from './bed-day-charges.service';
 import type { ChargeRow } from './charge-captures.service';
 
@@ -169,7 +170,6 @@ function build(world: World = {}) {
 
 async function make(world: World) {
   const d = build(world);
-  const { ChargeAccrualSupport } = await import('./charge-accrual.support');
   const real = new ChargeAccrualSupport();
   const service = new BedDayChargesService(
     d.em,

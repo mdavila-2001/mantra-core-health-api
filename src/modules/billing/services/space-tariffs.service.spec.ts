@@ -1,5 +1,6 @@
 import { runWithTenant } from '../../../common';
 import { mockFn } from '../../practice/services/infrastructure.testing';
+import { PRAC } from '../../practice/practice.concepts';
 import { BILL } from '../billing.concepts';
 import { SpaceTariffsService } from './space-tariffs.service';
 
@@ -159,7 +160,6 @@ describe('SpaceTariffsService.create', () => {
         : undefined,
     );
     // el concepto SPACE_RETIRED llega de practice.concepts; se simula con su valor real
-    const { PRAC } = await import('../../practice/practice.concepts');
     retirada.tx.execute.mockImplementation(async (sql: string) =>
       sql.includes('from practice.care_spaces')
         ? [{ id: 'b', status_concept_id: PRAC.SPACE_RETIRED }]

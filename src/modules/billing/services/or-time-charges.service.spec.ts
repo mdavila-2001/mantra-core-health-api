@@ -1,6 +1,7 @@
 import { mockFn } from '../../practice/services/infrastructure.testing';
 import { PERIOP } from '../../procedures_perioperative/procedures_perioperative.concepts';
 import { BILL } from '../billing.concepts';
+import { ChargeAccrualSupport } from './charge-accrual.support';
 import { OrTimeChargesService } from './or-time-charges.service';
 
 const TENANT = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
@@ -78,7 +79,6 @@ function build(
 
 async function make(opts: Parameters<typeof build>[0] = {}) {
   const d = build(opts);
-  const { ChargeAccrualSupport } = await import('./charge-accrual.support');
   const events = { publish: mockFn().mockResolvedValue(undefined) };
   const history = { append: mockFn().mockResolvedValue(undefined) };
   const logger = {

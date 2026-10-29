@@ -38,13 +38,15 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn().mockResolvedValue(undefined) };
+  const tx: { flush: any; execute?: any } = {
+    flush: mockFn().mockResolvedValue(undefined),
+  };
   const forked = {};
   const em = {
     transactional: mockFn((cb: any) => cb(tx)),
     fork: mockFn(() => forked),
   };
-  const repo = {
+  const repo: Record<string, any> = {
     findSpecimen: mockFn(),
     findAccession: mockFn(),
     findContainer: mockFn(),
@@ -80,7 +82,7 @@ function build() {
   };
   const raw = new DiagnosticsSpecimensService(
     em as any,
-    repo,
+    repo as any,
     scope,
     logger as any,
     collectionPoints as any,
