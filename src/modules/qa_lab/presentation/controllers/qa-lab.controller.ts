@@ -14,8 +14,8 @@ import {
   CurrentUser,
   Roles,
   type AuthenticatedUser,
-} from '../../../common';
-import { QaCatalogService, QaRunsService } from '../services';
+} from '../../../../common';
+import { QaCatalogService, QaRunsService } from '../../application/services';
 import {
   CreateEnvironmentDto,
   EnvironmentResponseDto,

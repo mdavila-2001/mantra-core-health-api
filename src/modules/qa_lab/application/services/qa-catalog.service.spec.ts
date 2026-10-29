@@ -15,8 +15,8 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
   runWithTenant,
-} from '../../../common';
-import { QaLabErrorReason } from '../qa_lab.error-reasons';
+} from '../../../../common';
+import { QaLabErrorReason } from '../../qa_lab.error-reasons';
 
 const TENANT_A = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';

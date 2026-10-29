@@ -9,8 +9,8 @@ import {
   ResponsePayloads,
   RunArtifacts,
   TestDefects,
-} from '../entities';
-import { createdBy } from '../../../common';
+} from '../../entities';
+import { createdBy } from '../../../../common';
 
 /**
  * Describe el contrato estructural de create run data.

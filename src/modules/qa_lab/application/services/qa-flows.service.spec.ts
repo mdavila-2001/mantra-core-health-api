@@ -1,14 +1,14 @@
 import { describe, it, expect, jest } from '@jest/globals';
 import { QaFlowsService } from './qa-flows.service';
-import { CONCEPTS } from '../../../common/constants/concepts';
+import { CONCEPTS } from '../../../../common/constants/concepts';
 import {
   AssertionResults,
   TestCaseResults,
   TestCases,
   TestSuites,
-} from '../entities';
-import { branchCaseCode, casesOf } from '../domain/flow-catalog';
-import { FLOW_CATALOG } from '../flows';
+} from '../../entities';
+import { branchCaseCode, casesOf } from '../../domain/flow-catalog';
+import { FLOW_CATALOG } from '../../domain/flows';
 
 type Row = Record<string, any>;
 

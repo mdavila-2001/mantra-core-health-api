@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { ResourceNotFoundException } from '../../../common';
-import { conceptCode } from '../../../common/constants/concept-code';
-import { CONCEPTS } from '../../../common/constants/concepts';
+import { ResourceNotFoundException } from '../../../../common';
+import { conceptCode } from '../../../../common/constants/concept-code';
+import { CONCEPTS } from '../../../../common/constants/concepts';
 import {
   normalizeTemplate,
   RouteIndexService,
-} from '../../../observability/route-index/route-index.service';
+} from '../../../../observability/route-index/route-index.service';
 import {
   AssertionResults,
   TestCaseResults,
   TestCases,
   TestSuites,
-} from '../entities';
+} from '../../entities';
 import {
   branchCaseCode,
   countFlow,
@@ -22,8 +22,8 @@ import {
   type FlowCounts,
   type FlowDefinition,
   type FlowNode,
-} from '../domain/flow-catalog';
-import { FLOW_CATALOG } from '../flows';
+} from '../../domain/flow-catalog';
+import { FLOW_CATALOG } from '../../domain/flows';
 
 /** Cómo está cubierto un flujo: filtro de la lista. */
 export const FLOW_COVERAGE = [
