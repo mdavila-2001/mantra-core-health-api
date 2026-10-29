@@ -13,6 +13,8 @@ Entidades y relaciones que representan el modelo persistente.
 | `index.ts`                               | Punto de exportación pública de la carpeta.        |
 | `tenant_affiliation_documents.entity.ts` | Mapeo de una entidad persistente y sus relaciones. |
 | `tenant_legal_representatives.entity.ts` | Mapeo de una entidad persistente y sus relaciones. |
+| `tenant_medical_facilities.entity.ts`    | Mapeo de una entidad persistente y sus relaciones. |
+| `tenant_medical_facility_sites.entity.ts` | Mapeo de una entidad persistente y sus relaciones. |
 | `tenant_memberships.entity.ts`           | Mapeo de una entidad persistente y sus relaciones. |
 | `tenant_web_configs.entity.ts`           | Mapeo de una entidad persistente y sus relaciones. |
 | `tenants.entity.ts`                      | Mapeo de una entidad persistente y sus relaciones. |

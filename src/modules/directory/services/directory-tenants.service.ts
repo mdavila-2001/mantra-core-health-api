@@ -102,10 +102,19 @@ export class DirectoryTenantsService {
     this.logger.setContext(DirectoryTenantsService.name);
   }
 
-  /** UC-04-01: aprovisiona un tenant raíz (pending/unverified) con su membership owner. */
+  /**
+   * UC-04-01: aprovisiona un tenant raíz (pending/unverified) con su membership owner.
+   *
+   * @param dto - Datos del alta.
+   * @param actor - Quién la hace.
+   * @param fixedIds - Ids fijos para el tenant y su membresía owner. Solo los
+   *   pasa un proceso interno (los seeds), para que la organización tenga el
+   *   mismo id en todos los entornos; el endpoint nunca los recibe del cliente.
+   */
   async provision(
     dto: CreateTenantDto,
     actor: AuthenticatedUser,
+    fixedIds: { tenantId?: string; ownerMembershipId?: string } = {},
   ): Promise<TenantResponseDto> {
     this.logger.info(
       { operation: 'directory.tenant.provision', actorId: actor.id },
@@ -135,6 +144,7 @@ export class DirectoryTenantsService {
       });
 
       const tenant = this.tenantsRepo.create(tx, {
+        id: fixedIds.tenantId,
         code: dto.code,
         legalName: dto.legalName,
         tradeName: dto.tradeName,
@@ -173,6 +183,7 @@ export class DirectoryTenantsService {
       );
 
       this.membershipsRepo.create(tx, {
+        id: fixedIds.ownerMembershipId,
         userId: dto.ownerUserId,
         tenantId: tenant.id,
         tenantRoleConceptId: DIR.ROLE_OWNER,

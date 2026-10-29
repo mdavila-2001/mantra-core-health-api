@@ -14,7 +14,7 @@
     "indicesConParaQue": 7804,
     "paraQuePorTipo": {
       "DOCUMENTO": 8014,
-      "CONSULTA": 1481,
+      "CONSULTA": 1485,
       "ESTRUCTURAL": 17
     },
     "tablasConEntidad": 1230,
@@ -147,6 +147,24 @@
         "ddl": {
           "tipo": "PARCHE",
           "fuente": "SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql"
+        }
+      },
+      {
+        "tabla": "directory.tenant_medical_facilities",
+        "clase": "TenantMedicalFacilities",
+        "archivo": "src/modules/directory/entities/tenant_medical_facilities.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
+        }
+      },
+      {
+        "tabla": "directory.tenant_medical_facility_sites",
+        "clase": "TenantMedicalFacilitySites",
+        "archivo": "src/modules/directory/entities/tenant_medical_facility_sites.entity.ts",
+        "ddl": {
+          "tipo": "SIN_DDL",
+          "fuente": null
         }
       },
       {
@@ -3903,7 +3921,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 17,
       "indices": 8,
-      "operaciones": 46,
+      "operaciones": 48,
       "orm": "DIVERGE",
       "appendOnly": false
     },
@@ -4596,7 +4614,7 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 17,
       "indices": 8,
-      "operaciones": 44,
+      "operaciones": 46,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4607,7 +4625,7 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 13,
       "indices": 8,
-      "operaciones": 42,
+      "operaciones": 44,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4860,7 +4878,7 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 20,
       "indices": 12,
-      "operaciones": 163,
+      "operaciones": 180,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4959,7 +4977,7 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 10,
       "indices": 6,
-      "operaciones": 35,
+      "operaciones": 36,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -6378,7 +6396,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 15,
       "indices": 10,
-      "operaciones": 135,
+      "operaciones": 193,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -6400,7 +6418,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 19,
       "indices": 13,
-      "operaciones": 62,
+      "operaciones": 138,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8050,7 +8068,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 16,
       "indices": 7,
-      "operaciones": 49,
+      "operaciones": 50,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8149,7 +8167,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 21,
       "indices": 8,
-      "operaciones": 59,
+      "operaciones": 60,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10679,7 +10697,7 @@
       "dominio": "Farmacia",
       "columnas": 22,
       "indices": 14,
-      "operaciones": 39,
+      "operaciones": 40,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10822,7 +10840,7 @@
       "dominio": "Farmacia",
       "columnas": 16,
       "indices": 13,
-      "operaciones": 66,
+      "operaciones": 67,
       "orm": "DIVERGE",
       "appendOnly": false
     },
@@ -11647,7 +11665,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 15,
       "indices": 8,
-      "operaciones": 175,
+      "operaciones": 176,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12164,7 +12182,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 13,
       "indices": 8,
-      "operaciones": 243,
+      "operaciones": 244,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12219,7 +12237,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 16,
       "indices": 8,
-      "operaciones": 52,
+      "operaciones": 53,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -13704,7 +13722,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 16,
       "indices": 8,
-      "operaciones": 153,
+      "operaciones": 155,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -13770,7 +13788,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 10,
       "indices": 3,
-      "operaciones": 25,
+      "operaciones": 27,
       "orm": "COINCIDE",
       "appendOnly": false
     },

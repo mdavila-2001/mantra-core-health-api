@@ -15,7 +15,9 @@ import {
   FILE_STORAGE_ADAPTER,
   PreconditionFailedException,
   ResourceNotFoundException,
+  UNSUPPORTED_IMAGE_FORMAT_REASON,
   UPLOAD_MIME_ALLOWLIST,
+  detectUnsupportedImageFormat,
   isMimeTypeAllowedForCategory,
   loadStorageEnv,
   sniffMimeType,
@@ -177,6 +179,20 @@ export class FileUploadService {
 
     const detectedMimeType = sniffMimeType(file.buffer);
     if (!detectedMimeType) {
+      // Una foto de iPhone (HEIC) no es contenido sospechoso: es un formato
+      // que no se acepta. Se dice cuál y qué hacer, con un `reason` estable
+      // para que el cliente lo explique sin parsear el mensaje.
+      const unsupportedImage = detectUnsupportedImageFormat(file.buffer);
+      if (unsupportedImage) {
+        throw new PreconditionFailedException(
+          'Las fotos HEIC, HEIF o AVIF no se aceptan: enviala como JPEG, PNG, WEBP o GIF',
+          {
+            detectedFormat: unsupportedImage,
+            allowedMimeTypes: UPLOAD_MIME_ALLOWLIST[dto.category],
+          },
+          UNSUPPORTED_IMAGE_FORMAT_REASON,
+        );
+      }
       throw new PreconditionFailedException(
         'El contenido no corresponde a ningún formato de archivo permitido',
         { allowedMimeTypes: UPLOAD_MIME_ALLOWLIST[dto.category] },

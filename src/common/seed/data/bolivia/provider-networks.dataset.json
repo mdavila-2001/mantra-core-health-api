@@ -1,5 +1,12 @@
 {
   "_nota": "Redes de prestadores de Alianza y Nacional Seguros, agrupadas por profesional. Contiene nombres de médicos reales: es dato profesional, no clínico.",
+  "_procedencia": {
+    "modeloCommit": "3dc2f323b0f4c533c31430c64187baf6d63d6459",
+    "fuentes": {
+      "markdown_convertidos/Alianza_Medicos_Habilitados.md": "425bbcadd7b177638f08fecc8aad39299746794e06ecd270617ab483fcaf5727",
+      "markdown_convertidos/Nacional_Seguros_Red_Medica_Bolivia.md": "bfcd40c8bb0019b50f466e0bd2502ba521953a0cda1ef7a133bad308a7713a72"
+    }
+  },
   "datos": {
     "redes": [
       {

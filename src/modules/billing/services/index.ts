@@ -11,4 +11,5 @@ export * from './kpi-snapshots.service';
 export * from './billing-service-catalog.service';
 export * from './procedure-nomenclature.service';
 export * from './billing-simulated.service';
+export * from './procedure-import.service';
 export * from './patient-spending.service';

@@ -5,6 +5,11 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PharmacyModule } from '../pharmacy/pharmacy.module';
 import { MessagingModule } from '../messaging/messaging.module';
 import { ProfilesModule } from '../profiles/profiles.module';
+// El chat del pedido (hilo paciente ↔ vitrina de la farmacia). No hay ciclo:
+// `community` no importa este módulo.
+import { CommunityModule } from '../community/community.module';
+import { PHARMACY_ORDER_CHAT_PORT } from './application/ports/pharmacy-order-chat.port';
+import { CommunityPharmacyOrderChatAdapter } from './infrastructure/adapters/community-pharmacy-order-chat.adapter';
 import { DIRECTORY_TENANT_ADMINISTRATION_PORT } from './application/ports/directory-tenant-administration.port';
 import { INSURANCE_PATIENT_SETTLEMENT_PORT } from './application/ports/insurance-patient-settlement.port';
 import { PHARMACY_DIRECTORY_PORT } from './application/ports/pharmacy-directory.port';
@@ -98,6 +103,7 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     // (enviado, cancelado, vencido) en la misma transacción del cambio.
     MessagingModule,
     ProfilesModule,
+    CommunityModule,
   ],
   controllers: [
     PharmacyProcurementController,
@@ -156,6 +162,11 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     {
       provide: PERSON_ACCOUNT_LINKS_PORT,
       useExisting: ProfilesPersonAccountLinksAdapter,
+    },
+    CommunityPharmacyOrderChatAdapter,
+    {
+      provide: PHARMACY_ORDER_CHAT_PORT,
+      useExisting: CommunityPharmacyOrderChatAdapter,
     },
     // Servicios
     InventoryLocationsService,

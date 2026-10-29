@@ -10,6 +10,8 @@ import {
 import { COMM } from '../../../community/community.concepts';
 import { Users } from '../../../iam/entities';
 import type { AgendaNotice } from '../../application/ports/agenda-notice.port';
+import { chatTextForNotice } from '../../domain/notices/chat-messages';
+import { loadAgendaNoticesEnv } from '../config/agenda-notices.env';
 
 /**
  * `SupportAdmin`: quién escribe el aviso de agenda en el chat de la empresa
@@ -41,6 +43,8 @@ import type { AgendaNotice } from '../../application/ports/agenda-notice.port';
  */
 @Injectable()
 export class SupportAdminNoticeAdapter {
+  private readonly env = loadAgendaNoticesEnv();
+
   constructor(
     private readonly em: EntityManager,
     private readonly messaging: CommunityMessagingService,
@@ -51,7 +55,7 @@ export class SupportAdminNoticeAdapter {
   }
 
   /**
-   * Manda el mismo texto del aviso al hilo de `SupportAdmin` del destinatario.
+   * Manda el aviso, en su versión de chat, al hilo de `SupportAdmin` del destinatario.
    *
    * Nunca lanza: un chat que no sale no puede tumbar la agenda ni degradar lo
    * que ya entregaron el in-app o el correo.
@@ -99,7 +103,9 @@ export class SupportAdminNoticeAdapter {
         conversation.id,
         {
           senderProfileId: supportAdminProfileId,
-          bodyText: notice.bodyText,
+          // La versión de chat del aviso: encabezado con emoji, el cuerpo y
+          // el enlace que el frontend convierte en «Ir a la cita».
+          bodyText: chatTextForNotice(notice, this.env.webAppBaseUrl),
           contentType: 'TEXT',
         },
         actor,

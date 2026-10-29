@@ -27,6 +27,7 @@ import {
   BranchesRepository,
   BranchMembershipsRepository,
   DirectoryTenantLegalRepository,
+  TenantMedicalFacilitiesRepository,
 } from './repositories';
 
 /**
@@ -80,6 +81,7 @@ import {
     BranchesRepository,
     BranchMembershipsRepository,
     DirectoryTenantLegalRepository,
+    TenantMedicalFacilitiesRepository,
     // Servicios
     DirectoryTenantsService,
     DirectoryBranchesService,
@@ -99,6 +101,8 @@ import {
   // `TenantAffiliationDocumentsService` lo necesita `iam` para el
   // autorregistro de organización, igual que `TenantTypeProfileService`.
   exports: [
+    // Los seeds de organizaciones dan de alta por el mismo caso de uso que la API.
+    DirectoryTenantsService,
     TenantsRepository,
     DirectoryAuthorizationModule,
     BranchesRepository,

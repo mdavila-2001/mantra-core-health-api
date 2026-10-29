@@ -135,7 +135,7 @@ Representa domicilios y direcciones de personas, sedes y organizaciones utilizad
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_addresses_owner_type_concept_id` | no | owner_type_concept_id | Soporta la clave foránea fk_addresses_owner_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_addresses_owner_type_concept_id` | no | owner_type_concept_id | Soporta la clave foránea fk_addresses_owner_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «owner_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_addresses_use_concept_id` | no | use_concept_id | Soporta la clave foránea fk_addresses_use_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «use_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_addresses_type_concept_id` | no | type_concept_id | Soporta la clave foránea fk_addresses_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_addresses_administrative_area_concept_id` | no | administrative_area_concept_id | Soporta la clave foránea fk_addresses_administrative_area_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
