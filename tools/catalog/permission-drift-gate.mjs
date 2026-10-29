@@ -40,7 +40,7 @@ async function main() {
     'common/seed/authz-clinical-roles-seed.service.js',
   );
   const { PLATFORM_ROLE_CODES } = await dist(
-    'modules/data_catalog/services/permission-drift.service.js',
+    'modules/data_catalog/infrastructure/adapters/iam-platform-role-codes.adapter.js',
   );
   const {
     blockingDrift,
@@ -48,7 +48,9 @@ async function main() {
     invalidAllowlist,
     routeKey,
     staleAllowlist,
-  } = await dist('modules/data_catalog/permission-drift/permission-drift.js');
+  } = await dist(
+    'modules/data_catalog/domain/permission-drift/permission-drift.js',
+  );
 
   const app = await NestFactory.createApplicationContext(AppModule, {
     logger: ['error'],
