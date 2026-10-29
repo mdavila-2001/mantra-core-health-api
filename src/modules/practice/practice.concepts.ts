@@ -545,4 +545,151 @@ export const { seeds: PRACTICE_CONCEPT_SEEDS, ids: PRAC } =
     CLN_PENDING: { code: 'CLN_PENDING', display: 'Limpieza pendiente' },
     CLN_IN_PROGRESS: { code: 'CLN_IN_PROGRESS', display: 'Limpieza en curso' },
     CLN_DONE: { code: 'CLN_DONE', display: 'Limpieza hecha' },
+
+    // --- infraestructura hospitalaria F2: operación (CONTRATO-F2-F5 §F2.2). ---
+    // Disponibilidad: reutiliza `operational_status_concept_id`
+    // (`SPACE_OP_AVAILABLE` y `SPACE_OP_CLOSED` ya existían).
+    SPACE_OP_BLOCKED_CLINICAL: {
+      code: 'SPACE_OP_BLOCKED_CLINICAL',
+      display: 'Bloqueada por motivo clínico',
+    },
+    SPACE_OP_BLOCKED_ADMIN: {
+      code: 'SPACE_OP_BLOCKED_ADMIN',
+      display: 'Bloqueada por motivo administrativo',
+    },
+    SPACE_OP_MAINTENANCE: {
+      code: 'SPACE_OP_MAINTENANCE',
+      display: 'En mantenimiento',
+    },
+    // Higiene (`HYG_CLEAN` está arriba).
+    HYG_DIRTY: { code: 'HYG_DIRTY', display: 'Higiene: sucio' },
+    HYG_CLEANING: { code: 'HYG_CLEANING', display: 'Higiene: en limpieza' },
+    HYG_INSPECTED: { code: 'HYG_INSPECTED', display: 'Higiene: inspeccionado' },
+    HYG_CONTAMINATED: {
+      code: 'HYG_CONTAMINATED',
+      display: 'Higiene: contaminado',
+    },
+    // Aislamiento (`ISO_NONE` está arriba).
+    ISO_CONTACT: { code: 'ISO_CONTACT', display: 'Aislamiento por contacto' },
+    ISO_DROPLET: { code: 'ISO_DROPLET', display: 'Aislamiento por gotas' },
+    ISO_AIRBORNE: { code: 'ISO_AIRBORNE', display: 'Aislamiento aéreo' },
+    ISO_PROTECTIVE: {
+      code: 'ISO_PROTECTIVE',
+      display: 'Aislamiento protector',
+    },
+    // Ocupación (derivada, sólo lectura).
+    OCC_FREE: { code: 'OCC_FREE', display: 'Ocupación: libre' },
+    OCC_RESERVED: { code: 'OCC_RESERVED', display: 'Ocupación: reservada' },
+    OCC_OCCUPIED: { code: 'OCC_OCCUPIED', display: 'Ocupación: ocupada' },
+    // Tipo de bloqueo (`BLOCK_MAINTENANCE` está arriba).
+    BLOCK_CLINICAL: { code: 'BLOCK_CLINICAL', display: 'Bloqueo clínico' },
+    BLOCK_ADMIN: { code: 'BLOCK_ADMIN', display: 'Bloqueo administrativo' },
+    BLOCK_CLOSURE: { code: 'BLOCK_CLOSURE', display: 'Cierre' },
+    // Motivos de bloqueo.
+    BLOCK_RSN_STAFF_SHORTAGE: {
+      code: 'BLOCK_RSN_STAFF_SHORTAGE',
+      display: 'Falta de personal',
+    },
+    BLOCK_RSN_ISOLATION_COHORT: {
+      code: 'BLOCK_RSN_ISOLATION_COHORT',
+      display: 'Aislamiento de la habitación (cohorte)',
+    },
+    BLOCK_RSN_PATIENT_CONDITION: {
+      code: 'BLOCK_RSN_PATIENT_CONDITION',
+      display: 'Condición del paciente',
+    },
+    BLOCK_RSN_EQUIPMENT_FAILURE: {
+      code: 'BLOCK_RSN_EQUIPMENT_FAILURE',
+      display: 'Falla de equipo',
+    },
+    BLOCK_RSN_PREVENTIVE_MAINTENANCE: {
+      code: 'BLOCK_RSN_PREVENTIVE_MAINTENANCE',
+      display: 'Mantenimiento preventivo',
+    },
+    BLOCK_RSN_INFRASTRUCTURE: {
+      code: 'BLOCK_RSN_INFRASTRUCTURE',
+      display: 'Falla de infraestructura',
+    },
+    BLOCK_RSN_PEST_CONTROL: {
+      code: 'BLOCK_RSN_PEST_CONTROL',
+      display: 'Control de plagas',
+    },
+    BLOCK_RSN_ADMIN_DECISION: {
+      code: 'BLOCK_RSN_ADMIN_DECISION',
+      display: 'Decisión administrativa',
+    },
+    BLOCK_RSN_OTHER: { code: 'BLOCK_RSN_OTHER', display: 'Otro motivo' },
+    // Ejes del evento de estado (A20).
+    AXIS_AVAILABILITY: {
+      code: 'AXIS_AVAILABILITY',
+      display: 'Eje: disponibilidad',
+    },
+    AXIS_HYGIENE: { code: 'AXIS_HYGIENE', display: 'Eje: higiene' },
+    AXIS_ISOLATION: { code: 'AXIS_ISOLATION', display: 'Eje: aislamiento' },
+    AXIS_OCCUPANCY: { code: 'AXIS_OCCUPANCY', display: 'Eje: ocupación' },
+    // Origen del cambio de estado.
+    SRC_MANUAL: { code: 'SRC_MANUAL', display: 'Origen: manual' },
+    SRC_ADT: {
+      code: 'SRC_ADT',
+      display: 'Origen: admisión, egreso y traslado',
+    },
+    SRC_CLEANING: {
+      code: 'SRC_CLEANING',
+      display: 'Origen: orden de limpieza',
+    },
+    SRC_BLOCK: { code: 'SRC_BLOCK', display: 'Origen: bloqueo' },
+    SRC_ROOM_EVENT: {
+      code: 'SRC_ROOM_EVENT',
+      display: 'Origen: evento de sala',
+    },
+    SRC_SYSTEM: { code: 'SRC_SYSTEM', display: 'Origen: sistema' },
+    // Orden de limpieza: tipo, disparador, prioridad, estado y resultado.
+    CLEAN_ROUTINE: { code: 'CLEAN_ROUTINE', display: 'Limpieza de rutina' },
+    CLEAN_DISCHARGE: {
+      code: 'CLEAN_DISCHARGE',
+      display: 'Limpieza de egreso',
+    },
+    CLEAN_TERMINAL: { code: 'CLEAN_TERMINAL', display: 'Limpieza terminal' },
+    CLEAN_OR_TURNOVER: {
+      code: 'CLEAN_OR_TURNOVER',
+      display: 'Recambio de quirófano',
+    },
+    CLEAN_SPOT: { code: 'CLEAN_SPOT', display: 'Limpieza puntual' },
+    CLN_TRG_DISCHARGE: { code: 'CLN_TRG_DISCHARGE', display: 'Por egreso' },
+    CLN_TRG_TRANSFER: { code: 'CLN_TRG_TRANSFER', display: 'Por traslado' },
+    CLN_TRG_MANUAL: { code: 'CLN_TRG_MANUAL', display: 'Pedida a mano' },
+    CLN_TRG_ISOLATION_END: {
+      code: 'CLN_TRG_ISOLATION_END',
+      display: 'Por fin de aislamiento',
+    },
+    CLN_TRG_CONTAMINATION: {
+      code: 'CLN_TRG_CONTAMINATION',
+      display: 'Por contaminación',
+    },
+    CLN_TRG_MAINTENANCE_END: {
+      code: 'CLN_TRG_MAINTENANCE_END',
+      display: 'Por fin de mantenimiento',
+    },
+    CLN_TRG_OR_TURNOVER: {
+      code: 'CLN_TRG_OR_TURNOVER',
+      display: 'Por recambio de quirófano',
+    },
+    CLN_TRG_INSPECTION_FAILED: {
+      code: 'CLN_TRG_INSPECTION_FAILED',
+      display: 'Por inspección rechazada',
+    },
+    CLN_PRIO_ROUTINE: { code: 'CLN_PRIO_ROUTINE', display: 'Prioridad rutina' },
+    CLN_PRIO_URGENT: { code: 'CLN_PRIO_URGENT', display: 'Prioridad urgente' },
+    CLN_PRIO_STAT: { code: 'CLN_PRIO_STAT', display: 'Prioridad inmediata' },
+    CLN_INSPECTED: { code: 'CLN_INSPECTED', display: 'Limpieza inspeccionada' },
+    CLN_REJECTED: { code: 'CLN_REJECTED', display: 'Limpieza rechazada' },
+    CLN_CANCELLED: { code: 'CLN_CANCELLED', display: 'Limpieza cancelada' },
+    CLN_INSPECT_PASS: {
+      code: 'CLN_INSPECT_PASS',
+      display: 'Inspección aprobada',
+    },
+    CLN_INSPECT_FAIL: {
+      code: 'CLN_INSPECT_FAIL',
+      display: 'Inspección rechazada',
+    },
   });
