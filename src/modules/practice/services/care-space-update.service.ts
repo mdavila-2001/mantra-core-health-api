@@ -36,6 +36,7 @@ import {
   STRUCTURE_EVENTS,
   StructureEventsService,
 } from './structure-events.service';
+import { moveBreaksPlanException } from '../plan/plan-constraint-reasons';
 import { mapReferenceViolation } from './structure-errors';
 import { STRUCTURE_HISTORY, structureSnapshot } from './structure-history';
 
@@ -269,6 +270,27 @@ export class CareSpaceUpdateService {
    * @returns El detalle actualizado.
    */
   async move(
+    spaceId: string,
+    newParentId: string | null,
+    expectedVersion: number,
+    actor: AuthenticatedUser,
+    correlationId?: string,
+  ): Promise<CareSpaceDetail> {
+    try {
+      return await this.moveInTransaction(
+        spaceId,
+        newParentId,
+        expectedVersion,
+        actor,
+        correlationId,
+      );
+    } catch (error) {
+      // Los triggers diferidos del plano rechazan al confirmar; se traducen aquí.
+      throw moveBreaksPlanException(error, spaceId) ?? error;
+    }
+  }
+
+  private async moveInTransaction(
     spaceId: string,
     newParentId: string | null,
     expectedVersion: number,

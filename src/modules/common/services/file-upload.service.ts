@@ -577,6 +577,64 @@ export class FileUploadService {
   }
 
   /**
+   * Bytes de **una versión concreta** de un archivo cuya lectura ya autorizó el
+   * módulo dueño del contexto. A diferencia de {@link downloadForAuthorizedContext}
+   * no lee «la vigente» en el instante de la lectura: lee la que el llamador
+   * validó o firmó, de modo que una versión nueva subida entre la validación y la
+   * lectura no se cuela (TOCTOU). La versión debe pertenecer al archivo y no estar
+   * infectada; el archivo debe estar vivo.
+   *
+   * Mismo contrato de autorización que {@link downloadForAuthorizedContext}: esta
+   * función **no autoriza nada**.
+   *
+   * @param fileId - Archivo.
+   * @param versionId - Versión pedida.
+   * @param operation - Operación del llamador, para el registro.
+   * @returns Bytes y tipo MIME **declarado** de esa versión (el llamador debe
+   *   deducir el real con `sniffMimeType` antes de servirla).
+   * @throws ResourceNotFoundException si el archivo o la versión no existen o no coinciden.
+   * @throws PreconditionFailedException si está borrado o la versión resultó infectada.
+   */
+  async downloadVersionForAuthorizedContext(
+    fileId: string,
+    versionId: string,
+    operation: string,
+  ): Promise<FileContentDto> {
+    const forked = this.em.fork();
+    const file = await this.filesRepo.findById(forked, fileId);
+    if (!file) {
+      throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
+    }
+    if (
+      file.deletedAt ||
+      file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED
+    ) {
+      throw new PreconditionFailedException('El archivo está borrado', {
+        fileId,
+      });
+    }
+    const version = await this.fileVersionsRepo.findById(forked, versionId);
+    if (!version || version.fileId !== fileId) {
+      throw new ResourceNotFoundException('Versión no encontrada', { fileId });
+    }
+    if (version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED) {
+      throw new PreconditionFailedException('La versión resultó infectada', {
+        fileId,
+      });
+    }
+    this.logger.info(
+      { operation, fileId, versionId },
+      'Serving a pinned file version',
+    );
+    const buffer = await this.storage.retrieve(version.storageUri);
+    return {
+      buffer,
+      mimeType: version.mimeType,
+      originalName: file.originalName,
+    };
+  }
+
+  /**
    * La versión vigente de un archivo ya autorizado, lista para servir.
    *
    * **Quién valida qué, y por qué no se valida acá.** El estado del archivo

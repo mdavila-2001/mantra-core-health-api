@@ -84,6 +84,7 @@ import {
   SpaceUnitAssignmentsRepository,
   SiteDeclaredCapacitiesRepository,
 } from './repositories';
+import { FLOOR_PLAN_CONTROLLERS, FLOOR_PLAN_PROVIDERS } from './plan';
 import { ServiceCatalogRepository } from '../billing/repositories';
 import { ProcedureReferenceReader } from '../billing/services/procedure-reference.reader';
 import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
@@ -150,6 +151,8 @@ import {
     SiteInfrastructureController,
     SiteLicensesController,
     InfrastructureCatalogController,
+    // Plano de planta (F1c)
+    ...FLOOR_PLAN_CONTROLLERS,
     CareSpaceOpsController,
     PracticeInternalController,
   ],
@@ -226,6 +229,8 @@ import {
     RetireBlockerRegistry,
     { provide: RETIRE_BLOCKER_PROVIDERS, useExisting: RetireBlockerRegistry },
     PracticeRetireBlockersInitializer,
+    // Plano de planta (F1c)
+    ...FLOOR_PLAN_PROVIDERS,
     // Infraestructura hospitalaria F2: operación de espacios.
     InfraPolicyRegistry,
     { provide: INFRA_POLICIES, useExisting: InfraPolicyRegistry },
