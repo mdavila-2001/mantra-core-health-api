@@ -56,7 +56,11 @@ export const RequestIdParam = createParamDecorator(
   },
 );
 
-const READERS = ['ADMISSIONS_REVIEWER', 'ADMISSIONS_APPROVER', 'SECURITY_ADMIN'];
+const READERS = [
+  'ADMISSIONS_REVIEWER',
+  'ADMISSIONS_APPROVER',
+  'SECURITY_ADMIN',
+];
 const REVIEWERS = ['ADMISSIONS_REVIEWER', 'SECURITY_ADMIN'];
 const APPROVERS = ['ADMISSIONS_APPROVER', 'SECURITY_ADMIN'];
 
@@ -106,7 +110,8 @@ export class AdmissionsController {
   @Audited({ action: 'ADMISSIONS_SEARCHED', entity: 'practitioner_admission' })
   @ApiOperation({
     summary: 'Bandeja de admisiones con los filtros en el cuerpo',
-    description: 'Igual que `GET /admissions`, pero el texto buscado (nombre, cédula, matrícula) no viaja en la URL.',
+    description:
+      'Igual que `GET /admissions`, pero el texto buscado (nombre, cédula, matrícula) no viaja en la URL.',
   })
   @ApiOkResponse({ type: AdmissionListDto })
   search(
@@ -120,7 +125,10 @@ export class AdmissionsController {
   @Post('expire-sweep')
   @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @Audited({ action: 'ADMISSIONS_EXPIRY_SWEPT', entity: 'practitioner_admission' })
+  @Audited({
+    action: 'ADMISSIONS_EXPIRY_SWEPT',
+    entity: 'practitioner_admission',
+  })
   @ApiOperation({
     summary: 'Barrido de vencimientos',
     description:
@@ -159,7 +167,11 @@ export class AdmissionsController {
   @Post(':id/claim')
   @Roles(...REVIEWERS)
   @HttpCode(HttpStatus.OK)
-  @Audited({ action: 'ADMISSION_CLAIMED', entity: 'practitioner_admission', entityId: 'param:id' })
+  @Audited({
+    action: 'ADMISSION_CLAIMED',
+    entity: 'practitioner_admission',
+    entityId: 'param:id',
+  })
   @ApiOperation({ summary: 'Tomar la admisión para revisarla' })
   @ApiOkResponse({ type: AdmissionDetailDto })
   claim(
@@ -168,13 +180,21 @@ export class AdmissionsController {
     @CurrentUser() actor: AuthenticatedUser,
     @RequestIdParam() requestId?: string,
   ): Promise<AdmissionDetailDto> {
-    return this.admissions.claim(id, dto.expectedRowVersion, this.caller(actor, requestId));
+    return this.admissions.claim(
+      id,
+      dto.expectedRowVersion,
+      this.caller(actor, requestId),
+    );
   }
 
   @Post(':id/release')
   @Roles(...READERS)
   @HttpCode(HttpStatus.OK)
-  @Audited({ action: 'ADMISSION_RELEASED', entity: 'practitioner_admission', entityId: 'param:id' })
+  @Audited({
+    action: 'ADMISSION_RELEASED',
+    entity: 'practitioner_admission',
+    entityId: 'param:id',
+  })
   @ApiOperation({ summary: 'Soltar una revisión tomada para que otro la tome' })
   @ApiOkResponse({ type: AdmissionDetailDto })
   release(
@@ -183,13 +203,21 @@ export class AdmissionsController {
     @CurrentUser() actor: AuthenticatedUser,
     @RequestIdParam() requestId?: string,
   ): Promise<AdmissionDetailDto> {
-    return this.admissions.release(id, dto.expectedRowVersion, this.caller(actor, requestId));
+    return this.admissions.release(
+      id,
+      dto.expectedRowVersion,
+      this.caller(actor, requestId),
+    );
   }
 
   @Post(':id/reassign')
   @Roles(...APPROVERS)
   @HttpCode(HttpStatus.OK)
-  @Audited({ action: 'ADMISSION_REASSIGNED', entity: 'practitioner_admission', entityId: 'param:id' })
+  @Audited({
+    action: 'ADMISSION_REASSIGNED',
+    entity: 'practitioner_admission',
+    entityId: 'param:id',
+  })
   @ApiOperation({ summary: 'Pasar la revisión a otro revisor' })
   @ApiOkResponse({ type: AdmissionDetailDto })
   reassign(
@@ -198,13 +226,22 @@ export class AdmissionsController {
     @CurrentUser() actor: AuthenticatedUser,
     @RequestIdParam() requestId?: string,
   ): Promise<AdmissionDetailDto> {
-    return this.admissions.reassign(id, dto.toUserId, dto.expectedRowVersion, this.caller(actor, requestId));
+    return this.admissions.reassign(
+      id,
+      dto.toUserId,
+      dto.expectedRowVersion,
+      this.caller(actor, requestId),
+    );
   }
 
   @Post(':id/request-info')
   @Roles(...REVIEWERS)
   @HttpCode(HttpStatus.OK)
-  @Audited({ action: 'ADMISSION_INFO_REQUESTED', entity: 'practitioner_admission', entityId: 'param:id' })
+  @Audited({
+    action: 'ADMISSION_INFO_REQUESTED',
+    entity: 'practitioner_admission',
+    entityId: 'param:id',
+  })
   @ApiOperation({ summary: 'Pedir información al médico' })
   @ApiOkResponse({ type: AdmissionDetailDto })
   requestInfo(
@@ -219,7 +256,11 @@ export class AdmissionsController {
   @Post(':id/items/:itemId/review')
   @Roles(...REVIEWERS)
   @HttpCode(HttpStatus.OK)
-  @Audited({ action: 'ADMISSION_ITEM_REVIEWED', entity: 'practitioner_admission_review', entityId: 'param:itemId' })
+  @Audited({
+    action: 'ADMISSION_ITEM_REVIEWED',
+    entity: 'practitioner_admission_review',
+    entityId: 'param:itemId',
+  })
   @ApiOperation({
     summary: 'Revisar un ítem del checklist',
     description:
@@ -234,13 +275,22 @@ export class AdmissionsController {
     @CurrentUser() actor: AuthenticatedUser,
     @RequestIdParam() requestId?: string,
   ): Promise<AdmissionDetailDto> {
-    return this.admissions.reviewItem(id, itemId, dto, this.caller(actor, requestId));
+    return this.admissions.reviewItem(
+      id,
+      itemId,
+      dto,
+      this.caller(actor, requestId),
+    );
   }
 
   @Post(':id/decision')
   @Roles(...APPROVERS)
   @HttpCode(HttpStatus.OK)
-  @Audited({ action: 'ADMISSION_DECIDED', entity: 'practitioner_admission', entityId: 'param:id' })
+  @Audited({
+    action: 'ADMISSION_DECIDED',
+    entity: 'practitioner_admission',
+    entityId: 'param:id',
+  })
   @ApiOperation({
     summary: 'Resolver la admisión: VERIFIED o REJECTED',
     description:
@@ -260,7 +310,11 @@ export class AdmissionsController {
   @Post(':id/suspend')
   @Roles(...APPROVERS)
   @HttpCode(HttpStatus.OK)
-  @Audited({ action: 'ADMISSION_SUSPENDED', entity: 'practitioner_admission', entityId: 'param:id' })
+  @Audited({
+    action: 'ADMISSION_SUSPENDED',
+    entity: 'practitioner_admission',
+    entityId: 'param:id',
+  })
   @ApiOperation({ summary: 'Suspender una verificación (quita el check)' })
   @ApiOkResponse({ type: AdmissionDetailDto })
   suspend(
@@ -275,8 +329,14 @@ export class AdmissionsController {
   @Post(':id/reinstate')
   @Roles(...APPROVERS)
   @HttpCode(HttpStatus.OK)
-  @Audited({ action: 'ADMISSION_REINSTATED', entity: 'practitioner_admission', entityId: 'param:id' })
-  @ApiOperation({ summary: 'Reponer una verificación suspendida (devuelve el check)' })
+  @Audited({
+    action: 'ADMISSION_REINSTATED',
+    entity: 'practitioner_admission',
+    entityId: 'param:id',
+  })
+  @ApiOperation({
+    summary: 'Reponer una verificación suspendida (devuelve el check)',
+  })
   @ApiOkResponse({ type: AdmissionDetailDto })
   reinstate(
     @Param('id', ParseUUIDPipe) id: string,
@@ -291,7 +351,11 @@ export class AdmissionsController {
   @Roles(...READERS)
   @HttpCode(HttpStatus.CREATED)
   @Header('Cache-Control', 'private, no-store')
-  @Audited({ action: 'FILE_DOWNLOAD_URL_ISSUED', entity: 'file', entityId: 'param:fileId' })
+  @Audited({
+    action: 'FILE_DOWNLOAD_URL_ISSUED',
+    entity: 'file',
+    entityId: 'param:fileId',
+  })
   @ApiOperation({
     summary: 'URL firmada para abrir un documento de la admisión',
     description:
@@ -315,7 +379,8 @@ export class AdmissionsController {
   })
   @ApiOperation({
     summary: 'Contenido de un documento de la admisión (URL firmada)',
-    description: 'Sin `Content-Type` sniffing, sin caché y con sandbox: el documento no puede ejecutar nada.',
+    description:
+      'Sin `Content-Type` sniffing, sin caché y con sandbox: el documento no puede ejecutar nada.',
   })
   async documentContent(
     @Param('id', ParseUUIDPipe) id: string,
@@ -325,7 +390,12 @@ export class AdmissionsController {
     @CurrentUser() actor: AuthenticatedUser,
     @Res() res: Response,
   ): Promise<void> {
-    const content = await this.documents.open(id, fileId, { expires, signature }, actor);
+    const content = await this.documents.open(
+      id,
+      fileId,
+      { expires, signature },
+      actor,
+    );
     res.setHeader('Content-Type', content.mimeType);
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Cache-Control', 'private, no-store');

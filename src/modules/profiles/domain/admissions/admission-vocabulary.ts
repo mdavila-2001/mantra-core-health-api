@@ -56,8 +56,14 @@ export type ReasonCode = (typeof REASON_CODES)[number];
 export const REASONS: Readonly<
   Record<ReasonCode, { concept: string; label: string; staffOnly?: boolean }>
 > = {
-  ILEGIBLE: { concept: PROF.ADMISSION_REASON_ILLEGIBLE, label: 'Documento ilegible' },
-  VENCIDO: { concept: PROF.ADMISSION_REASON_EXPIRED, label: 'Documento vencido' },
+  ILEGIBLE: {
+    concept: PROF.ADMISSION_REASON_ILLEGIBLE,
+    label: 'Documento ilegible',
+  },
+  VENCIDO: {
+    concept: PROF.ADMISSION_REASON_EXPIRED,
+    label: 'Documento vencido',
+  },
   NO_COINCIDE_NOMBRE: {
     concept: PROF.ADMISSION_REASON_NAME_MISMATCH,
     label: 'El nombre no coincide',
@@ -80,17 +86,23 @@ export const REASONS: Readonly<
 };
 
 /** El código de fuente de un concepto, o `undefined`. */
-export function sourceTypeOf(conceptId?: string | null): SourceTypeCode | undefined {
+export function sourceTypeOf(
+  conceptId?: string | null,
+): SourceTypeCode | undefined {
   return SOURCE_TYPE_CODES.find((c) => SOURCE_TYPES[c].concept === conceptId);
 }
 
 /** El código de motivo de un concepto, o `undefined`. */
-export function reasonCodeOf(conceptId?: string | null): ReasonCode | undefined {
+export function reasonCodeOf(
+  conceptId?: string | null,
+): ReasonCode | undefined {
   return REASON_CODES.find((c) => REASONS[c].concept === conceptId);
 }
 
 /** Lo que ve el solicitante de un código de motivo (nunca el reservado al personal). */
-export function applicantVisibleReason(code?: ReasonCode): ReasonCode | undefined {
+export function applicantVisibleReason(
+  code?: ReasonCode,
+): ReasonCode | undefined {
   if (!code) return undefined;
   return REASONS[code].staffOnly ? 'OTRO' : code;
 }

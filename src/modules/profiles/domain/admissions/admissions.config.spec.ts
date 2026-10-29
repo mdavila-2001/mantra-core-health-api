@@ -62,9 +62,15 @@ describe('configuración de admisiones', () => {
   });
 
   it('el esquema de entorno rechaza valores fuera de rango y acepta los vacíos', () => {
-    expect(admissionsEnvSchema.validate({ ADMISSIONS_SLA_BUSINESS_DAYS: 0 }).error).toBeDefined();
-    expect(admissionsEnvSchema.validate({ ADMISSIONS_SLA_BUSINESS_DAYS: 31 }).error).toBeDefined();
-    expect(admissionsEnvSchema.validate({ ADMISSIONS_FOUR_EYES: '' }).error).toBeUndefined();
+    expect(
+      admissionsEnvSchema.validate({ ADMISSIONS_SLA_BUSINESS_DAYS: 0 }).error,
+    ).toBeDefined();
+    expect(
+      admissionsEnvSchema.validate({ ADMISSIONS_SLA_BUSINESS_DAYS: 31 }).error,
+    ).toBeDefined();
+    expect(
+      admissionsEnvSchema.validate({ ADMISSIONS_FOUR_EYES: '' }).error,
+    ).toBeUndefined();
     expect(admissionsEnvSchema.validate({}).value).toMatchObject({
       ADMISSIONS_SLA_BUSINESS_DAYS: 3,
     });

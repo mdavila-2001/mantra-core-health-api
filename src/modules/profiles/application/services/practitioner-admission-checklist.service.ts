@@ -131,22 +131,26 @@ export class PractitionerAdmissionChecklistService {
     const [live, reviews, requirements] = await Promise.all([
       preloaded?.live ??
         this.evidence.collect(em, admission.practitionerProfileId),
-      preloaded?.reviews ??
-        this.reviewsRepo.findByAdmission(em, admission.id),
+      preloaded?.reviews ?? this.reviewsRepo.findByAdmission(em, admission.id),
       preloaded?.requirements ??
         this.requirementsOf(em, admission.admissionTypeConceptId),
     ]);
     const reviewByKey = new Map(
       reviews.map((r) => [`${r.requirementId}:${r.itemId}`, r]),
     );
-    const applicable = applicableRequirements(requirements, live.professionGroup);
+    const applicable = applicableRequirements(
+      requirements,
+      live.professionGroup,
+    );
     const inputs = applicable.map((requirement) => ({
       requirement,
       items: live.items
         .filter((item) => matches(requirement, item))
         .map((item): ChecklistViewItem => {
           const review = reviewByKey.get(`${requirement.id}:${item.itemId}`);
-          const recorded = review ? reviewStateOf(review.statusConceptId) : 'PENDING';
+          const recorded = review
+            ? reviewStateOf(review.statusConceptId)
+            : 'PENDING';
           const evidenceChanged =
             review !== undefined &&
             recorded !== 'PENDING' &&
@@ -212,8 +216,7 @@ export class PractitionerAdmissionChecklistService {
         const mustReset =
           recorded !== 'PENDING' &&
           (reset === 'ALL' ||
-            (reset === 'CHANGED' &&
-              (changed || recorded === 'INFO_REQUIRED')));
+            (reset === 'CHANGED' && (changed || recorded === 'INFO_REQUIRED')));
         if (mustReset) {
           this.clearReview(review, now, options.actorUserId);
           await this.applyEntityDecision(tx, item.live, 'PENDING', {
@@ -221,7 +224,11 @@ export class PractitionerAdmissionChecklistService {
             at: now,
           });
         }
-        if (mustReset || recorded === 'PENDING' || review.evidenceSha256 == null) {
+        if (
+          mustReset ||
+          recorded === 'PENDING' ||
+          review.evidenceSha256 == null
+        ) {
           review.fileId = item.live.fileId;
           review.evidenceSha256 = item.live.evidenceSha256;
           touch(review, options.actorUserId, now);
@@ -265,7 +272,9 @@ export class PractitionerAdmissionChecklistService {
   ): Promise<void> {
     const type: AdmissionItemType = item.itemType;
     if (type === 'LICENSE') {
-      const row = await tx.findOne(JurisdictionAuthorizations, { id: item.itemId });
+      const row = await tx.findOne(JurisdictionAuthorizations, {
+        id: item.itemId,
+      });
       if (!row) return;
       row.stateConceptId = AUTH_STATE[decision];
       if (decision === 'PENDING') {
@@ -282,7 +291,9 @@ export class PractitionerAdmissionChecklistService {
       }
       touch(row, meta.actorUserId, meta.at);
     } else if (type === 'CREDENTIAL') {
-      const row = await tx.findOne(ProfessionalCredentials, { id: item.itemId });
+      const row = await tx.findOne(ProfessionalCredentials, {
+        id: item.itemId,
+      });
       if (!row) return;
       row.stateConceptId = CRED_STATE[decision];
       if (decision === 'PENDING') {
@@ -299,7 +310,9 @@ export class PractitionerAdmissionChecklistService {
       }
       touch(row, meta.actorUserId, meta.at);
     } else if (type === 'SPECIALTY') {
-      const row = await tx.findOne(PractitionerSpecialties, { id: item.itemId });
+      const row = await tx.findOne(PractitionerSpecialties, {
+        id: item.itemId,
+      });
       if (!row) return;
       row.verificationStatusConceptId = SPEC_STATE[decision];
       row.verifiedAt = decision === 'VERIFIED' ? meta.at : NULL;
@@ -309,7 +322,10 @@ export class PractitionerAdmissionChecklistService {
   }
 }
 
-function matches(requirement: ChecklistRequirement, item: LiveAdmissionItem): boolean {
+function matches(
+  requirement: ChecklistRequirement,
+  item: LiveAdmissionItem,
+): boolean {
   return (
     requirement.itemType === item.itemType &&
     (requirement.itemSubtype === undefined ||

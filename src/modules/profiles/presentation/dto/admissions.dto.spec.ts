@@ -14,7 +14,11 @@ async function invalidFields(body: Record<string, unknown>): Promise<string[]> {
 }
 
 describe('ReviewAdmissionItemDto · evidenceSha256 (S-2)', () => {
-  const base = { decision: 'VERIFIED', sourceType: 'COLEGIO_MEDICO', expectedRowVersion: 2 };
+  const base = {
+    decision: 'VERIFIED',
+    sourceType: 'COLEGIO_MEDICO',
+    expectedRowVersion: 2,
+  };
 
   it('VERIFIED con la huella de 64 hex es válido', async () => {
     expect(await invalidFields({ ...base, evidenceSha256: HASH })).toEqual([]);
@@ -32,16 +36,32 @@ describe('ReviewAdmissionItemDto · evidenceSha256 (S-2)', () => {
     ['vacía', ''],
     ['con espacios', ` ${'a'.repeat(62)} `],
   ])('una huella %s se rechaza', async (_name, value) => {
-    expect(await invalidFields({ ...base, evidenceSha256: value })).toEqual(['evidenceSha256']);
+    expect(await invalidFields({ ...base, evidenceSha256: value })).toEqual([
+      'evidenceSha256',
+    ]);
   });
 
   it('REJECTED e INFO_REQUIRED no la exigen, pero si vienen deben ser válidas', async () => {
     for (const decision of ['REJECTED', 'INFO_REQUIRED']) {
-      expect(await invalidFields({ decision, reason: 'x', expectedRowVersion: 1 })).toEqual([]);
-      expect(await invalidFields({ decision, reason: 'x', expectedRowVersion: 1, evidenceSha256: HASH })).toEqual([]);
-      expect(await invalidFields({ decision, reason: 'x', expectedRowVersion: 1, evidenceSha256: 'zz' })).toEqual([
-        'evidenceSha256',
-      ]);
+      expect(
+        await invalidFields({ decision, reason: 'x', expectedRowVersion: 1 }),
+      ).toEqual([]);
+      expect(
+        await invalidFields({
+          decision,
+          reason: 'x',
+          expectedRowVersion: 1,
+          evidenceSha256: HASH,
+        }),
+      ).toEqual([]);
+      expect(
+        await invalidFields({
+          decision,
+          reason: 'x',
+          expectedRowVersion: 1,
+          evidenceSha256: 'zz',
+        }),
+      ).toEqual(['evidenceSha256']);
     }
   });
 });

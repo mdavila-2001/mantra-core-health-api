@@ -77,6 +77,7 @@ import { composeAccountDisplayName } from '../../domain/person-name';
 import { applyOccupation, applyCompany } from '../../domain/person-work-fields';
 import { ProfileOwnershipService } from './profile-ownership.service';
 import { ProfilesAffiliationsService } from './profiles-affiliations.service';
+import type { PractitionerVerificationView } from '../../domain/admissions/admission-status';
 import { ProfilesErrorReason } from '../../profiles.error-reasons';
 import { PractitionerAdmissionsService } from './practitioner-admissions.service';
 import { PractitionerAdmissionsReadService } from './practitioner-admissions-read.service';
@@ -1082,10 +1083,19 @@ export class ProfilesPractitionersService {
     const verification = (
       await this.withoutBreakingRecord(
         () => this.admissionsRead.verificationOf(em, [profileId]),
-        new Map(),
-        { profileId, pieza: 'verificación', section: 'verification', unavailable },
+        new Map<string, PractitionerVerificationView>(),
+        {
+          profileId,
+          pieza: 'verificación',
+          section: 'verification',
+          unavailable,
+        },
       )
-    ).get(profileId) ?? { status: 'UNVERIFIED' as const, verifiedAt: null, validUntil: null };
+    ).get(profileId) ?? {
+      status: 'UNVERIFIED' as const,
+      verifiedAt: null,
+      validUntil: null,
+    };
 
     return {
       ...(unavailable.length > 0

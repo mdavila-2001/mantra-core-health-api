@@ -7,12 +7,16 @@ const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 
 function build(practitioner: Record<string, any> | null) {
   const practitionersRepo = { findById: fn().mockResolvedValue(practitioner) };
-  const accountLinksRepo = { findActiveByPerson: fn().mockResolvedValue({ userId: 'u-doctor' }) };
+  const accountLinksRepo = {
+    findActiveByPerson: fn().mockResolvedValue({ userId: 'u-doctor' }),
+  };
   const verification = {
     applyVerified: fn().mockResolvedValue({ action: 'granted' }),
     applyRevoked: fn().mockResolvedValue({ revoked: 1 }),
   };
-  const practitionerContext = { ensurePractitionerRole: fn().mockResolvedValue(true) };
+  const practitionerContext = {
+    ensurePractitionerRole: fn().mockResolvedValue(true),
+  };
   const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
   const service = new PractitionerVerificationProjector(
     practitionersRepo as never,
@@ -21,7 +25,14 @@ function build(practitioner: Record<string, any> | null) {
     practitionerContext as never,
     logger as never,
   );
-  return { service, practitionersRepo, accountLinksRepo, verification, practitionerContext, logger };
+  return {
+    service,
+    practitionersRepo,
+    accountLinksRepo,
+    verification,
+    practitionerContext,
+    logger,
+  };
 }
 
 const TX = {} as never;
@@ -37,14 +48,24 @@ describe('PractitionerVerificationProjector (único escritor de PRACT_VERIF_*)',
     const p = pending();
     const d = build(p);
     const validTo = new Date('2027-05-02T03:59:59.999Z');
-    const result = await d.service.projectVerified(TX, 'prac-1', 'u-app', 'adm-1', validTo);
+    const result = await d.service.projectVerified(
+      TX,
+      'prac-1',
+      'u-app',
+      'adm-1',
+      validTo,
+    );
     expect(p).toMatchObject({
       verificationStatusConceptId: PROF.PRACT_VERIF_VERIFIED,
       practiceStatusConceptId: PROF.PRACTICE_ACTIVE,
       acceptsNewPatients: true,
       updatedByUserId: 'u-app',
     });
-    expect(d.practitionerContext.ensurePractitionerRole).toHaveBeenCalledWith(TX, 'u-doctor', 'u-app');
+    expect(d.practitionerContext.ensurePractitionerRole).toHaveBeenCalledWith(
+      TX,
+      'u-doctor',
+      'u-app',
+    );
     expect(d.verification.applyVerified).toHaveBeenCalledWith(TX, {
       targetId: 'prac-1',
       methodConceptId: COMM.BADGE_METHOD_MANUAL_ADMIN,
@@ -57,14 +78,28 @@ describe('PractitionerVerificationProjector (único escritor de PRACT_VERIF_*)',
 
   it('un sello nunca nace sin vencimiento: el parámetro es obligatorio', async () => {
     const d = build(pending());
-    await d.service.projectVerified(TX, 'prac-1', 'u', 'adm-1', new Date('2027-01-01T00:00:00Z'));
-    expect(d.verification.applyVerified.mock.calls[0][1].validTo).toBeInstanceOf(Date);
+    await d.service.projectVerified(
+      TX,
+      'prac-1',
+      'u',
+      'adm-1',
+      new Date('2027-01-01T00:00:00Z'),
+    );
+    expect(
+      d.verification.applyVerified.mock.calls[0][1].validTo,
+    ).toBeInstanceOf(Date);
   });
 
   it('si el rol asistencial no se puede conceder, no rompe una verificación correcta pero lo avisa', async () => {
     const d = build(pending());
     d.practitionerContext.ensurePractitionerRole.mockResolvedValue(false);
-    const result = await d.service.projectVerified(TX, 'prac-1', 'u', 'adm-1', new Date());
+    const result = await d.service.projectVerified(
+      TX,
+      'prac-1',
+      'u',
+      'adm-1',
+      new Date(),
+    );
     expect(result.roleGranted).toBe(false);
     expect(d.logger.warn).toHaveBeenCalled();
   });
@@ -79,7 +114,9 @@ describe('PractitionerVerificationProjector (único escritor de PRACT_VERIF_*)',
 
   it('un perfil inexistente no proyecta nada ni emite sello', async () => {
     const d = build(null);
-    expect(await d.service.projectVerified(TX, 'x', 'u', 'adm-1', new Date())).toEqual({
+    expect(
+      await d.service.projectVerified(TX, 'x', 'u', 'adm-1', new Date()),
+    ).toEqual({
       projected: false,
       roleGranted: false,
     });
@@ -87,20 +124,37 @@ describe('PractitionerVerificationProjector (único escritor de PRACT_VERIF_*)',
   });
 
   it('projectNotVerified baja a pendiente, cierra la agenda a pacientes nuevos y revoca el sello', async () => {
-    const p = { ...pending(), verificationStatusConceptId: PROF.PRACT_VERIF_VERIFIED, acceptsNewPatients: true };
+    const p = {
+      ...pending(),
+      verificationStatusConceptId: PROF.PRACT_VERIF_VERIFIED,
+      acceptsNewPatients: true,
+    };
     const d = build(p);
     await d.service.projectNotVerified(TX, 'prac-1', 'u-app');
     expect(p).toMatchObject({
       verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
       acceptsNewPatients: false,
     });
-    expect(d.verification.applyRevoked).toHaveBeenCalledWith(TX, 'prac-1', 'u-app', 'REVOKED');
+    expect(d.verification.applyRevoked).toHaveBeenCalledWith(
+      TX,
+      'prac-1',
+      'u-app',
+      'REVOKED',
+    );
   });
 
   it('por vencimiento el sello cae como EXPIRED, no como revocado', async () => {
-    const d = build({ ...pending(), verificationStatusConceptId: PROF.PRACT_VERIF_VERIFIED });
+    const d = build({
+      ...pending(),
+      verificationStatusConceptId: PROF.PRACT_VERIF_VERIFIED,
+    });
     await d.service.projectNotVerified(TX, 'prac-1', 'sys', 'EXPIRED');
-    expect(d.verification.applyRevoked).toHaveBeenCalledWith(TX, 'prac-1', 'sys', 'EXPIRED');
+    expect(d.verification.applyRevoked).toHaveBeenCalledWith(
+      TX,
+      'prac-1',
+      'sys',
+      'EXPIRED',
+    );
   });
 
   it('proyectar «no verificado» sobre quien nunca estuvo verificado no inventa cambios', async () => {

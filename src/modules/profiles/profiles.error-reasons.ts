@@ -126,10 +126,10 @@ export enum ProfilesErrorReason {
   ADMISSION_CHECKLIST_INCOMPLETE = 'ADMISSION_CHECKLIST_INCOMPLETE',
   /** Cuatro ojos: quien resuelve no puede ser quien revisó la admisión. */
   ADMISSION_FOUR_EYES_REQUIRED = 'ADMISSION_FOUR_EYES_REQUIRED',
-  /** Nadie revisa ni aprueba su propia admisión. */
-  ADMISSION_SELF_REVIEW = 'ADMISSION_SELF_REVIEW',
   /** Quien consulta es el propio profesional: el personal no ve ni actúa sobre su propia admisión. */
   ADMISSION_SELF_ACCESS = 'ADMISSION_SELF_ACCESS',
+  /** Verificar un ítem de una admisión abierta sólo se hace por la revisión de la admisión. */
+  ADMISSION_VERIFY_VIA_REVIEW = 'ADMISSION_VERIFY_VIA_REVIEW',
   /** El documento o dato cambió desde que el revisor lo miró: debe volver a revisarlo. */
   ADMISSION_EVIDENCE_CHANGED = 'ADMISSION_EVIDENCE_CHANGED',
   /** Sólo quien tomó la revisión puede actuar sobre sus ítems. */

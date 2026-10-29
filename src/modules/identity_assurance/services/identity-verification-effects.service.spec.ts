@@ -317,7 +317,9 @@ describe('IdentityVerificationEffectsService · sello público (P13)', () => {
     // Un sello por una sola matrícula, sin revisar títulos ni identidad, era el
     // «sello que miente»: ahora el check sólo nace de la resolución de la admisión.
     expect(d.verification.applyVerified).not.toHaveBeenCalled();
-    expect(d.admissions.recordExternalLicenseVerification).toHaveBeenCalledTimes(1);
+    expect(
+      d.admissions.recordExternalLicenseVerification,
+    ).toHaveBeenCalledTimes(1);
   });
 
   it('una institución verificada emite su sello', async () => {

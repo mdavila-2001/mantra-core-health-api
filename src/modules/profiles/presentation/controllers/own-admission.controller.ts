@@ -1,6 +1,15 @@
 import { Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Audited, CurrentUser, type AuthenticatedUser } from '../../../../common';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  Audited,
+  CurrentUser,
+  type AuthenticatedUser,
+} from '../../../../common';
 import { PractitionerAdmissionsReadService } from '../../application/services/practitioner-admissions-read.service';
 import { PractitionerAdmissionsService } from '../../application/services/practitioner-admissions.service';
 import { OwnAdmissionDto } from '../dto/admissions.dto';
@@ -26,7 +35,8 @@ export class OwnAdmissionController {
   @Get()
   @ApiOperation({
     summary: 'Estado de mi verificación',
-    description: 'Estados, qué falta y los mensajes dirigidos al médico. Nada del personal.',
+    description:
+      'Estados, qué falta y los mensajes dirigidos al médico. Nada del personal.',
   })
   @ApiOkResponse({ type: OwnAdmissionDto })
   get(@CurrentUser() actor: AuthenticatedUser): Promise<OwnAdmissionDto> {
@@ -35,10 +45,14 @@ export class OwnAdmissionController {
 
   @Post('resubmit')
   @HttpCode(HttpStatus.OK)
-  @Audited({ action: 'ADMISSION_RESUBMITTED', entity: 'practitioner_admission' })
+  @Audited({
+    action: 'ADMISSION_RESUBMITTED',
+    entity: 'practitioner_admission',
+  })
   @ApiOperation({
     summary: 'Reenviar mi solicitud',
-    description: 'Sólo desde INFORMACION_REQUERIDA, RECHAZADA, EXPIRADA o ABANDONADA, con tope de reenvíos.',
+    description:
+      'Sólo desde INFORMACION_REQUERIDA, RECHAZADA, EXPIRADA o ABANDONADA, con tope de reenvíos.',
   })
   @ApiOkResponse({ type: OwnAdmissionDto })
   resubmit(
@@ -51,7 +65,9 @@ export class OwnAdmissionController {
   @Post('withdraw')
   @HttpCode(HttpStatus.OK)
   @Audited({ action: 'ADMISSION_WITHDRAWN', entity: 'practitioner_admission' })
-  @ApiOperation({ summary: 'Retirar mi solicitud (ENVIADA o INFORMACION_REQUERIDA)' })
+  @ApiOperation({
+    summary: 'Retirar mi solicitud (ENVIADA o INFORMACION_REQUERIDA)',
+  })
   @ApiOkResponse({ type: OwnAdmissionDto })
   withdraw(
     @CurrentUser() actor: AuthenticatedUser,

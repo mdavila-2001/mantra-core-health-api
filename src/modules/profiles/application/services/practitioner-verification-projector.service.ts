@@ -142,7 +142,9 @@ export class PractitionerVerificationProjector {
     );
     if (!practitioner) return { projected: false, roleGranted: false };
 
-    if (practitioner.verificationStatusConceptId === PROF.PRACT_VERIF_VERIFIED) {
+    if (
+      practitioner.verificationStatusConceptId === PROF.PRACT_VERIF_VERIFIED
+    ) {
       practitioner.verificationStatusConceptId = PROF.PRACT_VERIF_PENDING;
       practitioner.acceptsNewPatients = false;
       touch(practitioner, actorUserId);

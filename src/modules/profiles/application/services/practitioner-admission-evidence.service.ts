@@ -172,7 +172,9 @@ function canonicalJson(value: unknown): string {
 
 function asDateString(value: Date | string | undefined | null): string | null {
   if (value === undefined || value === null) return null;
-  return typeof value === 'string' ? value.slice(0, 10) : value.toISOString().slice(0, 10);
+  return typeof value === 'string'
+    ? value.slice(0, 10)
+    : value.toISOString().slice(0, 10);
 }
 
 function ageOn(birth: string | null, now: Date): number | null {
@@ -181,7 +183,8 @@ function ageOn(birth: string | null, now: Date): number | null {
   if (!y || !m || !d) return null;
   let age = now.getUTCFullYear() - y;
   const hadBirthday =
-    now.getUTCMonth() + 1 > m || (now.getUTCMonth() + 1 === m && now.getUTCDate() >= d);
+    now.getUTCMonth() + 1 > m ||
+    (now.getUTCMonth() + 1 === m && now.getUTCDate() >= d);
   if (!hadBirthday) age -= 1;
   return age >= 0 ? age : null;
 }
@@ -190,7 +193,9 @@ function toGps(lat?: string | null, lng?: string | null): GpsPoint | null {
   if (lat == null || lng == null) return null;
   const la = Number(lat);
   const ln = Number(lng);
-  return Number.isFinite(la) && Number.isFinite(ln) ? { lat: la, lng: ln } : null;
+  return Number.isFinite(la) && Number.isFinite(ln)
+    ? { lat: la, lng: ln }
+    : null;
 }
 
 /**
@@ -375,12 +380,21 @@ export class PractitionerAdmissionEvidenceService {
   private async practiceSites(
     em: EntityManager,
     practitionerProfileId: string,
-  ): Promise<Array<{ id: string; name: string; address: string | null; gps: GpsPoint | null }>> {
+  ): Promise<
+    Array<{
+      id: string;
+      name: string;
+      address: string | null;
+      gps: GpsPoint | null;
+    }>
+  > {
     const roles = await em.find(PractitionerRoleAssignments, {
       practitionerProfileId,
     });
     const siteIds = [
-      ...new Set(roles.map((r) => r.practiceSiteId).filter((id): id is string => !!id)),
+      ...new Set(
+        roles.map((r) => r.practiceSiteId).filter((id): id is string => !!id),
+      ),
     ];
     if (siteIds.length === 0) return [];
     const sites = await em.find(PracticeSites, { id: { $in: siteIds } });
@@ -393,7 +407,9 @@ export class PractitionerAdmissionEvidenceService {
     const addressById = new Map(addresses.map((a) => [a.id, a]));
     return sites
       .map((site) => {
-        const address = site.addressId ? addressById.get(site.addressId) : undefined;
+        const address = site.addressId
+          ? addressById.get(site.addressId)
+          : undefined;
         return {
           id: site.id,
           name: site.name,
@@ -412,14 +428,14 @@ export class PractitionerAdmissionEvidenceService {
     professionGroup: ProfessionGroup = 'MEDICO',
   ): Promise<SubmittedForm> {
     const [person, identifier, contacts, addresses] = await Promise.all([
-        em.findOne(Persons, { id: practitionerProfileId }),
-        em.findOne(Identifiers, {
-          ownerId: practitionerProfileId,
-          typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
-        }),
-        em.find(ContactPoints, { ownerId: practitionerProfileId }),
-        em.find(Addresses, { ownerId: practitionerProfileId }),
-      ]);
+      em.findOne(Persons, { id: practitionerProfileId }),
+      em.findOne(Identifiers, {
+        ownerId: practitionerProfileId,
+        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+      }),
+      em.find(ContactPoints, { ownerId: practitionerProfileId }),
+      em.find(Addresses, { ownerId: practitionerProfileId }),
+    ]);
     const licenses = await em.find(JurisdictionAuthorizations, {
       practitionerProfileId,
     });
@@ -441,15 +457,18 @@ export class PractitionerAdmissionEvidenceService {
     const sites = await this.practiceSites(em, practitionerProfileId);
 
     const contact = (system: string, use: string) =>
-      contacts.find((c) => c.systemConceptId === system && c.useConceptId === use)
-        ?.value ?? null;
+      contacts.find(
+        (c) => c.systemConceptId === system && c.useConceptId === use,
+      )?.value ?? null;
     const address = (use: string): SubmittedAddress | null => {
       const row = addresses.find((a) => a.useConceptId === use);
       if (!row) return null;
       return {
         lines: row.lines ?? null,
         locality:
-          (row.municipalityConceptId ? names.get(row.municipalityConceptId) : undefined) ??
+          (row.municipalityConceptId
+            ? names.get(row.municipalityConceptId)
+            : undefined) ??
           row.districtText ??
           row.city ??
           null,
@@ -482,8 +501,14 @@ export class PractitionerAdmissionEvidenceService {
           null,
       },
       contact: {
-        personalMobile: contact(CONCEPTS.CONTACT_MOBILE, CONCEPTS.CONTACT_USE_HOME),
-        personalEmail: contact(CONCEPTS.CONTACT_EMAIL, CONCEPTS.CONTACT_USE_HOME),
+        personalMobile: contact(
+          CONCEPTS.CONTACT_MOBILE,
+          CONCEPTS.CONTACT_USE_HOME,
+        ),
+        personalEmail: contact(
+          CONCEPTS.CONTACT_EMAIL,
+          CONCEPTS.CONTACT_USE_HOME,
+        ),
         workMobile: contact(CONCEPTS.CONTACT_MOBILE, CONCEPTS.CONTACT_USE_WORK),
         workPhone: contact(CONCEPTS.CONTACT_PHONE, CONCEPTS.CONTACT_USE_WORK),
         workEmail: contact(CONCEPTS.CONTACT_EMAIL, CONCEPTS.CONTACT_USE_WORK),
@@ -520,7 +545,9 @@ export class PractitionerAdmissionEvidenceService {
           level: LEVEL_BY_SUBTYPE[subtype],
           title: c.titleText ?? null,
           institution: c.issuingInstitutionText ?? null,
-          year: c.issueDate ? Number(asDateString(c.issueDate)?.slice(0, 4)) : null,
+          year: c.issueDate
+            ? Number(asDateString(c.issueDate)?.slice(0, 4))
+            : null,
           number: c.number,
           fileId: c.fileId ?? null,
         };
@@ -542,4 +569,3 @@ export class PractitionerAdmissionEvidenceService {
     };
   }
 }
-

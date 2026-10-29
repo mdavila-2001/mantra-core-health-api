@@ -122,6 +122,8 @@ export const PUBLIC_RESULT_KEYS = [
   // P13. `verified` se mantiene porque el front ya lo consume, pero es el
   // resumen booleano de `verifiedBadge.status`, no una segunda verdad.
   'verifiedBadge',
+  // Objeto aditivo {status, verifiedAt, validUntil}: lo mismo que `verifiedBadge`, en la forma común a todas las superficies.
+  'verification',
   'hasPublishedAgenda',
   'nextAvailableDate',
   // La tarjeta del directorio se mira antes de leerse: sin portada, sin calle
@@ -154,6 +156,7 @@ export const PUBLIC_PROFILE_KEYS = [
   'ratingCount',
   'acceptsReviews',
   'verifiedBadge',
+  'verification',
   'hasPublishedAgenda',
   'nextAvailableDate',
   'posts',

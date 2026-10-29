@@ -10,6 +10,7 @@ import {
 } from '../../../../common';
 import { resolveSecret } from '../../../../common/crypto/dev-secret';
 import { FileUploadService } from '../../../common/services';
+import { assertNotSelfAccess } from './admission-self-access';
 import { ProfilesErrorReason } from '../../profiles.error-reasons';
 import {
   PersonAccountLinksRepository,
@@ -104,9 +105,15 @@ export class PractitionerAdmissionDocumentsService {
     this.assertAllowedRole(actor);
     const expiry = Number(query.expires);
     if (!query.signature || !Number.isFinite(expiry)) throw invalidUrl();
-    const expected = Buffer.from(this.sign(admissionId, fileId, actor.id, expiry), 'hex');
+    const expected = Buffer.from(
+      this.sign(admissionId, fileId, actor.id, expiry),
+      'hex',
+    );
     const presented = Buffer.from(query.signature, 'hex');
-    if (presented.length !== expected.length || !timingSafeEqual(presented, expected)) {
+    if (
+      presented.length !== expected.length ||
+      !timingSafeEqual(presented, expected)
+    ) {
       throw invalidUrl();
     }
     if (expiry < now.getTime()) {
@@ -129,14 +136,21 @@ export class PractitionerAdmissionDocumentsService {
     return {
       buffer: content.buffer,
       mimeType,
-      disposition: INLINE_SAFE_MIME.has(content.mimeType) ? 'inline' : 'attachment',
+      disposition: INLINE_SAFE_MIME.has(content.mimeType)
+        ? 'inline'
+        : 'attachment',
       fileName: content.originalName ?? facts.name,
     };
   }
 
   private assertAllowedRole(actor: AuthenticatedUser): void {
     const ok = actor.roles.some((r) =>
-      ['ADMISSIONS_REVIEWER', 'ADMISSIONS_APPROVER', 'SECURITY_ADMIN', 'SUPERADMIN'].includes(r),
+      [
+        'ADMISSIONS_REVIEWER',
+        'ADMISSIONS_APPROVER',
+        'SECURITY_ADMIN',
+        'SUPERADMIN',
+      ].includes(r),
     );
     if (!ok) {
       throw new InsufficientRoleException(
@@ -162,16 +176,11 @@ export class PractitionerAdmissionDocumentsService {
         ProfilesErrorReason.ADMISSION_DOCUMENT_NOT_FOUND,
       );
     if (!admission) throw notFound();
-    // El propio profesional no abre sus documentos por la vista del personal.
-    const ownLink = await this.accountLinksRepo.findActiveByUser(em, actor.id);
-    if (ownLink && ownLink.personId === admission.practitionerProfileId) {
-      throw new InsufficientRoleException(
-        'No puede abrir los documentos de su propia admisión por la vista del personal',
-        {},
-        ProfilesErrorReason.ADMISSION_SELF_ACCESS,
-      );
-    }
-    const live = await this.evidence.collect(em, admission.practitionerProfileId);
+    await assertNotSelfAccess(this.accountLinksRepo, em, admission, actor);
+    const live = await this.evidence.collect(
+      em,
+      admission.practitionerProfileId,
+    );
     if (!live.items.some((item) => item.fileId === fileId)) {
       this.logger.warn(
         { operation: 'profiles.admission.document', admissionId },
@@ -184,7 +193,12 @@ export class PractitionerAdmissionDocumentsService {
     return facts;
   }
 
-  private sign(admissionId: string, fileId: string, actorId: string, expiry: number): string {
+  private sign(
+    admissionId: string,
+    fileId: string,
+    actorId: string,
+    expiry: number,
+  ): string {
     return createHmac('sha256', documentSecret())
       .update(`admission-doc:${admissionId}:${fileId}:${actorId}:${expiry}`)
       .digest('hex');

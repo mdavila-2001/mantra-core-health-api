@@ -107,7 +107,10 @@ export class PractitionerAdmissionsRepository {
   }
 
   /** La admisión por id, sin bloquear. */
-  findById(em: EntityManager, id: string): Promise<PractitionerAdmissions | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<PractitionerAdmissions | null> {
     return em.findOne(PractitionerAdmissions, { id });
   }
 

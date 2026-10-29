@@ -42,11 +42,7 @@ export interface ChecklistItemState {
 
 /** Por qué un requisito impide verificar la admisión. */
 export type ChecklistBlockReason =
-  | 'MISSING'
-  | 'REJECTED'
-  | 'PENDING'
-  | 'INFO_REQUIRED'
-  | 'BELOW_MINIMUM';
+  'MISSING' | 'REJECTED' | 'PENDING' | 'INFO_REQUIRED' | 'BELOW_MINIMUM';
 
 /** Resultado de evaluar un requisito. */
 export interface RequirementEvaluation {
@@ -66,7 +62,9 @@ export function applicableRequirements<T extends ChecklistRequirement>(
   group: ProfessionGroup,
 ): T[] {
   return requirements
-    .filter((r) => r.professionGroup === undefined || r.professionGroup === group)
+    .filter(
+      (r) => r.professionGroup === undefined || r.professionGroup === group,
+    )
     .sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
@@ -212,7 +210,8 @@ export function evaluateChecklist<I extends ChecklistItemState>(
   for (const { requirement, evaluation } of rows) {
     if (evaluation.state !== 'NOT_PROVIDED') {
       total += 1;
-      if (evaluation.state === 'VERIFIED' && evaluation.satisfied) verified += 1;
+      if (evaluation.state === 'VERIFIED' && evaluation.satisfied)
+        verified += 1;
       else if (evaluation.state === 'REJECTED') rejected += 1;
       else pending += 1;
     }
