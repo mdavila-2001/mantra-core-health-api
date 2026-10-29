@@ -11,9 +11,13 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
-import { Audited, CurrentUser, type AuthenticatedUser } from '../../../common';
-import { AudioAssetsFacade } from '../audio-assets.facade';
-import { AudioContentService } from '../audio-content.service';
+import {
+  Audited,
+  CurrentUser,
+  type AuthenticatedUser,
+} from '../../../../common';
+import { AudioAssetsFacade } from '../../application/audio-assets.facade';
+import { AudioContentService } from '../../application/audio-content.service';
 import { ResolveAudioAssetDto } from '../dto/audio-assets.dto';
 
 @ApiTags('audio-assets')

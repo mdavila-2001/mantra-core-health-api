@@ -12,10 +12,10 @@ import {
   CurrentUser,
   Roles,
   type AuthenticatedUser,
-} from '../../../common';
-import { AudioGenerationUseCase } from '../application/audio-generation.use-case';
-import { AudioMaintenanceService } from '../application/audio-maintenance.service';
-import { PregenerateAudioAssetsUseCase } from '../application/pregenerate-audio-assets.use-case';
+} from '../../../../common';
+import { AudioGenerationUseCase } from '../../application/audio-generation.use-case';
+import { AudioMaintenanceService } from '../../application/audio-maintenance.service';
+import { PregenerateAudioAssetsUseCase } from '../../application/pregenerate-audio-assets.use-case';
 import {
   AudioMaintenanceDto,
   FailedAudioAssetDto,
