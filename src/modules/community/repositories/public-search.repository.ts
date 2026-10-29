@@ -9,6 +9,7 @@ import {
 } from '../entities';
 import { COMM } from '../community.concepts';
 import { PROF } from '../../profiles/profiles.concepts';
+import { PractitionerAdmissions } from '../../profiles/entities';
 import { PRAC } from '../../practice/practice.concepts';
 import type { PublicTerritoryFilter } from '../services/public-territory-filter.service';
 
@@ -1102,6 +1103,39 @@ export class PublicSearchRepository {
       output.set(badge.subjectRefId, previous);
     }
     return output;
+  }
+
+  /**
+   * Profesionales con una solicitud de verificación abierta (enviada, en
+   * revisión o con información pedida): los que el sello público muestra «En
+   * verificación». Un padrón sin solicitud NO está acá: nunca se ve «en
+   * verificación» quien no pidió nada.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerIds - Profesionales de la página (`target_id`).
+   * @returns Los ids con solicitud abierta.
+   */
+  async practitionersInReview(
+    em: EntityManager,
+    practitionerIds: string[],
+  ): Promise<Set<string>> {
+    if (practitionerIds.length === 0) return new Set();
+    const rows = await em.find(
+      PractitionerAdmissions,
+      {
+        practitionerProfileId: { $in: practitionerIds },
+        closedAt: null,
+        statusConceptId: {
+          $in: [
+            PROF.ADMISSION_STATUS_SUBMITTED,
+            PROF.ADMISSION_STATUS_IN_REVIEW,
+            PROF.ADMISSION_STATUS_INFO_REQUIRED,
+          ],
+        },
+      },
+      { fields: ['practitionerProfileId'] },
+    );
+    return new Set(rows.map((row) => row.practitionerProfileId));
   }
 
   /** El perfil público de ese slug, o `null` si no existe **o no es público**. */

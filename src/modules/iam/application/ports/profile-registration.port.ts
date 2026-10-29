@@ -50,6 +50,20 @@ export interface ProfileRegistrationPort {
   createPractitionerLanguage(tx: EntityManager, data: object): unknown;
   createPractitionerSpecialty(tx: EntityManager, data: object): unknown;
 
+  /**
+   * Abre la solicitud de admisión (ENVIADA) del profesional recién registrado,
+   * en la MISMA transacción del alta: si falla, el alta entera se revierte.
+   * Debe llamarse con las fichas del profesional ya creadas.
+   */
+  openPractitionerAdmission(
+    tx: EntityManager,
+    data: {
+      practitionerProfileId: string;
+      actorUserId: string;
+      attestation?: { acceptedAt: Date; textVersion: string };
+    },
+  ): Promise<unknown>;
+
   /** Rechaza (422) un concepto que no es un departamento del catálogo. */
   assertIsAdministrativeArea(
     tx: EntityManager,

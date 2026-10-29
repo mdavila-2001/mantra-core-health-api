@@ -41,6 +41,7 @@ import {
 } from '../community.concepts';
 import {
   CommunityVerificationService,
+  verificationFromBadge,
   type VerifiedBadgeDto,
 } from './community-verification.service';
 import { CommunityProfileStatsService } from './community-profile-stats.service';
@@ -212,6 +213,8 @@ interface ProfileSignals {
   >;
   /** Ciudad y punto, por sujeto. */
   readonly locations: Map<string, ProfileLocation>;
+  /** Profesionales con una solicitud de verificación abierta (`target_id`). */
+  readonly inReview: Set<string>;
 }
 
 /**
@@ -894,6 +897,7 @@ export class CommunityPublicService {
     const badge = this.verification.readBadge(
       profile,
       señales.badges.get(profile.id) ?? [],
+      señales.inReview.has(profile.targetId),
     );
     const agenda = señales.agenda.get(profile.targetId);
     const location = señales.locations.get(profile.targetId);
@@ -936,6 +940,7 @@ export class CommunityPublicService {
       ratingCount: rating?.count ?? 0,
       acceptsReviews: profile.acceptsReviews ?? false,
       verifiedBadge: badge,
+      verification: verificationFromBadge(badge),
       hasPublishedAgenda: agenda?.hasAgenda ?? false,
       nextAvailableDate: agenda?.nextAvailableDate ?? null,
       posts: posts.map((post) => {
@@ -1249,7 +1254,7 @@ export class CommunityPublicService {
     const status = text('verifiedBadgeStatus');
     const verifiedBadge: VerifiedBadgeDto = {
       status:
-        status === 'VERIFIED' || status === 'EXPIRED'
+        status === 'VERIFIED' || status === 'EXPIRED' || status === 'IN_REVIEW'
           ? status
           : source.verified === true
             ? 'VERIFIED'
@@ -1288,6 +1293,7 @@ export class CommunityPublicService {
       ratingAverage: readNumber('ratingAverage'),
       ratingCount: readNumber('ratingCount') ?? 0,
       verifiedBadge,
+      verification: verificationFromBadge(verifiedBadge),
       hasPublishedAgenda: source.hasPublishedAgenda === true,
       nextAvailableDate: text('nextAvailableDate'),
       coverUrl: text('coverUrl'),
@@ -1353,6 +1359,7 @@ export class CommunityPublicService {
     const badge = this.verification.readBadge(
       profile,
       signals.badges.get(profile.id) ?? [],
+      signals.inReview.has(profile.targetId),
     );
     const agenda = signals.agenda.get(profile.targetId);
     const location = signals.locations.get(profile.targetId);
@@ -1377,6 +1384,7 @@ export class CommunityPublicService {
       ratingAverage: rating?.average ?? null,
       ratingCount: rating?.count ?? 0,
       verifiedBadge: badge,
+      verification: verificationFromBadge(badge),
       hasPublishedAgenda: agenda?.hasAgenda ?? false,
       nextAvailableDate: agenda?.nextAvailableDate ?? null,
     };
@@ -1396,13 +1404,14 @@ export class CommunityPublicService {
     const ids = page.map((profile) => profile.id);
     const targetIds = page.map((profile) => profile.targetId);
 
-    const [ratings, badges, agenda, locations] = await Promise.all([
+    const [ratings, badges, agenda, locations, inReview] = await Promise.all([
       this.repo.ratingsByProfile(em, ids),
       this.repo.badgesByProfiles(em, ids),
       this.repo.agendaByPractitioner(em, targetIds),
       this.repo.locationsByOwner(em, targetIds),
+      this.repo.practitionersInReview(em, targetIds),
     ]);
-    return { ratings, badges, agenda, locations };
+    return { ratings, badges, agenda, locations, inReview };
   }
 
   /** Tipo de resultado; un perfil de usuario se sirve como profesional. */

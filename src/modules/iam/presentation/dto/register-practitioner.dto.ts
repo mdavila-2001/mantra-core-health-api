@@ -800,6 +800,30 @@ export class RegisterPractitionerDto {
   @ValidateNested({ each: true })
   @Type(() => RegisterPractitionerCredentialDto)
   credentials?: RegisterPractitionerCredentialDto[];
+
+  /**
+   * Atestación del solicitante: declara que lo que envía es verdadero y que
+   * autoriza a la plataforma a verificarlo contra los documentos y registros
+   * que corresponda. Se guarda con la fecha y la versión del texto que aceptó
+   * en la solicitud de verificación (`attested_at`).
+   */
+  @ApiPropertyOptional({
+    description:
+      'true si aceptó la declaración de veracidad y la verificación de sus datos',
+  })
+  @IsOptional()
+  @IsBoolean()
+  attestationAccepted?: boolean;
+
+  /**
+   * Versión del texto de la declaración que el cliente mostró. Obligatoria si
+   * `attestationAccepted` es true.
+   */
+  @ApiPropertyOptional({ maxLength: 40, example: '2026-10-29' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  attestationTextVersion?: string;
 }
 
 /**
