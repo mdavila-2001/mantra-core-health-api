@@ -69,6 +69,10 @@ function build() {
     findTenantOfPractice: mockFn().mockResolvedValue('tenant-1'),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const captures = {
+    loadForInvoice: mockFn().mockResolvedValue([]),
+    markInvoiced: mockFn().mockResolvedValue(undefined),
+  };
   const raw = new InvoicesService(
     em as any,
     invoicesRepo as any,
@@ -76,6 +80,7 @@ function build() {
     linkTargets as any,
     practiceTenantLookup as any,
     logger as any,
+    captures as any,
   );
   return {
     service: inTenant(raw, TENANT_A),
@@ -87,6 +92,7 @@ function build() {
     linksRepo,
     linkTargets,
     practiceTenantLookup,
+    captures,
   };
 }
 
@@ -124,6 +130,221 @@ describe('InvoicesService', () => {
       expect(d.tx.flush).toHaveBeenCalled();
       expect(d.invoicesRepo.createLine).toHaveBeenCalledTimes(2);
       expect(d.linksRepo.create).toHaveBeenCalled();
+    });
+
+    describe('con cargos devengados (chargeCaptureIds, F5e)', () => {
+      const charge = (id: string, extra: Record<string, unknown> = {}) => ({
+        id,
+        tenant_id: TENANT_A,
+        practice_id: 'pr1',
+        patient_profile_id: 'p1',
+        encounter_id: 'e1',
+        source_kind_concept_id: BILL.CHG_SRC_BED_DAY,
+        service_date: '2026-10-27',
+        care_space_id: 'bed-1',
+        service_catalog_id: 'svc-1',
+        minimum_stay_charge: false,
+        quantity: '1',
+        unit_price: '350.000000',
+        currency_concept_id: 'bob',
+        cost_center_id: 'cc-1',
+        status_concept_id: BILL.CHG_PENDING,
+        ...extra,
+      });
+      const base = (extra: Record<string, unknown> = {}) => ({
+        practiceId: 'pr1',
+        patientProfileId: 'p1',
+        encounterId: 'e1',
+        chargeCaptureIds: ['c1', 'c2'],
+        ...extra,
+      });
+
+      function ready() {
+        const d = build();
+        d.invoicesRepo.findByNumber.mockResolvedValue(null);
+        d.invoicesRepo.create.mockImplementation((_tx: unknown, data: any) => ({
+          id: 'inv1',
+          invoiceNumber: 'INV-1',
+          patientProfileId: 'p1',
+          statusConceptId: BILL.INVOICE_ISSUED,
+          total: data.total,
+          balance: data.balance,
+          currencyConceptId: data.currencyConceptId,
+        }));
+        let n = 0;
+        d.invoicesRepo.createLine.mockImplementation(() => ({
+          id: `line-${++n}`,
+        }));
+        d.captures.loadForInvoice.mockResolvedValue([
+          charge('c1'),
+          charge('c2', {
+            service_date: '2026-10-28',
+            unit_price: '900.000000',
+          }),
+        ]);
+        return d;
+      }
+
+      it('cada cargo genera su línea con su cantidad y precio, la factura suma, y los cargos pasan a INVOICED DESPUÉS de persistir las líneas', async () => {
+        const d = ready();
+        const res = await d.service.issueFromEncounter(
+          base() as any,
+          actor,
+          'req-1',
+        );
+        expect(res).toMatchObject({ total: '1250.00', lineCount: 2 });
+        expect(d.captures.loadForInvoice).toHaveBeenCalledWith(
+          d.tx,
+          ['c1', 'c2'],
+          { practiceId: 'pr1', patientProfileId: 'p1', encounterId: 'e1' },
+          actor,
+        );
+        const lines = d.invoicesRepo.createLine.mock.calls.map(
+          (c: any[]) => c[1],
+        );
+        expect(
+          lines.map((l: any) => [
+            l.unitPrice,
+            l.quantity,
+            l.serviceId,
+            l.costCenterId,
+          ]),
+        ).toEqual([
+          ['350.00', '1', 'svc-1', 'cc-1'],
+          ['900.00', '1', 'svc-1', 'cc-1'],
+        ]);
+        expect(d.captures.markInvoiced).toHaveBeenCalledTimes(2);
+        expect(d.captures.markInvoiced).toHaveBeenNthCalledWith(
+          1,
+          d.tx,
+          expect.objectContaining({ id: 'c1' }),
+          { invoiceId: 'inv1', invoiceLineId: 'line-1' },
+          actor,
+          'req-1',
+        );
+        // el flush de las líneas va antes del primer markInvoiced (la base valida la línea)
+        const flushes = d.tx.flush.mock.invocationCallOrder;
+        expect(flushes[flushes.length - 1]).toBeLessThan(
+          d.captures.markInvoiced.mock.invocationCallOrder[0],
+        );
+        // la moneda de la factura sale de los cargos
+        expect(d.invoicesRepo.create.mock.calls[0][1].currencyConceptId).toBe(
+          'bob',
+        );
+      });
+
+      it('se mezclan con las líneas del cliente; los cargos se numeran después', async () => {
+        const d = ready();
+        d.captures.loadForInvoice.mockResolvedValue([charge('c1')]);
+        const res = await d.service.issueFromEncounter(
+          base({
+            chargeCaptureIds: ['c1'],
+            lines: [{ quantity: '1', unitPrice: '50.00' }],
+          }) as any,
+          actor,
+        );
+        expect(res.lineCount).toBe(2);
+        expect(d.captures.markInvoiced).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({ id: 'c1' }),
+          { invoiceId: 'inv1', invoiceLineId: 'line-2' },
+          actor,
+          undefined,
+        );
+      });
+
+      it('exige el encuentro de la factura y ninguna factura se crea sin líneas ni cargos', async () => {
+        const d = ready();
+        await expect(
+          d.service.issueFromEncounter(
+            base({ encounterId: undefined }) as any,
+            actor,
+          ),
+        ).rejects.toMatchObject({ reason: 'CHARGE_NOT_OF_INVOICE' });
+        const vacia = ready();
+        await expect(
+          vacia.service.issueFromEncounter(
+            {
+              practiceId: 'pr1',
+              patientProfileId: 'p1',
+              encounterId: 'e1',
+            } as any,
+            actor,
+          ),
+        ).rejects.toMatchObject({ reason: 'INVOICE_LINES_REQUIRED' });
+        expect(d.invoicesRepo.create).not.toHaveBeenCalled();
+        expect(vacia.invoicesRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('moneda distinta entre cargos, o entre cargos y factura: 422 y no se crea nada', async () => {
+        const mezcla = ready();
+        mezcla.captures.loadForInvoice.mockResolvedValue([
+          charge('c1'),
+          charge('c2', { currency_concept_id: 'usd' }),
+        ]);
+        await expect(
+          mezcla.service.issueFromEncounter(base() as any, actor),
+        ).rejects.toMatchObject({
+          reason: 'CHARGE_NOT_OF_INVOICE',
+        });
+        const otra = ready();
+        await expect(
+          otra.service.issueFromEncounter(
+            base({ currencyConceptId: 'usd' }) as any,
+            actor,
+          ),
+        ).rejects.toMatchObject({ reason: 'CHARGE_NOT_OF_INVOICE' });
+        expect(mezcla.invoicesRepo.create).not.toHaveBeenCalled();
+        expect(otra.invoicesRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('un cargo con más de dos decimales de precio no se puede facturar en centavos: la validación de la línea lo rechaza', async () => {
+        const d = ready();
+        d.captures.loadForInvoice.mockResolvedValue([
+          charge('c1', { unit_price: '350.123456' }),
+        ]);
+        await expect(
+          d.service.issueFromEncounter(
+            base({ chargeCaptureIds: ['c1'] }) as any,
+            actor,
+          ),
+        ).rejects.toMatchObject({ reason: 'INVOICE_LINE_AMOUNT_INVALID' });
+        expect(d.captures.markInvoiced).not.toHaveBeenCalled();
+      });
+
+      it('si los cargos no cargan (ajenos o ya emitidos) el error de loadForInvoice se propaga y no se escribe la factura', async () => {
+        const d = ready();
+        d.captures.loadForInvoice.mockRejectedValue(
+          Object.assign(new Error('409'), {
+            reason: 'CHARGE_ALREADY_INVOICED',
+          }),
+        );
+        await expect(
+          d.service.issueFromEncounter(base() as any, actor),
+        ).rejects.toMatchObject({
+          reason: 'CHARGE_ALREADY_INVOICED',
+        });
+        expect(d.invoicesRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('el día mínimo y el quirófano llevan su descripción', async () => {
+        const d = ready();
+        d.captures.loadForInvoice.mockResolvedValue([
+          charge('c1', { minimum_stay_charge: true }),
+          charge('c2', {
+            source_kind_concept_id: BILL.CHG_SRC_OR_TIME,
+            quantity: '4',
+            unit_price: '200.000000',
+          }),
+        ]);
+        await d.service.issueFromEncounter(base() as any, actor);
+        const lines = d.invoicesRepo.createLine.mock.calls.map(
+          (c: any[]) => c[1],
+        );
+        expect(lines[0].description).toMatch(/mínimo/);
+        expect(lines[1].description).toMatch(/quirófano/i);
+        expect(lines[1].quantity).toBe('4');
+      });
     });
 
     it('rechaza una factura que declara un reclamo a la aseguradora (carril 16, REQ-16-029)', async () => {

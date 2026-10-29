@@ -20,6 +20,7 @@ export * from './structure-events.service';
 export * from './care-space-read.service';
 export * from './care-space-creation.service';
 export * from './care-space-update.service';
+export * from './care-space-category-periods.service';
 export * from './care-space-lifecycle.service';
 export * from './space-unit-assignments.service';
 export * from './clinical-units.service';

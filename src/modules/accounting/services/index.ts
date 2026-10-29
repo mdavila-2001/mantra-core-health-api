@@ -11,3 +11,8 @@ export { PostingHelper } from './posting.helper';
 export { PractitionerAccountingService } from './practitioner-accounting.service';
 export { AccountingReadService } from './accounting-read.service';
 export { PractitionerSimpleAccountingService } from './practitioner-simple-accounting.service';
+export { AccountingInfrastructureService } from './accounting-infrastructure.service';
+export {
+  AccountingRetireBlockersInitializer,
+  EQUIPMENT_BLOCKER,
+} from './accounting-retire-blockers';

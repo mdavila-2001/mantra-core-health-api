@@ -18,6 +18,8 @@ import {
   PlacementIncidentsHistory,
   OperatingRoomBlocksHistory,
   OperatingRoomBlockSeriesHistory,
+  SpaceTariffsHistory,
+  ChargeCapturesHistory,
 } from '../entities';
 
 /** Datos para sellar una revisión en una tabla `*_history` (write-side). */
@@ -202,6 +204,17 @@ const HISTORY_REGISTRY: Record<string, HistoryBinding> = {
   operating_room_block_series: {
     entity: OperatingRoomBlockSeriesHistory,
     sourceField: 'operatingRoomBlockSeriesId',
+    revisionField: 'revisionNo',
+  },
+  // F5e de infraestructura hospitalaria: tarifas de espacio y cargos devengados.
+  space_tariffs: {
+    entity: SpaceTariffsHistory,
+    sourceField: 'spaceTariffId',
+    revisionField: 'revisionNo',
+  },
+  charge_captures: {
+    entity: ChargeCapturesHistory,
+    sourceField: 'chargeCaptureId',
     revisionField: 'revisionNo',
   },
 };

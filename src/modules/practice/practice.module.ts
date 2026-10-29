@@ -42,6 +42,7 @@ import {
   CareSpaceReadService,
   CareSpaceCreationService,
   CareSpaceUpdateService,
+  CareSpaceCategoryPeriodsService,
   CareSpaceLifecycleService,
   SpaceUnitAssignmentsService,
   ClinicalUnitsService,
@@ -219,6 +220,8 @@ import {
     CareSpaceReadService,
     CareSpaceCreationService,
     CareSpaceUpdateService,
+    // F5e: períodos de categoría de cama (base del día-cama).
+    CareSpaceCategoryPeriodsService,
     CareSpaceLifecycleService,
     SpaceUnitAssignmentsService,
     ClinicalUnitsService,

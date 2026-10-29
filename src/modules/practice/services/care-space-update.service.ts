@@ -18,6 +18,7 @@ import {
 } from '../repositories';
 import type { CareSpaceDetail } from '../dto/infrastructure.types';
 import { assertRowVersion, withVersionConflict } from '../http/row-version';
+import { CareSpaceCategoryPeriodsService } from './care-space-category-periods.service';
 import { CareSpaceReadService } from './care-space-read.service';
 import {
   PARENT_OPEN_STATUSES,
@@ -69,6 +70,7 @@ export class CareSpaceUpdateService {
    * @param historyRepo - Historia.
    * @param events - Outbox.
    * @param reader - Arma el detalle de respuesta.
+   * @param categoryPeriods - Períodos de categoría de cama (F5e).
    */
   constructor(
     private readonly em: EntityManager,
@@ -78,6 +80,7 @@ export class CareSpaceUpdateService {
     private readonly historyRepo: HistoryRepository,
     private readonly events: StructureEventsService,
     private readonly reader: CareSpaceReadService,
+    private readonly categoryPeriods: CareSpaceCategoryPeriodsService,
   ) {}
 
   /**
@@ -114,6 +117,7 @@ export class CareSpaceUpdateService {
       const errors: FieldError[] = [];
       const changed: string[] = [];
       const locked = space.statusConceptId !== PRAC.SPACE_PLANNED;
+      const previousCategory = space.bedCategoryConceptId ?? null;
 
       const nextCode = patch.code?.trim();
       if (nextCode !== undefined && nextCode !== space.code) {
@@ -234,6 +238,21 @@ export class CareSpaceUpdateService {
 
       touch(space, actor.id);
       await withVersionConflict(() => mapReferenceViolation(() => tx.flush()));
+      // F5e: la categoría de cama es la base de la facturación del día-cama. El
+      // período vigente se cierra y se abre otro en ESTA transacción: si una
+      // parte falla, el cambio de categoría tampoco queda.
+      if (
+        changed.includes('bedCategoryCode') &&
+        (space.bedCategoryConceptId ?? null) !== previousCategory
+      ) {
+        await this.categoryPeriods.change(tx, {
+          careSpaceId: space.id,
+          tenantId,
+          categoryConceptId: space.bedCategoryConceptId ?? null,
+          at: new Date(),
+          actorUserId: actor.id,
+        });
+      }
       await this.historyRepo.append(tx, STRUCTURE_HISTORY.space, space.id, {
         operationConceptId: AUD.OPERATION_UPDATE,
         dataSnapshot: structureSnapshot(space),

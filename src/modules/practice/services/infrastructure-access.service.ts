@@ -3,6 +3,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import {
   CONCEPTS,
   requireTenantId,
+  roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../common';
 import { InsufficientRoleException } from '../../../common/errors/domain.exception';
@@ -20,7 +21,10 @@ import {
 } from '../policies/infra-policy';
 import { placeholders, str, strOrNull } from './ops-rows';
 import { practiceOutOfScope } from './practice-scope';
-import { StructureAccessService } from './structure-access.service';
+import {
+  StructureAccessService,
+  type StructureAccess,
+} from './structure-access.service';
 
 /** Sobre qué se pide la acción. */
 export type InfraTarget =
@@ -215,6 +219,21 @@ export class InfrastructureAccessService {
     return new Set(rows.map((row) => String(row.id)));
   }
 
+  /**
+   * Nivel del actor en la estructura del tenant del contexto (plataforma,
+   * organización, sucursal). Lo usan las franjas que autorizan algo que no cuelga
+   * de una sede (una tarifa de práctica sin sedes).
+   *
+   * @param tx - Transacción o contexto activo.
+   * @param actor - Quien pide.
+   */
+  structureLevel(
+    tx: EntityManager,
+    actor: AuthenticatedUser,
+  ): Promise<StructureAccess> {
+    return this.structure.resolve(tx, requireTenantId(), actor);
+  }
+
   /** ¿Tiene el actor alguno de estos roles cubriendo el objetivo? */
   hasRole(grant: InfraGrant, ...roles: InfraRole[]): boolean {
     return grant.grants.some((g) => roles.includes(g.role));
@@ -347,6 +366,15 @@ export class InfrastructureAccessService {
     if (access.level !== 'NONE') {
       const raw = await this.delegatedAssignments(tx, tenantId, actor);
       grants.push(...(await this.coveringAssignments(tx, raw, resolved)));
+    }
+
+    // Facturación también se otorga como rol global del usuario en el tenant
+    // (CONTRATO-F2-F5 §0.3, «DA_ASSIGN_BILLING o BILLING global»): cubre toda la sede.
+    if (
+      roleAuthorizesInTenant(actor, 'BILLING', tenantId) &&
+      !grants.some((grant) => grant.role === 'BILLING' && grant.wide)
+    ) {
+      grants.push({ role: 'BILLING', wide: true });
     }
 
     // El supervisor puede lo que el operario.

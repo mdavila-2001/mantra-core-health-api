@@ -48,6 +48,9 @@ function build(space: any, siteOverrides: Record<string, unknown> = {}) {
       spaces.map(detailStub),
     ),
   };
+  const categoryPeriods = {
+    change: mockFn().mockResolvedValue({ closed: null, openedId: null }),
+  };
   const service = new CareSpaceUpdateService(
     em as any,
     context as any,
@@ -56,6 +59,7 @@ function build(space: any, siteOverrides: Record<string, unknown> = {}) {
     historyRepo as any,
     events as any,
     reader as any,
+    categoryPeriods as any,
   );
   return {
     service,
@@ -66,6 +70,7 @@ function build(space: any, siteOverrides: Record<string, unknown> = {}) {
     historyRepo,
     events,
     reader,
+    categoryPeriods,
   };
 }
 
@@ -109,6 +114,60 @@ describe('CareSpaceUpdateService.patch', () => {
         }),
       }),
     );
+  });
+
+  it('F5e: cambiar la categoría de cama cierra el período vigente y abre otro, en la misma transacción que el PATCH', async () => {
+    const space = makeSpace({
+      bedCategoryConceptId: PRAC.BED_CAT_SHARED,
+      censable: true,
+    });
+    const d = build(space);
+    await d.service.patch(
+      space.id,
+      { bedCategoryCode: 'BED_CAT_ICU' },
+      1,
+      actor,
+    );
+    expect(space.bedCategoryConceptId).toBe(PRAC.BED_CAT_ICU);
+    expect(d.categoryPeriods.change).toHaveBeenCalledTimes(1);
+    expect(d.categoryPeriods.change).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        careSpaceId: space.id,
+        tenantId: TENANT_A,
+        categoryConceptId: PRAC.BED_CAT_ICU,
+        actorUserId: actor.id,
+        at: expect.any(Date),
+      }),
+    );
+    const order = [
+      d.tx.flush.mock.invocationCallOrder[0],
+      d.categoryPeriods.change.mock.invocationCallOrder[0],
+      d.events.publish.mock.invocationCallOrder[0],
+    ];
+    expect([...order].sort((a, b) => a - b)).toEqual(order);
+  });
+
+  it('F5e: si el PATCH no cambia la categoría (o es inválido), no se toca ningún período', async () => {
+    const space = makeSpace({
+      bedCategoryConceptId: PRAC.BED_CAT_SHARED,
+      censable: true,
+    });
+    const d = build(space);
+    await d.service.patch(
+      space.id,
+      { bedCategoryCode: 'BED_CAT_SHARED', name: 'Otro nombre' },
+      1,
+      actor,
+    );
+    expect(d.categoryPeriods.change).not.toHaveBeenCalled();
+
+    const invalid = makeSpace({ bedCategoryConceptId: PRAC.BED_CAT_SHARED });
+    const e = build(invalid);
+    await e.service
+      .patch(invalid.id, { bedCategoryCode: 'BED_CAT_INEXISTENTE' }, 1, actor)
+      .catch(() => undefined);
+    expect(e.categoryPeriods.change).not.toHaveBeenCalled();
   });
 
   it('una versión vieja es 412 y no toca nada (antes de validar el cuerpo)', async () => {

@@ -16,6 +16,7 @@ import {
   AccountingPractitionerController,
   AccountingPractitionerSimpleController,
   AccountingCockpitController,
+  AccountingInfrastructureController,
 } from './controllers';
 import {
   LedgerReadService,
@@ -31,6 +32,8 @@ import {
   PractitionerAccountingService,
   PractitionerSimpleAccountingService,
   AccountingReadService,
+  AccountingInfrastructureService,
+  AccountingRetireBlockersInitializer,
 } from './services';
 import {
   JournalRepository,
@@ -74,6 +77,7 @@ import {
     AccountingPractitionerController,
     AccountingPractitionerSimpleController,
     AccountingCockpitController,
+    AccountingInfrastructureController,
   ],
   providers: [
     // Repositorios
@@ -101,6 +105,9 @@ import {
     PractitionerAccountingService,
     PractitionerSimpleAccountingService,
     AccountingReadService,
+    // F5f: activos ubicados en espacios, centro de costo por unidad y bloqueo de clausura.
+    AccountingInfrastructureService,
+    AccountingRetireBlockersInitializer,
   ],
 })
 export class AccountingModule {}
