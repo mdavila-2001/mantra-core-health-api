@@ -13,6 +13,7 @@ import {
   type CancellationPolicySnapshot,
 } from '../../entities';
 import { createdBy } from '../../../../common';
+import { Invoices } from '../../../billing/entities';
 
 /**
  * Describe el contrato estructural de create hold data.
@@ -455,6 +456,37 @@ export class SchedulingBookingsRepository {
     return em.findOne(AppointmentPaymentStates, {
       appointmentBookingId: bookingId,
     });
+  }
+
+  /**
+   * S-3 (FAC-01): al abrir el encuentro de una cita, su factura queda ligada a
+   * él. La cita se cobró antes de atenderse, así que su cuenta por cobrar nació
+   * sin encuentro; acá se completa, solo si todavía no tiene uno.
+   *
+   * @param em - Transacción del check-in.
+   * @param appointmentId - La cita clínica del encuentro.
+   * @param encounterId - El encuentro recién abierto.
+   * @returns Si alguna factura quedó ligada.
+   */
+  async linkPaymentInvoiceToEncounter(
+    em: EntityManager,
+    appointmentId: string,
+    encounterId: string,
+  ): Promise<boolean> {
+    const booking = await em.findOne(
+      AppointmentBookings,
+      { appointmentId },
+      { fields: ['id'] },
+    );
+    if (!booking) return false;
+    const payment = await this.findPaymentState(em, booking.id);
+    if (!payment?.invoiceId) return false;
+    const updated = await em.nativeUpdate(
+      Invoices,
+      { id: payment.invoiceId, encounterId: null },
+      { encounterId },
+    );
+    return updated > 0;
   }
 
   /** Cita concreta, sin bloquear: es la cara de lectura de UC-41-15. */
