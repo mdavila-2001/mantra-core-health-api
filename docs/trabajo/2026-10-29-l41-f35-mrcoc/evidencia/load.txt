@@ -1,0 +1,15 @@
+antes: evidencias|263873
+antes: relaciones|382799
+== dry-run
+  "rowsAfterDatabaseFilter": 10427,
+[f3 mrcoc] {"batchId":"ffcfeef7-3858-f4f3-c1f2-d8a78008486a","dryRun":true,"read":10427,"relationships":{"inserted":10004,"updated":0},"evidence":{"inserted":10427,"updated":0},"derivedUpdated":10427,"checksum":"836ef92710e152577a6f0db0deece3d26122aab3827b87548186ba56917a8971","timingsMs":{"copy":35,"validate":6,"relationships":
+== pasada1
+  "rowsAfterDatabaseFilter": 10427,
+[f3 mrcoc] {"batchId":"ab2d79c8-659b-0cdd-caf8-b4ba1a85531e","dryRun":false,"read":10427,"relationships":{"inserted":10004,"updated":0},"evidence":{"inserted":10427,"updated":0},"derivedUpdated":10427,"checksum":"836ef92710e152577a6f0db0deece3d26122aab3827b87548186ba56917a8971","timingsMs":{"copy":34,"validate":2,"relationships"
+== pasada2
+  "rowsAfterDatabaseFilter": 10427,
+[f3 mrcoc] {"batchId":"b682847d-b0e4-88e4-7f4f-9efd65c3382c","dryRun":false,"read":10427,"relationships":{"inserted":0,"updated":0},"evidence":{"inserted":0,"updated":0},"derivedUpdated":0,"checksum":"836ef92710e152577a6f0db0deece3d26122aab3827b87548186ba56917a8971","timingsMs":{"copy":21,"validate":3,"relationships":36,"evidenc
+fks_no_validadas|0
+despues: evidencias|274300
+despues: relaciones|392803
+evid_sin_relacion|0
