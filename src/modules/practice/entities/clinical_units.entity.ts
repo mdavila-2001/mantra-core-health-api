@@ -93,4 +93,7 @@ export class ClinicalUnits {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  @Property({ fieldName: 'responsible_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
+  responsibleUserId?: string;
 }

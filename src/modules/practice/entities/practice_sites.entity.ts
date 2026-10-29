@@ -84,8 +84,11 @@ export class PracticeSites {
    * Archivo del QR de cobro bancario de la sede, en `common.files`. Nulo si la
    * sede no cobra por QR.
    */
-  @Property({ fieldName: 'bank_qr_file_id', type: 'uuid', nullable: true }) // FK → common.files
+  @Property({ fieldName: 'bank_qr_file_id', type: 'uuid', nullable: true }) // FK → common.files (inferida)
   bankQrFileId?: string;
+
+  @Property({ fieldName: 'logo_file_id', type: 'uuid', nullable: true }) // FK → common.files (inferida)
+  logoFileId?: string;
 
   /**
    * Identificador asociado a status concept.

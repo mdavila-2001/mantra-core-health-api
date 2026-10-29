@@ -99,4 +99,10 @@ export class CareSpaces {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  @Property({ fieldName: 'prep_minutes', columnType: 'int', nullable: true })
+  prepMinutes?: number;
+
+  @Property({ fieldName: 'cleanup_minutes', columnType: 'int', nullable: true })
+  cleanupMinutes?: number;
 }
