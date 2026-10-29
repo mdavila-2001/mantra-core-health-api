@@ -77,8 +77,8 @@ function build() {
     unavailableWindows: mockFn().mockResolvedValue([]),
     coveredSlotIds: mockFn().mockResolvedValue(new Set()),
   };
-  const outbox = {
-    publishDomainEvent: mockFn().mockResolvedValue({ duplicate: false }),
+  const events = {
+    publish: mockFn().mockResolvedValue(undefined),
   };
   const service = createCatalogService({
     em,
@@ -94,9 +94,9 @@ function build() {
     notices: {},
     careSpaces,
     slotSync,
-    outbox,
+    events,
   });
-  return { service, tx, catalogRepo, careSpaces, slotSync, outbox, resource };
+  return { service, tx, catalogRepo, careSpaces, slotSync, events, resource };
 }
 
 describe('createTemplate · horario por espacio (F5d)', () => {
@@ -353,7 +353,7 @@ describe('excepciones de disponibilidad · tenant y origen', () => {
         sourceKindConceptId: SCHED.EXC_SRC_MANUAL,
       }),
     );
-    expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+    expect(d.events.publish).toHaveBeenCalledWith(
       d.tx,
       expect.objectContaining({
         tenantId: TENANT,

@@ -7,61 +7,37 @@ import {
   ResourceNotFoundException,
   roleAuthorizesInTenant,
   type AuthenticatedUser,
-} from '../../../../../common';
-import { CLIN } from '../../../../clinical/clinical.concepts';
+} from '../../../../common';
+import { CLIN } from '../../../clinical/clinical.concepts';
 import {
   FUNCTIONS,
   FUNCTION_PROFILES,
   type FunctionCode,
-} from '../../../../practice/infrastructure-catalog';
+} from '../../../practice/infrastructure-catalog';
 import {
   CARE_SPACE_OPS_PORT,
   type CareSpaceOpsPort,
-} from '../../../../practice/services/care-space-ops.port';
-import { InfrastructureAccessService } from '../../../../practice/services/infrastructure-access.service';
-import { OpsStateService } from '../../../../practice/services/ops-state';
+} from '../../../practice/services/care-space-ops.port';
+import { InfrastructureAccessService } from '../../../practice/services/infrastructure-access.service';
+import { OpsStateService } from '../../../practice/services/ops-state';
 import {
   bandContaining,
   type TemplateBand,
-} from '../../../domain/catalog/care-space-agenda';
+} from '../../domain/catalog/care-space-agenda';
 import {
   AGENDA_OPERATOR_ROLES,
   operatesAnyAgenda,
-} from '../../../domain/booking/agenda-actors';
-import { EQUIPMENT_REF_TYPE } from '../../../domain/catalog/catalog-concepts';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
-import type { SchedulableResources } from '../../../entities';
-import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
+} from '../../domain/booking/agenda-actors';
+import { EQUIPMENT_REF_TYPE } from '../../domain/catalog/catalog-concepts';
+import type {
+  AppointmentSpaceRequest,
+  CareSpaceAppointmentResolverPort,
+} from '../../application/ports/care-space-appointment-resolver.port';
+import { SchedulingErrorReason } from '../../scheduling.error-reasons';
+import { SchedulingCatalogRepository } from '../repositories';
 
 /** Roles que coordinan las agendas de todo el tenant: no necesitan alcance por espacio. */
 const COORDINATOR_ROLES: readonly string[] = ['SCHEDULING_ADMIN', 'SUPERADMIN'];
-
-/** Qué se sabe del turno cuando hay que decidir en qué espacio ocurre. */
-export interface AppointmentSpaceRequest {
-  /** El recurso del cupo (su tenant ya se comprobó contra el contexto). */
-  readonly resource: SchedulableResources;
-  /** La plantilla de la que nació el cupo, si nació de una. */
-  readonly scheduleTemplateId?: string | null;
-  /** El consultorio que pidió quien agenda (cita puntual o mostrador). */
-  readonly requestedCareSpaceId?: string | null;
-  readonly startAt: Date;
-  readonly endAt: Date;
-  /**
-   * El tenant que declaró quien reserva, cuando el cuerpo lo trae. Tiene que ser el del
-   * recurso: una cita no apunta al consultorio de otra organización (404 uniforme).
-   */
-  readonly bookingTenantId?: string;
-  /** La cita que se mueve o se acepta: no se compara consigo misma. */
-  readonly exceptAppointmentId?: string | null;
-  /**
-   * `true` cuando la cita queda comprometida (reservada o aceptada) y por tanto ocupa el
-   * espacio; una solicitud pendiente todavía no lo ocupa y no se compara con las demás.
-   */
-  readonly commits: boolean;
-  /** Cita sin plantilla: el espacio sale de la franja publicada que contiene el inicio. */
-  readonly inferFromBands?: boolean;
-  readonly actor: AuthenticatedUser;
-}
 
 /**
  * Decide en qué espacio ocurre una cita y comprueba que se pueda reservar ahí (F5d):
@@ -87,7 +63,7 @@ export interface AppointmentSpaceRequest {
  * @returns El espacio a escribir en `appointments.care_space_id`, o `null` si la cita no lo lleva.
  */
 @Injectable()
-export class CareSpaceAppointmentResolver {
+export class PracticeCareSpaceAppointmentResolverAdapter implements CareSpaceAppointmentResolverPort {
   /**
    * @param state - Lectura de la fila de un espacio.
    * @param ops - Puerto de F2: ¿se puede reservar el espacio en la ventana?
@@ -101,7 +77,7 @@ export class CareSpaceAppointmentResolver {
     private readonly infra: InfrastructureAccessService,
   ) {}
 
-  /** @see {@link CareSpaceAppointmentResolver} */
+  /** @see {@link CareSpaceAppointmentResolverPort} */
   async resolve(
     tx: EntityManager,
     request: AppointmentSpaceRequest,

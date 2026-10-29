@@ -11,7 +11,10 @@ import {
   type CancelledByBlock,
 } from '../support/blocked-bookings-canceller';
 import { CatalogAccess } from '../support/catalog-access';
-import { CareSpaceTemplateGuard } from '../support/care-space-template-guard';
+import {
+  CARE_SPACE_TEMPLATE_GUARD_PORT,
+  type CareSpaceTemplateGuardPort,
+} from '../../ports/care-space-template-guard.port';
 import { SCHED } from '../../../domain/scheduling.concepts';
 import {
   CreateExceptionDto,
@@ -22,12 +25,15 @@ import {
   REASON_REQUIRING_TEXT,
 } from '../../../domain/catalog/catalog-concepts';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PRACTITIONER_PROFILE_TABLES } from '../../../domain/resource/practitioner-profile-tables';
 import { PinoLogger } from 'nestjs-pino';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
-import { OutboxService } from '../../../../messaging/services/outbox.service';
-import { AVAILABILITY_EXCEPTION_CREATED_EVENT } from '../support/care-space-slot-sync';
+import { AVAILABILITY_EXCEPTION_CREATED_EVENT } from '../../../domain/catalog/agenda-events';
+import {
+  DOMAIN_EVENT_PUBLISHER_PORT,
+  type DomainEventPublisherPort,
+} from '../../ports/domain-event-publisher.port';
 import { SchedulingProfessionalTimeService } from '../../professional-time/scheduling-professional-time.service';
 
 /** UC-41-04: registra una excepción de disponibilidad. */
@@ -40,8 +46,10 @@ export class CreateExceptionUseCase {
     private readonly access: CatalogAccess,
     private readonly blockedBookings: BlockedBookingsCanceller,
     private readonly logger: PinoLogger,
-    private readonly careSpaces: CareSpaceTemplateGuard,
-    private readonly outbox: OutboxService,
+    @Inject(CARE_SPACE_TEMPLATE_GUARD_PORT)
+    private readonly careSpaces: CareSpaceTemplateGuardPort,
+    @Inject(DOMAIN_EVENT_PUBLISHER_PORT)
+    private readonly events: DomainEventPublisherPort,
   ) {
     this.logger.setContext(CreateExceptionUseCase.name);
   }
@@ -174,7 +182,7 @@ export class CreateExceptionUseCase {
         }
       }
 
-      await this.outbox.publishDomainEvent(tx, {
+      await this.events.publish(tx, {
         tenantId: resource.tenantId,
         eventType: AVAILABILITY_EXCEPTION_CREATED_EVENT,
         aggregateType: 'availability_exception',

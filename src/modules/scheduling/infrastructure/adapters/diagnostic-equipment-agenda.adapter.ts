@@ -10,11 +10,9 @@ import {
   CARE_SPACE_OPS_PORT,
   type CareSpaceOpsPort,
 } from '../../../practice/services/care-space-ops.port';
-import {
-  CareSpaceSlotSync,
-  EQUIPMENT_STATUS_EXCEPTION_REASON,
-} from '../../application/catalog/support/care-space-slot-sync';
-import { EquipmentResourceLinker } from '../../application/catalog/support/equipment-resource-linker';
+import { DiagnosticEquipmentResourceLinkerAdapter } from './diagnostic-equipment-resource-linker.adapter';
+import { PracticeCareSpaceSlotSyncAdapter } from './practice-care-space-slot-sync.adapter';
+import { EQUIPMENT_STATUS_EXCEPTION_REASON } from '../../domain/catalog/agenda-events';
 import {
   ACTIVE_BOOKING_STATES,
   PENDING_BOOKING_STATES,
@@ -48,8 +46,8 @@ export class DiagnosticEquipmentAgendaAdapter
    */
   constructor(
     private readonly registry: EquipmentAgendaRegistry,
-    private readonly linker: EquipmentResourceLinker,
-    private readonly sync: CareSpaceSlotSync,
+    private readonly linker: DiagnosticEquipmentResourceLinkerAdapter,
+    private readonly sync: PracticeCareSpaceSlotSyncAdapter,
     @Inject(CARE_SPACE_OPS_PORT) private readonly ops: CareSpaceOpsPort,
   ) {}
 

@@ -18,7 +18,10 @@ import {
 import { BookingAccess } from '../support/booking-access';
 import { BookingChangeNotifier } from '../support/booking-change-notifier';
 import { BookingTransitionRecorder } from '../support/booking-transition-recorder';
-import { CareSpaceAppointmentResolver } from '../support/care-space-appointment-resolver';
+import {
+  CARE_SPACE_APPOINTMENT_RESOLVER_PORT,
+  type CareSpaceAppointmentResolverPort,
+} from '../../ports/care-space-appointment-resolver.port';
 import { CLIN } from '../../../../clinical/clinical.concepts';
 import {
   CLINICAL_APPOINTMENTS_PORT,
@@ -69,7 +72,8 @@ export class CreateDirectAppointmentUseCase {
     @Inject(FORM_ORIGIN_PORT)
     private readonly formOrigin: FormOriginPort,
     private readonly logger: PinoLogger,
-    private readonly spaces: CareSpaceAppointmentResolver,
+    @Inject(CARE_SPACE_APPOINTMENT_RESOLVER_PORT)
+    private readonly spaces: CareSpaceAppointmentResolverPort,
   ) {
     this.logger.setContext(CreateDirectAppointmentUseCase.name);
   }

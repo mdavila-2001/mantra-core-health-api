@@ -3,6 +3,7 @@ import { ClinicalAppointmentsAdapter } from '../../infrastructure/adapters/clini
 import { FormsOriginAdapter } from '../../infrastructure/adapters/forms-origin.adapter';
 import { InsuranceReadAdapter } from '../../infrastructure/adapters/insurance-read.adapter';
 import { ProfilesPatientRepresentationAdapter } from '../../infrastructure/adapters/profiles-patient-representation.adapter';
+import type { CareSpaceAppointmentResolverPort } from '../ports/care-space-appointment-resolver.port';
 import { SchedulingBookingsService } from './scheduling-bookings.service';
 import {
   BookingAccess,
@@ -10,7 +11,6 @@ import {
   BookingItemAssembler,
   BookingMaterializer,
   BookingTransitionRecorder,
-  CareSpaceAppointmentResolver,
   ClinicalAppointmentSync,
   DisplacedRequestsCanceller,
   ServiceSlotLifecycle,
@@ -107,7 +107,7 @@ export function createBookingsService(d: BookingsServiceDoubles) {
   const spaces = (d.spaces ?? {
     resolve: async () => null,
     assertSlotHoldable: async () => undefined,
-  }) as CareSpaceAppointmentResolver;
+  }) as CareSpaceAppointmentResolverPort;
   const slotPolicy = new SlotPolicyResolver(d.catalogRepo);
   const materializer = new BookingMaterializer(
     d.em,

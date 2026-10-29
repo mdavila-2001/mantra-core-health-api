@@ -13,7 +13,10 @@ import {
 } from '../../ports/booking-history.port';
 import { BookingAccess } from '../support/booking-access';
 import { BookingChangeNotifier } from '../support/booking-change-notifier';
-import { CareSpaceAppointmentResolver } from '../support/care-space-appointment-resolver';
+import {
+  CARE_SPACE_APPOINTMENT_RESOLVER_PORT,
+  type CareSpaceAppointmentResolverPort,
+} from '../../ports/care-space-appointment-resolver.port';
 import { ClinicalAppointmentSync } from '../support/clinical-appointment-sync';
 import type { BookingTransitionSnapshot } from '../../../domain/booking/booking-transition';
 import { EntityManager } from '@mikro-orm/postgresql';
@@ -48,7 +51,8 @@ export class RescheduleBookingUseCase {
     private readonly history: BookingHistoryPort,
     private readonly notifier: BookingChangeNotifier,
     private readonly logger: PinoLogger,
-    private readonly spaces: CareSpaceAppointmentResolver,
+    @Inject(CARE_SPACE_APPOINTMENT_RESOLVER_PORT)
+    private readonly spaces: CareSpaceAppointmentResolverPort,
     private readonly clinicalSync: ClinicalAppointmentSync,
   ) {
     this.logger.setContext(RescheduleBookingUseCase.name);

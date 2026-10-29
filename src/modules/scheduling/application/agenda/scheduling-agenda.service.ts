@@ -1,5 +1,8 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
-import { CareSpaceSlotSync } from '../catalog/support/care-space-slot-sync';
+import {
+  CARE_SPACE_SLOT_SYNC_PORT,
+  type CareSpaceSlotSyncPort,
+} from '../ports/care-space-slot-sync.port';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { CONCEPTS, PreconditionFailedException } from '../../../../common';
@@ -65,7 +68,9 @@ export class SchedulingAgendaService {
     @Inject(PRACTITIONER_DIRECTORY_PORT)
     private readonly directory: PractitionerDirectoryPort,
     private readonly logger: PinoLogger,
-    @Optional() private readonly slotSync?: CareSpaceSlotSync,
+    @Optional()
+    @Inject(CARE_SPACE_SLOT_SYNC_PORT)
+    private readonly slotSync?: CareSpaceSlotSyncPort,
   ) {
     this.logger.setContext(SchedulingAgendaService.name);
   }
@@ -164,7 +169,7 @@ export class SchedulingAgendaService {
     );
 
     // F5d · lo que se ofrece tiene que poder reservarse: se descartan los cupos cuyo espacio
-    // está bloqueado o cuyo equipo está fuera de servicio (ver `CareSpaceSlotSync`).
+    // está bloqueado o cuyo equipo está fuera de servicio (ver `CareSpaceSlotSyncPort`).
     const offered =
       query.onlyAvailable && this.slotSync && rows.length > 0
         ? await this.withoutCovered(em, rows)

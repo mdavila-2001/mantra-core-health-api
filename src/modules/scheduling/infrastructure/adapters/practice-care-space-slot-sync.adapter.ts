@@ -1,49 +1,38 @@
 import { randomUUID } from 'node:crypto';
 import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { CONCEPTS } from '../../../../../common';
-import { DUNIT } from '../../../../diagnostic_units/diagnostic_units.concepts';
-import { OutboxService } from '../../../../messaging/services/outbox.service';
-import { PRAC } from '../../../../practice/practice.concepts';
+import { CONCEPTS } from '../../../../common';
+import { DUNIT } from '../../../diagnostic_units/diagnostic_units.concepts';
+import { OutboxService } from '../../../messaging/services/outbox.service';
+import { PRAC } from '../../../practice/practice.concepts';
 import {
   CARE_SPACE_BLOCK_LISTENERS,
   CareSpaceBlockListenerRegistry,
   type BlockListenerContext,
   type BlockOutcome,
   type CareSpaceBlockListener,
-} from '../../../../practice/services/care-space-block-listeners';
+} from '../../../practice/services/care-space-block-listeners';
 import type {
   BlockRow,
   SpaceOpsRow,
-} from '../../../../practice/services/ops-rows';
+} from '../../../practice/services/ops-rows';
 import {
   OPEN_ENDED_BLOCK_END,
   type TimeWindow,
-} from '../../../domain/catalog/care-space-agenda';
-import { SCHED } from '../../../domain/scheduling.concepts';
-import { AvailabilityExceptions } from '../../../entities';
-
-/** `scheduling.availability_exception.created` (con `sourceKind`). */
-export const AVAILABILITY_EXCEPTION_CREATED_EVENT =
-  'scheduling.availability_exception.created';
-/** `scheduling.availability_exception.ended`: la fuente volvió y la excepción se acortó o se quitó. */
-export const AVAILABILITY_EXCEPTION_ENDED_EVENT =
-  'scheduling.availability_exception.ended';
-
-/** Qué cupos se examinan. */
-export type SlotScope =
-  | { readonly careSpaceId: string }
-  | { readonly equipmentId: string }
-  | { readonly resourceIds: readonly string[] };
-
-/** Quién provoca el cambio. */
-export interface SyncActor {
-  readonly userId: string | null;
-  readonly now?: Date;
-}
-
-/** Tipo de fuente de una excepción. */
-export type ExceptionSource = 'CARE_SPACE_BLOCK' | 'EQUIPMENT_STATUS';
+} from '../../domain/catalog/care-space-agenda';
+import {
+  AVAILABILITY_EXCEPTION_CREATED_EVENT,
+  AVAILABILITY_EXCEPTION_ENDED_EVENT,
+  CARE_SPACE_BLOCK_EXCEPTION_REASON,
+} from '../../domain/catalog/agenda-events';
+import { SCHED } from '../../domain/scheduling.concepts';
+import { AvailabilityExceptions } from '../../entities';
+import type {
+  CareSpaceSlotSyncPort,
+  ExceptionSource,
+  SlotScope,
+  SyncActor,
+} from '../../application/ports/care-space-slot-sync.port';
 
 const SOURCE_CONCEPT: Readonly<Record<ExceptionSource, string>> = {
   CARE_SPACE_BLOCK: SCHED.EXC_SRC_CARE_SPACE_BLOCK,
@@ -135,7 +124,7 @@ function scopeSql(scope: SlotScope): { sql: string; params: unknown[] } {
  * verdad (la consulta de «cubierto»), no contra lo que se recuerda de la última llamada.
  */
 @Injectable()
-export class CareSpaceSlotSync {
+export class PracticeCareSpaceSlotSyncAdapter implements CareSpaceSlotSyncPort {
   /** @param outbox - Outbox transaccional. */
   constructor(private readonly outbox: OutboxService) {}
 
@@ -466,11 +455,6 @@ export class CareSpaceSlotSync {
   }
 }
 
-/** Texto de la excepción creada por un bloqueo del espacio (sin el motivo clínico). */
-export const CARE_SPACE_BLOCK_EXCEPTION_REASON = 'Bloqueo del consultorio';
-/** Texto de la excepción creada por el estado del equipo. */
-export const EQUIPMENT_STATUS_EXCEPTION_REASON = 'Equipo fuera de servicio';
-
 /**
  * Oyente de F2: cuando un espacio se bloquea, la agenda cierra sus cupos y crea la excepción de
  * solo lectura; cuando el bloqueo termina o se cancela, los reabre. Corre en la transacción
@@ -485,7 +469,7 @@ export class CareSpaceBlockAgendaListener
    * @param registry - Registro de oyentes de `practice`.
    */
   constructor(
-    private readonly sync: CareSpaceSlotSync,
+    private readonly sync: PracticeCareSpaceSlotSyncAdapter,
     @Inject(CARE_SPACE_BLOCK_LISTENERS)
     private readonly registry: CareSpaceBlockListenerRegistry,
   ) {}

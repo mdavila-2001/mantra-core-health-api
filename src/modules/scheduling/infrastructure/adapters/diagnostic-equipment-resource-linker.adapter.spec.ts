@@ -1,8 +1,8 @@
 import { jest } from '@jest/globals';
-import { CONCEPTS } from '../../../../../common';
-import { runWithTenant } from '../../../../../common/tenant/tenant-context';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
-import { EquipmentResourceLinker } from './equipment-resource-linker';
+import { CONCEPTS } from '../../../../common';
+import { runWithTenant } from '../../../../common/tenant/tenant-context';
+import { SchedulingErrorReason } from '../../scheduling.error-reasons';
+import { DiagnosticEquipmentResourceLinkerAdapter } from './diagnostic-equipment-resource-linker.adapter';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
@@ -46,7 +46,7 @@ function build(
       return [];
     }),
   };
-  const linker = new EquipmentResourceLinker(
+  const linker = new DiagnosticEquipmentResourceLinkerAdapter(
     infra as any,
     catalogRepo as any,
     outbox as any,

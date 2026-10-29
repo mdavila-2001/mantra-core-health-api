@@ -7,8 +7,14 @@ import {
 } from '../../../../../common';
 import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 import { CatalogAccess } from '../support/catalog-access';
-import { SpaceResourceLinker } from '../support/space-resource-linker';
-import { EquipmentResourceLinker } from '../support/equipment-resource-linker';
+import {
+  SPACE_RESOURCE_LINKER_PORT,
+  type SpaceResourceLinkerPort,
+} from '../../ports/space-resource-linker.port';
+import {
+  EQUIPMENT_RESOURCE_LINKER_PORT,
+  type EquipmentResourceLinkerPort,
+} from '../../ports/equipment-resource-linker.port';
 import {
   CreateResourceDto,
   ResourceResponseDto,
@@ -24,7 +30,7 @@ import {
   normalizeRefType,
 } from '../../../domain/catalog/catalog-concepts';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
 
@@ -51,8 +57,10 @@ export class CreateResourceUseCase {
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly access: CatalogAccess,
     private readonly logger: PinoLogger,
-    private readonly spaceLinker: SpaceResourceLinker,
-    private readonly equipmentLinker: EquipmentResourceLinker,
+    @Inject(SPACE_RESOURCE_LINKER_PORT)
+    private readonly spaceLinker: SpaceResourceLinkerPort,
+    @Inject(EQUIPMENT_RESOURCE_LINKER_PORT)
+    private readonly equipmentLinker: EquipmentResourceLinkerPort,
   ) {
     this.logger.setContext(CreateResourceUseCase.name);
   }

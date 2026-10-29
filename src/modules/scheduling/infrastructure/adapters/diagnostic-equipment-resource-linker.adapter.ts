@@ -8,38 +8,21 @@ import {
   requireTenantId,
   roleAuthorizesInTenant,
   type AuthenticatedUser,
-} from '../../../../../common';
-import { OutboxService } from '../../../../messaging/services/outbox.service';
-import { InfrastructureAccessService } from '../../../../practice/services/infrastructure-access.service';
+} from '../../../../common';
+import { OutboxService } from '../../../messaging/services/outbox.service';
+import { InfrastructureAccessService } from '../../../practice/services/infrastructure-access.service';
 import {
   DEFAULT_SLOT_CAPACITY,
   RESOURCE_TYPE_CONCEPT,
-} from '../../../domain/catalog/catalog-concepts';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
-import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
-
-/** Evento que se publica al ligar un recurso agendable a un equipo (`asyncapi/fragments/f5agenda.yaml`). */
-export const RESOURCE_LINKED_TO_EQUIPMENT_EVENT =
-  'scheduling.resource.linked_to_equipment';
-
-/** El equipo con el sitio y la sala que importan para ligarlo. */
-export interface EquipmentRef {
-  readonly id: string;
-  readonly tenantId: string;
-  readonly careSpaceId: string | null;
-  readonly practiceSiteId: string;
-  readonly practiceId: string;
-  readonly schedulableResourceId: string | null;
-  readonly operationalStatusConceptId: string;
-  readonly label: string;
-}
-
-/** Datos de alta que el cliente puede elegir. */
-export interface EquipmentResourceInput {
-  readonly name?: string;
-  readonly timeZone?: string;
-  readonly capacity?: number;
-}
+} from '../../domain/catalog/catalog-concepts';
+import { RESOURCE_LINKED_TO_EQUIPMENT_EVENT } from '../../domain/catalog/agenda-events';
+import type {
+  EquipmentRef,
+  EquipmentResourceInput,
+  EquipmentResourceLinkerPort,
+} from '../../application/ports/equipment-resource-linker.port';
+import { SchedulingErrorReason } from '../../scheduling.error-reasons';
+import { SchedulingCatalogRepository } from '../repositories';
 
 /** El 404 uniforme del equipo: inexistente y de otra organización responden igual. */
 export function equipmentRefNotFound(): ResourceNotFoundException {
@@ -67,7 +50,7 @@ export function equipmentRefNotFound(): ResourceNotFoundException {
  * El `tenant_id` del recurso sale del contexto, nunca del cuerpo.
  */
 @Injectable()
-export class EquipmentResourceLinker {
+export class DiagnosticEquipmentResourceLinkerAdapter implements EquipmentResourceLinkerPort {
   /**
    * @param infra - Evaluador de la política de infraestructura.
    * @param catalogRepo - Repositorio del catálogo de agenda.

@@ -4,8 +4,11 @@ import {
   ResourceNotFoundException,
 } from '../../../../../common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { Injectable, Optional } from '@nestjs/common';
-import { CareSpaceSlotSync } from '../support/care-space-slot-sync';
+import { Inject, Injectable, Optional } from '@nestjs/common';
+import {
+  CARE_SPACE_SLOT_SYNC_PORT,
+  type CareSpaceSlotSyncPort,
+} from '../../ports/care-space-slot-sync.port';
 import { ResourceAgendaResponseDto } from '../../../presentation/dto';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
 
@@ -15,7 +18,9 @@ export class GetResourceAgendaUseCase {
   constructor(
     private readonly em: EntityManager,
     private readonly catalogRepo: SchedulingCatalogRepository,
-    @Optional() private readonly slotSync?: CareSpaceSlotSync,
+    @Optional()
+    @Inject(CARE_SPACE_SLOT_SYNC_PORT)
+    private readonly slotSync?: CareSpaceSlotSyncPort,
   ) {}
 
   /**

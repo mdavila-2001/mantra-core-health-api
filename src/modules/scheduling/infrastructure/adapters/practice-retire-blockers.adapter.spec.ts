@@ -1,11 +1,11 @@
 import { jest } from '@jest/globals';
-import { CONCEPTS } from '../../../../../common';
-import { CLIN } from '../../../../clinical/clinical.concepts';
-import { RetireBlockerRegistry } from '../../../../practice/services/retire-blockers';
+import { CONCEPTS } from '../../../../common';
+import { CLIN } from '../../../clinical/clinical.concepts';
+import { RetireBlockerRegistry } from '../../../practice/services/retire-blockers';
 import {
   AGENDA_RETIRE_BLOCKERS,
   AgendaRetireBlockersInitializer,
-} from './agenda-retire-blockers';
+} from './practice-retire-blockers.adapter';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 const NOW = new Date('2026-11-02T12:00:00Z');

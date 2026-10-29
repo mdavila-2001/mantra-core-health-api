@@ -8,38 +8,29 @@ import {
   requireTenantId,
   roleAuthorizesInTenant,
   type AuthenticatedUser,
-} from '../../../../../common';
-import { InsufficientRoleException } from '../../../../../common/errors/domain.exception';
-import { OpsErrorReason } from '../../../../practice/practice-ops.error-reasons';
-import { OutboxService } from '../../../../messaging/services/outbox.service';
-import { FUNCTIONS } from '../../../../practice/infrastructure-catalog';
-import { PRAC } from '../../../../practice/practice.concepts';
-import { InfrastructureAccessService } from '../../../../practice/services/infrastructure-access.service';
-import type { SpaceOpsRow } from '../../../../practice/services/ops-rows';
-import { OpsStateService } from '../../../../practice/services/ops-state';
+} from '../../../../common';
+import { InsufficientRoleException } from '../../../../common/errors/domain.exception';
+import { OpsErrorReason } from '../../../practice/practice-ops.error-reasons';
+import { OutboxService } from '../../../messaging/services/outbox.service';
+import { FUNCTIONS } from '../../../practice/infrastructure-catalog';
+import { PRAC } from '../../../practice/practice.concepts';
+import { InfrastructureAccessService } from '../../../practice/services/infrastructure-access.service';
+import type { SpaceOpsRow } from '../../../practice/services/ops-rows';
+import { OpsStateService } from '../../../practice/services/ops-state';
 import {
   AGENDA_SPACE_FUNCTIONS,
   findSpaceBandClash,
   type WeekBand,
-} from '../../../domain/catalog/care-space-agenda';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
-import type { SchedulableResources } from '../../../entities';
-import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
-
-/** Evento que se publica al atar (o soltar) el horario de una plantilla a un espacio. */
-export const TEMPLATE_CARE_SPACE_SET_EVENT =
-  'scheduling.template.care_space_set';
-
-/** Lo que de una plantilla nueva o editada hace falta para saber si pisa a otra. */
-export interface TemplateSpaceProposal {
-  readonly resource: Pick<SchedulableResources, 'timeZone' | 'id'>;
-  readonly careSpaceId: string;
-  /** Plantilla que se edita (no se compara consigo misma). */
-  readonly templateId?: string;
-  readonly validFrom?: Date | null;
-  readonly validTo?: Date | null;
-  readonly bands: readonly WeekBand[];
-}
+} from '../../domain/catalog/care-space-agenda';
+import { SchedulingErrorReason } from '../../scheduling.error-reasons';
+import { TEMPLATE_CARE_SPACE_SET_EVENT } from '../../domain/catalog/agenda-events';
+import type { SchedulableResources } from '../../entities';
+import { SchedulingCatalogRepository } from '../repositories';
+import type {
+  CareSpaceTemplateGuardPort,
+  TemplateCareSpaceSetEvent,
+  TemplateSpaceProposal,
+} from '../../application/ports/care-space-template-guard.port';
 
 /**
  * Reglas de una plantilla que declara su horario en un espacio (F5d):
@@ -60,7 +51,7 @@ export interface TemplateSpaceProposal {
  * La doble reserva real de una cita la impide, además, el `EXCLUDE` de `clinical.appointments`.
  */
 @Injectable()
-export class CareSpaceTemplateGuard {
+export class PracticeCareSpaceTemplateGuardAdapter implements CareSpaceTemplateGuardPort {
   /**
    * @param state - Lectura del estado y la fila de un espacio (tenant del contexto).
    * @param infra - Evaluador de la política de infraestructura.
@@ -298,15 +289,7 @@ export class CareSpaceTemplateGuard {
    */
   async announce(
     tx: EntityManager,
-    event: {
-      tenantId: string;
-      templateId: string;
-      resourceId: string;
-      careSpaceId: string | null;
-      previousCareSpaceId: string | null;
-      siteId: string | null;
-      actorUserId: string;
-    },
+    event: TemplateCareSpaceSetEvent,
   ): Promise<void> {
     await this.outbox.publishDomainEvent(tx, {
       tenantId: event.tenantId,
