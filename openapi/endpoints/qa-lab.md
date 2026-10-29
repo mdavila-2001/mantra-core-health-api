@@ -42,7 +42,7 @@ Referencia exhaustiva de 21 operación(es) del módulo `qa_lab`, derivada del co
 - **Nombre:** Defectos deduplicados por firma
 - **Operation ID:** `QaLabReadController_defects`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabReadController.defects](../../src/modules/qa_lab/controllers/qa-lab-read.controller.ts)
+- **Implementación:** [QaLabReadController.defects](../../src/modules/qa_lab/presentation/controllers/qa-lab-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -135,7 +135,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Entornos de prueba
 - **Operation ID:** `QaLabReadController_environments`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabReadController.environments](../../src/modules/qa_lab/controllers/qa-lab-read.controller.ts)
+- **Implementación:** [QaLabReadController.environments](../../src/modules/qa_lab/presentation/controllers/qa-lab-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -225,7 +225,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Catálogo de flujos: recorridos del usuario con su cobertura de contrato y de pruebas
 - **Operation ID:** `QaLabReadController_listFlows`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabReadController.listFlows](../../src/modules/qa_lab/controllers/qa-lab-read.controller.ts)
+- **Implementación:** [QaLabReadController.listFlows](../../src/modules/qa_lab/presentation/controllers/qa-lab-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -320,7 +320,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Árbol de decisión de un flujo: pasos, endpoints (declarado o ausente), ramas válidas, límite e inválidas y su último veredicto
 - **Operation ID:** `QaLabReadController_flow`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabReadController.flow](../../src/modules/qa_lab/controllers/qa-lab-read.controller.ts)
+- **Implementación:** [QaLabReadController.flow](../../src/modules/qa_lab/presentation/controllers/qa-lab-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -390,7 +390,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Flujo no encontrado | Excepción explícita en src/modules/qa_lab/services/qa-flows.service.ts |
+| 404 | `NOT_FOUND` | Flujo no encontrado | Excepción explícita en src/modules/qa_lab/application/services/qa-flows.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -415,7 +415,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Corridas recientes
 - **Operation ID:** `QaLabReadController_runs`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabReadController.runs](../../src/modules/qa_lab/controllers/qa-lab-read.controller.ts)
+- **Implementación:** [QaLabReadController.runs](../../src/modules/qa_lab/presentation/controllers/qa-lab-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -509,7 +509,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Corrida con resultados por caso y veredicto por aserción (valor observado)
 - **Operation ID:** `QaLabReadController_run`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabReadController.run](../../src/modules/qa_lab/controllers/qa-lab-read.controller.ts)
+- **Implementación:** [QaLabReadController.run](../../src/modules/qa_lab/presentation/controllers/qa-lab-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -604,7 +604,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Suites con conteo de casos y última corrida
 - **Operation ID:** `QaLabReadController_suites`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabReadController.suites](../../src/modules/qa_lab/controllers/qa-lab-read.controller.ts)
+- **Implementación:** [QaLabReadController.suites](../../src/modules/qa_lab/presentation/controllers/qa-lab-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -694,7 +694,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Suite con casos y aserciones
 - **Operation ID:** `QaLabReadController_suite`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabReadController.suite](../../src/modules/qa_lab/controllers/qa-lab-read.controller.ts)
+- **Implementación:** [QaLabReadController.suite](../../src/modules/qa_lab/presentation/controllers/qa-lab-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -789,7 +789,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Evaluar programaciones vencidas y encolar sus corridas
 - **Operation ID:** `QaLabInternalController_runDueSchedules`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabInternalController.runDueSchedules](../../src/modules/qa_lab/controllers/qa-lab-internal.controller.ts)
+- **Implementación:** [QaLabInternalController.runDueSchedules](../../src/modules/qa_lab/presentation/controllers/qa-lab-internal.controller.ts)
 
 ### Descripción de negocio
 
@@ -902,7 +902,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, QA_ADMIN. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | No se pudo asignar número de corrida | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
+| 409 | `CONFLICT` | No se pudo asignar número de corrida | Excepción explícita en src/modules/qa_lab/application/services/qa-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -928,7 +928,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Evaluar las aserciones y fijar el resultado del caso
 - **Operation ID:** `QaLabController_evaluateResult`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.evaluateResult](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.evaluateResult](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -1023,9 +1023,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, QA_ENGINEER. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | El resultado ya fue evaluado | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 422 | `PRECONDITION_FAILED` | El caso falló en transporte: no hay respuesta que evaluar | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 422 | `PRECONDITION_FAILED` | El caso no tiene aserciones | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
+| 409 | `CONFLICT` | El resultado ya fue evaluado | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | El caso falló en transporte: no hay respuesta que evaluar | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | El caso no tiene aserciones | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1050,7 +1050,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Registrar un defecto detectado
 - **Operation ID:** `QaLabController_registerDefect`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.registerDefect](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.registerDefect](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -1171,9 +1171,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, QA_ENGINEER, QA_ADMIN. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | No se pudo asignar número de defecto | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
+| 409 | `CONFLICT` | No se pudo asignar número de defecto | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El resultado pertenece a otro caso | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | El resultado pertenece a otro caso | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1198,7 +1198,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Triage y transición de estado del defecto
 - **Operation ID:** `QaLabController_triageDefect`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.triageDefect](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.triageDefect](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -1312,9 +1312,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER. | Roles/tenant/guards de autorización |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El defecto está en un estado desconocido | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 422 | `PRECONDITION_FAILED` | La transición de estado no está permitida | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 422 | `PRECONDITION_FAILED` | Un defecto en curso necesita responsable | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | El defecto está en un estado desconocido | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | La transición de estado no está permitida | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un defecto en curso necesita responsable | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1339,7 +1339,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Registrar un entorno de pruebas gobernado
 - **Operation ID:** `QaLabController_createEnvironment`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.createEnvironment](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.createEnvironment](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -1454,9 +1454,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | Ya existe un entorno con ese código | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
+| 409 | `CONFLICT` | Ya existe un entorno con ese código | Excepción explícita en src/modules/qa_lab/application/services/qa-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Un entorno de producción no puede declararse seguro para capturar payloads | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un entorno de producción no puede declararse seguro para capturar payloads | Excepción explícita en src/modules/qa_lab/application/services/qa-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1481,7 +1481,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Disparar una corrida de pruebas
 - **Operation ID:** `QaLabController_createRun`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.createRun](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.createRun](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -1594,12 +1594,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER, SYSTEM. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | La suite ya tiene una corrida en marcha | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 409 | `CONFLICT` | No se pudo asignar número de corrida | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
+| 409 | `CONFLICT` | La suite ya tiene una corrida en marcha | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
+| 409 | `CONFLICT` | No se pudo asignar número de corrida | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La suite no está publicada | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 422 | `PRECONDITION_FAILED` | El entorno no está activo | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 422 | `PRECONDITION_FAILED` | La suite no tiene casos activos | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | La suite no está publicada | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | El entorno no está activo | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | La suite no tiene casos activos | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1624,7 +1624,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Adjuntar un artefacto de evidencia a la corrida
 - **Operation ID:** `QaLabController_attachArtifact`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.attachArtifact](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.attachArtifact](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -1735,7 +1735,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, QA_ENGINEER. | Roles/tenant/guards de autorización |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El resultado pertenece a otra corrida | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | El resultado pertenece a otra corrida | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1760,7 +1760,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Registrar la ejecución del caso con sus payloads
 - **Operation ID:** `QaLabController_executeCase`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.executeCase](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.executeCase](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -1883,10 +1883,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, QA_ENGINEER. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | La corrida ya está cerrada | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 409 | `CONFLICT` | El caso ya se ejecutó en esta corrida | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
+| 409 | `CONFLICT` | La corrida ya está cerrada | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
+| 409 | `CONFLICT` | El caso ya se ejecutó en esta corrida | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El caso pertenece a otra suite | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | El caso pertenece a otra suite | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1911,7 +1911,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Cerrar la corrida y consolidar totales
 - **Operation ID:** `QaLabController_finalizeRun`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.finalizeRun](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.finalizeRun](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -2008,7 +2008,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, QA_ENGINEER. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | La corrida ya está cerrada | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
+| 409 | `CONFLICT` | La corrida ya está cerrada | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2033,7 +2033,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Enlazar la evidencia de la corrida a un release
 - **Operation ID:** `QaLabController_linkRelease`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.linkRelease](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.linkRelease](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -2141,8 +2141,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: RELEASE_MANAGER, QA_ADMIN. | Roles/tenant/guards de autorización |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Sólo una corrida que pasó puede respaldar un release | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 422 | `PRECONDITION_FAILED` | La corrida no tiene evidencia adjunta | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | Sólo una corrida que pasó puede respaldar un release | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
+| 422 | `PRECONDITION_FAILED` | La corrida no tiene evidencia adjunta | Excepción explícita en src/modules/qa_lab/application/services/qa-runs.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2167,7 +2167,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Programar la ejecución automática de la suite
 - **Operation ID:** `QaLabController_createSchedule`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.createSchedule](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.createSchedule](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -2289,10 +2289,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | Ya existe una programación con ese código para la suite y el entorno | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
+| 409 | `CONFLICT` | Ya existe una programación con ese código para la suite y el entorno | Excepción explícita en src/modules/qa_lab/application/services/qa-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La suite no está publicada | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El entorno no está activo | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La suite no está publicada | Excepción explícita en src/modules/qa_lab/application/services/qa-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El entorno no está activo | Excepción explícita en src/modules/qa_lab/application/services/qa-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2317,7 +2317,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Definir un caso de prueba con sus aserciones
 - **Operation ID:** `QaLabController_createTestCase`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.createTestCase](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.createTestCase](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -2465,10 +2465,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | Ya existe un caso con ese código en la suite | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
+| 409 | `CONFLICT` | Ya existe un caso con ese código en la suite | Excepción explícita en src/modules/qa_lab/application/services/qa-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Una aserción JSON_PATH necesita su ruta | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | La aserción necesita valor esperado | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una aserción JSON_PATH necesita su ruta | Excepción explícita en src/modules/qa_lab/application/services/qa-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La aserción necesita valor esperado | Excepción explícita en src/modules/qa_lab/application/services/qa-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2493,7 +2493,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Publicar la suite y activar sus casos
 - **Operation ID:** `QaLabController_publishSuite`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [QaLabController.publishSuite](../../src/modules/qa_lab/controllers/qa-lab.controller.ts)
+- **Implementación:** [QaLabController.publishSuite](../../src/modules/qa_lab/presentation/controllers/qa-lab.controller.ts)
 
 ### Descripción de negocio
 
@@ -2597,7 +2597,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER. | Roles/tenant/guards de autorización |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Una suite sin casos no puede publicarse | Excepción explícita en src/modules/qa_lab/services/qa-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una suite sin casos no puede publicarse | Excepción explícita en src/modules/qa_lab/application/services/qa-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
