@@ -15,6 +15,7 @@ fija; la auditoría usa `createdBy`/`touch`. Excepciones de dominio:
 | `DiagnosticStudiesService` | publicar oferta con componentes (05), retirar oferta (08) |
 | `DiagnosticPricingService` | cronograma (06), versionar precio append-only (07), cerrar precio (08) |
 | `DiagnosticEquipmentService` | registrar y actualizar equipamiento (09) |
+| `DiagnosticUnitScopeService` | resuelve unidad, sitio, acreditación, equipo, oferta, cronograma y precio por UUID acotados al tenant activo (hijo → unidad → tenant); lo ajeno responde 404 `DIAGNOSTIC_UNIT_RESOURCE_OUT_OF_SCOPE`, igual que lo inexistente |
 
 Los `*.spec.ts` son pruebas unitarias (mockean repos y `EntityManager`) que
 cubren happy path, not-found, conflicto y al menos un rechazo de regla de negocio.

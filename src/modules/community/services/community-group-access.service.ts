@@ -5,9 +5,11 @@ import {
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
+import { InsufficientRoleException } from '../../../common/errors/domain.exception';
 import { GroupsRepository } from '../repositories';
 import { COMM } from '../community.concepts';
 import type { GroupMembers, Groups } from '../entities';
+import { CommunityGroupAudienceService } from './community-group-audience.service';
 import { CommunityVisibilityService } from './community-visibility.service';
 import { CommunityErrorReason } from '../community.error-reasons';
 
@@ -59,6 +61,10 @@ export interface GroupAccess {
  *   el ingreso, pero no el muro ni el padrón.
  * - **Secreto**: para quien no es integrante activo **no existe**. Responde 404
  *   incluso en la ficha: un 403 ya confirmaría que ese grupo existe con ese id.
+ * - **Público autorizado** (doctores verificados, personal de la organización,
+ *   pacientes atendidos; API#837): quien no pertenece a ese público **no ve el
+ *   foro** —404 idéntico al de un id inexistente— y quien sí pertenece lo lee
+ *   como un grupo público: publica sólo si es integrante.
  */
 @Injectable()
 export class CommunityGroupAccessService {
@@ -67,10 +73,12 @@ export class CommunityGroupAccessService {
    *
    * @param groupsRepo - Acceso a `community.groups` y `group_members`.
    * @param visibility - Resuelve el perfil del lector contra la sesión.
+   * @param audience - Decide si la sesión es del público autorizado del foro.
    */
   constructor(
     private readonly groupsRepo: GroupsRepository,
     private readonly visibility: CommunityVisibilityService,
+    private readonly audience: CommunityGroupAudienceService,
   ) {}
 
   /**
@@ -81,8 +89,9 @@ export class CommunityGroupAccessService {
    * @param actor - Quien pide.
    * @param requestedProfileId - Perfil propuesto por el cliente; se verifica.
    * @returns El grupo y los permisos del actor sobre él.
-   * @throws ResourceNotFoundException si el grupo no existe, o si es secreto y
-   *   el actor no es integrante activo.
+   * @throws ResourceNotFoundException si el grupo no existe, si es secreto y
+   *   el actor no es integrante activo, o si restringe su público y el actor
+   *   no pertenece a él.
    */
   async resolve(
     em: EntityManager,
@@ -117,6 +126,13 @@ export class CommunityGroupAccessService {
     const canModerate =
       isPlatform || (isMember && !!role && MODERATION_ROLES.includes(role));
 
+    // API#837: el público autorizado se decide en el servidor, con la sesión y
+    // no con lo que el cliente declare.
+    await this.assertAudienceVisible(em, group, actor);
+    const isAudienceGroup = this.audience.isRestricted(
+      group.visibilityConceptId,
+    );
+
     const isSecret = group.visibilityConceptId === COMM.GROUP_VISIBILITY_SECRET;
     if (isSecret && !isMember && !isPlatform)
       throw new ResourceNotFoundException(
@@ -149,9 +165,112 @@ export class CommunityGroupAccessService {
       isMember,
       canAdminister,
       canModerate,
-      canRead: isPublic || isMember || isPlatform,
+      canRead: isPublic || isAudienceGroup || isMember || isPlatform,
       canPost: isMember || isPlatform,
     };
+  }
+
+  /**
+   * Exige que la sesión pertenezca al público autorizado del foro, si lo tiene.
+   *
+   * Responde exactamente lo que un id inexistente —mismo mensaje, mismo
+   * `reason`— para no confirmar que el foro existe. La plataforma lo alcanza
+   * por la misma razón que alcanza los grupos secretos: moderar es su trabajo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param group - Grupo ya cargado.
+   * @param actor - Quien pide.
+   * @throws ResourceNotFoundException si el foro restringe su público y el
+   *   actor no pertenece a él.
+   */
+  async assertAudienceVisible(
+    em: EntityManager,
+    group: Groups,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (!this.audience.isRestricted(group.visibilityConceptId)) return;
+    if (this.visibility.isPlatform(actor)) return;
+    if (
+      await this.audience.isEligible(
+        em,
+        group.visibilityConceptId,
+        group.tenantId,
+        actor,
+      )
+    )
+      return;
+    throw new ResourceNotFoundException(
+      'Grupo no encontrado',
+      { groupId: group.id },
+      CommunityErrorReason.GROUP_NOT_FOUND,
+    );
+  }
+
+  /**
+   * Exige que la organización activa pueda abrir foros o iniciar debates.
+   *
+   * ALOVIDA prohíbe que una aseguradora cree foros o inicie debates, y la
+   * organización médica sí puede (ORG-FOR-001, DOC-SOC-010, API#837). El tipo
+   * de organización sale de la base —`directory.tenants`— y no del claim
+   * `tenantTypes` del token, que es sólo presentación.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Organización activa del request; sin ella no hay tipo
+   *   contra el cual negar.
+   * @param action - Qué se intenta: abrir un foro o iniciar un debate.
+   * @throws InsufficientRoleException si la organización activa es una aseguradora.
+   */
+  async assertOrganizationMayStartForums(
+    em: EntityManager,
+    tenantId: string | undefined,
+    action: 'CREATE_GROUP' | 'START_DEBATE',
+  ): Promise<void> {
+    if (!tenantId) return;
+    const type = await this.groupsRepo.findTenantTypeConceptId(em, tenantId);
+    if (type !== CONCEPTS.TENANT_TYPE_PAYER) return;
+    throw action === 'CREATE_GROUP'
+      ? new InsufficientRoleException(
+          'Una aseguradora no puede crear foros',
+          undefined,
+          CommunityErrorReason.INSURER_CANNOT_CREATE_GROUP,
+        )
+      : new InsufficientRoleException(
+          'Una aseguradora no puede iniciar debates',
+          undefined,
+          CommunityErrorReason.INSURER_CANNOT_START_DEBATE,
+        );
+  }
+
+  /**
+   * Exige que quien abre un foro de público autorizado pertenezca a ese público.
+   *
+   * Sin esto, el creador quedaría fuera de su propio foro: un foro de «personal»
+   * abierto por alguien que no lo es, o de «doctores verificados» por quien no
+   * tiene la matrícula verificada. Una visibilidad que no restringe el público
+   * no exige nada.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param visibilityConceptId - Visibilidad con la que se abre el foro.
+   * @param tenantId - Organización activa, que será la del foro.
+   * @param actor - Quien lo abre.
+   * @throws InsufficientRoleException si el actor no pertenece al público.
+   */
+  async assertActorBelongsToAudience(
+    em: EntityManager,
+    visibilityConceptId: string,
+    tenantId: string | undefined,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (!this.audience.isRestricted(visibilityConceptId)) return;
+    if (
+      await this.audience.isEligible(em, visibilityConceptId, tenantId, actor)
+    )
+      return;
+    throw new InsufficientRoleException(
+      'Para abrir un foro con este público hay que pertenecer a él',
+      undefined,
+      CommunityErrorReason.GROUP_AUDIENCE_OWNER_NOT_ELIGIBLE,
+    );
   }
 
   /**

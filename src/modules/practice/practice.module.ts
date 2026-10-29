@@ -8,6 +8,9 @@ import {
   PractitionerSitesController,
   RoleAssignmentsController,
   InventoryItemsController,
+  OrganizationPracticesController,
+  PracticeInvitationsController,
+  PractitionerInvitationsController,
 } from './controllers';
 import {
   PracticeSitesService,
@@ -21,6 +24,10 @@ import {
   OwnSiteProvisioningService,
   PracticeOrganizationReadService,
   PracticeAccessService,
+  OrganizationPracticeProvisioningService,
+  PracticeAdministrationService,
+  HealthcareServiceOffersService,
+  PracticeAffiliationInvitationsService,
 } from './services';
 import {
   PracticesRepository,
@@ -37,16 +44,18 @@ import {
   PracticeOrganizationReadRepository,
 } from './repositories';
 import { ServiceCatalogRepository } from '../billing/repositories';
-// F0 infraestructura hospitalaria: la estructura (sede, unidad, espacio) se
-// autoriza con la regla de organización —OWNER/ADMIN del tenant o plataforma—
-// que vive en `DirectoryAuthorizationModule`, y versiona en `audit.*_history`
-// con el `HistoryRepository` que exporta `AuditModule`. Ninguno de los dos
-// importa `practice`, así que no cierran ciclo. `BranchesRepository` es una
-// clase sin estado (recibe el `em`): se registra suelta, como el catálogo.
+import { ProcedureReferenceReader } from '../billing/services/procedure-reference.reader';
 import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
-import { AuditModule } from '../audit/audit.module';
+import { TenantsRepository } from '../directory/repositories';
 import { BranchesRepository } from '../directory/repositories/branches.repository';
+// La estructura versiona en `audit.*_history` con el `HistoryRepository` que
+// exporta `AuditModule`; `audit` no importa `practice`, no cierra ciclo.
+import { AuditModule } from '../audit/audit.module';
 import { AddressesRepository } from '../common/repositories';
+// El logo del consultorio pasa por `AttachableFileService` (archivo vivo, de
+// imagen y subido por quien lo fija). `common` no importa `practice`, así que
+// no cierra ciclo.
+import { CommonModule } from '../common/common.module';
 // ALV-005/006: `PractitionerSitesService.createOwnSite` necesita saber de
 // quién es la sesión (`ProfileOwnershipService`); `OwnSiteProvisioningService`
 // necesita crear la dirección de la sede (`AddressesRepository`). Mismo
@@ -68,7 +77,10 @@ import {
 @Module({
   imports: [
     MikroOrmModule.forFeature(Object.values(entities)),
+    // Regla de administración por organización (A-6), sin importar
+    // `DirectoryModule` entero.
     DirectoryAuthorizationModule,
+    CommonModule,
     AuditModule,
   ],
   controllers: [
@@ -78,6 +90,9 @@ import {
     PractitionerSitesController,
     RoleAssignmentsController,
     InventoryItemsController,
+    OrganizationPracticesController,
+    PracticeInvitationsController,
+    PractitionerInvitationsController,
   ],
   providers: [
     // Repositorios
@@ -99,8 +114,13 @@ import {
     // e importarlo cerraría el ciclo. El repositorio no guarda estado —recibe el
     // `em` en cada llamada—, así que una segunda instancia es la misma cosa.
     ServiceCatalogRepository,
-    BranchesRepository,
+    // Lector sin estado del nomenclador: se registra la clase, no `BillingModule`.
+    ProcedureReferenceReader,
     AddressesRepository,
+    // Stateless: sólo lee la verificación de la organización (CM-11).
+    TenantsRepository,
+    // Clase sin estado (recibe el `em`): valida `branchId` al dar de alta sedes.
+    BranchesRepository,
     PersonAccountLinksRepository,
     HealthPractitionerProfilesRepository,
     PatientProfilesRepository,
@@ -117,6 +137,10 @@ import {
     OwnSiteProvisioningService,
     PracticeOrganizationReadService,
     PracticeAccessService,
+    OrganizationPracticeProvisioningService,
+    PracticeAdministrationService,
+    HealthcareServiceOffersService,
+    PracticeAffiliationInvitationsService,
   ],
   // `scheduling` resuelve con esto la sede de cada recurso agendable: el dato
   // vive acá y no se duplica allá. `practice` no importa `scheduling`, así que

@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   AutomationDefinitionService,
   AutomationExecutionService,
@@ -56,6 +61,11 @@ export class AutomationOrchestrationController {
   ) {}
 
   /** UC-48-06. */
+  @Audited({
+    action: 'AUTOMATION_WORKFLOW_DEFINED',
+    entity: 'workflow',
+    entityId: 'result.id',
+  })
   @Post('workflows')
   @Roles('AUTOMATION_ENGINEER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -72,6 +82,11 @@ export class AutomationOrchestrationController {
   }
 
   /** UC-48-07. */
+  @Audited({
+    action: 'AUTOMATION_TRIGGER_CONFIGURED',
+    entity: 'automation_trigger',
+    entityId: 'result.id',
+  })
   @Post('triggers')
   @Roles('AUTOMATION_ENGINEER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -88,6 +103,10 @@ export class AutomationOrchestrationController {
   }
 
   /** Worker · UC-48-07 (evaluación periódica). */
+  @Audited({
+    action: 'AUTOMATION_CALENDAR_TRIGGERS_EVALUATED',
+    entity: 'automation_trigger',
+  })
   @Post('triggers/calendar/tick')
   @Roles('SYSTEM')
   @HttpCode(HttpStatus.OK)
@@ -104,6 +123,11 @@ export class AutomationOrchestrationController {
   }
 
   /** UC-48-08. */
+  @Audited({
+    action: 'AUTOMATION_WORKFLOW_RUN_STARTED',
+    entity: 'workflow_run',
+    entityId: 'result.id',
+  })
   @Post('workflows/:id/runs')
   @Roles('SYSTEM', 'AUTOMATION_ENGINEER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -121,6 +145,11 @@ export class AutomationOrchestrationController {
   }
 
   /** UC-48-09 (arranque del agente). */
+  @Audited({
+    action: 'AGENT_RUN_STARTED',
+    entity: 'agent_run',
+    entityId: 'result.id',
+  })
   @Post('runs/:workflowRunId/agent-runs')
   @Roles('SYSTEM', 'AGENT_RUNTIME', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -138,6 +167,11 @@ export class AutomationOrchestrationController {
   }
 
   /** UC-48-09 (traza) + UC-48-10 (pausa automática). */
+  @Audited({
+    action: 'AGENT_RUN_STEP_RECORDED',
+    entity: 'agent_run_step',
+    entityId: 'result.id',
+  })
   @Post('agent-runs/:id/steps')
   @Roles('SYSTEM', 'AGENT_RUNTIME', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -155,6 +189,11 @@ export class AutomationOrchestrationController {
   }
 
   /** UC-48-10. */
+  @Audited({
+    action: 'AUTOMATION_APPROVAL_REQUESTED',
+    entity: 'automation_approval',
+    entityId: 'result.id',
+  })
   @Post('agent-runs/:id/approvals')
   @Roles('SYSTEM', 'AGENT_RUNTIME', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -172,6 +211,11 @@ export class AutomationOrchestrationController {
   }
 
   /** UC-48-11. */
+  @Audited({
+    action: 'AUTOMATION_APPROVAL_DECIDED',
+    entity: 'automation_approval',
+    entityId: 'param:id',
+  })
   @Post('approvals/:id/decide')
   @Roles('CLINICAL_APPROVER', 'OPERATIONAL_APPROVER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -188,6 +232,11 @@ export class AutomationOrchestrationController {
   }
 
   /** UC-48-13. */
+  @Audited({
+    action: 'RECORD_AUTOMATION_EXECUTED',
+    entity: 'record_automation',
+    entityId: 'param:recordAutomationId',
+  })
   @Post('agent-runs/:id/record-automations/:recordAutomationId/execute')
   @Roles('SYSTEM', 'AGENT_RUNTIME', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -211,6 +260,11 @@ export class AutomationOrchestrationController {
   }
 
   /** UC-48-14. */
+  @Audited({
+    action: 'AUTOMATION_WORKFLOW_RUN_FINALIZED',
+    entity: 'workflow_run',
+    entityId: 'param:workflowRunId',
+  })
   @Post('runs/:workflowRunId/finalize')
   @Roles('SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)

@@ -105,4 +105,80 @@ export class CareSpaces {
 
   @Property({ fieldName: 'cleanup_minutes', columnType: 'int', nullable: true })
   cleanupMinutes?: number;
+
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants (inferida)
+  tenantId!: string;
+
+  @Property({ fieldName: 'form_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
+  formConceptId?: string;
+
+  @Property({ columnType: 'varchar', nullable: true })
+  description?: string;
+
+  @Property({ fieldName: 'floor_number', columnType: 'int', nullable: true })
+  floorNumber?: number;
+
+  @Property({
+    fieldName: 'area_m2',
+    columnType: 'numeric(10,2)',
+    nullable: true,
+  })
+  areaM2?: string;
+
+  @Property({ fieldName: 'asepsis_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
+  asepsisConceptId?: string;
+
+  @Property({ fieldName: 'pressure_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
+  pressureConceptId?: string;
+
+  @Property({
+    fieldName: 'air_changes_per_hour',
+    columnType: 'numeric(6,2)',
+    nullable: true,
+  })
+  airChangesPerHour?: string;
+
+  @Property({
+    fieldName: 'hvac_validated_on',
+    columnType: 'date',
+    nullable: true,
+  })
+  hvacValidatedOn?: Date;
+
+  @Property({
+    fieldName: 'sex_restriction_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  sexRestrictionConceptId?: string;
+
+  @Property({ fieldName: 'age_group_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
+  ageGroupConceptId?: string;
+
+  @Property({
+    fieldName: 'bed_category_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  bedCategoryConceptId?: string;
+
+  @Property({ type: 'boolean', nullable: true })
+  censable?: boolean;
+
+  @Property({ columnType: 'varchar(13)', nullable: true })
+  gln?: string;
+
+  @Property({
+    fieldName: 'valid_from',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  validFrom?: Date;
+
+  @Property({
+    fieldName: 'valid_to',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  validTo?: Date;
 }

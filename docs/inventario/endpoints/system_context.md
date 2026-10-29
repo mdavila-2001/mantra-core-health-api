@@ -35,7 +35,7 @@
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SystemContextController.createContext` — `src/modules/system_context/controllers/system-context.controller.ts:259`
+- **Implementación:** `SystemContextController.createContext` — `src/modules/system_context/controllers/system-context.controller.ts:289`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -45,43 +45,43 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /system-context/contexts` la atiende `SystemContextController.createContext` (src/modules/system_context/controllers/system-context.controller.ts:259). Exige sesión con alguno de los roles PLATFORM_ADMIN, GOVERNANCE. Valida el cuerpo como `CreateSystemContextDto` (11 campos, 5 obligatorios). Delega en `SystemContextsService.createContext`. Crea filas en system_context.system_context_versions, system_context.system_contexts. Actualiza system_context.system_contexts. Lee system_context.system_contexts.
+`POST /system-context/contexts` la atiende `SystemContextController.createContext` (src/modules/system_context/controllers/system-context.controller.ts:289). Exige sesión con alguno de los roles PLATFORM_ADMIN, GOVERNANCE. Valida el cuerpo como `CreateSystemContextDto` (11 campos, 5 obligatorios). Delega en `SystemContextsService.createContext`. Crea filas en system_context.system_context_versions, system_context.system_contexts. Actualiza system_context.system_contexts. Lee system_context.system_contexts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, GOVERNANCE | `src/modules/system_context/controllers/system-context.controller.ts:259` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: PLATFORM_ADMIN, GOVERNANCE | `src/modules/system_context/controllers/system-context.controller.ts:289` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `system_context.system_context_versions` | ESCRIBE | CREA | DIRECTA | SystemContextController.createContext → SystemContextsService.createContext → SystemContextRepository.createContextVersion | `src/modules/system_context/repositories/system-context.repository.ts:769` |
-| `system_context.system_contexts` | ESCRIBE | ACTUALIZA | POR_TIPO | SystemContextController.createContext → SystemContextsService.createContext | `src/modules/system_context/services/system-contexts.service.ts:106` |
-| `system_context.system_contexts` | ESCRIBE | CREA | DIRECTA | SystemContextController.createContext → SystemContextsService.createContext → SystemContextRepository.createContext | `src/modules/system_context/repositories/system-context.repository.ts:697` |
-| `system_context.system_contexts` | LEE | LEE | DIRECTA | SystemContextController.createContext → SystemContextsService.createContext → SystemContextRepository.findContextByCode | `src/modules/system_context/repositories/system-context.repository.ts:753` |
+| `system_context.system_context_versions` | ESCRIBE | CREA | DIRECTA | SystemContextController.createContext → SystemContextsService.createContext → SystemContextRepository.createContextVersion | `src/modules/system_context/repositories/system-context.repository.ts:789` |
+| `system_context.system_contexts` | ESCRIBE | ACTUALIZA | POR_TIPO | SystemContextController.createContext → SystemContextsService.createContext | `src/modules/system_context/services/system-contexts.service.ts:113` |
+| `system_context.system_contexts` | ESCRIBE | CREA | DIRECTA | SystemContextController.createContext → SystemContextsService.createContext → SystemContextRepository.createContext | `src/modules/system_context/repositories/system-context.repository.ts:717` |
+| `system_context.system_contexts` | LEE | LEE | DIRECTA | SystemContextController.createContext → SystemContextsService.createContext → SystemContextRepository.findContextByCode | `src/modules/system_context/repositories/system-context.repository.ts:773` |
 
 ### Cuerpo — DTO `CreateSystemContextDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `code` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Código único del contexto | `src/modules/system_context/dto/system-context.dto.ts:595` |
-| `name` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | — | `src/modules/system_context/dto/system-context.dto.ts:603` |
-| `description` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/system_context/dto/system-context.dto.ts:611` |
-| `contextTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Tipo de contexto (catálogo abierto) | `src/modules/system_context/dto/system-context.dto.ts:621` |
-| `scopeTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Ámbito del contexto (catálogo abierto) | `src/modules/system_context/dto/system-context.dto.ts:631` |
-| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/system_context/dto/system-context.dto.ts:639` |
-| `countryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/system_context/dto/system-context.dto.ts:647` |
-| `localeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/system_context/dto/system-context.dto.ts:655` |
-| `refreshPolicyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Política de refresco (catálogo abierto) | `src/modules/system_context/dto/system-context.dto.ts:666` |
-| `schemaVersion` | `string` | No | longitud máxima 50 | `@IsOptional()` `@IsString()` `@MaxLength(50)` | — | `src/modules/system_context/dto/system-context.dto.ts:675` |
-| `contextJson` | `object` | Sí | — | `@IsObject()` | Contenido del contexto. Nunca secretos: sólo referencias gobernadas. | `src/modules/system_context/dto/system-context.dto.ts:685` |
+| `code` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Código único del contexto | `src/modules/system_context/dto/system-context.dto.ts:596` |
+| `name` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | — | `src/modules/system_context/dto/system-context.dto.ts:604` |
+| `description` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/system_context/dto/system-context.dto.ts:612` |
+| `contextTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Tipo de contexto (catálogo abierto) | `src/modules/system_context/dto/system-context.dto.ts:622` |
+| `scopeTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Ámbito del contexto (catálogo abierto) | `src/modules/system_context/dto/system-context.dto.ts:632` |
+| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/system_context/dto/system-context.dto.ts:640` |
+| `countryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/system_context/dto/system-context.dto.ts:648` |
+| `localeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/system_context/dto/system-context.dto.ts:656` |
+| `refreshPolicyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Política de refresco (catálogo abierto) | `src/modules/system_context/dto/system-context.dto.ts:667` |
+| `schemaVersion` | `string` | No | longitud máxima 50 | `@IsOptional()` `@IsString()` `@MaxLength(50)` | — | `src/modules/system_context/dto/system-context.dto.ts:676` |
+| `contextJson` | `object` | Sí | — | `@IsObject()` | Contenido del contexto. Nunca secretos: sólo referencias gobernadas. | `src/modules/system_context/dto/system-context.dto.ts:686` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -119,11 +119,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/system_context/dto/system-context.dto.ts:696` |
-| `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/system_context/dto/system-context.dto.ts:702` |
-| `currentVersionId` | `string` | Sí | formato uuid | — | Versión 1, creada en la misma transacción | `src/modules/system_context/dto/system-context.dto.ts:711` |
-| `contentHash` | `string` | Sí | — | — | Hash del contenido de la versión inicial | `src/modules/system_context/dto/system-context.dto.ts:717` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:723` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/system_context/dto/system-context.dto.ts:697` |
+| `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/system_context/dto/system-context.dto.ts:703` |
+| `currentVersionId` | `string` | Sí | formato uuid | — | Versión 1, creada en la misma transacción | `src/modules/system_context/dto/system-context.dto.ts:712` |
+| `contentHash` | `string` | Sí | — | — | Hash del contenido de la versión inicial | `src/modules/system_context/dto/system-context.dto.ts:718` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:724` |
 
 ### Respuestas posibles
 
@@ -135,6 +135,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: Ya existe un contexto con ese código |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.PAYLOAD_TOO_LARGE} |
 
 El árbol de decisión completo está en [flujos](../flujos/system_context.md).
 
@@ -157,7 +158,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SystemContextController.createContextBinding` — `src/modules/system_context/controllers/system-context.controller.ts:309`
+- **Implementación:** `SystemContextController.createContextBinding` — `src/modules/system_context/controllers/system-context.controller.ts:354`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -167,27 +168,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /system-context/contexts/{id}/bindings` la atiende `SystemContextController.createContextBinding` (src/modules/system_context/controllers/system-context.controller.ts:309). Exige sesión con alguno de los roles MODULE_OWNER, PLATFORM_ADMIN. Valida el cuerpo como `CreateContextBindingDto` (8 campos, 2 obligatorios). Delega en `SystemContextsService.createBinding`. Crea filas en system_context.system_context_bindings. Lee system_context.system_context_bindings, system_context.system_contexts.
+`POST /system-context/contexts/{id}/bindings` la atiende `SystemContextController.createContextBinding` (src/modules/system_context/controllers/system-context.controller.ts:354). Exige sesión con alguno de los roles MODULE_OWNER, PLATFORM_ADMIN. Valida el cuerpo como `CreateContextBindingDto` (8 campos, 2 obligatorios). Delega en `SystemContextsService.createBinding`. Crea filas en system_context.system_context_bindings. Lee system_context.system_context_bindings, system_context.system_contexts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: MODULE_OWNER, PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:309` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_context/controllers/system-context.controller.ts:309` |
+| ROL | Alguno de: MODULE_OWNER, PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:354` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_context/controllers/system-context.controller.ts:354` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `system_context.system_context_bindings` | ESCRIBE | CREA | DIRECTA | SystemContextController.createContextBinding → SystemContextsService.createBinding → SystemContextRepository.createContextBinding | `src/modules/system_context/repositories/system-context.repository.ts:1063` |
-| `system_context.system_context_bindings` | LEE | LEE | DIRECTA | SystemContextController.createContextBinding → SystemContextsService.createBinding → SystemContextRepository.findContextBindingsForConsumer | `src/modules/system_context/repositories/system-context.repository.ts:1090` |
-| `system_context.system_contexts` | LEE | LEE | DIRECTA | SystemContextController.createContextBinding → SystemContextsService.createBinding → SystemContextRepository.findContextById | `src/modules/system_context/repositories/system-context.repository.ts:727` |
+| `system_context.system_context_bindings` | ESCRIBE | CREA | DIRECTA | SystemContextController.createContextBinding → SystemContextsService.createBinding → SystemContextRepository.createContextBinding | `src/modules/system_context/repositories/system-context.repository.ts:1116` |
+| `system_context.system_context_bindings` | LEE | LEE | DIRECTA | SystemContextController.createContextBinding → SystemContextsService.createBinding → SystemContextRepository.findContextBindingsForConsumer | `src/modules/system_context/repositories/system-context.repository.ts:1143` |
+| `system_context.system_contexts` | LEE | LEE | DIRECTA | SystemContextController.createContextBinding → SystemContextsService.createBinding → SystemContextRepository.findContextForUpdate | `src/modules/system_context/repositories/system-context.repository.ts:755` |
 
 ### Parámetros
 
@@ -199,14 +200,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `consumerTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Naturaleza del consumidor (catálogo abierto) | `src/modules/system_context/dto/system-context.dto.ts:1016` |
-| `consumerId` | `string` | Sí | formato uuid | `@IsUUID()` | Consumidor concreto | `src/modules/system_context/dto/system-context.dto.ts:1023` |
-| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/system_context/dto/system-context.dto.ts:1031` |
-| `countryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/system_context/dto/system-context.dto.ts:1039` |
-| `activationRuleJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Condición de activación del binding | `src/modules/system_context/dto/system-context.dto.ts:1047` |
-| `priority` | `number` | No | mínimo 1 | `@IsOptional()` `@IsInt()` `@Min(1)` | Desempata varios bindings; menor gana | `src/modules/system_context/dto/system-context.dto.ts:1059` |
-| `validFrom` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/system_context/dto/system-context.dto.ts:1067` |
-| `validTo` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/system_context/dto/system-context.dto.ts:1075` |
+| `consumerTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Naturaleza del consumidor (catálogo abierto) | `src/modules/system_context/dto/system-context.dto.ts:1018` |
+| `consumerId` | `string` | Sí | formato uuid | `@IsUUID()` | Consumidor concreto | `src/modules/system_context/dto/system-context.dto.ts:1025` |
+| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/system_context/dto/system-context.dto.ts:1033` |
+| `countryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/system_context/dto/system-context.dto.ts:1041` |
+| `activationRuleJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Condición de activación del binding | `src/modules/system_context/dto/system-context.dto.ts:1049` |
+| `priority` | `number` | No | mínimo 1 | `@IsOptional()` `@IsInt()` `@Min(1)` | Desempata varios bindings; menor gana | `src/modules/system_context/dto/system-context.dto.ts:1061` |
+| `validFrom` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/system_context/dto/system-context.dto.ts:1069` |
+| `validTo` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/system_context/dto/system-context.dto.ts:1077` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -238,10 +239,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/system_context/dto/system-context.dto.ts:1086` |
-| `systemContextId` | `string` | Sí | formato uuid | — | Identificador asociado a system context. | `src/modules/system_context/dto/system-context.dto.ts:1092` |
-| `priority` | `number` | Sí | — | — | Valor de priority mantenido por la instancia. | `src/modules/system_context/dto/system-context.dto.ts:1098` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:1104` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/system_context/dto/system-context.dto.ts:1088` |
+| `systemContextId` | `string` | Sí | formato uuid | — | Identificador asociado a system context. | `src/modules/system_context/dto/system-context.dto.ts:1094` |
+| `priority` | `number` | Sí | — | — | Valor de priority mantenido por la instancia. | `src/modules/system_context/dto/system-context.dto.ts:1100` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:1106` |
 
 ### Respuestas posibles
 
@@ -277,7 +278,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SystemContextController.refreshContext` — `src/modules/system_context/controllers/system-context.controller.ts:275`
+- **Implementación:** `SystemContextController.refreshContext` — `src/modules/system_context/controllers/system-context.controller.ts:310`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -287,31 +288,31 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /system-context/contexts/{id}/refresh` la atiende `SystemContextController.refreshContext` (src/modules/system_context/controllers/system-context.controller.ts:275). Exige sesión con alguno de los roles SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `RefreshSystemContextDto` (16 campos, 3 obligatorios). Delega en `SystemContextsService.refreshContext`. Crea filas en system_context.system_context_inputs, system_context.system_context_refresh_runs, system_context.system_context_versions. Actualiza system_context.system_context_refresh_runs. Lee system_context.system_context_refresh_runs, system_context.system_context_versions, system_context.system_contexts.
+`POST /system-context/contexts/{id}/refresh` la atiende `SystemContextController.refreshContext` (src/modules/system_context/controllers/system-context.controller.ts:310). Exige sesión con alguno de los roles SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `RefreshSystemContextDto` (16 campos, 3 obligatorios). Delega en `SystemContextsService.refreshContext`. Crea filas en system_context.system_context_inputs, system_context.system_context_refresh_runs, system_context.system_context_versions. Actualiza system_context.system_context_refresh_runs. Lee system_context.system_context_refresh_runs, system_context.system_context_versions, system_context.system_contexts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:275` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_context/controllers/system-context.controller.ts:275` |
+| ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:310` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_context/controllers/system-context.controller.ts:310` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `system_context.system_context_inputs` | ESCRIBE | CREA | DIRECTA | SystemContextController.refreshContext → SystemContextsService.refreshContext → SystemContextRepository.createContextInput | `src/modules/system_context/repositories/system-context.repository.ts:910` |
-| `system_context.system_context_refresh_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | SystemContextController.refreshContext → SystemContextsService.refreshContext | `src/modules/system_context/services/system-contexts.service.ts:188` |
-| `system_context.system_context_refresh_runs` | ESCRIBE | CREA | DIRECTA | SystemContextController.refreshContext → SystemContextsService.refreshContext → SystemContextRepository.createRefreshRun | `src/modules/system_context/repositories/system-context.repository.ts:982` |
-| `system_context.system_context_refresh_runs` | LEE | LEE | DIRECTA | SystemContextController.refreshContext → SystemContextsService.refreshContext → SystemContextRepository.findRefreshRunByKey | `src/modules/system_context/repositories/system-context.repository.ts:1002` |
-| `system_context.system_context_versions` | ESCRIBE | CREA | DIRECTA | SystemContextController.refreshContext → SystemContextsService.refreshContext → SystemContextRepository.createContextVersion | `src/modules/system_context/repositories/system-context.repository.ts:769` |
-| `system_context.system_context_versions` | LEE | LEE | DIRECTA | SystemContextController.refreshContext → SystemContextsService.refreshContext → SystemContextRepository.findLatestContextVersion | `src/modules/system_context/repositories/system-context.repository.ts:834` |
-| `system_context.system_contexts` | LEE | LEE | DIRECTA | SystemContextController.refreshContext → SystemContextsService.refreshContext → SystemContextRepository.findContextForUpdate | `src/modules/system_context/repositories/system-context.repository.ts:735` |
+| `system_context.system_context_inputs` | ESCRIBE | CREA | DIRECTA | SystemContextController.refreshContext → SystemContextsService.refreshContext → SystemContextRepository.createContextInput | `src/modules/system_context/repositories/system-context.repository.ts:930` |
+| `system_context.system_context_refresh_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | SystemContextController.refreshContext → SystemContextsService.refreshContext | `src/modules/system_context/services/system-contexts.service.ts:206` |
+| `system_context.system_context_refresh_runs` | ESCRIBE | CREA | DIRECTA | SystemContextController.refreshContext → SystemContextsService.refreshContext → SystemContextRepository.createRefreshRun | `src/modules/system_context/repositories/system-context.repository.ts:1002` |
+| `system_context.system_context_refresh_runs` | LEE | LEE | DIRECTA | SystemContextController.refreshContext → SystemContextsService.refreshContext → SystemContextRepository.findRefreshRunByKey | `src/modules/system_context/repositories/system-context.repository.ts:1044` |
+| `system_context.system_context_versions` | ESCRIBE | CREA | DIRECTA | SystemContextController.refreshContext → SystemContextsService.refreshContext → SystemContextRepository.createContextVersion | `src/modules/system_context/repositories/system-context.repository.ts:789` |
+| `system_context.system_context_versions` | LEE | LEE | DIRECTA | SystemContextController.refreshContext → SystemContextsService.refreshContext → SystemContextRepository.findLatestContextVersion | `src/modules/system_context/repositories/system-context.repository.ts:854` |
+| `system_context.system_contexts` | LEE | LEE | DIRECTA | SystemContextController.refreshContext → SystemContextsService.refreshContext → SystemContextRepository.findContextForUpdate | `src/modules/system_context/repositories/system-context.repository.ts:755` |
 
 ### Parámetros
 
@@ -323,22 +324,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `idempotencyKey` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Clave de idempotencia de la corrida | `src/modules/system_context/dto/system-context.dto.ts:843` |
-| `trigger` | `string` | Sí | valores: SCHEDULED, MANUAL, EVENT | `@IsIn(REFRESH_TRIGGERS)` | — | `src/modules/system_context/dto/system-context.dto.ts:850` |
-| `contextJson` | `object` | Sí | — | `@IsObject()` | Contenido regenerado del contexto | `src/modules/system_context/dto/system-context.dto.ts:857` |
-| `schemaVersion` | `string` | No | longitud máxima 50 | `@IsOptional()` `@IsString()` `@MaxLength(50)` | — | `src/modules/system_context/dto/system-context.dto.ts:866` |
-| `generatedByAgentId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Agente que generó el contenido | `src/modules/system_context/dto/system-context.dto.ts:877` |
-| `inputs` | `array<ContextInputDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => ContextInputDto)` | Procedencia de lo recogido | `src/modules/system_context/dto/system-context.dto.ts:890` |
-| `inputs[].sourceTypeConceptId` | `string` | No | formato uuid | `@IsUUID()` | Naturaleza de la fuente (catálogo abierto) | `src/modules/system_context/dto/system-context.dto.ts:742` |
-| `inputs[].sourceSchemaName` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/system_context/dto/system-context.dto.ts:751` |
-| `inputs[].sourceEntityName` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/system_context/dto/system-context.dto.ts:760` |
-| `inputs[].sourceRecordId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/system_context/dto/system-context.dto.ts:768` |
-| `inputs[].sourceVersionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/system_context/dto/system-context.dto.ts:776` |
-| `inputs[].sourceContentHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash del contenido de la fuente en el momento del snapshot | `src/modules/system_context/dto/system-context.dto.ts:787` |
-| `inputs[].sourceFreshnessAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Frescura del dato de origen | `src/modules/system_context/dto/system-context.dto.ts:798` |
-| `inputs[].precedence` | `number` | No | mínimo 1 | `@IsOptional()` `@IsInt()` `@Min(1)` | Precedencia; menor gana ante colisión | `src/modules/system_context/dto/system-context.dto.ts:810` |
-| `inputs[].required` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Si falta, la corrida falla | `src/modules/system_context/dto/system-context.dto.ts:821` |
-| `inputs[].missing` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | true si la entrada no pudo recogerse | `src/modules/system_context/dto/system-context.dto.ts:829` |
+| `idempotencyKey` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Clave de idempotencia de la corrida | `src/modules/system_context/dto/system-context.dto.ts:844` |
+| `trigger` | `string` | Sí | valores: SCHEDULED, MANUAL, EVENT | `@IsIn(REFRESH_TRIGGERS)` | — | `src/modules/system_context/dto/system-context.dto.ts:851` |
+| `contextJson` | `object` | Sí | — | `@IsObject()` | Contenido regenerado del contexto | `src/modules/system_context/dto/system-context.dto.ts:858` |
+| `schemaVersion` | `string` | No | longitud máxima 50 | `@IsOptional()` `@IsString()` `@MaxLength(50)` | — | `src/modules/system_context/dto/system-context.dto.ts:867` |
+| `generatedByAgentId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Agente que generó el contenido | `src/modules/system_context/dto/system-context.dto.ts:878` |
+| `inputs` | `array<ContextInputDto>` | No | máximo 500 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(500)` `@ValidateNested({ each: true })` `@Type(() => ContextInputDto)` | Procedencia de lo recogido | `src/modules/system_context/dto/system-context.dto.ts:892` |
+| `inputs[].sourceTypeConceptId` | `string` | No | formato uuid | `@IsUUID()` | Naturaleza de la fuente (catálogo abierto) | `src/modules/system_context/dto/system-context.dto.ts:743` |
+| `inputs[].sourceSchemaName` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/system_context/dto/system-context.dto.ts:752` |
+| `inputs[].sourceEntityName` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/system_context/dto/system-context.dto.ts:761` |
+| `inputs[].sourceRecordId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/system_context/dto/system-context.dto.ts:769` |
+| `inputs[].sourceVersionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/system_context/dto/system-context.dto.ts:777` |
+| `inputs[].sourceContentHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash del contenido de la fuente en el momento del snapshot | `src/modules/system_context/dto/system-context.dto.ts:788` |
+| `inputs[].sourceFreshnessAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Frescura del dato de origen | `src/modules/system_context/dto/system-context.dto.ts:799` |
+| `inputs[].precedence` | `number` | No | mínimo 1 | `@IsOptional()` `@IsInt()` `@Min(1)` | Precedencia; menor gana ante colisión | `src/modules/system_context/dto/system-context.dto.ts:811` |
+| `inputs[].required` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Si falta, la corrida falla | `src/modules/system_context/dto/system-context.dto.ts:822` |
+| `inputs[].missing` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | true si la entrada no pudo recogerse | `src/modules/system_context/dto/system-context.dto.ts:830` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -382,14 +383,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `runId` | `string` | Sí | formato uuid | — | Identificador asociado a run. | `src/modules/system_context/dto/system-context.dto.ts:901` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:907` |
-| `versionId` | `string` | No | formato uuid | — | Versión redactada, si hubo cambio | `src/modules/system_context/dto/system-context.dto.ts:916` |
-| `versionNumber` | `number` | No | — | — | Número de la versión redactada | `src/modules/system_context/dto/system-context.dto.ts:922` |
-| `contentHash` | `string` | Sí | — | — | Hash del contenido regenerado | `src/modules/system_context/dto/system-context.dto.ts:928` |
-| `unchanged` | `boolean` | Sí | — | — | true si el contenido no cambió y no se redactó versión | `src/modules/system_context/dto/system-context.dto.ts:936` |
-| `inputCount` | `number` | Sí | — | — | Entradas de procedencia registradas | `src/modules/system_context/dto/system-context.dto.ts:942` |
-| `duplicate` | `boolean` | Sí | — | — | true si la corrida ya existía con esa clave | `src/modules/system_context/dto/system-context.dto.ts:948` |
+| `runId` | `string` | Sí | formato uuid | — | Identificador asociado a run. | `src/modules/system_context/dto/system-context.dto.ts:903` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:909` |
+| `versionId` | `string` | No | formato uuid | — | Versión redactada, si hubo cambio | `src/modules/system_context/dto/system-context.dto.ts:918` |
+| `versionNumber` | `number` | No | — | — | Número de la versión redactada | `src/modules/system_context/dto/system-context.dto.ts:924` |
+| `contentHash` | `string` | Sí | — | — | Hash del contenido regenerado | `src/modules/system_context/dto/system-context.dto.ts:930` |
+| `unchanged` | `boolean` | Sí | — | — | true si el contenido no cambió y no se redactó versión | `src/modules/system_context/dto/system-context.dto.ts:938` |
+| `inputCount` | `number` | Sí | — | — | Entradas de procedencia registradas | `src/modules/system_context/dto/system-context.dto.ts:944` |
+| `duplicate` | `boolean` | Sí | — | — | true si la corrida ya existía con esa clave | `src/modules/system_context/dto/system-context.dto.ts:950` |
 
 ### Respuestas posibles
 
@@ -402,6 +403,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Contexto no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El contexto no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.PAYLOAD_TOO_LARGE}; DomainException: {HttpStatus.BAD_REQUEST} |
 
 El árbol de decisión completo está en [flujos](../flujos/system_context.md).
 
@@ -424,7 +426,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SystemContextController.rollbackContext` — `src/modules/system_context/controllers/system-context.controller.ts:326`
+- **Implementación:** `SystemContextController.rollbackContext` — `src/modules/system_context/controllers/system-context.controller.ts:376`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -434,28 +436,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /system-context/contexts/{id}/rollback` la atiende `SystemContextController.rollbackContext` (src/modules/system_context/controllers/system-context.controller.ts:326). Exige sesión con alguno de los roles PLATFORM_ADMIN. Valida el cuerpo como `RollbackContextDto` (3 campos, 2 obligatorios). Delega en `SystemContextsService.rollbackContext`. Actualiza system_context.system_context_versions, system_context.system_contexts. Lee system_context.system_context_versions, system_context.system_contexts.
+`POST /system-context/contexts/{id}/rollback` la atiende `SystemContextController.rollbackContext` (src/modules/system_context/controllers/system-context.controller.ts:376). Exige sesión con alguno de los roles PLATFORM_ADMIN. Valida el cuerpo como `RollbackContextDto` (3 campos, 2 obligatorios). Delega en `SystemContextsService.rollbackContext`. Actualiza system_context.system_context_versions, system_context.system_contexts. Lee system_context.system_context_versions, system_context.system_contexts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:326` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_context/controllers/system-context.controller.ts:326` |
+| ROL | Alguno de: PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:376` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_context/controllers/system-context.controller.ts:376` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `system_context.system_context_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | SystemContextController.rollbackContext → SystemContextsService.rollbackContext | `src/modules/system_context/services/system-contexts.service.ts:558` |
-| `system_context.system_context_versions` | LEE | LEE | DIRECTA | SystemContextController.rollbackContext → SystemContextsService.rollbackContext → SystemContextRepository.findContextVersionForUpdate | `src/modules/system_context/repositories/system-context.repository.ts:816` |
-| `system_context.system_contexts` | ESCRIBE | ACTUALIZA | POR_TIPO | SystemContextController.rollbackContext → SystemContextsService.rollbackContext | `src/modules/system_context/services/system-contexts.service.ts:565` |
-| `system_context.system_contexts` | LEE | LEE | DIRECTA | SystemContextController.rollbackContext → SystemContextsService.rollbackContext → SystemContextRepository.findContextForUpdate | `src/modules/system_context/repositories/system-context.repository.ts:735` |
+| `system_context.system_context_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | SystemContextController.rollbackContext → SystemContextsService.rollbackContext | `src/modules/system_context/services/system-contexts.service.ts:586` |
+| `system_context.system_context_versions` | LEE | LEE | DIRECTA | SystemContextController.rollbackContext → SystemContextsService.rollbackContext → SystemContextRepository.findContextVersionForUpdate | `src/modules/system_context/repositories/system-context.repository.ts:836` |
+| `system_context.system_contexts` | ESCRIBE | ACTUALIZA | POR_TIPO | SystemContextController.rollbackContext → SystemContextsService.rollbackContext | `src/modules/system_context/services/system-contexts.service.ts:593` |
+| `system_context.system_contexts` | LEE | LEE | DIRECTA | SystemContextController.rollbackContext → SystemContextsService.rollbackContext → SystemContextRepository.findContextForUpdate | `src/modules/system_context/repositories/system-context.repository.ts:755` |
 
 ### Parámetros
 
@@ -467,9 +469,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `targetVersionNumber` | `number` | Sí | mínimo 1 | `@IsInt()` `@Min(1)` | Versión a reactivar | `src/modules/system_context/dto/system-context.dto.ts:1119` |
-| `reason` | `string` | Sí | — | `@IsString()` | Por qué se vuelve atrás | `src/modules/system_context/dto/system-context.dto.ts:1126` |
-| `expectedContentHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash esperado de la versión objetivo | `src/modules/system_context/dto/system-context.dto.ts:1135` |
+| `targetVersionNumber` | `number` | Sí | mínimo 1 | `@IsInt()` `@Min(1)` | Versión a reactivar | `src/modules/system_context/dto/system-context.dto.ts:1121` |
+| `reason` | `string` | Sí | — | `@IsString()` | Por qué se vuelve atrás | `src/modules/system_context/dto/system-context.dto.ts:1128` |
+| `expectedContentHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash esperado de la versión objetivo | `src/modules/system_context/dto/system-context.dto.ts:1137` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -496,10 +498,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Versión reactivada | `src/modules/system_context/dto/system-context.dto.ts:1146` |
-| `versionNumber` | `number` | Sí | — | — | Valor de version number mantenido por la instancia. | `src/modules/system_context/dto/system-context.dto.ts:1152` |
-| `supersededVersionId` | `string` | Sí | formato uuid | — | Versión que queda superseded | `src/modules/system_context/dto/system-context.dto.ts:1158` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:1164` |
+| `id` | `string` | Sí | formato uuid | — | Versión reactivada | `src/modules/system_context/dto/system-context.dto.ts:1148` |
+| `versionNumber` | `number` | Sí | — | — | Valor de version number mantenido por la instancia. | `src/modules/system_context/dto/system-context.dto.ts:1154` |
+| `supersededVersionId` | `string` | Sí | formato uuid | — | Versión que queda superseded | `src/modules/system_context/dto/system-context.dto.ts:1160` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:1166` |
 
 ### Respuestas posibles
 
@@ -534,7 +536,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SystemContextController.activateContextVersion` — `src/modules/system_context/controllers/system-context.controller.ts:292`
+- **Implementación:** `SystemContextController.activateContextVersion` — `src/modules/system_context/controllers/system-context.controller.ts:332`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -544,28 +546,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /system-context/contexts/{id}/versions/{version}/activate` la atiende `SystemContextController.activateContextVersion` (src/modules/system_context/controllers/system-context.controller.ts:292). Exige sesión con alguno de los roles PLATFORM_ADMIN. Valida el cuerpo como `ActivateContextVersionDto` (1 campo, 0 obligatorios). Delega en `SystemContextsService.activateVersion`. Actualiza system_context.system_context_versions, system_context.system_contexts. Lee system_context.system_context_versions, system_context.system_contexts.
+`POST /system-context/contexts/{id}/versions/{version}/activate` la atiende `SystemContextController.activateContextVersion` (src/modules/system_context/controllers/system-context.controller.ts:332). Exige sesión con alguno de los roles PLATFORM_ADMIN. Valida el cuerpo como `ActivateContextVersionDto` (1 campo, 0 obligatorios). Delega en `SystemContextsService.activateVersion`. Actualiza system_context.system_context_versions, system_context.system_contexts. Lee system_context.system_context_versions, system_context.system_contexts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:292` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_context/controllers/system-context.controller.ts:292` |
+| ROL | Alguno de: PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:332` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_context/controllers/system-context.controller.ts:332` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `system_context.system_context_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | SystemContextController.activateContextVersion → SystemContextsService.activateVersion | `src/modules/system_context/services/system-contexts.service.ts:375` |
-| `system_context.system_context_versions` | LEE | LEE | DIRECTA | SystemContextController.activateContextVersion → SystemContextsService.activateVersion → SystemContextRepository.findContextVersionForUpdate | `src/modules/system_context/repositories/system-context.repository.ts:816` |
-| `system_context.system_contexts` | ESCRIBE | ACTUALIZA | POR_TIPO | SystemContextController.activateContextVersion → SystemContextsService.activateVersion | `src/modules/system_context/services/system-contexts.service.ts:383` |
-| `system_context.system_contexts` | LEE | LEE | DIRECTA | SystemContextController.activateContextVersion → SystemContextsService.activateVersion → SystemContextRepository.findContextForUpdate | `src/modules/system_context/repositories/system-context.repository.ts:735` |
+| `system_context.system_context_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | SystemContextController.activateContextVersion → SystemContextsService.activateVersion | `src/modules/system_context/services/system-contexts.service.ts:396` |
+| `system_context.system_context_versions` | LEE | LEE | DIRECTA | SystemContextController.activateContextVersion → SystemContextsService.activateVersion → SystemContextRepository.findContextVersionForUpdate | `src/modules/system_context/repositories/system-context.repository.ts:836` |
+| `system_context.system_contexts` | ESCRIBE | ACTUALIZA | POR_TIPO | SystemContextController.activateContextVersion → SystemContextsService.activateVersion | `src/modules/system_context/services/system-contexts.service.ts:404` |
+| `system_context.system_contexts` | LEE | LEE | DIRECTA | SystemContextController.activateContextVersion → SystemContextsService.activateVersion → SystemContextRepository.findContextForUpdate | `src/modules/system_context/repositories/system-context.repository.ts:755` |
 
 ### Parámetros
 
@@ -578,7 +580,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `expectedContentHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash esperado; si no coincide con el de la versión, no se activa | `src/modules/system_context/dto/system-context.dto.ts:967` |
+| `expectedContentHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash esperado; si no coincide con el de la versión, no se activa | `src/modules/system_context/dto/system-context.dto.ts:969` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -600,10 +602,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/system_context/dto/system-context.dto.ts:978` |
-| `versionNumber` | `number` | Sí | — | — | Valor de version number mantenido por la instancia. | `src/modules/system_context/dto/system-context.dto.ts:984` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:990` |
-| `supersededVersionId` | `string` | No | formato uuid | — | Versión que queda superseded | `src/modules/system_context/dto/system-context.dto.ts:999` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/system_context/dto/system-context.dto.ts:980` |
+| `versionNumber` | `number` | Sí | — | — | Valor de version number mantenido por la instancia. | `src/modules/system_context/dto/system-context.dto.ts:986` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:992` |
+| `supersededVersionId` | `string` | No | formato uuid | — | Versión que queda superseded | `src/modules/system_context/dto/system-context.dto.ts:1001` |
 
 ### Respuestas posibles
 
@@ -639,7 +641,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SystemContextController.readEnum` — `src/modules/system_context/controllers/system-context.controller.ts:132`
+- **Implementación:** `SystemContextController.readEnum` — `src/modules/system_context/controllers/system-context.controller.ts:133`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -649,20 +651,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /system-context/dynamic-enums` la atiende `SystemContextController.readEnum` (src/modules/system_context/controllers/system-context.controller.ts:132). Es una ruta pública: no exige token. Delega en `DynamicEnumsService.readEnum`. Lee system_context.dynamic_enum_bindings, system_context.dynamic_enum_definitions, system_context.dynamic_enum_options, system_context.dynamic_enum_versions, terminology.concept_designations.
+`GET /system-context/dynamic-enums` la atiende `SystemContextController.readEnum` (src/modules/system_context/controllers/system-context.controller.ts:133). Es una ruta pública: no exige token. Delega en `DynamicEnumsService.readEnum`. Lee system_context.dynamic_enum_bindings, system_context.dynamic_enum_definitions, system_context.dynamic_enum_options, system_context.dynamic_enum_versions, terminology.concept_designations.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
-| AUTENTICACION | Ruta pública: no exige token | `src/modules/system_context/controllers/system-context.controller.ts:132` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| AUTENTICACION | Ruta pública: no exige token | `src/modules/system_context/controllers/system-context.controller.ts:133` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `system_context.dynamic_enum_bindings` | LEE | LEE | DIRECTA | SystemContextController.readEnum → DynamicEnumsService.readEnum → DynamicEnumsService.definitionForTarget → SystemContextRepository.findEnumBindingByTarget | `src/modules/system_context/repositories/system-context.repository.ts:562` |
+| `system_context.dynamic_enum_bindings` | LEE | LEE | DIRECTA | SystemContextController.readEnum → DynamicEnumsService.readEnum → DynamicEnumsService.definitionForTarget → SystemContextRepository.findEnumBindingByTarget | `src/modules/system_context/repositories/system-context.repository.ts:582` |
 | `system_context.dynamic_enum_definitions` | LEE | LEE | DIRECTA | SystemContextController.readEnum → DynamicEnumsService.readEnum → SystemContextRepository.findEnumDefinitionByCode | `src/modules/system_context/repositories/system-context.repository.ts:244` |
 | `system_context.dynamic_enum_options` | LEE | LEE | DIRECTA | SystemContextController.readEnum → DynamicEnumsService.readEnum → SystemContextRepository.findEnumOptions | `src/modules/system_context/repositories/system-context.repository.ts:436` |
 | `system_context.dynamic_enum_versions` | LEE | LEE | DIRECTA | SystemContextController.readEnum → DynamicEnumsService.readEnum → SystemContextRepository.findPublishedEnumVersion | `src/modules/system_context/repositories/system-context.repository.ts:393` |
@@ -683,23 +685,23 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `code` | `string` | Sí | — | — | Código estable de la enumeración. | `src/modules/system_context/dto/system-context.dto.ts:1228` |
-| `name` | `string` | Sí | — | — | Nombre legible de la enumeración. | `src/modules/system_context/dto/system-context.dto.ts:1234` |
-| `description` | `string` | No | — | — | Qué gobierna la enumeración. | `src/modules/system_context/dto/system-context.dto.ts:1240` |
-| `definitionId` | `string` | Sí | formato uuid | — | Identificador de la definición. | `src/modules/system_context/dto/system-context.dto.ts:1246` |
-| `valueSetId` | `string` | Sí | formato uuid | — | Conjunto de valores de terminología del que sale la enumeración. | `src/modules/system_context/dto/system-context.dto.ts:1252` |
-| `versionId` | `string` | Sí | formato uuid | — | Versión publicada de la que salen las opciones. | `src/modules/system_context/dto/system-context.dto.ts:1258` |
-| `valueSetVersionId` | `string` | Sí | formato uuid | — | Versión del value set que la versión vigente congeló. Es lo que hay que volver a mandar para redactar la siguiente: la entidad la exige y ninguna otra lectura la exponía. | `src/modules/system_context/dto/system-context.dto.ts:1267` |
-| `schemaVersion` | `string` | Sí | — | — | Versión de esquema que la versión vigente declara. Se repite al redactar. | `src/modules/system_context/dto/system-context.dto.ts:1271` |
-| `cacheToken` | `string` | No | — | — | Testigo de caché de la versión publicada. | `src/modules/system_context/dto/system-context.dto.ts:1277` |
-| `allowCustomValue` | `boolean` | Sí | — | — | Si el campo admite un valor fuera del conjunto. | `src/modules/system_context/dto/system-context.dto.ts:1283` |
-| `options` | `array<DynamicEnumOptionItemDto>` | Sí | — | — | Opciones habilitadas, en el orden en que se ofrecen. | `src/modules/system_context/dto/system-context.dto.ts:1289` |
-| `options[].conceptId` | `string` | Sí | formato uuid | — | Concepto que respalda la opción; es el valor que se envía al escribir. | `src/modules/system_context/dto/system-context.dto.ts:1181` |
-| `options[].code` | `string` | Sí | — | — | Código estable del concepto. | `src/modules/system_context/dto/system-context.dto.ts:1187` |
-| `options[].display` | `string` | Sí | — | — | Rótulo legible de la opción. | `src/modules/system_context/dto/system-context.dto.ts:1193` |
-| `options[].displayEs` | `string` | No | — | — | Nombre en castellano (designación `ES` preferida del concepto), si existe. `display` es el rótulo del sistema de codificación y está en inglés («Complete blood count»); el selector prefiere éste cuando viene. | `src/modules/system_context/dto/system-context.dto.ts:1202` |
-| `options[].ordinal` | `number` | No | — | — | Posición en la que se ofrece, empezando en cero. | `src/modules/system_context/dto/system-context.dto.ts:1208` |
-| `options[].isDefault` | `boolean` | Sí | — | — | Si la opción viene preseleccionada. | `src/modules/system_context/dto/system-context.dto.ts:1214` |
+| `code` | `string` | Sí | — | — | Código estable de la enumeración. | `src/modules/system_context/dto/system-context.dto.ts:1230` |
+| `name` | `string` | Sí | — | — | Nombre legible de la enumeración. | `src/modules/system_context/dto/system-context.dto.ts:1236` |
+| `description` | `string` | No | — | — | Qué gobierna la enumeración. | `src/modules/system_context/dto/system-context.dto.ts:1242` |
+| `definitionId` | `string` | Sí | formato uuid | — | Identificador de la definición. | `src/modules/system_context/dto/system-context.dto.ts:1248` |
+| `valueSetId` | `string` | Sí | formato uuid | — | Conjunto de valores de terminología del que sale la enumeración. | `src/modules/system_context/dto/system-context.dto.ts:1254` |
+| `versionId` | `string` | Sí | formato uuid | — | Versión publicada de la que salen las opciones. | `src/modules/system_context/dto/system-context.dto.ts:1260` |
+| `valueSetVersionId` | `string` | Sí | formato uuid | — | Versión del value set que la versión vigente congeló. Es lo que hay que volver a mandar para redactar la siguiente: la entidad la exige y ninguna otra lectura la exponía. | `src/modules/system_context/dto/system-context.dto.ts:1269` |
+| `schemaVersion` | `string` | Sí | — | — | Versión de esquema que la versión vigente declara. Se repite al redactar. | `src/modules/system_context/dto/system-context.dto.ts:1273` |
+| `cacheToken` | `string` | No | — | — | Testigo de caché de la versión publicada. | `src/modules/system_context/dto/system-context.dto.ts:1279` |
+| `allowCustomValue` | `boolean` | Sí | — | — | Si el campo admite un valor fuera del conjunto. | `src/modules/system_context/dto/system-context.dto.ts:1285` |
+| `options` | `array<DynamicEnumOptionItemDto>` | Sí | — | — | Opciones habilitadas, en el orden en que se ofrecen. | `src/modules/system_context/dto/system-context.dto.ts:1291` |
+| `options[].conceptId` | `string` | Sí | formato uuid | — | Concepto que respalda la opción; es el valor que se envía al escribir. | `src/modules/system_context/dto/system-context.dto.ts:1183` |
+| `options[].code` | `string` | Sí | — | — | Código estable del concepto. | `src/modules/system_context/dto/system-context.dto.ts:1189` |
+| `options[].display` | `string` | Sí | — | — | Rótulo legible de la opción. | `src/modules/system_context/dto/system-context.dto.ts:1195` |
+| `options[].displayEs` | `string` | No | — | — | Nombre en castellano (designación `ES` preferida del concepto), si existe. `display` es el rótulo del sistema de codificación y está en inglés («Complete blood count»); el selector prefiere éste cuando viene. | `src/modules/system_context/dto/system-context.dto.ts:1204` |
+| `options[].ordinal` | `number` | No | — | — | Posición en la que se ofrece, empezando en cero. | `src/modules/system_context/dto/system-context.dto.ts:1210` |
+| `options[].isDefault` | `boolean` | Sí | — | — | Si la opción viene preseleccionada. | `src/modules/system_context/dto/system-context.dto.ts:1216` |
 
 ### Respuestas posibles
 
@@ -719,6 +721,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_context.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/lab-reception-inbox.int-spec.ts:217` |
+| INTEGRACION | `test/integration/laboratory-registration.int-spec.ts:56` |
 | CONTROLADOR | `src/modules/system_context/controllers/system-context.controller.spec.ts:196` |
 
 ### Flujos
@@ -734,7 +737,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SystemContextController.listEnumBindings` — `src/modules/system_context/controllers/system-context.controller.ts:92`
+- **Implementación:** `SystemContextController.listEnumBindings` — `src/modules/system_context/controllers/system-context.controller.ts:93`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -744,23 +747,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /system-context/dynamic-enums/bindings` la atiende `SystemContextController.listEnumBindings` (src/modules/system_context/controllers/system-context.controller.ts:92). Exige sesión; el controlador no declara roles. Delega en `DynamicEnumsService.listBindings`. Lee system_context.dynamic_enum_bindings, system_context.dynamic_enum_definitions.
+`GET /system-context/dynamic-enums/bindings` la atiende `SystemContextController.listEnumBindings` (src/modules/system_context/controllers/system-context.controller.ts:93). Exige sesión; el controlador no declara roles. Delega en `DynamicEnumsService.listBindings`. Lee system_context.dynamic_enum_bindings, system_context.dynamic_enum_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/system_context/controllers/system-context.controller.ts:92` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/system_context/controllers/system-context.controller.ts:93` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `system_context.dynamic_enum_bindings` | LEE | LEE | DIRECTA | SystemContextController.listEnumBindings → DynamicEnumsService.listBindings → SystemContextRepository.findActiveEnumBindings | `src/modules/system_context/repositories/system-context.repository.ts:601` |
-| `system_context.dynamic_enum_definitions` | LEE | LEE | DIRECTA | SystemContextController.listEnumBindings → DynamicEnumsService.listBindings → SystemContextRepository.findEnumDefinitionsByIds | `src/modules/system_context/repositories/system-context.repository.ts:622` |
+| `system_context.dynamic_enum_bindings` | LEE | LEE | DIRECTA | SystemContextController.listEnumBindings → DynamicEnumsService.listBindings → SystemContextRepository.findActiveEnumBindings | `src/modules/system_context/repositories/system-context.repository.ts:621` |
+| `system_context.dynamic_enum_definitions` | LEE | LEE | DIRECTA | SystemContextController.listEnumBindings → DynamicEnumsService.listBindings → SystemContextRepository.findEnumDefinitionsByIds | `src/modules/system_context/repositories/system-context.repository.ts:642` |
 
 ### Parámetros
 
@@ -777,18 +780,18 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<DynamicEnumBindingItemDto>` | Sí | — | — | Amarres activos, ordenados por campo. | `src/modules/system_context/dto/system-context.dto.ts:1368` |
-| `items[].target` | `string` | Sí | — | — | Campo gobernado, en la forma `esquema.tabla.columna`. | `src/modules/system_context/dto/system-context.dto.ts:1303` |
-| `items[].targetSchemaName` | `string` | Sí | — | — | Esquema de la tabla destino. | `src/modules/system_context/dto/system-context.dto.ts:1309` |
-| `items[].targetEntityName` | `string` | Sí | — | — | Tabla destino. | `src/modules/system_context/dto/system-context.dto.ts:1315` |
-| `items[].targetFieldName` | `string` | Sí | — | — | Columna destino. | `src/modules/system_context/dto/system-context.dto.ts:1321` |
-| `items[].enumCode` | `string` | Sí | — | — | Código estable de la enumeración que lo gobierna. | `src/modules/system_context/dto/system-context.dto.ts:1327` |
-| `items[].definitionId` | `string` | Sí | formato uuid | — | Identificador de la definición. | `src/modules/system_context/dto/system-context.dto.ts:1333` |
-| `items[].valueSetId` | `string` | Sí | formato uuid | — | Conjunto de valores del que sale la enumeración. | `src/modules/system_context/dto/system-context.dto.ts:1339` |
-| `items[].required` | `boolean` | Sí | — | — | Si el amarre declara el campo obligatorio. | `src/modules/system_context/dto/system-context.dto.ts:1345` |
-| `items[].fallbackConceptId` | `string` | No | formato uuid | — | Concepto de reserva cuando la validación es permisiva. | `src/modules/system_context/dto/system-context.dto.ts:1351` |
-| `items[].validationModeConceptId` | `string` | No | formato uuid | — | Modo de validación con el que se resuelve el valor propuesto. | `src/modules/system_context/dto/system-context.dto.ts:1357` |
-| `count` | `number` | Sí | — | — | Cuántos amarres trae la respuesta. | `src/modules/system_context/dto/system-context.dto.ts:1374` |
+| `items` | `array<DynamicEnumBindingItemDto>` | Sí | — | — | Amarres activos, ordenados por campo. | `src/modules/system_context/dto/system-context.dto.ts:1370` |
+| `items[].target` | `string` | Sí | — | — | Campo gobernado, en la forma `esquema.tabla.columna`. | `src/modules/system_context/dto/system-context.dto.ts:1305` |
+| `items[].targetSchemaName` | `string` | Sí | — | — | Esquema de la tabla destino. | `src/modules/system_context/dto/system-context.dto.ts:1311` |
+| `items[].targetEntityName` | `string` | Sí | — | — | Tabla destino. | `src/modules/system_context/dto/system-context.dto.ts:1317` |
+| `items[].targetFieldName` | `string` | Sí | — | — | Columna destino. | `src/modules/system_context/dto/system-context.dto.ts:1323` |
+| `items[].enumCode` | `string` | Sí | — | — | Código estable de la enumeración que lo gobierna. | `src/modules/system_context/dto/system-context.dto.ts:1329` |
+| `items[].definitionId` | `string` | Sí | formato uuid | — | Identificador de la definición. | `src/modules/system_context/dto/system-context.dto.ts:1335` |
+| `items[].valueSetId` | `string` | Sí | formato uuid | — | Conjunto de valores del que sale la enumeración. | `src/modules/system_context/dto/system-context.dto.ts:1341` |
+| `items[].required` | `boolean` | Sí | — | — | Si el amarre declara el campo obligatorio. | `src/modules/system_context/dto/system-context.dto.ts:1347` |
+| `items[].fallbackConceptId` | `string` | No | formato uuid | — | Concepto de reserva cuando la validación es permisiva. | `src/modules/system_context/dto/system-context.dto.ts:1353` |
+| `items[].validationModeConceptId` | `string` | No | formato uuid | — | Modo de validación con el que se resuelve el valor propuesto. | `src/modules/system_context/dto/system-context.dto.ts:1359` |
+| `count` | `number` | Sí | — | — | Cuántos amarres trae la respuesta. | `src/modules/system_context/dto/system-context.dto.ts:1376` |
 
 ### Respuestas posibles
 
@@ -820,7 +823,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SystemContextController.createEnumDefinition` — `src/modules/system_context/controllers/system-context.controller.ts:159`
+- **Implementación:** `SystemContextController.createEnumDefinition` — `src/modules/system_context/controllers/system-context.controller.ts:160`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -830,18 +833,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /system-context/dynamic-enums/definitions` la atiende `SystemContextController.createEnumDefinition` (src/modules/system_context/controllers/system-context.controller.ts:159). Exige sesión con alguno de los roles TERMINOLOGY_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `CreateEnumDefinitionDto` (10 campos, 5 obligatorios). Delega en `DynamicEnumsService.createDefinition`. Crea filas en system_context.dynamic_enum_definitions. Lee system_context.dynamic_enum_definitions.
+`POST /system-context/dynamic-enums/definitions` la atiende `SystemContextController.createEnumDefinition` (src/modules/system_context/controllers/system-context.controller.ts:160). Exige sesión con alguno de los roles TERMINOLOGY_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `CreateEnumDefinitionDto` (10 campos, 5 obligatorios). Delega en `DynamicEnumsService.createDefinition`. Crea filas en system_context.dynamic_enum_definitions. Lee system_context.dynamic_enum_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: TERMINOLOGY_ENGINEER, PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:159` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: TERMINOLOGY_ENGINEER, PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:160` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -854,16 +857,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `code` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Código único global de la definición | `src/modules/system_context/dto/system-context.dto.ts:45` |
-| `name` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | — | `src/modules/system_context/dto/system-context.dto.ts:53` |
-| `description` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/system_context/dto/system-context.dto.ts:61` |
-| `valueSetId` | `string` | Sí | formato uuid | `@IsUUID()` | Value set de terminología del que sale el enum | `src/modules/system_context/dto/system-context.dto.ts:71` |
-| `scopeTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Ámbito de la definición (catálogo abierto) | `src/modules/system_context/dto/system-context.dto.ts:81` |
-| `selectionModeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Modo de selección (catálogo abierto) | `src/modules/system_context/dto/system-context.dto.ts:91` |
-| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/system_context/dto/system-context.dto.ts:99` |
-| `countryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/system_context/dto/system-context.dto.ts:107` |
-| `allowTenantExtension` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | El tenant puede añadir opciones propias | `src/modules/system_context/dto/system-context.dto.ts:118` |
-| `allowCustomValue` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Se admite un valor fuera del catálogo | `src/modules/system_context/dto/system-context.dto.ts:129` |
+| `code` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Código único global de la definición | `src/modules/system_context/dto/system-context.dto.ts:46` |
+| `name` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | — | `src/modules/system_context/dto/system-context.dto.ts:54` |
+| `description` | `string` | No | — | `@IsOptional()` `@IsString()` | — | `src/modules/system_context/dto/system-context.dto.ts:62` |
+| `valueSetId` | `string` | Sí | formato uuid | `@IsUUID()` | Value set de terminología del que sale el enum | `src/modules/system_context/dto/system-context.dto.ts:72` |
+| `scopeTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Ámbito de la definición (catálogo abierto) | `src/modules/system_context/dto/system-context.dto.ts:82` |
+| `selectionModeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Modo de selección (catálogo abierto) | `src/modules/system_context/dto/system-context.dto.ts:92` |
+| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/system_context/dto/system-context.dto.ts:100` |
+| `countryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/system_context/dto/system-context.dto.ts:108` |
+| `allowTenantExtension` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | El tenant puede añadir opciones propias | `src/modules/system_context/dto/system-context.dto.ts:119` |
+| `allowCustomValue` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Se admite un valor fuera del catálogo | `src/modules/system_context/dto/system-context.dto.ts:130` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -900,9 +903,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/system_context/dto/system-context.dto.ts:140` |
-| `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/system_context/dto/system-context.dto.ts:146` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | La definición nace en borrador | `src/modules/system_context/dto/system-context.dto.ts:155` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/system_context/dto/system-context.dto.ts:141` |
+| `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/system_context/dto/system-context.dto.ts:147` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | La definición nace en borrador | `src/modules/system_context/dto/system-context.dto.ts:156` |
 
 ### Respuestas posibles
 
@@ -936,7 +939,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SystemContextController.createEnumBinding` — `src/modules/system_context/controllers/system-context.controller.ts:209`
+- **Implementación:** `SystemContextController.createEnumBinding` — `src/modules/system_context/controllers/system-context.controller.ts:225`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -946,26 +949,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /system-context/dynamic-enums/definitions/{defId}/bindings` la atiende `SystemContextController.createEnumBinding` (src/modules/system_context/controllers/system-context.controller.ts:209). Exige sesión con alguno de los roles MODULE_OWNER, PLATFORM_ADMIN. Valida el cuerpo como `CreateEnumBindingDto` (7 campos, 4 obligatorios). Delega en `DynamicEnumsService.createBinding`. Crea filas en system_context.dynamic_enum_bindings. Lee system_context.dynamic_enum_bindings, system_context.dynamic_enum_definitions.
+`POST /system-context/dynamic-enums/definitions/{defId}/bindings` la atiende `SystemContextController.createEnumBinding` (src/modules/system_context/controllers/system-context.controller.ts:225). Exige sesión con alguno de los roles MODULE_OWNER, PLATFORM_ADMIN. Valida el cuerpo como `CreateEnumBindingDto` (7 campos, 4 obligatorios). Delega en `DynamicEnumsService.createBinding`. Crea filas en system_context.dynamic_enum_bindings. Lee system_context.dynamic_enum_bindings, system_context.dynamic_enum_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: MODULE_OWNER, PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:209` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: defId | `src/modules/system_context/controllers/system-context.controller.ts:209` |
+| ROL | Alguno de: MODULE_OWNER, PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:225` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: defId | `src/modules/system_context/controllers/system-context.controller.ts:225` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `system_context.dynamic_enum_bindings` | ESCRIBE | CREA | DIRECTA | SystemContextController.createEnumBinding → DynamicEnumsService.createBinding → SystemContextRepository.createEnumBinding | `src/modules/system_context/repositories/system-context.repository.ts:536` |
-| `system_context.dynamic_enum_bindings` | LEE | LEE | DIRECTA | SystemContextController.createEnumBinding → DynamicEnumsService.createBinding → SystemContextRepository.findEnumBindingByTarget | `src/modules/system_context/repositories/system-context.repository.ts:562` |
+| `system_context.dynamic_enum_bindings` | LEE | LEE | DIRECTA | SystemContextController.createEnumBinding → DynamicEnumsService.createBinding → SystemContextRepository.findEnumBindingByTarget | `src/modules/system_context/repositories/system-context.repository.ts:582` |
 | `system_context.dynamic_enum_definitions` | LEE | LEE | DIRECTA | SystemContextController.createEnumBinding → DynamicEnumsService.createBinding → SystemContextRepository.findEnumDefinitionById | `src/modules/system_context/repositories/system-context.repository.ts:215` |
 
 ### Parámetros
@@ -978,13 +981,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `targetSchemaName` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Esquema del campo destino | `src/modules/system_context/dto/system-context.dto.ts:355` |
-| `targetEntityName` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Entidad del campo destino | `src/modules/system_context/dto/system-context.dto.ts:363` |
-| `targetFieldName` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Campo gobernado por el enum | `src/modules/system_context/dto/system-context.dto.ts:371` |
-| `systemContextId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Contexto que acota la resolución | `src/modules/system_context/dto/system-context.dto.ts:382` |
-| `required` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | El campo no admite quedarse vacío | `src/modules/system_context/dto/system-context.dto.ts:393` |
-| `fallbackConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concepto al que se cae en modo LENIENT; obligatorio en ese modo | `src/modules/system_context/dto/system-context.dto.ts:405` |
-| `validationMode` | `string` | Sí | valores: STRICT, LENIENT | `@IsIn(VALIDATION_MODES)` | — | `src/modules/system_context/dto/system-context.dto.ts:412` |
+| `targetSchemaName` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Esquema del campo destino | `src/modules/system_context/dto/system-context.dto.ts:356` |
+| `targetEntityName` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Entidad del campo destino | `src/modules/system_context/dto/system-context.dto.ts:364` |
+| `targetFieldName` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Campo gobernado por el enum | `src/modules/system_context/dto/system-context.dto.ts:372` |
+| `systemContextId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Contexto que acota la resolución | `src/modules/system_context/dto/system-context.dto.ts:383` |
+| `required` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | El campo no admite quedarse vacío | `src/modules/system_context/dto/system-context.dto.ts:394` |
+| `fallbackConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concepto al que se cae en modo LENIENT; obligatorio en ese modo | `src/modules/system_context/dto/system-context.dto.ts:406` |
+| `validationMode` | `string` | Sí | valores: STRICT, LENIENT | `@IsIn(VALIDATION_MODES)` | — | `src/modules/system_context/dto/system-context.dto.ts:413` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1017,9 +1020,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/system_context/dto/system-context.dto.ts:423` |
-| `dynamicEnumDefinitionId` | `string` | Sí | formato uuid | — | Identificador asociado a dynamic enum definition. | `src/modules/system_context/dto/system-context.dto.ts:429` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:435` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/system_context/dto/system-context.dto.ts:424` |
+| `dynamicEnumDefinitionId` | `string` | Sí | formato uuid | — | Identificador asociado a dynamic enum definition. | `src/modules/system_context/dto/system-context.dto.ts:430` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:436` |
 
 ### Respuestas posibles
 
@@ -1055,7 +1058,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SystemContextController.retireEnumDefinition` — `src/modules/system_context/controllers/system-context.controller.ts:242`
+- **Implementación:** `SystemContextController.retireEnumDefinition` — `src/modules/system_context/controllers/system-context.controller.ts:267`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1065,27 +1068,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /system-context/dynamic-enums/definitions/{defId}/retire` la atiende `SystemContextController.retireEnumDefinition` (src/modules/system_context/controllers/system-context.controller.ts:242). Exige sesión con alguno de los roles PLATFORM_ADMIN. Valida el cuerpo como `RetireEnumDefinitionDto` (1 campo, 1 obligatorio). Delega en `DynamicEnumsService.retireDefinition`. Actualiza system_context.dynamic_enum_bindings, system_context.dynamic_enum_definitions. Lee system_context.dynamic_enum_bindings, system_context.dynamic_enum_definitions.
+`POST /system-context/dynamic-enums/definitions/{defId}/retire` la atiende `SystemContextController.retireEnumDefinition` (src/modules/system_context/controllers/system-context.controller.ts:267). Exige sesión con alguno de los roles PLATFORM_ADMIN. Valida el cuerpo como `RetireEnumDefinitionDto` (1 campo, 1 obligatorio). Delega en `DynamicEnumsService.retireDefinition`. Actualiza system_context.dynamic_enum_bindings, system_context.dynamic_enum_definitions. Lee system_context.dynamic_enum_bindings, system_context.dynamic_enum_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:242` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: defId | `src/modules/system_context/controllers/system-context.controller.ts:242` |
+| ROL | Alguno de: PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:267` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: defId | `src/modules/system_context/controllers/system-context.controller.ts:267` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `system_context.dynamic_enum_bindings` | ESCRIBE | ACTUALIZA | POR_TIPO | SystemContextController.retireEnumDefinition → DynamicEnumsService.retireDefinition | `src/modules/system_context/services/dynamic-enums.service.ts:717` |
-| `system_context.dynamic_enum_bindings` | LEE | LEE | DIRECTA | SystemContextController.retireEnumDefinition → DynamicEnumsService.retireDefinition → SystemContextRepository.findEnumBindingsForUpdate | `src/modules/system_context/repositories/system-context.repository.ts:632` |
-| `system_context.dynamic_enum_definitions` | ESCRIBE | ACTUALIZA | POR_TIPO | SystemContextController.retireEnumDefinition → DynamicEnumsService.retireDefinition | `src/modules/system_context/services/dynamic-enums.service.ts:721` |
+| `system_context.dynamic_enum_bindings` | ESCRIBE | ACTUALIZA | POR_TIPO | SystemContextController.retireEnumDefinition → DynamicEnumsService.retireDefinition | `src/modules/system_context/services/dynamic-enums.service.ts:728` |
+| `system_context.dynamic_enum_bindings` | LEE | LEE | DIRECTA | SystemContextController.retireEnumDefinition → DynamicEnumsService.retireDefinition → SystemContextRepository.findEnumBindingsForUpdate | `src/modules/system_context/repositories/system-context.repository.ts:652` |
+| `system_context.dynamic_enum_definitions` | ESCRIBE | ACTUALIZA | POR_TIPO | SystemContextController.retireEnumDefinition → DynamicEnumsService.retireDefinition | `src/modules/system_context/services/dynamic-enums.service.ts:732` |
 | `system_context.dynamic_enum_definitions` | LEE | LEE | DIRECTA | SystemContextController.retireEnumDefinition → DynamicEnumsService.retireDefinition → SystemContextRepository.findEnumDefinitionForUpdate | `src/modules/system_context/repositories/system-context.repository.ts:226` |
 
 ### Parámetros
@@ -1098,7 +1101,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reason` | `string` | Sí | — | `@IsString()` | Por qué se retira | `src/modules/system_context/dto/system-context.dto.ts:557` |
+| `reason` | `string` | Sí | — | `@IsString()` | Por qué se retira | `src/modules/system_context/dto/system-context.dto.ts:558` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1122,9 +1125,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/system_context/dto/system-context.dto.ts:568` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:574` |
-| `disabledBindings` | `number` | Sí | — | — | Bindings que quedan deshabilitados | `src/modules/system_context/dto/system-context.dto.ts:580` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/system_context/dto/system-context.dto.ts:569` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:575` |
+| `disabledBindings` | `number` | Sí | — | — | Bindings que quedan deshabilitados | `src/modules/system_context/dto/system-context.dto.ts:581` |
 
 ### Respuestas posibles
 
@@ -1160,7 +1163,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SystemContextController.draftEnumVersion` — `src/modules/system_context/controllers/system-context.controller.ts:175`
+- **Implementación:** `SystemContextController.draftEnumVersion` — `src/modules/system_context/controllers/system-context.controller.ts:181`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1170,19 +1173,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /system-context/dynamic-enums/definitions/{defId}/versions` la atiende `SystemContextController.draftEnumVersion` (src/modules/system_context/controllers/system-context.controller.ts:175). Exige sesión con alguno de los roles TERMINOLOGY_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `DraftEnumVersionDto` (10 campos, 6 obligatorios). Delega en `DynamicEnumsService.draftVersion`. Crea filas en system_context.dynamic_enum_options, system_context.dynamic_enum_versions. Lee system_context.dynamic_enum_definitions, system_context.dynamic_enum_versions.
+`POST /system-context/dynamic-enums/definitions/{defId}/versions` la atiende `SystemContextController.draftEnumVersion` (src/modules/system_context/controllers/system-context.controller.ts:181). Exige sesión con alguno de los roles TERMINOLOGY_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `DraftEnumVersionDto` (10 campos, 6 obligatorios). Delega en `DynamicEnumsService.draftVersion`. Crea filas en system_context.dynamic_enum_options, system_context.dynamic_enum_versions. Lee system_context.dynamic_enum_definitions, system_context.dynamic_enum_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: TERMINOLOGY_ENGINEER, PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:175` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: defId | `src/modules/system_context/controllers/system-context.controller.ts:175` |
+| ROL | Alguno de: TERMINOLOGY_ENGINEER, PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:181` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: defId | `src/modules/system_context/controllers/system-context.controller.ts:181` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1203,16 +1206,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `valueSetVersionId` | `string` | Sí | formato uuid | `@IsUUID()` | Versión del value set que se congela | `src/modules/system_context/dto/system-context.dto.ts:244` |
-| `schemaVersion` | `string` | Sí | longitud máxima 50 | `@IsString()` `@MaxLength(50)` | — | `src/modules/system_context/dto/system-context.dto.ts:254` |
-| `options` | `array<EnumOptionDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => EnumOptionDto)` | Snapshot ordenado de las opciones | `src/modules/system_context/dto/system-context.dto.ts:267` |
-| `options[].conceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Concepto de terminología | `src/modules/system_context/dto/system-context.dto.ts:171` |
-| `options[].code` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | — | `src/modules/system_context/dto/system-context.dto.ts:179` |
-| `options[].display` | `string` | Sí | longitud máxima 300 | `@IsString()` `@MaxLength(300)` | — | `src/modules/system_context/dto/system-context.dto.ts:187` |
-| `options[].ordinal` | `number` | No | mínimo 0 | `@IsOptional()` `@IsInt()` `@Min(0)` | Orden de presentación; por defecto, el del array | `src/modules/system_context/dto/system-context.dto.ts:198` |
-| `options[].isDefault` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Sólo una opción puede serlo | `src/modules/system_context/dto/system-context.dto.ts:209` |
-| `options[].enabled` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | — | `src/modules/system_context/dto/system-context.dto.ts:217` |
-| `options[].metadataJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | — | `src/modules/system_context/dto/system-context.dto.ts:225` |
+| `valueSetVersionId` | `string` | Sí | formato uuid | `@IsUUID()` | Versión del value set que se congela | `src/modules/system_context/dto/system-context.dto.ts:245` |
+| `schemaVersion` | `string` | Sí | longitud máxima 50 | `@IsString()` `@MaxLength(50)` | — | `src/modules/system_context/dto/system-context.dto.ts:255` |
+| `options` | `array<EnumOptionDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => EnumOptionDto)` | Snapshot ordenado de las opciones | `src/modules/system_context/dto/system-context.dto.ts:268` |
+| `options[].conceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Concepto de terminología | `src/modules/system_context/dto/system-context.dto.ts:172` |
+| `options[].code` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | — | `src/modules/system_context/dto/system-context.dto.ts:180` |
+| `options[].display` | `string` | Sí | longitud máxima 300 | `@IsString()` `@MaxLength(300)` | — | `src/modules/system_context/dto/system-context.dto.ts:188` |
+| `options[].ordinal` | `number` | No | mínimo 0 | `@IsOptional()` `@IsInt()` `@Min(0)` | Orden de presentación; por defecto, el del array | `src/modules/system_context/dto/system-context.dto.ts:199` |
+| `options[].isDefault` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Sólo una opción puede serlo | `src/modules/system_context/dto/system-context.dto.ts:210` |
+| `options[].enabled` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | — | `src/modules/system_context/dto/system-context.dto.ts:218` |
+| `options[].metadataJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | — | `src/modules/system_context/dto/system-context.dto.ts:226` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1256,10 +1259,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/system_context/dto/system-context.dto.ts:278` |
-| `versionNumber` | `number` | Sí | — | — | Valor de version number mantenido por la instancia. | `src/modules/system_context/dto/system-context.dto.ts:284` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:290` |
-| `optionIds` | `array<string>` | Sí | formato uuid | — | Valor de option ids mantenido por la instancia. | `src/modules/system_context/dto/system-context.dto.ts:296` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/system_context/dto/system-context.dto.ts:279` |
+| `versionNumber` | `number` | Sí | — | — | Valor de version number mantenido por la instancia. | `src/modules/system_context/dto/system-context.dto.ts:285` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:291` |
+| `optionIds` | `array<string>` | Sí | formato uuid | — | Valor de option ids mantenido por la instancia. | `src/modules/system_context/dto/system-context.dto.ts:297` |
 
 ### Respuestas posibles
 
@@ -1294,7 +1297,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SystemContextController.publishEnumVersion` — `src/modules/system_context/controllers/system-context.controller.ts:192`
+- **Implementación:** `SystemContextController.publishEnumVersion` — `src/modules/system_context/controllers/system-context.controller.ts:203`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1304,26 +1307,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /system-context/dynamic-enums/definitions/{defId}/versions/{version}/publish` la atiende `SystemContextController.publishEnumVersion` (src/modules/system_context/controllers/system-context.controller.ts:192). Exige sesión con alguno de los roles TERMINOLOGY_ENGINEER, PLATFORM_ADMIN. Delega en `DynamicEnumsService.publishVersion`. Actualiza system_context.dynamic_enum_definitions, system_context.dynamic_enum_versions. Lee system_context.dynamic_enum_definitions, system_context.dynamic_enum_options, system_context.dynamic_enum_versions.
+`POST /system-context/dynamic-enums/definitions/{defId}/versions/{version}/publish` la atiende `SystemContextController.publishEnumVersion` (src/modules/system_context/controllers/system-context.controller.ts:203). Exige sesión con alguno de los roles TERMINOLOGY_ENGINEER, PLATFORM_ADMIN. Delega en `DynamicEnumsService.publishVersion`. Actualiza system_context.dynamic_enum_definitions, system_context.dynamic_enum_versions. Lee system_context.dynamic_enum_definitions, system_context.dynamic_enum_options, system_context.dynamic_enum_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: TERMINOLOGY_ENGINEER, PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:192` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: defId | `src/modules/system_context/controllers/system-context.controller.ts:192` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: TERMINOLOGY_ENGINEER, PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:203` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: defId | `src/modules/system_context/controllers/system-context.controller.ts:203` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `system_context.dynamic_enum_definitions` | ESCRIBE | ACTUALIZA | POR_TIPO | SystemContextController.publishEnumVersion → DynamicEnumsService.publishVersion | `src/modules/system_context/services/dynamic-enums.service.ts:468` |
+| `system_context.dynamic_enum_definitions` | ESCRIBE | ACTUALIZA | POR_TIPO | SystemContextController.publishEnumVersion → DynamicEnumsService.publishVersion | `src/modules/system_context/services/dynamic-enums.service.ts:469` |
 | `system_context.dynamic_enum_definitions` | LEE | LEE | DIRECTA | SystemContextController.publishEnumVersion → DynamicEnumsService.publishVersion → SystemContextRepository.findEnumDefinitionForUpdate | `src/modules/system_context/repositories/system-context.repository.ts:226` |
 | `system_context.dynamic_enum_options` | LEE | LEE | DIRECTA | SystemContextController.publishEnumVersion → DynamicEnumsService.publishVersion → SystemContextRepository.countEnabledOptions | `src/modules/system_context/repositories/system-context.repository.ts:476` |
-| `system_context.dynamic_enum_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | SystemContextController.publishEnumVersion → DynamicEnumsService.publishVersion | `src/modules/system_context/services/dynamic-enums.service.ts:458` |
+| `system_context.dynamic_enum_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | SystemContextController.publishEnumVersion → DynamicEnumsService.publishVersion | `src/modules/system_context/services/dynamic-enums.service.ts:459` |
 | `system_context.dynamic_enum_versions` | LEE | LEE | DIRECTA | SystemContextController.publishEnumVersion → DynamicEnumsService.publishVersion → SystemContextRepository.findEnumVersionForUpdate | `src/modules/system_context/repositories/system-context.repository.ts:335` |
 
 ### Parámetros
@@ -1341,11 +1344,11 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/system_context/dto/system-context.dto.ts:311` |
-| `versionNumber` | `number` | Sí | — | — | Valor de version number mantenido por la instancia. | `src/modules/system_context/dto/system-context.dto.ts:317` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:323` |
-| `cacheToken` | `string` | Sí | — | — | Token nuevo; invalida la caché de la definición | `src/modules/system_context/dto/system-context.dto.ts:331` |
-| `supersededVersionId` | `string` | No | formato uuid | — | Versión que queda superseded | `src/modules/system_context/dto/system-context.dto.ts:340` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/system_context/dto/system-context.dto.ts:312` |
+| `versionNumber` | `number` | Sí | — | — | Valor de version number mantenido por la instancia. | `src/modules/system_context/dto/system-context.dto.ts:318` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:324` |
+| `cacheToken` | `string` | Sí | — | — | Token nuevo; invalida la caché de la definición | `src/modules/system_context/dto/system-context.dto.ts:332` |
+| `supersededVersionId` | `string` | No | formato uuid | — | Versión que queda superseded | `src/modules/system_context/dto/system-context.dto.ts:341` |
 
 ### Respuestas posibles
 
@@ -1380,7 +1383,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_context.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SystemContextController.resolveEnumValue` — `src/modules/system_context/controllers/system-context.controller.ts:226`
+- **Implementación:** `SystemContextController.resolveEnumValue` — `src/modules/system_context/controllers/system-context.controller.ts:247`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1390,24 +1393,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Cómo se atiende (sistema)
 
-`POST /system-context/dynamic-enums/resolve` la atiende `SystemContextController.resolveEnumValue` (src/modules/system_context/controllers/system-context.controller.ts:226). Exige sesión con alguno de los roles WRITE_SERVICE, MODULE_OWNER, PLATFORM_ADMIN. Valida el cuerpo como `ResolveEnumValueDto` (5 campos, 3 obligatorios). Delega en `DynamicEnumsService.resolveValue`. Lee system_context.dynamic_enum_bindings, system_context.dynamic_enum_options, system_context.dynamic_enum_versions.
+`POST /system-context/dynamic-enums/resolve` la atiende `SystemContextController.resolveEnumValue` (src/modules/system_context/controllers/system-context.controller.ts:247). Exige sesión con alguno de los roles WRITE_SERVICE, MODULE_OWNER, PLATFORM_ADMIN. Valida el cuerpo como `ResolveEnumValueDto` (5 campos, 3 obligatorios). Delega en `DynamicEnumsService.resolveValue`. Lee system_context.dynamic_enum_bindings, system_context.dynamic_enum_options, system_context.dynamic_enum_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: WRITE_SERVICE, MODULE_OWNER, PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:226` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: WRITE_SERVICE, MODULE_OWNER, PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:247` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `system_context.dynamic_enum_bindings` | LEE | LEE | DIRECTA | SystemContextController.resolveEnumValue → DynamicEnumsService.resolveValue → SystemContextRepository.findEnumBindingByTarget | `src/modules/system_context/repositories/system-context.repository.ts:562` |
+| `system_context.dynamic_enum_bindings` | LEE | LEE | DIRECTA | SystemContextController.resolveEnumValue → DynamicEnumsService.resolveValue → SystemContextRepository.findEnumBindingByTarget | `src/modules/system_context/repositories/system-context.repository.ts:582` |
 | `system_context.dynamic_enum_options` | LEE | LEE | DIRECTA | SystemContextController.resolveEnumValue → DynamicEnumsService.resolveValue → SystemContextRepository.findEnumOptions | `src/modules/system_context/repositories/system-context.repository.ts:436` |
 | `system_context.dynamic_enum_versions` | LEE | LEE | DIRECTA | SystemContextController.resolveEnumValue → DynamicEnumsService.resolveValue → SystemContextRepository.findPublishedEnumVersion | `src/modules/system_context/repositories/system-context.repository.ts:393` |
 
@@ -1415,11 +1418,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `targetSchemaName` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | — | `src/modules/system_context/dto/system-context.dto.ts:450` |
-| `targetEntityName` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | — | `src/modules/system_context/dto/system-context.dto.ts:458` |
-| `targetFieldName` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | — | `src/modules/system_context/dto/system-context.dto.ts:466` |
-| `conceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Valor propuesto, por concepto | `src/modules/system_context/dto/system-context.dto.ts:477` |
-| `code` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Valor propuesto, por código de la opción | `src/modules/system_context/dto/system-context.dto.ts:489` |
+| `targetSchemaName` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | — | `src/modules/system_context/dto/system-context.dto.ts:451` |
+| `targetEntityName` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | — | `src/modules/system_context/dto/system-context.dto.ts:459` |
+| `targetFieldName` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | — | `src/modules/system_context/dto/system-context.dto.ts:467` |
+| `conceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Valor propuesto, por concepto | `src/modules/system_context/dto/system-context.dto.ts:478` |
+| `code` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Valor propuesto, por código de la opción | `src/modules/system_context/dto/system-context.dto.ts:490` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1449,13 +1452,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `accepted` | `boolean` | Sí | — | — | true si el valor puede escribirse | `src/modules/system_context/dto/system-context.dto.ts:500` |
-| `resolvedConceptId` | `string` | No | formato uuid | — | Concepto resuelto que debe persistirse | `src/modules/system_context/dto/system-context.dto.ts:509` |
-| `resolvedCode` | `string` | No | — | — | Código de la opción resuelta | `src/modules/system_context/dto/system-context.dto.ts:515` |
-| `usedFallback` | `boolean` | Sí | — | — | true si se cayó al concepto de reserva del binding | `src/modules/system_context/dto/system-context.dto.ts:523` |
-| `validationModeConceptId` | `string` | Sí | formato uuid | — | Modo con el que se evaluó | `src/modules/system_context/dto/system-context.dto.ts:529` |
-| `cacheToken` | `string` | Sí | — | — | Token de la versión resuelta; identifica la caché | `src/modules/system_context/dto/system-context.dto.ts:537` |
-| `rejectionReason` | `string` | No | — | — | Por qué se rechazó | `src/modules/system_context/dto/system-context.dto.ts:543` |
+| `accepted` | `boolean` | Sí | — | — | true si el valor puede escribirse | `src/modules/system_context/dto/system-context.dto.ts:501` |
+| `resolvedConceptId` | `string` | No | formato uuid | — | Concepto resuelto que debe persistirse | `src/modules/system_context/dto/system-context.dto.ts:510` |
+| `resolvedCode` | `string` | No | — | — | Código de la opción resuelta | `src/modules/system_context/dto/system-context.dto.ts:516` |
+| `usedFallback` | `boolean` | Sí | — | — | true si se cayó al concepto de reserva del binding | `src/modules/system_context/dto/system-context.dto.ts:524` |
+| `validationModeConceptId` | `string` | Sí | formato uuid | — | Modo con el que se evaluó | `src/modules/system_context/dto/system-context.dto.ts:530` |
+| `cacheToken` | `string` | Sí | — | — | Token de la versión resuelta; identifica la caché | `src/modules/system_context/dto/system-context.dto.ts:538` |
+| `rejectionReason` | `string` | No | — | — | Por qué se rechazó | `src/modules/system_context/dto/system-context.dto.ts:544` |
 
 ### Respuestas posibles
 

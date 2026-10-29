@@ -10,8 +10,8 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [canonical_health_resource_versions](#canonical_health_resource_versions) | Preserva versiones de recursos canónicos para reconstruir cambios y mantener contexto temporal de la historia longitudinal. | 15 | 10 | 4 | COINCIDE |
-| [canonical_health_resources](#canonical_health_resources) | Almacena recursos de salud normalizados que integran información longitudinal proveniente de distintos sistemas. | 15 | 10 | 13 | COINCIDE |
+| [canonical_health_resource_versions](#canonical_health_resource_versions) | Preserva versiones de recursos canónicos para reconstruir cambios y mantener contexto temporal de la historia longitudinal. | 15 | 10 | 5 | COINCIDE |
+| [canonical_health_resources](#canonical_health_resources) | Almacena recursos de salud normalizados que integran información longitudinal proveniente de distintos sistemas. | 15 | 10 | 15 | COINCIDE |
 | [canonical_resource_bindings](#canonical_resource_bindings) | Vincula recursos canónicos con sujetos o ámbitos de gestión que controlan su uso dentro de la plataforma de datos de salud. | 9 | 8 | 4 | COINCIDE |
 | [canonical_resource_identifiers](#canonical_resource_identifiers) | Asocia identificadores externos y canónicos a recursos de salud para facilitar interoperabilidad y resolución de referencias. | 10 | 3 | 3 | COINCIDE |
 | [canonical_resource_relationships](#canonical_resource_relationships) | Expresa relaciones entre recursos canónicos para mantener conexiones semánticas de la información longitudinal integrada. | 9 | 5 | 5 | COINCIDE |
@@ -23,24 +23,24 @@
 | [health_data_quality_rule_sets](#health_data_quality_rule_sets) | Agrupa reglas de calidad aplicables a datos sanitarios para evaluar su aptitud y consistencia de manera gobernada. | 13 | 8 | 1 | COINCIDE |
 | [health_data_quality_rules](#health_data_quality_rules) | Define verificaciones concretas sobre datos de salud para detectar problemas antes de usarlos en atención, intercambio o análisis. | 15 | 8 | 1 | COINCIDE |
 | [health_data_quality_runs](#health_data_quality_runs) | Registra ejecuciones de controles de calidad para seguir qué reglas se aplicaron y cuándo. | 12 | 7 | 2 | COINCIDE |
-| [health_deidentification_profiles](#health_deidentification_profiles) | Configura perfiles de desidentificación para preparar datos de salud para usos autorizados que no requieren identificación directa. | 17 | 8 | 3 | COINCIDE |
+| [health_deidentification_profiles](#health_deidentification_profiles) | Configura perfiles de desidentificación para preparar datos de salud para usos autorizados que no requieren identificación directa. | 17 | 8 | 5 | COINCIDE |
 | [health_deidentification_runs](#health_deidentification_runs) | Traza ejecuciones de desidentificación para vincular los datos procesados con el perfil y resultado de la operación. | 14 | 9 | 4 | COINCIDE |
 | [health_export_jobs](#health_export_jobs) | Representa trabajos de exportación de datos de salud para controlar sus solicitudes, ejecución y destino previsto. | 15 | 11 | 5 | COINCIDE |
 | [health_export_manifests](#health_export_manifests) | Enumera los recursos incluidos en exportaciones para hacer verificable el contenido entregado. | 10 | 7 | 5 | COINCIDE |
 | [health_ingestion_batches](#health_ingestion_batches) | Agrupa cargas de información sanitaria para seguir su recepción y resultado como unidades operativas. | 16 | 8 | 5 | COINCIDE |
-| [health_ingestion_records](#health_ingestion_records) | Conserva registros individuales recibidos durante ingestiones para reconciliar datos originales con su procesamiento canónico. | 13 | 8 | 5 | COINCIDE |
+| [health_ingestion_records](#health_ingestion_records) | Conserva registros individuales recibidos durante ingestiones para reconciliar datos originales con su procesamiento canónico. | 13 | 8 | 4 | COINCIDE |
 | [health_lineage_edges](#health_lineage_edges) | Representa vínculos de linaje entre datos de salud y transformaciones para reconstruir dependencias y recorrido de la información. | 12 | 11 | 3 | COINCIDE |
 | [health_provenance_records](#health_provenance_records) | Registra procedencia de recursos de salud para establecer fuente, proceso y contexto de generación o transformación. | 14 | 8 | 5 | COINCIDE |
 | [health_provenance_targets](#health_provenance_targets) | Vincula evidencia de procedencia con los recursos afectados para mostrar a qué datos aplica cada registro de origen. | 6 | 6 | 5 | COINCIDE |
 | [health_source_connections](#health_source_connections) | Define conexiones técnicas a sistemas de origen para permitir intercambios de datos de salud autorizados y trazables. | 16 | 10 | 3 | COINCIDE |
-| [health_source_systems](#health_source_systems) | Registra sistemas de origen de datos de salud y su nivel de confianza para gobernar la incorporación de información clínica externa. | 17 | 9 | 2 | COINCIDE |
+| [health_source_systems](#health_source_systems) | Registra sistemas de origen de datos de salud y su nivel de confianza para gobernar la incorporación de información clínica externa. | 17 | 9 | 4 | COINCIDE |
 | [health_terminology_mapping_rules](#health_terminology_mapping_rules) | Define correspondencias entre conceptos de origen y destino para normalizar terminología en procesos de interoperabilidad. | 14 | 7 | 0 | COINCIDE |
 | [health_terminology_mapping_sets](#health_terminology_mapping_sets) | Agrupa mapeos terminológicos sanitarios utilizados para traducir códigos y conceptos entre catálogos. | 13 | 8 | 0 | COINCIDE |
 | [omop_mapping_rules](#omop_mapping_rules) | Define transformaciones entre recursos canónicos y conceptos o estructuras OMOP para preparar datos de investigación. | 14 | 7 | 0 | COINCIDE |
 | [omop_mapping_sets](#omop_mapping_sets) | Agrupa reglas de transformación hacia el modelo analítico OMOP utilizado para estudios y análisis de salud. | 12 | 6 | 0 | COINCIDE |
 | [omop_transformation_runs](#omop_transformation_runs) | Registra ejecuciones de transformación OMOP para trazar cuándo y con qué resultado se preparó un conjunto de datos. | 13 | 7 | 0 | COINCIDE |
-| [patient_identity_clusters](#patient_identity_clusters) | Agrupa identidades que pueden corresponder a un mismo paciente para apoyar la resolución de identidad a escala longitudinal. | 12 | 7 | 3 | COINCIDE |
-| [patient_identity_members](#patient_identity_members) | Asocia perfiles o identificadores a clústeres de identidad para dejar explícita la composición de cada agrupación candidata. | 11 | 6 | 3 | COINCIDE |
+| [patient_identity_clusters](#patient_identity_clusters) | Agrupa identidades que pueden corresponder a un mismo paciente para apoyar la resolución de identidad a escala longitudinal. | 12 | 7 | 5 | COINCIDE |
+| [patient_identity_members](#patient_identity_members) | Asocia perfiles o identificadores a clústeres de identidad para dejar explícita la composición de cada agrupación candidata. | 11 | 6 | 4 | COINCIDE |
 | [patient_match_candidates](#patient_match_candidates) | Registra candidatos a coincidencia entre identidades de pacientes para revisión o evaluación de vinculación. | 11 | 7 | 2 | COINCIDE |
 | [patient_match_decisions](#patient_match_decisions) | Preserva decisiones tomadas sobre coincidencias de pacientes para hacer trazable la resolución de identidad. | 9 | 6 | 2 | COINCIDE |
 | [patient_timeline_entries](#patient_timeline_entries) | Proyecta recursos relevantes en una línea de tiempo longitudinal para facilitar la revisión histórica de la atención del paciente. | 15 | 12 | 2 | COINCIDE |
@@ -382,7 +382,7 @@ Preserva versiones de recursos canónicos para reconstruir cambios y mantener co
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml: canonical_health_resource_versions`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml` · **DDL:** `SQL/52_health_data/02_tables.sql`
 - **Entidad del ORM:** `CanonicalHealthResourceVersions` — `src/modules/health_data/entities/canonical_health_resource_versions.entity.ts`
-- **Resumen:** 15 columnas · 10 índices · 7 FK salientes · 5 entrantes · 4 operaciones
+- **Resumen:** 15 columnas · 10 índices · 7 FK salientes · 5 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -449,6 +449,7 @@ Preserva versiones de recursos canónicos para reconstruir cambios y mantener co
 | GET /fhir/r5/Patient/{id}/$everything | LEE | DIRECTA |
 | POST /health-data/canonical-resources/project | CREA | DIRECTA |
 | POST /health-data/canonical-resources/project | LEE | DIRECTA |
+| POST /health-data/deidentification-runs | LEE | DIRECTA |
 | POST /health-data/versions/{id}/validate | LEE | DIRECTA |
 
 #### Gobierno
@@ -474,7 +475,7 @@ Almacena recursos de salud normalizados que integran información longitudinal p
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml: canonical_health_resources`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml` · **DDL:** `SQL/52_health_data/02_tables.sql`
 - **Entidad del ORM:** `CanonicalHealthResources` — `src/modules/health_data/entities/canonical_health_resources.entity.ts`
-- **Resumen:** 15 columnas · 10 índices · 8 FK salientes · 8 entrantes · 13 operaciones
+- **Resumen:** 15 columnas · 10 índices · 8 FK salientes · 8 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -521,15 +522,15 @@ Almacena recursos de salud normalizados que integran información longitudinal p
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_canonical_health_resources_custodian_tenant_id` | no | custodian_tenant_id | Soporta la clave foránea fk_canonical_health_resources_custodian_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «custodian_tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_canonical_health_resources_custodian_tenant_id` | no | custodian_tenant_id | Soporta la clave foránea fk_canonical_health_resources_custodian_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «custodian_tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_canonical_health_resources_resource_type_concept_id` | no | resource_type_concept_id | Soporta la clave foránea fk_canonical_health_resources_resource_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «resource_type_concept_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_canonical_health_resources_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_canonical_health_resources_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_canonical_health_resources_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_canonical_health_resources_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_canonical_health_resources_encounter_id` | no | encounter_id | Soporta la clave foránea fk_canonical_health_resources_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_canonical_health_resources_source_system_id` | no | source_system_id | Soporta la clave foránea fk_canonical_health_resources_source_system_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_canonical_health_resources_current_version_id` | no | current_version_id | Soporta la clave foránea fk_canonical_health_resources_current_version_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_canonical_health_resources_lifecycle_status_concept_id` | no | lifecycle_status_concept_id | Soporta la clave foránea fk_canonical_health_resources_lifecycle_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «lifecycle_status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_canonical_health_resources_retention_policy_id` | no | retention_policy_id | Soporta la clave foránea fk_canonical_health_resources_retention_policy_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `uk_canonical_health_resources_tenant_type_logical` | sí | custodian_tenant_id, resource_type_concept_id, logical_identifier | Garantiza que no se repita la combinación (custodian_tenant_id, resource_type_concept_id, logical_identifier) _(DOCUMENTO)_; Soporta la clave foránea fk_canonical_health_resources_custodian_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «custodian_tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `uk_canonical_health_resources_tenant_type_logical` | sí | custodian_tenant_id, resource_type_concept_id, logical_identifier | Garantiza que no se repita la combinación (custodian_tenant_id, resource_type_concept_id, logical_identifier) _(DOCUMENTO)_; Soporta la clave foránea fk_canonical_health_resources_custodian_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «custodian_tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_canonical_health_resources_patient_type` | no | custodian_tenant_id, patient_profile_id, resource_type_concept_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
 
 #### Restricciones
@@ -542,6 +543,7 @@ Almacena recursos de salud normalizados que integran información longitudinal p
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /fhir/r5/$export | LEE | DIRECTA |
 | GET /fhir/r5/Patient/{id}/$everything | LEE | DIRECTA |
 | POST /health-data/canonical-resources/{id}/bindings | ACTUALIZA | POR_TIPO |
 | POST /health-data/canonical-resources/{id}/bindings | LEE | DIRECTA |
@@ -553,6 +555,7 @@ Almacena recursos de salud normalizados que integran información longitudinal p
 | POST /health-data/canonical-resources/project | ACTUALIZA | POR_TIPO |
 | POST /health-data/canonical-resources/project | CREA | DIRECTA |
 | POST /health-data/canonical-resources/project | LEE | DIRECTA |
+| POST /health-data/deidentification-runs | LEE | DIRECTA |
 | POST /health-data/versions/{id}/validate | ACTUALIZA | POR_TIPO |
 | POST /health-data/versions/{id}/validate | LEE | DIRECTA |
 
@@ -1389,7 +1392,7 @@ Configura perfiles de desidentificación para preparar datos de salud para usos 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml: health_deidentification_profiles`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml` · **DDL:** `SQL/52_health_data/02_tables.sql`
 - **Entidad del ORM:** `HealthDeidentificationProfiles` — `src/modules/health_data/entities/health_deidentification_profiles.entity.ts`
-- **Resumen:** 17 columnas · 8 índices · 6 FK salientes · 1 entrantes · 3 operaciones
+- **Resumen:** 17 columnas · 8 índices · 6 FK salientes · 1 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -1448,9 +1451,11 @@ Configura perfiles de desidentificación para preparar datos de salud para usos 
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /fhir/r5/$export | LEE | DIRECTA |
 | POST /health-data/deidentification-runs | LEE | DIRECTA |
 | POST /lakehouse/ingestion/curated-runs | LEE | DIRECTA |
 | POST /research/deidentification-profiles | CREA | DIRECTA |
+| POST /research/projects/{id}/cohorts | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1775,9 +1780,9 @@ Agrupa cargas de información sanitaria para seguir su recepción y resultado co
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /health-data/canonical-resources/project | LEE | DIRECTA |
 | POST /health-data/ingestion-batches | CREA | DIRECTA |
 | POST /health-data/ingestion-batches | LEE | DIRECTA |
-| POST /health-data/ingestion-batches/{id}/close | ACTUALIZA | POR_TIPO |
 | POST /health-data/ingestion-batches/{id}/close | LEE | DIRECTA |
 | POST /health-data/ingestion-batches/{id}/records | LEE | DIRECTA |
 
@@ -1804,7 +1809,7 @@ Conserva registros individuales recibidos durante ingestiones para reconciliar d
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml: health_ingestion_records`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml` · **DDL:** `SQL/52_health_data/02_tables.sql`
 - **Entidad del ORM:** `HealthIngestionRecords` — `src/modules/health_data/entities/health_ingestion_records.entity.ts`
-- **Resumen:** 13 columnas · 8 índices · 6 FK salientes · 1 entrantes · 5 operaciones
+- **Resumen:** 13 columnas · 8 índices · 6 FK salientes · 1 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -1859,7 +1864,6 @@ Conserva registros individuales recibidos durante ingestiones para reconciliar d
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| POST /health-data/canonical-resources/project | ACTUALIZA | POR_TIPO |
 | POST /health-data/canonical-resources/project | LEE | DIRECTA |
 | POST /health-data/ingestion-batches/{id}/close | LEE | DIRECTA |
 | POST /health-data/ingestion-batches/{id}/records | CREA | DIRECTA |
@@ -2176,7 +2180,7 @@ Define conexiones técnicas a sistemas de origen para permitir intercambios de d
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| POST /health-data/ingestion-batches | ACTUALIZA | POR_TIPO |
+| POST /health-data/canonical-resources/project | LEE | DIRECTA |
 | POST /health-data/ingestion-batches | LEE | DIRECTA |
 | POST /health-data/source-connections | CREA | DIRECTA |
 
@@ -2203,7 +2207,7 @@ Registra sistemas de origen de datos de salud y su nivel de confianza para gober
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml: health_source_systems`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml` · **DDL:** `SQL/52_health_data/02_tables.sql`
 - **Entidad del ORM:** `HealthSourceSystems` — `src/modules/health_data/entities/health_source_systems.entity.ts`
-- **Resumen:** 17 columnas · 9 índices · 6 FK salientes · 7 entrantes · 2 operaciones
+- **Resumen:** 17 columnas · 9 índices · 6 FK salientes · 7 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -2269,6 +2273,8 @@ Registra sistemas de origen de datos de salud y su nivel de confianza para gober
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /health-data/canonical-resources/project | LEE | DIRECTA |
+| POST /health-data/ingestion-batches | LEE | DIRECTA |
 | POST /health-data/source-connections | CREA | DIRECTA |
 | POST /health-data/source-connections | LEE | DIRECTA |
 
@@ -2670,7 +2676,7 @@ Agrupa identidades que pueden corresponder a un mismo paciente para apoyar la re
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml: patient_identity_clusters`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml` · **DDL:** `SQL/52_health_data/02_tables.sql`
 - **Entidad del ORM:** `PatientIdentityClusters` — `src/modules/health_data/entities/patient_identity_clusters.entity.ts`
-- **Resumen:** 12 columnas · 7 índices · 5 FK salientes · 2 entrantes · 3 operaciones
+- **Resumen:** 12 columnas · 7 índices · 5 FK salientes · 2 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -2705,13 +2711,13 @@ Agrupa identidades que pueden corresponder a un mismo paciente para apoyar la re
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_patient_identity_clusters_tenant_id` | no | tenant_id | Soporta la clave foránea fk_patient_identity_clusters_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_patient_identity_clusters_tenant_id` | no | tenant_id | Soporta la clave foránea fk_patient_identity_clusters_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_patient_identity_clusters_master_patient_profile_id` | no | master_patient_profile_id | Soporta la clave foránea fk_patient_identity_clusters_master_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_patient_identity_clusters_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_patient_identity_clusters_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_patient_identity_clusters_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_patient_identity_clusters_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_patient_identity_clusters_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_patient_identity_clusters_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_patient_identity_clusters_tenant_status` | no | tenant_id, status_concept_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
-| `uk_patient_identity_clusters_tenant_identifier` | sí | tenant_id, cluster_identifier | Garantiza que no se repita la combinación (tenant_id, cluster_identifier) _(DOCUMENTO)_; Soporta la clave foránea fk_patient_identity_clusters_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `uk_patient_identity_clusters_tenant_identifier` | sí | tenant_id, cluster_identifier | Garantiza que no se repita la combinación (tenant_id, cluster_identifier) _(DOCUMENTO)_; Soporta la clave foránea fk_patient_identity_clusters_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Restricciones
 
@@ -2723,6 +2729,8 @@ Agrupa identidades que pueden corresponder a un mismo paciente para apoyar la re
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /fhir/r5/$export | LEE | DIRECTA |
+| GET /fhir/r5/Patient/{id}/$everything | LEE | DIRECTA |
 | POST /health-data/identity/candidates/{id}/decision | ACTUALIZA | POR_TIPO |
 | POST /health-data/identity/candidates/{id}/decision | CREA | DIRECTA |
 | POST /health-data/identity/candidates/{id}/decision | LEE | DIRECTA |
@@ -2750,7 +2758,7 @@ Asocia perfiles o identificadores a clústeres de identidad para dejar explícit
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml: patient_identity_members`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml` · **DDL:** `SQL/52_health_data/02_tables.sql`
 - **Entidad del ORM:** `PatientIdentityMembers` — `src/modules/health_data/entities/patient_identity_members.entity.ts`
-- **Resumen:** 11 columnas · 6 índices · 5 FK salientes · 0 entrantes · 3 operaciones
+- **Resumen:** 11 columnas · 6 índices · 5 FK salientes · 0 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -2783,7 +2791,7 @@ Asocia perfiles o identificadores a clústeres de identidad para dejar explícit
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `ix_patient_identity_members_patient_identity_cluster_id` | no | patient_identity_cluster_id | Soporta la clave foránea fk_patient_identity_members_patient_identity_cluster_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «patient_identity_cluster_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_patient_identity_members_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_patient_identity_members_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_patient_identity_members_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_patient_identity_members_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_patient_identity_members_source_system_id` | no | source_system_id | Soporta la clave foránea fk_patient_identity_members_source_system_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_patient_identity_members_member_role_concept_id` | no | member_role_concept_id | Soporta la clave foránea fk_patient_identity_members_member_role_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_patient_identity_members_match_status_concept_id` | no | match_status_concept_id | Soporta la clave foránea fk_patient_identity_members_match_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -2799,6 +2807,7 @@ Asocia perfiles o identificadores a clústeres de identidad para dejar explícit
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /fhir/r5/$export | LEE | DIRECTA |
 | GET /fhir/r5/Patient/{id}/$everything | LEE | DIRECTA |
 | POST /health-data/identity/candidates/{id}/decision | CREA | DIRECTA |
 | POST /health-data/identity/candidates/{id}/decision | LEE | DIRECTA |

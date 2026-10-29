@@ -152,18 +152,20 @@ export class IdentityVerificationCasesRepository {
    * @param em - Contexto de persistencia.
    * @param statuses - Estados que forman la cola.
    * @param limit - Tope de resultados.
+   * @param offset - Casos a saltar (paginación de la cola).
    * @returns Casos ordenados por apertura ascendente.
    */
   findByStatuses(
     em: EntityManager,
     statuses: string[],
     limit = 50,
+    offset = 0,
   ): Promise<IdentityVerificationCases[]> {
     if (statuses.length === 0) return Promise.resolve([]);
     return em.find(
       IdentityVerificationCases,
       { statusConceptId: { $in: statuses } },
-      { orderBy: { openedAt: 'ASC' }, limit },
+      { orderBy: { openedAt: 'ASC' }, limit, offset },
     );
   }
 

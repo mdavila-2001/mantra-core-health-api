@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { SurveyInvitations } from '../entities';
 import { createdBy } from '../../../common';
@@ -58,19 +59,47 @@ export class InvitationsRepository {
   }
 
   /**
-   * Lista las invitaciones de un paciente, más recientes primero.
+   * Obtiene la invitación bloqueándola hasta el fin de la transacción.
+   *
+   * Serializa dos envíos simultáneos de la misma invitación: el segundo espera,
+   * ve la invitación ya respondida y recibe el conflicto en lugar de duplicar la
+   * respuesta.
+   *
+   * @param em - Transacción activa.
+   * @param id - Identificador de la invitación.
+   * @returns Resultado conforme al contrato `Promise<SurveyInvitations | null>`.
+   */
+  findByIdForUpdate(
+    em: EntityManager,
+    id: string,
+  ): Promise<SurveyInvitations | null> {
+    return em.findOne(
+      SurveyInvitations,
+      { id },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  /**
+   * Lista las invitaciones de un paciente **en un tenant**, más recientes primero.
+   *
+   * El perfil de paciente es global (no lleva `tenant_id`): la igualdad del
+   * perfil no prueba que la invitación pertenezca a la organización activa, así
+   * que el tenant es parte obligatoria del criterio.
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param patientProfileId - Identificador del perfil de paciente.
+   * @param tenantId - Tenant activo de la petición.
    * @returns Resultado conforme al contrato `Promise<SurveyInvitations[]>`.
    */
   listByPatient(
     em: EntityManager,
     patientProfileId: string,
+    tenantId: string,
   ): Promise<SurveyInvitations[]> {
     return em.find(
       SurveyInvitations,
-      { patientProfileId },
+      { patientProfileId, tenantId },
       { orderBy: { issuedAt: 'desc' } },
     );
   }

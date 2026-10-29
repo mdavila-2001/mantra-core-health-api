@@ -1,0 +1,21 @@
+#description: "HPO annotations for rare diseases [8478: OMIM; 47: DECIPHER; 4357 ORPHANET]"
+#version: 2026-09-02
+#tracker: https://github.com/obophenotype/human-phenotype-ontology/issues
+#hpo-version: http://purl.obolibrary.org/obo/hp/releases/2026-09-01/hp.json
+#fixture-source: phenotype.hpoa (version 2026-09-02) https://github.com/obophenotype/human-phenotype-ontology/releases/latest/download/phenotype.hpoa
+#fixture-lines: 6,24,11790,21,1986,184,170098,3302,15,268,45561,45562,11860,11862 (numero de linea del archivo original, en el mismo orden)
+database_id	disease_name	qualifier	hpo_id	reference	evidence	onset	frequency	sex	modifier	aspect	biocuration
+OMIM:619340	Developmental and epileptic encephalopathy 96		HP:0011097	PMID:31675180	PCS		1/2			P	HPO:probinson[2021-06-21]
+OMIM:614102	Immunoglobulin kappa light chain deficiency		HP:0002014	OMIM:614102	TAS		HP:0040283			P	HPO:skoehler[2012-11-18]
+OMIM:607155	Muscular dystrophy-dystroglycanopathy (limb-girdle), type C, 5		HP:0008305	OMIM:607155	TAS		25%			P	HPO:probinson[2012-04-08]
+OMIM:609153	Pseudohyperkalemia, familial, 2, due to red cell leak		HP:0001878	PMID:24947683	PCS		0/2			P	HPO:lccarmody[2018-10-03];HPO:probinson[2024-03-14]
+OMIM:605231	Bardet-Biedl syndrome 6		HP:0000047	PMID:10973238	PCS		1/3	MALE		P	HPO:skoehler[2014-11-26];HPO:probinson[2022-09-30]
+OMIM:619354	Deafness, cataract, impaired intellectual development, and polyneuropathy		HP:0000365	PMID:32500975	PCS	HP:0003577	3/3			P	HPO:probinson[2021-08-18]
+ORPHA:199310	Tetragametic chimerism syndrome	NOT	HP:0001263	ORPHA:199310	TAS					P	ORPHA:orphadata[2026-09-02]
+DECIPHER:16	22q11 deletion syndrome (Velocardiofacial / DiGeorge syndrome)		HP:0005403	DECIPHER:16	IEA					P	HPO:skoehler[2013-05-29]
+OMIM:619340	Developmental and epileptic encephalopathy 96		HP:0000006	PMID:31675180	PCS					I	HPO:probinson[2021-06-21];HPO:probinson[2021-06-21]
+OMIM:612229	Colorectal cancer, susceptibility to, 3		HP:0003003	PMID:18372901;PMID:17934461;PMID:18372905	PCS					P	HPO:curators[2010-07-08]
+OMIM:609285	Congenital myopathy 23		HP:0001288	PMID:23378224	PCS		1/1			P	ORCID:0000-0002-0736-9199[2024-06-29]
+OMIM:609285	Congenital myopathy 23		HP:0001288	PMID:23378224	PCS		2/2			P	ORCID:0000-0002-0736-9199[2024-06-29]
+OMIM:613646	Methylmalonic aciduria, transient, due to transcobalamin receptor defect		HP:0012120	PMID:20524213	TAS	HP:0003623	1/1			P	HPO:probinson[2013-06-02];HPO:probinson[2020-07-24];HPO:probinson[2022-06-14]
+OMIM:613646	Methylmalonic aciduria, transient, due to transcobalamin receptor defect		HP:0012120	PMID:20524213	PCS		1/1			P	HPO:probinson[2023-07-18]

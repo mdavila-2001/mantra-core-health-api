@@ -7,12 +7,14 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Put,
   Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
@@ -33,6 +35,7 @@ import {
   PracticeWorkforceService,
   PracticeInventoryService,
   PracticeOrganizationReadService,
+  HealthcareServiceOffersService,
 } from '../services';
 import {
   CreatePracticeDto,
@@ -55,7 +58,12 @@ import {
   SelfRequestRoleAssignmentDto,
   MedicalOrganizationConsoleDto,
   ListPracticeRoleAssignmentsResponseDto,
+  UpdateHealthcareServiceDto,
 } from '../dto';
+import {
+  HealthcareServiceOfferDto,
+  HealthcareServiceOffersResponseDto,
+} from '../dto/healthcare-service-offer.dto';
 
 /**
  * Endpoints con raíz en `/practices`. Capa fina: valida parámetros y delega en el
@@ -85,6 +93,7 @@ export class PracticesController {
     private readonly workforceService: PracticeWorkforceService,
     private readonly inventoryService: PracticeInventoryService,
     private readonly organizationReadService: PracticeOrganizationReadService,
+    private readonly offersService: HealthcareServiceOffersService,
   ) {}
 
   /** Bootstrap: alta de la práctica (organización raíz). */
@@ -97,25 +106,10 @@ export class PracticesController {
    * del sistema. Sólo devuelve identificación y estado, no configuración.
    */
   @Get()
-  @Roles(
-    'SECURITY_ADMIN',
-    'SURGERY_SCHEDULER',
-    'PERIOP_ADMIN',
-    'SURGEON',
-    'ANESTHESIOLOGIST',
-    'PERIOP_NURSE',
-    'SCHEDULING_ADMIN',
-    // Los roles clínicos generales, que faltaban: sin ellos un médico no puede
-    // ni saber en qué práctica trabaja, y las lecturas del mayor —que cuelgan
-    // todas de un `practiceId`— quedan inalcanzables para él.
-    'PRACTITIONER',
-    'CLINICIAN',
-    'ACCOUNTING_APPROVER',
-  )
   @ApiOperation({
     summary: 'Listar las prácticas activas del tenant',
     description:
-      'Un PRACTITIONER sólo recibe las prácticas donde tiene una vinculación ACTIVE.',
+      'Sin `@Roles`: el servicio autoriza por rol clínico o por ser OWNER/ADMIN de la organización (A-6). Un PRACTITIONER sólo recibe las prácticas donde tiene una vinculación ACTIVE; quien administra la organización recibe todas las suyas.',
   })
   listPractices(
     @CurrentUser() actor: AuthenticatedUser,
@@ -160,32 +154,30 @@ export class PracticesController {
     );
   }
 
-  /** Sedes de una práctica. */
+  /**
+   * Sedes de una práctica.
+   *
+   * Sin `@Roles`: lee quien tiene un rol de programación o clínica y quien
+   * administra la organización dueña (A-6), que decide el servicio. Un `@Roles`
+   * global no ve la membresía y le cerraba la puerta al dueño del centro.
+   */
   @Get(':practiceId/sites')
-  @Roles(
-    'SECURITY_ADMIN',
-    'SURGERY_SCHEDULER',
-    'PERIOP_ADMIN',
-    'SURGEON',
-    'ANESTHESIOLOGIST',
-    'PERIOP_NURSE',
-    'SCHEDULING_ADMIN',
-  )
   @ApiOperation({ summary: 'Listar las sedes de una práctica' })
   listSites(
     @Param('practiceId', ParseUUIDPipe) practiceId: string,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<SiteSummaryDto[]> {
-    return this.sitesService.listSites(practiceId, requireTenantId());
+    return this.sitesService.listSites(practiceId, requireTenantId(), actor);
   }
 
   /**
    * Vinculaciones profesional-organización de la práctica, paginadas por
    * cursor (CV-14). Antes de esto, `POST …/role-assignments/:roleId/approve`
    * existía sin ninguna forma de ver qué había pendiente: el administrador
-   * tenía que conseguir el uuid por otro canal.
+   * tenía que conseguir el uuid por otro canal. Sin `@Roles`: la ve quien
+   * administra esa organización (A-6), que decide el servicio.
    */
   @Get(':practiceId/role-assignments')
-  @Roles('SECURITY_ADMIN')
   @ApiOperation({
     summary: 'Listar las vinculaciones profesional-organización de la práctica',
   })
@@ -206,17 +198,23 @@ export class PracticesController {
   })
   listRoleAssignments(
     @Param('practiceId', ParseUUIDPipe) practiceId: string,
+    @CurrentUser() actor: AuthenticatedUser,
     @Query('status') statusConceptId?: string,
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<ListPracticeRoleAssignmentsResponseDto> {
-    return this.workforceService.listPracticeAssignments(
-      practiceId,
-      requireTenantId(),
-      { statusConceptId, cursor, limit },
-    );
+    return this.workforceService.listPracticeAssignments(practiceId, actor, {
+      statusConceptId,
+      cursor,
+      limit,
+    });
   }
 
+  @Audited({
+    action: 'PRACTICE_CREATED',
+    entity: 'practice',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -228,13 +226,7 @@ export class PracticesController {
     return this.sitesService.createPractice(dto, actor);
   }
 
-  /**
-   * UC-14-01.
-   *
-   * Sin `@Roles`: lo autoriza el servicio con la regla de organización
-   * (OWNER/ADMIN del tenant o plataforma); una práctica de otro tenant
-   * responde 404.
-   */
+  /** UC-14-01. */
   @Audited({
     action: 'PRACTICE_SITE_CREATED',
     entity: 'practice_site',
@@ -248,15 +240,10 @@ export class PracticesController {
     @Body() dto: CreateSiteDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<SiteResponseDto> {
-    return this.sitesService.createSite(
-      practiceId,
-      dto,
-      actor,
-      requireTenantId(),
-    );
+    return this.sitesService.createSite(practiceId, dto, actor);
   }
 
-  /** UC-14-12. Misma autorización que `createSite`. */
+  /** UC-14-12. */
   @Audited({
     action: 'PRACTICE_SITE_DECOMMISSIONED',
     entity: 'practice_site',
@@ -270,15 +257,15 @@ export class PracticesController {
     @Param('siteId', ParseUUIDPipe) siteId: string,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
-    return this.sitesService.decommissionSite(
-      practiceId,
-      siteId,
-      actor,
-      requireTenantId(),
-    );
+    return this.sitesService.decommissionSite(practiceId, siteId, actor);
   }
 
   /** UC-14-02. */
+  @Audited({
+    action: 'PRACTICE_ACCREDITATION_CREATED',
+    entity: 'practice_accreditation',
+    entityId: 'result.id',
+  })
   @Post(':practiceId/accreditations')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -291,11 +278,22 @@ export class PracticesController {
     return this.accreditationsService.create(practiceId, dto, actor);
   }
 
-  /** UC-14-06. */
+  /**
+   * UC-14-06. Sin `@Roles`: lo publica quien administra **esa** organización
+   * (A-6) o un rol de plataforma, y eso lo decide el servicio por la membresía.
+   */
+  @Audited({
+    action: 'HEALTHCARE_SERVICE_PUBLISHED',
+    entity: 'healthcare_service',
+    entityId: 'result.id',
+  })
   @Post(':practiceId/healthcare-services')
-  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Publicar un servicio de salud' })
+  @ApiOperation({
+    summary: 'Publicar un procedimiento del nomenclador en una sede',
+    description:
+      'El concepto debe ser del nomenclador (`VS_BO_MEDICAL_PROCEDURE`) y coincidir con el del ítem de catálogo que fija el precio. Una sede no puede ofrecer dos veces el mismo procedimiento (409).',
+  })
   publishHealthcareService(
     @Param('practiceId', ParseUUIDPipe) practiceId: string,
     @Body() dto: CreateHealthcareServiceDto,
@@ -308,7 +306,53 @@ export class PracticesController {
     );
   }
 
+  /** Lo que la práctica ofrece del nomenclador, con precio y referencia. */
+  @Get(':practiceId/healthcare-services')
+  @ApiOperation({
+    summary: 'Listar los procedimientos que ofrecen las sedes de la práctica',
+  })
+  @ApiQuery({
+    name: 'practiceSiteId',
+    required: false,
+    description: 'Solo la oferta de esa sede',
+  })
+  @ApiOkResponse({ type: HealthcareServiceOffersResponseDto })
+  listHealthcareServices(
+    @Param('practiceId', ParseUUIDPipe) practiceId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Query('practiceSiteId', new ParseUUIDPipe({ optional: true }))
+    practiceSiteId?: string,
+  ): Promise<HealthcareServiceOffersResponseDto> {
+    return this.offersService.listOffers(practiceId, practiceSiteId, actor);
+  }
+
+  /** Cambia el precio de la sede o activa/desactiva el procedimiento. */
+  @Audited({
+    action: 'HEALTHCARE_SERVICE_UPDATED',
+    entity: 'healthcare_service',
+    entityId: 'param:id',
+  })
+  @Patch(':practiceId/healthcare-services/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Actualizar el precio o el estado de un procedimiento de la sede',
+  })
+  @ApiOkResponse({ type: HealthcareServiceOfferDto })
+  updateHealthcareService(
+    @Param('practiceId', ParseUUIDPipe) practiceId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateHealthcareServiceDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<HealthcareServiceOfferDto> {
+    return this.offersService.updateOffer(practiceId, id, dto, actor);
+  }
+
   /** UC-14-07. */
+  @Audited({
+    action: 'PRACTICE_SETTING_UPSERTED',
+    entity: 'practice_setting',
+    entityId: 'result.id',
+  })
   @Put(':practiceId/settings/:settingKey')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -323,6 +367,11 @@ export class PracticesController {
   }
 
   /** UC-14-08. */
+  @Audited({
+    action: 'PRACTITIONER_ROLE_ASSIGNED',
+    entity: 'practitioner_role_assignment',
+    entityId: 'result.id',
+  })
   @Post(':practiceId/role-assignments')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -342,6 +391,11 @@ export class PracticesController {
    * cuenta; queda `PENDING` hasta que la organización la apruebe (ver
    * `/role-assignments/:roleId/approve` en `RoleAssignmentsController`).
    */
+  @Audited({
+    action: 'PRACTITIONER_ROLE_SELF_REQUESTED',
+    entity: 'practitioner_role_assignment',
+    entityId: 'result.id',
+  })
   @Post(':practiceId/role-assignments/self-request')
   @Roles('PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
@@ -359,6 +413,11 @@ export class PracticesController {
   }
 
   /** UC-14-10. */
+  @Audited({
+    action: 'PRACTICE_INVENTORY_ITEM_CREATED',
+    entity: 'inventory_item',
+    entityId: 'result.id',
+  })
   @Post(':practiceId/inventory-items')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

@@ -228,13 +228,15 @@ export class OpsReleasesRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param id - Identificador de id.
+   * @param tenantId - Tenant activo: el componente de otro tenant no se encuentra.
    * @returns Resultado de find component by id conforme al contrato `Promise<ServiceComponents | null>`.
    */
   findComponentById(
     em: EntityManager,
     id: string,
+    tenantId: string,
   ): Promise<ServiceComponents | null> {
-    return em.findOne(ServiceComponents, { id });
+    return em.findOne(ServiceComponents, { id, tenantId });
   }
 
   /**
@@ -242,10 +244,20 @@ export class OpsReleasesRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param id - Identificador de id.
+   * @param tenantId - Tenant activo: sólo se ven las herramientas propias o compartidas.
    * @returns Resultado de find tool by id conforme al contrato `Promise<ToolRegistry | null>`.
    */
-  findToolById(em: EntityManager, id: string): Promise<ToolRegistry | null> {
-    return em.findOne(ToolRegistry, { id });
+  findToolById(
+    em: EntityManager,
+    id: string,
+    tenantId: string,
+  ): Promise<ToolRegistry | null> {
+    // El registro de herramientas es un catálogo: la herramienta sin tenant es
+    // compartida, la de otro tenant no se ve.
+    return em.findOne(ToolRegistry, {
+      id,
+      $or: [{ tenantId }, { tenantId: null }],
+    });
   }
 
   /**
@@ -255,10 +267,11 @@ export class OpsReleasesRepository {
   findWindowForUpdate(
     em: EntityManager,
     id: string,
+    tenantId: string,
   ): Promise<MaintenanceWindows | null> {
     return em.findOne(
       MaintenanceWindows,
-      { id },
+      { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }
@@ -321,14 +334,18 @@ export class OpsReleasesRepository {
     return em.findOne(ChangeRequests, { id });
   }
 
-  /** El cambio se bloquea para que la transición de estado sea atómica. */
+  /**
+   * El cambio se bloquea para que la transición de estado sea atómica. Sólo se
+   * encuentra dentro del tenant: el de otro no se bloquea ni se lee.
+   */
   findChangeRequestForUpdate(
     em: EntityManager,
     id: string,
+    tenantId: string,
   ): Promise<ChangeRequests | null> {
     return em.findOne(
       ChangeRequests,
-      { id },
+      { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }
@@ -462,10 +479,15 @@ export class OpsReleasesRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param id - Identificador de id.
+   * @param tenantId - Tenant activo: el artefacto de otro tenant no se encuentra.
    * @returns Resultado de find artifact by id conforme al contrato `Promise<Artifacts | null>`.
    */
-  findArtifactById(em: EntityManager, id: string): Promise<Artifacts | null> {
-    return em.findOne(Artifacts, { id });
+  findArtifactById(
+    em: EntityManager,
+    id: string,
+    tenantId: string,
+  ): Promise<Artifacts | null> {
+    return em.findOne(Artifacts, { id, tenantId });
   }
 
   /**
@@ -535,13 +557,15 @@ export class OpsReleasesRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param id - Identificador de id.
+   * @param tenantId - Tenant activo: el despliegue de otro tenant no se encuentra.
    * @returns Resultado de find deployment by id conforme al contrato `Promise<Deployments | null>`.
    */
   findDeploymentById(
     em: EntityManager,
     id: string,
+    tenantId: string,
   ): Promise<Deployments | null> {
-    return em.findOne(Deployments, { id });
+    return em.findOne(Deployments, { id, tenantId });
   }
 
   /**
@@ -549,15 +573,17 @@ export class OpsReleasesRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param id - Identificador de id.
+   * @param tenantId - Tenant activo: el despliegue de otro tenant no se bloquea.
    * @returns Resultado de find deployment for update conforme al contrato `Promise<Deployments | null>`.
    */
   findDeploymentForUpdate(
     em: EntityManager,
     id: string,
+    tenantId: string,
   ): Promise<Deployments | null> {
     return em.findOne(
       Deployments,
-      { id },
+      { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }

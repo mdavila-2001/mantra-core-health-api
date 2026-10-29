@@ -15,7 +15,11 @@ export type AgendaNoticeKind =
   /** Falta poco para el turno (recordatorio de 24 h y 2 h). */
   | 'APPOINTMENT_REMINDER'
   /** La cita se aceptó, rechazó, reprogramó o canceló, con su motivo. */
-  | 'BOOKING_STATE_CHANGED';
+  | 'BOOKING_STATE_CHANGED'
+  /** El paciente subió el comprobante de lo que pagó: va al médico. */
+  | 'PAYMENT_RECEIPT_UPLOADED'
+  /** El médico confirmó o rechazó un comprobante: va al paciente. */
+  | 'PAYMENT_RECEIPT_REVIEWED';
 
 /** A quién va dirigido el aviso. Uno de los dos, no los dos. */
 export interface AgendaNoticeRecipient {

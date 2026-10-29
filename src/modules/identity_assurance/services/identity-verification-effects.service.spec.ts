@@ -25,12 +25,18 @@ describe('IdentityVerificationEffectsService', () => {
       applyVerified: fn().mockResolvedValue({ action: 'granted' }),
       applyRevoked: fn().mockResolvedValue({ revoked: 1 }),
     };
+    // Por defecto el tenant no tiene requisitos para operar (no es farmacia
+    // ni laboratorio): `evaluateForTenant` devuelve `undefined`.
+    const operatingRequirements = {
+      evaluateForTenant: fn().mockResolvedValue(undefined),
+    };
     const service = new IdentityVerificationEffectsService(
       authorizationsRepo as never,
       practitionersRepo as never,
       tenantsRepo as never,
       verification as never,
       logger as never,
+      operatingRequirements as never,
     );
     return {
       service,
@@ -39,6 +45,7 @@ describe('IdentityVerificationEffectsService', () => {
       practitionersRepo,
       tenantsRepo,
       verification,
+      operatingRequirements,
     };
   }
 
@@ -93,6 +100,70 @@ describe('IdentityVerificationEffectsService', () => {
 
     expect(tenant.verificationStatusConceptId).toBe(CONCEPTS.TENANT_VERIFIED);
     expect(tenant.statusConceptId).toBe(CONCEPTS.TENANT_ACTIVE);
+  });
+
+  it('keeps a pending pharmacy without its papers pending and without badge (P50)', async () => {
+    const d = build();
+    const tenant = {
+      id: 'tenant-1',
+      statusConceptId: DIR.TENANT_PENDING,
+      verificationStatusConceptId: CONCEPTS.TENANT_UNVERIFIED,
+      updatedAt: new Date(),
+    };
+    d.tenantsRepo.findById.mockResolvedValue(tenant);
+    d.operatingRequirements.evaluateForTenant.mockResolvedValue({
+      kind: 'PHARMACY',
+      readiness: {
+        ready: false,
+        missing: ['HEADQUARTERS_LOCATION'],
+        documentIds: [],
+      },
+    });
+
+    await d.service.applyVerified(
+      d.tx as never,
+      verifiedCase(IDA.SUBJECT_TENANT_IDENTITY, 'tenant-1'),
+      ACTOR,
+    );
+
+    expect(d.operatingRequirements.evaluateForTenant).toHaveBeenCalledWith(
+      d.tx,
+      tenant,
+    );
+    expect(tenant.statusConceptId).toBe(DIR.TENANT_PENDING);
+    expect(tenant.verificationStatusConceptId).toBe(CONCEPTS.TENANT_UNVERIFIED);
+    expect(d.verification.applyVerified).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        reason: 'pharmacy-not-ready',
+        missing: ['HEADQUARTERS_LOCATION'],
+      }),
+      expect.any(String),
+    );
+  });
+
+  it('activates a pending laboratory that has its papers (P51)', async () => {
+    const d = build();
+    const tenant = {
+      id: 'tenant-1',
+      statusConceptId: DIR.TENANT_PENDING,
+      verificationStatusConceptId: CONCEPTS.TENANT_UNVERIFIED,
+      updatedAt: new Date(),
+    };
+    d.tenantsRepo.findById.mockResolvedValue(tenant);
+    d.operatingRequirements.evaluateForTenant.mockResolvedValue({
+      kind: 'LABORATORY',
+      readiness: { ready: true, missing: [], documentIds: ['d1', 'd2', 'd3'] },
+    });
+
+    await d.service.applyVerified(
+      d.tx as never,
+      verifiedCase(IDA.SUBJECT_TENANT_IDENTITY, 'tenant-1'),
+      ACTOR,
+    );
+
+    expect(tenant.statusConceptId).toBe(CONCEPTS.TENANT_ACTIVE);
+    expect(tenant.verificationStatusConceptId).toBe(CONCEPTS.TENANT_VERIFIED);
   });
 
   it('verifies an already-operating institution without reactivating it', async () => {
@@ -166,12 +237,18 @@ describe('IdentityVerificationEffectsService · sello público (P13)', () => {
       applyVerified: fn().mockResolvedValue({ action: 'granted' }),
       applyRevoked: fn().mockResolvedValue({ revoked: 1 }),
     };
+    // Por defecto el tenant no tiene requisitos para operar (no es farmacia
+    // ni laboratorio): `evaluateForTenant` devuelve `undefined`.
+    const operatingRequirements = {
+      evaluateForTenant: fn().mockResolvedValue(undefined),
+    };
     const service = new IdentityVerificationEffectsService(
       authorizationsRepo as never,
       practitionersRepo as never,
       tenantsRepo as never,
       verification as never,
       logger as never,
+      operatingRequirements as never,
     );
     return {
       service,
@@ -180,6 +257,7 @@ describe('IdentityVerificationEffectsService · sello público (P13)', () => {
       practitionersRepo,
       tenantsRepo,
       verification,
+      operatingRequirements,
     };
   }
 

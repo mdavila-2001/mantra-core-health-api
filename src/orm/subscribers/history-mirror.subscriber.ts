@@ -5,6 +5,7 @@ import {
   ChangeSetType,
   wrap,
 } from '@mikro-orm/core';
+import { Logger } from '@nestjs/common';
 import type { EntityManager as SqlEntityManager } from '@mikro-orm/postgresql';
 import { AUD } from '../../modules/audit/audit.concepts';
 import { getAuditRequestContext, isUuid } from '../../common/audit-trail';
@@ -104,6 +105,12 @@ function qualifiedTable(
  * creer que la escritura de negocio quedó confirmada sin su historia.
  */
 export class HistoryMirrorSubscriber implements EventSubscriber {
+  /**
+   * Logger estructurado de Nest (pino en runtime). Reemplaza a `console.error`
+   * (ORMN-02): lo que se escribe acá nunca incluye el mensaje crudo del driver.
+   */
+  private readonly logger = new Logger('HistoryMirror');
+
   /** Registro `tablaFuente -> binding`, derivado una vez del `information_schema`. */
   private registry: Map<string, HistoryBinding> | null = null;
 
@@ -159,8 +166,8 @@ export class HistoryMirrorSubscriber implements EventSubscriber {
     if (targets.size !== 1) {
       // Sin una FK única no se sabe de qué schema es el agregado; adivinarlo por
       // nombre es lo que hacía chocar a las homónimas. Se dice y no se versiona.
-      console.error(
-        `[history-mirror] audit.${tableName}: la columna ${sourceIdColumn} no tiene una FK única a su tabla fuente (${targets.size}); no se versionará`,
+      this.logger.error(
+        `audit.${tableName}: la columna ${sourceIdColumn} no tiene una FK única a su tabla fuente (${targets.size}); no se versionará`,
       );
       return undefined;
     }
@@ -198,6 +205,13 @@ export class HistoryMirrorSubscriber implements EventSubscriber {
         },
       ];
     });
+  }
+
+  private sqlState(err: unknown): string {
+    const code = (err as { code?: unknown } | null)?.code;
+    return typeof code === 'string' && /^[0-9A-Z]{5}$/.test(code)
+      ? code
+      : 'desconocido';
   }
 
   private formatSourceId(value: unknown): string {
@@ -279,8 +293,10 @@ export class HistoryMirrorSubscriber implements EventSubscriber {
           ],
         );
       } catch (err) {
-        console.error(
-          `[history-mirror] fallo al versionar ${sourceTable} ${this.formatSourceId(sourceId)}: ${(err as Error).message}`,
+        // Sólo tabla, identificador y código SQLSTATE: el `message` del driver
+        // puede traer `DETAIL: Key (col)=(valor)` con datos de la fila (ORMN-02).
+        this.logger.error(
+          `fallo al versionar ${sourceTable} ${this.formatSourceId(sourceId)} (sqlstate ${this.sqlState(err)})`,
         );
         throw err;
       }

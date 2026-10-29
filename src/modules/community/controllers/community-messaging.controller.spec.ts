@@ -104,6 +104,70 @@ describe('CommunityMessagingController', () => {
     expect(res.send).toHaveBeenCalledWith(Buffer.from('bytes'));
   });
 
+  it('sirve una imagen del chat en línea, con su tipo y nosniff', async () => {
+    const d = build();
+    d.readService.getAttachmentContent.mockResolvedValue({
+      buffer: Buffer.from('jpeg'),
+      mimeType: 'image/jpeg',
+      originalName: 'foto.jpg',
+    });
+    const res = { setHeader: mockFn(), send: mockFn() } as any;
+
+    await d.controller.getAttachmentContent(
+      'conv1',
+      'file1',
+      'profile1',
+      res,
+      actor,
+    );
+
+    expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'image/jpeg');
+    expect(res.setHeader).toHaveBeenCalledWith(
+      'Content-Disposition',
+      "inline; filename*=UTF-8''foto.jpg",
+    );
+    expect(res.setHeader).toHaveBeenCalledWith(
+      'X-Content-Type-Options',
+      'nosniff',
+    );
+    expect(res.setHeader).toHaveBeenCalledWith(
+      'Cache-Control',
+      'private, no-store',
+    );
+  });
+
+  it('nunca sirve un adjunto SVG/HTML como documento activo en línea', async () => {
+    const d = build();
+    d.readService.getAttachmentContent.mockResolvedValue({
+      buffer: Buffer.from('<svg onload="alert(1)"/>'),
+      // `mimeType` declarado por un camino de metadata, no por el sniff.
+      mimeType: 'image/svg+xml',
+      originalName: undefined,
+    });
+    const res = { setHeader: mockFn(), send: mockFn() } as any;
+
+    await d.controller.getAttachmentContent(
+      'conv1',
+      'file1',
+      'profile1',
+      res,
+      actor,
+    );
+
+    expect(res.setHeader).toHaveBeenCalledWith(
+      'Content-Type',
+      'application/octet-stream',
+    );
+    expect(res.setHeader).toHaveBeenCalledWith(
+      'Content-Disposition',
+      'attachment',
+    );
+    expect(res.setHeader).not.toHaveBeenCalledWith(
+      'Content-Type',
+      'image/svg+xml',
+    );
+  });
+
   it('delegates markRead (UC-19-07)', async () => {
     const d = build();
     const dto = { recipientProfileId: 'p1' };

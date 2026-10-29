@@ -46,8 +46,7 @@ export class SitesController {
    *
    * Sin `@Roles`: el dueño de una organización entra con rol global `USER` y
    * su poder es la membresía OWNER/ADMIN. La autorización la hace el servicio
-   * (`TenantAdministrationService.assertCanAdminister`), y una sede de otro
-   * tenant responde 404.
+   * y una sede de otro tenant responde 404.
    */
   @Audited({
     action: 'CLINICAL_UNIT_CREATED',
@@ -62,12 +61,7 @@ export class SitesController {
     @Body() dto: CreateClinicalUnitDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ClinicalUnitResponseDto> {
-    return this.structureService.createClinicalUnit(
-      siteId,
-      dto,
-      actor,
-      requireTenantId(),
-    );
+    return this.structureService.createClinicalUnit(siteId, dto, actor);
   }
 
   /**
@@ -110,11 +104,6 @@ export class SitesController {
     @Body() dto: CreateCareSpaceDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<CareSpaceResponseDto> {
-    return this.structureService.createCareSpace(
-      siteId,
-      dto,
-      actor,
-      requireTenantId(),
-    );
+    return this.structureService.createCareSpace(siteId, dto, actor);
   }
 }

@@ -95,6 +95,7 @@ export function createBookingsService(d: BookingsServiceDoubles) {
   const serviceSlots = new ServiceSlotLifecycle(
     d.bookingsRepo,
     d.serviceAgenda,
+    d.catalogRepo,
   );
   const clinicalSync = new ClinicalAppointmentSync(clinical);
   const slotPolicy = new SlotPolicyResolver(d.catalogRepo);

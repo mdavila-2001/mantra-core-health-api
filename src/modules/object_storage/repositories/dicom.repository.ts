@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
+import { ImagingStudies } from '../../diagnostics/entities';
+import { PatientProfiles } from '../../profiles/entities';
 import {
   DicomStudyManifests,
   DicomSeriesManifests,
@@ -95,17 +97,66 @@ export class DicomRepository {
   }
 
   /**
-   * Obtiene find study by uid.
+   * Estudio por su UID **dentro del tenant**: el UID de un estudio de otra
+   * organización no se encuentra, igual que uno que no existe.
    *
    * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant activo del request.
    * @param studyInstanceUid - Identificador de study instance uid.
    * @returns Resultado de find study by uid conforme al contrato `Promise<DicomStudyManifests | null>`.
    */
   findStudyByUid(
     em: EntityManager,
+    tenantId: string,
     studyInstanceUid: string,
   ): Promise<DicomStudyManifests | null> {
-    return em.findOne(DicomStudyManifests, { studyInstanceUid });
+    return em.findOne(DicomStudyManifests, { tenantId, studyInstanceUid });
+  }
+
+  /** Si existe el perfil de paciente que el gateway declara para el estudio. */
+  async patientProfileExists(
+    em: EntityManager,
+    patientProfileId: string,
+  ): Promise<boolean> {
+    return (
+      (await em.count(PatientProfiles, { profileId: patientProfileId })) > 0
+    );
+  }
+
+  /**
+   * Si el estudio de imagen que el gateway cita es de la custodia del tenant y,
+   * cuando se declara paciente, de ese paciente.
+   */
+  async imagingStudyInScope(
+    em: EntityManager,
+    imagingStudyId: string,
+    tenantId: string,
+    patientProfileId?: string,
+  ): Promise<boolean> {
+    const count = await em.count(ImagingStudies, {
+      id: imagingStudyId,
+      custodianTenantId: tenantId,
+      ...(patientProfileId ? { patientProfileId } : {}),
+    });
+    return count > 0;
+  }
+
+  /**
+   * Paciente de un estudio de imagen de la custodia del tenant.
+   *
+   * @returns El perfil del paciente, o `undefined` si el estudio no existe, no
+   *   es del tenant o no tiene paciente.
+   */
+  async imagingStudyPatientId(
+    em: EntityManager,
+    imagingStudyId: string,
+    tenantId: string,
+  ): Promise<string | undefined> {
+    const study = await em.findOne(ImagingStudies, {
+      id: imagingStudyId,
+      custodianTenantId: tenantId,
+    });
+    return study?.patientProfileId ?? undefined;
   }
 
   // --- Series (UC-60-04, 05) ---

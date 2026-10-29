@@ -426,6 +426,12 @@ describe('Relación agenda → mensajería · dobles de ambos extremos (H2)', ()
             continue;
           }
           if (!ruta.endsWith('.ts')) continue;
+          // Lo que el build excluye (`tsconfig.build.json`: `**/*spec.ts`,
+          // `**/*.testing.ts`) no llega a `dist/`; un spec es justamente quien
+          // importa los dobles de `test/`. M1-bis comprueba que esa exclusión
+          // siga declarada, así que esto no abre un agujero: lo acota a lo que
+          // el build compila.
+          if (/spec\.ts$|\.testing\.ts$/.test(ruta)) continue;
           const texto = fs.readFileSync(ruta, 'utf8');
           // Cualquier import que salga de `src/` hacia `test/`.
           if (/from\s+['"][^'"]*\/test\//.test(texto)) {
@@ -448,6 +454,10 @@ describe('Relación agenda → mensajería · dobles de ambos extremos (H2)', ()
       // terminaría dentro de `dist/`.
       expect(tsconfigBuild).toMatch(/"exclude"/);
       expect(tsconfigBuild).toMatch(/test/);
+      // Y los specs y los `*.testing.ts`, que M1 deja fuera del escaneo
+      // precisamente porque el build no los compila.
+      expect(tsconfigBuild).toContain('"**/*spec.ts"');
+      expect(tsconfigBuild).toContain('"**/*.testing.ts"');
     });
   });
 

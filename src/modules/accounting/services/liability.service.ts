@@ -11,6 +11,7 @@ import { ACCT } from '../accounting.concepts';
 import { AccountingErrorReason } from '../accounting.error-reasons';
 import { LiabilityRepository } from '../repositories';
 import { PostingHelper, type PostingLine } from './posting.helper';
+import { AccountingScopeService } from './accounting-scope.service';
 import { toCents, fromCents } from './money';
 import { PayLiabilityDto, LiabilityPaymentResponseDto } from '../dto';
 
@@ -27,12 +28,14 @@ export class LiabilityService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param liabilityRepo - Valor de liability repo requerido por la operación.
    * @param posting - Valor de posting requerido por la operación.
+   * @param scope - Política de alcance de tenant (ACC-01).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly liabilityRepo: LiabilityRepository,
     private readonly posting: PostingHelper,
+    private readonly scope: AccountingScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(LiabilityService.name);
@@ -80,16 +83,15 @@ export class LiabilityService {
     }
 
     return this.em.transactional(async (tx) => {
-      const liability = await this.liabilityRepo.findById(tx, liabilityId);
-      if (!liability) {
-        throw new ResourceNotFoundException(
-          'Pasivo no encontrado',
-          {
-            liabilityId,
-          },
-          AccountingErrorReason.LIABILITY_NOT_FOUND,
-        );
-      }
+      // ACC-01: la práctica es del tenant activo y el pasivo es de **esa**
+      // práctica; un pasivo de otra práctica responde como inexistente. Las
+      // cuentas del pago las acota el posteo, antes de escribir el asiento.
+      await this.scope.practice(dto.practiceId);
+      const liability = await this.scope.liabilityInPractice(
+        tx,
+        liabilityId,
+        dto.practiceId,
+      );
       if (liability.statusConceptId !== ACCT.LIABILITY_ACTIVE) {
         throw new PreconditionFailedException(
           'El pasivo no está ACTIVO',

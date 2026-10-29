@@ -16,6 +16,8 @@
  * backend de métricas; alimenta uno.
  */
 
+import { normalizeSql } from './sql-redaction';
+
 /** Familias de sentencia que se contabilizan por separado. */
 export type QueryKind =
   'select' | 'insert' | 'update' | 'delete' | 'ddl' | 'other';
@@ -127,7 +129,8 @@ export class QueryMetrics {
     if (slow) this.slow += 1;
     if (tookMs > this.maxMs) {
       this.maxMs = tookMs;
-      this.slowestQuery = sql.slice(0, MAX_SQL_SAMPLE);
+      // Sólo la forma de la consulta, sin literales ni parámetros (ORMN-02).
+      this.slowestQuery = normalizeSql(sql).slice(0, MAX_SQL_SAMPLE);
     }
   }
 

@@ -125,4 +125,14 @@ export class FacilityLicenses {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  @Property({ fieldName: 'clinical_unit_id', type: 'uuid', nullable: true }) // FK → practice.clinical_units (inferida)
+  clinicalUnitId?: string;
+
+  @Property({
+    fieldName: 'healthcare_service_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → practice.healthcare_services (inferida)
+  healthcareServiceId?: string;
 }

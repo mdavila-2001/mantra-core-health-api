@@ -5,6 +5,8 @@ import { DiagnosticUnitProvisioningService } from './diagnostic-unit-provisionin
 import { PRAC } from '../../practice/practice.concepts';
 import { DUNIT } from '../diagnostic_units.concepts';
 import { CONCEPTS } from '../../../common';
+import { boProvinceConceptId } from '../../../common/seed/admin-divisions.catalog';
+import { boMunicipalityConceptId } from '../../../common/seed/bo-geography.catalog';
 
 const OWNER = {
   tenantId: 'tenant-1',
@@ -96,7 +98,9 @@ describe('DiagnosticUnitProvisioningService', () => {
           tenantId: OWNER.tenantId,
           code: OWNER.tenantCode,
           name: OWNER.legalName,
-          diagnosticUnitTypeConceptId: DUNIT.UNIT_TYPE_IMAGING,
+          // Sin tipo ni modalidades de imagen, la unidad es de laboratorio
+          // (P51, D-1): antes era imágenes por omisión.
+          diagnosticUnitTypeConceptId: DUNIT.UNIT_TYPE_LABORATORY,
           ownershipTypeConceptId: DUNIT.OWNERSHIP_PRIVATE,
           practiceId: 'practice-1',
           primaryPracticeSiteId: 'site-1',
@@ -111,8 +115,8 @@ describe('DiagnosticUnitProvisioningService', () => {
           diagnosticUnitId: 'unit-1',
           practiceSiteId: 'site-1',
           siteRoleConceptId: DUNIT.SITE_ROLE_PRIMARY,
-          imagingAvailable: true,
-          sampleCollectionAvailable: undefined,
+          imagingAvailable: undefined,
+          sampleCollectionAvailable: true,
         }),
       );
       expect(res).toMatchObject({
@@ -122,6 +126,52 @@ describe('DiagnosticUnitProvisioningService', () => {
         addressId: undefined,
         offeringIds: [],
       });
+    });
+
+    it('sin tipo declarado, una modalidad de imagen hace la unidad de imágenes (P51, D-1)', async () => {
+      const d = build();
+
+      await d.service.provision(
+        d.tx as never,
+        OWNER,
+        {
+          modalityConceptIds: [DUNIT.MODALITY_LABORATORY, DUNIT.MODALITY_XRAY],
+        },
+        OWNER.ownerUserId,
+      );
+
+      expect(d.unitsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          diagnosticUnitTypeConceptId: DUNIT.UNIT_TYPE_IMAGING,
+        }),
+      );
+      expect(d.unitSitesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          siteRoleConceptId: DUNIT.SITE_ROLE_PRIMARY,
+          imagingAvailable: true,
+          sampleCollectionAvailable: undefined,
+        }),
+      );
+    });
+
+    it('sin tipo declarado, sólo la modalidad de laboratorio hace la unidad de laboratorio (P51, D-1)', async () => {
+      const d = build();
+
+      await d.service.provision(
+        d.tx as never,
+        OWNER,
+        { modalityConceptIds: [DUNIT.MODALITY_LABORATORY] },
+        OWNER.ownerUserId,
+      );
+
+      expect(d.unitsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          diagnosticUnitTypeConceptId: DUNIT.UNIT_TYPE_LABORATORY,
+        }),
+      );
     });
 
     it('usa el código, el nombre y el tipo declarados en vez de los defaults', async () => {
@@ -225,6 +275,35 @@ describe('DiagnosticUnitProvisioningService', () => {
       expect(res.addressId).toBe('address-1');
     });
 
+    it('ADR-0028: guarda el distrito aparte y deduce la provincia del municipio', async () => {
+      const d = build();
+
+      await d.service.provision(
+        d.tx as never,
+        OWNER,
+        {
+          primarySite: {
+            name: 'Sede Santa Cruz',
+            address: {
+              lines: ['Av. San Martín 123'],
+              district: '  Equipetrol  ',
+              municipalityConceptId: boMunicipalityConceptId('070101'),
+            },
+          },
+        },
+        OWNER.ownerUserId,
+      );
+
+      expect(d.addressesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          lines: 'Av. San Martín 123',
+          districtText: 'Equipetrol',
+          administrativeArea2ConceptId: boProvinceConceptId('0701'),
+        }),
+      );
+    });
+
     it('crea una oferta activa por cada modalidad declarada, con el rótulo en castellano', async () => {
       const d = build();
 
@@ -326,6 +405,53 @@ describe('DiagnosticUnitProvisioningService', () => {
       // Práctica, dirección, sede, unidad, sede de unidad y la oferta: seis
       // filas con FK a la anterior.
       expect(d.tx.flush).toHaveBeenCalledTimes(6);
+    });
+
+    it('crea cada sucursal como sede de práctica y sede de unidad con rol de toma de muestras', async () => {
+      const d = build();
+      let n = 0;
+      d.sitesRepo.create.mockImplementation(() => ({ id: `site-${++n}` }));
+
+      const res = await d.service.provision(
+        d.tx as never,
+        OWNER,
+        {
+          diagnosticUnitTypeConceptId: DUNIT.UNIT_TYPE_LABORATORY,
+          branches: [
+            {
+              name: 'Sucursal Norte',
+              address: {
+                lines: ['Av. Banzer 100'],
+                latitude: -17.7,
+                longitude: -63.1,
+              },
+            },
+            { name: 'Sucursal Sur' },
+          ],
+        },
+        OWNER.ownerUserId,
+      );
+
+      // central + 2 sucursales
+      expect(d.sitesRepo.create).toHaveBeenCalledTimes(3);
+      expect(d.sitesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          practiceId: 'practice-1',
+          name: 'Sucursal Norte',
+        }),
+      );
+      expect(d.addressesRepo.create).toHaveBeenCalledTimes(1);
+      expect(d.unitSitesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          practiceSiteId: 'site-3',
+          siteRoleConceptId: DUNIT.SITE_ROLE_COLLECTION,
+          sampleCollectionAvailable: true,
+        }),
+      );
+      expect(res.siteId).toBe('site-1');
+      expect(res.branchSiteIds).toEqual(['site-2', 'site-3']);
     });
   });
 });

@@ -64,6 +64,24 @@ export enum AccountingErrorReason {
   /** El actor no porta ningún rol con autoridad para aprobar el asiento. */
   APPROVAL_ROLE_REQUIRED = 'APPROVAL_ROLE_REQUIRED',
 
+  // --- Alcance de tenant de las escrituras (accounting-scope.service.ts) ---
+  // Lo ajeno responde igual que lo inexistente: mismo mensaje, mismo `reason`,
+  // sin `details`.
+  /** El activo fijo no existe o es de una práctica de otra organización. */
+  ASSET_NOT_FOUND = 'ASSET_NOT_FOUND',
+  /** La cuenta bancaria de la empresa no existe o es de otra organización. */
+  COMPANY_BANK_ACCOUNT_NOT_FOUND = 'COMPANY_BANK_ACCOUNT_NOT_FOUND',
+  /** El centro de costo no existe o no es de la práctica de la operación. */
+  COST_CENTER_NOT_FOUND = 'COST_CENTER_NOT_FOUND',
+  /** El centro de beneficio no existe o es de otra organización. */
+  PROFIT_CENTER_NOT_FOUND = 'PROFIT_CENTER_NOT_FOUND',
+  /** El área de depreciación no existe o es de otra organización. */
+  DEPRECIATION_AREA_NOT_FOUND = 'DEPRECIATION_AREA_NOT_FOUND',
+  /** La línea del mayor no existe o su asiento es de otra organización. */
+  LEDGER_ENTRY_NOT_FOUND = 'LEDGER_ENTRY_NOT_FOUND',
+  /** El tipo de cambio es un dato de plataforma: sólo lo registra un actor de plataforma. */
+  EXCHANGE_RATE_PLATFORM_ONLY = 'EXCHANGE_RATE_PLATFORM_ONLY',
+
   // --- Lectura del mayor (ledger-read.service.ts) ---
   PRACTICE_NOT_FOUND = 'PRACTICE_NOT_FOUND',
   ACCOUNT_NOT_FOUND_IN_PRACTICE = 'ACCOUNT_NOT_FOUND_IN_PRACTICE',
@@ -92,4 +110,17 @@ export enum AccountingErrorReason {
   ASSET_CODE_ALREADY_EXISTS = 'ASSET_CODE_ALREADY_EXISTS',
   /** Ningún activo activo tiene un importe pendiente de depreciar en el periodo. */
   DEPRECIATION_NO_ELIGIBLE_ASSETS = 'DEPRECIATION_NO_ELIGIBLE_ASSETS',
+
+  // --- Contabilidad simple del doctor, P49 (practitioner-simple-accounting.service.ts) ---
+  /** Un campo de la cuenta, el registro o la transacción no cumple la spec (422). */
+  SIMPLE_ACCOUNTING_INVALID = 'SIMPLE_ACCOUNTING_INVALID',
+  SIMPLE_ACCOUNT_NOT_FOUND = 'SIMPLE_ACCOUNT_NOT_FOUND',
+  SIMPLE_RECORD_NOT_FOUND = 'SIMPLE_RECORD_NOT_FOUND',
+  SIMPLE_TRANSACTION_NOT_FOUND = 'SIMPLE_TRANSACTION_NOT_FOUND',
+  /** Ya hay una cuenta con ese nombre en esa clase (sin distinguir tildes ni mayúsculas). */
+  SIMPLE_ACCOUNT_DUPLICATE_NAME = 'SIMPLE_ACCOUNT_DUPLICATE_NAME',
+  /** La cuenta es una de las generales sembradas: se renombra, no se borra ni cambia de clase. */
+  SIMPLE_ACCOUNT_SEEDED = 'SIMPLE_ACCOUNT_SEEDED',
+  /** La cuenta ya la usa algún registro o transacción. */
+  SIMPLE_ACCOUNT_IN_USE = 'SIMPLE_ACCOUNT_IN_USE',
 }

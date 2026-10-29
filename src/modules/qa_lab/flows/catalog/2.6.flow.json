@@ -7,13 +7,8 @@
     "document": "SALUD/📋 Registro de procesos por módulo.md",
     "section": "2.6 · Consulta, elaboración de la ficha medica"
   },
-  "actors": [
-    "PRACTITIONER",
-    "PATIENT"
-  ],
-  "frontRoutes": [
-    "/medical-records/:profileId/consultation"
-  ],
+  "actors": ["PRACTITIONER", "PATIENT"],
+  "frontRoutes": ["/medical-records/:profileId/consultation"],
   "root": "crear-ficha",
   "nodes": [
     {
@@ -358,9 +353,7 @@
         "method": "POST",
         "path": "/clinical/encounters/{id}/close"
       },
-      "effects": [
-        "Gatilla la facturación (summary del contrato)"
-      ],
+      "effects": ["Gatilla la facturación (summary del contrato)"],
       "sourceRef": "ítem 1.3.4",
       "branches": [
         {

@@ -59,15 +59,18 @@ import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.servi
 import { TelemetryUxHeatmapSeedService } from './telemetry-ux-heatmap-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
+import { AdminDivisionsSeedService } from './admin-divisions-seed.service';
 import { LegalEntityTypesSeedService } from './legal-entity-types-seed.service';
 import { AffiliationCatalogsSeedService } from './affiliation-catalogs-seed.service';
 import { BoEmployersSeedService } from './bo-employers-seed.service';
 import { BoOccupationsSeedService } from './bo-occupations-seed.service';
+import { BoMedicalSpecialtiesSeedService } from './bo-medical-specialties-seed.service';
 import { BoProfessionsSeedService } from './bo-professions-seed.service';
 import { BoliviaFacilitiesSeedService } from './bolivia-facilities-seed.service';
 import { BoliviaFeeScheduleSeedService } from './bolivia-fee-schedule-seed.service';
 import { BoliviaInsuranceSeedService } from './bolivia-insurance-seed.service';
 import { SeedBootstrapService } from './seed-bootstrap.service';
+import { SeedCoreState } from './seed-core.state';
 import { SpecialtyChartTemplates } from '../../modules/chart/entities';
 import {
   DynamicFieldDefinitions,
@@ -140,7 +143,6 @@ import { Files, FileVersions } from '../../modules/common/entities';
       DynamicFieldSections,
       DynamicFieldDefinitions,
       FieldAssignments,
-      AuthzPermissions,
       // Pack de stickers (AG-17): filas de metadatos, sin bytes.
       Files,
       FileVersions,
@@ -160,6 +162,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     TelemetryUxHeatmapSeedService,
     GlossarySeedService,
     BoGeographySeedService,
+    AdminDivisionsSeedService,
     LegalEntityTypesSeedService,
     AffiliationCatalogsSeedService,
     BoOccupationsSeedService,
@@ -178,7 +181,9 @@ import { Files, FileVersions } from '../../modules/common/entities';
     QaFlowsSeedService,
     ProviderAccountsSeedService,
     SeedBootstrapService,
+    SeedCoreState,
     ClinicalFormsSeedService,
+    BoMedicalSpecialtiesSeedService,
     PracticeDefaultServicesSeedService,
     PeopleSeedService,
     DirectoryNetworksSeedService,
@@ -186,12 +191,14 @@ import { Files, FileVersions } from '../../modules/common/entities';
   ],
   exports: [
     SeedBootstrapService,
+    SeedCoreState,
     TerminologySeedService,
     DynamicEnumSeedService,
     PatientPortalProxySeedService,
     TelemetryUxHeatmapSeedService,
     GlossarySeedService,
     BoGeographySeedService,
+    AdminDivisionsSeedService,
     LegalEntityTypesSeedService,
     AffiliationCatalogsSeedService,
     BoOccupationsSeedService,
@@ -210,6 +217,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     QaFlowsSeedService,
     ProviderAccountsSeedService,
     ClinicalFormsSeedService,
+    BoMedicalSpecialtiesSeedService,
     PracticeDefaultServicesSeedService,
     PeopleSeedService,
     DirectoryNetworksSeedService,

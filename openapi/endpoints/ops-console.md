@@ -30,7 +30,7 @@ Referencia exhaustiva de 9 operación(es) del módulo `ops_console`, derivada de
 - **Nombre:** Políticas de backup con su última prueba de restauración
 - **Operation ID:** `OpsConsoleController_backups`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [OpsConsoleController.backups](../../src/modules/ops_console/ops-console.controller.ts)
+- **Implementación:** [OpsConsoleController.backups](../../src/modules/ops_console/presentation/controllers/ops-console.controller.ts)
 
 ### Descripción de negocio
 
@@ -84,6 +84,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -119,7 +120,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Solicitudes de cambio
 - **Operation ID:** `OpsConsoleController_changeRequests`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [OpsConsoleController.changeRequests](../../src/modules/ops_console/ops-console.controller.ts)
+- **Implementación:** [OpsConsoleController.changeRequests](../../src/modules/ops_console/presentation/controllers/ops-console.controller.ts)
 
 ### Descripción de negocio
 
@@ -175,6 +176,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -211,7 +213,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Despliegues recientes
 - **Operation ID:** `OpsConsoleController_deployments`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [OpsConsoleController.deployments](../../src/modules/ops_console/ops-console.controller.ts)
+- **Implementación:** [OpsConsoleController.deployments](../../src/modules/ops_console/presentation/controllers/ops-console.controller.ts)
 
 ### Descripción de negocio
 
@@ -267,6 +269,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -303,7 +306,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Incidentes
 - **Operation ID:** `OpsConsoleController_incidents`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [OpsConsoleController.incidents](../../src/modules/ops_console/ops-console.controller.ts)
+- **Implementación:** [OpsConsoleController.incidents](../../src/modules/ops_console/presentation/controllers/ops-console.controller.ts)
 
 ### Descripción de negocio
 
@@ -360,6 +363,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -396,7 +400,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Incidente con su timeline
 - **Operation ID:** `OpsConsoleController_incident`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [OpsConsoleController.incident](../../src/modules/ops_console/ops-console.controller.ts)
+- **Implementación:** [OpsConsoleController.incident](../../src/modules/ops_console/presentation/controllers/ops-console.controller.ts)
 
 ### Descripción de negocio
 
@@ -454,6 +458,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -466,7 +471,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Incidente no encontrado | Excepción explícita en src/modules/ops_console/ops-console.service.ts |
+| 404 | `NOT_FOUND` | Incidente no encontrado | Excepción explícita en src/modules/ops_console/application/ops-console.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -491,7 +496,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Preparación para producción: controles PASS/FAIL/UNKNOWN/N_A con evidencia
 - **Operation ID:** `OpsConsoleController_readiness`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [OpsConsoleController.readiness](../../src/modules/ops_console/ops-console.controller.ts)
+- **Implementación:** [OpsConsoleController.readiness](../../src/modules/ops_console/presentation/controllers/ops-console.controller.ts)
 
 ### Descripción de negocio
 
@@ -545,6 +550,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -580,7 +586,7 @@ Ejemplo de error normalizado:
 - **Nombre:** SLO activos con su última medición (numerador y denominador)
 - **Operation ID:** `OpsConsoleController_slos`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [OpsConsoleController.slos](../../src/modules/ops_console/ops-console.controller.ts)
+- **Implementación:** [OpsConsoleController.slos](../../src/modules/ops_console/presentation/controllers/ops-console.controller.ts)
 
 ### Descripción de negocio
 
@@ -634,6 +640,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -669,7 +676,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Tráfico HTTP de la API: solicitudes, éxito, fallos, latencia y usuarios activos
 - **Operation ID:** `OpsConsoleController_trafficOverview`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [OpsConsoleController.trafficOverview](../../src/modules/ops_console/ops-console.controller.ts)
+- **Implementación:** [OpsConsoleController.trafficOverview](../../src/modules/ops_console/presentation/controllers/ops-console.controller.ts)
 
 ### Descripción de negocio
 
@@ -727,6 +734,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -763,7 +771,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Endpoints tocados en la ventana, por plantilla de ruta
 - **Operation ID:** `OpsConsoleController_trafficEndpoints`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [OpsConsoleController.trafficEndpoints](../../src/modules/ops_console/ops-console.controller.ts)
+- **Implementación:** [OpsConsoleController.trafficEndpoints](../../src/modules/ops_console/presentation/controllers/ops-console.controller.ts)
 
 ### Descripción de negocio
 
@@ -822,6 +830,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 

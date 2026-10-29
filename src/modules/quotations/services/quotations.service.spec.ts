@@ -7,11 +7,13 @@ import { ValidationPipe } from '@nestjs/common';
 import { QuotationsService } from './quotations.service';
 import { CreateQuotationDto } from '../dto/create-quotation.dto';
 import { assertPaymentPlanClosesOnPrice, toCents } from './payment-plan';
+import { ForbiddenException } from '@nestjs/common';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
   runWithTenant,
 } from '../../../common';
+import { QuotationsErrorReason } from '../quotations.error-reasons';
 
 const actor = {
   id: 'user-1',
@@ -69,6 +71,7 @@ function build() {
     findById: mockFn(),
     findByPatient: mockFn(),
     create: mockFn(),
+    findAppointmentById: mockFn().mockResolvedValue(null),
   };
   const installmentsRepo = {
     findByQuotationId: mockFn(),
@@ -88,6 +91,11 @@ function build() {
     findActivePracticeIdsForTenant: mockFn().mockResolvedValue([]),
     findTenantOfPractice: mockFn().mockResolvedValue(null),
   };
+  // Por defecto el actor tiene base clínica sobre el paciente; las pruebas de
+  // alcance de paciente lo pisan con un 403, como lo hace la política real.
+  const clinicalRead = {
+    assertCanReadHistory: mockFn().mockResolvedValue(undefined),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new QuotationsService(
     em as any,
@@ -95,6 +103,7 @@ function build() {
     installmentsRepo as any,
     serviceCatalogRepo as any,
     practiceTenantLookup as any,
+    clinicalRead as any,
     logger as any,
   );
   return {
@@ -105,6 +114,7 @@ function build() {
     installmentsRepo,
     serviceCatalogRepo,
     practiceTenantLookup,
+    clinicalRead,
   };
 }
 
@@ -420,6 +430,152 @@ describe('QuotationsService.createQuotation', () => {
   });
 });
 
+/** Aserciones del 404 uniforme del paciente no disponible (QUOTE-01). */
+async function expectPatientNotAvailable(promise: Promise<unknown>) {
+  const error = await promise.then(
+    () => null,
+    (e: unknown) => e,
+  );
+  expect(error).toBeInstanceOf(ResourceNotFoundException);
+  const exception = error as ResourceNotFoundException;
+  expect(exception.getStatus()).toBe(404);
+  expect(exception.reason).toBe(
+    QuotationsErrorReason.QUOTATION_PATIENT_NOT_AVAILABLE,
+  );
+  expect(exception.details).toBeUndefined();
+  return exception;
+}
+
+describe('QuotationsService.createQuotation · alcance del paciente (QUOTE-01)', () => {
+  const appointment = {
+    id: 'appt-1',
+    patientProfileId: 'pat-1',
+    tenantId: 'mi-tenant',
+  };
+
+  it('relación clínica válida: consulta la política con el paciente y el actor, y crea', async () => {
+    const d = build();
+    d.serviceCatalogRepo.findById.mockResolvedValue(catalogItem);
+    d.quotationsRepo.create.mockReturnValue(quotationRow());
+
+    const res = await d.service.createQuotation(baseDto, actor);
+
+    expect(res.id).toBe('q-1');
+    expect(d.clinicalRead.assertCanReadHistory).toHaveBeenCalledWith(
+      'pat-1',
+      actor,
+    );
+    expect(d.quotationsRepo.create).toHaveBeenCalledTimes(1);
+  });
+
+  it('cita del mismo paciente y del tenant activo: crea', async () => {
+    const d = build();
+    d.serviceCatalogRepo.findById.mockResolvedValue(catalogItem);
+    d.quotationsRepo.findAppointmentById.mockResolvedValue(appointment);
+    d.quotationsRepo.create.mockReturnValue(
+      quotationRow({ appointmentId: 'appt-1' }),
+    );
+
+    const res = await runWithTenant('mi-tenant', () =>
+      d.service.createQuotation(
+        { ...baseDto, appointmentId: 'appt-1' } as any,
+        actor,
+      ),
+    );
+
+    expect(res.appointmentId).toBe('appt-1');
+    expect(d.quotationsRepo.findAppointmentById).toHaveBeenCalledWith(
+      expect.anything(),
+      'appt-1',
+    );
+  });
+
+  it('paciente sin base clínica: 404 uniforme y no persiste ni toca el catálogo', async () => {
+    const d = build();
+    d.clinicalRead.assertCanReadHistory.mockRejectedValue(
+      new ForbiddenException(
+        'Sólo puede consultar su propia historia clínica.',
+      ),
+    );
+
+    await expectPatientNotAvailable(d.service.createQuotation(baseDto, actor));
+
+    expect(d.tx.flush).not.toHaveBeenCalled();
+    expect(d.quotationsRepo.create).not.toHaveBeenCalled();
+    expect(d.serviceCatalogRepo.findById).not.toHaveBeenCalled();
+  });
+
+  it('un error que no es de acceso (p. ej. caída de la base) no se disfraza de 404', async () => {
+    const d = build();
+    d.clinicalRead.assertCanReadHistory.mockRejectedValue(new Error('db down'));
+
+    await expect(d.service.createQuotation(baseDto, actor)).rejects.toThrow(
+      'db down',
+    );
+  });
+
+  it('cita de otro paciente: mismo 404, no persiste', async () => {
+    const d = build();
+    d.quotationsRepo.findAppointmentById.mockResolvedValue({
+      ...appointment,
+      patientProfileId: 'pat-T2',
+    });
+
+    await expectPatientNotAvailable(
+      runWithTenant('mi-tenant', () =>
+        d.service.createQuotation(
+          { ...baseDto, appointmentId: 'appt-1' } as any,
+          actor,
+        ),
+      ),
+    );
+
+    expect(d.quotationsRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('cita de otro tenant: mismo 404, no persiste', async () => {
+    const d = build();
+    d.quotationsRepo.findAppointmentById.mockResolvedValue({
+      ...appointment,
+      tenantId: 'otro-tenant',
+    });
+
+    await expectPatientNotAvailable(
+      runWithTenant('mi-tenant', () =>
+        d.service.createQuotation(
+          { ...baseDto, appointmentId: 'appt-1' } as any,
+          actor,
+        ),
+      ),
+    );
+
+    expect(d.quotationsRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('cita inexistente: mismo 404 que paciente ajeno (mismo mensaje y reason, sin details)', async () => {
+    const d = build();
+    d.quotationsRepo.findAppointmentById.mockResolvedValue(null);
+    const missingAppointment = await expectPatientNotAvailable(
+      d.service.createQuotation(
+        { ...baseDto, appointmentId: 'appt-x' } as any,
+        actor,
+      ),
+    );
+
+    d.clinicalRead.assertCanReadHistory.mockRejectedValue(
+      new ForbiddenException('x'),
+    );
+    const foreignPatient = await expectPatientNotAvailable(
+      d.service.createQuotation(baseDto, actor),
+    );
+
+    expect(missingAppointment.message).toBe(foreignPatient.message);
+    expect(missingAppointment.getResponse()).toEqual(
+      foreignPatient.getResponse(),
+    );
+  });
+});
+
 describe('QuotationsService.getQuotation', () => {
   it('lanza ResourceNotFoundException si no existe', async () => {
     const d = build();
@@ -621,6 +777,67 @@ describe('QuotationsService.listQuotationsByPatient', () => {
       'pat-1',
       ['pr-a', 'pr-b'],
     );
+  });
+
+  it('profesional con base clínica sobre el paciente: lista las cotizaciones de sus prácticas', async () => {
+    const d = build();
+    d.quotationsRepo.findByPatient.mockResolvedValue([]);
+
+    await d.service.listQuotationsByPatient('pat-1', actor);
+
+    expect(d.clinicalRead.assertCanReadHistory).toHaveBeenCalledWith(
+      'pat-1',
+      actor,
+    );
+    expect(d.quotationsRepo.findByPatient).toHaveBeenCalledWith(
+      expect.anything(),
+      'pat-1',
+      ['pr1'],
+    );
+  });
+
+  it('profesional sin base clínica sobre el paciente: 404 uniforme, sin consultar cotizaciones', async () => {
+    const d = build();
+    d.clinicalRead.assertCanReadHistory.mockRejectedValue(
+      new ForbiddenException(
+        'Sólo puede consultar su propia historia clínica.',
+      ),
+    );
+
+    await expectPatientNotAvailable(
+      d.service.listQuotationsByPatient('pat-T2', actor),
+    );
+
+    expect(d.quotationsRepo.findByPatient).not.toHaveBeenCalled();
+    expect(d.installmentsRepo.findByQuotationIds).not.toHaveBeenCalled();
+  });
+
+  it('cuenta administradora que también es profesional sin base clínica: sólo ve lo de su organización', async () => {
+    const d = build();
+    const adminWithProfile = {
+      ...admin,
+      practitionerProfileId: 'hp-admin',
+    } as any;
+    d.clinicalRead.assertCanReadHistory.mockRejectedValue(
+      new ForbiddenException('x'),
+    );
+    d.practiceTenantLookup.findActivePracticeIdsForTenant.mockResolvedValue([
+      'pr-a',
+    ]);
+    d.quotationsRepo.findByPatient.mockResolvedValue([]);
+
+    await runWithTenant('mi-tenant', () =>
+      d.service.listQuotationsByPatient('pat-1', adminWithProfile),
+    );
+
+    expect(d.quotationsRepo.findByPatient).toHaveBeenCalledWith(
+      expect.anything(),
+      'pat-1',
+      ['pr-a'],
+    );
+    expect(
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner,
+    ).not.toHaveBeenCalled();
   });
 
   it('la cuenta administradora sin organización en contexto no tiene contra qué acotar: vacío', async () => {

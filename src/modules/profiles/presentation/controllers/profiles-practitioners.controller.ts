@@ -251,6 +251,43 @@ export class ProfilesPractitionersController {
   }
 
   /**
+   * Corregir el perfil profesional de otro — la plataforma (P28).
+   *
+   * Mismo cuerpo que `practitioners/me`. Sin `@Roles` por el mismo criterio
+   * que la foto: quién puede lo decide `ProfileOwnershipService` (titular o
+   * `SECURITY_ADMIN`/`SUPERADMIN`), y un profesional que apunta al perfil de un
+   * colega recibe 403.
+   *
+   * Va DESPUÉS de `practitioners/me`: Nest resuelve por orden de declaración y
+   * el parámetro capturaría `me`.
+   */
+  @Audited({
+    action: 'PRACTITIONER_PROFILE_UPDATED',
+    entity: 'health_practitioner_profile',
+    entityId: 'param:profileId',
+  })
+  @Patch('practitioners/:profileId')
+  @ApiOperation({
+    summary: 'Corregir el perfil profesional de otro (titular o plataforma)',
+    description:
+      '`403` si quien pide no es el titular ni plataforma. `409` ' +
+      '`NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY` si se corrige el número del ' +
+      'documento de una identidad verificada o con un caso de verificación en curso.',
+  })
+  @ApiOkResponse({ type: PractitionerProfileSummaryDto })
+  updatePractitionerProfile(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+    @Body() dto: UpdateOwnPractitionerProfileDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PractitionerProfileSummaryDto> {
+    return this.practitionersService.updatePractitionerProfile(
+      profileId,
+      dto,
+      actor,
+    );
+  }
+
+  /**
    * Fijar la foto del perfil profesional.
    *
    * Va con `:profileId` y no con `me` a propósito: la misma ruta sirve al

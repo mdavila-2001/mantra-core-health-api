@@ -95,6 +95,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<DicomInstanceAccessResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<DicomInstanceAccessResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<DicomInstanceAccessResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<DicomInstanceAccessResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DicomInstanceAccessResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -237,6 +238,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ArchiveJobResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ArchiveJobResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ArchiveJobResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ArchiveJobResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ArchiveJobResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -422,6 +424,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CatalogDicomStudyResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CatalogDicomStudyResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CatalogDicomStudyResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CatalogDicomStudyResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CatalogDicomStudyResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -458,7 +461,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PACS_GATEWAY, SYSTEM, STORAGE_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | El objeto de la instancia no existe | Excepción explícita en src/modules/object_storage/services/dicom-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -571,6 +573,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<LargePayloadResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<LargePayloadResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<LargePayloadResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LargePayloadResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LargePayloadResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -708,6 +711,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<UploadResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<UploadResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<UploadResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<UploadResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `UploadResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -843,6 +847,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DeletionMarkerResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeletionMarkerResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeletionMarkerResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeletionMarkerResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeletionMarkerResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1012,6 +1017,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ObjectVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ObjectVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ObjectVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ObjectVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ObjectVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1194,6 +1200,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ObjectVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ObjectVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ObjectVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ObjectVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ObjectVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1323,6 +1330,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<void>` | No |
 | 429 | Consulta completada correctamente. | `Promise<void>` | No |
 | 500 | Consulta completada correctamente. | `Promise<void>` | No |
+| 504 | Consulta completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -1335,7 +1343,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: DICOM_VIEWER, CLINICIAN, SYSTEM, STORAGE_ADMIN. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Enlace de acceso no válido | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
 | 404 | `NOT_FOUND` | El espacio de nombres de la versión no existe | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
 | 404 | `NOT_FOUND` | Versión no encontrada | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
@@ -1444,6 +1451,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IntegrityCheckResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IntegrityCheckResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IntegrityCheckResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IntegrityCheckResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IntegrityCheckResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1577,6 +1585,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<LegalHoldResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<LegalHoldResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<LegalHoldResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LegalHoldResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LegalHoldResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1697,6 +1706,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<LegalHoldResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<LegalHoldResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<LegalHoldResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LegalHoldResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LegalHoldResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1837,6 +1847,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RetentionLockResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RetentionLockResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RetentionLockResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RetentionLockResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RetentionLockResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1977,6 +1988,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SignedUrlResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SignedUrlResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SignedUrlResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SignedUrlResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SignedUrlResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2011,7 +2023,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: DICOM_VIEWER, CLINICIAN, SYSTEM, STORAGE_ADMIN. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Versión no encontrada | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
 | 404 | `NOT_FOUND` | Objeto no encontrado | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |
 | 404 | `NOT_FOUND` | La versión no tiene ubicación primaria | Excepción explícita en src/modules/object_storage/services/object-storage.service.ts |

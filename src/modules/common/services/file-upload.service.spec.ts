@@ -135,6 +135,30 @@ describe('FileUploadService', () => {
       expect(storage.store).not.toHaveBeenCalled();
     });
 
+    it('rechaza una foto HEIC de iPhone nombrando el formato, con reason estable', async () => {
+      const { service, storage } = build();
+      // Caja `ftyp` real de un HEIC: tamaño, 'ftyp', marca mayor 'heic'.
+      const heic = {
+        originalname: 'IMG_0001.HEIC',
+        mimetype: 'image/heic',
+        buffer: Buffer.concat([
+          Buffer.from([0x00, 0x00, 0x00, 0x18]),
+          Buffer.from('ftypheic'),
+          Buffer.from([0x00, 0x00, 0x00, 0x00]),
+          Buffer.from('mif1heic'),
+        ]),
+      };
+
+      const error = await service.upload(heic, dto, actor).catch((e) => e);
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect(error.reason).toBe('UNSUPPORTED_IMAGE_FORMAT');
+      expect(error.details).toEqual(
+        expect.objectContaining({ detectedFormat: 'image/heic' }),
+      );
+      expect(storage.store).not.toHaveBeenCalled();
+    });
+
     it('rejects a real PDF uploaded under the IMAGE category', async () => {
       const { service, storage } = build();
       const pdf = {

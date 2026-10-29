@@ -37,6 +37,7 @@ import {
   addAmounts,
 } from './payment-money';
 import { decideCallback, eventReference } from './payment-callback-machine';
+import { evaluateCallbackEndpoint } from './callback-endpoint.policy';
 import { PaymentsErrorReason } from '../payments.error-reasons';
 
 const OPERATION_CONCEPT: Readonly<Record<TransactionOperation, string>> = {
@@ -260,6 +261,7 @@ export class PaymentsTransactionsService {
   async applyCallback(
     callbackPath: string,
     dto: GatewayCallbackDto,
+    sourceIp?: string,
   ): Promise<CallbackResultDto> {
     this.logger.info(
       {
@@ -291,10 +293,14 @@ export class PaymentsTransactionsService {
       // configurada (`gateway_connections.webhook_secret_ref`); sin él, se rechaza.
       const { secrets, connectionId, reason } =
         await resolveGatewayWebhookSecrets(tx, transaction);
+      // `timestamp` entra en los bytes firmados sólo cuando el proveedor lo
+      // envía (JSON.stringify omite el `undefined`): el contrato previo sigue
+      // verificándose igual, y quien declara ventana de repetición lo exige.
       const signedBody = canonicalJson({
         gatewayTransactionRef: dto.gatewayTransactionRef,
         outcome: dto.outcome,
         authorizationCode: dto.authorizationCode,
+        timestamp: dto.timestamp,
       });
       const signature = dto.signature;
       if (
@@ -316,6 +322,36 @@ export class PaymentsTransactionsService {
           'Firma del webhook inválida',
           undefined,
           PaymentsErrorReason.GATEWAY_WEBHOOK_SIGNATURE_INVALID,
+        );
+      }
+
+      // El endpoint por el que llegó se contrasta con la configuración de la
+      // conexión de la transacción ANTES de decidir o mutar nada: ruta activa de
+      // esa conexión, red de origen y ventana de repetición.
+      const endpoints = connectionId
+        ? await this.transactionsRepo.findCallbackEndpoints(tx, connectionId)
+        : [];
+      const endpointDecision = evaluateCallbackEndpoint(endpoints, {
+        callbackPath,
+        sourceIp,
+        timestamp: dto.timestamp,
+        now: new Date(),
+        activeStateConceptId: CONCEPTS.STATE_ACTIVE,
+      });
+      if (!endpointDecision.allowed) {
+        this.logger.warn(
+          {
+            operation: 'payments.callback.apply',
+            gatewayTransactionRef: dto.gatewayTransactionRef,
+            gatewayConnectionId: connectionId,
+            reason: endpointDecision.reason,
+          },
+          'Rejected gateway callback by endpoint configuration',
+        );
+        throw new UnauthorizedException(
+          'Callback no autorizado para este endpoint',
+          undefined,
+          endpointDecision.reason,
         );
       }
 

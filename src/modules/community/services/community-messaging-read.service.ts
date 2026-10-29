@@ -91,6 +91,9 @@ export class CommunityMessagingReadService {
     limit: number,
   ): Promise<ChatContactPageDto> {
     const em = this.em.fork();
+    // Titularidad estricta a propósito (no `assertOwnMessagingProfile`): el
+    // personal de una farmacia no busca pacientes para escribirles en frío; su
+    // camino es el hilo del pedido.
     await this.visibility.assertOwnProfile(em, profileId, actor);
 
     const q = query.trim().slice(0, 120);
@@ -161,7 +164,7 @@ export class CommunityMessagingReadService {
   ): Promise<FileContentDto> {
     const em = this.em.fork();
     try {
-      await this.visibility.assertOwnProfile(em, profileId, actor);
+      await this.visibility.assertOwnMessagingProfile(em, profileId, actor);
     } catch (error) {
       if (error instanceof ForbiddenException) {
         throw this.attachmentNotFound(fileId);
@@ -259,7 +262,7 @@ export class CommunityMessagingReadService {
     },
   ): Promise<ConversationPageDto> {
     const em = this.em.fork();
-    await this.visibility.assertOwnProfile(em, profileId, actor);
+    await this.visibility.assertOwnMessagingProfile(em, profileId, actor);
 
     const participations =
       await this.conversationsRepo.listActiveParticipationsOf(
@@ -432,7 +435,7 @@ export class CommunityMessagingReadService {
     },
   ): Promise<DirectMessagePageDto> {
     const em = this.em.fork();
-    await this.visibility.assertOwnProfile(em, profileId, actor);
+    await this.visibility.assertOwnMessagingProfile(em, profileId, actor);
 
     const participant = await this.conversationsRepo.findActiveParticipant(
       em,
@@ -530,7 +533,7 @@ export class CommunityMessagingReadService {
     actor: AuthenticatedUser,
   ): Promise<ConversationPresenceDto> {
     const em = this.em.fork();
-    await this.visibility.assertOwnProfile(em, profileId, actor);
+    await this.visibility.assertOwnMessagingProfile(em, profileId, actor);
 
     const participant = await this.conversationsRepo.findActiveParticipant(
       em,

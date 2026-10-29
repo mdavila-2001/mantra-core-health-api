@@ -1,13 +1,26 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/postgresql';
+import {
+  EntityManager,
+  UniqueConstraintViolationException,
+} from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
+  requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
 import { PRAC } from '../practice.concepts';
+import { PracticeErrorReason } from '../practice.error-reasons';
+import { ServiceCatalogRepository } from '../../billing/repositories';
+import { ProcedureReferenceReader } from '../../billing/services/procedure-reference.reader';
+import { PracticeAdministrationService } from './practice-administration.service';
+import { TenantAdministrationService } from '../../directory/services';
+import { HistoryRepository } from '../../audit/repositories';
+import { AUD } from '../../audit/audit.concepts';
+import { STRUCTURE_HISTORY, structureSnapshot } from './structure-history';
+import { assertCatalogItemFits } from './healthcare-service-catalog-item';
+import { loadSiteInScope } from './practice-scope';
 import {
   PracticesRepository,
   PracticeSitesRepository,
@@ -23,10 +36,6 @@ import {
   CareSpaceResponseDto,
   HealthcareServiceResponseDto,
 } from '../dto';
-import { TenantAdministrationService } from '../../directory/services/tenant-administration.service';
-import { HistoryRepository } from '../../audit/repositories';
-import { AUD } from '../../audit/audit.concepts';
-import { STRUCTURE_HISTORY, structureSnapshot } from './structure-history';
 
 /**
  * Estructura clínica bajo un sitio: unidades jerárquicas (UC-14-04), espacios de
@@ -43,6 +52,9 @@ export class ClinicalStructureService {
    * @param unitsRepo - Valor de units repo requerido por la operación.
    * @param spacesRepo - Valor de spaces repo requerido por la operación.
    * @param servicesRepo - Valor de services repo requerido por la operación.
+   * @param administration - Regla de administración por organización (A-6).
+   * @param catalogRepo - Catálogo de precios de la práctica.
+   * @param procedures - Nomenclador de procedimientos.
    * @param logger - Valor de logger requerido por la operación.
    * @param tenantAdmin - Regla de quién administra una organización (OWNER/ADMIN o plataforma).
    * @param historyRepo - Versionado append-only en `audit.*_history`.
@@ -54,6 +66,9 @@ export class ClinicalStructureService {
     private readonly unitsRepo: ClinicalUnitsRepository,
     private readonly spacesRepo: CareSpacesRepository,
     private readonly servicesRepo: HealthcareServicesRepository,
+    private readonly administration: PracticeAdministrationService,
+    private readonly catalogRepo: ServiceCatalogRepository,
+    private readonly procedures: ProcedureReferenceReader,
     private readonly logger: PinoLogger,
     private readonly tenantAdmin: TenantAdministrationService,
     private readonly historyRepo: HistoryRepository,
@@ -61,41 +76,27 @@ export class ClinicalStructureService {
     this.logger.setContext(ClinicalStructureService.name);
   }
 
-  /**
-   * Sede del tenant activo, o 404.
-   *
-   * La sede no guarda el tenant: lo hereda de su práctica. Una sede de otra
-   * organización responde lo mismo que una inexistente, para no confirmar que
-   * el id existe.
-   */
-  private async requireSiteInTenant(
-    tx: EntityManager,
-    siteId: string,
-    tenantId: string,
-  ) {
-    const site = await this.sitesRepo.findById(tx, siteId);
-    if (!site)
-      throw new ResourceNotFoundException('Sitio no encontrado', { siteId });
-    const practice = await this.practicesRepo.findById(tx, site.practiceId);
-    if (!practice || practice.tenantId !== tenantId) {
-      throw new ResourceNotFoundException('Sitio no encontrado', { siteId });
-    }
-    return site;
-  }
-
   /** UC-14-04: crea una unidad clínica (opcionalmente jerárquica) bajo un sitio activo. */
   async createClinicalUnit(
     siteId: string,
     dto: CreateClinicalUnitDto,
     actor: AuthenticatedUser,
-    tenantId: string,
   ): Promise<ClinicalUnitResponseDto> {
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'practice.unit.create', siteId },
       'Creating clinical unit',
     );
     return this.em.transactional(async (tx) => {
-      const site = await this.requireSiteInTenant(tx, siteId, tenantId);
+      // La sede se resuelve hasta su práctica y se compara con el tenant activo
+      // antes de crear nada debajo.
+      const { site } = await loadSiteInScope(
+        this.sitesRepo,
+        this.practicesRepo,
+        tx,
+        siteId,
+        tenantId,
+      );
       await this.tenantAdmin.assertCanAdminister(tx, tenantId, actor);
       if (site.statusConceptId !== PRAC.SITE_ACTIVE) {
         throw new PreconditionFailedException('El sitio no está activo', {
@@ -162,14 +163,20 @@ export class ClinicalStructureService {
     siteId: string,
     dto: CreateCareSpaceDto,
     actor: AuthenticatedUser,
-    tenantId: string,
   ): Promise<CareSpaceResponseDto> {
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'practice.space.create', siteId },
       'Creating care space',
     );
     return this.em.transactional(async (tx) => {
-      const site = await this.requireSiteInTenant(tx, siteId, tenantId);
+      const { site } = await loadSiteInScope(
+        this.sitesRepo,
+        this.practicesRepo,
+        tx,
+        siteId,
+        tenantId,
+      );
       await this.tenantAdmin.assertCanAdminister(tx, tenantId, actor);
       if (site.statusConceptId !== PRAC.SITE_ACTIVE) {
         throw new PreconditionFailedException('El sitio no está activo', {
@@ -245,7 +252,18 @@ export class ClinicalStructureService {
     });
   }
 
-  /** UC-14-06: publica un servicio de salud en la práctica (opcionalmente en sitio/unidad). */
+  /**
+   * UC-14-06: publica un procedimiento del nomenclador en una sede, con el precio
+   * del ítem de catálogo indicado.
+   *
+   * Lo publica quien administra **esa** organización (A-6): el administrador de
+   * otra recibe 403. El precio es por sede: cada servicio apunta a su ítem, y dos
+   * sedes de la misma práctica pueden tener ítems distintos.
+   *
+   * @throws PreconditionFailedException (422) si el concepto no es un
+   * procedimiento, o el ítem no sirve (otra práctica, inactivo, otro concepto).
+   * @throws ConflictException (409) si la sede ya ofrece ese procedimiento.
+   */
   async publishHealthcareService(
     practiceId: string,
     dto: CreateHealthcareServiceDto,
@@ -255,58 +273,104 @@ export class ClinicalStructureService {
       { operation: 'practice.service.publish', practiceId },
       'Publishing healthcare service',
     );
-    return this.em.transactional(async (tx) => {
-      const practice = await this.practicesRepo.findById(tx, practiceId);
-      if (!practice)
-        throw new ResourceNotFoundException('Práctica no encontrada', {
+    try {
+      return await this.em.transactional(async (tx) => {
+        const practice = await this.administration.assertCanAdministerPractice(
+          tx,
           practiceId,
-        });
-      if (practice.statusConceptId !== PRAC.PRACTICE_ACTIVE) {
-        throw new PreconditionFailedException('La práctica no está activa', {
-          practiceId,
-        });
-      }
+          actor,
+        );
+        if (practice.statusConceptId !== PRAC.PRACTICE_ACTIVE) {
+          throw new PreconditionFailedException('La práctica no está activa', {
+            practiceId,
+          });
+        }
 
-      if (dto.practiceSiteId) {
         const site = await this.sitesRepo.findById(tx, dto.practiceSiteId);
         if (!site || site.practiceId !== practiceId) {
           throw new PreconditionFailedException(
             'El sitio no pertenece a la práctica',
-            {
-              practiceId,
-              siteId: dto.practiceSiteId,
-            },
+            { practiceId, siteId: dto.practiceSiteId },
           );
         }
-      }
-      if (dto.clinicalUnitId) {
-        const unit = await this.unitsRepo.findById(tx, dto.clinicalUnitId);
-        if (!unit) {
-          throw new PreconditionFailedException('La unidad clínica no existe', {
-            clinicalUnitId: dto.clinicalUnitId,
-          });
+        if (dto.clinicalUnitId) {
+          const unit = await this.unitsRepo.findById(tx, dto.clinicalUnitId);
+          // La unidad debe colgar de una sede de ESTA práctica: una unidad de otra
+          // práctica (o de otro tenant) responde igual que una inexistente.
+          const unitSite = unit
+            ? await this.sitesRepo.findById(tx, unit.practiceSiteId)
+            : null;
+          if (!unit || !unitSite || unitSite.practiceId !== practiceId) {
+            throw new PreconditionFailedException(
+              'La unidad clínica no existe',
+              { clinicalUnitId: dto.clinicalUnitId },
+            );
+          }
         }
-      }
 
-      const service = this.servicesRepo.create(tx, {
-        practiceId,
-        practiceSiteId: dto.practiceSiteId,
-        clinicalUnitId: dto.clinicalUnitId,
-        serviceConceptId: dto.serviceConceptId ?? PRAC.SERVICE_GENERAL,
-        specialtyConceptId: dto.specialtyConceptId,
-        referralRequired: dto.referralRequired,
-        appointmentRequired: dto.appointmentRequired,
-        telehealthAvailable: dto.telehealthAvailable,
-        statusConceptId: PRAC.SERVICE_ACTIVE,
-        actorUserId: actor.id,
+        if (!(await this.procedures.isProcedure(tx, dto.serviceConceptId))) {
+          throw new PreconditionFailedException(
+            'El concepto no es un procedimiento del nomenclador',
+            { serviceConceptId: dto.serviceConceptId },
+            PracticeErrorReason.SERVICE_CONCEPT_NOT_A_PROCEDURE,
+          );
+        }
+        await assertCatalogItemFits(
+          this.catalogRepo,
+          tx,
+          practiceId,
+          dto.serviceConceptId,
+          dto.serviceCatalogId,
+        );
+
+        const existing = await this.servicesRepo.findBySiteAndConcept(
+          tx,
+          dto.practiceSiteId,
+          dto.serviceConceptId,
+        );
+        if (existing) throw alreadyOffered(existing.id);
+
+        const service = this.servicesRepo.create(tx, {
+          practiceId,
+          practiceSiteId: dto.practiceSiteId,
+          clinicalUnitId: dto.clinicalUnitId,
+          serviceConceptId: dto.serviceConceptId,
+          serviceCatalogId: dto.serviceCatalogId,
+          specialtyConceptId: dto.specialtyConceptId,
+          referralRequired: dto.referralRequired,
+          appointmentRequired: dto.appointmentRequired,
+          telehealthAvailable: dto.telehealthAvailable,
+          statusConceptId: PRAC.SERVICE_ACTIVE,
+          actorUserId: actor.id,
+        });
+        await tx.flush();
+        return {
+          id: service.id,
+          practiceId: service.practiceId,
+          status: service.statusConceptId,
+          createdAt: service.createdAt,
+        };
       });
-      await tx.flush();
-      return {
-        id: service.id,
-        practiceId: service.practiceId,
-        status: service.statusConceptId,
-        createdAt: service.createdAt,
-      };
-    });
+    } catch (error) {
+      // Dos publicaciones simultáneas: gana una y la otra choca con el único.
+      if (error instanceof UniqueConstraintViolationException) {
+        throw alreadyOffered();
+      }
+      throw error;
+    }
   }
+}
+
+/**
+ * El 409 de «la sede ya ofrece este procedimiento».
+ *
+ * @param healthcareServiceId - El servicio existente, si se conoce.
+ * @returns La excepción lista para lanzar.
+ */
+function alreadyOffered(healthcareServiceId?: string): ConflictException {
+  return new ConflictException(
+    'La sede ya ofrece este procedimiento',
+    healthcareServiceId ? { healthcareServiceId } : undefined,
+    PracticeErrorReason.SERVICE_ALREADY_OFFERED_AT_SITE,
+  );
 }

@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `messaging`
 
-Referencia exhaustiva de 17 operación(es) del módulo `messaging`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 20 operación(es) del módulo `messaging`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `messaging`, `messaging-internal`, `messaging-webhooks`
-- **Controladores:** `MessagingController`, `MessagingInternalController`, `ProviderWebhooksController`
+- **Controladores:** `MessagingController`, `MessagingInternalController`, `ProviderWebhooksController`, `WebPushController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -25,9 +25,12 @@ Referencia exhaustiva de 17 operación(es) del módulo `messaging`, derivada del
 12. [GET /notifications/preferences/me](#12-get-notifications-preferences-me) — Mis preferencias de notificación in-app
 13. [PUT /notifications/preferences/me](#13-put-notifications-preferences-me) — Guardar mis preferencias de notificación in-app
 14. [POST /notifications/requests](#14-post-notifications-requests) — Crear una solicitud de notificación
-15. [POST /queues/{code}/jobs](#15-post-queues-code-jobs) — Encolar un trabajo
-16. [POST /queues/dead-letter/{deadLetterJobId}/redrive](#16-post-queues-dead-letter-deadletterjobid-redrive) — Reencolar un trabajo desde la cola muerta
-17. [POST /webhooks/providers/{providerCode}/receipts](#17-post-webhooks-providers-providercode-receipts) — Conciliar el acuse de entrega que envía el proveedor
+15. [GET /notifications/web-push/config](#15-get-notifications-web-push-config) — Clave pública VAPID, o enabled=false si no hay push
+16. [DELETE /notifications/web-push/subscription](#16-delete-notifications-web-push-subscription) — Quita la suscripción push de este navegador
+17. [PUT /notifications/web-push/subscription](#17-put-notifications-web-push-subscription) — Guarda la suscripción push de este navegador
+18. [POST /queues/{code}/jobs](#18-post-queues-code-jobs) — Encolar un trabajo
+19. [POST /queues/dead-letter/{deadLetterJobId}/redrive](#19-post-queues-dead-letter-deadletterjobid-redrive) — Reencolar un trabajo desde la cola muerta
+20. [POST /webhooks/providers/{providerCode}/receipts](#20-post-webhooks-providers-providercode-receipts) — Conciliar el acuse de entrega que envía el proveedor
 
 ---
 
@@ -114,6 +117,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EventDeliveryResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EventDeliveryResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EventDeliveryResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EventDeliveryResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EventDeliveryResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -242,6 +246,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DispatchEventResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DispatchEventResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DispatchEventResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DispatchEventResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DispatchEventResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -388,6 +393,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<JobResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<JobResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<JobResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<JobResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `JobResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -522,6 +528,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FailJobResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FailJobResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FailJobResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FailJobResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FailJobResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -673,6 +680,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DeliverNotificationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeliverNotificationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeliverNotificationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeliverNotificationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeliverNotificationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -795,6 +803,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PendingNotificationsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PendingNotificationsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PendingNotificationsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PendingNotificationsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PendingNotificationsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -936,6 +945,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OutboxRelayResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OutboxRelayResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OutboxRelayResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OutboxRelayResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OutboxRelayResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1079,6 +1089,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ClaimJobsResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ClaimJobsResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ClaimJobsResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ClaimJobsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ClaimJobsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1210,6 +1221,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<InAppReadResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<InAppReadResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<InAppReadResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<InAppReadResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `InAppReadResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1323,6 +1335,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<MarkAllInAppReadResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MarkAllInAppReadResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MarkAllInAppReadResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MarkAllInAppReadResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MarkAllInAppReadResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1431,6 +1444,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<InAppNotificationPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<InAppNotificationPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<InAppNotificationPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<InAppNotificationPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `InAppNotificationPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1570,6 +1584,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MyPreferencesDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MyPreferencesDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MyPreferencesDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyPreferencesDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyPreferencesDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1715,6 +1730,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MyPreferencesDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MyPreferencesDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MyPreferencesDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MyPreferencesDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyPreferencesDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1820,8 +1836,8 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `channelId` | Sí | `string` | formato `uuid` | Canal por el que se notifica | `00000000-0000-4000-8000-000000000001` |
-| `recipientUserId` | No | `string` | formato `uuid` | Destinatario interno | `00000000-0000-4000-8000-000000000001` |
-| `recipientAddress` | No | `string` | longitud máxima 300 | Dirección de destino si el canal es externo | `valor-ejemplo` |
+| `recipientUserId` | No | `string` | formato `uuid` | Usuario destinatario. Obligatorio: sin él la solicitud se rechaza con 422 NOTIFICATION_RECIPIENT_INVALID | `00000000-0000-4000-8000-000000000001` |
+| `recipientAddress` | No | `string` | longitud máxima 300 | Dirección de destino del canal externo; complementa a `recipientUserId`, no lo sustituye | `valor-ejemplo` |
 | `tenantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `templateId` | No | `string` | formato `uuid` | Plantilla publicada a usar | `00000000-0000-4000-8000-000000000001` |
 | `domainEventId` | No | `string` | formato `uuid` | Evento de dominio que la origina | `00000000-0000-4000-8000-000000000001` |
@@ -1875,6 +1891,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<NotificationRequestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<NotificationRequestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<NotificationRequestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<NotificationRequestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `NotificationRequestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1910,7 +1927,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -1931,7 +1948,339 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /queues/{code}/jobs
+## 15. GET /notifications/web-push/config
+
+- **Módulo:** `messaging`
+- **Etiqueta OpenAPI:** `messaging`
+- **Nombre:** Clave pública VAPID, o enabled=false si no hay push
+- **Operation ID:** `WebPushController_config`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [WebPushController.config](../../src/modules/messaging/controllers/web-push.controller.ts)
+
+### Descripción de negocio
+
+Clave pública VAPID, o enabled=false si no hay push. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /notifications/web-push/config` en `WebPushController_config`. El controlador delega en `WebPushService.publicKey`. No recibe body. El tipo de retorno estático es `WebPushConfigDto`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /notifications/web-push/config HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `USER`, `MESSAGING_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /notifications/web-push/config HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `WebPushConfigDto` | No |
+| 400 | Consulta completada correctamente. | `WebPushConfigDto` | No |
+| 401 | Consulta completada correctamente. | `WebPushConfigDto` | No |
+| 403 | Consulta completada correctamente. | `WebPushConfigDto` | No |
+| 429 | Consulta completada correctamente. | `WebPushConfigDto` | No |
+| 500 | Consulta completada correctamente. | `WebPushConfigDto` | No |
+| 504 | Consulta completada correctamente. | `WebPushConfigDto` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WebPushConfigDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "enabled": true,
+  "publicKey": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `enabled` | Sí | `boolean` | Sin restricción adicional declarada | Si el servidor tiene claves VAPID configuradas | `true` |
+| `publicKey` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: USER, MESSAGING_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/notifications/web-push/config"
+}
+```
+
+---
+
+## 16. DELETE /notifications/web-push/subscription
+
+- **Módulo:** `messaging`
+- **Etiqueta OpenAPI:** `messaging`
+- **Nombre:** Quita la suscripción push de este navegador
+- **Operation ID:** `WebPushController_unsubscribe`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [WebPushController.unsubscribe](../../src/modules/messaging/controllers/web-push.controller.ts)
+
+### Descripción de negocio
+
+Quita la suscripción push de este navegador. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /notifications/web-push/subscription` en `WebPushController_unsubscribe`. El controlador delega en `WebPushService.unsubscribe`. Valida el body como `WebPushUnsubscribeDto` y consume `application/json`. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `WebPushUnsubscribeDto`; los campos opcionales se omiten.
+
+```http
+DELETE /notifications/web-push/subscription HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "endpoint": "https://example.com/recurso"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `USER`, `MESSAGING_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `endpoint` | Sí | `string` | formato `uri`; longitud máxima 2048 | Sin descripción específica en el contrato OpenAPI. | `https://example.com/recurso` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+DELETE /notifications/web-push/subscription HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "endpoint": "https://example.com/recurso"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | Operación completada sin cuerpo de respuesta. | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | Operación completada correctamente. | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 413 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: USER, MESSAGING_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/notifications/web-push/subscription"
+}
+```
+
+---
+
+## 17. PUT /notifications/web-push/subscription
+
+- **Módulo:** `messaging`
+- **Etiqueta OpenAPI:** `messaging`
+- **Nombre:** Guarda la suscripción push de este navegador
+- **Operation ID:** `WebPushController_subscribe`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [WebPushController.subscribe](../../src/modules/messaging/controllers/web-push.controller.ts)
+
+### Descripción de negocio
+
+Guarda la suscripción push de este navegador. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /notifications/web-push/subscription` en `WebPushController_subscribe`. El controlador delega en `WebPushService.subscribe`. Valida el body como `WebPushSubscriptionDto` y consume `application/json`. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `WebPushSubscriptionDto`; los campos opcionales se omiten.
+
+```http
+PUT /notifications/web-push/subscription HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "endpoint": "https://example.com/recurso",
+  "keys": {
+    "p256dh": "valor-ejemploxxxxxxx",
+    "auth": "valor-ejemplo"
+  }
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `USER`, `MESSAGING_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `endpoint` | Sí | `string` | formato `uri`; longitud máxima 2048 | Dirección HTTPS del servicio de push del navegador | `https://example.com/recurso` |
+| `keys` | Sí | `WebPushKeysDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"p256dh":"valor-ejemploxxxxxxx","auth":"valor-ejemplo"}` |
+| `keys.p256dh` | Sí | `string` | longitud mínima 20; longitud máxima 200 | Clave pública ECDH (base64url) | `valor-ejemploxxxxxxx` |
+| `keys.auth` | Sí | `string` | longitud mínima 8; longitud máxima 100 | Secreto de autenticación (base64url) | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /notifications/web-push/subscription HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "endpoint": "https://example.com/recurso",
+  "keys": {
+    "p256dh": "valor-ejemploxxxxxxx",
+    "auth": "valor-ejemplo"
+  }
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | Operación completada sin cuerpo de respuesta. | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | Operación completada correctamente. | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 413 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: USER, MESSAGING_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Las notificaciones push no están activadas en este entorno | Excepción explícita en src/modules/messaging/services/web-push.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/notifications/web-push/subscription"
+}
+```
+
+---
+
+## 18. POST /queues/{code}/jobs
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging`
@@ -2025,6 +2374,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<JobResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<JobResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<JobResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<JobResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `JobResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2074,7 +2424,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /queues/dead-letter/{deadLetterJobId}/redrive
+## 19. POST /queues/dead-letter/{deadLetterJobId}/redrive
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging`
@@ -2157,6 +2507,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RedriveResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RedriveResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RedriveResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RedriveResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RedriveResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2209,7 +2560,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /webhooks/providers/{providerCode}/receipts
+## 20. POST /webhooks/providers/{providerCode}/receipts
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging-webhooks`
@@ -2295,6 +2646,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ProviderReceiptResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ProviderReceiptResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ProviderReceiptResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ProviderReceiptResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProviderReceiptResponseDto`. Ejemplo completo derivado de ese DTO:
 

@@ -5,10 +5,20 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  requireTenantId,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { forbiddenWithReason } from '../../../common/errors/reasoned-http-exceptions';
+import { SystemErrorReason } from '../../../common/errors/system-error-reasons';
+import { TenantAdministrationService } from '../../directory/services';
+import { BranchesRepository } from '../../directory/repositories/branches.repository';
+import { HistoryRepository } from '../../audit/repositories';
+import { AUD } from '../../audit/audit.concepts';
 import { PRAC } from '../practice.concepts';
+import { loadPracticeInScope, practiceOutOfScope } from './practice-scope';
+import { STRUCTURE_HISTORY, structureSnapshot } from './structure-history';
 import { PracticeAccessService } from './practice-access.service';
 import { DEFAULT_APPOINTMENT_SERVICE } from '../../billing/default-services';
 import { ServiceCatalogRepository } from '../../billing/repositories';
@@ -30,11 +40,6 @@ import {
   CareSpaceSummaryDto,
   StatusResultDto,
 } from '../dto';
-import { BranchesRepository } from '../../directory/repositories/branches.repository';
-import { TenantAdministrationService } from '../../directory/services/tenant-administration.service';
-import { HistoryRepository } from '../../audit/repositories';
-import { AUD } from '../../audit/audit.concepts';
-import { STRUCTURE_HISTORY, structureSnapshot } from './structure-history';
 
 /**
  * Casos de uso de organización y sitios: alta de la práctica raíz (bootstrap),
@@ -44,6 +49,37 @@ import { STRUCTURE_HISTORY, structureSnapshot } from './structure-history';
  * padre antes de crear hijos, ya que las FK son columnas uuid planas y MikroORM
  * no ordena inserts entre entidades no relacionadas.
  */
+/**
+ * Quién puede **listar** las prácticas del tenant y sus sedes, además de quien administra la organización.
+ *
+ * Son los roles que antes declaraba `@Roles(...)` en el controlador; ahora el servicio los evalúa junto con la
+ * membresía de administración (A-6), porque un `@Roles` global no ve que alguien es `OWNER` o `ADMIN` de **esa**
+ * organización y le respondía 403 al dueño de un centro recién registrado.
+ */
+const PRACTICE_LIST_ROLES = [
+  'SECURITY_ADMIN',
+  'SURGERY_SCHEDULER',
+  'PERIOP_ADMIN',
+  'SURGEON',
+  'ANESTHESIOLOGIST',
+  'PERIOP_NURSE',
+  'SCHEDULING_ADMIN',
+  // Los roles clínicos generales: sin ellos un médico no puede ni saber en qué práctica trabaja.
+  'PRACTITIONER',
+  'CLINICIAN',
+  'ACCOUNTING_APPROVER',
+] as const;
+
+const SITE_LIST_ROLES = [
+  'SECURITY_ADMIN',
+  'SURGERY_SCHEDULER',
+  'PERIOP_ADMIN',
+  'SURGEON',
+  'ANESTHESIOLOGIST',
+  'PERIOP_NURSE',
+  'SCHEDULING_ADMIN',
+] as const;
+
 @Injectable()
 export class PracticeSitesService {
   /**
@@ -57,8 +93,6 @@ export class PracticeSitesService {
    * @param servicesRepo - Valor de services repo requerido por la operación.
    * @param rolesRepo - Valor de roles repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
-   * @param access - Alcance de lectura de un profesional.
-   * @param tenantAdmin - Regla de quién administra una organización (OWNER/ADMIN o plataforma).
    * @param branchesRepo - Sucursales del directorio, para validar `branchId`.
    * @param historyRepo - Versionado append-only en `audit.*_history`.
    */
@@ -73,7 +107,7 @@ export class PracticeSitesService {
     private readonly serviceCatalogRepo: ServiceCatalogRepository,
     private readonly logger: PinoLogger,
     private readonly access: PracticeAccessService,
-    private readonly tenantAdmin: TenantAdministrationService,
+    private readonly tenantAdministration: TenantAdministrationService,
     private readonly branchesRepo: BranchesRepository,
     private readonly historyRepo: HistoryRepository,
   ) {
@@ -85,13 +119,15 @@ export class PracticeSitesService {
     dto: CreatePracticeDto,
     actor: AuthenticatedUser,
   ): Promise<PracticeResponseDto> {
+    // El tenant sale del contexto verificado; el del cuerpo no es fuente de verdad.
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'practice.create', actorId: actor.id },
       'Creating practice',
     );
     return this.em.transactional(async (tx) => {
       const practice = this.practicesRepo.create(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         name: dto.name,
         typeConceptId: dto.typeConceptId ?? PRAC.PRACTICE_TYPE_CLINIC,
@@ -131,6 +167,7 @@ export class PracticeSitesService {
     });
   }
 
+  /** UC-14-01: da de alta un sitio de práctica bajo una práctica activa. */
   /**
    * Prácticas activas del tenant.
    *
@@ -142,7 +179,15 @@ export class PracticeSitesService {
    * El tenant no basta para aislar a un `PRACTITIONER`: los médicos
    * auto-registrados comparten el tenant `DEFAULT`, así que a él sólo se le
    * listan las prácticas donde tiene una vinculación ACTIVE
-   * (`PracticeAccessService`).
+   * (`PracticeAccessService`) **y su consultorio propio**.
+   *
+   * El consultorio propio se lista aunque no haya vinculación ACTIVE que lo
+   * pruebe (vinculación cerrada o pendiente, perfil profesional ausente del
+   * token): es la práctica que `BillingServiceCatalogService` le deja tocar —
+   * `isOwnOffice`: tipo consultorio y él como administrador— y un selector de
+   * «a qué práctica importo» que no la mostrara dejaba al médico sin opciones
+   * en la única práctica donde sí puede dar de alta servicios. Lo que ese alta
+   * permite, esta lista lo muestra; no se abre nada que no estuviera abierto.
    *
    * @param tenantId - Tenant del contexto.
    * @param actor - Actor autenticado, para acotar lo que ve un profesional.
@@ -152,12 +197,24 @@ export class PracticeSitesService {
     tenantId: string,
     actor: AuthenticatedUser,
   ): Promise<PracticeSummaryDto[]> {
+    const administers = await this.assertCanReadPractices(
+      tenantId,
+      actor,
+      PRACTICE_LIST_ROLES,
+    );
     const [practices, allowed] = await Promise.all([
       this.practicesRepo.findByTenant(this.em, tenantId, PRAC.PRACTICE_ACTIVE),
-      this.access.allowedPracticeIds(actor),
+      // Quien administra la organización ve todas las suyas: el filtro por
+      // vinculación es para el profesional, que sólo ve donde trabaja.
+      administers
+        ? Promise.resolve(null)
+        : this.access.allowedPracticeIds(actor),
     ]);
     return practices
-      .filter((p) => allowed === null || allowed.has(p.id))
+      .filter(
+        (p) =>
+          allowed === null || allowed.has(p.id) || isOwnOfficeOf(p, actor.id),
+      )
       .map((p) => ({
         id: p.id,
         code: p.code,
@@ -177,7 +234,9 @@ export class PracticeSitesService {
   async listSites(
     practiceId: string,
     tenantId: string,
+    actor: AuthenticatedUser,
   ): Promise<SiteSummaryDto[]> {
+    await this.assertCanReadPractices(tenantId, actor, SITE_LIST_ROLES);
     const practice = await this.practicesRepo.findById(this.em, practiceId);
     // Comprobar el tenant aquí y no sólo filtrar evita responder una lista
     // vacía —indistinguible de "no tiene sedes"— cuando la práctica es de otra
@@ -236,26 +295,28 @@ export class PracticeSitesService {
    *
    * La práctica tiene que ser del tenant activo (404 si no) y el actor tiene
    * que poder administrarlo (`TenantAdministrationService`, 403 si no). Un
-   * `branchId` declarado tiene que existir (404) y ser una sucursal del mismo
-   * tenant (422), con el mismo criterio que `DirectoryMembershipsService`.
+   * `branchId` declarado tiene que ser una sucursal **del mismo tenant**: si no
+   * existe o es de otro tenant responde el mismo 404 (INV-02), para no revelar
+   * que el id existe en otra organización.
    */
   async createSite(
     practiceId: string,
     dto: CreateSiteDto,
     actor: AuthenticatedUser,
-    tenantId: string,
   ): Promise<SiteResponseDto> {
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'practice.site.create', practiceId, actorId: actor.id },
       'Creating site',
     );
     return this.em.transactional(async (tx) => {
-      const practice = await this.practicesRepo.findById(tx, practiceId);
-      if (!practice || practice.tenantId !== tenantId)
-        throw new ResourceNotFoundException('Práctica no encontrada', {
-          practiceId,
-        });
-      await this.tenantAdmin.assertCanAdminister(tx, tenantId, actor);
+      const practice = await loadPracticeInScope(
+        this.practicesRepo,
+        tx,
+        practiceId,
+        tenantId,
+      );
+      await this.tenantAdministration.assertCanAdminister(tx, tenantId, actor);
       if (practice.statusConceptId !== PRAC.PRACTICE_ACTIVE) {
         throw new PreconditionFailedException('La práctica no está activa', {
           practiceId,
@@ -264,16 +325,8 @@ export class PracticeSitesService {
 
       if (dto.branchId) {
         const branch = await this.branchesRepo.findById(tx, dto.branchId);
-        if (!branch) {
-          throw new ResourceNotFoundException('Branch no encontrada', {
-            branchId: dto.branchId,
-          });
-        }
-        if (branch.tenantId !== practice.tenantId) {
-          throw new PreconditionFailedException(
-            'La branch no pertenece al tenant de la práctica',
-            { practiceId, branchId: dto.branchId },
-          );
+        if (!branch || branch.tenantId !== tenantId) {
+          throw practiceOutOfScope('Sucursal no encontrada');
         }
       }
 
@@ -333,29 +386,24 @@ export class PracticeSitesService {
     practiceId: string,
     siteId: string,
     actor: AuthenticatedUser,
-    tenantId: string,
   ): Promise<StatusResultDto> {
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'practice.site.decommission', practiceId, siteId },
       'Decommissioning site',
     );
     return this.em.transactional(async (tx) => {
+      // La práctica primero: la sede se resuelve dentro de una práctica del
+      // tenant activo (una sede de otra práctica es, para este actor, inexistente).
+      await loadPracticeInScope(this.practicesRepo, tx, practiceId, tenantId);
+      await this.tenantAdministration.assertCanAdminister(tx, tenantId, actor);
       const site = await this.sitesRepo.findById(tx, siteId);
-      const practice = site
-        ? await this.practicesRepo.findById(tx, practiceId)
-        : null;
-      if (
-        !site ||
-        site.practiceId !== practiceId ||
-        !practice ||
-        practice.tenantId !== tenantId
-      ) {
+      if (!site || site.practiceId !== practiceId) {
         throw new ResourceNotFoundException(
           'Sitio no encontrado en la práctica',
           { practiceId, siteId },
         );
       }
-      await this.tenantAdmin.assertCanAdminister(tx, tenantId, actor);
       if (site.statusConceptId === PRAC.SITE_RETIRED) {
         throw new ConflictException('El sitio ya está retirado', { siteId });
       }
@@ -432,4 +480,58 @@ export class PracticeSitesService {
       return { ok: true };
     });
   }
+
+  /**
+   * Exige que el actor pueda leer las prácticas o las sedes del tenant: un rol de la lista, el comodín
+   * `SUPERADMIN` de plataforma, o ser `OWNER`/`ADMIN` activo de ese tenant por su membresía. Un rol de
+   * plataforma acotado a otro tenant (`scopedRoles`) no autoriza acá, igual que no autorizaba en el `RolesGuard`.
+   *
+   * La respuesta para quien no cumple es el mismo 403 `ROLE_INSUFFICIENT` que daba el `RolesGuard`, de modo que
+   * el contrato de error no cambia. El tenant es el del contexto verificado, nunca uno que venga en la petición.
+   *
+   * @param tenantId - Tenant del contexto.
+   * @param actor - Quien pide la lista.
+   * @param roles - Roles que ya podían leer, además de la administración.
+   * @returns `true` si pasa por administrar la organización y no por un rol de la lista.
+   * @throws ForbiddenException (`ROLE_INSUFFICIENT`) si no cumple ninguna de las tres.
+   */
+  private async assertCanReadPractices(
+    tenantId: string,
+    actor: AuthenticatedUser,
+    roles: readonly string[],
+  ): Promise<boolean> {
+    const byRole =
+      roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined) ||
+      roles.some((role) => roleAuthorizesInTenant(actor, role, tenantId));
+    // Sólo la membresía: los roles de plataforma ya se evaluaron arriba con el ámbito de `scopedRoles`.
+    const administers = await this.tenantAdministration.administersByMembership(
+      this.em,
+      tenantId,
+      actor,
+    );
+    if (!byRole && !administers) {
+      throw forbiddenWithReason(
+        'Rol insuficiente para la operación',
+        SystemErrorReason.ROLE_INSUFFICIENT,
+      );
+    }
+    return administers;
+  }
+}
+
+/**
+ * ¿Es esta práctica el consultorio propio de ese usuario?
+ *
+ * La misma regla que `PracticeTenantLookupService.isOwnOffice` —práctica de tipo
+ * consultorio con el usuario como administrador—, aplicada a una fila ya leída
+ * para no hacer una consulta por práctica.
+ */
+function isOwnOfficeOf(
+  practice: { adminUserId?: string; typeConceptId?: string },
+  userId: string,
+): boolean {
+  return (
+    practice.adminUserId === userId &&
+    practice.typeConceptId === PRAC.PRACTICE_TYPE_OFFICE
+  );
 }

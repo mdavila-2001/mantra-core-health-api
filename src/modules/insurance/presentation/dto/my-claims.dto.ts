@@ -1,5 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { MoneyDto } from './claims-read.dto';
+import { PRIOR_AUTHORIZATION_QUOTE_STATUSES } from './claim-quote.dto';
+import {
+  PATIENT_OBJECTION_REASONS,
+  type PatientObjectionReason,
+} from './claim-dispute.dto';
 import { InsuranceConceptDto } from './read.dto';
 import {
   RECEIVED_CLAIM_OUTCOMES,
@@ -23,6 +28,100 @@ export class MyClaimPractitionerDto {
 
   @ApiProperty({ nullable: true, type: String })
   specialty!: string | null;
+}
+
+/** Estado de la aprobación previa de una línea del desglose. */
+export type PriorAuthorizationQuoteStatus =
+  (typeof PRIOR_AUTHORIZATION_QUOTE_STATUSES)[number];
+
+/** Cómo entra cada servicio al cobro: con seguro, o el total como particular. */
+export const PATIENT_CHARGE_KINDS = ['INSURED_SHARE', 'PRIVATE_FULL'] as const;
+export type PatientChargeKind = (typeof PATIENT_CHARGE_KINDS)[number];
+
+/** Estados de la objeción del paciente que se le muestran. */
+export const MY_CLAIM_OBJECTION_STATUSES = ['OPEN', 'RESOLVED'] as const;
+export type MyClaimObjectionStatus =
+  (typeof MY_CLAIM_OBJECTION_STATUSES)[number];
+
+/** Un servicio del desglose: lo que cubre el plan y lo que paga cada parte. */
+export class MyClaimBreakdownLineDto {
+  /** Identificador de la línea del reclamo. */
+  @ApiProperty({ format: 'uuid' })
+  key!: string;
+
+  /** Nombre del servicio. */
+  @ApiProperty()
+  service!: string;
+
+  /** Precio del servicio, cadena decimal. */
+  @ApiProperty()
+  billedAmount!: string;
+
+  /** Porcentaje que cubre el plan, cadena decimal. */
+  @ApiProperty()
+  coveragePercent!: string;
+
+  /** Copago, cadena decimal. */
+  @ApiProperty()
+  copayAmount!: string;
+
+  /** Lo que paga la persona, cadena decimal. */
+  @ApiProperty()
+  patientAmount!: string;
+
+  /** Lo que paga la aseguradora, cadena decimal. */
+  @ApiProperty()
+  insurerAmount!: string;
+
+  /** Con seguro, o el total como particular. */
+  @ApiProperty({ enum: PATIENT_CHARGE_KINDS })
+  chargeKind!: PatientChargeKind;
+
+  /** Estado de la aprobación previa; `null` si el cobro es particular. */
+  @ApiProperty({
+    enum: PRIOR_AUTHORIZATION_QUOTE_STATUSES,
+    nullable: true,
+    type: String,
+  })
+  authorizationStatus!: PriorAuthorizationQuoteStatus | null;
+}
+
+/** El desglose completo del cobro a la persona, calculado por el servidor. */
+export class MyClaimBreakdownDto {
+  /** Código de la moneda, si el reclamo la declara. */
+  @ApiProperty({ nullable: true, type: String })
+  currencyCode!: string | null;
+
+  /** Total a cargo de la persona, cadena decimal. */
+  @ApiProperty()
+  patientTotal!: string;
+
+  /** Total a cargo de la aseguradora, cadena decimal. */
+  @ApiProperty()
+  insurerTotal!: string;
+
+  /** Un renglón por servicio. */
+  @ApiProperty({ type: [MyClaimBreakdownLineDto] })
+  lines!: MyClaimBreakdownLineDto[];
+}
+
+/** La objeción que la persona presentó sobre un cobro: motivo cerrado, sin texto libre. */
+export class MyClaimObjectionDto {
+  /** Identificador de la objeción. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** Motivo elegido de la lista cerrada. */
+  @ApiProperty({ enum: PATIENT_OBJECTION_REASONS })
+  reason!: PatientObjectionReason;
+
+  /** Cuándo la presentó. */
+  @ApiProperty({ format: 'date-time' })
+  submittedAt!: string;
+
+  /** Abierta, o ya resuelta. */
+  @ApiProperty({ enum: MY_CLAIM_OBJECTION_STATUSES })
+  status!: MyClaimObjectionStatus;
 }
 
 /** Dictamen vigente, sin la identidad del operador de la aseguradora. */
@@ -83,6 +182,17 @@ export class MyClaimDto {
 
   @ApiProperty({ nullable: true, type: MyClaimDecisionDto })
   decision!: MyClaimDecisionDto | null;
+
+  /**
+   * El desglose del cobro a la persona. Solo en la vista del paciente y para
+   * las solicitudes más recientes; `null` en cualquier otro caso.
+   */
+  @ApiProperty({ nullable: true, type: MyClaimBreakdownDto })
+  breakdown!: MyClaimBreakdownDto | null;
+
+  /** La objeción de la persona, si la presentó. Solo en la vista del paciente. */
+  @ApiProperty({ nullable: true, type: MyClaimObjectionDto })
+  patientObjection!: MyClaimObjectionDto | null;
 }
 
 /** Hasta 500 filas; NONE es una cuenta sin alcance, no un error de permisos. */

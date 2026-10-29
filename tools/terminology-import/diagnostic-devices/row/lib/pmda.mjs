@@ -24,6 +24,30 @@ export function extractPmdaDataset(html) {
   return JSON.parse(html.slice(start + OPEN_TAG.length, end));
 }
 
+/**
+ * Si el 一般的名称 de la fila es, letra por letra, un nombre del maestro JMDN de
+ * PMDA, `extra.deviceTypes` lleva su código, clase, 類別 y 中分類 tal como los
+ * publica el 医療機器基準データベース. No se completa `deviceTypeCode` ni
+ * `riskClass`: es una unión por nombre, y queda a la vista como tal.
+ */
+function jmdnTypes(name, jmdnByName) {
+  const entry = name === null ? undefined : jmdnByName?.get(name);
+  if (entry === undefined) return {};
+  return {
+    deviceTypes: [
+      {
+        system: 'jmdn',
+        code: entry.code,
+        name: entry.name,
+        class: entry.class,
+        category: entry.category,
+        subcategory: entry.subcategory,
+        joinedBy: 'exact-name',
+      },
+    ],
+  };
+}
+
 /** Clave de la fila: un mismo número aparece en el trámite original y en cada cambio parcial (一変). */
 export function pmdaRecordId(r) {
   return [r.approval_number, r.approval_date, r.approval_type, r.brand_name]
@@ -91,6 +115,7 @@ export function pmdaRows(dataset, ctx) {
       ...(Array.isArray(r.review_report_urls) && r.review_report_urls.length > 0
         ? { reviewReportUrls: r.review_report_urls }
         : {}),
+      ...jmdnTypes(textOrNull(r.generic_name), ctx.jmdnByName),
       manufacturerRole: '製造販売業者',
       mirror: ctx.mirror,
     };

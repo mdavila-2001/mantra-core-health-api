@@ -107,4 +107,28 @@ export class DiagnosticEquipment {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  @Property({ fieldName: 'care_space_id', type: 'uuid', nullable: true }) // FK → practice.care_spaces (inferida)
+  careSpaceId?: string;
+
+  @Property({
+    fieldName: 'ae_title',
+    columnType: 'varchar(16)',
+    nullable: true,
+  })
+  aeTitle?: string;
+
+  @Property({
+    fieldName: 'station_name',
+    columnType: 'varchar(16)',
+    nullable: true,
+  })
+  stationName?: string;
+
+  @Property({
+    fieldName: 'schedulable_resource_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → scheduling.schedulable_resources (inferida)
+  schedulableResourceId?: string;
 }

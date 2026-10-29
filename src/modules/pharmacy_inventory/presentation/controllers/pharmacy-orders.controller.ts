@@ -17,6 +17,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalDatePipe,
   ParseOptionalLimitPipe,
@@ -29,6 +30,7 @@ import {
   ConfirmPharmacyOrderDto,
   CreatePharmacyOrderDto,
   DispensePharmacyOrderDto,
+  PharmacyOrderConversationDto,
   PharmacyOrderDto,
   PharmacyOrderListResponseDto,
   RejectPharmacyOrderDto,
@@ -89,6 +91,11 @@ export class PharmacyOrdersController {
   }
 
   /** FAR-E1: crear el pedido (nace `ENVIADO`, vence a las 48 h). */
+  @Audited({
+    action: 'PHARMACY_ORDER_CREATED',
+    entity: 'medication_dispensation',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('PATIENT')
   @HttpCode(HttpStatus.CREATED)
@@ -141,7 +148,38 @@ export class PharmacyOrdersController {
     return this.orders.getOrder(id, actor);
   }
 
+  /**
+   * El chat del pedido: abre o reutiliza el hilo paciente ↔ vitrina de la
+   * farmacia. Titular o personal de la farmacia del pedido; terceros: 404.
+   * La autorización por recurso vive en el servicio (como `GET :id`).
+   */
+  @Post(':id/conversation')
+  @AccessLogged({ resourceType: 'PHARMACY_ORDER', resourceId: 'param:id' })
+  @Audited({
+    action: 'PHARMACY_ORDER_CONVERSATION_OPENED',
+    entity: 'medication_dispensation',
+    entityId: 'param:id',
+  })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Abrir el chat del pedido con la farmacia',
+    description:
+      'Idempotente: devuelve el mismo hilo directo entre el paciente titular y la vitrina pública de la farmacia. Lo piden el titular o el personal (PHARMACY_STAFF con membresía activa) de la farmacia del pedido; cualquier tercero recibe 404. 422 con reason ORGANIZATION_CHAT_PROFILE_UNAVAILABLE (farmacia sin vitrina activa/verificada), PATIENT_CHAT_PROFILE_MISSING (paciente sin perfil comunitario; no se crea) o bloqueo entre perfiles.',
+  })
+  @ApiOkResponse({ type: PharmacyOrderConversationDto })
+  openConversation(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyOrderConversationDto> {
+    return this.orders.openConversation(id, actor);
+  }
+
   /** FAR-E1: cancelar el propio pedido (libera el stock reservado). */
+  @Audited({
+    action: 'PHARMACY_ORDER_CANCELLED',
+    entity: 'medication_dispensation',
+    entityId: 'param:id',
+  })
   @Post(':id/cancel')
   @Roles('PATIENT')
   @HttpCode(HttpStatus.OK)
@@ -162,6 +200,11 @@ export class PharmacyOrdersController {
      protección real en los cuatro. ─────────────────────────────────── */
 
   /** FAR-E2: recepcionar — `ENVIADO → EN_REVISION` (el «visto»). */
+  @Audited({
+    action: 'PHARMACY_ORDER_REVIEW_OPENED',
+    entity: 'medication_dispensation',
+    entityId: 'param:id',
+  })
   @Post(':id/review')
   @Roles('SECURITY_ADMIN', 'PHARMACY_STAFF')
   @HttpCode(HttpStatus.OK)
@@ -178,6 +221,11 @@ export class PharmacyOrdersController {
   }
 
   /** FAR-E2: confirmar, con genéricos propuestos si el mostrador los declara. */
+  @Audited({
+    action: 'PHARMACY_ORDER_CONFIRMED',
+    entity: 'medication_dispensation',
+    entityId: 'param:id',
+  })
   @Post(':id/confirm')
   @Roles('SECURITY_ADMIN', 'PHARMACY_STAFF')
   @HttpCode(HttpStatus.OK)
@@ -198,6 +246,11 @@ export class PharmacyOrdersController {
    * FAR-E2/I2: el titular acepta los genéricos propuestos. Todo-o-nada, como
    * los dos botones del front: `ACEPTACION_PENDIENTE → ACEPTADO`.
    */
+  @Audited({
+    action: 'PHARMACY_ORDER_SUBSTITUTIONS_ACCEPTED',
+    entity: 'pharmacy_order_substitution',
+    entityId: 'param:id',
+  })
   @Post(':id/accept-substitutions')
   @Roles('PATIENT')
   @HttpCode(HttpStatus.OK)
@@ -217,6 +270,11 @@ export class PharmacyOrdersController {
    * FAR-E2/I2: el titular prefiere los originales.
    * `ACEPTACION_PENDIENTE → CONFIRMADO`; las líneas no se tocan.
    */
+  @Audited({
+    action: 'PHARMACY_ORDER_ORIGINAL_PREFERRED',
+    entity: 'pharmacy_order_substitution',
+    entityId: 'param:id',
+  })
   @Post(':id/prefer-original')
   @Roles('PATIENT')
   @HttpCode(HttpStatus.OK)
@@ -233,6 +291,11 @@ export class PharmacyOrdersController {
   }
 
   /** FAR-E2: rechazar con motivo (v4.2.1 lo persiste en el pedido). */
+  @Audited({
+    action: 'PHARMACY_ORDER_REJECTED',
+    entity: 'medication_dispensation',
+    entityId: 'param:id',
+  })
   @Post(':id/reject')
   @Roles('SECURITY_ADMIN', 'PHARMACY_STAFF')
   @HttpCode(HttpStatus.OK)
@@ -254,6 +317,11 @@ export class PharmacyOrdersController {
    * Exige que el pedido sea demostrablemente un RETIRO y que la sede ofrezca
    * mostrador; sella el código de retiro y renueva la reserva 48 h.
    */
+  @Audited({
+    action: 'PHARMACY_ORDER_READY',
+    entity: 'medication_dispensation',
+    entityId: 'param:id',
+  })
   @Post(':id/ready')
   @Roles('SECURITY_ADMIN', 'PHARMACY_STAFF')
   @HttpCode(HttpStatus.OK)
@@ -274,6 +342,11 @@ export class PharmacyOrdersController {
    * acumulativa: mientras quede saldo el pedido sigue LISTO_PARA_RETIRO con el
    * mismo código, y pasa a RETIRADO cuando la última línea se cubre.
    */
+  @Audited({
+    action: 'PHARMACY_ORDER_DISPENSED',
+    entity: 'medication_dispensation',
+    entityId: 'param:id',
+  })
   @Post(':id/dispense')
   @Roles('SECURITY_ADMIN', 'PHARMACY_STAFF')
   @HttpCode(HttpStatus.OK)

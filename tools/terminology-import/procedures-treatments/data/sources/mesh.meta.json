@@ -1,0 +1,19 @@
+{
+  "source": "mesh",
+  "name": "Medical Subject Headings (MeSH) 2026 — descriptores",
+  "publisher": "U.S. National Library of Medicine",
+  "license": "Términos de uso de MeSH (NLM): sin cargo, con atribución y versión identificada; no implica respaldo de NLM",
+  "licenseUrl": "https://www.nlm.nih.gov/databases/download/terms_and_conditions_mesh.html",
+  "homepage": "https://www.nlm.nih.gov/mesh/",
+  "retrievedAt": "2026-10-24T16:36:33.293Z",
+  "lastModified": "Wed, 12 Aug 2026 18:33:47 GMT",
+  "files": {
+    "desc2026.xml.gz": {
+      "url": "https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.gz",
+      "fileUrl": "https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.gz",
+      "lastModified": "Wed, 12 Aug 2026 18:33:47 GMT",
+      "sha256": "ccd4d0d33bebfd4c836a59e7dd0c635b1d4e20c4f5a6abc55e2eb0ba4c8716dd",
+      "bytes": 16812612
+    }
+  }
+}

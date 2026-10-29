@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { ResourceNotFoundException } from '../../../common';
+import { requireTenantId } from '../../../common';
 import { conceptCode } from '../../../common/constants/concept-code';
+import { assertQaResource } from './qa-scope';
 import {
   AssertionResults,
   TestAssertions,
@@ -27,9 +28,10 @@ export class QaLabReadService {
   constructor(private readonly em: EntityManager) {}
 
   async listEnvironments() {
+    const tenantId = requireTenantId();
     const rows = await this.em.find(
       TestEnvironments,
-      {},
+      { tenantId },
       { orderBy: { code: 'asc' } },
     );
     return rows.map((env) => ({
@@ -44,28 +46,36 @@ export class QaLabReadService {
   }
 
   async listSuites() {
+    const tenantId = requireTenantId();
     const suites = await this.em.find(
       TestSuites,
-      {},
+      { tenantId },
       { orderBy: { code: 'asc' }, limit: MAX_LIST },
     );
     const cases = await this.em.find(TestCases, {
       suiteId: { $in: suites.map((s) => s.id) },
     });
-    const lastRuns = await this.em.getConnection().execute<
-      Array<{
-        suite_id: string;
-        id: string;
-        run_number: string;
-        status_concept_id: string;
-        finished_at: Date | null;
-      }>
-    >(
-      `SELECT DISTINCT ON (suite_id) suite_id, id, run_number, status_concept_id, finished_at
-         FROM qa_lab.test_runs ORDER BY suite_id, created_at DESC`,
-      [],
-      'all',
-    );
+    // La última corrida sólo se busca para las suites del tenant activo.
+    const suiteIds = suites.map((suite) => suite.id);
+    const lastRuns =
+      suiteIds.length === 0
+        ? []
+        : await this.em.getConnection().execute<
+            Array<{
+              suite_id: string;
+              id: string;
+              run_number: string;
+              status_concept_id: string;
+              finished_at: Date | null;
+            }>
+          >(
+            `SELECT DISTINCT ON (suite_id) suite_id, id, run_number, status_concept_id, finished_at
+         FROM qa_lab.test_runs
+        WHERE suite_id IN (${suiteIds.map(() => '?').join(', ')})
+        ORDER BY suite_id, created_at DESC`,
+            suiteIds,
+            'all',
+          );
     const lastBySuite = new Map(lastRuns.map((row) => [row.suite_id, row]));
     return suites.map((suite) => {
       const suiteCases = cases.filter((c) => c.suiteId === suite.id);
@@ -98,9 +108,12 @@ export class QaLabReadService {
   }
 
   async getSuite(suiteId: string) {
-    const suite = await this.em.findOne(TestSuites, { id: suiteId });
-    if (!suite)
-      throw new ResourceNotFoundException('Suite no encontrada', { suiteId });
+    const tenantId = requireTenantId();
+    const suite = assertQaResource(
+      await this.em.findOne(TestSuites, { id: suiteId, tenantId }),
+      tenantId,
+      'Suite no encontrada',
+    );
     const cases = await this.em.find(
       TestCases,
       { suiteId },
@@ -145,9 +158,10 @@ export class QaLabReadService {
   }
 
   async listRuns(filters: { suiteId?: string; limit?: number }) {
+    const tenantId = requireTenantId();
     const runs = await this.em.find(
       TestRuns,
-      filters.suiteId ? { suiteId: filters.suiteId } : {},
+      filters.suiteId ? { suiteId: filters.suiteId, tenantId } : { tenantId },
       {
         orderBy: { createdAt: 'desc', id: 'desc' },
         limit: Math.min(filters.limit ?? 50, 100),
@@ -177,9 +191,12 @@ export class QaLabReadService {
   }
 
   async getRun(runId: string) {
-    const run = await this.em.findOne(TestRuns, { id: runId });
-    if (!run)
-      throw new ResourceNotFoundException('Corrida no encontrada', { runId });
+    const tenantId = requireTenantId();
+    const run = assertQaResource(
+      await this.em.findOne(TestRuns, { id: runId, tenantId }),
+      tenantId,
+      'Corrida no encontrada',
+    );
     const results = await this.em.find(
       TestCaseResults,
       { testRunId: runId },
@@ -215,9 +232,10 @@ export class QaLabReadService {
   }
 
   async listDefects(filters: { status?: string }) {
+    const tenantId = requireTenantId();
     const defects = await this.em.find(
       TestDefects,
-      {},
+      { tenantId },
       { orderBy: { lastSeenAt: 'desc' }, limit: MAX_LIST },
     );
     return defects

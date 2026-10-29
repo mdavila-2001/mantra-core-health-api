@@ -51,15 +51,15 @@ _Fuente: `src/modules/object_storage/README.md:83`_
 | `UC-60-01` | Iniciar carga multiparte | POST /object-storage/namespaces/{code}/uploads/initiate | STORAGE_CLIENT · SYSTEM · STORAGE_ADMIN | MEDIO | 3 |
 | `UC-60-02` | Completar y materializar versión | POST /object-storage/uploads/{id}/complete | STORAGE_CLIENT · SYSTEM · STORAGE_ADMIN | MEDIO | 11 |
 | `UC-60-03` | Nueva versión inmutable | POST /object-storage/objects/{manifestId}/versions | SYSTEM · STORAGE_ADMIN | MEDIO | 8 |
-| `UC-60-04` | Catalogar jerarquía DICOM | POST /object-storage/dicom/studies/catalog | PACS_GATEWAY · SYSTEM · STORAGE_ADMIN | MEDIO | 9 |
+| `UC-60-04` | Catalogar jerarquía DICOM | POST /object-storage/dicom/studies/catalog | PACS_GATEWAY · SYSTEM · STORAGE_ADMIN | MEDIO | 11 |
 | `UC-60-05` | Acceso DICOMweb | GET /dicomweb/studies/{studyUid}/series/{seriesUid}/instances/{sopUid} | DICOM_VIEWER · CLINICIAN · STORAGE_ADMIN | MEDIO | 5 |
 | `UC-60-06` | Registrar payload grande | POST /object-storage/large-payloads | SYSTEM · STORAGE_ADMIN | MEDIO | 4 |
 | `UC-60-07` | Retención WORM | POST /object-storage/versions/{versionId}/retention-lock | COMPLIANCE_OFFICER · STORAGE_ADMIN | MEDIO | 6 |
-| `UC-60-09` | Emitir acceso firmado | POST /object-storage/versions/{versionId}/signed-url | DICOM_VIEWER · CLINICIAN · SYSTEM · STORAGE_ADMIN | MEDIO | 30 |
+| `UC-60-09` | Emitir acceso firmado | POST /object-storage/versions/{versionId}/signed-url | DICOM_VIEWER · CLINICIAN · SYSTEM · STORAGE_ADMIN | MEDIO | 12 |
 | `UC-60-10` | Verificar integridad | POST /object-storage/versions/{versionId}/integrity-checks | SYSTEM · STORAGE_ADMIN | MEDIO | 8 |
 | `UC-60-11` | Archivar a frío | POST /object-storage/archive-jobs/build | SYSTEM · STORAGE_ADMIN | MEDIO | 7 |
 | `UC-60-12` | Borrado gobernado | POST /object-storage/objects/{manifestId}/request-deletion | COMPLIANCE_OFFICER · STORAGE_ADMIN | MEDIO | 7 |
-| `ctrl:ObjectStorageController` | Operaciones de ObjectStorageController que el README no asigna a un caso de uso | GET /object-storage/versions/{versionId}/content/{token} | DICOM_VIEWER · CLINICIAN · SYSTEM · STORAGE_ADMIN | MEDIO | 30 |
+| `ctrl:ObjectStorageController` | Operaciones de ObjectStorageController que el README no asigna a un caso de uso | GET /object-storage/versions/{versionId}/content/{token} | DICOM_VIEWER · CLINICIAN · SYSTEM · STORAGE_ADMIN | MEDIO | 12 |
 |  |  | POST /object-storage/versions/{versionId}/legal-holds | LEGAL_COUNSEL · STORAGE_ADMIN | MEDIO | 5 |
 |  |  | DELETE /object-storage/versions/{versionId}/legal-holds/{holdId} | LEGAL_COUNSEL · STORAGE_ADMIN | MEDIO | 6 |
 
@@ -71,31 +71,29 @@ flowchart LR
   a12(["SYSTEM · STORAGE_ADMIN"]):::actor
   a15(["PACS_GATEWAY · SYSTEM · STORAGE_ADMIN"]):::actor
   a21(["DICOM_VIEWER · CLINICIAN · STORAGE_ADMIN"]):::actor
-  a26(["COMPLIANCE_OFFICER · STORAGE_ADMIN"]):::actor
-  a30(["DICOM_VIEWER · CLINICIAN · SYSTEM · STORAGE_ADMIN"]):::actor
-  a50(["LEGAL_COUNSEL · STORAGE_ADMIN"]):::actor
+  a27(["COMPLIANCE_OFFICER · STORAGE_ADMIN"]):::actor
+  a31(["DICOM_VIEWER · CLINICIAN · SYSTEM · STORAGE_ADMIN"]):::actor
+  a48(["LEGAL_COUNSEL · STORAGE_ADMIN"]):::actor
   t3[("object_storage.multipart_uploads")]:::tabla
   t4[("object_storage.object_namespaces")]:::tabla
   t6[("object_storage.object_checksums")]:::tabla
   t7[("object_storage.object_encryption_envelopes")]:::tabla
   t8[("object_storage.object_locations")]:::tabla
   t9[("object_storage.object_manifests")]:::tabla
-  t16[("object_storage.dicom_instance_manifests")]:::tabla
-  t17[("object_storage.dicom_series_manifests")]:::tabla
-  t18[("object_storage.dicom_study_manifests")]:::tabla
-  t22[("object_storage.dicomweb_access_logs")]:::tabla
-  t24[("object_storage.large_payload_manifests")]:::tabla
-  t27[("object_storage.object_retention_locks")]:::tabla
-  t28[("object_storage.object_versions")]:::tabla
-  t31[("audit.audit_log")]:::tabla
-  t32[("authz.access_policies")]:::tabla
-  t33[("authz.care_relationships")]:::tabla
-  t34[("authz.clinical_access_grants")]:::tabla
-  t35[("authz.field_permissions")]:::tabla
-  t38[("object_storage.object_integrity_checks")]:::tabla
-  t41[("object_storage.archive_manifests")]:::tabla
-  t42[("object_storage.object_legal_holds")]:::tabla
-  t45[("object_storage.object_deletion_markers")]:::tabla
+  t16[("diagnostics.imaging_studies")]:::tabla
+  t17[("object_storage.dicom_instance_manifests")]:::tabla
+  t18[("object_storage.dicom_series_manifests")]:::tabla
+  t22[("object_storage.dicom_study_manifests")]:::tabla
+  t23[("object_storage.dicomweb_access_logs")]:::tabla
+  t25[("object_storage.large_payload_manifests")]:::tabla
+  t28[("object_storage.object_retention_locks")]:::tabla
+  t29[("object_storage.object_versions")]:::tabla
+  t32[("audit.audit_log")]:::tabla
+  t33[("iam.sessions")]:::tabla
+  t36[("object_storage.object_integrity_checks")]:::tabla
+  t39[("object_storage.archive_manifests")]:::tabla
+  t40[("object_storage.object_legal_holds")]:::tabla
+  t43[("object_storage.object_deletion_markers")]:::tabla
   subgraph s0["UC-60-01 · Iniciar carga multiparte"]
     o1["POST /object-storage/namespaces/{code}/uploads/initiate"]:::op
   end
@@ -107,7 +105,7 @@ flowchart LR
   subgraph s2["UC-60-03 · Nueva versión inmutable"]
     o11["POST /object-storage/objects/{manifestId}/versions"]:::op
   end
-  t19[("+3 tablas más")]
+  t19[("+5 tablas más")]
   subgraph s3["UC-60-04 · Catalogar jerarquía DICOM"]
     o14["POST /object-storage/dicom/studies/catalog"]:::op
   end
@@ -115,32 +113,32 @@ flowchart LR
     o20["GET /dicomweb/studies/{studyUid}/series/{seriesUid}/instances/{sopUid}"]:::op
   end
   subgraph s5["UC-60-06 · Registrar payload grande"]
-    o23["POST /object-storage/large-payloads"]:::op
+    o24["POST /object-storage/large-payloads"]:::op
   end
   subgraph s6["UC-60-07 · Retención WORM"]
-    o25["POST /object-storage/versions/{versionId}/retention-lock"]:::op
+    o26["POST /object-storage/versions/{versionId}/retention-lock"]:::op
   end
-  t36[("+24 tablas más")]
+  t34[("+6 tablas más")]
   subgraph s7["UC-60-09 · Emitir acceso firmado"]
-    o29["POST /object-storage/versions/{versionId}/signed-url"]:::op
+    o30["POST /object-storage/versions/{versionId}/signed-url"]:::op
   end
-  t39[("+2 tablas más")]
+  t37[("+2 tablas más")]
   subgraph s8["UC-60-10 · Verificar integridad"]
-    o37["POST /object-storage/versions/{versionId}/integrity-checks"]:::op
+    o35["POST /object-storage/versions/{versionId}/integrity-checks"]:::op
   end
-  t43[("+1 tablas más")]
+  t41[("+1 tablas más")]
   subgraph s9["UC-60-11 · Archivar a frío"]
-    o40["POST /object-storage/archive-jobs/build"]:::op
+    o38["POST /object-storage/archive-jobs/build"]:::op
   end
-  t46[("+1 tablas más")]
+  t44[("+1 tablas más")]
   subgraph s10["UC-60-12 · Borrado gobernado"]
-    o44["POST /object-storage/objects/{manifestId}/request-deletion"]:::op
+    o42["POST /object-storage/objects/{manifestId}/request-deletion"]:::op
   end
-  t48[("+24 tablas más")]
+  t46[("+6 tablas más")]
   subgraph s11["ctrl:ObjectStorageController · Operaciones de ObjectStorageController que el RE…"]
-    o47["GET /object-storage/versions/{versionId}/content/{token}"]:::op
-    o49["POST /object-storage/versions/{versionId}/legal-holds"]:::op
-    o51["DELETE /object-storage/versions/{versionId}/legal-holds/{holdId}"]:::op
+    o45["GET /object-storage/versions/{versionId}/content/{token}"]:::op
+    o47["POST /object-storage/versions/{versionId}/legal-holds"]:::op
+    o49["DELETE /object-storage/versions/{versionId}/legal-holds/{holdId}"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -163,84 +161,84 @@ flowchart LR
   o11 -->|"LEE"| t4
   o11 -.-> t13
   a15 --> o14
-  o14 -->|"CREA"| t16
   o14 -->|"LEE"| t16
-  o14 -->|"ACTUALIZA"| t17
   o14 -->|"CREA"| t17
   o14 -->|"LEE"| t17
   o14 -->|"ACTUALIZA"| t18
+  o14 -->|"CREA"| t18
+  o14 -->|"LEE"| t18
   o14 -.-> t19
   a21 --> o20
-  o20 -->|"LEE"| t16
   o20 -->|"LEE"| t17
   o20 -->|"LEE"| t18
-  o20 -->|"CREA"| t22
+  o20 -->|"LEE"| t22
+  o20 -->|"CREA"| t23
   o20 -->|"LEE"| t9
-  a12 --> o23
-  o23 -->|"CREA"| t24
-  o23 -->|"LEE"| t24
-  o23 -->|"ACTUALIZA"| t9
-  o23 -->|"LEE"| t9
-  a26 --> o25
-  o25 -->|"ACTUALIZA"| t9
-  o25 -->|"LEE"| t9
-  o25 -->|"LEE"| t4
-  o25 -->|"CREA"| t27
-  o25 -->|"LEE"| t27
-  o25 -->|"LEE"| t28
-  a30 --> o29
-  o29 -->|"CREA"| t31
-  o29 -->|"LEE"| t31
-  o29 -->|"LEE"| t32
-  o29 -->|"LEE"| t33
-  o29 -->|"LEE"| t34
-  o29 -->|"LEE"| t35
-  o29 -.-> t36
-  a12 --> o37
-  o37 -->|"ACTUALIZA"| t6
-  o37 -->|"LEE"| t6
-  o37 -->|"CREA"| t38
-  o37 -->|"ACTUALIZA"| t8
-  o37 -->|"LEE"| t8
-  o37 -->|"ACTUALIZA"| t9
-  o37 -.-> t39
-  a12 --> o40
-  o40 -->|"CREA"| t41
-  o40 -->|"LEE"| t41
-  o40 -->|"LEE"| t42
-  o40 -->|"CREA"| t8
-  o40 -->|"ACTUALIZA"| t9
-  o40 -->|"LEE"| t9
-  o40 -.-> t43
-  a26 --> o44
-  o44 -->|"CREA"| t45
-  o44 -->|"LEE"| t45
-  o44 -->|"LEE"| t42
-  o44 -->|"ACTUALIZA"| t9
-  o44 -->|"LEE"| t9
-  o44 -->|"LEE"| t27
-  o44 -.-> t46
-  a30 --> o47
-  o47 -->|"CREA"| t31
-  o47 -->|"LEE"| t31
-  o47 -->|"LEE"| t32
-  o47 -->|"LEE"| t33
-  o47 -->|"LEE"| t34
-  o47 -->|"LEE"| t35
-  o47 -.-> t48
-  a50 --> o49
-  o49 -->|"CREA"| t42
-  o49 -->|"LEE"| t42
+  a12 --> o24
+  o24 -->|"CREA"| t25
+  o24 -->|"LEE"| t25
+  o24 -->|"ACTUALIZA"| t9
+  o24 -->|"LEE"| t9
+  a27 --> o26
+  o26 -->|"ACTUALIZA"| t9
+  o26 -->|"LEE"| t9
+  o26 -->|"LEE"| t4
+  o26 -->|"CREA"| t28
+  o26 -->|"LEE"| t28
+  o26 -->|"LEE"| t29
+  a31 --> o30
+  o30 -->|"CREA"| t32
+  o30 -->|"LEE"| t32
+  o30 -->|"LEE"| t33
+  o30 -->|"LEE"| t17
+  o30 -->|"LEE"| t18
+  o30 -->|"LEE"| t22
+  o30 -.-> t34
+  a12 --> o35
+  o35 -->|"ACTUALIZA"| t6
+  o35 -->|"LEE"| t6
+  o35 -->|"CREA"| t36
+  o35 -->|"ACTUALIZA"| t8
+  o35 -->|"LEE"| t8
+  o35 -->|"ACTUALIZA"| t9
+  o35 -.-> t37
+  a12 --> o38
+  o38 -->|"CREA"| t39
+  o38 -->|"LEE"| t39
+  o38 -->|"LEE"| t40
+  o38 -->|"CREA"| t8
+  o38 -->|"ACTUALIZA"| t9
+  o38 -->|"LEE"| t9
+  o38 -.-> t41
+  a27 --> o42
+  o42 -->|"CREA"| t43
+  o42 -->|"LEE"| t43
+  o42 -->|"LEE"| t40
+  o42 -->|"ACTUALIZA"| t9
+  o42 -->|"LEE"| t9
+  o42 -->|"LEE"| t28
+  o42 -.-> t44
+  a31 --> o45
+  o45 -->|"CREA"| t32
+  o45 -->|"LEE"| t32
+  o45 -->|"LEE"| t33
+  o45 -->|"LEE"| t17
+  o45 -->|"LEE"| t18
+  o45 -->|"LEE"| t22
+  o45 -.-> t46
+  a48 --> o47
+  o47 -->|"CREA"| t40
+  o47 -->|"LEE"| t40
+  o47 -->|"ACTUALIZA"| t9
+  o47 -->|"LEE"| t9
+  o47 -->|"LEE"| t29
+  a48 --> o49
+  o49 -->|"ACTUALIZA"| t40
+  o49 -->|"LEE"| t40
   o49 -->|"ACTUALIZA"| t9
   o49 -->|"LEE"| t9
   o49 -->|"LEE"| t28
-  a50 --> o51
-  o51 -->|"ACTUALIZA"| t42
-  o51 -->|"LEE"| t42
-  o51 -->|"ACTUALIZA"| t9
-  o51 -->|"LEE"| t9
-  o51 -->|"LEE"| t27
-  o51 -->|"LEE"| t28
+  o49 -->|"LEE"| t29
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -334,7 +332,6 @@ Catalogar la jerarquía DICOM estudio/serie/instancia
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: El objeto de la instancia no existe |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -344,60 +341,103 @@ flowchart TD
   n1 --> n2
   n3["Llama a DicomCatalogService.catalogStudy"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a DicomCatalogService.ownerTenantId"]:::llamada
   n3 --> n4
-  n5["Llama a DicomRepository.findStudyByUidForUpdate"]:::llamada
+  n5{"!operates || (declaredTenantId !== undefined && declaredTenantId !== tenantId)"}:::decision
   n4 --> n5
-  n6[("LEE object_storage.dicom_study_manifests")]:::efecto
-  n5 --> n6
-  n7["Llama a DicomRepository.createStudy"]:::llamada
-  n6 --> n7
-  n8[("CREA object_storage.dicom_study_manifests")]:::efecto
+  n6(["↩ (relanza el error capturado)"]):::error
+  n5 -->|"sí"| n6
+  n7["Transacción: transactional(…)"]:::transaccion
+  n5 -->|"no"| n7
+  n8["Llama a DicomRepository.findStudyByUidForUpdate"]:::llamada
   n7 --> n8
-  n9["Repite: por cada const seriesDto de dto.series"]:::bucle
+  n9[("LEE object_storage.dicom_study_manifests")]:::efecto
   n8 --> n9
-  n10["Llama a DicomRepository.findSeriesByUidForUpdate"]:::llamada
-  n9 -->|"cada elemento"| n10
-  n11[("LEE object_storage.dicom_series_manifests")]:::efecto
+  n10["Llama a DicomCatalogService.assertClinicalReferences"]:::llamada
+  n9 --> n10
+  n11["Llama a DicomRepository.patientProfileExists"]:::llamada
   n10 --> n11
-  n12["Llama a DicomRepository.createSeries"]:::llamada
+  n12[("LEE profiles.patient_profiles")]:::efecto
   n11 --> n12
-  n13[("CREA object_storage.dicom_series_manifests")]:::efecto
+  n13{"dto.patientProfileId && (!dto.imagingStudyId || !(await this.dicomRepo.patientProfileExists(tx, dto.patientPr…"}:::decision
   n12 --> n13
-  n14["Repite: por cada const instanceDto de seriesDto.instances"]:::bucle
-  n13 --> n14
-  n15["Llama a DicomRepository.findInstanceByUid"]:::llamada
-  n14 -->|"cada elemento"| n15
-  n16[("LEE object_storage.dicom_instance_manifests")]:::efecto
+  n14(["↩ (relanza el error capturado)"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a DicomRepository.imagingStudyInScope"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE diagnostics.imaging_studies")]:::efecto
   n15 --> n16
-  n17["Llama a ObjectStorageRepository.findManifestById"]:::llamada
+  n17{"dto.imagingStudyId && !(await this.dicomRepo.imagingStudyInScope( tx, dto.imagingStudyId, tenantId, dto.patie…"}:::decision
   n16 --> n17
-  n18[("LEE object_storage.object_manifests")]:::efecto
-  n17 --> n18
-  n19{"!manifest"}:::decision
-  n18 --> n19
-  n20(["404 NOT_FOUND El objeto de la instancia no existe"]):::error
-  n19 -->|"sí"| n20
-  n21["Llama a DicomRepository.createInstance"]:::llamada
-  n19 -->|"no"| n21
-  n22[("CREA object_storage.dicom_instance_manifests")]:::efecto
+  n18(["↩ (relanza el error capturado)"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a DicomRepository.imagingStudyPatientId"]:::llamada
+  n17 -->|"no"| n19
+  n20[("LEE diagnostics.imaging_studies")]:::efecto
+  n19 --> n20
+  n21["Llama a DicomRepository.createStudy"]:::llamada
+  n20 --> n21
+  n22[("CREA object_storage.dicom_study_manifests")]:::efecto
   n21 --> n22
-  n23["Llama a DicomRepository.countInstancesBySeries"]:::llamada
+  n23["Repite: por cada const seriesDto de dto.series"]:::bucle
   n22 --> n23
-  n14 -->|"al terminar"| n23
-  n24[("LEE object_storage.dicom_instance_manifests")]:::efecto
-  n23 --> n24
-  n25[("ACTUALIZA object_storage.dicom_series_manifests")]:::efecto
+  n24["Llama a DicomRepository.findSeriesByUidForUpdate"]:::llamada
+  n23 -->|"cada elemento"| n24
+  n25[("LEE object_storage.dicom_series_manifests")]:::efecto
   n24 --> n25
-  n26["Llama a DicomRepository.findSeriesByStudy"]:::llamada
+  n26{"seriesDto.thumbnailObjectManifestId"}:::decision
   n25 --> n26
-  n9 -->|"al terminar"| n26
-  n27[("LEE object_storage.dicom_series_manifests")]:::efecto
-  n26 --> n27
-  n28[("ACTUALIZA object_storage.dicom_study_manifests · ACTUALIZA object_storage.dicom_study_manifests")]:::efecto
+  n27["Llama a DicomCatalogService.requireManifestInTenant"]:::llamada
+  n26 -->|"sí"| n27
+  n28["Llama a ObjectStorageRepository.findManifestById"]:::llamada
   n27 --> n28
-  n29(("201 Responde con éxito")):::ok
+  n29[("LEE object_storage.object_manifests")]:::efecto
   n28 --> n29
+  n30{"!manifest || manifest.tenantId !== tenantId"}:::decision
+  n29 --> n30
+  n31(["↩ (relanza el error capturado)"]):::error
+  n30 -->|"sí"| n31
+  n32["Llama a DicomRepository.createSeries"]:::llamada
+  n30 -->|"no"| n32
+  n26 -->|"no"| n32
+  n33[("CREA object_storage.dicom_series_manifests")]:::efecto
+  n32 --> n33
+  n34["Repite: por cada const instanceDto de seriesDto.instances"]:::bucle
+  n33 --> n34
+  n35["Llama a DicomRepository.findInstanceByUid"]:::llamada
+  n34 -->|"cada elemento"| n35
+  n36[("LEE object_storage.dicom_instance_manifests")]:::efecto
+  n35 --> n36
+  n37["Llama a DicomCatalogService.requireManifestInTenant"]:::llamada
+  n36 --> n37
+  n38["Llama a ObjectStorageRepository.findManifestById"]:::llamada
+  n37 --> n38
+  n39[("LEE object_storage.object_manifests")]:::efecto
+  n38 --> n39
+  n40{"!manifest || manifest.tenantId !== tenantId"}:::decision
+  n39 --> n40
+  n41(["↩ (relanza el error capturado)"]):::error
+  n40 -->|"sí"| n41
+  n42["Llama a DicomRepository.createInstance"]:::llamada
+  n40 -->|"no"| n42
+  n43[("CREA object_storage.dicom_instance_manifests")]:::efecto
+  n42 --> n43
+  n44["Llama a DicomRepository.countInstancesBySeries"]:::llamada
+  n43 --> n44
+  n34 -->|"al terminar"| n44
+  n45[("LEE object_storage.dicom_instance_manifests")]:::efecto
+  n44 --> n45
+  n46[("ACTUALIZA object_storage.dicom_series_manifests")]:::efecto
+  n45 --> n46
+  n47["Llama a DicomRepository.findSeriesByStudy"]:::llamada
+  n46 --> n47
+  n23 -->|"al terminar"| n47
+  n48[("LEE object_storage.dicom_series_manifests")]:::efecto
+  n47 --> n48
+  n49[("ACTUALIZA object_storage.dicom_study_manifests · ACTUALIZA object_storage.dicom_study_manifests")]:::efecto
+  n48 --> n49
+  n50(("201 Responde con éxito")):::ok
+  n49 --> n50
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -974,80 +1014,83 @@ flowchart TD
   n21 --> n22
   n23(["404 NOT_FOUND Objeto no encontrado"]):::error
   n22 -->|"sí"| n23
-  n24{"manifest.lifecycleState === OBJECT_LIFECYCLE.PENDING_DELETION || manifest.lifecycleState === OBJECT_LIFECYCLE…"}:::decision
+  n24["Llama a ObjectStorageService.assertActorMayAccess"]:::llamada
   n22 -->|"no"| n24
-  n25(["422 PRECONDITION_FAILED El objeto no está disponible"]):::error
-  n24 -->|"sí"| n25
-  n26["Llama a ObjectStorageRepository.findPrimaryLocation"]:::llamada
-  n24 -->|"no"| n26
-  n27[("LEE object_storage.object_locations")]:::efecto
-  n26 --> n27
-  n28{"!location"}:::decision
-  n27 --> n28
-  n29(["404 NOT_FOUND La versión no tiene ubicación primaria"]):::error
-  n28 -->|"sí"| n29
-  n30["Llama a ObjectStorageRepository.findChecksum"]:::llamada
-  n28 -->|"no"| n30
-  n31[("LEE object_storage.object_checksums")]:::efecto
-  n30 --> n31
-  n32{"!checksum || checksum.verificationStatus !== CHECKSUM_VERIFICATION.VERIFIED || !CHECKSUM_SOURCES_TRUSTED.incl…"}:::decision
-  n31 --> n32
-  n33(["422 PRECONDITION_FAILED La versión no tiene la integridad verificada"]):::error
-  n32 -->|"sí"| n33
-  n34{"COLD_STORAGE_CLASSES.includes(location.storageClass)"}:::decision
-  n32 -->|"no"| n34
-  n35(["422 PRECONDITION_FAILED La versión está en almacenamiento frío: requiere rehidratación previa"]):::error
+  n25(["404 NOT_FOUND Versión no encontrada"]):::error
+  n24 --> n25
+  n26{"manifest.lifecycleState === OBJECT_LIFECYCLE.PENDING_DELETION || manifest.lifecycleState === OBJECT_LIFECYCLE…"}:::decision
+  n27(["422 PRECONDITION_FAILED El objeto no está disponible"]):::error
+  n26 -->|"sí"| n27
+  n28["Llama a ObjectStorageRepository.findPrimaryLocation"]:::llamada
+  n26 -->|"no"| n28
+  n29[("LEE object_storage.object_locations")]:::efecto
+  n28 --> n29
+  n30{"!location"}:::decision
+  n29 --> n30
+  n31(["404 NOT_FOUND La versión no tiene ubicación primaria"]):::error
+  n30 -->|"sí"| n31
+  n32["Llama a ObjectStorageRepository.findChecksum"]:::llamada
+  n30 -->|"no"| n32
+  n33[("LEE object_storage.object_checksums")]:::efecto
+  n32 --> n33
+  n34{"!checksum || checksum.verificationStatus !== CHECKSUM_VERIFICATION.VERIFIED || !CHECKSUM_SOURCES_TRUSTED.incl…"}:::decision
+  n33 --> n34
+  n35(["422 PRECONDITION_FAILED La versión no tiene la integridad verificada"]):::error
   n34 -->|"sí"| n35
-  n36["Llama a ObjectStorageService.recordDicomAccess"]:::llamada
+  n36{"COLD_STORAGE_CLASSES.includes(location.storageClass)"}:::decision
   n34 -->|"no"| n36
-  n37["Llama a DicomRepository.findDicomCoordinates"]:::llamada
-  n36 --> n37
-  n38[("LEE object_storage.dicom_instance_manifests · LEE object_storage.dicom_series_manifests · LEE object_storage.…")]:::efecto
-  n37 --> n38
-  n39["Llama a DicomRepository.createAccessLog"]:::llamada
+  n37(["422 PRECONDITION_FAILED La versión está en almacenamiento frío: requiere rehidratación previa"]):::error
+  n36 -->|"sí"| n37
+  n38["Llama a ObjectStorageService.recordDicomAccess"]:::llamada
+  n36 -->|"no"| n38
+  n39["Llama a DicomRepository.findDicomCoordinates"]:::llamada
   n38 --> n39
-  n40[("CREA object_storage.dicomweb_access_logs")]:::efecto
+  n40[("LEE object_storage.dicom_instance_manifests · LEE object_storage.dicom_series_manifests · LEE object_storage.…")]:::efecto
   n39 --> n40
-  n41["Llama a AuditTrailService.record"]:::llamada
+  n41["Llama a DicomRepository.createAccessLog"]:::llamada
   n40 --> n41
-  n42["Llama a AuditLogRepository.append"]:::llamada
+  n42[("CREA object_storage.dicomweb_access_logs")]:::efecto
   n41 --> n42
-  n43[("CREA audit.audit_log")]:::efecto
+  n43["Llama a AuditTrailService.record"]:::llamada
   n42 --> n43
-  n44["Llama a ObjectStorageRepository.findNamespaceById"]:::llamada
+  n44["Llama a AuditLogRepository.append"]:::llamada
   n43 --> n44
-  n45[("LEE object_storage.object_namespaces")]:::efecto
+  n45[("CREA audit.audit_log")]:::efecto
   n44 --> n45
-  n46{"!namespace"}:::decision
+  n46["Llama a ObjectStorageRepository.findNamespaceById"]:::llamada
   n45 --> n46
-  n47(["404 NOT_FOUND El espacio de nombres de la versión no existe"]):::error
-  n46 -->|"sí"| n47
-  n48["Intenta"]:::intento
-  n46 -->|"no"| n48
-  n49["Llama a S3ObjectContentReader.open"]:::llamada
-  n48 --> n49
-  n50["Llama a S3ObjectContentReader.get"]:::llamada
-  n49 --> n50
-  n51["Intenta"]:::intento
+  n47[("LEE object_storage.object_namespaces")]:::efecto
+  n46 --> n47
+  n48{"!namespace"}:::decision
+  n47 --> n48
+  n49(["404 NOT_FOUND El espacio de nombres de la versión no existe"]):::error
+  n48 -->|"sí"| n49
+  n50["Intenta"]:::intento
+  n48 -->|"no"| n50
+  n51["Llama a S3ObjectContentReader.open"]:::llamada
   n50 --> n51
-  n52{"!(result.Body instanceof Readable)"}:::decision
+  n52["Llama a S3ObjectContentReader.get"]:::llamada
   n51 --> n52
-  n53(["500 INTERNAL BODY_UNREADABLE"]):::error
-  n52 -->|"sí"| n53
-  n54{"error instanceof ObjectContentUnavailableError"}:::decision
-  n51 -->|"si falla"| n54
-  n55(["↩ (relanza el error capturado)"]):::error
+  n53["Intenta"]:::intento
+  n52 --> n53
+  n54{"!(result.Body instanceof Readable)"}:::decision
+  n53 --> n54
+  n55(["500 INTERNAL BODY_UNREADABLE"]):::error
   n54 -->|"sí"| n55
-  n56(["500 INTERNAL NOT_FOUND / PROVIDER_ERROR"]):::error
-  n54 -->|"no"| n56
-  n57{"error instanceof ObjectContentUnavailableError"}:::decision
-  n48 -->|"si falla"| n57
-  n58(["503 DEPENDENCY_UNAVAILABLE No se pudo leer el objeto en el almacenamiento"]):::error
-  n57 -->|"sí"| n58
-  n59(["↩ (relanza el error capturado)"]):::error
-  n57 -->|"no"| n59
-  n60(("200 Responde con éxito")):::ok
-  n52 -->|"no"| n60
+  n56{"error instanceof ObjectContentUnavailableError"}:::decision
+  n53 -->|"si falla"| n56
+  n57(["↩ (relanza el error capturado)"]):::error
+  n56 -->|"sí"| n57
+  n58(["500 INTERNAL NOT_FOUND / PROVIDER_ERROR"]):::error
+  n56 -->|"no"| n58
+  n59{"error instanceof ObjectContentUnavailableError"}:::decision
+  n50 -->|"si falla"| n59
+  n60(["503 DEPENDENCY_UNAVAILABLE No se pudo leer el objeto en el almacenamiento"]):::error
+  n59 -->|"sí"| n60
+  n61(["↩ (relanza el error capturado)"]):::error
+  n59 -->|"no"| n61
+  n62(("200 Responde con éxito")):::ok
+  n54 -->|"no"| n62
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1420,52 +1463,55 @@ flowchart TD
   n19 --> n20
   n21(["404 NOT_FOUND Objeto no encontrado"]):::error
   n20 -->|"sí"| n21
-  n22{"manifest.lifecycleState === OBJECT_LIFECYCLE.PENDING_DELETION || manifest.lifecycleState === OBJECT_LIFECYCLE…"}:::decision
+  n22["Llama a ObjectStorageService.assertActorMayAccess"]:::llamada
   n20 -->|"no"| n22
-  n23(["422 PRECONDITION_FAILED El objeto no está disponible"]):::error
-  n22 -->|"sí"| n23
-  n24["Llama a ObjectStorageRepository.findPrimaryLocation"]:::llamada
-  n22 -->|"no"| n24
-  n25[("LEE object_storage.object_locations")]:::efecto
-  n24 --> n25
-  n26{"!location"}:::decision
-  n25 --> n26
-  n27(["404 NOT_FOUND La versión no tiene ubicación primaria"]):::error
-  n26 -->|"sí"| n27
-  n28["Llama a ObjectStorageRepository.findChecksum"]:::llamada
-  n26 -->|"no"| n28
-  n29[("LEE object_storage.object_checksums")]:::efecto
-  n28 --> n29
-  n30{"!checksum || checksum.verificationStatus !== CHECKSUM_VERIFICATION.VERIFIED || !CHECKSUM_SOURCES_TRUSTED.incl…"}:::decision
-  n29 --> n30
-  n31(["422 PRECONDITION_FAILED La versión no tiene la integridad verificada"]):::error
-  n30 -->|"sí"| n31
-  n32{"COLD_STORAGE_CLASSES.includes(location.storageClass)"}:::decision
-  n30 -->|"no"| n32
-  n33(["422 PRECONDITION_FAILED La versión está en almacenamiento frío: requiere rehidratación previa"]):::error
+  n23(["404 NOT_FOUND Versión no encontrada"]):::error
+  n22 --> n23
+  n24{"manifest.lifecycleState === OBJECT_LIFECYCLE.PENDING_DELETION || manifest.lifecycleState === OBJECT_LIFECYCLE…"}:::decision
+  n25(["422 PRECONDITION_FAILED El objeto no está disponible"]):::error
+  n24 -->|"sí"| n25
+  n26["Llama a ObjectStorageRepository.findPrimaryLocation"]:::llamada
+  n24 -->|"no"| n26
+  n27[("LEE object_storage.object_locations")]:::efecto
+  n26 --> n27
+  n28{"!location"}:::decision
+  n27 --> n28
+  n29(["404 NOT_FOUND La versión no tiene ubicación primaria"]):::error
+  n28 -->|"sí"| n29
+  n30["Llama a ObjectStorageRepository.findChecksum"]:::llamada
+  n28 -->|"no"| n30
+  n31[("LEE object_storage.object_checksums")]:::efecto
+  n30 --> n31
+  n32{"!checksum || checksum.verificationStatus !== CHECKSUM_VERIFICATION.VERIFIED || !CHECKSUM_SOURCES_TRUSTED.incl…"}:::decision
+  n31 --> n32
+  n33(["422 PRECONDITION_FAILED La versión no tiene la integridad verificada"]):::error
   n32 -->|"sí"| n33
-  n34["Llama a ObjectStorageRepository.findEncryptionEnvelope"]:::llamada
+  n34{"COLD_STORAGE_CLASSES.includes(location.storageClass)"}:::decision
   n32 -->|"no"| n34
-  n35[("LEE object_storage.object_encryption_envelopes")]:::efecto
-  n34 --> n35
-  n36["Llama a ObjectStorageService.recordDicomAccess"]:::llamada
-  n35 --> n36
-  n37["Llama a DicomRepository.findDicomCoordinates"]:::llamada
+  n35(["422 PRECONDITION_FAILED La versión está en almacenamiento frío: requiere rehidratación previa"]):::error
+  n34 -->|"sí"| n35
+  n36["Llama a ObjectStorageRepository.findEncryptionEnvelope"]:::llamada
+  n34 -->|"no"| n36
+  n37[("LEE object_storage.object_encryption_envelopes")]:::efecto
   n36 --> n37
-  n38[("LEE object_storage.dicom_instance_manifests · LEE object_storage.dicom_series_manifests · LEE object_storage.…")]:::efecto
+  n38["Llama a ObjectStorageService.recordDicomAccess"]:::llamada
   n37 --> n38
-  n39["Llama a DicomRepository.createAccessLog"]:::llamada
+  n39["Llama a DicomRepository.findDicomCoordinates"]:::llamada
   n38 --> n39
-  n40[("CREA object_storage.dicomweb_access_logs")]:::efecto
+  n40[("LEE object_storage.dicom_instance_manifests · LEE object_storage.dicom_series_manifests · LEE object_storage.…")]:::efecto
   n39 --> n40
-  n41["Llama a AuditTrailService.record"]:::llamada
+  n41["Llama a DicomRepository.createAccessLog"]:::llamada
   n40 --> n41
-  n42["Llama a AuditLogRepository.append"]:::llamada
+  n42[("CREA object_storage.dicomweb_access_logs")]:::efecto
   n41 --> n42
-  n43[("CREA audit.audit_log")]:::efecto
+  n43["Llama a AuditTrailService.record"]:::llamada
   n42 --> n43
-  n44(("201 Responde con éxito")):::ok
+  n44["Llama a AuditLogRepository.append"]:::llamada
   n43 --> n44
+  n45[("CREA audit.audit_log")]:::efecto
+  n44 --> n45
+  n46(("201 Responde con éxito")):::ok
+  n45 --> n46
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

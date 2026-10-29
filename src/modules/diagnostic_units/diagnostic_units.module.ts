@@ -12,6 +12,7 @@ import {
   DiagnosticUnitAccreditationsController,
 } from './controllers';
 import {
+  DiagnosticUnitScopeService,
   DiagnosticUnitsService,
   DiagnosticStudiesService,
   DiagnosticPricingService,
@@ -77,6 +78,7 @@ import {
     DiagnosticUnitsReadRepository,
     DiagnosticUnitsAdminReadRepository,
     // Servicios
+    DiagnosticUnitScopeService,
     DiagnosticUnitsService,
     DiagnosticStudiesService,
     DiagnosticPricingService,

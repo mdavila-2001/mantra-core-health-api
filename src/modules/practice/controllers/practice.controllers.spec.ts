@@ -29,6 +29,7 @@ describe('PracticesController', () => {
       createSite: mockFn(),
       decommissionSite: mockFn(),
       listPractices: mockFn(),
+      listSites: mockFn(),
     };
     const accreditationsService = { create: mockFn() };
     const structureService = { publishHealthcareService: mockFn() };
@@ -39,6 +40,7 @@ describe('PracticesController', () => {
     };
     const inventoryService = { createItem: mockFn() };
     const organizationReadService = { getConsole: mockFn() };
+    const offersService = { listOffers: mockFn(), updateOffer: mockFn() };
     const controller = new PracticesController(
       sitesService as any,
       accreditationsService as any,
@@ -47,6 +49,7 @@ describe('PracticesController', () => {
       workforceService as any,
       inventoryService as any,
       organizationReadService as any,
+      offersService as any,
     );
     return {
       controller,
@@ -57,6 +60,7 @@ describe('PracticesController', () => {
       workforceService,
       inventoryService,
       organizationReadService,
+      offersService,
     };
   }
 
@@ -70,27 +74,17 @@ describe('PracticesController', () => {
   it('delegates createSite (UC-14-01)', async () => {
     const d = build();
     const dto = { code: 'S', name: 'N' };
-    await runWithTenant('tenant-1', () =>
-      d.controller.createSite('p1', dto, actor),
-    );
-    expect(d.sitesService.createSite).toHaveBeenCalledWith(
-      'p1',
-      dto,
-      actor,
-      'tenant-1',
-    );
+    await d.controller.createSite('p1', dto, actor);
+    expect(d.sitesService.createSite).toHaveBeenCalledWith('p1', dto, actor);
   });
 
   it('delegates decommissionSite (UC-14-12)', async () => {
     const d = build();
-    await runWithTenant('tenant-1', () =>
-      d.controller.decommissionSite('p1', 's1', actor),
-    );
+    await d.controller.decommissionSite('p1', 's1', actor);
     expect(d.sitesService.decommissionSite).toHaveBeenCalledWith(
       'p1',
       's1',
       actor,
-      'tenant-1',
     );
   });
 
@@ -107,10 +101,28 @@ describe('PracticesController', () => {
 
   it('delegates publishHealthcareService (UC-14-06)', async () => {
     const d = build();
-    const dto = {};
+    const dto = {} as any;
     await d.controller.publishHealthcareService('p1', dto, actor);
     expect(d.structureService.publishHealthcareService).toHaveBeenCalledWith(
       'p1',
+      dto,
+      actor,
+    );
+  });
+
+  it('delegates listHealthcareServices con la sede opcional', async () => {
+    const d = build();
+    await d.controller.listHealthcareServices('p1', actor, 's1');
+    expect(d.offersService.listOffers).toHaveBeenCalledWith('p1', 's1', actor);
+  });
+
+  it('delegates updateHealthcareService (PATCH)', async () => {
+    const d = build();
+    const dto = { active: false };
+    await d.controller.updateHealthcareService('p1', 'hs1', dto, actor);
+    expect(d.offersService.updateOffer).toHaveBeenCalledWith(
+      'p1',
+      'hs1',
       dto,
       actor,
     );
@@ -160,14 +172,22 @@ describe('PracticesController', () => {
     );
   });
 
-  it('pasa el tenant del contexto al listar vinculaciones (CV-14)', async () => {
+  it('pasa el tenant del contexto y el actor al listar sedes: el servicio autoriza por rol o por administración de la organización (A-6)', async () => {
     const d = build();
-    await runWithTenant('tenant-1', () =>
-      d.controller.listRoleAssignments('p1', 'PENDING', 'cur1', 10),
-    );
-    expect(d.workforceService.listPracticeAssignments).toHaveBeenCalledWith(
+    await runWithTenant('tenant-1', () => d.controller.listSites('p1', actor));
+    expect(d.sitesService.listSites).toHaveBeenCalledWith(
       'p1',
       'tenant-1',
+      actor,
+    );
+  });
+
+  it('pasa el actor al listar vinculaciones: el servicio autoriza por administración de la organización (CV-14, A-6)', async () => {
+    const d = build();
+    await d.controller.listRoleAssignments('p1', actor, 'PENDING', 'cur1', 10);
+    expect(d.workforceService.listPracticeAssignments).toHaveBeenCalledWith(
+      'p1',
+      actor,
       { statusConceptId: 'PENDING', cursor: 'cur1', limit: 10 },
     );
   });
@@ -195,39 +215,18 @@ describe('SitesController', () => {
       structureService as any,
       sitesService as any,
     );
-    await runWithTenant('tenant-1', () =>
-      controller.createClinicalUnit('s1', { code: 'U', name: 'N' }, actor),
-    );
+    await controller.createClinicalUnit('s1', { code: 'U', name: 'N' }, actor);
     expect(structureService.createClinicalUnit).toHaveBeenCalledWith(
       's1',
       { code: 'U', name: 'N' },
       actor,
-      'tenant-1',
     );
-    await runWithTenant('tenant-1', () =>
-      controller.createCareSpace('s1', { code: 'C', name: 'N' }, actor),
-    );
+    await controller.createCareSpace('s1', { code: 'C', name: 'N' }, actor);
     expect(structureService.createCareSpace).toHaveBeenCalledWith(
       's1',
       { code: 'C', name: 'N' },
       actor,
-      'tenant-1',
     );
-  });
-
-  it('sin tenant activo las escrituras de estructura fallan cerradas', () => {
-    const structureService = {
-      createClinicalUnit: mockFn(),
-      createCareSpace: mockFn(),
-    };
-    const controller = new SitesController(
-      structureService as any,
-      { listCareSpaces: mockFn() } as any,
-    );
-    expect(() =>
-      controller.createCareSpace('s1', { code: 'C', name: 'N' }, actor),
-    ).toThrow();
-    expect(structureService.createCareSpace).not.toHaveBeenCalled();
   });
 });
 

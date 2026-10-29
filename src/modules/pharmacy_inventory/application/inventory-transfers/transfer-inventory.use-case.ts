@@ -3,12 +3,10 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { randomUUID } from 'node:crypto';
 import { PinoLogger } from 'nestjs-pino';
 import {
-  ResourceNotFoundException,
   PreconditionFailedException,
   type AuthenticatedUser,
 } from '../../../../common';
 import {
-  LocationsRepository,
   StockPositionsRepository,
   LedgerRepository,
 } from '../../infrastructure/repositories';
@@ -17,6 +15,7 @@ import type {
   TransferResponseDto,
 } from '../../presentation/dto';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
+import { PharmacyInventoryScopePolicy } from '../scope/pharmacy-inventory-scope.policy';
 
 const num = (value: string | null | undefined): number =>
   value == null ? 0 : Number(value);
@@ -32,9 +31,9 @@ const recompute = (
 export class TransferInventoryUseCase {
   constructor(
     private readonly em: EntityManager,
-    private readonly locationsRepo: LocationsRepository,
     private readonly stockRepo: StockPositionsRepository,
     private readonly ledgerRepo: LedgerRepository,
+    private readonly scope: PharmacyInventoryScopePolicy,
     private readonly logger: PinoLogger,
   ) {}
 
@@ -53,18 +52,30 @@ export class TransferInventoryUseCase {
       'Transferring stock',
     );
     return this.em.transactional(async (tx) => {
-      const from = await this.locationsRepo.findById(tx, dto.fromLocationId);
-      if (!from) {
-        throw new ResourceNotFoundException('Ubicación origen no encontrada', {
-          locationId: dto.fromLocationId,
-        });
-      }
-      const to = await this.locationsRepo.findById(tx, dto.toLocationId);
-      if (!to) {
-        throw new ResourceNotFoundException('Ubicación destino no encontrada', {
-          locationId: dto.toLocationId,
-        });
-      }
+      // Origen y destino deben ser ubicaciones de la misma farmacia, del producto
+      // y lote de esa farmacia; no hay transferencias entre farmacias.
+      const pharmacy = await this.scope.requireManagedPharmacy(
+        tx,
+        pharmacyId,
+        actor,
+      );
+      await this.scope.requireSite(tx, pharmacy, dto.pharmacySiteId);
+      const from = await this.scope.requireLocationInPharmacy(
+        tx,
+        pharmacy,
+        dto.fromLocationId,
+      );
+      const to = await this.scope.requireLocationInPharmacy(
+        tx,
+        pharmacy,
+        dto.toLocationId,
+      );
+      await this.scope.requireProduct(tx, pharmacy, dto.pharmacyProductId);
+      await this.scope.requireLot(
+        tx,
+        dto.inventoryLotId,
+        dto.pharmacyProductId,
+      );
 
       const fromPosition = await this.stockRepo.findByKeyForUpdate(tx, {
         inventoryLocationId: dto.fromLocationId,
@@ -85,7 +96,7 @@ export class TransferInventoryUseCase {
       const outSeq = await this.ledgerRepo.nextSequence(tx, pharmacyId);
       const outEntry = this.ledgerRepo.append(tx, {
         pharmacyId,
-        pharmacySiteId: dto.pharmacySiteId,
+        pharmacySiteId: from.pharmacySiteId,
         inventoryLocationId: dto.fromLocationId,
         pharmacyProductId: dto.pharmacyProductId,
         inventoryLotId: dto.inventoryLotId,
@@ -100,7 +111,7 @@ export class TransferInventoryUseCase {
       const inSeq = await this.ledgerRepo.nextSequence(tx, pharmacyId);
       const inEntry = this.ledgerRepo.append(tx, {
         pharmacyId,
-        pharmacySiteId: dto.pharmacySiteId,
+        pharmacySiteId: to.pharmacySiteId,
         inventoryLocationId: dto.toLocationId,
         pharmacyProductId: dto.pharmacyProductId,
         inventoryLotId: dto.inventoryLotId,

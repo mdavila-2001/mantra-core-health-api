@@ -5,6 +5,8 @@ import { GoogleAnalyticsHttpClient } from './google-analytics-http.client';
 import { GoogleAnalyticsAdapter } from './google-analytics.adapter';
 import { TelemetryWebAnalyticsService } from '../../services/telemetry-web-analytics.service';
 import { TelemetryEventsService } from '../../services/telemetry-events.service';
+import { TELE } from '../../telemetry.concepts';
+import { runWithTenant } from '../../../../common';
 
 /**
  * Contrato de extremo a extremo contra un colector que habla el Measurement
@@ -299,23 +301,41 @@ describe('Google Analytics Measurement Protocol (contract)', () => {
       { create: mockFn() } as any,
       { findById: mockFn() } as any,
       { findExisting: mockFn(), create: mockFn() } as any,
-      { findById: mockFn() } as any,
-      { findLatest: mockFn() } as any,
+      {
+        findById: mockFn(async () => ({
+          id: '3f6d2b1a-7c4e-4b6a-9f2d-1c8b5e7a0d33',
+          userId: 'user-1',
+        })),
+      } as any,
+      {
+        findLatest: mockFn(async () => ({
+          decisionConceptId: TELE.DECISION_GRANTED,
+        })),
+      } as any,
+      {
+        findIdByToken: mockFn(
+          async () => '9f1c1f2e-1f7a-4d1c-9a1e-4d2b6c8e0a11',
+        ),
+        belongsToUser: mockFn(async () => true),
+      } as any,
       forwarder,
       silentLogger(),
     );
 
-    const response = await service.captureActivityEvents({
-      events: [
+    const response = await runWithTenant('tenant-1', () =>
+      service.captureActivityEvents(
         {
-          eventSchemaDefinitionId: 'schema-1',
-          sessionId: '9f1c1f2e-1f7a-4d1c-9a1e-4d2b6c8e0a11',
-          analyticsSubjectId: '3f6d2b1a-7c4e-4b6a-9f2d-1c8b5e7a0d33',
-          routeTemplate: '/doctores/:id',
-          tenantId: 'tenant-1',
+          events: [
+            {
+              eventSchemaDefinitionId: 'schema-1',
+              analyticsSubjectId: '3f6d2b1a-7c4e-4b6a-9f2d-1c8b5e7a0d33',
+              routeTemplate: '/doctores/:id',
+            },
+          ],
         },
-      ],
-    });
+        { id: 'user-1', sessionId: 'token-1', roles: ['USER'] },
+      ),
+    );
     await forwarder.whenIdle();
 
     expect(response.inserted).toBe(1);

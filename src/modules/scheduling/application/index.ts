@@ -1,5 +1,6 @@
 export { SchedulingCatalogService } from './catalog/scheduling-catalog.service';
 export { SchedulingBookingsService } from './bookings/scheduling-bookings.service';
+export { SchedulingPaymentReceiptsService } from './bookings/scheduling-payment-receipts.service';
 export { SchedulingWaitlistService } from './waitlist/scheduling-waitlist.service';
 export {
   SchedulingConfirmationService,
@@ -20,3 +21,4 @@ export { SchedulingWalkInService } from './walk-in/scheduling-walk-in.service';
 export { SchedulingServiceOfferingsService } from './service-offerings/scheduling-service-offerings.service';
 export { SchedulingServiceAgendaService } from './service-offerings/scheduling-service-agenda.service';
 export { SchedulingServiceBookingService } from './service-offerings/scheduling-service-booking.service';
+export { SchedulingFlexibleBookingService } from './flexible/scheduling-flexible-booking.service';
