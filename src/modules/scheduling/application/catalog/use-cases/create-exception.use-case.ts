@@ -144,10 +144,9 @@ export class CreateExceptionUseCase {
       }
 
       const exception = this.catalogRepo.createException(tx, {
-        tenantId: resource.tenantId,
-        resourceId,
         // El tenant sale del recurso ya acotado; el origen es una persona (F5d).
         tenantId: resource.tenantId,
+        resourceId,
         sourceKindConceptId: SCHED.EXC_SRC_MANUAL,
         exceptionTypeConceptId: EXCEPTION_TYPE_CONCEPT[dto.exceptionType],
         startAt,

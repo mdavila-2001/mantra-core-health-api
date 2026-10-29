@@ -132,8 +132,6 @@ export interface CreateTemplateData {
    * Identificador asociado a resource.
    */
   resourceId: string;
-  /** Tenant del recurso: lo escribe la API (el trigger del modelo sólo lo rellena si falta). */
-  tenantId?: string;
   /** Espacio al que pertenece el horario (F5d). Ausente ≡ horario sin espacio. */
   careSpaceId?: string;
   /**
@@ -226,8 +224,6 @@ export interface CreateExceptionData {
    * Identificador asociado a resource.
    */
   resourceId: string;
-  /** Tenant del recurso: lo escribe la API. */
-  tenantId?: string;
   /** Quién la creó (`EXC_SRC_*`). Ausente ≡ manual. */
   sourceKindConceptId?: string;
   /** Bloqueo del espacio o equipo que la originó. */
@@ -422,7 +418,6 @@ export class SchedulingCatalogRepository {
       {
         tenantId: data.tenantId,
         resourceId: data.resourceId,
-        tenantId: data.tenantId,
         careSpaceId: data.careSpaceId,
         name: data.name,
         serviceConceptId: data.serviceConceptId,
@@ -798,7 +793,6 @@ export class SchedulingCatalogRepository {
       {
         tenantId: data.tenantId,
         resourceId: data.resourceId,
-        tenantId: data.tenantId,
         sourceKindConceptId: data.sourceKindConceptId,
         sourceRefId: data.sourceRefId,
         exceptionTypeConceptId: data.exceptionTypeConceptId,

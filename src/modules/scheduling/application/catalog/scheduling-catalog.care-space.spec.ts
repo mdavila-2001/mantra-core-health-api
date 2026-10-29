@@ -26,7 +26,14 @@ function build() {
     transactional: mockFn((cb: any) => cb(tx)),
     fork: mockFn(() => tx),
   };
-  const resource = {
+  const resource: {
+    id: string;
+    tenantId: string;
+    timeZone: string;
+    resourceRefType: string;
+    resourceRefId: string;
+    careSpaceId?: string;
+  } = {
     id: RESOURCE,
     tenantId: TENANT,
     timeZone: 'America/La_Paz',

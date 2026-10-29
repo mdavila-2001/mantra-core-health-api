@@ -201,7 +201,9 @@ describe('CareSpaceSlotSync.endSourceExceptions', () => {
       actorUserId: 'u1',
     });
     expect(n).toBe(2);
-    const sqls = d.tx.execute.mock.calls.map((c: any[]) => c[0] as string);
+    const sqls: string[] = d.tx.execute.mock.calls.map(
+      (c: any[]) => c[0] as string,
+    );
     expect(sqls.some((q) => q.includes('set end_at = ?'))).toBe(true);
     expect(
       sqls.some((q) =>

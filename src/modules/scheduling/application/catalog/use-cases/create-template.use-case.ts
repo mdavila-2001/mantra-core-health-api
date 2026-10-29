@@ -128,10 +128,9 @@ export class CreateTemplateUseCase {
       }
 
       const template = this.catalogRepo.createTemplate(tx, {
-        tenantId: resource.tenantId,
-        resourceId,
         // El tenant sale del recurso ya acotado al contexto, nunca del cuerpo.
         tenantId: resource.tenantId,
+        resourceId,
         careSpaceId: space?.id,
         name: dto.name,
         validFrom: dto.validFrom ? new Date(dto.validFrom) : undefined,

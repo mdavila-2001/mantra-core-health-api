@@ -280,11 +280,10 @@ export class CloseSlotsUseCase {
       }
 
       const exception = this.catalogRepo.createException(tx, {
-        tenantId: resource.tenantId,
-        resourceId,
         // El tenant sale del recurso y el origen es una persona: la tabla exige el tenant
         // (`tenantId` es obligatorio en la entidad) y sin él cerrar cupos respondía 500.
         tenantId: resource.tenantId,
+        resourceId,
         sourceKindConceptId: SCHED.EXC_SRC_MANUAL,
         exceptionTypeConceptId: EXCEPTION_TYPE_CONCEPT[dto.exceptionType],
         startAt: from,
