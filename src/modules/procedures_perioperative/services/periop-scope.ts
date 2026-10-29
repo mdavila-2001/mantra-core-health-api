@@ -1,5 +1,12 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { ResourceNotFoundException, requireTenantId } from '../../../common';
+import { ForbiddenException } from '@nestjs/common';
+import {
+  ResourceNotFoundException,
+  requireTenantId,
+  type AuthenticatedUser,
+} from '../../../common';
+import type { AuthzClinicalScopeService } from '../../authz/services/authz-clinical-scope.service';
+import type { ClinicalReadService } from '../../clinical/services/clinical-read.service';
 import {
   assertResourceInTenant,
   type ResourceScopeFailure,
@@ -177,7 +184,7 @@ export async function assertProcedureOfCasePatient(
 /**
  * Cómo informa el módulo «el paciente no existe en esta organización».
  *
- * Un paciente sin atención en el tenant activo responde con **exactamente**
+ * Un paciente sin vínculo con el tenant activo responde con **exactamente**
  * esto, igual que uno inexistente: sin `details` y con el mismo `reason`.
  */
 export const PERIOP_PATIENT_NOT_FOUND: ResourceScopeFailure = {
@@ -185,33 +192,59 @@ export const PERIOP_PATIENT_NOT_FOUND: ResourceScopeFailure = {
   reason: ProceduresPerioperativeErrorReason.PATIENT_NOT_FOUND_IN_TENANT,
 };
 
+/** Lo que `assertPatientInScope` necesita de `authz` y de `clinical`. */
+export interface PatientScopeDeps {
+  clinicalScope: Pick<AuthzClinicalScopeService, 'isPatientInTenant'>;
+  clinicalRead: Pick<ClinicalReadService, 'assertCanWriteHistory'>;
+}
+
 /**
- * Exige que el paciente que manda el cliente exista y tenga atención en el
- * tenant activo (#893). Sin esto, un `patientProfileId` ajeno quedaba ligado al
- * caso quirúrgico o al registro odontológico de esta organización, y todo lo
- * que después cuelga de ellos lo heredaba.
+ * Exige que el paciente que manda el cliente tenga base para quedar ligado a
+ * un caso quirúrgico de esta organización (#893). Sin esto, un
+ * `patientProfileId` ajeno quedaba ligado al caso, y todo lo que después cuelga
+ * de él (informe, pasos, implantes, servicios recibidos) lo heredaba.
  *
- * @param casesRepo - Repositorio de casos.
+ * No hay una regla nueva: el padrón de personas es único para la plataforma y
+ * el modelo no guarda el tenant del paciente, así que se usan las dos que ya
+ * existen.
+ *
+ * 1. `AuthzClinicalScopeService.isPatientInTenant`: la huella que **el propio
+ *    paciente** deja en el tenant (una reserva suya o su membresía). Es la
+ *    regla de los accesos clínicos y de las relaciones asistenciales, y el
+ *    personal no la puede fabricar con un check-in, un turno directo o un
+ *    episodio de atención.
+ * 2. Si no la hay, la base clínica del actor sobre ese paciente
+ *    (`ClinicalReadService.assertCanWriteHistory`): lo está atendiendo, tiene
+ *    una relación asistencial vigente o un acceso de escritura que el paciente
+ *    autorizó. Es lo que exige escribir en la historia, y cubre al cirujano del
+ *    paciente que todavía no reservó nada en esta organización.
+ *
+ * Sin ninguna de las dos, el mismo 404 que un paciente inexistente.
+ *
+ * @param deps - Regla de `authz` y base clínica de `clinical`.
  * @param em - Contexto de persistencia o transacción activa.
  * @param patientProfileId - Paciente citado por el cliente.
  * @param tenantId - Tenant activo, del contexto verificado de la petición.
- * @throws ResourceNotFoundException (`PATIENT_NOT_FOUND_IN_TENANT`) si no existe o no tiene atención en el tenant.
+ * @param actor - Quien programa o modifica el caso.
+ * @throws ResourceNotFoundException (`PATIENT_NOT_FOUND_IN_TENANT`) si no existe o no hay base.
  */
 export async function assertPatientInScope(
-  casesRepo: Pick<PeriopCasesRepository, 'patientHasCareInTenant'>,
+  deps: PatientScopeDeps,
   em: EntityManager,
   patientProfileId: string,
   tenantId: string,
+  actor: AuthenticatedUser,
 ): Promise<void> {
-  const inTenant = await casesRepo.patientHasCareInTenant(
-    em,
-    patientProfileId,
-    tenantId,
-  );
-  assertResourceInTenant(
-    inTenant ? patientProfileId : null,
-    inTenant ? tenantId : null,
-    tenantId,
-    PERIOP_PATIENT_NOT_FOUND,
-  );
+  if (
+    await deps.clinicalScope.isPatientInTenant(em, patientProfileId, tenantId)
+  ) {
+    return;
+  }
+  try {
+    await deps.clinicalRead.assertCanWriteHistory(patientProfileId, actor);
+    return;
+  } catch (error) {
+    if (!(error instanceof ForbiddenException)) throw error;
+  }
+  assertResourceInTenant(null, null, tenantId, PERIOP_PATIENT_NOT_FOUND);
 }

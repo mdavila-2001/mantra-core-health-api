@@ -9,8 +9,8 @@ import {
 import { AuditTrailService } from '../../audit/services';
 import { CLIN } from '../../clinical/clinical.concepts';
 import { ReceivedServicesProjector } from '../../clinical/services';
-import { PeriopCasesRepository, PeriopDentalRepository } from '../repositories';
-import { assertPatientInScope } from './periop-scope';
+import { ClinicalReadService } from '../../clinical/services/clinical-read.service';
+import { PeriopDentalRepository } from '../repositories';
 import { ProceduresPerioperativeErrorReason } from '../procedures_perioperative.error-reasons';
 import {
   DENTAL_PROCEDURE_CODE_KEYS,
@@ -64,14 +64,14 @@ export class PeriopDentalService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param dentalRepo - Valor de dental repo requerido por la operación.
-   * @param casesRepo - Prueba que el paciente tiene atención en el tenant.
+   * @param clinicalRead - Base clínica del actor sobre el paciente (#893).
    * @param auditTrail - Valor de audit trail requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly dentalRepo: PeriopDentalRepository,
-    private readonly casesRepo: PeriopCasesRepository,
+    private readonly clinicalRead: ClinicalReadService,
     private readonly receivedServices: ReceivedServicesProjector,
     private readonly auditTrail: AuditTrailService,
     private readonly logger: PinoLogger,
@@ -132,14 +132,12 @@ export class PeriopDentalService {
       'Recording dental procedure',
     );
 
+    // El registro odontológico es un `clinical.procedures`: se exige lo mismo
+    // que para escribir cualquier otro procedimiento de la historia
+    // (MCH-007). Un paciente ajeno y uno inexistente reciben el mismo 403 (#893).
+    await this.clinicalRead.assertCanWriteHistory(dto.patientProfileId, actor);
+
     return this.em.transactional(async (tx) => {
-      // Un paciente sin atención en este tenant responde como inexistente (#893).
-      await assertPatientInScope(
-        this.casesRepo,
-        tx,
-        dto.patientProfileId,
-        tenantId,
-      );
       const procedure = this.dentalRepo.createProcedure(tx, {
         custodianTenantId: tenantId,
         patientProfileId: dto.patientProfileId,
@@ -209,15 +207,12 @@ export class PeriopDentalService {
    */
   async listByPatient(
     query: ListDentalProceduresQueryDto,
+    actor: AuthenticatedUser,
   ): Promise<DentalProcedureListDto> {
-    // El histórico de un paciente sin atención en este tenant no se lee: 404
-    // igual que uno inexistente (#893).
-    await assertPatientInScope(
-      this.casesRepo,
-      this.em,
-      query.patientProfileId,
-      requireTenantId(),
-    );
+    // La misma base que leer la historia (#893), y sólo lo que custodia esta
+    // organización: el histórico de otro tenant no se mezcla.
+    await this.clinicalRead.assertCanReadHistory(query.patientProfileId, actor);
+    const tenantId = requireTenantId();
     const limit = query.limit ?? DEFAULT_LIMIT;
     const category = PERIOP.DENTAL_PROCEDURE_CATEGORY;
 
@@ -225,10 +220,16 @@ export class PeriopDentalService {
       this.dentalRepo.findByPatient(
         this.em,
         query.patientProfileId,
+        tenantId,
         category,
         limit,
       ),
-      this.dentalRepo.countByPatient(this.em, query.patientProfileId, category),
+      this.dentalRepo.countByPatient(
+        this.em,
+        query.patientProfileId,
+        tenantId,
+        category,
+      ),
     ]);
 
     const sites = await this.dentalRepo.findSitesByProcedures(

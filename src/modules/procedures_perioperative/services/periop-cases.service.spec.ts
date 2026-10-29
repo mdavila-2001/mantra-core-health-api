@@ -104,8 +104,6 @@ function build() {
     countCasesMatching: mockFn().mockResolvedValue(0),
     findMilestonesByCase: mockFn().mockResolvedValue([]),
     findChargeItemsForUpdate: mockFn(),
-    // El paciente tiene atención en el tenant, salvo que el test diga otra cosa.
-    patientHasCareInTenant: mockFn().mockResolvedValue(true),
     // Procedimiento del paciente y tenant pedidos, salvo que el test diga otra cosa.
     findProcedureOfPatient: mockFn(
       (_tx: unknown, id: string, patientProfileId: string, tenantId: string) =>
@@ -148,6 +146,15 @@ function build() {
   // el detalle con un actor clínico la conceden).
   const clinicalRead = {
     assertCanReadHistory: mockFn().mockResolvedValue(undefined),
+    // Sin base clínica de escritura salvo que el test la conceda (#893).
+    assertCanWriteHistory: mockFn().mockRejectedValue(
+      new ForbiddenException('Sin acceso a la historia'),
+    ),
+  };
+  // El paciente tiene huella propia en el tenant, salvo que el test diga otra
+  // cosa (regla de `authz`, #893).
+  const clinicalScope = {
+    isPatientInTenant: mockFn().mockResolvedValue(true),
   };
   const service = new PeriopCasesService(
     em as any,
@@ -161,11 +168,13 @@ function build() {
     clinicalRead as any,
     new PeriopReacceptanceService(casesRepo as any, outbox as any),
     logger as any,
+    clinicalScope as any,
   );
   return {
     service: inTenant(service, TENANT_A),
     raw: service,
     clinicalRead,
+    clinicalScope,
     tx,
     casesRepo,
     preopRepo,
@@ -279,12 +288,12 @@ describe('PeriopCasesService', () => {
       expect(d.casesRepo.createCase).not.toHaveBeenCalled();
     });
 
-    it('#893: un paciente sin atención en el tenant responde 404 uniforme y no crea nada', async () => {
+    it('#893: un paciente sin huella en el tenant ni base clínica del actor responde 404 uniforme y no crea nada', async () => {
       const d = build();
       wire(d);
-      // El repositorio no distingue «no existe» de «es de otro tenant»: los dos
-      // casos llegan acá como `false` y salen con el mismo 404.
-      d.casesRepo.patientHasCareInTenant.mockResolvedValue(false);
+      // `isPatientInTenant` no distingue «no existe» de «es de otro tenant»:
+      // los dos llegan como `false` y salen con el mismo 404.
+      d.clinicalScope.isPatientInTenant.mockResolvedValue(false);
 
       const err: any = await d.service
         .scheduleCase(scheduleDto(), actor)
@@ -295,11 +304,50 @@ describe('PeriopCasesService', () => {
         reason: ProceduresPerioperativeErrorReason.PATIENT_NOT_FOUND_IN_TENANT,
       });
       expect(err.getResponse().details).toBeUndefined();
-      expect(d.casesRepo.patientHasCareInTenant).toHaveBeenCalledWith(
+      expect(d.clinicalScope.isPatientInTenant).toHaveBeenCalledWith(
         d.tx,
         PATIENT,
         TENANT,
       );
+      expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
+        PATIENT,
+        actor,
+      );
+      expect(d.casesRepo.createCase).not.toHaveBeenCalled();
+    });
+
+    it('#893: sin huella del paciente, alcanza la base clínica del actor (cirujano que lo atiende)', async () => {
+      const d = build();
+      wire(d);
+      d.clinicalScope.isPatientInTenant.mockResolvedValue(false);
+      d.clinicalRead.assertCanWriteHistory.mockResolvedValue(undefined);
+
+      await d.service.scheduleCase(scheduleDto(), actor);
+
+      expect(d.casesRepo.createCase).toHaveBeenCalled();
+    });
+
+    it('#893: con huella del paciente no consulta la base clínica', async () => {
+      const d = build();
+      wire(d);
+
+      await d.service.scheduleCase(scheduleDto(), actor);
+
+      expect(d.clinicalRead.assertCanWriteHistory).not.toHaveBeenCalled();
+      expect(d.casesRepo.createCase).toHaveBeenCalled();
+    });
+
+    it('#893: un error que no es de autorización no se convierte en 404', async () => {
+      const d = build();
+      wire(d);
+      d.clinicalScope.isPatientInTenant.mockResolvedValue(false);
+      d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
+        new Error('base caída'),
+      );
+
+      await expect(
+        d.service.scheduleCase(scheduleDto(), actor),
+      ).rejects.toThrow('base caída');
       expect(d.casesRepo.createCase).not.toHaveBeenCalled();
     });
 
@@ -726,7 +774,7 @@ describe('PeriopCasesService', () => {
       expect(surgicalCase.patientProfileId).toBe(NEW_PATIENT);
     });
 
-    it('#893: no corrige el paciente a uno sin atención en el tenant del caso (404 uniforme)', async () => {
+    it('#893: no corrige el paciente a uno sin huella en el tenant del caso ni base clínica (404 uniforme)', async () => {
       const d = build();
       const surgicalCase = draftCase();
       d.casesRepo.findCaseForUpdate.mockResolvedValue(surgicalCase);
@@ -736,14 +784,14 @@ describe('PeriopCasesService', () => {
           teamRoleConceptId: CONCEPTS.TEAM_ROLE_SURGEON,
         },
       ]);
-      d.casesRepo.patientHasCareInTenant.mockResolvedValue(false);
+      d.clinicalScope.isPatientInTenant.mockResolvedValue(false);
 
       await expect(
         d.service.updateCase(CASE, { patientProfileId: NEW_PATIENT }, actor),
       ).rejects.toMatchObject({
         reason: ProceduresPerioperativeErrorReason.PATIENT_NOT_FOUND_IN_TENANT,
       });
-      expect(d.casesRepo.patientHasCareInTenant).toHaveBeenCalledWith(
+      expect(d.clinicalScope.isPatientInTenant).toHaveBeenCalledWith(
         d.tx,
         NEW_PATIENT,
         TENANT_A,
