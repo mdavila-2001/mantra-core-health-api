@@ -33,6 +33,7 @@ import {
   DiagnosticsPatientResultsController,
   DiagnosticsReceptionController,
   DiagnosticsSamplePointsController,
+  DiagnosticsImagingStepsController,
 } from './controllers';
 import {
   DiagnosticsSpecimensService,
@@ -44,11 +45,13 @@ import {
   DiagnosticsPatientResultsService,
   DiagnosticsReceptionService,
   DiagnosticsSamplePointsService,
+  DiagnosticsImagingStepsService,
   DiagnosticsScopeService,
   DiagnosticsPatientAccessService,
 } from './services';
 import { SuggestedSiteNamesReader } from '../clinical/services/suggested-site-names.reader';
 import { ServiceRequestNotesService } from '../clinical/services/service-request-notes.service';
+import { PractitionerScopeService } from '../procedures_perioperative/policies/practitioner-scope.service';
 import {
   SpecimensRepository,
   LabWorkRepository,
@@ -90,6 +93,7 @@ import {
     DiagnosticsPatientResultsController,
     DiagnosticsReceptionController,
     DiagnosticsSamplePointsController,
+    DiagnosticsImagingStepsController,
   ],
   providers: [
     // Repositorios
@@ -118,11 +122,16 @@ import {
     DiagnosticsPatientResultsService,
     DiagnosticsReceptionService,
     DiagnosticsSamplePointsService,
+    DiagnosticsImagingStepsService,
     // Alcance de tenant de los writes clínicos y política paciente–profesional.
     DiagnosticsScopeService,
     DiagnosticsPatientAccessService,
     // Guard del personal de laboratorio (recepción y circuito de especímenes).
     LabStaffGuard,
+    // Sin estado: comprueba que un id de profesional que manda el cliente es de la
+    // organización activa (la misma regla de quirófanos; mismo criterio que scheduling con
+    // `AppointmentsRepository`).
+    PractitionerScopeService,
   ],
 })
 export class DiagnosticsModule {}

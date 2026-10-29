@@ -72,6 +72,8 @@ export class ClinicalAppointmentSync {
       channelConceptId?: string;
       /** Tipología (P42: la reconsulta nace `ACT_FOLLOW_UP`). Ausente = NULL. */
       typeConceptId?: string;
+      /** Espacio donde ocurre la cita (F5d); ausente = sin espacio. */
+      careSpaceId?: string;
       actorUserId?: string;
     },
   ): ClinicalAppointmentRef {
@@ -95,9 +97,46 @@ export class ClinicalAppointmentSync {
       ...(data.typeConceptId === undefined
         ? {}
         : { typeConceptId: data.typeConceptId }),
+      ...(data.careSpaceId === undefined
+        ? {}
+        : { careSpaceId: data.careSpaceId }),
       ...(data.actorUserId === undefined
         ? {}
         : { actorUserId: data.actorUserId }),
+    });
+  }
+
+  /**
+   * Mueve la cita clínica al cupo nuevo de una reprogramación: horario, espacio y, si la agenda
+   * destino es de un profesional, el profesional. Sin la cita (reservas anteriores al vínculo)
+   * no hace nada.
+   */
+  async moveAppointment(
+    tx: EntityManager,
+    booking: AppointmentBookings,
+    target: {
+      startAt: Date;
+      endAt?: Date;
+      careSpaceId: string | null;
+      resourceRefType?: string;
+      resourceRefId?: string;
+    },
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (booking.appointmentId === undefined || booking.appointmentId === null) {
+      return;
+    }
+    const isPractitionerResource =
+      target.resourceRefType !== undefined &&
+      PRACTITIONER_PROFILE_TABLES.includes(target.resourceRefType);
+    await this.clinical.move(tx, booking.appointmentId, {
+      startAt: target.startAt,
+      ...(target.endAt === undefined ? {} : { endAt: target.endAt }),
+      careSpaceId: target.careSpaceId,
+      ...(isPractitionerResource && target.resourceRefId !== undefined
+        ? { practitionerProfileId: target.resourceRefId }
+        : {}),
+      actorUserId: actor.id,
     });
   }
 

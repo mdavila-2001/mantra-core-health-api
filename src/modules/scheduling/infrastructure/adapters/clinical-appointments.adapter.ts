@@ -7,6 +7,7 @@ import {
 import type {
   ClinicalAppointmentRef,
   ClinicalAppointmentsPort,
+  MovedClinicalAppointment,
   NewClinicalAppointment,
 } from '../../application/ports/clinical-appointments.port';
 import type { UnitOfWork } from '../../application/ports/unit-of-work';
@@ -38,6 +39,26 @@ export class ClinicalAppointmentsAdapter implements ClinicalAppointmentsPort {
     }
     appointment.statusConceptId = statusConceptId;
     touch(appointment, actorUserId);
+  }
+
+  async move(
+    uow: UnitOfWork,
+    appointmentId: string,
+    data: MovedClinicalAppointment,
+  ): Promise<void> {
+    const appointment = await this.appointments.findById(uow, appointmentId);
+    if (!appointment) {
+      return;
+    }
+    appointment.startAt = data.startAt;
+    appointment.endAt = data.endAt;
+    // Columna anulable: soltar el espacio es escribir NULL.
+    (appointment as { careSpaceId?: string | null }).careSpaceId =
+      data.careSpaceId;
+    if (data.practitionerProfileId !== undefined) {
+      appointment.practitionerProfileId = data.practitionerProfileId;
+    }
+    touch(appointment, data.actorUserId);
   }
 
   findTypesByIds(

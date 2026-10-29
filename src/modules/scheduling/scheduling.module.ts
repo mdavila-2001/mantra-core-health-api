@@ -41,6 +41,10 @@ import {
 } from './infrastructure/repositories';
 import { AuditModule } from '../audit/audit.module';
 import { DirectoryModule } from '../directory/directory.module';
+// F5a: la agenda del equipo de diagnóstico se anota en el registro de `diagnostic_units`
+// (que no puede importar `scheduling`: el grafo pasa por `directory`).
+import { DiagnosticUnitsModule } from '../diagnostic_units/diagnostic_units.module';
+import { DiagnosticEquipmentAgendaAdapter } from './infrastructure/adapters/diagnostic-equipment-agenda.adapter';
 import { InsuranceModule } from '../insurance/insurance.module';
 // El repositorio de citas clínicas es una clase sin estado que recibe el
 // `EntityManager` por parámetro, así que proveerlo acá no duplica nada ni crea
@@ -84,6 +88,7 @@ import {
   BookingItemAssembler,
   BookingMaterializer,
   BookingTransitionRecorder,
+  CareSpaceAppointmentResolver,
   ClinicalAppointmentSync,
   DisplacedRequestsCanceller,
   PaymentReceiptAccess,
@@ -93,11 +98,17 @@ import {
 import { bookingUseCases } from './application/bookings/use-cases';
 import {
   AgendaOverlapGuard,
+  AgendaRetireBlockersInitializer,
+  CareSpaceBlockAgendaListener,
+  CareSpaceSlotSync,
+  CareSpaceTemplateGuard,
   CatalogAccess,
+  EquipmentResourceLinker,
   SpaceResourceLinker,
   BlockedBookingsCanceller,
   SlotMoveNotifier,
 } from './application/catalog/support';
+import { InfraF5AgendaPolicyInitializer } from './policies/infra-f5agenda.policy';
 import { catalogUseCases } from './application/catalog/use-cases';
 import { BOOKING_HISTORY_PORT } from './application/ports/booking-history.port';
 import { CLINICAL_APPOINTMENTS_PORT } from './application/ports/clinical-appointments.port';
@@ -147,6 +158,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     // ahí sale el permiso para leer su agenda. No hay ciclo: `directory` no
     // depende de `scheduling`.
     DirectoryModule,
+    DiagnosticUnitsModule,
     PracticeModule,
     PeriopAccessModule,
     MessagingModule,
@@ -266,6 +278,8 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     BookingChangeNotifier,
     ServiceSlotLifecycle,
     ClinicalAppointmentSync,
+    // F5d · el espacio donde ocurre cada cita, su disponibilidad y su doble reserva.
+    CareSpaceAppointmentResolver,
     SlotPolicyResolver,
     BookingMaterializer,
     DisplacedRequestsCanceller,
@@ -283,6 +297,16 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     // Catálogo de agenda: colaboradores compartidos y un caso de uso por operación.
     CatalogAccess,
     SpaceResourceLinker,
+    // F5a/F5d · agenda por espacio y por equipo: reglas de la plantilla con espacio, cierre y
+    // reapertura de cupos al bloquearse el espacio o el equipo, recurso del equipo, política y
+    // bloqueos de clausura de la agenda.
+    CareSpaceTemplateGuard,
+    CareSpaceSlotSync,
+    CareSpaceBlockAgendaListener,
+    EquipmentResourceLinker,
+    DiagnosticEquipmentAgendaAdapter,
+    InfraF5AgendaPolicyInitializer,
+    AgendaRetireBlockersInitializer,
     AgendaOverlapGuard,
     BlockedBookingsCanceller,
     SlotMoveNotifier,

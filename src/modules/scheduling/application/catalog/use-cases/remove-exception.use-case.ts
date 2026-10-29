@@ -3,6 +3,8 @@ import {
   type AuthenticatedUser,
 } from '../../../../../common';
 import { CatalogAccess } from '../support/catalog-access';
+import { CareSpaceTemplateGuard } from '../support/care-space-template-guard';
+import { assertManualException } from '../support/exception-source';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
@@ -16,6 +18,7 @@ export class RemoveExceptionUseCase {
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly access: CatalogAccess,
     private readonly logger: PinoLogger,
+    private readonly careSpaces: CareSpaceTemplateGuard,
   ) {
     this.logger.setContext(RemoveExceptionUseCase.name);
   }
@@ -35,7 +38,17 @@ export class RemoveExceptionUseCase {
         tx,
         exception.resourceId,
       );
-      if (resource) this.access.assertActorResource(resource, actor);
+      if (resource) {
+        this.careSpaces.assertResourceInActiveTenant(resource);
+        this.access.assertActorResource(resource, actor);
+        await this.careSpaces.assertMayManageBound(
+          tx,
+          resource,
+          [resource.careSpaceId],
+          actor,
+        );
+      }
+      assertManualException(exception.sourceKindConceptId);
 
       this.logger.info(
         { operation: 'scheduling.exception.remove', exceptionId },

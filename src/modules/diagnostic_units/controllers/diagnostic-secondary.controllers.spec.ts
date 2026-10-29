@@ -7,6 +7,8 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import { AUDITED_KEY } from '../../../common/audit-trail/audit-trail.decorators';
+import { ROLES_KEY } from '../../../common/auth/roles.decorator';
 import { DiagnosticUnitSitesController } from './diagnostic-unit-sites.controller';
 import { DiagnosticPricingController } from './diagnostic-pricing.controller';
 import { DiagnosticEquipmentController } from './diagnostic-equipment.controller';
@@ -78,6 +80,32 @@ describe('DiagnosticEquipmentController', () => {
       dto,
       actor,
     );
+  });
+
+  it('delegates linkResource and mwlStation (F5a)', async () => {
+    const equipmentService = { linkResource: mockFn(), mwlStation: mockFn() };
+    const controller = new DiagnosticEquipmentController(
+      equipmentService as any,
+    );
+    const dto = { name: 'TC 1' };
+    await controller.linkResource('e1', dto, actor);
+    expect(equipmentService.linkResource).toHaveBeenCalledWith(
+      'e1',
+      dto,
+      actor,
+    );
+    await controller.mwlStation('e1', actor);
+    expect(equipmentService.mwlStation).toHaveBeenCalledWith('e1', actor);
+  });
+
+  it('declara auditoría en las dos escrituras y ningún @Roles (decide el servicio contra el espacio)', () => {
+    const proto = DiagnosticEquipmentController.prototype as any;
+    for (const method of ['updateEquipment', 'linkResource']) {
+      expect(Reflect.getMetadataKeys(proto[method])).toContain(AUDITED_KEY);
+    }
+    for (const method of ['updateEquipment', 'linkResource', 'mwlStation']) {
+      expect(Reflect.getMetadataKeys(proto[method])).not.toContain(ROLES_KEY);
+    }
   });
 });
 

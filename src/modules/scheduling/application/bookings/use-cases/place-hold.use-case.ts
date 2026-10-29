@@ -8,6 +8,7 @@ import {
   type AuthenticatedUser,
 } from '../../../../../common';
 import { BookingAccess } from '../support/booking-access';
+import { CareSpaceAppointmentResolver } from '../support/care-space-appointment-resolver';
 import { CreateHoldDto, HoldResponseDto } from '../../../presentation/dto';
 import { DEFAULT_HOLD_TTL_SECONDS } from '../../../domain/booking/booking-defaults';
 import { EntityManager } from '@mikro-orm/postgresql';
@@ -32,6 +33,7 @@ export class PlaceHoldUseCase {
     private readonly slotPolicy: SlotPolicyResolver,
     private readonly access: BookingAccess,
     private readonly logger: PinoLogger,
+    private readonly spaces: CareSpaceAppointmentResolver,
   ) {
     this.logger.setContext(PlaceHoldUseCase.name);
   }
@@ -85,6 +87,10 @@ export class PlaceHoldUseCase {
           slotId,
         });
       }
+
+      // F5d · el cupo de un espacio bloqueado o en mantenimiento (o de un equipo fuera de
+      // servicio) no se retiene, aunque su estado todavía diga «abierto».
+      await this.spaces.assertSlotHoldable(tx, slot, actor);
 
       const policy = slot.scheduleTemplateId
         ? await this.slotPolicy.resolvePolicy(tx, slot.scheduleTemplateId)

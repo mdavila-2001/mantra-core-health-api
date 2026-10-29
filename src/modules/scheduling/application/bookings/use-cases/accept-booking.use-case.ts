@@ -8,6 +8,7 @@ import { BookingChangeNotifier } from '../support/booking-change-notifier';
 import { BookingTransitionRecorder } from '../support/booking-transition-recorder';
 import { CLIN } from '../../../../clinical/clinical.concepts';
 import { ClinicalAppointmentSync } from '../support/clinical-appointment-sync';
+import { CareSpaceAppointmentResolver } from '../support/care-space-appointment-resolver';
 import {
   DEFAULT_REMINDER_OFFSETS,
   DISPLACED_REASON,
@@ -37,6 +38,7 @@ export class AcceptBookingUseCase {
     private readonly displaced: DisplacedRequestsCanceller,
     private readonly notifier: BookingChangeNotifier,
     private readonly logger: PinoLogger,
+    private readonly spaces: CareSpaceAppointmentResolver,
   ) {
     this.logger.setContext(AcceptBookingUseCase.name);
   }
@@ -88,6 +90,28 @@ export class AcceptBookingUseCase {
             bookingSlot.endAt ?? bookingSlot.startAt,
             booking.id,
           );
+        }
+      }
+
+      // F5d · aceptar compromete el espacio de la cita: desde acá ocupa el consultorio y el
+      // `EXCLUDE` la protege. Entre la solicitud y el «sí» el espacio pudo bloquearse o la
+      // sala pasar a otra cita: se vuelve a comprobar (422 bloqueado, 409 ocupado).
+      if (bookingResource) {
+        const bookingSlot = await this.bookingsRepo.findSlotById(
+          tx,
+          booking.bookableSlotId,
+        );
+        if (bookingSlot) {
+          await this.spaces.resolve(tx, {
+            resource: bookingResource,
+            scheduleTemplateId: bookingSlot.scheduleTemplateId,
+            startAt: bookingSlot.startAt,
+            endAt: bookingSlot.endAt ?? bookingSlot.startAt,
+            exceptAppointmentId: booking.appointmentId,
+            commits: true,
+            bookingTenantId: booking.tenantId,
+            actor,
+          });
         }
       }
 

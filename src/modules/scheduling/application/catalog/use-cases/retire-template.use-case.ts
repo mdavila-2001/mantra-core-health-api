@@ -9,6 +9,7 @@ import {
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../../../common';
+import { CareSpaceTemplateGuard } from '../support/care-space-template-guard';
 import { CatalogAccess } from '../support/catalog-access';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
@@ -36,6 +37,7 @@ export class RetireTemplateUseCase {
     private readonly access: CatalogAccess,
     private readonly blockedBookings: BlockedBookingsCanceller,
     private readonly logger: PinoLogger,
+    private readonly careSpaces: CareSpaceTemplateGuard,
   ) {
     this.logger.setContext(RetireTemplateUseCase.name);
   }
@@ -92,7 +94,16 @@ export class RetireTemplateUseCase {
           },
         );
       }
+      this.careSpaces.assertResourceInActiveTenant(resource);
       this.access.assertActorResource(resource, actor);
+      // Retirar un horario que ocupa un consultorio (y cancelar sus reservas) es tocarlo: la
+      // misma autoridad que para editarlo o reactivarlo, antes de escribir nada.
+      await this.careSpaces.assertMayManageBound(
+        tx,
+        resource,
+        [template.careSpaceId, resource.careSpaceId],
+        actor,
+      );
 
       if (options.cancelAffectedBookings) {
         // Cancela citas y avisa a pacientes: dueño de la agenda, o de su

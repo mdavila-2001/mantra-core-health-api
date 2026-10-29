@@ -13,6 +13,8 @@ import {
   type AuthenticatedUser,
 } from '../../../../../common';
 import { CatalogAccess } from '../support/catalog-access';
+import { CareSpaceTemplateGuard } from '../support/care-space-template-guard';
+import { SCHED } from '../../../domain/scheduling.concepts';
 import {
   CloseSlotsDto,
   CloseSlotsResponseDto,
@@ -36,6 +38,7 @@ export class CloseSlotsUseCase {
     private readonly access: CatalogAccess,
     private readonly blockedBookings: BlockedBookingsCanceller,
     private readonly logger: PinoLogger,
+    private readonly careSpaces: CareSpaceTemplateGuard,
   ) {
     this.logger.setContext(CloseSlotsUseCase.name);
   }
@@ -213,7 +216,14 @@ export class CloseSlotsUseCase {
           resourceId,
         });
       }
+      this.careSpaces.assertResourceInActiveTenant(resource);
       this.access.assertActorResource(resource, actor);
+      await this.careSpaces.assertMayManageBound(
+        tx,
+        resource,
+        [resource.careSpaceId],
+        actor,
+      );
 
       const slots = await this.catalogRepo.findSlotsOfResourceForUpdate(
         tx,
@@ -272,6 +282,10 @@ export class CloseSlotsUseCase {
       const exception = this.catalogRepo.createException(tx, {
         tenantId: resource.tenantId,
         resourceId,
+        // El tenant sale del recurso y el origen es una persona: la tabla exige el tenant
+        // (`tenantId` es obligatorio en la entidad) y sin él cerrar cupos respondía 500.
+        tenantId: resource.tenantId,
+        sourceKindConceptId: SCHED.EXC_SRC_MANUAL,
         exceptionTypeConceptId: EXCEPTION_TYPE_CONCEPT[dto.exceptionType],
         startAt: from,
         endAt: to,

@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
   ConflictException,
@@ -24,6 +24,11 @@ import {
   type BlockKindCode,
 } from '../ops-catalog';
 import { OpsErrorReason } from '../practice-ops.error-reasons';
+import {
+  CARE_SPACE_BLOCK_LISTENERS,
+  CareSpaceBlockListenerRegistry,
+  type BlockListenerContext,
+} from './care-space-block-listeners';
 import { CleaningOrdersService } from './cleaning-orders.service';
 import { OPS_EVENTS, OpsEventsService } from './ops-events';
 import { OpsRecorder, type ApplyResult, type OpsContext } from './ops-recorder';
@@ -140,6 +145,7 @@ export class CareSpaceBlocksService {
    * @param events - Outbox.
    * @param historyRepo - Historia de los bloqueos.
    * @param cleaning - Órdenes de limpieza.
+   * @param listeners - Quienes reaccionan al bloqueo en la misma transacción (la agenda, F5d).
    */
   constructor(
     private readonly state: OpsStateService,
@@ -147,7 +153,20 @@ export class CareSpaceBlocksService {
     private readonly events: OpsEventsService,
     private readonly historyRepo: HistoryRepository,
     private readonly cleaning: CleaningOrdersService,
+    @Optional()
+    @Inject(CARE_SPACE_BLOCK_LISTENERS)
+    private readonly listeners?: CareSpaceBlockListenerRegistry,
   ) {}
+
+  /** Contexto que reciben los oyentes. */
+  private listenerContext(ctx: OpsContext, now: Date): BlockListenerContext {
+    return {
+      tenantId: ctx.tenantId,
+      actorUserId: ctx.actorUserId,
+      requestId: ctx.requestId,
+      now,
+    };
+  }
 
   /** Bloqueos de un espacio (por omisión, sólo los que no terminaron ni se cancelaron). */
   async list(
@@ -277,6 +296,14 @@ export class CareSpaceBlocksService {
     });
     const block = (await this.find(tx, row.tenantId, id))!;
     await this.historyOf(tx, block, ctx.actorUserId, 'create', true);
+    // La agenda cierra los cupos del espacio en la misma transacción: un bloqueo que se
+    // confirma no deja ofertas vivas, y uno que se revierte tampoco deja cupos cerrados.
+    await this.listeners?.created(
+      tx,
+      block,
+      row,
+      this.listenerContext(ctx, now),
+    );
 
     let result: ApplyResult | null = null;
     if (immediate) {
@@ -420,6 +447,13 @@ export class CareSpaceBlocksService {
       result = await this.recorder.applyChange(tx, row, release, blockCtx);
     }
     await this.historyOf(tx, next, ctx.actorUserId, 'end');
+    await this.listeners?.closed(
+      tx,
+      next,
+      row,
+      'ENDED',
+      this.listenerContext(ctx, now),
+    );
     await this.events.publish(tx, {
       type: OPS_EVENTS.blockEnded,
       aggregateType: 'care_space_block',
@@ -482,6 +516,13 @@ export class CareSpaceBlocksService {
       );
     }
     await this.historyOf(tx, next, ctx.actorUserId, 'cancel');
+    await this.listeners?.closed(
+      tx,
+      next,
+      row,
+      'CANCELLED',
+      this.listenerContext(ctx, now),
+    );
     await this.events.publish(tx, {
       type: OPS_EVENTS.blockCancelled,
       aggregateType: 'care_space_block',

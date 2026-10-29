@@ -6,3 +6,4 @@ export * from './diagnostics-orders.controller';
 export * from './diagnostics-patient-results.controller';
 export * from './diagnostics-reception.controller';
 export * from './diagnostics-sample-points.controller';
+export * from './diagnostics-imaging-steps.controller';

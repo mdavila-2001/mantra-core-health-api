@@ -16,6 +16,7 @@ import { BookingResponseDto } from '../../../presentation/dto';
 import { CLIN } from '../../../../clinical/clinical.concepts';
 import type { CancellationPolicySnapshot } from '../../../entities';
 import { ClinicalAppointmentSync } from './clinical-appointment-sync';
+import { CareSpaceAppointmentResolver } from './care-space-appointment-resolver';
 import { DEFAULT_CANCELLATION_WINDOW_MINUTES } from '../../../domain/booking/booking-defaults';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
@@ -49,6 +50,7 @@ export class BookingMaterializer {
     private readonly access: BookingAccess,
     private readonly clinicalSync: ClinicalAppointmentSync,
     private readonly slotPolicy: SlotPolicyResolver,
+    private readonly spaces: CareSpaceAppointmentResolver,
   ) {}
 
   /**
@@ -215,6 +217,23 @@ export class BookingMaterializer {
         capturedAt: new Date().toISOString(),
       };
 
+      // F5d · el espacio donde ocurre la cita: el de la sala, el del equipo o el de la plantilla
+      // del cupo. Se comprueba que se pueda reservar (bloqueos y mantenimiento de F2) y, si la
+      // cita queda comprometida, que nadie más lo ocupe a esa hora (409). Va antes de la cita
+      // para que un espacio no reservable no deje nada escrito.
+      const careSpaceId = resource
+        ? await this.spaces.resolve(tx, {
+            resource,
+            scheduleTemplateId: slot.scheduleTemplateId,
+            startAt: slot.startAt,
+            endAt: slot.endAt ?? slot.startAt,
+            commits:
+              effective.appointmentStatusConceptId === CLIN.APPOINTMENT_BOOKED,
+            bookingTenantId: plan.tenantId,
+            actor,
+          })
+        : null;
+
       // La cita clínica que respalda la reserva. Se crea **antes** para poder
       // enlazarla: `appointment_id` es una columna uuid suelta, así que el orden
       // lo garantiza esto y no la unidad de trabajo.
@@ -227,6 +246,7 @@ export class BookingMaterializer {
         endAt: slot.endAt,
         reasonText: plan.reasonText,
         statusConceptId: effective.appointmentStatusConceptId,
+        ...(careSpaceId ? { careSpaceId } : {}),
         ...(ofService
           ? {
               typeConceptId: CLIN.ACTIVITY_PROCEDURE,

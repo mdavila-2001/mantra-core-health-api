@@ -13,6 +13,8 @@ import {
 } from '../../ports/booking-history.port';
 import { BookingAccess } from '../support/booking-access';
 import { BookingChangeNotifier } from '../support/booking-change-notifier';
+import { CareSpaceAppointmentResolver } from '../support/care-space-appointment-resolver';
+import { ClinicalAppointmentSync } from '../support/clinical-appointment-sync';
 import type { BookingTransitionSnapshot } from '../../../domain/booking/booking-transition';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Inject, Injectable } from '@nestjs/common';
@@ -46,6 +48,8 @@ export class RescheduleBookingUseCase {
     private readonly history: BookingHistoryPort,
     private readonly notifier: BookingChangeNotifier,
     private readonly logger: PinoLogger,
+    private readonly spaces: CareSpaceAppointmentResolver,
+    private readonly clinicalSync: ClinicalAppointmentSync,
   ) {
     this.logger.setContext(RescheduleBookingUseCase.name);
   }
@@ -172,6 +176,24 @@ export class RescheduleBookingUseCase {
         );
       }
 
+      // F5d · el cupo destino puede ser de otro espacio (o del mismo, a otra hora): se vuelve a
+      // decidir el espacio, se comprueba que se pueda reservar y que nadie más lo ocupe a esa
+      // hora (la propia cita no cuenta), y la cita clínica se mueve con la reserva — sin esto
+      // conservaba el horario viejo y el `EXCLUDE` de la base protegía un rato que ya no es el
+      // de la reserva.
+      const careSpaceId = targetResource
+        ? await this.spaces.resolve(tx, {
+            resource: targetResource,
+            scheduleTemplateId: target.scheduleTemplateId,
+            startAt: target.startAt,
+            endAt: targetEnd,
+            exceptAppointmentId: booking.appointmentId,
+            commits: true,
+            bookingTenantId: booking.tenantId,
+            actor,
+          })
+        : null;
+
       const origin = await this.bookingsRepo.findSlotForUpdate(tx, fromSlotId);
       if (origin) {
         origin.remainingCapacity += 1;
@@ -191,6 +213,18 @@ export class RescheduleBookingUseCase {
       // la seguía atribuyendo al recurso viejo (y a su profesional).
       booking.resourceId = target.resourceId;
       touch(booking, actor.id);
+      await this.clinicalSync.moveAppointment(
+        tx,
+        booking,
+        {
+          startAt: target.startAt,
+          endAt: target.endAt ?? undefined,
+          careSpaceId,
+          resourceRefType: targetResource?.resourceRefType,
+          resourceRefId: targetResource?.resourceRefId,
+        },
+        actor,
+      );
 
       this.bookingsRepo.recordReschedule(tx, {
         bookingId,

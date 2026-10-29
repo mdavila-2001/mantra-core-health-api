@@ -353,6 +353,14 @@ export const { seeds: DIAGNOSTICS_CONCEPT_SEEDS, ids: DIAG } =
       code: 'MPPS_COMPLETED',
       display: 'Procedure step completed',
     },
+    PROCEDURE_STEP_PLANNED: {
+      code: 'MPPS_PLANNED',
+      display: 'Procedure step planned, not yet scheduled on a station',
+    },
+    PROCEDURE_STEP_SCHEDULED: {
+      code: 'MPPS_SCHEDULED',
+      display: 'Procedure step scheduled on a station and room',
+    },
 
     // --- Media clínica (clinical_media, media_annotations) ---
     MEDIA_TYPE_PHOTO: { code: 'MEDIA_PHOTO', display: 'Clinical photograph' },

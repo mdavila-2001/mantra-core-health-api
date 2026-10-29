@@ -12,6 +12,8 @@ import { EXCEPTION_TYPES } from '../../../presentation/dto';
 import {
   EXCEPTION_TYPE_CONCEPT,
   EXCEPTION_TYPE_LABEL,
+  exceptionSourceKind,
+  isManualException,
 } from '../../../domain/catalog/catalog-concepts';
 
 /** Lista las excepciones de un recurso. */
@@ -114,6 +116,8 @@ export class ListExceptionsUseCase {
       // vuelve como `null`, y la guarda estricta la dejaría pasar (#174).
       ...(isActors && row.reason != null ? { reason: row.reason } : {}),
       ...(row.isAvailable == null ? {} : { isAvailable: row.isAvailable }),
+      sourceKind: exceptionSourceKind(row.sourceKindConceptId),
+      readOnly: !isManualException(row.sourceKindConceptId),
     }));
 
     return { items, count: items.length };

@@ -85,6 +85,32 @@ describe('B.1 · dependientes y tutor legal (integración)', () => {
   }
 
   /**
+   * Una sede real de la organización por defecto. Una sala ya no apunta a un identificador
+   * cualquiera: la sede referenciada tiene que existir en el tenant (F5d, INV-40).
+   */
+  let sedeRealId: string | undefined;
+  async function sedeReal(): Promise<string> {
+    if (sedeRealId) return sedeRealId;
+    const practica = await http()
+      .post('/practices')
+      .set(admin())
+      .send({
+        tenantId: SEED.tenantId,
+        code: `FX16-P-${randomUUID().slice(0, 8)}`,
+        name: 'Práctica FX16',
+        timeZone: 'America/La_Paz',
+      })
+      .expect(201);
+    const sede = await http()
+      .post(`/practices/${practica.body.id}/sites`)
+      .set({ ...admin(), 'X-Tenant-Id': SEED.tenantId })
+      .send({ code: `FX16-S-${randomUUID().slice(0, 8)}`, name: 'Sede FX16' })
+      .expect(201);
+    sedeRealId = sede.body.id as string;
+    return sedeRealId;
+  }
+
+  /**
    * Publica una agenda con cupos y devuelve el primer cupo libre.
    *
    * Mismo camino que `tj2-reglas-cita`: recurso, plantilla, generación y
@@ -99,7 +125,7 @@ describe('B.1 · dependientes y tutor legal (integración)', () => {
         tenantId: SEED.tenantId,
         resourceType: 'ROOM',
         resourceRefType: 'practice_sites',
-        resourceRefId: randomUUID(),
+        resourceRefId: await sedeReal(),
         name: `Consultorio B1 ${horas}h ${marca}`,
         timeZone: 'America/La_Paz',
         capacity: 1,

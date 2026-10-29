@@ -3,6 +3,7 @@ import {
   type AuthenticatedUser,
 } from '../../../../../common';
 import { BlockedBookingsCanceller } from '../support/blocked-bookings-canceller';
+import { CareSpaceTemplateGuard } from '../support/care-space-template-guard';
 import { CatalogAccess } from '../support/catalog-access';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
@@ -24,6 +25,7 @@ export class ListTemplateLiveBookingsUseCase {
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly access: CatalogAccess,
     private readonly blockedBookings: BlockedBookingsCanceller,
+    private readonly careSpaces: CareSpaceTemplateGuard,
   ) {}
 
   async execute(
@@ -47,6 +49,8 @@ export class ListTemplateLiveBookingsUseCase {
         { resourceId: template.resourceId },
       );
     }
+    // Trae nombres de pacientes: una agenda de otra organización responde 404 a todos.
+    this.careSpaces.assertResourceInActiveTenant(resource);
     this.access.assertActorResource(resource, actor);
     // Trae nombres de pacientes: dueño de la agenda, o de su organización.
     this.access.assertMayReadAgendaBookings(resource, actor);

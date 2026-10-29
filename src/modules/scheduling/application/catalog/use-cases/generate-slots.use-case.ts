@@ -5,6 +5,12 @@ import {
   type AuthenticatedUser,
 } from '../../../../../common';
 import { CatalogAccess } from '../support/catalog-access';
+import { CareSpaceTemplateGuard } from '../support/care-space-template-guard';
+import { CareSpaceSlotSync } from '../support/care-space-slot-sync';
+import {
+  windowTouches,
+  type TimeWindow,
+} from '../../../domain/catalog/care-space-agenda';
 import {
   DEFAULT_SLOT_CAPACITY,
   DEFAULT_SLOT_MINUTES,
@@ -36,6 +42,8 @@ export class GenerateSlotsUseCase {
     private readonly professionalTime: SchedulingProfessionalTimeService,
     private readonly access: CatalogAccess,
     private readonly logger: PinoLogger,
+    private readonly careSpaces: CareSpaceTemplateGuard,
+    private readonly slotSync: CareSpaceSlotSync,
   ) {
     this.logger.setContext(GenerateSlotsUseCase.name);
   }
@@ -83,7 +91,17 @@ export class GenerateSlotsUseCase {
         template.resourceId,
       );
       const zone = resource?.timeZone ?? 'UTC';
-      if (resource) this.access.assertActorResource(resource, actor);
+      if (resource) {
+        this.careSpaces.assertResourceInActiveTenant(resource);
+        this.access.assertActorResource(resource, actor);
+        // Generar cupos en un horario que ocupa un espacio lo usa: la misma autoridad.
+        await this.careSpaces.assertMayManageBound(
+          tx,
+          resource,
+          [template.careSpaceId, resource.careSpaceId],
+          actor,
+        );
+      }
 
       // Horario flexible (P36): no hay grilla que materializar. El cupo nace
       // al retener, en la hora que pidió el paciente
@@ -109,6 +127,20 @@ export class GenerateSlotsUseCase {
             )
           : [];
 
+      // F5d · lo que la sala o el equipo no puede atender no se ofrece: bloqueos abiertos del
+      // consultorio, espacio que dejó de estar activo, equipo en mantenimiento o fuera de servicio.
+      const unavailable: TimeWindow[] = resource
+        ? await this.slotSync.unavailableWindows(tx, resource.tenantId, {
+            careSpaceIds: [resource.careSpaceId, template.careSpaceId],
+            equipmentId:
+              resource.resourceRefType === 'diagnostic_equipment'
+                ? resource.resourceRefId
+                : null,
+            from,
+            to,
+          })
+        : [];
+
       const rules = await this.catalogRepo.findRulesByTemplate(tx, templateId);
       const existing = await this.catalogRepo.findSlotsByTemplateInRange(
         tx,
@@ -123,6 +155,7 @@ export class GenerateSlotsUseCase {
       let created = 0;
       let skipped = 0;
       let omittedByCommitments = 0;
+      let omittedByCareSpaceBlock = 0;
 
       for (const rule of rules) {
         // Una franja sólo de servicios no genera cupos de consulta: sus turnos nacen
@@ -186,12 +219,28 @@ export class GenerateSlotsUseCase {
               omittedByCommitments += 1;
               continue;
             }
+            if (
+              unavailable.some((window) =>
+                windowTouches({ start: cursor, end }, window),
+              )
+            ) {
+              omittedByCareSpaceBlock += 1;
+              continue;
+            }
             if (created >= MAX_SLOTS_PER_RUN) {
               this.logger.warn(
                 { operation: 'scheduling.slots.generate', templateId, created },
                 'Slot generation hit the per-run cap; narrow the window and re-run',
               );
-              return { templateId, created, skipped, omittedByCommitments };
+              return {
+                templateId,
+                created,
+                skipped,
+                omittedByCommitments,
+                ...(omittedByCareSpaceBlock > 0
+                  ? { omittedByCareSpaceBlock }
+                  : {}),
+              };
             }
 
             this.catalogRepo.createSlot(tx, {
@@ -210,7 +259,14 @@ export class GenerateSlotsUseCase {
         }
       }
 
-      return { templateId, created, skipped, omittedByCommitments };
+      return {
+        templateId,
+        created,
+        skipped,
+        omittedByCommitments,
+        // Sólo cuando hubo: la respuesta de las agendas sin espacio no cambia de forma.
+        ...(omittedByCareSpaceBlock > 0 ? { omittedByCareSpaceBlock } : {}),
+      };
     });
   }
 }

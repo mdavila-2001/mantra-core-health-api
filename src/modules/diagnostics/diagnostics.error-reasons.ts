@@ -23,4 +23,10 @@ export enum DiagnosticsErrorReason {
    * firma la petición.
    */
   DIAGNOSTICS_AUTHOR_NOT_ACTOR = 'DIAGNOSTICS_AUTHOR_NOT_ACTOR',
+  /** El equipo del paso no está ubicado en una sala: sin sala no hay SPS Location. */
+  IMAGING_EQUIPMENT_NOT_LOCATED = 'IMAGING_EQUIPMENT_NOT_LOCATED',
+  /** El equipo está en mantenimiento o fuera de servicio: no se programan estudios en él. */
+  IMAGING_EQUIPMENT_UNAVAILABLE = 'IMAGING_EQUIPMENT_UNAVAILABLE',
+  /** La worklist se pide por estación: falta el equipo o el AE Title. */
+  IMAGING_WORKLIST_STATION_REQUIRED = 'IMAGING_WORKLIST_STATION_REQUIRED',
 }

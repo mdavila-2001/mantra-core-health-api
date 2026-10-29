@@ -21,7 +21,20 @@ export interface NewClinicalAppointment {
   channelConceptId?: string;
   /** Tipología (P42: la reconsulta nace `ACT_FOLLOW_UP`). Ausente = NULL. */
   typeConceptId?: string;
+  /** Espacio donde ocurre la cita (F5d). Ausente = la cita no lleva espacio. */
+  careSpaceId?: string;
   actorUserId?: string;
+}
+
+/** Lo que cambia al reprogramar: el horario y el espacio del cupo nuevo. */
+export interface MovedClinicalAppointment {
+  startAt: Date;
+  endAt?: Date;
+  /** `null` ≡ la cita deja de llevar espacio. */
+  careSpaceId: string | null;
+  /** Profesional del cupo nuevo, cuando la agenda es de uno. */
+  practitionerProfileId?: string;
+  actorUserId: string;
 }
 
 /**
@@ -44,6 +57,17 @@ export interface ClinicalAppointmentsPort {
     appointmentId: string,
     statusConceptId: string,
     actorUserId: string,
+  ): Promise<void>;
+
+  /**
+   * Mueve la cita a otro cupo (reprogramación): horario, espacio y profesional. Sin esto la
+   * cita clínica conservaba el horario viejo y las restricciones de la base —que miran la
+   * cita— protegían un rato que ya no es el de la reserva. No hace nada si la cita no existe.
+   */
+  move(
+    uow: UnitOfWork,
+    appointmentId: string,
+    data: MovedClinicalAppointment,
   ): Promise<void>;
 
   /** Mapa `appointmentId → tipología` de las citas que la declaran. */

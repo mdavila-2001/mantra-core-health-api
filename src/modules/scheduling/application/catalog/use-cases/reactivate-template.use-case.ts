@@ -4,6 +4,7 @@ import {
   type AuthenticatedUser,
 } from '../../../../../common';
 import { CatalogAccess } from '../support/catalog-access';
+import { CareSpaceTemplateGuard } from '../support/care-space-template-guard';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
@@ -18,6 +19,7 @@ export class ReactivateTemplateUseCase {
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly access: CatalogAccess,
     private readonly logger: PinoLogger,
+    private readonly careSpaces: CareSpaceTemplateGuard,
   ) {
     this.logger.setContext(ReactivateTemplateUseCase.name);
   }
@@ -49,7 +51,15 @@ export class ReactivateTemplateUseCase {
           { resourceId: template.resourceId },
         );
       }
+      this.careSpaces.assertResourceInActiveTenant(resource);
       this.access.assertActorResource(resource, actor);
+      // Volver a publicar un horario en un espacio lo ocupa de nuevo.
+      await this.careSpaces.assertMayManageBound(
+        tx,
+        resource,
+        [template.careSpaceId, resource.careSpaceId],
+        actor,
+      );
 
       // Reactivar lo que ya está vigente no es un error del que haya que
       // avisar: es que alguien tocó dos veces. Se responde lo mismo.
@@ -60,6 +70,14 @@ export class ReactivateTemplateUseCase {
           slotsPendientes: false,
         };
       }
+
+      // F5d: el horario de un espacio vuelve a ocuparlo; nadie más puede tenerlo a esa hora.
+      await this.careSpaces.assertReactivable(
+        tx,
+        resource,
+        template,
+        await this.catalogRepo.findRulesByTemplate(tx, templateId),
+      );
 
       await this.catalogRepo.reactivateTemplate(
         tx,

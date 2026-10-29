@@ -3,6 +3,11 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { CommunityModule } from '../community/community.module';
 import { CommonModule } from '../common/common.module';
 import { PracticeModule } from '../practice/practice.module';
+// `OutboxService`: el equipo publica sus hechos (ubicado, cambio de estado) en la misma
+// transacción. `messaging` no importa `diagnostic_units`, así que la dependencia no cierra ciclo.
+import { MessagingModule } from '../messaging/messaging.module';
+import { InfraF5APolicyInitializer } from './policies/infra-f5a.policy';
+import { EquipmentAgendaRegistry } from './services/equipment-agenda.port';
 import * as entities from './entities';
 import {
   DiagnosticUnitsController,
@@ -55,6 +60,7 @@ import {
     CommunityModule,
     CommonModule,
     PracticeModule,
+    MessagingModule,
   ],
   controllers: [
     DiagnosticUnitsController,
@@ -87,12 +93,15 @@ import {
     DiagnosticUnitsAdminReadService,
     DiagnosticUnitsSearchService,
     DiagnosticUnitProvisioningService,
+    // F5a: política del equipo y registro de la agenda (lo llena `scheduling` al arrancar).
+    InfraF5APolicyInitializer,
+    EquipmentAgendaRegistry,
   ],
   // Se exporta para `directory`: `TenantTypeProfileService` lo usa DENTRO de
   // su propia transacción para materializar la unidad diagnóstica de un
   // tenant `DIAGNOSTIC_CENTER` recién creado (subtarea 1.5). `diagnostic_units`
   // no importa `directory`, así que la dependencia va en un solo sentido y no
   // cierra ciclo.
-  exports: [DiagnosticUnitProvisioningService],
+  exports: [DiagnosticUnitProvisioningService, EquipmentAgendaRegistry],
 })
 export class DiagnosticUnitsModule {}
