@@ -246,3 +246,83 @@ describe('AllExceptionsFilter · SQLSTATE del SQL crudo', () => {
     );
   });
 });
+
+describe('AllExceptionsFilter · restricciones del modelo de infraestructura', () => {
+  function bodyFull(response: { json: { mock: { calls: unknown[][] } } }) {
+    return response.json.mock.calls[0]?.[0] as {
+      code?: string;
+      reason?: string;
+      message?: string;
+      details?: unknown;
+    };
+  }
+
+  it('una cama ocupada (23P01) no dice «se pisa con otra cita del profesional»', () => {
+    const { filter, host, response } = build();
+    filter.catch(
+      pgError('23P01', { constraint: 'ex_encounter_locations_bed_occupancy' }),
+      host,
+    );
+    expect(response.status).toHaveBeenCalledWith(HttpStatus.CONFLICT);
+    const body = bodyFull(response);
+    expect(body.reason).toBe('BED_DOUBLE_OCCUPANCY');
+    expect(body.message).not.toMatch(/cita|profesional/i);
+  });
+
+  it('el exclude de citas del profesional conserva su mensaje de siempre', () => {
+    const { filter, host, response } = build();
+    filter.catch(
+      pgError('23P01', { constraint: 'ex_appointments_practitioner_time' }),
+      host,
+    );
+    expect(response.status).toHaveBeenCalledWith(HttpStatus.CONFLICT);
+    expect(bodyFull(response).message).toMatch(/profesional/i);
+  });
+
+  it('restrict_violation (23001) es 409 con reason, no 500, y no reenvía el texto del servidor', () => {
+    const { filter, host, response } = build();
+    const secret = 'cargo 7c1d2e3f-aaaa-bbbb-cccc-0123456789ab emitido';
+    filter.catch(
+      new Error('x', {
+        cause: pgError('23001', {
+          message: `billing.charge_captures: un cargo emitido no se edita; ${secret}`,
+        }),
+      }),
+      host,
+    );
+    expect(response.status).toHaveBeenCalledWith(HttpStatus.CONFLICT);
+    const body = bodyFull(response);
+    expect(body.reason).toBe('CHARGE_ALREADY_INVOICED');
+    expect(JSON.stringify(body)).not.toContain('7c1d2e3f');
+  });
+
+  it('23503 por FK compuesta de tenant es 404 y no revela la restricción', () => {
+    const { filter, host, response } = build();
+    filter.catch(
+      new ForeignKeyConstraintViolationException(
+        pgError('23503', {
+          table: 'care_spaces',
+          constraint: 'fk_care_spaces_tenant_site',
+        }),
+      ),
+      host,
+    );
+    expect(response.status).toHaveBeenCalledWith(HttpStatus.NOT_FOUND);
+    const body = bodyFull(response);
+    expect(body.code).toBe(ErrorCode.NOT_FOUND);
+    expect(JSON.stringify(body)).not.toContain('fk_care_spaces_tenant_site');
+  });
+
+  it('un 23503 de FK simple sigue siendo 422', () => {
+    const { filter, host, response } = build();
+    filter.catch(
+      new ForeignKeyConstraintViolationException(
+        pgError('23503', { constraint: 'fk_patient' }),
+      ),
+      host,
+    );
+    expect(response.status).toHaveBeenCalledWith(
+      HttpStatus.UNPROCESSABLE_ENTITY,
+    );
+  });
+});

@@ -18,6 +18,7 @@ import type { Request, Response } from 'express';
 import { ErrorCode } from '../errors/error-codes';
 import { SystemErrorReason } from '../errors/system-error-reasons';
 import { SecretCipherError } from '../errors/secret-cipher.error';
+import { resolveDatabaseViolation } from '../errors/database-constraint-reasons';
 import {
   APP_ATTR,
   TracingService,
@@ -415,6 +416,16 @@ export class AllExceptionsFilter implements ExceptionFilter {
         message: 'El recurso fue modificado por otra operación; reintente',
         reason: SystemErrorReason.OPTIMISTIC_LOCK_CONFLICT,
       };
+    }
+
+    // Violaciones que el MODELO defiende en la base (EXCLUDE de camas y quirófanos,
+    // únicos parciales, FK compuestas por tenant, triggers `restrict_violation`):
+    // se resuelven por nombre de restricción o marca del trigger a un `reason`
+    // propio. Va antes del mapeo genérico por tipo de excepción, que respondería
+    // «se pisa con otra cita» a una cama ocupada y 500 a un `23001`.
+    const modelViolation = this.modelViolation(exception);
+    if (modelViolation) {
+      return modelViolation;
     }
 
     // Violación de restricción UNIQUE (p. ej. carrera entre dos flujos que
@@ -819,6 +830,38 @@ export class AllExceptionsFilter implements ExceptionFilter {
   }
 
   /**
+   * Respuesta a una violación que el modelo de infraestructura defiende en la
+   * base (ver `database-constraint-reasons.ts`). El texto del servidor sólo se
+   * usa para elegir el `reason`: no se copia a la respuesta ni al log.
+   */
+  private modelViolation(exception: unknown):
+    | {
+        status: number;
+        code: string;
+        message: string;
+        reason: string;
+        internals?: unknown;
+      }
+    | undefined {
+    const found = this.findSqlState(exception);
+    if (!found) return undefined;
+    const rule = resolveDatabaseViolation({
+      sqlstate: found.sqlstate,
+      constraint:
+        typeof found.constraint === 'string' ? found.constraint : undefined,
+      message: found.serverMessage,
+    });
+    if (!rule) return undefined;
+    return {
+      status: rule.status,
+      code: this.defaultCode(rule.status),
+      message: rule.message,
+      reason: rule.reason,
+      internals: this.constraintInternals(exception),
+    };
+  }
+
+  /**
    * Busca el primer `SQLSTATE` de la cadena de causas.
    *
    * El límite de profundidad no es paranoia gratuita: una cadena de causas
@@ -832,6 +875,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
         constraint?: unknown;
         table?: unknown;
         column?: unknown;
+        /** Texto del servidor: sólo para clasificar, nunca sale. */
+        serverMessage?: string;
       }
     | undefined {
     let current: unknown = exception;
@@ -842,6 +887,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         constraint?: unknown;
         table?: unknown;
         column?: unknown;
+        message?: unknown;
         cause?: unknown;
       };
 
@@ -857,6 +903,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
           constraint: candidate.constraint,
           table: candidate.table,
           column: candidate.column,
+          serverMessage:
+            typeof candidate.message === 'string'
+              ? candidate.message
+              : undefined,
         };
       }
 
