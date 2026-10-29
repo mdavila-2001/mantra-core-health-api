@@ -20,11 +20,7 @@ Se presupone el stack aislado levantado, la red Docker `alovida-dev`, los inicia
 ## Fases del complemento
 
 1. Aplicar `01-conceptos-demo.sql` mediante `psql -v ON_ERROR_STOP=1` al PostgreSQL de Dev. Sustituye conceptos placeholder del paquete por los conceptos reales usados por el API y recupera los enlaces de las vitrinas médicas. El SQL comprueba el nombre de la base.
-2. Preparar cuentas de aseguradoras desde el seeder del modelo:
-
-   ```sh
-   backend/tools/alovida-dev/run.sh python /jobs/completar-demo.py cuentas
-   ```
+2. Las cuentas de aseguradoras las crea el seed opt-in del API (`src/common/seed/insurer-accounts-seed.service.ts`) cuando `SEED_DEMO_PASSWORD` está definida; este complemento ya no las prepara.
 
 3. Vincular las cuentas clínicas a sus personas originales:
 

@@ -17,6 +17,7 @@ import { IamErrorReason } from '../../iam.error-reasons';
 import {
   BRANCH_TYPE_CONCEPT_BY_CODE,
   DIR,
+  MEDICAL_FACILITY_TENANT_TYPES,
   TENANT_TYPE_CONCEPT_BY_CODE,
 } from '../../../directory/directory.concepts';
 import {
@@ -357,6 +358,16 @@ export class IamOrganizationSelfRegistrationService {
         user.id,
       );
 
+      // Establecimiento médico: `materializeProfile` ya persistió el NIT, el
+      // registro sanitario, el director y las sedes declaradas. La respuesta lo
+      // informa sólo para los cinco tipos médicos: `true` si el alta trajo el
+      // bloque, `false` si no.
+      const medicalFacilityRegistered = MEDICAL_FACILITY_TENANT_TYPES.includes(
+        dto.organization.tenantType,
+      )
+        ? dto.organization.medicalFacility !== undefined
+        : undefined;
+
       // 2b) Farmacia (P50): la fila de `pharmacy.pharmacies` en borrador, su
       // práctica propia y la casa central y cada sucursal como sede física y
       // sede dispensadora, con la central enlazada. Las sucursales además se
@@ -422,7 +433,8 @@ export class IamOrganizationSelfRegistrationService {
             legalEntityType: dto.organization.legalEntityType,
             taxIdentifier:
               dto.organization.taxIdentifier ??
-              dto.organization.payer?.regulatorIdentifier,
+              dto.organization.payer?.regulatorIdentifier ??
+              dto.organization.medicalFacility?.taxIdentifierNumber,
             documents: {
               CONSTITUTION_DOC:
                 dto.organization.legalDocuments.constitutionFileId,
@@ -489,6 +501,7 @@ export class IamOrganizationSelfRegistrationService {
           ...(representativesRegistered === undefined
             ? {}
             : { representatives: representativesRegistered }),
+          ...(medicalFacilityRegistered ? { medicalFacility: true } : {}),
         },
       });
 
@@ -511,6 +524,7 @@ export class IamOrganizationSelfRegistrationService {
         pharmacyId,
         legalDocumentsRegistered: legalDocumentIds?.length,
         representativesRegistered,
+        medicalFacilityRegistered,
       };
     });
 
@@ -546,6 +560,7 @@ export class IamOrganizationSelfRegistrationService {
       pharmacyId: created.pharmacyId,
       legalDocumentsRegistered: created.legalDocumentsRegistered,
       representativesRegistered: created.representativesRegistered,
+      medicalFacilityRegistered: created.medicalFacilityRegistered,
     };
   }
 

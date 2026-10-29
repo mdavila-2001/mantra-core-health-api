@@ -216,6 +216,19 @@ export const TERRITORIAL_TENANT_TYPES: readonly TenantTypeCode[] = [
   'DIAGNOSTIC_CENTER',
 ];
 
+/**
+ * Los cinco tipos de establecimiento médico, los únicos que pueden declarar el
+ * bloque `medicalFacility` (NIT, registro sanitario, director médico, casa
+ * central y sucursales) en el alta pública.
+ */
+export const MEDICAL_FACILITY_TENANT_TYPES: readonly TenantTypeCode[] = [
+  'HOSPITAL',
+  'CLINIC',
+  'MEDICAL_OFFICE',
+  'NURSING',
+  'HEALTH_OTHER',
+];
+
 /** Mapea el código de rol de tenant (DTO) a su concept id. */
 export const TENANT_ROLE_CONCEPT_BY_CODE: Record<
   'OWNER' | 'ADMIN' | 'STAFF',

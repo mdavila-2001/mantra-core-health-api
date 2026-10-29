@@ -5,7 +5,10 @@ import { TenantTypeProfileService } from './tenant-type-profile.service';
 import { CONCEPTS, PreconditionFailedException } from '../../../common';
 import { INS } from '../../insurance/domain/insurance.concepts';
 import { DUNIT } from '../../diagnostic_units/diagnostic_units.concepts';
-import { TERRITORIAL_TENANT_TYPES } from '../directory.concepts';
+import {
+  MEDICAL_FACILITY_TENANT_TYPES,
+  TERRITORIAL_TENANT_TYPES,
+} from '../directory.concepts';
 import { LEGAL_ENTITY_COUNTRY_CONCEPT_BY_ISO } from '../legal-entity-types';
 
 describe('TenantTypeProfileService', () => {
@@ -40,12 +43,17 @@ describe('TenantTypeProfileService', () => {
     const branchesRepo = {
       create: fn(() => ({ id: 'branch-1' })),
     };
+    const medicalFacilitiesRepo = {
+      create: fn(() => ({ id: 'facility-1' })),
+      createSite: fn(() => ({ id: 'site-1' })),
+    };
     const service = new TenantTypeProfileService(
       catalogRepo as never,
       conceptsRepo as never,
       diagnosticUnitProvisioning as never,
       addressesRepo as never,
       branchesRepo as never,
+      medicalFacilitiesRepo as never,
     );
     return {
       service,
@@ -54,7 +62,8 @@ describe('TenantTypeProfileService', () => {
       diagnosticUnitProvisioning,
       addressesRepo,
       branchesRepo,
-      tx: {} as never,
+      medicalFacilitiesRepo,
+      tx: { flush: fn().mockResolvedValue(undefined) } as never,
     };
   }
 
@@ -871,6 +880,323 @@ describe('TenantTypeProfileService', () => {
 
       expect(id).toBeUndefined();
       expect(diagnosticUnitProvisioning.provision).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('assertProfileMatchesType · medicalFacility', () => {
+    const facility = {
+      taxIdentifierNumber: '1023456789',
+      healthFacilityRegistrationNumber: 'SEDES-SC-2020-0412',
+      medicalDirector: {
+        name: 'Ana',
+        lastName: 'Rojas',
+        professionalLicenseNumber: 'MAT-12345',
+        email: 'dir@clinica.bo',
+      },
+      headquarters: {
+        addressLines: ['Av. San Martín 123'],
+        latitude: -17.78,
+        longitude: -63.18,
+      },
+    };
+    const territorial = {
+      legalName: 'Clínica Z S.R.L.',
+      countryConceptId: 'country-1',
+      jurisdictionConceptId: 'jur-1',
+    };
+
+    it.each(MEDICAL_FACILITY_TENANT_TYPES)(
+      'acepta el bloque medicalFacility en %s',
+      (tenantType) => {
+        const { service } = build();
+
+        expect(() =>
+          service.assertProfileMatchesType({
+            ...territorial,
+            tenantType,
+            medicalFacility: facility,
+          }),
+        ).not.toThrow();
+      },
+    );
+
+    it.each([
+      'PROVIDER',
+      'UNIVERSITY',
+      'PHARMACY',
+      'HEALTH_BUSINESS',
+      'DIAGNOSTIC_CENTER',
+    ] as const)(
+      'rechaza el bloque medicalFacility con %s (422)',
+      (tenantType) => {
+        const { service } = build();
+
+        expect(() =>
+          service.assertProfileMatchesType({
+            ...territorial,
+            tenantType,
+            medicalFacility: facility,
+          }),
+        ).toThrow('El bloque `medicalFacility` sólo corresponde');
+      },
+    );
+
+    it('el 422 por tipo no médico nombra el bloque y los cinco tipos válidos', () => {
+      const { service } = build();
+
+      expect(() =>
+        service.assertProfileMatchesType({
+          ...territorial,
+          tenantType: 'DIAGNOSTIC_CENTER',
+          medicalFacility: facility,
+        }),
+      ).toThrow(
+        'El bloque `medicalFacility` sólo corresponde a un tenant de tipo HOSPITAL, CLINIC, MEDICAL_OFFICE, NURSING, HEALTH_OTHER',
+      );
+    });
+
+    it('un HOSPITAL sin el bloque sigue siendo válido (compatibilidad)', () => {
+      const { service } = build();
+
+      expect(() =>
+        service.assertProfileMatchesType({
+          ...territorial,
+          tenantType: 'HOSPITAL',
+        }),
+      ).not.toThrow();
+    });
+
+    it('rechaza una sede con latitud pero sin longitud, nombrando la sede', () => {
+      const { service } = build();
+
+      try {
+        service.assertProfileMatchesType({
+          ...territorial,
+          tenantType: 'CLINIC',
+          medicalFacility: {
+            ...facility,
+            branches: [
+              { name: 'Sucursal 1', addressLines: ['x'], latitude: -17.7 },
+            ],
+          },
+        });
+        throw new Error('debía rechazar');
+      } catch (error) {
+        expect(error).toBeInstanceOf(PreconditionFailedException);
+        expect((error as PreconditionFailedException).details).toMatchObject({
+          site: 'branches[0]',
+        });
+      }
+    });
+
+    it('rechaza más de 50 sucursales', () => {
+      const { service } = build();
+      const branches = Array.from({ length: 51 }, (_, index) => ({
+        name: `Sucursal ${index + 1}`,
+        addressLines: ['x'],
+      }));
+
+      expect(() =>
+        service.assertProfileMatchesType({
+          ...territorial,
+          tenantType: 'CLINIC',
+          medicalFacility: { ...facility, branches },
+        }),
+      ).toThrow('hasta 50 sucursales');
+    });
+  });
+
+  describe('materializeProfile · medicalFacility', () => {
+    const facility = {
+      taxIdentifierNumber: '1023456789',
+      healthFacilityRegistrationNumber: 'SEDES-SC-2020-0412',
+      medicalDirector: {
+        name: 'Ana',
+        middleName: 'Lucía',
+        lastName: 'Rojas',
+        motherLastName: 'Paz',
+        professionalLicenseNumber: 'MAT-12345',
+        email: 'dir@clinica.bo',
+        phone: '+591 70012345',
+      },
+      headquarters: {
+        addressLines: ['Av. San Martín 123'],
+        latitude: -17.78,
+        longitude: -63.18,
+      },
+      branches: [
+        {
+          name: 'Sucursal Equipetrol',
+          addressLines: ['Calle 1', 'Edificio 2'],
+          latitude: -17.7,
+          longitude: -63.1,
+        },
+        { name: 'Sucursal Norte', addressLines: ['Av. Banzer'] },
+      ],
+    };
+    const base = {
+      tenantType: 'CLINIC' as const,
+      legalName: 'Clínica Z S.R.L.',
+      countryConceptId: 'country-1',
+      jurisdictionConceptId: 'jur-1',
+    };
+
+    it('persiste el establecimiento con el director y devuelve su id', async () => {
+      const { service, medicalFacilitiesRepo, tx } = build();
+
+      const id = await service.materializeProfile(
+        tx,
+        'tenant-1',
+        { ...base, medicalFacility: facility },
+        'owner-1',
+      );
+
+      expect(id).toBe('facility-1');
+      expect(medicalFacilitiesRepo.create).toHaveBeenCalledWith(tx, {
+        tenantId: 'tenant-1',
+        taxIdentifierNumber: '1023456789',
+        healthFacilityRegistrationNumber: 'SEDES-SC-2020-0412',
+        medicalDirector: facility.medicalDirector,
+        actorUserId: 'owner-1',
+      });
+    });
+
+    it('vuelca el establecimiento antes de crear las sedes (la FK es una columna plana)', async () => {
+      const { service, medicalFacilitiesRepo, tx } = build();
+      const order: string[] = [];
+      medicalFacilitiesRepo.create.mockImplementation(() => {
+        order.push('create');
+        return { id: 'facility-1' };
+      });
+      (
+        tx as unknown as { flush: ReturnType<typeof fn> }
+      ).flush.mockImplementation(async () => {
+        order.push('flush');
+      });
+      medicalFacilitiesRepo.createSite.mockImplementation(() => {
+        order.push('site');
+        return { id: 'site-1' };
+      });
+
+      await service.materializeProfile(
+        tx,
+        'tenant-1',
+        { ...base, medicalFacility: facility },
+        'owner-1',
+      );
+
+      expect(order).toEqual(['create', 'flush', 'site', 'site', 'site']);
+    });
+
+    it('la casa central lleva ordinal 0 y las sucursales 1..n en el orden declarado', async () => {
+      const { service, medicalFacilitiesRepo, tx } = build();
+
+      await service.materializeProfile(
+        tx,
+        'tenant-1',
+        { ...base, medicalFacility: facility },
+        'owner-1',
+      );
+
+      const sites = medicalFacilitiesRepo.createSite.mock.calls.map(
+        ([, data]: [unknown, Record<string, unknown>]) => data,
+      );
+      expect(sites).toEqual([
+        {
+          tenantId: 'tenant-1',
+          medicalFacilityId: 'facility-1',
+          siteKind: 'headquarters',
+          ordinal: 0,
+          name: 'Casa central',
+          addressLines: ['Av. San Martín 123'],
+          latitude: -17.78,
+          longitude: -63.18,
+          actorUserId: 'owner-1',
+        },
+        {
+          tenantId: 'tenant-1',
+          medicalFacilityId: 'facility-1',
+          siteKind: 'branch',
+          ordinal: 1,
+          name: 'Sucursal Equipetrol',
+          addressLines: ['Calle 1', 'Edificio 2'],
+          latitude: -17.7,
+          longitude: -63.1,
+          actorUserId: 'owner-1',
+        },
+        {
+          tenantId: 'tenant-1',
+          medicalFacilityId: 'facility-1',
+          siteKind: 'branch',
+          ordinal: 2,
+          name: 'Sucursal Norte',
+          addressLines: ['Av. Banzer'],
+          latitude: undefined,
+          longitude: undefined,
+          actorUserId: 'owner-1',
+        },
+      ]);
+    });
+
+    it('respeta el nombre de la casa central cuando el cliente manda uno', async () => {
+      const { service, medicalFacilitiesRepo, tx } = build();
+
+      await service.materializeProfile(
+        tx,
+        'tenant-1',
+        {
+          ...base,
+          medicalFacility: {
+            ...facility,
+            headquarters: { name: 'Sede Matriz', addressLines: ['x'] },
+            branches: undefined,
+          },
+        },
+        'owner-1',
+      );
+
+      expect(medicalFacilitiesRepo.createSite).toHaveBeenCalledTimes(1);
+      expect(medicalFacilitiesRepo.createSite.mock.calls[0][1]).toMatchObject({
+        name: 'Sede Matriz',
+        ordinal: 0,
+      });
+    });
+
+    it('sin casa central ni sucursales, sólo crea el establecimiento', async () => {
+      const { service, medicalFacilitiesRepo, tx } = build();
+
+      await service.materializeProfile(
+        tx,
+        'tenant-1',
+        {
+          ...base,
+          medicalFacility: {
+            taxIdentifierNumber: facility.taxIdentifierNumber,
+            healthFacilityRegistrationNumber:
+              facility.healthFacilityRegistrationNumber,
+            medicalDirector: facility.medicalDirector,
+          },
+        },
+        'owner-1',
+      );
+
+      expect(medicalFacilitiesRepo.create).toHaveBeenCalledTimes(1);
+      expect(medicalFacilitiesRepo.createSite).not.toHaveBeenCalled();
+    });
+
+    it('no crea nada si un tipo médico no declaró el bloque', async () => {
+      const { service, medicalFacilitiesRepo, tx } = build();
+
+      const id = await service.materializeProfile(
+        tx,
+        'tenant-1',
+        { ...base, tenantType: 'HOSPITAL' },
+        'owner-1',
+      );
+
+      expect(id).toBeUndefined();
+      expect(medicalFacilitiesRepo.create).not.toHaveBeenCalled();
+      expect(medicalFacilitiesRepo.createSite).not.toHaveBeenCalled();
     });
   });
 });

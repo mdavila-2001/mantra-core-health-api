@@ -205,6 +205,25 @@ x-app-env: &app-env
   # son cuatro credenciales conocidas.
   SEED_DEMO_PASSWORD: ${SEED_DEMO_PASSWORD:-}
   SEED_DEMO_ALLOW_PRODUCTION: ${SEED_DEMO_ALLOW_PRODUCTION:-false}
+  # --- Carga de datos del padrón (los hace `api-migrate`) -----------------
+  # Todos apagados por defecto: un despliegue que no los declara no carga nada.
+  # Organizaciones reales (hospitales, clínicas, centros de salud, laboratorios,
+  # centros de imágenes y farmacias) con ids deterministas. No crea cuentas: es
+  # el único paso pensado también para producción. Cada ficha sale sin sello de
+  # verificado salvo las que `verify` acepta.
+  SEED_PADRON_ORGANIZATIONS_ENABLED: ${SEED_PADRON_ORGANIZATIONS_ENABLED:-false}
+  # Pasos de DEMOSTRACIÓN (solo desarrollo y pruebas): crean cuentas `@alovida.test`
+  # con `SEED_DEMO_PASSWORD` y exigen además `SEED_DEMO_ALLOW_PRODUCTION=true`.
+  # En producción no se define ninguna de las dos y estos pasos no hacen nada.
+  SEED_PADRON_ORG_ADMINS_ENABLED: ${SEED_PADRON_ORG_ADMINS_ENABLED:-false}
+  SEED_PEOPLE_ENABLED: ${SEED_PEOPLE_ENABLED:-false}
+  # Carpeta con USUARIO_MEDICOS_1.md y USUARIO_PACIENTES_1.md. Datos personales
+  # reales: se monta solo en desarrollo y pruebas y nunca entra al repositorio.
+  # Del padrón se toman nombre, apellidos, matrícula y ocupación; el resto se inventa.
+  SEED_PEOPLE_SOURCE_DIR: ${SEED_PEOPLE_SOURCE_DIR:-}
+  SEED_DIRECTORY_NETWORKS_ENABLED: ${SEED_DIRECTORY_NETWORKS_ENABLED:-false}
+  # Reindexa el directorio público en el buscador al final de la siembra.
+  SEED_SEARCH_REINDEX: ${SEED_SEARCH_REINDEX:-false}
 
   # --- Postura de seguridad ----------------------------------------------
   # Cookie httpOnly del refresh (TX-10). Se enciende junto con PUBLIC_REFRESH_COOKIE
@@ -259,6 +278,14 @@ x-app-env: &app-env
   GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET:-}
   GOOGLE_OAUTH_REFRESH_TOKEN: ${GOOGLE_OAUTH_REFRESH_TOKEN:-}
   GOOGLE_SENDER_EMAIL: ${GOOGLE_SENDER_EMAIL:-}
+  # Guarda de destinatarios para dev/test. Lista de dominios separada por comas
+  # (p. ej. `alovida.test`): el canal EMAIL solo entrega a esos dominios
+  # (comparación exacta, sin distinguir mayúsculas; subdominios solo si se
+  # listan) y suprime el resto sin llamar al proveedor. VACÍA = sin
+  # restricción, que es lo que corresponde en producción. La lee
+  # `worker-messaging`, que es quien envía; la API la recibe por compartir el
+  # bloque y la ignora.
+  EMAIL_ALLOWED_RECIPIENT_DOMAINS: ${EMAIL_ALLOWED_RECIPIENT_DOMAINS:-}
 
   # --- Audio / TTS --------------------------------------------------------
   # El único subsistema que puede COSTAR DINERO por ejecución, y por eso lleva

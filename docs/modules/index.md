@@ -38,7 +38,7 @@
 | [`organization_extensions`](organization_extensions.md) | 4 | 4 | 6 | 6 | 8 |
 | [`surveys`](surveys.md) | 4 | 5 | 6 | 7 | 11 |
 | [`data_catalog`](data_catalog.md) | 3 | 7 | 3 | 13 | 4 |
-| [`directory`](directory.md) | 3 | 12 | 5 | 7 | 21 |
+| [`directory`](directory.md) | 3 | 12 | 6 | 9 | 21 |
 | [`payments`](payments.md) | 3 | 5 | 6 | 53 | 4 |
 | [`pharmacy`](pharmacy.md) | 3 | 13 | 15 | 12 | 16 |
 | [`polyglot_storage`](polyglot_storage.md) | 3 | 3 | 4 | 20 | 1 |
@@ -78,4 +78,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **295** | **483** | **443** | **1281** | **548** |
+| **Total** | **295** | **483** | **444** | **1283** | **548** |

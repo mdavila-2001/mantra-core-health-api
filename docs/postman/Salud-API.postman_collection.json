@@ -51749,7 +51749,7 @@
                 "insurance-carrier-catalog"
               ]
             },
-            "description": "Catálogo público de aseguradoras y sus planes de salud. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /insurance-carrier-catalog`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 429, 500, 504\n\noperationId: `InsuranceCatalogController_listCatalog`",
+            "description": "Seguros públicos (seguridad social, SUS y cajas): siempre. Aseguradoras privadas: sólo las que tienen una cuenta registrada, es decir, un tenant activo con un OWNER o ADMIN vigente, usuario activo y credencial activa.\n\n`GET /insurance-carrier-catalog`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 429, 500, 504\n\noperationId: `InsuranceCatalogController_listCatalog`",
             "auth": {
               "type": "noauth"
             }
