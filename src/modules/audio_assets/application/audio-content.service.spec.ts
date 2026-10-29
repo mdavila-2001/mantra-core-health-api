@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { runWithTenant } from '../../common';
+import { runWithTenant } from '../../../common';
 import { AudioContentService } from './audio-content.service';
 
 const TENANT_A = '11111111-1111-1111-1111-111111111111';

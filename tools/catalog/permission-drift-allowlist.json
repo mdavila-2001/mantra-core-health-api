@@ -17,7 +17,7 @@
     {
       "reason": "Audio generado desde plantillas del catálogo (`templateKey`), no desde texto libre; la caché y el contenido por id se acotan al tenant del activo (404 si es de otro) y la generación pasa por la política de presupuesto.",
       "evidence": [
-        "src/modules/audio_assets/audio-content.service.ts#get",
+        "src/modules/audio_assets/application/audio-content.service.ts#get",
         "src/modules/audio_assets/application/resolve-audio-asset.use-case.ts#requiresTenantScope"
       ],
       "routes": [

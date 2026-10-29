@@ -4,8 +4,8 @@ import {
   ResourceNotFoundException,
   getCurrentTenantId,
   type FileStorageAdapter,
-} from '../../common';
-import { AudioAssetsRepository } from './repositories/audio-assets.repository';
+} from '../../../common';
+import { AudioAssetsRepository } from '../infrastructure/repositories/audio-assets.repository';
 
 @Injectable()
 export class AudioContentService {
