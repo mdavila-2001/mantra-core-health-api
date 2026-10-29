@@ -393,18 +393,23 @@ export class DiagnosticsImagingStepsService {
     actor: AuthenticatedUser,
   ): Promise<WorklistRow[]> {
     if (roleAuthorizesInTenant(actor, 'SUPERADMIN', tenantId)) return rows;
+    // La decisión es por SALA de la fila, no por equipo: un equipo reubicado conserva pasos
+    // en la sala anterior, y operar una no es operar la otra. Sin sala, nadie la opera.
     const operated = new Map<string, boolean>();
-    for (const row of rows) {
-      if (operated.has(row.equipment_id)) continue;
-      operated.set(
-        row.equipment_id,
-        await this.operatesStation(em, actor, row.scheduled_care_space_id),
-      );
-    }
+    const operatesRow = async (row: WorklistRow): Promise<boolean> => {
+      const room = row.scheduled_care_space_id;
+      if (!room) return false;
+      let decided = operated.get(room);
+      if (decided === undefined) {
+        decided = await this.operatesStation(em, actor, room);
+        operated.set(room, decided);
+      }
+      return decided;
+    };
     const patients = new Map<string, boolean>();
     const visible: WorklistRow[] = [];
     for (const row of rows) {
-      if (operated.get(row.equipment_id)) {
+      if (await operatesRow(row)) {
         visible.push(row);
         continue;
       }

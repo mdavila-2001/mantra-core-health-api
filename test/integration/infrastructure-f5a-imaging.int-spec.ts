@@ -824,6 +824,57 @@ describe('Infraestructura F5a · equipo, estación DICOM, pasos y worklist', () 
       expect(propio.body.items[0].patientProfileId).toBe(pacienteMio);
     });
 
+    it('un equipo reubicado con pasos en dos salas: el operador ve las dos; el clínico sin relación, ninguna', async () => {
+      const id = await equipo(sitioDiagA, plataformaA);
+      await patch(orgA, id, {
+        careSpaceId: salaImagen.id,
+        aeTitle: `RE-${sufijo}`,
+      }).expect(200);
+      // Un paso ya pasado en la sala vieja (no se arrastra al reubicar) y uno futuro en la nueva.
+      const pasado = (
+        await crearPaso(clinicoA, await estudio(orgA.tenantId)).expect(201)
+      ).body.id;
+      const hace = futuro(-1, '09:00');
+      await programar(coordA, pasado, id, hace).expect(200);
+      await patch(orgA, id, { careSpaceId: salaImagen2.id }).expect(200);
+      const futuroPaso = (
+        await crearPaso(clinicoA, await estudio(orgA.tenantId)).expect(201)
+      ).body.id;
+      await programar(coordA, futuroPaso, id, futuro(2, '09:00')).expect(200);
+      const salas = await filas(
+        ctx,
+        `select id, scheduled_care_space_id from diagnostics.imaging_procedure_steps where id in (?, ?)`,
+        [pasado, futuroPaso],
+      );
+      expect(new Set(salas.map((f: any) => f.scheduled_care_space_id))).toEqual(
+        new Set([salaImagen.id, salaImagen2.id]),
+      );
+      const ventana = {
+        equipmentId: id,
+        from: futuro(-1, '00:00'),
+        to: futuro(3, '00:00'),
+      };
+      const operador = await http()
+        .get('/diagnostics/imaging-worklist')
+        .set(como(operadorA))
+        .query(ventana)
+        .expect(200);
+      expect(operador.body.items.map((i: any) => i.stepId)).toEqual([
+        pasado,
+        futuroPaso,
+      ]);
+      expect(operador.body.items.map((i: any) => i.spsLocation)).toEqual([
+        salaImagen.code,
+        salaImagen2.code,
+      ]);
+      const clinico = await http()
+        .get('/diagnostics/imaging-worklist')
+        .set(como(clinicoA))
+        .query(ventana)
+        .expect(200);
+      expect(clinico.body.items).toEqual([]);
+    });
+
     it('la ventana de la worklist está acotada: más de 7 días o invertida es 422', async () => {
       const id = await equipo(sitioDiagA, plataformaA);
       const larga = await http()
