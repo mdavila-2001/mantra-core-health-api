@@ -11,6 +11,8 @@ import {
   type CancelledByBlock,
 } from '../support/blocked-bookings-canceller';
 import { CatalogAccess } from '../support/catalog-access';
+import { CareSpaceTemplateGuard } from '../support/care-space-template-guard';
+import { SCHED } from '../../../domain/scheduling.concepts';
 import {
   CreateExceptionDto,
   ExceptionResponseDto,
@@ -24,6 +26,8 @@ import { Injectable } from '@nestjs/common';
 import { PRACTITIONER_PROFILE_TABLES } from '../../../domain/resource/practitioner-profile-tables';
 import { PinoLogger } from 'nestjs-pino';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
+import { OutboxService } from '../../../../messaging/services/outbox.service';
+import { AVAILABILITY_EXCEPTION_CREATED_EVENT } from '../support/care-space-slot-sync';
 import { SchedulingProfessionalTimeService } from '../../professional-time/scheduling-professional-time.service';
 
 /** UC-41-04: registra una excepción de disponibilidad. */
@@ -36,6 +40,8 @@ export class CreateExceptionUseCase {
     private readonly access: CatalogAccess,
     private readonly blockedBookings: BlockedBookingsCanceller,
     private readonly logger: PinoLogger,
+    private readonly careSpaces: CareSpaceTemplateGuard,
+    private readonly outbox: OutboxService,
   ) {
     this.logger.setContext(CreateExceptionUseCase.name);
   }
@@ -106,6 +112,8 @@ export class CreateExceptionUseCase {
           resourceId,
         });
       }
+      // El tenant antes que el rol: una agenda de otra organización responde 404 a todos.
+      this.careSpaces.assertResourceInActiveTenant(resource);
       // Antes de mirar una sola cita: la vista previa trae nombres de
       // pacientes, y sólo quien administra esta agenda puede verlos. Cerrar
       // cupos (`CloseSlotsUseCase`) ya lo exigía; bloquear no, y hasta hoy no
@@ -131,6 +139,9 @@ export class CreateExceptionUseCase {
 
       const exception = this.catalogRepo.createException(tx, {
         resourceId,
+        // El tenant sale del recurso ya acotado; el origen es una persona (F5d).
+        tenantId: resource.tenantId,
+        sourceKindConceptId: SCHED.EXC_SRC_MANUAL,
         exceptionTypeConceptId: EXCEPTION_TYPE_CONCEPT[dto.exceptionType],
         startAt,
         endAt,
@@ -156,6 +167,26 @@ export class CreateExceptionUseCase {
           }
         }
       }
+
+      await this.outbox.publishDomainEvent(tx, {
+        tenantId: resource.tenantId,
+        eventType: AVAILABILITY_EXCEPTION_CREATED_EVENT,
+        aggregateType: 'availability_exception',
+        aggregateId: exception.id,
+        payloadJson: {
+          exceptionId: exception.id,
+          resourceId,
+          sourceKind: 'MANUAL',
+          sourceRefId: null,
+          startAt: startAt.toISOString(),
+          endAt: endAt.toISOString(),
+          isAvailable,
+          blockedSlots,
+          tenantId: resource.tenantId,
+          actorUserId: actor.id,
+        },
+        actorUserId: actor.id,
+      });
 
       return {
         id: exception.id,

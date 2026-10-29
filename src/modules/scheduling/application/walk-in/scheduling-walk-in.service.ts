@@ -95,6 +95,7 @@ export class SchedulingWalkInService {
             durationMinutes: dto.durationMinutes,
             reasonText: dto.reasonText,
             channel: dto.channel,
+            careSpaceId: dto.careSpaceId,
           },
           actor,
           { bookingChannel: 'WALK_IN' },

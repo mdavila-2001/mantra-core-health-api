@@ -66,6 +66,10 @@ import {
   PracticeOpsRetireBlockersInitializer,
 } from './services';
 import { SampleCollectionPointsService } from './services/sample-collection-points.service';
+import {
+  CARE_SPACE_BLOCK_LISTENERS,
+  CareSpaceBlockListenerRegistry,
+} from './services/care-space-block-listeners';
 import { OpsSettingsReader } from './services/ops-settings';
 import { INFRA_POLICIES, InfraPolicyRegistry } from './policies/infra-policy';
 import { InfraF2PolicyInitializer } from './policies/infra-f2.policy';
@@ -235,6 +239,12 @@ import {
     PracticeRetireBlockersInitializer,
     // Plano de planta (F1c)
     ...FLOOR_PLAN_PROVIDERS,
+    // Oyentes del ciclo de vida de los bloqueos (la agenda cierra y reabre cupos, F5d).
+    CareSpaceBlockListenerRegistry,
+    {
+      provide: CARE_SPACE_BLOCK_LISTENERS,
+      useExisting: CareSpaceBlockListenerRegistry,
+    },
     // Infraestructura hospitalaria F2: operación de espacios.
     InfraPolicyRegistry,
     { provide: INFRA_POLICIES, useExisting: InfraPolicyRegistry },
@@ -280,6 +290,9 @@ import {
     // (stock, equipos, reservas…) se registra acá sin editar `practice`.
     RETIRE_BLOCKER_PROVIDERS,
     RetireBlockerRegistry,
+    // F5d: la agenda reacciona a los bloqueos de un espacio en la misma transacción.
+    CARE_SPACE_BLOCK_LISTENERS,
+    CareSpaceBlockListenerRegistry,
     // F2: F3 (ADT) y F4 (quirófano) programan contra el puerto; cada franja
     // registra su política de roles en `INFRA_POLICIES` y autoriza con el evaluador.
     CARE_SPACE_OPS_PORT,

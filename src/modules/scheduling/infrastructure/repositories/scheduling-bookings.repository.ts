@@ -13,6 +13,7 @@ import {
   type CancellationPolicySnapshot,
 } from '../../entities';
 import { createdBy } from '../../../../common';
+import { SCHED } from '../../domain/scheduling.concepts';
 
 /**
  * Describe el contrato estructural de create hold data.
@@ -1079,8 +1080,20 @@ export class SchedulingBookingsRepository {
           AND e.start_at < ?
           AND e.end_at   > ?
           AND (? IS NULL OR e.id <> ?)
+          -- Un bloqueo del consultorio o el estado de un equipo cierra los cupos de ESE espacio
+          -- (F5d); no ocupa a la persona, que puede atender en otro consultorio.
+          AND (e.source_kind_concept_id IS NULL
+               OR e.source_kind_concept_id NOT IN (?, ?))
         ORDER BY e.start_at ASC`,
-      [practitionerProfileId, to, from, except ?? null, except ?? null],
+      [
+        practitionerProfileId,
+        to,
+        from,
+        except ?? null,
+        except ?? null,
+        SCHED.EXC_SRC_CARE_SPACE_BLOCK,
+        SCHED.EXC_SRC_EQUIPMENT_STATUS,
+      ],
     );
 
     // Misma frontera que los compromisos: el SQL crudo trae timestamptz como

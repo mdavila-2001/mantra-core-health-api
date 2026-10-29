@@ -27,7 +27,11 @@ const RESOURCE = '22222222-2222-2222-2222-222222222222';
  * @returns Resultado de build catalog.
  */
 function buildCatalog() {
-  const tx = { flush: mockFn() };
+  const tx = {
+    flush: mockFn(),
+    // F5d: una sede referenciada se busca en la base (la referencia deja de ser libre).
+    execute: mockFn().mockResolvedValue([{ id: 'sede-1' }] as unknown[]),
+  };
   // `fork()` además de `transactional`: las lecturas del servicio —listSlots y
   // listTemplates— no abren transacción, piden un contexto propio.
   const em = {
@@ -192,11 +196,12 @@ describe('SchedulingCatalogService', () => {
     });
 
     /**
-     * Un equipo no es un alias de nada: lo que no está en la tabla no se toca.
+     * Una sede no es un alias de nada: lo que no está en la tabla no se toca.
      *
-     * (Antes esta prueba usaba `care_spaces`; desde R0 de F4 una referencia a un espacio ya
-     * no es una referencia libre —INV-40— y se crea por `SpaceResourceLinker`, con sus
-     * propias pruebas en `space-resource-linker.spec.ts`.)
+     * (Antes esta prueba usaba `care_spaces` y después `diagnostic_equipment`; desde R0 de F4
+     * una referencia a un espacio ya no es una referencia libre —INV-40— y se crea por
+     * `SpaceResourceLinker`, y desde F5a lo mismo pasa con el equipo (`EquipmentResourceLinker`,
+     * con sus propias pruebas en `create-resource.use-case.spec.ts`).)
      */
     it('deja intactos los tipos que no son alias', async () => {
       const d = buildCatalog();
@@ -205,15 +210,15 @@ describe('SchedulingCatalogService', () => {
       await d.service.createResource(
         {
           ...base,
-          resourceType: 'EQUIPMENT',
-          resourceRefType: 'diagnostic_equipment',
+          resourceType: 'ROOM',
+          resourceRefType: 'practice_sites',
         } as never,
         actor as never,
       );
 
       expect(d.catalogRepo.createResource).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ resourceRefType: 'diagnostic_equipment' }),
+        expect.objectContaining({ resourceRefType: 'practice_sites' }),
       );
     });
   });
@@ -883,6 +888,8 @@ describe('SchedulingCatalogService', () => {
         expect(res.items[0]).toEqual({
           id: 'exc-1',
           exceptionTypeConceptId: 'tipo-1',
+          sourceKind: 'MANUAL',
+          readOnly: false,
           startAt: '2026-09-10T13:00:00.000Z',
           endAt: '2026-09-10T21:00:00.000Z',
           // Siempre presente: es una etiqueta derivada del concepto, no una

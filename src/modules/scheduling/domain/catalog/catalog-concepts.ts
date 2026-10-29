@@ -265,3 +265,42 @@ export const CARE_SPACES_REF_TYPE = 'care_spaces';
 export function refersToCareSpace(refType: string): boolean {
   return normalizeRefType(refType) === CARE_SPACES_REF_TYPE;
 }
+
+/** Quién creó una excepción de disponibilidad, como lo lee el cliente. */
+export type ExceptionSourceKind =
+  'MANUAL' | 'CARE_SPACE_BLOCK' | 'EQUIPMENT_STATUS';
+
+/** El origen de una excepción desde su concepto. Ausente (filas anteriores a F5d) ≡ manual. */
+export function exceptionSourceKind(
+  conceptId: string | null | undefined,
+): ExceptionSourceKind {
+  if (conceptId === SCHED.EXC_SRC_CARE_SPACE_BLOCK) return 'CARE_SPACE_BLOCK';
+  if (conceptId === SCHED.EXC_SRC_EQUIPMENT_STATUS) return 'EQUIPMENT_STATUS';
+  return 'MANUAL';
+}
+
+/** ¿La crea una persona? Sólo ésas se editan y se borran desde la agenda. */
+export function isManualException(
+  conceptId: string | null | undefined,
+): boolean {
+  return exceptionSourceKind(conceptId) === 'MANUAL';
+}
+
+/** `resourceRefType` canónico de un recurso que apunta a un equipo de diagnóstico (F5a). */
+export const EQUIPMENT_REF_TYPE = 'diagnostic_equipment';
+
+/** `resourceRefType` canónico de un recurso que apunta a una sede. */
+export const PRACTICE_SITES_REF_TYPE = 'practice_sites';
+
+/**
+ * A qué tablas puede apuntar cada tipo de recurso (F5a/F5d, INV-40): la referencia deja de ser
+ * libre. Una sala apunta a un espacio (o, en el modelo anterior, a una sede); un equipo, a un
+ * equipo de diagnóstico; un profesional, a su perfil.
+ */
+export const REF_TYPES_BY_RESOURCE: Readonly<
+  Record<ResourceType, readonly string[]>
+> = {
+  PRACTITIONER: ['health_practitioner_profiles'],
+  ROOM: [CARE_SPACES_REF_TYPE, PRACTICE_SITES_REF_TYPE],
+  EQUIPMENT: [EQUIPMENT_REF_TYPE],
+};

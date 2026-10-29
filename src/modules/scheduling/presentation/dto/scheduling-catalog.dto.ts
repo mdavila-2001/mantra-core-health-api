@@ -17,6 +17,7 @@ import {
   Max,
   MaxLength,
   Min,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 
@@ -479,6 +480,19 @@ export class CreateTemplateDto {
   @IsOptional()
   @IsBoolean()
   flexibleHours?: boolean;
+
+  /**
+   * Espacio (consultorio, sala de procedimientos o de imagen) en el que se atiende este horario
+   * (F5d). Dos plantillas publicadas no pueden ocupar el mismo espacio a la misma hora.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Espacio del tenant donde se atiende (consultorio, sala de procedimientos o de imagen). Ausente ≡ sin espacio',
+  })
+  @IsOptional()
+  @IsUUID()
+  careSpaceId?: string;
 }
 
 /**
@@ -539,6 +553,20 @@ export class UpdateTemplateDto {
   @IsOptional()
   @IsISO8601()
   validTo?: string;
+
+  /**
+   * Espacio en el que se atiende (F5d). `null` suelta el espacio; omitirlo lo conserva.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    nullable: true,
+    description:
+      'Espacio donde se atiende. null lo suelta; omitirlo lo conserva',
+  })
+  @IsOptional()
+  @ValidateIf((_o, value) => value !== null)
+  @IsUUID()
+  careSpaceId?: string | null;
 }
 
 /**
@@ -635,6 +663,10 @@ export class TemplateDetailDto {
   @ApiProperty({ description: 'true cuando el horario está retirado' })
   retired!: boolean;
 
+  /** Espacio en el que se atiende (F5d), si el horario lo declara. */
+  @ApiProperty({ format: 'uuid', required: false })
+  careSpaceId?: string;
+
   /** Duración por defecto de la plantilla, si la declara. */
   @ApiProperty({ required: false })
   slotMinutes?: number;
@@ -721,6 +753,20 @@ export class AvailabilityExceptionDto {
   /** `true` cuando la excepción ABRE disponibilidad en vez de cerrarla. */
   @ApiProperty({ required: false })
   isAvailable?: boolean;
+
+  /**
+   * Quién la creó (F5d): `MANUAL`, `CARE_SPACE_BLOCK` (un bloqueo del consultorio) o
+   * `EQUIPMENT_STATUS` (el equipo está en mantenimiento o fuera de servicio).
+   */
+  @ApiProperty({
+    enum: ['MANUAL', 'CARE_SPACE_BLOCK', 'EQUIPMENT_STATUS'],
+    default: 'MANUAL',
+  })
+  sourceKind!: 'MANUAL' | 'CARE_SPACE_BLOCK' | 'EQUIPMENT_STATUS';
+
+  /** `true` cuando sólo se cambia en su origen (bloqueo del consultorio, estado del equipo). */
+  @ApiProperty({ default: false })
+  readOnly!: boolean;
 }
 
 /** Las excepciones de un recurso en una ventana. */
@@ -761,6 +807,10 @@ export class TemplateResponseDto {
     description: 'true cuando el horario es flexible, sin turnos fijos',
   })
   flexibleHours!: boolean;
+
+  /** Espacio en el que se atiende (F5d); ausente cuando el horario no lo declara. */
+  @ApiProperty({ format: 'uuid', required: false })
+  careSpaceId?: string;
 
   /**
    * Identificador asociado a status concept.
@@ -826,6 +876,18 @@ export class GenerateSlotsResponseDto {
       'Cupos omitidos por chocar con compromisos del profesional (citas confirmadas en cualquiera de sus sedes)',
   })
   omittedByCommitments!: number;
+
+  /**
+   * Cupos que NO se generaron porque el espacio de la plantilla (o el equipo) está bloqueado,
+   * en mantenimiento o fuera de servicio en ese rato (F5d). Igual que el anterior: el hueco no
+   * es un error del generador.
+   */
+  @ApiProperty({
+    required: false,
+    description:
+      'Cupos omitidos porque el espacio o el equipo de la agenda no está disponible en ese rato',
+  })
+  omittedByCareSpaceBlock?: number;
 }
 
 /**

@@ -10,6 +10,7 @@ import {
   BookingItemAssembler,
   BookingMaterializer,
   BookingTransitionRecorder,
+  CareSpaceAppointmentResolver,
   ClinicalAppointmentSync,
   DisplacedRequestsCanceller,
   ServiceSlotLifecycle,
@@ -56,6 +57,11 @@ export interface BookingsServiceDoubles {
   representation: any;
   formOrigin: any;
   serviceAgenda: any;
+  /**
+   * El espacio donde ocurre cada cita (F5d), simulado. Opcional: por omisión ninguna cita
+   * lleva espacio y nada se bloquea, que es lo que ejercitan las pruebas anteriores a F5d.
+   */
+  spaces?: any;
 }
 
 /**
@@ -98,6 +104,10 @@ export function createBookingsService(d: BookingsServiceDoubles) {
     d.catalogRepo,
   );
   const clinicalSync = new ClinicalAppointmentSync(clinical);
+  const spaces = (d.spaces ?? {
+    resolve: async () => null,
+    assertSlotHoldable: async () => undefined,
+  }) as CareSpaceAppointmentResolver;
   const slotPolicy = new SlotPolicyResolver(d.catalogRepo);
   const materializer = new BookingMaterializer(
     d.em,
@@ -108,6 +118,7 @@ export function createBookingsService(d: BookingsServiceDoubles) {
     access,
     clinicalSync,
     slotPolicy,
+    spaces,
   );
   const displaced = new DisplacedRequestsCanceller(
     d.bookingsRepo,
@@ -133,7 +144,14 @@ export function createBookingsService(d: BookingsServiceDoubles) {
   );
 
   return new SchedulingBookingsService(
-    new PlaceHoldUseCase(d.em, d.bookingsRepo, slotPolicy, access, d.logger),
+    new PlaceHoldUseCase(
+      d.em,
+      d.bookingsRepo,
+      slotPolicy,
+      access,
+      d.logger,
+      spaces,
+    ),
     new ConfirmBookingUseCase(materializer, d.logger),
     new RequestBookingUseCase(materializer, notifier, d.logger),
     new CreateDirectAppointmentUseCase(
@@ -148,6 +166,7 @@ export function createBookingsService(d: BookingsServiceDoubles) {
       clinical,
       formOrigin,
       d.logger,
+      spaces,
     ),
     new ExpireHoldsUseCase(d.em, d.bookingsRepo, serviceSlots, d.logger),
     new RescheduleBookingUseCase(
@@ -160,6 +179,8 @@ export function createBookingsService(d: BookingsServiceDoubles) {
       history,
       notifier,
       d.logger,
+      spaces,
+      clinicalSync,
     ),
     cancelBooking,
     new RejectBookingUseCase(cancelBooking, d.logger),
@@ -176,6 +197,7 @@ export function createBookingsService(d: BookingsServiceDoubles) {
       displaced,
       notifier,
       d.logger,
+      spaces,
     ),
     new RequestBookingInfoUseCase(d.em, access, transitions, d.logger),
     new ProposeScheduleUseCase(

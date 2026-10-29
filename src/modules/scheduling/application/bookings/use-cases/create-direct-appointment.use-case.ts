@@ -18,6 +18,7 @@ import {
 import { BookingAccess } from '../support/booking-access';
 import { BookingChangeNotifier } from '../support/booking-change-notifier';
 import { BookingTransitionRecorder } from '../support/booking-transition-recorder';
+import { CareSpaceAppointmentResolver } from '../support/care-space-appointment-resolver';
 import { CLIN } from '../../../../clinical/clinical.concepts';
 import {
   CLINICAL_APPOINTMENTS_PORT,
@@ -68,6 +69,7 @@ export class CreateDirectAppointmentUseCase {
     @Inject(FORM_ORIGIN_PORT)
     private readonly formOrigin: FormOriginPort,
     private readonly logger: PinoLogger,
+    private readonly spaces: CareSpaceAppointmentResolver,
   ) {
     this.logger.setContext(CreateDirectAppointmentUseCase.name);
   }
@@ -260,6 +262,20 @@ export class CreateDirectAppointmentUseCase {
       );
     }
 
+    // F5d · el consultorio de la cita: el que fija la agenda (sala, equipo o la franja
+    // publicada que contiene el inicio) o el que nombra quien opera agendas. Se comprueba antes
+    // de retirar cupos: un espacio bloqueado o ya ocupado no deja nada escrito.
+    const careSpaceId = await this.spaces.resolve(tx, {
+      resource,
+      requestedCareSpaceId: dto.careSpaceId,
+      startAt,
+      endAt,
+      commits: true,
+      inferFromBands: true,
+      bookingTenantId: resource.tenantId,
+      actor,
+    });
+
     // La retracción: los cupos libres del profesional que este rato pisa se
     // retiran acá mismo, en cualquiera de sus sedes.
     let retractedSlots = 0;
@@ -305,6 +321,7 @@ export class CreateDirectAppointmentUseCase {
       endAt,
       reasonText: dto.reasonText,
       statusConceptId: CLIN.APPOINTMENT_BOOKED,
+      ...(careSpaceId ? { careSpaceId } : {}),
       // Ausente = presencial: no se escribe un valor que nadie eligió.
       ...(dto.channel === undefined
         ? {}

@@ -23,6 +23,8 @@ export function slotHoldRefusal(slot: {
 }): SlotHoldRefusal | null {
   if (slot.statusConceptId === CONCEPTS.SLOT_BLOCKED) return 'BLOCKED';
   if (slot.statusConceptId === SCHED.SLOT_RETRACTED) return 'RETRACTED';
+  // Cerrado por su espacio o su equipo (F5a/F5d): se dejó de ofrecer, igual que el retraído.
+  if (slot.statusConceptId === SCHED.SLOT_SOURCE_CLOSED) return 'RETRACTED';
   if (slot.remainingCapacity <= 0) return 'NO_CAPACITY';
   return null;
 }

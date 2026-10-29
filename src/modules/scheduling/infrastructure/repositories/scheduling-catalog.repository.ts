@@ -130,6 +130,10 @@ export interface CreateTemplateData {
    * Identificador asociado a resource.
    */
   resourceId: string;
+  /** Tenant del recurso: lo escribe la API (el trigger del modelo sólo lo rellena si falta). */
+  tenantId?: string;
+  /** Espacio al que pertenece el horario (F5d). Ausente ≡ horario sin espacio. */
+  careSpaceId?: string;
   /**
    * Valor de name mantenido por la instancia.
    */
@@ -218,6 +222,12 @@ export interface CreateExceptionData {
    * Identificador asociado a resource.
    */
   resourceId: string;
+  /** Tenant del recurso: lo escribe la API. */
+  tenantId?: string;
+  /** Quién la creó (`EXC_SRC_*`). Ausente ≡ manual. */
+  sourceKindConceptId?: string;
+  /** Bloqueo del espacio o equipo que la originó. */
+  sourceRefId?: string;
   /**
    * Identificador asociado a exception type concept.
    */
@@ -407,6 +417,8 @@ export class SchedulingCatalogRepository {
       ScheduleTemplates,
       {
         resourceId: data.resourceId,
+        tenantId: data.tenantId,
+        careSpaceId: data.careSpaceId,
         name: data.name,
         serviceConceptId: data.serviceConceptId,
         validFrom: data.validFrom,
@@ -433,6 +445,53 @@ export class SchedulingCatalogRepository {
     id: string,
   ): Promise<ScheduleTemplates | null> {
     return em.findOne(ScheduleTemplates, { id });
+  }
+
+  /**
+   * Las plantillas publicadas que ocupan un espacio (F5d), con su recurso y sus franjas.
+   *
+   * El filtro por `tenantId` es explícito: la base lo garantiza con RLS, pero la API no
+   * depende de que el rol de la conexión la respete.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant del contexto.
+   * @param careSpaceId - Espacio.
+   * @param publishedStatusConceptId - Concepto de plantilla publicada.
+   * @param exceptTemplateId - Plantilla que no se compara consigo misma.
+   */
+  async findPublishedTemplatesOfCareSpace(
+    em: EntityManager,
+    tenantId: string,
+    careSpaceId: string,
+    publishedStatusConceptId: string,
+    exceptTemplateId?: string,
+  ): Promise<
+    {
+      template: ScheduleTemplates;
+      resource: SchedulableResources | null;
+      rules: ScheduleRules[];
+    }[]
+  > {
+    const where: Record<string, unknown> = {
+      tenantId,
+      careSpaceId,
+      statusConceptId: publishedStatusConceptId,
+    };
+    if (exceptTemplateId) where.id = { $ne: exceptTemplateId };
+    const templates = await em.find(ScheduleTemplates, where);
+    if (templates.length === 0) return [];
+    const resources = await em.find(SchedulableResources, {
+      id: { $in: [...new Set(templates.map((t) => t.resourceId))] },
+      tenantId,
+    });
+    const rules = await em.find(ScheduleRules, {
+      scheduleTemplateId: { $in: templates.map((t) => t.id) },
+    });
+    return templates.map((template) => ({
+      template,
+      resource: resources.find((r) => r.id === template.resourceId) ?? null,
+      rules: rules.filter((r) => r.scheduleTemplateId === template.id),
+    }));
   }
 
   /**
@@ -733,6 +792,9 @@ export class SchedulingCatalogRepository {
       AvailabilityExceptions,
       {
         resourceId: data.resourceId,
+        tenantId: data.tenantId,
+        sourceKindConceptId: data.sourceKindConceptId,
+        sourceRefId: data.sourceRefId,
         exceptionTypeConceptId: data.exceptionTypeConceptId,
         startAt: data.startAt,
         endAt: data.endAt,

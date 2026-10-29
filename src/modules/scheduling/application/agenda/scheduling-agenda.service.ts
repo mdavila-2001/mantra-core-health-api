@@ -1,4 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
+import { CareSpaceSlotSync } from '../catalog/support/care-space-slot-sync';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { CONCEPTS, PreconditionFailedException } from '../../../../common';
@@ -64,6 +65,7 @@ export class SchedulingAgendaService {
     @Inject(PRACTITIONER_DIRECTORY_PORT)
     private readonly directory: PractitionerDirectoryPort,
     private readonly logger: PinoLogger,
+    @Optional() private readonly slotSync?: CareSpaceSlotSync,
   ) {
     this.logger.setContext(SchedulingAgendaService.name);
   }
@@ -161,8 +163,14 @@ export class SchedulingAgendaService {
       limit,
     );
 
-    const truncated = rows.length > limit;
-    const items = rows.slice(0, limit).map((slot) => this.toSlotItem(slot));
+    // F5d · lo que se ofrece tiene que poder reservarse: se descartan los cupos cuyo espacio
+    // está bloqueado o cuyo equipo está fuera de servicio (ver `CareSpaceSlotSync`).
+    const offered =
+      query.onlyAvailable && this.slotSync && rows.length > 0
+        ? await this.withoutCovered(em, rows)
+        : rows;
+    const truncated = offered.length > limit;
+    const items = offered.slice(0, limit).map((slot) => this.toSlotItem(slot));
     if (truncated) {
       this.logger.warn(
         { operation: 'scheduling.slots.list', limit },
@@ -170,6 +178,20 @@ export class SchedulingAgendaService {
       );
     }
     return { items, count: items.length, limit, truncated };
+  }
+
+  /** Descarta los cupos que su espacio o su equipo no puede atender. */
+  private async withoutCovered<T extends { id: string }>(
+    em: EntityManager,
+    rows: readonly T[],
+  ): Promise<T[]> {
+    const covered = await this.slotSync!.coveredSlotIds(
+      em,
+      rows.map((row) => row.id),
+    );
+    return covered.size === 0
+      ? [...rows]
+      : rows.filter((r) => !covered.has(r.id));
   }
 
   /** Citas que cumplen el filtro, ordenadas por el instante del cupo. */

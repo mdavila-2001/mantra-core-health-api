@@ -6,6 +6,8 @@ import {
   type AuthenticatedUser,
 } from '../../../../../common';
 import { CatalogAccess } from '../support/catalog-access';
+import { CareSpaceTemplateGuard } from '../support/care-space-template-guard';
+import { assertManualException } from '../support/exception-source';
 import {
   EXCEPTION_TYPE_CONCEPT,
   REASON_REQUIRING_TEXT,
@@ -27,6 +29,7 @@ export class UpdateExceptionUseCase {
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly access: CatalogAccess,
     private readonly logger: PinoLogger,
+    private readonly careSpaces: CareSpaceTemplateGuard,
   ) {
     this.logger.setContext(UpdateExceptionUseCase.name);
   }
@@ -130,7 +133,11 @@ export class UpdateExceptionUseCase {
         tx,
         exception.resourceId,
       );
-      if (resource) this.access.assertActorResource(resource, actor);
+      if (resource) {
+        this.careSpaces.assertResourceInActiveTenant(resource);
+        this.access.assertActorResource(resource, actor);
+      }
+      assertManualException(exception.sourceKindConceptId);
 
       const startAt =
         dto.startAt === undefined ? exception.startAt : new Date(dto.startAt);

@@ -89,6 +89,36 @@ export const { seeds: SCHEDULING_CONCEPT_SEEDS, ids: SCHED } =
       display: 'Slot retracted by a service booking',
     },
 
+    /**
+     * Cupo que dejó de ofrecerse porque su **fuente** quedó fuera de servicio: el espacio
+     * (bloqueo, mantenimiento, cierre de F2) o el equipo (mantenimiento, fuera de servicio).
+     *
+     * Estado propio y no `SLOT_BLOCKED` por la misma razón que `SLOT_RETRACTED`: el bloqueado
+     * es una decisión del profesional que nadie reabre solo, y éste es un efecto de la fuente
+     * que **vuelve** cuando la fuente vuelve. Si compartieran estado no habría cómo distinguir
+     * el cupo que hay que devolver del que el profesional cerró a propósito (F5a/F5d).
+     */
+    SLOT_SOURCE_CLOSED: {
+      code: 'SLOT_SOURCE_CLOSED',
+      display: 'Slot closed because its space or equipment is out of service',
+    },
+
+    // `availability_exceptions.source_kind_concept_id` (F5d): quién creó la excepción. Ausente
+    // (NULL) ≡ manual: es lo que toda excepción era antes de este cambio.
+    EXC_SRC_MANUAL: {
+      code: 'EXC_SRC_MANUAL',
+      display: 'Availability exception created by a person',
+    },
+    EXC_SRC_CARE_SPACE_BLOCK: {
+      code: 'EXC_SRC_CARE_SPACE_BLOCK',
+      display: 'Availability exception created by a care space block',
+    },
+    EXC_SRC_EQUIPMENT_STATUS: {
+      code: 'EXC_SRC_EQUIPMENT_STATUS',
+      display:
+        'Availability exception created by the status of a piece of equipment',
+    },
+
     // `schedule_rules.booking_mode_concept_id`: qué admite una franja. Ausente
     // (NULL) ≡ CONSULTATIONS: es lo que toda franja era antes de este cambio.
     RULE_MODE_CONSULTATIONS: {

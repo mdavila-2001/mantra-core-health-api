@@ -29,6 +29,15 @@ export enum SchedulingErrorReason {
   TEMPLATE_RULE_SLOT_TOO_LONG = 'TEMPLATE_RULE_SLOT_TOO_LONG',
   TEMPLATE_RULE_OVERLAP_SELF = 'TEMPLATE_RULE_OVERLAP_SELF',
   TEMPLATE_RULE_OVERLAP_OTHER_AGENDA = 'TEMPLATE_RULE_OVERLAP_OTHER_AGENDA',
+  /**
+   * Agenda por espacio (F5d). La función del espacio no admite horario propio (consultorio,
+   * sala de procedimientos y sala de imagen sí).
+   */
+  TEMPLATE_CARE_SPACE_INVALID_FUNCTION = 'TEMPLATE_CARE_SPACE_INVALID_FUNCTION',
+  /** El espacio no es de la sede/práctica del recurso, o no es el espacio al que el recurso ya está atado. */
+  TEMPLATE_CARE_SPACE_SITE_MISMATCH = 'TEMPLATE_CARE_SPACE_SITE_MISMATCH',
+  /** Otra plantilla vigente ocupa el mismo consultorio a la misma hora (la base no puede expresarlo). */
+  TEMPLATE_RULE_OVERLAP_CARE_SPACE = 'TEMPLATE_RULE_OVERLAP_CARE_SPACE',
   TEMPLATE_NOT_FOUND = 'TEMPLATE_NOT_FOUND',
   TEMPLATE_RESOURCE_NOT_FOUND = 'TEMPLATE_RESOURCE_NOT_FOUND',
   TEMPLATE_HAS_ACTIVE_BOOKINGS = 'TEMPLATE_HAS_ACTIVE_BOOKINGS',
@@ -94,6 +103,24 @@ export enum SchedulingErrorReason {
 
   // Tiempo del profesional cruzando todas sus agendas (REGLA MADRE AG-1).
   PRACTITIONER_NOT_AVAILABLE = 'PRACTITIONER_NOT_AVAILABLE',
+
+  // Agenda por espacio y por equipo (F5a/F5d).
+  /** La cita ya tiene consultorio y el pedido declara otro. */
+  APPOINTMENT_CARE_SPACE_MISMATCH = 'APPOINTMENT_CARE_SPACE_MISMATCH',
+  /** Dos citas en el mismo consultorio y horario: la API lo detecta antes, la base es la red. */
+  CARE_SPACE_DOUBLE_BOOKED = 'CARE_SPACE_DOUBLE_BOOKED',
+  /** La excepción la creó un bloqueo o el estado de un equipo: sólo se cambia en su origen. */
+  EXCEPTION_SOURCE_READ_ONLY = 'EXCEPTION_SOURCE_READ_ONLY',
+  /** El cupo dejó de ofrecerse porque su espacio o su equipo está fuera de servicio. */
+  SLOT_SOURCE_CLOSED = 'SLOT_SOURCE_CLOSED',
+  /** El tipo de recurso no corresponde a la tabla que referencia (p. ej. una sala que apunta a un perfil). */
+  RESOURCE_REF_TYPE_MISMATCH = 'RESOURCE_REF_TYPE_MISMATCH',
+  /** El perfil/equipo/sede referenciado no existe en la organización (404 uniforme). */
+  RESOURCE_REF_NOT_FOUND = 'RESOURCE_REF_NOT_FOUND',
+  /** El equipo no está ubicado en una sala: no hay a qué agenda atarlo. */
+  EQUIPMENT_NOT_LOCATED = 'EQUIPMENT_NOT_LOCATED',
+  /** Ya hay un recurso agendable activo para ese equipo. */
+  RESOURCE_ALREADY_EXISTS_FOR_EQUIPMENT = 'RESOURCE_ALREADY_EXISTS_FOR_EQUIPMENT',
 
   // Recurso agendable ligado a un espacio de infraestructura (R0, F4).
   SPACE_NOT_FOUND = 'SPACE_NOT_FOUND',

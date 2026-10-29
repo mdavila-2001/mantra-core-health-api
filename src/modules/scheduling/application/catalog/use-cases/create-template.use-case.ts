@@ -1,4 +1,5 @@
 import { AgendaOverlapGuard } from '../support/agenda-overlap-guard';
+import { CareSpaceTemplateGuard } from '../support/care-space-template-guard';
 import {
   CONCEPTS,
   PreconditionFailedException,
@@ -32,6 +33,7 @@ export class CreateTemplateUseCase {
     private readonly access: CatalogAccess,
     private readonly overlapGuard: AgendaOverlapGuard,
     private readonly logger: PinoLogger,
+    private readonly careSpaces: CareSpaceTemplateGuard,
   ) {
     this.logger.setContext(CreateTemplateUseCase.name);
   }
@@ -93,6 +95,8 @@ export class CreateTemplateUseCase {
           resourceId,
         });
       }
+      // El tenant antes que el rol: una agenda de otra organización responde 404 a todos.
+      this.careSpaces.assertResourceInActiveTenant(resource);
       this.access.assertActorResource(resource, actor);
       await this.overlapGuard.assertNoOverlapWithOtherAgendas(
         tx,
@@ -100,8 +104,27 @@ export class CreateTemplateUseCase {
         dto,
       );
 
+      // F5d · horario por espacio: el espacio es del tenant, lo puede atar quien administra,
+      // admite horario y nadie más lo ocupa a la misma hora.
+      const space =
+        dto.careSpaceId === undefined
+          ? null
+          : await this.careSpaces.attach(tx, resource, dto.careSpaceId, actor);
+      if (space) {
+        await this.careSpaces.assertNoOverlap(tx, {
+          resource,
+          careSpaceId: space.id,
+          validFrom: dto.validFrom ? new Date(dto.validFrom) : null,
+          validTo: dto.validTo ? new Date(dto.validTo) : null,
+          bands: dto.rules,
+        });
+      }
+
       const template = this.catalogRepo.createTemplate(tx, {
         resourceId,
+        // El tenant sale del recurso ya acotado al contexto, nunca del cuerpo.
+        tenantId: resource.tenantId,
+        careSpaceId: space?.id,
         name: dto.name,
         validFrom: dto.validFrom ? new Date(dto.validFrom) : undefined,
         validTo: dto.validTo ? new Date(dto.validTo) : undefined,
@@ -151,12 +174,25 @@ export class CreateTemplateUseCase {
         });
       }
 
+      if (space) {
+        await this.careSpaces.announce(tx, {
+          tenantId: resource.tenantId,
+          templateId: template.id,
+          resourceId,
+          careSpaceId: space.id,
+          previousCareSpaceId: null,
+          siteId: space.practiceSiteId,
+          actorUserId: actor.id,
+        });
+      }
+
       return {
         id: template.id,
         name: dto.name,
         ruleCount: dto.rules.length,
         statusConceptId: CONCEPTS.TEMPLATE_PUBLISHED,
         flexibleHours: flexible,
+        ...(space ? { careSpaceId: space.id } : {}),
       };
     });
   }

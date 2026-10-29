@@ -4,7 +4,8 @@ import {
   ResourceNotFoundException,
 } from '../../../../../common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
+import { CareSpaceSlotSync } from '../support/care-space-slot-sync';
 import { ResourceAgendaResponseDto } from '../../../presentation/dto';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
 
@@ -14,6 +15,7 @@ export class GetResourceAgendaUseCase {
   constructor(
     private readonly em: EntityManager,
     private readonly catalogRepo: SchedulingCatalogRepository,
+    @Optional() private readonly slotSync?: CareSpaceSlotSync,
   ) {}
 
   /**
@@ -80,8 +82,15 @@ export class GetResourceAgendaUseCase {
         openStatusConceptId: CONCEPTS.SLOT_OPEN,
       },
     );
-    const truncated = rows.length > options.limit;
-    const page = truncated ? rows.slice(0, options.limit) : rows;
+    // F5d · lo que se ofrece tiene que poder reservarse: un cupo cuyo espacio está bloqueado o
+    // cuyo equipo está fuera de servicio no se muestra aunque su estado todavía diga «abierto»
+    // (una cancelación dentro del bloqueo lo devuelve a `OPEN` por su propio camino).
+    const offered =
+      options.onlyAvailable && this.slotSync && rows.length > 0
+        ? await this.withoutCovered(em, rows)
+        : rows;
+    const truncated = offered.length > options.limit;
+    const page = truncated ? offered.slice(0, options.limit) : offered;
 
     return {
       resourceId,
@@ -103,5 +112,19 @@ export class GetResourceAgendaUseCase {
       limit: options.limit,
       truncated,
     };
+  }
+
+  /** Descarta los cupos que su espacio o su equipo no puede atender. */
+  private async withoutCovered<T extends { id: string }>(
+    em: EntityManager,
+    rows: readonly T[],
+  ): Promise<T[]> {
+    const covered = await this.slotSync!.coveredSlotIds(
+      em,
+      rows.map((row) => row.id),
+    );
+    return covered.size === 0
+      ? [...rows]
+      : rows.filter((r) => !covered.has(r.id));
   }
 }

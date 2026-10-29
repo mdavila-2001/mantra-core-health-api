@@ -45,8 +45,25 @@ export interface CreateAppointmentData {
    */
   typeConceptId?: string;
   /**
+   * Espacio donde ocurre la cita (F5d). Ausente en las salas que admiten solapes y en las
+   * citas sin espacio. Con la cita comprometida, `ex_appointments_care_space_time` impide dos
+   * citas en el mismo espacio y rato.
+   */
+  careSpaceId?: string;
+  /**
    * Identificador asociado a actor user.
    */
+  actorUserId?: string;
+}
+
+/** Lo que cambia al mover una cita a otro cupo (reprogramación). */
+export interface MoveAppointmentData {
+  startAt: Date;
+  endAt?: Date;
+  /** Espacio del cupo nuevo; `null` ≡ la cita deja de llevar espacio. */
+  careSpaceId: string | null;
+  /** Profesional del cupo nuevo, cuando la agenda es de uno. */
+  practitionerProfileId?: string;
   actorUserId?: string;
 }
 
@@ -87,6 +104,7 @@ export class AppointmentsRepository {
         reasonText: data.reasonText,
         channelConceptId: data.channelConceptId,
         typeConceptId: data.typeConceptId,
+        careSpaceId: data.careSpaceId,
         createdAt: now,
         updatedAt: now,
         createdByUserId: data.actorUserId,

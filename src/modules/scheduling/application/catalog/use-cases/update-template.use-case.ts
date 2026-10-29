@@ -1,10 +1,12 @@
 import {
+  CONCEPTS,
   PreconditionFailedException,
   ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../../../common';
 import { CatalogAccess } from '../support/catalog-access';
+import { CareSpaceTemplateGuard } from '../support/care-space-template-guard';
 import {
   DEFAULT_SLOT_CAPACITY,
   DEFAULT_SLOT_MINUTES,
@@ -30,6 +32,7 @@ export class UpdateTemplateUseCase {
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly access: CatalogAccess,
     private readonly logger: PinoLogger,
+    private readonly careSpaces: CareSpaceTemplateGuard,
   ) {
     this.logger.setContext(UpdateTemplateUseCase.name);
   }
@@ -94,7 +97,27 @@ export class UpdateTemplateUseCase {
           resourceId: template.resourceId,
         });
       }
+      this.careSpaces.assertResourceInActiveTenant(resource);
       this.access.assertActorResource(resource, actor);
+
+      // F5d · el espacio del horario. `undefined` lo conserva, `null` lo suelta y un id lo
+      // cambia (con las mismas reglas que al publicar). El tenant de la plantilla lo fija el
+      // recurso, no el cuerpo.
+      const previousCareSpaceId = template.careSpaceId ?? null;
+      let nextCareSpaceId = previousCareSpaceId;
+      let nextSiteId: string | null = null;
+      if (dto.careSpaceId === null) {
+        nextCareSpaceId = null;
+      } else if (dto.careSpaceId !== undefined) {
+        const space = await this.careSpaces.attach(
+          tx,
+          resource,
+          dto.careSpaceId,
+          actor,
+        );
+        nextCareSpaceId = space.id;
+        nextSiteId = space.practiceSiteId;
+      }
 
       if (dto.name !== undefined) template.name = dto.name;
       if (dto.slotMinutes !== undefined) {
@@ -168,8 +191,44 @@ export class UpdateTemplateUseCase {
         ruleCount = dto.rules.length;
       }
 
+      // Con espacio, la plantilla que queda (franjas, vigencia y espacio finales) no puede pisar a
+      // otra publicada en el mismo espacio. Sólo una plantilla vigente ocupa el espacio.
+      if (
+        nextCareSpaceId !== null &&
+        template.statusConceptId === CONCEPTS.TEMPLATE_PUBLISHED
+      ) {
+        await this.careSpaces.assertNoOverlap(tx, {
+          resource,
+          careSpaceId: nextCareSpaceId,
+          templateId: template.id,
+          validFrom: template.validFrom,
+          validTo: template.validTo,
+          bands:
+            dto.rules ??
+            (await this.catalogRepo.findRulesByTemplate(tx, templateId)),
+        });
+      }
+      const spaceChanged = nextCareSpaceId !== previousCareSpaceId;
+      if (spaceChanged) {
+        // Columna anulable: soltar el espacio es escribir NULL, no dejar el campo sin tocar.
+        (template as { careSpaceId?: string | null }).careSpaceId =
+          nextCareSpaceId;
+      }
+
       touch(template, actor.id);
       await tx.flush();
+
+      if (spaceChanged) {
+        await this.careSpaces.announce(tx, {
+          tenantId: resource.tenantId,
+          templateId: template.id,
+          resourceId: resource.id,
+          careSpaceId: nextCareSpaceId,
+          previousCareSpaceId,
+          siteId: nextSiteId,
+          actorUserId: actor.id,
+        });
+      }
 
       return {
         id: template.id,
@@ -177,6 +236,7 @@ export class UpdateTemplateUseCase {
         ruleCount,
         statusConceptId: template.statusConceptId,
         flexibleHours: template.flexibleHours === true,
+        ...(nextCareSpaceId ? { careSpaceId: nextCareSpaceId } : {}),
       };
     });
   }

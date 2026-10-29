@@ -139,17 +139,22 @@ describe('CareSpaceBlocksService.create', () => {
     };
     const events = { publish: fn().mockResolvedValue(true) };
     const historyRepo = { append: fn() };
+    const listeners = {
+      created: fn().mockResolvedValue(undefined),
+      closed: fn().mockResolvedValue(undefined),
+    };
     const service = new CareSpaceBlocksService(
       state as any,
       recorder as any,
       events as any,
       historyRepo as any,
       {} as any,
+      listeners as any,
     );
     (jest.spyOn as any)(service, 'commitments').mockResolvedValue(
       over.conflicts ?? [],
     );
-    return { service, tx, recorder, events };
+    return { service, tx, recorder, events, listeners };
   }
 
   const input = {
@@ -180,6 +185,53 @@ describe('CareSpaceBlocksService.create', () => {
     expect(d.events.publish.mock.calls[0][1].type).toBe(
       'practice.care_space.block_started',
     );
+  });
+
+  it('avisa a los oyentes (la agenda) del bloqueo creado, ya rija o quede programado, con el tenant y el autor', async () => {
+    const ahora = build();
+    await ahora.service.create(ahora.tx as any, makeRow(), input, ctx);
+    expect(ahora.listeners.created).toHaveBeenCalledTimes(1);
+    expect(ahora.listeners.created.mock.calls[0][3]).toEqual({
+      tenantId: TENANT,
+      actorUserId: 'u',
+      requestId: undefined,
+      now: NOW,
+    });
+    const futuro = build();
+    await futuro.service.create(
+      futuro.tx as any,
+      makeRow(),
+      { ...input, startsAt: new Date(NOW.getTime() + 86_400_000) },
+      ctx,
+    );
+    expect(futuro.listeners.created).toHaveBeenCalledTimes(1);
+  });
+
+  it('si el bloqueo no se crea (conflicto), los oyentes no se enteran', async () => {
+    const d = build({ overlap: [{ id: 'otro' }] });
+    await expect(
+      d.service.create(d.tx as any, makeRow(), input, ctx),
+    ).rejects.toBeDefined();
+    expect(d.listeners.created).not.toHaveBeenCalled();
+  });
+
+  it('sin registro de oyentes (una prueba, un despliegue parcial) el bloqueo se crea igual', async () => {
+    const d = build();
+    const solo = new CareSpaceBlocksService(
+      {
+        stateOf: (jest.fn as any)().mockResolvedValue({
+          occupancy: 'OCC_FREE',
+        }),
+      } as any,
+      d.recorder as any,
+      d.events as any,
+      { append: (jest.fn as any)() } as any,
+      {} as any,
+    );
+    (jest.spyOn as any)(solo, 'commitments').mockResolvedValue([]);
+    await expect(
+      solo.create(d.tx as any, makeRow(), input, ctx),
+    ).resolves.toMatchObject({ applied: true });
   });
 
   it('uno programado en el futuro se guarda sin tocar el espacio ni publicar', async () => {
@@ -243,5 +295,77 @@ describe('CareSpaceBlocksService.create', () => {
     expect(JSON.stringify(d.events.publish.mock.calls[0][1])).not.toContain(
       'Delirium',
     );
+  });
+});
+
+describe('CareSpaceBlocksService.end / cancel · avisan a la agenda', () => {
+  function build() {
+    const listeners = {
+      created: fn().mockResolvedValue(undefined),
+      closed: fn().mockResolvedValue(undefined),
+    };
+    const events = { publish: fn().mockResolvedValue(true) };
+    const recorder = {
+      applyChange: fn().mockResolvedValue({
+        row: makeRow(),
+        state: { v2Code: 'A' },
+        events: [],
+      }),
+    };
+    const service = new CareSpaceBlocksService(
+      {} as any,
+      recorder as any,
+      events as any,
+      { append: fn() } as any,
+      { openOrder: fn() } as any,
+      listeners as any,
+    );
+    const terminado = bloque({ endedAt: NOW });
+    (jest.spyOn as any)(service, 'updateBlock').mockResolvedValue(terminado);
+    (jest.spyOn as any)(service, 'historyOf').mockResolvedValue(undefined);
+    return { service, listeners, events, terminado };
+  }
+  const ctx = {
+    tenantId: TENANT,
+    actorUserId: 'u',
+    source: 'SRC_MANUAL',
+    action: 'X',
+    now: NOW,
+  } as any;
+
+  it('terminar un bloqueo avisa ENDED con el bloqueo ya terminado, después de dejarlo escrito', async () => {
+    const d = build();
+    const antes = bloque({ startsAt: new Date(NOW.getTime() - 3_600_000) });
+    await d.service.end({} as any, makeRow(), antes, 'listo', ctx);
+    expect(d.listeners.closed).toHaveBeenCalledTimes(1);
+    const [, block, , outcome, context] = d.listeners.closed.mock.calls[0];
+    expect(block).toBe(d.terminado);
+    expect(outcome).toBe('ENDED');
+    expect(context).toMatchObject({
+      tenantId: TENANT,
+      actorUserId: 'u',
+      now: NOW,
+    });
+  });
+
+  it('cancelar un bloqueo avisa CANCELLED', async () => {
+    const d = build();
+    await d.service.cancel(
+      {} as any,
+      makeRow(),
+      bloque(),
+      'error de carga',
+      ctx,
+    );
+    expect(d.listeners.closed).toHaveBeenCalledTimes(1);
+    expect(d.listeners.closed.mock.calls[0][3]).toBe('CANCELLED');
+  });
+
+  it('un bloqueo ya terminado es 409 y la agenda no se entera', async () => {
+    const d = build();
+    await expect(
+      d.service.end({} as any, makeRow(), bloque({ endedAt: NOW }), null, ctx),
+    ).rejects.toMatchObject({ status: 409 });
+    expect(d.listeners.closed).not.toHaveBeenCalled();
   });
 });

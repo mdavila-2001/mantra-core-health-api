@@ -117,6 +117,9 @@ export class ListTemplatesUseCase {
       ...(template.bookingPolicyId == null
         ? {}
         : { bookingPolicyId: template.bookingPolicyId }),
+      ...(template.careSpaceId == null
+        ? {}
+        : { careSpaceId: template.careSpaceId }),
       statusConceptId: template.statusConceptId,
       retired: template.statusConceptId === CONCEPTS.TEMPLATE_RETIRED,
       flexibleHours: template.flexibleHours === true,

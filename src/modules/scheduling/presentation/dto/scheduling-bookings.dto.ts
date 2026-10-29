@@ -1035,6 +1035,22 @@ export class CreateDirectAppointmentDto {
   channel?: AppointmentChannel;
 
   /**
+   * Consultorio (o sala) donde ocurre la atención (F5d). Opcional: si la agenda ya fija el
+   * espacio —sala, equipo o franja de una plantilla con espacio— no hace falta, y si lo
+   * declarás tiene que ser el mismo. Sólo quien opera agendas ajenas puede elegirlo cuando la
+   * agenda no lo fija. Con la cita reservada, dos citas en el mismo espacio y rato son 409
+   * `CARE_SPACE_DOUBLE_BOOKED`.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Espacio donde ocurre la atención. Ausente: el de la agenda (sala, equipo o franja con espacio)',
+  })
+  @IsOptional()
+  @IsUUID()
+  careSpaceId?: string;
+
+  /**
    * P42 · La reconsulta: la cita nace atada a la consulta de la que sale.
    *
    * Sólo cuando viene corren cuatro rechazos: 403 si la agenda no es del
