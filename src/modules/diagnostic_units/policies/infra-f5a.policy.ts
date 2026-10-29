@@ -23,6 +23,11 @@ export const INFRA_F5A_POLICY: InfraPolicy = {
       summary:
         'Cambiar el estado operativo del equipo (mantenimiento, fuera de servicio) y su calibración',
     },
+    'infra.equipment.worklist': {
+      roles: ['SUPERADMIN', 'ORG_ADMIN', 'BRANCH_ADMIN'],
+      summary:
+        'Operar la estación de imagen: ver la worklist completa del equipo (con los pacientes programados)',
+    },
     'infra.equipment.view': {
       roles: ['SUPERADMIN', 'ORG_ADMIN', 'BRANCH_ADMIN', 'MAINTENANCE'],
       summary: 'Ver la estación DICOM (AE Title, sala) de un equipo',

@@ -89,7 +89,8 @@ export class DiagnosticsImagingStepsController {
   })
   worklist(
     @Query() query: ImagingWorklistQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ImagingWorklistDto> {
-    return this.steps.worklist(query);
+    return this.steps.worklist(query, actor);
   }
 }

@@ -2,10 +2,16 @@ import { randomUUID } from 'node:crypto';
 import { bootstrapTestApp, bearer, type TestContext } from './harness';
 import { CONCEPTS } from '../../src/common';
 import { CLIN } from '../../src/modules/clinical/clinical.concepts';
+import { AUTHZ } from '../../src/modules/authz/authz.concepts';
 import { DIAG } from '../../src/modules/diagnostics/diagnostics.concepts';
 import { DELEG } from '../../src/modules/delegated_access/delegated_access.concepts';
 import { DUNIT } from '../../src/modules/diagnostic_units/diagnostic_units.concepts';
-import { createPatient, createStaff, ROLE } from './infrastructure-f3.fixtures';
+import {
+  PASSWORD,
+  createPatient,
+  createStaff,
+  ROLE,
+} from './infrastructure-f3.fixtures';
 import {
   como,
   crearEspacio,
@@ -53,6 +59,8 @@ describe('Infraestructura F5a · equipo, estación DICOM, pasos y worklist', () 
   let sinAlcanceA: { token: string; tenantId: string; userId: string };
   let mantenimientoA: { token: string };
   let enfermeriaA: { token: string };
+  /** El dueño de A con rol clínico: opera la estación (administra la organización). */
+  let operadorA: { token: string; tenantId: string };
   let doc1: Profesional;
   let doc2: Profesional;
   let seq = 0;
@@ -310,8 +318,23 @@ describe('Infraestructura F5a · equipo, estación DICOM, pasos y worklist', () 
       sufijo,
     );
     enfermeriaA = { token: enfermeria.token };
+    await http()
+      .post(`/authz/users/${orgA.userId}/role-assignments`)
+      .set(bearer(ctx.adminToken))
+      .send({ roleCode: 'CLINICIAN', tenantId: orgA.tenantId })
+      .expect(201);
+    operadorA = {
+      token: (
+        await http()
+          .post('/iam/auth/login')
+          .send({ email: orgA.email, password: PASSWORD })
+          .expect(200)
+      ).body.accessToken,
+      tenantId: orgA.tenantId,
+    };
     doc1 = await registrarProfesional(ctx, 'd1', sufijo);
     doc2 = await registrarProfesional(ctx, 'd2', sufijo);
+    await darMembresia(ctx, doc1.userId, orgA.tenantId);
   });
 
   afterAll(async () => {
@@ -609,7 +632,7 @@ describe('Infraestructura F5a · equipo, estación DICOM, pasos y worklist', () 
 
       const lista = await http()
         .get('/diagnostics/imaging-worklist')
-        .set(como(clinicoA))
+        .set(como(operadorA))
         .query({ aeTitle: `WL-${sufijo}`, from: inicio, to: futuro(6) })
         .expect(200);
       expect(lista.body.count).toBe(1);
@@ -626,7 +649,7 @@ describe('Infraestructura F5a · equipo, estación DICOM, pasos y worklist', () 
       // Por equipo da lo mismo, y recargar (otra petición) también.
       const porEquipo = await http()
         .get('/diagnostics/imaging-worklist')
-        .set(como(clinicoA))
+        .set(como(operadorA))
         .query({ equipmentId: id, from: inicio, to: futuro(6) })
         .expect(200);
       expect(porEquipo.body.items.map((i: any) => i.stepId)).toEqual([
@@ -696,7 +719,7 @@ describe('Infraestructura F5a · equipo, estación DICOM, pasos y worklist', () 
 
       const sinEstacion = await http()
         .get('/diagnostics/imaging-worklist')
-        .set(como(clinicoA));
+        .set(como(operadorA));
       expect(sinEstacion.status).toBe(422);
       expect(sinEstacion.body.reason).toBe('IMAGING_WORKLIST_STATION_REQUIRED');
       for (const filtro of [{ equipmentId: id }, { aeTitle: `ZZ-${sufijo}` }]) {
@@ -709,7 +732,7 @@ describe('Infraestructura F5a · equipo, estación DICOM, pasos y worklist', () 
             to: futuro(10, '00:00'),
           })
           .expect(200);
-        expect(deB.body).toEqual({ items: [], count: 0 });
+        expect(deB.body).toEqual({ items: [], count: 0, truncated: false });
       }
       const sinRol = await http()
         .get('/diagnostics/imaging-worklist')
@@ -719,6 +742,172 @@ describe('Infraestructura F5a · equipo, estación DICOM, pasos y worklist', () 
       // La plantilla de crear pasos tampoco es del mostrador.
       const crear = await crearPaso(coordA, study);
       expect(crear.status).toBe(403);
+    });
+
+    it('la worklist no lista pacientes a quien no opera la estación ni los atiende: el operador ve todo; el clínico sin relación, nada; el profesional ve sólo sus pacientes', async () => {
+      // doc1 es profesional de A con rol clínico en el tenant.
+      await http()
+        .post(`/authz/users/${doc1.userId}/role-assignments`)
+        .set(bearer(ctx.adminToken))
+        .send({ roleCode: 'PRACTITIONER', tenantId: orgA.tenantId })
+        .expect(201);
+      const profesional = asUser(
+        (
+          await http()
+            .post('/iam/auth/login')
+            .send({
+              email: `f4-prof-d1-${sufijo}@example.test`,
+              password: PASSWORD,
+            })
+            .expect(200)
+        ).body.accessToken,
+        orgA.tenantId,
+      );
+      const id = await equipo(sitioDiagA, plataformaA);
+      await patch(orgA, id, {
+        careSpaceId: salaImagen.id,
+        aeTitle: `PV-${sufijo}`,
+      }).expect(200);
+      const mio = await estudio(orgA.tenantId);
+      const ajeno = await estudio(orgA.tenantId);
+      const pasoMio = (await crearPaso(clinicoA, mio).expect(201)).body.id;
+      const pasoAjeno = (await crearPaso(clinicoA, ajeno).expect(201)).body.id;
+      await programar(coordA, pasoMio, id, futuro(10, '09:00')).expect(200);
+      await programar(coordA, pasoAjeno, id, futuro(10, '10:00')).expect(200);
+      const [{ patient_profile_id: pacienteMio }] = await filas(
+        ctx,
+        `select patient_profile_id from diagnostics.imaging_studies where id = ?`,
+        [mio],
+      );
+      await filas(
+        ctx,
+        `insert into authz.care_relationships
+           (id, tenant_id, patient_profile_id, practitioner_profile_id,
+            relationship_type_concept_id, status_concept_id, valid_from,
+            created_at, updated_at, row_version)
+         values (gen_random_uuid(), ?, ?, ?, ?, ?, now() - interval '1 day', now(), now(), 1)`,
+        [
+          orgA.tenantId,
+          pacienteMio,
+          doc1.hpid,
+          AUTHZ.CARE_REL_TREATING,
+          CONCEPTS.STATE_ACTIVE,
+        ],
+      );
+      const ventana = {
+        equipmentId: id,
+        from: futuro(10, '00:00'),
+        to: futuro(11, '00:00'),
+      };
+      const ver = (quien: { token: string; tenantId: string }) =>
+        http()
+          .get('/diagnostics/imaging-worklist')
+          .set(como(quien))
+          .query(ventana);
+
+      // Quien opera la estación (administración de la organización) ve a los dos.
+      const operador = await ver(operadorA).expect(200);
+      expect(operador.body.items.map((i: any) => i.stepId)).toEqual([
+        pasoMio,
+        pasoAjeno,
+      ]);
+      // Un clínico sin la estación ni relación con ellos: lista vacía, no 403.
+      const sinRelacion = await ver(clinicoA).expect(200);
+      expect(sinRelacion.body).toEqual({
+        items: [],
+        count: 0,
+        truncated: false,
+      });
+      // El profesional con relación asistencial ve sólo a su paciente.
+      const propio = await ver(profesional).expect(200);
+      expect(propio.body.items.map((i: any) => i.stepId)).toEqual([pasoMio]);
+      expect(propio.body.items[0].patientProfileId).toBe(pacienteMio);
+    });
+
+    it('la ventana de la worklist está acotada: más de 7 días o invertida es 422', async () => {
+      const id = await equipo(sitioDiagA, plataformaA);
+      const larga = await http()
+        .get('/diagnostics/imaging-worklist')
+        .set(como(operadorA))
+        .query({
+          equipmentId: id,
+          from: futuro(1, '00:00'),
+          to: futuro(9, '00:00'),
+        });
+      expect(larga.status).toBe(422);
+      expect(larga.body.reason).toBe('IMAGING_WORKLIST_WINDOW_TOO_LARGE');
+      const invertida = await http()
+        .get('/diagnostics/imaging-worklist')
+        .set(como(operadorA))
+        .query({
+          equipmentId: id,
+          from: futuro(3, '00:00'),
+          to: futuro(2, '00:00'),
+        });
+      expect(invertida.status).toBe(422);
+      expect(invertida.body.reason).toBe('IMAGING_WORKLIST_WINDOW_INVALID');
+      const demasiado = await http()
+        .get('/diagnostics/imaging-worklist')
+        .set(como(operadorA))
+        .query({ equipmentId: id, limit: 500 });
+      expect(demasiado.status).toBe(400);
+    });
+
+    it('programar valida el estado del paso: planificado y programado se (re)programan; completado o de otro estado es 409 y nada cambia', async () => {
+      const id = await equipo(sitioDiagA, plataformaA);
+      await patch(orgA, id, { careSpaceId: salaImagen.id }).expect(200);
+      const paso = (
+        await crearPaso(clinicoA, await estudio(orgA.tenantId)).expect(201)
+      ).body.id;
+      await programar(coordA, paso, id, futuro(11, '09:00')).expect(200);
+      // Reprogramar un paso ya programado: permitido.
+      await programar(coordA, paso, id, futuro(11, '10:00')).expect(200);
+      const estado = async () =>
+        (
+          await filas(
+            ctx,
+            `select status_concept_id, scheduled_start_at, scheduled_equipment_id, row_version
+               from diagnostics.imaging_procedure_steps where id = ?`,
+            [paso],
+          )
+        )[0];
+      await filas(
+        ctx,
+        `update diagnostics.imaging_procedure_steps set status_concept_id = ? where id = ?`,
+        [DIAG.PROCEDURE_STEP_COMPLETED, paso],
+      );
+      const antes = await estado();
+      const r = await programar(coordA, paso, id, futuro(11, '11:00'));
+      expect(r.status).toBe(409);
+      expect(r.body.reason).toBe('IMAGING_STEP_STATE_INVALID');
+      expect(await estado()).toEqual(antes);
+      // Un paso completado tampoco se arrastra si el equipo cambia de sala: conserva donde se hizo.
+      await patch(orgA, id, { careSpaceId: salaImagen2.id }).expect(200);
+      const [movido] = await filas(
+        ctx,
+        `select scheduled_care_space_id from diagnostics.imaging_procedure_steps where id = ?`,
+        [paso],
+      );
+      expect(movido.scheduled_care_space_id).toBe(salaImagen.id);
+      await patch(orgA, id, { careSpaceId: salaImagen.id }).expect(200);
+      // Dos programaciones simultáneas del mismo paso: se serializan y ambas dejan un estado válido.
+      const otro = (
+        await crearPaso(clinicoA, await estudio(orgA.tenantId)).expect(201)
+      ).body.id;
+      const [r1, r2] = await Promise.all([
+        programar(coordA, otro, id, futuro(12, '09:00')),
+        programar(coordA, otro, id, futuro(12, '10:00')),
+      ]);
+      expect([r1.status, r2.status]).toEqual([200, 200]);
+      const [fin] = await filas(
+        ctx,
+        `select status_concept_id, scheduled_care_space_id from diagnostics.imaging_procedure_steps where id = ?`,
+        [otro],
+      );
+      expect(fin).toMatchObject({
+        status_concept_id: DIAG.PROCEDURE_STEP_SCHEDULED,
+        scheduled_care_space_id: salaImagen.id,
+      });
     });
   });
 
@@ -973,7 +1162,6 @@ describe('Infraestructura F5a · equipo, estación DICOM, pasos y worklist', () 
   // ------------------------------------------------------------ colector de la muestra
   describe('POST /diagnostics/specimens · collectorProfileId', () => {
     it('un profesional de otra organización o inexistente es 422 PRACTITIONER_NOT_IN_TENANT y no se registra la muestra; uno de la organización pasa', async () => {
-      await darMembresia(ctx, doc1.userId, orgA.tenantId);
       const paciente = await createPatient(ctx, {
         name: `Paciente muestra ${sufijo}`,
         gender: 'FEMALE',

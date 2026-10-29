@@ -1,8 +1,10 @@
 import { jest } from '@jest/globals';
 import {
+  ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { InsufficientRoleException } from '../../../common/errors/domain.exception';
 import { DUNIT } from '../../diagnostic_units/diagnostic_units.concepts';
 import { OpsErrorReason } from '../../practice/practice-ops.error-reasons';
 import { DIAG } from '../diagnostics.concepts';
@@ -23,7 +25,16 @@ const SPACE = '40000000-0000-4000-8000-000000000004';
 const START = '2030-03-04T14:00:00.000Z';
 
 /** Servicio con la base y el puerto de F2 simulados; `rows` responde a cada SELECT por su texto. */
-function build(rows: Record<string, unknown[]> = {}) {
+function build(
+  rows: Record<string, unknown[]> = {},
+  stepState: string = DIAG.PROCEDURE_STEP_PLANNED,
+) {
+  rows = {
+    'select status_concept_id from diagnostics.imaging_procedure_steps': [
+      { status_concept_id: stepState },
+    ],
+    ...rows,
+  };
   const queries: { sql: string; params: unknown[] }[] = [];
   const answer = async (sql: string, params: unknown[] = []) => {
     queries.push({ sql, params });
@@ -53,15 +64,21 @@ function build(rows: Record<string, unknown[]> = {}) {
   };
   const ops = { assertBookable: mockFn().mockResolvedValue(undefined) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const infra = { assertCan: mockFn().mockResolvedValue({}) };
+  const patientAccess = {
+    assertCanReadPatient: mockFn().mockResolvedValue(undefined),
+  };
   const service = inTenant(
     new DiagnosticsImagingStepsService(
       em,
       scope as any,
       ops as any,
       logger as any,
+      infra as any,
+      patientAccess as any,
     ),
   );
-  return { service, tx, scope, ops, queries, step };
+  return { service, tx, scope, ops, queries, step, infra, patientAccess };
 }
 
 const found = {
@@ -240,6 +257,59 @@ describe('DiagnosticsImagingStepsService.scheduleStep', () => {
   });
 });
 
+describe('DiagnosticsImagingStepsService.scheduleStep · estado del paso', () => {
+  const dto = { equipmentId: EQUIPMENT, scheduledStartAt: START };
+
+  it('relee el paso con FOR UPDATE antes de decidir por su estado', async () => {
+    const d = build({ ...found, ...operationalEquipment() });
+    await d.service.scheduleStep(STEP, dto, actor);
+    const lock = d.queries.find((q) =>
+      q.sql.startsWith(
+        'select status_concept_id from diagnostics.imaging_procedure_steps',
+      ),
+    )!;
+    expect(lock.sql).toMatch(/for update/);
+    expect(lock.params).toEqual([STEP]);
+  });
+
+  it.each([DIAG.PROCEDURE_STEP_PLANNED, DIAG.PROCEDURE_STEP_SCHEDULED])(
+    'un paso %s se programa o se reprograma',
+    async (state) => {
+      const d = build({ ...found, ...operationalEquipment() }, state);
+      const res = await d.service.scheduleStep(STEP, dto, actor);
+      expect(res.statusConceptId).toBe(DIAG.PROCEDURE_STEP_SCHEDULED);
+    },
+  );
+
+  it.each([
+    ['completado', DIAG.PROCEDURE_STEP_COMPLETED],
+    [
+      'de un estado desconocido (en curso, cancelado…)',
+      '99999999-9999-4999-8999-999999999999',
+    ],
+  ])(
+    'un paso %s es 409 IMAGING_STEP_STATE_INVALID y no toca equipo, sala ni paso',
+    async (_name, state) => {
+      const d = build({ ...found, ...operationalEquipment() }, state);
+      const error: any = await d.service.scheduleStep(STEP, dto, actor).then(
+        () => null,
+        (e: unknown) => e,
+      );
+      expect(error).toBeInstanceOf(ConflictException);
+      expect(error.reason).toBe(
+        DiagnosticsErrorReason.IMAGING_STEP_STATE_INVALID,
+      );
+      expect(
+        d.queries.some((q) => q.sql.includes('diagnostic_equipment')),
+      ).toBe(false);
+      expect(d.ops.assertBookable).not.toHaveBeenCalled();
+      expect(d.step.scheduledEquipmentId).toBeUndefined();
+      expect(d.step.statusConceptId).toBe(DIAG.PROCEDURE_STEP_PLANNED);
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    },
+  );
+});
+
 describe('DiagnosticsImagingStepsService.worklist', () => {
   const row = (over: Record<string, unknown> = {}) => ({
     step_id: STEP,
@@ -256,19 +326,147 @@ describe('DiagnosticsImagingStepsService.worklist', () => {
     scheduled_start_at: new Date(START),
     ...over,
   });
+  const WL = 'from diagnostics.imaging_procedure_steps s';
+  const clinician = { id: 'c1', roles: ['CLINICIAN'] } as any;
+  const superadmin = { id: 's1', roles: ['SUPERADMIN'] } as any;
+  const denied = () => new ResourceNotFoundException('x');
 
-  it('sin equipo ni AE Title es 422 IMAGING_WORKLIST_STATION_REQUIRED (no hay volcado de todo el centro)', async () => {
+  it('sin equipo ni AE Title es 422 IMAGING_WORKLIST_STATION_REQUIRED', async () => {
     const d = build();
-    await expect(d.service.worklist({})).rejects.toMatchObject({
+    await expect(d.service.worklist({}, clinician)).rejects.toMatchObject({
       reason: DiagnosticsErrorReason.IMAGING_WORKLIST_STATION_REQUIRED,
     });
     expect(d.tx.execute).not.toHaveBeenCalled();
   });
 
-  it('devuelve los campos DICOM de la estación y sólo el identificador del paciente', async () => {
-    const d = build({ 'from diagnostics.imaging_procedure_steps s': [row()] });
-    const res = await d.service.worklist({ equipmentId: EQUIPMENT });
+  it('la ventana: invertida es 422 WINDOW_INVALID y de más de 7 días 422 WINDOW_TOO_LARGE; 7 días justos pasan', async () => {
+    const d = build({ [WL]: [] });
+    await expect(
+      d.service.worklist(
+        { equipmentId: EQUIPMENT, from: START, to: START },
+        clinician,
+      ),
+    ).rejects.toMatchObject({
+      reason: DiagnosticsErrorReason.IMAGING_WORKLIST_WINDOW_INVALID,
+    });
+    const long = new Date(
+      new Date(START).getTime() + 7 * 86_400_000 + 1,
+    ).toISOString();
+    await expect(
+      d.service.worklist(
+        { equipmentId: EQUIPMENT, from: START, to: long },
+        clinician,
+      ),
+    ).rejects.toMatchObject({
+      status: 422,
+      reason: DiagnosticsErrorReason.IMAGING_WORKLIST_WINDOW_TOO_LARGE,
+    });
+    expect(d.tx.execute).not.toHaveBeenCalled();
+    const justo = new Date(
+      new Date(START).getTime() + 7 * 86_400_000,
+    ).toISOString();
+    await d.service.worklist(
+      { equipmentId: EQUIPMENT, from: START, to: justo },
+      clinician,
+    );
+    expect(d.tx.execute).toHaveBeenCalledTimes(1);
+  });
+
+  it('quien opera la estación (infra.equipment.worklist sobre la sala del equipo) ve todas las filas, sin consultar la relación con cada paciente', async () => {
+    const d = build({
+      [WL]: [row(), row({ step_id: 's2', patient_profile_id: 'pp-2' })],
+    });
+    const res = await d.service.worklist({ equipmentId: EQUIPMENT }, clinician);
+    expect(res.items.map((i) => i.patientProfileId)).toEqual(['pp-1', 'pp-2']);
+    expect(d.infra.assertCan).toHaveBeenCalledTimes(1); // un equipo, una consulta
+    expect(d.infra.assertCan).toHaveBeenCalledWith(
+      clinician,
+      'infra.equipment.worklist',
+      { careSpaceId: SPACE },
+      d.tx,
+    );
+    expect(d.patientAccess.assertCanReadPatient).not.toHaveBeenCalled();
+  });
+
+  it('el personal clínico sin la estación ve SÓLO los pacientes con relación asistencial; el resto no aparece (ni cuenta)', async () => {
+    const d = build({
+      [WL]: [
+        row({ step_id: 's1', patient_profile_id: 'mio' }),
+        row({ step_id: 's2', patient_profile_id: 'ajeno' }),
+        row({ step_id: 's3', patient_profile_id: 'mio' }),
+      ],
+    });
+    d.infra.assertCan.mockRejectedValue(denied());
+    d.patientAccess.assertCanReadPatient.mockImplementation(
+      async (id: string) => {
+        if (id === 'ajeno') throw denied();
+      },
+    );
+    const res = await d.service.worklist({ equipmentId: EQUIPMENT }, clinician);
+    expect(res.items.map((i) => i.stepId)).toEqual(['s1', 's3']);
+    expect(res.count).toBe(2);
+    // Una consulta por paciente distinto, no por fila.
+    expect(d.patientAccess.assertCanReadPatient).toHaveBeenCalledTimes(2);
+  });
+
+  it('un rol con la estación a la vista pero sin la acción (403 de la política) tampoco ve pacientes ajenos', async () => {
+    const d = build({ [WL]: [row({ patient_profile_id: 'ajeno' })] });
+    d.infra.assertCan.mockRejectedValue(
+      new InsufficientRoleException('x', undefined, 'INFRA_ACTION_NOT_ALLOWED'),
+    );
+    d.patientAccess.assertCanReadPatient.mockRejectedValue(denied());
+    const res = await d.service.worklist({ equipmentId: EQUIPMENT }, clinician);
+    expect(res).toEqual({ items: [], count: 0, truncated: false });
+  });
+
+  it('un error inesperado de la política no se traga: sube', async () => {
+    const d = build({ [WL]: [row()] });
+    d.infra.assertCan.mockRejectedValue(new Error('base caída'));
+    await expect(
+      d.service.worklist({ equipmentId: EQUIPMENT }, clinician),
+    ).rejects.toThrow('base caída');
+  });
+
+  it('SUPERADMIN ve todo sin consultar las políticas', async () => {
+    const d = build({ [WL]: [row()] });
+    const res = await d.service.worklist(
+      { equipmentId: EQUIPMENT },
+      superadmin,
+    );
     expect(res.count).toBe(1);
+    expect(d.infra.assertCan).not.toHaveBeenCalled();
+    expect(d.patientAccess.assertCanReadPatient).not.toHaveBeenCalled();
+  });
+
+  it('un equipo sin sala (sin SPS Location) no es de nadie: se cae a la relación con el paciente', async () => {
+    const d = build({
+      [WL]: [row({ scheduled_care_space_id: null, sps_location: null })],
+    });
+    d.patientAccess.assertCanReadPatient.mockRejectedValue(denied());
+    const res = await d.service.worklist({ equipmentId: EQUIPMENT }, clinician);
+    expect(res.count).toBe(0);
+    expect(d.infra.assertCan).not.toHaveBeenCalled();
+  });
+
+  it('topa las filas: pide una de más para saber si hay más y marca truncated', async () => {
+    const rows = [
+      row({ step_id: 'a' }),
+      row({ step_id: 'b' }),
+      row({ step_id: 'c' }),
+    ];
+    const d = build({ [WL]: rows });
+    const res = await d.service.worklist(
+      { equipmentId: EQUIPMENT, limit: 2 },
+      clinician,
+    );
+    expect(res.items.map((i) => i.stepId)).toEqual(['a', 'b']);
+    expect(res.truncated).toBe(true);
+    expect(d.queries[0].params.at(-1)).toBe(3);
+  });
+
+  it('devuelve los campos DICOM de la estación y sólo el identificador del paciente', async () => {
+    const d = build({ [WL]: [row()] });
+    const res = await d.service.worklist({ equipmentId: EQUIPMENT }, clinician);
     expect(res.items[0]).toEqual({
       stepId: STEP,
       imagingStudyId: STUDY,
@@ -285,14 +483,12 @@ describe('DiagnosticsImagingStepsService.worklist', () => {
     });
   });
 
-  it('filtra por el tenant del contexto en el estudio Y en el equipo, y sólo pasos programados', async () => {
-    const d = build({ 'from diagnostics.imaging_procedure_steps s': [] });
-    await d.service.worklist({
-      aeTitle: 'CT1',
-      from: START,
-      to: '2030-03-05T00:00:00Z',
-      limit: 5,
-    });
+  it('filtra por el tenant del contexto en el estudio y en el equipo, sólo pasos programados, y por AE Title', async () => {
+    const d = build({ [WL]: [] });
+    await d.service.worklist(
+      { aeTitle: 'CT1', from: START, to: '2030-03-05T00:00:00Z', limit: 5 },
+      clinician,
+    );
     const { sql, params } = d.queries[0];
     expect(sql).toMatch(/st\.custodian_tenant_id = \? and u\.tenant_id = \?/);
     expect(sql).toMatch(/e\.ae_title = \?/);
@@ -302,13 +498,11 @@ describe('DiagnosticsImagingStepsService.worklist', () => {
       DIAG.PROCEDURE_STEP_SCHEDULED,
       'CT1',
     ]);
-    expect(params[4]).toEqual(new Date(START));
-    expect(params[6]).toBe(5);
   });
 
-  it('por omisión pide el día de hoy en UTC y 100 filas', async () => {
-    const d = build({ 'from diagnostics.imaging_procedure_steps s': [] });
-    await d.service.worklist({ equipmentId: EQUIPMENT });
+  it('por omisión pide el día de hoy en UTC, 24 horas y 100 filas', async () => {
+    const d = build({ [WL]: [] });
+    await d.service.worklist({ equipmentId: EQUIPMENT }, clinician);
     const [, , , , from, to, limit] = d.queries[0].params as [
       unknown,
       unknown,
@@ -320,29 +514,27 @@ describe('DiagnosticsImagingStepsService.worklist', () => {
     ];
     expect(from.toISOString().endsWith('T00:00:00.000Z')).toBe(true);
     expect(to.getTime() - from.getTime()).toBe(24 * 3_600_000);
-    expect(limit).toBe(100);
+    expect(limit).toBe(101);
   });
 
-  it('un paso sin AE Title, sala ni accession devuelve nulos, no la cadena "null"', async () => {
+  it('nulos de la fila viajan como null, no como la cadena "null"', async () => {
     const d = build({
-      'from diagnostics.imaging_procedure_steps s': [
+      [WL]: [
         row({
           accession_number: null,
           ae_title: null,
           station_name: null,
           sps_location: null,
-          scheduled_care_space_id: null,
           modality_concept_id: null,
         }),
       ],
     });
-    const res = await d.service.worklist({ equipmentId: EQUIPMENT });
+    const res = await d.service.worklist({ equipmentId: EQUIPMENT }, clinician);
     expect(res.items[0]).toMatchObject({
       accessionNumber: null,
       scheduledStationAETitle: null,
       scheduledStationName: null,
       spsLocation: null,
-      careSpaceId: null,
       modalityConceptId: null,
     });
   });

@@ -30,6 +30,7 @@ import {
   MwlStationDto,
   UpdateEquipmentDto,
 } from '../dto';
+import { DIAG } from '../../diagnostics/diagnostics.concepts';
 import { DUNIT } from '../diagnostic_units.concepts';
 import { DiagnosticUnitsErrorReason } from '../diagnostic_units.error-reasons';
 import {
@@ -584,8 +585,9 @@ export class DiagnosticEquipmentService {
     await tx.execute(
       `update diagnostics.imaging_procedure_steps
           set scheduled_care_space_id = ?, updated_at = ?, row_version = row_version + 1
-        where scheduled_equipment_id = ? and scheduled_start_at > ?`,
-      [careSpaceId, now, equipmentId, now],
+        where scheduled_equipment_id = ? and scheduled_start_at > ?
+          and status_concept_id = ?`,
+      [careSpaceId, now, equipmentId, now, DIAG.PROCEDURE_STEP_SCHEDULED],
     );
   }
 
