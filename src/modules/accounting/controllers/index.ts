@@ -8,3 +8,4 @@ export { AccountingExchangeRateController } from './accounting-exchange-rate.con
 export { AccountingPractitionerController } from './accounting-practitioner.controller';
 export { AccountingCockpitController } from './accounting-cockpit.controller';
 export { AccountingPractitionerSimpleController } from './accounting-practitioner-simple.controller';
+export { AccountingInfrastructureController } from './accounting-infrastructure.controller';

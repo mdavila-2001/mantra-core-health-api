@@ -127,6 +127,8 @@ export enum AccountingErrorReason {
   // --- F5f · centros de costo por unidad y activos ubicados en un espacio ---
   /** El espacio del activo no es de la práctica del activo (422). */
   INFRASTRUCTURE_SPACE_PRACTICE_MISMATCH = 'INFRASTRUCTURE_SPACE_PRACTICE_MISMATCH',
+  /** El espacio está clausurado: no aloja activos. */
+  INFRASTRUCTURE_SPACE_RETIRED = 'INFRASTRUCTURE_SPACE_RETIRED',
   /** El activo de infraestructura no existe en el tenant del actor (404, el ajeno responde igual). */
   INFRASTRUCTURE_ITEM_NOT_FOUND = 'INFRASTRUCTURE_ITEM_NOT_FOUND',
   /** El espacio no existe en el tenant del actor (404, el ajeno responde igual). */
