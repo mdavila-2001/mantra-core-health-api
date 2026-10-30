@@ -7,9 +7,8 @@ import { join, relative, sep } from 'node:path';
  * modelo en «Desvíos»: con `RLS_ENFORCE=true` la tabla se filtra por
  * `tenant_id` desde v4.2.67).
  *
- * Verificado contra la base local con el rol `mantra_app` (evidencia
- * `docs/trabajo/2026-10-29-f1-api-infraestructura/evidencia/
- * rls-practice-sites-mantra_app.txt`): sin `app.current_tenant_id` —una ruta
+ * Verificado contra la base local con el rol `mantra_app` (evidencia en la
+ * descripción del PR de F1): sin `app.current_tenant_id` —una ruta
  * `@Public`— se ven 0 sedes; con el tenant A, sólo las de A; con
  * `app.system_context`, todas.
  *

@@ -664,9 +664,9 @@ describe('PractitionerSimpleAccountingService (P49)', () => {
       );
 
       expect(ctx.repo.lockAccountsOf).toHaveBeenCalledWith(ctx.em, PRACTICE);
-      expect(
-        ctx.repo.lockAccountsOf.mock.invocationCallOrder[0],
-      ).toBeLessThan(ctx.repo.listAccounts.mock.invocationCallOrder[0]);
+      expect(ctx.repo.lockAccountsOf.mock.invocationCallOrder[0]).toBeLessThan(
+        ctx.repo.listAccounts.mock.invocationCallOrder[0],
+      );
     });
 
     it('sin accountClass en el cuerpo conserva la clase', async () => {
