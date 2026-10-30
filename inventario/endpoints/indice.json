@@ -1,20 +1,20 @@
 {
   "resumen": {
-    "total": 1627,
+    "total": 1633,
     "porOrigen": {
       "CONTRATO": 1618,
-      "CONTRATO_AUSENTE": 9
+      "CONTRATO_AUSENTE": 15
     },
     "porRiesgo": {
-      "BAJO": 528,
-      "MEDIO": 899,
+      "BAJO": 531,
+      "MEDIO": 902,
       "ALTO": 200
     },
-    "conTablas": 1565,
+    "conTablas": 1571,
     "sinTablasSinDeterminar": 1,
     "sinExplicacionDeNegocio": 0,
-    "conPruebas": 940,
-    "conRequerimientos": 1627
+    "conPruebas": 946,
+    "conRequerimientos": 1633
   },
   "endpoints": [
     {
@@ -292,7 +292,9 @@
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN"
+        "SECURITY_ADMIN",
+        "ACCOUNTING_APPROVER",
+        "PRACTITIONER"
       ],
       "tablas": 4,
       "eventos": 0,
@@ -869,7 +871,7 @@
       "roles": [
         "PRACTITIONER"
       ],
-      "tablas": 3,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -941,7 +943,7 @@
       "roles": [
         "PRACTITIONER"
       ],
-      "tablas": 2,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -1031,7 +1033,7 @@
       "roles": [
         "PRACTITIONER"
       ],
-      "tablas": 2,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -3773,7 +3775,7 @@
       "roles": [
         "PATIENT"
       ],
-      "tablas": 10,
+      "tablas": 11,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -4466,7 +4468,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 27,
+      "tablas": 29,
       "eventos": 0,
       "pruebas": 8,
       "revision": "AUTO_DETECTADA"
@@ -20506,6 +20508,120 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "PharmacyIntegrationSyncController_listConnections",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/pharmacies/{pharmacyId}/integration-connections",
+      "modulo": "pharmacy_inventory",
+      "bloque": "Farmacia",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyIntegrationSyncController_listExternalProducts",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-products",
+      "modulo": "pharmacy_inventory",
+      "bloque": "Farmacia",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyIntegrationSyncController_listMappings",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings",
+      "modulo": "pharmacy_inventory",
+      "bloque": "Farmacia",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyIntegrationSyncController_syncNow",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "POST",
+      "ruta": "/pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync",
+      "modulo": "pharmacy_inventory",
+      "bloque": "Farmacia",
+      "nombre": null,
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 16,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyIntegrationSyncController_listSyncBatches",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync-batches",
+      "modulo": "pharmacy_inventory",
+      "bloque": "Farmacia",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacySiteAvailabilityController_setSiteAvailability",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "PUT",
+      "ruta": "/pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability",
+      "modulo": "pharmacy_inventory",
+      "bloque": "Farmacia",
+      "nombre": "«Lo tengo / No lo tengo» de un producto en una sede.",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "PharmacyInventoryReadController_availability",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -25755,7 +25871,7 @@
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 18,
+      "tablas": 19,
       "eventos": 0,
       "pruebas": 5,
       "revision": "AUTO_DETECTADA"
@@ -25935,7 +26051,7 @@
         "SCHEDULING_ADMIN",
         "SCHEDULING_AGENT"
       ],
-      "tablas": 38,
+      "tablas": 47,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -25996,7 +26112,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 3,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -26009,14 +26125,14 @@
       "modulo": "scheduling",
       "bloque": "Práctica y Agenda",
       "nombre": "Marcar el estado de pago de una cita",
-      "riesgo": "BAJO",
+      "riesgo": "MEDIO",
       "publica": false,
       "roles": [
         "SCHEDULING_ADMIN",
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 2,
+      "tablas": 11,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -26783,7 +26899,7 @@
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 1,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
