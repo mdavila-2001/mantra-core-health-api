@@ -40,6 +40,8 @@ import { ReadPharmacyInventoryUseCase } from './application/pharmacy-inventory-r
 import { NotifyPharmacyOrderUseCase } from './application/pharmacy-order-notifications/notify-pharmacy-order.use-case';
 import { PharmacyOrdersUseCases } from './application/pharmacy-orders/pharmacy-orders.use-cases';
 import { PharmacyProcurementUseCases } from './application/pharmacy-procurement/pharmacy-procurement.use-cases';
+import { SetSiteProductAvailabilityUseCase } from './application/site-availability/set-site-product-availability.use-case';
+import { SiteStockWriter } from './application/site-availability/site-stock-writer';
 import {
   PharmacyProcurementController,
   PharmacyInventoryController,
@@ -47,6 +49,7 @@ import {
   PharmacyDispensingController,
   PharmacyInventoryInternalController,
   PharmacyInventoryReadController,
+  PharmacySiteAvailabilityController,
 } from './presentation/controllers';
 import {
   InventoryLocationsService,
@@ -112,6 +115,7 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     PharmacyDispensingController,
     PharmacyInventoryInternalController,
     PharmacyInventoryReadController,
+    PharmacySiteAvailabilityController,
   ],
   providers: [
     // Repositorios
@@ -187,6 +191,8 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     NotifyPharmacyOrderUseCase,
     PharmacyOrdersUseCases,
     PharmacyProcurementUseCases,
+    SiteStockWriter,
+    SetSiteProductAvailabilityUseCase,
     PharmacyProcurementService,
     InventoryReservationsService,
     PharmacyOrdersService,

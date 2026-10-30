@@ -18,4 +18,19 @@ export enum PharmacyInventoryErrorReason {
    * o una sede que no son las verdaderas.
    */
   PHARMACY_INVENTORY_SCOPE_INCONSISTENT = 'PHARMACY_INVENTORY_SCOPE_INCONSISTENT',
+  /**
+   * La farmacia marcó el producto «no tengo» para toda la farmacia
+   * (`out_of_stock_declared`), y esa marca gana sobre el stock de cada sede:
+   * una sede no la apaga. Se quita desde el catálogo.
+   */
+  PRODUCT_OUT_OF_STOCK_DECLARED = 'PRODUCT_OUT_OF_STOCK_DECLARED',
+  /** El producto es un borrador o está retirado: no se ofrece en ninguna sede. */
+  PRODUCT_NOT_PUBLISHED = 'PRODUCT_NOT_PUBLISHED',
+  /**
+   * La sede lleva ese producto por lotes (recepciones y conteos): su existencia
+   * no se cambia con el interruptor por sede.
+   */
+  SITE_PRODUCT_KEPT_BY_LOTS = 'SITE_PRODUCT_KEPT_BY_LOTS',
+  /** «Lo tengo» con cantidad 0 se contradice: se marca «No lo tengo». */
+  SITE_AVAILABILITY_QUANTITY_INVALID = 'SITE_AVAILABILITY_QUANTITY_INVALID',
 }
