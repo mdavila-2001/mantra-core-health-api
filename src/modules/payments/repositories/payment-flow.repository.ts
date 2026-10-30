@@ -10,7 +10,8 @@ import {
   PaymentDebts,
   PaymentIntents,
 } from '../entities';
-import { createdBy } from '../../../common';
+import { CONCEPTS, createdBy } from '../../../common';
+import { DEBT_SOURCE_REF_TYPE } from '../payments.source-refs';
 
 /**
  * Describe el contrato estructural de create fx lock data.
@@ -483,5 +484,70 @@ export class PaymentFlowRepository {
       { id },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
+  }
+
+  /**
+   * Sesiones de checkout abiertas sobre una deuda. Permite saber si otra intención
+   * conserva un cobro vivo antes de liberar la deuda.
+   *
+   * **Sin `FOR UPDATE`, a propósito.** Quien la llama ya tiene la deuda bloqueada, y
+   * el estado de las sesiones de esa deuda sólo cambia en transacciones que también
+   * bloquean la deuda (`releaseDebt`, `settleDebt`, la apertura del checkout): lo que
+   * se lee acá no puede cambiar hasta que quien llama confirme. Bloquear además las
+   * sesiones —que son de OTRAS intenciones, y sus webhooks bloquean las propias
+   * antes que la deuda— invertía el orden de bloqueo y daba un interbloqueo `40P01`
+   * entre los webhooks de dos intenciones distintas sobre la misma deuda (N6 de la
+   * re-revisión).
+   */
+  findOpenCheckoutSessionsByDebt(
+    em: EntityManager,
+    paymentDebtId: string,
+  ): Promise<PaymentCheckoutSessions[]> {
+    return em.find(PaymentCheckoutSessions, {
+      paymentDebtId,
+      statusConceptId: CONCEPTS.CHECKOUT_OPEN,
+    });
+  }
+
+  /**
+   * Otras intenciones del tenant con un cobro candidato a estar en vuelo en la
+   * pasarela sobre una deuda: tienen `gateway_intent_ref` (el `pi_…` o la marca de
+   * despacho, ver `gateway/payments-gateway-dispatch-mark.ts`), siguen
+   * `PI_PENDING`/`PI_PROCESSING` y apuntan a la deuda por su `sourceRef` o por una
+   * sesión de checkout. Si una marca de despacho sigue bloqueando (no venció su
+   * plazo) lo decide quien llama con `blocksOtherCharges`.
+   */
+  async findInFlightGatewayIntentsOnDebt(
+    em: EntityManager,
+    scope: {
+      /** Tenant de la deuda. */
+      tenantId: string;
+      /** Deuda que se quiere cobrar. */
+      paymentDebtId: string;
+      /** Intención que consulta (no cuenta contra sí misma). */
+      excludeIntentId: string;
+    },
+  ): Promise<PaymentIntents[]> {
+    const sessions = await em.find(PaymentCheckoutSessions, {
+      tenantId: scope.tenantId,
+      paymentDebtId: scope.paymentDebtId,
+      paymentIntentId: { $ne: null },
+    });
+    const viaSession = sessions.flatMap((s) =>
+      s.paymentIntentId ? [s.paymentIntentId] : [],
+    );
+    return em.find(PaymentIntents, {
+      tenantId: scope.tenantId,
+      id: { $ne: scope.excludeIntentId },
+      gatewayIntentRef: { $ne: null },
+      statusConceptId: { $in: [CONCEPTS.PI_PENDING, CONCEPTS.PI_PROCESSING] },
+      $or: [
+        {
+          sourceRefType: DEBT_SOURCE_REF_TYPE,
+          sourceRefId: scope.paymentDebtId,
+        },
+        ...(viaSession.length > 0 ? [{ id: { $in: viaSession } }] : []),
+      ],
+    });
   }
 }

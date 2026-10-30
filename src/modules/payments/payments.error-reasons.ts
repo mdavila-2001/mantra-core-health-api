@@ -94,6 +94,22 @@ export enum PaymentsErrorReason {
   PAYMENT_GATEWAY_UNAVAILABLE = 'PAYMENT_GATEWAY_UNAVAILABLE',
   /** La respuesta de la pasarela no coincide con lo pedido (importe distinto): no se asocia al cobro. */
   PAYMENT_GATEWAY_RESPONSE_MISMATCH = 'PAYMENT_GATEWAY_RESPONSE_MISMATCH',
+  /** La deuda de la intención ya tiene otro cobro en vuelo en la pasarela: no se abre un segundo. */
+  PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE = 'PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE',
+  /** El importe de la intención excede el saldo pendiente de la deuda que cobra. */
+  PAYMENT_GATEWAY_AMOUNT_EXCEEDS_DEBT = 'PAYMENT_GATEWAY_AMOUNT_EXCEEDS_DEBT',
+  /** La intención parece cobrar una deuda (propósito `DEBT` o referencia de origen) pero no se puede saber cuál: no se cobra a ciegas. */
+  PAYMENT_GATEWAY_DEBT_UNRESOLVED = 'PAYMENT_GATEWAY_DEBT_UNRESOLVED',
+  /** Hay un cobro posiblemente creado en la pasarela que la API no tiene asociado: se necesita conciliarlo (reenviar con la misma clave, o a mano si ya no se puede). */
+  PAYMENT_GATEWAY_RECONCILIATION_REQUIRED = 'PAYMENT_GATEWAY_RECONCILIATION_REQUIRED',
+  /** Demasiados cobros por la pasarela en curso en este proceso (límite de concurrencia con RLS): reintentable con la misma clave. */
+  PAYMENT_GATEWAY_BUSY = 'PAYMENT_GATEWAY_BUSY',
+  /** La reserva de despacho de la intención ya se cerró a mano. */
+  PAYMENT_GATEWAY_DISPATCH_ALREADY_CLOSED = 'PAYMENT_GATEWAY_DISPATCH_ALREADY_CLOSED',
+  /** La reserva de despacho todavía puede estar en vuelo: no se cierra a mano. */
+  PAYMENT_GATEWAY_DISPATCH_IN_FLIGHT = 'PAYMENT_GATEWAY_DISPATCH_IN_FLIGHT',
+  /** La intención no tiene una reserva de despacho pendiente: no hay nada que conciliar. */
+  PAYMENT_GATEWAY_NOTHING_TO_RECONCILE = 'PAYMENT_GATEWAY_NOTHING_TO_RECONCILE',
   /** Los webhooks de la pasarela están desactivados (`payments.via_gateway` apagado). */
   GATEWAY_WEBHOOKS_DISABLED = 'GATEWAY_WEBHOOKS_DISABLED',
   /** El webhook no trae el cuerpo crudo necesario para verificar la firma. */
@@ -102,4 +118,6 @@ export enum PaymentsErrorReason {
   GATEWAY_WEBHOOK_MODE_MISMATCH = 'GATEWAY_WEBHOOK_MODE_MISMATCH',
   /** El cuerpo del webhook no tiene la forma del contrato. */
   GATEWAY_WEBHOOK_MALFORMED = 'GATEWAY_WEBHOOK_MALFORMED',
+  /** Más de una intención (de uno o varios tenants) tiene la misma referencia `pi_…`: no se aplica a ninguna. */
+  GATEWAY_WEBHOOK_INTENT_REF_AMBIGUOUS = 'GATEWAY_WEBHOOK_INTENT_REF_AMBIGUOUS',
 }

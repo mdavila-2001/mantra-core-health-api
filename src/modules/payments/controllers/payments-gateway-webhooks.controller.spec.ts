@@ -51,6 +51,9 @@ const cfg = (viaGateway: boolean): PaymentsGatewayConfig => ({
   retryBaseMs: 10,
 });
 
+/** Logger del servicio de la última app construida: permite afirmar qué se registró. */
+let serviceLogger: Record<'setContext' | 'info' | 'warn' | 'error', jest.Mock>;
+
 async function buildApp(viaGateway: boolean): Promise<INestApplication> {
   const logger = {
     setContext: jest.fn(),
@@ -58,6 +61,7 @@ async function buildApp(viaGateway: boolean): Promise<INestApplication> {
     warn: jest.fn(),
     error: jest.fn(),
   };
+  serviceLogger = logger;
   const service = new PaymentsGatewayWebhookService(
     cfg(viaGateway),
     {
@@ -174,6 +178,65 @@ describe('POST /payments/gateway-webhooks (HTTP)', () => {
     });
   });
 
+  describe('m1: una petición sin credenciales nunca da 5xx ni log de error', () => {
+    const rawPost = async (
+      path: string,
+      type: string | undefined,
+      body: string | undefined,
+      headers: Record<string, string> = {},
+    ) => {
+      const app = await buildApp(true);
+      apps.push(app);
+      let req = request(app.getHttpServer()).post(path);
+      if (type) req = req.set('Content-Type', type);
+      return req.set(headers).send(body);
+    };
+
+    it.each([
+      ['Content-Type: text/plain', 'text/plain', 'hola'],
+      ['sin Content-Type ni cuerpo', undefined, undefined],
+      ['cuerpo JSON vacío', 'application/json', ''],
+    ])('%s: 400 determinista y sólo un aviso', async (_name, type, body) => {
+      const res = await rawPost(GATEWAY_WEBHOOK_PATH, type, body);
+
+      expect(res.status).toBe(400);
+      expect(res.body).toMatchObject({
+        reason: 'GATEWAY_WEBHOOK_RAW_BODY_MISSING',
+      });
+      expect(serviceLogger.error).not.toHaveBeenCalled();
+      expect(serviceLogger.warn).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+      ['barra final', `${GATEWAY_WEBHOOK_PATH}/`],
+      ['mayúsculas', '/Payments/Gateway-Webhooks'],
+      ['barra final y mayúsculas', '/PAYMENTS/gateway-webhooks/'],
+    ])(
+      '%s: la entrega firmada se verifica y se confirma con 200 (Express la enruta igual)',
+      async (_name, path) => {
+        const res = await rawPost(
+          path,
+          'application/json',
+          PAYLOAD,
+          signTestWebhook({ id: EVENT, timestamp: T0, payload: PAYLOAD }),
+        );
+
+        expect(res.status).toBe(200);
+        expect(res.body).toMatchObject({ received: true, eventId: EVENT });
+      },
+    );
+
+    it('barra final con la firma alterada: 401, no 500', async () => {
+      const res = await rawPost(
+        `${GATEWAY_WEBHOOK_PATH}/`,
+        'application/json',
+        PAYLOAD.replace('señal', 'senal'),
+        signTestWebhook({ id: EVENT, timestamp: T0, payload: PAYLOAD }),
+      );
+      expect(res.status).toBe(401);
+    });
+  });
+
   it('inválido: con el flag apagado es 503 (no 410) aunque la firma sea válida', async () => {
     const res = await post(
       false,
@@ -203,9 +266,17 @@ describe('captureGatewayWebhookRawBody', () => {
     );
   });
 
+  it('reconoce la ruta como la enruta Express: con barra final y sin distinguir mayúsculas', () => {
+    expect(run(`${GATEWAY_WEBHOOK_PATH}/`).rawBody?.toString()).toBe('{"a":1}');
+    expect(run('/Payments/Gateway-Webhooks?x=1').rawBody?.toString()).toBe(
+      '{"a":1}',
+    );
+  });
+
   it('no retiene el cuerpo de ninguna otra ruta', () => {
     expect(run('/payments/intents').rawBody).toBeUndefined();
     expect(run('/payments/gateway-webhooks/otra').rawBody).toBeUndefined();
+    expect(run('//payments/gateway-webhooks').rawBody).toBeUndefined();
     expect(run(undefined).rawBody).toBeUndefined();
   });
 });
