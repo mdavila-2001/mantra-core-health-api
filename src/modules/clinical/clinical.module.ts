@@ -70,6 +70,7 @@ import {
   ServiceRequestNotesService,
 } from './services';
 import { PerformerSiteDbReader } from './services/performer-site-db.reader';
+import { PrescriberIdentityReader } from './services/prescriber-identity.reader';
 import {
   CareEpisodesRepository,
   AppointmentsRepository,
@@ -261,6 +262,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     PrescriptionExpiryNoticesService,
     ClinicalRecordAccessGuard,
     PrescriptionPdfService,
+    PrescriberIdentityReader,
     DuplicateStudyDetector,
   ],
   // `procedures_perioperative` los usa para que el caso quirúrgico pueda dejar
@@ -299,6 +301,8 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     ClinicalRecordAccessGuard,
     EncounterSealGuardService,
     DuplicateStudyDetector,
+    // Nombre y matrícula del prescriptor para el enlace compartido de la receta.
+    PrescriberIdentityReader,
   ],
 })
 export class ClinicalModule {}

@@ -37,6 +37,102 @@ const REDACT_PATHS = [
 ];
 
 /**
+ * Rutas cuyo segmento siguiente es el token en claro de un enlace compartido
+ * de receta (S-6, D-6): la vista pública, la de la farmacia y la que dice si
+ * el enlace es de la sesión. El token es la credencial del enlace: quien lo
+ * lee en el agregador de logs abre la receta. `/clinical/prescription-shares/`
+ * sin `by-token/` lleva un id de enlace, no un token, y queda como está.
+ *
+ * Sin distinguir mayúsculas, como el ruteo de Express:
+ * `/PUBLIC/Prescription-Shares/<token>` también llega al handler. El segmento
+ * termina en `/`, `?`, `#` o un espacio, así que también sirve dentro de un
+ * texto como el `Cannot GET /…` del 404 de una ruta no declarada.
+ */
+const SHARE_TOKEN_IN_PATH =
+  /(\/(?:public\/prescription-shares|pharmacy\/prescription-shares|clinical\/prescription-shares\/by-token)\/)[^/?#\s]+/gi;
+
+/**
+ * Las páginas del front que llevan el token en su ruta: `/rx/<token>` y la de
+ * la farmacia que cuelga de ella (`…/rx/<token>`). `/verify/rx/<id>` lleva el
+ * id de la receta, que no es una credencial, y queda como está. Llegan a la API
+ * en el `Referer` de las peticiones que hace esa página.
+ */
+const SHARE_TOKEN_IN_WEB_PATH = /((?<!\/verify)\/rx\/)[^/?#\s]+/gi;
+
+/** Lo que queda en el log en lugar del token. */
+export const REDACTED_SHARE_TOKEN = '[token]';
+
+/**
+ * Reemplaza el token de un enlace compartido de receta en una URL o en un
+ * texto que la contiene.
+ *
+ * @param url - URL, ruta de la petición (con o sin query) o mensaje.
+ * @returns El mismo texto con el segmento del token cambiado por `[token]`.
+ */
+export function redactShareTokenInUrl(url: string): string {
+  return url.replace(SHARE_TOKEN_IN_PATH, `$1${REDACTED_SHARE_TOKEN}`);
+}
+
+/**
+ * Reemplaza el token en un `Referer`: el de las rutas de la API y el de las
+ * páginas `/rx/<token>` del front.
+ *
+ * @param referer - Valor de la cabecera.
+ * @returns El mismo valor con el token cambiado por `[token]`.
+ */
+export function redactShareTokenInReferer(referer: string): string {
+  return redactShareTokenInUrl(referer).replace(
+    SHARE_TOKEN_IN_WEB_PATH,
+    `$1${REDACTED_SHARE_TOKEN}`,
+  );
+}
+
+/** La forma de `req` que deja el serializador estándar de pino. */
+interface SerializedRequest {
+  url?: unknown;
+  params?: unknown;
+  headers?: unknown;
+  [key: string]: unknown;
+}
+
+/**
+ * Serializador de `req` de pino-http: recibe la petición ya serializada por
+ * `pino-std-serializers` y le saca el token del enlace compartido de `url`,
+ * de `params.token` y del `Referer`.
+ *
+ * El `Referer` se redacta en vez de quitarse: en el resto de las páginas sigue
+ * diciendo desde dónde vino la petición, que es lo que se busca en el log, y
+ * solo cambia el segmento del token. `params` y `headers` se copian: los
+ * objetos originales son los de Express y los siguen leyendo los handlers.
+ *
+ * @param req - Petición serializada.
+ * @returns La misma petición, sin el token en claro.
+ */
+export function serializeRequest(req: SerializedRequest): SerializedRequest {
+  if (typeof req.url === 'string') {
+    const url = redactShareTokenInUrl(req.url);
+    if (url !== req.url) {
+      req.url = url;
+      const params = req.params;
+      if (params && typeof params === 'object' && 'token' in params) {
+        req.params = { ...params, token: REDACTED_SHARE_TOKEN };
+      }
+    }
+  }
+  const headers = req.headers;
+  if (headers && typeof headers === 'object') {
+    const referer = (headers as { referer?: unknown }).referer;
+    if (typeof referer === 'string') {
+      const redacted = redactShareTokenInReferer(referer);
+      if (redacted !== referer) {
+        req.headers = { ...headers, referer: redacted };
+      }
+    }
+  }
+  return req;
+}
+
+/**
  * Comprueba si `pino-pretty` está instalado.
  *
  * El formato legible es una dependencia de desarrollo opcional. Referenciar un
@@ -101,6 +197,7 @@ export function buildPinoOptions(): Params {
       level: env.level,
       genReqId,
       redact: { paths: REDACT_PATHS, remove: true },
+      serializers: { req: serializeRequest },
 
       // Correlación log ↔ traza. `mixin` se evalúa en CADA línea de log y añade
       // el contexto de traza activo en ese instante, de modo que buscar
