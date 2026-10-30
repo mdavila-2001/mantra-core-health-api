@@ -448,8 +448,8 @@ describeIt(
     async function holdIntentLock(c: Created): Promise<Client> {
       const holder = new Client({ ...PG, database: DB_NAME });
       // El fallo de una consulta ya llega por su promesa; un corte tardío del socket no debe tumbar la suite.
-    holder.on('error', () => undefined);
-    await holder.connect();
+      holder.on('error', () => undefined);
+      await holder.connect();
       await holder.query('begin');
       await holder.query(
         'select id from payments.payment_intents where id = $1 for update',
