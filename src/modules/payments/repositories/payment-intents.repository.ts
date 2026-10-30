@@ -131,4 +131,22 @@ export class PaymentIntentsRepository {
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }
+
+  /**
+   * Intención asociada a un cobro de la pasarela (`pi_…`), con `FOR UPDATE`.
+   *
+   * La referencia es única por cobro de la pasarela (se asocia una sola vez y
+   * la pasarela no repite ids); el bloqueo serializa los webhooks concurrentes
+   * del mismo cobro.
+   */
+  findByGatewayIntentRefForUpdate(
+    em: EntityManager,
+    gatewayIntentRef: string,
+  ): Promise<PaymentIntents | null> {
+    return em.findOne(
+      PaymentIntents,
+      { gatewayIntentRef },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
 }

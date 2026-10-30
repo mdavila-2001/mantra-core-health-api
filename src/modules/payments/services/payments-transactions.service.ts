@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -39,6 +39,7 @@ import {
 import { decideCallback, eventReference } from './payment-callback-machine';
 import { evaluateCallbackEndpoint } from './callback-endpoint.policy';
 import { PaymentsErrorReason } from '../payments.error-reasons';
+import { PaymentsGatewayChargeService } from './payments-gateway-charge.service';
 
 const OPERATION_CONCEPT: Readonly<Record<TransactionOperation, string>> = {
   AUTHORIZE: CONCEPTS.TXN_OP_AUTHORIZE,
@@ -81,6 +82,7 @@ export class PaymentsTransactionsService {
     private readonly flowRepo: PaymentFlowRepository,
     private readonly transactionsRepo: PaymentTransactionsRepository,
     private readonly logger: PinoLogger,
+    @Optional() private readonly gatewayCharge?: PaymentsGatewayChargeService,
   ) {
     this.logger.setContext(PaymentsTransactionsService.name);
   }
@@ -113,6 +115,12 @@ export class PaymentsTransactionsService {
       'Processing gateway transaction',
     );
 
+    // `payments.via_gateway`: el cobro lo despacha la pasarela, pero detrás de la
+    // misma compuerta de estado y de riesgo que el camino de siempre.
+    if (this.gatewayCharge?.enabled) {
+      return this.processViaGateway(intentId, dto, this.gatewayCharge);
+    }
+
     return this.em.transactional(async (tx) => {
       const intent = await this.intentsRepo.findByIdForUpdate(tx, intentId);
       if (!intent) {
@@ -124,86 +132,31 @@ export class PaymentsTransactionsService {
           PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
         );
       }
-      if (intent.statusConceptId === CONCEPTS.PI_SUCCEEDED) {
+      this.assertIntentOpen(intent, intentId);
+      // Una intención cobrada por la pasarela (`payments.via_gateway`) no abre un
+      // segundo camino contra el proveedor: su resultado llega por webhook firmado.
+      if (intent.gatewayIntentRef) {
         throw new ConflictException(
-          'La intención ya fue cobrada',
-          {
-            intentId,
-          },
-          PaymentsErrorReason.PAYMENT_INTENT_ALREADY_SUCCEEDED,
-        );
-      }
-      if (intent.statusConceptId === CONCEPTS.PI_CANCELED) {
-        throw new PreconditionFailedException(
-          'La intención está cancelada',
-          {
-            intentId,
-          },
-          PaymentsErrorReason.PAYMENT_INTENT_CANCELED,
+          'La intención se cobra a través de la pasarela; no admite una operación directa contra el proveedor',
+          { intentId },
+          PaymentsErrorReason.PAYMENT_INTENT_VIA_GATEWAY,
         );
       }
 
-      // Una operación abierta impide otra que el proveedor pueda confirmar a la
-      // vez: sería un segundo cobro. Sobre una autorización confirmada sólo cabe
-      // capturarla; otra venta o autorización duplicaría el cargo.
-      const open = await this.transactionsRepo.findPendingByIntent(
+      const open = await this.assertNoBlockingOpenOperation(
         tx,
         intentId,
+        dto.operation,
       );
-      if (
-        open &&
-        (open.statusConceptId === CONCEPTS.TXN_PROCESSING ||
-          dto.operation !== 'CAPTURE')
-      ) {
-        throw new ConflictException(
-          'La intención tiene una operación abierta en el gateway',
-          {
-            intentId,
-            transactionId: open.id,
-            statusConceptId: open.statusConceptId,
-          },
-        );
-      }
 
-      const risk = await this.flowRepo.findLatestRiskAssessment(tx, intentId);
-      if (!risk) {
-        throw new PreconditionFailedException(
-          'La intención requiere evaluación de riesgo antes de cobrar',
-          { intentId },
-          PaymentsErrorReason.PAYMENT_INTENT_RISK_ASSESSMENT_MISSING,
-        );
-      }
-      if (risk.decisionConceptId === CONCEPTS.RISK_DECLINE) {
-        throw new PreconditionFailedException(
-          'El motor de riesgo rechazó la intención',
-          {
-            intentId,
-          },
-          PaymentsErrorReason.PAYMENT_INTENT_RISK_DECLINED,
-        );
-      }
+      await this.assertRiskCleared(tx, intentId, false);
 
-      // MCH-036: el importe de la operación se mide contra lo que todavía se
-      // debe, no contra el de la intención. Antes se admitía cualquier importe y
-      // el saldo nunca se calculaba, así que una captura parcial podía cerrar la
-      // intención completa y una segunda podía cobrar de más.
-      const captured = await this.intentCaptured(tx, intentId);
-      const balance = subtractAmounts(intent.amount, captured);
-      // Sin importe explícito se pide el saldo pendiente, que en una intención
-      // intacta es el total.
-      const requested = dto.amount ?? balance;
-      if (!isPositiveAmount(requested)) {
-        throw new PreconditionFailedException(
-          'El importe a procesar debe ser mayor que cero',
-          { intentId, amount: requested },
-        );
-      }
-      if (compareAmounts(requested, balance) > 0) {
-        throw new ConflictException(
-          'El importe excede el saldo pendiente de la intención',
-          { intentId, amount: requested, captured: captured, balance: balance },
-        );
-      }
+      const { requested } = await this.assertWithinBalance(
+        tx,
+        intent,
+        intentId,
+        dto.amount,
+      );
       // Capturar más de lo autorizado es un cobro sin autorización del emisor.
       if (
         dto.operation === 'CAPTURE' &&
@@ -243,6 +196,226 @@ export class PaymentsTransactionsService {
         gatewayTransactionRef: dto.gatewayTransactionRef,
       };
     });
+  }
+
+  /**
+   * Una operación abierta impide otra que el proveedor pueda confirmar a la vez:
+   * sería un segundo cobro. Sobre una autorización confirmada sólo cabe
+   * capturarla; otra venta o autorización duplicaría el cargo. La usan el camino
+   * de siempre y el de la pasarela.
+   *
+   * @returns La operación abierta que no bloquea (una autorización a capturar), si hay.
+   */
+  private async assertNoBlockingOpenOperation(
+    tx: EntityManager,
+    intentId: string,
+    operation: TransactionOperation,
+  ) {
+    const open = await this.transactionsRepo.findPendingByIntent(tx, intentId);
+    if (
+      open &&
+      (open.statusConceptId === CONCEPTS.TXN_PROCESSING ||
+        operation !== 'CAPTURE')
+    ) {
+      throw new ConflictException(
+        'La intención tiene una operación abierta en el gateway',
+        {
+          intentId,
+          transactionId: open.id,
+          statusConceptId: open.statusConceptId,
+        },
+      );
+    }
+    return open;
+  }
+
+  /**
+   * MCH-036: el importe de la operación se mide contra lo que todavía se debe, no
+   * contra el de la intención. Antes se admitía cualquier importe y el saldo nunca
+   * se calculaba, así que una captura parcial podía cerrar la intención completa
+   * y una segunda podía cobrar de más. La usan el camino de siempre y el de la
+   * pasarela (que cobra el importe completo: con algo ya capturado, excede el saldo).
+   *
+   * @param explicitAmount - Importe pedido; sin él se toma el saldo pendiente, que
+   *   en una intención intacta es el total.
+   */
+  private async assertWithinBalance(
+    tx: EntityManager,
+    intent: { amount: string },
+    intentId: string,
+    explicitAmount: string | undefined,
+  ): Promise<{ requested: string; captured: string; balance: string }> {
+    const captured = await this.intentCaptured(tx, intentId);
+    const balance = subtractAmounts(intent.amount, captured);
+    const requested = explicitAmount ?? balance;
+    if (!isPositiveAmount(requested)) {
+      throw new PreconditionFailedException(
+        'El importe a procesar debe ser mayor que cero',
+        { intentId, amount: requested },
+      );
+    }
+    if (compareAmounts(requested, balance) > 0) {
+      throw new ConflictException(
+        'El importe excede el saldo pendiente de la intención',
+        { intentId, amount: requested, captured: captured, balance: balance },
+      );
+    }
+    return { requested, captured, balance };
+  }
+
+  /** La intención no está cobrada ni cancelada: es lo primero que exige cualquier cobro. */
+  private assertIntentOpen(
+    intent: { statusConceptId: string },
+    intentId: string,
+  ): void {
+    if (intent.statusConceptId === CONCEPTS.PI_SUCCEEDED) {
+      throw new ConflictException(
+        'La intención ya fue cobrada',
+        {
+          intentId,
+        },
+        PaymentsErrorReason.PAYMENT_INTENT_ALREADY_SUCCEEDED,
+      );
+    }
+    if (intent.statusConceptId === CONCEPTS.PI_CANCELED) {
+      throw new PreconditionFailedException(
+        'La intención está cancelada',
+        {
+          intentId,
+        },
+        PaymentsErrorReason.PAYMENT_INTENT_CANCELED,
+      );
+    }
+  }
+
+  /**
+   * Compuerta de riesgo previa a cobrar: debe existir una evaluación y no puede
+   * ser `DECLINE`. Es la ÚNICA implementación: la usan el camino de siempre y el
+   * de la pasarela, para que ninguno cobre lo que el otro no cobraría.
+   *
+   * @param blockOnReview - Con `true`, una última evaluación `REVIEW` (pide
+   *   revisión humana) tampoco deja cobrar. El camino de siempre la deja pasar
+   *   (comportamiento previo, sin tocar); en el de la pasarela, donde el cobro
+   *   lo puede completar el pagador sin que nadie intervenga, se toma el
+   *   supuesto conservador. Ver la ambigüedad registrada en el informe del carril.
+   */
+  private async assertRiskCleared(
+    tx: EntityManager,
+    intentId: string,
+    blockOnReview: boolean,
+  ): Promise<void> {
+    const risk = await this.flowRepo.findLatestRiskAssessment(tx, intentId);
+    if (!risk) {
+      throw new PreconditionFailedException(
+        'La intención requiere evaluación de riesgo antes de cobrar',
+        { intentId },
+        PaymentsErrorReason.PAYMENT_INTENT_RISK_ASSESSMENT_MISSING,
+      );
+    }
+    if (risk.decisionConceptId === CONCEPTS.RISK_DECLINE) {
+      throw new PreconditionFailedException(
+        'El motor de riesgo rechazó la intención',
+        {
+          intentId,
+        },
+        PaymentsErrorReason.PAYMENT_INTENT_RISK_DECLINED,
+      );
+    }
+    if (blockOnReview && risk.decisionConceptId === CONCEPTS.RISK_REVIEW) {
+      throw new PreconditionFailedException(
+        'La evaluación de riesgo pide revisión humana antes de cobrar',
+        { intentId },
+        PaymentsErrorReason.PAYMENT_INTENT_RISK_REVIEW_PENDING,
+      );
+    }
+  }
+
+  /**
+   * UC-42-05 con `payments.via_gateway=on` (REQ-INT-1): crea el cobro en la pasarela.
+   *
+   * Pasa por la misma compuerta que el camino de siempre —estado de la intención
+   * y evaluación de riesgo— ANTES de llamar a la pasarela; si la compuerta no
+   * pasa, la pasarela no recibe ninguna llamada. La compuerta corre en su propia
+   * transacción y la llamada HTTP va fuera de ella, para no sostener el bloqueo
+   * de la fila durante los reintentos.
+   *
+   * La pasarela cobra el importe completo con un solo paso (`SALE`); no hay
+   * autorización/captura separadas ni importes parciales. Repetir la operación
+   * sobre una intención que ya tiene su cobro NO crea otro: lo consulta.
+   */
+  private async processViaGateway(
+    intentId: string,
+    dto: ProcessTransactionDto,
+    gateway: PaymentsGatewayChargeService,
+  ): Promise<TransactionResponseDto> {
+    if (dto.operation !== 'SALE') {
+      throw new PreconditionFailedException(
+        'La pasarela cobra en un solo paso: sólo admite la operación SALE',
+        { intentId, operation: dto.operation },
+        PaymentsErrorReason.PAYMENT_GATEWAY_OPERATION_NOT_SUPPORTED,
+      );
+    }
+
+    const intent = await this.em.transactional(async (tx) => {
+      const found = await this.intentsRepo.findByIdForUpdate(tx, intentId);
+      if (!found) {
+        throw new ResourceNotFoundException(
+          'Intención de pago no encontrada',
+          { intentId },
+          PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
+        );
+      }
+      this.assertIntentOpen(found, intentId);
+      if (dto.amount && compareAmounts(dto.amount, found.amount) !== 0) {
+        throw new PreconditionFailedException(
+          'La pasarela cobra el importe completo de la intención',
+          { intentId },
+          PaymentsErrorReason.PAYMENT_GATEWAY_AMOUNT_MUST_MATCH_INTENT,
+        );
+      }
+      // Ya despachada antes: es el reintento con la MISMA clave (regla 11); no
+      // se vuelve a evaluar ni a crear, se consulta.
+      if (found.gatewayIntentRef) return found;
+
+      // Sin cobro en la pasarela, una intención `PI_PROCESSING` tiene una
+      // operación del camino de siempre en marcha: cobrarla otra vez duplicaría
+      // el cargo. Mismas compuertas que el camino de siempre, en su mismo orden:
+      // operación abierta, riesgo y saldo.
+      if (found.statusConceptId === CONCEPTS.PI_PROCESSING) {
+        throw new ConflictException(
+          'La intención ya está en proceso y no tiene un cobro en la pasarela',
+          { intentId },
+          PaymentsErrorReason.PAYMENT_INTENT_ALREADY_PROCESSING,
+        );
+      }
+      await this.assertNoBlockingOpenOperation(tx, intentId, dto.operation);
+      await this.assertRiskCleared(tx, intentId, true);
+      // La pasarela cobra el importe completo: si ya hay algo capturado por el
+      // camino de siempre, excede el saldo y no se despacha (sobrecobro).
+      await this.assertWithinBalance(tx, found, intentId, found.amount);
+      return found;
+    });
+
+    const charged = intent.gatewayIntentRef
+      ? await gateway.consult(
+          intent.id,
+          intent.gatewayIntentRef,
+          intent.statusConceptId,
+        )
+      : await gateway.dispatch(intent, dto.paymentMethodType);
+
+    return {
+      id: intent.id,
+      paymentIntentId: intent.id,
+      amount: intent.amount,
+      statusConceptId: charged.localStatusConceptId,
+      gatewayTransactionRef: charged.gatewayIntentRef,
+      gateway: {
+        paymentIntentId: charged.gatewayIntentRef,
+        status: charged.gatewayStatus,
+        ...(charged.nextAction ? { nextAction: charged.nextAction } : {}),
+      },
+    };
   }
 
   /**
