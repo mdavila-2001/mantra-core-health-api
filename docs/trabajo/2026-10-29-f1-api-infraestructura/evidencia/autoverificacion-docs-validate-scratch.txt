@@ -1,0 +1,28 @@
+# AUTOVERIFICACIÓN FUERA DEL GATE: equivalente de 'yarn docs:openapi:generate' (dist con tsc del scratch, node_modules del scratch por symlink temporal, xlsx = stub) y de 'yarn docs:validate'
+$ node tools/openapi/generate-openapi.mjs
+  949 DTO de cuerpo · 12 esquemas homónimos renombrados (EvidenceInputDto, CreateAssignmentDto, LocationPingDto, RunDueSchedulesDto, QualityFindingDto, CreateAffiliationDto) · 1162 esquemas con additionalProperties: false.
+  47/47 rutas públicas marcadas, 246 tags globales, 1078 descripciones y 11607 respuestas de error añadidas.
+OpenAPI generado: 1397 paths, 1533 operaciones, 1434 esquemas.
+  → /home/user/mantra-core-health-api/openapi/openapi.json
+  → /home/user/mantra-core-health-api/openapi/openapi.yaml
+EXIT=0
+$ node tools/openapi/check-breaking.mjs --base <openapi.json de HEAD> --head openapi/openapi.json
+Sin cambios incompatibles no aprobados en el contrato OpenAPI.
+EXIT=0
+$ redocly lint openapi/openapi.yaml
+Woohoo! Your API description is valid. 🎉
+
+EXIT=0
+$ node tools/asyncapi/validate.mjs asyncapi/asyncapi.yaml
+AsyncAPI válido: 0 advertencia(s), 0 errores.
+EXIT=0
+$ node tools/docs/check-doc-coverage.mjs
+Cobertura documental OK: sin marcadores pendientes, sin páginas vacías, sin módulos sin documentar, contratos presentes.
+EXIT=0
+$ node tools/docs/check-doc-links.mjs
+BROKEN LINK: docs/trabajo/2026-10-24-seed-dx-devices-us-official/PLAN.md -> ../2026-10-24-seed-dx-devices-us/REPORTE.md
+1 enlaces rotos.
+EXIT=1  (el único enlace roto es PREEXISTENTE: docs/trabajo/2026-10-24-seed-dx-devices-us-official/PLAN.md)
+$ git diff --diff-algorithm=patience --numstat openapi
+3633	5	openapi/openapi.json
+2533	4	openapi/openapi.yaml

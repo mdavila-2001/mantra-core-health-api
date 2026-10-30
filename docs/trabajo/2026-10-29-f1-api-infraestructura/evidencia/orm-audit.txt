@@ -1,0 +1,20 @@
+$ SALUD_VAULT=/home/user/mantra_core_technologies_health_docs/SALUD node tools/catalog/audit-fidelity.mjs <scratch>/fidelity.json
+{
+  "entidadesBoveda": 1331,
+  "conjuntosDeIndicesBoveda": 1220,
+  "entidadesMapeadas": 1269,
+  "entidadesFaltantes": 0,
+  "entidadesSobrantes": 83,
+  "columnasFaltantes": 0,
+  "columnasSobrantes": 133,
+  "tiposDivergentes": 0,
+  "obligatoriedadDivergente": 23,
+  "vistasNoMaterializadas": 78,
+  "indicesDeclarados": 7733,
+  "indicesEnCatalogo": 7676,
+  "fkDeclaradas": 6621,
+  "fkEnCatalogo": 6621
+}
+
+Informe completo: /tmp/claude-0/-home-user/f19241b2-e466-53c2-a2df-a87267a67063/scratchpad/apif1/fidelity.json
+EXIT=0

@@ -1,0 +1,6 @@
+{"level":30,"pid":21595,"hostname":"vm","context":"SeedBootstrapService","event":"seed.step","name":"reglas de infraestructura hospitalaria","inserted":36,"tookMs":17,"failed":false,"detail":{"parentRules":21,"typologyRules":15,"formBackfill":0},"msg":"Seed: reglas de infraestructura hospitalaria"}
+{"level":30,"pid":21595,"hostname":"vm","context":"SeedBootstrapService","event":"seed.summary","ok":29,"failed":0,"inserted":42514,"tookMs":319556,"steps":[{"name":"catálogo de conceptos","inserted":4623,"tookMs":539,"failed":false},{"name":"enumeraciones dinámicas","inserted":896,"tookMs":198,"failed":false},{"name":"apoderamiento de portal","inserted":3,"tookMs":15,"failed":false},{"name":"ma
+SEED_EXIT=0
+space_form_parent_rules|21
+facility_typology_rules|15
+care_spaces sin forma|0

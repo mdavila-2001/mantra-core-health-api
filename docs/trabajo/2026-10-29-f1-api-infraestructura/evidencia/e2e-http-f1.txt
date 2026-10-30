@@ -1,0 +1,56 @@
+# E2E HTTP de F1 contra la API real y la base local (2026-10-30). Fuera del gate:
+# dist construido con tsc del scratch (deps con versiones de yarn.lock, xlsx = stub vacío), seed:boot ejecutado (29/29),
+# API en :3100. Cada check: request → response → fila → historia/sello/evento → relectura. Datos sintéticos.
+$ tsx e2e-f1.ts
+OK   sede A con tenant_id de su práctica
+OK   catálogo 200 con 10 formas y 30 funciones
+OK   alta edificio 201 ACTIVO
+OK   fila: tenant, forma y estado
+OK   historia con tenant_id
+OK   sello CARE_SPACE_CREATED
+OK   evento practice.care_space.created
+OK   cama en la raíz 422 SPACE_PARENT_RULE_VIOLATION (con requestId)
+OK   local bajo edificio 201
+OK   alta masiva 201 ×3
+OK   3 camas en la base
+OK   código repetido 409 SPACE_CODE_TAKEN
+OK   structure 200 con 5 espacios y asOf
+OK   ficha: path, derivados (3 camas censables)
+OK   desde B: todo 404
+OK   nada cambió en A
+OK   PATCH sin If-Match 412 IF_MATCH_REQUIRED
+OK   PATCH If-Match distinto 412 ROW_VERSION_MISMATCH
+OK   PATCH 200 y rowVersion+1
+OK   PATCH persistido
+OK   relectura muestra la presión
+OK   código de activo 422 SPACE_IMMUTABLE_FIELD
+OK   mover padre bajo su hijo 422 SPACE_CYCLE
+OK   mover a la raíz 200 y persistido
+OK   evento moved
+OK   retire-check: ACTIVE_CHILDREN 3 + no verificables
+OK   retirar con hijos 409 SPACE_RETIRE_BLOCKED con próxima acción
+OK   retirar hoja 200 RETIRED
+OK   retiro persistido con valid_to
+OK   motivo en la historia, no en el evento
+OK   relectura: 2 camas
+OK   import dryRun: ok false, errores por línea, nada escrito
+OK   import real: created 1 y persistido
+OK   unidad 201 con tenant
+OK   vínculo OWNER 201
+OK   segundo OWNER 409
+OK   ficha de unidad con el vínculo
+OK   retirar unidad con espacio vinculado 409 UNIT_RETIRE_BLOCKED
+OK   tipología Puesto de Salud con camas 409 TYPOLOGY_CONFLICT
+OK   regulatorio 200 y faltantes obligatorios
+OK   regulatorio persistido
+OK   verificar SNIS como owner 403
+OK   verificar SNIS como plataforma 200
+OK   snis_verified_at en la base
+OK   verificar en B el código ya verificado en A: 409 genérico
+OK   habilitación 201 en trámite
+OK   habilitación en facility_licenses
+OK   plataforma la verifica; vencida se lee LIC_EXPIRED
+OK   capacidad declarada vs derivada: brecha 10 vs 2
+
+49 OK, 0 FAIL
+EXIT=0

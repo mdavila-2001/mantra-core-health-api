@@ -26286,6 +26286,62 @@
           "practice"
         ],
         "description": "Crear una unidad clínica jerárquica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "get": {
+        "operationId": "SiteInfrastructureController_listUnits",
+        "parameters": [
+          {
+            "name": "siteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClinicalUnitNodeDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar las unidades clínicas de la sede",
+        "tags": [
+          "practice"
+        ],
+        "description": "Listar las unidades clínicas de la sede. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/sites/{siteId}/care-spaces": {
@@ -26359,7 +26415,14 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CareSpaceDetailDto"
+                }
+              }
+            }
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -27260,6 +27323,1523 @@
           "practice"
         ],
         "description": "Registrar un movimiento de inventario (ajuste de stock). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/care-spaces/{id}": {
+      "get": {
+        "operationId": "CareSpacesController_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CareSpaceDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Ficha de un espacio de atención",
+        "tags": [
+          "practice"
+        ],
+        "description": "Ficha de un espacio de atención. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "patch": {
+        "operationId": "CareSpacesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "rowVersion leída (3, \"3\" o W/\"3\"). Ausente o distinta: 412",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCareSpaceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CareSpaceDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Editar un espacio de atención",
+        "tags": [
+          "practice"
+        ],
+        "description": "Editar un espacio de atención. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/care-spaces/{id}/move": {
+      "post": {
+        "operationId": "CareSpacesController_move",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "rowVersion leída (3, \"3\" o W/\"3\"). Ausente o distinta: 412",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveCareSpaceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CareSpaceDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mover un espacio de atención",
+        "tags": [
+          "practice"
+        ],
+        "description": "Mover un espacio de atención. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/care-spaces/{id}/lifecycle": {
+      "post": {
+        "operationId": "CareSpacesController_lifecycle",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "rowVersion leída (3, \"3\" o W/\"3\"). Ausente o distinta: 412",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LifecycleChangeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CareSpaceDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cambiar el ciclo de vida de un espacio",
+        "tags": [
+          "practice"
+        ],
+        "description": "Cambiar el ciclo de vida de un espacio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/care-spaces/{id}/retire-check": {
+      "get": {
+        "operationId": "CareSpacesController_retireCheck",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetireCheckDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Bloqueos para retirar un espacio",
+        "tags": [
+          "practice"
+        ],
+        "description": "Bloqueos para retirar un espacio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/care-spaces/{id}/unit-assignments": {
+      "post": {
+        "operationId": "CareSpacesController_addAssignment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUnitAssignmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpaceUnitAssignmentDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Vincular un espacio a una unidad clínica",
+        "tags": [
+          "practice"
+        ],
+        "description": "Vincular un espacio a una unidad clínica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/care-spaces/{id}/unit-assignments/{assignmentId}": {
+      "delete": {
+        "operationId": "CareSpacesController_removeAssignment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assignmentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentRemovedDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Desvincular un espacio de una unidad clínica",
+        "tags": [
+          "practice"
+        ],
+        "description": "Desvincular un espacio de una unidad clínica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/clinical-units/{id}": {
+      "get": {
+        "operationId": "ClinicalUnitsController_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicalUnitDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Ficha de una unidad clínica",
+        "tags": [
+          "practice"
+        ],
+        "description": "Ficha de una unidad clínica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "patch": {
+        "operationId": "ClinicalUnitsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "rowVersion leída. Ausente o distinta: 412",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateClinicalUnitDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicalUnitDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Editar una unidad clínica",
+        "tags": [
+          "practice"
+        ],
+        "description": "Editar una unidad clínica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/clinical-units/{id}/lifecycle": {
+      "post": {
+        "operationId": "ClinicalUnitsController_lifecycle",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "rowVersion leída. Ausente o distinta: 412",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LifecycleChangeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicalUnitDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cambiar el ciclo de vida de una unidad clínica",
+        "tags": [
+          "practice"
+        ],
+        "description": "Cambiar el ciclo de vida de una unidad clínica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/sites/{siteId}/structure": {
+      "get": {
+        "operationId": "SiteInfrastructureController_structure",
+        "parameters": [
+          {
+            "name": "siteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteStructureDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Estructura de la sede (espacios, unidades, vínculos)",
+        "tags": [
+          "practice"
+        ],
+        "description": "Estructura de la sede (espacios, unidades, vínculos). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/sites/{siteId}/care-spaces/bulk": {
+      "post": {
+        "operationId": "SiteInfrastructureController_bulk",
+        "parameters": [
+          {
+            "name": "siteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkCreateCareSpacesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkCreatedDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Alta masiva de espacios por patrón",
+        "tags": [
+          "practice"
+        ],
+        "description": "Alta masiva de espacios por patrón. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/sites/{siteId}/care-spaces/import": {
+      "post": {
+        "operationId": "SiteInfrastructureController_importRows",
+        "parameters": [
+          {
+            "name": "siteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dryRun",
+            "required": false,
+            "in": "query",
+            "description": "Por defecto true",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportCareSpacesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Importar espacios (dryRun=true valida sin escribir)",
+        "tags": [
+          "practice"
+        ],
+        "description": "Importar espacios (dryRun=true valida sin escribir). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/sites/{siteId}/regulatory": {
+      "get": {
+        "operationId": "SiteInfrastructureController_getRegulatory",
+        "parameters": [
+          {
+            "name": "siteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteRegulatoryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Datos regulatorios del establecimiento",
+        "tags": [
+          "practice"
+        ],
+        "description": "Datos regulatorios del establecimiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "patch": {
+        "operationId": "SiteInfrastructureController_updateRegulatory",
+        "parameters": [
+          {
+            "name": "siteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "rowVersion de la sede; si viene y no coincide: 412",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSiteRegulatoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteRegulatoryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Editar los datos regulatorios del establecimiento",
+        "tags": [
+          "practice"
+        ],
+        "description": "Editar los datos regulatorios del establecimiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/sites/{siteId}/regulatory/verify-snis": {
+      "post": {
+        "operationId": "SiteInfrastructureController_verifySnis",
+        "parameters": [
+          {
+            "name": "siteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteRegulatoryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Verificar el código SNIS del establecimiento (plataforma)",
+        "tags": [
+          "practice"
+        ],
+        "description": "Verificar el código SNIS del establecimiento (plataforma). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/sites/{siteId}/licenses": {
+      "get": {
+        "operationId": "SiteInfrastructureController_listLicenses",
+        "parameters": [
+          {
+            "name": "siteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SiteLicenseDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Habilitaciones del establecimiento",
+        "tags": [
+          "practice"
+        ],
+        "description": "Habilitaciones del establecimiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "post": {
+        "operationId": "SiteInfrastructureController_createLicense",
+        "parameters": [
+          {
+            "name": "siteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSiteLicenseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteLicenseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Registrar una habilitación del establecimiento",
+        "tags": [
+          "practice"
+        ],
+        "description": "Registrar una habilitación del establecimiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/sites/{siteId}/capacity": {
+      "get": {
+        "operationId": "SiteInfrastructureController_capacity",
+        "parameters": [
+          {
+            "name": "siteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteCapacityDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Capacidad declarada vs. derivada del establecimiento",
+        "tags": [
+          "practice"
+        ],
+        "description": "Capacidad declarada vs. derivada del establecimiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/sites/{siteId}/declared-capacities": {
+      "post": {
+        "operationId": "SiteInfrastructureController_declareCapacity",
+        "parameters": [
+          {
+            "name": "siteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDeclaredCapacityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteCapacityDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Declarar capacidad del establecimiento",
+        "tags": [
+          "practice"
+        ],
+        "description": "Declarar capacidad del establecimiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/practice/infrastructure-catalog": {
+      "get": {
+        "operationId": "InfrastructureCatalogController_catalog",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfrastructureCatalogDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Catálogo de infraestructura hospitalaria",
+        "tags": [
+          "practice"
+        ],
+        "description": "Catálogo de infraestructura hospitalaria. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/site-licenses/{id}": {
+      "patch": {
+        "operationId": "SiteLicensesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "rowVersion; si viene y no coincide: 412",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSiteLicenseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteLicenseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Editar una habilitación del establecimiento",
+        "tags": [
+          "practice"
+        ],
+        "description": "Editar una habilitación del establecimiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/diagnostic-units": {
@@ -106651,6 +108231,87 @@
       "CreateCareSpaceDto": {
         "type": "object",
         "properties": {
+          "description": {
+            "type": "string",
+            "description": "Descripción libre",
+            "maxLength": 1000,
+            "nullable": true
+          },
+          "capacity": {
+            "type": "number",
+            "description": "Capacidad (nº de plazas)",
+            "minimum": 0,
+            "nullable": true
+          },
+          "floorNumber": {
+            "type": "number",
+            "description": "Piso (negativo = subsuelo)",
+            "nullable": true
+          },
+          "areaM2": {
+            "type": "number",
+            "description": "Superficie útil en m²",
+            "minimum": 0,
+            "nullable": true
+          },
+          "asepsisCode": {
+            "type": "string",
+            "description": "Asepsia (ASEPSIS_*)",
+            "nullable": true
+          },
+          "pressureCode": {
+            "type": "string",
+            "description": "Presión relativa (PRESSURE_*)",
+            "nullable": true
+          },
+          "airChangesPerHour": {
+            "type": "number",
+            "description": "Renovaciones de aire por hora (ACH)",
+            "nullable": true
+          },
+          "hvacValidatedOn": {
+            "type": "string",
+            "description": "Fecha de validación HVAC (YYYY-MM-DD)",
+            "format": "date",
+            "nullable": true
+          },
+          "sexRestrictionCode": {
+            "type": "string",
+            "description": "Restricción de sexo (SEX_*)",
+            "nullable": true
+          },
+          "ageGroupCode": {
+            "type": "string",
+            "description": "Grupo etario (AGE_*)",
+            "nullable": true
+          },
+          "bedCategoryCode": {
+            "type": "string",
+            "description": "Categoría de cama (BED_CAT_*)",
+            "nullable": true
+          },
+          "censable": {
+            "type": "boolean",
+            "description": "Cama censable (cuenta para el censo)",
+            "nullable": true
+          },
+          "prepMinutes": {
+            "type": "number",
+            "description": "Minutos de preparación",
+            "minimum": 0,
+            "nullable": true
+          },
+          "cleanupMinutes": {
+            "type": "number",
+            "description": "Minutos de limpieza",
+            "minimum": 0,
+            "nullable": true
+          },
+          "gln": {
+            "type": "string",
+            "description": "GS1 GLN (13 dígitos)",
+            "nullable": true
+          },
           "clinicalUnitId": {
             "type": "string",
             "description": "Unidad clínica (misma sede)",
@@ -106673,12 +108334,21 @@
           },
           "spaceTypeConceptId": {
             "type": "string",
-            "description": "Concepto de tipo de espacio",
+            "description": "Obsoleto (F0): concepto de función. Usar functionCode; si vienen los dos, manda functionCode",
+            "deprecated": true,
             "format": "uuid"
           },
-          "capacity": {
-            "type": "number",
-            "description": "Capacidad (nº de plazas)"
+          "formCode": {
+            "type": "string",
+            "description": "Forma FHIR (LOC_FORM_*). Ausente: LOC_FORM_ROOM (compatibilidad con F0)"
+          },
+          "functionCode": {
+            "type": "string",
+            "description": "Función (SPACE_FN_* o SPACE_TYPE_ROOM). Ausente: SPACE_TYPE_ROOM (genérica)"
+          },
+          "activate": {
+            "type": "boolean",
+            "description": "Nacer ACTIVO en vez de PLANNED (el padre tiene que estar activo)"
           }
         },
         "required": [
@@ -106686,6 +108356,421 @@
           "name"
         ],
         "additionalProperties": false
+      },
+      "ConceptDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "display": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "display"
+        ]
+      },
+      "SpacePathStepDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "form": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "form"
+        ]
+      },
+      "CareSpaceNodeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "form": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "function": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "status": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "operationalStatus": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "clinicalUnitId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "capacity": {
+            "type": "number",
+            "nullable": true
+          },
+          "rowVersion": {
+            "type": "number"
+          },
+          "childCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "parentId",
+          "code",
+          "name",
+          "form",
+          "function",
+          "status",
+          "operationalStatus",
+          "clinicalUnitId",
+          "capacity",
+          "rowVersion",
+          "childCount"
+        ]
+      },
+      "SpaceUnitAssignmentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "careSpaceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "clinicalUnitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "validFrom": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "validTo": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "careSpaceId",
+          "clinicalUnitId",
+          "role",
+          "validFrom",
+          "validTo"
+        ]
+      },
+      "SpaceDerivedDto": {
+        "type": "object",
+        "properties": {
+          "beds": {
+            "type": "number"
+          },
+          "censableBeds": {
+            "type": "number"
+          },
+          "activeChildren": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "beds",
+          "censableBeds",
+          "activeChildren"
+        ]
+      },
+      "CareSpaceDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "form": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "function": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "status": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "operationalStatus": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "clinicalUnitId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "capacity": {
+            "type": "number",
+            "nullable": true
+          },
+          "rowVersion": {
+            "type": "number"
+          },
+          "childCount": {
+            "type": "number"
+          },
+          "practiceSiteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "floorNumber": {
+            "type": "number",
+            "nullable": true
+          },
+          "areaM2": {
+            "type": "number",
+            "nullable": true
+          },
+          "asepsis": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "pressure": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "airChangesPerHour": {
+            "type": "number",
+            "nullable": true
+          },
+          "hvacValidatedOn": {
+            "type": "object",
+            "nullable": true,
+            "format": "date"
+          },
+          "sexRestriction": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "ageGroup": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "bedCategory": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "censable": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "gln": {
+            "type": "string",
+            "nullable": true
+          },
+          "prepMinutes": {
+            "type": "number",
+            "nullable": true
+          },
+          "cleanupMinutes": {
+            "type": "number",
+            "nullable": true
+          },
+          "validFrom": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "validTo": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "path": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpacePathStepDto"
+            }
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CareSpaceNodeDto"
+            }
+          },
+          "assignments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpaceUnitAssignmentDto"
+            }
+          },
+          "derived": {
+            "$ref": "#/components/schemas/SpaceDerivedDto"
+          }
+        },
+        "required": [
+          "id",
+          "parentId",
+          "code",
+          "name",
+          "form",
+          "function",
+          "status",
+          "operationalStatus",
+          "clinicalUnitId",
+          "capacity",
+          "rowVersion",
+          "childCount",
+          "practiceSiteId",
+          "description",
+          "floorNumber",
+          "areaM2",
+          "asepsis",
+          "pressure",
+          "airChangesPerHour",
+          "hvacValidatedOn",
+          "sexRestriction",
+          "ageGroup",
+          "bedCategory",
+          "censable",
+          "gln",
+          "prepMinutes",
+          "cleanupMinutes",
+          "validFrom",
+          "validTo",
+          "path",
+          "children",
+          "assignments",
+          "derived"
+        ]
       },
       "VerifyAccreditationDto": {
         "type": "object",
@@ -106826,6 +108911,1549 @@
           "direction",
           "quantity"
         ],
+        "additionalProperties": false
+      },
+      "UpdateCareSpaceDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Descripción libre",
+            "maxLength": 1000,
+            "nullable": true
+          },
+          "capacity": {
+            "type": "number",
+            "description": "Capacidad (nº de plazas)",
+            "minimum": 0,
+            "nullable": true
+          },
+          "floorNumber": {
+            "type": "number",
+            "description": "Piso (negativo = subsuelo)",
+            "nullable": true
+          },
+          "areaM2": {
+            "type": "number",
+            "description": "Superficie útil en m²",
+            "minimum": 0,
+            "nullable": true
+          },
+          "asepsisCode": {
+            "type": "string",
+            "description": "Asepsia (ASEPSIS_*)",
+            "nullable": true
+          },
+          "pressureCode": {
+            "type": "string",
+            "description": "Presión relativa (PRESSURE_*)",
+            "nullable": true
+          },
+          "airChangesPerHour": {
+            "type": "number",
+            "description": "Renovaciones de aire por hora (ACH)",
+            "nullable": true
+          },
+          "hvacValidatedOn": {
+            "type": "string",
+            "description": "Fecha de validación HVAC (YYYY-MM-DD)",
+            "format": "date",
+            "nullable": true
+          },
+          "sexRestrictionCode": {
+            "type": "string",
+            "description": "Restricción de sexo (SEX_*)",
+            "nullable": true
+          },
+          "ageGroupCode": {
+            "type": "string",
+            "description": "Grupo etario (AGE_*)",
+            "nullable": true
+          },
+          "bedCategoryCode": {
+            "type": "string",
+            "description": "Categoría de cama (BED_CAT_*)",
+            "nullable": true
+          },
+          "censable": {
+            "type": "boolean",
+            "description": "Cama censable (cuenta para el censo)",
+            "nullable": true
+          },
+          "prepMinutes": {
+            "type": "number",
+            "description": "Minutos de preparación",
+            "minimum": 0,
+            "nullable": true
+          },
+          "cleanupMinutes": {
+            "type": "number",
+            "description": "Minutos de limpieza",
+            "minimum": 0,
+            "nullable": true
+          },
+          "gln": {
+            "type": "string",
+            "description": "GS1 GLN (13 dígitos)",
+            "nullable": true
+          },
+          "code": {
+            "type": "string",
+            "description": "Código: sólo mientras el espacio está PLANNED",
+            "maxLength": 100
+          },
+          "name": {
+            "type": "string",
+            "description": "Nombre",
+            "maxLength": 200
+          },
+          "formCode": {
+            "type": "string",
+            "description": "Forma: sólo mientras el espacio está PLANNED"
+          },
+          "functionCode": {
+            "type": "string",
+            "description": "Función (valida perfil y tipología)"
+          },
+          "clinicalUnitId": {
+            "type": "string",
+            "description": "Unidad clínica principal (misma sede); null la quita",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MoveCareSpaceDto": {
+        "type": "object",
+        "properties": {
+          "parentSpaceId": {
+            "type": "string",
+            "description": "Nuevo padre (misma sede); null o ausente: raíz",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LifecycleChangeDto": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "activate",
+              "suspend",
+              "reactivate",
+              "retire"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "description": "Motivo; obligatorio para suspend y retire",
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "additionalProperties": false
+      },
+      "BlockerDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "ACTIVE_CHILDREN",
+              "ACTIVE_ENCOUNTER",
+              "FUTURE_PROCEDURE",
+              "FUTURE_BOOKING",
+              "SCHEDULABLE_RESOURCE",
+              "INVENTORY_LOCATION",
+              "EQUIPMENT",
+              "ACTIVE_CHILD_UNITS",
+              "ACTIVE_SPACES",
+              "ACTIVE_STAFF"
+            ]
+          },
+          "count": {
+            "type": "number"
+          },
+          "sampleIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "nextAction": {
+            "type": "string",
+            "description": "Qué hacer para destrabarlo (S3)"
+          }
+        },
+        "required": [
+          "kind",
+          "count",
+          "sampleIds",
+          "nextAction"
+        ]
+      },
+      "UnverifiableCheckDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "why": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "why"
+        ]
+      },
+      "RetireCheckDto": {
+        "type": "object",
+        "properties": {
+          "blockers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlockerDto"
+            }
+          },
+          "unverifiable": {
+            "description": "Bloqueos que todavía no se pueden comprobar (sin FK al espacio)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnverifiableCheckDto"
+            }
+          }
+        },
+        "required": [
+          "blockers",
+          "unverifiable"
+        ]
+      },
+      "CreateUnitAssignmentDto": {
+        "type": "object",
+        "properties": {
+          "clinicalUnitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "roleCode": {
+            "type": "string",
+            "enum": [
+              "SPACE_UNIT_ROLE_OWNER",
+              "SPACE_UNIT_ROLE_SHARED",
+              "SPACE_UNIT_ROLE_LOAN"
+            ]
+          }
+        },
+        "required": [
+          "clinicalUnitId",
+          "roleCode"
+        ],
+        "additionalProperties": false
+      },
+      "AssignmentRemovedDto": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "ClinicalUnitNodeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "responsibleUserId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "rowVersion": {
+            "type": "number"
+          },
+          "childCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "parentId",
+          "code",
+          "name",
+          "description",
+          "status",
+          "responsibleUserId",
+          "rowVersion",
+          "childCount"
+        ]
+      },
+      "ClinicalUnitDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "responsibleUserId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "rowVersion": {
+            "type": "number"
+          },
+          "childCount": {
+            "type": "number"
+          },
+          "practiceSiteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "validFrom": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "validTo": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClinicalUnitNodeDto"
+            }
+          },
+          "spaces": {
+            "description": "Espacios con esta unidad principal",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CareSpaceNodeDto"
+            }
+          },
+          "assignments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpaceUnitAssignmentDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "parentId",
+          "code",
+          "name",
+          "description",
+          "status",
+          "responsibleUserId",
+          "rowVersion",
+          "childCount",
+          "practiceSiteId",
+          "validFrom",
+          "validTo",
+          "children",
+          "spaces",
+          "assignments"
+        ]
+      },
+      "UpdateClinicalUnitDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Código: sólo mientras está PLANNED"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000,
+            "nullable": true
+          },
+          "parentUnitId": {
+            "type": "string",
+            "description": "Unidad padre (misma sede); null: raíz",
+            "format": "uuid",
+            "nullable": true
+          },
+          "responsibleUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "specialtyConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "EstablishmentSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "practiceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "snisCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "snisVerified": {
+            "type": "boolean",
+            "description": "Verificado por la plataforma"
+          },
+          "subsector": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "careLevel": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "typology": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "sedes": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "managingEntityName": {
+            "type": "string",
+            "nullable": true
+          },
+          "healthNetworkName": {
+            "type": "string",
+            "nullable": true
+          },
+          "municipalityName": {
+            "type": "string",
+            "nullable": true
+          },
+          "rowVersion": {
+            "type": "number"
+          },
+          "canWrite": {
+            "type": "boolean",
+            "description": "El actor puede editar la estructura (sólo refleja; la API decide)"
+          }
+        },
+        "required": [
+          "id",
+          "practiceId",
+          "branchId",
+          "code",
+          "name",
+          "status",
+          "snisCode",
+          "snisVerified",
+          "subsector",
+          "careLevel",
+          "typology",
+          "sedes",
+          "managingEntityName",
+          "healthNetworkName",
+          "municipalityName",
+          "rowVersion",
+          "canWrite"
+        ]
+      },
+      "SiteStructureDto": {
+        "type": "object",
+        "properties": {
+          "site": {
+            "$ref": "#/components/schemas/EstablishmentSummaryDto"
+          },
+          "spaces": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CareSpaceNodeDto"
+            }
+          },
+          "units": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClinicalUnitNodeDto"
+            }
+          },
+          "assignments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpaceUnitAssignmentDto"
+            }
+          },
+          "asOf": {
+            "type": "string",
+            "description": "Instante de la lectura (S7)"
+          }
+        },
+        "required": [
+          "site",
+          "spaces",
+          "units",
+          "assignments",
+          "asOf"
+        ]
+      },
+      "BulkCreateCareSpacesDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Descripción libre",
+            "maxLength": 1000,
+            "nullable": true
+          },
+          "capacity": {
+            "type": "number",
+            "description": "Capacidad (nº de plazas)",
+            "minimum": 0,
+            "nullable": true
+          },
+          "floorNumber": {
+            "type": "number",
+            "description": "Piso (negativo = subsuelo)",
+            "nullable": true
+          },
+          "areaM2": {
+            "type": "number",
+            "description": "Superficie útil en m²",
+            "minimum": 0,
+            "nullable": true
+          },
+          "asepsisCode": {
+            "type": "string",
+            "description": "Asepsia (ASEPSIS_*)",
+            "nullable": true
+          },
+          "pressureCode": {
+            "type": "string",
+            "description": "Presión relativa (PRESSURE_*)",
+            "nullable": true
+          },
+          "airChangesPerHour": {
+            "type": "number",
+            "description": "Renovaciones de aire por hora (ACH)",
+            "nullable": true
+          },
+          "hvacValidatedOn": {
+            "type": "string",
+            "description": "Fecha de validación HVAC (YYYY-MM-DD)",
+            "format": "date",
+            "nullable": true
+          },
+          "sexRestrictionCode": {
+            "type": "string",
+            "description": "Restricción de sexo (SEX_*)",
+            "nullable": true
+          },
+          "ageGroupCode": {
+            "type": "string",
+            "description": "Grupo etario (AGE_*)",
+            "nullable": true
+          },
+          "bedCategoryCode": {
+            "type": "string",
+            "description": "Categoría de cama (BED_CAT_*)",
+            "nullable": true
+          },
+          "censable": {
+            "type": "boolean",
+            "description": "Cama censable (cuenta para el censo)",
+            "nullable": true
+          },
+          "prepMinutes": {
+            "type": "number",
+            "description": "Minutos de preparación",
+            "minimum": 0,
+            "nullable": true
+          },
+          "cleanupMinutes": {
+            "type": "number",
+            "description": "Minutos de limpieza",
+            "minimum": 0,
+            "nullable": true
+          },
+          "gln": {
+            "type": "string",
+            "description": "GS1 GLN (13 dígitos)",
+            "nullable": true
+          },
+          "parentSpaceId": {
+            "type": "string",
+            "description": "Padre común (misma sede). Ausente o null: raíz",
+            "format": "uuid",
+            "nullable": true
+          },
+          "formCode": {
+            "type": "string",
+            "description": "Forma (LOC_FORM_*)"
+          },
+          "functionCode": {
+            "type": "string",
+            "description": "Función (SPACE_FN_* o SPACE_TYPE_ROOM)"
+          },
+          "codePattern": {
+            "type": "string",
+            "description": "Patrón de código con un rango: \"301-{A..H}\", \"CAMA-{1..12}\"",
+            "example": "CAMA-{1..12}",
+            "maxLength": 100
+          },
+          "namePattern": {
+            "type": "string",
+            "description": "Patrón del nombre: el mismo rango, \"{}\" o nada (se agrega al final)",
+            "example": "Cama {1..12}",
+            "maxLength": 200
+          },
+          "clinicalUnitId": {
+            "type": "string",
+            "description": "Unidad clínica (misma sede)",
+            "format": "uuid"
+          },
+          "activate": {
+            "type": "boolean",
+            "description": "Nacer ACTIVOS (padre activo)"
+          }
+        },
+        "required": [
+          "formCode",
+          "functionCode",
+          "codePattern",
+          "namePattern"
+        ],
+        "additionalProperties": false
+      },
+      "BulkCreatedDto": {
+        "type": "object",
+        "properties": {
+          "created": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CareSpaceDetailDto"
+            }
+          }
+        },
+        "required": [
+          "created"
+        ]
+      },
+      "ImportCareSpacesDto": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "description": "Filas ya parseadas por el cliente. Cada una: code, name, formCode, functionCode, parentCode? (código de un espacio existente o de una fila anterior), clinicalUnitCode?, activate?, y los atributos de CareSpaceAttributes. Se validan fila por fila.",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "maxItems": 500
+          }
+        },
+        "required": [
+          "rows"
+        ],
+        "additionalProperties": false
+      },
+      "ImportFieldErrorDto": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "field",
+          "reason"
+        ]
+      },
+      "ImportRowResultDto": {
+        "type": "object",
+        "properties": {
+          "line": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "error"
+            ]
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImportFieldErrorDto"
+            }
+          }
+        },
+        "required": [
+          "line",
+          "status",
+          "errors"
+        ]
+      },
+      "ImportResultDto": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImportRowResultDto"
+            }
+          },
+          "created": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "ok",
+          "dryRun",
+          "rows"
+        ]
+      },
+      "SiteRegulatoryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "practiceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "snisCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "snisVerified": {
+            "type": "boolean",
+            "description": "Verificado por la plataforma"
+          },
+          "subsector": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "careLevel": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "typology": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "sedes": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "managingEntityName": {
+            "type": "string",
+            "nullable": true
+          },
+          "healthNetworkName": {
+            "type": "string",
+            "nullable": true
+          },
+          "municipalityName": {
+            "type": "string",
+            "nullable": true
+          },
+          "rowVersion": {
+            "type": "number"
+          },
+          "canWrite": {
+            "type": "boolean",
+            "description": "El actor puede editar la estructura (sólo refleja; la API decide)"
+          },
+          "missingRequiredFunctions": {
+            "description": "Funciones obligatorias que faltan",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "practiceId",
+          "branchId",
+          "code",
+          "name",
+          "status",
+          "snisCode",
+          "snisVerified",
+          "subsector",
+          "careLevel",
+          "typology",
+          "sedes",
+          "managingEntityName",
+          "healthNetworkName",
+          "municipalityName",
+          "rowVersion",
+          "canWrite",
+          "missingRequiredFunctions"
+        ]
+      },
+      "UpdateSiteRegulatoryDto": {
+        "type": "object",
+        "properties": {
+          "snisCode": {
+            "type": "string",
+            "description": "Código SNIS/SUIS",
+            "maxLength": 30,
+            "nullable": true
+          },
+          "subsectorCode": {
+            "type": "string",
+            "description": "SUBSECTOR_*",
+            "nullable": true
+          },
+          "careLevelCode": {
+            "type": "string",
+            "description": "CARE_LEVEL_*",
+            "nullable": true
+          },
+          "typologyCode": {
+            "type": "string",
+            "description": "TYPOLOGY_*",
+            "nullable": true
+          },
+          "managingEntityName": {
+            "type": "string",
+            "maxLength": 200,
+            "nullable": true
+          },
+          "healthNetworkName": {
+            "type": "string",
+            "maxLength": 200,
+            "nullable": true
+          },
+          "sedesCode": {
+            "type": "string",
+            "description": "SEDES_*",
+            "nullable": true
+          },
+          "municipalityName": {
+            "type": "string",
+            "maxLength": 200,
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SiteLicenseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "practiceSiteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "authorityName": {
+            "type": "string",
+            "nullable": true
+          },
+          "resolutionNumber": {
+            "type": "string"
+          },
+          "issuedOn": {
+            "type": "string",
+            "nullable": true,
+            "format": "date"
+          },
+          "expiresOn": {
+            "type": "string",
+            "nullable": true,
+            "format": "date"
+          },
+          "status": {
+            "description": "LIC_*; vencida se calcula al leer",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConceptDto"
+              }
+            ]
+          },
+          "clinicalUnitId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "healthcareServiceId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "documentFileId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "rowVersion": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "practiceSiteId",
+          "authorityName",
+          "resolutionNumber",
+          "issuedOn",
+          "expiresOn",
+          "status",
+          "clinicalUnitId",
+          "healthcareServiceId",
+          "documentFileId",
+          "rowVersion"
+        ]
+      },
+      "CreateSiteLicenseDto": {
+        "type": "object",
+        "properties": {
+          "authorityName": {
+            "type": "string",
+            "description": "Autoridad emisora (p. ej. SEDES La Paz)",
+            "maxLength": 200
+          },
+          "resolutionNumber": {
+            "type": "string",
+            "description": "Número de resolución",
+            "maxLength": 100
+          },
+          "issuedOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "expiresOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "clinicalUnitId": {
+            "type": "string",
+            "description": "Alcance: unidad de la sede",
+            "format": "uuid"
+          },
+          "healthcareServiceId": {
+            "type": "string",
+            "description": "Alcance: servicio de la sede",
+            "format": "uuid"
+          },
+          "documentFileId": {
+            "type": "string",
+            "description": "Archivo de la resolución",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "authorityName",
+          "resolutionNumber"
+        ],
+        "additionalProperties": false
+      },
+      "DeclaredCapacityLineDto": {
+        "type": "object",
+        "properties": {
+          "kindCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "asOf": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "resolutionNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "site",
+              "hospital"
+            ],
+            "description": "site = site_declared_capacities; hospital = organization_extensions.hospitals"
+          }
+        },
+        "required": [
+          "kindCode",
+          "quantity",
+          "asOf",
+          "resolutionNumber",
+          "source"
+        ]
+      },
+      "DerivedCapacityLineDto": {
+        "type": "object",
+        "properties": {
+          "kindCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "kindCode",
+          "quantity"
+        ]
+      },
+      "CapacityGapDto": {
+        "type": "object",
+        "properties": {
+          "kindCode": {
+            "type": "string"
+          },
+          "declared": {
+            "type": "number"
+          },
+          "derived": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "kindCode",
+          "declared",
+          "derived"
+        ]
+      },
+      "SiteCapacityDto": {
+        "type": "object",
+        "properties": {
+          "declared": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeclaredCapacityLineDto"
+            }
+          },
+          "derived": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DerivedCapacityLineDto"
+            }
+          },
+          "gaps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CapacityGapDto"
+            }
+          }
+        },
+        "required": [
+          "declared",
+          "derived",
+          "gaps"
+        ]
+      },
+      "CreateDeclaredCapacityDto": {
+        "type": "object",
+        "properties": {
+          "kindCode": {
+            "type": "string",
+            "description": "CAP_*"
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 0
+          },
+          "asOf": {
+            "type": "string",
+            "format": "date"
+          },
+          "resolutionNumber": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "validTo": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": [
+          "kindCode",
+          "quantity",
+          "asOf"
+        ],
+        "additionalProperties": false
+      },
+      "FormConceptDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "display": {
+            "type": "string"
+          },
+          "fhirCode": {
+            "type": "string",
+            "description": "Código FHIR R5 Location.form"
+          }
+        },
+        "required": [
+          "code",
+          "display",
+          "fhirCode"
+        ]
+      },
+      "FunctionProfileDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "display": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string",
+            "description": "Clave estable (GENERIC para SPACE_TYPE_ROOM)"
+          },
+          "forms": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "schedulable": {
+            "type": "boolean"
+          },
+          "inpatient": {
+            "type": "boolean"
+          },
+          "billable": {
+            "type": "boolean"
+          },
+          "allowOverlap": {
+            "type": "boolean"
+          },
+          "isolationCapable": {
+            "type": "boolean"
+          },
+          "stockPoint": {
+            "type": "boolean"
+          },
+          "hostsEquipment": {
+            "type": "boolean"
+          },
+          "requiresTerminalCleaning": {
+            "type": "boolean"
+          },
+          "requiresArea": {
+            "type": "boolean"
+          },
+          "requiresHvac": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "code",
+          "display",
+          "key",
+          "forms",
+          "schedulable",
+          "inpatient",
+          "billable",
+          "allowOverlap",
+          "isolationCapable",
+          "stockPoint",
+          "hostsEquipment",
+          "requiresTerminalCleaning",
+          "requiresArea",
+          "requiresHvac"
+        ]
+      },
+      "ParentRuleDto": {
+        "type": "object",
+        "properties": {
+          "parent": {
+            "type": "string",
+            "nullable": true,
+            "description": "null = raíz de la sede"
+          },
+          "child": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "parent",
+          "child"
+        ]
+      },
+      "TypologyRuleDto": {
+        "type": "object",
+        "properties": {
+          "typology": {
+            "type": "string"
+          },
+          "function": {
+            "type": "string"
+          },
+          "rule": {
+            "type": "string",
+            "enum": [
+              "TYPO_ALLOWED",
+              "TYPO_REQUIRED",
+              "TYPO_FORBIDDEN"
+            ]
+          }
+        },
+        "required": [
+          "typology",
+          "function",
+          "rule"
+        ]
+      },
+      "CatalogAttributesDto": {
+        "type": "object",
+        "properties": {
+          "asepsis": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConceptDto"
+            }
+          },
+          "pressure": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConceptDto"
+            }
+          },
+          "sex": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConceptDto"
+            }
+          },
+          "ageGroup": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConceptDto"
+            }
+          },
+          "bedCategory": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConceptDto"
+            }
+          },
+          "unitRole": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConceptDto"
+            }
+          }
+        },
+        "required": [
+          "asepsis",
+          "pressure",
+          "sex",
+          "ageGroup",
+          "bedCategory",
+          "unitRole"
+        ]
+      },
+      "CatalogRegulatoryDto": {
+        "type": "object",
+        "properties": {
+          "subsector": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConceptDto"
+            }
+          },
+          "careLevel": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConceptDto"
+            }
+          },
+          "typology": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConceptDto"
+            }
+          },
+          "sedes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConceptDto"
+            }
+          },
+          "licenseStatus": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConceptDto"
+            }
+          },
+          "capacityKind": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConceptDto"
+            }
+          }
+        },
+        "required": [
+          "subsector",
+          "careLevel",
+          "typology",
+          "sedes",
+          "licenseStatus",
+          "capacityKind"
+        ]
+      },
+      "InfrastructureCatalogDto": {
+        "type": "object",
+        "properties": {
+          "forms": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FormConceptDto"
+            }
+          },
+          "functions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FunctionProfileDto"
+            }
+          },
+          "parentRules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParentRuleDto"
+            }
+          },
+          "typologyRules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TypologyRuleDto"
+            }
+          },
+          "lifecycle": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConceptDto"
+            }
+          },
+          "unitLifecycle": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConceptDto"
+            }
+          },
+          "attributes": {
+            "$ref": "#/components/schemas/CatalogAttributesDto"
+          },
+          "regulatory": {
+            "$ref": "#/components/schemas/CatalogRegulatoryDto"
+          }
+        },
+        "required": [
+          "forms",
+          "functions",
+          "parentRules",
+          "typologyRules",
+          "lifecycle",
+          "unitLifecycle",
+          "attributes",
+          "regulatory"
+        ]
+      },
+      "UpdateSiteLicenseDto": {
+        "type": "object",
+        "properties": {
+          "authorityName": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "resolutionNumber": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "issuedOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "expiresOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "documentFileId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "statusCode": {
+            "type": "string",
+            "description": "Estado: LIC_IN_PROCESS | LIC_VALID | LIC_REVOKED (sólo plataforma). LIC_EXPIRED se calcula; LIC_SUSPENDED no tiene columna en facility_licenses"
+          }
+        },
         "additionalProperties": false
       },
       "DiagnosticConceptDto": {

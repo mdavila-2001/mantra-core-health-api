@@ -1,9 +1,11 @@
-# AUTOVERIFICACIÓN FUERA DEL GATE (no es yarn typecheck) — 2026-10-30, tras prettier/eslint
-# deps: npm install --ignore-scripts de package.json con las versiones de yarn.lock, SIN xlsx, en scratch; tsc del repo (src/** y test/**) con preserveSymlinks
-$ tsc -p <scratch>/tsconfig.json
-src/modules/terminology/import/xlsx-parser.spec.ts(4,23): error TS2307: Cannot find module 'xlsx' or its corresponding type declarations.
-src/modules/terminology/import/xlsx-parser.ts(10,23): error TS2307: Cannot find module 'xlsx' or its corresponding type declarations.
-src/modules/terminology/import/xlsx-parser.ts(11,44): error TS2307: Cannot find module 'xlsx' or its corresponding type declarations.
+# AUTOVERIFICACIÓN FUERA DEL GATE (no es yarn typecheck) — 2026-10-30, versión final
+# deps: npm --ignore-scripts con versiones de yarn.lock, SIN xlsx; tsc del repo (src/** y test/**)
+src/modules/terminology/import/xlsx-parser.spec.ts(4,23): error TS7016: Could not find a declaration file for module 'xlsx'. '/tmp/claude-0/-home-user/f19241b2-e466-53c2-a2df-a87267a67063/scratchpad/apif1/deps/node_modules/xlsx/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/xlsx` if it exists or add a new declaration (.d.ts) file containing `declare module 'xlsx';`
+src/modules/terminology/import/xlsx-parser.ts(10,23): error TS7016: Could not find a declaration file for module 'xlsx'. '/tmp/claude-0/-home-user/f19241b2-e466-53c2-a2df-a87267a67063/scratchpad/apif1/deps/node_modules/xlsx/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/xlsx` if it exists or add a new declaration (.d.ts) file containing `declare module 'xlsx';`
+src/modules/terminology/import/xlsx-parser.ts(11,44): error TS7016: Could not find a declaration file for module 'xlsx'. '/tmp/claude-0/-home-user/f19241b2-e466-53c2-a2df-a87267a67063/scratchpad/apif1/deps/node_modules/xlsx/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/xlsx` if it exists or add a new declaration (.d.ts) file containing `declare module 'xlsx';`
 src/modules/terminology/import/xlsx-parser.ts(110,42): error TS7006: Parameter 'record' implicitly has an 'any' type.
 src/modules/terminology/import/xlsx-parser.ts(110,50): error TS7006: Parameter 'recordIndex' implicitly has an 'any' type.
 src/modules/terminology/import/xlsx-parser.ts(128,33): error TS7006: Parameter 'cell' implicitly has an 'any' type.
@@ -15,8 +17,7 @@ src/modules/terminology/import/xlsx-parser.ts(154,47): error TS7006: Parameter '
 src/modules/terminology/import/xlsx-parser.ts(155,25): error TS7006: Parameter 'cell' implicitly has an 'any' type.
 src/modules/terminology/import/xlsx-parser.ts(158,23): error TS7006: Parameter 'cell' implicitly has an 'any' type.
 src/modules/terminology/import/xlsx-parser.ts(158,29): error TS7006: Parameter 'indexColumn' implicitly has an 'any' type.
-src/modules/terminology/services/concept-file-import.service.spec.ts(13,23): error TS2307: Cannot find module 'xlsx' or its corresponding type declarations.
+src/modules/terminology/services/concept-file-import.service.spec.ts(13,23): error TS7016: Could not find a declaration file for module 'xlsx'. '/tmp/claude-0/-home-user/f19241b2-e466-53c2-a2df-a87267a67063/scratchpad/apif1/deps/node_modules/xlsx/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/xlsx` if it exists or add a new declaration (.d.ts) file containing `declare module 'xlsx';`
 EXIT=2
-
-# errores que NO son de xlsx:
-0
+# errores que NO son de xlsx: 0
