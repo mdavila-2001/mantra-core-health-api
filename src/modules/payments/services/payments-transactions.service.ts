@@ -48,6 +48,7 @@ import {
   type GatewayChargeable,
 } from './payments-gateway-charge.service';
 import { runCommitted } from './payments-committed-transaction';
+import { releaseCheckoutForIntent } from './payments-checkout-release';
 import {
   MIN_DISPATCH_LEASE_MS,
   canResendWithSameKey,
@@ -396,51 +397,82 @@ export class PaymentsTransactionsService {
     const tenantId = requireTenantId();
     const leaseMs =
       this.gatewayCharge?.dispatchLeaseMs ?? MIN_DISPATCH_LEASE_MS;
-    const closed = await runCommitted(this.em, tenantId, async (tx) => {
-      const loaded = await this.intentsRepo.findByIdAndTenantForUpdate(
-        tx,
-        intentId,
-        tenantId,
-      );
-      const found = assertResourceInTenant(loaded, loaded?.tenantId, tenantId, {
-        message: 'Intención de pago no encontrada',
-        reason: PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
+    // Con transacción de petición el cierre también necesita una segunda conexión:
+    // pasa por el mismo cupo que los despachos.
+    const release = this.em.isInTransaction()
+      ? this.gatewayCharge?.acquireDispatchSlot(intentId)
+      : undefined;
+    try {
+      const closed = await runCommitted(this.em, tenantId, async (tx) => {
+        const loaded = await this.intentsRepo.findByIdAndTenantForUpdate(
+          tx,
+          intentId,
+          tenantId,
+        );
+        const found = assertResourceInTenant(
+          loaded,
+          loaded?.tenantId,
+          tenantId,
+          {
+            message: 'Intención de pago no encontrada',
+            reason: PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
+          },
+        );
+        if (!isDispatchMark(found.gatewayIntentRef)) {
+          throw new ConflictException(
+            'La intención no tiene una reserva de despacho que cerrar',
+            { intentId },
+            PaymentsErrorReason.PAYMENT_GATEWAY_NOTHING_TO_RECONCILE,
+          );
+        }
+        // Ya cerrada: no se vuelve a cerrar (ni a sellar la auditoría).
+        if (found.statusConceptId === CONCEPTS.PI_CANCELED) {
+          throw new ConflictException(
+            'La reserva de esta intención ya fue cerrada',
+            { intentId },
+            PaymentsErrorReason.PAYMENT_GATEWAY_DISPATCH_ALREADY_CLOSED,
+          );
+        }
+        // Vencida por la fecha de la marca Y sin actividad reciente: cada intento
+        // del dueño refresca `updated_at` (`reserveDispatch`), así que un reintento
+        // cuya llamada HTTP sigue en vuelo —la fecha de la marca se conserva a
+        // propósito— nunca se confunde con una reserva abandonada.
+        const idleMs = Date.now() - found.updatedAt.getTime();
+        if (
+          classifyInFlight(found, Date.now(), leaseMs) !==
+            'reconciliation_required' ||
+          !(idleMs >= leaseMs)
+        ) {
+          throw new ConflictException(
+            'La reserva puede seguir en vuelo: cerrarla ahora podría permitir un segundo cobro. Esperá a que requiera conciliación y no tenga actividad reciente',
+            { intentId },
+            PaymentsErrorReason.PAYMENT_GATEWAY_DISPATCH_IN_FLIGHT,
+          );
+        }
+        found.statusConceptId = CONCEPTS.PI_CANCELED;
+        touch(found, actor.id);
+        // Las sesiones de checkout abiertas de la intención se expiran y la deuda
+        // vuelve a `DEBT_PENDING` salvo que otra intención conserve una sesión.
+        await releaseCheckoutForIntent(this.flowRepo, tx, found);
+        return {
+          paymentIntentId: found.id,
+          statusConceptId: found.statusConceptId,
+        };
       });
-      if (!isDispatchMark(found.gatewayIntentRef)) {
-        throw new ConflictException(
-          'La intención no tiene una reserva de despacho que cerrar',
-          { intentId },
-          PaymentsErrorReason.PAYMENT_GATEWAY_NOTHING_TO_RECONCILE,
-        );
-      }
-      if (
-        classifyInFlight(found, Date.now(), leaseMs) !==
-        'reconciliation_required'
-      ) {
-        throw new ConflictException(
-          'La reserva puede seguir en vuelo: cerrarla ahora podría permitir un segundo cobro. Esperá a que requiera conciliación',
-          { intentId },
-          PaymentsErrorReason.PAYMENT_GATEWAY_DISPATCH_IN_FLIGHT,
-        );
-      }
-      found.statusConceptId = CONCEPTS.PI_CANCELED;
-      touch(found, actor.id);
-      return {
-        paymentIntentId: found.id,
-        statusConceptId: found.statusConceptId,
-      };
-    });
-    gatewayMetrics.reconciled('closed_manually');
-    this.logger.warn(
-      {
-        operation: 'payments.gateway.dispatch-closed',
-        intentId,
-        actorUserId: actor.id,
-        reason,
-      },
-      'Gateway dispatch reservation closed manually without contacting the gateway',
-    );
-    return closed;
+      gatewayMetrics.reconciled('closed_manually');
+      this.logger.warn(
+        {
+          operation: 'payments.gateway.dispatch-closed',
+          intentId,
+          actorUserId: actor.id,
+          reason,
+        },
+        'Gateway dispatch reservation closed manually without contacting the gateway; a charge may exist as an orphan in the gateway',
+      );
+      return closed;
+    } finally {
+      release?.();
+    }
   }
 
   /**

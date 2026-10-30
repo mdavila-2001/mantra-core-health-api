@@ -7,6 +7,7 @@ import {
 } from '../gateway/payments-gateway.double.testing';
 import type { PaymentsGatewayConfig } from '../gateway/payments-gateway.env';
 import { PaymentsErrorReason } from '../payments.error-reasons';
+import { gatewayMetrics } from '../gateway/payments-gateway-metrics';
 import { CONCEPTS } from '../../../common';
 
 /**
@@ -580,11 +581,15 @@ describe('PaymentsGatewayWebhookService', () => {
 
     it('cobro desconocido TERMINAL: 404 para que la pasarela reintente (no se confirma lo que no se asentó)', async () => {
       const d = build(config(), { intent: null });
+      const unknown = jest.spyOn(gatewayMetrics, 'unknownTerminalWebhook');
       await expect(d.service.receive(signed(body({})))).rejects.toMatchObject({
         status: 404,
         reason: PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
       });
       expect(d.events.size).toBe(0);
+      // D13: el cobro huérfano deja rastro medible mientras la pasarela reintenta.
+      expect(unknown).toHaveBeenCalledTimes(1);
+      unknown.mockRestore();
     });
 
     it('rotación de secretos: vale cualquiera de los configurados', async () => {

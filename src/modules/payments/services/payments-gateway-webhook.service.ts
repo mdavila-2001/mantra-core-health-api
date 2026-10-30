@@ -18,6 +18,8 @@ import {
 import { GatewayWebhookResultDto } from '../dto';
 import { PaymentsErrorReason } from '../payments.error-reasons';
 import { DEBT_SOURCE_REF_TYPE } from '../payments.source-refs';
+import { releaseCheckoutForIntent } from './payments-checkout-release';
+import { gatewayMetrics } from '../gateway/payments-gateway-metrics';
 import {
   PAYMENTS_GATEWAY_CONFIG,
   type PaymentsGatewayConfig,
@@ -326,6 +328,7 @@ export class PaymentsGatewayWebhookService {
         );
         return this.result(event.id, { ignored: true });
       }
+      gatewayMetrics.unknownTerminalWebhook();
       this.logger.warn(
         { operation: 'payments.gateway.webhook', eventId: event.id },
         'Gateway terminal webhook for an unknown payment intent; the gateway will retry',
@@ -528,48 +531,14 @@ export class PaymentsGatewayWebhookService {
   }
 
   /**
-   * Un cobro que terminó sin pagarse libera el checkout: la sesión se cierra y la
-   * deuda vuelve a `DEBT_PENDING` para poder abrir otra. Sin esto una deuda
-   * quedaría en `DEBT_IN_CHECKOUT` para siempre.
-   *
-   * Si otra intención conserva una sesión abierta sobre la misma deuda, la deuda
-   * **sigue en checkout**: liberarla dejaría abrir un tercer checkout encima de
-   * un cobro todavía vivo.
+   * Un cobro que terminó sin pagarse libera el checkout (ver
+   * `releaseCheckoutForIntent`).
    */
-  private async releaseDebt(
+  private releaseDebt(
     tx: EntityManager,
     intent: { id: string; tenantId: string },
   ): Promise<void> {
-    const sessions = await this.flowRepo.findCheckoutSessionsByIntentForUpdate(
-      tx,
-      intent.id,
-    );
-    const now = new Date();
-    const closing = new Set<string>();
-    for (const session of sessions) {
-      if (session.statusConceptId !== CONCEPTS.CHECKOUT_OPEN) continue;
-      session.statusConceptId = CONCEPTS.CHECKOUT_EXPIRED;
-      touch(session, undefined, now);
-      closing.add(session.id);
-      const debt = await this.flowRepo.findDebtByIdForUpdate(
-        tx,
-        session.paymentDebtId,
-      );
-      if (
-        debt &&
-        debt.tenantId === intent.tenantId &&
-        debt.statusConceptId === CONCEPTS.DEBT_IN_CHECKOUT
-      ) {
-        // Las sesiones que se cierran acá todavía figuran abiertas en la base
-        // (no se hizo flush): se excluyen por id.
-        const stillOpen = (
-          await this.flowRepo.findOpenCheckoutSessionsByDebt(tx, debt.id)
-        ).filter((other) => !closing.has(other.id));
-        if (stillOpen.length > 0) continue;
-        debt.statusConceptId = CONCEPTS.DEBT_PENDING;
-        touch(debt, undefined, now);
-      }
-    }
+    return releaseCheckoutForIntent(this.flowRepo, tx, intent);
   }
 
   private result(

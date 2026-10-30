@@ -150,11 +150,20 @@ deshabilitaría el endpoint en la pasarela).
   conciliación (`paymentIntentId`, `ageMs`, `canReconcile`);
   `POST /payments/gateway-dispatches/:intentId/reconcile` `{ paymentMethodType }` concilia
   (exige riesgo aprobado); `POST /payments/gateway-dispatches/:intentId/close` `{ reason }`
-  (10 a 300 caracteres, sin datos personales) **cierra a mano** una reserva que ya requiere
-  conciliación: no contacta a la pasarela, pasa la intención a `PI_CANCELED`, conserva la marca
-  como rastro y libera la deuda. Si la pasarela había creado el cobro queda huérfano (expira
-  solo); quien cierra se hace cargo de haberlo comprobado. Una reserva que puede seguir en
-  vuelo no se cierra (`409 PAYMENT_GATEWAY_DISPATCH_IN_FLIGHT`). El motivo queda en el log
+  (texto de 10 a 300 caracteres con al menos 10 letras, sin llaves ni símbolos y sin datos personales) **cierra a mano** una reserva que
+  ya requiere conciliación **y** no tuvo actividad reciente (`updated_at` más viejo que el plazo:
+  cada reintento del dueño lo refresca aunque conserve la fecha de la marca): no contacta a la
+  pasarela, pasa la intención a `PI_CANCELED`, conserva la marca como rastro, expira las
+  sesiones de checkout abiertas de la intención y devuelve la deuda a `DEBT_PENDING` (salvo que
+  OTRA intención conserve una sesión abierta). Si la pasarela había creado el cobro queda
+  huérfano (expira solo); quien cierra se hace cargo de haberlo comprobado. Una reserva que
+  puede seguir en vuelo no se cierra (`409 PAYMENT_GATEWAY_DISPATCH_IN_FLIGHT`) y un segundo
+  cierre responde `409 PAYMENT_GATEWAY_DISPATCH_ALREADY_CLOSED` (no repite ni vuelve a sellar
+  la auditoría). Si un cierre se cruza igual con una llamada en vuelo, `associate` guarda el
+  `pi_…` pero no entrega el cobro a una intención que ya no está abierta (`409
+  PAYMENT_GATEWAY_RECONCILIATION_REQUIRED`, sin `nextAction`, contador
+  `reason=charge_on_closed_intent`). Límite: un `DECLINE` registrado mientras el primer envío
+  está en vuelo no detiene ese cobro. El motivo queda en el log
   estructurado `payments.gateway.dispatch-closed`; la auditoría guarda quién, cuándo y qué
   intención (`audit.audit_log`) y el historial de la fila el cambio de estado. La
   prueba de `problem` del contrato exige la forma de `problem.schema.json` (`type`

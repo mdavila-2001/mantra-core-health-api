@@ -1,9 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsString, MaxLength, MinLength } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsIn, IsString, Matches, MaxLength } from 'class-validator';
 import {
   GATEWAY_PAYMENT_METHOD_TYPES,
   type GatewayPaymentMethodType,
 } from '../gateway/payments-gateway.types';
+
+/** 10 o más letras entre letras, números, espacios y puntuación corriente. */
+const REASON_PATTERN =
+  /^(?=(?:[^\p{L}]*\p{L}){10})[\p{L}\p{N}\s.,;:()¿?¡!'"%/_-]{10,300}$/u;
 
 /** Cuerpo de la conciliación de una reserva de despacho. */
 export class ReconcileGatewayDispatchDto {
@@ -24,9 +29,18 @@ export class CloseGatewayDispatchDto {
     minLength: 10,
     maxLength: 300,
   })
+  // Sólo texto: letras, números y puntuación corriente, con al menos 10 letras. No
+  // llaves, corchetes ni símbolos (rechaza JSON y basura numérica). Se recorta antes
+  // de validar y no se convierte a texto un número ni un objeto.
+  @Transform(({ obj }: { obj: Record<string, unknown> }) =>
+    typeof obj.reason === 'string' ? obj.reason.trim() : obj.reason,
+  )
   @IsString()
-  @MinLength(10)
   @MaxLength(300)
+  @Matches(REASON_PATTERN, {
+    message:
+      'El motivo debe ser texto con al menos 10 letras (sin llaves, corchetes ni símbolos)',
+  })
   reason!: string;
 }
 

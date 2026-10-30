@@ -55,7 +55,10 @@ describe('/payments/gateway-dispatches — autorización negativa', () => {
   }));
 
   const intentOfB: Record<string, any> = {};
-  const resetIntent = (mark = newDispatchMark(Date.now() - 2 * HOUR)) => {
+  const resetIntent = (
+    mark = newDispatchMark(Date.now() - 2 * HOUR),
+    idleMs = 2 * HOUR,
+  ) => {
     Object.assign(intentOfB, {
       id: INTENT_OF_B,
       tenantId: TENANT_B,
@@ -67,7 +70,7 @@ describe('/payments/gateway-dispatches — autorización negativa', () => {
       sourceRefId: DEBT_OF_B,
       gatewayIntentRef: mark,
       createdAt: new Date(),
-      updatedAt: new Date(),
+      updatedAt: new Date(Date.now() - idleMs),
     });
   };
   const debtOfB = {
@@ -374,6 +377,52 @@ describe('/payments/gateway-dispatches — autorización negativa', () => {
     untouched();
   });
 
+  it.each([
+    ['un número', 12345678901234],
+    ['un objeto', { a: 'xxxxxxxxxxxxxxxx' }],
+    ['diez espacios', '          '],
+    ['un JSON como texto', '{"a":"xxxxxxxxxxxxxxxx"}'],
+    ['sólo dígitos', '12345678901234'],
+    ['símbolos', '<<<<<<<<<<<<<<<<'],
+  ])(
+    'D11: el motivo %s se rechaza (400) y no se toca nada',
+    async (_n, reason) => {
+      const res = await call(
+        'post',
+        `/payments/gateway-dispatches/${INTENT_OF_B}/close`,
+        { reason } as never,
+        token({ roles: ['PAYMENTS_ADMIN'], tenants: [TENANT_B] }),
+        TENANT_B,
+      );
+      expect(res.status).toBe(400);
+      untouched();
+    },
+  );
+
+  it('D11: un motivo con tildes y puntuación corriente se acepta (y se recorta)', async () => {
+    const res = await call(
+      'post',
+      `/payments/gateway-dispatches/${INTENT_OF_B}/close`,
+      { reason: '   Verificado en la consola: no hay cobro (sin QR).   ' },
+      token({ roles: ['PAYMENTS_ADMIN'], tenants: [TENANT_B] }),
+      TENANT_B,
+    );
+    expect(res.status).toBe(201);
+  });
+
+  it('D12: el segundo cierre responde 409 (ya cerrada) y la intención sigue cancelada', async () => {
+    const admin = token({ roles: ['PAYMENTS_ADMIN'], tenants: [TENANT_B] });
+    const path = `/payments/gateway-dispatches/${INTENT_OF_B}/close`;
+    const body = {
+      reason: 'Verificado en la consola de la pasarela: no hay cobro',
+    };
+    expect((await call('post', path, body, admin, TENANT_B)).status).toBe(201);
+    const second = await call('post', path, body, admin, TENANT_B);
+    expect(second.status).toBe(409);
+    expect(second.body.reason).toBe('PAYMENT_GATEWAY_DISPATCH_ALREADY_CLOSED');
+    expect(intentOfB.statusConceptId).toBe(CONCEPTS.PI_CANCELED);
+  });
+
   it('conciliar: sin paymentMethodType válido es 400', async () => {
     const res = await call(
       'post',
@@ -427,7 +476,7 @@ describe('/payments/gateway-dispatches — autorización negativa', () => {
     });
 
     it('no cierra una reserva que puede seguir en vuelo: 409', async () => {
-      resetIntent(newDispatchMark());
+      resetIntent(newDispatchMark(Date.now() - 2 * HOUR), 0);
       const res = await call(
         'post',
         `/payments/gateway-dispatches/${INTENT_OF_B}/close`,

@@ -13,6 +13,14 @@ const reconciledCounter = meter.createCounter(
   { description: 'Conciliaciones de una reserva de despacho, por resultado' },
 );
 
+const unknownTerminalCounter = meter.createCounter(
+  'payments_gateway_webhook_unknown_terminal_total',
+  {
+    description:
+      'Webhooks terminales de un pi_ que ninguna intención tiene (cobro huérfano): la pasarela los reintenta',
+  },
+);
+
 /**
  * Métricas del despacho por la pasarela. Baja cardinalidad: sólo etiquetas
  * cerradas, nunca el id de la intención, de la deuda ni del tenant.
@@ -21,6 +29,10 @@ export const gatewayMetrics = {
   /** Una reserva sin `pi_` requiere conciliación (`stale_blocks_debt`, `stale_own_retry`, `too_old_to_resend`, `key_reused`). */
   reconciliationRequired(reason: string): void {
     requiredCounter.add(1, { reason });
+  },
+  /** Llegó un terminal de un `pi_…` sin intención (cobro huérfano, p. ej. tras un cierre manual). */
+  unknownTerminalWebhook(): void {
+    unknownTerminalCounter.add(1);
   },
   /** Una conciliación terminó (`replayed`, `created`, `rejected`, `ambiguous`). */
   reconciled(outcome: string): void {

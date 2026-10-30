@@ -209,6 +209,12 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
         _tx: unknown,
         intentId: string,
       ) => sessions.filter((x) => x.paymentIntentId === intentId),
+      findOpenCheckoutSessionsByDebt: async (_tx: unknown, debtId: string) =>
+        sessions.filter(
+          (x) =>
+            x.paymentDebtId === debtId &&
+            x.statusConceptId === CONCEPTS.CHECKOUT_OPEN,
+        ),
       findInFlightGatewayIntentsOnDebt: async (
         _tx: unknown,
         scope: {
@@ -1200,6 +1206,8 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
     /** Envejece la reserva de la intención: la fecha vive DENTRO de la marca. */
     const ageMark = (row: Row, ms: number) => {
       row.gatewayIntentRef = newDispatchMark(Date.now() - ms);
+      // Sin actividad desde hace lo mismo: el cierre manual mira también `updated_at`.
+      row.updatedAt = new Date(Date.now() - ms);
     };
     const HOUR = 3_600_000;
 
@@ -1835,6 +1843,114 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
         expect(b.gatewayIntentRef).toMatch(/^pi_/u);
       });
 
+      it('D8: una reserva vencida por su fecha pero con ACTIVIDAD reciente (un reintento del dueño en vuelo) NO se cierra', async () => {
+        const d = build(true);
+        const { a } = await pair(d);
+        await stale(d, a);
+        // El reintento del dueño refresca `updated_at` pero conserva la fecha de la marca.
+        a.updatedAt = new Date();
+
+        await expect(close(d, a.id)).rejects.toMatchObject({
+          status: 409,
+          reason: PaymentsErrorReason.PAYMENT_GATEWAY_DISPATCH_IN_FLIGHT,
+        });
+        expect(a.statusConceptId).toBe(CONCEPTS.PI_PENDING);
+      });
+
+      it('D8: si la intención se cancela mientras su llamada está en vuelo, el cobro se asocia pero NO se entrega (409, sin nextAction) y queda para anular', async () => {
+        const d = build(true);
+        const { a } = await pair(d);
+        const required = jest.spyOn(gatewayMetrics, 'reconciliationRequired');
+        double.onCreate = () => {
+          a.statusConceptId = CONCEPTS.PI_CANCELED;
+        };
+
+        const error = await d.transactions
+          .processTransaction(a.id, sale(), actor)
+          .catch((e: unknown) => e);
+
+        expect(error).toMatchObject({
+          status: 409,
+          reason: PaymentsErrorReason.PAYMENT_GATEWAY_RECONCILIATION_REQUIRED,
+        });
+        expect(JSON.stringify(error)).not.toContain('nextAction');
+        // El pi_ queda asociado (su webhook caerá en conciliación) y el estado no cambia.
+        expect(a.gatewayIntentRef).toMatch(/^pi_/u);
+        expect(a.statusConceptId).toBe(CONCEPTS.PI_CANCELED);
+        expect(required).toHaveBeenCalledWith('charge_on_closed_intent');
+        required.mockRestore();
+      });
+
+      it('D9: el cierre expira la sesión de checkout de la intención y devuelve la deuda a DEBT_PENDING', async () => {
+        const d = build(true);
+        const { a } = await pair(d);
+        a.sourceRefId = randomUUID();
+        d.debts.set(a.sourceRefId, {
+          ...d.debts.get(DEBT_ID),
+          id: a.sourceRefId,
+        });
+        const debt = d.debts.get(DEBT_ID)!;
+        debt.statusConceptId = CONCEPTS.DEBT_IN_CHECKOUT;
+        const session = {
+          id: randomUUID(),
+          paymentIntentId: a.id,
+          paymentDebtId: DEBT_ID,
+          statusConceptId: CONCEPTS.CHECKOUT_OPEN,
+        };
+        d.sessions.push(session);
+        await stale(d, a);
+
+        await close(d, a.id);
+
+        expect(session.statusConceptId).toBe(CONCEPTS.CHECKOUT_EXPIRED);
+        expect(debt.statusConceptId).toBe(CONCEPTS.DEBT_PENDING);
+      });
+
+      it('D9 (m6): si OTRA intención conserva una sesión abierta sobre la misma deuda, la deuda sigue en checkout', async () => {
+        const d = build(true);
+        const { a, b } = await pair(d);
+        a.sourceRefId = randomUUID();
+        d.debts.set(a.sourceRefId, {
+          ...d.debts.get(DEBT_ID),
+          id: a.sourceRefId,
+        });
+        const debt = d.debts.get(DEBT_ID)!;
+        debt.statusConceptId = CONCEPTS.DEBT_IN_CHECKOUT;
+        const mine = {
+          id: randomUUID(),
+          paymentIntentId: a.id,
+          paymentDebtId: DEBT_ID,
+          statusConceptId: CONCEPTS.CHECKOUT_OPEN,
+        };
+        const other = {
+          id: randomUUID(),
+          paymentIntentId: b.id,
+          paymentDebtId: DEBT_ID,
+          statusConceptId: CONCEPTS.CHECKOUT_OPEN,
+        };
+        d.sessions.push(mine, other);
+        await stale(d, a);
+
+        await close(d, a.id);
+
+        expect(mine.statusConceptId).toBe(CONCEPTS.CHECKOUT_EXPIRED);
+        expect(other.statusConceptId).toBe(CONCEPTS.CHECKOUT_OPEN);
+        expect(debt.statusConceptId).toBe(CONCEPTS.DEBT_IN_CHECKOUT);
+      });
+
+      it('D12: un segundo cierre se rechaza (409 ya cerrada) y no vuelve a tocar nada', async () => {
+        const d = build(true);
+        const { a } = await pair(d);
+        await stale(d, a);
+        await close(d, a.id);
+
+        await expect(close(d, a.id)).rejects.toMatchObject({
+          status: 409,
+          reason: PaymentsErrorReason.PAYMENT_GATEWAY_DISPATCH_ALREADY_CLOSED,
+        });
+        expect(a.statusConceptId).toBe(CONCEPTS.PI_CANCELED);
+      });
+
       it('una reserva que puede seguir en vuelo NO se cierra (409): sería el doble cobro', async () => {
         const d = build(true);
         const { a } = await pair(d);
@@ -1886,6 +2002,7 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
         });
         a.gatewayIntentRef = `dispatching:${randomUUID()}`;
         b.gatewayIntentRef = newDispatchMark(Date.now() + 3 * HOUR);
+        a.updatedAt = b.updatedAt = new Date(Date.now() - 3 * HOUR);
 
         const listed = await runWithTenant(TENANT, () =>
           d.realTransactions.listGatewayDispatchesRequiringReconciliation(),

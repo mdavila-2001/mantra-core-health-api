@@ -428,12 +428,31 @@ export class PaymentsGatewayChargeService {
       );
     }
 
-    const localStatusConceptId = await this.associate(
+    const { localStatusConceptId, open } = await this.associate(
       intent.id,
       intent.tenantId,
       created.intent.id,
       created.intent.status,
     );
+    if (!open) {
+      // El cobro existe y quedó asociado, pero la intención ya no está abierta: no se
+      // entrega el QR. Queda para anular o conciliar.
+      this.logger.error(
+        {
+          operation: 'payments.gateway.create',
+          intentId: intent.id,
+          gatewayIntentRef: created.intent.id,
+          localStatusConceptId,
+        },
+        'Gateway charge created for an intent that is no longer open; not delivering it, needs cancellation or reconciliation',
+      );
+      gatewayMetrics.reconciliationRequired('charge_on_closed_intent');
+      throw new ConflictException(
+        'El cobro se creó pero la intención ya no está abierta: no se entrega. Hay que anularlo o conciliarlo',
+        { intentId: intent.id },
+        PaymentsErrorReason.PAYMENT_GATEWAY_RECONCILIATION_REQUIRED,
+      );
+    }
 
     return {
       gatewayIntentRef: created.intent.id,
@@ -456,12 +475,17 @@ export class PaymentsGatewayChargeService {
     tenantId: string,
     gatewayIntentRef: string,
     gatewayStatus: GatewayPaymentIntentStatus,
-  ): Promise<string> {
+  ): Promise<{ localStatusConceptId: string; open: boolean }> {
     // Confirmada al terminar, no con la petición: el `pi_…` ya existe en la
     // pasarela y no puede perderse si lo que sigue en la petición falla.
     return runCommitted(this.em, tenantId, async (tx) => {
       const intent = await this.intentsRepo.findByIdForUpdate(tx, intentId);
-      if (!intent) return LOCAL_INTENT_STATUS[gatewayStatus];
+      if (!intent) {
+        return {
+          localStatusConceptId: LOCAL_INTENT_STATUS[gatewayStatus],
+          open: true,
+        };
+      }
       // Defensa en profundidad: la intención ya se acotó al tenant en la
       // compuerta; una fila de otro tenant nunca se asocia a este cobro.
       if (intent.tenantId !== tenantId) {
@@ -484,15 +508,24 @@ export class PaymentsGatewayChargeService {
           PaymentsErrorReason.PAYMENT_GATEWAY_RESPONSE_MISMATCH,
         );
       }
+      // El `pi_…` se guarda siempre: así su webhook se resuelve a una intención y
+      // cae en conciliación en vez de dar 404.
       intent.gatewayIntentRef = gatewayIntentRef;
+      // Pero una intención que ya no está abierta (p. ej. cancelada por un cierre
+      // manual que se cruzó con esta llamada) no recibe el cobro: no cambia de
+      // estado y el cliente no obtiene el QR.
+      const open = [CONCEPTS.PI_PENDING, CONCEPTS.PI_PROCESSING].includes(
+        intent.statusConceptId,
+      );
       if (
+        open &&
         !isTerminalGatewayStatus(gatewayStatus) &&
         decideGatewayEvent(intent.statusConceptId, gatewayStatus) === 'aplicar'
       ) {
         intent.statusConceptId = LOCAL_INTENT_STATUS[gatewayStatus];
       }
       touch(intent, undefined);
-      return intent.statusConceptId;
+      return { localStatusConceptId: intent.statusConceptId, open };
     });
   }
 
