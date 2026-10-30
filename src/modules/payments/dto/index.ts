@@ -1,6 +1,7 @@
 export {
   CreatePaymentIntentDto,
   PaymentIntentResponseDto,
+  PaymentIntentGatewayDto,
   PAYMENT_PURPOSES,
 } from './payment-intent.dto';
 export type { PaymentPurpose } from './payment-intent.dto';
@@ -46,3 +47,5 @@ export {
   ReconciliationRunResponseDto,
 } from './payment-operations.dto';
 export type { FeeMethod } from './payment-operations.dto';
+
+export { GatewayWebhookResultDto } from './payment-gateway-webhook.dto';

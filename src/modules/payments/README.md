@@ -6,14 +6,14 @@ y conciliación).
 
 ## Rutas HTTP y alcance (medido)
 
-<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+<!-- Medido el 2026-10-29 sobre 4e64353a más el carril INT. Repetir con:
   find src/modules/payments -name '*.controller.ts' | wc -l
   find src/modules/payments -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
   find src/modules/payments -name '*.entity.ts' | wc -l
   find src/modules/payments -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **3 controllers, 14 rutas HTTP, 53 entidades y 5 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **4 controllers, 15 rutas HTTP, 53 entidades y 7 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -30,6 +30,7 @@ Entidades (`tableName`, 53 de 53 archivos `*.entity.ts`): `callback_verification
 | `POST /payments/intents/:id/splits` | PAYMENTS_ADMIN | `payments-intents` |
 | `POST /payments/checkout-sessions` | PAYMENTS_ADMIN, CASHIER | `payments-operations` |
 | `POST /payments/callbacks/:callbackPath` | pública | `payments-operations` |
+| `POST /payments/gateway-webhooks` | pública | `payments-gateway-webhooks` |
 | `POST /payments/fee-schedules` | PAYMENTS_ADMIN | `payments-operations` |
 | `POST /payments/settlements/import` | PAYMENTS_ADMIN | `payments-operations` |
 | `POST /payments/payouts` | PAYMENTS_ADMIN | `payments-operations` |
@@ -38,7 +39,7 @@ Entidades (`tableName`, 53 de 53 archivos `*.entity.ts`): `callback_verification
 | `POST /payments/transactions/:id/refunds` | PAYMENTS_ADMIN | `payments-transactions` |
 | `POST /payments/transactions/:id/cancellation-requests` | PAYMENTS_ADMIN, CASHIER | `payments-transactions` |
 
-## Casos de uso cubiertos (14)
+## Casos de uso cubiertos (14 + receptor de la pasarela)
 
 | UC | Endpoint | Descripción |
 | --- | --- | --- |
@@ -56,6 +57,75 @@ Entidades (`tableName`, 53 de 53 archivos `*.entity.ts`): `callback_verification
 | UC-42-12 | `POST /payments/settlements/import` | Importar liquidación del gateway |
 | UC-42-13 | `POST /payments/payouts` | Ejecutar payout a cuenta conectada |
 | UC-42-14 | `POST /payments/reconciliation-runs` | Conciliar gateway vs ledger |
+
+## Pasarela de pagos como PSP (`payments.via_gateway`)
+
+Carril INT: la API cobra por la pasarela de pagos ALOVIDA (`pasarelapago`, API pública
+v1) como un comercio más. El flag se llama `payments.via_gateway`, vive en la variable
+`PAYMENTS_VIA_GATEWAY` y **está apagado por defecto**. Apagarlo es cambiar la variable y
+reiniciar; no hay un interruptor en caliente. Variables en `.env.example`
+(`PAYMENTS_GATEWAY_*`); el esquema Joi está en `gateway/payments-gateway.env.ts` y con el
+flag encendido el proceso no arranca sin URL base, clave `sk_…` y secreto de webhook.
+Ninguna clave vive en el repositorio.
+
+**Flag apagado (el defecto).** `POST /payments/intents` y el resto del módulo se comportan
+como antes: la respuesta no lleva `gateway` y no sale ninguna llamada a la pasarela. El
+receptor de webhooks responde `503 GATEWAY_WEBHOOKS_DISABLED` sin efecto (no `410`, que
+deshabilitaría el endpoint en la pasarela).
+
+**Flag encendido.**
+
+- `POST /payments/intents` exige `paymentMethodType` (`qr`, `card`, `bank_transfer`,
+  `wallet`), crea la intención local y llama a `POST /payment_intents` de la pasarela con
+  `Idempotency-Key = mantra-pi-v1-<sha256(tenant, deuda u orden, idempotencyKey local)>`.
+  La clave sale de campos persistidos, así que un reintento manda la misma. Nunca se llama
+  al proveedor directo. La respuesta agrega `gateway { paymentIntentId, status, nextAction }`
+  con lo que el pagador tiene que hacer (QR, transferencia, formulario del banco).
+- Sólo viaja lo mínimo: importe en centavos enteros, `BOB`, tipo de medio de pago, vida del
+  cobro (relativa al alta persistida) y el id local de la intención como metadato. La
+  pasarela opera en bolivianos (D-06): otra moneda, o un importe con más de 2 decimales, se
+  rechazan con `422` antes de persistir; no se redondea.
+- **Un resultado ambiguo no es un fallo.** Un corte, un timeout, un `5xx` o un `409
+  idempotency_request_in_progress` se reintentan (hasta `PAYMENTS_GATEWAY_MAX_ATTEMPTS`) con
+  la MISMA clave. Si se agotan, la API responde `504 PAYMENT_GATEWAY_RESULT_AMBIGUOUS`, la
+  intención local queda pendiente sin tocar y el cliente reintenta con la misma
+  `idempotencyKey`: se retoma sin crear un segundo cobro. Un `4xx` definitivo del contrato
+  corta los reintentos (`422 PAYMENT_GATEWAY_REJECTED`; `401/403` se muestran como `503`).
+- Una intención con `gateway_intent_ref` no admite `POST /payments/intents/:id/transactions`
+  (`409 PAYMENT_INTENT_VIA_GATEWAY`): su resultado llega por webhook.
+
+**Receptor de webhooks** (`POST /payments/gateway-webhooks`, pública). `main.ts` conserva
+los bytes crudos del cuerpo sólo de esa ruta (`gateway/payments-gateway-raw-body.ts`).
+`gateway/standard-webhook-signature.ts` replica la verificación Standard Webhooks de
+`@pay/webhook-signature` (HMAC `v1` y Ed25519 `v1a`); su paridad se prueba con vectores
+generados por la librería de referencia. Orden de las defensas: flag, firma y ventana de la
+marca de tiempo (`PAYMENTS_GATEWAY_WEBHOOK_TOLERANCE_SECONDS`, 300 por defecto; `401` con
+`GATEWAY_WEBHOOK_SIGNATURE_INVALID` o `GATEWAY_CALLBACK_OUTSIDE_REPLAY_WINDOW`, y el motivo
+de la librería en `details.code`), forma del evento y modo `test`/`live` de la clave,
+inbox y máquina de estados.
+
+- **Inbox**: `payment_webhook_events`, con `gateway_event_ref = pay-gateway:<webhook-id>`
+  (índice único), bajo `FOR UPDATE` de la intención. Una reentrega responde
+  `duplicate=true` sin repetir el efecto.
+- **Estados** (`gateway/payments-gateway-status.ts`): `requires_action` → `PI_PENDING`,
+  `processing` → `PI_PROCESSING`, `succeeded` → `PI_SUCCEEDED`, `failed` y `expired` →
+  `PI_FAILED`, `canceled` → `PI_CANCELED`. Un hecho atrasado (`processing` tras `succeeded`)
+  se ignora sin retroceder; un terminal distinto del ya conocido, o un importe que no
+  coincide con el cobrado, queda archivado con `processed=false` para conciliar.
+- **Deuda**: `succeeded` descuenta el importe del saldo de la deuda ligada por la sesión de
+  checkout (aritmética decimal exacta): saldo cero → `DEBT_SETTLED`; saldo positivo →
+  `DEBT_PENDING`. `failed`, `canceled` y `expired` cierran el checkout y devuelven la deuda
+  a `DEBT_PENDING`. Sobrepago, deuda ajena o ya saldada, o varias deudas por intención no
+  se resuelven por inferencia: la intención queda cobrada, la deuda no se toca y el evento
+  queda sin procesar. La factura de `billing` no se actualiza desde este módulo.
+- Se responde `2xx` sólo después del `COMMIT`. Un terminal de un cobro que todavía no está
+  asociado responde `404` para que la pasarela reintente; un evento no terminal de un cobro
+  desconocido, y cualquier tipo de evento que la API no aplica (reembolsos, contracargos,
+  pagos programados, tipos nuevos), se confirma sin efecto.
+
+Límites: la consulta por `gateway_intent_ref` no tiene índice propio; un cobro que
+quedó ambiguo no tiene un proceso que lo retome solo (lo retoma el reintento del cliente);
+`MAX_ATTEMPTS` y el plazo son por proceso, sin cortacircuitos.
 
 ## Entidades
 
