@@ -20,6 +20,9 @@
 //      además, cualquier oración de 4.3/4.5/4.6/4.8 que cite una cantidad, una
 //      pauta o remita a la 4.2 se descarta entera con la guardia de dosis del
 //      corte S3 (`encyclopedia/s3-farmacos/lib/dose-guard.mjs`) y va a la cola.
+//   3b. Una oración de 4.5 que NIEGA la interacción («no se dan interacciones…») o que
+//      dice que no se estudió no es un par: va a la cola con `negated-interaction` /
+//      `no-interaction-data` (`interaction-assertion.mjs`). Sólo degrada, nunca promueve.
 //   4. Nunca se envía `ordinal`: es de la relación, no de esta fuente.
 // =============================================================================
 
@@ -27,6 +30,7 @@ import { LACTMED_SOURCE } from '../../clinical-pharmacology/lib/lactmed.mjs';
 import { doseMatch } from '../../encyclopedia/s3-farmacos/lib/dose-guard.mjs';
 import { deterministicId, foldForSearch, htmlToText } from './common.mjs';
 import { SAFETY_SECTIONS, assertAllowedSection, sectionPublicUrl } from './cima.mjs';
+import { INTERACTION_DROP_REASON, interactionAssertion } from './interaction-assertion.mjs';
 import { conceptId } from './load-plan.mjs';
 
 export const CURATED_REFERENCE = 'CURATED_REFERENCE';
@@ -409,6 +413,12 @@ export function cimaSafety({ drug, sections, clinicalIndex, ingredientIndex }) {
         unmatched.push({ ...base, reason: `dose-guard:${dose}`, term: '', candidates: [] });
         continue;
       }
+      const severityCode = isInteraction ? interactionSeverity(unit.sentence) : null;
+      const dropReason = isInteraction ? INTERACTION_DROP_REASON[interactionAssertion(unit.sentence, severityCode, UNSPECIFIED_SEVERITY)] : null;
+      if (dropReason) {
+        unmatched.push({ ...base, reason: dropReason, term: '', candidates: [] });
+        continue;
+      }
       const found = findTerms(isInteraction ? ingredientIndex : clinicalIndex, unit.sentence).filter(
         (f) =>
           !(f.conceptIds.length === 1 && f.conceptIds[0] === drug.conceptId) && (s.section !== '4.6' || PREGNANCY_LACTATION_KEYS.has(f.term)),
@@ -434,7 +444,7 @@ export function cimaSafety({ drug, sections, clinicalIndex, ingredientIndex }) {
             substanceBConceptId: target,
             substanceA: drug.name,
             substanceB: f.term,
-            severityCode: interactionSeverity(unit.sentence),
+            severityCode,
             citationText: unit.sentence,
             citationLocator: locatorOf(s, unit),
             sourceReference: reference,
