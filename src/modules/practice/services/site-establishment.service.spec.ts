@@ -52,7 +52,7 @@ function build() {
   };
   const licensesRepo = {
     findBySite: mockFn(async () => licenses),
-    findById: mockFn(
+    findByIdInTenant: mockFn(
       async (_t: any, id: string) => licenses.find((l) => l.id === id) ?? null,
     ),
     findByNumber: mockFn().mockResolvedValue(null),

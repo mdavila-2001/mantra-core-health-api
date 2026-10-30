@@ -434,7 +434,11 @@ export class SiteEstablishmentService {
     tenantId: string,
   ): Promise<SiteLicenseDto> {
     return this.em.transactional(async (tx) => {
-      const license = await this.licensesRepo.findById(tx, licenseId);
+      const license = await this.licensesRepo.findByIdInTenant(
+        tx,
+        licenseId,
+        tenantId,
+      );
       if (
         !license ||
         license.tenantId !== tenantId ||

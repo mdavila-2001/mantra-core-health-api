@@ -407,7 +407,6 @@ export class PracticeSitesService {
     actor: AuthenticatedUser,
     tenantId: string,
   ): Promise<StatusResultDto> {
-    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'practice.site.decommission', practiceId, siteId },
       'Decommissioning site',
