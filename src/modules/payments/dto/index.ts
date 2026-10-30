@@ -49,3 +49,10 @@ export {
 export type { FeeMethod } from './payment-operations.dto';
 
 export { GatewayWebhookResultDto } from './payment-gateway-webhook.dto';
+
+export {
+  ReconcileGatewayDispatchDto,
+  CloseGatewayDispatchDto,
+  PendingGatewayDispatchDto,
+  ClosedGatewayDispatchDto,
+} from './payment-gateway-dispatch.dto';

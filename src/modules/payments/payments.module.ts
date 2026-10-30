@@ -6,6 +6,7 @@ import {
   PaymentsTransactionsController,
   PaymentsOperationsController,
   PaymentsGatewayWebhooksController,
+  PaymentsGatewayDispatchesController,
 } from './controllers';
 import {
   PaymentsIntentsService,
@@ -40,6 +41,7 @@ import {
     PaymentsTransactionsController,
     PaymentsOperationsController,
     PaymentsGatewayWebhooksController,
+    PaymentsGatewayDispatchesController,
   ],
   providers: [
     // Pasarela como PSP (`payments.via_gateway`, apagado por defecto). Se lee y

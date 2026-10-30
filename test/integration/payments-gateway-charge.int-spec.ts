@@ -5,7 +5,13 @@ import { join } from 'node:path';
 import { MikroORM } from '@mikro-orm/postgresql';
 import { ReflectMetadataProvider } from '@mikro-orm/decorators/legacy';
 import { Client } from 'pg';
-import { CONCEPTS, type AuthenticatedUser } from '../../src/common';
+import {
+  CONCEPTS,
+  runWithTenant,
+  type AuthenticatedUser,
+} from '../../src/common';
+import { PaymentCheckoutSessions } from '../../src/modules/payments/entities/payment_checkout_sessions.entity';
+import { PaymentDebts } from '../../src/modules/payments/entities/payment_debts.entity';
 import { PaymentIntents } from '../../src/modules/payments/entities/payment_intents.entity';
 import { PaymentTransactions } from '../../src/modules/payments/entities/payment_transactions.entity';
 import { RiskAssessments } from '../../src/modules/payments/entities/risk_assessments.entity';
@@ -19,6 +25,7 @@ import { PaymentsIntentsService } from '../../src/modules/payments/services/paym
 import { PaymentsTransactionsService } from '../../src/modules/payments/services/payments-transactions.service';
 import { PaymentsGatewayClient } from '../../src/modules/payments/gateway/payments-gateway.client';
 import type { PaymentsGatewayConfig } from '../../src/modules/payments/gateway/payments-gateway.env';
+import { newDispatchMark } from '../../src/modules/payments/gateway/payments-gateway-dispatch-mark';
 import { deriveGatewayIdempotencyKey } from '../../src/modules/payments/gateway/payments-gateway-idempotency';
 import {
   PayGatewayDouble,
@@ -84,6 +91,9 @@ const TABLES = [
   'payment_intents',
   'payment_transactions',
   'risk_assessments',
+  // La compuerta previa contra la deuda (M2) lee la deuda y las sesiones de checkout.
+  'payment_debts',
+  'payment_checkout_sessions',
 ] as const;
 
 const DDL_DIR = join(process.cwd(), 'database', 'SQL', '42_payments');
@@ -186,7 +196,7 @@ describeIt(
      * Con `viaGateway=false` el cobro por la pasarela recibe IGUAL un cliente que
      * apunta al doble: si el camino viejo llamara a la pasarela, el doble lo vería.
      */
-    function build(viaGateway: boolean) {
+    function build(viaGateway: boolean, onOrm: MikroORM = orm) {
       const cfg = config(viaGateway);
       const intentsRepo = new PaymentIntentsRepository();
       const flowRepo = new PaymentFlowRepository();
@@ -197,28 +207,58 @@ describeIt(
       });
       const charge = new PaymentsGatewayChargeService(
         cfg,
-        orm.em as never,
+        onOrm.em as never,
         intentsRepo,
         logger as never,
         client,
       );
+      const transactionsService = new PaymentsTransactionsService(
+        onOrm.em as never,
+        intentsRepo,
+        flowRepo,
+        txRepo,
+        logger as never,
+        charge,
+      );
       return {
         charge,
         intents: new PaymentsIntentsService(
-          orm.em as never,
+          onOrm.em as never,
           intentsRepo,
           flowRepo,
           logger as never,
           charge,
         ),
-        transactions: new PaymentsTransactionsService(
-          orm.em as never,
-          intentsRepo,
-          flowRepo,
-          txRepo,
-          logger as never,
-          charge,
-        ),
+        transactions: {
+          // El `TenantContextInterceptor` fija el tenant del actor antes del
+          // servicio; aquí se hace lo mismo.
+          processTransaction: (
+            id: string,
+            body: ProcessTransactionDto,
+            who: AuthenticatedUser,
+            tenant: string = TENANT,
+          ) =>
+            runWithTenant(tenant, () =>
+              transactionsService.processTransaction(id, body, who),
+            ),
+          closeGatewayDispatch: (
+            id: string,
+            reason: string,
+            who: AuthenticatedUser,
+            tenant: string = TENANT,
+          ) =>
+            runWithTenant(tenant, () =>
+              transactionsService.closeGatewayDispatch(id, reason, who),
+            ),
+          reconcileGatewayDispatch: (
+            id: string,
+            body: Pick<ProcessTransactionDto, 'paymentMethodType'>,
+            tenant: string = TENANT,
+          ) =>
+            runWithTenant(tenant, () =>
+              transactionsService.reconcileGatewayDispatch(id, body),
+            ),
+        },
       };
     }
     let on: ReturnType<typeof build>;
@@ -244,7 +284,13 @@ describeIt(
         user: PG.user,
         password: PG.password,
         dbName: DB_NAME,
-        entities: [PaymentIntents, PaymentTransactions, RiskAssessments],
+        entities: [
+          PaymentIntents,
+          PaymentTransactions,
+          RiskAssessments,
+          PaymentDebts,
+          PaymentCheckoutSessions,
+        ],
         metadataProvider: ReflectMetadataProvider,
         metadataCache: { enabled: false },
         allowGlobalContext: true,
@@ -294,6 +340,17 @@ describeIt(
       await double.stop();
       await orm?.close(true);
       if (admin) {
+        // El pool cierra sus sockets de forma asíncrona: terminar un backend que el
+        // pool todavía conserva ocioso emite un error sin manejar. Se espera por
+        // condición a que no quede ninguna conexión de esta base antes de tirarla.
+        for (let i = 0; i < 100; i += 1) {
+          const open = await admin.query(
+            `select count(*)::int as n from pg_stat_activity where datname = $1 and pid <> pg_backend_pid()`,
+            [DB_NAME],
+          );
+          if (open.rows[0].n === 0) break;
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        }
         // Sólo la base propia (nombre con prefijo y sufijo aleatorio de esta corrida).
         await admin.query(
           `select pg_terminate_backend(pid) from pg_stat_activity where datname = $1 and pid <> pg_backend_pid()`,
@@ -308,6 +365,8 @@ describeIt(
       double.calls.length = 0;
       double.created.clear();
       double.script = [];
+      double.latencyMs = 0;
+      double.onCreate = undefined;
     });
 
     // ---------------------------------------------------------------- ayudas
@@ -333,12 +392,42 @@ describeIt(
       ...over,
     });
 
-    /** Crea la intención con el `createIntent` REAL. */
+    /** Deuda real que la intención cobra (la compuerta M2 la mide). */
+    async function insertDebt(
+      id: string,
+      over: { tenantId?: string; outstanding?: string; status?: string } = {},
+    ): Promise<void> {
+      await run(
+        `insert into payments.payment_debts
+           (id, tenant_id, gateway_connection_id, debtor_business_partner_id, internal_debt_number, currency_code,
+            total_amount, outstanding_amount, due_at, status_concept_id, created_at, updated_at)
+         values (?, ?, ?, ?, ?, 'BOB', '1000.000000', ?, now() + interval '7 days', ?, now(), now())`,
+        [
+          id,
+          over.tenantId ?? TENANT,
+          randomUUID(),
+          randomUUID(),
+          `D-${id.slice(0, 8)}`,
+          over.outstanding ?? '1000.000000',
+          over.status ?? CONCEPTS.DEBT_PENDING,
+        ],
+      );
+    }
+
+    /** Crea la intención con el `createIntent` REAL (y la deuda que cobra, con saldo holgado). */
     async function createIntent(
       svc: ReturnType<typeof build> = on,
       over: Partial<CreatePaymentIntentDto> = {},
+      debt: { outstanding?: string; status?: string } | false = {},
     ): Promise<Created> {
       const dto = intentDto(over);
+      if (debt && dto.sourceRefType === 'payment_debt' && dto.sourceRefId) {
+        const [exists] = await rows(
+          `select 1 from payments.payment_debts where id = ?`,
+          [dto.sourceRefId],
+        );
+        if (!exists) await insertDebt(dto.sourceRefId, debt);
+      }
       const res = await svc.intents.createIntent(dto, actor);
       return {
         id: res.id,
@@ -447,6 +536,8 @@ describeIt(
     /** Cliente propio que retiene el bloqueo de la fila de la intención dentro de una transacción. */
     async function holdIntentLock(c: Created): Promise<Client> {
       const holder = new Client({ ...PG, database: DB_NAME });
+      // El fallo de una consulta ya llega por su promesa; un corte tardío del socket no debe tumbar la suite.
+      holder.on('error', () => undefined);
       await holder.connect();
       await holder.query('begin');
       await holder.query(
@@ -476,7 +567,7 @@ describeIt(
     }
 
     // ------------------------------------------------------------------- DDL
-    it('el DDL aplicado es el real: las 4 tablas, el índice único de la clave de idempotencia y las claves foráneas internas', async () => {
+    it('el DDL aplicado es el real: las 6 tablas, el índice único de la clave de idempotencia y las claves foráneas internas', async () => {
       const unique = await rows(
         `select indexdef from pg_indexes where schemaname = 'payments' and indexname = 'uq_payment_intents_idempotency_key'`,
       );
@@ -666,6 +757,33 @@ describeIt(
         expect(end.intent.row_version).toBe(mid.intent.row_version);
         expect(end.transactions).toHaveLength(0);
       });
+
+      it('una intención ya despachada no se vuelve a evaluar: tras `processing` (webhook) y una evaluación REVIEW posterior, reintentar CONSULTA (200), no da 409 ni 422 ni crea otro cobro', async () => {
+        const c = await approved();
+        const first = await on.transactions.processTransaction(
+          c.id,
+          sale(),
+          actor,
+        );
+        // Lo que dejaría el webhook `processing` (se simula el efecto sobre la fila, no el webhook).
+        await run(
+          `update payments.payment_intents set status_concept_id = ? where id = ?`,
+          [CONCEPTS.PI_PROCESSING, c.id],
+        );
+        await assess(c.id, 'REVIEW', '60');
+
+        const again = await on.transactions.processTransaction(
+          c.id,
+          sale(),
+          actor,
+        );
+
+        expect(again.gatewayTransactionRef).toBe(first.gatewayTransactionRef);
+        expect(again.statusConceptId).toBe(CONCEPTS.PI_PROCESSING);
+        expect(postsFor(c)).toHaveLength(1);
+        expect(double.createdCount).toBe(1);
+        expect(getsFor(first.gatewayTransactionRef as string)).toHaveLength(1);
+      });
     });
 
     // ------------------------------------------------ (2) concurrencia
@@ -843,7 +961,9 @@ describeIt(
           expect(double.createdCount).toBe(1);
           expect(postsFor(c)).toHaveLength(3);
           const ambiguous = await snapshot(c);
-          expect(ambiguous.intent.gateway_intent_ref).toBeNull();
+          // Sin `pi_…` (no se sabe si la pasarela lo creó), pero con la RESERVA de
+          // despacho confirmada: la deuda no se ofrece a otra intención (N4).
+          expect(ambiguous.intent.gateway_intent_ref).toMatch(/^dispatching:/u);
           expect(ambiguous.intent.status_concept_id).toBe(CONCEPTS.PI_PENDING);
           expect(ambiguous.transactions).toHaveLength(0);
 
@@ -882,7 +1002,10 @@ describeIt(
           PaymentsErrorReason.PAYMENT_GATEWAY_RESULT_AMBIGUOUS,
         );
         expect(double.createdCount).toBe(0);
-        expect((await snapshot(c)).intent.gateway_intent_ref).toBeNull();
+        // Resultado ambiguo (aunque acá no se ejecutó): sin `pi_…`, con la reserva.
+        expect((await snapshot(c)).intent.gateway_intent_ref).toMatch(
+          /^dispatching:/u,
+        );
 
         const res = await on.transactions.processTransaction(
           c.id,
@@ -1185,6 +1308,144 @@ describeIt(
     });
 
     // ------------------------------------------------ (7) flag apagado
+    describe('(8) M3: otro tenant no cobra la intención ajena', () => {
+      it('con el UUID de una intención de OTRO tenant: 404 como si no existiera, cero llamadas a la pasarela y la fila intacta', async () => {
+        const c = await approved();
+        const before = await snapshot(c);
+        const foreignTenant = randomUUID();
+
+        const error = await expectDomainError(
+          on.transactions.processTransaction(
+            c.id,
+            sale(),
+            actor,
+            foreignTenant,
+          ),
+          404,
+          PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
+        );
+        const missing = await expectDomainError(
+          on.transactions.processTransaction(
+            randomUUID(),
+            sale(),
+            actor,
+            foreignTenant,
+          ),
+          404,
+          PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
+        );
+
+        expect(error.getResponse()).toEqual(missing.getResponse());
+        expect(double.calls).toHaveLength(0);
+        const after = await snapshot(c);
+        expect(after.intent).toEqual(before.intent);
+        expect(after.transactions).toEqual([]);
+      });
+
+      it('el dueño sí cobra la misma intención (control)', async () => {
+        const c = await approved();
+        await on.transactions.processTransaction(c.id, sale(), actor, TENANT);
+        expect(postsFor(c)).toHaveLength(1);
+      });
+    });
+
+    describe('(9) M2: compuerta previa contra la deuda (BD real)', () => {
+      const sameDebt = async () => {
+        const sourceRefId = randomUUID();
+        const a = await createIntent(on, { sourceRefId });
+        const b = await createIntent(on, { sourceRefId });
+        await assess(a.id, 'APPROVE');
+        await assess(b.id, 'APPROVE');
+        return { a, b, sourceRefId };
+      };
+
+      it('dos intenciones con claves distintas sobre la MISMA deuda: la segunda es 409 y la pasarela sólo recibe el cobro de la primera', async () => {
+        const { a, b } = await sameDebt();
+        await on.transactions.processTransaction(a.id, sale(), actor);
+        double.calls.length = 0;
+
+        await expectDomainError(
+          on.transactions.processTransaction(b.id, sale(), actor),
+          409,
+          PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+        );
+
+        expect(double.calls).toHaveLength(0);
+        expect((await snapshot(b)).intent.gateway_intent_ref).toBeNull();
+      });
+
+      it('el reintento de la primera (ya despachada) no se bloquea: consulta, sin segundo cobro', async () => {
+        const { a } = await sameDebt();
+        await on.transactions.processTransaction(a.id, sale(), actor);
+        double.calls.length = 0;
+
+        await on.transactions.processTransaction(a.id, sale(), actor);
+
+        expect(double.postCalls).toHaveLength(0);
+        expect(double.calls.map((x) => x.method)).toEqual(['GET']);
+      });
+
+      it('si el primer cobro terminó sin pagarse, la deuda se puede cobrar de nuevo', async () => {
+        const { a, b } = await sameDebt();
+        await on.transactions.processTransaction(a.id, sale(), actor);
+        await run(
+          `update payments.payment_intents set status_concept_id = ? where id = ?`,
+          [CONCEPTS.PI_FAILED, a.id],
+        );
+
+        await on.transactions.processTransaction(b.id, sale(), actor);
+
+        expect(postsFor(b)).toHaveLength(1);
+      });
+
+      it('importe mayor que el saldo de la deuda: 409 y cero llamadas', async () => {
+        const c = await createIntent(on, {}, { outstanding: '149.999999' });
+        await assess(c.id, 'APPROVE');
+
+        await expectDomainError(
+          on.transactions.processTransaction(c.id, sale(), actor),
+          409,
+          PaymentsErrorReason.PAYMENT_GATEWAY_AMOUNT_EXCEEDS_DEBT,
+        );
+
+        expect(double.calls).toHaveLength(0);
+      });
+
+      it('deuda saldada: 422 y cero llamadas', async () => {
+        const c = await createIntent(on, {}, { status: CONCEPTS.DEBT_SETTLED });
+        await assess(c.id, 'APPROVE');
+
+        await expectDomainError(
+          on.transactions.processTransaction(c.id, sale(), actor),
+          422,
+          PaymentsErrorReason.PAYMENT_DEBT_ALREADY_SETTLED,
+        );
+
+        expect(double.calls).toHaveLength(0);
+      });
+    });
+
+    describe('(10) m5: una intención ya despachada no admite DECLINE ni fx-lock', () => {
+      it('DECLINE posterior al despacho: 409 y la intención sigue pendiente con su pi_…', async () => {
+        const c = await approved();
+        await on.transactions.processTransaction(c.id, sale(), actor);
+
+        await expectDomainError(
+          on.intents.assessRisk(
+            c.id,
+            { riskScore: '99', decision: 'DECLINE' },
+            actor,
+          ),
+          409,
+          PaymentsErrorReason.PAYMENT_INTENT_VIA_GATEWAY,
+        );
+
+        const snap = await snapshot(c);
+        expect(snap.intent.status_concept_id).toBe(CONCEPTS.PI_PENDING);
+        expect(snap.intent.gateway_intent_ref).toMatch(/^pi_/u);
+      });
+    });
+
     describe('(7) flag apagado: el camino de siempre no llama a la pasarela y no cambia', () => {
       it('createIntent acepta lo que la pasarela no podría cobrar (USD) y no llama a nadie', async () => {
         const c = await createIntent(off, { currency: 'USD' });
@@ -1257,6 +1518,989 @@ describeIt(
 
         expect(double.calls).toHaveLength(calls);
         expect((await snapshot(c)).transactions).toHaveLength(0);
+      });
+    });
+
+    // =====================================================================
+    // Re-revisión INT: N2/N4 (reserva), N3 (falla cerrado), N5 (sin bloqueos), N7 (timing)
+    // =====================================================================
+
+    /** Lo que hace `TenantContextInterceptor` con RLS_ENFORCE=true: la petición entera en UNA transacción. */
+    const asRlsInterceptor = <T>(fn: () => Promise<T>): Promise<T> =>
+      orm.em.transactional(async () => {
+        await orm.em.execute(
+          "select set_config('app.system_context', 'false', true)",
+        );
+        await orm.em.execute(
+          "select set_config('app.current_tenant_id', ?, true)",
+          [TENANT],
+        );
+        return fn();
+      });
+    type Dispatcher = <T>(fn: () => Promise<T>) => Promise<T>;
+    const direct: Dispatcher = (fn) => fn();
+    const MODES: ReadonlyArray<[string, Dispatcher]> = [
+      ['SIN transacción de petición (RLS_ENFORCE=false)', direct],
+      ['CON transacción de petición (RLS_ENFORCE=true)', asRlsInterceptor],
+    ];
+
+    const sameDebtPair = async (over: Partial<CreatePaymentIntentDto> = {}) => {
+      const sourceRefId = randomUUID();
+      const a = await createIntent(on, { sourceRefId });
+      const b = await createIntent(on, { sourceRefId, ...over });
+      await assess(a.id, 'APPROVE');
+      await assess(b.id, 'APPROVE');
+      return { a, b, sourceRefId };
+    };
+
+    /** Envejece la reserva: la fecha de la marca Y la última actividad de la fila. */
+    const ageReservation = (intentId: string, ms: number) =>
+      run(
+        `update payments.payment_intents set gateway_intent_ref = ?, updated_at = now() - ?::interval where id = ?`,
+        [newDispatchMark(Date.now() - ms), `${ms} milliseconds`, intentId],
+      );
+
+    /** Estado de la fila de la deuda/intención desde OTRA conexión, sin esperar: `NOWAIT`. */
+    async function lockProbe(
+      table: 'payment_debts' | 'payment_intents',
+      id: string,
+    ) {
+      const probe = new Client({ ...PG, database: DB_NAME });
+      probe.on('error', () => undefined);
+      await probe.connect();
+      try {
+        await probe.query('begin');
+        await probe.query(
+          `select id from payments.${table} where id = $1 for update nowait`,
+          [id],
+        );
+        return 'libre';
+      } catch (error: any) {
+        return error.code === '55P03' ? 'bloqueada' : `error ${error.code}`;
+      } finally {
+        await probe.query('rollback').catch(() => undefined);
+        await probe.end();
+      }
+    }
+
+    describe('(11) N2/N4: la reserva de despacho cierra la ventana de la llamada HTTP', () => {
+      describe.each(MODES)('%s', (_mode, dispatcher) => {
+        it('N2: dos intenciones simultáneas sobre la MISMA deuda, 8 rondas con la pasarela lenta: nunca dos cobros vivos', async () => {
+          double.latencyMs = 250;
+          const outcomes: string[] = [];
+          for (let round = 0; round < 8; round += 1) {
+            double.created.clear();
+            const { a, b } = await sameDebtPair();
+            const results = await Promise.allSettled([
+              dispatcher(() =>
+                on.transactions.processTransaction(a.id, sale(), actor),
+              ),
+              dispatcher(() =>
+                on.transactions.processTransaction(b.id, sale(), actor),
+              ),
+            ]);
+            const rejected = results.filter(
+              (r): r is PromiseRejectedResult => r.status === 'rejected',
+            );
+            expect(double.createdCount).toBe(1);
+            expect(
+              results.filter((r) => r.status === 'fulfilled'),
+            ).toHaveLength(1);
+            expect(rejected).toHaveLength(1);
+            expect(rejected[0].reason.getStatus?.()).toBe(409);
+            expect(rejected[0].reason.reason).toBe(
+              PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+            );
+            outcomes.push('1 cobro');
+          }
+          expect(outcomes).toHaveLength(8);
+        });
+
+        it('N4: tras un 504 la deuda sigue reservada (la reserva sobrevive a la petición fallida): otra intención es 409 y la primera reintenta con la MISMA clave', async () => {
+          const { a, b } = await sameDebtPair();
+          double.script = [
+            { kind: 'execute_then_drop' },
+            { kind: 'execute_then_drop' },
+            { kind: 'execute_then_drop' },
+          ];
+          await expectDomainError(
+            dispatcher(() =>
+              on.transactions.processTransaction(a.id, sale(), actor),
+            ),
+            504,
+            PaymentsErrorReason.PAYMENT_GATEWAY_RESULT_AMBIGUOUS,
+          );
+          expect(double.createdCount).toBe(1);
+          expect((await snapshot(a)).intent.gateway_intent_ref).toMatch(
+            /^dispatching:/u,
+          );
+          const posts = double.postCalls.length;
+
+          await expectDomainError(
+            dispatcher(() =>
+              on.transactions.processTransaction(b.id, sale(), actor),
+            ),
+            409,
+            PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+          );
+          expect(double.postCalls).toHaveLength(posts);
+          expect((await snapshot(b)).intent.gateway_intent_ref).toBeNull();
+
+          // Regla 11: la propia intención NO se bloquea a sí misma y recupera el MISMO cobro.
+          const retry = await dispatcher(() =>
+            on.transactions.processTransaction(a.id, sale(), actor),
+          );
+          expect(retry.gatewayTransactionRef).toBe(
+            double.created.get(a.gatewayKey)?.intent.id,
+          );
+          expect(double.createdCount).toBe(1);
+          expect(
+            new Set(double.postCalls.map((p) => p.idempotencyKey)),
+          ).toEqual(new Set([a.gatewayKey]));
+          expect((await snapshot(a)).intent.gateway_intent_ref).toBe(
+            retry.gatewayTransactionRef,
+          );
+        });
+
+        it('N5: durante la llamada HTTP la reserva YA está confirmada y ni la deuda ni la intención están bloqueadas', async () => {
+          const { a, sourceRefId } = await sameDebtPair();
+          const seen: Record<string, unknown> = {};
+          double.onCreate = async () => {
+            seen.ref = (await snapshot(a)).intent.gateway_intent_ref;
+            seen.debt = await lockProbe('payment_debts', sourceRefId);
+            seen.intent = await lockProbe('payment_intents', a.id);
+          };
+
+          await dispatcher(() =>
+            on.transactions.processTransaction(a.id, sale(), actor),
+          );
+
+          expect(seen.ref).toMatch(/^dispatching:/u);
+          expect(seen.debt).toBe('libre');
+          expect(seen.intent).toBe('libre');
+        });
+
+        it('un rechazo DEFINITIVO (422) libera la reserva en la base: otra intención de la deuda se cobra', async () => {
+          const { a, b } = await sameDebtPair();
+          double.script = [
+            { kind: 'status', status: 422, code: 'validation_failed' },
+          ];
+          await expectDomainError(
+            dispatcher(() =>
+              on.transactions.processTransaction(a.id, sale(), actor),
+            ),
+            422,
+            PaymentsErrorReason.PAYMENT_GATEWAY_REJECTED,
+          );
+          expect((await snapshot(a)).intent.gateway_intent_ref).toBeNull();
+
+          await dispatcher(() =>
+            on.transactions.processTransaction(b.id, sale(), actor),
+          );
+
+          expect(postsFor(b)).toHaveLength(1);
+        });
+      });
+
+      it('N5: sin transacción de petición no queda NINGUNA conexión «idle in transaction» durante la llamada HTTP', async () => {
+        const { a } = await sameDebtPair();
+        let idleInTx = -1;
+        double.onCreate = async () => {
+          const r = await admin.query(
+            `select count(*)::int as n from pg_stat_activity
+              where datname = $1 and state like 'idle in transaction%' and pid <> pg_backend_pid()`,
+            [DB_NAME],
+          );
+          idleInTx = r.rows[0].n;
+        };
+
+        await on.transactions.processTransaction(a.id, sale(), actor);
+
+        expect(idleInTx).toBe(0);
+      });
+
+      it('crash tras reservar y antes de asociar (marca fresca en la base, sin pi_): otra intención es 409; la propia reintenta y recupera su cobro', async () => {
+        const { a, b } = await sameDebtPair();
+        await run(
+          `update payments.payment_intents set gateway_intent_ref = ?, updated_at = now() where id = ?`,
+          [newDispatchMark(), a.id],
+        );
+
+        await expectDomainError(
+          on.transactions.processTransaction(b.id, sale(), actor),
+          409,
+          PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+        );
+        expect(double.calls).toHaveLength(0);
+
+        const res = await on.transactions.processTransaction(
+          a.id,
+          sale(),
+          actor,
+        );
+
+        expect(res.gatewayTransactionRef).toMatch(/^pi_/u);
+        expect(double.createdCount).toBe(1);
+      });
+
+      it('N2 (revisión 2): una marca VENCIDA sigue bloqueando a las otras intenciones y la propia se concilia con la MISMA clave sin segundo cobro', async () => {
+        const { a, b } = await sameDebtPair();
+        double.script = [
+          { kind: 'execute_then_drop' },
+          { kind: 'execute_then_drop' },
+          { kind: 'execute_then_drop' },
+        ];
+        await expectDomainError(
+          on.transactions.processTransaction(a.id, sale(), actor),
+          504,
+        );
+        expect(double.createdCount).toBe(1);
+        await run(
+          `update payments.payment_intents set gateway_intent_ref = ? where id = ?`,
+          [
+            newDispatchMark(
+              Date.now() - on.charge.dispatchLeaseMs - 5 * 3_600_000,
+            ),
+            a.id,
+          ],
+        );
+        double.calls.length = 0;
+
+        // Vencida, pero NO es permiso para cobrar la deuda con otra intención.
+        const blocked = await expectDomainError(
+          on.transactions.processTransaction(b.id, sale(), actor),
+          409,
+          PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+        );
+        expect(blocked.getResponse().details).toMatchObject({
+          reconciliationRequired: true,
+        });
+        expect(double.calls).toHaveLength(0);
+        expect(
+          (await on.charge.listDispatchesRequiringReconciliation(TENANT)).map(
+            (x) => x.intentId,
+          ),
+        ).toEqual(expect.arrayContaining([a.id]));
+
+        // La salida: reenviar la MISMA creación con la MISMA clave.
+        const res = await on.transactions.reconcileGatewayDispatch(a.id, {
+          paymentMethodType: 'qr',
+        });
+
+        expect(res.gatewayTransactionRef).toBe(
+          double.created.get(a.gatewayKey)?.intent.id,
+        );
+        expect(double.createdCount).toBe(1);
+        expect(postsFor(a)).toHaveLength(1);
+        expect((await snapshot(a)).intent.gateway_intent_ref).toBe(
+          res.gatewayTransactionRef,
+        );
+        // Ya con su pi_ real, la deuda sigue bloqueada para B.
+        await expectDomainError(
+          on.transactions.processTransaction(b.id, sale(), actor),
+          409,
+          PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+        );
+        expect(double.createdCount).toBe(1);
+      });
+
+      it('conciliación cuando el primer envío NUNCA llegó: el cobro de ESA intención, una sola vez', async () => {
+        const { a } = await sameDebtPair();
+        double.script = [
+          { kind: 'drop_before' },
+          { kind: 'drop_before' },
+          { kind: 'drop_before' },
+        ];
+        await expectDomainError(
+          on.transactions.processTransaction(a.id, sale(), actor),
+          504,
+        );
+        expect(double.createdCount).toBe(0);
+
+        const res = await on.transactions.reconcileGatewayDispatch(a.id, {
+          paymentMethodType: 'qr',
+        });
+
+        expect(double.createdCount).toBe(1);
+        expect((await snapshot(a)).intent.gateway_intent_ref).toBe(
+          res.gatewayTransactionRef,
+        );
+      });
+
+      it('pasadas 23 h la marca NO se reenvía: ni el reintento ni la conciliación llaman a la pasarela y la deuda sigue bloqueada', async () => {
+        const { a, b } = await sameDebtPair();
+        await run(
+          `update payments.payment_intents set gateway_intent_ref = ? where id = ?`,
+          [newDispatchMark(Date.now() - 25 * 3_600_000), a.id],
+        );
+
+        await expectDomainError(
+          on.transactions.processTransaction(a.id, sale(), actor),
+          409,
+          PaymentsErrorReason.PAYMENT_GATEWAY_RECONCILIATION_REQUIRED,
+        );
+        await expectDomainError(
+          on.transactions.reconcileGatewayDispatch(a.id, {
+            paymentMethodType: 'qr',
+          }),
+          409,
+          PaymentsErrorReason.PAYMENT_GATEWAY_RECONCILIATION_REQUIRED,
+        );
+        await expectDomainError(
+          on.transactions.processTransaction(b.id, sale(), actor),
+          409,
+          PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+        );
+        expect(double.calls).toHaveLength(0);
+        expect((await snapshot(a)).intent.gateway_intent_ref).toMatch(
+          /^dispatching:/u,
+        );
+      });
+
+      it('F1-A: un intento previo ambiguo y un 422 final conservan la reserva en la base (otra intención sigue bloqueada)', async () => {
+        const { a, b } = await sameDebtPair();
+        double.script = [
+          { kind: 'execute_then_status', status: 503 },
+          { kind: 'status', status: 422, code: 'validation_failed' },
+        ];
+
+        await expectDomainError(
+          on.transactions.processTransaction(a.id, sale(), actor),
+          504,
+          PaymentsErrorReason.PAYMENT_GATEWAY_RESULT_AMBIGUOUS,
+        );
+
+        expect((await snapshot(a)).intent.gateway_intent_ref).toMatch(
+          /^dispatching:/u,
+        );
+        await expectDomainError(
+          on.transactions.processTransaction(b.id, sale(), actor),
+          409,
+          PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+        );
+        expect(double.createdCount).toBe(1);
+      });
+
+      it('marca justo DENTRO del plazo: sigue bloqueando', async () => {
+        const { a, b } = await sameDebtPair();
+        await run(
+          `update payments.payment_intents set gateway_intent_ref = ? where id = ?`,
+          [
+            newDispatchMark(Date.now() - (on.charge.dispatchLeaseMs - 60_000)),
+            a.id,
+          ],
+        );
+
+        await expectDomainError(
+          on.transactions.processTransaction(b.id, sale(), actor),
+          409,
+          PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+        );
+      });
+
+      it('una marca de OTRO tenant sobre el mismo id de deuda no bloquea', async () => {
+        const { a, b } = await sameDebtPair();
+        await run(
+          `update payments.payment_intents set gateway_intent_ref = ?, tenant_id = ?, updated_at = now() where id = ?`,
+          [newDispatchMark(), randomUUID(), a.id],
+        );
+
+        await on.transactions.processTransaction(b.id, sale(), actor);
+
+        expect(postsFor(b)).toHaveLength(1);
+      });
+
+      it('la marca nunca llega a la pasarela como si fuera un cobro: el receptor de webhooks no resuelve ninguna intención por ella', async () => {
+        const { a } = await sameDebtPair();
+        const mark = newDispatchMark();
+        await run(
+          `update payments.payment_intents set gateway_intent_ref = ? where id = ?`,
+          [mark, a.id],
+        );
+        // El patrón de referencias del receptor (`^pi_[a-z0-9]{10,40}$`) no admite la marca.
+        expect(/^pi_[a-z0-9]{10,40}$/u.test(mark)).toBe(false);
+        await on.transactions.processTransaction(a.id, sale(), actor);
+        expect(double.calls.filter((c) => c.method === 'GET')).toHaveLength(0);
+      });
+    });
+
+    describe('(12) N3: la compuerta contra la deuda falla cerrado', () => {
+      it.each([
+        ['sourceRefType en mayúsculas', { sourceRefType: 'PAYMENT_DEBT' }],
+        ['sourceRefType distinto', { sourceRefType: 'debt' }],
+        ['sin sourceRefType (sólo sourceRefId)', { sourceRefType: undefined }],
+      ])(
+        '%s, con la deuda ya cobrada por otra intención: 422 PAYMENT_GATEWAY_DEBT_UNRESOLVED, cero llamadas y sin reserva',
+        async (_name, over) => {
+          const { a, b } = await sameDebtPair(
+            over as Partial<CreatePaymentIntentDto>,
+          );
+          await on.transactions.processTransaction(a.id, sale(), actor);
+          double.calls.length = 0;
+
+          await expectDomainError(
+            on.transactions.processTransaction(b.id, sale(), actor),
+            422,
+            PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_UNRESOLVED,
+          );
+
+          expect(double.calls).toHaveLength(0);
+          expect(double.createdCount).toBe(1);
+          expect((await snapshot(b)).intent.gateway_intent_ref).toBeNull();
+        },
+      );
+
+      it('un pago de curso (tipo ajeno a las deudas) sigue cobrándose', async () => {
+        const c = await createIntent(
+          on,
+          {
+            purpose: 'INVOICE',
+            sourceRefType: 'EDUCATION_COURSE',
+            sourceRefId: randomUUID(),
+          },
+          false,
+        );
+        await assess(c.id, 'APPROVE');
+
+        await on.transactions.processTransaction(c.id, sale(), actor);
+
+        expect(postsFor(c)).toHaveLength(1);
+      });
+    });
+
+    describe('(13) N7: la intención ajena no se espera ni se bloquea (sin oráculo de existencia por tiempo)', () => {
+      it('con la fila de la víctima bloqueada por su dueño, la petición de OTRO tenant responde AL INSTANTE y IGUAL que un UUID inexistente', async () => {
+        const c = await approved();
+        const holder = await holdIntentLock(c);
+        let foreignMs = -1;
+        let foreign: any;
+        let ghost: any;
+        let ghostMs = -1;
+        try {
+          const t0 = Date.now();
+          const pending = on.transactions
+            .processTransaction(c.id, sale(), actor, randomUUID())
+            .then(
+              (r) => r,
+              (e) => e,
+            )
+            .then((r) => {
+              foreignMs = Date.now() - t0;
+              return r;
+            });
+          await new Promise((resolve) => setTimeout(resolve, 700));
+          const settledWhileLocked = foreignMs >= 0;
+          const t1 = Date.now();
+          ghost = await on.transactions
+            .processTransaction(randomUUID(), sale(), actor, randomUUID())
+            .then(
+              (r) => r,
+              (e) => e,
+            );
+          ghostMs = Date.now() - t1;
+          expect(settledWhileLocked).toBe(true);
+          foreign = await pending;
+        } finally {
+          await holder.query('rollback');
+          await holder.end();
+        }
+        expect(foreignMs).toBeLessThan(500);
+        expect(ghostMs).toBeLessThan(500);
+        expect(foreign.getStatus()).toBe(404);
+        expect(ghost.getStatus()).toBe(404);
+        expect(foreign.getResponse()).toEqual(ghost.getResponse());
+        expect(double.calls).toHaveLength(0);
+      });
+    });
+
+    describe('(14) P1: con transacción de petición el pool nunca se cuelga', () => {
+      const asRlsOn = <T>(o: MikroORM, fn: () => Promise<T>): Promise<T> =>
+        o.em.transactional(async () => {
+          await o.em.execute(
+            "select set_config('app.system_context', 'false', true)",
+          );
+          await o.em.execute(
+            "select set_config('app.current_tenant_id', ?, true)",
+            [TENANT],
+          );
+          return fn();
+        });
+
+      async function smallPool(max: number) {
+        const before = process.env.DB_POOL_MAX;
+        process.env.DB_POOL_MAX = String(max);
+        const o = await MikroORM.init({
+          host: PG.host,
+          port: PG.port,
+          user: PG.user,
+          password: PG.password,
+          dbName: DB_NAME,
+          entities: [
+            PaymentIntents,
+            PaymentTransactions,
+            RiskAssessments,
+            PaymentDebts,
+            PaymentCheckoutSessions,
+          ],
+          metadataProvider: ReflectMetadataProvider,
+          metadataCache: { enabled: false },
+          allowGlobalContext: true,
+          pool: { min: 0, max },
+          // Sin esto `pg` espera sin límite y la prueba se colgaría en vez de fallar.
+          driverOptions: { connectionTimeoutMillis: 8_000 },
+        });
+        const svc = build(true, o);
+        if (before === undefined) delete process.env.DB_POOL_MAX;
+        else process.env.DB_POOL_MAX = before;
+        return { o, svc };
+      }
+
+      it.each([
+        [4, 3],
+        [4, 4],
+        [4, 8],
+        [10, 9],
+        [10, 10],
+        [10, 25],
+      ])(
+        'pool %i con %i cobros simultáneos con RLS: ninguno se cuelga, todos terminan (ok o 503 PAYMENT_GATEWAY_BUSY) y el pool se recupera',
+        async (poolMax, k) => {
+          const { o, svc } = await smallPool(poolMax);
+          try {
+            const cs: Created[] = [];
+            for (let i = 0; i < k; i += 1) cs.push(await approved());
+            double.latencyMs = 40;
+            const t0 = Date.now();
+            const res = await Promise.allSettled(
+              cs.map((c) =>
+                asRlsOn(o, () =>
+                  svc.transactions.processTransaction(c.id, sale(), actor),
+                ),
+              ),
+            );
+            const elapsed = Date.now() - t0;
+            const tally: Record<string, number> = {};
+            for (const r of res) {
+              const key =
+                r.status === 'fulfilled'
+                  ? 'ok'
+                  : `${r.reason?.getStatus?.() ?? 'ERR'} ${r.reason?.reason ?? r.reason?.message}`;
+              tally[key] = (tally[key] ?? 0) + 1;
+            }
+            process.stdout.write(
+              `(14) pool ${poolMax} x ${k}: ${JSON.stringify(tally)} en ${elapsed} ms\n`,
+            );
+            const unexpected = Object.keys(tally).filter(
+              (key) =>
+                key !== 'ok' &&
+                key !== `503 ${PaymentsErrorReason.PAYMENT_GATEWAY_BUSY}`,
+            );
+            expect(unexpected).toEqual([]);
+            expect(tally.ok ?? 0).toBeGreaterThanOrEqual(1);
+            expect(elapsed).toBeLessThan(6_000);
+
+            // El pool se recupera: un cobro posterior pasa.
+            double.latencyMs = 0;
+            const again = await approved();
+            await asRlsOn(o, () =>
+              svc.transactions.processTransaction(again.id, sale(), actor),
+            );
+            // Y los rechazados por falta de cupo se reintentan con la misma clave.
+            for (let i = 0; i < res.length; i += 1) {
+              if (res[i].status === 'rejected') {
+                await asRlsOn(o, () =>
+                  svc.transactions.processTransaction(cs[i].id, sale(), actor),
+                );
+              }
+            }
+            expect(double.createdCount).toBe(k + 1);
+          } finally {
+            double.latencyMs = 0;
+            await o.close(true);
+          }
+        },
+        60_000,
+      );
+    });
+
+    describe('(15) P2/P3/P9: la reserva solo se libera ante un rechazo definitivo y propio', () => {
+      it('P2: una petición con rechazo definitivo no borra la marca que otra petición de la MISMA intención escribió mientras tanto', async () => {
+        const { a, b } = await sameDebtPair();
+        let secondMark = '';
+        double.script = [
+          { kind: 'status', status: 422, code: 'validation_failed' },
+        ];
+        double.onCreate = async () => {
+          const [row] = await rows<{ gateway_intent_ref: string }>(
+            `select gateway_intent_ref from payments.payment_intents where id = ?`,
+            [a.id],
+          );
+          secondMark = newDispatchMark(
+            Number(row.gateway_intent_ref.split(':')[1]),
+          );
+          await run(
+            `update payments.payment_intents set gateway_intent_ref = ? where id = ?`,
+            [secondMark, a.id],
+          );
+        };
+
+        await expectDomainError(
+          on.transactions.processTransaction(a.id, sale(), actor),
+          422,
+          PaymentsErrorReason.PAYMENT_GATEWAY_REJECTED,
+        );
+
+        double.onCreate = undefined;
+        expect((await snapshot(a)).intent.gateway_intent_ref).toBe(secondMark);
+        await expectDomainError(
+          on.transactions.processTransaction(b.id, sale(), actor),
+          409,
+          PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+        );
+        expect(double.calls.filter((c) => c.method === 'POST')).toHaveLength(1);
+      });
+
+      it.each([404, 400, 408, 413, 499])(
+        'P3: un %i sin cuerpo del contrato conserva la reserva en la base y otra intención sigue bloqueada',
+        async (status) => {
+          const { a, b } = await sameDebtPair();
+          double.script = [{ kind: 'bare_status', status }];
+
+          await expectDomainError(
+            on.transactions.processTransaction(a.id, sale(), actor),
+            504,
+            PaymentsErrorReason.PAYMENT_GATEWAY_RESULT_AMBIGUOUS,
+          );
+
+          expect((await snapshot(a)).intent.gateway_intent_ref).toMatch(
+            /^dispatching:/u,
+          );
+          await expectDomainError(
+            on.transactions.processTransaction(b.id, sale(), actor),
+            409,
+            PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+          );
+        },
+      );
+
+      it.each([
+        ['REVIEW', 'REVIEW' as const],
+        ['DECLINE', 'DECLINE' as const],
+      ])(
+        'D1: el primer envío NUNCA llegó y se registra %s sobre la reserva (por la API real): el reintento NO crea cobro y la deuda sigue bloqueada',
+        async (_name, decision) => {
+          const { a, b } = await sameDebtPair();
+          double.script = [
+            { kind: 'drop_before' },
+            { kind: 'drop_before' },
+            { kind: 'drop_before' },
+          ];
+          await expectDomainError(
+            on.transactions.processTransaction(a.id, sale(), actor),
+            504,
+          );
+          expect(double.createdCount).toBe(0);
+          await on.intents.assessRisk(
+            a.id,
+            { riskScore: '90', decision },
+            actor,
+          );
+          const posts = double.postCalls.length;
+
+          await expectDomainError(
+            on.transactions.processTransaction(a.id, sale(), actor),
+            422,
+            decision === 'REVIEW'
+              ? PaymentsErrorReason.PAYMENT_INTENT_RISK_REVIEW_PENDING
+              : PaymentsErrorReason.PAYMENT_INTENT_RISK_DECLINED,
+          );
+
+          expect(double.postCalls).toHaveLength(posts);
+          expect(double.createdCount).toBe(0);
+          const snap = await snapshot(a);
+          expect(snap.intent.status_concept_id).toBe(CONCEPTS.PI_PENDING);
+          expect(snap.intent.gateway_intent_ref).toMatch(/^dispatching:/u);
+          await expectDomainError(
+            on.transactions.processTransaction(b.id, sale(), actor),
+            409,
+            PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+          );
+        },
+      );
+
+      it('D1: despachar y registrar un DECLINE a la vez, 30 rondas: ningún POST llega a la pasarela si el DECLINE se registró ANTES de que la compuerta reservara', async () => {
+        double.latencyMs = 15;
+        const violations: string[] = [];
+        for (let round = 0; round < 30; round += 1) {
+          double.created.clear();
+          double.calls.length = 0;
+          const { a } = await sameDebtPair();
+          double.onCreate = async () => {
+            // Un DECLINE posterior a la reserva sí se registra (es la palanca contra el
+            // reintento; el cobro ya en vuelo no se detiene, D10). Lo que no puede pasar
+            // es que el DECLINE ya estuviera registrado cuando la compuerta reservó.
+            const [{ n }] = await rows<{ n: number }>(
+              `select count(*)::int as n
+                 from payments.risk_assessments r
+                 join payments.payment_intents i on i.id = r.payment_intent_id
+                where r.payment_intent_id = ? and r.decision_concept_id = ?
+                  and r.assessed_at < to_timestamp(split_part(i.gateway_intent_ref, ':', 2)::bigint / 1000.0)`,
+              [a.id, CONCEPTS.RISK_DECLINE],
+            );
+            if (n > 0)
+              violations.push(
+                `ronda ${round}: POST con DECLINE previo a la reserva`,
+              );
+          };
+          await Promise.allSettled([
+            on.transactions.processTransaction(a.id, sale(), actor),
+            on.intents.assessRisk(
+              a.id,
+              { riskScore: '95', decision: 'DECLINE' },
+              actor,
+            ),
+          ]);
+          double.onCreate = undefined;
+        }
+        expect(violations).toEqual([]);
+      });
+
+      it('D1: un APPROVE posterior destraba el reintento de la reserva', async () => {
+        const { a } = await sameDebtPair();
+        double.script = [
+          { kind: 'drop_before' },
+          { kind: 'drop_before' },
+          { kind: 'drop_before' },
+        ];
+        await expectDomainError(
+          on.transactions.processTransaction(a.id, sale(), actor),
+          504,
+        );
+        await on.intents.assessRisk(
+          a.id,
+          { riskScore: '90', decision: 'REVIEW' },
+          actor,
+        );
+        await on.intents.assessRisk(
+          a.id,
+          { riskScore: '5', decision: 'APPROVE' },
+          actor,
+        );
+
+        const res = await on.transactions.processTransaction(
+          a.id,
+          sale(),
+          actor,
+        );
+
+        expect(res.gatewayTransactionRef).toMatch(/^pi_/u);
+        expect(double.createdCount).toBe(1);
+      });
+
+      it('D2: el cierre manual de una reserva vencida cancela la intención sin llamar a la pasarela y libera la deuda', async () => {
+        const { a, b } = await sameDebtPair();
+        double.script = [
+          { kind: 'drop_before' },
+          { kind: 'drop_before' },
+          { kind: 'drop_before' },
+        ];
+        await expectDomainError(
+          on.transactions.processTransaction(a.id, sale(), actor),
+          504,
+        );
+        await expectDomainError(
+          on.transactions.closeGatewayDispatch(
+            a.id,
+            'Verificado en la consola de la pasarela: no hay cobro',
+            actor,
+          ),
+          409,
+          PaymentsErrorReason.PAYMENT_GATEWAY_DISPATCH_IN_FLIGHT,
+        );
+        await ageReservation(a.id, on.charge.dispatchLeaseMs + 3_600_000);
+        const calls = double.calls.length;
+
+        const closed = await on.transactions.closeGatewayDispatch(
+          a.id,
+          'Verificado en la consola de la pasarela: no hay cobro',
+          actor,
+        );
+
+        expect(closed.statusConceptId).toBe(CONCEPTS.PI_CANCELED);
+        expect(double.calls).toHaveLength(calls);
+        expect((await snapshot(a)).intent.status_concept_id).toBe(
+          CONCEPTS.PI_CANCELED,
+        );
+        await on.transactions.processTransaction(b.id, sale(), actor);
+        expect(postsFor(b)).toHaveLength(1);
+      });
+    });
+
+    describe('(16) D8/D9: el cierre manual y el reintento del dueño no se pisan', () => {
+      describe.each(MODES)('%s', (_mode, dispatcher) => {
+        it('D8: reintento con la llamada en vuelo y cierre a la vez, 12 rondas: nunca una intención CANCELADA con el cobro entregado', async () => {
+          const outcomes: Record<string, number> = {};
+          for (let round = 0; round < 12; round += 1) {
+            const { a, b } = await sameDebtPair();
+            double.created.clear();
+            double.script = [
+              { kind: 'execute_then_drop' },
+              { kind: 'execute_then_drop' },
+              { kind: 'execute_then_drop' },
+            ];
+            await expectDomainError(
+              dispatcher(() =>
+                on.transactions.processTransaction(a.id, sale(), actor),
+              ),
+              504,
+            );
+            await ageReservation(a.id, on.charge.dispatchLeaseMs + 3_600_000);
+            double.latencyMs = 200;
+            const retry = dispatcher(() =>
+              on.transactions.processTransaction(a.id, sale(), actor),
+            );
+            // El cierre llega mientras la llamada del reintento está (o estuvo) en vuelo.
+            await new Promise((resolve) =>
+              setTimeout(resolve, 40 + round * 15),
+            );
+            const closing = dispatcher(() =>
+              on.transactions.closeGatewayDispatch(
+                a.id,
+                'Verificado en la consola de la pasarela: no hay cobro',
+                actor,
+              ),
+            );
+            const [retried, closed] = await Promise.allSettled([
+              retry,
+              closing,
+            ]);
+            double.latencyMs = 0;
+
+            const snap = await snapshot(a);
+            const delivered = retried.status === 'fulfilled';
+            const canceled =
+              snap.intent.status_concept_id === CONCEPTS.PI_CANCELED;
+            const key = `retry=${delivered ? 'ok' : 'no'} close=${closed.status === 'fulfilled' ? 'ok' : 'no'}`;
+            outcomes[key] = (outcomes[key] ?? 0) + 1;
+            // Invariante: un cobro entregado nunca vive en una intención cancelada.
+            expect({ round, delivered, canceled }).not.toEqual({
+              round,
+              delivered: true,
+              canceled: true,
+            });
+            // Y si el reintento entregó el cobro, la deuda sigue bloqueada para B.
+            if (delivered) {
+              await expectDomainError(
+                dispatcher(() =>
+                  on.transactions.processTransaction(b.id, sale(), actor),
+                ),
+                409,
+                PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+              );
+            }
+            expect(double.createdCount).toBeLessThanOrEqual(1);
+          }
+          process.stdout.write(
+            `(16) D8 ${_mode}: ${JSON.stringify(outcomes)}\n`,
+          );
+        }, 120_000);
+      });
+
+      it('D8: aunque la intención se cancele mientras su llamada está en vuelo, el cobro se asocia pero NO se entrega', async () => {
+        const { a } = await sameDebtPair();
+        double.onCreate = async () => {
+          await run(
+            `update payments.payment_intents set status_concept_id = ? where id = ?`,
+            [CONCEPTS.PI_CANCELED, a.id],
+          );
+        };
+
+        await expectDomainError(
+          on.transactions.processTransaction(a.id, sale(), actor),
+          409,
+          PaymentsErrorReason.PAYMENT_GATEWAY_RECONCILIATION_REQUIRED,
+        );
+
+        double.onCreate = undefined;
+        const snap = await snapshot(a);
+        expect(snap.intent.gateway_intent_ref).toMatch(/^pi_/u);
+        expect(snap.intent.status_concept_id).toBe(CONCEPTS.PI_CANCELED);
+      });
+
+      it('D9: el cierre de una intención ligada por SESIÓN de checkout expira la sesión y devuelve la deuda a DEBT_PENDING', async () => {
+        const debtId = randomUUID();
+        await insertDebt(debtId, { status: CONCEPTS.DEBT_IN_CHECKOUT });
+        const a = await createIntent(
+          on,
+          { sourceRefType: undefined, sourceRefId: undefined },
+          false,
+        );
+        await assess(a.id, 'APPROVE');
+        const sessionId = randomUUID();
+        await run(
+          `insert into payments.payment_checkout_sessions
+             (id, tenant_id, gateway_connection_id, payment_debt_id, payment_intent_id, session_token_hash, redirect_url,
+              expires_at, status_concept_id, created_at, updated_at)
+           values (?, ?, ?, ?, ?, ?, 'https://checkout.example/s', now() + interval '1 hour', ?, now(), now())`,
+          [
+            sessionId,
+            TENANT,
+            randomUUID(),
+            debtId,
+            a.id,
+            randomBytes(16).toString('hex'),
+            CONCEPTS.CHECKOUT_OPEN,
+          ],
+        );
+        double.script = [
+          { kind: 'drop_before' },
+          { kind: 'drop_before' },
+          { kind: 'drop_before' },
+        ];
+        await expectDomainError(
+          on.transactions.processTransaction(a.id, sale(), actor),
+          504,
+        );
+        await ageReservation(a.id, on.charge.dispatchLeaseMs + 3_600_000);
+
+        await on.transactions.closeGatewayDispatch(
+          a.id,
+          'Verificado en la consola de la pasarela: no hay cobro',
+          actor,
+        );
+
+        const [session] = await rows(
+          `select status_concept_id from payments.payment_checkout_sessions where id = ?`,
+          [sessionId],
+        );
+        const [debt] = await rows(
+          `select status_concept_id from payments.payment_debts where id = ?`,
+          [debtId],
+        );
+        expect(session.status_concept_id).toBe(CONCEPTS.CHECKOUT_EXPIRED);
+        expect(debt.status_concept_id).toBe(CONCEPTS.DEBT_PENDING);
+      });
+
+      it('D12: el segundo cierre responde 409 y no repite nada', async () => {
+        const { a } = await sameDebtPair();
+        double.script = [
+          { kind: 'drop_before' },
+          { kind: 'drop_before' },
+          { kind: 'drop_before' },
+        ];
+        await expectDomainError(
+          on.transactions.processTransaction(a.id, sale(), actor),
+          504,
+        );
+        await ageReservation(a.id, on.charge.dispatchLeaseMs + 3_600_000);
+        const reason = 'Verificado en la consola de la pasarela: no hay cobro';
+        await on.transactions.closeGatewayDispatch(a.id, reason, actor);
+
+        await expectDomainError(
+          on.transactions.closeGatewayDispatch(a.id, reason, actor),
+          409,
+          PaymentsErrorReason.PAYMENT_GATEWAY_DISPATCH_ALREADY_CLOSED,
+        );
       });
     });
   },

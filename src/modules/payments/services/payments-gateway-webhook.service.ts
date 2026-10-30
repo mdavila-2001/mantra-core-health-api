@@ -17,6 +17,9 @@ import {
 } from '../repositories';
 import { GatewayWebhookResultDto } from '../dto';
 import { PaymentsErrorReason } from '../payments.error-reasons';
+import { DEBT_SOURCE_REF_TYPE } from '../payments.source-refs';
+import { releaseCheckoutForIntent } from './payments-checkout-release';
+import { gatewayMetrics } from '../gateway/payments-gateway-metrics';
 import {
   PAYMENTS_GATEWAY_CONFIG,
   type PaymentsGatewayConfig,
@@ -62,6 +65,9 @@ const CREATED_EVENT = 'payment_intent.created';
 
 const PAYMENT_INTENT_ID = /^pi_[a-z0-9]{10,40}$/u;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
+
+/** Resultado de intentar saldar la deuda de una intención cobrada. */
+type DebtOutcome = { settled: true } | { settled: false; reason: string };
 
 /** Entrada del receptor: las cabeceras y los bytes exactos del cuerpo. */
 export interface GatewayWebhookInput {
@@ -135,14 +141,19 @@ export class PaymentsGatewayWebhookService {
       );
     }
     if (!input.rawBody || input.rawBody.length === 0) {
-      this.logger.error(
+      // Sin los bytes originales no hay firma que verificar, y reconstruirlos
+      // desde el JSON ya interpretado sería verificar otra cosa. Lo único que
+      // llega aquí sin credenciales es una petición vacía o que no es JSON
+      // (`Content-Type` distinto): es un rechazo del cliente, determinista y de
+      // nivel `warn`, no un fallo del servidor que cualquiera pueda provocar.
+      this.logger.warn(
         { operation: 'payments.gateway.webhook' },
-        'Gateway webhook arrived without raw body; check body parser wiring',
+        'Gateway webhook rejected: empty body or not JSON, so there is no raw body to verify',
       );
       throw new DomainException(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        ErrorCode.INTERNAL,
-        'No se pudo leer el cuerpo del webhook',
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.VALIDATION_FAILED,
+        'El webhook debe llegar con un cuerpo JSON',
         undefined,
         PaymentsErrorReason.GATEWAY_WEBHOOK_RAW_BODY_MISSING,
       );
@@ -317,6 +328,7 @@ export class PaymentsGatewayWebhookService {
         );
         return this.result(event.id, { ignored: true });
       }
+      gatewayMetrics.unknownTerminalWebhook();
       this.logger.warn(
         { operation: 'payments.gateway.webhook', eventId: event.id },
         'Gateway terminal webhook for an unknown payment intent; the gateway will retry',
@@ -342,11 +354,16 @@ export class PaymentsGatewayWebhookService {
     }
 
     let decision = decideGatewayEvent(intent.statusConceptId, status);
+    let reconciliationReason: string | undefined;
+    if (decision === 'contradiccion') {
+      reconciliationReason = 'terminal_state_contradiction';
+    }
     if (decision === 'aplicar' && status === 'succeeded') {
       // El importe que informa la pasarela tiene que ser el cobrado localmente:
       // si no, no se asienta nada y se concilia.
       if (!this.amountMatches(event, intent.amount)) {
         decision = 'contradiccion';
+        reconciliationReason = 'amount_or_currency_mismatch';
         this.logger.error(
           {
             operation: 'payments.gateway.webhook',
@@ -363,7 +380,11 @@ export class PaymentsGatewayWebhookService {
       intent.statusConceptId = LOCAL_INTENT_STATUS[status];
       touch(intent, undefined);
       if (status === 'succeeded') {
-        reconciliationRequired = !(await this.settleDebt(tx, intent));
+        const outcome = await this.settleDebt(tx, intent);
+        if (!outcome.settled) {
+          reconciliationRequired = true;
+          reconciliationReason = outcome.reason;
+        }
       } else if (isTerminalGatewayStatus(status)) {
         await this.releaseDebt(tx, intent);
       }
@@ -376,6 +397,7 @@ export class PaymentsGatewayWebhookService {
           intentId: intent.id,
           decision,
           reconciliationRequired,
+          reconciliationReason,
         },
         decision === 'obsoleto'
           ? 'Ignored out-of-order gateway event'
@@ -393,6 +415,10 @@ export class PaymentsGatewayWebhookService {
         created_at: event.created_at,
         mode: event.mode,
         data: event.data,
+        // Por qué quedó sin procesar: lo que necesita quien concilia.
+        ...(reconciliationRequired && reconciliationReason
+          ? { reconciliation: { reason: reconciliationReason } }
+          : {}),
       },
       signature,
       isVerified: true,
@@ -429,27 +455,45 @@ export class PaymentsGatewayWebhookService {
    * Descuenta lo cobrado del saldo con aritmética decimal exacta: saldo en cero
    * → `DEBT_SETTLED`; saldo positivo → vuelve a `DEBT_PENDING`. Si algo no
    * cuadra (varias deudas, deuda ajena o ya saldada, moneda distinta, cobro que
-   * excede el saldo) **no toca la deuda** y devuelve `false` para conciliar: el
+   * excede el saldo) **no toca la deuda** y devuelve el motivo para conciliar: el
    * dinero se movió y eso queda asentado en la intención, pero sobrepagar o
    * saldar dos veces no se resuelve por inferencia.
    *
+   * Una intención de deuda (`sourceRefType = payment_debt` o propósito `DEBT`)
+   * sin ninguna sesión de checkout que la ligue tampoco se da por aplicada: no
+   * hay con qué saber qué deuda descontar, el cobro ocurrió y la deuda sigue
+   * intacta, así que se concilia. Sólo una intención que no es de deuda y no
+   * tiene sesión no tiene nada que saldar.
+   *
    * La factura (`billing`) no se toca desde este módulo: la deuda la referencia
    * por `invoiceId` y ese dominio la consume.
-   *
-   * @returns `true` si no queda nada por conciliar.
    */
   private async settleDebt(
     tx: EntityManager,
-    intent: { id: string; tenantId: string; amount: string },
-  ): Promise<boolean> {
+    intent: {
+      id: string;
+      tenantId: string;
+      amount: string;
+      sourceRefType?: string | null;
+      purposeConceptId?: string | null;
+    },
+  ): Promise<DebtOutcome> {
     const sessions = await this.flowRepo.findCheckoutSessionsByIntentForUpdate(
       tx,
       intent.id,
     );
-    if (sessions.length === 0) return true;
+    if (sessions.length === 0) {
+      const isDebtIntent =
+        intent.sourceRefType === DEBT_SOURCE_REF_TYPE ||
+        intent.purposeConceptId === CONCEPTS.PAY_PURPOSE_DEBT;
+      return isDebtIntent
+        ? { settled: false, reason: 'debt_without_checkout_session' }
+        : { settled: true };
+    }
 
     const debtIds = [...new Set(sessions.map((s) => s.paymentDebtId))];
-    if (debtIds.length !== 1) return false;
+    if (debtIds.length !== 1)
+      return { settled: false, reason: 'several_debts' };
 
     const debt = await this.flowRepo.findDebtByIdForUpdate(tx, debtIds[0]);
     if (
@@ -459,10 +503,12 @@ export class PaymentsGatewayWebhookService {
       debt.statusConceptId === CONCEPTS.DEBT_SETTLED ||
       !isPositiveAmount(intent.amount)
     ) {
-      return false;
+      return { settled: false, reason: 'debt_unavailable' };
     }
     const remaining = subtractAmounts(debt.outstandingAmount, intent.amount);
-    if (compareAmounts(remaining, '0') < 0) return false;
+    if (compareAmounts(remaining, '0') < 0) {
+      return { settled: false, reason: 'amount_exceeds_outstanding' };
+    }
 
     const now = new Date();
     debt.outstandingAmount = remaining;
@@ -481,40 +527,18 @@ export class PaymentsGatewayWebhookService {
         touch(session, undefined, now);
       }
     }
-    return true;
+    return { settled: true };
   }
 
   /**
-   * Un cobro que terminó sin pagarse libera el checkout: la sesión se cierra y la
-   * deuda vuelve a `DEBT_PENDING` para poder abrir otra. Sin esto una deuda
-   * quedaría en `DEBT_IN_CHECKOUT` para siempre.
+   * Un cobro que terminó sin pagarse libera el checkout (ver
+   * `releaseCheckoutForIntent`).
    */
-  private async releaseDebt(
+  private releaseDebt(
     tx: EntityManager,
     intent: { id: string; tenantId: string },
   ): Promise<void> {
-    const sessions = await this.flowRepo.findCheckoutSessionsByIntentForUpdate(
-      tx,
-      intent.id,
-    );
-    const now = new Date();
-    for (const session of sessions) {
-      if (session.statusConceptId !== CONCEPTS.CHECKOUT_OPEN) continue;
-      session.statusConceptId = CONCEPTS.CHECKOUT_EXPIRED;
-      touch(session, undefined, now);
-      const debt = await this.flowRepo.findDebtByIdForUpdate(
-        tx,
-        session.paymentDebtId,
-      );
-      if (
-        debt &&
-        debt.tenantId === intent.tenantId &&
-        debt.statusConceptId === CONCEPTS.DEBT_IN_CHECKOUT
-      ) {
-        debt.statusConceptId = CONCEPTS.DEBT_PENDING;
-        touch(debt, undefined, now);
-      }
-    }
+    return releaseCheckoutForIntent(this.flowRepo, tx, intent);
   }
 
   private result(

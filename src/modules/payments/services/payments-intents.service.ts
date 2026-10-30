@@ -26,6 +26,7 @@ import {
   type RiskDecision,
 } from '../dto';
 import { PaymentsErrorReason } from '../payments.error-reasons';
+import { isDispatchMark } from '../gateway/payments-gateway-dispatch-mark';
 import { PaymentsGatewayChargeService } from './payments-gateway-charge.service';
 import {
   addAmounts,
@@ -189,6 +190,7 @@ export class PaymentsIntentsService {
           PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
         );
       }
+      this.assertNotDispatched(intent, intentId);
       if (intent.statusConceptId !== CONCEPTS.PI_PENDING) {
         throw new PreconditionFailedException(
           'Solo se puede bloquear el cambio de una intención pendiente',
@@ -269,6 +271,16 @@ export class PaymentsIntentsService {
         );
       }
 
+      // Un DECLINE pasa la intención a `failed`; con el cobro ya creado en la
+      // pasarela eso dejaría un cobro vivo contra una intención dada por perdida.
+      // Con una simple RESERVA (sin `pi_…`) el `DECLINE` sí se registra —es la
+      // palanca que frena el reintento si el envío nunca llegó—, pero no pasa la
+      // intención a `failed`: la pasarela pudo haber creado el cobro y, fallada, la
+      // deuda se ofrecería a otra intención.
+      const reservedOnly = isDispatchMark(intent.gatewayIntentRef);
+      if (dto.decision === 'DECLINE' && !reservedOnly)
+        this.assertNotDispatched(intent, intentId);
+
       const riskLevel = this.deriveRiskLevel(dto.riskScore);
       const assessment = this.flowRepo.createRiskAssessment(tx, {
         paymentIntentId: intentId,
@@ -284,7 +296,12 @@ export class PaymentsIntentsService {
         actorUserId: actor.id,
       });
 
-      if (dto.decision === 'DECLINE') {
+      if (dto.decision === 'DECLINE' && reservedOnly) {
+        this.logger.warn(
+          { operation: 'payments.intent.risk', intentId },
+          'Risk DECLINE recorded on an intent with a dispatch reservation; status kept so the debt stays blocked until reconciled',
+        );
+      } else if (dto.decision === 'DECLINE') {
         intent.statusConceptId = CONCEPTS.PI_FAILED;
         touch(intent, actor.id);
         this.logger.warn(
@@ -348,6 +365,8 @@ export class PaymentsIntentsService {
         );
       }
 
+      this.assertNotDispatched(intent, intentId);
+
       const amount =
         dto.splitType === 'AMOUNT'
           ? (dto.amount as string)
@@ -399,6 +418,25 @@ export class PaymentsIntentsService {
         isPlatformFee: dto.isPlatformFee ?? false,
       };
     });
+  }
+
+  /**
+   * Una intención con cobro ya creado en la pasarela (`gatewayIntentRef`) no
+   * admite cambios que alteren lo cobrado —importe y moneda por un bloqueo de
+   * cambio, repartos— ni un `DECLINE` que la dé por fallada: el cobro de la
+   * pasarela seguiría vivo y el pago posterior terminaría en conciliación.
+   */
+  private assertNotDispatched(
+    intent: { gatewayIntentRef?: string | null },
+    intentId: string,
+  ): void {
+    if (intent.gatewayIntentRef) {
+      throw new ConflictException(
+        'La intención ya tiene un cobro en la pasarela; no admite este cambio',
+        { intentId },
+        PaymentsErrorReason.PAYMENT_INTENT_VIA_GATEWAY,
+      );
+    }
   }
 
   /**
