@@ -25,4 +25,16 @@ export enum PharmacyErrorReason {
   ON_CALL_SHIFT_OVERLAP = 'ON_CALL_SHIFT_OVERLAP',
   /** El turno ya terminó o ya estaba cancelado: no se puede cancelar. */
   ON_CALL_SHIFT_NOT_CANCELLABLE = 'ON_CALL_SHIFT_NOT_CANCELLABLE',
+  /** Carga masiva: la clave de la fila ya existe y el modo es `CREATE`. */
+  ALREADY_EXISTS = 'ALREADY_EXISTS',
+  /** Carga masiva: la clave de la fila no existe y el modo es `UPDATE`. */
+  NOT_FOUND = 'NOT_FOUND',
+  /** Carga masiva: la misma clave ya vino en una fila anterior del pedido. */
+  DUPLICATE_IN_FILE = 'DUPLICATE_IN_FILE',
+  /** Carga masiva: el producto de ese código está retirado. */
+  PRODUCT_RETIRED = 'PRODUCT_RETIRED',
+  /** Carga masiva: el producto del catálogo oficial ya está cargado con otro código. */
+  CATALOG_PRODUCT_TAKEN = 'CATALOG_PRODUCT_TAKEN',
+  /** Carga masiva de precios: no hay producto con ese código. */
+  PRODUCT_NOT_FOUND = 'PRODUCT_NOT_FOUND',
 }
