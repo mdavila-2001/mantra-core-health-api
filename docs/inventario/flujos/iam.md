@@ -34,7 +34,7 @@ _Fuente: `src/modules/iam/README.md:3`_
 |  |  | POST /iam/auth/logout-all | Cualquier sesión válida | ALTO | 4 |
 |  |  | POST /iam/auth/register-organization | Público (sin sesión) | ALTO | 40 |
 |  |  | POST /iam/auth/register-patient | Público (sin sesión) | ALTO | 21 |
-|  |  | POST /iam/auth/register-practitioner | Público (sin sesión) | ALTO | 45 |
+|  |  | POST /iam/auth/register-practitioner | Público (sin sesión) | ALTO | 65 |
 |  |  | POST /iam/auth/resend-verification | Público (sin sesión) | ALTO | 9 |
 |  |  | POST /iam/auth/reset-password | Público (sin sesión) | ALTO | 8 |
 |  |  | POST /iam/auth/sessions/purge | SECURITY_ADMIN | MEDIO | 3 |
@@ -61,7 +61,7 @@ _Fuente: `src/modules/iam/README.md:3`_
 |  |  | GET /iam/users/{id}/mfa-factors | SECURITY_ADMIN | BAJO | 2 |
 |  |  | POST /iam/users/{id}/mfa-factors | Cualquier sesión válida | ALTO | 6 |
 |  |  | GET /iam/users/{id}/sessions | SECURITY_ADMIN | BAJO | 2 |
-|  |  | POST /iam/users/assisted-practitioner-registration | SECURITY_ADMIN | MEDIO | 42 |
+|  |  | POST /iam/users/assisted-practitioner-registration | SECURITY_ADMIN | ALTO | 62 |
 |  |  | POST /iam/users/assisted-registration | CLINICIAN · SECURITY_ADMIN | MEDIO | 10 |
 |  |  | POST /iam/users/search | SECURITY_ADMIN | BAJO | 2 |
 
@@ -106,7 +106,7 @@ flowchart LR
   t26[("+17 tablas más")]
   t35[("+34 tablas más")]
   t38[("+15 tablas más")]
-  t40[("+39 tablas más")]
+  t40[("+59 tablas más")]
   t44[("+3 tablas más")]
   t46[("+2 tablas más")]
   t50[("+9 tablas más")]
@@ -204,8 +204,8 @@ flowchart LR
   o39 -->|"CREA"| t21
   o39 -->|"LEE"| t21
   o39 -->|"CREA"| t30
+  o39 -->|"LEE"| t30
   o39 -->|"CREA"| t22
-  o39 -->|"CREA"| t31
   o39 -.-> t40
   a11 --> o41
   o41 -->|"LEE"| t3
@@ -276,7 +276,7 @@ flowchart LR
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
   a20(["Cualquier sesión válida"]):::actor
-  a38(["CLINICIAN · SECURITY_ADMIN"]):::actor
+  a37(["CLINICIAN · SECURITY_ADMIN"]):::actor
   t3[("iam.authentication_credentials")]:::tabla
   t4[("iam.users")]:::tabla
   t6[("common.contact_points")]:::tabla
@@ -290,13 +290,12 @@ flowchart LR
   t32[("authz.roles")]:::tabla
   t33[("authz.user_role_assignments")]:::tabla
   t34[("common.addresses")]:::tabla
-  t35[("common.file_versions")]:::tabla
-  t39[("iam.account_activations")]:::tabla
+  t38[("iam.account_activations")]:::tabla
   t13[("+2 tablas más")]
   t23[("+2 tablas más")]
   t26[("+1 tablas más")]
-  t36[("+36 tablas más")]
-  t40[("+4 tablas más")]
+  t35[("+56 tablas más")]
+  t39[("+4 tablas más")]
   subgraph s0["ctrl:IamUsersController · Operaciones de IamUsersController que el README no as…"]
     o1["GET /iam/users"]:::op
     o5["POST /iam/users"]:::op
@@ -314,8 +313,8 @@ flowchart LR
     o29["POST /iam/users/{id}/mfa-factors"]:::op
     o30["GET /iam/users/{id}/sessions"]:::op
     o31["POST /iam/users/assisted-practitioner-registration"]:::op
-    o37["POST /iam/users/assisted-registration"]:::op
-    o41["POST /iam/users/search"]:::op
+    o36["POST /iam/users/assisted-registration"]:::op
+    o40["POST /iam/users/search"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -393,20 +392,20 @@ flowchart LR
   o31 -->|"CREA"| t33
   o31 -->|"LEE"| t33
   o31 -->|"CREA"| t34
+  o31 -->|"LEE"| t34
   o31 -->|"CREA"| t6
-  o31 -->|"CREA"| t35
-  o31 -.-> t36
-  a38 --> o37
-  o37 -->|"CREA"| t39
-  o37 -->|"CREA"| t3
-  o37 -->|"LEE"| t3
-  o37 -->|"CREA"| t7
-  o37 -->|"CREA"| t8
-  o37 -->|"CREA"| t4
-  o37 -.-> t40
-  a2 --> o41
-  o41 -->|"LEE"| t3
-  o41 -->|"LEE"| t4
+  o31 -.-> t35
+  a37 --> o36
+  o36 -->|"CREA"| t38
+  o36 -->|"CREA"| t3
+  o36 -->|"LEE"| t3
+  o36 -->|"CREA"| t7
+  o36 -->|"CREA"| t8
+  o36 -->|"CREA"| t4
+  o36 -.-> t39
+  a2 --> o40
+  o40 -->|"LEE"| t3
+  o40 -->|"LEE"| t4
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -896,7 +895,7 @@ flowchart TD
   n8 --> n9
   n10(["409 CONFLICT El código de organización ya existe"]):::error
   n9 -->|"sí"| n10
-  n11["Llama a CredentialsRepository.findLivePasswordBySubject"]:::llamada
+  n11["Llama a CredentialsRepository.findLivePasswordByEmail"]:::llamada
   n9 -->|"no"| n11
   n12[("LEE iam.authentication_credentials")]:::efecto
   n11 --> n12
@@ -1165,7 +1164,7 @@ Registrarse como profesional de salud con su matrícula
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 409 | `CONFLICT` | ConflictException: Ya existe una cuenta con ese correo; ConflictException: El practitioner_code ya está en uso |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos; PreconditionFailedException: El archivo del registro del SEDES necesita su número de registro; PreconditionFailedException: La matrícula y el registro del SEDES no pueden compartir el mismo archivo; PreconditionFailedException: La fecha del registro del SEDES necesita su número de registro; PreconditionFailedException: Los datos del registro del colegio necesitan su número de registro; PreconditionFailedException: El registro del colegio no puede compartir el archivo de otra habilitación; PreconditionFailedException: La foto de perfil no es una imagen válida; PreconditionFailedException: El departamento emisor es obligatorio para el alta del profesional; PreconditionFailedException: {labels.subject} no corresponde a un archivo subido en este registro; PreconditionFailedException: La firma y el sello requieren una imagen privada de hasta 2 MB; PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: El número del título no puede estar vacío; PreconditionFailedException: Esa profesión no está en la Clasificación de Ocupaciones de Bolivia; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Alguno de los roles indicados no existe o no es asignable |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos; PreconditionFailedException: El archivo del registro del SEDES necesita su número de registro; PreconditionFailedException: La matrícula y el registro del SEDES no pueden compartir el mismo archivo; PreconditionFailedException: La fecha del registro del SEDES necesita su número de registro; PreconditionFailedException: Los datos del registro del colegio necesitan su número de registro; PreconditionFailedException: El registro del colegio no puede compartir el archivo de otra habilitación; PreconditionFailedException: La foto de perfil no es una imagen válida; PreconditionFailedException: El departamento emisor es obligatorio para el alta del profesional; PreconditionFailedException: {labels.subject} no corresponde a un archivo subido en este registro; PreconditionFailedException: La firma y el sello requieren una imagen privada de hasta 2 MB; PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: El número del título no puede estar vacío; PreconditionFailedException: Esa profesión no está en la Clasificación de Ocupaciones de Bolivia; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: La atestación necesita la versión del texto aceptado; PreconditionFailedException: Alguno de los roles indicados no existe o no es asignable |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING |
 
@@ -1220,7 +1219,7 @@ flowchart TD
   n24["Transacción: transactional(…)"]:::transaccion
   n21 --> n24
   n22 -->|"no"| n24
-  n25["Llama a CredentialsRepository.findLivePasswordBySubject"]:::llamada
+  n25["Llama a CredentialsRepository.findLivePasswordByEmail"]:::llamada
   n24 --> n25
   n26[("LEE iam.authentication_credentials")]:::efecto
   n25 --> n26
@@ -2117,7 +2116,7 @@ Crear un usuario con credencial de contraseña y rol inicial
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 409 | `CONFLICT` | ConflictException: El email ya tiene una credencial de contraseña activa |
+| 409 | `CONFLICT` | ConflictException: El email ya tiene una credencial de contraseña |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -2129,13 +2128,13 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a CredentialsRepository.findActivePasswordBySubject"]:::llamada
+  n5["Llama a CredentialsRepository.findLivePasswordByEmail"]:::llamada
   n4 --> n5
   n6[("LEE iam.authentication_credentials")]:::efecto
   n5 --> n6
   n7{"clash"}:::decision
   n6 --> n7
-  n8(["409 CONFLICT El email ya tiene una credencial de contraseña activa"]):::error
+  n8(["409 CONFLICT El email ya tiene una credencial de contraseña"]):::error
   n7 -->|"sí"| n8
   n9["Llama a UsersRepository.create"]:::llamada
   n7 -->|"no"| n9
@@ -2908,7 +2907,7 @@ Alta administrativa de un profesional (devuelve token de activación)
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: Ya existe una cuenta con ese correo; ConflictException: El practitioner_code ya está en uso |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos; PreconditionFailedException: El archivo del registro del SEDES necesita su número de registro; PreconditionFailedException: La matrícula y el registro del SEDES no pueden compartir el mismo archivo; PreconditionFailedException: La fecha del registro del SEDES necesita su número de registro; PreconditionFailedException: Los datos del registro del colegio necesitan su número de registro; PreconditionFailedException: El registro del colegio no puede compartir el archivo de otra habilitación; PreconditionFailedException: La foto de perfil no es una imagen válida; PreconditionFailedException: El departamento emisor es obligatorio para el alta del profesional; PreconditionFailedException: {labels.subject} no corresponde a un archivo subido en este registro; PreconditionFailedException: La firma y el sello requieren una imagen privada de hasta 2 MB; PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: El número del título no puede estar vacío; PreconditionFailedException: Esa profesión no está en la Clasificación de Ocupaciones de Bolivia; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Alguno de los roles indicados no existe o no es asignable |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos; PreconditionFailedException: El archivo del registro del SEDES necesita su número de registro; PreconditionFailedException: La matrícula y el registro del SEDES no pueden compartir el mismo archivo; PreconditionFailedException: La fecha del registro del SEDES necesita su número de registro; PreconditionFailedException: Los datos del registro del colegio necesitan su número de registro; PreconditionFailedException: El registro del colegio no puede compartir el archivo de otra habilitación; PreconditionFailedException: La foto de perfil no es una imagen válida; PreconditionFailedException: El departamento emisor es obligatorio para el alta del profesional; PreconditionFailedException: {labels.subject} no corresponde a un archivo subido en este registro; PreconditionFailedException: La firma y el sello requieren una imagen privada de hasta 2 MB; PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: El número del título no puede estar vacío; PreconditionFailedException: Esa profesión no está en la Clasificación de Ocupaciones de Bolivia; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: La atestación necesita la versión del texto aceptado; PreconditionFailedException: Alguno de los roles indicados no existe o no es asignable |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING |
 
@@ -2963,7 +2962,7 @@ flowchart TD
   n24["Transacción: transactional(…)"]:::transaccion
   n21 --> n24
   n22 -->|"no"| n24
-  n25["Llama a CredentialsRepository.findLivePasswordBySubject"]:::llamada
+  n25["Llama a CredentialsRepository.findLivePasswordByEmail"]:::llamada
   n24 --> n25
   n26[("LEE iam.authentication_credentials")]:::efecto
   n25 --> n26
@@ -3089,7 +3088,7 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a CredentialsRepository.findLivePasswordBySubject"]:::llamada
+  n5["Llama a CredentialsRepository.findLivePasswordByEmail"]:::llamada
   n4 --> n5
   n6[("LEE iam.authentication_credentials")]:::efecto
   n5 --> n6
