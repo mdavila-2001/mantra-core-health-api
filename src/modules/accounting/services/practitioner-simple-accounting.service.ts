@@ -365,7 +365,7 @@ export class PractitionerSimpleAccountingService {
       }
       // El mismo cerrojo que el alta: dos renombres simultáneos al mismo
       // nombre no pasan los dos la comprobación.
-      await this.repo.lockAccountCodes(tx, account.practiceId);
+      await this.repo.lockAccountsOf(tx, account.practiceId);
       const all = await this.repo.listAccounts(tx, account.practiceId);
       this.assertNameFree(all, accountClass, name, account.id);
 
