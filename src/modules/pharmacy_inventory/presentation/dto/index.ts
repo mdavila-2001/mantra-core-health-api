@@ -16,3 +16,4 @@ export * from './responses.dto';
 export * from './read-responses.dto';
 export * from './patient-settlement.dto';
 export * from './site-availability.dto';
+export * from './integration-sync.dto';

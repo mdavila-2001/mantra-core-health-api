@@ -96,6 +96,7 @@ import { QaExecutionModule } from './modules/qa_execution/qa_execution.module';
 import { OpsConsoleModule } from './modules/ops_console/ops_console.module';
 import { TelemetryModule } from './modules/telemetry/telemetry.module';
 import { webAnalyticsEnvSchema } from './modules/telemetry/web-analytics.env';
+import { pharmacyErpEnvSchema } from './modules/pharmacy_inventory/infrastructure/adapters/pharmacy-erp.env';
 import { TrackingModule } from './modules/tracking/tracking.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { TimeSeriesModule } from './modules/time_series/time_series.module';
@@ -132,6 +133,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
         .concat(admissionsEnvSchema)
         .concat(telemetryEnvSchema)
         .concat(webAnalyticsEnvSchema)
+        .concat(pharmacyErpEnvSchema)
         .concat(verificationBypassEnvSchema)
         .concat(seedBootEnvSchema),
     }),

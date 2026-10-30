@@ -5,11 +5,13 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { DeletionsModule } from './deletions/deletions.module';
 import { EmbeddingsModule } from './embeddings/embeddings.module';
 import { IdentityVerificationModule } from './identity-verification/identity-verification.module';
+import { PharmacyErpModule } from './pharmacy-erp/pharmacy-erp.module';
 
 /**
- * Emulador standalone de los cuatro proveedores externos que
+ * Emulador standalone de los proveedores externos que
  * mantra-core-health-redesa-api no conecta de verdad (mensajería, borrado
- * cross-store, embeddings y verificación de identidad).
+ * cross-store, embeddings, verificación de identidad y el sistema de gestión
+ * de una farmacia externa).
  *
  * Deliberadamente sin nada del backend principal: ni base de datos, ni
  * multi-tenant, ni el esquema de auth interno. Es un doble de prueba con
@@ -24,6 +26,7 @@ import { IdentityVerificationModule } from './identity-verification/identity-ver
     DeletionsModule,
     EmbeddingsModule,
     IdentityVerificationModule,
+    PharmacyErpModule,
   ],
 })
 export class AppModule {}

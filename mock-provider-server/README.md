@@ -1,6 +1,6 @@
 # mock-provider-server
 
-Emulador **standalone** de los cuatro proveedores externos que
+Emulador **standalone** de los proveedores externos que
 `mantra-core-health-redesa-api` no conecta de verdad porque ningún vendor
 concreto vive en ese repo:
 
@@ -10,6 +10,7 @@ concreto vive en ese repo:
 | Backends destino de borrado cross-store | `POST /deletions/execute`, `POST /deletions/verify` | `DeletionExecutionProviderAdapter`/`DeletionVerificationProviderAdapter` en `src/worker/jobs/cross_store_consistency/deletion-pipeline.job.ts` |
 | API de embeddings | `POST /embeddings/compute` | `EmbeddingProviderAdapter` en `src/worker/jobs/vector_rag/embedding-drain.job.ts` |
 | Autoridad de verificación de identidad (registro civil / colegio profesional / registro de sociedades) | `POST /identity-verification/execute`, `POST /identity-verification/verify` | `IdentityVerificationProviderAdapter` en `src/worker/jobs/identity_assurance/dispatch-identity-checks.job.ts` |
+| Sistema de gestión (ERP) de una farmacia externa: catálogo con códigos propios y stock por sucursal | `GET /pharmacy-erp/products`, `GET /pharmacy-erp/stock?siteCode=` | `HttpExternalPharmacyCatalogAdapter` en `src/modules/pharmacy_inventory/infrastructure/adapters/http-external-pharmacy-catalog.adapter.ts` (la sincronización «Sincronizar ahora» del catálogo de la farmacia) |
 
 ### El único proveedor con veredicto diferido
 
@@ -87,6 +88,7 @@ esté arriba.
 | `SIMULATED_LATENCY_MS` | `50` | Latencia añadida a cada respuesta |
 | `IDENTITY_VERIFICATION_DELAY_MS` | `10000` | Cuánto tarda la autoridad en dar el veredicto (mientras tanto, `/verify` responde `PENDING`) |
 | `IDENTITY_VERIFICATION_REJECTION_RATE` | `0` | Probabilidad (0-1) de que la verificación acabe `REJECTED` |
+| `PHARMACY_ERP_FAILURE_RATE` | `0` | Probabilidad (0-1) de que `/pharmacy-erp/*` responda 503 |
 
 ## Cómo lo consume el backend principal
 
@@ -113,6 +115,14 @@ el backend principal) arma un único documento **sintético** por job (texto de
 prueba, no contenido real) sólo para probar que el cableado de punta a punta
 funciona: descubrir el job → pedir el vector aquí → persistirlo. No indexa
 nada real.
+
+La API lee el ERP de farmacia por su propia variable, `PHARMACY_ERP_BASE_URL`
+(con `PHARMACY_ERP_API_KEY` y `PHARMACY_ERP_TIMEOUT_MS`), **vacía por
+defecto**: sin ella, «Sincronizar ahora» responde que la conexión no está
+configurada. Para probarla en local se apunta a este emulador
+(`PHARMACY_ERP_BASE_URL=http://127.0.0.1:4100`, con la misma clave que
+`MOCK_API_KEY` si se definió). El `siteCode` que pide la API es el código de
+su sede (`pharmacy_sites.code`).
 
 ## Tests
 
