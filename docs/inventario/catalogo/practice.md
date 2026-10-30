@@ -18,7 +18,7 @@
 | [practice_accreditations](#practice_accreditations) | Conserva acreditaciones de una práctica sanitaria para documentar reconocimientos o certificaciones institucionales. | 16 | 8 | 3 | COINCIDE |
 | [practice_settings](#practice_settings) | Almacena opciones operativas de una práctica para adaptar su funcionamiento dentro del sistema médico. | 10 | 4 | 3 | COINCIDE |
 | [practice_sites](#practice_sites) | Identifica ubicaciones donde una práctica presta servicios para vincular agenda, atención y recursos con una sede. | 18 | 11 | 85 | DIVERGE |
-| [practices](#practices) | Representa organizaciones o prácticas prestadoras de servicios de salud y su configuración de operación. | 15 | 8 | 176 | COINCIDE |
+| [practices](#practices) | Representa organizaciones o prácticas prestadoras de servicios de salud y su configuración de operación. | 15 | 8 | 179 | COINCIDE |
 | [practitioner_role_assignments](#practitioner_role_assignments) | Asigna roles asistenciales a profesionales dentro de una organización o sede para precisar sus responsabilidades operativas. | 20 | 12 | 96 | COINCIDE |
 | [practitioner_support_assignments](#practitioner_support_assignments) | Vincula personal de apoyo con profesionales o ámbitos de práctica para coordinar tareas de atención y gestión. | 13 | 8 | 1 | COINCIDE |
 
@@ -919,7 +919,7 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: practices`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `Practices` — `src/modules/practice/entities/practices.entity.ts`
-- **Resumen:** 15 columnas · 8 índices · 7 FK salientes · 50 entrantes · 176 operaciones
+- **Resumen:** 15 columnas · 8 índices · 7 FK salientes · 50 entrantes · 179 operaciones
 
 #### Columnas
 
@@ -1060,13 +1060,16 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 | PATCH /accounting/practitioner/liabilities/{id}/automation | LEE | DIRECTA |
 | POST /accounting/practitioner/liabilities/{id}/progress | LEE | DIRECTA |
 | GET /accounting/practitioner/liabilities/{id}/schedule | LEE | DIRECTA |
+| GET /accounting/practitioner/simple/accounts | LEE | DIRECTA |
 | POST /accounting/practitioner/simple/accounts | LEE | DIRECTA |
 | DELETE /accounting/practitioner/simple/accounts/{id} | LEE | DIRECTA |
 | PUT /accounting/practitioner/simple/accounts/{id} | LEE | DIRECTA |
+| GET /accounting/practitioner/simple/records | LEE | DIRECTA |
 | POST /accounting/practitioner/simple/records | LEE | DIRECTA |
 | DELETE /accounting/practitioner/simple/records/{id} | LEE | DIRECTA |
 | PUT /accounting/practitioner/simple/records/{id} | LEE | DIRECTA |
 | GET /accounting/practitioner/simple/summary | LEE | DIRECTA |
+| GET /accounting/practitioner/simple/transactions | LEE | DIRECTA |
 | POST /accounting/practitioner/simple/transactions | LEE | DIRECTA |
 | DELETE /accounting/practitioner/simple/transactions/{id} | LEE | DIRECTA |
 | PUT /accounting/practitioner/simple/transactions/{id} | LEE | DIRECTA |

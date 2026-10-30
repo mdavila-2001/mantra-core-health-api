@@ -5,7 +5,7 @@
 - **Bloque:** Financiero y ERP (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 - **Operaciones:** 38 (38 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 5 · MEDIO 14 · BAJO 19
-- **Tablas distintas que tocan:** 38
+- **Tablas distintas que tocan:** 39
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/billing.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -49,7 +49,7 @@
 | 35 | GET | `/billing/simulated/my-invoices/{invoiceId}` | Una de mis facturas | BAJO | 4 | sesión (sin roles) |
 | 36 | GET | `/billing/simulated/outbox` | Bandeja de correo simulada (sólo administración) | BAJO | 3 | sesión (sin roles) |
 | 37 | GET | `/billing/simulated/status` | Estado fiscal simulado: emisores y credenciales sintéticas | BAJO | 2 | sesión (sin roles) |
-| 38 | GET | `/patient-spending/me` | Mis gastos de salud | BAJO | 10 | PATIENT |
+| 38 | GET | `/patient-spending/me` | Mis gastos de salud | BAJO | 11 | PATIENT |
 
 ---
 
@@ -2176,7 +2176,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.service_catalog` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingServiceCatalogController.update → BillingServiceCatalogService.update | `src/modules/billing/services/billing-service-catalog.service.ts:400` |
+| `billing.service_catalog` | ESCRIBE | ACTUALIZA | POR_TIPO | BillingServiceCatalogController.update → BillingServiceCatalogService.update | `src/modules/billing/services/billing-service-catalog.service.ts:421` |
 | `billing.service_catalog` | LEE | LEE | DIRECTA | BillingServiceCatalogController.update → BillingServiceCatalogService.update → ServiceCatalogRepository.findById | `src/modules/billing/repositories/service-catalog.repository.ts:89` |
 | `practice.practices` | LEE | LEE | DIRECTA | BillingServiceCatalogController.update → BillingServiceCatalogService.update → BillingServiceCatalogService.assertCanEdit → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | BillingServiceCatalogController.update → BillingServiceCatalogService.update → BillingServiceCatalogService.assertCanEdit → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
@@ -3821,7 +3821,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /patient-spending/me` la atiende `PatientSpendingController.listMine` (src/modules/billing/controllers/patient-spending.controller.ts:52). Exige sesión con alguno de los roles PATIENT. Delega en `PatientSpendingService.listMine`. Lee billing.invoice_lines, billing.invoices, diagnostic_units.diagnostic_study_offerings, directory.tenants, insurance.insurance_claim_lines, insurance.insurance_claims, practice.practice_sites, practice.practices y 2 más.
+`GET /patient-spending/me` la atiende `PatientSpendingController.listMine` (src/modules/billing/controllers/patient-spending.controller.ts:52). Exige sesión con alguno de los roles PATIENT. Delega en `PatientSpendingService.listMine`. Lee billing.invoice_lines, billing.invoices, diagnostic_units.diagnostic_study_offerings, directory.tenants, insurance.insurance_claim_lines, insurance.insurance_claims, practice.practice_sites, practice.practices y 3 más.
 
 ### Requerimientos
 
@@ -3838,16 +3838,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.invoice_lines` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:107` |
-| `billing.invoices` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:107` |
-| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:107` |
-| `directory.tenants` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:107` |
-| `insurance.insurance_claim_lines` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:107` |
-| `insurance.insurance_claims` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:107` |
-| `practice.practice_sites` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:107` |
-| `practice.practices` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:107` |
-| `procedures_perioperative.procedure_charge_items` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:107` |
-| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:107` |
+| `billing.invoice_lines` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:108` |
+| `billing.invoices` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:108` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:108` |
+| `directory.tenants` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:108` |
+| `insurance.insurance_claim_lines` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:108` |
+| `insurance.insurance_claims` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:108` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:108` |
+| `practice.practices` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:108` |
+| `procedures_perioperative.procedure_charge_items` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:108` |
+| `scheduling.appointment_payment_states` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:108` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | PatientSpendingController.listMine → PatientSpendingService.listMine → PatientSpendingRepository.findForPatient | `src/modules/billing/repositories/patient-spending.repository.ts:108` |
 
 ### Parámetros
 
