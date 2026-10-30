@@ -19,7 +19,7 @@
         "ruta": "/audio-assets/{assetId}/content",
         "modulo": "audio_assets",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/audio_assets/controllers/audio-assets.controller.ts:44"
+        "fuente": "src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:48"
       },
       {
         "operacion": "AudioAssetsController_resolve",
@@ -27,7 +27,7 @@
         "ruta": "/audio-assets/resolve",
         "modulo": "audio_assets",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/audio_assets/controllers/audio-assets.controller.ts:28"
+        "fuente": "src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:32"
       },
       {
         "operacion": "BillingSimulatedController_issue",
@@ -1171,7 +1171,7 @@
         "ruta": "/telemetry/activity-events",
         "modulo": "telemetry",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/telemetry/controllers/telemetry-events.controller.ts:45"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:45"
       },
       {
         "operacion": "TelemetryEventsController_captureClientContext",
@@ -1179,7 +1179,7 @@
         "ruta": "/telemetry/client-contexts",
         "modulo": "telemetry",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/telemetry/controllers/telemetry-events.controller.ts:62"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:62"
       },
       {
         "operacion": "TelemetryEventsController_recordConversion",
@@ -1187,7 +1187,7 @@
         "ruta": "/telemetry/conversion-events",
         "modulo": "telemetry",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/telemetry/controllers/telemetry-events.controller.ts:97"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:97"
       },
       {
         "operacion": "TelemetryConsentController_acceptDisclosure",
@@ -1195,7 +1195,7 @@
         "ruta": "/telemetry/disclosure-acceptances",
         "modulo": "telemetry",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/telemetry/controllers/telemetry-consent.controller.ts:46"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts:46"
       },
       {
         "operacion": "TelemetryEventsController_closeJourney",
@@ -1203,7 +1203,7 @@
         "ruta": "/telemetry/session-journeys/{id}/close",
         "modulo": "telemetry",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/telemetry/controllers/telemetry-events.controller.ts:113"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:113"
       },
       {
         "operacion": "TelemetryConsentController_grantConsent",
@@ -1211,7 +1211,7 @@
         "ruta": "/telemetry/tracking-consents",
         "modulo": "telemetry",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/telemetry/controllers/telemetry-consent.controller.ts:64"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts:64"
       },
       {
         "operacion": "TelemetryConsentController_withdrawConsent",
@@ -1219,7 +1219,7 @@
         "ruta": "/telemetry/tracking-consents/{id}/withdraw",
         "modulo": "telemetry",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/telemetry/controllers/telemetry-consent.controller.ts:106"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts:106"
       },
       {
         "operacion": "TelemetryEventsController_recordWebVitals",
@@ -1227,7 +1227,7 @@
         "ruta": "/telemetry/web-vitals",
         "modulo": "telemetry",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/telemetry/controllers/telemetry-events.controller.ts:80"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:80"
       },
       {
         "operacion": "TerminologyFhirController_translate",
@@ -1429,7 +1429,7 @@
         "ruta": "/audio-assets/{assetId}/content",
         "modulo": "audio_assets",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/audio_assets/controllers/audio-assets.controller.ts:44"
+        "fuente": "src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:48"
       },
       {
         "operacion": "AudioAssetsController_resolve",
@@ -1437,7 +1437,7 @@
         "ruta": "/audio-assets/resolve",
         "modulo": "audio_assets",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/audio_assets/controllers/audio-assets.controller.ts:28"
+        "fuente": "src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:32"
       },
       {
         "operacion": "AuditController_applyRetention",
@@ -2381,7 +2381,7 @@
         "ruta": "/telemetry/activity-events",
         "modulo": "telemetry",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/telemetry/controllers/telemetry-events.controller.ts:45"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:45"
       },
       {
         "operacion": "TelemetryEventsController_captureClientContext",
@@ -2389,7 +2389,7 @@
         "ruta": "/telemetry/client-contexts",
         "modulo": "telemetry",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/telemetry/controllers/telemetry-events.controller.ts:62"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:62"
       },
       {
         "operacion": "TelemetryEventsController_recordConversion",
@@ -2397,7 +2397,7 @@
         "ruta": "/telemetry/conversion-events",
         "modulo": "telemetry",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/telemetry/controllers/telemetry-events.controller.ts:97"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:97"
       },
       {
         "operacion": "TelemetryConsentController_acceptDisclosure",
@@ -2405,7 +2405,7 @@
         "ruta": "/telemetry/disclosure-acceptances",
         "modulo": "telemetry",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/telemetry/controllers/telemetry-consent.controller.ts:46"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts:46"
       },
       {
         "operacion": "TelemetryEventsController_closeJourney",
@@ -2413,7 +2413,7 @@
         "ruta": "/telemetry/session-journeys/{id}/close",
         "modulo": "telemetry",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/telemetry/controllers/telemetry-events.controller.ts:113"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:113"
       },
       {
         "operacion": "TelemetryConsentController_grantConsent",
@@ -2421,7 +2421,7 @@
         "ruta": "/telemetry/tracking-consents",
         "modulo": "telemetry",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/telemetry/controllers/telemetry-consent.controller.ts:64"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts:64"
       },
       {
         "operacion": "TelemetryConsentController_withdrawConsent",
@@ -2429,7 +2429,7 @@
         "ruta": "/telemetry/tracking-consents/{id}/withdraw",
         "modulo": "telemetry",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/telemetry/controllers/telemetry-consent.controller.ts:106"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts:106"
       },
       {
         "operacion": "TelemetryEventsController_recordWebVitals",
@@ -2437,7 +2437,7 @@
         "ruta": "/telemetry/web-vitals",
         "modulo": "telemetry",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/telemetry/controllers/telemetry-events.controller.ts:80"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:80"
       },
       {
         "operacion": "TerminologyFhirController_translate",
@@ -8785,6 +8785,14 @@
         "fuente": null
       },
       {
+        "operacion": "PharmacySiteAvailabilityController_setSiteAvailability",
+        "metodo": "PUT",
+        "ruta": "/pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability",
+        "modulo": "pharmacy_inventory",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "PharmacyInventoryReadController_getSiteStock",
         "metodo": "GET",
         "ruta": "/pharmacy-inventory/sites/{siteId}/stock",
@@ -11657,7 +11665,7 @@
         "fuente": null
       }
     ],
-    "cuenta": 1131
+    "cuenta": 1132
   },
   {
     "id": "FLU-08",
@@ -11714,6 +11722,14 @@
         "fuente": "src/modules/messaging/controllers/web-push.controller.ts:78"
       },
       {
+        "operacion": "PharmacySiteAvailabilityController_setSiteAvailability",
+        "metodo": "PUT",
+        "ruta": "/pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability",
+        "modulo": "pharmacy_inventory",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:40"
+      },
+      {
         "operacion": "LoyaltyController_requireTenant",
         "metodo": "DESCONOCIDO",
         "ruta": "/",
@@ -11738,7 +11754,7 @@
         "fuente": "src/modules/search_platform/controllers/search-platform.controller.ts:114"
       }
     ],
-    "cuenta": 9
+    "cuenta": 10
   },
   {
     "id": "FLU-09",
@@ -11776,31 +11792,31 @@
         "ruta": "/audio-assets/{assetId}/content",
         "modulo": "audio_assets",
         "detalle": "DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317) | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229)",
-        "fuente": "src/modules/audio_assets/controllers/audio-assets.controller.ts:44"
+        "fuente": "src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:48"
       },
       {
         "operacion": "AudioAssetsController_resolve",
         "metodo": "POST",
         "ruta": "/audio-assets/resolve",
         "modulo": "audio_assets",
-        "detalle": "Error: No se pudo materializar el asset de audio idempotente (src/modules/audio_assets/repositories/audio-assets.repository.ts:118) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/audio_assets/repositories/audio-assets.repository.ts:127) | Error: No se pudo materializar el asset de audio idempotente (src/modules/audio_assets/repositories/audio-assets.repository.ts:118)",
-        "fuente": "src/modules/audio_assets/controllers/audio-assets.controller.ts:28"
+        "detalle": "Error: No se pudo materializar el asset de audio idempotente (src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:118) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:127) | Error: No se pudo materializar el asset de audio idempotente (src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:118)",
+        "fuente": "src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:32"
       },
       {
         "operacion": "AudioAssetsInternalController_generated",
         "metodo": "POST",
         "ruta": "/internal/audio-assets/{assetId}/generated",
         "modulo": "audio_assets",
-        "detalle": "StorageLifecycleDenied: PUBLICATION_PROOF_REQUIRED (src/modules/audio_assets/application/audio-generation.use-case.ts:122) | StorageLifecycleDenied: PUBLICATION_TRANSACTION_REQUIRED (src/modules/audio_assets/repositories/audio-assets.repository.ts:235) | StorageLifecycleDenied: PUBLICATION_TRANSACTION_REQUIRED (src/modules/audio_assets/repositories/audio-assets.repository.ts:235)",
-        "fuente": "src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:108"
+        "detalle": "StorageLifecycleDenied: PUBLICATION_PROOF_REQUIRED (src/modules/audio_assets/application/audio-generation.use-case.ts:126) | StorageLifecycleDenied: PUBLICATION_TRANSACTION_REQUIRED (src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:235) | StorageLifecycleDenied: PUBLICATION_TRANSACTION_REQUIRED (src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:235)",
+        "fuente": "src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:108"
       },
       {
         "operacion": "AudioAssetsInternalController_prepare",
         "metodo": "POST",
         "ruta": "/internal/audio-assets/{assetId}/prepare-generation",
         "modulo": "audio_assets",
-        "detalle": "Error: Payload cifrado de audio inválido (src/modules/audio_assets/infrastructure/audio-value-cipher.service.ts:38)",
-        "fuente": "src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:97"
+        "detalle": "Error: Payload cifrado de audio inválido (src/modules/audio_assets/infrastructure/adapters/audio-value-cipher.service.ts:39)",
+        "fuente": "src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:97"
       },
       {
         "operacion": "AudioAssetsInternalController_garbageCollect",
@@ -11808,15 +11824,15 @@
         "ruta": "/internal/audio-assets/garbage-collect",
         "modulo": "audio_assets",
         "detalle": "StorageLifecycleDenied: DELETE_PERMIT_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:212) | StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/common/storage/local-disk-file-storage.adapter.ts:215) | DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317)",
-        "fuente": "src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:71"
+        "fuente": "src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:71"
       },
       {
         "operacion": "AudioAssetsInternalController_pregenerateAssets",
         "metodo": "POST",
         "ruta": "/internal/audio-assets/pregenerate",
         "modulo": "audio_assets",
-        "detalle": "Error: La plantilla enumerada excede {MAX_ENUMERATED_COMBINATIONS} combinaciones (src/modules/audio_assets/application/pregenerate-audio-assets.use-case.ts:89) | Error: No se pudo materializar el asset de audio idempotente (src/modules/audio_assets/repositories/audio-assets.repository.ts:118) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/audio_assets/repositories/audio-assets.repository.ts:127)",
-        "fuente": "src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:46"
+        "detalle": "Error: La plantilla enumerada excede {MAX_ENUMERATED_COMBINATIONS} combinaciones (src/modules/audio_assets/application/pregenerate-audio-assets.use-case.ts:89) | Error: No se pudo materializar el asset de audio idempotente (src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:118) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:127)",
+        "fuente": "src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:46"
       },
       {
         "operacion": "AudioAssetsInternalController_verify",
@@ -11824,7 +11840,7 @@
         "ruta": "/internal/audio-assets/verify",
         "modulo": "audio_assets",
         "detalle": "DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317) | DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317) | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229)",
-        "fuente": "src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:61"
+        "fuente": "src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:61"
       },
       {
         "operacion": "AuditController_verifyIntegrity",
@@ -12207,40 +12223,40 @@
         "metodo": "POST",
         "ruta": "/admin/catalog/annotations/{id}/review",
         "modulo": "data_catalog",
-        "detalle": "DomainException: {403} (src/modules/data_catalog/services/catalog-governance.service.ts:264) | DomainException: {422} (src/modules/data_catalog/services/catalog-governance.service.ts:270)",
-        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:282"
+        "detalle": "DomainException: {403} (src/modules/data_catalog/application/catalog-governance.service.ts:264) | DomainException: {422} (src/modules/data_catalog/application/catalog-governance.service.ts:270)",
+        "fuente": "src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:282"
       },
       {
         "operacion": "AdminCatalogController_saveColumnAnnotation",
         "metodo": "PUT",
         "ruta": "/admin/catalog/columns/{id}/annotation",
         "modulo": "data_catalog",
-        "detalle": "DomainException: {422} (src/modules/data_catalog/services/catalog-governance.service.ts:120)",
-        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:252"
+        "detalle": "DomainException: {422} (src/modules/data_catalog/application/catalog-governance.service.ts:120)",
+        "fuente": "src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:252"
       },
       {
         "operacion": "AdminCatalogController_saveAnnotation",
         "metodo": "PUT",
         "ruta": "/admin/catalog/objects/{id}/annotation",
         "modulo": "data_catalog",
-        "detalle": "DomainException: {422} (src/modules/data_catalog/services/catalog-governance.service.ts:120)",
-        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:224"
+        "detalle": "DomainException: {422} (src/modules/data_catalog/application/catalog-governance.service.ts:120)",
+        "fuente": "src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:224"
       },
       {
         "operacion": "AdminCatalogController_requestScan",
         "metodo": "POST",
         "ruta": "/admin/catalog/scans",
         "modulo": "data_catalog",
-        "detalle": "ScanFenced (src/modules/data_catalog/services/catalog-scan.service.ts:234) | ScanFenced (src/modules/data_catalog/services/catalog-scan.service.ts:234)",
-        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:375"
+        "detalle": "ScanFenced (src/modules/data_catalog/application/catalog-scan.service.ts:234) | ScanFenced (src/modules/data_catalog/application/catalog-scan.service.ts:234)",
+        "fuente": "src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:375"
       },
       {
         "operacion": "InternalCatalogScansController_runNext",
         "metodo": "POST",
         "ruta": "/internal/catalog/scans/run-next",
         "modulo": "data_catalog",
-        "detalle": "ScanFenced (src/modules/data_catalog/services/catalog-scan.service.ts:234) | ScanFenced (src/modules/data_catalog/services/catalog-scan.service.ts:234)",
-        "fuente": "src/modules/data_catalog/controllers/internal-catalog.controller.ts:30"
+        "detalle": "ScanFenced (src/modules/data_catalog/application/catalog-scan.service.ts:234) | ScanFenced (src/modules/data_catalog/application/catalog-scan.service.ts:234)",
+        "fuente": "src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts:30"
       },
       {
         "operacion": "DelegatedAccessAuthzController_evaluate",
@@ -12483,6 +12499,14 @@
         "fuente": "src/modules/ops_console/presentation/controllers/ops-console.controller.ts:102"
       },
       {
+        "operacion": "PharmacySiteAvailabilityController_setSiteAvailability",
+        "metodo": "PUT",
+        "ruta": "/pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability",
+        "modulo": "pharmacy_inventory",
+        "detalle": "DomainException: {HttpStatus.BAD_REQUEST} (src/modules/pharmacy_inventory/application/site-availability/set-site-product-availability.use-case.ts:76)",
+        "fuente": "src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:40"
+      },
+      {
         "operacion": "PeriopController_addDiagnoses",
         "metodo": "POST",
         "ruta": "/procedure-cases/{id}/diagnoses",
@@ -12520,7 +12544,23 @@
         "ruta": "/scheduling/bookings/{id}/delay",
         "modulo": "scheduling",
         "detalle": "Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161)",
-        "fuente": "src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:545"
+        "fuente": "src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:546"
+      },
+      {
+        "operacion": "SchedulingBookingsController_confirmPaymentReceipt",
+        "metodo": "POST",
+        "ruta": "/scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm",
+        "modulo": "scheduling",
+        "detalle": "Error: La factura {data.invoiceId} de la cita {data.bookingId} no existe (src/modules/scheduling/infrastructure/adapters/billing-booking.adapter.ts:133) | Error: La factura {data.invoiceId} de la cita {data.bookingId} no existe (src/modules/scheduling/infrastructure/adapters/billing-booking.adapter.ts:133)",
+        "fuente": "src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:385"
+      },
+      {
+        "operacion": "SchedulingBookingsController_setPaymentState",
+        "metodo": "PUT",
+        "ruta": "/scheduling/bookings/{id}/payment-state",
+        "modulo": "scheduling",
+        "detalle": "Error: La factura {data.invoiceId} de la cita {data.bookingId} no existe (src/modules/scheduling/infrastructure/adapters/billing-booking.adapter.ts:133)",
+        "fuente": "src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:267"
       },
       {
         "operacion": "SchedulingBookingsController_reschedule",
@@ -12528,7 +12568,7 @@
         "ruta": "/scheduling/bookings/{id}/reschedule",
         "modulo": "scheduling",
         "detalle": "Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161)",
-        "fuente": "src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:479"
+        "fuente": "src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:480"
       },
       {
         "operacion": "SchedulingController_delayResource",
@@ -12575,56 +12615,56 @@
         "metodo": "GET",
         "ruta": "/admin/analytics/funnels/{funnelId}/report",
         "modulo": "telemetry",
-        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/services/telemetry-analytics.service.ts:105)",
-        "fuente": "src/modules/telemetry/controllers/telemetry-analytics.controller.ts:156"
+        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/application/services/telemetry-analytics.service.ts:105)",
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts:156"
       },
       {
         "operacion": "TelemetryAnalyticsController_overview",
         "metodo": "GET",
         "ruta": "/admin/analytics/overview",
         "modulo": "telemetry",
-        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/services/telemetry-analytics.service.ts:105)",
-        "fuente": "src/modules/telemetry/controllers/telemetry-analytics.controller.ts:121"
+        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/application/services/telemetry-analytics.service.ts:105)",
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts:121"
       },
       {
         "operacion": "TelemetryAnalyticsController_pipelineHealth",
         "metodo": "GET",
         "ruta": "/admin/analytics/pipeline-health",
         "modulo": "telemetry",
-        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/services/telemetry-analytics.service.ts:105)",
-        "fuente": "src/modules/telemetry/controllers/telemetry-analytics.controller.ts:169"
+        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/application/services/telemetry-analytics.service.ts:105)",
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts:169"
       },
       {
         "operacion": "TelemetryAnalyticsController_listSessions",
         "metodo": "GET",
         "ruta": "/admin/analytics/sessions",
         "modulo": "telemetry",
-        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/services/telemetry-analytics.service.ts:105)",
-        "fuente": "src/modules/telemetry/controllers/telemetry-analytics.controller.ts:179"
+        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/application/services/telemetry-analytics.service.ts:105)",
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts:179"
       },
       {
         "operacion": "TelemetryAnalyticsController_timeseries",
         "metodo": "GET",
         "ruta": "/admin/analytics/timeseries",
         "modulo": "telemetry",
-        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/services/telemetry-analytics.service.ts:105)",
-        "fuente": "src/modules/telemetry/controllers/telemetry-analytics.controller.ts:130"
+        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/application/services/telemetry-analytics.service.ts:105)",
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts:130"
       },
       {
         "operacion": "TelemetryAnalyticsController_webVitals",
         "metodo": "GET",
         "ruta": "/admin/analytics/web-vitals",
         "modulo": "telemetry",
-        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/services/telemetry-analytics.service.ts:105)",
-        "fuente": "src/modules/telemetry/controllers/telemetry-analytics.controller.ts:139"
+        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/application/services/telemetry-analytics.service.ts:105)",
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts:139"
       },
       {
         "operacion": "TelemetryEventsController_captureActivityEvents",
         "metodo": "POST",
         "ruta": "/telemetry/activity-events",
         "modulo": "telemetry",
-        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/services/telemetry-events.service.ts:682)",
-        "fuente": "src/modules/telemetry/controllers/telemetry-events.controller.ts:45"
+        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/application/services/telemetry-events.service.ts:682)",
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:45"
       },
       {
         "operacion": "TerminologyImportTemplateController_descargarPlantilla",
@@ -12659,6 +12699,6 @@
         "fuente": "src/modules/workflow/controllers/workflow-transitions.controller.ts:73"
       }
     ],
-    "cuenta": 113
+    "cuenta": 116
   }
 ]

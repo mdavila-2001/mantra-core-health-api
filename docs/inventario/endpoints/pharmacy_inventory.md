@@ -3,8 +3,8 @@
 # Endpoints del módulo `pharmacy_inventory`
 
 - **Bloque:** Farmacia (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
-- **Operaciones:** 30 (30 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 2 · MEDIO 26 · BAJO 2
+- **Operaciones:** 31 (30 en el contrato, 1 sólo en el código)
+- **Riesgo:** ALTO 2 · MEDIO 27 · BAJO 2
 - **Tablas distintas que tocan:** 63
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/pharmacy-inventory.md` (generado aparte por `yarn docs:endpoints:generate`)
 
@@ -15,33 +15,34 @@
 | 1 | POST | `/internal/inventory-sync-batches` | Ingerir un lote de sincronización ERP | MEDIO | 7 | SECURITY_ADMIN |
 | 2 | POST | `/internal/inventory-sync/{batchId}/reconcile` | Conciliar lote de sincronización externa (UC-25-12) | MEDIO | 6 | SECURITY_ADMIN |
 | 3 | POST | `/internal/reservations/expire` | Liberar reservas y pedidos vencidos (UC-25-05) | MEDIO | 24 | SYSTEM, SECURITY_ADMIN |
-| 4 | GET | `/pharmacy-inventory/availability` | Consultar qué sedes pueden surtir un conjunto de productos | BAJO | 10 | sesión (sin roles) |
-| 5 | GET | `/pharmacy-inventory/sites/{siteId}/stock` | Consultar el stock disponible de una sede | BAJO | 6 | sesión (sin roles) |
-| 6 | POST | `/pharmacy/{pharmacyId}/dispensations` | Dispensar una prescripción a un paciente (UC-25-03) | MEDIO | 19 | SECURITY_ADMIN |
-| 7 | POST | `/pharmacy/{pharmacyId}/goods-receipts` | Recepcionar mercancía por lote (UC-25-02) | MEDIO | 19 | SECURITY_ADMIN |
-| 8 | POST | `/pharmacy/{pharmacyId}/purchase-orders` | Emitir una orden de compra a proveedor (UC-25-01) | MEDIO | 8 | SECURITY_ADMIN |
-| 9 | POST | `/pharmacy/{pharmacyId}/reservations` | Reservar stock para una prescripción (UC-25-04) | MEDIO | 13 | SECURITY_ADMIN |
-| 10 | POST | `/pharmacy/{pharmacyId}/suppliers` | Registrar un proveedor de farmacia | MEDIO | 2 | SECURITY_ADMIN |
-| 11 | POST | `/pharmacy/{pharmacyId}/transfers` | Transferir stock entre ubicaciones (UC-25-10) | MEDIO | 10 | SECURITY_ADMIN |
-| 12 | POST | `/pharmacy/{siteId}/count-sessions` | Iniciar y congelar una sesión de conteo (UC-25-06) | MEDIO | 9 | SECURITY_ADMIN |
-| 13 | POST | `/pharmacy/{siteId}/inventory-locations` | Crear una ubicación de inventario | MEDIO | 4 | SECURITY_ADMIN |
-| 14 | POST | `/pharmacy/count-sessions/{id}/approve` | Aprobar conteo y ajustar ledger por varianza (UC-25-07) | MEDIO | 13 | SECURITY_ADMIN |
-| 15 | POST | `/pharmacy/dispensations/{id}/reverse` | Reversar una dispensación (UC-25-11) | MEDIO | 10 | SECURITY_ADMIN |
-| 16 | GET | `/pharmacy/orders` | Bandeja de pedidos de las farmacias del tenant (FAR-E2) | MEDIO | 34 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 17 | POST | `/pharmacy/orders` | Crear un pedido de farmacia (FAR-E1) | MEDIO | 27 | PATIENT |
-| 18 | GET | `/pharmacy/orders/{id}` | Consultar un pedido de farmacia (FAR-E1) | ALTO | 49 | sesión (sin roles) |
-| 19 | POST | `/pharmacy/orders/{id}/accept-substitutions` | Aceptar los genéricos propuestos (paciente) | MEDIO | 26 | PATIENT |
-| 20 | POST | `/pharmacy/orders/{id}/cancel` | Cancelar un pedido de farmacia (FAR-E1) | MEDIO | 23 | PATIENT |
-| 21 | POST | `/pharmacy/orders/{id}/confirm` | Confirmar el pedido (FAR-E2) | MEDIO | 37 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 22 | POST | `/pharmacy/orders/{id}/conversation` | Abrir el chat del pedido con la farmacia | ALTO | 11 | sesión (sin roles) |
-| 23 | POST | `/pharmacy/orders/{id}/dispense` | Dispensar el pedido en el mostrador (FAR-E3) | MEDIO | 37 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 24 | POST | `/pharmacy/orders/{id}/prefer-original` | Preferir los productos originales (paciente) | MEDIO | 19 | PATIENT |
-| 25 | POST | `/pharmacy/orders/{id}/ready` | Marcar el pedido listo para retiro (FAR-E2/E3) | MEDIO | 29 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 26 | POST | `/pharmacy/orders/{id}/reject` | Rechazar el pedido (FAR-E2) | MEDIO | 34 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 27 | POST | `/pharmacy/orders/{id}/review` | Abrir revisión del pedido (FAR-E2) | MEDIO | 29 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 28 | GET | `/pharmacy/orders/me` | Mis pedidos de farmacia, más nuevos primero (FAR-E1) | MEDIO | 48 | PATIENT |
-| 29 | POST | `/pharmacy/recall-holds` | Aplicar retiro/recall de lote (UC-25-08) | MEDIO | 11 | SECURITY_ADMIN |
-| 30 | POST | `/pharmacy/recall-holds/{id}/release` | Liberar recall y reactivar lote (UC-25-09) | MEDIO | 11 | SECURITY_ADMIN |
+| 4 | PUT | `/pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability` | «Lo tengo / No lo tengo» de un producto en una sede. | MEDIO | 8 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 5 | GET | `/pharmacy-inventory/availability` | Consultar qué sedes pueden surtir un conjunto de productos | BAJO | 10 | sesión (sin roles) |
+| 6 | GET | `/pharmacy-inventory/sites/{siteId}/stock` | Consultar el stock disponible de una sede | BAJO | 6 | sesión (sin roles) |
+| 7 | POST | `/pharmacy/{pharmacyId}/dispensations` | Dispensar una prescripción a un paciente (UC-25-03) | MEDIO | 19 | SECURITY_ADMIN |
+| 8 | POST | `/pharmacy/{pharmacyId}/goods-receipts` | Recepcionar mercancía por lote (UC-25-02) | MEDIO | 19 | SECURITY_ADMIN |
+| 9 | POST | `/pharmacy/{pharmacyId}/purchase-orders` | Emitir una orden de compra a proveedor (UC-25-01) | MEDIO | 8 | SECURITY_ADMIN |
+| 10 | POST | `/pharmacy/{pharmacyId}/reservations` | Reservar stock para una prescripción (UC-25-04) | MEDIO | 13 | SECURITY_ADMIN |
+| 11 | POST | `/pharmacy/{pharmacyId}/suppliers` | Registrar un proveedor de farmacia | MEDIO | 2 | SECURITY_ADMIN |
+| 12 | POST | `/pharmacy/{pharmacyId}/transfers` | Transferir stock entre ubicaciones (UC-25-10) | MEDIO | 10 | SECURITY_ADMIN |
+| 13 | POST | `/pharmacy/{siteId}/count-sessions` | Iniciar y congelar una sesión de conteo (UC-25-06) | MEDIO | 9 | SECURITY_ADMIN |
+| 14 | POST | `/pharmacy/{siteId}/inventory-locations` | Crear una ubicación de inventario | MEDIO | 4 | SECURITY_ADMIN |
+| 15 | POST | `/pharmacy/count-sessions/{id}/approve` | Aprobar conteo y ajustar ledger por varianza (UC-25-07) | MEDIO | 13 | SECURITY_ADMIN |
+| 16 | POST | `/pharmacy/dispensations/{id}/reverse` | Reversar una dispensación (UC-25-11) | MEDIO | 10 | SECURITY_ADMIN |
+| 17 | GET | `/pharmacy/orders` | Bandeja de pedidos de las farmacias del tenant (FAR-E2) | MEDIO | 34 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 18 | POST | `/pharmacy/orders` | Crear un pedido de farmacia (FAR-E1) | MEDIO | 27 | PATIENT |
+| 19 | GET | `/pharmacy/orders/{id}` | Consultar un pedido de farmacia (FAR-E1) | ALTO | 49 | sesión (sin roles) |
+| 20 | POST | `/pharmacy/orders/{id}/accept-substitutions` | Aceptar los genéricos propuestos (paciente) | MEDIO | 26 | PATIENT |
+| 21 | POST | `/pharmacy/orders/{id}/cancel` | Cancelar un pedido de farmacia (FAR-E1) | MEDIO | 23 | PATIENT |
+| 22 | POST | `/pharmacy/orders/{id}/confirm` | Confirmar el pedido (FAR-E2) | MEDIO | 37 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 23 | POST | `/pharmacy/orders/{id}/conversation` | Abrir el chat del pedido con la farmacia | ALTO | 11 | sesión (sin roles) |
+| 24 | POST | `/pharmacy/orders/{id}/dispense` | Dispensar el pedido en el mostrador (FAR-E3) | MEDIO | 37 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 25 | POST | `/pharmacy/orders/{id}/prefer-original` | Preferir los productos originales (paciente) | MEDIO | 19 | PATIENT |
+| 26 | POST | `/pharmacy/orders/{id}/ready` | Marcar el pedido listo para retiro (FAR-E2/E3) | MEDIO | 29 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 27 | POST | `/pharmacy/orders/{id}/reject` | Rechazar el pedido (FAR-E2) | MEDIO | 34 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 28 | POST | `/pharmacy/orders/{id}/review` | Abrir revisión del pedido (FAR-E2) | MEDIO | 29 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 29 | GET | `/pharmacy/orders/me` | Mis pedidos de farmacia, más nuevos primero (FAR-E1) | MEDIO | 48 | PATIENT |
+| 30 | POST | `/pharmacy/recall-holds` | Aplicar retiro/recall de lote (UC-25-08) | MEDIO | 11 | SECURITY_ADMIN |
+| 31 | POST | `/pharmacy/recall-holds/{id}/release` | Liberar recall y reactivar lote (UC-25-09) | MEDIO | 11 | SECURITY_ADMIN |
 
 ---
 
@@ -297,7 +298,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryInternalController.expireReservations → InventoryReservationsService.expire → ExpireInventoryReservationsUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/expire-inventory-reservations.use-case.ts:33` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.expireReservations → InventoryReservationsService.expire → ExpireInventoryReservationsUseCase.execute → ReservationsRepository.findExpired | `src/modules/pharmacy_inventory/infrastructure/repositories/reservations.repository.ts:125` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryInternalController.expireReservations → InventoryReservationsService.expire → ExpireInventoryReservationsUseCase.execute → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:72` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.expireReservations → InventoryReservationsService.expire → ExpireInventoryReservationsUseCase.execute → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.expireReservations → InventoryReservationsService.expire → ExpireInventoryReservationsUseCase.execute → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.expireReservations → PharmacyOrdersService.expireDue → PharmacyOrdersUseCases.expireDue → PharmacyOrdersRepository.findPharmaciesByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:265` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.expireReservations → PharmacyOrdersService.expireDue → PharmacyOrdersUseCases.expireDue → PharmacyOrderNotificationsService.expiredToPrescriber → NotifyPharmacyOrderUseCase.expiredToPrescriber → NotifyPharmacyOrderUseCase.emitToPerson → ProfilesPersonAccountLinksAdapter.findActiveByPerson → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
 
@@ -339,7 +340,118 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 4. GET /pharmacy-inventory/availability
+## 4. PUT /pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** «Lo tengo / No lo tengo» de un producto en una sede.
+- **Bloque:** Farmacia
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PharmacySiteAvailabilityController.setSiteAvailability` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:40`
+
+### Qué es y para qué sirve (negocio)
+
+«Lo tengo / No lo tengo» de un producto en una sede. Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+
+### Cómo se atiende (sistema)
+
+`PUT /pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability` la atiende `PharmacySiteAvailabilityController.setSiteAvailability` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:40). Exige sesión con alguno de los roles SECURITY_ADMIN, PHARMACY_STAFF. Valida el cuerpo como `SetSiteAvailabilityDto` (2 campos, 1 obligatorio). Delega en `SetSiteProductAvailabilityUseCase.execute`. Crea filas en pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions. Lee pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_products, pharmacy.pharmacy_sites.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:40` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, siteId, productId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:40` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `pharmacy_inventory.inventory_ledger_entries` | ESCRIBE | CREA | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → SiteStockWriter.write → SiteStockWriter.append → LedgerRepository.append | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:142` |
+| `pharmacy_inventory.inventory_locations` | ESCRIBE | CREA | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → SiteStockWriter.write → SiteStockWriter.defaultLocationId → LocationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:84` |
+| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → SiteStockWriter.write → SiteStockWriter.defaultLocationId → LocationsRepository.findFirstActiveInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:69` |
+| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | CREA | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → SiteStockWriter.write → StockPositionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:124` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → SiteStockWriter.write → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:47` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `pharmacyId` | path | Sí | `string` | — |
+| `siteId` | path | Sí | `string` | — |
+| `productId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `SetSiteAvailabilityDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `available` | `boolean` | Sí | — | `@IsBoolean()` | «Lo tengo» en esta sucursal | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:14` |
+| `quantity` | `number` | No | mínimo 0; máximo 1_000_000 | `@IsOptional()` `@IsInt()` `@Min(0)` `@Max(1_000_000)` | Unidades para vender en la sede. Sin ella, «Lo tengo» toma el conteo del catálogo, o 1 si el producto no tiene conteo o está en 0. | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:25` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "available": true
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "available": true,
+  "quantity": 1
+}
+```
+
+</details>
+
+### Respuesta — `Promise<SiteAvailabilityResponseDto>` · DTO `SiteAvailabilityResponseDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `siteId` | `string` | Sí | formato uuid | — | Sede de la farmacia. | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:34` |
+| `productId` | `string` | Sí | formato uuid | — | Producto de la farmacia. | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:40` |
+| `available` | `boolean` | Sí | — | — | Si hay unidades para vender en la sede. | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:46` |
+| `quantity` | `number` | Sí | — | — | Unidades para vender en la sede (sin lo reservado ni lo retenido). | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:52` |
+| `stockUpdatedAt` | `string` | Sí | formato date-time | — | Última actualización de la existencia de la sede, en ISO 8601. | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:58` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.BAD_REQUEST} |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.spec.ts:64` |
+
+### Flujos
+
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacySiteAvailabilityController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 5. GET /pharmacy-inventory/availability
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar qué sedes pueden surtir un conjunto de productos
@@ -464,7 +576,7 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 ---
 
-## 5. GET /pharmacy-inventory/sites/{siteId}/stock
+## 6. GET /pharmacy-inventory/sites/{siteId}/stock
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar el stock disponible de una sede
@@ -562,7 +674,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 6. POST /pharmacy/{pharmacyId}/dispensations
+## 7. POST /pharmacy/{pharmacyId}/dispensations
 
 - **Origen:** CONTRATO
 - **Nombre:** Dispensar una prescripción a un paciente (UC-25-03)
@@ -607,7 +719,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute | `src/modules/pharmacy_inventory/application/medication-dispensations/dispense-medication.use-case.ts:224` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → ReservationsRepository.findById | `src/modules/pharmacy_inventory/infrastructure/repositories/reservations.repository.ts:116` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute | `src/modules/pharmacy_inventory/application/medication-dispensations/dispense-medication.use-case.ts:197` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy_inventory.medication_dispensation_lines` | ESCRIBE | CREA | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → DispensationsRepository.createLine | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:177` |
 | `pharmacy_inventory.medication_dispensation_lines` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → DispensationsRepository.findLines | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:131` |
 | `pharmacy_inventory.medication_dispensations` | ESCRIBE | CREA | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → DispensationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:147` |
@@ -712,7 +824,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 7. POST /pharmacy/{pharmacyId}/goods-receipts
+## 8. POST /pharmacy/{pharmacyId}/goods-receipts
 
 - **Origen:** CONTRATO
 - **Nombre:** Recepcionar mercancía por lote (UC-25-02)
@@ -753,8 +865,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_lots` | ESCRIBE | CREA | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → LotsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/lots.repository.ts:69` |
 | `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → LotsRepository.findByProductAndNumber | `src/modules/pharmacy_inventory/infrastructure/repositories/lots.repository.ts:58` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods | `src/modules/pharmacy_inventory/application/pharmacy-procurement/pharmacy-procurement.use-cases.ts:373` |
-| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | CREA | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → StockPositionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:112` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | CREA | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → StockPositionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:124` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy_inventory.pharmacy_goods_receipt_lines` | ESCRIBE | CREA | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → GoodsReceiptsRepository.createLine | `src/modules/pharmacy_inventory/infrastructure/repositories/goods-receipts.repository.ts:166` |
 | `pharmacy_inventory.pharmacy_goods_receipt_lines` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → GoodsReceiptsRepository.findLines | `src/modules/pharmacy_inventory/infrastructure/repositories/goods-receipts.repository.ts:123` |
 | `pharmacy_inventory.pharmacy_goods_receipts` | ESCRIBE | CREA | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → GoodsReceiptsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/goods-receipts.repository.ts:139` |
@@ -868,7 +980,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 8. POST /pharmacy/{pharmacyId}/purchase-orders
+## 9. POST /pharmacy/{pharmacyId}/purchase-orders
 
 - **Origen:** CONTRATO
 - **Nombre:** Emitir una orden de compra a proveedor (UC-25-01)
@@ -997,7 +1109,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 9. POST /pharmacy/{pharmacyId}/reservations
+## 10. POST /pharmacy/{pharmacyId}/reservations
 
 - **Origen:** CONTRATO
 - **Nombre:** Reservar stock para una prescripción (UC-25-04)
@@ -1040,7 +1152,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_reservation_lines` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → ReservationsRepository.createLine | `src/modules/pharmacy_inventory/infrastructure/repositories/reservations.repository.ts:188` |
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → ReservationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/reservations.repository.ts:158` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requirePatientContext → InventoryScopeRepository.patientServedByPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:133` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireStockKey → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
 | `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:47` |
@@ -1136,7 +1248,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 10. POST /pharmacy/{pharmacyId}/suppliers
+## 11. POST /pharmacy/{pharmacyId}/suppliers
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar un proveedor de farmacia
@@ -1236,7 +1348,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 11. POST /pharmacy/{pharmacyId}/transfers
+## 12. POST /pharmacy/{pharmacyId}/transfers
 
 - **Origen:** CONTRATO
 - **Nombre:** Transferir stock entre ubicaciones (UC-25-10)
@@ -1276,8 +1388,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireLocationInPharmacy → InventoryScopeRepository.findLocation | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:64` |
 | `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireLot → InventoryScopeRepository.findLot | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:86` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-transfers/transfer-inventory.use-case.ts:125` |
-| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → StockPositionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:112` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → StockPositionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:124` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
 | `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:47` |
@@ -1357,7 +1469,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 12. POST /pharmacy/{siteId}/count-sessions
+## 13. POST /pharmacy/{siteId}/count-sessions
 
 - **Origen:** CONTRATO
 - **Nombre:** Iniciar y congelar una sesión de conteo (UC-25-06)
@@ -1397,7 +1509,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_count_sessions` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → CountSessionsRepository.countOpenAtLocation | `src/modules/pharmacy_inventory/infrastructure/repositories/count-sessions.repository.ts:97` |
 | `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireLocation → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:56` |
 | `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireLot → InventoryScopeRepository.findLot | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:86` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → StockPositionsRepository.findByKey | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:65` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → StockPositionsRepository.findByKey | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:77` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
 | `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → InventoryScopeRepository.findSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:38` |
@@ -1479,7 +1591,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 13. POST /pharmacy/{siteId}/inventory-locations
+## 14. POST /pharmacy/{siteId}/inventory-locations
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear una ubicación de inventario
@@ -1514,7 +1626,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `pharmacy_inventory.inventory_locations` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.createLocation → InventoryLocationsService.create → CreateInventoryLocationUseCase.execute → LocationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:68` |
+| `pharmacy_inventory.inventory_locations` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.createLocation → InventoryLocationsService.create → CreateInventoryLocationUseCase.execute → LocationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:84` |
 | `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryController.createLocation → InventoryLocationsService.create → CreateInventoryLocationUseCase.execute → PharmacyInventoryScopePolicy.requireLocation → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:56` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.createLocation → InventoryLocationsService.create → CreateInventoryLocationUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
 | `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.createLocation → InventoryLocationsService.create → CreateInventoryLocationUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → InventoryScopeRepository.findSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:38` |
@@ -1584,7 +1696,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 14. POST /pharmacy/count-sessions/{id}/approve
+## 15. POST /pharmacy/count-sessions/{id}/approve
 
 - **Origen:** CONTRATO
 - **Nombre:** Aprobar conteo y ajustar ledger por varianza (UC-25-07)
@@ -1628,7 +1740,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.assertStoredStockKey → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:56` |
 | `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.assertStoredStockKey → InventoryScopeRepository.findLot | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:86` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-count/approve-inventory-count.use-case.ts:122` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.assertStoredStockKey → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
 | `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → InventoryScopeRepository.findSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:38` |
@@ -1707,7 +1819,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 15. POST /pharmacy/dispensations/{id}/reverse
+## 16. POST /pharmacy/dispensations/{id}/reverse
 
 - **Origen:** CONTRATO
 - **Nombre:** Reversar una dispensación (UC-25-11)
@@ -1746,7 +1858,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_ledger_entries` | LEE | LEE | POR_SQL | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → LedgerRepository.nextSequence | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:113` |
 | `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → PharmacyInventoryScopePolicy.requireLocation → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:56` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute | `src/modules/pharmacy_inventory/application/medication-dispensations/reverse-medication-dispensation.use-case.ts:115` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy_inventory.medication_dispensation_lines` | LEE | LEE | DIRECTA | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → DispensationsRepository.findLines | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:131` |
 | `pharmacy_inventory.medication_dispensations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute | `src/modules/pharmacy_inventory/application/medication-dispensations/reverse-medication-dispensation.use-case.ts:86` |
 | `pharmacy_inventory.medication_dispensations` | LEE | LEE | DIRECTA | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → DispensationsRepository.findById | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:108` |
@@ -1812,7 +1924,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 16. GET /pharmacy/orders
+## 17. GET /pharmacy/orders
 
 - **Origen:** CONTRATO
 - **Nombre:** Bandeja de pedidos de las farmacias del tenant (FAR-E2)
@@ -1868,7 +1980,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersUseCases.expireDue | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1696` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersRepository.findOrdersForPharmacies | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:99` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:72` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersUseCases.composeOrders → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersRepository.findPharmaciesByTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:116` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findProductsByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:256` |
@@ -2022,7 +2134,7 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 ---
 
-## 17. POST /pharmacy/orders
+## 18. POST /pharmacy/orders
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear un pedido de farmacia (FAR-E1)
@@ -2256,7 +2368,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 18. GET /pharmacy/orders/{id}
+## 19. GET /pharmacy/orders/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar un pedido de farmacia (FAR-E1)
@@ -2327,7 +2439,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersUseCases.expireDue | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1696` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersRepository.findOrderById | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:45` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:72` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersUseCases.composeOrders → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersRepository.findPharmaciesByIdsInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:235` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findProductsByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:256` |
@@ -2476,7 +2588,7 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 ---
 
-## 19. POST /pharmacy/orders/{id}/accept-substitutions
+## 20. POST /pharmacy/orders/{id}/accept-substitutions
 
 - **Origen:** CONTRATO
 - **Nombre:** Aceptar los genéricos propuestos (paciente)
@@ -2672,7 +2784,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 20. POST /pharmacy/orders/{id}/cancel
+## 21. POST /pharmacy/orders/{id}/cancel
 
 - **Origen:** CONTRATO
 - **Nombre:** Cancelar un pedido de farmacia (FAR-E1)
@@ -2719,7 +2831,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:740` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → PharmacyOrdersRepository.findOrderByIdForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:61` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:72` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → PharmacyOrdersUseCases.readOwnOrder → PharmacyOrdersUseCases.composeOrders → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → PharmacyOrdersRepository.findPharmaciesByIdsInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:235` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → PharmacyOrdersUseCases.readOwnOrder → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findProductsByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:256` |
@@ -2866,7 +2978,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 21. POST /pharmacy/orders/{id}/confirm
+## 22. POST /pharmacy/orders/{id}/confirm
 
 - **Origen:** CONTRATO
 - **Nombre:** Confirmar el pedido (FAR-E2)
@@ -2925,7 +3037,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:972` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.loadTenantOrderForUpdate → PharmacyOrdersRepository.findOrderByIdForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:61` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:72` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | ESCRIBE | CREA | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.persistProposals → PharmacyOrderSubstitutionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:74` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.readOrderForTenant → PharmacyOrdersUseCases.composeOrders → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.loadTenantOrderForUpdate → PharmacyOrdersRepository.findPharmaciesByIdsInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:235` |
@@ -3102,7 +3214,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 22. POST /pharmacy/orders/{id}/conversation
+## 23. POST /pharmacy/orders/{id}/conversation
 
 - **Origen:** CONTRATO
 - **Nombre:** Abrir el chat del pedido con la farmacia
@@ -3187,7 +3299,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 23. POST /pharmacy/orders/{id}/dispense
+## 24. POST /pharmacy/orders/{id}/dispense
 
 - **Origen:** CONTRATO
 - **Nombre:** Dispensar el pedido en el mostrador (FAR-E3)
@@ -3246,7 +3358,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1553` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense → PharmacyOrdersUseCases.loadTenantOrderForUpdate → PharmacyOrdersRepository.findOrderByIdForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:61` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1527` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy_inventory.medication_dispensation_lines` | ESCRIBE | CREA | DIRECTA | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense → DispensationsRepository.createLine | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:177` |
 | `pharmacy_inventory.medication_dispensations` | ESCRIBE | CREA | DIRECTA | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense → DispensationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:147` |
 | `pharmacy_inventory.medication_dispensations` | LEE | LEE | DIRECTA | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense → DispensationsRepository.findByIdempotencyKey | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:117` |
@@ -3423,7 +3535,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 24. POST /pharmacy/orders/{id}/prefer-original
+## 25. POST /pharmacy/orders/{id}/prefer-original
 
 - **Origen:** CONTRATO
 - **Nombre:** Preferir los productos originales (paciente)
@@ -3612,7 +3724,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 25. POST /pharmacy/orders/{id}/ready
+## 26. POST /pharmacy/orders/{id}/ready
 
 - **Origen:** CONTRATO
 - **Nombre:** Marcar el pedido listo para retiro (FAR-E2/E3)
@@ -3812,7 +3924,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 26. POST /pharmacy/orders/{id}/reject
+## 27. POST /pharmacy/orders/{id}/reject
 
 - **Origen:** CONTRATO
 - **Nombre:** Rechazar el pedido (FAR-E2)
@@ -3871,7 +3983,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1233` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → PharmacyOrdersUseCases.loadTenantOrderForUpdate → PharmacyOrdersRepository.findOrderByIdForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:61` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:72` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → PharmacyOrdersUseCases.readOrderForTenant → PharmacyOrdersUseCases.composeOrders → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → PharmacyOrdersUseCases.loadTenantOrderForUpdate → PharmacyOrdersRepository.findPharmaciesByIdsInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:235` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → PharmacyOrdersUseCases.readOrderForTenant → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findProductsByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:256` |
@@ -4038,7 +4150,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 27. POST /pharmacy/orders/{id}/review
+## 28. POST /pharmacy/orders/{id}/review
 
 - **Origen:** CONTRATO
 - **Nombre:** Abrir revisión del pedido (FAR-E2)
@@ -4237,7 +4349,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 28. GET /pharmacy/orders/me
+## 29. GET /pharmacy/orders/me
 
 - **Origen:** CONTRATO
 - **Nombre:** Mis pedidos de farmacia, más nuevos primero (FAR-E1)
@@ -4306,7 +4418,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.expireDue | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1696` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersRepository.findOrdersByPatient | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:165` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:72` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.composeOrders → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.expireDue → PharmacyOrdersRepository.findPharmaciesByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:265` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findProductsByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:256` |
@@ -4451,7 +4563,7 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 ---
 
-## 29. POST /pharmacy/recall-holds
+## 30. POST /pharmacy/recall-holds
 
 - **Origen:** CONTRATO
 - **Nombre:** Aplicar retiro/recall de lote (UC-25-08)
@@ -4492,7 +4604,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → LotsRepository.findById | `src/modules/pharmacy_inventory/infrastructure/repositories/lots.repository.ts:49` |
 | `pharmacy_inventory.inventory_recall_holds` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → RecallHoldsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/recall-holds.repository.ts:67` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-recall/create-recall-hold.use-case.ts:105` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → StockPositionsRepository.findByKey | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:65` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → StockPositionsRepository.findByKey | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:77` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.requireStockKey → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
 | `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:47` |
@@ -4566,7 +4678,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 30. POST /pharmacy/recall-holds/{id}/release
+## 31. POST /pharmacy/recall-holds/{id}/release
 
 - **Origen:** CONTRATO
 - **Nombre:** Liberar recall y reactivar lote (UC-25-09)
@@ -4608,7 +4720,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_recall_holds` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-recall/release-recall-hold.use-case.ts:98` |
 | `pharmacy_inventory.inventory_recall_holds` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → RecallHoldsRepository.findById | `src/modules/pharmacy_inventory/infrastructure/repositories/recall-holds.repository.ts:56` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-recall/release-recall-hold.use-case.ts:127` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → StockPositionsRepository.findByLot | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:98` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → StockPositionsRepository.findByLot | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:110` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.requireManagedProduct → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.requireManagedProduct → InventoryScopeRepository.findProduct | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:81` |
 | `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.resolveStoredLocation → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:47` |

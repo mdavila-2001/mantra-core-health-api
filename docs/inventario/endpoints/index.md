@@ -2,11 +2,11 @@
 
 # Inventario de endpoints
 
-Se inventarían **1627 operaciones HTTP** en **72 módulos**: 1618 publicadas en el contrato OpenAPI y 9 que existen sólo en el código.
+Se inventarían **1628 operaciones HTTP** en **72 módulos**: 1618 publicadas en el contrato OpenAPI y 10 que existen sólo en el código.
 
-- Con al menos una tabla identificada: 1565
-- Riesgo ALTO 200 · MEDIO 899 · BAJO 528
-- Mencionadas por al menos una prueba: 940
+- Con al menos una tabla identificada: 1566
+- Riesgo ALTO 200 · MEDIO 901 · BAJO 527
+- Mencionadas por al menos una prueba: 941
 
 Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [README del inventario](../README.md).
 
@@ -59,7 +59,7 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `payments` | 14 | 1 | [payments.md](payments.md) |
 | `pharma_lab` | 76 | 6 | [pharma_lab.md](pharma_lab.md) |
 | `pharmacy` | 33 | 3 | [pharmacy.md](pharmacy.md) |
-| `pharmacy_inventory` | 30 | 2 | [pharmacy_inventory.md](pharmacy_inventory.md) |
+| `pharmacy_inventory` | 31 | 2 | [pharmacy_inventory.md](pharmacy_inventory.md) |
 | `platform_ops` | 15 | 0 | [platform_ops.md](platform_ops.md) |
 | `polyglot_storage` | 15 | 0 | [polyglot_storage.md](polyglot_storage.md) |
 | `practice` | 37 | 4 | [practice.md](practice.md) |

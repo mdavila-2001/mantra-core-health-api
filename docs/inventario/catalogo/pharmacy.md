@@ -10,15 +10,15 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [pharmacies](#pharmacies) | Representa organizaciones farmacéuticas integradas al sistema médico para identificar prestadores y operadores de farmacia. | 16 | 13 | 67 | DIVERGE |
+| [pharmacies](#pharmacies) | Representa organizaciones farmacéuticas integradas al sistema médico para identificar prestadores y operadores de farmacia. | 16 | 13 | 68 | DIVERGE |
 | [pharmacy_external_product_mappings](#pharmacy_external_product_mappings) | Mapea productos internos a referencias externas para intercambiar información farmacéutica entre sistemas. | 12 | 5 | 6 | COINCIDE |
 | [pharmacy_integration_connections](#pharmacy_integration_connections) | Configura conexiones de farmacia con sistemas externos para sincronizar catálogos u operaciones autorizadas. | 17 | 8 | 5 | COINCIDE |
 | [pharmacy_licenses](#pharmacy_licenses) | Registra licencias de farmacias para documentar habilitaciones vinculadas a su operación. | 16 | 9 | 4 | COINCIDE |
 | [pharmacy_price_lists](#pharmacy_price_lists) | Define listas de precios de farmacia para organizar precios por vigencia, sede o contexto comercial. | 16 | 10 | 19 | COINCIDE |
 | [pharmacy_product_identifiers](#pharmacy_product_identifiers) | Mantiene identificadores alternativos de productos farmacéuticos para reconciliar códigos propios y externos. | 10 | 5 | 1 | COINCIDE |
 | [pharmacy_product_prices](#pharmacy_product_prices) | Asocia productos con precios concretos para soportar consulta y operación económica farmacéutica. | 14 | 5 | 24 | COINCIDE |
-| [pharmacy_products](#pharmacy_products) | Cataloga productos comercializados o gestionados por farmacias, incluidos los medicamentos que pueden relacionarse con prescripciones. | 21 | 11 | 60 | DIVERGE |
-| [pharmacy_sites](#pharmacy_sites) | Identifica sucursales y ubicaciones de farmacias para asociar productos, precios e integraciones con cada sitio. | 16 | 9 | 45 | DIVERGE |
+| [pharmacy_products](#pharmacy_products) | Cataloga productos comercializados o gestionados por farmacias, incluidos los medicamentos que pueden relacionarse con prescripciones. | 21 | 11 | 61 | DIVERGE |
+| [pharmacy_sites](#pharmacy_sites) | Identifica sucursales y ubicaciones de farmacias para asociar productos, precios e integraciones con cada sitio. | 16 | 9 | 46 | DIVERGE |
 
 ## Diagrama entidad-relación
 
@@ -137,7 +137,7 @@ Representa organizaciones farmacéuticas integradas al sistema médico para iden
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_24_pharmacy.puml: pharmacies`
 - **Dominio:** Farmacia · **Diagrama:** `Mantra Core Health Context/modules/diagram_24_pharmacy.puml` · **DDL:** `SQL/24_pharmacy/02_tables.sql`
 - **Entidad del ORM:** `Pharmacies` — `src/modules/pharmacy/entities/pharmacies.entity.ts`
-- **Resumen:** 16 columnas · 13 índices · 9 FK salientes · 13 entrantes · 67 operaciones
+- **Resumen:** 16 columnas · 13 índices · 9 FK salientes · 13 entrantes · 68 operaciones
 
 #### Columnas
 
@@ -253,6 +253,7 @@ Representa organizaciones farmacéuticas integradas al sistema médico para iden
 | POST /internal/inventory-sync-batches | LEE | DIRECTA |
 | POST /internal/inventory-sync/{batchId}/reconcile | LEE | DIRECTA |
 | POST /internal/reservations/expire | LEE | DIRECTA |
+| PUT /pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability | LEE | DIRECTA |
 | GET /pharmacy-inventory/availability | LEE | DIRECTA |
 | GET /pharmacy-inventory/sites/{siteId}/stock | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/dispensations | LEE | DIRECTA |
@@ -813,7 +814,7 @@ Cataloga productos comercializados o gestionados por farmacias, incluidos los me
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_24_pharmacy.puml: pharmacy_products`
 - **Dominio:** Farmacia · **Diagrama:** `Mantra Core Health Context/modules/diagram_24_pharmacy.puml` · **DDL:** `SQL/24_pharmacy/02_tables.sql`
 - **Entidad del ORM:** `PharmacyProducts` — `src/modules/pharmacy/entities/pharmacy_products.entity.ts`
-- **Resumen:** 21 columnas · 11 índices · 9 FK salientes · 16 entrantes · 60 operaciones
+- **Resumen:** 21 columnas · 11 índices · 9 FK salientes · 16 entrantes · 61 operaciones
 
 #### Columnas
 
@@ -933,6 +934,7 @@ Cataloga productos comercializados o gestionados por farmacias, incluidos los me
 | GET /public/medications | LEE | POR_SQL |
 | GET /public/medications/{conceptId}/availability | LEE | POR_SQL |
 | POST /internal/inventory-sync-batches | LEE | DIRECTA |
+| PUT /pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability | LEE | DIRECTA |
 | GET /pharmacy-inventory/availability | LEE | DIRECTA |
 | GET /pharmacy-inventory/sites/{siteId}/stock | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/dispensations | LEE | DIRECTA |
@@ -982,7 +984,7 @@ Identifica sucursales y ubicaciones de farmacias para asociar productos, precios
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_24_pharmacy.puml: pharmacy_sites`
 - **Dominio:** Farmacia · **Diagrama:** `Mantra Core Health Context/modules/diagram_24_pharmacy.puml` · **DDL:** `SQL/24_pharmacy/02_tables.sql`
 - **Entidad del ORM:** `PharmacySites` — `src/modules/pharmacy/entities/pharmacy_sites.entity.ts`
-- **Resumen:** 16 columnas · 9 índices · 8 FK salientes · 10 entrantes · 45 operaciones
+- **Resumen:** 16 columnas · 9 índices · 8 FK salientes · 10 entrantes · 46 operaciones
 
 #### Columnas
 
@@ -1064,6 +1066,7 @@ Identifica sucursales y ubicaciones de farmacias para asociar productos, precios
 | GET /public/medications | LEE | POR_SQL |
 | GET /public/medications/{conceptId}/availability | LEE | POR_SQL |
 | GET /public/pharmacies/open-now | LEE | POR_SQL |
+| PUT /pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability | LEE | DIRECTA |
 | GET /pharmacy-inventory/availability | LEE | DIRECTA |
 | GET /pharmacy-inventory/sites/{siteId}/stock | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/dispensations | LEE | DIRECTA |

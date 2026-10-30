@@ -3,12 +3,12 @@
 # Flujos del módulo `pharmacy_inventory`
 
 - **Procesos:** 1 · **Máquinas de estado:** 1
-- **Operaciones:** 30 (29 con decisiones propias, 1 sin ellas)
+- **Operaciones:** 31 (30 con decisiones propias, 1 sin ellas)
 - Inventario de endpoints del módulo: [pharmacy_inventory](../endpoints/pharmacy_inventory.md)
 
 ## Proceso: src / modules / pharmacy inventory
 
-- **Código:** `pharmacy_inventory` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 30
+- **Código:** `pharmacy_inventory` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 31
 - **Actores:** Cualquier sesión válida · PATIENT · PHARMACY_STAFF · SECURITY_ADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/pharmacy_inventory/README.md`
@@ -53,6 +53,7 @@ _Fuente: `src/modules/pharmacy_inventory/README.md:3`_
 | `ctrl:PharmacyProcurementController` | Operaciones de PharmacyProcurementController que el README no asigna a un caso de uso | POST /pharmacy/{pharmacyId}/goods-receipts | SECURITY_ADMIN | MEDIO | 19 |
 |  |  | POST /pharmacy/{pharmacyId}/purchase-orders | SECURITY_ADMIN | MEDIO | 8 |
 |  |  | POST /pharmacy/{pharmacyId}/suppliers | SECURITY_ADMIN | MEDIO | 2 |
+| `ctrl:PharmacySiteAvailabilityController` | Operaciones de PharmacySiteAvailabilityController que el README no asigna a un caso de uso | PUT /pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 8 |
 
 ### Diagrama 1 de 2 — etapas `ctrl:PharmacyDispensingController`, `ctrl:PharmacyInventoryController`, `ctrl:PharmacyInventoryInternalController`…
 
@@ -232,7 +233,7 @@ flowchart LR
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 2 de 2 — etapas `ctrl:PharmacyOrdersController`, `ctrl:PharmacyProcurementController`
+### Diagrama 2 de 2 — etapas `ctrl:PharmacyOrdersController`, `ctrl:PharmacyProcurementController`, `ctrl:PharmacySiteAvailabilityController`
 
 ```mermaid
 flowchart LR
@@ -296,6 +297,10 @@ flowchart LR
     o44["POST /pharmacy/{pharmacyId}/goods-receipts"]:::op
     o51["POST /pharmacy/{pharmacyId}/purchase-orders"]:::op
     o57["POST /pharmacy/{pharmacyId}/suppliers"]:::op
+  end
+  t59[("+2 tablas más")]
+  subgraph s2["ctrl:PharmacySiteAvailabilityController · Operaciones de PharmacySiteAvailabili…"]
+    o58["PUT /pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/avai…"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -432,6 +437,14 @@ flowchart LR
   a45 --> o57
   o57 -->|"CREA"| t54
   o57 -->|"LEE"| t55
+  a2 --> o58
+  o58 -->|"CREA"| t46
+  o58 -->|"CREA"| t47
+  o58 -->|"LEE"| t47
+  o58 -->|"CREA"| t49
+  o58 -->|"LEE"| t49
+  o58 -->|"LEE"| t55
+  o58 -.-> t59
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -780,7 +793,135 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. GET /pharmacy-inventory/availability
+#### 4. PUT /pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability
+
+«Lo tengo / No lo tengo» de un producto en una sede.
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.BAD_REQUEST} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a SetSiteProductAvailabilityUseCase.execute"]:::llamada
+  n2 --> n3
+  n4{"dto.available && dto.quantity === 0"}:::decision
+  n3 --> n4
+  n5(["500 INTERNAL {HttpStatus.BAD_REQUEST}"]):::error
+  n4 -->|"sí"| n5
+  n6["Transacción: transactional(…)"]:::transaccion
+  n4 -->|"no"| n6
+  n7["Llama a PharmacyInventoryScopePolicy.requireManagedPharmacy"]:::llamada
+  n6 --> n7
+  n8["Llama a InventoryScopeRepository.findPharmacyInTenant"]:::llamada
+  n7 --> n8
+  n9[("LEE pharmacy.pharmacies")]:::efecto
+  n8 --> n9
+  n10["Llama a PharmacyInventoryScopePolicy.requireSite"]:::llamada
+  n9 --> n10
+  n11["Llama a InventoryScopeRepository.findSiteInPharmacy"]:::llamada
+  n10 --> n11
+  n12[("LEE pharmacy.pharmacy_sites")]:::efecto
+  n11 --> n12
+  n13{"!site"}:::decision
+  n12 --> n13
+  n14(["↩ (relanza el error capturado)"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a InventoryScopeRepository.findProductInPharmacy"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE pharmacy.pharmacy_products")]:::efecto
+  n15 --> n16
+  n17{"!product"}:::decision
+  n16 --> n17
+  n18(["↩ (relanza el error capturado)"]):::error
+  n17 -->|"sí"| n18
+  n19{"product.statusConceptId !== PHARM.PRODUCT_ACTIVE"}:::decision
+  n17 -->|"no"| n19
+  n20(["↩ (relanza el error capturado)"]):::error
+  n19 -->|"sí"| n20
+  n21{"dto.available && product.outOfStockDeclared"}:::decision
+  n19 -->|"no"| n21
+  n22(["↩ (relanza el error capturado)"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a StockPositionsRepository.countLotPositionsInSite"]:::llamada
+  n21 -->|"no"| n23
+  n24[("LEE pharmacy_inventory.inventory_locations · LEE pharmacy_inventory.inventory_stock_positions")]:::efecto
+  n23 --> n24
+  n25{"lotPositions › 0"}:::decision
+  n24 --> n25
+  n26(["↩ (relanza el error capturado)"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a SiteStockWriter.write"]:::llamada
+  n25 -->|"no"| n27
+  n28["Llama a SiteStockWriter.defaultLocationId"]:::llamada
+  n27 --> n28
+  n29["Llama a LocationsRepository.findFirstActiveInSite"]:::llamada
+  n28 --> n29
+  n30[("LEE pharmacy_inventory.inventory_locations")]:::efecto
+  n29 --> n30
+  n31["Llama a LocationsRepository.create"]:::llamada
+  n30 --> n31
+  n32[("CREA pharmacy_inventory.inventory_locations")]:::efecto
+  n31 --> n32
+  n33["Llama a StockPositionsRepository.findProductsWithoutPositionInSite"]:::llamada
+  n32 --> n33
+  n34[("LEE pharmacy.pharmacy_products · LEE pharmacy_inventory.inventory_locations · LEE pharmacy_inventory.inventor…")]:::efecto
+  n33 --> n34
+  n35["Repite: por cada const product de missing"]:::bucle
+  n34 --> n35
+  n36{"quantity !== 0"}:::decision
+  n35 -->|"cada elemento"| n36
+  n37["Llama a SiteStockWriter.append"]:::llamada
+  n36 -->|"sí"| n37
+  n38["Llama a LedgerRepository.append"]:::llamada
+  n37 --> n38
+  n39[("CREA pharmacy_inventory.inventory_ledger_entries")]:::efecto
+  n38 --> n39
+  n40["Llama a StockPositionsRepository.create"]:::llamada
+  n39 --> n40
+  n36 -->|"no"| n40
+  n41[("CREA pharmacy_inventory.inventory_stock_positions")]:::efecto
+  n40 --> n41
+  n42["Repite: por cada const target de targets"]:::bucle
+  n41 --> n42
+  n35 -->|"al terminar"| n42
+  n43["Llama a StockPositionsRepository.findByKeyForUpdate"]:::llamada
+  n42 -->|"cada elemento"| n43
+  n44[("LEE pharmacy_inventory.inventory_stock_positions")]:::efecto
+  n43 --> n44
+  n45["Llama a StockPositionsRepository.create"]:::llamada
+  n44 --> n45
+  n46[("CREA pharmacy_inventory.inventory_stock_positions")]:::efecto
+  n45 --> n46
+  n47{"delta !== 0"}:::decision
+  n46 --> n47
+  n48["Llama a SiteStockWriter.append"]:::llamada
+  n47 -->|"sí"| n48
+  n49["Llama a LedgerRepository.append"]:::llamada
+  n48 --> n49
+  n50[("CREA pharmacy_inventory.inventory_ledger_entries")]:::efecto
+  n49 --> n50
+  n51(("200 Responde con éxito")):::ok
+  n50 --> n51
+  n47 -->|"no"| n51
+  n42 -->|"al terminar"| n51
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 5. GET /pharmacy-inventory/availability
 
 Consultar qué sedes pueden surtir un conjunto de productos
 
@@ -859,7 +1000,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. GET /pharmacy-inventory/sites/{siteId}/stock
+#### 6. GET /pharmacy-inventory/sites/{siteId}/stock
 
 Consultar el stock disponible de una sede
 
@@ -927,7 +1068,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /pharmacy/{pharmacyId}/dispensations
+#### 7. POST /pharmacy/{pharmacyId}/dispensations
 
 Dispensar una prescripción a un paciente (UC-25-03)
 
@@ -1098,7 +1239,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /pharmacy/{pharmacyId}/goods-receipts
+#### 8. POST /pharmacy/{pharmacyId}/goods-receipts
 
 Recepcionar mercancía por lote (UC-25-02)
 
@@ -1264,7 +1405,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /pharmacy/{pharmacyId}/purchase-orders
+#### 9. POST /pharmacy/{pharmacyId}/purchase-orders
 
 Emitir una orden de compra a proveedor (UC-25-01)
 
@@ -1364,7 +1505,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /pharmacy/{pharmacyId}/reservations
+#### 10. POST /pharmacy/{pharmacyId}/reservations
 
 Reservar stock para una prescripción (UC-25-04)
 
@@ -1496,7 +1637,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /pharmacy/{pharmacyId}/transfers
+#### 11. POST /pharmacy/{pharmacyId}/transfers
 
 Transferir stock entre ubicaciones (UC-25-10)
 
@@ -1641,7 +1782,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /pharmacy/{siteId}/count-sessions
+#### 12. POST /pharmacy/{siteId}/count-sessions
 
 Iniciar y congelar una sesión de conteo (UC-25-06)
 
@@ -1741,7 +1882,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /pharmacy/{siteId}/inventory-locations
+#### 13. POST /pharmacy/{siteId}/inventory-locations
 
 Crear una ubicación de inventario
 
@@ -1801,7 +1942,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /pharmacy/count-sessions/{id}/approve
+#### 14. POST /pharmacy/count-sessions/{id}/approve
 
 Aprobar conteo y ajustar ledger por varianza (UC-25-07)
 
@@ -1947,7 +2088,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. POST /pharmacy/dispensations/{id}/reverse
+#### 15. POST /pharmacy/dispensations/{id}/reverse
 
 Reversar una dispensación (UC-25-11)
 
@@ -2051,7 +2192,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. GET /pharmacy/orders
+#### 16. GET /pharmacy/orders
 
 Bandeja de pedidos de las farmacias del tenant (FAR-E2)
 
@@ -2176,7 +2317,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. POST /pharmacy/orders
+#### 17. POST /pharmacy/orders
 
 Crear un pedido de farmacia (FAR-E1)
 
@@ -2328,7 +2469,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. GET /pharmacy/orders/{id}
+#### 18. GET /pharmacy/orders/{id}
 
 Consultar un pedido de farmacia (FAR-E1)
 
@@ -2467,7 +2608,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. POST /pharmacy/orders/{id}/accept-substitutions
+#### 19. POST /pharmacy/orders/{id}/accept-substitutions
 
 Aceptar los genéricos propuestos (paciente)
 
@@ -2640,7 +2781,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. POST /pharmacy/orders/{id}/cancel
+#### 20. POST /pharmacy/orders/{id}/cancel
 
 Cancelar un pedido de farmacia (FAR-E1)
 
@@ -2738,7 +2879,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. POST /pharmacy/orders/{id}/confirm
+#### 21. POST /pharmacy/orders/{id}/confirm
 
 Confirmar el pedido (FAR-E2)
 
@@ -2896,7 +3037,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. POST /pharmacy/orders/{id}/conversation
+#### 22. POST /pharmacy/orders/{id}/conversation
 
 Abrir el chat del pedido con la farmacia
 
@@ -2976,7 +3117,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. POST /pharmacy/orders/{id}/dispense
+#### 23. POST /pharmacy/orders/{id}/dispense
 
 Dispensar el pedido en el mostrador (FAR-E3)
 
@@ -3126,7 +3267,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. POST /pharmacy/orders/{id}/prefer-original
+#### 24. POST /pharmacy/orders/{id}/prefer-original
 
 Preferir los productos originales (paciente)
 
@@ -3235,7 +3376,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. POST /pharmacy/orders/{id}/ready
+#### 25. POST /pharmacy/orders/{id}/ready
 
 Marcar el pedido listo para retiro (FAR-E2/E3)
 
@@ -3345,7 +3486,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. POST /pharmacy/orders/{id}/reject
+#### 26. POST /pharmacy/orders/{id}/reject
 
 Rechazar el pedido (FAR-E2)
 
@@ -3446,7 +3587,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. POST /pharmacy/orders/{id}/review
+#### 27. POST /pharmacy/orders/{id}/review
 
 Abrir revisión del pedido (FAR-E2)
 
@@ -3526,7 +3667,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. GET /pharmacy/orders/me
+#### 28. GET /pharmacy/orders/me
 
 Mis pedidos de farmacia, más nuevos primero (FAR-E1)
 
@@ -3647,7 +3788,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. POST /pharmacy/recall-holds
+#### 29. POST /pharmacy/recall-holds
 
 Aplicar retiro/recall de lote (UC-25-08)
 
@@ -3747,7 +3888,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 29. POST /pharmacy/recall-holds/{id}/release
+#### 30. POST /pharmacy/recall-holds/{id}/release
 
 Liberar recall y reactivar lote (UC-25-09)
 
