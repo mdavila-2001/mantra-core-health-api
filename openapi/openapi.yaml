@@ -10427,6 +10427,33 @@ paths:
       summary: Estadísticas de la vitrina pública propia
       tags:
         - community-social
+  /community/profiles/organization-showcases/me:
+    get:
+      operationId: CommunitySocialController_listOwnOrganizationShowcases
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Vitrinas de organización que la sesión puede atender en el chat
+      tags:
+        - community-social
+      description: >-
+        Vitrinas de organización que la sesión puede atender en el chat. Requiere JWT y los roles o alcances declarados
+        por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /community/profiles/{profileId}/posts:
     post:
       operationId: CommunitySocialController_publishPost
@@ -23477,10 +23504,6 @@ paths:
                 $ref: '#/components/schemas/PublicOpenNowPageDto'
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '429':
           $ref: '#/components/responses/RateLimited'
         '500':
@@ -23490,9 +23513,10 @@ paths:
       summary: 'Farmacias abiertas ahora: 24 h o de turno vigente'
       tags:
         - pharmacy-public
+      security: []
       description: >-
-        Farmacias abiertas ahora: 24 h o de turno vigente. Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+        Farmacias abiertas ahora: 24 h o de turno vigente. Operación pública; no requiere JWT. Todas las respuestas de
+        error usan el envelope ErrorResponse.
   /public/medications:
     get:
       operationId: PharmacyPublicController_listMedications
@@ -50863,6 +50887,51 @@ paths:
       summary: Consultar un pedido de farmacia (FAR-E1)
       tags:
         - pharmacy-orders
+  /pharmacy/orders/{id}/conversation:
+    post:
+      description: >-
+        Idempotente: devuelve el mismo hilo directo entre el paciente titular y la vitrina pública de la farmacia. Lo
+        piden el titular o el personal (PHARMACY_STAFF con membresía activa) de la farmacia del pedido; cualquier
+        tercero recibe 404. 422 con reason ORGANIZATION_CHAT_PROFILE_UNAVAILABLE (farmacia sin vitrina
+        activa/verificada), PATIENT_CHAT_PROFILE_MISSING (paciente sin perfil comunitario; no se crea) o bloqueo entre
+        perfiles.
+      operationId: PharmacyOrdersController_openConversation
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PharmacyOrderConversationDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Abrir el chat del pedido con la farmacia
+      tags:
+        - pharmacy-orders
   /pharmacy/orders/{id}/cancel:
     post:
       description: Solo el titular, desde cualquier estado no terminal; un terminal responde 409 sin efectos.
@@ -54984,10 +55053,6 @@ paths:
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '429':
@@ -54999,6 +55064,7 @@ paths:
       summary: Sucursales de una farmacia, desde su ficha pública
       tags:
         - public-catalog
+      security: []
   /public/profiles/f/{slug}/branch-availability:
     post:
       description: >-
@@ -55023,10 +55089,6 @@ paths:
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
@@ -55044,6 +55106,7 @@ paths:
       summary: Disponibilidad de una receta en las sucursales de una farmacia
       tags:
         - public-catalog
+      security: []
   /qa/environments:
     post:
       description: '`isProductionSafe` decide si los payloads capturados se guardan en claro.'
@@ -83337,8 +83400,9 @@ components:
             la lista pública `CATALOGO`.
           oneOf:
             - type: number
+              nullable: true
             - type: string
-          nullable: true
+              nullable: true
           example: 12.5
         category:
           type: string
@@ -100642,6 +100706,13 @@ components:
         pickupCode:
           type: string
           nullable: true
+        pharmacyPublicProfileId:
+          type: string
+          format: uuid
+          nullable: true
+        pharmacyPublicSlug:
+          type: string
+          nullable: true
         totalAmount:
           type: string
           nullable: true
@@ -100687,6 +100758,18 @@ components:
       required:
         - items
         - count
+    PharmacyOrderConversationDto:
+      type: object
+      properties:
+        conversationId:
+          type: string
+          format: uuid
+        pharmacyProfileId:
+          type: string
+          format: uuid
+      required:
+        - conversationId
+        - pharmacyProfileId
     ConfirmOrderAdjustmentDto:
       type: object
       properties:
