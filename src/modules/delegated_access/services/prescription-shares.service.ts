@@ -311,16 +311,38 @@ export class PrescriptionSharesService {
   /**
    * Vista sin sesión (`GET /public/prescription-shares/:token`, S-4, D-2):
    * estado, cuándo y quién la emitió. Nada del paciente ni de los fármacos.
-   * Un enlace revocado solo dice `REVOKED`. No registra uso.
+   * Un enlace revocado solo dice `REVOKED`.
+   *
+   * Cada apertura deja un uso `OPEN` en `shared_access_link_uses` (S-4), como
+   * la de la farmacia: `DENIED` si el enlace venció o fue revocado (la vista
+   * igual responde con su `status`), escrito antes de armar la respuesta;
+   * `OPENED` si es válido, escrito al final, cuando la respuesta ya está
+   * armada. Falla cerrada: si el uso no se puede escribir, la lectura no se
+   * sirve (500), porque toda lectura deja rastro auditable
+   * (`.agents/rules/90-seguridad-y-datos-sensibles.md`, regla 7). Un token
+   * desconocido o mal formado responde 404 y no deja uso.
    *
    * @param token - Token en claro de la ruta.
+   * @param context - IP y agente del cliente.
    * @returns La vista pública del enlace.
    * @throws ResourceNotFoundException 404 si el token no existe.
    */
-  async readPublic(token: string): Promise<PublicPrescriptionShareDto> {
+  async readPublic(
+    token: string,
+    context: PrescriptionShareUseContext = {},
+  ): Promise<PublicPrescriptionShareDto> {
     const em = this.em.fork();
-    const resolved = await this.resolve(em, token);
+    const now = new Date();
+    const resolved = await this.resolve(em, token, now);
     if (!resolved) throw this.shareNotFound();
+    if (resolved.status !== 'VALID') {
+      await this.recordUse(
+        resolved.link.id,
+        DELEG.SHARE_OUTCOME_DENIED,
+        context,
+        now,
+      );
+    }
     if (resolved.status === 'REVOKED') {
       // El paciente dejó de compartirla: el enlace ya no muestra nada de la
       // receta, solo que fue revocado.
@@ -337,13 +359,22 @@ export class PrescriptionSharesService {
         ? resolved.activeItems
         : resolved.allItems;
     const prescriber = await this.prescriberOf(em, shown);
-    return {
+    const view: PublicPrescriptionShareDto = {
       status: resolved.status,
       issuedAt: earliestDate(shown.map((item) => item.issuedAt)),
       prescriberName: prescriber.name,
       prescriberLicense: prescriber.license,
       itemCount: resolved.activeItems.length,
     };
+    if (resolved.status === 'VALID') {
+      await this.recordUse(
+        resolved.link.id,
+        DELEG.SHARE_OUTCOME_OPENED,
+        context,
+        now,
+      );
+    }
+    return view;
   }
 
   /**

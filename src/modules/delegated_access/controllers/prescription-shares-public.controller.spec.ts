@@ -63,8 +63,13 @@ describe('PrescriptionSharesPublicController', () => {
     };
     const service = { readPublic: mockFn().mockResolvedValue(view) };
     const controller = new PrescriptionSharesPublicController(service as any);
-    await expect(controller.read('tok')).resolves.toBe(view);
-    expect(service.readPublic).toHaveBeenCalledWith('tok');
+    await expect(
+      controller.read('tok', '203.0.113.9', 'agente-prueba'),
+    ).resolves.toBe(view);
+    expect(service.readPublic).toHaveBeenCalledWith('tok', {
+      sourceIp: '203.0.113.9',
+      userAgent: 'agente-prueba',
+    });
   });
 });
 
@@ -106,12 +111,15 @@ describe('PrescriptionSharesPublicController · HTTP', () => {
       prescriberLicense: null,
       itemCount: 2,
     });
-    const res = await request(app.getHttpServer()).get(
-      `/public/prescription-shares/${TOKEN}`,
-    );
+    const res = await request(app.getHttpServer())
+      .get(`/public/prescription-shares/${TOKEN}`)
+      .set('User-Agent', 'agente-prueba');
     expect(res.status).toBe(200);
     expect(res.headers['cache-control']).toBe('no-store');
-    expect(service.readPublic).toHaveBeenLastCalledWith(TOKEN);
+    expect(service.readPublic).toHaveBeenLastCalledWith(TOKEN, {
+      sourceIp: expect.any(String),
+      userAgent: 'agente-prueba',
+    });
     expect(Object.keys(res.body).sort()).toEqual([
       'issuedAt',
       'itemCount',

@@ -61,7 +61,8 @@ describe('PrescriptionSharesService (lecturas por token)', () => {
       );
       const keys = keysOf(result);
       expect(keys.filter((key) => FORBIDDEN_KEYS.test(key))).toEqual([]);
-      expect(repo.appendUse).not.toHaveBeenCalled();
+      // La apertura pública también queda registrada (S-4).
+      expect(repo.appendUse).toHaveBeenCalledTimes(1);
     });
 
     it('un enlace con expiresAt pasado lee EXPIRED', async () => {
@@ -92,6 +93,112 @@ describe('PrescriptionSharesService (lecturas por token)', () => {
         itemCount: 0,
       });
       expect(prescriberIdentity.read).not.toHaveBeenCalled();
+    });
+
+    describe('registro de la apertura pública (S-4)', () => {
+      const context = { sourceIp: '203.0.113.9', userAgent: 'agente-prueba' };
+
+      it('válido: un uso OPEN/OPENED con IP y agente, sin el token', async () => {
+        const { service, repo, committedUses } = build();
+        const { token, tokenHash } = issueShareToken();
+        repo.findByTokenHash.mockResolvedValue(link({ tokenHash }));
+        repo.findItemsByEncounter.mockResolvedValue([item()]);
+        const result = await service.readPublic(token, context);
+        expect(result.status).toBe('VALID');
+        expect(committedUses).toEqual([
+          {
+            sharedAccessLinkId: SHARE,
+            actionConceptId: DELEG.SHARE_ACTION_OPEN,
+            outcomeConceptId: DELEG.SHARE_OUTCOME_OPENED,
+            sourceIp: '203.0.113.9',
+            userAgent: 'agente-prueba',
+            occurredAt: expect.any(Date),
+          },
+        ]);
+        expect(JSON.stringify(committedUses)).not.toContain(token);
+      });
+
+      it('vencido: 200 con EXPIRED y un uso OPEN/DENIED', async () => {
+        const { service, repo, committedUses } = build();
+        const { token } = issueShareToken();
+        repo.findByTokenHash.mockResolvedValue(
+          link({ expiresAt: new Date(Date.now() - DAY) }),
+        );
+        repo.findItemsByEncounter.mockResolvedValue([item()]);
+        const result = await service.readPublic(token, context);
+        expect(result.status).toBe('EXPIRED');
+        expect(committedUses).toEqual([
+          expect.objectContaining({
+            actionConceptId: DELEG.SHARE_ACTION_OPEN,
+            outcomeConceptId: DELEG.SHARE_OUTCOME_DENIED,
+          }),
+        ]);
+      });
+
+      it('revocado: 200 con REVOKED y un uso OPEN/DENIED', async () => {
+        const { service, repo, committedUses } = build();
+        const { token } = issueShareToken();
+        repo.findByTokenHash.mockResolvedValue(
+          link({
+            statusConceptId: CONCEPTS.STATE_REVOKED,
+            revokedAt: new Date(),
+          }),
+        );
+        repo.findItemsByEncounter.mockResolvedValue([item()]);
+        const result = await service.readPublic(token, context);
+        expect(result.status).toBe('REVOKED');
+        expect(committedUses).toEqual([
+          expect.objectContaining({
+            outcomeConceptId: DELEG.SHARE_OUTCOME_DENIED,
+          }),
+        ]);
+      });
+
+      it('token desconocido o mal formado: 404 sin uso', async () => {
+        const { service, repo } = build();
+        expect(
+          await thrown(service.readPublic(issueShareToken().token, context)),
+        ).toBeInstanceOf(ResourceNotFoundException);
+        expect(
+          await thrown(service.readPublic('corto', context)),
+        ).toBeInstanceOf(ResourceNotFoundException);
+        expect(repo.appendUse).not.toHaveBeenCalled();
+      });
+
+      it('IP inválida no se guarda y el agente se recorta', async () => {
+        const { service, repo, committedUses } = build();
+        const { token } = issueShareToken();
+        repo.findByTokenHash.mockResolvedValue(link());
+        repo.findItemsByEncounter.mockResolvedValue([item()]);
+        await service.readPublic(token, {
+          sourceIp: 'no-es-ip',
+          userAgent: 'x'.repeat(2000),
+        });
+        expect(committedUses[0].sourceIp).toBeUndefined();
+        expect(committedUses[0].userAgent).toHaveLength(512);
+      });
+
+      it('si el uso no se puede escribir, la lectura falla cerrada', async () => {
+        const { service, repo } = build();
+        const { token } = issueShareToken();
+        repo.findByTokenHash.mockResolvedValue(link());
+        repo.findItemsByEncounter.mockResolvedValue([item()]);
+        const failure = new Error('escritura caída');
+        repo.appendUse.mockImplementation(() => {
+          throw failure;
+        });
+        await expect(service.readPublic(token, context)).rejects.toBe(failure);
+      });
+
+      it('si falla el lector del prescriptor no queda un OPENED', async () => {
+        const { service, repo, committedUses, prescriberIdentity } = build();
+        const { token } = issueShareToken();
+        repo.findByTokenHash.mockResolvedValue(link());
+        repo.findItemsByEncounter.mockResolvedValue([item()]);
+        prescriberIdentity.read.mockRejectedValue(new Error('lector caído'));
+        await thrown(service.readPublic(token, context));
+        expect(committedUses).toEqual([]);
+      });
     });
 
     it('token desconocido es 404', async () => {
