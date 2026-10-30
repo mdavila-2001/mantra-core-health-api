@@ -33,4 +33,16 @@ export enum PharmacyInventoryErrorReason {
   SITE_PRODUCT_KEPT_BY_LOTS = 'SITE_PRODUCT_KEPT_BY_LOTS',
   /** «Lo tengo» con cantidad 0 se contradice: se marca «No lo tengo». */
   SITE_AVAILABILITY_QUANTITY_INVALID = 'SITE_AVAILABILITY_QUANTITY_INVALID',
+  /**
+   * La API no sabe dónde está el sistema de la farmacia externa
+   * (`PHARMACY_ERP_BASE_URL` vacía): no se llama a nadie ni se crea lote.
+   */
+  PHARMACY_INTEGRATION_NOT_CONFIGURED = 'PHARMACY_INTEGRATION_NOT_CONFIGURED',
+  /**
+   * El sistema de la farmacia externa no respondió, respondió con error o con
+   * algo que no se entiende. No se crea lote.
+   */
+  PHARMACY_INTEGRATION_UNAVAILABLE = 'PHARMACY_INTEGRATION_UNAVAILABLE',
+  /** La conexión no está activa o no admite consultar stock. */
+  PHARMACY_INTEGRATION_CONNECTION_INACTIVE = 'PHARMACY_INTEGRATION_CONNECTION_INACTIVE',
 }
