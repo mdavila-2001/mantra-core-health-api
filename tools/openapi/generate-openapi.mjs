@@ -162,12 +162,12 @@ const KNOWN_PUBLIC_OPERATIONS = [
   // Calle desde el punto del mapa en el alta (`reverse-geocoding.controller.ts`,
   // `@Public()`, 2026-10-26).
   ['post', '/public/geo/reverse'],
-  // Farmacias abiertas ahora (`pharmacy-public.controller.ts`) y sedes de la
-  // ficha pública de una farmacia (`public-catalog.controller.ts`): las tres
+  // Receta compartida por enlace (`prescription-shares-public.controller.ts`) y
+  // receptor de webhooks de la pasarela de pagos
+  // (`payments-gateway-webhooks.controller.ts`, firma verificada en el servicio):
   // llevan `@Public()` y entraron sin sumarse acá (2026-10-30).
-  ['get', '/public/pharmacies/open-now'],
-  ['get', '/public/profiles/f/{slug}/branches'],
-  ['post', '/public/profiles/f/{slug}/branch-availability'],
+  ['get', '/public/prescription-shares/{token}'],
+  ['post', '/payments/gateway-webhooks'],
 ];
 
 function markPublicOperations(document) {

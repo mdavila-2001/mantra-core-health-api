@@ -1604,6 +1604,8 @@ Content-Type: application/json
 | `credentials[].professionConceptId` | No | `string` | formato `uuid` | Concept id de VS_BO_PROFESSION (COB-2023) | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].titleText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `credentials[].fileId` | No | `string` | formato `uuid` | fileId del PDF subido por POST /iam/auth/upload-registration-document | `00000000-0000-4000-8000-000000000001` |
+| `attestationAccepted` | No | `boolean` | Sin restricción adicional declarada | true si aceptó la declaración de veracidad y la verificación de sus datos | `true` |
+| `attestationTextVersion` | No | `string` | longitud máxima 40 | Sin descripción específica en el contrato OpenAPI. | `2026-10-29` |
 
 ### Payload completo de ejemplo
 
@@ -1698,7 +1700,9 @@ Content-Type: application/json
       "titleText": "valor-ejemplo",
       "fileId": "00000000-0000-4000-8000-000000000001"
     }
-  ]
+  ],
+  "attestationAccepted": true,
+  "attestationTextVersion": "2026-10-29"
 }
 ```
 
@@ -1776,6 +1780,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El número del título no puede estar vacío | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Esa profesión no está en la Clasificación de Ocupaciones de Bolivia | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | La atestación necesita la versión del texto aceptado | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Alguno de los roles indicados no existe o no es asignable | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento emisor es obligatorio para el alta del profesional | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
@@ -4093,7 +4098,7 @@ Campos de la respuesta:
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `state` | Sí | `string` | formato `uuid` | Concept id del estado de la credencial | `00000000-0000-4000-8000-000000000001` |
 | `verifiedAt` | No | `string` | formato `date-time` | Valor de verified at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
-| `practitionerVerified` | Sí | `boolean` | Sin restricción adicional declarada | true si al verificar quedó habilitado todo el perfil profesional | `true` |
+| `practitionerVerified` | Sí | `boolean` | Sin restricción adicional declarada | Siempre false desde v4.2.67: verificar una credencial ya no habilita el perfil; | `true` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -5283,6 +5288,8 @@ Content-Type: application/json
 | `credentials[].professionConceptId` | No | `string` | formato `uuid` | Concept id de VS_BO_PROFESSION (COB-2023) | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].titleText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `credentials[].fileId` | No | `string` | formato `uuid` | fileId del PDF subido por POST /iam/auth/upload-registration-document | `00000000-0000-4000-8000-000000000001` |
+| `attestationAccepted` | No | `boolean` | Sin restricción adicional declarada | true si aceptó la declaración de veracidad y la verificación de sus datos | `true` |
+| `attestationTextVersion` | No | `string` | longitud máxima 40 | Sin descripción específica en el contrato OpenAPI. | `2026-10-29` |
 | `reason` | Sí | `string` | longitud máxima 500 | Motivo del alta administrativa (trazabilidad C-18) | `Texto descriptivo de ejemplo` |
 | `clinicalRoles` | No | `array<string>` | longitud máxima 100; máximo 10 elemento(s) | Roles asistenciales a conceder (códigos de `GET /authz/roles`) | `["CLINICIAN","SURGEON"]` |
 
@@ -5380,6 +5387,8 @@ Content-Type: application/json
       "fileId": "00000000-0000-4000-8000-000000000001"
     }
   ],
+  "attestationAccepted": true,
+  "attestationTextVersion": "2026-10-29",
   "reason": "Texto descriptivo de ejemplo",
   "clinicalRoles": [
     "CLINICIAN",
@@ -5446,6 +5455,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El número del título no puede estar vacío | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Esa profesión no está en la Clasificación de Ocupaciones de Bolivia | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | La atestación necesita la versión del texto aceptado | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Alguno de los roles indicados no existe o no es asignable | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento emisor es obligatorio para el alta del profesional | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |

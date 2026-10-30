@@ -1211,7 +1211,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         {
           "profileId": "00000000-0000-4000-8000-000000000001",
           "displayName": "Nombre de ejemplo",
-          "avatarUrl": "valor-ejemplo"
+          "avatarUrl": "valor-ejemplo",
+          "verification": {
+            "status": "VERIFIED",
+            "verifiedAt": "2026-07-31T12:00:00.000Z",
+            "validUntil": "valor-ejemplo"
+          }
         }
       ]
     }
@@ -1226,7 +1231,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<ConversationListItemDto>` | Sin restricción adicional declarada | Conversaciones de la página. | `[{"id":"00000000-0000-4000-8000-000000000001","conversationTypeConceptId":"00000000-0000-4000-8000-000000000001","groupId":"00000000-0000-4000-8000-000000000001","lastMessageAt":"2026-07-31T12:00:00.000Z","messageCount":1,"lastMessage":{"id":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","contentTypeConceptId":"00000000-0000-4000-8000-000000000001","attachmentFileId":"00000000-0000-4000-8000-000000000001","deletedAt":"2026-07-31T12:00:00.000Z","sentAt":"2026-07-31T12:00:00.000Z"},"unreadCount":1,"lastMessageReadByPeer":true,"isFavorite":true,"isPinned":true,"archivedAt":"2026-07-31T12:00:00.000Z","pinnedMessageId":"00000000-0000-4000-8000-000000000001","peers":[{"profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","avatarUrl":"valor-ejemplo"}]}]` |
+| `items` | Sí | `array<ConversationListItemDto>` | Sin restricción adicional declarada | Conversaciones de la página. | `[{"id":"00000000-0000-4000-8000-000000000001","conversationTypeConceptId":"00000000-0000-4000-8000-000000000001","groupId":"00000000-0000-4000-8000-000000000001","lastMessageAt":"2026-07-31T12:00:00.000Z","messageCount":1,"lastMessage":{"id":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","contentTypeConceptId":"00000000-0000-4000-8000-000000000001","attachmentFileId":"00000000-0000-4000-8000-000000000001","deletedAt":"2026-07-31T12:00:00.000Z","sentAt":"2026-07-31T12:00:00.000Z"},"unreadCount":1,"lastMessageReadByPeer":true,"isFavorite":true,"isPinned":true,"archivedAt":"2026-07-31T12:00:00.000Z","pinnedMessageId":"00000000-0000-4000-8000-000000000001","peers":[{"profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","avatarUrl":"valor-ejemplo","verification":{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}}]}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador de la conversación. | `00000000-0000-4000-8000-000000000001` |
 | `items[].conversationTypeConceptId` | Sí | `string` | formato `uuid` | Concept id del tipo de conversación (directa, grupal). | `00000000-0000-4000-8000-000000000001` |
 | `items[].groupId` | No | `string` | formato `uuid`; admite null | Grupo al que pertenece, si es de grupo. | `00000000-0000-4000-8000-000000000001` |
@@ -1246,10 +1251,14 @@ Campos de la respuesta:
 | `items[].isPinned` | Sí | `boolean` | Sin restricción adicional declarada | Fijada arriba de la bandeja del actor (F4.4). Las fijadas van primero. | `true` |
 | `items[].archivedAt` | No | `string` | formato `date-time`; admite null | Desde cuándo la archivó el actor; `null` si no está archivada (F4.4). | `2026-07-31T12:00:00.000Z` |
 | `items[].pinnedMessageId` | No | `string` | formato `uuid`; admite null | El mensaje fijado en la barra superior, si hay uno (F4.6). | `00000000-0000-4000-8000-000000000001` |
-| `items[].peers` | Sí | `array<ConversationPeerDto>` | Sin restricción adicional declarada | Los demás participantes, sin el propio. Sin el propio porque la bandeja se lee desde un lado: incluirse a uno mismo obligaría a cada pantalla a filtrarse, y la que se olvide muestra «Conversación con vos». | `[{"profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","avatarUrl":"valor-ejemplo"}]` |
+| `items[].peers` | Sí | `array<ConversationPeerDto>` | Sin restricción adicional declarada | Los demás participantes, sin el propio. Sin el propio porque la bandeja se lee desde un lado: incluirse a uno mismo obligaría a cada pantalla a filtrarse, y la que se olvide muestra «Conversación con vos». | `[{"profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","avatarUrl":"valor-ejemplo","verification":{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}}]` |
 | `items[].peers[].profileId` | Sí | `string` | formato `uuid` | Perfil público del participante. | `00000000-0000-4000-8000-000000000001` |
 | `items[].peers[].displayName` | No | `string` | admite null | Cómo se llama, para poder pintar la fila. | `Nombre de ejemplo` |
 | `items[].peers[].avatarUrl` | No | `string` | admite null | Su avatar público, o `null` si no subió ninguno. Misma regla que la ficha pública. | `valor-ejemplo` |
+| `items[].peers[].verification` | No | `PractitionerVerificationDto` | Sin restricción adicional declarada | El sello de verificación del participante cuando es un profesional; `null` para pacientes, organizaciones y cualquier otro perfil. Es la misma forma y la misma proyección de la admisión que muestran la Guía y el buscador (`VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED`): el chat no interpreta el estado por su cuenta. Aditivo. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `items[].peers[].verification.status` | No | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `items[].peers[].verification.verifiedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].peers[].verification.validUntil` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cuántas trae esta página. | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope pedido. | `1` |
 | `nextCursor` | No | `string` | admite null | Cursor de la página siguiente, o `null` si no hay más (F4.3). Se pagina sobre el orden de la bandeja —fijadas primero, después por último mensaje— y dentro del mismo recorte que aplique `q`. | `valor-ejemplo` |
@@ -1624,7 +1633,19 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "isEdited": true,
     "deletedAt": "2026-07-31T12:00:00.000Z",
     "sentAt": "2026-07-31T12:00:00.000Z"
-  }
+  },
+  "peers": [
+    {
+      "profileId": "00000000-0000-4000-8000-000000000001",
+      "displayName": "Nombre de ejemplo",
+      "avatarUrl": "valor-ejemplo",
+      "verification": {
+        "status": "VERIFIED",
+        "verifiedAt": "2026-07-31T12:00:00.000Z",
+        "validUntil": "valor-ejemplo"
+      }
+    }
+  ]
 }
 ```
 
@@ -1658,6 +1679,14 @@ Campos de la respuesta:
 | `pinnedMessage.isEdited` | No | `boolean` | admite null | Si fue editado (F4.5). | `true` |
 | `pinnedMessage.deletedAt` | No | `string` | formato `date-time`; admite null | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `2026-07-31T12:00:00.000Z` |
 | `pinnedMessage.sentAt` | No | `string` | formato `date-time`; admite null | Cuándo se envió. | `2026-07-31T12:00:00.000Z` |
+| `peers` | No | `array<ConversationPeerDto>` | Sin restricción adicional declarada | Los demás participantes con su sello, como en la bandeja. Viaja sólo con la primera página (la cabecera del hilo se pinta al abrir y no en cada página de historia). Es el «detalle» de la conversación: no hay `GET :id`. | `[{"profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","avatarUrl":"valor-ejemplo","verification":{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}}]` |
+| `peers[].profileId` | No | `string` | formato `uuid` | Perfil público del participante. | `00000000-0000-4000-8000-000000000001` |
+| `peers[].displayName` | No | `string` | admite null | Cómo se llama, para poder pintar la fila. | `Nombre de ejemplo` |
+| `peers[].avatarUrl` | No | `string` | admite null | Su avatar público, o `null` si no subió ninguno. Misma regla que la ficha pública. | `valor-ejemplo` |
+| `peers[].verification` | No | `PractitionerVerificationDto` | Sin restricción adicional declarada | El sello de verificación del participante cuando es un profesional; `null` para pacientes, organizaciones y cualquier otro perfil. Es la misma forma y la misma proyección de la admisión que muestran la Guía y el buscador (`VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED`): el chat no interpreta el estado por su cuenta. Aditivo. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `peers[].verification.status` | No | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `peers[].verification.verifiedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `peers[].verification.validUntil` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -9661,6 +9690,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "verifiedAt": "valor-ejemplo",
     "validUntil": "valor-ejemplo"
   },
+  "verification": {
+    "status": "VERIFIED",
+    "verifiedAt": "2026-07-31T12:00:00.000Z",
+    "validUntil": "valor-ejemplo"
+  },
   "hasPublishedAgenda": true,
   "nextAvailableDate": "valor-ejemplo",
   "posts": [
@@ -9715,11 +9749,15 @@ Campos de la respuesta:
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `verifiedBadge` | Sí | `PublicVerifiedBadgeDto` | Sin restricción adicional declarada | El mismo sello y la misma semántica que en el buscador | `{"status":"VERIFIED","badgeTypeConceptId":"00000000-0000-4000-8000-000000000001","verificationMethodConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","validUntil":"valor-ejemplo"}` |
-| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `VERIFIED` |
+| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `IN_REVIEW` si pidió la verificación y | `VERIFIED` |
 | `verifiedBadge.badgeTypeConceptId` | Sí | `string` | admite null | Qué se verificó | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verificationMethodConceptId` | Sí | `string` | admite null | Cómo se verificó (autoridad externa, alta manual auditada) | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verifiedAt` | Sí | `string` | admite null | Desde cuándo vale, ISO | `valor-ejemplo` |
 | `verifiedBadge.validUntil` | Sí | `string` | admite null | Hasta cuándo vale, ISO | `valor-ejemplo` |
+| `verification` | Sí | `PractitionerVerificationDto` | Sin restricción adicional declarada | El mismo sello en la forma `verification`, derivado de `verifiedBadge`. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `verification.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `verification.verifiedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `verification.validUntil` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `hasPublishedAgenda` | Sí | `boolean` | Sin restricción adicional declarada | Si tiene agenda publicada | `true` |
 | `nextAvailableDate` | Sí | `string` | admite null | Primer día con hueco (YYYY-MM-DD) | `valor-ejemplo` |
 | `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |
@@ -10971,6 +11009,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "verifiedAt": "valor-ejemplo",
     "validUntil": "valor-ejemplo"
   },
+  "verification": {
+    "status": "VERIFIED",
+    "verifiedAt": "2026-07-31T12:00:00.000Z",
+    "validUntil": "valor-ejemplo"
+  },
   "hasPublishedAgenda": true,
   "nextAvailableDate": "valor-ejemplo",
   "posts": [
@@ -11025,11 +11068,15 @@ Campos de la respuesta:
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `verifiedBadge` | Sí | `PublicVerifiedBadgeDto` | Sin restricción adicional declarada | El mismo sello y la misma semántica que en el buscador | `{"status":"VERIFIED","badgeTypeConceptId":"00000000-0000-4000-8000-000000000001","verificationMethodConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","validUntil":"valor-ejemplo"}` |
-| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `VERIFIED` |
+| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `IN_REVIEW` si pidió la verificación y | `VERIFIED` |
 | `verifiedBadge.badgeTypeConceptId` | Sí | `string` | admite null | Qué se verificó | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verificationMethodConceptId` | Sí | `string` | admite null | Cómo se verificó (autoridad externa, alta manual auditada) | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verifiedAt` | Sí | `string` | admite null | Desde cuándo vale, ISO | `valor-ejemplo` |
 | `verifiedBadge.validUntil` | Sí | `string` | admite null | Hasta cuándo vale, ISO | `valor-ejemplo` |
+| `verification` | Sí | `PractitionerVerificationDto` | Sin restricción adicional declarada | El mismo sello en la forma `verification`, derivado de `verifiedBadge`. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `verification.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `verification.verifiedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `verification.validUntil` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `hasPublishedAgenda` | Sí | `boolean` | Sin restricción adicional declarada | Si tiene agenda publicada | `true` |
 | `nextAvailableDate` | Sí | `string` | admite null | Primer día con hueco (YYYY-MM-DD) | `valor-ejemplo` |
 | `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |
@@ -11182,6 +11229,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "verifiedAt": "valor-ejemplo",
     "validUntil": "valor-ejemplo"
   },
+  "verification": {
+    "status": "VERIFIED",
+    "verifiedAt": "2026-07-31T12:00:00.000Z",
+    "validUntil": "valor-ejemplo"
+  },
   "hasPublishedAgenda": true,
   "nextAvailableDate": "valor-ejemplo",
   "posts": [
@@ -11236,11 +11288,15 @@ Campos de la respuesta:
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `verifiedBadge` | Sí | `PublicVerifiedBadgeDto` | Sin restricción adicional declarada | El mismo sello y la misma semántica que en el buscador | `{"status":"VERIFIED","badgeTypeConceptId":"00000000-0000-4000-8000-000000000001","verificationMethodConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","validUntil":"valor-ejemplo"}` |
-| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `VERIFIED` |
+| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `IN_REVIEW` si pidió la verificación y | `VERIFIED` |
 | `verifiedBadge.badgeTypeConceptId` | Sí | `string` | admite null | Qué se verificó | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verificationMethodConceptId` | Sí | `string` | admite null | Cómo se verificó (autoridad externa, alta manual auditada) | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verifiedAt` | Sí | `string` | admite null | Desde cuándo vale, ISO | `valor-ejemplo` |
 | `verifiedBadge.validUntil` | Sí | `string` | admite null | Hasta cuándo vale, ISO | `valor-ejemplo` |
+| `verification` | Sí | `PractitionerVerificationDto` | Sin restricción adicional declarada | El mismo sello en la forma `verification`, derivado de `verifiedBadge`. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `verification.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `verification.verifiedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `verification.validUntil` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `hasPublishedAgenda` | Sí | `boolean` | Sin restricción adicional declarada | Si tiene agenda publicada | `true` |
 | `nextAvailableDate` | Sí | `string` | admite null | Primer día con hueco (YYYY-MM-DD) | `valor-ejemplo` |
 | `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |
@@ -11393,6 +11449,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "verifiedAt": "valor-ejemplo",
     "validUntil": "valor-ejemplo"
   },
+  "verification": {
+    "status": "VERIFIED",
+    "verifiedAt": "2026-07-31T12:00:00.000Z",
+    "validUntil": "valor-ejemplo"
+  },
   "hasPublishedAgenda": true,
   "nextAvailableDate": "valor-ejemplo",
   "posts": [
@@ -11447,11 +11508,15 @@ Campos de la respuesta:
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `verifiedBadge` | Sí | `PublicVerifiedBadgeDto` | Sin restricción adicional declarada | El mismo sello y la misma semántica que en el buscador | `{"status":"VERIFIED","badgeTypeConceptId":"00000000-0000-4000-8000-000000000001","verificationMethodConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","validUntil":"valor-ejemplo"}` |
-| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `VERIFIED` |
+| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `IN_REVIEW` si pidió la verificación y | `VERIFIED` |
 | `verifiedBadge.badgeTypeConceptId` | Sí | `string` | admite null | Qué se verificó | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verificationMethodConceptId` | Sí | `string` | admite null | Cómo se verificó (autoridad externa, alta manual auditada) | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verifiedAt` | Sí | `string` | admite null | Desde cuándo vale, ISO | `valor-ejemplo` |
 | `verifiedBadge.validUntil` | Sí | `string` | admite null | Hasta cuándo vale, ISO | `valor-ejemplo` |
+| `verification` | Sí | `PractitionerVerificationDto` | Sin restricción adicional declarada | El mismo sello en la forma `verification`, derivado de `verifiedBadge`. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `verification.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `verification.verifiedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `verification.validUntil` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `hasPublishedAgenda` | Sí | `boolean` | Sin restricción adicional declarada | Si tiene agenda publicada | `true` |
 | `nextAvailableDate` | Sí | `string` | admite null | Primer día con hueco (YYYY-MM-DD) | `valor-ejemplo` |
 | `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |
@@ -12427,6 +12492,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "verifiedAt": "valor-ejemplo",
     "validUntil": "valor-ejemplo"
   },
+  "verification": {
+    "status": "VERIFIED",
+    "verifiedAt": "2026-07-31T12:00:00.000Z",
+    "validUntil": "valor-ejemplo"
+  },
   "hasPublishedAgenda": true,
   "nextAvailableDate": "valor-ejemplo",
   "posts": [
@@ -12481,11 +12551,15 @@ Campos de la respuesta:
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `verifiedBadge` | Sí | `PublicVerifiedBadgeDto` | Sin restricción adicional declarada | El mismo sello y la misma semántica que en el buscador | `{"status":"VERIFIED","badgeTypeConceptId":"00000000-0000-4000-8000-000000000001","verificationMethodConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","validUntil":"valor-ejemplo"}` |
-| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `VERIFIED` |
+| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `IN_REVIEW` si pidió la verificación y | `VERIFIED` |
 | `verifiedBadge.badgeTypeConceptId` | Sí | `string` | admite null | Qué se verificó | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verificationMethodConceptId` | Sí | `string` | admite null | Cómo se verificó (autoridad externa, alta manual auditada) | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verifiedAt` | Sí | `string` | admite null | Desde cuándo vale, ISO | `valor-ejemplo` |
 | `verifiedBadge.validUntil` | Sí | `string` | admite null | Hasta cuándo vale, ISO | `valor-ejemplo` |
+| `verification` | Sí | `PractitionerVerificationDto` | Sin restricción adicional declarada | El mismo sello en la forma `verification`, derivado de `verifiedBadge`. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `verification.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `verification.verifiedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `verification.validUntil` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `hasPublishedAgenda` | Sí | `boolean` | Sin restricción adicional declarada | Si tiene agenda publicada | `true` |
 | `nextAvailableDate` | Sí | `string` | admite null | Primer día con hueco (YYYY-MM-DD) | `valor-ejemplo` |
 | `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |
@@ -13451,6 +13525,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "verifiedAt": "valor-ejemplo",
     "validUntil": "valor-ejemplo"
   },
+  "verification": {
+    "status": "VERIFIED",
+    "verifiedAt": "2026-07-31T12:00:00.000Z",
+    "validUntil": "valor-ejemplo"
+  },
   "hasPublishedAgenda": true,
   "nextAvailableDate": "valor-ejemplo",
   "posts": [
@@ -13505,11 +13584,15 @@ Campos de la respuesta:
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `verifiedBadge` | Sí | `PublicVerifiedBadgeDto` | Sin restricción adicional declarada | El mismo sello y la misma semántica que en el buscador | `{"status":"VERIFIED","badgeTypeConceptId":"00000000-0000-4000-8000-000000000001","verificationMethodConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"valor-ejemplo","validUntil":"valor-ejemplo"}` |
-| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `VERIFIED` |
+| `verifiedBadge.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `EXPIRED`, `NONE` | `VERIFIED` sólo con respaldo vigente; `IN_REVIEW` si pidió la verificación y | `VERIFIED` |
 | `verifiedBadge.badgeTypeConceptId` | Sí | `string` | admite null | Qué se verificó | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verificationMethodConceptId` | Sí | `string` | admite null | Cómo se verificó (autoridad externa, alta manual auditada) | `00000000-0000-4000-8000-000000000001` |
 | `verifiedBadge.verifiedAt` | Sí | `string` | admite null | Desde cuándo vale, ISO | `valor-ejemplo` |
 | `verifiedBadge.validUntil` | Sí | `string` | admite null | Hasta cuándo vale, ISO | `valor-ejemplo` |
+| `verification` | Sí | `PractitionerVerificationDto` | Sin restricción adicional declarada | El mismo sello en la forma `verification`, derivado de `verifiedBadge`. | `{"status":"VERIFIED","verifiedAt":"2026-07-31T12:00:00.000Z","validUntil":"valor-ejemplo"}` |
+| `verification.status` | Sí | `string` | valores: `VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED` | Sin descripción específica en el contrato OpenAPI. | `VERIFIED` |
+| `verification.verifiedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `verification.validUntil` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `hasPublishedAgenda` | Sí | `boolean` | Sin restricción adicional declarada | Si tiene agenda publicada | `true` |
 | `nextAvailableDate` | Sí | `string` | admite null | Primer día con hueco (YYYY-MM-DD) | `valor-ejemplo` |
 | `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |
