@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -26,6 +26,8 @@ import {
   type RiskDecision,
 } from '../dto';
 import { PaymentsErrorReason } from '../payments.error-reasons';
+import { isDispatchMark } from '../gateway/payments-gateway-dispatch-mark';
+import { PaymentsGatewayChargeService } from './payments-gateway-charge.service';
 import {
   addAmounts,
   compareAmounts,
@@ -67,12 +69,17 @@ export class PaymentsIntentsService {
    * @param intentsRepo - Valor de intents repo requerido por la operación.
    * @param flowRepo - Valor de flow repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
+   * @param gatewayCharge - Cobro por la pasarela (flag `payments.via_gateway`).
+   *   Opcional: sin él, o con el flag apagado, el comportamiento es el previo.
+   *   Al crear la intención sólo comprueba que se podría cobrar por la pasarela;
+   *   el cobro en sí lo despacha `PaymentsTransactionsService.processTransaction`.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly intentsRepo: PaymentIntentsRepository,
     private readonly flowRepo: PaymentFlowRepository,
     private readonly logger: PinoLogger,
+    @Optional() private readonly gatewayCharge?: PaymentsGatewayChargeService,
   ) {
     this.logger.setContext(PaymentsIntentsService.name);
   }
@@ -133,6 +140,14 @@ export class PaymentsIntentsService {
         expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : undefined,
         actorUserId: actor.id,
       });
+      // `payments.via_gateway`: la intención se crea igual que siempre, pero si
+      // la pasarela no podría cobrarla (otra moneda, centavos fraccionados,
+      // vencimiento fuera de rango) falla acá y la transacción se revierte. El
+      // cobro en la pasarela NO ocurre en este paso: va después de la compuerta
+      // de riesgo, en `processTransaction`.
+      if (this.gatewayCharge?.enabled) {
+        this.gatewayCharge.assertRoutable(intent);
+      }
       return this.toIntentResponse(intent, false);
     });
   }
@@ -175,6 +190,7 @@ export class PaymentsIntentsService {
           PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
         );
       }
+      this.assertNotDispatched(intent, intentId);
       if (intent.statusConceptId !== CONCEPTS.PI_PENDING) {
         throw new PreconditionFailedException(
           'Solo se puede bloquear el cambio de una intención pendiente',
@@ -255,6 +271,16 @@ export class PaymentsIntentsService {
         );
       }
 
+      // Un DECLINE pasa la intención a `failed`; con el cobro ya creado en la
+      // pasarela eso dejaría un cobro vivo contra una intención dada por perdida.
+      // Con una simple RESERVA (sin `pi_…`) el `DECLINE` sí se registra —es la
+      // palanca que frena el reintento si el envío nunca llegó—, pero no pasa la
+      // intención a `failed`: la pasarela pudo haber creado el cobro y, fallada, la
+      // deuda se ofrecería a otra intención.
+      const reservedOnly = isDispatchMark(intent.gatewayIntentRef);
+      if (dto.decision === 'DECLINE' && !reservedOnly)
+        this.assertNotDispatched(intent, intentId);
+
       const riskLevel = this.deriveRiskLevel(dto.riskScore);
       const assessment = this.flowRepo.createRiskAssessment(tx, {
         paymentIntentId: intentId,
@@ -270,7 +296,12 @@ export class PaymentsIntentsService {
         actorUserId: actor.id,
       });
 
-      if (dto.decision === 'DECLINE') {
+      if (dto.decision === 'DECLINE' && reservedOnly) {
+        this.logger.warn(
+          { operation: 'payments.intent.risk', intentId },
+          'Risk DECLINE recorded on an intent with a dispatch reservation; status kept so the debt stays blocked until reconciled',
+        );
+      } else if (dto.decision === 'DECLINE') {
         intent.statusConceptId = CONCEPTS.PI_FAILED;
         touch(intent, actor.id);
         this.logger.warn(
@@ -334,6 +365,8 @@ export class PaymentsIntentsService {
         );
       }
 
+      this.assertNotDispatched(intent, intentId);
+
       const amount =
         dto.splitType === 'AMOUNT'
           ? (dto.amount as string)
@@ -385,6 +418,25 @@ export class PaymentsIntentsService {
         isPlatformFee: dto.isPlatformFee ?? false,
       };
     });
+  }
+
+  /**
+   * Una intención con cobro ya creado en la pasarela (`gatewayIntentRef`) no
+   * admite cambios que alteren lo cobrado —importe y moneda por un bloqueo de
+   * cambio, repartos— ni un `DECLINE` que la dé por fallada: el cobro de la
+   * pasarela seguiría vivo y el pago posterior terminaría en conciliación.
+   */
+  private assertNotDispatched(
+    intent: { gatewayIntentRef?: string | null },
+    intentId: string,
+  ): void {
+    if (intent.gatewayIntentRef) {
+      throw new ConflictException(
+        'La intención ya tiene un cobro en la pasarela; no admite este cambio',
+        { intentId },
+        PaymentsErrorReason.PAYMENT_INTENT_VIA_GATEWAY,
+      );
+    }
   }
 
   /**

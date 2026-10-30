@@ -4,3 +4,5 @@ export * from './pharmacy-orders.controller';
 export * from './pharmacy-dispensing.controller';
 export * from './pharmacy-inventory-internal.controller';
 export * from './pharmacy-inventory-read.controller';
+export * from './pharmacy-site-availability.controller';
+export * from './pharmacy-integration-sync.controller';

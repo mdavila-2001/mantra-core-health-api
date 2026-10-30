@@ -8,7 +8,7 @@ import { DisabledTtsAdapter } from './disabled-tts.adapter';
 import { ElevenLabsHttpClient } from './elevenlabs/elevenlabs-http.client';
 import { ElevenLabsTtsAdapter } from './elevenlabs/elevenlabs-tts.adapter';
 import { FakeTtsAdapter } from './fake-tts.adapter';
-import { AudioMetricsService } from '../../../modules/audio_assets/infrastructure/audio-metrics.service';
+import { AudioMetricsService } from '../../../modules/audio_assets/infrastructure/adapters/audio-metrics.service';
 
 @Module({
   imports: [FileStorageModule],

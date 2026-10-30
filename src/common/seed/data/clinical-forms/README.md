@@ -22,6 +22,20 @@ donde el equipo guarde los adjuntos. Un formulario clínico guardado como imagen
 formulario: es un adjunto. Lo que sirve —y lo que este directorio contiene— es la transcripción a
 campos, que es lo que el motor captura.
 
+## Ficha por defecto de la cita médica (2026-10-29)
+
+**375 fichas.** `transversal/cita-medica.json` (`TRANSV_CITA_MEDICA`, clase `GENERAL`) es la ficha
+que el front muestra **por defecto** en «Mis formularios»: el registro de cualquier cita
+ambulatoria, de cualquier especialidad, en el orden de la consulta externa de la NT 022 —datos de
+la cita, motivo, antecedentes relevantes, signos vitales, examen dirigido, diagnóstico con su tipo
+P/D/R y plan—. Es corta a propósito: lo propio de cada especialidad sigue en su ficha base.
+
+- Pregunta lo que evita dañar antes de indicar algo: alergias, medicación habitual y embarazo.
+- Cierra con signos de alarma explicados, comprensión verificada por «teach-back» (AHRQ, dominio
+  público) y el destino de la cita: un control programado pide la fecha; una referencia, su motivo.
+- Se escribe desde `tools/clinical-forms/fichas-otras.mjs` como las demás transversales; nace en
+  versión 1 y conserva su nota (`POSTERIORES_A_V2` en `build-forms.mjs`).
+
 ## Ampliación internacional (2026-10-24)
 
 **374 fichas, 6 373 campos** (antes 370 y 6 164): 29 fichas mejoradas —cada una sube `version`— y

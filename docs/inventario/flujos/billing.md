@@ -40,10 +40,10 @@ _Fuente: `src/modules/billing/README.md:3`_
 |  |  | GET /billing/invoices/{id} | SECURITY_ADMIN | BAJO | 3 |
 |  |  | GET /billing/patient-statements | SECURITY_ADMIN | BAJO | 2 |
 | `ctrl:BillingServiceCatalogController` | Operaciones de BillingServiceCatalogController que el README no asigna a un caso de uso | GET /billing/service-catalog | Cualquier sesión válida | BAJO | 1 |
-|  |  | POST /billing/service-catalog | SECURITY_ADMIN · PRACTITIONER · CLINICIAN | MEDIO | 10 |
+|  |  | POST /billing/service-catalog | SECURITY_ADMIN · PRACTITIONER · CLINICIAN | MEDIO | 5 |
 |  |  | PATCH /billing/service-catalog/{id} | PRACTITIONER · CLINICIAN · SECURITY_ADMIN | MEDIO | 4 |
 |  |  | GET /billing/service-catalog/{id}/image | Cualquier sesión válida | BAJO | 4 |
-|  |  | POST /billing/service-catalog/import-procedures | SECURITY_ADMIN · PRACTITIONER · CLINICIAN | MEDIO | 10 |
+|  |  | POST /billing/service-catalog/import-procedures | SECURITY_ADMIN · PRACTITIONER · CLINICIAN | MEDIO | 5 |
 |  |  | GET /billing/service-catalog/procedure-specialties | Cualquier sesión válida | BAJO | 1 |
 |  |  | GET /billing/service-catalog/procedure-specialties/mine | Cualquier sesión válida | BAJO | 3 |
 |  |  | GET /billing/service-catalog/procedures | Cualquier sesión válida | BAJO | 2 |
@@ -226,69 +226,65 @@ flowchart LR
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
   a5(["SECURITY_ADMIN · PRACTITIONER · CLINICIAN"]):::actor
-  a12(["PRACTITIONER · CLINICIAN · SECURITY_ADMIN"]):::actor
-  a55(["PATIENT"]):::actor
+  a10(["PRACTITIONER · CLINICIAN · SECURITY_ADMIN"]):::actor
+  a51(["PATIENT"]):::actor
   t3[("billing.service_catalog")]:::tabla
   t6[("common.file_versions")]:::tabla
   t7[("common.files")]:::tabla
   t8[("practice.practices")]:::tabla
-  t9[("practice.practitioner_role_assignments")]:::tabla
-  t15[("surveys.survey_assignments")]:::tabla
-  t16[("surveys.survey_questions")]:::tabla
-  t19[("terminology.concept_properties")]:::tabla
-  t21[("profiles.practitioner_specialties")]:::tabla
-  t22[("terminology.catalog_concepts")]:::tabla
-  t26[("billing.invoice_lines")]:::tabla
-  t27[("billing.invoices")]:::tabla
-  t28[("billing.payments_received")]:::tabla
-  t29[("billing.receivable_payment_allocations")]:::tabla
-  t30[("billing.siat_simulated_invoices")]:::tabla
-  t37[("billing.billing_document_links")]:::tabla
-  t48[("clinical.encounters")]:::tabla
-  t49[("profiles.persons")]:::tabla
-  t52[("billing.siat_simulated_outbox")]:::tabla
-  t56[("diagnostic_units.diagnostic_study_offerings")]:::tabla
-  t57[("directory.tenants")]:::tabla
-  t58[("insurance.insurance_claim_lines")]:::tabla
-  t59[("insurance.insurance_claims")]:::tabla
-  t10[("+4 tablas más")]
-  t17[("+4 tablas más")]
+  t11[("practice.practitioner_role_assignments")]:::tabla
+  t14[("terminology.catalog_concepts")]:::tabla
+  t15[("terminology.concept_properties")]:::tabla
+  t18[("profiles.practitioner_specialties")]:::tabla
+  t22[("billing.invoice_lines")]:::tabla
+  t23[("billing.invoices")]:::tabla
+  t24[("billing.payments_received")]:::tabla
+  t25[("billing.receivable_payment_allocations")]:::tabla
+  t26[("billing.siat_simulated_invoices")]:::tabla
+  t33[("billing.billing_document_links")]:::tabla
+  t44[("clinical.encounters")]:::tabla
+  t45[("profiles.persons")]:::tabla
+  t48[("billing.siat_simulated_outbox")]:::tabla
+  t52[("diagnostic_units.diagnostic_study_offerings")]:::tabla
+  t53[("directory.tenants")]:::tabla
+  t54[("insurance.insurance_claim_lines")]:::tabla
+  t55[("insurance.insurance_claims")]:::tabla
   subgraph s0["ctrl:BillingServiceCatalogController · Operaciones de BillingServiceCatalogCont…"]
     o1["GET /billing/service-catalog"]:::op
     o4["POST /billing/service-catalog"]:::op
-    o11["PATCH /billing/service-catalog/{id}"]:::op
-    o13["GET /billing/service-catalog/{id}/image"]:::op
-    o14["POST /billing/service-catalog/import-procedures"]:::op
-    o18["GET /billing/service-catalog/procedure-specialties"]:::op
-    o20["GET /billing/service-catalog/procedure-specialties/mine"]:::op
-    o23["GET /billing/service-catalog/procedures"]:::op
+    o9["PATCH /billing/service-catalog/{id}"]:::op
+    o12["GET /billing/service-catalog/{id}/image"]:::op
+    o13["POST /billing/service-catalog/import-procedures"]:::op
+    o16["GET /billing/service-catalog/procedure-specialties"]:::op
+    o17["GET /billing/service-catalog/procedure-specialties/mine"]:::op
+    o19["GET /billing/service-catalog/procedures"]:::op
   end
-  t31[("+5 tablas más")]
-  t33[("+5 tablas más")]
-  t35[("+6 tablas más")]
-  t38[("+12 tablas más")]
-  t40[("+5 tablas más")]
-  t42[("+6 tablas más")]
-  t44[("+6 tablas más")]
-  t46[("+7 tablas más")]
+  t27[("+5 tablas más")]
+  t29[("+5 tablas más")]
+  t31[("+6 tablas más")]
+  t34[("+12 tablas más")]
+  t36[("+5 tablas más")]
+  t38[("+6 tablas más")]
+  t40[("+6 tablas más")]
+  t42[("+7 tablas más")]
   subgraph s1["ctrl:BillingSimulatedController · Operaciones de BillingSimulatedController que…"]
-    o24["GET /billing/simulated/catalogs"]:::op
-    o25["GET /billing/simulated/charges"]:::op
-    o32["POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/pay…"]:::op
-    o34["POST /billing/simulated/charges/{chargeId}/invoices"]:::op
-    o36["POST /billing/simulated/charges/{chargeId}/payment"]:::op
-    o39["GET /billing/simulated/invoices/{invoiceId}"]:::op
-    o41["POST /billing/simulated/invoices/{invoiceId}/annulment"]:::op
-    o43["POST /billing/simulated/invoices/{invoiceId}/annulment-reversal"]:::op
-    o45["POST /billing/simulated/invoices/{invoiceId}/email"]:::op
-    o47["GET /billing/simulated/my-invoices"]:::op
-    o50["GET /billing/simulated/my-invoices/{invoiceId}"]:::op
-    o51["GET /billing/simulated/outbox"]:::op
-    o53["GET /billing/simulated/status"]:::op
+    o20["GET /billing/simulated/catalogs"]:::op
+    o21["GET /billing/simulated/charges"]:::op
+    o28["POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/pay…"]:::op
+    o30["POST /billing/simulated/charges/{chargeId}/invoices"]:::op
+    o32["POST /billing/simulated/charges/{chargeId}/payment"]:::op
+    o35["GET /billing/simulated/invoices/{invoiceId}"]:::op
+    o37["POST /billing/simulated/invoices/{invoiceId}/annulment"]:::op
+    o39["POST /billing/simulated/invoices/{invoiceId}/annulment-reversal"]:::op
+    o41["POST /billing/simulated/invoices/{invoiceId}/email"]:::op
+    o43["GET /billing/simulated/my-invoices"]:::op
+    o46["GET /billing/simulated/my-invoices/{invoiceId}"]:::op
+    o47["GET /billing/simulated/outbox"]:::op
+    o49["GET /billing/simulated/status"]:::op
   end
-  t60[("+4 tablas más")]
+  t56[("+4 tablas más")]
   subgraph s2["ctrl:PatientSpendingController · Operaciones de PatientSpendingController que e…"]
-    o54["GET /patient-spending/me"]:::op
+    o50["GET /patient-spending/me"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -298,125 +294,121 @@ flowchart LR
   o4 -->|"LEE"| t6
   o4 -->|"LEE"| t7
   o4 -->|"LEE"| t8
-  o4 -->|"LEE"| t9
-  o4 -.-> t10
-  a12 --> o11
-  o11 -->|"ACTUALIZA"| t3
-  o11 -->|"LEE"| t3
-  o11 -->|"LEE"| t8
-  o11 -->|"LEE"| t9
-  a2 --> o13
+  a10 --> o9
+  o9 -->|"ACTUALIZA"| t3
+  o9 -->|"LEE"| t3
+  o9 -->|"LEE"| t8
+  o9 -->|"LEE"| t11
+  a2 --> o12
+  o12 -->|"LEE"| t3
+  o12 -->|"LEE"| t6
+  o12 -->|"LEE"| t7
+  o12 -->|"LEE"| t8
+  a5 --> o13
+  o13 -->|"CREA"| t3
   o13 -->|"LEE"| t3
-  o13 -->|"LEE"| t6
-  o13 -->|"LEE"| t7
   o13 -->|"LEE"| t8
-  a5 --> o14
-  o14 -->|"CREA"| t3
-  o14 -->|"LEE"| t3
-  o14 -->|"LEE"| t8
-  o14 -->|"LEE"| t9
-  o14 -->|"CREA"| t15
-  o14 -->|"CREA"| t16
-  o14 -.-> t17
-  a2 --> o18
-  o18 -->|"LEE"| t19
+  o13 -->|"LEE"| t14
+  o13 -->|"LEE"| t15
+  a2 --> o16
+  o16 -->|"LEE"| t15
+  a2 --> o17
+  o17 -->|"LEE"| t18
+  o17 -->|"LEE"| t14
+  o17 -->|"LEE"| t15
+  a2 --> o19
+  o19 -->|"LEE"| t14
+  o19 -->|"LEE"| t15
   a2 --> o20
-  o20 -->|"LEE"| t21
-  o20 -->|"LEE"| t22
-  o20 -->|"LEE"| t19
-  a2 --> o23
-  o23 -->|"LEE"| t22
-  o23 -->|"LEE"| t19
-  a2 --> o24
-  a2 --> o25
-  o25 -->|"LEE"| t26
-  o25 -->|"LEE"| t27
-  o25 -->|"LEE"| t28
-  o25 -->|"LEE"| t29
-  o25 -->|"LEE"| t3
-  o25 -->|"LEE"| t30
-  o25 -.-> t31
+  a2 --> o21
+  o21 -->|"LEE"| t22
+  o21 -->|"LEE"| t23
+  o21 -->|"LEE"| t24
+  o21 -->|"LEE"| t25
+  o21 -->|"LEE"| t3
+  o21 -->|"LEE"| t26
+  o21 -.-> t27
+  a2 --> o28
+  o28 -->|"LEE"| t22
+  o28 -->|"LEE"| t23
+  o28 -->|"LEE"| t24
+  o28 -->|"LEE"| t25
+  o28 -->|"LEE"| t3
+  o28 -->|"LEE"| t26
+  o28 -.-> t29
+  a2 --> o30
+  o30 -->|"LEE"| t22
+  o30 -->|"LEE"| t23
+  o30 -->|"LEE"| t24
+  o30 -->|"LEE"| t25
+  o30 -->|"LEE"| t3
+  o30 -->|"CREA"| t26
+  o30 -.-> t31
   a2 --> o32
-  o32 -->|"LEE"| t26
-  o32 -->|"LEE"| t27
-  o32 -->|"LEE"| t28
-  o32 -->|"LEE"| t29
-  o32 -->|"LEE"| t3
-  o32 -->|"LEE"| t30
-  o32 -.-> t33
-  a2 --> o34
-  o34 -->|"LEE"| t26
-  o34 -->|"LEE"| t27
-  o34 -->|"LEE"| t28
-  o34 -->|"LEE"| t29
-  o34 -->|"LEE"| t3
-  o34 -->|"CREA"| t30
-  o34 -.-> t35
-  a2 --> o36
-  o36 -->|"CREA"| t37
-  o36 -->|"CREA"| t26
-  o36 -->|"LEE"| t26
-  o36 -->|"CREA"| t27
-  o36 -->|"LEE"| t27
-  o36 -->|"CREA"| t28
-  o36 -.-> t38
+  o32 -->|"CREA"| t33
+  o32 -->|"CREA"| t22
+  o32 -->|"LEE"| t22
+  o32 -->|"CREA"| t23
+  o32 -->|"LEE"| t23
+  o32 -->|"CREA"| t24
+  o32 -.-> t34
+  a2 --> o35
+  o35 -->|"LEE"| t22
+  o35 -->|"LEE"| t23
+  o35 -->|"LEE"| t24
+  o35 -->|"LEE"| t25
+  o35 -->|"LEE"| t3
+  o35 -->|"LEE"| t26
+  o35 -.-> t36
+  a2 --> o37
+  o37 -->|"LEE"| t22
+  o37 -->|"LEE"| t23
+  o37 -->|"LEE"| t24
+  o37 -->|"LEE"| t25
+  o37 -->|"LEE"| t3
+  o37 -->|"ACTUALIZA"| t26
+  o37 -.-> t38
   a2 --> o39
-  o39 -->|"LEE"| t26
-  o39 -->|"LEE"| t27
-  o39 -->|"LEE"| t28
-  o39 -->|"LEE"| t29
+  o39 -->|"LEE"| t22
+  o39 -->|"LEE"| t23
+  o39 -->|"LEE"| t24
+  o39 -->|"LEE"| t25
   o39 -->|"LEE"| t3
-  o39 -->|"LEE"| t30
+  o39 -->|"ACTUALIZA"| t26
   o39 -.-> t40
   a2 --> o41
-  o41 -->|"LEE"| t26
-  o41 -->|"LEE"| t27
-  o41 -->|"LEE"| t28
-  o41 -->|"LEE"| t29
+  o41 -->|"LEE"| t22
+  o41 -->|"LEE"| t23
+  o41 -->|"LEE"| t24
+  o41 -->|"LEE"| t25
   o41 -->|"LEE"| t3
-  o41 -->|"ACTUALIZA"| t30
+  o41 -->|"ACTUALIZA"| t26
   o41 -.-> t42
   a2 --> o43
   o43 -->|"LEE"| t26
-  o43 -->|"LEE"| t27
-  o43 -->|"LEE"| t28
-  o43 -->|"LEE"| t29
-  o43 -->|"LEE"| t3
-  o43 -->|"ACTUALIZA"| t30
-  o43 -.-> t44
-  a2 --> o45
-  o45 -->|"LEE"| t26
-  o45 -->|"LEE"| t27
-  o45 -->|"LEE"| t28
-  o45 -->|"LEE"| t29
-  o45 -->|"LEE"| t3
-  o45 -->|"ACTUALIZA"| t30
-  o45 -.-> t46
+  o43 -->|"LEE"| t44
+  o43 -->|"LEE"| t8
+  o43 -->|"LEE"| t45
+  a2 --> o46
+  o46 -->|"LEE"| t26
+  o46 -->|"LEE"| t44
+  o46 -->|"LEE"| t8
+  o46 -->|"LEE"| t45
   a2 --> o47
-  o47 -->|"LEE"| t30
+  o47 -->|"LEE"| t26
   o47 -->|"LEE"| t48
-  o47 -->|"LEE"| t8
-  o47 -->|"LEE"| t49
-  a2 --> o50
-  o50 -->|"LEE"| t30
-  o50 -->|"LEE"| t48
-  o50 -->|"LEE"| t8
-  o50 -->|"LEE"| t49
-  a2 --> o51
-  o51 -->|"LEE"| t30
-  o51 -->|"LEE"| t52
-  o51 -->|"LEE"| t48
-  a2 --> o53
-  o53 -->|"LEE"| t48
-  o53 -->|"LEE"| t8
-  a55 --> o54
-  o54 -->|"LEE"| t26
-  o54 -->|"LEE"| t27
-  o54 -->|"LEE"| t56
-  o54 -->|"LEE"| t57
-  o54 -->|"LEE"| t58
-  o54 -->|"LEE"| t59
-  o54 -.-> t60
+  o47 -->|"LEE"| t44
+  a2 --> o49
+  o49 -->|"LEE"| t44
+  o49 -->|"LEE"| t8
+  a51 --> o50
+  o50 -->|"LEE"| t22
+  o50 -->|"LEE"| t23
+  o50 -->|"LEE"| t52
+  o50 -->|"LEE"| t53
+  o50 -->|"LEE"| t54
+  o50 -->|"LEE"| t55
+  o50 -.-> t56
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -1532,42 +1524,8 @@ flowchart TD
   n38 -->|"no"| n40
   n41[("CREA billing.service_catalog")]:::efecto
   n40 --> n41
-  n42["Llama a BillingServiceCatalogService.attachDefaultSatisfactionSurveys"]:::llamada
+  n42(("201 Responde con éxito")):::ok
   n41 --> n42
-  n43["Repite: por cada const item de items"]:::bucle
-  n42 --> n43
-  n44{"owner === undefined"}:::decision
-  n43 -->|"cada elemento"| n44
-  n45["Llama a BillingServiceCatalogService.findDefaultSurveyOwner"]:::llamada
-  n44 -->|"sí"| n45
-  n46[("LEE practice.practitioner_role_assignments")]:::efecto
-  n45 --> n46
-  n47["Llama a TemplatesRepository.createTemplate"]:::llamada
-  n46 --> n47
-  n44 -->|"no"| n47
-  n43 -->|"al terminar"| n47
-  n48[("CREA surveys.survey_templates")]:::efecto
-  n47 --> n48
-  n49["Llama a TemplatesRepository.createVersion"]:::llamada
-  n48 --> n49
-  n50[("CREA surveys.survey_versions")]:::efecto
-  n49 --> n50
-  n51["Repite: por cada const version de versions"]:::bucle
-  n50 --> n51
-  n52["Llama a TemplatesRepository.createQuestion"]:::llamada
-  n51 -->|"cada elemento"| n52
-  n53[("CREA surveys.survey_questions")]:::efecto
-  n52 --> n53
-  n54["Repite: forEach(…)"]:::bucle
-  n53 --> n54
-  n51 -->|"al terminar"| n54
-  n55["Llama a AssignmentsRepository.create"]:::llamada
-  n54 -->|"cada elemento"| n55
-  n56[("CREA surveys.survey_assignments")]:::efecto
-  n55 --> n56
-  n57(("201 Responde con éxito")):::ok
-  n56 --> n57
-  n54 -->|"al terminar"| n57
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1844,47 +1802,16 @@ flowchart TD
   n19["Repite: ciclo for"]:::bucle
   n18 --> n19
   n16 -->|"al terminar"| n19
-  n20["Llama a ServiceCatalogRepository.create"]:::llamada
+  n20["Repite: por cada const row de pending.slice(i, i + INSERT_CHUNK)"]:::bucle
   n19 -->|"cada elemento"| n20
-  n21[("CREA billing.service_catalog")]:::efecto
-  n20 --> n21
-  n22["Llama a BillingServiceCatalogService.attachDefaultSatisfactionSurveys"]:::llamada
+  n21["Llama a ServiceCatalogRepository.create"]:::llamada
+  n20 -->|"cada elemento"| n21
+  n22[("CREA billing.service_catalog")]:::efecto
   n21 --> n22
-  n23["Repite: por cada const item de items"]:::bucle
+  n23(("201 Responde con éxito")):::ok
   n22 --> n23
-  n24{"owner === undefined"}:::decision
-  n23 -->|"cada elemento"| n24
-  n25["Llama a BillingServiceCatalogService.findDefaultSurveyOwner"]:::llamada
-  n24 -->|"sí"| n25
-  n26[("LEE practice.practitioner_role_assignments")]:::efecto
-  n25 --> n26
-  n27["Llama a TemplatesRepository.createTemplate"]:::llamada
-  n26 --> n27
-  n24 -->|"no"| n27
-  n23 -->|"al terminar"| n27
-  n28[("CREA surveys.survey_templates")]:::efecto
-  n27 --> n28
-  n29["Llama a TemplatesRepository.createVersion"]:::llamada
-  n28 --> n29
-  n30[("CREA surveys.survey_versions")]:::efecto
-  n29 --> n30
-  n31["Repite: por cada const version de versions"]:::bucle
-  n30 --> n31
-  n32["Llama a TemplatesRepository.createQuestion"]:::llamada
-  n31 -->|"cada elemento"| n32
-  n33[("CREA surveys.survey_questions")]:::efecto
-  n32 --> n33
-  n34["Repite: forEach(…)"]:::bucle
-  n33 --> n34
-  n31 -->|"al terminar"| n34
-  n35["Llama a AssignmentsRepository.create"]:::llamada
-  n34 -->|"cada elemento"| n35
-  n36[("CREA surveys.survey_assignments")]:::efecto
-  n35 --> n36
-  n37(("201 Responde con éxito")):::ok
-  n36 --> n37
-  n34 -->|"al terminar"| n37
-  n19 -->|"al terminar"| n37
+  n20 -->|"al terminar"| n23
+  n19 -->|"al terminar"| n23
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

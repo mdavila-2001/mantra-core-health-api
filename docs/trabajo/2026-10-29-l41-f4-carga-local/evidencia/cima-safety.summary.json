@@ -1,0 +1,37 @@
+{
+  "drugs": 2380,
+  "relationships": {
+    "CONTRAINDICATED_IN": 6951,
+    "ADVERSE_EFFECT": 64059
+  },
+  "frequency": {
+    "SIN_FRECUENCIA": 50919,
+    "FREQUENT": 4720,
+    "VERY_RARE": 2278,
+    "OCCASIONAL": 3770,
+    "VERY_FREQUENT": 2372
+  },
+  "interactionsBySeverity": {},
+  "unmatchedBySection": {
+    "4.3": 6656,
+    "4.8": 101304
+  },
+  "unmatchedByReason": {
+    "no-exact-term": 55343,
+    "ambiguous": 23411,
+    "dose-guard": 16231,
+    "not-a-sentence": 12975
+  },
+  "loadableRelationships": 71010,
+  "missingConcepts": 0,
+  "lactmed": {
+    "summaries": 1148,
+    "relationships": 588,
+    "loadableRelationships": 588,
+    "unmatchedByReason": {
+      "no-catalog-drug": 314,
+      "dose-guard": 239,
+      "ambiguous-atc": 7
+    }
+  }
+}

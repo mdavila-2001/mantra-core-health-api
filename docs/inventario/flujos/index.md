@@ -2,9 +2,9 @@
 
 # Inventario de flujos
 
-**74 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 72 de módulo), **12 máquinas de estado** y **1625 árboles de decisión**.
+**74 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 72 de módulo), **12 máquinas de estado** y **1627 árboles de decisión**.
 
-- Operaciones con decisiones propias: 1468 · sin ellas: 157
+- Operaciones con decisiones propias: 1469 · sin ellas: 158
 - Operaciones sin proceso asignado: 0
 - Procesos por agrupación: AGRUPACION_POR_CONTROLADOR 32 · CASO_DE_USO_README 15 · MIXTO 25 · CURADO_EN_DOCUMENTO 2
 
@@ -25,7 +25,7 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 | `clinical` | 1 | 42 | 1 | [clinical.md](clinical.md) |
 | `clinical_ext` | 1 | 32 | 0 | [clinical_ext.md](clinical_ext.md) |
 | `common` | 1 | 19 | 0 | [common.md](common.md) |
-| `community` | 1 | 103 | 0 | [community.md](community.md) |
+| `community` | 1 | 104 | 0 | [community.md](community.md) |
 | `consent` | 2 | 27 | 0 | [consent.md](consent.md) |
 | `content_packs` | 1 | 2 | 0 | [content_packs.md](content_packs.md) |
 | `crm` | 1 | 16 | 0 | [crm.md](crm.md) |
@@ -75,7 +75,7 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 | `reporting` | 1 | 12 | 0 | [reporting.md](reporting.md) |
 | `scheduling` | 2 | 66 | 1 | [scheduling.md](scheduling.md) |
 | `search_platform` | 1 | 4 | 0 | [search_platform.md](search_platform.md) |
-| `surveys` | 1 | 17 | 0 | [surveys.md](surveys.md) |
+| `surveys` | 1 | 18 | 0 | [surveys.md](surveys.md) |
 | `system_context` | 1 | 13 | 0 | [system_context.md](system_context.md) |
 | `system_ops` | 1 | 24 | 0 | [system_ops.md](system_ops.md) |
 | `telemetry` | 1 | 25 | 0 | [telemetry.md](telemetry.md) |

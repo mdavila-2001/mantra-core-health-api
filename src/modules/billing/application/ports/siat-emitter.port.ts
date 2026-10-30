@@ -45,7 +45,10 @@ export interface ISiatEmitterPort {
   readonly siatMode: 'simulated' | 'real';
 
   /** Perfil del emisor: NIT real o sintético según el modo. */
-  resolveIssuer(practiceId: string, legalName: string): Promise<SiatIssuerProfile>;
+  resolveIssuer(
+    practiceId: string,
+    legalName: string,
+  ): Promise<SiatIssuerProfile>;
 
   /** CUIS y CUFD vigentes al instante indicado. */
   resolveCredentials(

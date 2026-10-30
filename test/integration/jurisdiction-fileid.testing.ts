@@ -172,6 +172,9 @@ export function api(orm: MikroORM): ProfilesPractitionersService {
     unused,
     unused,
     unused,
+    // v4.2.67: admisiones (alta, lectura del estado visible).
+    unused,
+    unused,
     logger as never,
   );
 }

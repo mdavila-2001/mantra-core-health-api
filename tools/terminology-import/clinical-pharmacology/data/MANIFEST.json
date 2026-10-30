@@ -1,41 +1,41 @@
 {
-  "generatedAt": "2026-10-24T19:07:29.151Z",
+  "generatedAt": "2026-10-30T05:25:41.990Z",
   "note": "Datos normalizados (no crudos). Ver SOURCES.md y docs/seed-research/clinical-pharmacology.md.",
   "files": [
     {
       "name": "monographs.part-001.ndjson.gz",
       "from": "out/monographs.ndjson",
-      "bytes": 28633963,
-      "sha256": "5ae6cd35a8c3552b4c2c8d9758d7e83b84a0c3d4f51ab23a356e77cd802aa626",
-      "rows": 895
+      "bytes": 28656644,
+      "sha256": "6f00e7a4b2c4f91f968010547bf082e79ceecf8ebd2c6ea9f281c770f498827e",
+      "rows": 899
     },
     {
       "name": "monographs.part-002.ndjson.gz",
       "from": "out/monographs.ndjson",
-      "bytes": 28938567,
-      "sha256": "a4b0e9787de2377ed5d6e166f58e4438456dff05900d43fa4100f4b61278c0a7",
-      "rows": 619
+      "bytes": 29126921,
+      "sha256": "845197ffd0bd395b32635207e976b98eebf0694baf92bf62f0ad4ea672997c24",
+      "rows": 618
     },
     {
       "name": "monographs.part-003.ndjson.gz",
       "from": "out/monographs.ndjson",
-      "bytes": 41361906,
-      "sha256": "779c510452a266c2188df52e68015f352fd8c38967a4ffe69ff4235f4a06a8d7",
+      "bytes": 41427124,
+      "sha256": "f67e35f618a9980965b318ae2927527b07a34fa54ddb0551d98a1fb6fa5fdbb6",
       "rows": 373
     },
     {
       "name": "monographs.part-004.ndjson.gz",
       "from": "out/monographs.ndjson",
-      "bytes": 27628723,
-      "sha256": "ad7532963c26a096f47d04d7957085ceb298e2d10b1a9076255e999f4b071a71",
-      "rows": 781
+      "bytes": 27581484,
+      "sha256": "21bcac705288855b030f7da5f2a19715061ca6a331e3b9f72afafa31a7a7c13d",
+      "rows": 798
     },
     {
       "name": "monographs.part-005.ndjson.gz",
       "from": "out/monographs.ndjson",
-      "bytes": 4554328,
-      "sha256": "7445c9dc14ff6c27a9009f6fb7cbb003c394d80ab3458bc7dc57f7b8e3a5e47f",
-      "rows": 215
+      "bytes": 4185006,
+      "sha256": "b08163bfb2eac58dedaf96aadcdba41f78d0ab699cd82d709e7548d23a6eccfc",
+      "rows": 195
     },
     {
       "name": "gsrs-entries.part-001.ndjson.gz",
@@ -47,8 +47,8 @@
     {
       "name": "monographs.meta.json.gz",
       "from": "out/monographs.meta.json",
-      "bytes": 3142,
-      "sha256": "27d45713c1768a533bafa7f98ed57afb574c19a22f873a60b5808e0a22051f0f",
+      "bytes": 3383,
+      "sha256": "64d05f45c7dc2ac5ebedf889e14eaa68d4d3983bfa21fc2ed0639953c1b13fd1",
       "rows": null
     },
     {
@@ -61,29 +61,29 @@
     {
       "name": "coverage.json.gz",
       "from": "out/coverage.json",
-      "bytes": 6787,
-      "sha256": "34829bbdac8098a05cc642b7a7dc2dce0a4cb67b81238cfd05cf73063500508b",
+      "bytes": 6677,
+      "sha256": "76fb3dff711dd598936367e3c8649633bf2801c87aaed3bcb167d6617e7d3644",
       "rows": null
     },
     {
       "name": "coverage.md.gz",
       "from": "out/coverage.md",
-      "bytes": 1005,
-      "sha256": "0c5dcafcf04d47169f66a16731782f1b738e92d2cf325d3355803376bb6feadf",
+      "bytes": 985,
+      "sha256": "8ebfffa6143da59397c3c1d9b30fddfa27a2bdc2521ad70ed0b40eeea67814af",
       "rows": null
     },
     {
       "name": "validate-links.json.gz",
       "from": "out/validate-links.json",
       "bytes": 473,
-      "sha256": "8e940e93d0bec508b5f13ab9553b70d4cf472d5c22fd923a40bcaca45a576178",
+      "sha256": "d8c00688ae14b008a8ab96890c68bb646b055e59525495fec48956358e2c1dcb",
       "rows": null
     },
     {
       "name": "load-plan.dry-run.json.gz",
       "from": "out/load-plan.dry-run.json",
-      "bytes": 206,
-      "sha256": "eb1b4d776eddbff67e46b6659564e6d35f52225f914e8276a8287afe79c0ca8f",
+      "bytes": 204,
+      "sha256": "57419aceffe251c7bc7a04c1b8cce9aefd3f135471bfacad7fa4513d90abfc25",
       "rows": null
     },
     {
@@ -141,11 +141,18 @@
       "bytes": 419,
       "sha256": "bc2c3ea02982b49cc0060394196b67a708110111420cea214bb04ab51ebe5c32",
       "rows": null
+    },
+    {
+      "name": "ema-pi__fetch.meta.json.gz",
+      "from": "cache/ema-pi/fetch.meta.json",
+      "bytes": 83701,
+      "sha256": "2d90de614efdbaa475ddaa761431126d61a0be495c82a1e1f5ac6502595d7e77",
+      "rows": null
     }
   ],
   "ndjson": {
     "monographs": {
-      "sha256": "c0cfda65e477ddbade4b3025ca40f5cf80a1cba6d4cf30a6f6b9853ff5ee3160",
+      "sha256": "642cd0bdc9115f41620ed8443b307b646f62548215dabbb45ac61b4c1fdd8363",
       "rows": 2883,
       "parts": 5
     },

@@ -995,6 +995,29 @@ export class IamPractitionerSelfRegistrationService {
           )
         : null;
 
+      // 7c) La solicitud de admisión (verificación del alta). Va en ESTA
+      // transacción: si no se puede abrir, el alta entera se revierte en vez de
+      // dejar a un profesional pendiente que nadie va a ver en la bandeja. Se abre
+      // con todas las fichas ya creadas, porque la foto del formulario las toma.
+      // Si pidió atestación, el texto y la fecha quedan con la solicitud.
+      if (dto.attestationAccepted === true && !dto.attestationTextVersion) {
+        throw new PreconditionFailedException(
+          'La atestación necesita la versión del texto aceptado',
+          { field: 'attestationTextVersion' },
+        );
+      }
+      await this.profiles.openPractitionerAdmission(tx, {
+        practitionerProfileId: person.id,
+        actorUserId: assisted?.actor.id ?? user.id,
+        attestation:
+          dto.attestationAccepted === true && dto.attestationTextVersion
+            ? {
+                acceptedAt: new Date(),
+                textVersion: dto.attestationTextVersion,
+              }
+            : undefined,
+      });
+
       // 8) Verificación del correo. No condiciona el acceso.
       const { raw, hash } = this.tokenService.issueRefreshToken();
       this.emailVerificationsRepo.create(tx, {

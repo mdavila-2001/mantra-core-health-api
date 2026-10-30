@@ -14,7 +14,7 @@ import {
   type FlowDefinition,
   type FlowHttpMethod,
 } from '../../modules/qa_lab/domain/flow-catalog';
-import { FLOW_CATALOG } from '../../modules/qa_lab/flows';
+import { FLOW_CATALOG } from '../../modules/qa_lab/domain/flows';
 import { CONCEPTS, SEED } from '../constants/concepts';
 import { createdBy } from '../persistence/audit-fields';
 

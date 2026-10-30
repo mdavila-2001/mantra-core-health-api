@@ -119,9 +119,14 @@ const EMAIL_BOUNCE = ':email';
  */
 @Injectable()
 export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
-  /** Avisos que además tocan el chat de `SupportAdmin` (TAREA-15, puntos 1 y 3). */
+  /**
+   * Avisos que además tocan el chat de `SupportAdmin` (TAREA-15, puntos 1 y 3).
+   *
+   * La demora se sumó por pedido del cliente (2026-10-28): el paciente tiene
+   * que enterarse aunque no mire la campana, y el chat es lo que más mira.
+   */
   private static readonly KINDS_WITH_CHAT: ReadonlySet<AgendaNoticeKind> =
-    new Set(['BOOKING_STATE_CHANGED']);
+    new Set(['BOOKING_STATE_CHANGED', 'PRACTITIONER_DELAY']);
 
   private readonly env = loadAgendaNoticesEnv();
 
@@ -278,8 +283,8 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
   /**
    * Manda el mismo aviso al chat de `SupportAdmin`, sólo para los avisos que
    * el pedido cubre (TAREA-15, puntos 1 y 3): nueva solicitud, aceptar,
-   * rechazar, mover y cancelar. Los otros tres avisos (cupo liberado, demora,
-   * recordatorio) no lo pide la ficha y no se inventan.
+   * rechazar, mover y cancelar, y la demora del profesional. Cupo liberado y
+   * recordatorio no los pide la ficha y no se inventan.
    *
    * Corre después del in-app y del correo, y no cambia lo que devuelven: es
    * información adicional, no una condición para el resto.

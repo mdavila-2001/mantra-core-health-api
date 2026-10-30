@@ -30,7 +30,7 @@ _Fuente: `src/modules/scheduling/README.md:3`_
 |  |  | POST /scheduling/bookings/{id}/accept | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 57 |
 |  |  | POST /scheduling/bookings/{id}/cancel | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | MEDIO | 49 |
 |  |  | POST /scheduling/bookings/{id}/check-in | SCHEDULING_ADMIN · SCHEDULING_AGENT | MEDIO | 5 |
-|  |  | POST /scheduling/bookings/{id}/complete | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 14 |
+|  |  | POST /scheduling/bookings/{id}/complete | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 26 |
 |  |  | POST /scheduling/bookings/{id}/delay | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 36 |
 |  |  | GET /scheduling/bookings/{id}/payment-receipts | PATIENT · PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT | BAJO | 9 |
 |  |  | POST /scheduling/bookings/{id}/payment-receipts | PATIENT | MEDIO | 40 |
@@ -136,7 +136,7 @@ flowchart LR
   t23[("+4 tablas más")]
   t27[("+51 tablas más")]
   t31[("+43 tablas más")]
-  t36[("+8 tablas más")]
+  t36[("+20 tablas más")]
   t38[("+30 tablas más")]
   t43[("+3 tablas más")]
   t46[("+34 tablas más")]

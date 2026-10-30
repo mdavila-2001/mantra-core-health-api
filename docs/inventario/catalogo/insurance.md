@@ -1726,7 +1726,7 @@ Representa aseguradoras que emiten o administran coberturas de salud utilizadas 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `uq_insurance_carriers_tenant_id` | sí | tenant_id | Garantiza que no se repita la combinación (tenant_id) _(DOCUMENTO)_; Soporta la clave foránea fk_insurance_carriers_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
-| `uq_insurance_carriers_carrier_code` | sí | carrier_code | Garantiza que no se repita la combinación (carrier_code) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «carrier_code», la primera columna del índice _(CONSULTA)_ |
+| `uq_insurance_carriers_carrier_code` | sí | carrier_code | Garantiza que no se repita la combinación (carrier_code) _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «carrier_code», la primera columna del índice _(CONSULTA)_ |
 | `ix_insurance_carriers_tenant_id` | no | tenant_id | Soporta la clave foránea fk_insurance_carriers_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_insurance_carriers_jurisdiction_concept_id` | no | jurisdiction_concept_id | Soporta la clave foránea fk_insurance_carriers_jurisdiction_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_insurance_carriers_public_profile_id` | no | public_profile_id | Soporta la clave foránea fk_insurance_carriers_public_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |

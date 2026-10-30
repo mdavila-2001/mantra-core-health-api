@@ -37,6 +37,7 @@ import {
   DispensationsRepository,
   PharmacyOrderSubstitutionsRepository,
 } from '../../infrastructure/repositories';
+import { PrescriptionOrderGuard } from './prescription-order-guard';
 import { addressText } from '../../domain/address-text';
 import { isRetailList } from '../../domain/pricing/is-retail-list';
 import {
@@ -353,6 +354,7 @@ export class PharmacyOrdersUseCases {
     private readonly orderChat: PharmacyOrderChatPort,
     @Inject(PERSON_ACCOUNT_LINKS_PORT)
     private readonly accountLinks: PersonAccountLinksPort,
+    private readonly prescriptionGuard: PrescriptionOrderGuard,
   ) {
     this.logger.setContext('PharmacyOrdersService');
   }
@@ -399,18 +401,21 @@ export class PharmacyOrdersUseCases {
         });
       }
 
-      if (dto.medicationRequestId) {
-        const request = await this.ordersRepo.findOwnMedicationRequest(
-          tx,
-          dto.medicationRequestId,
-          patientProfileId,
-        );
-        // Receta inexistente y receta ajena: el mismo 404.
-        if (!request) {
-          throw new ResourceNotFoundException('Receta no encontrada', {
-            medicationRequestId: dto.medicationRequestId,
-          });
-        }
+      // Receta con lock y un solo instante por pedido (FAR-03).
+      const now = new Date();
+      const request = dto.medicationRequestId
+        ? await this.prescriptionGuard.lockOwnRequest(
+            tx,
+            dto.medicationRequestId,
+            patientProfileId,
+            now,
+          )
+        : null;
+      // Receta inexistente y receta ajena: el mismo 404.
+      if (dto.medicationRequestId && !request) {
+        throw new ResourceNotFoundException('Receta no encontrada', {
+          medicationRequestId: dto.medicationRequestId,
+        });
       }
 
       const productIds = dto.lines.map((line) => line.productId);
@@ -433,6 +438,14 @@ export class PharmacyOrdersUseCases {
           { productIds: unknown },
         );
       }
+
+      // El pedido respeta la receta (FAR-03), antes de reservar nada.
+      await this.prescriptionGuard.assertOrderRespectsPrescription(
+        tx,
+        request,
+        products,
+        dto.lines,
+      );
 
       // El precio se CONGELA acá, al crear (v4.2.1): lo que el paciente vio
       // al pedir es lo que el comprobante va a decir, aunque la lista cambie

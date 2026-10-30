@@ -92,10 +92,10 @@ export class PractitionerSimpleAccountingService {
   ) {}
 
   /**
-   * Práctica de una lectura o una escritura por `practiceId`: el profesional
-   * está vinculado a ella (misma regla que sus hermanos) y es del tenant activo
-   * (ACC-01, como `createOwnLiability`). Una práctica de otro tenant responde
-   * igual en las lecturas que en las escrituras.
+   * Práctica de una operación por `practiceId`, de lectura o de escritura: el
+   * profesional está vinculado a ella (misma regla que sus hermanos) y es del
+   * tenant activo (ACC-01, como `createOwnLiability`). Lo ajeno responde idéntico
+   * a lo inexistente: 404, mismo mensaje y `reason`, sin `details`.
    *
    * @returns El perfil profesional del actor.
    */
@@ -316,7 +316,9 @@ export class PractitionerSimpleAccountingService {
     const accountClass = this.validClass(dto.accountClass);
     const em = this.em.fork();
     return em.transactional(async (tx) => {
-      await this.repo.lockAccountCodes(tx, dto.practiceId);
+      // El código sale de leer-y-sumar: se serializa por práctica para que dos
+      // altas simultáneas no calculen el mismo.
+      await this.repo.lockAccountsOf(tx, dto.practiceId);
       await this.ensureGeneralAccounts(tx, dto.practiceId, actor.id);
       const all = await this.repo.listAccounts(tx, dto.practiceId);
       this.assertNameFree(all, accountClass, name, undefined);
@@ -339,40 +341,35 @@ export class PractitionerSimpleAccountingService {
     actor: AuthenticatedUser,
   ): Promise<SimpleAccountDto> {
     const em = this.em.fork();
-    return em.transactional(async (tx) => {
-      const account = await this.requireAccount(tx, id, actor);
-      const name = this.validName(dto.name);
-      const accountClass =
-        dto.accountClass === undefined
-          ? (account.accountClass as SimpleAccountClass)
-          : this.validClass(dto.accountClass);
+    const account = await this.requireAccount(em, id, actor);
+    const name = this.validName(dto.name);
+    const accountClass =
+      dto.accountClass === undefined
+        ? (account.accountClass as SimpleAccountClass)
+        : this.validClass(dto.accountClass);
 
-      if (accountClass !== account.accountClass) {
-        if (
-          account.seeded ||
-          (await this.repo.countAccountUsage(tx, account.id)) > 0
-        ) {
-          throw new ConflictException(
-            'No se puede cambiar la clase de una cuenta general o que ya se usa.',
-            { accountId: id },
-            account.seeded
-              ? AccountingErrorReason.SIMPLE_ACCOUNT_SEEDED
-              : AccountingErrorReason.SIMPLE_ACCOUNT_IN_USE,
-          );
-        }
+    if (accountClass !== account.accountClass) {
+      if (
+        account.seeded ||
+        (await this.repo.countAccountUsage(em, account.id)) > 0
+      ) {
+        throw new ConflictException(
+          'No se puede cambiar la clase de una cuenta general o que ya se usa.',
+          { accountId: id },
+          account.seeded
+            ? AccountingErrorReason.SIMPLE_ACCOUNT_SEEDED
+            : AccountingErrorReason.SIMPLE_ACCOUNT_IN_USE,
+        );
       }
-      // El mismo cerrojo que el alta: dos renombres simultáneos al mismo
-      // nombre no pasan los dos la comprobación.
-      await this.repo.lockAccountCodes(tx, account.practiceId);
-      const all = await this.repo.listAccounts(tx, account.practiceId);
-      this.assertNameFree(all, accountClass, name, account.id);
+    }
+    const all = await this.repo.listAccounts(em, account.practiceId);
+    this.assertNameFree(all, accountClass, name, account.id);
 
-      account.name = name;
-      account.accountClass = accountClass;
-      touch(account, actor.id);
-      await tx.flush();
-      return toAccountDto(account);
-    });
+    account.name = name;
+    account.accountClass = accountClass;
+    touch(account, actor.id);
+    await em.flush();
+    return toAccountDto(account);
   }
 
   async deleteAccount(id: string, actor: AuthenticatedUser): Promise<void> {

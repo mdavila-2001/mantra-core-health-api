@@ -52,6 +52,14 @@ describe('docker-compose.coolify.yml', () => {
     expect(init).toContain('DB_APP_PASSWORD: ${DB_APP_PASSWORD:-}');
   });
 
+  it('la guarda de destinatarios de correo existe, vacía por defecto y documentada', () => {
+    expect(compose).toMatch(
+      /\n {2}EMAIL_ALLOWED_RECIPIENT_DOMAINS: \$\{EMAIL_ALLOWED_RECIPIENT_DOMAINS:-\}\n/,
+    );
+    // Los workers (worker-messaging envía) heredan el bloque `x-app-env`.
+    expect(serviceBlock(compose, 'worker-messaging')).toContain('<<: *worker');
+  });
+
   it('el proceso que sirve HTTP no sincroniza el esquema con el rol dueño', () => {
     expect(compose).toMatch(/\n {2}ORM_SCHEMA_SYNC: "off"\n/);
   });

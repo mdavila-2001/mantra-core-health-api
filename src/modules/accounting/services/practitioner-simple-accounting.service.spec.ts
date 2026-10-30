@@ -76,8 +76,8 @@ function memoryRepo() {
       async (_em: any, practiceId: string) =>
         accounts.filter((a) => a.practiceId === practiceId && a.seeded).length,
     ),
-    lockAccountCodes: mockFn().mockResolvedValue(undefined),
     createAccount: mockFn(make(accounts)),
+    lockAccountsOf: mockFn(async () => undefined),
     // Mismo contrato que el real: `ON CONFLICT (practice_id, code) DO NOTHING`.
     seedAccounts: mockFn(
       async (
@@ -188,7 +188,12 @@ function build() {
 
 /** Siembra las generales de la práctica y devuelve la cuenta por código. */
 async function seeded(ctx: ReturnType<typeof build>, practiceId = PRACTICE) {
-  await ctx.service.listAccounts(practiceId, actor);
+  if (practiceId === FOREIGN_PRACTICE) {
+    // Las filas ajenas ya existen en la base: el servicio no las siembra desde otro tenant.
+    await ctx.repo.seedAccounts(null, practiceId, GENERAL_ACCOUNTS, actor.id);
+  } else {
+    await ctx.service.listAccounts(practiceId, actor);
+  }
   const byCode = (code: string): Row =>
     ctx.repo.accounts.find(
       (a) => a.practiceId === practiceId && a.code === code,
@@ -314,9 +319,7 @@ describe('PractitionerSimpleAccountingService (P49)', () => {
 
   describe('alcance de tenant (ACC-01)', () => {
     async function foreignRows(ctx: ReturnType<typeof build>) {
-      // La práctica ajena se siembra por el repositorio: por la API ya no se
-      // puede leer desde el tenant activo.
-      await ctx.repo.seedAccounts(null, FOREIGN_PRACTICE, GENERAL_ACCOUNTS);
+      await seeded(ctx, FOREIGN_PRACTICE);
       const account = ctx.repo.accounts.find(
         (a) => a.practiceId === FOREIGN_PRACTICE && a.code === '5.1',
       )!;
@@ -440,16 +443,19 @@ describe('PractitionerSimpleAccountingService (P49)', () => {
       expect(ctx.repo.records).toHaveLength(0);
       expect(ctx.repo.transactions).toHaveLength(0);
     });
+  });
 
-    it('no se lee una práctica de otro tenant aunque el profesional figure vinculado: misma respuesta que las escrituras (#995)', async () => {
+  describe('alcance de tenant en las lecturas (ACC-01)', () => {
+    it('resumen, cuentas, registros y transacciones de una práctica de otro tenant → 404 «Práctica no encontrada», sin sembrar ni leer', async () => {
       const ctx = build();
-      const write = await rejected(
-        ctx.service.createAccount(
-          { practiceId: FOREIGN_PRACTICE, name: 'X', accountClass: 'ASSET' },
-          actor,
-        ),
-      );
-      const reads: Promise<unknown>[] = [
+      await seeded(ctx, FOREIGN_PRACTICE);
+      const before = ctx.repo.accounts.length;
+      ctx.repo.listAccounts.mockClear();
+      ctx.repo.listRecords.mockClear();
+      ctx.repo.listTransactions.mockClear();
+      ctx.repo.seedAccounts.mockClear();
+
+      const reads = [
         ctx.service.summary(FOREIGN_PRACTICE, 'month', actor),
         ctx.service.listAccounts(FOREIGN_PRACTICE, actor),
         ctx.service.listRecords(FOREIGN_PRACTICE, undefined, actor),
@@ -458,12 +464,14 @@ describe('PractitionerSimpleAccountingService (P49)', () => {
       for (const read of reads) {
         const error = await rejected(read);
         expect(error).toBeInstanceOf(ResourceNotFoundException);
-        expect(error.getStatus()).toBe(write.getStatus());
-        expect(error.getResponse()).toEqual(write.getResponse());
+        expect(error.message).toBe('Práctica no encontrada');
+        expect(JSON.stringify(error.getResponse())).not.toContain('details');
       }
-      // ni siquiera siembra las generales en la práctica ajena
+      expect(ctx.repo.listAccounts).not.toHaveBeenCalled();
+      expect(ctx.repo.listRecords).not.toHaveBeenCalled();
+      expect(ctx.repo.listTransactions).not.toHaveBeenCalled();
       expect(ctx.repo.seedAccounts).not.toHaveBeenCalled();
-      expect(ctx.repo.accounts).toHaveLength(0);
+      expect(ctx.repo.accounts).toHaveLength(before);
     });
   });
 
@@ -525,6 +533,21 @@ describe('PractitionerSimpleAccountingService (P49)', () => {
       expect(codes.slice(-2)).toEqual(['5.9', '5.10']);
     });
 
+    it('el alta toma el lock de la práctica antes de leer las cuentas y calcular el código', async () => {
+      const ctx = build();
+      await ctx.service.createAccount(
+        { practiceId: PRACTICE, name: 'Capacitación', accountClass: 'EXPENSE' },
+        actor,
+      );
+      expect(ctx.repo.lockAccountsOf).toHaveBeenCalledWith(
+        expect.anything(),
+        PRACTICE,
+      );
+      expect(ctx.repo.lockAccountsOf.mock.invocationCallOrder[0]).toBeLessThan(
+        ctx.repo.listAccounts.mock.invocationCallOrder[0],
+      );
+    });
+
     it('crea una cuenta propia, no sembrada, con el código siguiente de su clase', async () => {
       const ctx = build();
       const created = await ctx.service.createAccount(
@@ -548,21 +571,6 @@ describe('PractitionerSimpleAccountingService (P49)', () => {
           actorUserId: 'user-1',
         }),
       );
-    });
-
-    it('toma el cerrojo de la práctica en la transacción antes de calcular el código (#995)', async () => {
-      const ctx = build();
-      await ctx.service.createAccount(
-        { practiceId: PRACTICE, name: 'Capacitación', accountClass: 'EXPENSE' },
-        actor,
-      );
-      expect(ctx.em.transactional).toHaveBeenCalledTimes(1);
-      expect(ctx.repo.lockAccountCodes).toHaveBeenCalledWith(ctx.em, PRACTICE);
-      const lockedAt = ctx.repo.lockAccountCodes.mock.invocationCallOrder[0];
-      const listedAt = ctx.repo.listAccounts.mock.invocationCallOrder[0];
-      const createdAt = ctx.repo.createAccount.mock.invocationCallOrder[0];
-      expect(lockedAt).toBeLessThan(listedAt);
-      expect(lockedAt).toBeLessThan(createdAt);
     });
 
     it('rechaza con 422 y el motivo en castellano un nombre vacío, largo o una clase inválida', async () => {
@@ -641,24 +649,6 @@ describe('PractitionerSimpleAccountingService (P49)', () => {
         AccountingErrorReason.SIMPLE_ACCOUNT_SEEDED,
       );
       expect(caja.accountClass).toBe('ASSET');
-    });
-
-    it('el renombre comprueba el nombre bajo el cerrojo de la práctica (#995)', async () => {
-      const ctx = build();
-      const byCode = await seeded(ctx);
-      ctx.repo.lockAccountCodes.mockClear();
-      ctx.repo.listAccounts.mockClear();
-
-      await ctx.service.updateAccount(
-        byCode('5.8').id,
-        { name: 'Marketing' },
-        actor,
-      );
-
-      expect(ctx.repo.lockAccountCodes).toHaveBeenCalledWith(ctx.em, PRACTICE);
-      expect(
-        ctx.repo.lockAccountCodes.mock.invocationCallOrder[0],
-      ).toBeLessThan(ctx.repo.listAccounts.mock.invocationCallOrder[0]);
     });
 
     it('sin accountClass en el cuerpo conserva la clase', async () => {

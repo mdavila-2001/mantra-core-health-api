@@ -18,6 +18,7 @@ import type { Request, Response } from 'express';
 import { ErrorCode } from '../errors/error-codes';
 import { SystemErrorReason } from '../errors/system-error-reasons';
 import { SecretCipherError } from '../errors/secret-cipher.error';
+import { redactShareTokenInUrl } from '../../logging/share-token-redaction';
 import {
   APP_ATTR,
   TracingService,
@@ -139,7 +140,22 @@ function toCorrelationId(value: unknown): string | undefined {
  * escritos en los logs y devueltos al cliente (y a cualquier proxy).
  */
 function pathOf(request: { url?: string }): string {
-  return (request.url ?? '').split('?')[0];
+  // El token de un enlace compartido de receta viaja en la ruta (S-6): sale
+  // del log y del cuerpo como `[token]`.
+  return redactShareTokenInUrl((request.url ?? '').split('?')[0]);
+}
+
+/**
+ * El mismo registro con `message` redactado si lleva el token de un enlace
+ * compartido de receta. Lo usan el diagnóstico (`API_ERROR_DIAGNOSTICS`) y el
+ * `err` del log de un 5xx, que copian el mensaje de la excepción original.
+ */
+function withShareTokenSafeMessage<T extends { message?: unknown }>(
+  record: T,
+): T {
+  if (typeof record.message !== 'string') return record;
+  const message = redactShareTokenInUrl(record.message);
+  return message === record.message ? record : { ...record, message };
 }
 
 /**
@@ -218,8 +234,17 @@ export class AllExceptionsFilter implements ExceptionFilter {
       request.id ?? request.headers['x-request-id'],
     );
 
-    const { status, code, message, details, reason, internals } =
-      this.normalize(exception);
+    const {
+      status,
+      code,
+      message: rawMessage,
+      details,
+      reason,
+      internals,
+    } = this.normalize(exception);
+    // El 404 de una ruta no declarada dice `Cannot GET <ruta>`: si la ruta
+    // lleva el token de un enlace compartido de receta, sale como `[token]`.
+    const message = redactShareTokenInUrl(rawMessage);
 
     const body: ErrorResponseBody = {
       code,
@@ -244,7 +269,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         {
           // Nunca `err: exception`: pino volcaría `detail`, parámetros y el SQL
           // con valores. Ver `safeErrorForLog`.
-          err: safeErrorForLog(exception, internals),
+          err: withShareTokenSafeMessage(safeErrorForLog(exception, internals)),
           code,
           reason,
           correlationId,
@@ -291,7 +316,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // Después de la censura de los 5xx a propósito: el diagnóstico es para
     // quien depura, y sólo existe con el interruptor encendido.
     if (errorDiagnosticsEnabled()) {
-      body.diagnostics = describeForDiagnostics(exception, internals);
+      body.diagnostics = withShareTokenSafeMessage(
+        describeForDiagnostics(exception, internals),
+      );
     }
 
     response.status(status).json(body);
@@ -322,7 +349,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       // span: se adjunta sólo su tipo y sus marcos.
       this.tracing.recordException(
         exception instanceof HttpException
-          ? exception
+          ? this.withoutShareToken(exception)
           : this.scrubbedForTrace(exception),
       );
       return;
@@ -331,6 +358,22 @@ export class AllExceptionsFilter implements ExceptionFilter {
       [APP_ATTR.ERROR_CODE]: code,
       'http.response.status_code': status,
     });
+  }
+
+  /**
+   * La excepción tal cual, o una copia con el token de un enlace compartido de
+   * receta cambiado por `[token]` en el mensaje y el stack, si lo trae.
+   */
+  private withoutShareToken(exception: HttpException): Error {
+    const message = redactShareTokenInUrl(exception.message);
+    const stack = exception.stack && redactShareTokenInUrl(exception.stack);
+    if (message === exception.message && stack === exception.stack) {
+      return exception;
+    }
+    const copy = new Error(message);
+    copy.name = exception.name;
+    copy.stack = stack;
+    return copy;
   }
 
   /** Copia de una excepción sin su mensaje: tipo y marcos del stack. */

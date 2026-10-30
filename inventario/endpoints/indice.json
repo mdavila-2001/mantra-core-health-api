@@ -1,20 +1,20 @@
 {
   "resumen": {
-    "total": 1625,
+    "total": 1627,
     "porOrigen": {
-      "CONTRATO": 1616,
+      "CONTRATO": 1618,
       "CONTRATO_AUSENTE": 9
     },
     "porRiesgo": {
-      "BAJO": 526,
+      "BAJO": 528,
       "MEDIO": 899,
       "ALTO": 200
     },
-    "conTablas": 1563,
-    "sinTablasSinDeterminar": 0,
+    "conTablas": 1565,
+    "sinTablasSinDeterminar": 1,
     "sinExplicacionDeNegocio": 0,
-    "conPruebas": 939,
-    "conRequerimientos": 1625
+    "conPruebas": 940,
+    "conRequerimientos": 1627
   },
   "endpoints": [
     {
@@ -869,7 +869,7 @@
       "roles": [
         "PRACTITIONER"
       ],
-      "tablas": 4,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -941,7 +941,7 @@
       "roles": [
         "PRACTITIONER"
       ],
-      "tablas": 3,
+      "tablas": 2,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -1031,7 +1031,7 @@
       "roles": [
         "PRACTITIONER"
       ],
-      "tablas": 3,
+      "tablas": 2,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -3443,7 +3443,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 10,
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -3499,7 +3499,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 10,
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -5510,7 +5510,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 6,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -7334,6 +7334,24 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "PatientReviewsController_getReviewableCare",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/patients/me/reviewable-care",
+      "modulo": "community",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": "Consultar si una atención recibida se puede calificar",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PATIENT"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "PatientReviewsController_publishOwnReview",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -8135,7 +8153,7 @@
       "roles": [
         "SUPERADMIN"
       ],
-      "tablas": 60,
+      "tablas": 63,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -10796,7 +10814,7 @@
       "roles": [
         "SUPERADMIN"
       ],
-      "tablas": 14,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -10981,7 +10999,7 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 14,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -13536,9 +13554,9 @@
       "riesgo": "ALTO",
       "publica": true,
       "roles": [],
-      "tablas": 38,
+      "tablas": 40,
       "eventos": 0,
-      "pruebas": 23,
+      "pruebas": 24,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -14915,7 +14933,7 @@
       "riesgo": "BAJO",
       "publica": true,
       "roles": [],
-      "tablas": 3,
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -21598,7 +21616,7 @@
       "roles": [],
       "tablas": 3,
       "eventos": 0,
-      "pruebas": 2,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -22232,7 +22250,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 20,
+      "tablas": 2,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -22251,7 +22269,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 24,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -25838,7 +25856,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 14,
+      "tablas": 26,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -27033,7 +27051,26 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 4,
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SurveysInsightsController_getInsights",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/surveys/insights",
+      "modulo": "surveys",
+      "bloque": null,
+      "nombre": "Resumen general de mis encuestas (agregado, sin pacientes)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 11,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -27052,7 +27089,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 7,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -27068,7 +27105,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 9,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -27084,7 +27121,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 4,
+      "tablas": 10,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -27157,7 +27194,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 3,
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"

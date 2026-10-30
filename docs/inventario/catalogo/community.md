@@ -40,11 +40,11 @@
 | [post_shares](#post_shares) | Registra compartidos de publicaciones para conocer cómo circula contenido público entre usuarios. | 11 | 6 | 0 | COINCIDE |
 | [prestige_awards](#prestige_awards) | Registra reconocimientos otorgados a perfiles para comunicar logros o contribuciones comunitarias. | 17 | 6 | 0 | COINCIDE |
 | [prestige_scores](#prestige_scores) | Mantiene puntajes de reputación o participación asociados a perfiles según reglas del producto. | 16 | 4 | 2 | COINCIDE |
-| [public_profiles](#public_profiles) | Publica perfiles de descubrimiento y reputación de prestadores sanitarios, separados del expediente clínico. | 20 | 12 | 176 | COINCIDE |
+| [public_profiles](#public_profiles) | Publica perfiles de descubrimiento y reputación de prestadores sanitarios, separados del expediente clínico. | 20 | 12 | 180 | COINCIDE |
 | [reactions](#reactions) | Registra reacciones de usuarios a contenido comunitario para expresar interacción social. | 10 | 6 | 16 | COINCIDE |
 | [review_dimension_scores](#review_dimension_scores) | Desglosa puntuaciones de reseñas por dimensión para resumir la experiencia de atención. | 5 | 2 | 4 | COINCIDE |
 | [review_responses](#review_responses) | Conserva respuestas de prestadores a reseñas para sostener interacción y gestión de reputación. | 11 | 5 | 4 | COINCIDE |
-| [service_reviews](#service_reviews) | Registra reseñas sobre prestadores y servicios, con verificación de experiencia cuando corresponde y sin publicar identificadores de encuentros. | 17 | 11 | 23 | COINCIDE |
+| [service_reviews](#service_reviews) | Registra reseñas sobre prestadores y servicios, con verificación de experiencia cuando corresponde y sin publicar identificadores de encuentros. | 17 | 11 | 24 | COINCIDE |
 | [social_follows](#social_follows) | Relaciona usuarios que siguen perfiles para personalizar descubrimiento y actualizaciones públicas. | 11 | 7 | 17 | COINCIDE |
 | [social_notifications](#social_notifications) | Genera avisos sobre interacciones sociales para que usuarios conozcan menciones, respuestas o actividad relevante. | 16 | 8 | 1 | COINCIDE |
 | [social_posts](#social_posts) | Conserva publicaciones públicas de profesionales y organizaciones para informar y facilitar su descubrimiento, sin incorporarlas a la historia clínica. | 16 | 10 | 24 | COINCIDE |
@@ -2892,7 +2892,7 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: public_profiles; BIZ note`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `PublicProfiles` — `src/modules/community/entities/public_profiles.entity.ts`
-- **Resumen:** 20 columnas · 12 índices · 9 FK salientes · 32 entrantes · 176 operaciones
+- **Resumen:** 20 columnas · 12 índices · 9 FK salientes · 32 entrantes · 180 operaciones
 
 #### Columnas
 
@@ -2971,7 +2971,7 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 |---|---|---|---|
 | `uq_public_profiles_slug` | sí | slug | Garantiza que no se repita la combinación (slug) _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «slug», la primera columna del índice _(CONSULTA)_ |
 | `ix_public_profiles_tenant_id` | no | tenant_id | Soporta la clave foránea fk_public_profiles_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_public_profiles_target_type_concept_id` | no | target_type_concept_id | Soporta la clave foránea fk_public_profiles_target_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «target_type_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_public_profiles_target_type_concept_id` | no | target_type_concept_id | Soporta la clave foránea fk_public_profiles_target_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 7 consulta(s) de repositorio filtran u ordenan por «target_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_public_profiles_avatar_file_id` | no | avatar_file_id | Soporta la clave foránea fk_public_profiles_avatar_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_public_profiles_cover_file_id` | no | cover_file_id | Soporta la clave foránea fk_public_profiles_cover_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_public_profiles_verification_status_concept_id` | no | verification_status_concept_id | Soporta la clave foránea fk_public_profiles_verification_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -3063,6 +3063,7 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 | GET /l/{slug} | LEE | DIRECTA |
 | GET /o/{slug} | LEE | DIRECTA |
 | GET /p/{slug} | LEE | DIRECTA |
+| GET /patients/me/reviewable-care | LEE | DIRECTA |
 | POST /patients/me/reviews | LEE | DIRECTA |
 | GET /public/comments/{commentId}/replies | LEE | POR_SQL |
 | GET /public/media/{id} | LEE | DIRECTA |
@@ -3080,6 +3081,9 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 | GET /public/search/pharmacies | LEE | DIRECTA |
 | GET /public/search/practitioners | LEE | DIRECTA |
 | GET /s/{slug} | LEE | DIRECTA |
+| POST /admin/content-packs/{code}/apply | ACTUALIZA | POR_TIPO |
+| POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
+| POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
 | POST /diagnostic-units/{id}/verify-and-publish | ACTUALIZA | POR_TIPO |
 | POST /diagnostic-units/{id}/verify-and-publish | CREA | DIRECTA |
 | POST /diagnostic-units/{id}/verify-and-publish | LEE | DIRECTA |
@@ -3408,7 +3412,7 @@ Registra reseñas sobre prestadores y servicios, con verificación de experienci
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: service_reviews; BIZ note`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `ServiceReviews` — `src/modules/community/entities/service_reviews.entity.ts`
-- **Resumen:** 17 columnas · 11 índices · 9 FK salientes · 3 entrantes · 23 operaciones
+- **Resumen:** 17 columnas · 11 índices · 9 FK salientes · 3 entrantes · 24 operaciones
 
 #### Columnas
 
@@ -3458,7 +3462,7 @@ Registra reseñas sobre prestadores y servicios, con verificación de experienci
 | `ix_service_reviews_verified_encounter_id` | no | verified_encounter_id | Soporta la clave foránea fk_service_reviews_verified_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «verified_encounter_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_service_reviews_reviewer_display_mode_concept_id` | no | reviewer_display_mode_concept_id | Soporta la clave foránea fk_service_reviews_reviewer_display_mode_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_service_reviews_verification_status_concept_id` | no | verification_status_concept_id | Soporta la clave foránea fk_service_reviews_verification_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_service_reviews_moderation_status_concept_id` | no | moderation_status_concept_id | Soporta la clave foránea fk_service_reviews_moderation_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «moderation_status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_service_reviews_moderation_status_concept_id` | no | moderation_status_concept_id | Soporta la clave foránea fk_service_reviews_moderation_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «moderation_status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_service_reviews_publication_status_concept_id` | no | publication_status_concept_id | Soporta la clave foránea fk_service_reviews_publication_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «publication_status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_service_reviews_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_service_reviews_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_service_reviews_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_service_reviews_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -3484,6 +3488,7 @@ Registra reseñas sobre prestadores y servicios, con verificación de experienci
 | GET /l/{slug} | LEE | POR_SQL |
 | GET /o/{slug} | LEE | POR_SQL |
 | GET /p/{slug} | LEE | POR_SQL |
+| GET /patients/me/reviewable-care | LEE | DIRECTA |
 | POST /patients/me/reviews | CREA | DIRECTA |
 | POST /patients/me/reviews | LEE | DIRECTA |
 | GET /public/nearby | LEE | POR_SQL |

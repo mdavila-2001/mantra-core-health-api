@@ -146,6 +146,11 @@ const KNOWN_PUBLIC_OPERATIONS = [
   ['post', '/iam/auth/upload-registration-logo'],
   ['get', '/public/profiles/o/{slug}/services'],
   ['get', '/public/profiles/f/{slug}/products'],
+  // P34 y P37 (`pharmacy-public.controller.ts` y `public-catalog.controller.ts`,
+  // las tres con `@Public()`): farmacias abiertas ahora y sucursales de una ficha.
+  ['get', '/public/pharmacies/open-now'],
+  ['get', '/public/profiles/f/{slug}/branches'],
+  ['post', '/public/profiles/f/{slug}/branch-availability'],
   // Borradores del alta y eventos del embudo de onboarding: llevan `@Public()` en
   // `iam-onboarding-drafts.controller.ts` (líneas 24, 41 y 59) y en
   // `telemetry-onboarding-analytics.controller.ts` (línea 31). Entraron en `test`

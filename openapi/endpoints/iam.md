@@ -805,7 +805,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `organization` | Sí | `RegisterOrganizationDetailsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CLINICA_SAN_RAFAEL","legalName":"Nombre de ejemplo","tradeName":"Nombre de ejemplo","tenantType":"HOSPITAL","legalEntityType":"SRL","taxIdentifier":"1023456029","legalDocuments":{"constitutionFileId":"00000000-0000-4000-8000-000000000001","taxIdentifierFileId":"00000000-0000-4000-8000-000000000001","commerceRegistryFileId":"00000000-0000-4000-8000-000000000001","operatingLicenseFileId":"00000000-0000-4000-8000-000000000001","healthAuthorityCertificateFileId":"00000000-0000-4000-8000-000000000001"},"legalRepresentative":{"name":"Mariana","middleName":"Elena","lastName":"Siles","motherLastName":"Justiniano","fullName":"Mariana Siles Justiniano","idNumber":"4872190 SC","email":"legal@aseguradora.com","phone":"+591 70012345","powerOfAttorneyFileId":"00000000-0000-4000-8000-000000000001"},"executives":{"generalManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"commercialManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"marketingManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"}},"payer":{"carrierCode":"CODIGO_EJEMPLO","sigla":"BUPA","address":"valor-ejemplo","latitude":-17.7833,"longitude":-63.1821,"regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"},"broker":{"id":"00000000-0000-4000-8000-000000000001","brokerCode":"CODIGO_EJEMPLO","legalName":"Nombre de ejemplo","licenseNumber":"valor-ejemplo","jurisdiction":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"verification":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"independent":true,"currentCarrierCount":1,"createdAt":"2026-07-31T12:00:00.000Z","agreements":[{"id":"00000000-0000-4000-8000-000000000001","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierLegalName":"Nombre de ejemplo","agreementCode":"CODIGO_EJEMPLO","commissionModel":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"current":true,"contractFileId":"00000000-0000-4000-8000-000000000001"}],"publicProfileId":"00000000-0000-4000-8000-000000000001"},"diagnosticUnit":{"code":"CENTRO_IMAGEN_CENTRAL","name":"Centro de Diagnóstico por Imágenes","diagnosticUnitTypeConceptId":"00000000-0000-4000-8000-000000000001","modalityConceptIds":["00000000-0000-4000-8000-000000000001"],"walkInAvailable":true,"homeCollectionAvailable":false,"primarySite":{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}},"branches":[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1},"description":"Frente al mercado","locationUrl":"https://maps.google.com/?q=-17.78,-63.18"}]},"countryConceptId":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz","pharmacy":{"address":"Av. Cristo Redentor 1234, Santa Cruz de la Sierra","latitude":1,"longitude":1,"branches":[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo"}]}}` |
+| `organization` | Sí | `RegisterOrganizationDetailsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CLINICA_SAN_RAFAEL","legalName":"Nombre de ejemplo","tradeName":"Nombre de ejemplo","tenantType":"HOSPITAL","legalEntityType":"SRL","taxIdentifier":"1023456029","legalDocuments":{"constitutionFileId":"00000000-0000-4000-8000-000000000001","taxIdentifierFileId":"00000000-0000-4000-8000-000000000001","commerceRegistryFileId":"00000000-0000-4000-8000-000000000001","operatingLicenseFileId":"00000000-0000-4000-8000-000000000001","healthAuthorityCertificateFileId":"00000000-0000-4000-8000-000000000001"},"legalRepresentative":{"name":"Mariana","middleName":"Elena","lastName":"Siles","motherLastName":"Justiniano","fullName":"Mariana Siles Justiniano","idNumber":"4872190 SC","email":"legal@aseguradora.com","phone":"+591 70012345","powerOfAttorneyFileId":"00000000-0000-4000-8000-000000000001"},"executives":{"generalManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"commercialManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"marketingManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"}},"payer":{"carrierCode":"CODIGO_EJEMPLO","sigla":"BUPA","address":"valor-ejemplo","latitude":-17.7833,"longitude":-63.1821,"regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"},"broker":{"id":"00000000-0000-4000-8000-000000000001","brokerCode":"CODIGO_EJEMPLO","legalName":"Nombre de ejemplo","licenseNumber":"valor-ejemplo","jurisdiction":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"verification":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"independent":true,"currentCarrierCount":1,"createdAt":"2026-07-31T12:00:00.000Z","agreements":[{"id":"00000000-0000-4000-8000-000000000001","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierLegalName":"Nombre de ejemplo","agreementCode":"CODIGO_EJEMPLO","commissionModel":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"current":true,"contractFileId":"00000000-0000-4000-8000-000000000001"}],"publicProfileId":"00000000-0000-4000-8000-000000000001"},"diagnosticUnit":{"code":"CENTRO_IMAGEN_CENTRAL","name":"Centro de Diagnóstico por Imágenes","diagnosticUnitTypeConceptId":"00000000-0000-4000-8000-000000000001","modalityConceptIds":["00000000-0000-4000-8000-000000000001"],"walkInAvailable":true,"homeCollectionAvailable":false,"primarySite":{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}},"branches":[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1},"description":"Frente al mercado","locationUrl":"https://maps.google.com/?q=-17.78,-63.18"}]},"medicalFacility":{"taxIdentifierNumber":"1023456789","healthFacilityRegistrationNumber":"SEDES-SC-2020-0412","medicalDirector":{"name":"Ana","middleName":"Lucía","lastName":"Rojas","motherLastName":"Paz","professionalLicenseNumber":"MAT-12345","email":"dir@clinica.bo","phone":"+591 70012345"},"headquarters":{"name":"Casa central","addressLines":["Av. San Martín 123"],"latitude":-17.78,"longitude":-63.18},"branches":[{"name":"Sucursal Equipetrol","addressLines":["Av. San Martín 123"],"latitude":-17.78,"longitude":-63.18}]},"countryConceptId":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz","pharmacy":{"address":"Av. Cristo Redentor 1234, Santa Cruz de la Sierra","latitude":1,"longitude":1,"branches":[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo"}]}}` |
 | `organization.code` | Sí | `string` | longitud mínima 3; longitud máxima 100; patrón runtime `/^[A-Za-z0-9._-]+$/` | Código único global de la organización | `CLINICA_SAN_RAFAEL` |
 | `organization.legalName` | Sí | `string` | longitud mínima 1; longitud máxima 300 | Razón social / nombre legal | `Nombre de ejemplo` |
 | `organization.tradeName` | No | `string` | longitud máxima 300 | Nombre comercial | `Nombre de ejemplo` |
@@ -924,6 +924,27 @@ Content-Type: application/json
 | `organization.diagnosticUnit.branches[].address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `organization.diagnosticUnit.branches[].description` | No | `string` | longitud máxima 1000 | Sin descripción específica en el contrato OpenAPI. | `Frente al mercado` |
 | `organization.diagnosticUnit.branches[].locationUrl` | No | `string` | longitud máxima 2000; patrón runtime `/^https?:\/\//i` | Sin descripción específica en el contrato OpenAPI. | `https://maps.google.com/?q=-17.78,-63.18` |
+| `organization.medicalFacility` | No | `MedicalFacilityDto` | Sin restricción adicional declarada | Sólo para HOSPITAL, CLINIC, MEDICAL_OFFICE, NURSING y HEALTH_OTHER: NIT, registro sanitario, director médico, casa central y sucursales | `{"taxIdentifierNumber":"1023456789","healthFacilityRegistrationNumber":"SEDES-SC-2020-0412","medicalDirector":{"name":"Ana","middleName":"Lucía","lastName":"Rojas","motherLastName":"Paz","professionalLicenseNumber":"MAT-12345","email":"dir@clinica.bo","phone":"+591 70012345"},"headquarters":{"name":"Casa central","addressLines":["Av. San Martín 123"],"latitude":-17.78,"longitude":-63.18},"branches":[{"name":"Sucursal Equipetrol","addressLines":["Av. San Martín 123"],"latitude":-17.78,"longitude":-63.18}]}` |
+| `organization.medicalFacility.taxIdentifierNumber` | No | `string` | patrón `^[0-9][0-9-]{3,19}$` | NIT del establecimiento (número, sin el certificado) | `1023456789` |
+| `organization.medicalFacility.healthFacilityRegistrationNumber` | No | `string` | longitud mínima 3; longitud máxima 50; patrón `^[A-Za-z0-9./-]+$` | Número de registro del establecimiento ante la autoridad sanitaria (SEDES en Bolivia) | `SEDES-SC-2020-0412` |
+| `organization.medicalFacility.medicalDirector` | No | `MedicalDirectorDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"name":"Ana","middleName":"Lucía","lastName":"Rojas","motherLastName":"Paz","professionalLicenseNumber":"MAT-12345","email":"dir@clinica.bo","phone":"+591 70012345"}` |
+| `organization.medicalFacility.medicalDirector.name` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Ana` |
+| `organization.medicalFacility.medicalDirector.middleName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Lucía` |
+| `organization.medicalFacility.medicalDirector.lastName` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Rojas` |
+| `organization.medicalFacility.medicalDirector.motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Paz` |
+| `organization.medicalFacility.medicalDirector.professionalLicenseNumber` | No | `string` | longitud mínima 3; longitud máxima 50 | Matrícula profesional del director médico | `MAT-12345` |
+| `organization.medicalFacility.medicalDirector.email` | No | `string` | formato `email`; longitud máxima 320 | Sin descripción específica en el contrato OpenAPI. | `dir@clinica.bo` |
+| `organization.medicalFacility.medicalDirector.phone` | No | `string` | longitud mínima 7; longitud máxima 30 | Sin descripción específica en el contrato OpenAPI. | `+591 70012345` |
+| `organization.medicalFacility.headquarters` | No | `MedicalFacilityHeadquartersDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"name":"Casa central","addressLines":["Av. San Martín 123"],"latitude":-17.78,"longitude":-63.18}` |
+| `organization.medicalFacility.headquarters.name` | No | `string` | longitud mínima 1; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Casa central` |
+| `organization.medicalFacility.headquarters.addressLines` | No | `array<string>` | longitud mínima 1; longitud máxima 500; mínimo 1 elemento(s); máximo 10 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["Av. San Martín 123"]` |
+| `organization.medicalFacility.headquarters.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `-17.78` |
+| `organization.medicalFacility.headquarters.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `-63.18` |
+| `organization.medicalFacility.branches` | No | `array<MedicalFacilitySiteDto>` | máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"name":"Sucursal Equipetrol","addressLines":["Av. San Martín 123"],"latitude":-17.78,"longitude":-63.18}]` |
+| `organization.medicalFacility.branches[].name` | No | `string` | longitud mínima 1; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Sucursal Equipetrol` |
+| `organization.medicalFacility.branches[].addressLines` | No | `array<string>` | longitud mínima 1; longitud máxima 500; mínimo 1 elemento(s); máximo 10 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["Av. San Martín 123"]` |
+| `organization.medicalFacility.branches[].latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `-17.78` |
+| `organization.medicalFacility.branches[].longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `-63.18` |
 | `organization.countryConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.jurisdictionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.timeZone` | No | `string` | longitud máxima 100 | Zona horaria IANA | `America/La_Paz` |
@@ -1105,6 +1126,37 @@ Content-Type: application/json
         }
       ]
     },
+    "medicalFacility": {
+      "taxIdentifierNumber": "1023456789",
+      "healthFacilityRegistrationNumber": "SEDES-SC-2020-0412",
+      "medicalDirector": {
+        "name": "Ana",
+        "middleName": "Lucía",
+        "lastName": "Rojas",
+        "motherLastName": "Paz",
+        "professionalLicenseNumber": "MAT-12345",
+        "email": "dir@clinica.bo",
+        "phone": "+591 70012345"
+      },
+      "headquarters": {
+        "name": "Casa central",
+        "addressLines": [
+          "Av. San Martín 123"
+        ],
+        "latitude": -17.78,
+        "longitude": -63.18
+      },
+      "branches": [
+        {
+          "name": "Sucursal Equipetrol",
+          "addressLines": [
+            "Av. San Martín 123"
+          ],
+          "latitude": -17.78,
+          "longitude": -63.18
+        }
+      ]
+    },
     "countryConceptId": "00000000-0000-4000-8000-000000000001",
     "jurisdictionConceptId": "00000000-0000-4000-8000-000000000001",
     "timeZone": "America/La_Paz",
@@ -1162,7 +1214,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "diagnosticUnitId": "00000000-0000-4000-8000-000000000001",
   "pharmacyId": "00000000-0000-4000-8000-000000000001",
   "legalDocumentsRegistered": 1,
-  "representativesRegistered": 1
+  "representativesRegistered": 1,
+  "medicalFacilityRegistered": true
 }
 ```
 
@@ -1180,6 +1233,7 @@ Campos de la respuesta:
 | `pharmacyId` | No | `string` | formato `uuid` | Id de la farmacia creada (sólo PHARMACY) | `00000000-0000-4000-8000-000000000001` |
 | `legalDocumentsRegistered` | No | `number` | Sin restricción adicional declarada | Cuántos documentos legales quedaron registrados pendientes de | `1` |
 | `representativesRegistered` | No | `number` | Sin restricción adicional declarada | Vínculos de representación registrados (representante legal + gerencias) | `1` |
+| `medicalFacilityRegistered` | No | `boolean` | Sin restricción adicional declarada | Si los datos del establecimiento médico quedaron registrados (sólo HOSPITAL, CLINIC, MEDICAL_OFFICE, NURSING y HEALTH_OTHER) | `true` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 

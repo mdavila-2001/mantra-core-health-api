@@ -1,0 +1,220 @@
+import { jest } from '@jest/globals';
+import { PINV } from '../../domain/pharmacy_inventory.concepts';
+import { SiteStockWriter } from './site-stock-writer';
+
+const SITE = {
+  tenantId: 'tenant-1',
+  pharmacyId: 'pharmacy-1',
+  siteId: 'site-1',
+};
+
+interface Position {
+  inventoryLocationId: string;
+  pharmacyProductId: string;
+  onHandQuantity: string;
+  reservedQuantity: string;
+  quarantineQuantity: string;
+  availableQuantity: string;
+  lastLedgerSequence: string;
+  updatedAt: Date;
+}
+
+function position(overrides: Partial<Position> = {}): Position {
+  return {
+    inventoryLocationId: 'loc-1',
+    pharmacyProductId: 'product-a',
+    onHandQuantity: '0',
+    reservedQuantity: '0',
+    quarantineQuantity: '0',
+    availableQuantity: '0',
+    lastLedgerSequence: '0',
+    updatedAt: new Date('2026-10-01T00:00:00Z'),
+    ...overrides,
+  };
+}
+
+function build(options: {
+  location?: { id: string } | null;
+  existing?: Position | null;
+}) {
+  const tx = {
+    execute: jest.fn(async () => []),
+    flush: jest.fn(async () => undefined),
+  };
+  const locations = {
+    findFirstActiveInSite: jest.fn(async () =>
+      options.location === undefined ? { id: 'loc-1' } : options.location,
+    ),
+    create: jest.fn(() => ({ id: 'loc-new' })),
+  };
+  const created: Position[] = [];
+  const positions = {
+    findByKeyForUpdate: jest.fn(async () => options.existing ?? null),
+    create: jest.fn((_tx: unknown, data: Partial<Position>) => {
+      const row = position({
+        onHandQuantity: '0',
+        availableQuantity: '0',
+        ...data,
+      });
+      created.push(row);
+      return row;
+    }),
+  };
+  const ledger = {
+    nextSequence: jest.fn(async () => '41'),
+    append: jest.fn(),
+  };
+  const writer = new SiteStockWriter(
+    locations as any,
+    positions as any,
+    ledger as any,
+  );
+  return { writer, tx, locations, positions, ledger, created };
+}
+
+const movement = {
+  movementTypeConceptId: PINV.MV_COUNT_ADJUSTMENT,
+  actorUserId: 'user-1',
+};
+
+describe('SiteStockWriter', () => {
+  it('locks the site before touching anything', async () => {
+    const d = build({
+      existing: position({ onHandQuantity: '3', availableQuantity: '3' }),
+    });
+    await d.writer.write(
+      d.tx as any,
+      SITE,
+      [{ productId: 'product-a', availableQuantity: 3 }],
+      movement,
+    );
+    expect(d.tx.execute).toHaveBeenCalledWith(
+      'select pg_advisory_xact_lock(hashtext(?))',
+      ['pharmacy_inventory.site:site-1'],
+    );
+  });
+
+  it('writes only the requested products: a product without a position stays on the catalogue', async () => {
+    const d = build({});
+
+    const [result] = await d.writer.write(
+      d.tx as any,
+      SITE,
+      [{ productId: 'product-a', availableQuantity: 0 }],
+      movement,
+    );
+
+    expect(d.created.map((p) => p.pharmacyProductId)).toEqual(['product-a']);
+    // Pasar a «No lo tengo» sin posición previa no mueve existencias: sin asiento.
+    expect(d.ledger.append).not.toHaveBeenCalled();
+    expect(result.changed).toBe(false);
+    expect(result.position.availableQuantity).toBe('0');
+  });
+
+  it('creates the general location when the site has none', async () => {
+    const d = build({ location: null });
+    await d.writer.write(
+      d.tx as any,
+      SITE,
+      [{ productId: 'product-a', availableQuantity: 1 }],
+      movement,
+    );
+    expect(d.locations.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        pharmacySiteId: 'site-1',
+        code: 'GENERAL',
+        name: 'Depósito general',
+        statusConceptId: PINV.LOCATION_ACTIVE,
+      }),
+    );
+    expect(d.positions.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        inventoryLocationId: 'loc-new',
+        pharmacyProductId: 'product-a',
+      }),
+    );
+  });
+
+  it('keeps reserved and quarantined units on top of the sellable quantity', async () => {
+    const d = build({
+      existing: position({
+        onHandQuantity: '6',
+        reservedQuantity: '2',
+        quarantineQuantity: '1',
+        availableQuantity: '3',
+      }),
+    });
+    const [result] = await d.writer.write(
+      d.tx as any,
+      SITE,
+      [{ productId: 'product-a', availableQuantity: 0 }],
+      movement,
+    );
+    expect(result.position.onHandQuantity).toBe('3');
+    expect(result.position.availableQuantity).toBe('0');
+    expect(d.ledger.append).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        quantityDelta: '-3',
+        movementTypeConceptId: PINV.MV_COUNT_ADJUSTMENT,
+      }),
+    );
+  });
+
+  it('writes no entry when nothing changes', async () => {
+    const d = build({
+      existing: position({ onHandQuantity: '4', availableQuantity: '4' }),
+    });
+    const [result] = await d.writer.write(
+      d.tx as any,
+      SITE,
+      [{ productId: 'product-a', availableQuantity: 4 }],
+      movement,
+    );
+    expect(result.changed).toBe(false);
+    expect(d.ledger.append).not.toHaveBeenCalled();
+    expect(d.ledger.nextSequence).not.toHaveBeenCalled();
+  });
+
+  it('asks for one sequence even when it writes 500 products', async () => {
+    const d = build({});
+    const targets = Array.from({ length: 500 }, (_, i) => ({
+      productId: `product-${i}`,
+      availableQuantity: 3,
+    }));
+    await d.writer.write(d.tx as any, SITE, targets, movement);
+    expect(d.ledger.nextSequence).toHaveBeenCalledTimes(1);
+    expect(d.ledger.append).toHaveBeenCalledTimes(500);
+    const sequences = d.ledger.append.mock.calls.map(
+      ([, e]: any) => e.ledgerSequence,
+    );
+    expect(new Set(sequences).size).toBe(500);
+    expect(sequences[499]).toBe('540');
+  });
+
+  it('records the movement type and source of the caller', async () => {
+    const d = build({ existing: position({ onHandQuantity: '0' }) });
+    await d.writer.write(
+      d.tx as any,
+      SITE,
+      [{ productId: 'product-a', availableQuantity: 7 }],
+      {
+        movementTypeConceptId: PINV.MV_SYNC_ADJUSTMENT,
+        sourceId: 'batch-1',
+        actorUserId: 'user-1',
+      },
+    );
+    expect(d.ledger.append).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        movementTypeConceptId: PINV.MV_SYNC_ADJUSTMENT,
+        sourceId: 'batch-1',
+        quantityDelta: '7',
+        pharmacySiteId: 'site-1',
+        pharmacyId: 'pharmacy-1',
+      }),
+    );
+  });
+});

@@ -67,4 +67,57 @@ export enum PaymentsErrorReason {
   GATEWAY_CALLBACK_SOURCE_NOT_ALLOWED = 'GATEWAY_CALLBACK_SOURCE_NOT_ALLOWED',
   /** El callback no trae `timestamp` firmado o está fuera de la ventana de repetición del endpoint. */
   GATEWAY_CALLBACK_OUTSIDE_REPLAY_WINDOW = 'GATEWAY_CALLBACK_OUTSIDE_REPLAY_WINDOW',
+
+  /** La intención se cobra por la pasarela: no admite una operación directa contra el proveedor. */
+  PAYMENT_INTENT_VIA_GATEWAY = 'PAYMENT_INTENT_VIA_GATEWAY',
+  /** La intención está en proceso por el camino de siempre y no tiene un cobro en la pasarela: no se despacha otro. */
+  PAYMENT_INTENT_ALREADY_PROCESSING = 'PAYMENT_INTENT_ALREADY_PROCESSING',
+  /** La última evaluación de riesgo pide revisión humana: con la pasarela activa no se cobra hasta que se resuelva. */
+  PAYMENT_INTENT_RISK_REVIEW_PENDING = 'PAYMENT_INTENT_RISK_REVIEW_PENDING',
+  /** La pasarela sólo cobra con la operación SALE (autoriza y captura en un paso). */
+  PAYMENT_GATEWAY_OPERATION_NOT_SUPPORTED = 'PAYMENT_GATEWAY_OPERATION_NOT_SUPPORTED',
+  /** La pasarela cobra el importe completo de la intención; no admite un importe parcial. */
+  PAYMENT_GATEWAY_AMOUNT_MUST_MATCH_INTENT = 'PAYMENT_GATEWAY_AMOUNT_MUST_MATCH_INTENT',
+  /** La pasarela sólo opera en bolivianos (D-06); la moneda de la intención no se puede enviar. */
+  PAYMENT_GATEWAY_CURRENCY_NOT_SUPPORTED = 'PAYMENT_GATEWAY_CURRENCY_NOT_SUPPORTED',
+  /** Con la pasarela activa, la intención exige `paymentMethodType`. */
+  PAYMENT_GATEWAY_METHOD_REQUIRED = 'PAYMENT_GATEWAY_METHOD_REQUIRED',
+  /** El importe no se expresa en unidades menores enteras (más decimales que la moneda o fuera de rango). */
+  PAYMENT_GATEWAY_AMOUNT_NOT_REPRESENTABLE = 'PAYMENT_GATEWAY_AMOUNT_NOT_REPRESENTABLE',
+  /** La vida pedida para la intención queda fuera de lo que admite la pasarela (60 s a 24 h). */
+  PAYMENT_GATEWAY_EXPIRY_OUT_OF_RANGE = 'PAYMENT_GATEWAY_EXPIRY_OUT_OF_RANGE',
+  /** La pasarela rechazó la creación del cobro con una respuesta definitiva del contrato. */
+  PAYMENT_GATEWAY_REJECTED = 'PAYMENT_GATEWAY_REJECTED',
+  /** No se sabe si la pasarela creó el cobro: reintentar con la misma `idempotencyKey`. */
+  PAYMENT_GATEWAY_RESULT_AMBIGUOUS = 'PAYMENT_GATEWAY_RESULT_AMBIGUOUS',
+  /** La pasarela no está disponible o no acepta las credenciales de la API. */
+  PAYMENT_GATEWAY_UNAVAILABLE = 'PAYMENT_GATEWAY_UNAVAILABLE',
+  /** La respuesta de la pasarela no coincide con lo pedido (importe distinto): no se asocia al cobro. */
+  PAYMENT_GATEWAY_RESPONSE_MISMATCH = 'PAYMENT_GATEWAY_RESPONSE_MISMATCH',
+  /** La deuda de la intención ya tiene otro cobro en vuelo en la pasarela: no se abre un segundo. */
+  PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE = 'PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE',
+  /** El importe de la intención excede el saldo pendiente de la deuda que cobra. */
+  PAYMENT_GATEWAY_AMOUNT_EXCEEDS_DEBT = 'PAYMENT_GATEWAY_AMOUNT_EXCEEDS_DEBT',
+  /** La intención parece cobrar una deuda (propósito `DEBT` o referencia de origen) pero no se puede saber cuál: no se cobra a ciegas. */
+  PAYMENT_GATEWAY_DEBT_UNRESOLVED = 'PAYMENT_GATEWAY_DEBT_UNRESOLVED',
+  /** Hay un cobro posiblemente creado en la pasarela que la API no tiene asociado: se necesita conciliarlo (reenviar con la misma clave, o a mano si ya no se puede). */
+  PAYMENT_GATEWAY_RECONCILIATION_REQUIRED = 'PAYMENT_GATEWAY_RECONCILIATION_REQUIRED',
+  /** Demasiados cobros por la pasarela en curso en este proceso (límite de concurrencia con RLS): reintentable con la misma clave. */
+  PAYMENT_GATEWAY_BUSY = 'PAYMENT_GATEWAY_BUSY',
+  /** La reserva de despacho de la intención ya se cerró a mano. */
+  PAYMENT_GATEWAY_DISPATCH_ALREADY_CLOSED = 'PAYMENT_GATEWAY_DISPATCH_ALREADY_CLOSED',
+  /** La reserva de despacho todavía puede estar en vuelo: no se cierra a mano. */
+  PAYMENT_GATEWAY_DISPATCH_IN_FLIGHT = 'PAYMENT_GATEWAY_DISPATCH_IN_FLIGHT',
+  /** La intención no tiene una reserva de despacho pendiente: no hay nada que conciliar. */
+  PAYMENT_GATEWAY_NOTHING_TO_RECONCILE = 'PAYMENT_GATEWAY_NOTHING_TO_RECONCILE',
+  /** Los webhooks de la pasarela están desactivados (`payments.via_gateway` apagado). */
+  GATEWAY_WEBHOOKS_DISABLED = 'GATEWAY_WEBHOOKS_DISABLED',
+  /** El webhook no trae el cuerpo crudo necesario para verificar la firma. */
+  GATEWAY_WEBHOOK_RAW_BODY_MISSING = 'GATEWAY_WEBHOOK_RAW_BODY_MISSING',
+  /** El webhook es de otro modo (`test`/`live`) que la clave configurada. */
+  GATEWAY_WEBHOOK_MODE_MISMATCH = 'GATEWAY_WEBHOOK_MODE_MISMATCH',
+  /** El cuerpo del webhook no tiene la forma del contrato. */
+  GATEWAY_WEBHOOK_MALFORMED = 'GATEWAY_WEBHOOK_MALFORMED',
+  /** Más de una intención (de uno o varios tenants) tiene la misma referencia `pi_…`: no se aplica a ninguna. */
+  GATEWAY_WEBHOOK_INTENT_REF_AMBIGUOUS = 'GATEWAY_WEBHOOK_INTENT_REF_AMBIGUOUS',
 }

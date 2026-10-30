@@ -10,21 +10,21 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [access_policies](#access_policies) | Define políticas de acceso que combinan identidad, recurso y contexto para autorizar operaciones. | 13 | 6 | 63 | COINCIDE |
+| [access_policies](#access_policies) | Define políticas de acceso que combinan identidad, recurso y contexto para autorizar operaciones. | 13 | 6 | 61 | COINCIDE |
 | [break_glass_sessions](#break_glass_sessions) | Documenta sesiones de acceso de emergencia que pueden superar restricciones ordinarias bajo controles reforzados. | 20 | 5 | 1 | COINCIDE |
-| [care_relationships](#care_relationships) | Vincula profesionales con pacientes bajo una relación de cuidado que sirve como contexto de autorización clínica. | 15 | 3 | 79 | COINCIDE |
-| [clinical_access_grants](#clinical_access_grants) | Registra concesiones de acceso clínico a pacientes o expedientes bajo un propósito y alcance determinados. | 17 | 13 | 75 | COINCIDE |
-| [field_permissions](#field_permissions) | Controla permisos a nivel de campo para proteger atributos sensibles de registros de salud. | 13 | 4 | 64 | COINCIDE |
+| [care_relationships](#care_relationships) | Vincula profesionales con pacientes bajo una relación de cuidado que sirve como contexto de autorización clínica. | 15 | 3 | 77 | COINCIDE |
+| [clinical_access_grants](#clinical_access_grants) | Registra concesiones de acceso clínico a pacientes o expedientes bajo un propósito y alcance determinados. | 17 | 13 | 73 | COINCIDE |
+| [field_permissions](#field_permissions) | Controla permisos a nivel de campo para proteger atributos sensibles de registros de salud. | 13 | 4 | 62 | COINCIDE |
 | [ip_access_rules](#ip_access_rules) | Aplica reglas de acceso por dirección de red para limitar orígenes de conexión permitidos. | 17 | 3 | 0 | COINCIDE |
-| [patient_legal_representations](#patient_legal_representations) | Registra representación legal de pacientes para determinar quién puede actuar en su nombre dentro de ámbitos permitidos. | 14 | 2 | 65 | COINCIDE |
+| [patient_legal_representations](#patient_legal_representations) | Registra representación legal de pacientes para determinar quién puede actuar en su nombre dentro de ámbitos permitidos. | 14 | 2 | 63 | COINCIDE |
 | [permission_categories](#permission_categories) | Agrupa permisos por área funcional para organizar la autorización en módulos del sistema médico. | 10 | 3 | 3 | COINCIDE |
-| [permissions](#permissions) | Define acciones que pueden autorizarse sobre recursos clínicos y administrativos. | 18 | 7 | 68 | COINCIDE |
-| [resource_scope_grants](#resource_scope_grants) | Limita accesos a recursos según alcance de tenant, paciente u organización. | 16 | 8 | 69 | DIVERGE |
-| [role_permissions](#role_permissions) | Relaciona roles con permisos para establecer qué acciones habilita cada función. | 13 | 8 | 64 | COINCIDE |
-| [roles](#roles) | Define conjuntos reutilizables de privilegios para asignar funciones de acceso a usuarios y servicios. | 16 | 8 | 80 | COINCIDE |
+| [permissions](#permissions) | Define acciones que pueden autorizarse sobre recursos clínicos y administrativos. | 18 | 7 | 66 | COINCIDE |
+| [resource_scope_grants](#resource_scope_grants) | Limita accesos a recursos según alcance de tenant, paciente u organización. | 16 | 8 | 67 | DIVERGE |
+| [role_permissions](#role_permissions) | Relaciona roles con permisos para establecer qué acciones habilita cada función. | 13 | 8 | 62 | COINCIDE |
+| [roles](#roles) | Define conjuntos reutilizables de privilegios para asignar funciones de acceso a usuarios y servicios. | 16 | 8 | 78 | COINCIDE |
 | [service_principals](#service_principals) | Representa identidades no humanas que ejecutan integraciones y procesos autorizados. | 1 | 0 | 0 | COINCIDE |
-| [user_permission_grants](#user_permission_grants) | Registra permisos otorgados directamente a usuarios cuando una asignación por rol no expresa el acceso requerido. | 16 | 9 | 63 | COINCIDE |
-| [user_role_assignments](#user_role_assignments) | Asigna roles a usuarios dentro del ámbito correspondiente para controlar acceso operativo. | 15 | 11 | 83 | COINCIDE |
+| [user_permission_grants](#user_permission_grants) | Registra permisos otorgados directamente a usuarios cuando una asignación por rol no expresa el acceso requerido. | 16 | 9 | 61 | COINCIDE |
+| [user_role_assignments](#user_role_assignments) | Asigna roles a usuarios dentro del ámbito correspondiente para controlar acceso operativo. | 15 | 11 | 81 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -154,7 +154,7 @@ Define políticas de acceso que combinan identidad, recurso y contexto para auto
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: access_policies`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `AccessPolicies` — `src/modules/authz/entities/access_policies.entity.ts`
-- **Resumen:** 13 columnas · 6 índices · 5 FK salientes · 1 entrantes · 63 operaciones
+- **Resumen:** 13 columnas · 6 índices · 5 FK salientes · 1 entrantes · 61 operaciones
 
 #### Columnas
 
@@ -256,8 +256,6 @@ Define políticas de acceso que combinan identidad, recurso y contexto para auto
 | GET /forms/instances/{id} | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
-| GET /dental-procedures | LEE | DIRECTA |
-| POST /dental-procedures | LEE | DIRECTA |
 | GET /procedure-cases/{id} | LEE | DIRECTA |
 | GET /quotations | LEE | DIRECTA |
 | POST /quotations | LEE | DIRECTA |
@@ -368,7 +366,7 @@ Vincula profesionales con pacientes bajo una relación de cuidado que sirve como
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: care_relationships`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `CareRelationships` — `src/modules/authz/entities/care_relationships.entity.ts`
-- **Resumen:** 15 columnas · 3 índices · 9 FK salientes · 0 entrantes · 79 operaciones
+- **Resumen:** 15 columnas · 3 índices · 9 FK salientes · 0 entrantes · 77 operaciones
 
 #### Columnas
 
@@ -488,8 +486,6 @@ Vincula profesionales con pacientes bajo una relación de cuidado que sirve como
 | GET /patient-coverages/by-patient/{patientProfileId} | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
-| GET /dental-procedures | LEE | DIRECTA |
-| POST /dental-procedures | LEE | DIRECTA |
 | GET /procedure-cases/{id} | LEE | DIRECTA |
 | GET /quotations | LEE | DIRECTA |
 | POST /quotations | LEE | DIRECTA |
@@ -519,7 +515,7 @@ Registra concesiones de acceso clínico a pacientes o expedientes bajo un propó
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: clinical_access_grants`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `ClinicalAccessGrants` — `src/modules/authz/entities/clinical_access_grants.entity.ts`
-- **Resumen:** 17 columnas · 13 índices · 11 FK salientes · 0 entrantes · 75 operaciones
+- **Resumen:** 17 columnas · 13 índices · 11 FK salientes · 0 entrantes · 73 operaciones
 
 #### Columnas
 
@@ -649,8 +645,6 @@ Registra concesiones de acceso clínico a pacientes o expedientes bajo un propó
 | GET /fhir/r5/Patient/{id}/$everything | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
-| GET /dental-procedures | LEE | DIRECTA |
-| POST /dental-procedures | LEE | DIRECTA |
 | GET /procedure-cases/{id} | LEE | DIRECTA |
 | GET /quotations | LEE | DIRECTA |
 | POST /quotations | LEE | DIRECTA |
@@ -680,7 +674,7 @@ Controla permisos a nivel de campo para proteger atributos sensibles de registro
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: field_permissions`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `FieldPermissions` — `src/modules/authz/entities/field_permissions.entity.ts`
-- **Resumen:** 13 columnas · 4 índices · 4 FK salientes · 0 entrantes · 64 operaciones
+- **Resumen:** 13 columnas · 4 índices · 4 FK salientes · 0 entrantes · 62 operaciones
 
 #### Columnas
 
@@ -779,8 +773,6 @@ Controla permisos a nivel de campo para proteger atributos sensibles de registro
 | GET /forms/instances/{id} | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
-| GET /dental-procedures | LEE | DIRECTA |
-| POST /dental-procedures | LEE | DIRECTA |
 | GET /procedure-cases/{id} | LEE | DIRECTA |
 | GET /quotations | LEE | DIRECTA |
 | POST /quotations | LEE | DIRECTA |
@@ -882,7 +874,7 @@ Registra representación legal de pacientes para determinar quién puede actuar 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: patient_legal_representations`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `PatientLegalRepresentations` — `src/modules/authz/entities/patient_legal_representations.entity.ts`
-- **Resumen:** 14 columnas · 2 índices · 7 FK salientes · 1 entrantes · 65 operaciones
+- **Resumen:** 14 columnas · 2 índices · 7 FK salientes · 1 entrantes · 63 operaciones
 
 #### Columnas
 
@@ -985,8 +977,6 @@ Registra representación legal de pacientes para determinar quién puede actuar 
 | GET /forms/instances/{id} | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
-| GET /dental-procedures | LEE | DIRECTA |
-| POST /dental-procedures | LEE | DIRECTA |
 | GET /procedure-cases/{id} | LEE | DIRECTA |
 | GET /quotations | LEE | DIRECTA |
 | POST /quotations | LEE | DIRECTA |
@@ -1086,7 +1076,7 @@ Define acciones que pueden autorizarse sobre recursos clínicos y administrativo
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: permissions`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `Permissions` — `src/modules/authz/entities/permissions.entity.ts`
-- **Resumen:** 18 columnas · 7 índices · 6 FK salientes · 12 entrantes · 68 operaciones
+- **Resumen:** 18 columnas · 7 índices · 6 FK salientes · 12 entrantes · 66 operaciones
 
 #### Columnas
 
@@ -1217,8 +1207,6 @@ Define acciones que pueden autorizarse sobre recursos clínicos y administrativo
 | GET /forms/instances/{id} | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
-| GET /dental-procedures | LEE | DIRECTA |
-| POST /dental-procedures | LEE | DIRECTA |
 | GET /procedure-cases/{id} | LEE | DIRECTA |
 | GET /quotations | LEE | DIRECTA |
 | POST /quotations | LEE | DIRECTA |
@@ -1248,7 +1236,7 @@ Limita accesos a recursos según alcance de tenant, paciente u organización.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: resource_scope_grants`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `ResourceScopeGrants` — `src/modules/authz/entities/resource_scope_grants.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 7 FK salientes · 0 entrantes · 69 operaciones
+- **Resumen:** 16 columnas · 8 índices · 7 FK salientes · 0 entrantes · 67 operaciones
 
 #### Columnas
 
@@ -1362,8 +1350,6 @@ Limita accesos a recursos según alcance de tenant, paciente u organización.
 | GET /forms/instances/{id} | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
-| GET /dental-procedures | LEE | DIRECTA |
-| POST /dental-procedures | LEE | DIRECTA |
 | GET /procedure-cases/{id} | LEE | DIRECTA |
 | GET /quotations | LEE | DIRECTA |
 | POST /quotations | LEE | DIRECTA |
@@ -1393,7 +1379,7 @@ Relaciona roles con permisos para establecer qué acciones habilita cada funció
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: role_permissions`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `RolePermissions` — `src/modules/authz/entities/role_permissions.entity.ts`
-- **Resumen:** 13 columnas · 8 índices · 8 FK salientes · 0 entrantes · 64 operaciones
+- **Resumen:** 13 columnas · 8 índices · 8 FK salientes · 0 entrantes · 62 operaciones
 
 #### Columnas
 
@@ -1500,8 +1486,6 @@ Relaciona roles con permisos para establecer qué acciones habilita cada funció
 | GET /forms/instances/{id} | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
-| GET /dental-procedures | LEE | DIRECTA |
-| POST /dental-procedures | LEE | DIRECTA |
 | GET /procedure-cases/{id} | LEE | DIRECTA |
 | GET /quotations | LEE | DIRECTA |
 | POST /quotations | LEE | DIRECTA |
@@ -1531,7 +1515,7 @@ Define conjuntos reutilizables de privilegios para asignar funciones de acceso a
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: roles`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `Roles` — `src/modules/authz/entities/roles.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 7 FK salientes · 4 entrantes · 80 operaciones
+- **Resumen:** 16 columnas · 8 índices · 7 FK salientes · 4 entrantes · 78 operaciones
 
 #### Columnas
 
@@ -1659,8 +1643,6 @@ Define conjuntos reutilizables de privilegios para asignar funciones de acceso a
 | POST /pharma-labs/{pharmaLabId}/medical-visitors | LEE | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/relink | LEE | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | LEE | DIRECTA |
-| GET /dental-procedures | LEE | DIRECTA |
-| POST /dental-procedures | LEE | DIRECTA |
 | GET /procedure-cases/{id} | LEE | DIRECTA |
 | POST /profiles/credentials/{credentialId}/verify | LEE | DIRECTA |
 | GET /quotations | LEE | DIRECTA |
@@ -1732,7 +1714,7 @@ Registra permisos otorgados directamente a usuarios cuando una asignación por r
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: user_permission_grants`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `UserPermissionGrants` — `src/modules/authz/entities/user_permission_grants.entity.ts`
-- **Resumen:** 16 columnas · 9 índices · 8 FK salientes · 0 entrantes · 63 operaciones
+- **Resumen:** 16 columnas · 9 índices · 8 FK salientes · 0 entrantes · 61 operaciones
 
 #### Columnas
 
@@ -1842,8 +1824,6 @@ Registra permisos otorgados directamente a usuarios cuando una asignación por r
 | GET /forms/instances/{id} | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
-| GET /dental-procedures | LEE | DIRECTA |
-| POST /dental-procedures | LEE | DIRECTA |
 | GET /procedure-cases/{id} | LEE | DIRECTA |
 | GET /quotations | LEE | DIRECTA |
 | POST /quotations | LEE | DIRECTA |
@@ -1873,7 +1853,7 @@ Asigna roles a usuarios dentro del ámbito correspondiente para controlar acceso
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: user_role_assignments`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `UserRoleAssignments` — `src/modules/authz/entities/user_role_assignments.entity.ts`
-- **Resumen:** 15 columnas · 11 índices · 9 FK salientes · 0 entrantes · 83 operaciones
+- **Resumen:** 15 columnas · 11 índices · 9 FK salientes · 0 entrantes · 81 operaciones
 
 #### Columnas
 
@@ -2003,8 +1983,6 @@ Asigna roles a usuarios dentro del ámbito correspondiente para controlar acceso
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/relink | LEE | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | ACTUALIZA | POR_TIPO |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | LEE | DIRECTA |
-| GET /dental-procedures | LEE | DIRECTA |
-| POST /dental-procedures | LEE | DIRECTA |
 | GET /procedure-cases/{id} | LEE | DIRECTA |
 | POST /profiles/credentials/{credentialId}/verify | CREA | DIRECTA |
 | POST /profiles/credentials/{credentialId}/verify | LEE | DIRECTA |

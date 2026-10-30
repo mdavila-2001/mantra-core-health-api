@@ -2,7 +2,7 @@
 
 # Mapa de operaciones
 
-1625 operaciones: ruta, proceso, módulo, riesgo, autorización, quién la llama y señales. Equivale a la vista `/flows` de AtlasAdminPortal.
+1627 operaciones: ruta, proceso, módulo, riesgo, autorización, quién la llama y señales. Equivale a la vista `/flows` de AtlasAdminPortal.
 
 «Quién la llama» sale del inventario de clientes del frontend (`docs/reports/generated/api-inventory.md`). Una operación sin cliente puede ser interna, móvil o deuda: la columna informa, no concluye.
 
@@ -418,6 +418,7 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | GET `/l/{slug}` | Módulo Community (19) (ctrl:CommunityPublicController) | community | BAJO | Pública | — | PUBLICA · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/o/{slug}` | Módulo Community (19) (ctrl:CommunityPublicController) | community | BAJO | Pública | — | PUBLICA · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/p/{slug}` | Módulo Community (19) (ctrl:CommunityPublicController) | community | BAJO | Pública | — | PUBLICA · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| GET `/patients/me/reviewable-care` | Módulo Community (19) (ctrl:PatientReviewsController) | community | BAJO | PATIENT | — | SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/patients/me/reviews` | Módulo Community (19) (ctrl:PatientReviewsController) | community | MEDIO | PATIENT | CommunityClient | ESCRIBE · SIN_PRUEBAS · CON_DECISIONES |
 | GET `/public/comments/{commentId}/replies` | Módulo Community (19) (ctrl:CommunityPublicController) | community | BAJO | Pública | PublicDirectoryClient | PUBLICA · SIN_INTEGRACION · CON_DECISIONES |
 | GET `/public/media/{id}` | Módulo Community (19) (ctrl:CommunityPublicController) | community | BAJO | Pública | — | PUBLICA · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
@@ -1220,7 +1221,7 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | POST `/sites/{siteId}/care-spaces` | Módulo Practice (14) (UC-14-05) | practice | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/sites/{siteId}/clinical-units` | Módulo Practice (14) (UC-14-04) | practice | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/tenants/{tenantId}/practices` | Módulo Practice (14) (ctrl:OrganizationPracticesController) | practice | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
-| GET `/dental-procedures` | Módulo 53 — Procedimientos y Perioperatorio (ctrl:DentalController) | procedures_perioperative | BAJO | CLINICIAN · PRACTITIONER | ProceduresClient | CON_DECISIONES |
+| GET `/dental-procedures` | Módulo 53 — Procedimientos y Perioperatorio (ctrl:DentalController) | procedures_perioperative | BAJO | CLINICIAN · PRACTITIONER | ProceduresClient | — |
 | POST `/dental-procedures` | Módulo 53 — Procedimientos y Perioperatorio (ctrl:DentalController) | procedures_perioperative | MEDIO | CLINICIAN · PRACTITIONER | ProceduresClient | ESCRIBE · CON_DECISIONES |
 | GET `/dental-procedures/catalog` | Módulo 53 — Procedimientos y Perioperatorio (ctrl:DentalController) | procedures_perioperative | BAJO | CLINICIAN · PRACTITIONER | ProceduresClient | SIN_TABLAS |
 | POST `/pacu-stays/{stayId}/assessments` | Módulo 53 — Procedimientos y Perioperatorio (ctrl:PeriopController) | procedures_perioperative | MEDIO | PERIOP_NURSE · ANESTHESIOLOGIST · PERIOP_ADMIN | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
@@ -1480,6 +1481,7 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | POST `/search/{index}/documents` | Módulo 57 — Plataforma de búsqueda (`search_platform`) (ctrl:SearchPlatformController) | search_platform | BAJO | PLATFORM_ADMIN · SEARCH_ADMIN · SYSTEM | — | SIN_TABLAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | DELETE `/search/{index}/documents/{id}` | Módulo 57 — Plataforma de búsqueda (`search_platform`) (ctrl:SearchPlatformController) | search_platform | BAJO | PLATFORM_ADMIN · SEARCH_ADMIN · SYSTEM | — | SIN_TABLAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/surveys/assignments` | Módulo Surveys — Cuestionarios y encuestas de satisfacción (ctrl:SurveysAssignmentsController) | surveys | MEDIO | PRACTITIONER · CLINICIAN | SurveysClient | ESCRIBE · SIN_PRUEBAS · CON_DECISIONES |
+| GET `/surveys/insights` | Módulo Surveys — Cuestionarios y encuestas de satisfacción (ctrl:SurveysInsightsController) | surveys | BAJO | PRACTITIONER · CLINICIAN | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/surveys/invitations` | Módulo Surveys — Cuestionarios y encuestas de satisfacción (ctrl:SurveysAssignmentsController) | surveys | MEDIO | PRACTITIONER · CLINICIAN | SurveysClient | ESCRIBE · SIN_PRUEBAS · CON_DECISIONES |
 | GET `/surveys/me/invitations` | Módulo Surveys — Cuestionarios y encuestas de satisfacción (ctrl:SurveysPatientController) | surveys | BAJO | Sesión sin roles | SurveysClient | SIN_PRUEBAS · CON_DECISIONES |
 | GET `/surveys/me/invitations/{id}` | Módulo Surveys — Cuestionarios y encuestas de satisfacción (ctrl:SurveysPatientController) | surveys | BAJO | Sesión sin roles | SurveysClient | SIN_PRUEBAS · CON_DECISIONES |

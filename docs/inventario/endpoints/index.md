@@ -2,11 +2,11 @@
 
 # Inventario de endpoints
 
-Se inventarían **1625 operaciones HTTP** en **72 módulos**: 1616 publicadas en el contrato OpenAPI y 9 que existen sólo en el código.
+Se inventarían **1627 operaciones HTTP** en **72 módulos**: 1618 publicadas en el contrato OpenAPI y 9 que existen sólo en el código.
 
-- Con al menos una tabla identificada: 1563
-- Riesgo ALTO 200 · MEDIO 899 · BAJO 526
-- Mencionadas por al menos una prueba: 939
+- Con al menos una tabla identificada: 1565
+- Riesgo ALTO 200 · MEDIO 899 · BAJO 528
+- Mencionadas por al menos una prueba: 940
 
 Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [README del inventario](../README.md).
 
@@ -25,7 +25,7 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `clinical` | 42 | 1 | [clinical.md](clinical.md) |
 | `clinical_ext` | 32 | 2 | [clinical_ext.md](clinical_ext.md) |
 | `common` | 19 | 6 | [common.md](common.md) |
-| `community` | 103 | 29 | [community.md](community.md) |
+| `community` | 104 | 29 | [community.md](community.md) |
 | `consent` | 27 | 0 | [consent.md](consent.md) |
 | `content_packs` | 2 | 1 | [content_packs.md](content_packs.md) |
 | `crm` | 16 | 0 | [crm.md](crm.md) |
@@ -75,7 +75,7 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `reporting` | 12 | 0 | [reporting.md](reporting.md) |
 | `scheduling` | 66 | 3 | [scheduling.md](scheduling.md) |
 | `search_platform` | 4 | 0 | [search_platform.md](search_platform.md) |
-| `surveys` | 17 | 2 | [surveys.md](surveys.md) |
+| `surveys` | 18 | 2 | [surveys.md](surveys.md) |
 | `system_context` | 13 | 0 | [system_context.md](system_context.md) |
 | `system_ops` | 24 | 1 | [system_ops.md](system_ops.md) |
 | `telemetry` | 25 | 8 | [telemetry.md](telemetry.md) |

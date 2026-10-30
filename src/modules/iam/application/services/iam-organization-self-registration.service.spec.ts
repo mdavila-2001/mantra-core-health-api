@@ -908,4 +908,243 @@ describe('IamOrganizationSelfRegistrationService', () => {
       ).rejects.toThrow(PreconditionFailedException);
     });
   });
+
+  describe('establecimiento médico (medicalFacility)', () => {
+    const medicalFacility = {
+      taxIdentifierNumber: '1023456789',
+      healthFacilityRegistrationNumber: 'SEDES-SC-2020-0412',
+      medicalDirector: {
+        name: 'Ana',
+        lastName: 'Rojas',
+        professionalLicenseNumber: 'MAT-12345',
+        email: 'dir@clinica.bo',
+      },
+      headquarters: { addressLines: ['Av. San Martín 123'] },
+    };
+    const legalDocuments = {
+      constitutionFileId: 'file-constitution',
+      taxIdentifierFileId: 'file-tax',
+      commerceRegistryFileId: 'file-commerce',
+      operatingLicenseFileId: 'file-license',
+      healthAuthorityCertificateFileId: 'file-sedes',
+    };
+    const medicalDto = (
+      tenantType: RegisterOrganizationDto['organization']['tenantType'],
+      withBlock = true,
+    ): RegisterOrganizationDto => ({
+      ...dto,
+      organization: {
+        ...dto.organization,
+        tenantType,
+        legalEntityType: 'SRL',
+        ...(withBlock ? { medicalFacility } : {}),
+      },
+    });
+
+    it.each([
+      'HOSPITAL',
+      'CLINIC',
+      'MEDICAL_OFFICE',
+      'NURSING',
+      'HEALTH_OTHER',
+    ] as const)(
+      '%s con el bloque: lo persiste en la misma transacción y responde medicalFacilityRegistered=true',
+      async (tenantType) => {
+        const d = build();
+        d.typeProfile.materializeProfile.mockResolvedValueOnce('facility-1');
+
+        const result = await d.service.registerOrganization(
+          medicalDto(tenantType),
+        );
+
+        expect(d.typeProfile.materializeProfile).toHaveBeenCalledWith(
+          d.tx,
+          'tenant-1',
+          expect.objectContaining({ tenantType, medicalFacility }),
+          'user-1',
+        );
+        expect(result.medicalFacilityRegistered).toBe(true);
+        // El id de la fila del establecimiento no se expone como unidad
+        // diagnóstica ni como farmacia.
+        expect(result.diagnosticUnitId).toBeUndefined();
+        expect(result.pharmacyId).toBeUndefined();
+      },
+    );
+
+    it('valida el bloque contra el tipo antes de crear la cuenta', async () => {
+      const d = build();
+
+      await d.service.registerOrganization(medicalDto('CLINIC'));
+
+      expect(d.typeProfile.assertProfileMatchesType).toHaveBeenCalledWith(
+        expect.objectContaining({ medicalFacility }),
+      );
+      expect(
+        d.typeProfile.assertProfileMatchesType.mock.invocationCallOrder[0],
+      ).toBeLessThan(d.usersRepo.create.mock.invocationCallOrder[0]);
+    });
+
+    it('un tipo no médico con el bloque responde 422 y no crea cuenta, tenant ni correo', async () => {
+      const d = build();
+      d.typeProfile.assertProfileMatchesType.mockImplementation(() => {
+        throw new PreconditionFailedException(
+          'El bloque `medicalFacility` sólo corresponde a un tenant de tipo HOSPITAL, CLINIC, MEDICAL_OFFICE, NURSING, HEALTH_OTHER',
+        );
+      });
+
+      await expect(
+        d.service.registerOrganization(medicalDto('PHARMACY')),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      expect(d.usersRepo.create).not.toHaveBeenCalled();
+      expect(d.tenantsRepo.create).not.toHaveBeenCalled();
+      expect(d.emailVerificationsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('un tipo médico sin el bloque se registra igual y responde medicalFacilityRegistered=false', async () => {
+      const d = build();
+
+      const result = await d.service.registerOrganization(
+        medicalDto('HOSPITAL', false),
+      );
+
+      expect(result.medicalFacilityRegistered).toBe(false);
+    });
+
+    it('un tipo no médico no lleva medicalFacilityRegistered', async () => {
+      const d = build();
+
+      const result = await d.service.registerOrganization(dto);
+
+      expect(result).not.toHaveProperty('medicalFacilityRegistered', true);
+      expect(result.medicalFacilityRegistered).toBeUndefined();
+    });
+
+    it('un fallo al persistir el establecimiento revienta toda el alta', async () => {
+      const d = build();
+      d.typeProfile.materializeProfile.mockRejectedValueOnce(
+        new Error('fallo de base'),
+      );
+
+      await expect(
+        d.service.registerOrganization(medicalDto('CLINIC')),
+      ).rejects.toThrow('fallo de base');
+
+      expect(d.emailVerificationsRepo.create).not.toHaveBeenCalled();
+      expect(d.membershipsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('copia el NIT del bloque como número del documento tributario', async () => {
+      const d = build();
+
+      await d.service.registerOrganization({
+        ...medicalDto('CLINIC'),
+        organization: { ...medicalDto('CLINIC').organization, legalDocuments },
+      });
+
+      expect(
+        d.affiliationDocuments.attachRegistrationDocuments,
+      ).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ taxIdentifier: '1023456789' }),
+      );
+    });
+
+    it('el NIT de organization.taxIdentifier manda sobre el del bloque', async () => {
+      const d = build();
+      const base = medicalDto('CLINIC');
+
+      await d.service.registerOrganization({
+        ...base,
+        organization: {
+          ...base.organization,
+          taxIdentifier: '999888777',
+          legalDocuments,
+        },
+      });
+
+      expect(
+        d.affiliationDocuments.attachRegistrationDocuments,
+      ).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ taxIdentifier: '999888777' }),
+      );
+    });
+
+    it('el representante legal y las tres gerencias se registran también para un tipo médico', async () => {
+      const d = build();
+      const base = medicalDto('HOSPITAL');
+      const manager = {
+        name: 'Carlos',
+        lastName: 'Mendoza',
+        phone: '+591 70012345',
+        email: 'gerente@clinica.bo',
+      };
+      const legalRepresentative = {
+        name: 'Mariana',
+        lastName: 'Siles',
+        idNumber: '4872190 SC',
+        email: 'legal@clinica.bo',
+        powerOfAttorneyFileId: 'file-power',
+      };
+      const executives = {
+        generalManager: manager,
+        commercialManager: manager,
+        marketingManager: manager,
+      };
+
+      const result = await d.service.registerOrganization({
+        ...base,
+        organization: {
+          ...base.organization,
+          legalDocuments,
+          legalRepresentative,
+          executives,
+        },
+      });
+
+      expect(d.representatives.register).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          tenantId: 'tenant-1',
+          legalRepresentative,
+          executives,
+        }),
+      );
+      expect(result.representativesRegistered).toBe(4);
+    });
+
+    it('un tipo médico con representante sin poder responde 422: el poder se exige fuera de la farmacia', async () => {
+      const d = build();
+      const base = medicalDto('CLINIC');
+
+      await expect(
+        d.service.registerOrganization({
+          ...base,
+          organization: {
+            ...base.organization,
+            legalDocuments,
+            legalRepresentative: {
+              name: 'Mariana',
+              lastName: 'Siles',
+              idNumber: '4872190 SC',
+              email: 'legal@clinica.bo',
+            },
+          },
+        }),
+      ).rejects.toThrow(/poder notariado/);
+      expect(d.usersRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('anota en el evento de seguridad que el alta trajo el establecimiento, sin datos personales', async () => {
+      const d = build();
+
+      await d.service.registerOrganization(medicalDto('CLINIC'));
+
+      const detail = d.eventsRepo.record.mock.calls[0][1].detailJson;
+      expect(detail).toMatchObject({ medicalFacility: true });
+      expect(JSON.stringify(detail)).not.toContain('MAT-12345');
+      expect(JSON.stringify(detail)).not.toContain('dir@clinica.bo');
+    });
+  });
 });

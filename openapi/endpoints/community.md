@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `community`
 
-Referencia exhaustiva de 99 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 100 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-ratings`, `community-reviews`, `community-social`, `community-timeline`
 - **Controladores:** `CommunityFeedController`, `CommunityGroupsController`, `CommunityMessagingController`, `CommunityModerationController`, `CommunityPollsController`, `CommunityPublicController`, `CommunityReviewsController`, `CommunitySearchIndexController`, `CommunitySocialController`, `CommunityTimelineController`, `CommunityTopicsController`, `CommunityVerificationController`, `PartyRatingsController`, `PatientReviewsController`
@@ -93,23 +93,24 @@ Referencia exhaustiva de 99 operación(es) del módulo `community`, derivada del
 80. [GET /l/{slug}](#80-get-l-slug) — Ficha pública de un laboratorio
 81. [GET /o/{slug}](#81-get-o-slug) — Ficha pública de una organización
 82. [GET /p/{slug}](#82-get-p-slug) — Ficha pública de un profesional
-83. [POST /patients/me/reviews](#83-post-patients-me-reviews) — Calificar una atención recibida
-84. [GET /public/comments/{commentId}/replies](#84-get-public-comments-commentid-replies) — Respuestas de un comentario público
-85. [GET /public/media/{id}](#85-get-public-media-id) — Servir una imagen pública (avatar, portada o post)
-86. [GET /public/nearby](#86-get-public-nearby) — Prestadores cercanos, en línea recta
-87. [GET /public/posts](#87-get-public-posts) — Últimas publicaciones de todos los profesionales
-88. [GET /public/posts/{postId}/comments](#88-get-public-posts-postid-comments) — Comentarios raíz de una publicación pública
-89. [GET /public/posts/{postId}/reactions](#89-get-public-posts-postid-reactions) — Quiénes reaccionaron a una publicación pública
-90. [GET /public/profiles/{prefijo}/{slug}](#90-get-public-profiles-prefijo-slug) — Ficha pública por prefijo de vertical
-91. [GET /public/profiles/{prefijo}/{slug}/reviews](#91-get-public-profiles-prefijo-slug-reviews) — Opiniones publicadas de una ficha pública
-92. [GET /public/search](#92-get-public-search) — Buscador público unificado
-93. [GET /public/search/diagnostic-units](#93-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
-94. [GET /public/search/insurers](#94-get-public-search-insurers) — Aseguradoras en el directorio público
-95. [GET /public/search/medications](#95-get-public-search-medications) — Medicamentos ofertados públicamente
-96. [GET /public/search/organizations](#96-get-public-search-organizations) — Organizaciones en el directorio público
-97. [GET /public/search/pharmacies](#97-get-public-search-pharmacies) — Farmacias en el directorio público
-98. [GET /public/search/practitioners](#98-get-public-search-practitioners) — Profesionales en el directorio público
-99. [GET /s/{slug}](#99-get-s-slug) — Ficha pública de una aseguradora
+83. [GET /patients/me/reviewable-care](#83-get-patients-me-reviewable-care) — Consultar si una atención recibida se puede calificar
+84. [POST /patients/me/reviews](#84-post-patients-me-reviews) — Calificar una atención recibida
+85. [GET /public/comments/{commentId}/replies](#85-get-public-comments-commentid-replies) — Respuestas de un comentario público
+86. [GET /public/media/{id}](#86-get-public-media-id) — Servir una imagen pública (avatar, portada o post)
+87. [GET /public/nearby](#87-get-public-nearby) — Prestadores cercanos, en línea recta
+88. [GET /public/posts](#88-get-public-posts) — Últimas publicaciones de todos los profesionales
+89. [GET /public/posts/{postId}/comments](#89-get-public-posts-postid-comments) — Comentarios raíz de una publicación pública
+90. [GET /public/posts/{postId}/reactions](#90-get-public-posts-postid-reactions) — Quiénes reaccionaron a una publicación pública
+91. [GET /public/profiles/{prefijo}/{slug}](#91-get-public-profiles-prefijo-slug) — Ficha pública por prefijo de vertical
+92. [GET /public/profiles/{prefijo}/{slug}/reviews](#92-get-public-profiles-prefijo-slug-reviews) — Opiniones publicadas de una ficha pública
+93. [GET /public/search](#93-get-public-search) — Buscador público unificado
+94. [GET /public/search/diagnostic-units](#94-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
+95. [GET /public/search/insurers](#95-get-public-search-insurers) — Aseguradoras en el directorio público
+96. [GET /public/search/medications](#96-get-public-search-medications) — Medicamentos ofertados públicamente
+97. [GET /public/search/organizations](#97-get-public-search-organizations) — Organizaciones en el directorio público
+98. [GET /public/search/pharmacies](#98-get-public-search-pharmacies) — Farmacias en el directorio público
+99. [GET /public/search/practitioners](#99-get-public-search-practitioners) — Profesionales en el directorio público
+100. [GET /s/{slug}](#100-get-s-slug) — Ficha pública de una aseguradora
 
 ---
 
@@ -7602,7 +7603,7 @@ Content-Type: application/json
 | `verifiedEncounterId` | Sí | `string` | formato `uuid` | Atención que respalda la reseña (nunca se expone) | `00000000-0000-4000-8000-000000000001` |
 | `overallRating` | Sí | `number` | mínimo 1; máximo 5 | Calificación global 1..5 | `1` |
 | `reviewText` | No | `string` | longitud máxima 4000 | Texto de la review | `valor-ejemplo` |
-| `displayMode` | No | `string` | valores: `REAL_NAME`, `ANONYMOUS` | Modo de visualización del reviewer | `REAL_NAME` |
+| `displayMode` | No | `string` | valores: `REAL_NAME`, `ANONYMOUS` | Modo de visualización del reviewer. Si no se envía, la reseña es ANONYMOUS (privacidad por defecto); el nombre real se muestra sólo si se pide REAL_NAME | `ANONYMOUS` |
 | `dimensions` | No | `array<ReviewDimensionInputDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"dimension":"COMMUNICATION","score":1}]` |
 | `dimensions[].dimension` | No | `string` | valores: `COMMUNICATION`, `PUNCTUALITY`, `CLEANLINESS`, `OUTCOME` | Dimensión | `COMMUNICATION` |
 | `dimensions[].score` | No | `number` | mínimo 1; máximo 5 | Puntuación 1..5 | `1` |
@@ -7621,7 +7622,7 @@ Content-Type: application/json
   "verifiedEncounterId": "00000000-0000-4000-8000-000000000001",
   "overallRating": 1,
   "reviewText": "valor-ejemplo",
-  "displayMode": "REAL_NAME",
+  "displayMode": "ANONYMOUS",
   "dimensions": [
     {
       "dimension": "COMMUNICATION",
@@ -11489,7 +11490,125 @@ Ejemplo de error normalizado:
 
 ---
 
-## 83. POST /patients/me/reviews
+## 83. GET /patients/me/reviewable-care
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-reviews`
+- **Nombre:** Consultar si una atención recibida se puede calificar
+- **Operation ID:** `PatientReviewsController_getReviewableCare`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PatientReviewsController.getReviewableCare](../../src/modules/community/controllers/patient-reviews.controller.ts)
+
+### Descripción de negocio
+
+Parte de la reserva (la misma de la encuesta) y devuelve el encuentro que respalda la reseña pública, el nombre público del profesional, y `alreadyReviewed` / `canReview`. Una reserva ajena o inexistente responde 404 igual.
+
+Contexto declarado en el controlador: ¿Puedo calificar la atención de esta reserva? Devuelve el encuentro que la respalda y si la reseña sería aceptada.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /patients/me/reviewable-care` en `PatientReviewsController_getReviewableCare`. El controlador delega en `CommunityReviewableCareService.getReviewableCare`. No recibe body. El tipo de retorno estático es `Promise<ReviewableCareDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `appointmentBookingId` | query | Sí | `string` | formato `uuid` | Reserva de la atención recibida (la misma de la encuesta) | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /patients/me/reviewable-care?appointmentBookingId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /patients/me/reviewable-care?appointmentBookingId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReviewableCareDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ReviewableCareDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReviewableCareDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReviewableCareDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReviewableCareDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReviewableCareDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReviewableCareDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReviewableCareDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "encounterId": "00000000-0000-4000-8000-000000000001",
+  "appointmentBookingId": "00000000-0000-4000-8000-000000000001",
+  "practitionerDisplayName": "Nombre de ejemplo",
+  "startAt": "2026-07-31T12:00:00.000Z",
+  "alreadyReviewed": true,
+  "canReview": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `encounterId` | Sí | `string` | formato `uuid`; admite null | Encuentro que respalda la reseña. `null` si la atención todavía no tiene uno. | `00000000-0000-4000-8000-000000000001` |
+| `appointmentBookingId` | Sí | `string` | formato `uuid` | La reserva consultada. | `00000000-0000-4000-8000-000000000001` |
+| `practitionerDisplayName` | Sí | `string` | admite null | Nombre público del profesional que atendió. `null` si no tiene vitrina. | `Nombre de ejemplo` |
+| `startAt` | Sí | `string` | formato `date-time`; admite null | Inicio de la atención. `null` si no hay encuentro. | `2026-07-31T12:00:00.000Z` |
+| `alreadyReviewed` | Sí | `boolean` | Sin restricción adicional declarada | Si este paciente ya reseñó este encuentro. | `true` |
+| `canReview` | Sí | `boolean` | Sin restricción adicional declarada | Si `POST /patients/me/reviews` aceptaría una reseña de este encuentro: encuentro terminado, vitrina del profesional que acepta reseñas y sin reseña previa. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo un paciente puede consultar sus atenciones | Excepción explícita en src/modules/community/services/community-reviewable-care.service.ts |
+| 404 | `NOT_FOUND` | Atención no encontrada | Excepción explícita en src/modules/community/services/community-reviewable-care.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/patients/me/reviewable-care"
+}
+```
+
+---
+
+## 84. POST /patients/me/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -11541,7 +11660,7 @@ Content-Type: application/json
 | `verifiedEncounterId` | Sí | `string` | formato `uuid` | Atención que respalda la reseña (nunca se expone) | `00000000-0000-4000-8000-000000000001` |
 | `overallRating` | Sí | `number` | mínimo 1; máximo 5 | Calificación global 1..5 | `1` |
 | `reviewText` | No | `string` | longitud máxima 4000 | Texto de la review | `valor-ejemplo` |
-| `displayMode` | No | `string` | valores: `REAL_NAME`, `ANONYMOUS` | Modo de visualización del reviewer | `REAL_NAME` |
+| `displayMode` | No | `string` | valores: `REAL_NAME`, `ANONYMOUS` | Modo de visualización del reviewer. Si no se envía, la reseña es ANONYMOUS (privacidad por defecto); el nombre real se muestra sólo si se pide REAL_NAME | `ANONYMOUS` |
 | `dimensions` | No | `array<ReviewDimensionInputDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"dimension":"COMMUNICATION","score":1}]` |
 | `dimensions[].dimension` | No | `string` | valores: `COMMUNICATION`, `PUNCTUALITY`, `CLEANLINESS`, `OUTCOME` | Dimensión | `COMMUNICATION` |
 | `dimensions[].score` | No | `number` | mínimo 1; máximo 5 | Puntuación 1..5 | `1` |
@@ -11560,7 +11679,7 @@ Content-Type: application/json
   "verifiedEncounterId": "00000000-0000-4000-8000-000000000001",
   "overallRating": 1,
   "reviewText": "valor-ejemplo",
-  "displayMode": "REAL_NAME",
+  "displayMode": "ANONYMOUS",
   "dimensions": [
     {
       "dimension": "COMMUNICATION",
@@ -11639,7 +11758,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 84. GET /public/comments/{commentId}/replies
+## 85. GET /public/comments/{commentId}/replies
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11732,7 +11851,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 85. GET /public/media/{id}
+## 86. GET /public/media/{id}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11826,7 +11945,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 86. GET /public/nearby
+## 87. GET /public/nearby
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11921,7 +12040,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 87. GET /public/posts
+## 88. GET /public/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12009,7 +12128,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 88. GET /public/posts/{postId}/comments
+## 89. GET /public/posts/{postId}/comments
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12101,7 +12220,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 89. GET /public/posts/{postId}/reactions
+## 90. GET /public/posts/{postId}/reactions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12193,7 +12312,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 90. GET /public/profiles/{prefijo}/{slug}
+## 91. GET /public/profiles/{prefijo}/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12405,7 +12524,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 91. GET /public/profiles/{prefijo}/{slug}/reviews
+## 92. GET /public/profiles/{prefijo}/{slug}/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12511,7 +12630,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 92. GET /public/search
+## 93. GET /public/search
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12611,7 +12730,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 93. GET /public/search/diagnostic-units
+## 94. GET /public/search/diagnostic-units
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12711,7 +12830,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 94. GET /public/search/insurers
+## 95. GET /public/search/insurers
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12811,7 +12930,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 95. GET /public/search/medications
+## 96. GET /public/search/medications
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12911,7 +13030,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 96. GET /public/search/organizations
+## 97. GET /public/search/organizations
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -13014,7 +13133,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 97. GET /public/search/pharmacies
+## 98. GET /public/search/pharmacies
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -13114,7 +13233,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 98. GET /public/search/practitioners
+## 99. GET /public/search/practitioners
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -13218,7 +13337,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 99. GET /s/{slug}
+## 100. GET /s/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`

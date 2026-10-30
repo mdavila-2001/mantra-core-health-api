@@ -1275,7 +1275,7 @@
         "metodo": "POST",
         "ruta": "/iam/auth/register-organization",
         "modulo": "iam",
-        "detalle": "CREA common.addresses, ACTUALIZA common.files, CREA diagnostic_units.diagnostic_study_offerings, CREA diagnostic_units.diagnostic_unit_sites, CREA diagnostic_units.diagnostic_units, CREA directory.branches, CREA directory.tenant_affiliation_documents, CREA directory.tenant_legal_representatives, CREA directory.tenant_memberships, CREA directory.tenants, CREA iam.authentication_credentials, CREA iam.email_verifications, CREA iam.security_events, CREA iam.user_global_roles, CREA iam.users, CREA insurance.insurance_brokers, CREA insurance.insurance_carriers, CREA messaging.notification_requests, CREA pharmacy.pharmacies, CREA pharmacy.pharmacy_product_categories, CREA pharmacy.pharmacy_sites, CREA practice.practice_sites, CREA practice.practices",
+        "detalle": "CREA common.addresses, ACTUALIZA common.files, CREA diagnostic_units.diagnostic_study_offerings, CREA diagnostic_units.diagnostic_unit_sites, CREA diagnostic_units.diagnostic_units, CREA directory.branches, CREA directory.tenant_affiliation_documents, CREA directory.tenant_legal_representatives, CREA directory.tenant_medical_facilities, CREA directory.tenant_medical_facility_sites, CREA directory.tenant_memberships, CREA directory.tenants, CREA iam.authentication_credentials, CREA iam.email_verifications, CREA iam.security_events, CREA iam.user_global_roles, CREA iam.users, CREA insurance.insurance_brokers, CREA insurance.insurance_carriers, CREA messaging.notification_requests, CREA pharmacy.pharmacies, CREA pharmacy.pharmacy_product_categories, CREA pharmacy.pharmacy_sites, CREA practice.practice_sites, CREA practice.practices",
         "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:134"
       },
       {
@@ -4716,6 +4716,14 @@
         "operacion": "CommunityPublicController_getPractitioner",
         "metodo": "GET",
         "ruta": "/p/{slug}",
+        "modulo": "community",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PatientReviewsController_getReviewableCare",
+        "metodo": "GET",
+        "ruta": "/patients/me/reviewable-care",
         "modulo": "community",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -10673,6 +10681,14 @@
         "fuente": null
       },
       {
+        "operacion": "SurveysInsightsController_getInsights",
+        "metodo": "GET",
+        "ruta": "/surveys/insights",
+        "modulo": "surveys",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "SystemContextController_createContext",
         "metodo": "POST",
         "ruta": "/system-context/contexts",
@@ -11641,7 +11657,7 @@
         "fuente": null
       }
     ],
-    "cuenta": 1129
+    "cuenta": 1131
   },
   {
     "id": "FLU-08",
@@ -12183,7 +12199,7 @@
         "metodo": "POST",
         "ruta": "/admin/content-packs/{code}/apply",
         "modulo": "content_packs",
-        "detalle": "Error: El catálogo del glosario declara el slug \"{term.slug}\" más de una vez (src/common/seed/glossary-seed.service.ts:372) | Error: El directorio declara el código \"{facility.code}\" más de una vez (src/common/seed/bolivia-facilities-seed.service.ts:184) | Error: El catálogo geográfico declara la sigla \"{department.code}\" más de una vez (src/common/seed/bo-geography-seed.service.ts:247)",
+        "detalle": "Error: El catálogo del glosario declara el slug \"{term.slug}\" más de una vez (src/common/seed/glossary-seed.service.ts:372) | Error: El directorio declara el código \"{facility.code}\" más de una vez (src/common/seed/bolivia-facilities-seed.service.ts:187) | Error: El catálogo geográfico declara la sigla \"{department.code}\" más de una vez (src/common/seed/bo-geography-seed.service.ts:247)",
         "fuente": "src/modules/content_packs/content-packs.controller.ts:69"
       },
       {
@@ -12523,6 +12539,14 @@
         "fuente": "src/modules/scheduling/presentation/controllers/scheduling.controller.ts:841"
       },
       {
+        "operacion": "SurveysAssignmentsController_issueInvitations",
+        "metodo": "POST",
+        "ruta": "/surveys/invitations",
+        "modulo": "surveys",
+        "detalle": "Error: La encuesta base {kind} del tenant no quedó materializada (plantilla {ids.templateId}) (src/modules/surveys/services/surveys-system-templates.service.ts:142)",
+        "fuente": "src/modules/surveys/controllers/surveys-assignments.controller.ts:55"
+      },
+      {
         "operacion": "SystemContextController_createContext",
         "metodo": "POST",
         "ruta": "/system-context/contexts",
@@ -12635,6 +12659,6 @@
         "fuente": "src/modules/workflow/controllers/workflow-transitions.controller.ts:73"
       }
     ],
-    "cuenta": 112
+    "cuenta": 113
   }
 ]

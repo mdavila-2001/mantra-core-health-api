@@ -115,6 +115,11 @@ const PLATFORM_OPERATIONS: readonly ClinicalRoleSeed[] = [
   role('OPERATIONAL_APPROVER', 'Aprobador operativo', 'STAFF', 'GLOBAL'),
   role('MESSAGING_ADMIN', 'Administrador de mensajería', 'ADMIN', 'GLOBAL'),
   role('IDENTITY_ADMIN', 'Administrador de identidad', 'ADMIN', 'GLOBAL'),
+  // Admisiones de profesionales (v4.2.67). Se asignan de forma explícita:
+  // `SECURITY_ADMIN` sólo los hereda donde `ADMISSIONS_SECURITY_ADMIN_INHERITS`
+  // lo permite (por defecto, fuera de producción).
+  role('ADMISSIONS_REVIEWER', 'Revisor de admisiones', 'STAFF', 'GLOBAL'),
+  role('ADMISSIONS_APPROVER', 'Aprobador de admisiones', 'STAFF', 'GLOBAL'),
   role('STORAGE_ADMIN', 'Administrador de almacenamiento', 'ADMIN', 'GLOBAL'),
   role('SEARCH_ADMIN', 'Administrador de búsqueda', 'ADMIN', 'GLOBAL'),
   role('SEARCH_READER', 'Lector de búsqueda', 'STAFF', 'GLOBAL'),

@@ -98,7 +98,7 @@ Representa domicilios y direcciones de personas, sedes y organizaciones utilizad
 | 6 | `lines` | `varchar` | Opcional | _sin dato_ | coincide |
 | 7 | `city` | `varchar` | Opcional | _sin dato_ | coincide |
 | 8 | `administrative_area_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
-| 9 | `municipality_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.1.5 — municipio. `administrative_area_concept_id` sigue siendo el departamento; éste es el nivel de detalle que `city` (texto libre) no puede garantizar consistente. Value set: vs_bo_municipality (340 municipios). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_02_common.puml:90`)_ | coincide |
+| 9 | `municipality_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.1.5 — municipio. `administrative_area_concept_id` sigue siendo el departamento; éste es el nivel de detalle que `city` (texto libre) no puede garantizar consistente. Value set: vs_bo_municipality (340 municipios). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_02_common.puml:86`)_ | coincide |
 | 10 | `postal_code` | `varchar` | Opcional | _sin dato_ | coincide |
 | 11 | `country_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 12 | `latitude` | `numeric` | Opcional | _sin dato_ | coincide |
@@ -135,7 +135,7 @@ Representa domicilios y direcciones de personas, sedes y organizaciones utilizad
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_addresses_owner_type_concept_id` | no | owner_type_concept_id | Soporta la clave foránea fk_addresses_owner_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_addresses_owner_type_concept_id` | no | owner_type_concept_id | Soporta la clave foránea fk_addresses_owner_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «owner_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_addresses_use_concept_id` | no | use_concept_id | Soporta la clave foránea fk_addresses_use_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «use_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_addresses_type_concept_id` | no | type_concept_id | Soporta la clave foránea fk_addresses_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_addresses_administrative_area_concept_id` | no | administrative_area_concept_id | Soporta la clave foránea fk_addresses_administrative_area_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |

@@ -14,14 +14,15 @@
 // Uso: node tools/terminology-import/clinical-pharmacology/build-monographs.mjs [--granularity route|product]
 // =============================================================================
 
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { readNdjson, writeJson, writeNdjson } from '../lib/glossary-es/common.mjs';
 import { cimaSafetyNotes, cimaSections, groupByAtc5, referenceDocuments } from './lib/cima.mjs';
 import { listJson, parseArgs, readJsonIfExists, retrievedAtOf } from './lib/cli.mjs';
 import { buildGsrsIndex, combineLinks, gsrsDisplayFor, linkUniiSet, moietiesOf, rxnavIndex, uniiForCas } from './lib/gsrs.mjs';
-import { emaIndicationSection, emaRecords, isHumanAuthorised } from './lib/ema.mjs';
+import { EMA_LICENSE, emaIndicationSection, emaRecords, isHumanAuthorised } from './lib/ema.mjs';
+import { cimaNregCandidates, comparisonKey, emaPiPointer, emaPiSlug, emaPiUrl, piMonographSections, piSmpcs } from './lib/ema-pi.mjs';
 import { dailyMedPointer } from './lib/dailymed.mjs';
 import { emlReference, isCurrentRecommendation } from './lib/eml.mjs';
 import { lactmedIdentity, lactmedSections } from './lib/lactmed.mjs';
@@ -30,7 +31,7 @@ import { readAllInputs, readBridge, readDailyMedIdentities, readEma, readEml, re
 import { zipResults } from './lib/json-stream.mjs';
 import { assertSection, atcNameIndex, buildMonograph, hasVersion } from './lib/monograph.mjs';
 import { labelIdentity, openFdaPharmClasses, openFdaSections, referenceLabels } from './lib/openfda.mjs';
-import { cpOut, ftPath, ftSectionPath, monographsOutputs, notesPath, openFdaDir } from './lib/paths.mjs';
+import { cpOut, emaPiPdfPath, emaPiTextPath, ftPath, ftSectionPath, monographsOutputs, notesPath, openFdaDir } from './lib/paths.mjs';
 
 const { opt, has } = parseArgs();
 const GRANULARITY = opt('--granularity', 'route');
@@ -48,6 +49,8 @@ const NO_DAILYMED = has('--no-dailymed');
 const NO_LACTMED = has('--no-lactmed');
 /** `--no-livertox`: arma sin LiverTox (medición por pasada). */
 const NO_LIVERTOX = has('--no-livertox');
+/** `--no-ema-pi`: arma sin la información de producto de la EMA en PDF (medición por pasada). */
+const NO_EMA_PI = has('--no-ema-pi');
 
 /** Ficha completa + secciones sueltas de respaldo, en ese orden (la completa gana). */
 function readCimaDoc(nreg) {
@@ -339,6 +342,57 @@ async function main() {
     }
   }
 
+  // EMA, información de producto (PDF en castellano). Si el nº de autorización EU está en CIMA, es el mismo
+  // documento y ya entra por CIMA: sirve para medir la fidelidad de la extracción del PDF contra el texto de CIMA.
+  // Si no está, entra como PUNTERO sin texto: la extracción no es literal en todos los casos (ver EMA_PI_TEXT_WITHHELD).
+  const emaPiPointers = new Map();
+  const emaPiStats = { medicines: 0, withoutPdf: 0, withoutAnnexI: 0, inCima: 0, notInCima: 0, pointers: 0, fidelity: {} };
+  if (!NO_EMA_PI && emaRaw) {
+    const cimaNregs = new Set(inputs.products.map((p) => String(p.nregistro)));
+    for (const r of emaRecords(emaRaw.rows).filter((x) => isHumanAuthorised(x) && x.atc5.length)) {
+      emaPiStats.medicines++;
+      const slug = emaPiSlug(r.url);
+      const txt = slug ? emaPiTextPath(slug) : null;
+      if (!txt || !existsSync(txt)) {
+        emaPiStats.withoutPdf++;
+        continue;
+      }
+      const smpcs = piSmpcs(readFileSync(txt, 'utf8'));
+      if (smpcs.length === 0) {
+        emaPiStats.withoutAnnexI++;
+        continue;
+      }
+      const inCima = smpcs.flatMap((sm) => sm.euNumbers.flatMap(cimaNregCandidates)).filter((n) => cimaNregs.has(n));
+      if (inCima.length) {
+        emaPiStats.inCima++;
+        // Fidelidad: cada sección del PDF frente a la misma sección de la ficha de CIMA de ese nº de registro.
+        const nreg = inCima.find((n) => existsSync(ftPath(n)));
+        const doc = nreg ? readCimaDoc(nreg) : null;
+        if (!doc) continue;
+        const cimaText = new Map(cimaSections(doc.doc, { product: { nregistro: nreg } }, doc.retrievedAt).map((s) => [s.section.number, comparisonKey(s.text)]));
+        const sm = smpcs.find((x) => x.euNumbers.some((eu) => cimaNregCandidates(eu).includes(nreg))) ?? smpcs[0];
+        for (const s of piMonographSections(sm)) {
+          if (!cimaText.has(s.number)) continue;
+          const f = (emaPiStats.fidelity[s.number] ??= { compared: 0, identical: 0 });
+          f.compared++;
+          if (cimaText.get(s.number) === comparisonKey(s.text)) f.identical++;
+        }
+        continue;
+      }
+      emaPiStats.notInCima++;
+      const url = emaPiUrl(slug);
+      const retrievedAt = retrievedAtOf(emaPiPdfPath(slug));
+      for (const sm of smpcs) {
+        const ptr = emaPiPointer(r, sm, { url, retrievedAt, license: EMA_LICENSE });
+        for (const code of r.atc5) {
+          if (!emaPiPointers.has(code)) emaPiPointers.set(code, []);
+          emaPiPointers.get(code).push(ptr);
+          emaPiStats.pointers++;
+        }
+      }
+    }
+  }
+
   const stats = { cimaDocsMissing: 0, cimaSectionsWithoutVersion: 0, cimaSectionsVersionUnpublished: 0, cimaDuplicateSections: 0, skippedWithoutData: 0, uniiWithoutLabel: 0, fdaRefsWithoutLabel: 0, fdaRefsWithoutMappedSections: 0, fdaSectionsWithoutVersion: 0 };
   const out = [];
   for (const [code, origin] of universe) {
@@ -407,7 +461,7 @@ async function main() {
     for (const s of emaByAtc.get(code) ?? []) if (hasVersion(s)) sections.push(assertSection(s));
     for (const s of lactmedByAtc.get(code)?.values() ?? []) if (hasVersion(s)) sections.push(assertSection(s));
     for (const s of livertoxByAtc.get(code)?.values() ?? []) if (hasVersion(s)) sections.push(assertSection(s));
-    const externalDocuments = [...(fda.pointers.get(code) ?? []), ...(emlRefsByAtc.get(code) ?? [])];
+    const externalDocuments = [...(fda.pointers.get(code) ?? []), ...(emlRefsByAtc.get(code) ?? []), ...(emaPiPointers.get(code) ?? [])];
     if (cimaProducts.length === 0 && sections.length === 0 && externalDocuments.length === 0) {
       stats.skippedWithoutData++;
       continue;
@@ -421,11 +475,12 @@ async function main() {
   const meta = {
     generatedAt: new Date().toISOString(),
     granularity: GRANULARITY,
-    sources: [NO_CIMA ? 'sin CIMA' : 'CIMA', NO_EMA ? 'sin EMA' : 'EMA', NO_EML ? 'sin eEML' : 'eEML', NO_DAILYMED ? 'sin DailyMed' : 'DailyMed', NO_LACTMED ? 'sin LactMed' : 'LactMed', NO_LIVERTOX ? 'sin LiverTox' : 'LiverTox', 'openFDA', 'GSRS', 'RxNav'].join(', '),
+    sources: [NO_CIMA ? 'sin CIMA' : 'CIMA', NO_EMA ? 'sin EMA' : 'EMA', NO_EML ? 'sin eEML' : 'eEML', NO_DAILYMED ? 'sin DailyMed' : 'DailyMed', NO_LACTMED ? 'sin LactMed' : 'LactMed', NO_LIVERTOX ? 'sin LiverTox' : 'LiverTox', NO_EMA_PI ? 'sin EMA PDF' : 'EMA PDF', 'openFDA', 'GSRS', 'RxNav'].join(', '),
     ema: emaStats,
     eml: emlStats,
     lactmed: lactmedStats,
     livertox: livertoxStats,
+    emaPi: emaPiStats,
     universe: universe.size,
     monographs: out.length,
     sections: out.reduce((n, m) => n + m.sections.length, 0),
