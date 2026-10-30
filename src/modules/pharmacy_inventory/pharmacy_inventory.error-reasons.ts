@@ -13,6 +13,25 @@ export enum PharmacyInventoryErrorReason {
    */
   PHARMACY_INVENTORY_RESOURCE_NOT_AVAILABLE = 'PHARMACY_INVENTORY_RESOURCE_NOT_AVAILABLE',
   /**
+   * La receta del pedido no está emitida: es un borrador o fue invalidada,
+   * reemplazada o completada.
+   */
+  PRESCRIPTION_NOT_ACTIVE = 'PRESCRIPTION_NOT_ACTIVE',
+  /** La receta del pedido está emitida, pero su `valid_to` ya pasó. */
+  PRESCRIPTION_EXPIRED = 'PRESCRIPTION_EXPIRED',
+  /**
+   * Una línea del pedido es de un producto de receta obligatoria cuyo fármaco
+   * no está en la receta (o no declara fármaco).
+   */
+  PRODUCT_NOT_PRESCRIBED = 'PRODUCT_NOT_PRESCRIBED',
+  /**
+   * Lo pedido de un fármaco supera lo que queda de la receta (recetado −
+   * entregado − reservado), cuando la unidad recetada es comparable.
+   */
+  QUANTITY_EXCEEDS_PRESCRIPTION = 'QUANTITY_EXCEEDS_PRESCRIPTION',
+  /** Un pedido sin receta trae un producto de receta obligatoria. */
+  PRESCRIPTION_REQUIRED = 'PRESCRIPTION_REQUIRED',
+  /**
    * Los datos ya guardados no cierran la cadena farmacia, sede, ubicación,
    * producto y lote: operar sobre ellos escribiría asientos con una farmacia
    * o una sede que no son las verdaderas.
