@@ -31,12 +31,12 @@
 | [`forms`](forms.md) | 6 | 6 | 6 | 16 | 17 |
 | [`diagnostic_units`](diagnostic_units.md) | 5 | 9 | 12 | 10 | 13 |
 | [`geo`](geo.md) | 5 | 5 | 6 | 6 | 14 |
+| [`payments`](payments.md) | 5 | 7 | 6 | 53 | 6 |
 | [`telemetry`](telemetry.md) | 5 | 6 | 16 | 14 | 12 |
 | [`iam`](iam.md) | 4 | 16 | 13 | 14 | 24 |
 | [`integrations`](integrations.md) | 4 | 5 | 9 | 10 | 9 |
 | [`messaging`](messaging.md) | 4 | 4 | 4 | 22 | 3 |
 | [`organization_extensions`](organization_extensions.md) | 4 | 4 | 6 | 6 | 8 |
-| [`payments`](payments.md) | 4 | 7 | 6 | 53 | 5 |
 | [`pharmacy`](pharmacy.md) | 4 | 14 | 15 | 12 | 17 |
 | [`qa_lab`](qa_lab.md) | 4 | 5 | 2 | 13 | 1 |
 | [`surveys`](surveys.md) | 4 | 5 | 6 | 7 | 11 |
@@ -78,4 +78,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **305** | **496** | **450** | **1289** | **557** |
+| **Total** | **306** | **496** | **450** | **1289** | **558** |
