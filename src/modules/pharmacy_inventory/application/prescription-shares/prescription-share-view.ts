@@ -2,6 +2,7 @@ import { documentLast3, maskedName } from '../../domain/masked-patient';
 import {
   isComparableUnit,
   remainingQuantity,
+  sumQuantities,
 } from '../../domain/prescription-balance';
 import type { PrescribedProductRow } from '../../infrastructure/repositories/prescription-share-read.repository';
 import type { PatientIdentitySnapshot } from '../ports/patient-identity.port';
@@ -92,7 +93,8 @@ export function prescribedByDrug(
       unitConceptId: units.size === 1 ? [...units][0] : null,
       quantity: group.some((item) => item.quantity === null)
         ? null
-        : group.reduce((sum, item) => sum + (item.quantity ?? 0), 0),
+        : // Suma exacta, como el pedido: `0.1 + 0.2` da `0.3`.
+          sumQuantities(group.map((item) => item.quantity ?? 0)),
     });
   }
   return totals;
