@@ -679,6 +679,18 @@
       "routes": [
         "GET /billing/service-catalog/procedure-specialties/mine"
       ]
+    },
+    {
+      "reason": "Admisión del propio médico: las rutas son `me`, la admisión sale del perfil profesional del vínculo SELF y ACTIVO de la cuenta (`currentOf`/`ownLocked`), nunca de la URL ni del cuerpo, así que nadie lee, reenvía ni retira la de otro; sin perfil profesional responde 404. Un rol global dejaría fuera al médico en verificación, que es quien la usa.",
+      "evidence": [
+        "src/modules/profiles/application/services/practitioner-admissions-read.service.ts#currentOf",
+        "src/modules/profiles/application/services/practitioner-admissions.service.ts#ownLocked"
+      ],
+      "routes": [
+        "GET /profiles/practitioners/me/admission",
+        "POST /profiles/practitioners/me/admission/resubmit",
+        "POST /profiles/practitioners/me/admission/withdraw"
+      ]
     }
   ]
 }
