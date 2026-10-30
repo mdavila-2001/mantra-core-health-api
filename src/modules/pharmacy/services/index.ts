@@ -11,3 +11,8 @@ export * from './medicine-catalog-search.service';
 export * from './pharmacy-categories.service';
 export * from './pharmacy-opening-hours.service';
 export * from './pharmacy-provisioning.service';
+export * from './pharmacy-bulk.service';
+export * from './bulk/categories.bulk-handler';
+export * from './bulk/products.bulk-handler';
+export * from './bulk/prices.bulk-handler';
+export * from './bulk/sites.bulk-handler';
