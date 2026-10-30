@@ -84,12 +84,22 @@ describe('POST /payments/intents/:id/transactions (via_gateway) — autorizació
       error: () => undefined,
     };
     const em = {
+      isInTransaction: () => false,
       transactional: async (cb: (tx: unknown) => unknown) => cb({}),
     };
     const intentsRepo = {
       // Como el repositorio real: por UUID, sin mirar el tenant.
       findByIdForUpdate: async (_tx: unknown, id: string) =>
         id === INTENT_OF_B ? intentOfB : null,
+      // Con el tenant en el mismo `WHERE`, la fila del tenant B no se devuelve a A.
+      findByIdAndTenantForUpdate: async (
+        _tx: unknown,
+        id: string,
+        tenantId: string,
+      ) =>
+        id === INTENT_OF_B && intentOfB.tenantId === tenantId
+          ? intentOfB
+          : null,
     };
     const flowRepo = {
       findLatestRiskAssessment: async () => ({
@@ -104,7 +114,14 @@ describe('POST /payments/intents/:id/transactions (via_gateway) — autorizació
       findPendingByIntent: async () => null,
       findByIntent: async () => [],
     };
-    const charge = { enabled: true, dispatch, consult };
+    const charge = {
+      enabled: true,
+      dispatchLeaseMs: 900_000,
+      buildCreateRequest: () => ({}),
+      reserveDispatch: () => undefined,
+      dispatch,
+      consult,
+    };
     const transactions = new PaymentsTransactionsService(
       em as never,
       intentsRepo as never,

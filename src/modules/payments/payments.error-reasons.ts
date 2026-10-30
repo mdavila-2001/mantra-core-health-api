@@ -98,6 +98,8 @@ export enum PaymentsErrorReason {
   PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE = 'PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE',
   /** El importe de la intención excede el saldo pendiente de la deuda que cobra. */
   PAYMENT_GATEWAY_AMOUNT_EXCEEDS_DEBT = 'PAYMENT_GATEWAY_AMOUNT_EXCEEDS_DEBT',
+  /** La intención parece cobrar una deuda (propósito `DEBT` o referencia de origen) pero no se puede saber cuál: no se cobra a ciegas. */
+  PAYMENT_GATEWAY_DEBT_UNRESOLVED = 'PAYMENT_GATEWAY_DEBT_UNRESOLVED',
   /** Los webhooks de la pasarela están desactivados (`payments.via_gateway` apagado). */
   GATEWAY_WEBHOOKS_DISABLED = 'GATEWAY_WEBHOOKS_DISABLED',
   /** El webhook no trae el cuerpo crudo necesario para verificar la firma. */

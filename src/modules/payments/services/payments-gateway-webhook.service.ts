@@ -17,6 +17,7 @@ import {
 } from '../repositories';
 import { GatewayWebhookResultDto } from '../dto';
 import { PaymentsErrorReason } from '../payments.error-reasons';
+import { DEBT_SOURCE_REF_TYPE } from '../payments.source-refs';
 import {
   PAYMENTS_GATEWAY_CONFIG,
   type PaymentsGatewayConfig,
@@ -62,9 +63,6 @@ const CREATED_EVENT = 'payment_intent.created';
 
 const PAYMENT_INTENT_ID = /^pi_[a-z0-9]{10,40}$/u;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
-
-/** Tipo de recurso de origen con el que se identifica una intención de deuda. */
-const DEBT_SOURCE_REF_TYPE = 'payment_debt';
 
 /** Resultado de intentar saldar la deuda de una intención cobrada. */
 type DebtOutcome = { settled: true } | { settled: false; reason: string };

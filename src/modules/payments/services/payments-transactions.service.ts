@@ -42,6 +42,12 @@ import { decideCallback, eventReference } from './payment-callback-machine';
 import { evaluateCallbackEndpoint } from './callback-endpoint.policy';
 import { PaymentsErrorReason } from '../payments.error-reasons';
 import { PaymentsGatewayChargeService } from './payments-gateway-charge.service';
+import { runCommitted } from './payments-committed-transaction';
+import {
+  blocksOtherCharges,
+  isDispatchMark,
+} from '../gateway/payments-gateway-dispatch-mark';
+import { DEBT_SOURCE_REF_TYPE, mayChargeADebt } from '../payments.source-refs';
 
 const OPERATION_CONCEPT: Readonly<Record<TransactionOperation, string>> = {
   AUTHORIZE: CONCEPTS.TXN_OP_AUTHORIZE,
@@ -335,15 +341,35 @@ export class PaymentsTransactionsService {
   /**
    * UC-42-05 con `payments.via_gateway=on` (REQ-INT-1): crea el cobro en la pasarela.
    *
-   * Pasa por la misma compuerta que el camino de siempre —estado de la intención
-   * y evaluación de riesgo— ANTES de llamar a la pasarela; si la compuerta no
-   * pasa, la pasarela no recibe ninguna llamada. La compuerta corre en su propia
-   * transacción y la llamada HTTP va fuera de ella, para no sostener el bloqueo
-   * de la fila durante los reintentos.
+   * Tres tiempos. La llamada HTTP no sostiene ningún bloqueo de fila: la compuerta y
+   * la asociación son transacciones cortas que se confirman solas (`runCommitted`).
+   *
+   * 1. **Compuerta + reserva** (transacción propia, confirmada). La misma compuerta
+   *    de estado y de riesgo que el camino de siempre, más la medición contra la
+   *    deuda (`assertDebtAllowsCharge`, con la deuda bloqueada). Si pasa, deja
+   *    escrita la MARCA DE DESPACHO en la intención y confirma: desde ese `COMMIT`
+   *    cualquier otra intención de la deuda ve este cobro como «en vuelo» aunque
+   *    todavía no tenga `pi_…`. Es la reserva que antes no existía (N2/N4).
+   * 2. **Llamada HTTP**, sin transacción propia. Si la compuerta no pasó, la
+   *    pasarela no recibe ninguna llamada.
+   * 3. **Asociación** (`PaymentsGatewayChargeService.associate`, transacción propia):
+   *    el `pi_…` reemplaza la marca. Una respuesta definitiva de rechazo libera la
+   *    marca; un resultado ambiguo (504) la conserva.
+   *
+   * Qué NO se evita: con `RLS_ENFORCE=true` el `TenantContextInterceptor` ya abrió
+   * una transacción para toda la petición y esa conexión permanece tomada («idle in
+   * transaction») durante la llamada HTTP, hasta 3 × 10 s más las esperas con los
+   * valores por defecto. Es propio del interceptor y alcanza a todas las rutas de la
+   * API: no retiene bloqueos de las filas de la compuerta (se soltaron al confirmar)
+   * pero sí una conexión del pool, que con muchas llamadas lentas simultáneas se
+   * puede agotar. Con `RLS_ENFORCE=false` no queda ninguna conexión tomada.
    *
    * La pasarela cobra el importe completo con un solo paso (`SALE`); no hay
    * autorización/captura separadas ni importes parciales. Repetir la operación
-   * sobre una intención que ya tiene su cobro NO crea otro: lo consulta.
+   * sobre una intención que ya tiene su cobro NO crea otro: lo consulta. Repetirla
+   * sobre una que sólo tiene la marca (la llamada anterior terminó ambigua o el
+   * proceso murió) vuelve a despachar con la MISMA `Idempotency-Key`: la pasarela
+   * devuelve el cobro original o lo crea una sola vez (regla 11).
    */
   private async processViaGateway(
     intentId: string,
@@ -361,11 +387,16 @@ export class PaymentsTransactionsService {
       );
     }
 
-    const intent = await this.em.transactional(async (tx) => {
-      const loaded = await this.intentsRepo.findByIdForUpdate(tx, intentId);
-      // Una intención de otro tenant responde igual que una inexistente (mismo
-      // 404, mismo mensaje, sin `details`): el servicio no se apoya en RLS, que
-      // con `RLS_ENFORCE=false` no existe. Ver `assertResourceInTenant`.
+    const intent = await runCommitted(this.em, tenantId, async (tx) => {
+      // El tenant va en el mismo `WHERE` que el bloqueo: una intención ajena no se
+      // espera ni se bloquea, y responde igual y a la misma velocidad que un UUID
+      // inexistente (mismo 404, mismo mensaje, sin `details`). El servicio no se
+      // apoya en RLS, que con `RLS_ENFORCE=false` no existe. Ver `assertResourceInTenant`.
+      const loaded = await this.intentsRepo.findByIdAndTenantForUpdate(
+        tx,
+        intentId,
+        tenantId,
+      );
       const found = assertResourceInTenant(loaded, loaded?.tenantId, tenantId, {
         message: 'Intención de pago no encontrada',
         reason: PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
@@ -379,8 +410,12 @@ export class PaymentsTransactionsService {
         );
       }
       // Ya despachada antes: es el reintento con la MISMA clave (regla 11); no
-      // se vuelve a evaluar ni a crear, se consulta.
-      if (found.gatewayIntentRef) return found;
+      // se vuelve a evaluar ni a crear, se consulta. Una MARCA de despacho no es
+      // un cobro: la llamada anterior no llegó a asociar su `pi_…`, así que sigue
+      // un despacho normal (mismas compuertas, misma clave) que lo retoma.
+      if (found.gatewayIntentRef && !isDispatchMark(found.gatewayIntentRef)) {
+        return found;
+      }
 
       // Sin cobro en la pasarela, una intención `PI_PROCESSING` tiene una
       // operación del camino de siempre en marcha: cobrarla otra vez duplicaría
@@ -398,17 +433,22 @@ export class PaymentsTransactionsService {
       // La pasarela cobra el importe completo: si ya hay algo capturado por el
       // camino de siempre, excede el saldo y no se despacha (sobrecobro).
       await this.assertWithinBalance(tx, found, intentId, found.amount);
-      await this.assertDebtAllowsCharge(tx, found);
+      await this.assertDebtAllowsCharge(tx, found, gateway.dispatchLeaseMs);
+      // Una solicitud que la pasarela no podría cobrar (sin medio de pago, otra
+      // moneda, vencimiento fuera de rango) falla ANTES de reservar.
+      gateway.buildCreateRequest(found, dto.paymentMethodType);
+      gateway.reserveDispatch(found);
       return found;
     });
 
-    const charged = intent.gatewayIntentRef
-      ? await gateway.consult(
-          intent.id,
-          intent.gatewayIntentRef,
-          intent.statusConceptId,
-        )
-      : await gateway.dispatch(intent, dto.paymentMethodType);
+    const charged =
+      intent.gatewayIntentRef && !isDispatchMark(intent.gatewayIntentRef)
+        ? await gateway.consult(
+            intent.id,
+            intent.gatewayIntentRef,
+            intent.statusConceptId,
+          )
+        : await gateway.dispatch(intent, dto.paymentMethodType);
 
     return {
       id: intent.id,
@@ -435,13 +475,22 @@ export class PaymentsTransactionsService {
    * (serializa las compuertas concurrentes) y en aritmética decimal exacta:
    *
    * 1. tiene que existir, ser del mismo tenant y no estar saldada, en BOB;
-   * 2. ninguna OTRA intención del tenant puede tener un cobro en vuelo sobre ella
-   *    (con `pi_…` y todavía `PI_PENDING`/`PI_PROCESSING`);
+   * 2. ninguna OTRA intención del tenant puede tener un cobro en vuelo sobre ella:
+   *    con `pi_…`, o con la marca de despacho vigente (`PI_PENDING`/`PI_PROCESSING`);
    * 3. el importe de la intención no puede exceder el saldo pendiente de la deuda.
    *
-   * No se aplica a la intención que ya tiene su `gatewayIntentRef`: esa es el
-   * reintento con la misma clave (regla 11) y sale antes, hacia la consulta.
-   * Una intención sin deuda asociada (otro propósito) no tiene nada que medir.
+   * **Falla cerrado si no puede saber qué deuda es.** Una intención que no declara
+   * `source_ref_type = payment_debt` ni tiene sesión de checkout, pero tiene
+   * propósito `DEBT` o una referencia de origen de un tipo que no se reconoce como
+   * ajeno a las deudas (`mayChargeADebt`), se rechaza con `422
+   * PAYMENT_GATEWAY_DEBT_UNRESOLVED`: saltarse la compuerta por una diferencia de
+   * mayúsculas en un texto libre dejaba despachar el cobro doble (N3).
+   *
+   * No se aplica a la intención que ya tiene su `pi_…`: esa es el reintento con la
+   * misma clave (regla 11) y sale antes, hacia la consulta. La marca de despacho de
+   * la PROPIA intención no cuenta contra ella (`excludeIntentId`). La de otra
+   * intención deja de bloquear cuando vence (`dispatchLeaseMs`); entonces se deja
+   * constancia en el log y la deuda se ofrece de nuevo.
    */
   private async assertDebtAllowsCharge(
     tx: EntityManager,
@@ -449,12 +498,14 @@ export class PaymentsTransactionsService {
       id: string;
       tenantId: string;
       amount: string;
+      purposeConceptId?: string | null;
       sourceRefType?: string | null;
       sourceRefId?: string | null;
     },
+    leaseMs: number,
   ): Promise<void> {
     const debtIds = new Set<string>();
-    if (intent.sourceRefType === 'payment_debt' && intent.sourceRefId) {
+    if (intent.sourceRefType === DEBT_SOURCE_REF_TYPE && intent.sourceRefId) {
       debtIds.add(intent.sourceRefId);
     }
     const sessions = await this.flowRepo.findCheckoutSessionsByIntentForUpdate(
@@ -462,6 +513,21 @@ export class PaymentsTransactionsService {
       intent.id,
     );
     for (const session of sessions) debtIds.add(session.paymentDebtId);
+
+    if (
+      debtIds.size === 0 &&
+      mayChargeADebt({
+        purposeIsDebt: intent.purposeConceptId === CONCEPTS.PAY_PURPOSE_DEBT,
+        sourceRefType: intent.sourceRefType,
+        sourceRefId: intent.sourceRefId,
+      })
+    ) {
+      throw new PreconditionFailedException(
+        'La intención parece cobrar una deuda pero no se puede saber cuál: indicá sourceRefType "payment_debt" con el id de la deuda, o abrí una sesión de checkout',
+        { intentId: intent.id },
+        PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_UNRESOLVED,
+      );
+    }
 
     for (const paymentDebtId of debtIds) {
       const debt = await this.flowRepo.findDebtByIdForUpdate(tx, paymentDebtId);
@@ -486,7 +552,7 @@ export class PaymentsTransactionsService {
           PaymentsErrorReason.PAYMENT_GATEWAY_CURRENCY_NOT_SUPPORTED,
         );
       }
-      const inFlight = await this.flowRepo.findInFlightGatewayIntentsOnDebt(
+      const candidates = await this.flowRepo.findInFlightGatewayIntentsOnDebt(
         tx,
         {
           tenantId: intent.tenantId,
@@ -494,6 +560,22 @@ export class PaymentsTransactionsService {
           excludeIntentId: intent.id,
         },
       );
+      const nowMs = Date.now();
+      const inFlight = candidates.filter((other) =>
+        blocksOtherCharges(other, nowMs, leaseMs),
+      );
+      const expired = candidates.filter((other) => !inFlight.includes(other));
+      if (expired.length > 0) {
+        this.logger.warn(
+          {
+            operation: 'payments.gateway.debt-gate',
+            intentId: intent.id,
+            paymentDebtId,
+            expiredReservationIntentIds: expired.map((other) => other.id),
+          },
+          'Ignoring expired dispatch reservations on the debt; those charges may exist in the gateway and need to be reviewed',
+        );
+      }
       if (inFlight.length > 0) {
         throw new ConflictException(
           'La deuda ya tiene otro cobro en curso en la pasarela',

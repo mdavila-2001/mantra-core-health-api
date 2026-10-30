@@ -83,6 +83,10 @@ export class PayGatewayDouble {
   readonly created = new Map<string, StoredIntent>();
   /** Fallos pendientes, uno por petición `POST /payment_intents`. */
   script: DoubleFault[] = [];
+  /** Retraso artificial antes de procesar un `POST /payment_intents` (ensancha la ventana de la llamada HTTP). */
+  latencyMs = 0;
+  /** Gancho que corre al llegar un `POST /payment_intents`, antes de procesarlo (observa el estado de la API durante la llamada). */
+  onCreate?: () => void | Promise<void>;
 
   private server?: Server;
   private counter = 0;
@@ -179,6 +183,10 @@ export class PayGatewayDouble {
     key: string | undefined,
   ): Promise<void> {
     const fault = this.script.shift();
+    await this.onCreate?.();
+    if (this.latencyMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, this.latencyMs));
+    }
 
     if (fault?.kind === 'drop_before') return void req.socket.destroy();
     if (fault?.kind === 'status') {

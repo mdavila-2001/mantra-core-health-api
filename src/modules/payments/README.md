@@ -107,6 +107,36 @@ deshabilitaría el endpoint en la pasarela).
   intención local queda pendiente sin tocar y el cliente repite la operación
   (`/transactions`): se retoma con la misma clave sin crear un segundo cobro. Un `4xx` definitivo del contrato
   corta los reintentos (`422 PAYMENT_GATEWAY_REJECTED`; `401/403` se muestran como `503`).
+- **Reserva de despacho** (`gateway/payments-gateway-dispatch-mark.ts`). El `pi_…` sólo se
+  conoce después de la respuesta de la pasarela, así que durante toda la llamada HTTP (y
+  para siempre si termina ambigua o el proceso muere antes de asociar) otra intención de la
+  misma deuda no vería ningún cobro en vuelo. Por eso la compuerta, con la deuda bloqueada
+  `FOR UPDATE`, escribe una marca `dispatching:<uuid>` en `gateway_intent_ref` y **confirma
+  esa transacción antes de llamar**: la compuerta contra la deuda cuenta como «en vuelo» a
+  toda otra intención con `pi_…` o con una marca vigente, y responde `409
+  PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE`. La llamada HTTP no sostiene ningún bloqueo de fila
+  (la compuerta y la asociación del `pi_…` son transacciones cortas, confirmadas con
+  `runCommitted`). El `pi_…` reemplaza la marca al asociar; una respuesta definitiva de
+  rechazo (`4xx` del contrato, `429` agotado) la libera; un resultado ambiguo (`504`) la
+  conserva. La marca no es un cobro: nunca se consulta ni resuelve un webhook. La propia
+  intención no se bloquea a sí misma (regla 11): repetir `/transactions` con la marca vuelve
+  a pasar las compuertas y despacha con la MISMA `Idempotency-Key`. Una marca más vieja que
+  `dispatchLeaseMs` (el mayor de 15 minutos y cuatro veces el peor caso de la llamada, por
+  `updated_at`) deja de bloquear a las OTRAS intenciones y se registra en el log con los ids
+  afectados; la marca no se borra: es el rastro de un cobro que pudo crearse y que
+  alguien debe revisar. Una marca sin fecha legible bloquea.
+- **La compuerta falla cerrado.** Una intención sin sesión de checkout que parece cobrar
+  una deuda —propósito `DEBT`, o `sourceRefType`/`sourceRefId` con un tipo que no sea
+  `payment_debt` ni uno conocido como ajeno a las deudas, como `EDUCATION_COURSE`
+  (`payments.source-refs.ts`)— se rechaza con `422 PAYMENT_GATEWAY_DEBT_UNRESOLVED` antes
+  de reservar ni llamar. `sourceRefType` es texto libre en el DTO: la compuerta mide por
+  `sourceRef` sólo el valor exacto `payment_debt`.
+- **Conexión durante la llamada.** Con `RLS_ENFORCE=false` ninguna conexión del pool queda
+  tomada durante la llamada HTTP. Con `RLS_ENFORCE=true` el `TenantContextInterceptor` abre
+  una transacción para toda la petición y esa conexión queda «idle in transaction» hasta
+  que termina (hasta 3 × 10 s más esperas con los valores por defecto); la compuerta y la
+  asociación corren en una transacción aparte y no retienen bloqueos de fila. Con muchas
+  llamadas lentas simultáneas el pool se puede agotar.
 - Con el flag apagado, una intención con `gateway_intent_ref` no admite
   `POST /payments/intents/:id/transactions` (`409 PAYMENT_INTENT_VIA_GATEWAY`): su resultado
   llega por webhook y no hay un segundo camino hacia el proveedor.

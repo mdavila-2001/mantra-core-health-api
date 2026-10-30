@@ -16,6 +16,12 @@ import {
 } from '../gateway/payments-gateway.env';
 import { PaymentsGatewayClient } from '../gateway/payments-gateway.client';
 import {
+  dispatchLeaseMs,
+  isDispatchMark,
+  newDispatchMark,
+} from '../gateway/payments-gateway-dispatch-mark';
+import { runCommitted } from './payments-committed-transaction';
+import {
   PaymentsGatewayError,
   PaymentsGatewayResultAmbiguousException,
   PaymentsGatewayUnavailableException,
@@ -127,6 +133,31 @@ export class PaymentsGatewayChargeService {
   }
 
   /**
+   * Cuánto bloquea la marca de despacho de una intención a las demás de la misma
+   * deuda antes de darse por abandonada. Ver `dispatchLeaseMs`.
+   */
+  get dispatchLeaseMs(): number {
+    return dispatchLeaseMs(this.config);
+  }
+
+  /**
+   * Reserva el despacho: escribe la marca en `gateway_intent_ref`. Se llama DENTRO
+   * de la transacción de la compuerta, con la deuda bloqueada, para que se confirme
+   * junto con ella y antes de llamar a la pasarela. A partir de ese `COMMIT` las
+   * demás intenciones de la deuda ven este cobro como «en vuelo» (`pi_…` todavía
+   * desconocido incluido) y la propia intención puede repetir la operación con la
+   * misma clave sin bloquearse.
+   */
+  reserveDispatch(intent: {
+    gatewayIntentRef?: string;
+    updatedAt: Date;
+    updatedByUserId?: string;
+  }): void {
+    intent.gatewayIntentRef = newDispatchMark();
+    touch(intent, undefined);
+  }
+
+  /**
    * Arma el cuerpo de `POST /payment_intents` desde la intención **persistida**.
    *
    * Es una función pura de campos guardados: una intención reintentada produce
@@ -218,6 +249,12 @@ export class PaymentsGatewayChargeService {
    * pasarela y el guardado de la referencia, repetir la operación manda la misma
    * `Idempotency-Key` y recibe el mismo cobro.
    *
+   * La intención ya llega con su reserva (`reserveDispatch`, confirmada por la
+   * compuerta antes de llamar). Acá se decide qué pasa con ella según el
+   * resultado: éxito → el `pi_…` la reemplaza; respuesta definitiva de rechazo →
+   * se libera; resultado ambiguo o cualquier otro fallo → se conserva, porque no
+   * se puede afirmar que la pasarela no creó el cobro.
+   *
    * @throws PaymentsGatewayResultAmbiguousException (504) si no se sabe si se creó.
    * @throws PaymentsGatewayUnavailableException (503) si la pasarela no atiende.
    * @throws PreconditionFailedException (422) si la pasarela la rechazó de forma definitiva.
@@ -226,17 +263,27 @@ export class PaymentsGatewayChargeService {
     intent: GatewayChargeable,
     methodType: GatewayPaymentMethodType | undefined,
   ): Promise<GatewayDispatchResult> {
-    const request = this.buildCreateRequest(intent, methodType);
-    const idempotencyKey = deriveGatewayIdempotencyKey({
-      tenantId: intent.tenantId,
-      sourceRefType: intent.sourceRefType,
-      sourceRefId: intent.sourceRefId,
-      invoiceId: intent.invoiceId,
-      localIdempotencyKey: intent.idempotencyKey,
-    });
-    if (!this.client) {
-      // Inalcanzable con `enabled`; falla cerrado si alguien lo invoca igual.
-      throw new PaymentsGatewayUnavailableException(intent.id);
+    let request: GatewayPaymentIntentCreate;
+    let idempotencyKey: string;
+    let client: PaymentsGatewayClient;
+    try {
+      request = this.buildCreateRequest(intent, methodType);
+      idempotencyKey = deriveGatewayIdempotencyKey({
+        tenantId: intent.tenantId,
+        sourceRefType: intent.sourceRefType,
+        sourceRefId: intent.sourceRefId,
+        invoiceId: intent.invoiceId,
+        localIdempotencyKey: intent.idempotencyKey,
+      });
+      if (!this.client) {
+        // Inalcanzable con `enabled`; falla cerrado si alguien lo invoca igual.
+        throw new PaymentsGatewayUnavailableException(intent.id);
+      }
+      client = this.client;
+    } catch (error) {
+      // Nada salió hacia la pasarela: la reserva no tiene motivo para quedar.
+      await this.releaseReservation(intent);
+      throw error;
     }
 
     this.logger.info(
@@ -246,7 +293,7 @@ export class PaymentsGatewayChargeService {
 
     let created;
     try {
-      created = await this.client.createPaymentIntent(request, idempotencyKey, {
+      created = await client.createPaymentIntent(request, idempotencyKey, {
         requestId: `mantra-${intent.id}`,
         onRetry: (info) =>
           this.logger.warn(
@@ -261,6 +308,12 @@ export class PaymentsGatewayChargeService {
           ),
       });
     } catch (error) {
+      // Sólo una respuesta definitiva de la pasarela prueba que no creó nada y
+      // libera la reserva. Un resultado ambiguo (504) la CONSERVA: el cobro pudo
+      // haberse creado, y mientras tanto la deuda no se ofrece a otra intención.
+      if (error instanceof PaymentsGatewayError && !error.isAmbiguous) {
+        await this.releaseReservation(intent);
+      }
       throw this.toDomainError(error, intent.id);
     }
 
@@ -311,7 +364,9 @@ export class PaymentsGatewayChargeService {
     gatewayIntentRef: string,
     gatewayStatus: GatewayPaymentIntentStatus,
   ): Promise<string> {
-    return this.em.transactional(async (tx) => {
+    // Confirmada al terminar, no con la petición: el `pi_…` ya existe en la
+    // pasarela y no puede perderse si lo que sigue en la petición falla.
+    return runCommitted(this.em, tenantId, async (tx) => {
       const intent = await this.intentsRepo.findByIdForUpdate(tx, intentId);
       if (!intent) return LOCAL_INTENT_STATUS[gatewayStatus];
       // Defensa en profundidad: la intención ya se acotó al tenant en la
@@ -323,8 +378,11 @@ export class PaymentsGatewayChargeService {
           PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
         );
       }
+      // La marca de despacho es la reserva que este mismo cobro dejó antes de
+      // llamar: el `pi_…` la reemplaza. Un `pi_…` DISTINTO ya asociado no se pisa.
       if (
         intent.gatewayIntentRef &&
+        !isDispatchMark(intent.gatewayIntentRef) &&
         intent.gatewayIntentRef !== gatewayIntentRef
       ) {
         throw new ConflictException(
@@ -343,6 +401,40 @@ export class PaymentsGatewayChargeService {
       touch(intent, undefined);
       return intent.statusConceptId;
     });
+  }
+
+  /**
+   * Libera la reserva de despacho de la intención, en su propia transacción
+   * confirmada. Sólo toca una marca (`dispatching:…`): un `pi_…` real nunca se
+   * borra. Si no se puede liberar no se enmascara el error que la motivó: la
+   * marca vence sola (`dispatchLeaseMs`) y la propia intención puede repetir.
+   */
+  private async releaseReservation(intent: {
+    id: string;
+    tenantId: string;
+  }): Promise<void> {
+    try {
+      await runCommitted(this.em, intent.tenantId, async (tx) => {
+        const row = await this.intentsRepo.findByIdAndTenantForUpdate(
+          tx,
+          intent.id,
+          intent.tenantId,
+        );
+        if (row && isDispatchMark(row.gatewayIntentRef)) {
+          row.gatewayIntentRef = undefined;
+          touch(row, undefined);
+        }
+      });
+    } catch (error) {
+      this.logger.error(
+        {
+          operation: 'payments.gateway.create',
+          intentId: intent.id,
+          reason: error instanceof Error ? error.name : 'unknown',
+        },
+        'Could not release the dispatch reservation; it expires on its own',
+      );
+    }
   }
 
   /**

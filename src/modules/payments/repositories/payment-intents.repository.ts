@@ -134,6 +134,28 @@ export class PaymentIntentsRepository {
   }
 
   /**
+   * `SELECT ... FOR UPDATE` de la intención **de ese tenant**. El `tenant_id` va en
+   * el mismo `WHERE` que el `id`: PostgreSQL sólo bloquea las filas que cumplen el
+   * `WHERE`, así que una intención de OTRO tenant no se bloquea ni se espera —
+   * responde `null` al instante, igual que un UUID inexistente—. Cargar por `id`
+   * con `FOR UPDATE` y comparar el tenant después hacía que la fila ajena, si
+   * estaba bloqueada por su dueño, retrasara la respuesta: un oráculo de
+   * existencia por tiempo (N7 de la re-revisión) que además tomaba un bloqueo
+   * momentáneo sobre la intención de otro tenant.
+   */
+  findByIdAndTenantForUpdate(
+    em: EntityManager,
+    id: string,
+    tenantId: string,
+  ): Promise<PaymentIntents | null> {
+    return em.findOne(
+      PaymentIntents,
+      { id, tenantId },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  /**
    * Intención asociada a un cobro de la pasarela (`pi_…`), con `FOR UPDATE`, y
    * deja la transacción **fijada al tenant de esa intención**.
    *

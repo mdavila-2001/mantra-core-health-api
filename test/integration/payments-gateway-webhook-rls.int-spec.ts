@@ -596,4 +596,88 @@ describeIt('Receptor de webhooks bajo RLS con un rol NOBYPASSRLS', () => {
       }
     });
   });
+  describe('N6: dos webhooks de intenciones distintas sobre la MISMA deuda no se interbloquean', () => {
+    /** Dos intenciones con su sesión abierta sobre la misma deuda (el estado excepcional que m6 tolera). */
+    async function twoOnOneDebt() {
+      const tenantId = randomUUID();
+      const debtId = await seedDebt(tenantId);
+      const a = await seedIntent(tenantId, debtId);
+      const b = await seedIntent(tenantId, debtId);
+      await seedSession(tenantId, debtId, a.id);
+      await seedSession(tenantId, debtId, b.id);
+      return { debtId, a, b };
+    }
+    const failureCodes = (settled: PromiseSettledResult<unknown>[]) =>
+      settled.flatMap((r) =>
+        r.status === 'rejected'
+          ? [
+              String(
+                (r.reason as any)?.code ??
+                  (r.reason as any)?.status ??
+                  (r.reason as any)?.message,
+              ),
+            ]
+          : [],
+      );
+
+    it('A(failed) || B(succeeded), 40 rondas, rol NOBYPASSRLS: CERO interbloqueos (40P01) y la deuda termina saldada', async () => {
+      const errors: string[] = [];
+      for (let round = 0; round < 40; round += 1) {
+        const { debtId, a, b } = await twoOnOneDebt();
+        const settled = await Promise.allSettled([
+          service.receive(webhook(a.ref, { type: 'payment_intent.failed' })),
+          service.receive(webhook(b.ref)),
+        ]);
+        const codes = failureCodes(settled);
+        errors.push(...codes);
+        // El primer interbloqueo (40P01) se nombra en el fallo, con su ronda.
+        expect({ round, codes }).toEqual({ round, codes: [] });
+        const [debt] = await q(
+          `select status_concept_id, outstanding_amount::text as o from payments.payment_debts where id = $1`,
+          [debtId],
+        );
+        expect(debt).toEqual({
+          status_concept_id: CONCEPTS.DEBT_SETTLED,
+          o: '0.000000',
+        });
+      }
+      expect(errors).toEqual([]);
+    });
+
+    it('A(failed) || B(failed), 20 rondas: sin interbloqueos y la deuda vuelve a pendiente cuando se cierran las dos sesiones', async () => {
+      const errors: string[] = [];
+      for (let round = 0; round < 20; round += 1) {
+        const { debtId, a, b } = await twoOnOneDebt();
+        const settled = await Promise.allSettled([
+          service.receive(webhook(a.ref, { type: 'payment_intent.failed' })),
+          service.receive(webhook(b.ref, { type: 'payment_intent.failed' })),
+        ]);
+        const codes = failureCodes(settled);
+        errors.push(...codes);
+        // El primer interbloqueo (40P01) se nombra en el fallo, con su ronda.
+        expect({ round, codes }).toEqual({ round, codes: [] });
+        const [debt] = await q(
+          `select status_concept_id from payments.payment_debts where id = $1`,
+          [debtId],
+        );
+        expect(debt.status_concept_id).toBe(CONCEPTS.DEBT_PENDING);
+        const open = await q(
+          `select count(*)::int as n from payments.payment_checkout_sessions where payment_debt_id = $1 and status_concept_id = $2`,
+          [debtId, CONCEPTS.CHECKOUT_OPEN],
+        );
+        expect(open[0].n).toBe(0);
+      }
+      expect(errors).toEqual([]);
+    });
+
+    it('con UNA sola intención fallando mientras la otra conserva su sesión abierta, la deuda NO se libera (m6 sigue vigente)', async () => {
+      const { debtId, a } = await twoOnOneDebt();
+      await service.receive(webhook(a.ref, { type: 'payment_intent.failed' }));
+      const [debt] = await q(
+        `select status_concept_id from payments.payment_debts where id = $1`,
+        [debtId],
+      );
+      expect(debt.status_concept_id).toBe(CONCEPTS.DEBT_IN_CHECKOUT);
+    });
+  });
 });
