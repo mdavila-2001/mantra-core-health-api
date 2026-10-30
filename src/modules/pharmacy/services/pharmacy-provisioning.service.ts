@@ -159,7 +159,7 @@ export class PharmacyProvisioningService {
     };
 
     // 3) La casa central: sede de práctica + sede dispensadora, y el enlace.
-    const central = await this.createSite(
+    const central = await this.addSite(
       tx,
       owner,
       practice.id,
@@ -173,7 +173,7 @@ export class PharmacyProvisioningService {
     // 4) Cada sucursal, igual que la central.
     const branchPharmacySiteIds: string[] = [];
     for (const branch of profile.branches ?? []) {
-      const site = await this.createSite(
+      const site = await this.addSite(
         tx,
         owner,
         practice.id,
@@ -206,9 +206,10 @@ export class PharmacyProvisioningService {
 
   /**
    * Crea la dirección (si hay algo que guardar), la sede de práctica y la sede
-   * dispensadora que cuelga de ella.
+   * dispensadora que cuelga de ella. El alta la usa para la casa central y cada
+   * sucursal; la carga masiva de sucursales, para cada sede nueva.
    */
-  private async createSite(
+  async addSite(
     tx: EntityManager,
     owner: PharmacyOwner,
     practiceId: string,

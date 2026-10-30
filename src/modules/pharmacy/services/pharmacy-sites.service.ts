@@ -4,8 +4,10 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
+  touch,
   type AuthenticatedUser,
 } from '../../../common';
+import type { PharmacySites } from '../entities';
 import {
   PharmaciesRepository,
   PharmacyReferencesRepository,
@@ -120,5 +122,34 @@ export class PharmacySitesService {
         createdAt: site.createdAt,
       };
     });
+  }
+
+  /**
+   * Cambia lo que la carga masiva de sucursales puede cambiar de una sede ya
+   * existente: el nombre y si hace retiro o envío. Dice si cambió algo.
+   */
+  updateSite(
+    site: PharmacySites,
+    patch: {
+      readonly name: string;
+      readonly pickupAvailable?: boolean;
+      readonly homeDeliveryAvailable?: boolean;
+    },
+    actorUserId: string,
+  ): boolean {
+    const next = {
+      name: patch.name,
+      pickupAvailable: patch.pickupAvailable ?? site.pickupAvailable,
+      homeDeliveryAvailable:
+        patch.homeDeliveryAvailable ?? site.homeDeliveryAvailable,
+    };
+    const changed =
+      next.name !== site.name ||
+      next.pickupAvailable !== site.pickupAvailable ||
+      next.homeDeliveryAvailable !== site.homeDeliveryAvailable;
+    if (!changed) return false;
+    Object.assign(site, next);
+    touch(site, actorUserId);
+    return true;
   }
 }
