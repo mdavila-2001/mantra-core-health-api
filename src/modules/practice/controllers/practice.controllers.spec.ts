@@ -74,17 +74,27 @@ describe('PracticesController', () => {
   it('delegates createSite (UC-14-01)', async () => {
     const d = build();
     const dto = { code: 'S', name: 'N' };
-    await d.controller.createSite('p1', dto, actor);
-    expect(d.sitesService.createSite).toHaveBeenCalledWith('p1', dto, actor);
+    await runWithTenant('tenant-1', () =>
+      d.controller.createSite('p1', dto, actor),
+    );
+    expect(d.sitesService.createSite).toHaveBeenCalledWith(
+      'p1',
+      dto,
+      actor,
+      'tenant-1',
+    );
   });
 
   it('delegates decommissionSite (UC-14-12)', async () => {
     const d = build();
-    await d.controller.decommissionSite('p1', 's1', actor);
+    await runWithTenant('tenant-1', () =>
+      d.controller.decommissionSite('p1', 's1', actor),
+    );
     expect(d.sitesService.decommissionSite).toHaveBeenCalledWith(
       'p1',
       's1',
       actor,
+      'tenant-1',
     );
   });
 
@@ -206,27 +216,51 @@ describe('PracticesController', () => {
 
 describe('SitesController', () => {
   it('delegates clinical unit and care space (UC-14-04/05)', async () => {
-    const structureService = {
-      createClinicalUnit: mockFn(),
-      createCareSpace: mockFn(),
-    };
+    const structureService = { createClinicalUnit: mockFn() };
+    // F1: el alta de espacios la hace `CareSpacesAdminService`.
+    const spacesAdmin = { create: mockFn() };
     const sitesService = { listCareSpaces: mockFn().mockResolvedValue([]) };
     const controller = new SitesController(
       structureService as any,
       sitesService as any,
+      spacesAdmin as any,
     );
-    await controller.createClinicalUnit('s1', { code: 'U', name: 'N' }, actor);
+    await runWithTenant('tenant-1', () =>
+      controller.createClinicalUnit('s1', { code: 'U', name: 'N' }, actor),
+    );
     expect(structureService.createClinicalUnit).toHaveBeenCalledWith(
       's1',
       { code: 'U', name: 'N' },
       actor,
+      'tenant-1',
     );
-    await controller.createCareSpace('s1', { code: 'C', name: 'N' }, actor);
-    expect(structureService.createCareSpace).toHaveBeenCalledWith(
+    await runWithTenant('tenant-1', () =>
+      controller.createCareSpace('s1', { code: 'C', name: 'N' }, actor),
+    );
+    expect(spacesAdmin.create).toHaveBeenCalledWith(
       's1',
       { code: 'C', name: 'N' },
       actor,
+      'tenant-1',
     );
+  });
+
+  it('sin tenant activo las escrituras de estructura fallan cerradas', () => {
+    const structureService = { createClinicalUnit: mockFn() };
+    const spacesAdmin = { create: mockFn() };
+    const controller = new SitesController(
+      structureService as any,
+      { listCareSpaces: mockFn() } as any,
+      spacesAdmin as any,
+    );
+    expect(() =>
+      controller.createCareSpace('s1', { code: 'C', name: 'N' }, actor),
+    ).toThrow();
+    expect(() =>
+      controller.createClinicalUnit('s1', { code: 'U', name: 'N' }, actor),
+    ).toThrow();
+    expect(spacesAdmin.create).not.toHaveBeenCalled();
+    expect(structureService.createClinicalUnit).not.toHaveBeenCalled();
   });
 });
 

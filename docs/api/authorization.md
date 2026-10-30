@@ -53,6 +53,21 @@ propio. Las rutas revisadas caen en estas clases:
 | Guard propio | Un guard de clase en lugar de `@Roles` | `LabStaffGuard` en recepción de muestras y laboratorio |
 | Catálogo de lectura abierta | Datos publicados, iguales para toda sesión, acotados por tenant (RLS) | directorio de farmacias y de unidades diagnósticas, terminología, temas de la comunidad |
 
+**Rutas de farmacia, laboratorio y gastos del paciente.**
+
+- `GET /patient-spending/me` lleva `@Roles('PATIENT')` y no recibe identificador de persona: el titular
+  sale del token, así que solo se leen los gastos propios. La lectura queda en el registro de accesos
+  (`@AccessLogged`, recurso `PATIENT_SPENDING`).
+- El alta y la edición de productos y las guardias de una farmacia (`/pharmacies/:pharmacyId/...`)
+  llevan `@Roles('SECURITY_ADMIN', 'PHARMACY_STAFF')` y `PharmacyTenantScopeGuard`: el personal solo
+  opera sobre la farmacia de su membresía, no sobre otra.
+- `POST /tenants/:tenantId/affiliation-documents`, `GET /tenants/:tenantId/pharmacy-readiness` y
+  `GET /tenants/:tenantId/laboratory-readiness` no llevan `@Roles`: decide el servicio de
+  completado de documentos con la membresía de la organización (`403` si el actor no pertenece a ella).
+- `GET /public/pharmacies/open-now`, `GET /public/profiles/f/:slug/branches` y
+  `POST /public/profiles/f/:slug/branch-availability` son `@Public()`. El `POST` es una lectura: los
+  renglones de la receta viajan en el cuerpo para no quedar en la URL, y no se guardan.
+
 Una ruta que **escribe** con un dueño que viaja en el cuerpo y sin comprobación en el servicio
 **no** entra en ninguna de estas clases y lleva `@Roles`: las altas de `/common/addresses`,
 `/common/contact-points` e `/common/identifiers`, la verificación de un contacto y el estado de las

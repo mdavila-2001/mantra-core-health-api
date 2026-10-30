@@ -226,14 +226,19 @@ export class PracticesController {
     return this.sitesService.createPractice(dto, actor);
   }
 
-  /** UC-14-01. */
+  /**
+   * UC-14-01.
+   *
+   * Sin `@Roles`: lo autoriza el servicio con la regla de organización
+   * (OWNER/ADMIN del tenant o plataforma); una práctica de otro tenant
+   * responde 404.
+   */
   @Audited({
     action: 'PRACTICE_SITE_CREATED',
     entity: 'practice_site',
     entityId: 'result.id',
   })
   @Post(':practiceId/sites')
-  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Dar de alta un sitio de práctica' })
   createSite(
@@ -241,17 +246,21 @@ export class PracticesController {
     @Body() dto: CreateSiteDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<SiteResponseDto> {
-    return this.sitesService.createSite(practiceId, dto, actor);
+    return this.sitesService.createSite(
+      practiceId,
+      dto,
+      actor,
+      requireTenantId(),
+    );
   }
 
-  /** UC-14-12. */
+  /** UC-14-12. Misma autorización que `createSite`. */
   @Audited({
     action: 'PRACTICE_SITE_DECOMMISSIONED',
     entity: 'practice_site',
     entityId: 'param:siteId',
   })
   @Delete(':practiceId/sites/:siteId')
-  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Desmantelar un sitio en cascada (soft-delete)' })
   decommissionSite(
@@ -259,7 +268,12 @@ export class PracticesController {
     @Param('siteId', ParseUUIDPipe) siteId: string,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
-    return this.sitesService.decommissionSite(practiceId, siteId, actor);
+    return this.sitesService.decommissionSite(
+      practiceId,
+      siteId,
+      actor,
+      requireTenantId(),
+    );
   }
 
   /** UC-14-02. */

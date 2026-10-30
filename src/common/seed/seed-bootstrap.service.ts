@@ -34,6 +34,7 @@ import { TerminologySeedService } from './terminology-seed.service';
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
 import { BoMedicalSpecialtiesSeedService } from './bo-medical-specialties-seed.service';
 import { PracticeDefaultServicesSeedService } from './practice-default-services-seed.service';
+import { PracticeInfrastructureSeedService } from './practice-infrastructure-seed.service';
 import { PeopleSeedService } from './people-seed.service';
 import { DirectoryNetworksSeedService } from './directory-networks-seed.service';
 import { PadronOrganizationsSeedService } from './padron-organizations-seed.service';
@@ -288,6 +289,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly clinicalForms: ClinicalFormsSeedService,
     private readonly boMedicalSpecialties: BoMedicalSpecialtiesSeedService,
     private readonly practiceDefaultServices: PracticeDefaultServicesSeedService,
+    private readonly practiceInfrastructure: PracticeInfrastructureSeedService,
     private readonly people: PeopleSeedService,
     private readonly directoryNetworks: DirectoryNetworksSeedService,
     private readonly qaFlows: QaFlowsSeedService,
@@ -688,6 +690,16 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'directorio de redes de aseguradoras',
         kind: 'content',
         run: () => this.directoryNetworks.run(this.explicitly()),
+      },
+      // F1 de infraestructura hospitalaria: reglas padre→hijo y de tipología
+      // (concept ids de `practice.concepts.ts`, que el catálogo acaba de
+      // materializar) y forma `LOC_FORM_ROOM` en los espacios anteriores. Es
+      // núcleo: sin reglas, toda alta de espacio que cuelgue de un padre
+      // responde 422 `SPACE_PARENT_RULE`.
+      {
+        name: 'reglas de infraestructura hospitalaria',
+        kind: 'core',
+        run: () => this.practiceInfrastructure.run(),
       },
       // Después de las aseguradoras y de las redes, y antes del servicio por
       // defecto de cada práctica: crea las organizaciones del padrón público

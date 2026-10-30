@@ -8,7 +8,9 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PracticeSitesService } from './practice-sites.service';
+import { ForbiddenException } from '@nestjs/common';
 import { PRAC } from '../practice.concepts';
+import { AUD } from '../../audit/audit.concepts';
 import {
   CONCEPTS,
   ConflictException,
@@ -23,6 +25,8 @@ import {
 } from './practice-access.testing';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+const TENANT = 'tenant-a';
+const OTHER_TENANT = 'tenant-b';
 const TENANT_A = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 
@@ -91,6 +95,13 @@ function build(assignments: AssignmentRow[] = []) {
   const rolesRepo = { findBySite: mockFn().mockResolvedValue([]) };
   const serviceCatalogRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // F1: `StructureAccessService` (ADMIN acotado a sucursal ya no administra
+  // la organización entera); se conserva el nombre del doble.
+  const tenantAdmin = {
+    assertCanAdministerOrganization: mockFn().mockResolvedValue(undefined),
+  };
+  const branchesRepo = { findById: mockFn().mockResolvedValue(null) };
+  const historyRepo = { append: mockFn().mockResolvedValue(undefined) };
   // Por omisión nadie administra la organización: lo que ya pasaba por rol sigue pasando por rol.
   const tenantAdministration = {
     administersByMembership: mockFn().mockResolvedValue(false),
@@ -107,6 +118,9 @@ function build(assignments: AssignmentRow[] = []) {
     serviceCatalogRepo as any,
     logger as any,
     buildPracticeAccess(assignments),
+    tenantAdmin as any,
+    branchesRepo as any,
+    historyRepo as any,
     tenantAdministration as any,
   );
   return {
@@ -120,6 +134,9 @@ function build(assignments: AssignmentRow[] = []) {
     spacesRepo,
     servicesRepo,
     rolesRepo,
+    tenantAdmin,
+    branchesRepo,
+    historyRepo,
     tenantAdministration,
   };
 }
@@ -189,7 +206,12 @@ describe('PracticeSitesService', () => {
       const d = build();
       d.practicesRepo.findById.mockResolvedValue(null);
       await expect(
-        d.service.createSite('p1', { code: 'S-1', name: 'Site' } as any, actor),
+        d.service.createSite(
+          'p1',
+          { code: 'S-1', name: 'Site' } as any,
+          actor,
+          TENANT,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
@@ -197,10 +219,16 @@ describe('PracticeSitesService', () => {
       const d = build();
       d.practicesRepo.findById.mockResolvedValue({
         id: 'p1',
+        tenantId: TENANT,
         statusConceptId: 'other',
       });
       await expect(
-        d.service.createSite('p1', { code: 'S-1', name: 'Site' } as any, actor),
+        d.service.createSite(
+          'p1',
+          { code: 'S-1', name: 'Site' } as any,
+          actor,
+          TENANT,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -208,11 +236,17 @@ describe('PracticeSitesService', () => {
       const d = build();
       d.practicesRepo.findById.mockResolvedValue({
         id: 'p1',
+        tenantId: TENANT,
         statusConceptId: PRAC.PRACTICE_ACTIVE,
       });
       d.sitesRepo.findByPracticeAndCode.mockResolvedValue({ id: 'dup' });
       await expect(
-        d.service.createSite('p1', { code: 'S-1', name: 'Site' } as any, actor),
+        d.service.createSite(
+          'p1',
+          { code: 'S-1', name: 'Site' } as any,
+          actor,
+          TENANT,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
@@ -220,6 +254,7 @@ describe('PracticeSitesService', () => {
       const d = build();
       d.practicesRepo.findById.mockResolvedValue({
         id: 'p1',
+        tenantId: TENANT,
         statusConceptId: PRAC.PRACTICE_ACTIVE,
       });
       d.sitesRepo.findByPracticeAndCode.mockResolvedValue(null);
@@ -237,6 +272,7 @@ describe('PracticeSitesService', () => {
         'p1',
         { code: 'S-1', name: 'Site' },
         actor,
+        TENANT,
       );
 
       expect(res.operationalStatus).toBe(PRAC.SITE_OP_PLANNED);
@@ -250,7 +286,7 @@ describe('PracticeSitesService', () => {
       const d = build();
       d.sitesRepo.findById.mockResolvedValue({ id: 's1', practiceId: 'other' });
       await expect(
-        d.service.decommissionSite('p1', 's1', actor),
+        d.service.decommissionSite('p1', 's1', actor, TENANT),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
@@ -264,6 +300,10 @@ describe('PracticeSitesService', () => {
         updatedAt: new Date(),
       };
       d.sitesRepo.findById.mockResolvedValue(site);
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        tenantId: TENANT,
+      });
       const unit = { statusConceptId: PRAC.UNIT_ACTIVE, updatedAt: new Date() };
       const space = {
         statusConceptId: PRAC.SPACE_ACTIVE,
@@ -284,7 +324,7 @@ describe('PracticeSitesService', () => {
       d.servicesRepo.findBySite.mockResolvedValue([svc]);
       d.rolesRepo.findBySite.mockResolvedValue([role]);
 
-      const res = await d.service.decommissionSite('p1', 's1', actor);
+      const res = await d.service.decommissionSite('p1', 's1', actor, TENANT);
 
       expect(res).toEqual({ ok: true });
       expect(site.statusConceptId).toBe(PRAC.SITE_RETIRED);
@@ -294,6 +334,191 @@ describe('PracticeSitesService', () => {
       expect(svc.statusConceptId).toBe(PRAC.SERVICE_SUSPENDED);
       expect(role.statusConceptId).toBe(PRAC.ROLE_ASSIGNMENT_ENDED);
       expect(role.validTo).toBeInstanceOf(Date);
+    });
+  });
+
+  describe('F0 · createSite aislado por tenant y regla de organización', () => {
+    const activePractice = {
+      id: 'p1',
+      tenantId: TENANT,
+      statusConceptId: PRAC.PRACTICE_ACTIVE,
+    };
+    const created = {
+      id: 's1',
+      practiceId: 'p1',
+      code: 'S-1',
+      statusConceptId: PRAC.SITE_ACTIVE,
+      operationalStatusConceptId: PRAC.SITE_OP_PLANNED,
+      createdAt: new Date(),
+    };
+
+    it('práctica de otro tenant: 404, sin autorizar ni crear', async () => {
+      const d = build();
+      d.practicesRepo.findById.mockResolvedValue({
+        ...activePractice,
+        tenantId: OTHER_TENANT,
+      });
+      await expect(
+        d.service.createSite(
+          'p1',
+          { code: 'S-1', name: 'S' } as any,
+          actor,
+          TENANT,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(
+        d.tenantAdmin.assertCanAdministerOrganization,
+      ).not.toHaveBeenCalled();
+      expect(d.sitesRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('sin ser OWNER/ADMIN del tenant: 403 y no crea', async () => {
+      const d = build();
+      d.practicesRepo.findById.mockResolvedValue(activePractice);
+      d.tenantAdmin.assertCanAdministerOrganization.mockRejectedValue(
+        new ForbiddenException('no'),
+      );
+      await expect(
+        d.service.createSite(
+          'p1',
+          { code: 'S-1', name: 'S' } as any,
+          actor,
+          TENANT,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.sitesRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('branchId inexistente: 404 y no crea', async () => {
+      const d = build();
+      d.practicesRepo.findById.mockResolvedValue(activePractice);
+      d.branchesRepo.findById.mockResolvedValue(null);
+      await expect(
+        d.service.createSite(
+          'p1',
+          { code: 'S-1', name: 'S', branchId: 'b1' } as any,
+          actor,
+          TENANT,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.sitesRepo.create).not.toHaveBeenCalled();
+    });
+
+    // F1 (contrato §3): una sucursal de otro tenant responde 404, igual que
+    // una inexistente; el 422 de F0 confirmaba que el id existía.
+    it('branchId de otro tenant: 404 y no crea', async () => {
+      const d = build();
+      d.practicesRepo.findById.mockResolvedValue(activePractice);
+      d.branchesRepo.findById.mockResolvedValue({
+        id: 'b1',
+        tenantId: OTHER_TENANT,
+      });
+      await expect(
+        d.service.createSite(
+          'p1',
+          { code: 'S-1', name: 'S', branchId: 'b1' } as any,
+          actor,
+          TENANT,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.sitesRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('branchId del tenant y admin: crea, autoriza y versiona', async () => {
+      const d = build();
+      d.practicesRepo.findById.mockResolvedValue(activePractice);
+      d.branchesRepo.findById.mockResolvedValue({ id: 'b1', tenantId: TENANT });
+      d.sitesRepo.findByPracticeAndCode.mockResolvedValue(null);
+      d.sitesRepo.create.mockReturnValue(created);
+      await d.service.createSite(
+        'p1',
+        { code: 'S-1', name: 'S', branchId: 'b1' } as any,
+        actor,
+        TENANT,
+      );
+      expect(
+        d.tenantAdmin.assertCanAdministerOrganization,
+      ).toHaveBeenCalledWith(d.tx, TENANT, actor);
+      expect(d.sitesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ branchId: 'b1', tenantId: TENANT }),
+      );
+      expect(d.historyRepo.append).toHaveBeenCalledWith(
+        d.tx,
+        'practice_sites',
+        's1',
+        expect.objectContaining({
+          operationConceptId: AUD.OPERATION_INSERT,
+          changedByUserId: actor.id,
+        }),
+      );
+    });
+  });
+
+  describe('F0 · decommissionSite aislado por tenant y regla de organización', () => {
+    const site = () => ({
+      id: 's1',
+      practiceId: 'p1',
+      statusConceptId: PRAC.SITE_ACTIVE,
+      operationalStatusConceptId: PRAC.SITE_OP_PLANNED,
+    });
+
+    it('práctica de otro tenant: 404 y no toca la sede', async () => {
+      const d = build();
+      const row = site();
+      d.sitesRepo.findById.mockResolvedValue(row);
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        tenantId: OTHER_TENANT,
+      });
+      await expect(
+        d.service.decommissionSite('p1', 's1', actor, TENANT),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(row.statusConceptId).toBe(PRAC.SITE_ACTIVE);
+      expect(
+        d.tenantAdmin.assertCanAdministerOrganization,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('sin ser OWNER/ADMIN del tenant: 403 y no toca la sede', async () => {
+      const d = build();
+      const row = site();
+      d.sitesRepo.findById.mockResolvedValue(row);
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        tenantId: TENANT,
+      });
+      d.tenantAdmin.assertCanAdministerOrganization.mockRejectedValue(
+        new ForbiddenException('no'),
+      );
+      await expect(
+        d.service.decommissionSite('p1', 's1', actor, TENANT),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(row.statusConceptId).toBe(PRAC.SITE_ACTIVE);
+    });
+
+    it('versiona la sede, sus unidades y sus espacios', async () => {
+      const d = build();
+      d.sitesRepo.findById.mockResolvedValue(site());
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        tenantId: TENANT,
+      });
+      d.unitsRepo.findBySite.mockResolvedValue([
+        { id: 'u1', statusConceptId: PRAC.UNIT_ACTIVE },
+      ]);
+      d.spacesRepo.findBySite.mockResolvedValue([
+        { id: 'c1', statusConceptId: PRAC.SPACE_ACTIVE },
+      ]);
+      await d.service.decommissionSite('p1', 's1', actor, TENANT);
+      const appended = d.historyRepo.append.mock.calls.map(
+        (call: any[]) => `${call[1]}:${call[2]}`,
+      );
+      expect(appended).toEqual([
+        'practice_sites:s1',
+        'clinical_units:u1',
+        'care_spaces:c1',
+      ]);
     });
   });
 });
@@ -528,6 +753,7 @@ describe('PracticeSitesService · alcance de tenant (PRAC-01)', () => {
       'p1',
       { code: 'S', name: 'Sede' } as any,
       actor,
+      TENANT_A,
     );
 
     expect(res.practiceId).toBe('p1');
@@ -538,12 +764,22 @@ describe('PracticeSitesService · alcance de tenant (PRAC-01)', () => {
     const d = build();
     d.practicesRepo.findById.mockResolvedValue(foreignPractice());
     const foreign = await expectOutOfScope(
-      d.service.createSite('p1', { code: 'S', name: 'Sede' } as any, actor),
+      d.service.createSite(
+        'p1',
+        { code: 'S', name: 'Sede' } as any,
+        actor,
+        TENANT_A,
+      ),
       'Práctica no encontrada',
     );
     d.practicesRepo.findById.mockResolvedValue(null);
     const missing = await expectOutOfScope(
-      d.service.createSite('p1', { code: 'S', name: 'Sede' } as any, actor),
+      d.service.createSite(
+        'p1',
+        { code: 'S', name: 'Sede' } as any,
+        actor,
+        TENANT_A,
+      ),
       'Práctica no encontrada',
     );
 
@@ -556,9 +792,15 @@ describe('PracticeSitesService · alcance de tenant (PRAC-01)', () => {
     const d = build();
 
     await expect(
-      d.raw.createSite('p1', { code: 'S', name: 'Sede' } as any, actor),
+      d.raw.createSite(
+        'p1',
+        { code: 'S', name: 'Sede' } as any,
+        actor,
+        undefined as any,
+      ),
     ).rejects.toThrow();
-    expect(d.practicesRepo.findById).not.toHaveBeenCalled();
+    expect(d.sitesRepo.create).not.toHaveBeenCalled();
+    expect(d.tx.flush).not.toHaveBeenCalled();
   });
 
   it('dar de baja una sede de otro tenant: 404 uniforme; la sede y sus hijos de B no cambian', async () => {
@@ -572,7 +814,7 @@ describe('PracticeSitesService · alcance de tenant (PRAC-01)', () => {
     d.sitesRepo.findById.mockResolvedValue(site);
 
     await expectOutOfScope(
-      d.service.decommissionSite('p1', 's1', actor),
+      d.service.decommissionSite('p1', 's1', actor, TENANT),
       'Práctica no encontrada',
     );
 

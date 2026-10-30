@@ -26,9 +26,10 @@ export interface CreateCareSpaceData {
    */
   statusConceptId: string;
   /**
-   * Identificador asociado a operational status concept.
+   * Identificador asociado a operational status concept. Nulo mientras el
+   * espacio está PLANNED (F1).
    */
-  operationalStatusConceptId: string;
+  operationalStatusConceptId?: string;
   /**
    * Identificador asociado a clinical unit.
    */
@@ -45,6 +46,29 @@ export interface CreateCareSpaceData {
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
+  /**
+   * Tenant de la sede (F1): con RLS, una fila sin tenant es invisible para
+   * `mantra_app`, así que todo alta lo escribe.
+   */
+  tenantId: string;
+  /** Forma FHIR `Location.form` (`LOC_FORM_*`). */
+  formConceptId?: string;
+  /** Atributos descriptivos y técnicos (F1, contrato §1.1). */
+  description?: string;
+  floorNumber?: number;
+  areaM2?: string;
+  asepsisConceptId?: string;
+  pressureConceptId?: string;
+  airChangesPerHour?: string;
+  hvacValidatedOn?: Date;
+  sexRestrictionConceptId?: string;
+  ageGroupConceptId?: string;
+  bedCategoryConceptId?: string;
+  censable?: boolean;
+  gln?: string;
+  prepMinutes?: number;
+  cleanupMinutes?: number;
+  validFrom?: Date;
 }
 
 /** Acceso a datos de `practice.care_spaces` (stateless). */
@@ -73,6 +97,32 @@ export class CareSpacesRepository {
   }
 
   /**
+   * Espacios por id, acotados a una sede.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Ids buscados.
+   * @returns Los que existen.
+   */
+  findByIds(em: EntityManager, ids: readonly string[]): Promise<CareSpaces[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(CareSpaces, { id: { $in: [...ids] } });
+  }
+
+  /**
+   * Hijos directos de un espacio.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param parentSpaceId - Padre.
+   * @returns Sus hijos, en cualquier estado.
+   */
+  findChildren(
+    em: EntityManager,
+    parentSpaceId: string,
+  ): Promise<CareSpaces[]> {
+    return em.find(CareSpaces, { parentSpaceId });
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.
@@ -92,6 +142,23 @@ export class CareSpacesRepository {
         capacity: data.capacity,
         operationalStatusConceptId: data.operationalStatusConceptId,
         statusConceptId: data.statusConceptId,
+        tenantId: data.tenantId,
+        formConceptId: data.formConceptId,
+        description: data.description,
+        floorNumber: data.floorNumber,
+        areaM2: data.areaM2,
+        asepsisConceptId: data.asepsisConceptId,
+        pressureConceptId: data.pressureConceptId,
+        airChangesPerHour: data.airChangesPerHour,
+        hvacValidatedOn: data.hvacValidatedOn,
+        sexRestrictionConceptId: data.sexRestrictionConceptId,
+        ageGroupConceptId: data.ageGroupConceptId,
+        bedCategoryConceptId: data.bedCategoryConceptId,
+        censable: data.censable,
+        gln: data.gln,
+        prepMinutes: data.prepMinutes,
+        cleanupMinutes: data.cleanupMinutes,
+        validFrom: data.validFrom,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

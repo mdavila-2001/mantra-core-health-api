@@ -251,6 +251,8 @@ export class PharmacyProvisioningService {
       timeZone: owner.timeZone,
       addressId,
       managingTenantId: owner.tenantId,
+      // F1: la sede pertenece al tenant de su práctica (NOT NULL desde v4.2.67).
+      tenantId: owner.tenantId,
       statusConceptId: PRAC.SITE_ACTIVE,
       actorUserId,
     });
