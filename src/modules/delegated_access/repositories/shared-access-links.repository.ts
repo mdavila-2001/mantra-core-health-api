@@ -139,7 +139,9 @@ export class SharedAccessLinksRepository {
   }
 
   /**
-   * Aperturas `OPENED` por enlace.
+   * Aperturas `OPENED` por enlace, contadas en la base con un `COUNT` agrupado
+   * en una sola consulta: `shared_access_link_uses` es append-only y crece sin
+   * límite, así que sus filas no se cargan en memoria.
    *
    * @param em - Contexto de persistencia.
    * @param linkIds - Enlaces a contar.
@@ -151,20 +153,24 @@ export class SharedAccessLinksRepository {
   ): Promise<Map<string, number>> {
     const counts = new Map<string, number>();
     if (linkIds.length === 0) return counts;
-    const uses = await em.find(
-      SharedAccessLinkUses,
-      {
-        sharedAccessLinkId: { $in: [...linkIds] },
-        actionConceptId: DELEG.SHARE_ACTION_OPEN,
-        outcomeConceptId: DELEG.SHARE_OUTCOME_OPENED,
-      },
-      { fields: ['id', 'sharedAccessLinkId'] },
-    );
-    for (const use of uses) {
-      counts.set(
-        use.sharedAccessLinkId,
-        (counts.get(use.sharedAccessLinkId) ?? 0) + 1,
+    // Un marcador por id: el driver no traduce un arreglo de JavaScript a un
+    // arreglo de Postgres (mismo criterio que `CommentsRepository`).
+    const markers = linkIds.map(() => '?').join(', ');
+    const rows = await em
+      .getConnection()
+      .execute<Array<{ shared_access_link_id: string; count: number }>>(
+        `select shared_access_link_id, count(*)::int as count
+           from delegated_access.shared_access_link_uses
+          where action_concept_id = ?
+            and outcome_concept_id = ?
+            and shared_access_link_id in (${markers})
+          group by shared_access_link_id`,
+        [DELEG.SHARE_ACTION_OPEN, DELEG.SHARE_OUTCOME_OPENED, ...linkIds],
+        'all',
+        em.getTransactionContext(),
       );
+    for (const row of rows) {
+      counts.set(row.shared_access_link_id, Number(row.count));
     }
     return counts;
   }

@@ -234,6 +234,30 @@ describe('PrescriptionSharesService', () => {
       );
     });
 
+    it('pide el conteo de aperturas una sola vez para todos los enlaces', async () => {
+      const { service, repo } = build();
+      const second = '77777777-7777-4777-8777-777777777778';
+      repo.findByPatient.mockResolvedValue([link(), link({ id: second })]);
+      repo.findItemsForResources.mockResolvedValue([item()]);
+      repo.countOpenedByLinkIds.mockResolvedValue(new Map([[second, 5]]));
+      const result = await service.listForPatient(PATIENT, patientActor);
+      expect(repo.countOpenedByLinkIds).toHaveBeenCalledTimes(1);
+      expect(repo.countOpenedByLinkIds).toHaveBeenCalledWith(
+        expect.anything(),
+        [SHARE, second],
+      );
+      expect(result.map((row) => row.uses)).toEqual([0, 5]);
+    });
+
+    it('sin enlaces no cuenta aperturas', async () => {
+      const { service, repo } = build();
+      repo.findByPatient.mockResolvedValue([]);
+      await expect(
+        service.listForPatient(PATIENT, patientActor),
+      ).resolves.toEqual([]);
+      expect(repo.countOpenedByLinkIds).not.toHaveBeenCalled();
+    });
+
     it('un enlace cuya receta ya no tiene ítems vigentes se lee EXPIRED', async () => {
       const { service, repo } = build();
       repo.findByPatient.mockResolvedValue([link()]);
