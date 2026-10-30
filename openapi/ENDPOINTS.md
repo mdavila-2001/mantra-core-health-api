@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1618 de 1618 endpoints** en **73 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1655 de 1655 endpoints** en **73 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -25,7 +25,7 @@ Se documentan **1618 de 1618 endpoints** en **73 módulos**. La referencia compl
 | `crm` | 16 | [Abrir referencia](endpoints/crm.md) |
 | `cross_store_consistency` | 16 | [Abrir referencia](endpoints/cross-store-consistency.md) |
 | `data_catalog` | 38 | [Abrir referencia](endpoints/data-catalog.md) |
-| `delegated_access` | 12 | [Abrir referencia](endpoints/delegated-access.md) |
+| `delegated_access` | 17 | [Abrir referencia](endpoints/delegated-access.md) |
 | `diagnostic_units` | 21 | [Abrir referencia](endpoints/diagnostic-units.md) |
 | `diagnostics` | 31 | [Abrir referencia](endpoints/diagnostics.md) |
 | `directory` | 26 | [Abrir referencia](endpoints/directory.md) |
@@ -51,15 +51,15 @@ Se documentan **1618 de 1618 endpoints** en **73 módulos**. La referencia compl
 | `object_storage` | 14 | [Abrir referencia](endpoints/object-storage.md) |
 | `ops_console` | 9 | [Abrir referencia](endpoints/ops-console.md) |
 | `organization_extensions` | 9 | [Abrir referencia](endpoints/organization-extensions.md) |
-| `payments` | 14 | [Abrir referencia](endpoints/payments.md) |
+| `payments` | 18 | [Abrir referencia](endpoints/payments.md) |
 | `pharma_lab` | 76 | [Abrir referencia](endpoints/pharma-lab.md) |
-| `pharmacy` | 33 | [Abrir referencia](endpoints/pharmacy.md) |
-| `pharmacy_inventory` | 30 | [Abrir referencia](endpoints/pharmacy-inventory.md) |
+| `pharmacy` | 37 | [Abrir referencia](endpoints/pharmacy.md) |
+| `pharmacy_inventory` | 37 | [Abrir referencia](endpoints/pharmacy-inventory.md) |
 | `platform_ops` | 15 | [Abrir referencia](endpoints/platform-ops.md) |
 | `polyglot_storage` | 15 | [Abrir referencia](endpoints/polyglot-storage.md) |
 | `practice` | 37 | [Abrir referencia](endpoints/practice.md) |
 | `procedures_perioperative` | 32 | [Abrir referencia](endpoints/procedures-perioperative.md) |
-| `profiles` | 67 | [Abrir referencia](endpoints/profiles.md) |
+| `profiles` | 84 | [Abrir referencia](endpoints/profiles.md) |
 | `promotions` | 19 | [Abrir referencia](endpoints/promotions.md) |
 | `public` | 4 | [Abrir referencia](endpoints/public.md) |
 | `qa_execution` | 9 | [Abrir referencia](endpoints/qa-execution.md) |

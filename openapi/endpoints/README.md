@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1618 de 1618 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **73 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1655 de 1655 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **73 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -63,7 +63,7 @@ Esta referencia documenta **1618 de 1618 operaciones HTTP** registradas en `open
 | [crm](crm.md) | 16 | `crm` | 1 |
 | [cross_store_consistency](cross-store-consistency.md) | 16 | `cross_store_consistency` | 2 |
 | [data_catalog](data-catalog.md) | 38 | `admin-catalog`, `admin-portal`, `data-catalog-internal` | 4 |
-| [delegated_access](delegated-access.md) | 12 | `delegated-access-authz`, `delegated-access-org`, `delegated-access-permission-sets`, `delegated-access-practitioner-delegates`, `delegated-access-requests` | 5 |
+| [delegated_access](delegated-access.md) | 17 | `clinical-prescription-shares`, `clinical-prescription-shares-public`, `delegated-access-authz`, `delegated-access-org`, `delegated-access-permission-sets`, `delegated-access-practitioner-delegates`, `delegated-access-requests` | 7 |
 | [diagnostic_units](diagnostic-units.md) | 21 | `diagnostic-equipment`, `diagnostic-pricing`, `diagnostic-unit-accreditations`, `diagnostic-unit-sites`, `diagnostic-units` | 5 |
 | [diagnostics](diagnostics.md) | 31 | `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-orders`, `diagnostics-patient-results`, `diagnostics-reception`, `diagnostics-reports`, `diagnostics-specimens` | 7 |
 | [directory](directory.md) | 26 | `directory-admin-tenants`, `directory-tenants` | 3 |
@@ -89,15 +89,15 @@ Esta referencia documenta **1618 de 1618 operaciones HTTP** registradas en `open
 | [object_storage](object-storage.md) | 14 | `dicomweb`, `object-storage` | 2 |
 | [ops_console](ops-console.md) | 9 | `ops-console` | 1 |
 | [organization_extensions](organization-extensions.md) | 9 | `orgext-affiliations`, `orgext-data-boundaries`, `orgext-facility-licenses`, `orgext-hospitals` | 4 |
-| [payments](payments.md) | 14 | `payments`, `payments-intents`, `payments-transactions` | 3 |
+| [payments](payments.md) | 18 | `payments`, `payments-gateway-dispatches`, `payments-gateway-webhooks`, `payments-intents`, `payments-transactions` | 5 |
 | [pharma_lab](pharma-lab.md) | 76 | `pharma-lab-catalog`, `pharma-lab-notices`, `pharma-lab-pharmacovigilance`, `pharma-lab-reference`, `pharma-lab-regulatory`, `pharma-lab-social-accounting`, `pharma-lab-visit-agenda`, `pharma-lab-visit-records`, `pharma-lab-visit-requests`, `pharma-lab-visit-surveys`, `pharma-lab-visitors`, `pharma-labs` | 12 |
-| [pharmacy](pharmacy.md) | 33 | `pharmacy`, `pharmacy-directory`, `pharmacy-public` | 3 |
-| [pharmacy_inventory](pharmacy-inventory.md) | 30 | `pharmacy-inventory`, `pharmacy-inventory-directory`, `pharmacy-inventory-internal`, `pharmacy-orders` | 6 |
+| [pharmacy](pharmacy.md) | 37 | `pharmacy`, `pharmacy-directory`, `pharmacy-public` | 4 |
+| [pharmacy_inventory](pharmacy-inventory.md) | 37 | `pharmacy-inventory`, `pharmacy-inventory-directory`, `pharmacy-inventory-internal`, `pharmacy-orders`, `pharmacy-prescription-shares` | 9 |
 | [platform_ops](platform-ops.md) | 15 | `platform-ops` | 1 |
 | [polyglot_storage](polyglot-storage.md) | 15 | `polyglot-finops`, `polyglot-governance`, `polyglot-ops` | 3 |
 | [practice](practice.md) | 37 | `practice` | 9 |
 | [procedures_perioperative](procedures-perioperative.md) | 32 | `dental-procedures`, `procedure-cases` | 2 |
-| [profiles](profiles.md) | 67 | `profiles-affiliations`, `profiles-patients`, `profiles-practitioners`, `profiles-primary-practitioner` | 7 |
+| [profiles](profiles.md) | 84 | `admissions`, `profiles-affiliations`, `profiles-patients`, `profiles-practitioner-admission`, `profiles-practitioners`, `profiles-primary-practitioner` | 9 |
 | [promotions](promotions.md) | 19 | `loyalty`, `promotions` | 2 |
 | [public](public.md) | 4 | `public-catalog` | 1 |
 | [qa_execution](qa-execution.md) | 9 | `qa-execution`, `qa-execution-internal` | 2 |
@@ -124,4 +124,4 @@ Esta referencia documenta **1618 de 1618 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1618 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1655 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
