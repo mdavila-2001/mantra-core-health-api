@@ -14,3 +14,4 @@ export * from './responses.dto';
 export * from './read-responses.dto';
 export * from './public-marketplace.dto';
 export * from './opening-hours.dto';
+export * from './bulk.dto';
