@@ -117,7 +117,12 @@ export class ClinicalUnitsAdminService {
     tenantId: string,
   ): Promise<ClinicalUnitDetailDto> {
     return this.em.transactional(async (tx) => {
-      const { unit, siteUnits } = await this.writable(tx, unitId, tenantId, actor);
+      const { unit, siteUnits } = await this.writable(
+        tx,
+        unitId,
+        tenantId,
+        actor,
+      );
       if (unit.statusConceptId === PRAC.UNIT_RETIRED) {
         throw ruleException(PracticeErrorReason.SPACE_RETIRED, { unitId });
       }
@@ -152,7 +157,8 @@ export class ClinicalUnitsAdminService {
             );
           }
           const lifecycle = judgeParentAllows(stateOf(unit)!, stateOf(parent));
-          if (!lifecycle.ok) throw ruleException(lifecycle.reason, lifecycle.details);
+          if (!lifecycle.ok)
+            throw ruleException(lifecycle.reason, lifecycle.details);
         }
         const cycle = judgeNoCycle(
           unit.id,
@@ -165,20 +171,43 @@ export class ClinicalUnitsAdminService {
         unit.parentUnitId = parentId ?? undefined;
         changes.push('parentUnitId');
       }
-      for (const key of ['name', 'description', 'responsibleUserId', 'specialtyConceptId'] as const) {
+      for (const key of [
+        'name',
+        'description',
+        'responsibleUserId',
+        'specialtyConceptId',
+      ] as const) {
         if (dto[key] === undefined) continue;
-        (unit as unknown as Record<string, unknown>)[key] = dto[key] ?? undefined;
+        (unit as unknown as Record<string, unknown>)[key] =
+          dto[key] ?? undefined;
         changes.push(key);
       }
       touch(unit, actor.id);
       await flushStructure(tx);
-      await appendStructureRevision(this.historyRepo, tx, 'unit', unit, AUD.OPERATION_UPDATE, actor.id);
-      await publishStructureEvent(this.outbox, tx, STRUCTURE_EVENTS.unitUpdated, {
-        tenantId: unit.tenantId,
-        aggregateId: unit.id,
-        actorUserId: actor.id,
-        payload: { siteId: unit.practiceSiteId, unitId: unit.id, changes, rowVersion: unit.rowVersion },
-      });
+      await appendStructureRevision(
+        this.historyRepo,
+        tx,
+        'unit',
+        unit,
+        AUD.OPERATION_UPDATE,
+        actor.id,
+      );
+      await publishStructureEvent(
+        this.outbox,
+        tx,
+        STRUCTURE_EVENTS.unitUpdated,
+        {
+          tenantId: unit.tenantId,
+          aggregateId: unit.id,
+          actorUserId: actor.id,
+          payload: {
+            siteId: unit.practiceSiteId,
+            unitId: unit.id,
+            changes,
+            rowVersion: unit.rowVersion,
+          },
+        },
+      );
       await flushStructure(tx);
       return this.toDetail(tx, unit);
     });
@@ -193,33 +222,57 @@ export class ClinicalUnitsAdminService {
     tenantId: string,
   ): Promise<ClinicalUnitDetailDto> {
     return this.em.transactional(async (tx) => {
-      const { unit, siteUnits } = await this.writable(tx, unitId, tenantId, actor);
+      const { unit, siteUnits } = await this.writable(
+        tx,
+        unitId,
+        tenantId,
+        actor,
+      );
       assertIfMatch(ifMatch, unit.rowVersion);
       const from = stateOf(unit) ?? 'ACTIVE';
       const verdict = judgeTransition(from, dto.action, dto.reason);
       if (!verdict.ok) throw ruleException(verdict.reason, verdict.details);
       const to = verdict.to!;
-      const parent = unit.parentUnitId ? siteUnits.find((u) => u.id === unit.parentUnitId) : undefined;
+      const parent = unit.parentUnitId
+        ? siteUnits.find((u) => u.id === unit.parentUnitId)
+        : undefined;
       const now = new Date();
 
       if (to === 'ACTIVE') {
-        const allowed = judgeParentAllows('ACTIVE', parent ? stateOf(parent) : null);
+        const allowed = judgeParentAllows(
+          'ACTIVE',
+          parent ? stateOf(parent) : null,
+        );
         if (!allowed.ok) throw ruleException(allowed.reason, allowed.details);
         if (!unit.validFrom) unit.validFrom = now;
       }
       if (to === 'SUSPENDED') {
         const b = blocker(
           'ACTIVE_CHILD_UNITS',
-          siteUnits.filter((u) => u.parentUnitId === unit.id && u.statusConceptId === PRAC.UNIT_ACTIVE).map((u) => u.id),
+          siteUnits
+            .filter(
+              (u) =>
+                u.parentUnitId === unit.id &&
+                u.statusConceptId === PRAC.UNIT_ACTIVE,
+            )
+            .map((u) => u.id),
         );
         if (b) {
-          throw conflict(PracticeErrorReason.UNIT_SUSPEND_BLOCKED, 'La unidad tiene unidades hijas activas', { blockers: [b] });
+          throw conflict(
+            PracticeErrorReason.UNIT_SUSPEND_BLOCKED,
+            'La unidad tiene unidades hijas activas',
+            { blockers: [b] },
+          );
         }
       }
       if (to === 'RETIRED') {
         const blockers = await this.retireBlockers(tx, unit, siteUnits);
         if (blockers.length > 0) {
-          throw conflict(PracticeErrorReason.UNIT_RETIRE_BLOCKED, 'La unidad no se puede retirar todavía', { blockers });
+          throw conflict(
+            PracticeErrorReason.UNIT_RETIRE_BLOCKED,
+            'La unidad no se puede retirar todavía',
+            { blockers },
+          );
         }
         unit.validTo = now;
       }
@@ -229,63 +282,124 @@ export class ClinicalUnitsAdminService {
       await this.historyRepo.append(tx, 'clinical_units', unit.id, {
         operationConceptId: AUD.OPERATION_UPDATE,
         dataSnapshot: {
-          ...Object.fromEntries(Object.entries(unit).filter(([k, v]) => !k.startsWith('__') && typeof v !== 'function')),
+          ...Object.fromEntries(
+            Object.entries(unit).filter(
+              ([k, v]) => !k.startsWith('__') && typeof v !== 'function',
+            ),
+          ),
           lifecycleAction: dto.action,
           lifecycleReason: dto.reason ?? null,
         },
         changedByUserId: actor.id,
         tenantId: unit.tenantId,
       });
-      await publishStructureEvent(this.outbox, tx, STRUCTURE_EVENTS.unitLifecycleChanged, {
-        tenantId: unit.tenantId,
-        aggregateId: unit.id,
-        actorUserId: actor.id,
-        payload: { siteId: unit.practiceSiteId, unitId: unit.id, action: dto.action, from, to, reasonProvided: Boolean(dto.reason?.trim()), rowVersion: unit.rowVersion },
-      });
+      await publishStructureEvent(
+        this.outbox,
+        tx,
+        STRUCTURE_EVENTS.unitLifecycleChanged,
+        {
+          tenantId: unit.tenantId,
+          aggregateId: unit.id,
+          actorUserId: actor.id,
+          payload: {
+            siteId: unit.practiceSiteId,
+            unitId: unit.id,
+            action: dto.action,
+            from,
+            to,
+            reasonProvided: Boolean(dto.reason?.trim()),
+            rowVersion: unit.rowVersion,
+          },
+        },
+      );
       await flushStructure(tx);
       return this.toDetail(tx, unit);
     });
   }
 
-  private async writable(tx: EntityManager, unitId: string, tenantId: string, actor: AuthenticatedUser) {
+  private async writable(
+    tx: EntityManager,
+    unitId: string,
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ) {
     const unit = await this.access.requireUnit(tx, unitId, tenantId);
-    const site = await this.access.requireSite(tx, unit.practiceSiteId, tenantId);
+    const site = await this.access.requireSite(
+      tx,
+      unit.practiceSiteId,
+      tenantId,
+    );
     await this.access.assertCanWriteSite(tx, site, actor);
     const siteUnits = await this.unitsRepo.findBySite(tx, site.id);
     return { unit, site, siteUnits };
   }
 
-  private async retireBlockers(tx: EntityManager, unit: ClinicalUnits, siteUnits: readonly ClinicalUnits[]): Promise<Blocker[]> {
-    const children = siteUnits.filter((u) => u.parentUnitId === unit.id && u.statusConceptId !== PRAC.UNIT_RETIRED);
-    const spaces = (await this.spacesRepo.findBySite(tx, unit.practiceSiteId)).filter(
-      (s) => s.clinicalUnitId === unit.id && s.statusConceptId !== PRAC.SPACE_RETIRED,
+  private async retireBlockers(
+    tx: EntityManager,
+    unit: ClinicalUnits,
+    siteUnits: readonly ClinicalUnits[],
+  ): Promise<Blocker[]> {
+    const children = siteUnits.filter(
+      (u) =>
+        u.parentUnitId === unit.id && u.statusConceptId !== PRAC.UNIT_RETIRED,
+    );
+    const spaces = (
+      await this.spacesRepo.findBySite(tx, unit.practiceSiteId)
+    ).filter(
+      (s) =>
+        s.clinicalUnitId === unit.id &&
+        s.statusConceptId !== PRAC.SPACE_RETIRED,
     );
     const linked = await this.assignmentsRepo.findCurrentByUnit(tx, unit.id);
-    const spaceIds = [...new Set([...spaces.map((s) => s.id), ...linked.map((a) => a.careSpaceId)])];
+    const spaceIds = [
+      ...new Set([
+        ...spaces.map((s) => s.id),
+        ...linked.map((a) => a.careSpaceId),
+      ]),
+    ];
     const staff = await tx.find(
       PractitionerRoleAssignments,
       { clinicalUnitId: unit.id, statusConceptId: { $in: LIVE_STAFF } },
       { fields: ['id'], limit: 50 },
     );
     return [
-      blocker('ACTIVE_CHILD_UNITS', children.map((u) => u.id)),
+      blocker(
+        'ACTIVE_CHILD_UNITS',
+        children.map((u) => u.id),
+      ),
       blocker('ACTIVE_SPACES', spaceIds),
-      blocker('ACTIVE_STAFF', staff.map((r) => r.id)),
+      blocker(
+        'ACTIVE_STAFF',
+        staff.map((r) => r.id),
+      ),
     ].filter((b): b is Blocker => b !== null);
   }
 
-  private async toDetail(tx: EntityManager, unit: ClinicalUnits): Promise<ClinicalUnitDetailDto> {
+  private async toDetail(
+    tx: EntityManager,
+    unit: ClinicalUnits,
+  ): Promise<ClinicalUnitDetailDto> {
     const siteUnits = await this.unitsRepo.findBySite(tx, unit.practiceSiteId);
-    const siteSpaces = await this.spacesRepo.findBySite(tx, unit.practiceSiteId);
-    const assignments = await this.assignmentsRepo.findCurrentByUnit(tx, unit.id);
+    const siteSpaces = await this.spacesRepo.findBySite(
+      tx,
+      unit.practiceSiteId,
+    );
+    const assignments = await this.assignmentsRepo.findCurrentByUnit(
+      tx,
+      unit.id,
+    );
     const children = childrenIndex(siteSpaces);
     return {
       ...toUnitNode(unit, siteUnits),
       practiceSiteId: unit.practiceSiteId,
       validFrom: unit.validFrom ?? null,
       validTo: unit.validTo ?? null,
-      children: siteUnits.filter((u) => u.parentUnitId === unit.id).map((u) => toUnitNode(u, siteUnits)),
-      spaces: siteSpaces.filter((s) => s.clinicalUnitId === unit.id).map((s) => toSpaceNode(s, children)),
+      children: siteUnits
+        .filter((u) => u.parentUnitId === unit.id)
+        .map((u) => toUnitNode(u, siteUnits)),
+      spaces: siteSpaces
+        .filter((s) => s.clinicalUnitId === unit.id)
+        .map((s) => toSpaceNode(s, children)),
       assignments: assignments.map(toAssignment),
     };
   }

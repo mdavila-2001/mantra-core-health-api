@@ -175,20 +175,29 @@ export class CareSpacesAdminService {
     actor: AuthenticatedUser,
     tenantId: string,
   ): Promise<CareSpaceDetailDto> {
-    this.logger.info({ operation: 'practice.space.create', siteId }, 'Creating care space');
+    this.logger.info(
+      { operation: 'practice.space.create', siteId },
+      'Creating care space',
+    );
     return this.em.transactional(async (tx) => {
       const site = await this.writableSite(tx, siteId, tenantId, actor);
-      const legacy = dto.formCode === undefined && dto.functionCode === undefined;
-      const functionCode = dto.functionCode ??
-        (dto.spaceTypeConceptId ? (codeOf(dto.spaceTypeConceptId) ?? dto.spaceTypeConceptId) : 'SPACE_TYPE_ROOM');
+      const legacy =
+        dto.formCode === undefined && dto.functionCode === undefined;
+      const functionCode =
+        dto.functionCode ??
+        (dto.spaceTypeConceptId
+          ? (codeOf(dto.spaceTypeConceptId) ?? dto.spaceTypeConceptId)
+          : 'SPACE_TYPE_ROOM');
       const formCode = dto.formCode ?? 'LOC_FORM_ROOM';
-      const target: LifecycleState = legacy || dto.activate ? 'ACTIVE' : 'PLANNED';
+      const target: LifecycleState =
+        legacy || dto.activate ? 'ACTIVE' : 'PLANNED';
 
       const siteSpaces = await this.spacesRepo.findBySite(tx, siteId);
       const parent = dto.parentSpaceId
         ? this.sameSiteSpace(siteSpaces, dto.parentSpaceId, 'parentSpaceId')
         : null;
-      if (dto.clinicalUnitId) await this.sameSiteUnit(tx, site, dto.clinicalUnitId);
+      if (dto.clinicalUnitId)
+        await this.sameSiteUnit(tx, site, dto.clinicalUnitId);
 
       const rules = await this.loadRules(tx, site);
       const errors = this.validateCandidate(
@@ -197,7 +206,9 @@ export class CareSpacesAdminService {
           name: dto.name,
           formCode,
           functionCode,
-          parent: parent ? { form: formOf(parent), state: stateOf(parent) } : null,
+          parent: parent
+            ? { form: formOf(parent), state: stateOf(parent) }
+            : null,
           target,
         },
         rules,
@@ -248,7 +259,8 @@ export class CareSpacesAdminService {
       const parent = dto.parentSpaceId
         ? this.sameSiteSpace(siteSpaces, dto.parentSpaceId, 'parentSpaceId')
         : null;
-      if (dto.clinicalUnitId) await this.sameSiteUnit(tx, site, dto.clinicalUnitId);
+      if (dto.clinicalUnitId)
+        await this.sameSiteUnit(tx, site, dto.clinicalUnitId);
       const rules = await this.loadRules(tx, site);
       const attrs = resolveAttributes(dto);
       const target: LifecycleState = dto.activate ? 'ACTIVE' : 'PLANNED';
@@ -262,7 +274,9 @@ export class CareSpacesAdminService {
               name: item.name,
               formCode: dto.formCode,
               functionCode: dto.functionCode,
-              parent: parent ? { form: formOf(parent), state: stateOf(parent) } : null,
+              parent: parent
+                ? { form: formOf(parent), state: stateOf(parent) }
+                : null,
               target,
             },
             rules,
@@ -271,11 +285,17 @@ export class CareSpacesAdminService {
           ...attrs.errors,
         ];
         codes.add(item.code);
-        return { line: index + 1, status: errors.length ? 'error' : 'ok', errors: errors.map(({ field, reason }) => ({ field, reason })) };
+        return {
+          line: index + 1,
+          status: errors.length ? 'error' : 'ok',
+          errors: errors.map(({ field, reason }) => ({ field, reason })),
+        };
       });
       if (rows.some((r) => r.status === 'error')) {
         throw ruleException(PracticeErrorReason.IMPORT_INVALID_ROWS, {
-          rows: rows.filter((r) => r.status === 'error').map((r) => ({ ...r, code: expanded.items[r.line - 1].code })),
+          rows: rows
+            .filter((r) => r.status === 'error')
+            .map((r) => ({ ...r, code: expanded.items[r.line - 1].code })),
         });
       }
 
@@ -320,11 +340,21 @@ export class CareSpacesAdminService {
       const units = await this.unitsRepo.findBySite(tx, siteId);
       const rules = await this.loadRules(tx, site);
 
-      const byCode = new Map<string, { form: FormCode | null; state: LifecycleState | null; id?: string }>(
-        siteSpaces.map((s) => [s.code, { form: formOf(s), state: stateOf(s), id: s.id }]),
+      const byCode = new Map<
+        string,
+        { form: FormCode | null; state: LifecycleState | null; id?: string }
+      >(
+        siteSpaces.map((s) => [
+          s.code,
+          { form: formOf(s), state: stateOf(s), id: s.id },
+        ]),
       );
       const codes = new Set(siteSpaces.map((s) => s.code));
-      const planned: Array<{ row: ImportRowInput; attrs: SpaceAttributeColumns; unitId?: string }> = [];
+      const planned: Array<{
+        row: ImportRowInput;
+        attrs: SpaceAttributeColumns;
+        unitId?: string;
+      }> = [];
 
       const results: ImportRowResultDto[] = dto.rows.map((raw, index) => {
         const row = plainToInstance(ImportRowInput, raw);
@@ -345,15 +375,27 @@ export class CareSpacesAdminService {
             else parent = { form: p.form, state: p.state };
           }
           if (row.clinicalUnitCode) {
-            const unit = units.find((u) => u.code === row.clinicalUnitCode && u.statusConceptId !== PRAC.UNIT_RETIRED);
-            if (!unit) errors.push({ field: 'clinicalUnitCode', reason: 'NOT_FOUND' });
+            const unit = units.find(
+              (u) =>
+                u.code === row.clinicalUnitCode &&
+                u.statusConceptId !== PRAC.UNIT_RETIRED,
+            );
+            if (!unit)
+              errors.push({ field: 'clinicalUnitCode', reason: 'NOT_FOUND' });
             else unitId = unit.id;
           }
           const target: LifecycleState = row.activate ? 'ACTIVE' : 'PLANNED';
           if (!errors.some((e) => e.field === 'parentCode')) {
             errors.push(
               ...this.validateCandidate(
-                { code: row.code, name: row.name, formCode: row.formCode, functionCode: row.functionCode, parent, target },
+                {
+                  code: row.code,
+                  name: row.name,
+                  formCode: row.formCode,
+                  functionCode: row.functionCode,
+                  parent,
+                  target,
+                },
                 rules,
                 codes,
               ).map(({ field, reason }) => ({ field, reason })),
@@ -364,15 +406,23 @@ export class CareSpacesAdminService {
           errors.push(...resolved.errors);
           if (errors.length === 0) {
             codes.add(row.code);
-            byCode.set(row.code, { form: row.formCode as FormCode, state: target });
+            byCode.set(row.code, {
+              form: row.formCode as FormCode,
+              state: target,
+            });
           }
         }
         if (errors.length === 0) planned.push({ row, attrs, unitId });
-        return { line: index + 1, status: errors.length ? 'error' : 'ok', errors };
+        return {
+          line: index + 1,
+          status: errors.length ? 'error' : 'ok',
+          errors,
+        };
       });
 
       const ok = results.every((r) => r.status === 'ok');
-      if (dryRun || !ok) return { ok, dryRun, rows: results, created: dryRun ? undefined : 0 };
+      if (dryRun || !ok)
+        return { ok, dryRun, rows: results, created: dryRun ? undefined : 0 };
 
       // Alta en orden: un padre del lote se crea (y se resuelve su id) antes
       // que sus hijos.
@@ -384,7 +434,9 @@ export class CareSpacesAdminService {
           name: row.name,
           formCode: row.formCode,
           functionCode: row.functionCode,
-          parentSpaceId: row.parentCode ? idByCode.get(row.parentCode) : undefined,
+          parentSpaceId: row.parentCode
+            ? idByCode.get(row.parentCode)
+            : undefined,
           clinicalUnitId: unitId,
           target: row.activate ? 'ACTIVE' : 'PLANNED',
           attrs,
@@ -414,7 +466,12 @@ export class CareSpacesAdminService {
     tenantId: string,
   ): Promise<CareSpaceDetailDto> {
     return this.em.transactional(async (tx) => {
-      const { space, site } = await this.writableSpace(tx, spaceId, tenantId, actor);
+      const { space, site } = await this.writableSpace(
+        tx,
+        spaceId,
+        tenantId,
+        actor,
+      );
       assertIfMatch(ifMatch, space.rowVersion);
       const state = stateOf(space);
       const siteSpaces = await this.spacesRepo.findBySite(tx, site.id);
@@ -422,46 +479,84 @@ export class CareSpacesAdminService {
       const changes: string[] = [];
 
       const codeChanges = dto.code !== undefined && dto.code !== space.code;
-      const formChanges = dto.formCode !== undefined && dto.formCode !== formOf(space);
+      const formChanges =
+        dto.formCode !== undefined && dto.formCode !== formOf(space);
       if ((codeChanges || formChanges) && state !== 'PLANNED') {
         throw ruleException(PracticeErrorReason.SPACE_IMMUTABLE_FIELD, {
-          fields: [codeChanges && 'code', formChanges && 'formCode'].filter(Boolean),
+          fields: [codeChanges && 'code', formChanges && 'formCode'].filter(
+            Boolean,
+          ),
           status: state,
         });
       }
       if (codeChanges) {
         if (siteSpaces.some((s) => s.id !== space.id && s.code === dto.code)) {
-          throw conflict(PracticeErrorReason.SPACE_CODE_TAKEN, 'Ya existe un espacio con ese código en la sede', { code: dto.code });
+          throw conflict(
+            PracticeErrorReason.SPACE_CODE_TAKEN,
+            'Ya existe un espacio con ese código en la sede',
+            { code: dto.code },
+          );
         }
         space.code = dto.code!;
         changes.push('code');
       }
 
-      const formCode = (dto.formCode ?? formOf(space) ?? 'LOC_FORM_ROOM') as FormCode;
-      const functionCode = dto.functionCode ?? codeOf(space.spaceTypeConceptId) ?? 'SPACE_TYPE_ROOM';
+      const formCode = (dto.formCode ??
+        formOf(space) ??
+        'LOC_FORM_ROOM') as FormCode;
+      const functionCode =
+        dto.functionCode ??
+        codeOf(space.spaceTypeConceptId) ??
+        'SPACE_TYPE_ROOM';
       if (formChanges || dto.functionCode !== undefined) {
         if (!formIdOf(formCode)) {
-          throw ruleException(PracticeErrorReason.SPACE_UNKNOWN_CODE, { field: 'formCode', formCode });
+          throw ruleException(PracticeErrorReason.SPACE_UNKNOWN_CODE, {
+            field: 'formCode',
+            formCode,
+          });
         }
         const fit = judgeFunctionForm(functionCode, formCode);
         if (!fit.ok) throw ruleException(fit.reason, fit.details);
-        const typo = judgeTypology(rules.typologyCode, functionCode, rules.typologyRules);
+        const typo = judgeTypology(
+          rules.typologyCode,
+          functionCode,
+          rules.typologyRules,
+        );
         if (!typo.ok) throw ruleException(typo.reason, typo.details);
       }
       if (formChanges) {
-        const parent = space.parentSpaceId ? siteSpaces.find((s) => s.id === space.parentSpaceId) : undefined;
-        const asChild = judgeParentChild(parent ? formOf(parent) : null, formCode, rules.parentRules);
+        const parent = space.parentSpaceId
+          ? siteSpaces.find((s) => s.id === space.parentSpaceId)
+          : undefined;
+        const asChild = judgeParentChild(
+          parent ? formOf(parent) : null,
+          formCode,
+          rules.parentRules,
+        );
         if (!asChild.ok) throw ruleException(asChild.reason, asChild.details);
-        for (const child of siteSpaces.filter((s) => s.parentSpaceId === space.id)) {
+        for (const child of siteSpaces.filter(
+          (s) => s.parentSpaceId === space.id,
+        )) {
           const childForm = formOf(child);
           if (!childForm) continue;
-          const asParent = judgeParentChild(formCode, childForm, rules.parentRules);
-          if (!asParent.ok) throw ruleException(asParent.reason, { ...asParent.details, childId: child.id });
+          const asParent = judgeParentChild(
+            formCode,
+            childForm,
+            rules.parentRules,
+          );
+          if (!asParent.ok)
+            throw ruleException(asParent.reason, {
+              ...asParent.details,
+              childId: child.id,
+            });
         }
         space.formConceptId = formIdOf(formCode);
         changes.push('formCode');
       }
-      if (dto.functionCode !== undefined && functionIdOf(functionCode) !== space.spaceTypeConceptId) {
+      if (
+        dto.functionCode !== undefined &&
+        functionIdOf(functionCode) !== space.spaceTypeConceptId
+      ) {
         space.spaceTypeConceptId = functionIdOf(functionCode)!;
         changes.push('functionCode');
       }
@@ -470,13 +565,16 @@ export class CareSpacesAdminService {
         changes.push('name');
       }
       if (dto.clinicalUnitId !== undefined) {
-        if (dto.clinicalUnitId !== null) await this.sameSiteUnit(tx, site, dto.clinicalUnitId);
+        if (dto.clinicalUnitId !== null)
+          await this.sameSiteUnit(tx, site, dto.clinicalUnitId);
         space.clinicalUnitId = dto.clinicalUnitId ?? undefined;
         changes.push('clinicalUnitId');
       }
       const attrs = resolveAttributes(dto);
       if (attrs.errors.length) {
-        throw ruleException(attrs.errors[0].reason, { field: attrs.errors[0].field });
+        throw ruleException(attrs.errors[0].reason, {
+          field: attrs.errors[0].field,
+        });
       }
       for (const [key, value] of Object.entries(attrs.values)) {
         (space as unknown as Record<string, unknown>)[key] = value ?? undefined;
@@ -485,13 +583,30 @@ export class CareSpacesAdminService {
 
       touch(space, actor.id);
       await flushStructure(tx);
-      await appendStructureRevision(this.historyRepo, tx, 'space', space, AUD.OPERATION_UPDATE, actor.id);
-      await publishStructureEvent(this.outbox, tx, STRUCTURE_EVENTS.spaceUpdated, {
-        tenantId: space.tenantId,
-        aggregateId: space.id,
-        actorUserId: actor.id,
-        payload: { siteId: site.id, spaceId: space.id, changes, rowVersion: space.rowVersion },
-      });
+      await appendStructureRevision(
+        this.historyRepo,
+        tx,
+        'space',
+        space,
+        AUD.OPERATION_UPDATE,
+        actor.id,
+      );
+      await publishStructureEvent(
+        this.outbox,
+        tx,
+        STRUCTURE_EVENTS.spaceUpdated,
+        {
+          tenantId: space.tenantId,
+          aggregateId: space.id,
+          actorUserId: actor.id,
+          payload: {
+            siteId: site.id,
+            spaceId: space.id,
+            changes,
+            rowVersion: space.rowVersion,
+          },
+        },
+      );
       await flushStructure(tx);
       return this.detail(tx, space, siteSpaces);
     });
@@ -506,12 +621,19 @@ export class CareSpacesAdminService {
     tenantId: string,
   ): Promise<CareSpaceDetailDto> {
     return this.em.transactional(async (tx) => {
-      const { space, site } = await this.writableSpace(tx, spaceId, tenantId, actor);
+      const { space, site } = await this.writableSpace(
+        tx,
+        spaceId,
+        tenantId,
+        actor,
+      );
       assertIfMatch(ifMatch, space.rowVersion);
       const siteSpaces = await this.spacesRepo.findBySite(tx, site.id);
       const rules = await this.loadRules(tx, site);
       const newParentId = dto.parentSpaceId ?? null;
-      const parent = newParentId ? this.sameSiteSpace(siteSpaces, newParentId, 'parentSpaceId') : null;
+      const parent = newParentId
+        ? this.sameSiteSpace(siteSpaces, newParentId, 'parentSpaceId')
+        : null;
 
       const cycle = judgeNoCycle(
         space.id,
@@ -520,23 +642,49 @@ export class CareSpacesAdminService {
       );
       if (!cycle.ok) throw ruleException(cycle.reason, cycle.details);
       const form = formOf(space) ?? 'LOC_FORM_ROOM';
-      const shape = judgeParentChild(parent ? formOf(parent) : null, form, rules.parentRules);
+      const shape = judgeParentChild(
+        parent ? formOf(parent) : null,
+        form,
+        rules.parentRules,
+      );
       if (!shape.ok) throw ruleException(shape.reason, shape.details);
       const state = stateOf(space)!;
-      const lifecycle = judgeParentAllows(state, parent ? stateOf(parent) : null);
-      if (!lifecycle.ok) throw ruleException(lifecycle.reason, lifecycle.details);
+      const lifecycle = judgeParentAllows(
+        state,
+        parent ? stateOf(parent) : null,
+      );
+      if (!lifecycle.ok)
+        throw ruleException(lifecycle.reason, lifecycle.details);
 
       const from = space.parentSpaceId ?? null;
       space.parentSpaceId = newParentId ?? undefined;
       touch(space, actor.id);
       await flushStructure(tx);
-      await appendStructureRevision(this.historyRepo, tx, 'space', space, AUD.OPERATION_UPDATE, actor.id);
-      await publishStructureEvent(this.outbox, tx, STRUCTURE_EVENTS.spaceMoved, {
-        tenantId: space.tenantId,
-        aggregateId: space.id,
-        actorUserId: actor.id,
-        payload: { siteId: site.id, spaceId: space.id, fromParentId: from, toParentId: newParentId, rowVersion: space.rowVersion },
-      });
+      await appendStructureRevision(
+        this.historyRepo,
+        tx,
+        'space',
+        space,
+        AUD.OPERATION_UPDATE,
+        actor.id,
+      );
+      await publishStructureEvent(
+        this.outbox,
+        tx,
+        STRUCTURE_EVENTS.spaceMoved,
+        {
+          tenantId: space.tenantId,
+          aggregateId: space.id,
+          actorUserId: actor.id,
+          payload: {
+            siteId: site.id,
+            spaceId: space.id,
+            fromParentId: from,
+            toParentId: newParentId,
+            rowVersion: space.rowVersion,
+          },
+        },
+      );
       await flushStructure(tx);
       return this.detail(tx, space, siteSpaces);
     });
@@ -579,7 +727,13 @@ export class CareSpacesAdminService {
     tenantId: string,
   ): Promise<CareSpaceDetailDto> {
     return this.em.transactional(async (tx) => {
-      const { space, site } = await this.writableSpace(tx, spaceId, tenantId, actor, true);
+      const { space, site } = await this.writableSpace(
+        tx,
+        spaceId,
+        tenantId,
+        actor,
+        true,
+      );
       assertIfMatch(ifMatch, space.rowVersion);
       const from = stateOf(space) ?? 'ACTIVE';
       const verdict = judgeTransition(from, dto.action, dto.reason);
@@ -588,28 +742,50 @@ export class CareSpacesAdminService {
       const siteSpaces = await this.spacesRepo.findBySite(tx, site.id);
 
       if (to === 'ACTIVE') {
-        const parent = space.parentSpaceId ? siteSpaces.find((s) => s.id === space.parentSpaceId) : undefined;
-        const allowed = judgeParentAllows('ACTIVE', parent ? stateOf(parent) : null);
+        const parent = space.parentSpaceId
+          ? siteSpaces.find((s) => s.id === space.parentSpaceId)
+          : undefined;
+        const allowed = judgeParentAllows(
+          'ACTIVE',
+          parent ? stateOf(parent) : null,
+        );
         if (!allowed.ok) throw ruleException(allowed.reason, allowed.details);
       }
       if (to === 'SUSPENDED') {
-        const active = siteSpaces.filter((s) => s.parentSpaceId === space.id && s.statusConceptId === PRAC.SPACE_ACTIVE);
-        const b = blocker('ACTIVE_CHILDREN', active.map((s) => s.id));
+        const active = siteSpaces.filter(
+          (s) =>
+            s.parentSpaceId === space.id &&
+            s.statusConceptId === PRAC.SPACE_ACTIVE,
+        );
+        const b = blocker(
+          'ACTIVE_CHILDREN',
+          active.map((s) => s.id),
+        );
         if (b) {
-          throw conflict(PracticeErrorReason.SPACE_SUSPEND_BLOCKED, 'El espacio tiene hijos activos', { blockers: [b] });
+          throw conflict(
+            PracticeErrorReason.SPACE_SUSPEND_BLOCKED,
+            'El espacio tiene hijos activos',
+            { blockers: [b] },
+          );
         }
       }
       const now = new Date();
       if (to === 'RETIRED') {
         const blockers = await this.retireBlockers(tx, space, siteSpaces);
         if (blockers.length > 0) {
-          throw conflict(PracticeErrorReason.SPACE_RETIRE_BLOCKED, 'El espacio no se puede retirar todavía', {
-            blockers,
-            unverifiable: UNVERIFIABLE_SPACE_CHECKS,
-          });
+          throw conflict(
+            PracticeErrorReason.SPACE_RETIRE_BLOCKED,
+            'El espacio no se puede retirar todavía',
+            {
+              blockers,
+              unverifiable: UNVERIFIABLE_SPACE_CHECKS,
+            },
+          );
         }
         space.validTo = now;
-        for (const a of await this.assignmentsRepo.findCurrentBySpaces(tx, [space.id])) {
+        for (const a of await this.assignmentsRepo.findCurrentBySpaces(tx, [
+          space.id,
+        ])) {
           a.validTo = now;
           touch(a, actor.id, now);
         }
@@ -622,16 +798,33 @@ export class CareSpacesAdminService {
       await flushStructure(tx);
       await this.historyRepo.append(tx, 'care_spaces', space.id, {
         operationConceptId: AUD.OPERATION_UPDATE,
-        dataSnapshot: { ...this.snapshot(space), lifecycleAction: dto.action, lifecycleReason: dto.reason ?? null },
+        dataSnapshot: {
+          ...this.snapshot(space),
+          lifecycleAction: dto.action,
+          lifecycleReason: dto.reason ?? null,
+        },
         changedByUserId: actor.id,
         tenantId: space.tenantId,
       });
-      await publishStructureEvent(this.outbox, tx, STRUCTURE_EVENTS.spaceLifecycleChanged, {
-        tenantId: space.tenantId,
-        aggregateId: space.id,
-        actorUserId: actor.id,
-        payload: { siteId: site.id, spaceId: space.id, action: dto.action, from, to, reasonProvided: Boolean(dto.reason?.trim()), rowVersion: space.rowVersion },
-      });
+      await publishStructureEvent(
+        this.outbox,
+        tx,
+        STRUCTURE_EVENTS.spaceLifecycleChanged,
+        {
+          tenantId: space.tenantId,
+          aggregateId: space.id,
+          actorUserId: actor.id,
+          payload: {
+            siteId: site.id,
+            spaceId: space.id,
+            action: dto.action,
+            from,
+            to,
+            reasonProvided: Boolean(dto.reason?.trim()),
+            rowVersion: space.rowVersion,
+          },
+        },
+      );
       await flushStructure(tx);
       return this.detail(tx, space, siteSpaces);
     });
@@ -647,15 +840,33 @@ export class CareSpacesAdminService {
     tenantId: string,
   ): Promise<SpaceUnitAssignmentDto> {
     return this.em.transactional(async (tx) => {
-      const { space, site } = await this.writableSpace(tx, spaceId, tenantId, actor);
+      const { space, site } = await this.writableSpace(
+        tx,
+        spaceId,
+        tenantId,
+        actor,
+      );
       await this.sameSiteUnit(tx, site, dto.clinicalUnitId);
       const roleId = PRACTICE_CONCEPT_BY_CODE.get(dto.roleCode)!.id;
-      const current = await this.assignmentsRepo.findCurrentBySpaces(tx, [space.id]);
+      const current = await this.assignmentsRepo.findCurrentBySpaces(tx, [
+        space.id,
+      ]);
       if (current.some((a) => a.clinicalUnitId === dto.clinicalUnitId)) {
-        throw conflict(PracticeErrorReason.ASSIGNMENT_DUPLICATE, 'La unidad ya está vinculada a este espacio', { clinicalUnitId: dto.clinicalUnitId });
+        throw conflict(
+          PracticeErrorReason.ASSIGNMENT_DUPLICATE,
+          'La unidad ya está vinculada a este espacio',
+          { clinicalUnitId: dto.clinicalUnitId },
+        );
       }
-      if (roleId === PRAC.SPACE_UNIT_ROLE_OWNER && current.some((a) => a.roleConceptId === PRAC.SPACE_UNIT_ROLE_OWNER)) {
-        throw conflict(PracticeErrorReason.ASSIGNMENT_OWNER_TAKEN, 'El espacio ya tiene una unidad propietaria vigente', {});
+      if (
+        roleId === PRAC.SPACE_UNIT_ROLE_OWNER &&
+        current.some((a) => a.roleConceptId === PRAC.SPACE_UNIT_ROLE_OWNER)
+      ) {
+        throw conflict(
+          PracticeErrorReason.ASSIGNMENT_OWNER_TAKEN,
+          'El espacio ya tiene una unidad propietaria vigente',
+          {},
+        );
       }
       const assignment = this.assignmentsRepo.create(tx, {
         tenantId: space.tenantId,
@@ -666,12 +877,24 @@ export class CareSpacesAdminService {
         actorUserId: actor.id,
       });
       await flushStructure(tx);
-      await publishStructureEvent(this.outbox, tx, STRUCTURE_EVENTS.spaceUpdated, {
-        tenantId: space.tenantId,
-        aggregateId: space.id,
-        actorUserId: actor.id,
-        payload: { siteId: site.id, spaceId: space.id, changes: ['assignments'], assignmentId: assignment.id, op: 'added', roleCode: dto.roleCode },
-      });
+      await publishStructureEvent(
+        this.outbox,
+        tx,
+        STRUCTURE_EVENTS.spaceUpdated,
+        {
+          tenantId: space.tenantId,
+          aggregateId: space.id,
+          actorUserId: actor.id,
+          payload: {
+            siteId: site.id,
+            spaceId: space.id,
+            changes: ['assignments'],
+            assignmentId: assignment.id,
+            op: 'added',
+            roleCode: dto.roleCode,
+          },
+        },
+      );
       await flushStructure(tx);
       return toAssignment(assignment);
     });
@@ -685,20 +908,44 @@ export class CareSpacesAdminService {
     tenantId: string,
   ): Promise<{ ok: boolean }> {
     return this.em.transactional(async (tx) => {
-      const { space, site } = await this.writableSpace(tx, spaceId, tenantId, actor, true);
+      const { space, site } = await this.writableSpace(
+        tx,
+        spaceId,
+        tenantId,
+        actor,
+        true,
+      );
       const assignment = await this.assignmentsRepo.findById(tx, assignmentId);
-      if (!assignment || assignment.careSpaceId !== space.id || assignment.tenantId !== tenantId || assignment.validTo) {
-        throw new ResourceNotFoundException('Vínculo no encontrado', { assignmentId });
+      if (
+        !assignment ||
+        assignment.careSpaceId !== space.id ||
+        assignment.tenantId !== tenantId ||
+        assignment.validTo
+      ) {
+        throw new ResourceNotFoundException('Vínculo no encontrado', {
+          assignmentId,
+        });
       }
       assignment.validTo = new Date();
       touch(assignment, actor.id);
       await flushStructure(tx);
-      await publishStructureEvent(this.outbox, tx, STRUCTURE_EVENTS.spaceUpdated, {
-        tenantId: space.tenantId,
-        aggregateId: space.id,
-        actorUserId: actor.id,
-        payload: { siteId: site.id, spaceId: space.id, changes: ['assignments'], assignmentId, op: 'removed' },
-      });
+      await publishStructureEvent(
+        this.outbox,
+        tx,
+        STRUCTURE_EVENTS.spaceUpdated,
+        {
+          tenantId: space.tenantId,
+          aggregateId: space.id,
+          actorUserId: actor.id,
+          payload: {
+            siteId: site.id,
+            spaceId: space.id,
+            changes: ['assignments'],
+            assignmentId,
+            op: 'removed',
+          },
+        },
+      );
       await flushStructure(tx);
       return { ok: true };
     });
@@ -706,7 +953,12 @@ export class CareSpacesAdminService {
 
   // --------------------------------------------------------------- apoyo
 
-  private async writableSite(tx: EntityManager, siteId: string, tenantId: string, actor: AuthenticatedUser): Promise<PracticeSites> {
+  private async writableSite(
+    tx: EntityManager,
+    siteId: string,
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): Promise<PracticeSites> {
     const site = await this.access.requireSite(tx, siteId, tenantId);
     await this.access.assertCanWriteSite(tx, site, actor);
     if (site.statusConceptId !== PRAC.SITE_ACTIVE) {
@@ -724,44 +976,80 @@ export class CareSpacesAdminService {
     allowRetiredForLifecycle = false,
   ): Promise<{ space: CareSpaces; site: PracticeSites }> {
     const space = await this.access.requireSpace(tx, spaceId, tenantId);
-    const site = await this.access.requireSite(tx, space.practiceSiteId, tenantId);
+    const site = await this.access.requireSite(
+      tx,
+      space.practiceSiteId,
+      tenantId,
+    );
     await this.access.assertCanWriteSite(tx, site, actor);
-    if (!allowRetiredForLifecycle && space.statusConceptId === PRAC.SPACE_RETIRED) {
+    if (
+      !allowRetiredForLifecycle &&
+      space.statusConceptId === PRAC.SPACE_RETIRED
+    ) {
       throw ruleException(PracticeErrorReason.SPACE_RETIRED, { spaceId });
     }
     return { space, site };
   }
 
   /** Un espacio de la misma sede y no retirado, o 404 (no se dice de dónde es). */
-  private sameSiteSpace(siteSpaces: readonly CareSpaces[], id: string, field: string): CareSpaces {
+  private sameSiteSpace(
+    siteSpaces: readonly CareSpaces[],
+    id: string,
+    field: string,
+  ): CareSpaces {
     const found = siteSpaces.find((s) => s.id === id);
     if (!found) {
-      throw new ResourceNotFoundException('Espacio no encontrado', { [field]: id });
+      throw new ResourceNotFoundException('Espacio no encontrado', {
+        [field]: id,
+      });
     }
     if (found.statusConceptId === PRAC.SPACE_RETIRED) {
-      throw ruleException(PracticeErrorReason.PARENT_NOT_ACTIVE, { [field]: id, parentStatus: 'RETIRED' });
+      throw ruleException(PracticeErrorReason.PARENT_NOT_ACTIVE, {
+        [field]: id,
+        parentStatus: 'RETIRED',
+      });
     }
     return found;
   }
 
   /** Una unidad de la misma sede y no retirada, o 404. */
-  private async sameSiteUnit(tx: EntityManager, site: PracticeSites, unitId: string): Promise<ClinicalUnits> {
+  private async sameSiteUnit(
+    tx: EntityManager,
+    site: PracticeSites,
+    unitId: string,
+  ): Promise<ClinicalUnits> {
     const unit = await this.unitsRepo.findById(tx, unitId);
-    if (!unit || unit.practiceSiteId !== site.id || unit.tenantId !== site.tenantId) {
-      throw new ResourceNotFoundException('Unidad clínica no encontrada', { clinicalUnitId: unitId });
+    if (
+      !unit ||
+      unit.practiceSiteId !== site.id ||
+      unit.tenantId !== site.tenantId
+    ) {
+      throw new ResourceNotFoundException('Unidad clínica no encontrada', {
+        clinicalUnitId: unitId,
+      });
     }
     if (unit.statusConceptId === PRAC.UNIT_RETIRED) {
-      throw ruleException(PracticeErrorReason.CROSS_SITE_REFERENCE, { clinicalUnitId: unitId, status: 'RETIRED' });
+      throw ruleException(PracticeErrorReason.CROSS_SITE_REFERENCE, {
+        clinicalUnitId: unitId,
+        status: 'RETIRED',
+      });
     }
     return unit;
   }
 
-  private async loadRules(tx: EntityManager, site: PracticeSites): Promise<RuleSet> {
+  private async loadRules(
+    tx: EntityManager,
+    site: PracticeSites,
+  ): Promise<RuleSet> {
     const [parentRules, typologyRules] = await Promise.all([
       this.rulesRepo.parentRules(tx),
       this.rulesRepo.typologyRules(tx),
     ]);
-    return { parentRules, typologyRules, typologyCode: codeOf(site.facilityTypologyConceptId) };
+    return {
+      parentRules,
+      typologyRules,
+      typologyCode: codeOf(site.facilityTypologyConceptId),
+    };
   }
 
   /** Reglas de un alta; devuelve todos los errores, no sólo el primero. */
@@ -772,20 +1060,42 @@ export class CareSpacesAdminService {
   ): Array<FieldError & { details: Record<string, unknown> }> {
     const out: Array<FieldError & { details: Record<string, unknown> }> = [];
     if (existingCodes.has(c.code)) {
-      out.push({ field: 'code', reason: PracticeErrorReason.SPACE_CODE_TAKEN, details: { code: c.code } });
+      out.push({
+        field: 'code',
+        reason: PracticeErrorReason.SPACE_CODE_TAKEN,
+        details: { code: c.code },
+      });
     }
     if (!formIdOf(c.formCode)) {
-      out.push({ field: 'formCode', reason: PracticeErrorReason.SPACE_UNKNOWN_CODE, details: { formCode: c.formCode } });
+      out.push({
+        field: 'formCode',
+        reason: PracticeErrorReason.SPACE_UNKNOWN_CODE,
+        details: { formCode: c.formCode },
+      });
       return out;
     }
     const form = c.formCode as FormCode;
     for (const [field, verdict] of [
       ['functionCode', judgeFunctionForm(c.functionCode, form)],
-      ['parentSpaceId', judgeParentChild(c.parent ? c.parent.form : null, form, rules.parentRules)],
-      ['functionCode', judgeTypology(rules.typologyCode, c.functionCode, rules.typologyRules)],
-      ['parentSpaceId', judgeParentAllows(c.target, c.parent ? c.parent.state : null)],
+      [
+        'parentSpaceId',
+        judgeParentChild(
+          c.parent ? c.parent.form : null,
+          form,
+          rules.parentRules,
+        ),
+      ],
+      [
+        'functionCode',
+        judgeTypology(rules.typologyCode, c.functionCode, rules.typologyRules),
+      ],
+      [
+        'parentSpaceId',
+        judgeParentAllows(c.target, c.parent ? c.parent.state : null),
+      ],
     ] as const) {
-      if (!verdict.ok) out.push({ field, reason: verdict.reason, details: verdict.details });
+      if (!verdict.ok)
+        out.push({ field, reason: verdict.reason, details: verdict.details });
     }
     return out;
   }
@@ -797,8 +1107,12 @@ export class CareSpacesAdminService {
   ): void {
     const first = errors[0];
     if (!first) return;
-    if (first.reason === PracticeErrorReason.SPACE_CODE_TAKEN) {
-      throw conflict(PracticeErrorReason.SPACE_CODE_TAKEN, 'Ya existe un espacio con ese código en la sede', { ...context, ...first.details });
+    if (first.reason === String(PracticeErrorReason.SPACE_CODE_TAKEN)) {
+      throw conflict(
+        PracticeErrorReason.SPACE_CODE_TAKEN,
+        'Ya existe un espacio con ese código en la sede',
+        { ...context, ...first.details },
+      );
     }
     throw ruleException(first.reason, { ...context, ...first.details });
   }
@@ -851,23 +1165,39 @@ export class CareSpacesAdminService {
     });
   }
 
-  private async sealCreated(tx: EntityManager, space: CareSpaces, actor: AuthenticatedUser): Promise<void> {
-    await appendStructureRevision(this.historyRepo, tx, 'space', space, AUD.OPERATION_INSERT, actor.id);
-    await publishStructureEvent(this.outbox, tx, STRUCTURE_EVENTS.spaceCreated, {
-      tenantId: space.tenantId,
-      aggregateId: space.id,
-      actorUserId: actor.id,
-      payload: {
-        siteId: space.practiceSiteId,
-        spaceId: space.id,
-        parentId: space.parentSpaceId ?? null,
-        code: space.code,
-        formCode: codeOf(space.formConceptId),
-        functionCode: codeOf(space.spaceTypeConceptId),
-        statusCode: codeOf(space.statusConceptId),
-        rowVersion: space.rowVersion ?? 1,
+  private async sealCreated(
+    tx: EntityManager,
+    space: CareSpaces,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    await appendStructureRevision(
+      this.historyRepo,
+      tx,
+      'space',
+      space,
+      AUD.OPERATION_INSERT,
+      actor.id,
+    );
+    await publishStructureEvent(
+      this.outbox,
+      tx,
+      STRUCTURE_EVENTS.spaceCreated,
+      {
+        tenantId: space.tenantId,
+        aggregateId: space.id,
+        actorUserId: actor.id,
+        payload: {
+          siteId: space.practiceSiteId,
+          spaceId: space.id,
+          parentId: space.parentSpaceId ?? null,
+          code: space.code,
+          formCode: codeOf(space.formConceptId),
+          functionCode: codeOf(space.spaceTypeConceptId),
+          statusCode: codeOf(space.statusConceptId),
+          rowVersion: space.rowVersion ?? 1,
+        },
       },
-    });
+    );
   }
 
   /** Bloqueos de retiro: hijos no retirados + lo que vive en otros módulos. */
@@ -876,26 +1206,58 @@ export class CareSpacesAdminService {
     space: CareSpaces,
     siteSpaces?: readonly CareSpaces[],
   ): Promise<Blocker[]> {
-    const all = siteSpaces ?? (await this.spacesRepo.findChildren(tx, space.id));
-    const children = all.filter((s) => s.parentSpaceId === space.id && s.statusConceptId !== PRAC.SPACE_RETIRED);
+    const all =
+      siteSpaces ?? (await this.spacesRepo.findChildren(tx, space.id));
+    const children = all.filter(
+      (s) =>
+        s.parentSpaceId === space.id &&
+        s.statusConceptId !== PRAC.SPACE_RETIRED,
+    );
     const ext = await this.blockersRepo.forSpace(tx, space.id);
     return [
-      blocker('ACTIVE_CHILDREN', children.map((c) => c.id)),
-      blocker('ACTIVE_ENCOUNTER', ext.activeEncounters.sampleIds, ext.activeEncounters.count),
-      blocker('FUTURE_PROCEDURE', ext.futureProcedures.sampleIds, ext.futureProcedures.count),
-      blocker('FUTURE_BOOKING', ext.futureBookings.sampleIds, ext.futureBookings.count),
-      blocker('SCHEDULABLE_RESOURCE', ext.schedulableResources.sampleIds, ext.schedulableResources.count),
+      blocker(
+        'ACTIVE_CHILDREN',
+        children.map((c) => c.id),
+      ),
+      blocker(
+        'ACTIVE_ENCOUNTER',
+        ext.activeEncounters.sampleIds,
+        ext.activeEncounters.count,
+      ),
+      blocker(
+        'FUTURE_PROCEDURE',
+        ext.futureProcedures.sampleIds,
+        ext.futureProcedures.count,
+      ),
+      blocker(
+        'FUTURE_BOOKING',
+        ext.futureBookings.sampleIds,
+        ext.futureBookings.count,
+      ),
+      blocker(
+        'SCHEDULABLE_RESOURCE',
+        ext.schedulableResources.sampleIds,
+        ext.schedulableResources.count,
+      ),
     ].filter((b): b is Blocker => b !== null);
   }
 
   private snapshot(space: CareSpaces): Record<string, unknown> {
     return Object.fromEntries(
-      Object.entries(space).filter(([k, v]) => !k.startsWith('__') && typeof v !== 'function'),
+      Object.entries(space).filter(
+        ([k, v]) => !k.startsWith('__') && typeof v !== 'function',
+      ),
     );
   }
 
-  private async detail(tx: EntityManager, space: CareSpaces, siteSpaces: readonly CareSpaces[]): Promise<CareSpaceDetailDto> {
-    const assignments = await this.assignmentsRepo.findCurrentBySpaces(tx, [space.id]);
+  private async detail(
+    tx: EntityManager,
+    space: CareSpaces,
+    siteSpaces: readonly CareSpaces[],
+  ): Promise<CareSpaceDetailDto> {
+    const assignments = await this.assignmentsRepo.findCurrentBySpaces(tx, [
+      space.id,
+    ]);
     const others = siteSpaces.filter((s) => s.id !== space.id);
     return toSpaceDetail(space, [...others, space], assignments);
   }

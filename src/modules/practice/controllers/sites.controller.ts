@@ -127,11 +127,6 @@ export class SitesController {
     @Body() dto: CreateCareSpaceDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<CareSpaceDetailDto> {
-    return this.spacesAdmin.create(
-      siteId,
-      dto,
-      actor,
-      requireTenantId(),
-    );
+    return this.spacesAdmin.create(siteId, dto, actor, requireTenantId());
   }
 }

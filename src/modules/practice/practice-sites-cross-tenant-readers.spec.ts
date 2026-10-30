@@ -55,7 +55,8 @@ const KNOWN_READERS: Record<string, string> = {
 };
 
 const MODULES = join(process.cwd(), 'src', 'modules');
-const PATTERN = /PracticeSites\b|practice\.practice_sites|PracticeSitesRepository/;
+const PATTERN =
+  /PracticeSites\b|practice\.practice_sites|PracticeSitesRepository/;
 const SKIP = /\.spec\.ts$|\/entities\/|\/dto\/|error-reasons|generated/;
 
 function walk(dir: string): string[] {
@@ -78,6 +79,8 @@ describe('lectores de practice.practice_sites fuera de practice (RLS)', () => {
   });
 
   it('el inventario no nombra archivos que ya no leen la tabla', () => {
-    expect(Object.keys(KNOWN_READERS).filter((f) => !found.includes(f))).toEqual([]);
+    expect(
+      Object.keys(KNOWN_READERS).filter((f) => !found.includes(f)),
+    ).toEqual([]);
   });
 });

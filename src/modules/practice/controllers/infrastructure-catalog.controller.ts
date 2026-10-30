@@ -20,7 +20,10 @@ import {
   requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
-import { InfrastructureReadService, SiteEstablishmentService } from '../services';
+import {
+  InfrastructureReadService,
+  SiteEstablishmentService,
+} from '../services';
 import {
   InfrastructureCatalogDto,
   SiteLicenseDto,
@@ -54,10 +57,18 @@ export class SiteLicensesController {
   constructor(private readonly establishment: SiteEstablishmentService) {}
 
   /** Editar una habilitación; el estado sólo lo cambia la plataforma. */
-  @Audited({ action: 'SITE_LICENSE_UPDATED', entity: 'facility_license', entityId: 'param:id' })
+  @Audited({
+    action: 'SITE_LICENSE_UPDATED',
+    entity: 'facility_license',
+    entityId: 'param:id',
+  })
   @Patch(':id')
   @ApiOperation({ summary: 'Editar una habilitación del establecimiento' })
-  @ApiHeader({ name: 'If-Match', required: false, description: 'rowVersion; si viene y no coincide: 412' })
+  @ApiHeader({
+    name: 'If-Match',
+    required: false,
+    description: 'rowVersion; si viene y no coincide: 412',
+  })
   @ApiOkResponse({ type: SiteLicenseDto })
   update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -65,6 +76,12 @@ export class SiteLicensesController {
     @Headers('if-match') ifMatch: string | undefined,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<SiteLicenseDto> {
-    return this.establishment.updateLicense(id, dto, ifMatch, actor, requireTenantId());
+    return this.establishment.updateLicense(
+      id,
+      dto,
+      ifMatch,
+      actor,
+      requireTenantId(),
+    );
   }
 }

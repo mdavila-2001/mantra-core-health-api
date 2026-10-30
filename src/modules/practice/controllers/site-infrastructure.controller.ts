@@ -65,7 +65,9 @@ export class SiteInfrastructureController {
 
   /** Árbol físico y organizativo de la sede, plano con `parentId`. */
   @Get(':siteId/structure')
-  @ApiOperation({ summary: 'Estructura de la sede (espacios, unidades, vínculos)' })
+  @ApiOperation({
+    summary: 'Estructura de la sede (espacios, unidades, vínculos)',
+  })
   @ApiOkResponse({ type: SiteStructureDto })
   structure(
     @Param('siteId', ParseUUIDPipe) siteId: string,
@@ -75,7 +77,11 @@ export class SiteInfrastructureController {
   }
 
   /** Alta masiva con patrón; todo o nada, máximo 200. */
-  @Audited({ action: 'CARE_SPACES_BULK_CREATED', entity: 'practice_site', entityId: 'param:siteId' })
+  @Audited({
+    action: 'CARE_SPACES_BULK_CREATED',
+    entity: 'practice_site',
+    entityId: 'param:siteId',
+  })
   @Post(':siteId/care-spaces/bulk')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Alta masiva de espacios por patrón' })
@@ -89,11 +95,22 @@ export class SiteInfrastructureController {
   }
 
   /** Importación de filas ya parseadas, con validación en seco. */
-  @Audited({ action: 'CARE_SPACES_IMPORTED', entity: 'practice_site', entityId: 'param:siteId' })
+  @Audited({
+    action: 'CARE_SPACES_IMPORTED',
+    entity: 'practice_site',
+    entityId: 'param:siteId',
+  })
   @Post(':siteId/care-spaces/import')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Importar espacios (dryRun=true valida sin escribir)' })
-  @ApiQuery({ name: 'dryRun', required: false, enum: ['true', 'false'], description: 'Por defecto true' })
+  @ApiOperation({
+    summary: 'Importar espacios (dryRun=true valida sin escribir)',
+  })
+  @ApiQuery({
+    name: 'dryRun',
+    required: false,
+    enum: ['true', 'false'],
+    description: 'Por defecto true',
+  })
   @ApiOkResponse({ type: ImportResultDto })
   importRows(
     @Param('siteId', ParseUUIDPipe) siteId: string,
@@ -101,7 +118,13 @@ export class SiteInfrastructureController {
     @Body() dto: ImportCareSpacesDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ImportResultDto> {
-    return this.spaces.importRows(siteId, dto, dryRun !== 'false', actor, requireTenantId());
+    return this.spaces.importRows(
+      siteId,
+      dto,
+      dryRun !== 'false',
+      actor,
+      requireTenantId(),
+    );
   }
 
   /** Unidades clínicas de la sede. */
@@ -127,10 +150,20 @@ export class SiteInfrastructureController {
   }
 
   /** Editar datos regulatorios (409 `TYPOLOGY_CONFLICT`). */
-  @Audited({ action: 'SITE_REGULATORY_UPDATED', entity: 'practice_site', entityId: 'param:siteId' })
+  @Audited({
+    action: 'SITE_REGULATORY_UPDATED',
+    entity: 'practice_site',
+    entityId: 'param:siteId',
+  })
   @Patch(':siteId/regulatory')
-  @ApiOperation({ summary: 'Editar los datos regulatorios del establecimiento' })
-  @ApiHeader({ name: 'If-Match', required: false, description: 'rowVersion de la sede; si viene y no coincide: 412' })
+  @ApiOperation({
+    summary: 'Editar los datos regulatorios del establecimiento',
+  })
+  @ApiHeader({
+    name: 'If-Match',
+    required: false,
+    description: 'rowVersion de la sede; si viene y no coincide: 412',
+  })
   @ApiOkResponse({ type: SiteRegulatoryDto })
   updateRegulatory(
     @Param('siteId', ParseUUIDPipe) siteId: string,
@@ -138,14 +171,26 @@ export class SiteInfrastructureController {
     @Headers('if-match') ifMatch: string | undefined,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<SiteRegulatoryDto> {
-    return this.establishment.updateRegulatory(siteId, dto, ifMatch, actor, requireTenantId());
+    return this.establishment.updateRegulatory(
+      siteId,
+      dto,
+      ifMatch,
+      actor,
+      requireTenantId(),
+    );
   }
 
   /** Verificar el código SNIS (sólo plataforma). */
-  @Audited({ action: 'SITE_SNIS_VERIFIED', entity: 'practice_site', entityId: 'param:siteId' })
+  @Audited({
+    action: 'SITE_SNIS_VERIFIED',
+    entity: 'practice_site',
+    entityId: 'param:siteId',
+  })
   @Post(':siteId/regulatory/verify-snis')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Verificar el código SNIS del establecimiento (plataforma)' })
+  @ApiOperation({
+    summary: 'Verificar el código SNIS del establecimiento (plataforma)',
+  })
   @ApiOkResponse({ type: SiteRegulatoryDto })
   verifySnis(
     @Param('siteId', ParseUUIDPipe) siteId: string,
@@ -166,7 +211,11 @@ export class SiteInfrastructureController {
   }
 
   /** Registrar una habilitación (nace en trámite). */
-  @Audited({ action: 'SITE_LICENSE_CREATED', entity: 'facility_license', entityId: 'result.id' })
+  @Audited({
+    action: 'SITE_LICENSE_CREATED',
+    entity: 'facility_license',
+    entityId: 'result.id',
+  })
   @Post(':siteId/licenses')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar una habilitación del establecimiento' })
@@ -176,12 +225,19 @@ export class SiteInfrastructureController {
     @Body() dto: CreateSiteLicenseDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<SiteLicenseDto> {
-    return this.establishment.createLicense(siteId, dto, actor, requireTenantId());
+    return this.establishment.createLicense(
+      siteId,
+      dto,
+      actor,
+      requireTenantId(),
+    );
   }
 
   /** Capacidad declarada vs. derivada. */
   @Get(':siteId/capacity')
-  @ApiOperation({ summary: 'Capacidad declarada vs. derivada del establecimiento' })
+  @ApiOperation({
+    summary: 'Capacidad declarada vs. derivada del establecimiento',
+  })
   @ApiOkResponse({ type: SiteCapacityDto })
   capacity(
     @Param('siteId', ParseUUIDPipe) siteId: string,
@@ -191,7 +247,11 @@ export class SiteInfrastructureController {
   }
 
   /** Declarar capacidad (habilitación, resolución). */
-  @Audited({ action: 'SITE_CAPACITY_DECLARED', entity: 'practice_site', entityId: 'param:siteId' })
+  @Audited({
+    action: 'SITE_CAPACITY_DECLARED',
+    entity: 'practice_site',
+    entityId: 'param:siteId',
+  })
   @Post(':siteId/declared-capacities')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Declarar capacidad del establecimiento' })
@@ -201,6 +261,11 @@ export class SiteInfrastructureController {
     @Body() dto: CreateDeclaredCapacityDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<SiteCapacityDto> {
-    return this.establishment.declareCapacity(siteId, dto, actor, requireTenantId());
+    return this.establishment.declareCapacity(
+      siteId,
+      dto,
+      actor,
+      requireTenantId(),
+    );
   }
 }

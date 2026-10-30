@@ -8,12 +8,14 @@ export class ConceptDto {
 
 /** Forma del catálogo, con su código FHIR. */
 export class FormConceptDto extends ConceptDto {
-  @ApiProperty({ description: 'Código FHIR R5 Location.form' }) fhirCode!: string;
+  @ApiProperty({ description: 'Código FHIR R5 Location.form' })
+  fhirCode!: string;
 }
 
 /** Perfil de función (contrato §2). */
 export class FunctionProfileDto extends ConceptDto {
-  @ApiProperty({ description: 'Clave estable (GENERIC para SPACE_TYPE_ROOM)' }) key!: string;
+  @ApiProperty({ description: 'Clave estable (GENERIC para SPACE_TYPE_ROOM)' })
+  key!: string;
   @ApiProperty({ type: [String] }) forms!: string[];
   @ApiProperty() schedulable!: boolean;
   @ApiProperty() inpatient!: boolean;
@@ -29,7 +31,8 @@ export class FunctionProfileDto extends ConceptDto {
 
 /** Regla padre→hijo. */
 export class ParentRuleDto {
-  @ApiProperty({ nullable: true, description: 'null = raíz de la sede' }) parent!: string | null;
+  @ApiProperty({ nullable: true, description: 'null = raíz de la sede' })
+  parent!: string | null;
   @ApiProperty() child!: string;
 }
 
@@ -37,7 +40,8 @@ export class ParentRuleDto {
 export class TypologyRuleDto {
   @ApiProperty() typology!: string;
   @ApiProperty() function!: string;
-  @ApiProperty({ enum: ['TYPO_ALLOWED', 'TYPO_REQUIRED', 'TYPO_FORBIDDEN'] }) rule!: string;
+  @ApiProperty({ enum: ['TYPO_ALLOWED', 'TYPO_REQUIRED', 'TYPO_FORBIDDEN'] })
+  rule!: string;
 }
 
 /** Atributos del catálogo. */
@@ -68,8 +72,10 @@ export class InfrastructureCatalogDto {
   @ApiProperty({ type: [TypologyRuleDto] }) typologyRules!: TypologyRuleDto[];
   @ApiProperty({ type: [ConceptDto] }) lifecycle!: ConceptDto[];
   @ApiProperty({ type: [ConceptDto] }) unitLifecycle!: ConceptDto[];
-  @ApiProperty({ type: CatalogAttributesDto }) attributes!: CatalogAttributesDto;
-  @ApiProperty({ type: CatalogRegulatoryDto }) regulatory!: CatalogRegulatoryDto;
+  @ApiProperty({ type: CatalogAttributesDto })
+  attributes!: CatalogAttributesDto;
+  @ApiProperty({ type: CatalogRegulatoryDto })
+  regulatory!: CatalogRegulatoryDto;
 }
 
 /** Nodo del árbol físico (contrato §3, `CareSpaceNode`). */
@@ -79,10 +85,13 @@ export class CareSpaceNodeDto {
   @ApiProperty() code!: string;
   @ApiProperty() name!: string;
   @ApiProperty({ type: ConceptDto, nullable: true }) form!: ConceptDto | null;
-  @ApiProperty({ type: ConceptDto, nullable: true }) function!: ConceptDto | null;
+  @ApiProperty({ type: ConceptDto, nullable: true })
+  function!: ConceptDto | null;
   @ApiProperty({ type: ConceptDto, nullable: true }) status!: ConceptDto | null;
-  @ApiProperty({ type: ConceptDto, nullable: true }) operationalStatus!: ConceptDto | null;
-  @ApiProperty({ format: 'uuid', nullable: true }) clinicalUnitId!: string | null;
+  @ApiProperty({ type: ConceptDto, nullable: true })
+  operationalStatus!: ConceptDto | null;
+  @ApiProperty({ format: 'uuid', nullable: true }) clinicalUnitId!:
+    string | null;
   @ApiProperty({ nullable: true }) capacity!: number | null;
   @ApiProperty() rowVersion!: number;
   @ApiProperty() childCount!: number;
@@ -96,7 +105,8 @@ export class ClinicalUnitNodeDto {
   @ApiProperty() name!: string;
   @ApiProperty({ nullable: true }) description!: string | null;
   @ApiProperty({ type: ConceptDto, nullable: true }) status!: ConceptDto | null;
-  @ApiProperty({ format: 'uuid', nullable: true }) responsibleUserId!: string | null;
+  @ApiProperty({ format: 'uuid', nullable: true }) responsibleUserId!:
+    string | null;
   @ApiProperty() rowVersion!: number;
   @ApiProperty() childCount!: number;
 }
@@ -120,25 +130,34 @@ export class EstablishmentSummaryDto {
   @ApiProperty() name!: string;
   @ApiProperty({ type: ConceptDto, nullable: true }) status!: ConceptDto | null;
   @ApiProperty({ nullable: true }) snisCode!: string | null;
-  @ApiProperty({ description: 'Verificado por la plataforma' }) snisVerified!: boolean;
-  @ApiProperty({ type: ConceptDto, nullable: true }) subsector!: ConceptDto | null;
-  @ApiProperty({ type: ConceptDto, nullable: true }) careLevel!: ConceptDto | null;
-  @ApiProperty({ type: ConceptDto, nullable: true }) typology!: ConceptDto | null;
+  @ApiProperty({ description: 'Verificado por la plataforma' })
+  snisVerified!: boolean;
+  @ApiProperty({ type: ConceptDto, nullable: true })
+  subsector!: ConceptDto | null;
+  @ApiProperty({ type: ConceptDto, nullable: true })
+  careLevel!: ConceptDto | null;
+  @ApiProperty({ type: ConceptDto, nullable: true })
+  typology!: ConceptDto | null;
   @ApiProperty({ type: ConceptDto, nullable: true }) sedes!: ConceptDto | null;
   @ApiProperty({ nullable: true }) managingEntityName!: string | null;
   @ApiProperty({ nullable: true }) healthNetworkName!: string | null;
   @ApiProperty({ nullable: true }) municipalityName!: string | null;
   @ApiProperty() rowVersion!: number;
-  @ApiProperty({ description: 'El actor puede editar la estructura (sólo refleja; la API decide)' })
+  @ApiProperty({
+    description:
+      'El actor puede editar la estructura (sólo refleja; la API decide)',
+  })
   canWrite!: boolean;
 }
 
 /** `GET /sites/:siteId/structure`. */
 export class SiteStructureDto {
-  @ApiProperty({ type: EstablishmentSummaryDto }) site!: EstablishmentSummaryDto;
+  @ApiProperty({ type: EstablishmentSummaryDto })
+  site!: EstablishmentSummaryDto;
   @ApiProperty({ type: [CareSpaceNodeDto] }) spaces!: CareSpaceNodeDto[];
   @ApiProperty({ type: [ClinicalUnitNodeDto] }) units!: ClinicalUnitNodeDto[];
-  @ApiProperty({ type: [SpaceUnitAssignmentDto] }) assignments!: SpaceUnitAssignmentDto[];
+  @ApiProperty({ type: [SpaceUnitAssignmentDto] })
+  assignments!: SpaceUnitAssignmentDto[];
   @ApiProperty({ description: 'Instante de la lectura (S7)' }) asOf!: string;
 }
 
@@ -163,13 +182,19 @@ export class CareSpaceDetailDto extends CareSpaceNodeDto {
   @ApiProperty({ nullable: true }) description!: string | null;
   @ApiProperty({ nullable: true }) floorNumber!: number | null;
   @ApiProperty({ nullable: true }) areaM2!: number | null;
-  @ApiProperty({ type: ConceptDto, nullable: true }) asepsis!: ConceptDto | null;
-  @ApiProperty({ type: ConceptDto, nullable: true }) pressure!: ConceptDto | null;
+  @ApiProperty({ type: ConceptDto, nullable: true })
+  asepsis!: ConceptDto | null;
+  @ApiProperty({ type: ConceptDto, nullable: true })
+  pressure!: ConceptDto | null;
   @ApiProperty({ nullable: true }) airChangesPerHour!: number | null;
-  @ApiProperty({ nullable: true, format: 'date' }) hvacValidatedOn!: string | null;
-  @ApiProperty({ type: ConceptDto, nullable: true }) sexRestriction!: ConceptDto | null;
-  @ApiProperty({ type: ConceptDto, nullable: true }) ageGroup!: ConceptDto | null;
-  @ApiProperty({ type: ConceptDto, nullable: true }) bedCategory!: ConceptDto | null;
+  @ApiProperty({ nullable: true, format: 'date' }) hvacValidatedOn!:
+    string | null;
+  @ApiProperty({ type: ConceptDto, nullable: true })
+  sexRestriction!: ConceptDto | null;
+  @ApiProperty({ type: ConceptDto, nullable: true })
+  ageGroup!: ConceptDto | null;
+  @ApiProperty({ type: ConceptDto, nullable: true })
+  bedCategory!: ConceptDto | null;
   @ApiProperty({ nullable: true }) censable!: boolean | null;
   @ApiProperty({ nullable: true }) gln!: string | null;
   @ApiProperty({ nullable: true }) prepMinutes!: number | null;
@@ -178,7 +203,8 @@ export class CareSpaceDetailDto extends CareSpaceNodeDto {
   @ApiProperty({ nullable: true }) validTo!: Date | null;
   @ApiProperty({ type: [SpacePathStepDto] }) path!: SpacePathStepDto[];
   @ApiProperty({ type: [CareSpaceNodeDto] }) children!: CareSpaceNodeDto[];
-  @ApiProperty({ type: [SpaceUnitAssignmentDto] }) assignments!: SpaceUnitAssignmentDto[];
+  @ApiProperty({ type: [SpaceUnitAssignmentDto] })
+  assignments!: SpaceUnitAssignmentDto[];
   @ApiProperty({ type: SpaceDerivedDto }) derived!: SpaceDerivedDto;
 }
 
@@ -227,7 +253,8 @@ export class BlockerDto {
   kind!: string;
   @ApiProperty() count!: number;
   @ApiProperty({ type: [String] }) sampleIds!: string[];
-  @ApiProperty({ description: 'Qué hacer para destrabarlo (S3)' }) nextAction!: string;
+  @ApiProperty({ description: 'Qué hacer para destrabarlo (S3)' })
+  nextAction!: string;
 }
 
 /** Comprobación que F1 no puede hacer. */
@@ -241,7 +268,8 @@ export class RetireCheckDto {
   @ApiProperty({ type: [BlockerDto] }) blockers!: BlockerDto[];
   @ApiProperty({
     type: [UnverifiableCheckDto],
-    description: 'Bloqueos que todavía no se pueden comprobar (sin FK al espacio)',
+    description:
+      'Bloqueos que todavía no se pueden comprobar (sin FK al espacio)',
   })
   unverifiable!: UnverifiableCheckDto[];
 }
@@ -251,10 +279,15 @@ export class ClinicalUnitDetailDto extends ClinicalUnitNodeDto {
   @ApiProperty({ format: 'uuid' }) practiceSiteId!: string;
   @ApiProperty({ nullable: true }) validFrom!: Date | null;
   @ApiProperty({ nullable: true }) validTo!: Date | null;
-  @ApiProperty({ type: [ClinicalUnitNodeDto] }) children!: ClinicalUnitNodeDto[];
-  @ApiProperty({ type: [CareSpaceNodeDto], description: 'Espacios con esta unidad principal' })
+  @ApiProperty({ type: [ClinicalUnitNodeDto] })
+  children!: ClinicalUnitNodeDto[];
+  @ApiProperty({
+    type: [CareSpaceNodeDto],
+    description: 'Espacios con esta unidad principal',
+  })
   spaces!: CareSpaceNodeDto[];
-  @ApiProperty({ type: [SpaceUnitAssignmentDto] }) assignments!: SpaceUnitAssignmentDto[];
+  @ApiProperty({ type: [SpaceUnitAssignmentDto] })
+  assignments!: SpaceUnitAssignmentDto[];
 }
 
 /** Conflicto de tipología. */
@@ -266,7 +299,10 @@ export class TypologyConflictDto {
 
 /** Datos regulatorios tras el PATCH. */
 export class SiteRegulatoryDto extends EstablishmentSummaryDto {
-  @ApiProperty({ type: [String], description: 'Funciones obligatorias que faltan' })
+  @ApiProperty({
+    type: [String],
+    description: 'Funciones obligatorias que faltan',
+  })
   missingRequiredFunctions!: string[];
 }
 
@@ -278,11 +314,17 @@ export class SiteLicenseDto {
   @ApiProperty() resolutionNumber!: string;
   @ApiProperty({ nullable: true, format: 'date' }) issuedOn!: string | null;
   @ApiProperty({ nullable: true, format: 'date' }) expiresOn!: string | null;
-  @ApiProperty({ type: ConceptDto, description: 'LIC_*; vencida se calcula al leer' })
+  @ApiProperty({
+    type: ConceptDto,
+    description: 'LIC_*; vencida se calcula al leer',
+  })
   status!: ConceptDto;
-  @ApiProperty({ format: 'uuid', nullable: true }) clinicalUnitId!: string | null;
-  @ApiProperty({ format: 'uuid', nullable: true }) healthcareServiceId!: string | null;
-  @ApiProperty({ format: 'uuid', nullable: true }) documentFileId!: string | null;
+  @ApiProperty({ format: 'uuid', nullable: true }) clinicalUnitId!:
+    string | null;
+  @ApiProperty({ format: 'uuid', nullable: true }) healthcareServiceId!:
+    string | null;
+  @ApiProperty({ format: 'uuid', nullable: true }) documentFileId!:
+    string | null;
   @ApiProperty() rowVersion!: number;
 }
 
@@ -294,7 +336,8 @@ export class DeclaredCapacityLineDto {
   @ApiProperty({ nullable: true }) resolutionNumber!: string | null;
   @ApiProperty({
     enum: ['site', 'hospital'],
-    description: 'site = site_declared_capacities; hospital = organization_extensions.hospitals',
+    description:
+      'site = site_declared_capacities; hospital = organization_extensions.hospitals',
   })
   source!: 'site' | 'hospital';
 }
@@ -314,8 +357,10 @@ export class CapacityGapDto {
 
 /** `GET /sites/:siteId/capacity`. */
 export class SiteCapacityDto {
-  @ApiProperty({ type: [DeclaredCapacityLineDto] }) declared!: DeclaredCapacityLineDto[];
-  @ApiProperty({ type: [DerivedCapacityLineDto] }) derived!: DerivedCapacityLineDto[];
+  @ApiProperty({ type: [DeclaredCapacityLineDto] })
+  declared!: DeclaredCapacityLineDto[];
+  @ApiProperty({ type: [DerivedCapacityLineDto] })
+  derived!: DerivedCapacityLineDto[];
   @ApiProperty({ type: [CapacityGapDto] }) gaps!: CapacityGapDto[];
 }
 

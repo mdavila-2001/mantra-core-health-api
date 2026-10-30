@@ -22,19 +22,29 @@ function build() {
   const tx: any = {
     execute: mockFn(async (sql: string) => {
       if (sql.startsWith('UPDATE')) {
-        const out = Array.from({ length: pendingBackfill }, (_, i) => ({ id: `c${i}` }));
+        const out = Array.from({ length: pendingBackfill }, (_, i) => ({
+          id: `c${i}`,
+        }));
         pendingBackfill = 0;
         return out;
       }
       return [];
     }),
     find: mockFn(async (entity: unknown) => [...(rows.get(entity) ?? [])]),
-    create: mockFn((entity: unknown, data: any) => rows.get(entity)!.push(data)),
+    create: mockFn((entity: unknown, data: any) =>
+      rows.get(entity)!.push(data),
+    ),
     flush: mockFn().mockResolvedValue(undefined),
   };
-  const orm: any = { em: { fork: () => ({ transactional: (cb: any) => cb(tx) }) } };
+  const orm: any = {
+    em: { fork: () => ({ transactional: (cb: any) => cb(tx) }) },
+  };
   const logger = { setContext: mockFn(), info: mockFn() };
-  return { service: new PracticeInfrastructureSeedService(orm, logger as any), tx, rows };
+  return {
+    service: new PracticeInfrastructureSeedService(orm, logger as any),
+    tx,
+    rows,
+  };
 }
 
 describe('PracticeInfrastructureSeedService', () => {
@@ -55,7 +65,11 @@ describe('PracticeInfrastructureSeedService', () => {
       'all',
     );
     const second = await d.service.run();
-    expect(second).toEqual({ parentRules: 0, typologyRules: 0, formBackfill: 0 });
+    expect(second).toEqual({
+      parentRules: 0,
+      typologyRules: 0,
+      formBackfill: 0,
+    });
   });
 
   it('no pisa una regla de tipología ajustada a mano', async () => {
@@ -68,6 +82,8 @@ describe('PracticeInfrastructureSeedService', () => {
     });
     const res = await d.service.run();
     expect(res.typologyRules).toBe(TYPOLOGY_RULE_SEED.length - 1);
-    expect(d.rows.get(FacilityTypologyRules)![0].ruleConceptId).toBe(PRAC.TYPO_ALLOWED);
+    expect(d.rows.get(FacilityTypologyRules)![0].ruleConceptId).toBe(
+      PRAC.TYPO_ALLOWED,
+    );
   });
 });

@@ -31,7 +31,8 @@ function tokensOf(from: string, to: string): string[] | null {
     const width = from.startsWith('0') && from.length > 1 ? from.length : 0;
     const out: string[] = [];
     // Corta antes de reservar memoria para un rango absurdo.
-    if (b - a + 1 > BULK_MAX) return Array.from({ length: BULK_MAX + 1 }, String);
+    if (b - a + 1 > BULK_MAX)
+      return Array.from({ length: BULK_MAX + 1 }, String);
     for (let n = a; n <= b; n += 1) out.push(String(n).padStart(width, '0'));
     return out;
   }
@@ -88,7 +89,8 @@ export function expandPattern(
   const items = tokens.map((token) => {
     const code = codePattern.replace(whole, token);
     let name: string;
-    if (namePattern.includes(whole)) name = namePattern.split(whole).join(token);
+    if (namePattern.includes(whole))
+      name = namePattern.split(whole).join(token);
     else if (namePattern.includes('{}'))
       name = namePattern.split('{}').join(token);
     else name = `${namePattern} ${token}`.trim();

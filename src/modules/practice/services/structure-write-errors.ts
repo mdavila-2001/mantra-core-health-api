@@ -8,7 +8,11 @@ function sqlStateOf(
 ): { code: string; constraint?: string } | undefined {
   let current: unknown = error;
   for (let depth = 0; depth < 5 && current; depth += 1) {
-    const c = current as { code?: unknown; constraint?: unknown; cause?: unknown };
+    const c = current as {
+      code?: unknown;
+      constraint?: unknown;
+      cause?: unknown;
+    };
     if (typeof c.code === 'string' && /^[0-9A-Z]{5}$/.test(c.code)) {
       return {
         code: c.code,
@@ -43,14 +47,20 @@ export function translateStructureWriteError(error: unknown): unknown {
   if (state.code === '23503') {
     return new ResourceNotFoundException('Recurso no encontrado');
   }
-  if (state.code === '23505' && state.constraint === 'ux_practice_sites_snis_code') {
+  if (
+    state.code === '23505' &&
+    state.constraint === 'ux_practice_sites_snis_code'
+  ) {
     return conflict(
       PracticeErrorReason.SNIS_CODE_UNAVAILABLE,
       'El código SNIS no está disponible',
       {},
     );
   }
-  if (state.code === '23505' && state.constraint === 'ux_care_spaces_site_code') {
+  if (
+    state.code === '23505' &&
+    state.constraint === 'ux_care_spaces_site_code'
+  ) {
     return conflict(
       PracticeErrorReason.SPACE_CODE_TAKEN,
       'Ya existe un espacio con ese código en la sede',

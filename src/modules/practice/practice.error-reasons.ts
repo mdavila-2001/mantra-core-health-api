@@ -147,7 +147,8 @@ export function ruleException(
   details: Record<string, unknown>,
 ): DomainException {
   const message =
-    MESSAGES[reason as PracticeErrorReason] ?? 'Regla de estructura no cumplida';
+    MESSAGES[reason as PracticeErrorReason] ??
+    'Regla de estructura no cumplida';
   return new PreconditionFailedException(message, details, reason);
 }
 

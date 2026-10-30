@@ -1,21 +1,16 @@
-# AUTOVERIFICACIÓN FUERA DEL GATE: jest del repo desde un árbol scratch (deps npm sin xlsx; xlsx mapeado a un stub vacío)
-# Corrida completa (primera pasada, sin symlinks de database/ openapi/ en el scratch):
-Test Suites: 6 failed, 1 skipped, 875 passed, 881 of 882 total
-Tests:       48 failed, 1 skipped, 10734 passed, 10783 total
+# AUTOVERIFICACIÓN FUERA DEL GATE: jest del repo desde el árbol scratch (deps con versiones de yarn.lock, sin xlsx; xlsx mapeado a stub vacío; symlinks de database/ openapi/ docs/ …) — 2026-10-30, tras prettier/eslint
+$ jest -c <scratch>/jest.config.json   (suite unitaria completa)
+Test Suites: 3 failed, 1 skipped, 878 passed, 881 of 882 total
+Tests:       2 failed, 1 skipped, 10829 passed, 10832 total
 EXIT=1
 # Suites en rojo:
-FAIL modules/data_catalog/controllers/admin-portal.controller.spec.ts
-FAIL modules/qa_lab/domain/flow-catalog.spec.ts
 FAIL modules/terminology/import/xlsx-parser.spec.ts
 FAIL modules/terminology/services/concept-file-import.service.spec.ts
-FAIL observability/route-index/route-index.service.spec.ts
 FAIL orm/catalog/profiles-fileid.contract.spec.ts
+src/modules/terminology/import/xlsx-parser.spec.ts
+src/modules/terminology/services/concept-file-import.service.spec.ts
+src/orm/catalog/profiles-fileid.contract.spec.ts
 
 # Clasificación:
-- terminology/import/xlsx-parser.spec.ts, terminology/services/concept-file-import.service.spec.ts: xlsx stub (entorno; dependen de xlsx real)
-- data_catalog admin-portal, qa_lab flow-catalog, observability route-index: leían rutas relativas a cwd (openapi/, docs/) ausentes en el scratch; con symlinks pasan (abajo)
-- orm/catalog/profiles-fileid.contract.spec.ts: PREEXISTENTE desde bebe22db (vendoreo de F0): la fila '| 05 | profiles |' del _generation_report vendoreado cambió de 19/127/2/136 a 20/134/7/145; no lo toca F1
-  ● profiles.fileId / canonical Model PR #20 › reports only the profiles delta in the vendored generation report
-  ● profiles.fileId / canonical Model PR #20 › reports only the profiles delta in the vendored generation report
-Test Suites: 1 failed, 57 passed, 58 total
-Tests:       1 failed, 698 passed, 699 total
+- terminology/import/xlsx-parser.spec.ts y terminology/services/concept-file-import.service.spec.ts: necesitan xlsx real (bloqueado); stub en el scratch.
+- orm/catalog/profiles-fileid.contract.spec.ts: PREEXISTENTE desde bebe22db (vendoreo de F0): la fila '| 05 | profiles |' del _generation_report vendoreado pasó de 19/127/2/136 a 20/134/7/145. F1 no lo toca.

@@ -39,8 +39,7 @@ export const NEXT_ACTION: Readonly<Record<BlockerKind, string>> = {
     'Dar de alta o trasladar a los pacientes que ocupan el espacio.',
   FUTURE_PROCEDURE:
     'Reprogramar en otro quirófano o cancelar las intervenciones futuras.',
-  FUTURE_BOOKING:
-    'Reprogramar o cancelar las reservas futuras del espacio.',
+  FUTURE_BOOKING: 'Reprogramar o cancelar las reservas futuras del espacio.',
   SCHEDULABLE_RESOURCE:
     'Dar de baja el recurso de agenda o el horario que usa este espacio.',
   INVENTORY_LOCATION:

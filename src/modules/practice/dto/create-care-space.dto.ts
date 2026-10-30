@@ -67,7 +67,6 @@ export class CreateCareSpaceDto extends CareSpaceAttributesDto {
   @IsUUID()
   spaceTypeConceptId?: string;
 
-
   @ApiPropertyOptional({
     description:
       'Forma FHIR (LOC_FORM_*). Ausente: LOC_FORM_ROOM (compatibilidad con F0)',

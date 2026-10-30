@@ -9,7 +9,10 @@ import {
   lifecycleStateOf,
   type LifecycleState,
 } from '../domain/structure/lifecycle';
-import { IfMatchFailedException, PracticeErrorReason } from '../practice.error-reasons';
+import {
+  IfMatchFailedException,
+  PracticeErrorReason,
+} from '../practice.error-reasons';
 import type { CareSpaceAttributesDto } from '../dto/care-space-attributes.dto';
 
 /** Error de un campo (importación, alta masiva). */
@@ -49,7 +52,9 @@ const CODED: ReadonlyArray<
 ];
 
 /** Campos que pasan tal cual. */
-const PLAIN: ReadonlyArray<keyof CareSpaceAttributesDto & keyof SpaceAttributeColumns> = [
+const PLAIN: ReadonlyArray<
+  keyof CareSpaceAttributesDto & keyof SpaceAttributeColumns
+> = [
   'description',
   'capacity',
   'floorNumber',
@@ -73,7 +78,9 @@ export function resolveAttributes(dto: CareSpaceAttributesDto): {
 } {
   const values: SpaceAttributeColumns = {};
   const errors: FieldError[] = [];
-  const has = (k: string) => Object.prototype.hasOwnProperty.call(dto, k) && (dto as Record<string, unknown>)[k] !== undefined;
+  const has = (k: string) =>
+    Object.prototype.hasOwnProperty.call(dto, k) &&
+    (dto as Record<string, unknown>)[k] !== undefined;
   for (const [field, column, prefix] of CODED) {
     if (!has(field)) continue;
     const code = dto[field] as string | null;
@@ -82,14 +89,16 @@ export function resolveAttributes(dto: CareSpaceAttributesDto): {
       continue;
     }
     const id = conceptIdOf(code, prefix);
-    if (!id) errors.push({ field, reason: PracticeErrorReason.SPACE_UNKNOWN_CODE });
+    if (!id)
+      errors.push({ field, reason: PracticeErrorReason.SPACE_UNKNOWN_CODE });
     else (values as Record<string, unknown>)[column] = id;
   }
   for (const field of PLAIN) {
     if (has(field)) (values as Record<string, unknown>)[field] = dto[field];
   }
   // `numeric` se guarda como string para no perder precisión.
-  if (has('areaM2')) values.areaM2 = dto.areaM2 === null ? null : String(dto.areaM2);
+  if (has('areaM2'))
+    values.areaM2 = dto.areaM2 === null ? null : String(dto.areaM2);
   if (has('airChangesPerHour')) {
     values.airChangesPerHour =
       dto.airChangesPerHour === null ? null : String(dto.airChangesPerHour);
@@ -109,7 +118,9 @@ export function formIdOf(code: string | undefined | null): string | undefined {
 }
 
 /** Id de una función conocida por su código (incluye `SPACE_TYPE_ROOM`). */
-export function functionIdOf(code: string | undefined | null): string | undefined {
+export function functionIdOf(
+  code: string | undefined | null,
+): string | undefined {
   if (!code || !FUNCTION_PROFILE_BY_CODE.has(code)) return undefined;
   return PRACTICE_CONCEPT_BY_CODE.get(code)?.id;
 }
@@ -120,12 +131,16 @@ export function codeOf(id: string | undefined | null): string | null {
 }
 
 /** Código de forma de una fila, o `null` si no tiene (filas anteriores al backfill). */
-export function formOf(row: { formConceptId?: string | null }): FormCode | null {
+export function formOf(row: {
+  formConceptId?: string | null;
+}): FormCode | null {
   return (codeOf(row.formConceptId) as FormCode | null) ?? null;
 }
 
 /** Estado de ciclo de vida de una fila. */
-export function stateOf(row: { statusConceptId: string }): LifecycleState | null {
+export function stateOf(row: {
+  statusConceptId: string;
+}): LifecycleState | null {
   return lifecycleStateOf(codeOf(row.statusConceptId));
 }
 
@@ -139,9 +154,13 @@ export function stateOf(row: { statusConceptId: string }): LifecycleState | null
  * @param header - Valor de la cabecera.
  * @param rowVersion - Versión actual de la fila.
  */
-export function assertIfMatch(header: string | undefined, rowVersion: number): void {
+export function assertIfMatch(
+  header: string | undefined,
+  rowVersion: number,
+): void {
   const raw = header?.trim();
-  if (!raw) throw new IfMatchFailedException(PracticeErrorReason.IF_MATCH_REQUIRED);
+  if (!raw)
+    throw new IfMatchFailedException(PracticeErrorReason.IF_MATCH_REQUIRED);
   const m = /^(?:W\/)?"?(\d+)"?$/.exec(raw);
   const expected = m ? Number(m[1]) : NaN;
   if (expected !== rowVersion) {

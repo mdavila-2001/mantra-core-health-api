@@ -28,7 +28,9 @@ function num(value: string | number | null | undefined): number | null {
 }
 
 /** `date` a `YYYY-MM-DD` (sin corrimiento por zona horaria). */
-export function isoDate(value: Date | string | null | undefined): string | null {
+export function isoDate(
+  value: Date | string | null | undefined,
+): string | null {
   if (!value) return null;
   if (typeof value === 'string') return value.slice(0, 10);
   return value.toISOString().slice(0, 10);

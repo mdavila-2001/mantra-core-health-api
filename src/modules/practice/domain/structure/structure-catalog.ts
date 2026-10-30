@@ -115,30 +115,128 @@ const BED: FormCode[] = ['LOC_FORM_BED'];
  * para limpieza de egreso. Los umbrales numéricos NO viven acá: son de F2.
  */
 export const FUNCTION_PROFILES: readonly FunctionProfile[] = [
-  profile('SPACE_TYPE_ROOM', ['LOC_FORM_ROOM', 'LOC_FORM_AREA', 'LOC_FORM_VIRTUAL'], {}, 'GENERIC'),
-  profile('SPACE_FN_CONSULTING_ROOM', ROOM, { schedulable: true, billable: true, hostsEquipment: true, requiresArea: true }),
-  profile('SPACE_FN_INPATIENT_ROOM', ROOM, { inpatient: true, billable: true, requiresTerminalCleaning: true, requiresArea: true }),
-  profile('SPACE_FN_OPERATING_ROOM', ROOM, { schedulable: true, billable: true, hostsEquipment: true, requiresTerminalCleaning: true, requiresArea: true, requiresHvac: true }),
-  profile('SPACE_FN_PROCEDURE_ROOM', ROOM, { schedulable: true, billable: true, hostsEquipment: true, requiresTerminalCleaning: true, requiresArea: true }),
-  profile('SPACE_FN_DELIVERY_ROOM', ROOM, { schedulable: true, billable: true, hostsEquipment: true, requiresTerminalCleaning: true, requiresArea: true, requiresHvac: true }),
-  profile('SPACE_FN_RECOVERY_PACU', ROOM_AREA, { billable: true, allowOverlap: true, hostsEquipment: true, requiresArea: true }),
-  profile('SPACE_FN_ICU_BAY', ROOM_AREA, { inpatient: true, billable: true, hostsEquipment: true, requiresTerminalCleaning: true, requiresArea: true }),
-  profile('SPACE_FN_EMERGENCY_BOX', ROOM_AREA, { billable: true, hostsEquipment: true, requiresTerminalCleaning: true }),
-  profile('SPACE_FN_OBSERVATION', ROOM_AREA, { billable: true, allowOverlap: true }),
-  profile('SPACE_FN_ISOLATION_AIIR', ROOM, { inpatient: true, billable: true, isolationCapable: true, requiresTerminalCleaning: true, requiresArea: true, requiresHvac: true }),
-  profile('SPACE_FN_PROTECTIVE_ENV', ROOM, { inpatient: true, billable: true, isolationCapable: true, requiresTerminalCleaning: true, requiresArea: true, requiresHvac: true }),
-  profile('SPACE_FN_IMAGING_ROOM', ROOM, { schedulable: true, billable: true, hostsEquipment: true, requiresArea: true }),
-  profile('SPACE_FN_SAMPLE_COLLECTION', ROOM_AREA, { schedulable: true, allowOverlap: true }),
-  profile('SPACE_FN_LAB_AREA', ROOM_AREA, { hostsEquipment: true, stockPoint: true }),
+  profile(
+    'SPACE_TYPE_ROOM',
+    ['LOC_FORM_ROOM', 'LOC_FORM_AREA', 'LOC_FORM_VIRTUAL'],
+    {},
+    'GENERIC',
+  ),
+  profile('SPACE_FN_CONSULTING_ROOM', ROOM, {
+    schedulable: true,
+    billable: true,
+    hostsEquipment: true,
+    requiresArea: true,
+  }),
+  profile('SPACE_FN_INPATIENT_ROOM', ROOM, {
+    inpatient: true,
+    billable: true,
+    requiresTerminalCleaning: true,
+    requiresArea: true,
+  }),
+  profile('SPACE_FN_OPERATING_ROOM', ROOM, {
+    schedulable: true,
+    billable: true,
+    hostsEquipment: true,
+    requiresTerminalCleaning: true,
+    requiresArea: true,
+    requiresHvac: true,
+  }),
+  profile('SPACE_FN_PROCEDURE_ROOM', ROOM, {
+    schedulable: true,
+    billable: true,
+    hostsEquipment: true,
+    requiresTerminalCleaning: true,
+    requiresArea: true,
+  }),
+  profile('SPACE_FN_DELIVERY_ROOM', ROOM, {
+    schedulable: true,
+    billable: true,
+    hostsEquipment: true,
+    requiresTerminalCleaning: true,
+    requiresArea: true,
+    requiresHvac: true,
+  }),
+  profile('SPACE_FN_RECOVERY_PACU', ROOM_AREA, {
+    billable: true,
+    allowOverlap: true,
+    hostsEquipment: true,
+    requiresArea: true,
+  }),
+  profile('SPACE_FN_ICU_BAY', ROOM_AREA, {
+    inpatient: true,
+    billable: true,
+    hostsEquipment: true,
+    requiresTerminalCleaning: true,
+    requiresArea: true,
+  }),
+  profile('SPACE_FN_EMERGENCY_BOX', ROOM_AREA, {
+    billable: true,
+    hostsEquipment: true,
+    requiresTerminalCleaning: true,
+  }),
+  profile('SPACE_FN_OBSERVATION', ROOM_AREA, {
+    billable: true,
+    allowOverlap: true,
+  }),
+  profile('SPACE_FN_ISOLATION_AIIR', ROOM, {
+    inpatient: true,
+    billable: true,
+    isolationCapable: true,
+    requiresTerminalCleaning: true,
+    requiresArea: true,
+    requiresHvac: true,
+  }),
+  profile('SPACE_FN_PROTECTIVE_ENV', ROOM, {
+    inpatient: true,
+    billable: true,
+    isolationCapable: true,
+    requiresTerminalCleaning: true,
+    requiresArea: true,
+    requiresHvac: true,
+  }),
+  profile('SPACE_FN_IMAGING_ROOM', ROOM, {
+    schedulable: true,
+    billable: true,
+    hostsEquipment: true,
+    requiresArea: true,
+  }),
+  profile('SPACE_FN_SAMPLE_COLLECTION', ROOM_AREA, {
+    schedulable: true,
+    allowOverlap: true,
+  }),
+  profile('SPACE_FN_LAB_AREA', ROOM_AREA, {
+    hostsEquipment: true,
+    stockPoint: true,
+  }),
   profile('SPACE_FN_PHARMACY', ROOM_AREA, { stockPoint: true }),
   profile('SPACE_FN_STORAGE', ROOM_AREA, { stockPoint: true }),
-  profile('SPACE_FN_STERILIZATION', ROOM_AREA, { hostsEquipment: true, requiresHvac: true }),
-  profile('SPACE_FN_WAITING', ['LOC_FORM_ROOM', 'LOC_FORM_AREA', 'LOC_FORM_CORRIDOR'], { allowOverlap: true }),
+  profile('SPACE_FN_STERILIZATION', ROOM_AREA, {
+    hostsEquipment: true,
+    requiresHvac: true,
+  }),
+  profile(
+    'SPACE_FN_WAITING',
+    ['LOC_FORM_ROOM', 'LOC_FORM_AREA', 'LOC_FORM_CORRIDOR'],
+    { allowOverlap: true },
+  ),
   profile('SPACE_FN_NURSE_STATION', ROOM_AREA, { stockPoint: true }),
   profile('SPACE_FN_OFFICE_ADMIN', ROOM),
-  profile('SPACE_FN_BED_STANDARD', BED, { inpatient: true, billable: true, requiresTerminalCleaning: true }),
-  profile('SPACE_FN_BED_ICU', BED, { inpatient: true, billable: true, hostsEquipment: true, requiresTerminalCleaning: true }),
-  profile('SPACE_FN_CRIB', BED, { inpatient: true, billable: true, requiresTerminalCleaning: true }),
+  profile('SPACE_FN_BED_STANDARD', BED, {
+    inpatient: true,
+    billable: true,
+    requiresTerminalCleaning: true,
+  }),
+  profile('SPACE_FN_BED_ICU', BED, {
+    inpatient: true,
+    billable: true,
+    hostsEquipment: true,
+    requiresTerminalCleaning: true,
+  }),
+  profile('SPACE_FN_CRIB', BED, {
+    inpatient: true,
+    billable: true,
+    requiresTerminalCleaning: true,
+  }),
   profile('SPACE_FN_STRETCHER', BED),
   profile('SPACE_FN_BUILDING_GENERIC', ['LOC_FORM_BUILDING']),
   profile('SPACE_FN_WING_GENERIC', ['LOC_FORM_WING']),
@@ -165,16 +263,25 @@ export interface ParentRule {
 export const PARENT_RULE_SEED: readonly ParentRule[] = (
   [
     ['LOC_FORM_SITE', ['LOC_FORM_BUILDING', 'LOC_FORM_AREA']],
-    ['LOC_FORM_BUILDING', ['LOC_FORM_WING', 'LOC_FORM_LEVEL', 'LOC_FORM_AREA', 'LOC_FORM_ROOM']],
-    ['LOC_FORM_WING', ['LOC_FORM_LEVEL', 'LOC_FORM_WARD', 'LOC_FORM_AREA', 'LOC_FORM_ROOM']],
-    ['LOC_FORM_LEVEL', ['LOC_FORM_WARD', 'LOC_FORM_AREA', 'LOC_FORM_ROOM', 'LOC_FORM_CORRIDOR']],
+    [
+      'LOC_FORM_BUILDING',
+      ['LOC_FORM_WING', 'LOC_FORM_LEVEL', 'LOC_FORM_AREA', 'LOC_FORM_ROOM'],
+    ],
+    [
+      'LOC_FORM_WING',
+      ['LOC_FORM_LEVEL', 'LOC_FORM_WARD', 'LOC_FORM_AREA', 'LOC_FORM_ROOM'],
+    ],
+    [
+      'LOC_FORM_LEVEL',
+      ['LOC_FORM_WARD', 'LOC_FORM_AREA', 'LOC_FORM_ROOM', 'LOC_FORM_CORRIDOR'],
+    ],
     ['LOC_FORM_WARD', ['LOC_FORM_ROOM', 'LOC_FORM_BED']],
     ['LOC_FORM_AREA', ['LOC_FORM_ROOM', 'LOC_FORM_BED', 'LOC_FORM_AREA']],
     ['LOC_FORM_ROOM', ['LOC_FORM_BED']],
     ['LOC_FORM_CORRIDOR', ['LOC_FORM_ROOM']],
   ] as const
 ).flatMap(([parent, children]) =>
-  children.map((child) => ({ parent, child }) as ParentRule),
+  children.map((child): ParentRule => ({ parent, child })),
 );
 
 /**
@@ -191,7 +298,8 @@ export const ROOT_FORMS: readonly FormCode[] = [
 ];
 
 /** Código de regla de tipología. */
-export type TypologyRuleCode = 'TYPO_ALLOWED' | 'TYPO_REQUIRED' | 'TYPO_FORBIDDEN';
+export type TypologyRuleCode =
+  'TYPO_ALLOWED' | 'TYPO_REQUIRED' | 'TYPO_FORBIDDEN';
 
 /** Una regla de tipología por códigos. */
 export interface TypologyRule {
@@ -267,7 +375,11 @@ export interface CapacityDerivation {
  */
 export const CAPACITY_DERIVATION: readonly CapacityDerivation[] = [
   { kindCode: 'CAP_BEDS_CENSABLE', forms: ['LOC_FORM_BED'], censable: true },
-  { kindCode: 'CAP_BEDS_NON_CENSABLE', forms: ['LOC_FORM_BED'], censable: false },
+  {
+    kindCode: 'CAP_BEDS_NON_CENSABLE',
+    forms: ['LOC_FORM_BED'],
+    censable: false,
+  },
   { kindCode: 'CAP_CONSULTING_ROOMS', functions: ['SPACE_FN_CONSULTING_ROOM'] },
   { kindCode: 'CAP_OPERATING_ROOMS', functions: ['SPACE_FN_OPERATING_ROOM'] },
   { kindCode: 'CAP_DELIVERY_ROOMS', functions: ['SPACE_FN_DELIVERY_ROOM'] },

@@ -55,7 +55,11 @@ export class ClinicalUnitsController {
   }
 
   /** Editar la unidad. */
-  @Audited({ action: 'CLINICAL_UNIT_UPDATED', entity: 'clinical_unit', entityId: 'param:id' })
+  @Audited({
+    action: 'CLINICAL_UNIT_UPDATED',
+    entity: 'clinical_unit',
+    entityId: 'param:id',
+  })
   @Patch(':id')
   @ApiOperation({ summary: 'Editar una unidad clínica' })
   @ApiHeader(IF_MATCH)
@@ -86,6 +90,12 @@ export class ClinicalUnitsController {
     @Headers('if-match') ifMatch: string | undefined,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ClinicalUnitDetailDto> {
-    return this.units.changeLifecycle(id, dto, ifMatch, actor, requireTenantId());
+    return this.units.changeLifecycle(
+      id,
+      dto,
+      ifMatch,
+      actor,
+      requireTenantId(),
+    );
   }
 }

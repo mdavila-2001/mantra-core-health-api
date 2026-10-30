@@ -156,7 +156,10 @@ export class SiteEstablishmentService {
         } else {
           const id = conceptIdOf(value, prefix);
           if (!id) {
-            throw ruleException(PracticeErrorReason.SPACE_UNKNOWN_CODE, { field, code: value });
+            throw ruleException(PracticeErrorReason.SPACE_UNKNOWN_CODE, {
+              field,
+              code: value,
+            });
           }
           row[column] = id;
         }
@@ -167,7 +170,10 @@ export class SiteEstablishmentService {
         row[field] = dto[field] ?? undefined;
         changes.push(field);
       }
-      if (dto.snisCode !== undefined && (dto.snisCode ?? undefined) !== site.snisCode) {
+      if (
+        dto.snisCode !== undefined &&
+        (dto.snisCode ?? undefined) !== site.snisCode
+      ) {
         site.snisCode = dto.snisCode ?? undefined;
         changes.push('snisCode');
       }
@@ -181,7 +187,11 @@ export class SiteEstablishmentService {
         const conflicts = spaces
           .map((s) => ({ s, fn: codeOf(s.spaceTypeConceptId) ?? '' }))
           .filter(({ fn }) => !judgeTypology(typologyCode, fn, rules).ok)
-          .map(({ s, fn }) => ({ spaceId: s.id, code: s.code, functionCode: fn }));
+          .map(({ s, fn }) => ({
+            spaceId: s.id,
+            code: s.code,
+            functionCode: fn,
+          }));
         if (conflicts.length > 0) {
           throw conflict(
             PracticeErrorReason.TYPOLOGY_CONFLICT,
@@ -193,15 +203,34 @@ export class SiteEstablishmentService {
 
       touch(site, actor.id);
       await flushStructure(tx);
-      await appendStructureRevision(this.historyRepo, tx, 'site', site, AUD.OPERATION_UPDATE, actor.id);
-      await publishStructureEvent(this.outbox, tx, STRUCTURE_EVENTS.siteRegulatoryUpdated, {
-        tenantId: site.tenantId,
-        aggregateId: site.id,
-        actorUserId: actor.id,
-        payload: { siteId: site.id, changes, rowVersion: site.rowVersion },
-      });
+      await appendStructureRevision(
+        this.historyRepo,
+        tx,
+        'site',
+        site,
+        AUD.OPERATION_UPDATE,
+        actor.id,
+      );
+      await publishStructureEvent(
+        this.outbox,
+        tx,
+        STRUCTURE_EVENTS.siteRegulatoryUpdated,
+        {
+          tenantId: site.tenantId,
+          aggregateId: site.id,
+          actorUserId: actor.id,
+          payload: { siteId: site.id, changes, rowVersion: site.rowVersion },
+        },
+      );
       await flushStructure(tx);
-      return this.regulatoryView(tx, site, actor, spaces.map((s) => codeOf(s.spaceTypeConceptId) ?? ''), typologyCode, rules);
+      return this.regulatoryView(
+        tx,
+        site,
+        actor,
+        spaces.map((s) => codeOf(s.spaceTypeConceptId) ?? ''),
+        typologyCode,
+        rules,
+      );
     });
   }
 
@@ -220,7 +249,9 @@ export class SiteEstablishmentService {
     tenantId: string,
   ): Promise<SiteRegulatoryDto> {
     if (!PLATFORM_ROLES.some((r) => (actor.roles ?? []).includes(r))) {
-      throw new ForbiddenException('Sólo la plataforma verifica el código SNIS');
+      throw new ForbiddenException(
+        'Sólo la plataforma verifica el código SNIS',
+      );
     }
     return this.em.transactional(async (tx) => {
       const site = await this.access.requireSite(tx, siteId, tenantId);
@@ -234,15 +265,29 @@ export class SiteEstablishmentService {
         touch(site, actor.id);
         await flushStructure(tx);
       } finally {
-        await tx.execute("select set_config('app.system_context', 'false', true)");
+        await tx.execute(
+          "select set_config('app.system_context', 'false', true)",
+        );
       }
-      await appendStructureRevision(this.historyRepo, tx, 'site', site, AUD.OPERATION_UPDATE, actor.id);
-      await publishStructureEvent(this.outbox, tx, STRUCTURE_EVENTS.siteSnisVerified, {
-        tenantId: site.tenantId,
-        aggregateId: site.id,
-        actorUserId: actor.id,
-        payload: { siteId: site.id, rowVersion: site.rowVersion },
-      });
+      await appendStructureRevision(
+        this.historyRepo,
+        tx,
+        'site',
+        site,
+        AUD.OPERATION_UPDATE,
+        actor.id,
+      );
+      await publishStructureEvent(
+        this.outbox,
+        tx,
+        STRUCTURE_EVENTS.siteSnisVerified,
+        {
+          tenantId: site.tenantId,
+          aggregateId: site.id,
+          actorUserId: actor.id,
+          payload: { siteId: site.id, rowVersion: site.rowVersion },
+        },
+      );
       await flushStructure(tx);
       const rules = await this.rulesRepo.typologyRules(tx);
       const spaces = await this.spacesRepo.findBySite(tx, siteId);
@@ -250,7 +295,9 @@ export class SiteEstablishmentService {
         tx,
         site,
         actor,
-        spaces.filter((s) => s.statusConceptId !== PRAC.SPACE_RETIRED).map((s) => codeOf(s.spaceTypeConceptId) ?? ''),
+        spaces
+          .filter((s) => s.statusConceptId !== PRAC.SPACE_RETIRED)
+          .map((s) => codeOf(s.spaceTypeConceptId) ?? ''),
         codeOf(site.facilityTypologyConceptId),
         rules,
       );
@@ -258,7 +305,11 @@ export class SiteEstablishmentService {
   }
 
   /** `GET /sites/:siteId/regulatory`. */
-  async getRegulatory(siteId: string, actor: AuthenticatedUser, tenantId: string): Promise<SiteRegulatoryDto> {
+  async getRegulatory(
+    siteId: string,
+    actor: AuthenticatedUser,
+    tenantId: string,
+  ): Promise<SiteRegulatoryDto> {
     const site = await this.access.requireSite(this.em, siteId, tenantId);
     await this.access.assertCanRead(this.em, tenantId, actor);
     const rules = await this.rulesRepo.typologyRules(this.em);
@@ -267,7 +318,9 @@ export class SiteEstablishmentService {
       this.em,
       site,
       actor,
-      spaces.filter((s) => s.statusConceptId !== PRAC.SPACE_RETIRED).map((s) => codeOf(s.spaceTypeConceptId) ?? ''),
+      spaces
+        .filter((s) => s.statusConceptId !== PRAC.SPACE_RETIRED)
+        .map((s) => codeOf(s.spaceTypeConceptId) ?? ''),
       codeOf(site.facilityTypologyConceptId),
       rules,
     );
@@ -276,10 +329,18 @@ export class SiteEstablishmentService {
   // -------------------------------------------------------- habilitaciones
 
   /** `GET /sites/:siteId/licenses`. */
-  async listLicenses(siteId: string, actor: AuthenticatedUser, tenantId: string): Promise<SiteLicenseDto[]> {
+  async listLicenses(
+    siteId: string,
+    actor: AuthenticatedUser,
+    tenantId: string,
+  ): Promise<SiteLicenseDto[]> {
     const site = await this.access.requireSite(this.em, siteId, tenantId);
     await this.access.assertCanRead(this.em, tenantId, actor);
-    const rows = await this.licensesRepo.findBySite(this.em, site.tenantId, site.id);
+    const rows = await this.licensesRepo.findBySite(
+      this.em,
+      site.tenantId,
+      site.id,
+    );
     return rows.map((r) => this.toLicense(r));
   }
 
@@ -296,9 +357,21 @@ export class SiteEstablishmentService {
     return this.em.transactional(async (tx) => {
       const site = await this.access.requireSite(tx, siteId, tenantId);
       await this.access.assertCanAdministerOrganization(tx, tenantId, actor);
-      await this.assertScope(tx, site, dto.clinicalUnitId, dto.healthcareServiceId);
+      await this.assertScope(
+        tx,
+        site,
+        dto.clinicalUnitId,
+        dto.healthcareServiceId,
+      );
       const typeId = ORGEXT.LICENSE_TYPE_OPERATING;
-      if (await this.licensesRepo.findByNumber(tx, site.tenantId, typeId, dto.resolutionNumber)) {
+      if (
+        await this.licensesRepo.findByNumber(
+          tx,
+          site.tenantId,
+          typeId,
+          dto.resolutionNumber,
+        )
+      ) {
         throw conflict(
           PracticeErrorReason.LICENSE_NUMBER_TAKEN,
           'Ya existe una habilitación con ese número de resolución',
@@ -321,12 +394,22 @@ export class SiteEstablishmentService {
         actorUserId: actor.id,
       });
       await flushStructure(tx);
-      await publishStructureEvent(this.outbox, tx, STRUCTURE_EVENTS.licenseCreated, {
-        tenantId: site.tenantId,
-        aggregateId: license.id,
-        actorUserId: actor.id,
-        payload: { siteId: site.id, licenseId: license.id, statusCode: 'LIC_IN_PROCESS', rowVersion: license.rowVersion ?? 1 },
-      });
+      await publishStructureEvent(
+        this.outbox,
+        tx,
+        STRUCTURE_EVENTS.licenseCreated,
+        {
+          tenantId: site.tenantId,
+          aggregateId: license.id,
+          actorUserId: actor.id,
+          payload: {
+            siteId: site.id,
+            licenseId: license.id,
+            statusCode: 'LIC_IN_PROCESS',
+            rowVersion: license.rowVersion ?? 1,
+          },
+        },
+      );
       await flushStructure(tx);
       return this.toLicense(license);
     });
@@ -348,24 +431,53 @@ export class SiteEstablishmentService {
   ): Promise<SiteLicenseDto> {
     return this.em.transactional(async (tx) => {
       const license = await this.licensesRepo.findById(tx, licenseId);
-      if (!license || license.tenantId !== tenantId || !license.practiceSiteId) {
-        throw new ResourceNotFoundException('Habilitación no encontrada', { licenseId });
+      if (
+        !license ||
+        license.tenantId !== tenantId ||
+        !license.practiceSiteId
+      ) {
+        throw new ResourceNotFoundException('Habilitación no encontrada', {
+          licenseId,
+        });
       }
-      const site = await this.access.requireSite(tx, license.practiceSiteId, tenantId);
+      const site = await this.access.requireSite(
+        tx,
+        license.practiceSiteId,
+        tenantId,
+      );
       await this.access.assertCanAdministerOrganization(tx, tenantId, actor);
       checkIfMatchWhenPresent(ifMatch, license.rowVersion);
-      const platform = PLATFORM_ROLES.some((r) => (actor.roles ?? []).includes(r));
+      const platform = PLATFORM_ROLES.some((r) =>
+        (actor.roles ?? []).includes(r),
+      );
       const changes: string[] = [];
 
-      if (dto.authorityName !== undefined) { license.issuingAuthorityName = dto.authorityName; changes.push('authorityName'); }
-      if (dto.resolutionNumber !== undefined) { license.licenseNumber = dto.resolutionNumber; changes.push('resolutionNumber'); }
-      if (dto.issuedOn !== undefined) { license.validFrom = dateOrUndefined(dto.issuedOn); changes.push('issuedOn'); }
-      if (dto.expiresOn !== undefined) { license.validTo = dateOrUndefined(dto.expiresOn); changes.push('expiresOn'); }
-      if (dto.documentFileId !== undefined) { license.evidenceFileId = dto.documentFileId ?? undefined; changes.push('documentFileId'); }
+      if (dto.authorityName !== undefined) {
+        license.issuingAuthorityName = dto.authorityName;
+        changes.push('authorityName');
+      }
+      if (dto.resolutionNumber !== undefined) {
+        license.licenseNumber = dto.resolutionNumber;
+        changes.push('resolutionNumber');
+      }
+      if (dto.issuedOn !== undefined) {
+        license.validFrom = dateOrUndefined(dto.issuedOn);
+        changes.push('issuedOn');
+      }
+      if (dto.expiresOn !== undefined) {
+        license.validTo = dateOrUndefined(dto.expiresOn);
+        changes.push('expiresOn');
+      }
+      if (dto.documentFileId !== undefined) {
+        license.evidenceFileId = dto.documentFileId ?? undefined;
+        changes.push('documentFileId');
+      }
 
       if (dto.statusCode !== undefined) {
         if (!platform) {
-          throw new ForbiddenException('Sólo la plataforma cambia el estado de una habilitación');
+          throw new ForbiddenException(
+            'Sólo la plataforma cambia el estado de una habilitación',
+          );
         }
         const verification = VERIFICATION_BY_STATUS[dto.statusCode];
         if (!verification) {
@@ -376,19 +488,34 @@ export class SiteEstablishmentService {
         }
         license.verificationStatusConceptId = verification;
         changes.push('statusCode');
-      } else if (changes.length > 0 && !platform && license.verificationStatusConceptId === ORGEXT.LICENSE_VERIFIED) {
+      } else if (
+        changes.length > 0 &&
+        !platform &&
+        license.verificationStatusConceptId === ORGEXT.LICENSE_VERIFIED
+      ) {
         license.verificationStatusConceptId = ORGEXT.LICENSE_PENDING;
         changes.push('statusCode');
       }
 
       touch(license, actor.id);
       await flushStructure(tx);
-      await publishStructureEvent(this.outbox, tx, STRUCTURE_EVENTS.licenseUpdated, {
-        tenantId: site.tenantId,
-        aggregateId: license.id,
-        actorUserId: actor.id,
-        payload: { siteId: site.id, licenseId: license.id, changes, statusCode: this.toLicense(license).status.code, rowVersion: license.rowVersion },
-      });
+      await publishStructureEvent(
+        this.outbox,
+        tx,
+        STRUCTURE_EVENTS.licenseUpdated,
+        {
+          tenantId: site.tenantId,
+          aggregateId: license.id,
+          actorUserId: actor.id,
+          payload: {
+            siteId: site.id,
+            licenseId: license.id,
+            changes,
+            statusCode: this.toLicense(license).status.code,
+            rowVersion: license.rowVersion,
+          },
+        },
+      );
       await flushStructure(tx);
       return this.toLicense(license);
     });
@@ -402,7 +529,11 @@ export class SiteEstablishmentService {
    * `CAP_BEDS_CENSABLE` de origen `hospital` si la sede es la del hospital)
    * vs. derivada (espacios activos contados).
    */
-  async capacity(siteId: string, actor: AuthenticatedUser, tenantId: string): Promise<SiteCapacityDto> {
+  async capacity(
+    siteId: string,
+    actor: AuthenticatedUser,
+    tenantId: string,
+  ): Promise<SiteCapacityDto> {
     const site = await this.access.requireSite(this.em, siteId, tenantId);
     await this.access.assertCanRead(this.em, tenantId, actor);
     return this.capacityOf(this.em, site);
@@ -420,7 +551,10 @@ export class SiteEstablishmentService {
       await this.access.assertCanAdministerOrganization(tx, tenantId, actor);
       const kindId = conceptIdOf(dto.kindCode, 'CAP_');
       if (!kindId) {
-        throw ruleException(PracticeErrorReason.SPACE_UNKNOWN_CODE, { field: 'kindCode', code: dto.kindCode });
+        throw ruleException(PracticeErrorReason.SPACE_UNKNOWN_CODE, {
+          field: 'kindCode',
+          code: dto.kindCode,
+        });
       }
       const row = this.capacitiesRepo.create(tx, {
         tenantId: site.tenantId,
@@ -433,12 +567,23 @@ export class SiteEstablishmentService {
         actorUserId: actor.id,
       });
       await flushStructure(tx);
-      await publishStructureEvent(this.outbox, tx, STRUCTURE_EVENTS.siteCapacityDeclared, {
-        tenantId: site.tenantId,
-        aggregateId: site.id,
-        actorUserId: actor.id,
-        payload: { siteId: site.id, declaredCapacityId: row.id, kindCode: dto.kindCode, quantity: dto.quantity, asOf: dto.asOf },
-      });
+      await publishStructureEvent(
+        this.outbox,
+        tx,
+        STRUCTURE_EVENTS.siteCapacityDeclared,
+        {
+          tenantId: site.tenantId,
+          aggregateId: site.id,
+          actorUserId: actor.id,
+          payload: {
+            siteId: site.id,
+            declaredCapacityId: row.id,
+            kindCode: dto.kindCode,
+            quantity: dto.quantity,
+            asOf: dto.asOf,
+          },
+        },
+      );
       await flushStructure(tx);
       return this.capacityOf(tx, site);
     });
@@ -446,7 +591,10 @@ export class SiteEstablishmentService {
 
   // --------------------------------------------------------------- apoyo
 
-  private async capacityOf(em: EntityManager, site: PracticeSites): Promise<SiteCapacityDto> {
+  private async capacityOf(
+    em: EntityManager,
+    site: PracticeSites,
+  ): Promise<SiteCapacityDto> {
     const now = today();
     const rows = await this.capacitiesRepo.findBySite(em, site.id);
     const latest = new Map<string, (typeof rows)[number]>();
@@ -456,17 +604,22 @@ export class SiteEstablishmentService {
       const code = codeOf(r.capacityKindConceptId);
       if (code && !latest.has(code)) latest.set(code, r);
     }
-    const declared: SiteCapacityDto['declared'] = [...latest.entries()].map(([kindCode, r]) => ({
-      kindCode,
-      quantity: r.quantity,
-      asOf: isoDate(r.asOf),
-      resolutionNumber: r.resolutionNumber ?? null,
-      source: 'site',
-    }));
+    const declared: SiteCapacityDto['declared'] = [...latest.entries()].map(
+      ([kindCode, r]) => ({
+        kindCode,
+        quantity: r.quantity,
+        asOf: isoDate(r.asOf),
+        resolutionNumber: r.resolutionNumber ?? null,
+        source: 'site',
+      }),
+    );
     const hospital = await em.findOne(Hospitals, {
       tenantId: site.tenantId,
       practiceId: site.practiceId,
-      $or: [{ primaryPracticeSiteId: site.id }, { primaryPracticeSiteId: null }],
+      $or: [
+        { primaryPracticeSiteId: site.id },
+        { primaryPracticeSiteId: null },
+      ],
     });
     if (hospital?.licensedBedCapacity != null) {
       declared.push({
@@ -489,11 +642,18 @@ export class SiteEstablishmentService {
     // Para la brecha manda lo declarado por la sede; el dato del hospital sólo
     // cuenta para un tipo que la sede no declaró.
     const forGaps = new Map<string, number>();
-    for (const d of declared) if (!forGaps.has(d.kindCode)) forGaps.set(d.kindCode, d.quantity);
+    for (const d of declared)
+      if (!forGaps.has(d.kindCode)) forGaps.set(d.kindCode, d.quantity);
     return {
       declared,
       derived,
-      gaps: capacityGaps([...forGaps.entries()].map(([kindCode, quantity]) => ({ kindCode, quantity })), derived),
+      gaps: capacityGaps(
+        [...forGaps.entries()].map(([kindCode, quantity]) => ({
+          kindCode,
+          quantity,
+        })),
+        derived,
+      ),
     };
   }
 
@@ -507,28 +667,51 @@ export class SiteEstablishmentService {
   ): Promise<SiteRegulatoryDto> {
     return {
       ...toEstablishment(site, await this.access.canWriteSite(em, site, actor)),
-      missingRequiredFunctions: missingRequiredFunctions(typologyCode, new Set(presentFunctions), rules),
+      missingRequiredFunctions: missingRequiredFunctions(
+        typologyCode,
+        new Set(presentFunctions),
+        rules,
+      ),
     };
   }
 
   /** Alcance de la habilitación: unidad y servicio de la misma sede, o 404. */
-  private async assertScope(tx: EntityManager, site: PracticeSites, unitId?: string, serviceId?: string): Promise<void> {
+  private async assertScope(
+    tx: EntityManager,
+    site: PracticeSites,
+    unitId?: string,
+    serviceId?: string,
+  ): Promise<void> {
     if (unitId) {
       const unit = await this.unitsRepo.findById(tx, unitId);
-      if (!unit || unit.practiceSiteId !== site.id || unit.tenantId !== site.tenantId) {
-        throw new ResourceNotFoundException('Unidad clínica no encontrada', { clinicalUnitId: unitId });
+      if (
+        !unit ||
+        unit.practiceSiteId !== site.id ||
+        unit.tenantId !== site.tenantId
+      ) {
+        throw new ResourceNotFoundException('Unidad clínica no encontrada', {
+          clinicalUnitId: unitId,
+        });
       }
     }
     if (serviceId) {
       const service = await tx.findOne(HealthcareServices, { id: serviceId });
-      if (!service || service.practiceId !== site.practiceId || (service.practiceSiteId && service.practiceSiteId !== site.id)) {
-        throw new ResourceNotFoundException('Servicio no encontrado', { healthcareServiceId: serviceId });
+      if (
+        !service ||
+        service.practiceId !== site.practiceId ||
+        (service.practiceSiteId && service.practiceSiteId !== site.id)
+      ) {
+        throw new ResourceNotFoundException('Servicio no encontrado', {
+          healthcareServiceId: serviceId,
+        });
       }
     }
   }
 
   private toLicense(l: FacilityLicenses): SiteLicenseDto {
-    const base = BASE_STATUS_BY_VERIFICATION[l.verificationStatusConceptId] ?? 'LIC_IN_PROCESS';
+    const base =
+      BASE_STATUS_BY_VERIFICATION[l.verificationStatusConceptId] ??
+      'LIC_IN_PROCESS';
     const code = effectiveLicenseStatus(base, isoDate(l.validTo), today());
     const concept = PRACTICE_CONCEPT_BY_CODE.get(code)!;
     return {

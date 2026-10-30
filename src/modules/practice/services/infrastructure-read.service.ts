@@ -38,7 +38,10 @@ const ref = (code: string) => {
   return { code: c.code, display: c.display };
 };
 const group = (prefix: string, exclude: string[] = []) =>
-  conceptsByPrefix(prefix, exclude).map((c) => ({ code: c.code, display: c.display }));
+  conceptsByPrefix(prefix, exclude).map((c) => ({
+    code: c.code,
+    display: c.display,
+  }));
 
 /**
  * Lecturas de la infraestructura (F1, contrato §3): catálogo, árbol de la
@@ -65,8 +68,15 @@ export class InfrastructureReadService {
       this.rulesRepo.typologyRules(this.em),
     ]);
     return {
-      forms: FORM_CODES.map((code) => ({ ...ref(code), fhirCode: FORM_FHIR_CODE[code] })),
-      functions: FUNCTION_PROFILES.map((p) => ({ ...ref(p.code), ...p, forms: [...p.forms] })),
+      forms: FORM_CODES.map((code) => ({
+        ...ref(code),
+        fhirCode: FORM_FHIR_CODE[code],
+      })),
+      functions: FUNCTION_PROFILES.map((p) => ({
+        ...ref(p.code),
+        ...p,
+        forms: [...p.forms],
+      })),
       parentRules: [
         ...ROOT_FORMS.map((child) => ({ parent: null, child })),
         ...parentRules,
@@ -110,9 +120,13 @@ export class InfrastructureReadService {
       spaces.map((s) => s.id),
     );
     const children = childrenIndex(spaces);
-    const byCode = (a: { code: string }, b: { code: string }) => a.code.localeCompare(b.code);
+    const byCode = (a: { code: string }, b: { code: string }) =>
+      a.code.localeCompare(b.code);
     return {
-      site: toEstablishment(site, await this.access.canWriteSite(this.em, site, actor)),
+      site: toEstablishment(
+        site,
+        await this.access.canWriteSite(this.em, site, actor),
+      ),
       spaces: [...spaces].sort(byCode).map((s) => toSpaceNode(s, children)),
       units: [...units].sort(byCode).map((u) => toUnitNode(u, units)),
       assignments: assignments.map(toAssignment),
@@ -128,8 +142,14 @@ export class InfrastructureReadService {
   ): Promise<CareSpaceDetailDto> {
     const space = await this.access.requireSpace(this.em, spaceId, tenantId);
     await this.access.assertCanRead(this.em, tenantId, actor);
-    const siteSpaces = await this.spacesRepo.findBySite(this.em, space.practiceSiteId);
-    const assignments = await this.assignmentsRepo.findCurrentBySpaces(this.em, [space.id]);
+    const siteSpaces = await this.spacesRepo.findBySite(
+      this.em,
+      space.practiceSiteId,
+    );
+    const assignments = await this.assignmentsRepo.findCurrentBySpaces(
+      this.em,
+      [space.id],
+    );
     return toSpaceDetail(space, siteSpaces, assignments);
   }
 }

@@ -63,10 +63,7 @@ export function capacityGaps(
 
 /** Estado base de una habilitación antes de mirar el vencimiento. */
 export type LicenseBaseStatus =
-  | 'LIC_IN_PROCESS'
-  | 'LIC_VALID'
-  | 'LIC_SUSPENDED'
-  | 'LIC_REVOKED';
+  'LIC_IN_PROCESS' | 'LIC_VALID' | 'LIC_SUSPENDED' | 'LIC_REVOKED';
 
 /**
  * Estado que se muestra: una habilitación vigente cuyo `valid_to` ya pasó se

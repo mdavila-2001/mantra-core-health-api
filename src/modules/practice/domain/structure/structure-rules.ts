@@ -160,7 +160,10 @@ export function judgeNoCycle(
   const limit = parentOf.size + 1;
   for (let step = 0; cursor && step <= limit; step += 1) {
     if (cursor === nodeId) {
-      return fail('SPACE_CYCLE', { spaceId: nodeId, parentSpaceId: newParentId });
+      return fail('SPACE_CYCLE', {
+        spaceId: nodeId,
+        parentSpaceId: newParentId,
+      });
     }
     cursor = parentOf.get(cursor) ?? null;
   }

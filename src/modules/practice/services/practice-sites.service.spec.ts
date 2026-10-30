@@ -316,7 +316,9 @@ describe('PracticeSitesService', () => {
           TENANT,
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
-      expect(d.tenantAdmin.assertCanAdministerOrganization).not.toHaveBeenCalled();
+      expect(
+        d.tenantAdmin.assertCanAdministerOrganization,
+      ).not.toHaveBeenCalled();
       expect(d.sitesRepo.create).not.toHaveBeenCalled();
     });
 
@@ -384,11 +386,9 @@ describe('PracticeSitesService', () => {
         actor,
         TENANT,
       );
-      expect(d.tenantAdmin.assertCanAdministerOrganization).toHaveBeenCalledWith(
-        d.tx,
-        TENANT,
-        actor,
-      );
+      expect(
+        d.tenantAdmin.assertCanAdministerOrganization,
+      ).toHaveBeenCalledWith(d.tx, TENANT, actor);
       expect(d.sitesRepo.create).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({ branchId: 'b1', tenantId: TENANT }),
@@ -425,7 +425,9 @@ describe('PracticeSitesService', () => {
         d.service.decommissionSite('p1', 's1', actor, TENANT),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
       expect(row.statusConceptId).toBe(PRAC.SITE_ACTIVE);
-      expect(d.tenantAdmin.assertCanAdministerOrganization).not.toHaveBeenCalled();
+      expect(
+        d.tenantAdmin.assertCanAdministerOrganization,
+      ).not.toHaveBeenCalled();
     });
 
     it('sin ser OWNER/ADMIN del tenant: 403 y no toca la sede', async () => {

@@ -25,10 +25,7 @@ import {
   requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
-import {
-  CareSpacesAdminService,
-  InfrastructureReadService,
-} from '../services';
+import { CareSpacesAdminService, InfrastructureReadService } from '../services';
 import {
   AssignmentRemovedDto,
   CareSpaceDetailDto,
@@ -72,7 +69,11 @@ export class CareSpacesController {
   }
 
   /** Editar descriptivos y atributos; `code`/`formCode` sólo en PLANNED. */
-  @Audited({ action: 'CARE_SPACE_UPDATED', entity: 'care_space', entityId: 'param:id' })
+  @Audited({
+    action: 'CARE_SPACE_UPDATED',
+    entity: 'care_space',
+    entityId: 'param:id',
+  })
   @Patch(':id')
   @ApiOperation({ summary: 'Editar un espacio de atención' })
   @ApiHeader(IF_MATCH)
@@ -87,7 +88,11 @@ export class CareSpacesController {
   }
 
   /** Mover bajo otro padre (regla padre→hijo y anti-ciclo). */
-  @Audited({ action: 'CARE_SPACE_MOVED', entity: 'care_space', entityId: 'param:id' })
+  @Audited({
+    action: 'CARE_SPACE_MOVED',
+    entity: 'care_space',
+    entityId: 'param:id',
+  })
   @Post(':id/move')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Mover un espacio de atención' })
@@ -119,7 +124,13 @@ export class CareSpacesController {
     @Headers('if-match') ifMatch: string | undefined,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<CareSpaceDetailDto> {
-    return this.admin.changeLifecycle(id, dto, ifMatch, actor, requireTenantId());
+    return this.admin.changeLifecycle(
+      id,
+      dto,
+      ifMatch,
+      actor,
+      requireTenantId(),
+    );
   }
 
   /** Lo que impediría retirarlo, para mostrar antes de confirmar. */
@@ -166,6 +177,11 @@ export class CareSpacesController {
     @Param('assignmentId', ParseUUIDPipe) assignmentId: string,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<AssignmentRemovedDto> {
-    return this.admin.removeAssignment(id, assignmentId, actor, requireTenantId());
+    return this.admin.removeAssignment(
+      id,
+      assignmentId,
+      actor,
+      requireTenantId(),
+    );
   }
 }

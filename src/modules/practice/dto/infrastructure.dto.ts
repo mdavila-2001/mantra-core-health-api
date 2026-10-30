@@ -63,7 +63,10 @@ export class BulkCreateCareSpacesDto extends CareSpaceAttributesDto {
   @MaxLength(200)
   namePattern!: string;
 
-  @ApiPropertyOptional({ description: 'Unidad clínica (misma sede)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Unidad clínica (misma sede)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   clinicalUnitId?: string;
@@ -148,7 +151,7 @@ export class MoveCareSpaceDto {
 /** Cuerpo de `POST /care-spaces/:id/lifecycle` y `/clinical-units/:id/lifecycle`. */
 export class LifecycleChangeDto {
   @ApiProperty({ enum: LIFECYCLE_ACTIONS })
-  @IsIn(LIFECYCLE_ACTIONS as unknown as string[])
+  @IsIn([...LIFECYCLE_ACTIONS])
   action!: LifecycleAction;
 
   @ApiPropertyOptional({
@@ -168,9 +171,17 @@ export class CreateUnitAssignmentDto {
   clinicalUnitId!: string;
 
   @ApiProperty({
-    enum: ['SPACE_UNIT_ROLE_OWNER', 'SPACE_UNIT_ROLE_SHARED', 'SPACE_UNIT_ROLE_LOAN'],
+    enum: [
+      'SPACE_UNIT_ROLE_OWNER',
+      'SPACE_UNIT_ROLE_SHARED',
+      'SPACE_UNIT_ROLE_LOAN',
+    ],
   })
-  @IsIn(['SPACE_UNIT_ROLE_OWNER', 'SPACE_UNIT_ROLE_SHARED', 'SPACE_UNIT_ROLE_LOAN'])
+  @IsIn([
+    'SPACE_UNIT_ROLE_OWNER',
+    'SPACE_UNIT_ROLE_SHARED',
+    'SPACE_UNIT_ROLE_LOAN',
+  ])
   roleCode!: string;
 }
 
@@ -218,7 +229,11 @@ export class UpdateClinicalUnitDto {
 
 /** Cuerpo de `PATCH /sites/:siteId/regulatory` (contrato §3). */
 export class UpdateSiteRegulatoryDto {
-  @ApiPropertyOptional({ description: 'Código SNIS/SUIS', maxLength: 30, nullable: true })
+  @ApiPropertyOptional({
+    description: 'Código SNIS/SUIS',
+    maxLength: 30,
+    nullable: true,
+  })
   @IsOptional()
   @IsString()
   @Matches(/^[A-Za-z0-9-]{1,30}$/)
@@ -265,7 +280,10 @@ export class UpdateSiteRegulatoryDto {
 
 /** Cuerpo de `POST /sites/:siteId/licenses`. */
 export class CreateSiteLicenseDto {
-  @ApiProperty({ description: 'Autoridad emisora (p. ej. SEDES La Paz)', maxLength: 200 })
+  @ApiProperty({
+    description: 'Autoridad emisora (p. ej. SEDES La Paz)',
+    maxLength: 200,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(200)
@@ -287,17 +305,26 @@ export class CreateSiteLicenseDto {
   @Matches(DATE)
   expiresOn?: string;
 
-  @ApiPropertyOptional({ description: 'Alcance: unidad de la sede', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Alcance: unidad de la sede',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   clinicalUnitId?: string;
 
-  @ApiPropertyOptional({ description: 'Alcance: servicio de la sede', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Alcance: servicio de la sede',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   healthcareServiceId?: string;
 
-  @ApiPropertyOptional({ description: 'Archivo de la resolución', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Archivo de la resolución',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   documentFileId?: string;

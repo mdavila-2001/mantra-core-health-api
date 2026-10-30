@@ -1,6 +1,9 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { ResourceNotFoundException, type AuthenticatedUser } from '../../../common';
+import {
+  ResourceNotFoundException,
+  type AuthenticatedUser,
+} from '../../../common';
 import { DIR } from '../../directory/directory.concepts';
 import { BranchMemberships } from '../../directory/entities';
 import { TenantMembershipsRepository } from '../../directory/repositories';
