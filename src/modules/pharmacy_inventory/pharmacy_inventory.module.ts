@@ -40,6 +40,8 @@ import { IntegrationReadService } from './application/inventory-sync/integration
 import { TransferInventoryUseCase } from './application/inventory-transfers/transfer-inventory.use-case';
 import { DispenseMedicationUseCase } from './application/medication-dispensations/dispense-medication.use-case';
 import { ReverseMedicationDispensationUseCase } from './application/medication-dispensations/reverse-medication-dispensation.use-case';
+import { PrescriptionBalanceRepository } from './infrastructure/repositories/prescription-balance.repository';
+import { PrescriptionOrderGuard } from './application/pharmacy-orders/prescription-order-guard';
 import { ReadPharmacyInventoryUseCase } from './application/pharmacy-inventory-read/read-pharmacy-inventory.use-case';
 import { NotifyPharmacyOrderUseCase } from './application/pharmacy-order-notifications/notify-pharmacy-order.use-case';
 import { PharmacyOrdersUseCases } from './application/pharmacy-orders/pharmacy-orders.use-cases';
@@ -135,6 +137,7 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     GoodsReceiptsRepository,
     ReservationsRepository,
     PharmacyOrdersRepository,
+    PrescriptionBalanceRepository,
     DispensationsRepository,
     PharmacyOrderSubstitutionsRepository,
     CountSessionsRepository,
@@ -212,6 +215,7 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     PharmacyProcurementService,
     InventoryReservationsService,
     PharmacyOrdersService,
+    PrescriptionOrderGuard,
     PharmacyOrderNotificationsService,
     MedicationDispensationsService,
     InventoryCountService,
