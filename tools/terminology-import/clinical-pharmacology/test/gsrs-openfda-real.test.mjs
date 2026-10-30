@@ -237,3 +237,24 @@ test('LiverTox real: CAS → UNII por el CAS PRIMARY del GSRS; sólo secciones h
   assert.match(rows[0].disclaimer, /not meant as a substitute for FDA approved product labeling/);
   assert.deepEqual(livertoxIdentity(xml('Salicylates')).cas, [], 'ficha de clase sin CAS: no se enlaza');
 });
+
+// --- EMA, información de producto: texto real de `pdftotext -layout` del PDF en castellano de Desloratadina Teva ------
+import { annexI, cimaNregCandidates, comparisonKey, piLines, piMonographSections, piSmpcs } from '../lib/ema-pi.mjs';
+
+test('EMA PDF real: anexo I por números QRD, sin números de página, nº EU → nº de registro de CIMA', () => {
+  const text = readRaw(join(HERE, 'fixtures', 'ema-pi', 'desloratadine-teva_es.txt'), 'utf8');
+  const smpcs = piSmpcs(text);
+  assert.equal(smpcs.length, 1, 'el anexo III (etiquetado) también dice «NOMBRE DEL MEDICAMENTO» y no cuenta');
+  const rows = piMonographSections(smpcs[0]);
+  assert.deepEqual(rows.map((r) => r.number), ['2', '3', '4.1', '4.2', '4.3', '4.4', '4.5', '4.6', '4.7', '4.8', '4.9', '5.1', '5.2', '5.3', '6.1', '6.2']);
+  assert.equal(
+    rows.find((r) => r.number === '4.1').text,
+    'Desloratadina Teva está indicada en adultos y adolescentes a partir de 12 años de edad para el alivio\nde los síntomas asociados con:\n- rinitis alérgica (ver sección 5.1)\n- urticaria (ver sección 5.1)',
+  );
+  assert.ok(piLines(text).every((l) => !/\f/.test(l)), 'sin saltos de página');
+  assert.ok(annexI(piLines(text)).length > 0);
+  assert.equal(smpcs[0].euNumbers[0], 'EU/1/11/732/001');
+  assert.deepEqual(cimaNregCandidates('EU/1/11/732/004'), ['11732004', '111732004'], 'las dos formas que usa CIMA');
+  assert.deepEqual(cimaNregCandidates('EU/1/04/0299/001'), ['04299001', '104299001'], 'sin el cero inicial del nº de producto');
+  assert.equal(comparisonKey('a  b\n c'), 'abc');
+});
