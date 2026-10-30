@@ -146,6 +146,7 @@ export function withheldReason(s) {
   if (s.graphic) return 'trazo dibujado dentro del texto';
   if (s.unresolved > 0 || s.text.includes('\uFFFD')) return 'glifo sin resolver';
   if (AMBIGUOUS_HYPHEN.test(s.text)) return 'guion de fin de línea ambiguo';
+  if (s.consensus === false) return 'pdftotext no coincide';
   return null;
 }
 
@@ -165,7 +166,7 @@ export function cimaNregCandidates(eu) {
 
 /** Secciones de una ficha que entran en la monografía (catálogo de CIMA, por número QRD). */
 export const piMonographSections = (smpc) =>
-  [...smpc.sections].filter(([n, s]) => CIMA_SECTIONS[n] && s.text).map(([n, s]) => ({ number: n, key: CIMA_SECTIONS[n], title: s.title, text: s.text, html: s.html ?? null, table: s.table, graphic: s.graphic, incomplete: s.incomplete, unresolved: s.unresolved }));
+  [...smpc.sections].filter(([n, s]) => CIMA_SECTIONS[n] && s.text).map(([n, s]) => ({ number: n, key: CIMA_SECTIONS[n], title: s.title, text: s.text, html: s.html ?? null, table: s.table, graphic: s.graphic, incomplete: s.incomplete, unresolved: s.unresolved, consensus: s.consensus }));
 
 /** Clave de comparación entre fuentes: el texto sin ningún espacio en blanco. Sólo para medir, nunca se publica. */
 export const comparisonKey = (text) => String(text ?? '').replace(/\s+/g, '');
@@ -184,6 +185,35 @@ export const fidelityKey = (text) =>
       .replace(/(^|\n)\s*[-–•▪·] {2,}/g, '$1')
       .replace(/•/g, ''),
   );
+
+/** Carácter que `pdftotext` puede perder (lo deja en blanco) y `pdfminer` recupera: no ASCII y no letra latina. */
+const LOSABLE_SYMBOL = /^[^\x00-\x7F]$/u;
+const LATIN_LETTER = /^[\p{Script=Latin}]$/u;
+
+/**
+ * Consenso de dos extractores independientes sobre la misma sección: `pdfminer` (verificado) y `pdftotext`.
+ * Sin espacios y en NFKC (`fidelityKey`), deben dar los mismos caracteres. La única diferencia admitida es un
+ * símbolo no latino que `pdftotext` deja en blanco (el «≥» de las fuentes Symbol sin mapa, ya demostrado) y que
+ * `pdfminer` resolvió. Cualquier otra diferencia → false.
+ */
+export function extractorsAgree(pdfminerText, pdftotextText) {
+  const a = fidelityKey(pdfminerText);
+  const b = fidelityKey(pdftotextText);
+  let i = 0;
+  let j = 0;
+  while (i < a.length && j < b.length) {
+    if (a[i] === b[j]) {
+      i++;
+      j++;
+    } else if (LOSABLE_SYMBOL.test(a[i]) && !LATIN_LETTER.test(a[i])) {
+      i++;
+    } else {
+      return false;
+    }
+  }
+  while (i < a.length && LOSABLE_SYMBOL.test(a[i]) && !LATIN_LETTER.test(a[i])) i++;
+  return i === a.length && j === b.length;
+}
 
 /** Dónde difieren dos claves: el tramo distinto de cada una, sin el prefijo ni el sufijo comunes. */
 export function keyDiff(a, b) {

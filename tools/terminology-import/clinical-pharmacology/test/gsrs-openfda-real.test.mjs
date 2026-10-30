@@ -260,7 +260,7 @@ test('EMA PDF real: anexo I por números QRD, sin números de página, nº EU �
 });
 
 // --- EMA, extractor verificado: salida real de py/ema_pi_extract.py para Desloratadina Teva ------------------------
-import { fidelityKey, isVerifiedSection, keyDiff, piSmpcsFromRows } from '../lib/ema-pi.mjs';
+import { extractorsAgree, fidelityKey, isVerifiedSection, keyDiff, piSmpcsFromRows } from '../lib/ema-pi.mjs';
 
 test('EMA PDF verificado: filas del extractor → secciones; sólo se publican las verificadas (sin tablas ni glifos sin resolver)', () => {
   const doc = JSON.parse(readRaw(join(HERE, 'fixtures', 'ema-pi', 'desloratadine-teva_es.rows.json'), 'utf8'));
@@ -280,4 +280,14 @@ test('EMA PDF verificado: filas del extractor → secciones; sólo se publican l
   // Clave de fidelidad (sólo para medir contra CIMA): NFKC, sin espacios, sin «•» ni el marcador de lista del extractor.
   assert.equal(fidelityKey('• rinitis alérgica\n• 1 000 µg/l'), fidelityKey('-\trinitis alérgica\n-\t1 000 μg/l'));
   assert.deepEqual(keyDiff('abcXYdef', 'abcZdef'), { at: 3, a: 'XY', b: 'Z' });
+});
+
+test('EMA PDF: consenso de dos extractores (pdfminer verificado y pdftotext) — casos reales de la medición', () => {
+  // Deferasirox Accord 4.1: pdftotext deja en blanco el «≥» de SymbolMT; pdfminer lo resuelve con la tabla de Adobe.
+  assert.equal(extractorsAgree('frecuentes (≥ 7 ml/kg/mes de concentrado', 'frecuentes ( 7 ml/kg/mes de concentrado'), true);
+  // Emtricitabina/Tenofovir Mylan 4.1: el ToUnicode da un espacio donde el PDF dibuja un guion; pdftotext lee «VIH-1».
+  assert.equal(extractorsAgree('infectados por VIH 1 con resistencia', 'infectados por VIH-1 con resistencia'), false);
+  assert.equal(extractorsAgree('ferritina > 1 000 μg/l', 'ferritina > 1 000 µg/l'), true, 'µ y μ: mismo carácter en NFKC');
+  assert.equal(extractorsAgree('(≥ 7', '(³ 7'), false, 'una lectura distinta del símbolo no es «perderlo»');
+  assert.equal(extractorsAgree('clase 2', 'clase ≥ 2'), false, 'pdfminer no puede perder lo que pdftotext tiene');
 });
