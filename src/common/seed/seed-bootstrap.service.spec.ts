@@ -43,6 +43,7 @@ const STEPS = [
   'directoryNetworks',
   'practiceDefaultServices',
   'qaFlows',
+  'admissionRequirements',
 ] as const;
 
 type Step = (typeof STEPS)[number];
@@ -123,6 +124,7 @@ function build(
     double.people as never,
     double.directoryNetworks as never,
     double.qaFlows as never,
+    double.admissionRequirements as never,
     logger as never,
     coreState,
     extras.padronOrganizations as never,
