@@ -270,6 +270,11 @@ describe('AllExceptionsFilter · 404 del router con el token en la ruta', () => 
     ['POST', `/public/prescription-shares/${TOKEN}`],
     ['GET', `/public/prescription-shares/${TOKEN}/extra`],
     ['DELETE', `/clinical/prescription-shares/by-token/${TOKEN}`],
+    ['GET', `/public//prescription-shares/${TOKEN}`],
+    ['GET', `/public%2Fprescription-shares/${TOKEN}`],
+    ['GET', `/public/prescription%2Dshares/${TOKEN}`],
+    ['GET', `/public/prescription-shares%2F${TOKEN}`],
+    ['GET', `/clinical/prescription-shares/by-token//${TOKEN}`],
   ])('%s %s', async (verb, url) => {
     const server = request(app.getHttpServer());
     const res =
