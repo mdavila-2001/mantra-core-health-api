@@ -258,3 +258,26 @@ test('EMA PDF real: anexo I por números QRD, sin números de página, nº EU �
   assert.deepEqual(cimaNregCandidates('EU/1/04/0299/001'), ['04299001', '104299001'], 'sin el cero inicial del nº de producto');
   assert.equal(comparisonKey('a  b\n c'), 'abc');
 });
+
+// --- EMA, extractor verificado: salida real de py/ema_pi_extract.py para Desloratadina Teva ------------------------
+import { fidelityKey, isVerifiedSection, keyDiff, piSmpcsFromRows } from '../lib/ema-pi.mjs';
+
+test('EMA PDF verificado: filas del extractor → secciones; sólo se publican las verificadas (sin tablas ni glifos sin resolver)', () => {
+  const doc = JSON.parse(readRaw(join(HERE, 'fixtures', 'ema-pi', 'desloratadine-teva_es.rows.json'), 'utf8'));
+  const smpcs = piSmpcsFromRows(doc);
+  assert.equal(smpcs.length, 1);
+  assert.equal(smpcs[0].euNumbers[0], 'EU/1/11/732/001');
+  const rows = piMonographSections(smpcs[0]);
+  assert.equal(
+    rows.find((r) => r.number === '4.1').text,
+    'Desloratadina Teva está indicada en adultos y adolescentes a partir de 12 años de edad para el alivio\nde los síntomas asociados con:\n-\trinitis alérgica (ver sección 5.1)\n-\turticaria (ver sección 5.1)',
+  );
+  const r48 = rows.find((r) => r.number === '4.8');
+  assert.equal(r48.table, true, 'la 4.8 trae la tabla de reacciones adversas');
+  assert.equal(isVerifiedSection(r48), false, 'una sección con tabla no se publica');
+  assert.ok(rows.filter((r) => r.number !== '4.8').every(isVerifiedSection));
+  assert.equal(isVerifiedSection({ text: 'ferritina > 1 000 �g/l', table: false, unresolved: 1 }), false, 'un glifo sin resolver invalida la sección');
+  // Clave de fidelidad (sólo para medir contra CIMA): NFKC, sin espacios, sin «•» ni el marcador de lista del extractor.
+  assert.equal(fidelityKey('• rinitis alérgica\n• 1 000 µg/l'), fidelityKey('-\trinitis alérgica\n-\t1 000 μg/l'));
+  assert.deepEqual(keyDiff('abcXYdef', 'abcZdef'), { at: 3, a: 'XY', b: 'Z' });
+});

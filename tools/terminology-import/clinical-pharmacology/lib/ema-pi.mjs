@@ -16,6 +16,7 @@
 //   la ficha ya está en CIMA.
 // =============================================================================
 
+import { textSha256 } from './literal.mjs';
 import { CIMA_SECTIONS } from './sections.mjs';
 
 export const EMA_PI_SOURCE = 'ema-product-information';
@@ -61,18 +62,24 @@ const clean = (lines) => {
   return t.trim() === '' ? null : t;
 };
 
-/** Anexo I → fichas: `[{ sections: Map(número → { title, text }), euNumbers: ['EU/1/AA/NNN/PPP', …] }]`. */
-export function piSmpcs(text) {
-  const lines = annexI(piLines(text));
+/** Líneas `{ text, table }` del anexo I → fichas (ver `piSmpcs`). */
+function smpcsFromLines(lines) {
   const smpcs = [];
   let cur = null;
   let sec = null;
   const close = () => {
-    if (cur && sec) cur.sections.set(sec.number, { title: sec.title, text: clean(sec.lines) });
+    if (cur && sec) {
+      cur.sections.set(sec.number, {
+        title: sec.title,
+        text: clean(sec.lines.map((l) => l.text)),
+        table: sec.lines.some((l) => l.table),
+        unresolved: sec.lines.reduce((n, l) => n + (l.text.match(/\uFFFD/g)?.length ?? 0), 0),
+      });
+    }
     sec = null;
   };
   for (const l of lines) {
-    const h = HEADING.exec(l);
+    const h = HEADING.exec(l.text);
     const isHeading = h && QRD_NUMBERS.has(h[1]) && /^[A-ZÁÉÍÓÚÑÜ]/.test(h[2]);
     if (isHeading && h[1] === '1' && /^NOMBRE DEL MEDICAMENTO/.test(h[2])) {
       close();
@@ -96,6 +103,27 @@ export function piSmpcs(text) {
 }
 
 /**
+ * Texto de `pdftotext -layout` → fichas: `[{ sections: Map(número → { title, text, table, unresolved }), euNumbers }]`.
+ * Sirve para leer la sección 8 (nº EU); este texto no se publica (pierde símbolos, ver EMA_PI_TEXT_WITHHELD).
+ */
+export const piSmpcs = (text) => smpcsFromLines(annexI(piLines(text)).map((t) => ({ text: t, table: false })));
+
+/**
+ * Salida de `py/ema_pi_extract.py` (filas por página, con la marca de tabla) → fichas, con el mismo
+ * parser. Cada sección lleva `table` (alguna fila dentro de una grilla dibujada) y `unresolved` (U+FFFD).
+ */
+export function piSmpcsFromRows(doc) {
+  const lines = (doc?.pages ?? []).flatMap((p) => p.rows.map((r) => ({ text: r.text.replace(/\s+$/, ''), table: Boolean(r.table) })));
+  const start = lines.findIndex((l) => /^\s*ANEXO I\s*$/.test(l.text));
+  if (start < 0) return [];
+  const end = lines.findIndex((l, i) => i > start && /^\s*ANEXO II\s*$/.test(l.text));
+  return smpcsFromLines(lines.slice(start + 1, end < 0 ? lines.length : end));
+}
+
+/** Sección publicable: sin glifos sin resolver y sin filas dentro de una tabla. */
+export const isVerifiedSection = (s) => Boolean(s?.text) && !s.table && s.unresolved === 0 && !s.text.includes('\uFFFD');
+
+/**
  * Nº de autorización EU → nº de registro con que CIMA publica el mismo medicamento. CIMA usa dos formas
  * (EU/1/11/732/004 → `11732004`; EU/1/13/823/002 → `113823002`): se prueban las dos, nunca otra cosa.
  */
@@ -107,15 +135,74 @@ export function cimaNregCandidates(eu) {
 }
 
 /** Secciones de una ficha que entran en la monografía (catálogo de CIMA, por número QRD). */
-export const piMonographSections = (smpc) => [...smpc.sections].filter(([n, s]) => CIMA_SECTIONS[n] && s.text).map(([n, s]) => ({ number: n, key: CIMA_SECTIONS[n], title: s.title, text: s.text }));
+export const piMonographSections = (smpc) =>
+  [...smpc.sections].filter(([n, s]) => CIMA_SECTIONS[n] && s.text).map(([n, s]) => ({ number: n, key: CIMA_SECTIONS[n], title: s.title, text: s.text, table: s.table, unresolved: s.unresolved }));
 
 /** Clave de comparación entre fuentes: el texto sin ningún espacio en blanco. Sólo para medir, nunca se publica. */
 export const comparisonKey = (text) => String(text ?? '').replace(/\s+/g, '');
 
+/**
+ * Clave para medir la fidelidad frente a CIMA (nunca se publica): NFKC (µ y μ son el mismo carácter),
+ * sin espacios y sin «•», porque CIMA agrega «•» a cada ítem de lista al pasar su HTML a texto.
+ */
+export const fidelityKey = (text) =>
+  comparisonKey(
+    String(text ?? '')
+      .normalize('NFKC')
+      // Marcador de lista de un carácter que el extractor separa del texto con un tabulador (columna distinta en el PDF).
+      .replace(/(^|\n)\s*[-–•o▪·]\t/g, '$1')
+      .replace(/•/g, ''),
+  );
+
+/** Dónde difieren dos claves: el tramo distinto de cada una, sin el prefijo ni el sufijo comunes. */
+export function keyDiff(a, b) {
+  let i = 0;
+  while (i < a.length && i < b.length && a[i] === b[i]) i++;
+  let j = 0;
+  while (j < a.length - i && j < b.length - i && a[a.length - 1 - j] === b[b.length - 1 - j]) j++;
+  return { at: i, a: a.slice(i, a.length - j), b: b.slice(i, b.length - j) };
+}
+
 export const EMA_PI_TEXT_WITHHELD =
-  'Texto no publicado: la extracción del PDF (pdftotext) no es literal en todos los casos. Medida contra la ficha de CIMA del mismo nº de registro, ' +
-  'pierde símbolos de fuentes sin mapa a Unicode (p. ej. Deferasirox Accord, 4.1: CIMA «(≥7 ml/kg/mes» → PDF «( 7 ml/kg/mes»; 705 de 1 397 PDF tienen alguna ' +
-  'fuente así) y no conserva la estructura de las tablas (4.8: 34 de 1 042 idénticas). Se guarda el puntero al documento oficial.';
+  'Texto publicado sólo en las secciones de extracción verificada (py/ema_pi_extract.py): cada carácter sale del mapa ToUnicode o de la codificación ' +
+  'declarada de una fuente de texto; los símbolos de fuentes Symbol se traducen con la tabla oficial de Adobe (unicode.org). Una sección con algún ' +
+  'glifo que no se puede resolver, o con filas dentro de una tabla, no se publica: queda este puntero al documento oficial.';
+
+/** Sección verificada de una ficha EMA que no está en CIMA → fila literal (castellano) con su procedencia. */
+export function emaPiSection(r, smpc, s, { url, retrievedAt, license }) {
+  return {
+    key: s.key,
+    source: EMA_PI_SOURCE,
+    sourceName: EMA_PI_SOURCE_NAME,
+    language: 'es',
+    audience: 'professional',
+    document: {
+      type: 'epar-product-information',
+      id: r.productNumber,
+      title: r.name,
+      holder: r.holder,
+      version: r.revision != null ? `revision ${r.revision}` : null,
+      effectiveDate: r.lastUpdated,
+      euNumbers: smpc.euNumbers,
+      url,
+      pageUrl: r.url,
+    },
+    section: { number: s.number, title: s.title, url, apiUrl: url },
+    html: null,
+    text: s.text,
+    tables: [],
+    textSha256: textSha256(s.text),
+    extraction:
+      'pdfminer.six (py/ema_pi_extract.py): carácter por carácter desde el mapa ToUnicode o la codificación declarada; símbolos de fuentes Symbol con la tabla ' +
+      'oficial de Adobe (unicode.org), en su forma NFKC cuando la tabla da varios valores equivalentes (μ). Verificada: sin glifos sin resolver y sin tablas.',
+    retrievedAt,
+    license,
+    citation:
+      `European Medicines Agency (EMA). ${r.name} (${r.productNumber}), EPAR — Información del producto, anexo I (ficha técnica), sección ${s.number} «${s.title}», ` +
+      `revisión ${r.revision ?? '?'}, actualizado el ${r.lastUpdated ?? '?'}. ${url} (consultado el ${retrievedAt.slice(0, 10)}).`,
+    selection: { criterion: 'Medicamento de autorización centralizada con ATC 5 asignado por la EMA cuyo nº de autorización EU no figura en CIMA.', group: { atc: r.atc5 } },
+  };
+}
 
 /** Ficha de un medicamento EMA que no está en CIMA → puntero citable al PDF oficial, sin texto. */
 export function emaPiPointer(r, smpc, { url, retrievedAt, license }) {
@@ -133,7 +220,13 @@ export function emaPiPointer(r, smpc, { url, retrievedAt, license }) {
       url,
       pageUrl: r.url,
     },
-    sections: piMonographSections(smpc).map((s) => ({ number: s.number, key: s.key, title: s.title })),
+    sections: piMonographSections(smpc).map((s) => ({
+      number: s.number,
+      key: s.key,
+      title: s.title,
+      textPublished: isVerifiedSection(s),
+      ...(isVerifiedSection(s) ? {} : { withheldBecause: s.table ? 'tabla' : 'glifo sin resolver' }),
+    })),
     atc5: r.atc5,
     atcLinkRule: 'ATC 5 asignado por la EMA (informe «Medicines output»)',
     textWithheld: EMA_PI_TEXT_WITHHELD,
