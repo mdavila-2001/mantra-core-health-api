@@ -259,16 +259,17 @@ export class SiteEstablishmentService {
         throw ruleException(PracticeErrorReason.SNIS_CODE_MISSING, { siteId });
       }
       await tx.execute("select set_config('app.system_context', 'true', true)");
-      try {
-        site.snisVerifiedAt = new Date();
-        site.snisVerifiedByUserId = actor.id;
-        touch(site, actor.id);
-        await flushStructure(tx);
-      } finally {
-        await tx.execute(
-          "select set_config('app.system_context', 'false', true)",
-        );
-      }
+      // Sin `finally`: si la escritura falla (p. ej. 23505 del SNIS ya
+      // verificado), la transacción queda abortada y cualquier sentencia más
+      // —incluido este reset— reemplazaría el 409 por un 500. El SET LOCAL
+      // muere con el ROLLBACK; sólo hace falta cerrarlo en el camino feliz.
+      site.snisVerifiedAt = new Date();
+      site.snisVerifiedByUserId = actor.id;
+      touch(site, actor.id);
+      await flushStructure(tx);
+      await tx.execute(
+        "select set_config('app.system_context', 'false', true)",
+      );
       await appendStructureRevision(
         this.historyRepo,
         tx,

@@ -31,7 +31,11 @@ export class FunctionProfileDto extends ConceptDto {
 
 /** Regla padre→hijo. */
 export class ParentRuleDto {
-  @ApiProperty({ nullable: true, description: 'null = raíz de la sede' })
+  @ApiProperty({
+    nullable: true,
+    description: 'null = raíz de la sede',
+    type: String,
+  })
   parent!: string | null;
   @ApiProperty() child!: string;
 }
@@ -81,7 +85,8 @@ export class InfrastructureCatalogDto {
 /** Nodo del árbol físico (contrato §3, `CareSpaceNode`). */
 export class CareSpaceNodeDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
-  @ApiProperty({ format: 'uuid', nullable: true }) parentId!: string | null;
+  @ApiProperty({ format: 'uuid', nullable: true, type: String }) parentId!:
+    string | null;
   @ApiProperty() code!: string;
   @ApiProperty() name!: string;
   @ApiProperty({ type: ConceptDto, nullable: true }) form!: ConceptDto | null;
@@ -92,7 +97,7 @@ export class CareSpaceNodeDto {
   operationalStatus!: ConceptDto | null;
   @ApiProperty({ format: 'uuid', nullable: true }) clinicalUnitId!:
     string | null;
-  @ApiProperty({ nullable: true }) capacity!: number | null;
+  @ApiProperty({ nullable: true, type: Number }) capacity!: number | null;
   @ApiProperty() rowVersion!: number;
   @ApiProperty() childCount!: number;
 }
@@ -100,10 +105,11 @@ export class CareSpaceNodeDto {
 /** Nodo del árbol organizativo. */
 export class ClinicalUnitNodeDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
-  @ApiProperty({ format: 'uuid', nullable: true }) parentId!: string | null;
+  @ApiProperty({ format: 'uuid', nullable: true, type: String }) parentId!:
+    string | null;
   @ApiProperty() code!: string;
   @ApiProperty() name!: string;
-  @ApiProperty({ nullable: true }) description!: string | null;
+  @ApiProperty({ nullable: true, type: String }) description!: string | null;
   @ApiProperty({ type: ConceptDto, nullable: true }) status!: ConceptDto | null;
   @ApiProperty({ format: 'uuid', nullable: true }) responsibleUserId!:
     string | null;
@@ -118,18 +124,20 @@ export class SpaceUnitAssignmentDto {
   @ApiProperty({ format: 'uuid' }) clinicalUnitId!: string;
   @ApiProperty({ type: ConceptDto, nullable: true }) role!: ConceptDto | null;
   @ApiProperty() validFrom!: Date;
-  @ApiProperty({ nullable: true }) validTo!: Date | null;
+  @ApiProperty({ nullable: true, type: String, format: 'date-time' })
+  validTo!: Date | null;
 }
 
 /** Resumen regulatorio de la sede. */
 export class EstablishmentSummaryDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty({ format: 'uuid' }) practiceId!: string;
-  @ApiProperty({ format: 'uuid', nullable: true }) branchId!: string | null;
+  @ApiProperty({ format: 'uuid', nullable: true, type: String }) branchId!:
+    string | null;
   @ApiProperty() code!: string;
   @ApiProperty() name!: string;
   @ApiProperty({ type: ConceptDto, nullable: true }) status!: ConceptDto | null;
-  @ApiProperty({ nullable: true }) snisCode!: string | null;
+  @ApiProperty({ nullable: true, type: String }) snisCode!: string | null;
   @ApiProperty({ description: 'Verificado por la plataforma' })
   snisVerified!: boolean;
   @ApiProperty({ type: ConceptDto, nullable: true })
@@ -139,9 +147,12 @@ export class EstablishmentSummaryDto {
   @ApiProperty({ type: ConceptDto, nullable: true })
   typology!: ConceptDto | null;
   @ApiProperty({ type: ConceptDto, nullable: true }) sedes!: ConceptDto | null;
-  @ApiProperty({ nullable: true }) managingEntityName!: string | null;
-  @ApiProperty({ nullable: true }) healthNetworkName!: string | null;
-  @ApiProperty({ nullable: true }) municipalityName!: string | null;
+  @ApiProperty({ nullable: true, type: String }) managingEntityName!:
+    string | null;
+  @ApiProperty({ nullable: true, type: String }) healthNetworkName!:
+    string | null;
+  @ApiProperty({ nullable: true, type: String }) municipalityName!:
+    string | null;
   @ApiProperty() rowVersion!: number;
   @ApiProperty({
     description:
@@ -179,14 +190,15 @@ export class SpaceDerivedDto {
 /** `GET /care-spaces/:id` (contrato §3, `CareSpaceDetail`). */
 export class CareSpaceDetailDto extends CareSpaceNodeDto {
   @ApiProperty({ format: 'uuid' }) practiceSiteId!: string;
-  @ApiProperty({ nullable: true }) description!: string | null;
-  @ApiProperty({ nullable: true }) floorNumber!: number | null;
-  @ApiProperty({ nullable: true }) areaM2!: number | null;
+  @ApiProperty({ nullable: true, type: String }) description!: string | null;
+  @ApiProperty({ nullable: true, type: Number }) floorNumber!: number | null;
+  @ApiProperty({ nullable: true, type: Number }) areaM2!: number | null;
   @ApiProperty({ type: ConceptDto, nullable: true })
   asepsis!: ConceptDto | null;
   @ApiProperty({ type: ConceptDto, nullable: true })
   pressure!: ConceptDto | null;
-  @ApiProperty({ nullable: true }) airChangesPerHour!: number | null;
+  @ApiProperty({ nullable: true, type: Number }) airChangesPerHour!:
+    number | null;
   @ApiProperty({ nullable: true, format: 'date' }) hvacValidatedOn!:
     string | null;
   @ApiProperty({ type: ConceptDto, nullable: true })
@@ -195,12 +207,14 @@ export class CareSpaceDetailDto extends CareSpaceNodeDto {
   ageGroup!: ConceptDto | null;
   @ApiProperty({ type: ConceptDto, nullable: true })
   bedCategory!: ConceptDto | null;
-  @ApiProperty({ nullable: true }) censable!: boolean | null;
-  @ApiProperty({ nullable: true }) gln!: string | null;
-  @ApiProperty({ nullable: true }) prepMinutes!: number | null;
-  @ApiProperty({ nullable: true }) cleanupMinutes!: number | null;
-  @ApiProperty({ nullable: true }) validFrom!: Date | null;
-  @ApiProperty({ nullable: true }) validTo!: Date | null;
+  @ApiProperty({ nullable: true, type: Boolean }) censable!: boolean | null;
+  @ApiProperty({ nullable: true, type: String }) gln!: string | null;
+  @ApiProperty({ nullable: true, type: Number }) prepMinutes!: number | null;
+  @ApiProperty({ nullable: true, type: Number }) cleanupMinutes!: number | null;
+  @ApiProperty({ nullable: true, type: String, format: 'date-time' })
+  validFrom!: Date | null;
+  @ApiProperty({ nullable: true, type: String, format: 'date-time' })
+  validTo!: Date | null;
   @ApiProperty({ type: [SpacePathStepDto] }) path!: SpacePathStepDto[];
   @ApiProperty({ type: [CareSpaceNodeDto] }) children!: CareSpaceNodeDto[];
   @ApiProperty({ type: [SpaceUnitAssignmentDto] })
@@ -277,8 +291,10 @@ export class RetireCheckDto {
 /** `GET /clinical-units/:id`. */
 export class ClinicalUnitDetailDto extends ClinicalUnitNodeDto {
   @ApiProperty({ format: 'uuid' }) practiceSiteId!: string;
-  @ApiProperty({ nullable: true }) validFrom!: Date | null;
-  @ApiProperty({ nullable: true }) validTo!: Date | null;
+  @ApiProperty({ nullable: true, type: String, format: 'date-time' })
+  validFrom!: Date | null;
+  @ApiProperty({ nullable: true, type: String, format: 'date-time' })
+  validTo!: Date | null;
   @ApiProperty({ type: [ClinicalUnitNodeDto] })
   children!: ClinicalUnitNodeDto[];
   @ApiProperty({
@@ -310,10 +326,12 @@ export class SiteRegulatoryDto extends EstablishmentSummaryDto {
 export class SiteLicenseDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty({ format: 'uuid' }) practiceSiteId!: string;
-  @ApiProperty({ nullable: true }) authorityName!: string | null;
+  @ApiProperty({ nullable: true, type: String }) authorityName!: string | null;
   @ApiProperty() resolutionNumber!: string;
-  @ApiProperty({ nullable: true, format: 'date' }) issuedOn!: string | null;
-  @ApiProperty({ nullable: true, format: 'date' }) expiresOn!: string | null;
+  @ApiProperty({ nullable: true, format: 'date', type: String }) issuedOn!:
+    string | null;
+  @ApiProperty({ nullable: true, format: 'date', type: String }) expiresOn!:
+    string | null;
   @ApiProperty({
     type: ConceptDto,
     description: 'LIC_*; vencida se calcula al leer',
@@ -332,8 +350,10 @@ export class SiteLicenseDto {
 export class DeclaredCapacityLineDto {
   @ApiProperty() kindCode!: string;
   @ApiProperty() quantity!: number;
-  @ApiProperty({ format: 'date', nullable: true }) asOf!: string | null;
-  @ApiProperty({ nullable: true }) resolutionNumber!: string | null;
+  @ApiProperty({ format: 'date', nullable: true, type: String }) asOf!:
+    string | null;
+  @ApiProperty({ nullable: true, type: String }) resolutionNumber!:
+    string | null;
   @ApiProperty({
     enum: ['site', 'hospital'],
     description:

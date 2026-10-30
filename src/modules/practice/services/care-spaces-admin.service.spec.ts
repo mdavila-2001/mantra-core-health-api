@@ -486,6 +486,21 @@ describe('CareSpacesAdminService', () => {
       );
     });
 
+    it('fila que no es objeto: error de esa línea, el resto se valida', async () => {
+      const d = build();
+      const res = await d.service.importRows(
+        's1',
+        { rows: ['texto', rows[0]] } as any,
+        true,
+        actor,
+        TENANT,
+      );
+      expect(res.rows.map((r) => r.status)).toEqual(['error', 'ok']);
+      expect(res.rows[0].errors).toEqual([
+        { field: 'row', reason: 'NOT_AN_OBJECT' },
+      ]);
+    });
+
     it('campo con tipo inválido: error de validación de la fila', async () => {
       const d = build();
       const res = await d.service.importRows(

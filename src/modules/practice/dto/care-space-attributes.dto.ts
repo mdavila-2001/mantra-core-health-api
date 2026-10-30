@@ -19,43 +19,74 @@ import {
  * el valor y ausente lo deja como está.
  */
 export class CareSpaceAttributesDto {
-  @ApiPropertyOptional({ description: 'Descripción libre', maxLength: 1000 })
+  @ApiPropertyOptional({
+    description: 'Descripción libre',
+    maxLength: 1000,
+    type: String,
+    nullable: true,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(1000)
   description?: string | null;
 
-  @ApiPropertyOptional({ description: 'Capacidad (nº de plazas)', minimum: 0 })
+  @ApiPropertyOptional({
+    description: 'Capacidad (nº de plazas)',
+    minimum: 0,
+    type: Number,
+    nullable: true,
+  })
   @IsOptional()
   @IsInt()
   @Min(0)
   capacity?: number | null;
 
-  @ApiPropertyOptional({ description: 'Piso (negativo = subsuelo)' })
+  @ApiPropertyOptional({
+    description: 'Piso (negativo = subsuelo)',
+    type: Number,
+    nullable: true,
+  })
   @IsOptional()
   @IsInt()
   @Min(-20)
   @Max(300)
   floorNumber?: number | null;
 
-  @ApiPropertyOptional({ description: 'Superficie útil en m²', minimum: 0 })
+  @ApiPropertyOptional({
+    description: 'Superficie útil en m²',
+    minimum: 0,
+    type: Number,
+    nullable: true,
+  })
   @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   @Max(99999999)
   areaM2?: number | null;
 
-  @ApiPropertyOptional({ description: 'Asepsia (ASEPSIS_*)' })
+  @ApiPropertyOptional({
+    description: 'Asepsia (ASEPSIS_*)',
+    type: String,
+    nullable: true,
+  })
   @IsOptional()
   @IsString()
   asepsisCode?: string | null;
 
-  @ApiPropertyOptional({ description: 'Presión relativa (PRESSURE_*)' })
+  @ApiPropertyOptional({
+    description: 'Presión relativa (PRESSURE_*)',
+    type: String,
+    nullable: true,
+  })
   @IsOptional()
   @IsString()
   pressureCode?: string | null;
 
-  @ApiPropertyOptional({ description: 'Renovaciones de aire por hora (ACH)' })
+  @ApiPropertyOptional({
+    description: 'Renovaciones de aire por hora (ACH)',
+    type: Number,
+    nullable: true,
+  })
   @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
@@ -65,46 +96,78 @@ export class CareSpaceAttributesDto {
   @ApiPropertyOptional({
     description: 'Fecha de validación HVAC (YYYY-MM-DD)',
     format: 'date',
+    type: String,
+    nullable: true,
   })
   @IsOptional()
   @Matches(/^\d{4}-\d{2}-\d{2}$/)
   hvacValidatedOn?: string | null;
 
-  @ApiPropertyOptional({ description: 'Restricción de sexo (SEX_*)' })
+  @ApiPropertyOptional({
+    description: 'Restricción de sexo (SEX_*)',
+    type: String,
+    nullable: true,
+  })
   @IsOptional()
   @IsString()
   sexRestrictionCode?: string | null;
 
-  @ApiPropertyOptional({ description: 'Grupo etario (AGE_*)' })
+  @ApiPropertyOptional({
+    description: 'Grupo etario (AGE_*)',
+    type: String,
+    nullable: true,
+  })
   @IsOptional()
   @IsString()
   ageGroupCode?: string | null;
 
-  @ApiPropertyOptional({ description: 'Categoría de cama (BED_CAT_*)' })
+  @ApiPropertyOptional({
+    description: 'Categoría de cama (BED_CAT_*)',
+    type: String,
+    nullable: true,
+  })
   @IsOptional()
   @IsString()
   bedCategoryCode?: string | null;
 
-  @ApiPropertyOptional({ description: 'Cama censable (cuenta para el censo)' })
+  @ApiPropertyOptional({
+    description: 'Cama censable (cuenta para el censo)',
+    type: Boolean,
+    nullable: true,
+  })
   @IsOptional()
   @IsBoolean()
   censable?: boolean | null;
 
-  @ApiPropertyOptional({ description: 'Minutos de preparación', minimum: 0 })
+  @ApiPropertyOptional({
+    description: 'Minutos de preparación',
+    minimum: 0,
+    type: Number,
+    nullable: true,
+  })
   @IsOptional()
   @IsInt()
   @Min(0)
   @Max(1440)
   prepMinutes?: number | null;
 
-  @ApiPropertyOptional({ description: 'Minutos de limpieza', minimum: 0 })
+  @ApiPropertyOptional({
+    description: 'Minutos de limpieza',
+    minimum: 0,
+    type: Number,
+    nullable: true,
+  })
   @IsOptional()
   @IsInt()
   @Min(0)
   @Max(1440)
   cleanupMinutes?: number | null;
 
-  @ApiPropertyOptional({ description: 'GS1 GLN (13 dígitos)' })
+  @ApiPropertyOptional({
+    description: 'GS1 GLN (13 dígitos)',
+    type: String,
+    nullable: true,
+  })
   @IsOptional()
   @Matches(/^\d{13}$/)
   gln?: string | null;

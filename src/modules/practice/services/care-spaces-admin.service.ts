@@ -357,6 +357,15 @@ export class CareSpacesAdminService {
       }> = [];
 
       const results: ImportRowResultDto[] = dto.rows.map((raw, index) => {
+        // La validación es por fila (y no del cuerpo entero) para poder
+        // devolver los errores por línea; una fila que no es objeto es eso.
+        if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) {
+          return {
+            line: index + 1,
+            status: 'error' as const,
+            errors: [{ field: 'row', reason: 'NOT_AN_OBJECT' }],
+          };
+        }
         const row = plainToInstance(ImportRowInput, raw);
         const errors: FieldError[] = validateSync(row, {
           whitelist: true,

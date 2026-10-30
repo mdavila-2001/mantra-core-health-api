@@ -174,6 +174,20 @@ describe('SiteEstablishmentService', () => {
       ]);
     });
 
+    it('si la escritura choca (23505), responde el 409 y no intenta otra sentencia', async () => {
+      const d = build();
+      d.site.snisCode = '200101';
+      d.tx.flush.mockRejectedValueOnce({
+        code: '23505',
+        constraint: 'ux_practice_sites_snis_code',
+      });
+      const err: any = await d.service
+        .verifySnis('s1', platform, TENANT)
+        .catch((e) => e);
+      expect(err.reason).toBe('SNIS_CODE_UNAVAILABLE');
+      expect(d.tx.execute).toHaveBeenCalledTimes(1);
+    });
+
     it('sin código declarado: 422 SNIS_CODE_MISSING', async () => {
       const d = build();
       await expect(

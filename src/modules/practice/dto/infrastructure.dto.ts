@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   ArrayMinSize,
@@ -6,7 +7,6 @@ import {
   IsBoolean,
   IsIn,
   IsInt,
-  IsObject,
   IsOptional,
   IsString,
   IsUUID,
@@ -29,6 +29,7 @@ export class BulkCreateCareSpacesDto extends CareSpaceAttributesDto {
     description: 'Padre común (misma sede). Ausente o null: raíz',
     format: 'uuid',
     nullable: true,
+    type: String,
   })
   @IsOptional()
   @IsUUID()
@@ -91,7 +92,10 @@ export class ImportCareSpacesDto {
   @IsArray()
   @ArrayMinSize(1)
   @ArrayMaxSize(500)
-  @IsObject({ each: true })
+  // Sin esto, `enableImplicitConversion` (pipe global) aplica el tipo de
+  // diseño `Array` a cada elemento y la fila llega como `[]` (lo detectó el
+  // E2E de F1). `Object` deja cada fila tal cual; se valida en el servicio.
+  @Type(() => Object)
   rows!: Record<string, unknown>[];
 }
 
@@ -130,6 +134,7 @@ export class UpdateCareSpaceDto extends CareSpaceAttributesDto {
     description: 'Unidad clínica principal (misma sede); null la quita',
     format: 'uuid',
     nullable: true,
+    type: String,
   })
   @IsOptional()
   @IsUUID()
@@ -142,6 +147,7 @@ export class MoveCareSpaceDto {
     description: 'Nuevo padre (misma sede); null o ausente: raíz',
     format: 'uuid',
     nullable: true,
+    type: String,
   })
   @IsOptional()
   @IsUUID()
@@ -201,7 +207,7 @@ export class UpdateClinicalUnitDto {
   @MaxLength(200)
   name?: string;
 
-  @ApiPropertyOptional({ maxLength: 1000, nullable: true })
+  @ApiPropertyOptional({ maxLength: 1000, nullable: true, type: String })
   @IsOptional()
   @IsString()
   @MaxLength(1000)
@@ -211,17 +217,18 @@ export class UpdateClinicalUnitDto {
     description: 'Unidad padre (misma sede); null: raíz',
     format: 'uuid',
     nullable: true,
+    type: String,
   })
   @IsOptional()
   @IsUUID()
   parentUnitId?: string | null;
 
-  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  @ApiPropertyOptional({ format: 'uuid', nullable: true, type: String })
   @IsOptional()
   @IsUUID()
   responsibleUserId?: string | null;
 
-  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  @ApiPropertyOptional({ format: 'uuid', nullable: true, type: String })
   @IsOptional()
   @IsUUID()
   specialtyConceptId?: string | null;
@@ -233,45 +240,58 @@ export class UpdateSiteRegulatoryDto {
     description: 'Código SNIS/SUIS',
     maxLength: 30,
     nullable: true,
+    type: String,
   })
   @IsOptional()
   @IsString()
   @Matches(/^[A-Za-z0-9-]{1,30}$/)
   snisCode?: string | null;
 
-  @ApiPropertyOptional({ description: 'SUBSECTOR_*', nullable: true })
+  @ApiPropertyOptional({
+    description: 'SUBSECTOR_*',
+    nullable: true,
+    type: String,
+  })
   @IsOptional()
   @IsString()
   subsectorCode?: string | null;
 
-  @ApiPropertyOptional({ description: 'CARE_LEVEL_*', nullable: true })
+  @ApiPropertyOptional({
+    description: 'CARE_LEVEL_*',
+    nullable: true,
+    type: String,
+  })
   @IsOptional()
   @IsString()
   careLevelCode?: string | null;
 
-  @ApiPropertyOptional({ description: 'TYPOLOGY_*', nullable: true })
+  @ApiPropertyOptional({
+    description: 'TYPOLOGY_*',
+    nullable: true,
+    type: String,
+  })
   @IsOptional()
   @IsString()
   typologyCode?: string | null;
 
-  @ApiPropertyOptional({ maxLength: 200, nullable: true })
+  @ApiPropertyOptional({ maxLength: 200, nullable: true, type: String })
   @IsOptional()
   @IsString()
   @MaxLength(200)
   managingEntityName?: string | null;
 
-  @ApiPropertyOptional({ maxLength: 200, nullable: true })
+  @ApiPropertyOptional({ maxLength: 200, nullable: true, type: String })
   @IsOptional()
   @IsString()
   @MaxLength(200)
   healthNetworkName?: string | null;
 
-  @ApiPropertyOptional({ description: 'SEDES_*', nullable: true })
+  @ApiPropertyOptional({ description: 'SEDES_*', nullable: true, type: String })
   @IsOptional()
   @IsString()
   sedesCode?: string | null;
 
-  @ApiPropertyOptional({ maxLength: 200, nullable: true })
+  @ApiPropertyOptional({ maxLength: 200, nullable: true, type: String })
   @IsOptional()
   @IsString()
   @MaxLength(200)
@@ -346,17 +366,17 @@ export class UpdateSiteLicenseDto {
   @MaxLength(100)
   resolutionNumber?: string;
 
-  @ApiPropertyOptional({ format: 'date', nullable: true })
+  @ApiPropertyOptional({ format: 'date', nullable: true, type: String })
   @IsOptional()
   @Matches(DATE)
   issuedOn?: string | null;
 
-  @ApiPropertyOptional({ format: 'date', nullable: true })
+  @ApiPropertyOptional({ format: 'date', nullable: true, type: String })
   @IsOptional()
   @Matches(DATE)
   expiresOn?: string | null;
 
-  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  @ApiPropertyOptional({ format: 'uuid', nullable: true, type: String })
   @IsOptional()
   @IsUUID()
   documentFileId?: string | null;

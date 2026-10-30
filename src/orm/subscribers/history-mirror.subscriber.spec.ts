@@ -94,6 +94,15 @@ describe('HistoryMirrorSubscriber', () => {
     expect(inserts).toEqual([]);
   });
 
+  it.each(['practice_sites', 'clinical_units', 'care_spaces'])(
+    'no duplica la historia que practice ya versiona (%s, F0/F1)',
+    async (table) => {
+      const { args, inserts } = flushArgs({ schema: 'practice', table });
+      await new HistoryMirrorSubscriber().afterFlush(args);
+      expect(inserts).toEqual([]);
+    },
+  );
+
   describe('tablas homónimas: resuelve por schema.tabla, no por nombre', () => {
     // `audit.groups_history.groups_id` apunta a `community.groups`
     // (fk_groups_history_groups_id); `medical_groups.groups` no tiene historial.
