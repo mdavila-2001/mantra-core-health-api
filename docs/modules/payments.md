@@ -94,9 +94,13 @@ deshabilitaría el endpoint en la pasarela).
   pasarela podría cobrarla (BOB, centavos enteros, vencimiento de 60 s a 24 h): si no, `422`
   y no queda fila. **Aquí no se cobra**: la evaluación de riesgo todavía no puede existir.
 - `POST /payments/intents/:id/transactions` despacha el cobro, detrás de la MISMA compuerta
-  que el camino de siempre (estado de la intención y evaluación de riesgo presente y no
-  `DECLINE`, una sola implementación en `assertRiskCleared`); si la compuerta no pasa, la
-  pasarela no recibe ninguna llamada. Con la pasarela una última evaluación `REVIEW` tampoco
+  que el camino de siempre, con las mismas funciones: estado de la intención, operación
+  abierta (`assertNoBlockingOpenOperation`), evaluación de riesgo presente y no `DECLINE`
+  (`assertRiskCleared`) y saldo (`assertWithinBalance`: la pasarela cobra el importe completo,
+  así que algo ya capturado por el camino de siempre lo excede y no se cobra). Una intención
+  `PI_PROCESSING` sin cobro en la pasarela tampoco se re-despacha (`409
+  PAYMENT_INTENT_ALREADY_PROCESSING`). Si la compuerta no pasa, la pasarela no recibe ninguna
+  llamada. Con la pasarela una última evaluación `REVIEW` tampoco
   deja cobrar (el camino de siempre la deja pasar, sin tocarlo). Exige `paymentMethodType`
   (`qr`, `card`, `bank_transfer`, `wallet`), sólo admite `SALE` y el importe completo, y llama
   a `POST /payment_intents` de la pasarela con

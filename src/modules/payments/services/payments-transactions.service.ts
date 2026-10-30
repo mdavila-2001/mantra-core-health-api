@@ -143,51 +143,20 @@ export class PaymentsTransactionsService {
         );
       }
 
-      // Una operación abierta impide otra que el proveedor pueda confirmar a la
-      // vez: sería un segundo cobro. Sobre una autorización confirmada sólo cabe
-      // capturarla; otra venta o autorización duplicaría el cargo.
-      const open = await this.transactionsRepo.findPendingByIntent(
+      const open = await this.assertNoBlockingOpenOperation(
         tx,
         intentId,
+        dto.operation,
       );
-      if (
-        open &&
-        (open.statusConceptId === CONCEPTS.TXN_PROCESSING ||
-          dto.operation !== 'CAPTURE')
-      ) {
-        throw new ConflictException(
-          'La intención tiene una operación abierta en el gateway',
-          {
-            intentId,
-            transactionId: open.id,
-            statusConceptId: open.statusConceptId,
-          },
-        );
-      }
 
       await this.assertRiskCleared(tx, intentId, false);
 
-      // MCH-036: el importe de la operación se mide contra lo que todavía se
-      // debe, no contra el de la intención. Antes se admitía cualquier importe y
-      // el saldo nunca se calculaba, así que una captura parcial podía cerrar la
-      // intención completa y una segunda podía cobrar de más.
-      const captured = await this.intentCaptured(tx, intentId);
-      const balance = subtractAmounts(intent.amount, captured);
-      // Sin importe explícito se pide el saldo pendiente, que en una intención
-      // intacta es el total.
-      const requested = dto.amount ?? balance;
-      if (!isPositiveAmount(requested)) {
-        throw new PreconditionFailedException(
-          'El importe a procesar debe ser mayor que cero',
-          { intentId, amount: requested },
-        );
-      }
-      if (compareAmounts(requested, balance) > 0) {
-        throw new ConflictException(
-          'El importe excede el saldo pendiente de la intención',
-          { intentId, amount: requested, captured: captured, balance: balance },
-        );
-      }
+      const { requested } = await this.assertWithinBalance(
+        tx,
+        intent,
+        intentId,
+        dto.amount,
+      );
       // Capturar más de lo autorizado es un cobro sin autorización del emisor.
       if (
         dto.operation === 'CAPTURE' &&
@@ -227,6 +196,71 @@ export class PaymentsTransactionsService {
         gatewayTransactionRef: dto.gatewayTransactionRef,
       };
     });
+  }
+
+  /**
+   * Una operación abierta impide otra que el proveedor pueda confirmar a la vez:
+   * sería un segundo cobro. Sobre una autorización confirmada sólo cabe
+   * capturarla; otra venta o autorización duplicaría el cargo. La usan el camino
+   * de siempre y el de la pasarela.
+   *
+   * @returns La operación abierta que no bloquea (una autorización a capturar), si hay.
+   */
+  private async assertNoBlockingOpenOperation(
+    tx: EntityManager,
+    intentId: string,
+    operation: TransactionOperation,
+  ) {
+    const open = await this.transactionsRepo.findPendingByIntent(tx, intentId);
+    if (
+      open &&
+      (open.statusConceptId === CONCEPTS.TXN_PROCESSING ||
+        operation !== 'CAPTURE')
+    ) {
+      throw new ConflictException(
+        'La intención tiene una operación abierta en el gateway',
+        {
+          intentId,
+          transactionId: open.id,
+          statusConceptId: open.statusConceptId,
+        },
+      );
+    }
+    return open;
+  }
+
+  /**
+   * MCH-036: el importe de la operación se mide contra lo que todavía se debe, no
+   * contra el de la intención. Antes se admitía cualquier importe y el saldo nunca
+   * se calculaba, así que una captura parcial podía cerrar la intención completa
+   * y una segunda podía cobrar de más. La usan el camino de siempre y el de la
+   * pasarela (que cobra el importe completo: con algo ya capturado, excede el saldo).
+   *
+   * @param explicitAmount - Importe pedido; sin él se toma el saldo pendiente, que
+   *   en una intención intacta es el total.
+   */
+  private async assertWithinBalance(
+    tx: EntityManager,
+    intent: { amount: string },
+    intentId: string,
+    explicitAmount: string | undefined,
+  ): Promise<{ requested: string; captured: string; balance: string }> {
+    const captured = await this.intentCaptured(tx, intentId);
+    const balance = subtractAmounts(intent.amount, captured);
+    const requested = explicitAmount ?? balance;
+    if (!isPositiveAmount(requested)) {
+      throw new PreconditionFailedException(
+        'El importe a procesar debe ser mayor que cero',
+        { intentId, amount: requested },
+      );
+    }
+    if (compareAmounts(requested, balance) > 0) {
+      throw new ConflictException(
+        'El importe excede el saldo pendiente de la intención',
+        { intentId, amount: requested, captured: captured, balance: balance },
+      );
+    }
+    return { requested, captured, balance };
   }
 
   /** La intención no está cobrada ni cancelada: es lo primero que exige cualquier cobro. */
@@ -339,10 +373,26 @@ export class PaymentsTransactionsService {
           PaymentsErrorReason.PAYMENT_GATEWAY_AMOUNT_MUST_MATCH_INTENT,
         );
       }
-      // Ya despachada antes: no se vuelve a evaluar ni a crear; se consulta.
-      if (!found.gatewayIntentRef) {
-        await this.assertRiskCleared(tx, intentId, true);
+      // Ya despachada antes: es el reintento con la MISMA clave (regla 11); no
+      // se vuelve a evaluar ni a crear, se consulta.
+      if (found.gatewayIntentRef) return found;
+
+      // Sin cobro en la pasarela, una intención `PI_PROCESSING` tiene una
+      // operación del camino de siempre en marcha: cobrarla otra vez duplicaría
+      // el cargo. Mismas compuertas que el camino de siempre, en su mismo orden:
+      // operación abierta, riesgo y saldo.
+      if (found.statusConceptId === CONCEPTS.PI_PROCESSING) {
+        throw new ConflictException(
+          'La intención ya está en proceso y no tiene un cobro en la pasarela',
+          { intentId },
+          PaymentsErrorReason.PAYMENT_INTENT_ALREADY_PROCESSING,
+        );
       }
+      await this.assertNoBlockingOpenOperation(tx, intentId, dto.operation);
+      await this.assertRiskCleared(tx, intentId, true);
+      // La pasarela cobra el importe completo: si ya hay algo capturado por el
+      // camino de siempre, excede el saldo y no se despacha (sobrecobro).
+      await this.assertWithinBalance(tx, found, intentId, found.amount);
       return found;
     });
 
