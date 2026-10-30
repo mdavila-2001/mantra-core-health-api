@@ -26,6 +26,7 @@ import {
   type RiskDecision,
 } from '../dto';
 import { PaymentsErrorReason } from '../payments.error-reasons';
+import { isDispatchMark } from '../gateway/payments-gateway-dispatch-mark';
 import { PaymentsGatewayChargeService } from './payments-gateway-charge.service';
 import {
   addAmounts,
@@ -272,7 +273,12 @@ export class PaymentsIntentsService {
 
       // Un DECLINE pasa la intención a `failed`; con el cobro ya creado en la
       // pasarela eso dejaría un cobro vivo contra una intención dada por perdida.
-      if (dto.decision === 'DECLINE')
+      // Con una simple RESERVA (sin `pi_…`) el `DECLINE` sí se registra —es la
+      // palanca que frena el reintento si el envío nunca llegó—, pero no pasa la
+      // intención a `failed`: la pasarela pudo haber creado el cobro y, fallada, la
+      // deuda se ofrecería a otra intención.
+      const reservedOnly = isDispatchMark(intent.gatewayIntentRef);
+      if (dto.decision === 'DECLINE' && !reservedOnly)
         this.assertNotDispatched(intent, intentId);
 
       const riskLevel = this.deriveRiskLevel(dto.riskScore);
@@ -290,7 +296,12 @@ export class PaymentsIntentsService {
         actorUserId: actor.id,
       });
 
-      if (dto.decision === 'DECLINE') {
+      if (dto.decision === 'DECLINE' && reservedOnly) {
+        this.logger.warn(
+          { operation: 'payments.intent.risk', intentId },
+          'Risk DECLINE recorded on an intent with a dispatch reservation; status kept so the debt stays blocked until reconciled',
+        );
+      } else if (dto.decision === 'DECLINE') {
         intent.statusConceptId = CONCEPTS.PI_FAILED;
         touch(intent, actor.id);
         this.logger.warn(

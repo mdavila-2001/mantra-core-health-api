@@ -263,6 +263,53 @@ describe('PaymentsGatewayClient (contra el doble HTTP)', () => {
         },
       );
 
+      it.each([
+        ['un JSON ajeno con un campo code', { code: 'upstream_blocked' }],
+        [
+          'un problema sin type del contrato',
+          { code: 'blocked', title: 'x', status: 404 },
+        ],
+        [
+          'un type que no es del contrato',
+          {
+            type: 'https://waf.example/blocked',
+            title: 'x',
+            status: 404,
+            code: 'blocked',
+          },
+        ],
+        [
+          'un status fuera de 400-599',
+          {
+            type: 'urn:alovida:pay:problem:blocked',
+            title: 'x',
+            status: 200,
+            code: 'blocked',
+          },
+        ],
+        [
+          'un code con mayúsculas',
+          {
+            type: 'urn:alovida:pay:problem:blocked',
+            title: 'x',
+            status: 404,
+            code: 'Blocked',
+          },
+        ],
+      ])(
+        'D3: un 404 con %s NO es un problema del contrato: ambiguo',
+        async (_name, body) => {
+          double.script = [{ kind: 'foreign_json', status: 404, body }];
+
+          const error = (await client()
+            .createPaymentIntent(BODY, KEY)
+            .catch((e: unknown) => e)) as PaymentsGatewayError;
+
+          expect(error.ambiguity).toBe('ambiguous');
+          expect(error.isAmbiguous).toBe(true);
+        },
+      );
+
       it('control: el mismo 400 CON problema del contrato sí es definitivo', async () => {
         double.script = [
           { kind: 'status', status: 400, code: 'invalid_request' },

@@ -139,9 +139,7 @@ deshabilitaría el endpoint en la pasarela).
   final aunque el último intento sea un `4xx`, y `422 idempotency_key_reused` prueba que el
   cobro existe. Un resultado ambiguo (`504`) la conserva. Cada petición escribe su propio
   valor de marca y libera sólo el suyo (una segunda petición de la misma intención que sigue
-  en vuelo conserva el suyo). Un reintento con marca no vuelve a evaluar el riesgo (el riesgo
-  se evaluó antes de reservar y un `REVIEW` posterior no impide recuperar un cobro que pudo
-  crearse). La marca no es un cobro: nunca se consulta ni
+  en vuelo conserva el suyo). Un reintento con marca SÍ vuelve a evaluar el riesgo: si el primer envío nunca llegó, el reintento crea el cobro por primera vez y no puede hacerlo bajo una revisión pendiente. Con sólo una reserva (sin `pi_…`) el `DECLINE` se puede registrar —es la palanca que frena el reintento— pero no pasa la intención a `failed` (la deuda sigue bloqueada); con un `pi_…` asociado sigue siendo `409`. La marca no es un cobro: nunca se consulta ni
   resuelve un webhook.
 - **Una marca no vence como permiso para cobrar.** La ambigüedad no prueba que la pasarela
   no ejecutó la operación (regla 11), así que una marca bloquea a las OTRAS intenciones de
@@ -152,14 +150,31 @@ deshabilitaría el endpoint en la pasarela).
   `409` con `details.reconciliationRequired` y
   `PaymentsGatewayChargeService.listDispatchesRequiringReconciliation(tenantId)` las lista.
   La salida es `PaymentsTransactionsService.reconcileGatewayDispatch(intentId, { paymentMethodType })`
-  (servicio, sin endpoint): reenvía la MISMA creación con la MISMA `Idempotency-Key`; si la
+  (ruta administrativa, abajo): reenvía la MISMA creación con la MISMA `Idempotency-Key`; si la
   pasarela ya tenía el cobro (`replayed`) lo asocia y consulta su estado vigente, y si
   nunca llegó lo crea una sola vez para ESA intención. Necesita el mismo `paymentMethodType`
   de la primera vez (no se persiste). Reintentar `/transactions` con la misma intención
   hace lo mismo. Con la marca de más de 23 h (la pasarela retiene la clave 24 h) o con la
-  fecha ilegible **no reenvía**: `409 PAYMENT_GATEWAY_RECONCILIATION_REQUIRED` y la
-  conciliación es manual contra la pasarela. Un reintento que vuelve a terminar ambiguo
+  fecha ilegible **no reenvía**: `409 PAYMENT_GATEWAY_RECONCILIATION_REQUIRED`; se cierra a
+  mano (abajo). Un reintento que vuelve a terminar ambiguo
   conserva la fecha original de la marca.
+- **Rutas administrativas de las reservas** (`PAYMENTS_ADMIN`; el tenant sale SIEMPRE del
+  contexto verificado, nunca de la ruta ni del cuerpo; las respuestas no llevan datos de
+  pacientes ni de pagadores; las dos que mutan llevan `@Audited`):
+  `GET /payments/gateway-dispatches/pending-reconciliation` lista las reservas que requieren
+  conciliación (`paymentIntentId`, `ageMs`, `canReconcile`);
+  `POST /payments/gateway-dispatches/:intentId/reconcile` `{ paymentMethodType }` concilia
+  (exige riesgo aprobado); `POST /payments/gateway-dispatches/:intentId/close` `{ reason }`
+  (10 a 300 caracteres, sin datos personales) **cierra a mano** una reserva que ya requiere
+  conciliación: no contacta a la pasarela, pasa la intención a `PI_CANCELED`, conserva la marca
+  como rastro y libera la deuda. Si la pasarela había creado el cobro queda huérfano (expira
+  solo); quien cierra se hace cargo de haberlo comprobado. Una reserva que puede seguir en
+  vuelo no se cierra (`409 PAYMENT_GATEWAY_DISPATCH_IN_FLIGHT`). El motivo queda en el log
+  estructurado `payments.gateway.dispatch-closed`; la auditoría guarda quién, cuándo y qué
+  intención (`audit.audit_log`) y el historial de la fila el cambio de estado. La
+  prueba de `problem` del contrato exige la forma de `problem.schema.json` (`type`
+  `urn:alovida:pay:problem:*`, `title`, `status` 4xx/5xx, `code`): un JSON ajeno con un
+  campo `code` no cuenta.
 - **La compuerta falla cerrado.** Una intención sin sesión de checkout que parece cobrar
   una deuda —propósito `DEBT`, o `sourceRefType`/`sourceRefId` con un tipo que no sea
   `payment_debt` ni uno conocido como ajeno a las deudas (hoy sólo `EDUCATION_COURSE`,

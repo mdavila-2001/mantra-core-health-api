@@ -104,6 +104,8 @@ export enum PaymentsErrorReason {
   PAYMENT_GATEWAY_RECONCILIATION_REQUIRED = 'PAYMENT_GATEWAY_RECONCILIATION_REQUIRED',
   /** Demasiados cobros por la pasarela en curso en este proceso (límite de concurrencia con RLS): reintentable con la misma clave. */
   PAYMENT_GATEWAY_BUSY = 'PAYMENT_GATEWAY_BUSY',
+  /** La reserva de despacho todavía puede estar en vuelo: no se cierra a mano. */
+  PAYMENT_GATEWAY_DISPATCH_IN_FLIGHT = 'PAYMENT_GATEWAY_DISPATCH_IN_FLIGHT',
   /** La intención no tiene una reserva de despacho pendiente: no hay nada que conciliar. */
   PAYMENT_GATEWAY_NOTHING_TO_RECONCILE = 'PAYMENT_GATEWAY_NOTHING_TO_RECONCILE',
   /** Los webhooks de la pasarela están desactivados (`payments.via_gateway` apagado). */

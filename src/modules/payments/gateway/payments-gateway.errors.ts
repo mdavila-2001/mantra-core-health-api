@@ -77,11 +77,28 @@ export class PaymentsGatewayError extends Error {
   }
 }
 
+const PROBLEM_CODE = /^[a-z][a-z0-9_]*$/u;
+const PROBLEM_TYPE = /^urn:alovida:pay:problem:[a-z][a-z0-9_]*$/u;
+
 /** Extrae un `GatewayProblem` válido del cuerpo de una respuesta de error, si lo es. */
 export function parseProblem(body: unknown): GatewayProblem | undefined {
   if (typeof body !== 'object' || body === null) return undefined;
   const candidate = body as Record<string, unknown>;
-  if (typeof candidate.code !== 'string') return undefined;
+  // La forma de `problem.schema.json`: un JSON ajeno con un campo `code` (el de un
+  // proxy, un WAF) no es un problema del contrato y no prueba nada sobre la operación.
+  if (
+    typeof candidate.code !== 'string' ||
+    !PROBLEM_CODE.test(candidate.code) ||
+    typeof candidate.type !== 'string' ||
+    !PROBLEM_TYPE.test(candidate.type) ||
+    typeof candidate.title !== 'string' ||
+    candidate.title.length === 0 ||
+    !Number.isInteger(candidate.status) ||
+    (candidate.status as number) < 400 ||
+    (candidate.status as number) > 599
+  ) {
+    return undefined;
+  }
   return {
     code: candidate.code,
     status: typeof candidate.status === 'number' ? candidate.status : undefined,

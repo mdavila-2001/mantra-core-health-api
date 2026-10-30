@@ -51,6 +51,9 @@ export const MAX_RESEND_AGE_MS = GATEWAY_IDEMPOTENCY_RETENTION_MS - 3_600_000;
 /** Tope del backoff entre reintentos del cliente (ver `PaymentsGatewayClient.send`). */
 const CLIENT_MAX_DELAY_MS = 5_000;
 
+/** Deriva de reloj tolerada entre réplicas al leer la fecha de una marca. */
+const MAX_CLOCK_SKEW_MS = 5 * 60_000;
+
 const MARK_PATTERN = /^dispatching:(\d{10,16}):[0-9a-f-]{36}$/u;
 
 /** Valor nuevo de marca, fechado en `nowMs`. */
@@ -84,7 +87,10 @@ export function dispatchMarkAgeMs(
   nowMs: number,
 ): number | undefined {
   const stamp = dispatchMarkStamp(ref);
-  return stamp === undefined ? undefined : Math.max(0, nowMs - stamp);
+  if (stamp === undefined) return undefined;
+  // Una fecha más allá de la deriva de reloj razonable es ilegible, no «reciente».
+  if (stamp - nowMs > MAX_CLOCK_SKEW_MS) return undefined;
+  return Math.max(0, nowMs - stamp);
 }
 
 /**

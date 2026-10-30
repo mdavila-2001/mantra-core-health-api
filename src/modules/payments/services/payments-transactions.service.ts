@@ -28,6 +28,8 @@ import {
   RefundResponseDto,
   CreateCancellationDto,
   CancellationResponseDto,
+  PendingGatewayDispatchDto,
+  ClosedGatewayDispatchDto,
   type TransactionOperation,
 } from '../dto';
 import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
@@ -47,6 +49,7 @@ import {
 } from './payments-gateway-charge.service';
 import { runCommitted } from './payments-committed-transaction';
 import {
+  MIN_DISPATCH_LEASE_MS,
   canResendWithSameKey,
   classifyInFlight,
   isDispatchMark,
@@ -348,6 +351,99 @@ export class PaymentsTransactionsService {
   }
 
   /**
+   * Reservas de despacho del tenant de la petición que requieren conciliación
+   * (más viejas que el plazo, o con la fecha ilegible). El tenant sale SIEMPRE del
+   * contexto verificado, nunca de un parámetro.
+   */
+  async listGatewayDispatchesRequiringReconciliation(): Promise<
+    PendingGatewayDispatchDto[]
+  > {
+    const tenantId = requireTenantId();
+    const pending =
+      (await this.gatewayCharge?.listDispatchesRequiringReconciliation(
+        tenantId,
+      )) ?? [];
+    return pending.map((row) => ({
+      paymentIntentId: row.intentId,
+      ageMs: row.ageMs,
+      canReconcile: row.canReconcile,
+    }));
+  }
+
+  /**
+   * Cierre manual de una reserva de despacho que ya no se puede (o no se debe)
+   * conciliar reenviando: pasadas las 23 h, con la fecha ilegible, o cuando quien
+   * opera comprobó contra la pasarela que no hay nada que asociar.
+   *
+   * **No reenvía nada a la pasarela.** Pasa la intención a `PI_CANCELED` —no se
+   * reutiliza— y conserva la marca como rastro, con lo que la deuda deja de estar
+   * bloqueada por ella. Si la pasarela SÍ había creado el cobro, queda huérfano
+   * (expira solo) y su webhook terminal no encontrará intención: quien cierra se
+   * hace cargo de haberlo comprobado, y por eso el motivo es obligatorio. Queda el
+   * sello de auditoría de la ruta (quién, cuándo, qué intención), el historial de
+   * la fila y el motivo en el log estructurado.
+   *
+   * Sólo cierra una reserva que ya requiere conciliación: cerrar una que puede
+   * seguir en vuelo crearía el doble cobro que la reserva evita.
+   *
+   * @throws ConflictException si no hay reserva, o si todavía puede estar en vuelo.
+   */
+  async closeGatewayDispatch(
+    intentId: string,
+    reason: string,
+    actor: AuthenticatedUser,
+  ): Promise<ClosedGatewayDispatchDto> {
+    const tenantId = requireTenantId();
+    const leaseMs =
+      this.gatewayCharge?.dispatchLeaseMs ?? MIN_DISPATCH_LEASE_MS;
+    const closed = await runCommitted(this.em, tenantId, async (tx) => {
+      const loaded = await this.intentsRepo.findByIdAndTenantForUpdate(
+        tx,
+        intentId,
+        tenantId,
+      );
+      const found = assertResourceInTenant(loaded, loaded?.tenantId, tenantId, {
+        message: 'Intención de pago no encontrada',
+        reason: PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
+      });
+      if (!isDispatchMark(found.gatewayIntentRef)) {
+        throw new ConflictException(
+          'La intención no tiene una reserva de despacho que cerrar',
+          { intentId },
+          PaymentsErrorReason.PAYMENT_GATEWAY_NOTHING_TO_RECONCILE,
+        );
+      }
+      if (
+        classifyInFlight(found, Date.now(), leaseMs) !==
+        'reconciliation_required'
+      ) {
+        throw new ConflictException(
+          'La reserva puede seguir en vuelo: cerrarla ahora podría permitir un segundo cobro. Esperá a que requiera conciliación',
+          { intentId },
+          PaymentsErrorReason.PAYMENT_GATEWAY_DISPATCH_IN_FLIGHT,
+        );
+      }
+      found.statusConceptId = CONCEPTS.PI_CANCELED;
+      touch(found, actor.id);
+      return {
+        paymentIntentId: found.id,
+        statusConceptId: found.statusConceptId,
+      };
+    });
+    gatewayMetrics.reconciled('closed_manually');
+    this.logger.warn(
+      {
+        operation: 'payments.gateway.dispatch-closed',
+        intentId,
+        actorUserId: actor.id,
+        reason,
+      },
+      'Gateway dispatch reservation closed manually without contacting the gateway',
+    );
+    return closed;
+  }
+
+  /**
    * Conciliación explícita de una reserva de despacho sin `pi_…` (la llamada anterior
    * terminó ambigua, o el proceso murió antes de asociar).
    *
@@ -575,12 +671,12 @@ export class PaymentsTransactionsService {
         );
       }
       await this.assertNoBlockingOpenOperation(tx, intentId, dto.operation);
-      // Una intención que ya tiene su reserva pudo haber creado un cobro que SÍ
-      // existe: el riesgo ya se evaluó antes de reservar y un `REVIEW` posterior no
-      // puede impedir recuperarlo (igual que con un `pi_…`, que sale antes).
-      if (!isDispatchMark(found.gatewayIntentRef)) {
-        await this.assertRiskCleared(tx, intentId, true);
-      }
+      // También con reserva: si el primer envío NUNCA llegó, el reintento crea el
+      // cobro por primera vez (con su QR) y no puede hacerlo bajo una revisión de
+      // riesgo pendiente. Bloquear el reintento no expone dinero —el QR sólo viaja
+      // en la respuesta de creación—; a lo sumo queda un cobro huérfano que se
+      // concilia. Un `APPROVE` posterior lo destraba; si no, se cierra a mano.
+      await this.assertRiskCleared(tx, intentId, true);
       // La pasarela cobra el importe completo: si ya hay algo capturado por el
       // camino de siempre, excede el saldo y no se despacha (sobrecobro).
       await this.assertWithinBalance(tx, found, intentId, found.amount);

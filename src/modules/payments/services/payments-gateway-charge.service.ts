@@ -16,6 +16,7 @@ import {
 } from '../gateway/payments-gateway.env';
 import { PaymentsGatewayClient } from '../gateway/payments-gateway.client';
 import {
+  canResendWithSameKey,
   classifyInFlight,
   dispatchLeaseMs,
   dispatchMarkAgeMs,
@@ -221,7 +222,9 @@ export class PaymentsGatewayChargeService {
    */
   async listDispatchesRequiringReconciliation(
     tenantId: string,
-  ): Promise<{ intentId: string; ageMs: number | null }[]> {
+  ): Promise<
+    { intentId: string; ageMs: number | null; canReconcile: boolean }[]
+  > {
     const nowMs = Date.now();
     const marked = await this.intentsRepo.findDispatchMarksByTenant(
       this.em,
@@ -236,6 +239,7 @@ export class PaymentsGatewayChargeService {
       .map((row) => ({
         intentId: row.id,
         ageMs: dispatchMarkAgeMs(row.gatewayIntentRef, nowMs) ?? null,
+        canReconcile: canResendWithSameKey(row.gatewayIntentRef, nowMs),
       }));
   }
 

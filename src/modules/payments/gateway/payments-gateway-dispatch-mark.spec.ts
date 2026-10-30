@@ -46,10 +46,28 @@ describe('marca de despacho', () => {
     });
 
     it('límite: una marca fechada en el futuro tiene antigüedad 0, no negativa', () => {
-      expect(dispatchMarkAgeMs(newDispatchMark(NOW + HOUR), NOW)).toBe(0);
+      expect(dispatchMarkAgeMs(newDispatchMark(NOW + 2 * MIN), NOW)).toBe(0);
+    });
+
+    it('D4: una fecha más allá de la deriva de reloj tolerada (5 min) es ilegible, no «reciente»', () => {
+      expect(dispatchMarkAgeMs(newDispatchMark(NOW + 4 * MIN), NOW)).toBe(0);
+      expect(
+        dispatchMarkAgeMs(newDispatchMark(NOW + 6 * MIN), NOW),
+      ).toBeUndefined();
+      expect(
+        classifyInFlight(
+          { gatewayIntentRef: newDispatchMark(NOW + 3 * HOUR) },
+          NOW,
+          15 * MIN,
+        ),
+      ).toBe('reconciliation_required');
     });
 
     it.each([
+      [
+        'formato anterior sin fecha (dispatching:<uuid>)',
+        'dispatching:123e4567-e89b-12d3-a456-426614174000',
+      ],
       ['otro formato', 'dispatching:x'],
       ['sin uuid', `dispatching:${NOW}`],
       [

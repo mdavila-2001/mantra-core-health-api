@@ -46,6 +46,8 @@ export type DoubleFault =
   | { kind: 'execute_then_hang'; ms: number }
   /** Responde un estado HTTP SIN cuerpo (lo que haría un proxy): no es un problema del contrato. */
   | { kind: 'bare_status'; status: number }
+  /** Responde un estado HTTP con un JSON AJENO al contrato (p. ej. el de un WAF con un campo `code`). */
+  | { kind: 'foreign_json'; status: number; body: unknown }
   /** Responde con un problema sin ejecutar nada. */
   | { kind: 'status'; status: number; code: string; retryAfter?: number }
   /** Responde 201 con un cuerpo que no cumple el contrato (la operación SÍ se ejecutó). */
@@ -191,6 +193,10 @@ export class PayGatewayDouble {
     }
 
     if (fault?.kind === 'drop_before') return void req.socket.destroy();
+    if (fault?.kind === 'foreign_json') {
+      res.writeHead(fault.status, { 'Content-Type': 'application/json' });
+      return void res.end(JSON.stringify(fault.body));
+    }
     if (fault?.kind === 'bare_status') {
       res.writeHead(fault.status);
       return void res.end();

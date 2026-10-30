@@ -241,6 +241,15 @@ describeIt(
             runWithTenant(tenant, () =>
               transactionsService.processTransaction(id, body, who),
             ),
+          closeGatewayDispatch: (
+            id: string,
+            reason: string,
+            who: AuthenticatedUser,
+            tenant: string = TENANT,
+          ) =>
+            runWithTenant(tenant, () =>
+              transactionsService.closeGatewayDispatch(id, reason, who),
+            ),
           reconcileGatewayDispatch: (
             id: string,
             body: Pick<ProcessTransactionDto, 'paymentMethodType'>,
@@ -2167,19 +2176,99 @@ describeIt(
         },
       );
 
-      it('P9: un riesgo REVIEW posterior al 504 no impide recuperar el cobro que SÍ se creó', async () => {
+      it.each([
+        ['REVIEW', 'REVIEW' as const],
+        ['DECLINE', 'DECLINE' as const],
+      ])(
+        'D1: el primer envío NUNCA llegó y se registra %s sobre la reserva (por la API real): el reintento NO crea cobro y la deuda sigue bloqueada',
+        async (_name, decision) => {
+          const { a, b } = await sameDebtPair();
+          double.script = [
+            { kind: 'drop_before' },
+            { kind: 'drop_before' },
+            { kind: 'drop_before' },
+          ];
+          await expectDomainError(
+            on.transactions.processTransaction(a.id, sale(), actor),
+            504,
+          );
+          expect(double.createdCount).toBe(0);
+          await on.intents.assessRisk(
+            a.id,
+            { riskScore: '90', decision },
+            actor,
+          );
+          const posts = double.postCalls.length;
+
+          await expectDomainError(
+            on.transactions.processTransaction(a.id, sale(), actor),
+            422,
+            decision === 'REVIEW'
+              ? PaymentsErrorReason.PAYMENT_INTENT_RISK_REVIEW_PENDING
+              : PaymentsErrorReason.PAYMENT_INTENT_RISK_DECLINED,
+          );
+
+          expect(double.postCalls).toHaveLength(posts);
+          expect(double.createdCount).toBe(0);
+          const snap = await snapshot(a);
+          expect(snap.intent.status_concept_id).toBe(CONCEPTS.PI_PENDING);
+          expect(snap.intent.gateway_intent_ref).toMatch(/^dispatching:/u);
+          await expectDomainError(
+            on.transactions.processTransaction(b.id, sale(), actor),
+            409,
+            PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+          );
+        },
+      );
+
+      it('D1: despachar y registrar un DECLINE a la vez, 30 rondas: ningún POST llega a la pasarela con un DECLINE ya registrado', async () => {
+        double.latencyMs = 15;
+        const violations: string[] = [];
+        for (let round = 0; round < 30; round += 1) {
+          double.created.clear();
+          double.calls.length = 0;
+          const { a } = await sameDebtPair();
+          double.onCreate = async () => {
+            const [{ n }] = await rows<{ n: number }>(
+              `select count(*)::int as n from payments.risk_assessments where payment_intent_id = ? and decision_concept_id = ?`,
+              [a.id, CONCEPTS.RISK_DECLINE],
+            );
+            if (n > 0) violations.push(`ronda ${round}: POST con DECLINE`);
+          };
+          await Promise.allSettled([
+            on.transactions.processTransaction(a.id, sale(), actor),
+            on.intents.assessRisk(
+              a.id,
+              { riskScore: '95', decision: 'DECLINE' },
+              actor,
+            ),
+          ]);
+          double.onCreate = undefined;
+        }
+        expect(violations).toEqual([]);
+      });
+
+      it('D1: un APPROVE posterior destraba el reintento de la reserva', async () => {
         const { a } = await sameDebtPair();
         double.script = [
-          { kind: 'execute_then_drop' },
-          { kind: 'execute_then_drop' },
-          { kind: 'execute_then_drop' },
+          { kind: 'drop_before' },
+          { kind: 'drop_before' },
+          { kind: 'drop_before' },
         ];
         await expectDomainError(
           on.transactions.processTransaction(a.id, sale(), actor),
           504,
         );
-        expect(double.createdCount).toBe(1);
-        await assess(a.id, 'REVIEW');
+        await on.intents.assessRisk(
+          a.id,
+          { riskScore: '90', decision: 'REVIEW' },
+          actor,
+        );
+        await on.intents.assessRisk(
+          a.id,
+          { riskScore: '5', decision: 'APPROVE' },
+          actor,
+        );
 
         const res = await on.transactions.processTransaction(
           a.id,
@@ -2187,10 +2276,52 @@ describeIt(
           actor,
         );
 
-        expect(res.gatewayTransactionRef).toBe(
-          double.created.get(a.gatewayKey)?.intent.id,
-        );
+        expect(res.gatewayTransactionRef).toMatch(/^pi_/u);
         expect(double.createdCount).toBe(1);
+      });
+
+      it('D2: el cierre manual de una reserva vencida cancela la intención sin llamar a la pasarela y libera la deuda', async () => {
+        const { a, b } = await sameDebtPair();
+        double.script = [
+          { kind: 'drop_before' },
+          { kind: 'drop_before' },
+          { kind: 'drop_before' },
+        ];
+        await expectDomainError(
+          on.transactions.processTransaction(a.id, sale(), actor),
+          504,
+        );
+        await expectDomainError(
+          on.transactions.closeGatewayDispatch(
+            a.id,
+            'Verificado en la consola de la pasarela: no hay cobro',
+            actor,
+          ),
+          409,
+          PaymentsErrorReason.PAYMENT_GATEWAY_DISPATCH_IN_FLIGHT,
+        );
+        await run(
+          `update payments.payment_intents set gateway_intent_ref = ? where id = ?`,
+          [
+            newDispatchMark(Date.now() - on.charge.dispatchLeaseMs - 3_600_000),
+            a.id,
+          ],
+        );
+        const calls = double.calls.length;
+
+        const closed = await on.transactions.closeGatewayDispatch(
+          a.id,
+          'Verificado en la consola de la pasarela: no hay cobro',
+          actor,
+        );
+
+        expect(closed.statusConceptId).toBe(CONCEPTS.PI_CANCELED);
+        expect(double.calls).toHaveLength(calls);
+        expect((await snapshot(a)).intent.status_concept_id).toBe(
+          CONCEPTS.PI_CANCELED,
+        );
+        await on.transactions.processTransaction(b.id, sale(), actor);
+        expect(postsFor(b)).toHaveLength(1);
       });
     });
   },
