@@ -69,8 +69,8 @@ interface SyncPlan {
  * 4. Crea el lote y lo concilia con los casos de uso de siempre, en proceso
  *    (por HTTP son solo de la plataforma).
  * 5. Aplica cada ítem conciliado con el escritor de stock por sede
- *    (`SiteStockWriter`, `MV_SYNC_ADJUSTMENT`, origen = el lote), que
- *    inicializa la sede si hace falta. Si este paso falla, el lote queda
+ *    (`SiteStockWriter`, `MV_SYNC_ADJUSTMENT`, origen = el lote); los
+ *    productos sin vínculo no se tocan. Si este paso falla, el lote queda
  *    conciliado como rastro y la respuesta es el error.
  */
 @Injectable()

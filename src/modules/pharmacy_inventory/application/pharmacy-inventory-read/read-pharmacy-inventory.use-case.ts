@@ -208,8 +208,8 @@ export class ReadPharmacyInventoryUseCase {
     const now = new Date();
     const [availabilityRows, locations, allPriceLists, practiceContext] =
       await Promise.all([
-        // La regla única de existencias por sede (A1): lotes si la sede los
-        // lleva, lo declarado en el catálogo si no.
+        // La regla única de existencias por sede (A1): lotes si el producto
+        // tiene posición en la sede, lo declarado en el catálogo si no.
         this.inventoryRepo.findSiteProductAvailability(
           em,
           sites.map((site) => site.id),
@@ -264,7 +264,7 @@ export class ReadPharmacyInventoryUseCase {
     const listById = new Map(priceLists.map((list) => [list.id, list]));
 
     // Disponible por sede y producto: la fila existe sólo si está disponible;
-    // la cantidad es `null` si la sede no lleva lotes y no declaró conteo.
+    // la cantidad es `null` si no tiene posición y no se declaró conteo.
     const availableBySite = new Map<string, Map<string, number | null>>();
     for (const row of availabilityRows) {
       const perProduct =
