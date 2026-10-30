@@ -135,6 +135,27 @@ describe('evaluatePrescriptionOrder', () => {
     ).toBeNull();
   });
 
+  it('con decimales la comparación es exacta: dos líneas de 0.1 y 0.2 caben en 0.3', () => {
+    const prescription = rx({
+      drugs: [{ medicationConceptId: X, remaining: 0.3 }],
+    });
+    expect(
+      evaluatePrescriptionOrder({
+        prescription,
+        lines: [line('prod-x1', X, 0.1), line('prod-x2', X, 0.2)],
+      }),
+    ).toBeNull();
+    expect(
+      evaluatePrescriptionOrder({
+        prescription,
+        lines: [line('prod-x1', X, 0.1), line('prod-x2', X, 0.21)],
+      }),
+    ).toEqual({
+      reason: 'QUANTITY_EXCEEDS_PRESCRIPTION',
+      productIds: ['prod-x1', 'prod-x2'],
+    });
+  });
+
   it('saldo en cero rechaza cualquier cantidad', () => {
     expect(
       evaluatePrescriptionOrder({

@@ -230,6 +230,41 @@ describe('PrescriptionOrderGuard', () => {
     );
   });
 
+  it('con decimales el saldo es exacto: recetado 0.3, entregado 0.1, pedido 0.2 → pasa', async () => {
+    const { balances, guard } = build();
+    balances.balanceByConcept.mockResolvedValue({
+      dispensed: new Map([['concept-x', 0.1]]),
+      reserved: new Map(),
+    });
+    const prescription = locked(item({ quantity: 0.3 }));
+    const products = [product('prod-x', 'concept-x')];
+
+    await expect(
+      guard.assertOrderRespectsPrescription(em, prescription, products, [
+        { productId: 'prod-x', quantity: 0.2 },
+      ]),
+    ).resolves.toBeUndefined();
+    const error = await failureOf(
+      guard.assertOrderRespectsPrescription(em, prescription, products, [
+        { productId: 'prod-x', quantity: 0.21 },
+      ]),
+    );
+    expect(error.reason).toBe('QUANTITY_EXCEEDS_PRESCRIPTION');
+  });
+
+  it('con decimales lo recetado de dos ítems se suma exacto: 0.1 + 0.2 alcanza para 0.3', async () => {
+    const { guard } = build();
+
+    await expect(
+      guard.assertOrderRespectsPrescription(
+        em,
+        locked(item({ quantity: 0.1 }), [item({ id: 'rx-2', quantity: 0.2 })]),
+        [product('prod-x', 'concept-x')],
+        [{ productId: 'prod-x', quantity: 0.3 }],
+      ),
+    ).resolves.toBeUndefined();
+  });
+
   it('unidades distintas del mismo fármaco no se comparan', async () => {
     const { balances, guard } = build();
 

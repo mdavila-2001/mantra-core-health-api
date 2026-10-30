@@ -25,6 +25,25 @@ export const RESERVING_ORDER_STATUS_IDS: readonly string[] = [
   PINV.ORDER_LISTO_PARA_RETIRO,
 ];
 
+/**
+ * Estados de **línea** de pedido que no retienen nada contra la receta, aunque
+ * el pedido siga vivo. El contrato FAR-03 §2 dice «reservado en pedidos
+ * activos», y eso manda sobre el `requested − fulfilled` de REQ-003 para estas
+ * líneas:
+ *
+ * - `SIN_STOCK`: se guarda con `reserved_quantity = 0` (al crear el pedido, o
+ *   cuando la farmacia la marca `NO_DISPONIBLE` al confirmar). No hay nada
+ *   reservado y no se puede entregar.
+ * - `RELEASED`: en un pedido vivo, la deja la aceptación del genérico. El
+ *   stock del original se devuelve, y su total se vuelve a reservar sobre la
+ *   línea del genérico, que es del mismo fármaco. Contarla descontaría dos
+ *   veces. La entrega solo toma líneas `CONFIRMED`, así que nunca se entrega.
+ */
+export const NON_RESERVING_LINE_STATUS_IDS: readonly string[] = [
+  PINV.RES_LINE_OUT_OF_STOCK,
+  PINV.RES_LINE_RELEASED,
+];
+
 /** Lo entregado y lo reservado de una receta, por fármaco. */
 export interface PrescriptionBalanceByConcept {
   dispensed: Map<string, number>;
@@ -141,8 +160,10 @@ export class PrescriptionBalanceRepository {
    * - Entregado: suma de `dispensed_quantity` de las dispensaciones
    *   `DISPENSED` de esas recetas (una revertida no cuenta).
    * - Reservado: `requested_quantity − fulfilled_quantity` (nunca negativo) de
-   *   las líneas de pedidos de esas recetas en un estado de `activeStatusIds`.
-   *   Lo ya entregado de un pedido vivo lo cuenta su dispensación.
+   *   las líneas de pedidos de esas recetas en un estado de `activeStatusIds`,
+   *   salvo las líneas `SIN_STOCK` y `RELEASED`
+   *   ({@link NON_RESERVING_LINE_STATUS_IDS}), que no retienen nada. Lo ya entregado de un pedido vivo lo cuenta su
+   *   dispensación.
    * - En los dos, solo productos de los fármacos pedidos.
    *
    * @param em - EntityManager de la transacción del alta.
@@ -200,6 +221,7 @@ export class PrescriptionBalanceRepository {
                ON product.id = line.pharmacy_product_id
             WHERE reservation.medication_request_id IN (${list(requestIds)})
               AND reservation.reservation_status_concept_id IN (${list(activeStatusIds)})
+              AND line.status_concept_id NOT IN (${list(NON_RESERVING_LINE_STATUS_IDS)})
               AND product.medication_concept_id IN (${list(conceptIds)})
          ) movement
         GROUP BY movement.concept_id, movement.kind`,
@@ -209,6 +231,7 @@ export class PrescriptionBalanceRepository {
         ...conceptIds,
         ...requestIds,
         ...activeStatusIds,
+        ...NON_RESERVING_LINE_STATUS_IDS,
         ...conceptIds,
       ],
       'all',
