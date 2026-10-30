@@ -5,3 +5,5 @@ export * from './delegated_permission_sets.entity';
 export * from './delegation_events.entity';
 export * from './organization_user_assignments.entity';
 export * from './practitioner_delegate_assignments.entity';
+export * from './shared_access_link_uses.entity';
+export * from './shared_access_links.entity';
