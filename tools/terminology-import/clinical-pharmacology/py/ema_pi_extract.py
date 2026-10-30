@@ -21,6 +21,14 @@ Los superíndices y subíndices (más chicos y con la línea base corrida, p. ej
 9 de «10⁹/l») no caben en el texto plano: la fila lleva además `html` con
 <sup>/<sub>, como el HTML de CIMA.
 Se quita el número de página (última fila de la página, sólo dígitos).
+Completitud: se cuentan todos los glifos de la página (también los de figuras)
+y los que llegan a las filas; si falta alguno, las filas de esa página quedan
+marcadas `incomplete` y su sección no se publica.
+Gráficos en el texto: un símbolo puede estar dibujado como vector y no como
+glifo (p. ej. el «≥» de Besremi, 4.3, es una curva y una barra). Una fila con un
+trazo (fuera de una grilla de tabla) dentro de su franja queda marcada `graphic`
+y su sección no se publica. Un subrayado (trazo horizontal fino de 12 pt o más)
+no cuenta.
 
 Uso: python3 -I ema_pi_extract.py <symbol.txt> <salida-dir> <pdf>...
      escribe <salida-dir>/<nombre>.rows.json por PDF (lo ya escrito no se repite).
@@ -35,7 +43,7 @@ from pdfminer.converter import PDFPageAggregator
 from html import escape
 from statistics import median
 
-from pdfminer.layout import LAParams, LTAnno, LTChar, LTCurve, LTLine, LTRect, LTTextContainer, LTTextLine
+from pdfminer.layout import LAParams, LTAnno, LTChar, LTCurve, LTFigure, LTLine, LTRect, LTTextBox, LTTextLine
 from pdfminer.pdffont import PDFUnicodeNotDefined
 from pdfminer.pdfinterp import PDFPageInterpreter, PDFResourceManager
 from pdfminer.pdfpage import PDFPage
@@ -188,6 +196,30 @@ def line_markup(ln):
     return text, (''.join(out).rstrip('\n') if marked else None)
 
 
+def text_lines(container):
+    """Todas las líneas de texto: sueltas en la página, dentro de cajas y dentro de figuras (recursivo)."""
+    for el in container:
+        if isinstance(el, LTTextLine):
+            yield el
+        elif isinstance(el, LTTextBox):
+            for ln in el:
+                if isinstance(ln, LTTextLine):
+                    yield ln
+        elif isinstance(el, LTFigure):
+            yield from text_lines(el)
+
+
+def count_chars(container):
+    """Glifos de la página, en cualquier nivel (para el control de completitud)."""
+    n = 0
+    for el in container:
+        if isinstance(el, LTChar):
+            n += 1
+        elif hasattr(el, '__iter__') and not isinstance(el, LTAnno):
+            n += count_chars(el)
+    return n
+
+
 def page_rows(page):
     """
     Filas de texto de arriba hacia abajo. Una línea entra en la fila con la que más se solapa en vertical (al menos
@@ -195,12 +227,11 @@ def page_rows(page):
     la línea base apenas corrida, quedan en su fila y no en la anterior. Dentro de la fila, de izquierda a derecha,
     unidas con tabulador.
     """
-    lines = []
-    for el in page:
-        if isinstance(el, LTTextContainer):
-            for ln in el:
-                if isinstance(ln, LTTextLine) and ln.get_text().strip():
-                    lines.append(ln)
+    lines = [ln for ln in text_lines(page) if ln.get_text().strip()]
+    emitted = sum(1 for ln in lines for c in ln if isinstance(c, LTChar))
+    total = count_chars(page)
+    blank = sum(1 for ln in text_lines(page) if not ln.get_text().strip() for c in ln if isinstance(c, LTChar))
+    incomplete = emitted + blank != total
     lines.sort(key=lambda l: (-(l.y0 + l.y1) / 2, l.x0))
     boxes = table_boxes(page)
     rows = []  # cada fila: {'y0', 'y1', 'parts': [(x0, texto, en_tabla)]}
@@ -216,11 +247,20 @@ def page_rows(page):
         text, html = line_markup(ln)
         part = (ln.x0, text.rstrip(), in_table, html.rstrip() if html else None)
         if best is None:
-            rows.append({'y0': ln.y0, 'y1': ln.y1, 'parts': [part]})
+            rows.append({'y0': ln.y0, 'y1': ln.y1, 'x0': ln.x0, 'x1': ln.x1, 'parts': [part]})
         else:
             best['parts'].append(part)
             best['y0'], best['y1'] = min(best['y0'], ln.y0), max(best['y1'], ln.y1)
+            best['x0'], best['x1'] = min(best['x0'], ln.x0), max(best['x1'], ln.x1)
     rows.sort(key=lambda r: -(r['y0'] + r['y1']) / 2)
+    # Trazos fuera de las grillas de tabla: si caen dentro de la franja de una fila, la fila puede tener un símbolo dibujado.
+    strokes = [el.bbox for el in page if isinstance(el, (LTRect, LTLine, LTCurve)) and el.width < page.width * 0.9]
+    strokes = [g for g in strokes if not any(b[0] - 1 <= g[0] and g[2] <= b[2] + 1 and b[1] - 1 <= g[1] and g[3] <= b[3] + 1 for b in boxes)]
+    # Un subrayado (trazo horizontal fino de al menos 12 pt) no es un símbolo: no marca la fila.
+    curves = [el.bbox for el in page if isinstance(el, LTCurve) and not isinstance(el, (LTRect, LTLine))]
+    strokes = [g for g in strokes if g in curves or not (g[3] - g[1] <= 1.5 and g[2] - g[0] >= 12)]
+    for r in rows:
+        r['graphic'] = any(r['y0'] - 1 <= (g[1] + g[3]) / 2 <= r['y1'] + 1 and g[0] <= r['x1'] + 10 and g[2] >= r['x0'] - 10 for g in strokes)
     out = []
     for r in rows:
         parts = sorted(r['parts'], key=lambda p: p[0])
@@ -229,10 +269,13 @@ def page_rows(page):
         if any(p[3] for p in parts):
             hs = [p[3] if p[3] else escape(p[1]) for p in parts]
             html = hs[0] + ''.join('\t' + h.strip() for h in hs[1:])
-        out.append({'text': text, 'y': r['y0'], 'table': any(p[2] for p in parts), 'html': html})
+        out.append({'text': text, 'y': r['y0'], 'table': any(p[2] for p in parts), 'html': html, 'graphic': r['graphic']})
     if out and out[-1]['text'].strip().isdigit() and out[-1]['y'] < 90:
         out.pop()
-    return [{'text': r['text'], 'table': r['table'], **({'html': r['html']} if r['html'] else {})} for r in out]
+    return [
+        {'text': r['text'], 'table': r['table'], **({'html': r['html']} if r['html'] else {}), **({'graphic': True} if r['graphic'] else {}), **({'incomplete': True} if incomplete else {})}
+        for r in out
+    ]
 
 
 def extract(args):
@@ -254,7 +297,7 @@ def extract(args):
 def extract_pdf(symbol_path, pdf):
     table = load_symbol_table(symbol_path)
     rsrc = PDFResourceManager()
-    dev = LiteralAggregator(rsrc, table, LAParams())
+    dev = LiteralAggregator(rsrc, table, LAParams(all_texts=True))
     interp = PDFPageInterpreter(rsrc, dev)
     pages, started, chars, unresolved = [], False, 0, 0
     with open(pdf, 'rb') as f:

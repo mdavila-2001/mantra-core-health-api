@@ -1,6 +1,7 @@
 """
-Pruebas del extractor verificado con un PDF real de la EMA (Deferasirox Accord,
-información de producto en castellano) y la tabla oficial de Adobe/Unicode.
+Pruebas del extractor verificado con PDF reales de la EMA (información de
+producto en castellano: Deferasirox Accord y Besremi) y la tabla oficial de
+Adobe/Unicode.
 
 Uso: python3 -I -m unittest discover -s tools/terminology-import/clinical-pharmacology/py -p 'test_*.py'
      (con pdfminer.six de py/requirements.txt instalado)
@@ -93,6 +94,22 @@ class RealPdf(unittest.TestCase):
         self.assertIn('2.\tCOMPOSICIÓN CUALITATIVA Y CUANTITATIVA', texts, 'el número de sección va antes del título aunque esté en otra columna')
         self.assertTrue(any('50 000/mm<sup>3</sup> (50 x 10<sup>9</sup>/l)' in (r.get('html') or '') for r in rows), 'superíndices en html')
         self.assertFalse(any(t.strip().isdigit() and len(t.strip()) <= 3 for t in texts[-3:]), 'sin número de página al final')
+
+
+class VectorSymbol(unittest.TestCase):
+    def test_besremi_mayor_o_igual_dibujado(self):
+        """En Besremi, 4.3, el «≥» de «clase ≥ 2 de la NYHA» es una curva y una barra, no un glifo."""
+        with tempfile.TemporaryDirectory() as out:
+            path = x.extract((SYMBOL, out, os.path.join(FIX, 'besremi_es.pdf')))
+            with open(path, encoding='utf-8') as f:
+                doc = json.load(f)
+        rows = [r for p in doc['pages'] for r in p['rows']]
+        nyha = [r for r in rows if 'clase' in r['text'] and 'NYHA' in r['text']]
+        self.assertEqual(len(nyha), 1)
+        self.assertEqual(nyha[0]['text'], 'insuficiencia cardiaca congestiva (clase\t2 de la NYHA), arritmia cardiaca grave, estenosis')
+        self.assertTrue(nyha[0].get('graphic'), 'la fila queda marcada: el símbolo no está en el texto')
+        self.assertFalse(any(r.get('graphic') for r in rows if r['text'].strip() in ('Posología', 'Embarazo')), 'un subrayado no marca la fila')
+        self.assertFalse(any(r.get('incomplete') for r in rows), 'todos los glifos de la página llegan a las filas')
 
 
 if __name__ == '__main__':
