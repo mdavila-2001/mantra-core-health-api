@@ -18,11 +18,11 @@
 | [`profiles`](profiles.md) | 9 | 20 | 17 | 24 | 34 |
 | [`clinical_ext`](clinical_ext.md) | 8 | 9 | 13 | 13 | 9 |
 | [`identity_assurance`](identity_assurance.md) | 8 | 12 | 10 | 11 | 17 |
+| [`pharmacy_inventory`](pharmacy_inventory.md) | 8 | 12 | 18 | 21 | 19 |
 | [`scheduling`](scheduling.md) | 8 | 16 | 8 | 19 | 10 |
 | [`system_ops`](system_ops.md) | 8 | 8 | 8 | 30 | 10 |
 | [`chart`](chart.md) | 7 | 9 | 4 | 11 | 6 |
 | [`diagnostics`](diagnostics.md) | 7 | 10 | 8 | 36 | 9 |
-| [`pharmacy_inventory`](pharmacy_inventory.md) | 7 | 11 | 17 | 21 | 18 |
 | [`terminology`](terminology.md) | 7 | 9 | 9 | 16 | 19 |
 | [`audit`](audit.md) | 6 | 8 | 9 | 131 | 11 |
 | [`billing`](billing.md) | 6 | 15 | 12 | 24 | 16 |
@@ -78,4 +78,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **300** | **492** | **446** | **1287** | **553** |
+| **Total** | **301** | **493** | **447** | **1287** | **554** |
