@@ -1,16 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsInt,
+  IsBoolean,
   IsOptional,
   IsString,
   IsUUID,
   MaxLength,
-  Min,
   MinLength,
 } from 'class-validator';
+import { CareSpaceAttributesDto } from './care-space-attributes.dto';
 
 /** Cuerpo de `POST /sites/{siteId}/care-spaces` (UC-14-05). */
-export class CreateCareSpaceDto {
+export class CreateCareSpaceDto extends CareSpaceAttributesDto {
   /**
    * Identificador asociado a clinical unit.
    */
@@ -58,19 +58,37 @@ export class CreateCareSpaceDto {
    * Identificador asociado a space type concept.
    */
   @ApiPropertyOptional({
-    description: 'Concepto de tipo de espacio',
+    description:
+      'Obsoleto (F0): concepto de función. Usar functionCode; si vienen los dos, manda functionCode',
+    deprecated: true,
     format: 'uuid',
   })
   @IsOptional()
   @IsUUID()
   spaceTypeConceptId?: string;
 
-  /**
-   * Valor de capacity mantenido por la instancia.
-   */
-  @ApiPropertyOptional({ description: 'Capacidad (nº de plazas)' })
+
+  @ApiPropertyOptional({
+    description:
+      'Forma FHIR (LOC_FORM_*). Ausente: LOC_FORM_ROOM (compatibilidad con F0)',
+  })
   @IsOptional()
-  @IsInt()
-  @Min(0)
-  capacity?: number;
+  @IsString()
+  formCode?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Función (SPACE_FN_* o SPACE_TYPE_ROOM). Ausente: SPACE_TYPE_ROOM (genérica)',
+  })
+  @IsOptional()
+  @IsString()
+  functionCode?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Nacer ACTIVO en vez de PLANNED (el padre tiene que estar activo)',
+  })
+  @IsOptional()
+  @IsBoolean()
+  activate?: boolean;
 }

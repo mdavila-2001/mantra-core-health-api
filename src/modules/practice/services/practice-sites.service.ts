@@ -34,7 +34,7 @@ import { BranchesRepository } from '../../directory/repositories/branches.reposi
 import { TenantAdministrationService } from '../../directory/services/tenant-administration.service';
 import { HistoryRepository } from '../../audit/repositories';
 import { AUD } from '../../audit/audit.concepts';
-import { STRUCTURE_HISTORY, structureSnapshot } from './structure-history';
+import { appendStructureRevision } from './structure-history';
 
 /**
  * Casos de uso de organización y sitios: alta de la práctica raíz (bootstrap),
@@ -235,9 +235,9 @@ export class PracticeSitesService {
    * UC-14-01: da de alta un sitio de práctica bajo una práctica activa.
    *
    * La práctica tiene que ser del tenant activo (404 si no) y el actor tiene
-   * que poder administrarlo (`TenantAdministrationService`, 403 si no). Un
-   * `branchId` declarado tiene que existir (404) y ser una sucursal del mismo
-   * tenant (422), con el mismo criterio que `DirectoryMembershipsService`.
+   * que poder administrarlo a nivel organización (`StructureAccessService`,
+   * 403 si no). Un `branchId` declarado tiene que existir y ser del mismo
+   * tenant: si no, 404 en los dos casos, para no revelar que existe en otro.
    */
   async createSite(
     practiceId: string,
@@ -269,11 +269,12 @@ export class PracticeSitesService {
             branchId: dto.branchId,
           });
         }
+        // F1: una sucursal de otro tenant responde lo mismo que una
+        // inexistente (404). El 422 de F0 confirmaba que el id existía.
         if (branch.tenantId !== practice.tenantId) {
-          throw new PreconditionFailedException(
-            'La branch no pertenece al tenant de la práctica',
-            { practiceId, branchId: dto.branchId },
-          );
+          throw new ResourceNotFoundException('Branch no encontrada', {
+            branchId: dto.branchId,
+          });
         }
       }
 
@@ -304,14 +305,18 @@ export class PracticeSitesService {
         branchId: dto.branchId,
         managingTenantId: dto.managingTenantId,
         statusConceptId: PRAC.SITE_ACTIVE,
+        tenantId: practice.tenantId,
         actorUserId: actor.id,
       });
       await tx.flush();
-      await this.historyRepo.append(tx, STRUCTURE_HISTORY.site, site.id, {
-        operationConceptId: AUD.OPERATION_INSERT,
-        dataSnapshot: structureSnapshot(site),
-        changedByUserId: actor.id,
-      });
+      await appendStructureRevision(
+        this.historyRepo,
+        tx,
+        'site',
+        site,
+        AUD.OPERATION_INSERT,
+        actor.id,
+      );
       await tx.flush();
       this.logger.info(
         { operation: 'practice.site.create', siteId: site.id },
@@ -396,25 +401,34 @@ export class PracticeSitesService {
       // Una revisión por fila que el desmantelamiento cambió: la cascada es
       // la mutación de mayor alcance de la estructura y tiene que poder
       // reconstruirse punto a punto (`valid_to` cierra la revisión previa).
-      const revision = { changedByUserId: actor.id };
-      await this.historyRepo.append(tx, STRUCTURE_HISTORY.site, site.id, {
-        ...revision,
-        operationConceptId: AUD.OPERATION_UPDATE,
-        dataSnapshot: structureSnapshot(site),
-      });
+      const update = AUD.OPERATION_UPDATE;
+      await appendStructureRevision(
+        this.historyRepo,
+        tx,
+        'site',
+        site,
+        update,
+        actor.id,
+      );
       for (const unit of units) {
-        await this.historyRepo.append(tx, STRUCTURE_HISTORY.unit, unit.id, {
-          ...revision,
-          operationConceptId: AUD.OPERATION_UPDATE,
-          dataSnapshot: structureSnapshot(unit),
-        });
+        await appendStructureRevision(
+          this.historyRepo,
+          tx,
+          'unit',
+          unit,
+          update,
+          actor.id,
+        );
       }
       for (const space of spaces) {
-        await this.historyRepo.append(tx, STRUCTURE_HISTORY.space, space.id, {
-          ...revision,
-          operationConceptId: AUD.OPERATION_UPDATE,
-          dataSnapshot: structureSnapshot(space),
-        });
+        await appendStructureRevision(
+          this.historyRepo,
+          tx,
+          'space',
+          space,
+          update,
+          actor.id,
+        );
       }
 
       await tx.flush();

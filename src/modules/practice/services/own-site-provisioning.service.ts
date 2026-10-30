@@ -153,6 +153,9 @@ export class OwnSiteProvisioningService {
       addressId,
       managingTenantId: owner.tenantId,
       statusConceptId: PRAC.SITE_ACTIVE,
+      // F1: la sede pertenece al tenant de su práctica (backfill del patch
+      // v4.2.67); `managingTenantId` sigue diciendo quién la opera.
+      tenantId: practice.tenantId,
       actorUserId,
     });
     await tx.flush();

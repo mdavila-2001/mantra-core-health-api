@@ -209,6 +209,8 @@ export class DiagnosticUnitProvisioningService {
       addressId,
       managingTenantId: owner.tenantId,
       statusConceptId: PRAC.SITE_ACTIVE,
+      // F1: la sede pertenece al tenant de su práctica (NOT NULL desde v4.2.67).
+      tenantId: practice.tenantId,
       actorUserId,
     });
     await tx.flush();

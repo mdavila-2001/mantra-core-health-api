@@ -15,3 +15,6 @@ export * from './create-movement.dto';
 export * from './responses.dto';
 export * from './organization-console.dto';
 export * from './update-own-site.dto';
+export * from './care-space-attributes.dto';
+export * from './infrastructure.dto';
+export * from './infrastructure-responses.dto';
