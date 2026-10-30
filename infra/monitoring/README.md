@@ -63,7 +63,7 @@ ignoran y quedan en el log.
 
 | Campo | Valor |
 |---|---|
-| Rama | `test` |
+| Rama | `dev` |
 | Base Directory | `/infra/monitoring` |
 | Docker Compose Location | `/docker-compose.yml` |
 | Nombre | `alovida-monitoring` |
