@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `clinical_ext`
 
-Referencia exhaustiva de 27 operación(es) del módulo `clinical_ext`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 32 operación(es) del módulo `clinical_ext`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `clinical-ext-alerts`, `clinical-ext-care-gaps`, `clinical-ext-care-teams`, `clinical-ext-cds`, `clinical-ext-order-sets`, `clinical-ext-prescription-favorites`, `clinical-ext-referrals`, `clinical-ext-virtual-encounters`
 - **Controladores:** `CareGapsController`, `CareTeamsController`, `CdsController`, `ClinicalAlertsController`, `OrderSetsController`, `PrescriptionFavoritesController`, `ReferralsController`, `VirtualEncountersController`
@@ -33,11 +33,16 @@ Referencia exhaustiva de 27 operación(es) del módulo `clinical_ext`, derivada 
 20. [DELETE /prescription-favorites/{id}](#20-delete-prescription-favorites-id) — Borrar un favorito de prescripción propio
 21. [GET /referrals](#21-get-referrals) — Listar derivaciones de un paciente
 22. [POST /referrals](#22-post-referrals) — Emitir una referencia desde un encuentro
-23. [PATCH /referrals/{id}/respond](#23-patch-referrals-id-respond) — Responder / aceptar una referencia inter-tenant
-24. [GET /referrals/me](#24-get-referrals-me) — Mis derivaciones
-25. [POST /virtual-encounters](#25-post-virtual-encounters) — Iniciar una sesión de telesalud
-26. [PATCH /virtual-encounters/{id}/end](#26-patch-virtual-encounters-id-end) — Finalizar una sesión de telesalud
-27. [PATCH /virtual-encounters/{id}/join](#27-patch-virtual-encounters-id-join) — Unirse a una sesión de telesalud
+23. [GET /referrals/{id}](#23-get-referrals-id) — Leer una derivación
+24. [PATCH /referrals/{id}/cancel](#24-patch-referrals-id-cancel) — Anular una derivación
+25. [PATCH /referrals/{id}/counter-referral](#25-patch-referrals-id-counter-referral) — Registrar la contrarreferencia de una derivación
+26. [PATCH /referrals/{id}/respond](#26-patch-referrals-id-respond) — Responder / aceptar una referencia inter-tenant
+27. [GET /referrals/me](#27-get-referrals-me) — Mis derivaciones
+28. [GET /referrals/target-services](#28-get-referrals-target-services) — Servicios activos de un destino de derivación
+29. [GET /referrals/targets](#29-get-referrals-targets) — Buscar destinos de derivación
+30. [POST /virtual-encounters](#30-post-virtual-encounters) — Iniciar una sesión de telesalud
+31. [PATCH /virtual-encounters/{id}/end](#31-patch-virtual-encounters-id-end) — Finalizar una sesión de telesalud
+32. [PATCH /virtual-encounters/{id}/join](#32-patch-virtual-encounters-id-join) — Unirse a una sesión de telesalud
 
 ---
 
@@ -2744,7 +2749,7 @@ Contexto declarado en el controlador: La lectura que faltaba: derivaciones de un
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /referrals` en `ReferralsController_listByPatient`. El controlador delega en `ReferralsService.listByPatient`. No recibe body. El tipo de retorno estático es `no declarado`.
+NestJS resuelve `GET /referrals` en `ReferralsController_listByPatient`. El controlador delega en `ReferralsService.listByPatient`. No recibe body. El tipo de retorno estático es `Promise<ReferralListItemDto[]>`.
 
 ### Parámetros
 
@@ -2785,15 +2790,65 @@ Authorization: Bearer <access_token_jwt>
 
 | HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
 |---:|---|---|---|
-| 200 | Operación completada correctamente. | `no declarado` | No |
-| 400 | Consulta completada correctamente. | `no declarado` | No |
-| 401 | Consulta completada correctamente. | `no declarado` | No |
-| 403 | Consulta completada correctamente. | `no declarado` | No |
-| 429 | Consulta completada correctamente. | `no declarado` | No |
-| 500 | Consulta completada correctamente. | `no declarado` | No |
-| 504 | Consulta completada correctamente. | `no declarado` | No |
+| 200 | Operación completada correctamente. | `Promise<ReferralListItemDto[]>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
 
-El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReferralListItemDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "patientProfileId": "00000000-0000-4000-8000-000000000001",
+    "status": "PENDING",
+    "statusConceptId": "00000000-0000-4000-8000-000000000001",
+    "referralType": "TREATMENT",
+    "referralTypeConceptId": "00000000-0000-4000-8000-000000000001",
+    "targetServiceCatalogId": "00000000-0000-4000-8000-000000000001",
+    "sourceEncounterId": "00000000-0000-4000-8000-000000000001",
+    "referringProfileId": "00000000-0000-4000-8000-000000000001",
+    "targetProfileId": "00000000-0000-4000-8000-000000000001",
+    "targetTenantId": "00000000-0000-4000-8000-000000000001",
+    "targetTenantName": "Nombre de ejemplo",
+    "targetBranchId": "00000000-0000-4000-8000-000000000001",
+    "targetBranchName": "Nombre de ejemplo",
+    "targetExternalName": "Nombre de ejemplo",
+    "targetExternalContact": "valor-ejemplo",
+    "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
+    "serviceRequestId": "00000000-0000-4000-8000-000000000001",
+    "requestedServiceText": "valor-ejemplo",
+    "requestedServiceConceptId": "00000000-0000-4000-8000-000000000001",
+    "reasonConceptId": "00000000-0000-4000-8000-000000000001",
+    "reasonText": "Texto descriptivo de ejemplo",
+    "diagnosisText": "valor-ejemplo",
+    "clinicalSummary": "valor-ejemplo",
+    "treatmentGivenText": "valor-ejemplo",
+    "informedConsentId": "00000000-0000-4000-8000-000000000001",
+    "priorityConceptId": "00000000-0000-4000-8000-000000000001",
+    "validUntil": "2026-07-31",
+    "respondedAt": "2026-07-31T12:00:00.000Z",
+    "rejectReason": "Texto descriptivo de ejemplo",
+    "counterReferralText": "valor-ejemplo",
+    "counterReferralAt": "2026-07-31T12:00:00.000Z",
+    "updatedAt": "2026-07-31T12:00:00.000Z",
+    "createdAt": "2026-07-31T12:00:00.000Z",
+    "createdByUserId": "00000000-0000-4000-8000-000000000001",
+    "updatedByUserId": "00000000-0000-4000-8000-000000000001",
+    "rowVersion": 1,
+    "targetDisplayName": "Nombre de ejemplo",
+    "targetServiceName": "Nombre de ejemplo"
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -2879,6 +2934,17 @@ Content-Type: application/json
 | `reasonText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
 | `priorityConceptId` | No | `string` | formato `uuid` | Prioridad (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `validUntil` | No | `string` | formato `date` | Vigencia de la referencia | `2026-07-31` |
+| `referralType` | No | `string` | valores: `TREATMENT`, `CONSULTATION`, `DIAGNOSTIC_STUDY`, `PROCEDURE`, `SECOND_OPINION`, `THERAPY`, `HOSPITALIZATION`, `OTHER` | Tipo de derivación (tratamiento, consulta, estudio, …) | `CONSULTATION` |
+| `targetBranchId` | No | `string` | formato `uuid` | Sede u organización médica destino | `00000000-0000-4000-8000-000000000001` |
+| `targetExternalName` | No | `string` | longitud máxima 200 | Doctor u organización destino fuera de la plataforma | `Nombre de ejemplo` |
+| `targetExternalContact` | No | `string` | longitud máxima 200 | Contacto del destino externo | `valor-ejemplo` |
+| `requestedServiceText` | No | `string` | longitud máxima 500 | Servicio específico pedido | `valor-ejemplo` |
+| `requestedServiceConceptId` | No | `string` | formato `uuid` | Servicio codificado (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `diagnosisText` | No | `string` | longitud máxima 4000 | Diagnóstico presuntivo o definitivo | `valor-ejemplo` |
+| `clinicalSummary` | No | `string` | longitud máxima 8000 | Resumen clínico | `valor-ejemplo` |
+| `treatmentGivenText` | No | `string` | longitud máxima 4000 | Tratamiento realizado antes de derivar | `valor-ejemplo` |
+| `informedConsentId` | No | `string` | formato `uuid` | NO enviar: se rechaza con 400 REFERRAL_CONSENT_LINK_NOT_ALLOWED. El vínculo lo escribe el consentimiento registrado con targetType=REFERRAL y targetId=<derivación>. | `00000000-0000-4000-8000-000000000001` |
+| `targetServiceCatalogId` | No | `string` | formato `uuid` | Servicio del catálogo del destino | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -2900,7 +2966,18 @@ Content-Type: application/json
   "reasonConceptId": "00000000-0000-4000-8000-000000000001",
   "reasonText": "Texto descriptivo de ejemplo",
   "priorityConceptId": "00000000-0000-4000-8000-000000000001",
-  "validUntil": "2026-07-31"
+  "validUntil": "2026-07-31",
+  "referralType": "CONSULTATION",
+  "targetBranchId": "00000000-0000-4000-8000-000000000001",
+  "targetExternalName": "Nombre de ejemplo",
+  "targetExternalContact": "valor-ejemplo",
+  "requestedServiceText": "valor-ejemplo",
+  "requestedServiceConceptId": "00000000-0000-4000-8000-000000000001",
+  "diagnosisText": "valor-ejemplo",
+  "clinicalSummary": "valor-ejemplo",
+  "treatmentGivenText": "valor-ejemplo",
+  "informedConsentId": "00000000-0000-4000-8000-000000000001",
+  "targetServiceCatalogId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -2947,7 +3024,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 404 | `NOT_FOUND` | Sede destino no encontrada | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 404 | `NOT_FOUND` | Servicio no encontrado | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -2955,6 +3034,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | El proveedor configurado para el canal no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | Ya existe una referencia equivalente | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La derivación necesita un destino: profesional, organización, servicio, sede o destino externo. | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ese servicio está inactivo en el catálogo. | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 422 | `PRECONDITION_FAILED` | El servicio no pertenece a la organización destino. | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional destino no ofrece ese servicio. | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -2980,7 +3063,370 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. PATCH /referrals/{id}/respond
+## 23. GET /referrals/{id}
+
+- **Módulo:** `clinical_ext`
+- **Etiqueta OpenAPI:** `clinical-ext-referrals`
+- **Nombre:** Leer una derivación
+- **Operation ID:** `ReferralsController_get`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ReferralsController.get](../../src/modules/clinical_ext/controllers/referrals.controller.ts)
+
+### Descripción de negocio
+
+Leer una derivación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: v4266: una derivación por id. Declarada después de `me` para que esa ruta no caiga acá. La lee quien puede leer la historia o el destino.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /referrals/{id}` en `ReferralsController_get`. El controlador delega en `ReferralsService.get`. No recibe body. El tipo de retorno estático es `Promise<ReferralResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /referrals/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /referrals/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReferralResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReferralResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "referralCode": "CODIGO_EJEMPLO",
+  "statusConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `referralCode` | Sí | `string` | Sin restricción adicional declarada | Código a compartir | `CODIGO_EJEMPLO` |
+| `statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 404 | `NOT_FOUND` | Referencia no encontrada | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/referrals/{id}"
+}
+```
+
+---
+
+## 24. PATCH /referrals/{id}/cancel
+
+- **Módulo:** `clinical_ext`
+- **Etiqueta OpenAPI:** `clinical-ext-referrals`
+- **Nombre:** Anular una derivación
+- **Operation ID:** `ReferralsController_cancel`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ReferralsController.cancel](../../src/modules/clinical_ext/controllers/referrals.controller.ts)
+
+### Descripción de negocio
+
+Anular una derivación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: v4266: anula una derivación pendiente o aceptada.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /referrals/{id}/cancel` en `ReferralsController_cancel`. El controlador delega en `ReferralsService.cancel`. No recibe body. El tipo de retorno estático es `Promise<ReferralResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+PATCH /referrals/00000000-0000-4000-8000-000000000001/cancel HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+PATCH /referrals/00000000-0000-4000-8000-000000000001/cancel HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReferralResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "referralCode": "CODIGO_EJEMPLO",
+  "statusConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `referralCode` | Sí | `string` | Sin restricción adicional declarada | Código a compartir | `CODIGO_EJEMPLO` |
+| `statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 404 | `NOT_FOUND` | Referencia no encontrada | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 422 | `PRECONDITION_FAILED` | La derivación ya está cerrada | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/referrals/{id}/cancel"
+}
+```
+
+---
+
+## 25. PATCH /referrals/{id}/counter-referral
+
+- **Módulo:** `clinical_ext`
+- **Etiqueta OpenAPI:** `clinical-ext-referrals`
+- **Nombre:** Registrar la contrarreferencia de una derivación
+- **Operation ID:** `ReferralsController_counterReferral`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ReferralsController.counterReferral](../../src/modules/clinical_ext/controllers/referrals.controller.ts)
+
+### Descripción de negocio
+
+Registrar la contrarreferencia de una derivación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: v4266: contrarreferencia del destino; cierra la derivación.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /referrals/{id}/counter-referral` en `ReferralsController_counterReferral`. El controlador delega en `ReferralsService.counterReferral`. Valida el body como `CounterReferralDto` y consume `application/json`. El tipo de retorno estático es `Promise<ReferralResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CounterReferralDto`; los campos opcionales se omiten.
+
+```http
+PATCH /referrals/00000000-0000-4000-8000-000000000001/counter-referral HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "counterReferralText": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `counterReferralText` | Sí | `string` | longitud mínima 1; longitud máxima 8000 | Contrarreferencia | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /referrals/00000000-0000-4000-8000-000000000001/counter-referral HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "counterReferralText": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReferralResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReferralResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "referralCode": "CODIGO_EJEMPLO",
+  "statusConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `referralCode` | Sí | `string` | Sin restricción adicional declarada | Código a compartir | `CODIGO_EJEMPLO` |
+| `statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 404 | `NOT_FOUND` | Referencia no encontrada | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La derivación no admite contrarreferencia en su estado actual | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/referrals/{id}/counter-referral"
+}
+```
+
+---
+
+## 26. PATCH /referrals/{id}/respond
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-referrals`
@@ -2996,7 +3442,7 @@ Responder / aceptar una referencia inter-tenant. Requiere JWT y los roles o alca
 
 ### Descripción del sistema
 
-NestJS resuelve `PATCH /referrals/{id}/respond` en `ReferralsController_respond`. El controlador delega en `ReferralsService.respond`. Valida el body como `RespondReferralDto` y consume `application/json`. El tipo de retorno estático es `Promise<StatusResultDto>`.
+NestJS resuelve `PATCH /referrals/{id}/respond` en `ReferralsController_respond`. El controlador delega en `ReferralsService.respond`. Valida el body como `RespondReferralDto` y consume `application/json`. El tipo de retorno estático es `Promise<RespondReferralResultDto>`.
 
 ### Parámetros
 
@@ -3031,6 +3477,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `decision` | Sí | `string` | valores: `ACCEPT`, `REJECT` | Decisión del tenant destino | `ACCEPT` |
+| `rejectReason` | No | `string` | longitud máxima 4000 | Motivo del rechazo (obligatorio si REJECT) | `Texto descriptivo de ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -3043,7 +3490,8 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "decision": "ACCEPT"
+  "decision": "ACCEPT",
+  "rejectReason": "Texto descriptivo de ejemplo"
 }
 ```
 
@@ -3051,19 +3499,19 @@ Content-Type: application/json
 
 | HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
 |---:|---|---|---|
-| 200 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
-| 400 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
-| 401 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
-| 403 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
-| 404 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
-| 409 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
-| 413 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
-| 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
-| 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
-| 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
-| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 200 | Operación completada correctamente. | `Promise<RespondReferralResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<RespondReferralResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<RespondReferralResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<RespondReferralResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<RespondReferralResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<RespondReferralResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<RespondReferralResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<RespondReferralResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<RespondReferralResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<RespondReferralResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RespondReferralResultDto>` | No |
 
-Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RespondReferralResultDto`. Ejemplo completo derivado de ese DTO:
 
 ```json
 {
@@ -3075,7 +3523,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `ok` | Sí | `boolean` | Sin restricción adicional declarada | true si la operación se aplicó | `true` |
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Siempre `true` cuando la operación se aplicó. | `true` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -3106,7 +3554,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. GET /referrals/me
+## 27. GET /referrals/me
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-referrals`
@@ -3123,7 +3571,7 @@ Contexto declarado en el controlador: CV-10 — el paciente lee sus propias deri
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /referrals/me` en `ReferralsController_listMine`. El controlador delega en `ReferralsService.listMine`. No recibe body. El tipo de retorno estático es `no declarado`.
+NestJS resuelve `GET /referrals/me` en `ReferralsController_listMine`. El controlador delega en `ReferralsService.listMine`. No recibe body. El tipo de retorno estático es `Promise<ReferralListItemDto[]>`.
 
 ### Parámetros
 
@@ -3162,15 +3610,65 @@ Authorization: Bearer <access_token_jwt>
 
 | HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
 |---:|---|---|---|
-| 200 | Operación completada correctamente. | `no declarado` | No |
-| 400 | Consulta completada correctamente. | `no declarado` | No |
-| 401 | Consulta completada correctamente. | `no declarado` | No |
-| 403 | Consulta completada correctamente. | `no declarado` | No |
-| 429 | Consulta completada correctamente. | `no declarado` | No |
-| 500 | Consulta completada correctamente. | `no declarado` | No |
-| 504 | Consulta completada correctamente. | `no declarado` | No |
+| 200 | Operación completada correctamente. | `Promise<ReferralListItemDto[]>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReferralListItemDto[]>` | No |
 
-El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReferralListItemDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "patientProfileId": "00000000-0000-4000-8000-000000000001",
+    "status": "PENDING",
+    "statusConceptId": "00000000-0000-4000-8000-000000000001",
+    "referralType": "TREATMENT",
+    "referralTypeConceptId": "00000000-0000-4000-8000-000000000001",
+    "targetServiceCatalogId": "00000000-0000-4000-8000-000000000001",
+    "sourceEncounterId": "00000000-0000-4000-8000-000000000001",
+    "referringProfileId": "00000000-0000-4000-8000-000000000001",
+    "targetProfileId": "00000000-0000-4000-8000-000000000001",
+    "targetTenantId": "00000000-0000-4000-8000-000000000001",
+    "targetTenantName": "Nombre de ejemplo",
+    "targetBranchId": "00000000-0000-4000-8000-000000000001",
+    "targetBranchName": "Nombre de ejemplo",
+    "targetExternalName": "Nombre de ejemplo",
+    "targetExternalContact": "valor-ejemplo",
+    "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
+    "serviceRequestId": "00000000-0000-4000-8000-000000000001",
+    "requestedServiceText": "valor-ejemplo",
+    "requestedServiceConceptId": "00000000-0000-4000-8000-000000000001",
+    "reasonConceptId": "00000000-0000-4000-8000-000000000001",
+    "reasonText": "Texto descriptivo de ejemplo",
+    "diagnosisText": "valor-ejemplo",
+    "clinicalSummary": "valor-ejemplo",
+    "treatmentGivenText": "valor-ejemplo",
+    "informedConsentId": "00000000-0000-4000-8000-000000000001",
+    "priorityConceptId": "00000000-0000-4000-8000-000000000001",
+    "validUntil": "2026-07-31",
+    "respondedAt": "2026-07-31T12:00:00.000Z",
+    "rejectReason": "Texto descriptivo de ejemplo",
+    "counterReferralText": "valor-ejemplo",
+    "counterReferralAt": "2026-07-31T12:00:00.000Z",
+    "updatedAt": "2026-07-31T12:00:00.000Z",
+    "createdAt": "2026-07-31T12:00:00.000Z",
+    "createdByUserId": "00000000-0000-4000-8000-000000000001",
+    "updatedByUserId": "00000000-0000-4000-8000-000000000001",
+    "rowVersion": 1,
+    "targetDisplayName": "Nombre de ejemplo",
+    "targetServiceName": "Nombre de ejemplo"
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -3197,7 +3695,255 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /virtual-encounters
+## 28. GET /referrals/target-services
+
+- **Módulo:** `clinical_ext`
+- **Etiqueta OpenAPI:** `clinical-ext-referrals`
+- **Nombre:** Servicios activos de un destino de derivación
+- **Operation ID:** `ReferralsController_listTargetServices`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ReferralsController.listTargetServices](../../src/modules/clinical_ext/controllers/referrals.controller.ts)
+
+### Descripción de negocio
+
+Servicios activos de un destino de derivación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Servicios activos de un profesional u organización destino.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /referrals/target-services` en `ReferralsController_listTargetServices`. El controlador delega en `ReferralsService.listTargetServices`. No recibe body. El tipo de retorno estático es `Promise<ReferralTargetServiceListDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `targetProfileId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `targetTenantId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /referrals/target-services HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Rate limit particular: `Throttle(REFERRAL_TARGETS_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /referrals/target-services?targetProfileId=00000000-0000-4000-8000-000000000001&targetTenantId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReferralTargetServiceListDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ReferralTargetServiceListDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReferralTargetServiceListDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReferralTargetServiceListDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReferralTargetServiceListDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReferralTargetServiceListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReferralTargetServiceListDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReferralTargetServiceListDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "price": 1,
+      "currency": "BOB",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "practiceName": "Nombre de ejemplo"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<ReferralTargetServiceDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","description":"Texto descriptivo de ejemplo","price":1,"currency":"BOB","tenantId":"00000000-0000-4000-8000-000000000001","practiceName":"Nombre de ejemplo"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].description` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `items[].price` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].currency` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `items[].tenantId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practiceName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | Indique targetProfileId o targetTenantId. | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(REFERRAL_TARGETS_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/referrals/target-services"
+}
+```
+
+---
+
+## 29. GET /referrals/targets
+
+- **Módulo:** `clinical_ext`
+- **Etiqueta OpenAPI:** `clinical-ext-referrals`
+- **Nombre:** Buscar destinos de derivación
+- **Operation ID:** `ReferralsController_searchTargets`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ReferralsController.searchTargets](../../src/modules/clinical_ext/controllers/referrals.controller.ts)
+
+### Descripción de negocio
+
+Buscar destinos de derivación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Destinos posibles de una derivación (profesionales y organizaciones). Va antes de cualquier ruta con `:id` para que `targets` no se lea como id.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /referrals/targets` en `ReferralsController_searchTargets`. El controlador delega en `ReferralsService.searchTargets`. No recibe body. El tipo de retorno estático es `Promise<ReferralTargetListDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `q` | query | Sí | `string` | longitud mínima 2; longitud máxima 100 | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `kind` | query | No | `string` | valores: `PRACTITIONER`, `ORGANIZATION` | Sin descripción específica en OpenAPI. | `PRACTITIONER` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /referrals/targets?q=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Rate limit particular: `Throttle(REFERRAL_TARGETS_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /referrals/targets?q=valor-ejemplo&kind=PRACTITIONER HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReferralTargetListDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ReferralTargetListDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReferralTargetListDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReferralTargetListDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReferralTargetListDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReferralTargetListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReferralTargetListDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReferralTargetListDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "kind": "PRACTITIONER",
+      "id": "00000000-0000-4000-8000-000000000001",
+      "displayName": "Nombre de ejemplo",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "subtitle": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<ReferralTargetDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"kind":"PRACTITIONER","id":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","tenantId":"00000000-0000-4000-8000-000000000001","subtitle":"valor-ejemplo"}]` |
+| `items[].kind` | Sí | `string` | valores: `PRACTITIONER`, `ORGANIZATION` | Sin descripción específica en el contrato OpenAPI. | `PRACTITIONER` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].tenantId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].subtitle` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La búsqueda necesita al menos dos caracteres. | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(REFERRAL_TARGETS_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/referrals/targets"
+}
+```
+
+---
+
+## 30. POST /virtual-encounters
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-virtual-encounters`
@@ -3332,7 +4078,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. PATCH /virtual-encounters/{id}/end
+## 31. PATCH /virtual-encounters/{id}/end
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-virtual-encounters`
@@ -3464,7 +4210,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. PATCH /virtual-encounters/{id}/join
+## 32. PATCH /virtual-encounters/{id}/join
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-virtual-encounters`

@@ -1,0 +1,22 @@
+caused-by existe|1
+antes relaciones|392803
+antes evidencias|274300
+== dry-run
+    "afterDatabaseFilter": 194
+    "afterDatabaseFilter": 5135
+[f3-wikidata evidencia] {"batchId":"86c83e26-de86-8577-6a64-40d3c4c49559","dryRun":true,"read":194,"relationships":{"inserted":188,"updated":0},"evidence":{"inserted":194,"updated":0},"derivedUpdated":188,"checksum":"d447a0bdd16dc1ef4847364fed5f677ca6e510bb45c4031b2fec78de54bf1b73","timingsMs":{"cop
+[f3-wikidata P279] relaciones IS_A nuevas: 1766 (dry-run: se revierte)
+== pasada1
+    "afterDatabaseFilter": 194
+    "afterDatabaseFilter": 5135
+[f3-wikidata evidencia] {"batchId":"24c2bcf9-e435-6dc6-93bf-acb90679a196","dryRun":false,"read":194,"relationships":{"inserted":188,"updated":0},"evidence":{"inserted":194,"updated":0},"derivedUpdated":188,"checksum":"d447a0bdd16dc1ef4847364fed5f677ca6e510bb45c4031b2fec78de54bf1b73","timingsMs":{"co
+[f3-wikidata P279] relaciones IS_A nuevas: 1766
+== pasada2
+    "afterDatabaseFilter": 194
+    "afterDatabaseFilter": 5135
+[f3-wikidata evidencia] {"batchId":"e1df1d86-c80b-57fe-cd63-ff9d49410ea0","dryRun":false,"read":194,"relationships":{"inserted":0,"updated":0},"evidence":{"inserted":0,"updated":0},"derivedUpdated":0,"checksum":"d447a0bdd16dc1ef4847364fed5f677ca6e510bb45c4031b2fec78de54bf1b73","timingsMs":{"copy":6,
+[f3-wikidata P279] relaciones IS_A nuevas: 0
+despues relaciones|394757
+despues evidencias|274494
+fks_no_validadas|0
+evid_sin_relacion|0

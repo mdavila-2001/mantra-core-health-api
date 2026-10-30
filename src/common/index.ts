@@ -164,11 +164,25 @@ export { S3FileStorageAdapter } from './storage/s3-file-storage.adapter';
 export { storageEnvSchema, loadStorageEnv } from './storage/storage.env';
 export type { StorageEnv, FileStorageAdapterName } from './storage/storage.env';
 export {
+  UNSUPPORTED_IMAGE_FORMAT_REASON,
   UPLOAD_MIME_ALLOWLIST,
+  detectUnsupportedImageFormat,
   isMimeTypeAllowedForCategory,
   sniffMimeType,
 } from './storage/upload-content-type';
-export type { SniffedMimeType } from './storage/upload-content-type';
+export type {
+  SniffedMimeType,
+  UnsupportedImageFormat,
+} from './storage/upload-content-type';
+export {
+  OPAQUE_MIME_TYPE,
+  servedContentHeaders,
+} from './storage/served-content-headers';
+export {
+  LOGO_IMAGE_MIME_TYPES,
+  LOGO_MAX_BYTES,
+  assertLogoImage,
+} from './storage/logo-image';
 export { appSecurityEnvSchema } from './security/app-security.env';
 
 // Bypass de verificación DEV/TEST (corrección #12, contrato DEV_VERIFICATION_BYPASS.md)

@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `practice`
 
-Referencia exhaustiva de 36 operación(es) del módulo `practice`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 37 operación(es) del módulo `practice`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `practice`
 - **Controladores:** `AccreditationsController`, `InventoryItemsController`, `OrganizationPracticesController`, `PracticeInvitationsController`, `PracticesController`, `PractitionerInvitationsController`, `PractitionerSitesController`, `RoleAssignmentsController`, `SitesController`
@@ -38,15 +38,16 @@ Referencia exhaustiva de 36 operación(es) del módulo `practice`, derivada del 
 25. [PATCH /practitioners/me/sites/{siteId}](#25-patch-practitioners-me-sites-siteid) — Corregir un consultorio propio
 26. [PUT /practitioners/me/sites/{siteId}/bank-qr](#26-put-practitioners-me-sites-siteid-bank-qr) — Fijar o quitar el QR bancario de una sede
 27. [PUT /practitioners/me/sites/{siteId}/contact-phone](#27-put-practitioners-me-sites-siteid-contact-phone) — Guardar o quitar mi teléfono en una sede
-28. [POST /role-assignments/{roleId}/approve](#28-post-role-assignments-roleid-approve) — Aprobar una vinculación pendiente
-29. [POST /role-assignments/{roleId}/end](#29-post-role-assignments-roleid-end) — Finalizar una vinculación
-30. [POST /role-assignments/{roleId}/reject](#30-post-role-assignments-roleid-reject) — Rechazar una vinculación pendiente
-31. [POST /role-assignments/{roleId}/support-assignments](#31-post-role-assignments-roleid-support-assignments) — Adjuntar personal de apoyo a un rol de profesional
-32. [POST /role-assignments/{roleId}/suspend](#32-post-role-assignments-roleid-suspend) — Suspender una vinculación activa
-33. [GET /sites/{siteId}/care-spaces](#33-get-sites-siteid-care-spaces) — Listar los espacios de atención de la sede
-34. [POST /sites/{siteId}/care-spaces](#34-post-sites-siteid-care-spaces) — Crear un espacio de atención bajo una unidad/sitio
-35. [POST /sites/{siteId}/clinical-units](#35-post-sites-siteid-clinical-units) — Crear una unidad clínica jerárquica
-36. [POST /tenants/{tenantId}/practices](#36-post-tenants-tenantid-practices) — Crear la práctica y la primera sede de una organización
+28. [PUT /practitioners/me/sites/{siteId}/logo](#28-put-practitioners-me-sites-siteid-logo) — Fijar o quitar el logo del consultorio propio
+29. [POST /role-assignments/{roleId}/approve](#29-post-role-assignments-roleid-approve) — Aprobar una vinculación pendiente
+30. [POST /role-assignments/{roleId}/end](#30-post-role-assignments-roleid-end) — Finalizar una vinculación
+31. [POST /role-assignments/{roleId}/reject](#31-post-role-assignments-roleid-reject) — Rechazar una vinculación pendiente
+32. [POST /role-assignments/{roleId}/support-assignments](#32-post-role-assignments-roleid-support-assignments) — Adjuntar personal de apoyo a un rol de profesional
+33. [POST /role-assignments/{roleId}/suspend](#33-post-role-assignments-roleid-suspend) — Suspender una vinculación activa
+34. [GET /sites/{siteId}/care-spaces](#34-get-sites-siteid-care-spaces) — Listar los espacios de atención de la sede
+35. [POST /sites/{siteId}/care-spaces](#35-post-sites-siteid-care-spaces) — Crear un espacio de atención bajo una unidad/sitio
+36. [POST /sites/{siteId}/clinical-units](#36-post-sites-siteid-clinical-units) — Crear una unidad clínica jerárquica
+37. [POST /tenants/{tenantId}/practices](#37-post-tenants-tenantid-practices) — Crear la práctica y la primera sede de una organización
 
 ---
 
@@ -2890,6 +2891,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "contactPhone": "+591 72123456",
       "isOwnSite": true,
       "bankQrFileId": "00000000-0000-4000-8000-000000000001",
+      "logoFileId": "00000000-0000-4000-8000-000000000001",
       "status": "00000000-0000-4000-8000-000000000001"
     }
   ],
@@ -2901,7 +2903,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<PractitionerSiteDto>` | Sin restricción adicional declarada | Las sedes donde atiende, la principal primero. | `[{"id":"00000000-0000-4000-8000-000000000001","practiceId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","timeZone":"America/La_Paz","addressText":"Av. Brasil 1234, La Paz","latitude":1,"longitude":1,"contactPhone":"+591 72123456","isOwnSite":true,"bankQrFileId":"00000000-0000-4000-8000-000000000001","status":"00000000-0000-4000-8000-000000000001"}]` |
+| `items` | Sí | `array<PractitionerSiteDto>` | Sin restricción adicional declarada | Las sedes donde atiende, la principal primero. | `[{"id":"00000000-0000-4000-8000-000000000001","practiceId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","timeZone":"America/La_Paz","addressText":"Av. Brasil 1234, La Paz","latitude":1,"longitude":1,"contactPhone":"+591 72123456","isOwnSite":true,"bankQrFileId":"00000000-0000-4000-8000-000000000001","logoFileId":"00000000-0000-4000-8000-000000000001","status":"00000000-0000-4000-8000-000000000001"}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador de la sede. | `00000000-0000-4000-8000-000000000001` |
 | `items[].practiceId` | Sí | `string` | formato `uuid` | Práctica a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
 | `items[].code` | Sí | `string` | Sin restricción adicional declarada | Código único dentro de la práctica. | `CODIGO_EJEMPLO` |
@@ -2913,6 +2915,7 @@ Campos de la respuesta:
 | `items[].contactPhone` | No | `string` | admite null | Teléfono de este profesional en esta sede, si lo declaró. | `+591 72123456` |
 | `items[].isOwnSite` | Sí | `boolean` | Sin restricción adicional declarada | Si la sede es el consultorio **propio** del profesional —su práctica personal— y no la de otra organización donde atiende (P32-a). La lista mezclaba las dos cosas sin distinguirlas: «Consultorio Dra. Rojas» y «Hospital San Lucas» llegaban con la misma forma, y retirar lo propio no es el mismo acto que desvincularse de un hospital. Sale de comparar la práctica de la sede con la práctica personal del profesional (tipo consultorio y él como cuenta administradora), no de adivinar por el nombre. | `true` |
 | `items[].bankQrFileId` | No | `string` | formato `uuid`; admite null | Archivo del QR bancario con el que el profesional cobra **en esta sede**, o `null` si no configuró ninguno (P33). Es por sede y no por persona porque no se cobra igual en todos lados: en el consultorio propio cobra el profesional y en la clínica puede cobrar la clínica. Un QR único de perfil obligaría a corregirlo cada vez que cambia de establecimiento. | `00000000-0000-4000-8000-000000000001` |
+| `items[].logoFileId` | No | `string` | formato `uuid`; admite null | Logo del consultorio, el que sale en el membrete de sus PDF, o `null` si no tiene. Se lee con `GET /common/files/:id/content`. | `00000000-0000-4000-8000-000000000001` |
 | `items[].status` | Sí | `string` | formato `uuid` | Concepto de estado. | `00000000-0000-4000-8000-000000000001` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta. | `1` |
 
@@ -3371,14 +3374,16 @@ Content-Type: application/json
 |---|:---:|---|---|---|---|
 | `name` | Sí | `string` | longitud mínima 2; longitud máxima 200 | Nombre del consultorio | `Nombre de ejemplo` |
 | `timeZone` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
-| `address` | No | `OwnSiteAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `address` | No | `OwnSiteAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
 | `address.lines` | No | `array<string>` | longitud máxima 500 | Líneas de la dirección; puede ir vacía si la sede se ubica sólo por municipio o coordenadas | `["valor-ejemplo"]` |
 | `address.city` | No | `string` | longitud máxima 255 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `address.municipalityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `address.district` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `contactPhone` | No | `string` | longitud máxima 40; patrón runtime `SITE_CONTACT_PHONE_PATTERN` | Sin descripción específica en el contrato OpenAPI. | `+591 72123456` |
+| `logoFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -3399,11 +3404,13 @@ Content-Type: application/json
     ],
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "administrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
     "latitude": 1,
     "longitude": 1
   },
-  "contactPhone": "+591 72123456"
+  "contactPhone": "+591 72123456",
+  "logoFileId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -3437,6 +3444,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "contactPhone": "+591 72123456",
   "isOwnSite": true,
   "bankQrFileId": "00000000-0000-4000-8000-000000000001",
+  "logoFileId": "00000000-0000-4000-8000-000000000001",
   "status": "00000000-0000-4000-8000-000000000001"
 }
 ```
@@ -3456,6 +3464,7 @@ Campos de la respuesta:
 | `contactPhone` | No | `string` | admite null | Teléfono de este profesional en esta sede, si lo declaró. | `+591 72123456` |
 | `isOwnSite` | Sí | `boolean` | Sin restricción adicional declarada | Si la sede es el consultorio **propio** del profesional —su práctica personal— y no la de otra organización donde atiende (P32-a). La lista mezclaba las dos cosas sin distinguirlas: «Consultorio Dra. Rojas» y «Hospital San Lucas» llegaban con la misma forma, y retirar lo propio no es el mismo acto que desvincularse de un hospital. Sale de comparar la práctica de la sede con la práctica personal del profesional (tipo consultorio y él como cuenta administradora), no de adivinar por el nombre. | `true` |
 | `bankQrFileId` | No | `string` | formato `uuid`; admite null | Archivo del QR bancario con el que el profesional cobra **en esta sede**, o `null` si no configuró ninguno (P33). Es por sede y no por persona porque no se cobra igual en todos lados: en el consultorio propio cobra el profesional y en la clínica puede cobrar la clínica. Un QR único de perfil obligaría a corregirlo cada vez que cambia de establecimiento. | `00000000-0000-4000-8000-000000000001` |
+| `logoFileId` | No | `string` | formato `uuid`; admite null | Logo del consultorio, el que sale en el membrete de sus PDF, o `null` si no tiene. Se lee con `GET /common/files/:id/content`. | `00000000-0000-4000-8000-000000000001` |
 | `status` | Sí | `string` | formato `uuid` | Concepto de estado. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -3467,8 +3476,16 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | ${labels.subject} no le pertenece | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El logo no es un archivo suyo que se pueda usar | Excepción explícita en src/modules/practice/services/practitioner-sites.service.ts |
+| 422 | `PRECONDITION_FAILED` | El logo debe ser una imagen | Excepción explícita en src/modules/practice/services/practitioner-sites.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3637,10 +3654,11 @@ Content-Type: application/json
 |---|:---:|---|---|---|---|
 | `name` | No | `string` | longitud mínima 2; longitud máxima 200 | Nombre del consultorio | `Nombre de ejemplo` |
 | `timeZone` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
-| `address` | No | `OwnSiteAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `address` | No | `OwnSiteAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
 | `address.lines` | No | `array<string>` | longitud máxima 500 | Líneas de la dirección; puede ir vacía si la sede se ubica sólo por municipio o coordenadas | `["valor-ejemplo"]` |
 | `address.city` | No | `string` | longitud máxima 255 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `address.municipalityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `address.district` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
@@ -3664,6 +3682,7 @@ Content-Type: application/json
     ],
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "administrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
     "latitude": 1,
     "longitude": 1
@@ -3702,6 +3721,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "contactPhone": "+591 72123456",
   "isOwnSite": true,
   "bankQrFileId": "00000000-0000-4000-8000-000000000001",
+  "logoFileId": "00000000-0000-4000-8000-000000000001",
   "status": "00000000-0000-4000-8000-000000000001"
 }
 ```
@@ -3721,6 +3741,7 @@ Campos de la respuesta:
 | `contactPhone` | No | `string` | admite null | Teléfono de este profesional en esta sede, si lo declaró. | `+591 72123456` |
 | `isOwnSite` | Sí | `boolean` | Sin restricción adicional declarada | Si la sede es el consultorio **propio** del profesional —su práctica personal— y no la de otra organización donde atiende (P32-a). La lista mezclaba las dos cosas sin distinguirlas: «Consultorio Dra. Rojas» y «Hospital San Lucas» llegaban con la misma forma, y retirar lo propio no es el mismo acto que desvincularse de un hospital. Sale de comparar la práctica de la sede con la práctica personal del profesional (tipo consultorio y él como cuenta administradora), no de adivinar por el nombre. | `true` |
 | `bankQrFileId` | No | `string` | formato `uuid`; admite null | Archivo del QR bancario con el que el profesional cobra **en esta sede**, o `null` si no configuró ninguno (P33). Es por sede y no por persona porque no se cobra igual en todos lados: en el consultorio propio cobra el profesional y en la clínica puede cobrar la clínica. Un QR único de perfil obligaría a corregirlo cada vez que cambia de establecimiento. | `00000000-0000-4000-8000-000000000001` |
+| `logoFileId` | No | `string` | formato `uuid`; admite null | Logo del consultorio, el que sale en el membrete de sus PDF, o `null` si no tiene. Se lee con `GET /common/files/:id/content`. | `00000000-0000-4000-8000-000000000001` |
 | `status` | Sí | `string` | formato `uuid` | Concepto de estado. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -3851,6 +3872,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "contactPhone": "+591 72123456",
   "isOwnSite": true,
   "bankQrFileId": "00000000-0000-4000-8000-000000000001",
+  "logoFileId": "00000000-0000-4000-8000-000000000001",
   "status": "00000000-0000-4000-8000-000000000001"
 }
 ```
@@ -3870,6 +3892,7 @@ Campos de la respuesta:
 | `contactPhone` | No | `string` | admite null | Teléfono de este profesional en esta sede, si lo declaró. | `+591 72123456` |
 | `isOwnSite` | Sí | `boolean` | Sin restricción adicional declarada | Si la sede es el consultorio **propio** del profesional —su práctica personal— y no la de otra organización donde atiende (P32-a). La lista mezclaba las dos cosas sin distinguirlas: «Consultorio Dra. Rojas» y «Hospital San Lucas» llegaban con la misma forma, y retirar lo propio no es el mismo acto que desvincularse de un hospital. Sale de comparar la práctica de la sede con la práctica personal del profesional (tipo consultorio y él como cuenta administradora), no de adivinar por el nombre. | `true` |
 | `bankQrFileId` | No | `string` | formato `uuid`; admite null | Archivo del QR bancario con el que el profesional cobra **en esta sede**, o `null` si no configuró ninguno (P33). Es por sede y no por persona porque no se cobra igual en todos lados: en el consultorio propio cobra el profesional y en la clínica puede cobrar la clínica. Un QR único de perfil obligaría a corregirlo cada vez que cambia de establecimiento. | `00000000-0000-4000-8000-000000000001` |
+| `logoFileId` | No | `string` | formato `uuid`; admite null | Logo del consultorio, el que sale en el membrete de sus PDF, o `null` si no tiene. Se lee con `GET /common/files/:id/content`. | `00000000-0000-4000-8000-000000000001` |
 | `status` | Sí | `string` | formato `uuid` | Concepto de estado. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -4000,6 +4023,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "contactPhone": "+591 72123456",
   "isOwnSite": true,
   "bankQrFileId": "00000000-0000-4000-8000-000000000001",
+  "logoFileId": "00000000-0000-4000-8000-000000000001",
   "status": "00000000-0000-4000-8000-000000000001"
 }
 ```
@@ -4019,6 +4043,7 @@ Campos de la respuesta:
 | `contactPhone` | No | `string` | admite null | Teléfono de este profesional en esta sede, si lo declaró. | `+591 72123456` |
 | `isOwnSite` | Sí | `boolean` | Sin restricción adicional declarada | Si la sede es el consultorio **propio** del profesional —su práctica personal— y no la de otra organización donde atiende (P32-a). La lista mezclaba las dos cosas sin distinguirlas: «Consultorio Dra. Rojas» y «Hospital San Lucas» llegaban con la misma forma, y retirar lo propio no es el mismo acto que desvincularse de un hospital. Sale de comparar la práctica de la sede con la práctica personal del profesional (tipo consultorio y él como cuenta administradora), no de adivinar por el nombre. | `true` |
 | `bankQrFileId` | No | `string` | formato `uuid`; admite null | Archivo del QR bancario con el que el profesional cobra **en esta sede**, o `null` si no configuró ninguno (P33). Es por sede y no por persona porque no se cobra igual en todos lados: en el consultorio propio cobra el profesional y en la clínica puede cobrar la clínica. Un QR único de perfil obligaría a corregirlo cada vez que cambia de establecimiento. | `00000000-0000-4000-8000-000000000001` |
+| `logoFileId` | No | `string` | formato `uuid`; admite null | Logo del consultorio, el que sale en el membrete de sus PDF, o `null` si no tiene. Se lee con `GET /common/files/:id/content`. | `00000000-0000-4000-8000-000000000001` |
 | `status` | Sí | `string` | formato `uuid` | Concepto de estado. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -4050,7 +4075,166 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /role-assignments/{roleId}/approve
+## 28. PUT /practitioners/me/sites/{siteId}/logo
+
+- **Módulo:** `practice`
+- **Etiqueta OpenAPI:** `practice`
+- **Nombre:** Fijar o quitar el logo del consultorio propio
+- **Operation ID:** `PractitionerSitesController_setSiteLogo`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerSitesController.setSiteLogo](../../src/modules/practice/controllers/practitioner-sites.controller.ts)
+
+### Descripción de negocio
+
+Asocia una imagen ya subida (png, jpeg o webp, NORMAL, hasta 2 MB) como logo del consultorio. `fileId: null` lo quita. 404 si la sede no es un consultorio propio; 422 si el archivo no sirve como logo.
+
+Contexto declarado en el controlador: El logo del consultorio propio, el que sale en el membrete de sus PDF. A diferencia del QR, sólo alcanza al consultorio **propio**: una sede de otra organización responde 404. El archivo ya entró por `POST /common/files/upload` y se valida como el logo de una organización.
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /practitioners/me/sites/{siteId}/logo` en `PractitionerSitesController_setSiteLogo`. El controlador delega en `PractitionerSitesService.setSiteLogo`. Valida el body como `SetSiteLogoDto` y consume `application/json`. El tipo de retorno estático es `Promise<PractitionerSiteDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `siteId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SetSiteLogoDto`; los campos opcionales se omiten.
+
+```http
+PUT /practitioners/me/sites/00000000-0000-4000-8000-000000000001/logo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "fileId": {}
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `siteId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `fileId` | Sí | `object` | formato `uuid`; admite null | Imagen del logo ya subida, o null para quitarlo | `{}` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /practitioners/me/sites/00000000-0000-4000-8000-000000000001/logo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "fileId": {}
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerSiteDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "timeZone": "America/La_Paz",
+  "addressText": "Av. Brasil 1234, La Paz",
+  "latitude": 1,
+  "longitude": 1,
+  "contactPhone": "+591 72123456",
+  "isOwnSite": true,
+  "bankQrFileId": "00000000-0000-4000-8000-000000000001",
+  "logoFileId": "00000000-0000-4000-8000-000000000001",
+  "status": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador de la sede. | `00000000-0000-4000-8000-000000000001` |
+| `practiceId` | Sí | `string` | formato `uuid` | Práctica a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Código único dentro de la práctica. | `CODIGO_EJEMPLO` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible. | `Nombre de ejemplo` |
+| `timeZone` | No | `string` | admite null | Zona horaria IANA de la sede, si la declara. | `America/La_Paz` |
+| `addressText` | No | `string` | admite null | Dirección en una línea, o `null` si la sede no tiene ninguna cargada. | `Av. Brasil 1234, La Paz` |
+| `latitude` | No | `number` | admite null | Latitud del punto de la sede, si la dirección la tiene cargada (ALV-006). | `1` |
+| `longitude` | No | `number` | admite null | Longitud del punto de la sede. Va siempre junto a `latitude`. | `1` |
+| `contactPhone` | No | `string` | admite null | Teléfono de este profesional en esta sede, si lo declaró. | `+591 72123456` |
+| `isOwnSite` | Sí | `boolean` | Sin restricción adicional declarada | Si la sede es el consultorio **propio** del profesional —su práctica personal— y no la de otra organización donde atiende (P32-a). La lista mezclaba las dos cosas sin distinguirlas: «Consultorio Dra. Rojas» y «Hospital San Lucas» llegaban con la misma forma, y retirar lo propio no es el mismo acto que desvincularse de un hospital. Sale de comparar la práctica de la sede con la práctica personal del profesional (tipo consultorio y él como cuenta administradora), no de adivinar por el nombre. | `true` |
+| `bankQrFileId` | No | `string` | formato `uuid`; admite null | Archivo del QR bancario con el que el profesional cobra **en esta sede**, o `null` si no configuró ninguno (P33). Es por sede y no por persona porque no se cobra igual en todos lados: en el consultorio propio cobra el profesional y en la clínica puede cobrar la clínica. Un QR único de perfil obligaría a corregirlo cada vez que cambia de establecimiento. | `00000000-0000-4000-8000-000000000001` |
+| `logoFileId` | No | `string` | formato `uuid`; admite null | Logo del consultorio, el que sale en el membrete de sus PDF, o `null` si no tiene. Se lee con `GET /common/files/:id/content`. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | formato `uuid` | Concepto de estado. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | ${labels.subject} no le pertenece | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Esa sede no es un consultorio propio suyo | Excepción explícita en src/modules/practice/services/practitioner-sites.service.ts |
+| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El logo no es un archivo suyo que se pueda usar | Excepción explícita en src/modules/practice/services/practitioner-sites.service.ts |
+| 422 | `PRECONDITION_FAILED` | El logo debe ser una imagen | Excepción explícita en src/modules/practice/services/practitioner-sites.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/practitioners/me/sites/{siteId}/logo"
+}
+```
+
+---
+
+## 29. POST /role-assignments/{roleId}/approve
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -4182,7 +4366,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /role-assignments/{roleId}/end
+## 30. POST /role-assignments/{roleId}/end
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -4315,7 +4499,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /role-assignments/{roleId}/reject
+## 31. POST /role-assignments/{roleId}/reject
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -4447,7 +4631,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. POST /role-assignments/{roleId}/support-assignments
+## 32. POST /role-assignments/{roleId}/support-assignments
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -4586,7 +4770,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. POST /role-assignments/{roleId}/suspend
+## 33. POST /role-assignments/{roleId}/suspend
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -4719,7 +4903,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. GET /sites/{siteId}/care-spaces
+## 34. GET /sites/{siteId}/care-spaces
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -4833,7 +5017,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. POST /sites/{siteId}/care-spaces
+## 35. POST /sites/{siteId}/care-spaces
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -4982,7 +5166,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. POST /sites/{siteId}/clinical-units
+## 36. POST /sites/{siteId}/clinical-units
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -5128,7 +5312,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. POST /tenants/{tenantId}/practices
+## 37. POST /tenants/{tenantId}/practices
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`

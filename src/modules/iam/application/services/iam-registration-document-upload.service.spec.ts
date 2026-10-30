@@ -117,3 +117,35 @@ describe('Precarga privada de firma y sello', () => {
     );
   });
 });
+
+describe('Precarga del logo del consultorio propio', () => {
+  it('usa IMAGE/NORMAL y los formatos del logo', async () => {
+    const d = build();
+    const file = {
+      originalname: 'logo.png',
+      mimetype: 'image/png',
+      buffer: Buffer.from('png'),
+    };
+    await d.service.uploadOwnSiteLogo(file);
+    expect(d.fileUploadService.uploadAnonymous).toHaveBeenCalledWith(
+      file,
+      { category: FileCategory.IMAGE, sensitivity: FileSensitivity.NORMAL },
+      {
+        allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+        operation: 'iam.auth.upload-registration-logo',
+      },
+    );
+  });
+
+  it('rechaza más de 2 MB antes de escribir', async () => {
+    const d = build();
+    await expect(
+      d.service.uploadOwnSiteLogo({
+        originalname: 'logo.png',
+        mimetype: 'image/png',
+        buffer: Buffer.alloc(2 * 1024 * 1024 + 1),
+      }),
+    ).rejects.toThrow('2 MB');
+    expect(d.fileUploadService.uploadAnonymous).not.toHaveBeenCalled();
+  });
+});

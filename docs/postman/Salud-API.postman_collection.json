@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1584 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1584 requests en 146 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1618 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1618 requests en 146 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -18431,7 +18431,7 @@
       ]
     },
     {
-      "name": "billing (35)",
+      "name": "billing (37)",
       "item": [
         {
           "name": "billing-operations",
@@ -19547,6 +19547,55 @@
               ]
             },
             {
+              "name": "GET /billing/service-catalog/procedure-specialties/mine · Listar las especialidades del arancel que corresponden al médico",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/billing/service-catalog/procedure-specialties/mine",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "billing",
+                    "service-catalog",
+                    "procedure-specialties",
+                    "mine"
+                  ]
+                },
+                "description": "Listar las especialidades del arancel que corresponden al médico. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /billing/service-catalog/procedure-specialties/mine`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `BillingServiceCatalogController_listMyProcedureSpecialties`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.procedureSpecialties || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('procedureSpecialtyId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "GET /billing/service-catalog/procedures · Listar el nomenclador de procedimientos (arancel de referencia)",
               "request": {
                 "method": "GET",
@@ -19578,7 +19627,7 @@
                     {
                       "key": "q",
                       "value": "q-ejemplo",
-                      "description": "Texto a buscar en el nombre del procedimiento",
+                      "description": "Palabras a buscar (todas deben aparecer), sin distinguir tildes ni mayúsculas, en el nombre, el código, el grupo o la especialidad",
                       "disabled": true
                     },
                     {
@@ -19673,6 +19722,66 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.serviceCatalogId);",
                       "  if (id) pm.environment.set('serviceCatalogId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /billing/service-catalog/import-procedures · Importar en lote procedimientos del arancel al catálogo",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/billing/service-catalog/import-procedures",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "billing",
+                    "service-catalog",
+                    "import-procedures"
+                  ]
+                },
+                "description": "Crea en el catálogo de la práctica todos los procedimientos del arancel que cumplan el filtro (especialidades, códigos y/o texto, combinados con Y; al menos uno). Idempotente: salta los códigos que la práctica ya tiene. Tope de 5000 coincidencias (400 si lo excede).\n\n`POST /billing/service-catalog/import-procedures`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `BillingServiceCatalogController_importProcedures`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"practiceId\": \"{{practiceId}}\",\n  \"specialties\": [\n    \"Cardiología\"\n  ],\n  \"codes\": [\n    \"procedure:bo:BO_ARM_AUDITORIA_MEDICA_I_GENERAL\"\n  ],\n  \"q\": \"q-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{importProcedureId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.importProcedureId);",
+                      "  if (id) pm.environment.set('importProcedureId', id);",
                       "}"
                     ]
                   }
@@ -26415,7 +26524,7 @@
       ]
     },
     {
-      "name": "community (68)",
+      "name": "community (69)",
       "item": [
         {
           "name": "community-groups",
@@ -29005,7 +29114,7 @@
                 "description": "Publicar una review verificada de servicio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /community/profiles/{profileId}/reviews`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `CommunityReviewsController_publishReview`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"verifiedEncounterId\": \"<verifiedEncounterId: uuid existente>\",\n  \"overallRating\": 1,\n  \"reviewText\": \"reviewText-ejemplo\",\n  \"displayMode\": \"REAL_NAME\",\n  \"dimensions\": [\n    {\n      \"dimension\": \"COMMUNICATION\",\n      \"score\": 1\n    }\n  ]\n}",
+                  "raw": "{\n  \"verifiedEncounterId\": \"<verifiedEncounterId: uuid existente>\",\n  \"overallRating\": 1,\n  \"reviewText\": \"reviewText-ejemplo\",\n  \"displayMode\": \"ANONYMOUS\",\n  \"dimensions\": [\n    {\n      \"dimension\": \"COMMUNICATION\",\n      \"score\": 1\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -29483,6 +29592,55 @@
                       "  const list = Array.isArray(body) ? body : (body.stats || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('statId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /community/profiles/organization-showcases/me · Vitrinas de organización que la sesión puede atender en el chat",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/community/profiles/organization-showcases/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "community",
+                    "profiles",
+                    "organization-showcases",
+                    "me"
+                  ]
+                },
+                "description": "Vitrinas de organización que la sesión puede atender en el chat. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /community/profiles/organization-showcases/me`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `CommunitySocialController_listOwnOrganizationShowcases`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.organizationShowcases || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('organizationShowcaseId', first.id);",
                       "}"
                     ]
                   }
@@ -30914,7 +31072,7 @@
       ]
     },
     {
-      "name": "consent (22)",
+      "name": "consent (27)",
       "item": [
         {
           "name": "consent-consents",
@@ -32036,6 +32194,73 @@
           "name": "consent-treatment-informed-consents",
           "item": [
             {
+              "name": "GET /consent/treatment-informed-consents · Listar consentimientos informados de tratamiento",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/consent/treatment-informed-consents?patientProfileId={{patientProfileId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "consent",
+                    "treatment-informed-consents"
+                  ],
+                  "query": [
+                    {
+                      "key": "patientProfileId",
+                      "value": "{{patientProfileId}}",
+                      "description": "Paciente titular",
+                      "disabled": false
+                    },
+                    {
+                      "key": "targetType",
+                      "value": "MEDICATION_REQUEST",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "targetId",
+                      "value": "{{targetId}}",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Listar consentimientos informados de tratamiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /consent/treatment-informed-consents`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `TreatmentInformedConsentsController_list`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.treatmentInformedConsents || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('treatmentInformedConsentId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "POST /consent/treatment-informed-consents · Capturar consentimiento informado de tratamiento",
               "request": {
                 "method": "POST",
@@ -32064,7 +32289,7 @@
                 "description": "Capturar consentimiento informado de tratamiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /consent/treatment-informed-consents`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `TreatmentInformedConsentsController_sign`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"decision\": \"ACCEPTED\",\n  \"informationVersion\": \"informationVersion-ejemplo\",\n  \"tenantId\": \"{{tenantId}}\"\n}",
+                  "raw": "{\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"decision\": \"ACCEPTED\",\n  \"informationVersion\": \"informationVersion-ejemplo\",\n  \"tenantId\": \"{{tenantId}}\",\n  \"targetType\": \"MEDICATION_REQUEST\",\n  \"targetId\": \"{{targetId}}\",\n  \"targetLabel\": \"targetLabel-ejemplo\",\n  \"diagnosisText\": \"diagnosisText-ejemplo\",\n  \"purposeText\": \"purposeText-ejemplo\",\n  \"benefitsText\": \"benefitsText-ejemplo\",\n  \"risksText\": \"risksText-ejemplo\",\n  \"personalizedRisksText\": \"personalizedRisksText-ejemplo\",\n  \"alternativesText\": \"alternativesText-ejemplo\",\n  \"refusalConsequencesText\": \"refusalConsequencesText-ejemplo\",\n  \"patientQuestionsText\": \"patientQuestionsText-ejemplo\",\n  \"grantedBy\": \"PATIENT\",\n  \"representativeName\": \"representativeName-ejemplo\",\n  \"representativeDocument\": \"representativeDocument-ejemplo\",\n  \"representativeRelationship\": \"representativeRelationship-ejemplo\",\n  \"incapacityReason\": \"incapacityReason-ejemplo\",\n  \"channel\": \"IN_PERSON\",\n  \"exceptionType\": \"EMERGENCY\",\n  \"exceptionJustification\": \"exceptionJustification-ejemplo\",\n  \"witnessName\": \"witnessName-ejemplo\",\n  \"witnessDocument\": \"witnessDocument-ejemplo\",\n  \"informationLanguage\": \"informationLanguage-ejemplo\",\n  \"assentObtained\": true,\n  \"assentNotes\": \"assentNotes-ejemplo\",\n  \"revocationRightInformed\": true\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -32132,7 +32357,7 @@
                 "description": "Registrar el consentimiento informado del encuentro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /consent/encounters/{encounterId}/informed-consent`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `EncounterInformedConsentsController_register`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"decision\": \"ACCEPTED\",\n  \"informationVersion\": \"informationVersion-ejemplo\"\n}",
+                  "raw": "{\n  \"decision\": \"ACCEPTED\",\n  \"informationVersion\": \"informationVersion-ejemplo\",\n  \"targetType\": \"MEDICATION_REQUEST\",\n  \"targetId\": \"{{targetId}}\",\n  \"targetLabel\": \"targetLabel-ejemplo\",\n  \"diagnosisText\": \"diagnosisText-ejemplo\",\n  \"purposeText\": \"purposeText-ejemplo\",\n  \"benefitsText\": \"benefitsText-ejemplo\",\n  \"risksText\": \"risksText-ejemplo\",\n  \"personalizedRisksText\": \"personalizedRisksText-ejemplo\",\n  \"alternativesText\": \"alternativesText-ejemplo\",\n  \"refusalConsequencesText\": \"refusalConsequencesText-ejemplo\",\n  \"patientQuestionsText\": \"patientQuestionsText-ejemplo\",\n  \"grantedBy\": \"PATIENT\",\n  \"representativeName\": \"representativeName-ejemplo\",\n  \"representativeDocument\": \"representativeDocument-ejemplo\",\n  \"representativeRelationship\": \"representativeRelationship-ejemplo\",\n  \"incapacityReason\": \"incapacityReason-ejemplo\",\n  \"channel\": \"IN_PERSON\",\n  \"exceptionType\": \"EMERGENCY\",\n  \"exceptionJustification\": \"exceptionJustification-ejemplo\",\n  \"witnessName\": \"witnessName-ejemplo\",\n  \"witnessDocument\": \"witnessDocument-ejemplo\",\n  \"informationLanguage\": \"informationLanguage-ejemplo\",\n  \"assentObtained\": true,\n  \"assentNotes\": \"assentNotes-ejemplo\",\n  \"revocationRightInformed\": true\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -32156,6 +32381,74 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.encounterId);",
                       "  if (id) pm.environment.set('encounterId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /consent/treatment-informed-consents/{id}/evidence · Adjuntar evidencia de firma al consentimiento de tratamiento",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/consent/treatment-informed-consents/:id/evidence",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "consent",
+                    "treatment-informed-consents",
+                    ":id",
+                    "evidence"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{treatmentInformedConsentId}}",
+                      "description": "Identificador de ruta · variable `{{treatmentInformedConsentId}}`"
+                    }
+                  ]
+                },
+                "description": "Adjuntar evidencia de firma al consentimiento de tratamiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /consent/treatment-informed-consents/{id}/evidence`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `TreatmentInformedConsentsController_recordEvidence`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"policySnapshotHash\": \"policySnapshotHash-ejemplo\",\n  \"evidenceHash\": \"evidenceHash-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{treatmentInformedConsentId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.treatmentInformedConsentId);",
+                      "  if (id) pm.environment.set('treatmentInformedConsentId', id);",
                       "}"
                     ]
                   }
@@ -32213,6 +32506,183 @@
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('encounterId', first.id);",
                       "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /consent/treatment-informed-consents/{id} · Leer un consentimiento informado de tratamiento",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/consent/treatment-informed-consents/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "consent",
+                    "treatment-informed-consents",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{treatmentInformedConsentId}}",
+                      "description": "Identificador de ruta · variable `{{treatmentInformedConsentId}}`"
+                    }
+                  ]
+                },
+                "description": "Leer un consentimiento informado de tratamiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /consent/treatment-informed-consents/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `TreatmentInformedConsentsController_get`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.treatmentInformedConsents || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('treatmentInformedConsentId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PATCH /consent/treatment-informed-consents/{id}/post-emergency-information · Registrar la información posterior a una emergencia",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/consent/treatment-informed-consents/:id/post-emergency-information",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "consent",
+                    "treatment-informed-consents",
+                    ":id",
+                    "post-emergency-information"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{treatmentInformedConsentId}}",
+                      "description": "Identificador de ruta · variable `{{treatmentInformedConsentId}}`"
+                    }
+                  ]
+                },
+                "description": "Registrar la información posterior a una emergencia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /consent/treatment-informed-consents/{id}/post-emergency-information`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `TreatmentInformedConsentsController_postEmergencyInformation`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"informedAt\": \"2026-01-01T00:00:00.000Z\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PATCH /consent/treatment-informed-consents/{id}/withdraw · Revocar un consentimiento informado de tratamiento",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/consent/treatment-informed-consents/:id/withdraw",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "consent",
+                    "treatment-informed-consents",
+                    ":id",
+                    "withdraw"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{treatmentInformedConsentId}}",
+                      "description": "Identificador de ruta · variable `{{treatmentInformedConsentId}}`"
+                    }
+                  ]
+                },
+                "description": "Revocar un consentimiento informado de tratamiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /consent/treatment-informed-consents/{id}/withdraw`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `TreatmentInformedConsentsController_withdraw`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"reason-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
                     ]
                   }
                 }
@@ -45576,7 +46046,7 @@
       ]
     },
     {
-      "name": "iam (39)",
+      "name": "iam (40)",
       "item": [
         {
           "name": "iam-auth",
@@ -46417,6 +46887,63 @@
               ]
             },
             {
+              "name": "POST /iam/auth/upload-registration-logo · Pre-cargar el logo del consultorio propio para el registro",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/auth/upload-registration-logo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "auth",
+                    "upload-registration-logo"
+                  ]
+                },
+                "description": "png, jpeg o webp de hasta 2 MB. El `fileId` se reenvía en `ownSite.logoFileId` del alta, que lo reclama en su misma transacción.\n\n`POST /iam/auth/upload-registration-logo`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500, 504\n\noperationId: `IamAuthController_uploadRegistrationLogo`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"file\": \"<binario>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{uploadRegistrationLogoId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.uploadRegistrationLogoId);",
+                      "  if (id) pm.environment.set('uploadRegistrationLogoId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "POST /iam/auth/upload-registration-signature-image · Pre-cargar una imagen de firma o sello para el registro",
               "request": {
                 "method": "POST",
@@ -46934,7 +47461,7 @@
                 "description": "Alta administrativa de un profesional (devuelve token de activación). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/users/assisted-practitioner-registration`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `IamUsersController_assistedPractitionerRegistration`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"{{email}}\",\n  \"personalEmail\": \"usuario@example.test\",\n  \"workEmail\": \"usuario@example.test\",\n  \"name\": \"Ana\",\n  \"middleName\": \"Lucía\",\n  \"lastName\": \"Rojas\",\n  \"motherLastName\": \"Paz\",\n  \"displayName\": \"displayName-ejemplo\",\n  \"licenseNumber\": \"licenseNumber-ejemplo\",\n  \"credentialNumber\": \"credentialNumber-ejemplo\",\n  \"sedesLicenseNumber\": \"T.I. 538/14\",\n  \"regulatoryAuthority\": \"2026-01-01T00:00:00.000Z\",\n  \"licenseIssueDate\": \"2026-01-01\",\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"specialtyConceptIds\": [\n    \"<specialtyConceptIds: uuid existente>\"\n  ],\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"issuerAdministrativeAreaConceptId\": \"<issuerAdministrativeAreaConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"homeLatitude\": -90,\n  \"homeLongitude\": -180,\n  \"workAddressLines\": \"workAddressLines-ejemplo\",\n  \"workLatitude\": -90,\n  \"workLongitude\": -180,\n  \"phone\": \"phone-ejemplo\",\n  \"mobilePhone\": \"mobilePhone-ejemplo\",\n  \"workMobilePhone\": \"workMobilePhone-ejemplo\",\n  \"workLandline\": \"workLandline-ejemplo\",\n  \"birthDate\": \"2026-01-01\",\n  \"gender\": \"MALE\",\n  \"sexAtBirth\": \"MALE\",\n  \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\",\n  \"acceptsNewPatients\": false,\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\",\n  \"timeZone\": \"timeZone-ejemplo\",\n  \"profilePhotoBase64\": \"2026-01-01T00:00:00.000Z\",\n  \"ownSite\": {\n    \"name\": \"name-ejemplo\",\n    \"timeZone\": \"America/La_Paz\",\n    \"address\": {\n      \"lines\": [\n        \"lines-ejemplo\"\n      ],\n      \"city\": \"city-ejemplo\",\n      \"latitude\": -90,\n      \"longitude\": -180\n    },\n    \"contactPhone\": \"+591 72123456\"\n  },\n  \"credentials\": [\n    {\n      \"credentialTypeConceptId\": \"<credentialTypeConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"number\": \"number-ejemplo\",\n      \"issuingInstitutionText\": \"issuingInstitutionText-ejemplo\",\n      \"issuingCityText\": \"issuingCityText-ejemplo\",\n      \"issuingCountryText\": \"issuingCountryText-ejemplo\",\n      \"professionConceptId\": \"<professionConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"titleText\": \"titleText-ejemplo\",\n      \"fileId\": \"{{fileId}}\"\n    }\n  ],\n  \"reason\": \"reason-ejemplo\",\n  \"clinicalRoles\": [\n    \"CLINICIAN\",\n    \"SURGEON\"\n  ]\n}",
+                  "raw": "{\n  \"email\": \"{{email}}\",\n  \"personalEmail\": \"usuario@example.test\",\n  \"workEmail\": \"usuario@example.test\",\n  \"name\": \"Ana\",\n  \"middleName\": \"Lucía\",\n  \"lastName\": \"Rojas\",\n  \"motherLastName\": \"Paz\",\n  \"displayName\": \"displayName-ejemplo\",\n  \"licenseNumber\": \"licenseNumber-ejemplo\",\n  \"credentialNumber\": \"credentialNumber-ejemplo\",\n  \"sedesLicenseNumber\": \"T.I. 538/14\",\n  \"regulatoryAuthority\": \"2026-01-01T00:00:00.000Z\",\n  \"licenseIssueDate\": \"2026-01-01\",\n  \"sedesLicenseIssueDate\": \"2026-01-01\",\n  \"collegeLicenseNumber\": \"CMB-12345\",\n  \"collegeName\": \"Colegio Médico de Bolivia\",\n  \"collegeLicenseIssueDate\": \"2026-01-01\",\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"specialtyConceptIds\": [\n    \"<specialtyConceptIds: uuid existente>\"\n  ],\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"issuerAdministrativeAreaConceptId\": \"<issuerAdministrativeAreaConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"homeDistrict\": \"homeDistrict-ejemplo\",\n  \"homeLatitude\": -90,\n  \"homeLongitude\": -180,\n  \"workAddressLines\": \"workAddressLines-ejemplo\",\n  \"workLatitude\": -90,\n  \"workLongitude\": -180,\n  \"phone\": \"phone-ejemplo\",\n  \"mobilePhone\": \"mobilePhone-ejemplo\",\n  \"workMobilePhone\": \"workMobilePhone-ejemplo\",\n  \"workLandline\": \"workLandline-ejemplo\",\n  \"birthDate\": \"2026-01-01\",\n  \"gender\": \"MALE\",\n  \"sexAtBirth\": \"MALE\",\n  \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\",\n  \"acceptsNewPatients\": false,\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\",\n  \"timeZone\": \"timeZone-ejemplo\",\n  \"profilePhotoBase64\": \"2026-01-01T00:00:00.000Z\",\n  \"ownSite\": {\n    \"name\": \"name-ejemplo\",\n    \"timeZone\": \"America/La_Paz\",\n    \"address\": {\n      \"lines\": [\n        \"lines-ejemplo\"\n      ],\n      \"city\": \"city-ejemplo\",\n      \"district\": \"district-ejemplo\",\n      \"latitude\": -90,\n      \"longitude\": -180\n    },\n    \"contactPhone\": \"+591 72123456\"\n  },\n  \"credentials\": [\n    {\n      \"credentialTypeConceptId\": \"<credentialTypeConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"number\": \"number-ejemplo\",\n      \"issuingInstitutionText\": \"issuingInstitutionText-ejemplo\",\n      \"issuingCityText\": \"issuingCityText-ejemplo\",\n      \"issuingCountryText\": \"issuingCountryText-ejemplo\",\n      \"professionConceptId\": \"<professionConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"titleText\": \"titleText-ejemplo\",\n      \"fileId\": \"{{fileId}}\"\n    }\n  ],\n  \"reason\": \"reason-ejemplo\",\n  \"clinicalRoles\": [\n    \"CLINICIAN\",\n    \"SURGEON\"\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -51222,7 +51749,7 @@
                 "insurance-carrier-catalog"
               ]
             },
-            "description": "Catálogo público de aseguradoras y sus planes de salud. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /insurance-carrier-catalog`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 429, 500, 504\n\noperationId: `InsuranceCatalogController_listCatalog`",
+            "description": "Seguros públicos (seguridad social, SUS y cajas): siempre. Aseguradoras privadas: sólo las que tienen una cuenta registrada, es decir, un tenant activo con un OWNER o ADMIN vigente, usuario activo y credencial activa.\n\n`GET /insurance-carrier-catalog`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 429, 500, 504\n\noperationId: `InsuranceCatalogController_listCatalog`",
             "auth": {
               "type": "noauth"
             }
@@ -63417,7 +63944,7 @@
       ]
     },
     {
-      "name": "patient-coverages (2)",
+      "name": "patient-coverages (3)",
       "item": [
         {
           "name": "GET /patient-coverages/me · Mi cobertura",
@@ -63523,6 +64050,61 @@
               }
             }
           ]
+        },
+        {
+          "name": "GET /patient-coverages/by-patient/{patientProfileId} · Seguros de una persona, para quien cobra",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient-coverages/by-patient/:patientProfileId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient-coverages",
+                "by-patient",
+                ":patientProfileId"
+              ],
+              "variable": [
+                {
+                  "key": "patientProfileId",
+                  "value": "{{patientProfileId}}",
+                  "description": "Identificador de ruta · variable `{{patientProfileId}}`"
+                }
+              ]
+            },
+            "description": "Seguros de una persona, para quien cobra. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /patient-coverages/by-patient/{patientProfileId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `CoverageController_listForPatient`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.patientCoverages || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('patientCoverageId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -63599,8 +64181,64 @@
       ]
     },
     {
-      "name": "patients (2)",
+      "name": "patients (3)",
       "item": [
+        {
+          "name": "GET /patients/me/reviewable-care · Consultar si una atención recibida se puede calificar",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patients/me/reviewable-care?appointmentBookingId=<appointmentBookingId: uuid existente>",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patients",
+                "me",
+                "reviewable-care"
+              ],
+              "query": [
+                {
+                  "key": "appointmentBookingId",
+                  "value": "<appointmentBookingId: uuid existente>",
+                  "description": "Reserva de la atención recibida (la misma de la encuesta)",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": "Parte de la reserva (la misma de la encuesta) y devuelve el encuentro que respalda la reseña pública, el nombre público del profesional, y `alreadyReviewed` / `canReview`. Una reserva ajena o inexistente responde 404 igual.\n\n`GET /patients/me/reviewable-care`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `PatientReviewsController_getReviewableCare`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.patients || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('patientId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
         {
           "name": "POST /patients/me/reviews · Calificar una atención recibida",
           "request": {
@@ -63631,7 +64269,7 @@
             "description": "El destinatario sale del encuentro declarado: no hace falta conocer el identificador de la vitrina del profesional.\n\n`POST /patients/me/reviews`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `PatientReviewsController_publishOwnReview`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"verifiedEncounterId\": \"<verifiedEncounterId: uuid existente>\",\n  \"overallRating\": 1,\n  \"reviewText\": \"reviewText-ejemplo\",\n  \"displayMode\": \"REAL_NAME\",\n  \"dimensions\": [\n    {\n      \"dimension\": \"COMMUNICATION\",\n      \"score\": 1\n    }\n  ]\n}",
+              "raw": "{\n  \"verifiedEncounterId\": \"<verifiedEncounterId: uuid existente>\",\n  \"overallRating\": 1,\n  \"reviewText\": \"reviewText-ejemplo\",\n  \"displayMode\": \"ANONYMOUS\",\n  \"dimensions\": [\n    {\n      \"dimension\": \"COMMUNICATION\",\n      \"score\": 1\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -69002,7 +69640,7 @@
       ]
     },
     {
-      "name": "pharmacy (33)",
+      "name": "pharmacy (34)",
       "item": [
         {
           "name": "pharmacy-directory",
@@ -70722,6 +71360,61 @@
                     }
                   }
                 }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{orderId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.orderId);",
+                      "  if (id) pm.environment.set('orderId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /pharmacy/orders/{id}/conversation · Abrir el chat del pedido con la farmacia",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/pharmacy/orders/:id/conversation",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pharmacy",
+                    "orders",
+                    ":id",
+                    "conversation"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{orderId}}",
+                      "description": "Identificador de ruta · variable `{{orderId}}`"
+                    }
+                  ]
+                },
+                "description": "Idempotente: devuelve el mismo hilo directo entre el paciente titular y la vitrina pública de la farmacia. Lo piden el titular o el personal (PHARMACY_STAFF con membresía activa) de la farmacia del pedido; cualquier tercero recibe 404. 422 con reason ORGANIZATION_CHAT_PROFILE_UNAVAILABLE (farmacia sin vitrina activa/verificada), PATIENT_CHAT_PROFILE_MISSING (paciente sin perfil comunitario; no se crea) o bloqueo entre perfiles.\n\n`POST /pharmacy/orders/{id}/conversation`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `PharmacyOrdersController_openConversation`"
               },
               "response": [],
               "event": [
@@ -72971,7 +73664,7 @@
       ]
     },
     {
-      "name": "practitioners (10)",
+      "name": "practitioners (11)",
       "item": [
         {
           "name": "insurance",
@@ -73114,7 +73807,7 @@
                 "description": "Crea (o reutiliza) la práctica personal del profesional, la sede y la vinculación que la conecta con su agenda.\n\n`POST /practitioners/me/sites`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `PractitionerSitesController_createOwnSite`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"timeZone\": \"America/La_Paz\",\n  \"address\": {\n    \"lines\": [\n      \"lines-ejemplo\"\n    ],\n    \"city\": \"city-ejemplo\",\n    \"latitude\": -90,\n    \"longitude\": -180\n  },\n  \"contactPhone\": \"+591 72123456\"\n}",
+                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"timeZone\": \"America/La_Paz\",\n  \"address\": {\n    \"lines\": [\n      \"lines-ejemplo\"\n    ],\n    \"city\": \"city-ejemplo\",\n    \"district\": \"district-ejemplo\",\n    \"latitude\": -90,\n    \"longitude\": -180\n  },\n  \"contactPhone\": \"+591 72123456\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -73349,7 +74042,7 @@
                 "description": "Cambia nombre, huso horario o dirección sin retirar la sede: el id se conserva, y es el que la agenda referencia en cada turno.\n\n`PATCH /practitioners/me/sites/{siteId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PractitionerSitesController_updateOwnSite`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"timeZone\": \"America/La_Paz\",\n  \"address\": {\n    \"lines\": [\n      \"lines-ejemplo\"\n    ],\n    \"city\": \"city-ejemplo\",\n    \"latitude\": -90,\n    \"longitude\": -180\n  }\n}",
+                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"timeZone\": \"America/La_Paz\",\n  \"address\": {\n    \"lines\": [\n      \"lines-ejemplo\"\n    ],\n    \"city\": \"city-ejemplo\",\n    \"district\": \"district-ejemplo\",\n    \"latitude\": -90,\n    \"longitude\": -180\n  }\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -73474,6 +74167,68 @@
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"contactPhone\": \"+591 72123456\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /practitioners/me/sites/{siteId}/logo · Fijar o quitar el logo del consultorio propio",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/practitioners/me/sites/:siteId/logo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "practitioners",
+                    "me",
+                    "sites",
+                    ":siteId",
+                    "logo"
+                  ],
+                  "variable": [
+                    {
+                      "key": "siteId",
+                      "value": "{{siteId}}",
+                      "description": "Identificador de ruta · variable `{{siteId}}`"
+                    }
+                  ]
+                },
+                "description": "Asocia una imagen ya subida (png, jpeg o webp, NORMAL, hasta 2 MB) como logo del consultorio. `fileId: null` lo quita. 404 si la sede no es un consultorio propio; 422 si el archivo no sirve como logo.\n\n`PUT /practitioners/me/sites/{siteId}/logo`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PractitionerSitesController_setSiteLogo`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fileId\": {}\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -75938,7 +76693,7 @@
       ]
     },
     {
-      "name": "profiles (54)",
+      "name": "profiles (63)",
       "item": [
         {
           "name": "profiles-patients",
@@ -76064,6 +76819,55 @@
                       "  const list = Array.isArray(body) ? body : (body.patients || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('patientId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /profiles/patients/me/addresses · Listar las propias direcciones (la preferida primero)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/addresses",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "addresses"
+                  ]
+                },
+                "description": "Listar las propias direcciones (la preferida primero). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /profiles/patients/me/addresses`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `PatientAddressBookController_list`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.addresses || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('addressId', first.id);",
                       "}"
                     ]
                   }
@@ -76390,6 +77194,67 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.patientId);",
                       "  if (id) pm.environment.set('patientId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /profiles/patients/me/addresses · Guardar una dirección nueva",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/addresses",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "addresses"
+                  ]
+                },
+                "description": "Guardar una dirección nueva. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /profiles/patients/me/addresses`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `PatientAddressBookController_create`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"label\": \"Casa de mi mamá\",\n  \"municipalityConceptId\": \"<municipalityConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"lines\": \"lines-ejemplo\",\n  \"district\": \"district-ejemplo\",\n  \"latitude\": -90,\n  \"longitude\": -180,\n  \"isPreferred\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{addressId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.addressId);",
+                      "  if (id) pm.environment.set('addressId', id);",
                       "}"
                     ]
                   }
@@ -77241,13 +78106,125 @@
                 "description": "Editar los propios datos de filiación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /profiles/patients/me`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `ProfilesPatientsController_updateOwnProfile`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Lucía\",\n  \"middleName\": \"Andrea\",\n  \"lastName\": \"Mamani\",\n  \"motherLastName\": \"Quispe\",\n  \"birthDate\": {},\n  \"sexAtBirth\": \"MALE\",\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"phone\": \"phone-ejemplo\",\n  \"taxId\": \"taxId-ejemplo\",\n  \"taxHolderName\": \"taxHolderName-ejemplo\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"workAddressLines\": \"workAddressLines-ejemplo\",\n  \"homeLatitude\": {},\n  \"homeLongitude\": {},\n  \"workLatitude\": {},\n  \"workLongitude\": {},\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\",\n  \"guardianName\": \"guardianName-ejemplo\",\n  \"guardianPhone\": \"guardianPhone-ejemplo\"\n}",
+                  "raw": "{\n  \"name\": \"Lucía\",\n  \"middleName\": \"Andrea\",\n  \"lastName\": \"Mamani\",\n  \"motherLastName\": \"Quispe\",\n  \"birthDate\": {},\n  \"sexAtBirth\": \"MALE\",\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"phone\": \"phone-ejemplo\",\n  \"taxId\": \"taxId-ejemplo\",\n  \"taxHolderName\": \"taxHolderName-ejemplo\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"workAddressLines\": \"workAddressLines-ejemplo\",\n  \"homeDistrict\": \"homeDistrict-ejemplo\",\n  \"workDistrict\": \"workDistrict-ejemplo\",\n  \"homeLatitude\": {},\n  \"homeLongitude\": {},\n  \"workLatitude\": {},\n  \"workLongitude\": {},\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\",\n  \"guardianName\": \"guardianName-ejemplo\",\n  \"guardianPhone\": \"guardianPhone-ejemplo\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
                     }
                   }
                 }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PATCH /profiles/patients/me/addresses/{id} · Corregir una dirección (cierra la vigente y abre otra)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/addresses/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "addresses",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{addressId}}",
+                      "description": "Identificador de ruta · variable `{{addressId}}`"
+                    }
+                  ]
+                },
+                "description": "Corregir una dirección (cierra la vigente y abre otra). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /profiles/patients/me/addresses/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PatientAddressBookController_update`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"label\": \"label-ejemplo\",\n  \"lines\": \"lines-ejemplo\",\n  \"district\": \"district-ejemplo\",\n  \"latitude\": -90,\n  \"longitude\": -180\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /profiles/patients/me/addresses/{id}/preferred · Marcar la dirección que se ofrece primero",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/addresses/:id/preferred",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "addresses",
+                    ":id",
+                    "preferred"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{addressId}}",
+                      "description": "Identificador de ruta · variable `{{addressId}}`"
+                    }
+                  ]
+                },
+                "description": "Marcar la dirección que se ofrece primero. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PUT /profiles/patients/me/addresses/{id}/preferred`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `PatientAddressBookController_prefer`"
               },
               "response": [],
               "event": [
@@ -77302,6 +78279,55 @@
                     }
                   }
                 }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "DELETE /profiles/patients/me/addresses/{id} · Quitar una dirección guardada o la del trabajo",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/addresses/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "addresses",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{addressId}}",
+                      "description": "Identificador de ruta · variable `{{addressId}}`"
+                    }
+                  ]
+                },
+                "description": "Quitar una dirección guardada o la del trabajo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`DELETE /profiles/patients/me/addresses/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `PatientAddressBookController_remove`"
               },
               "response": [],
               "event": [
@@ -78356,7 +79382,7 @@
                 "description": "Editar la presentación del propio perfil profesional. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /profiles/practitioners/me`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `ProfilesPractitionersController_updateOwnPractitionerProfile`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"professionalBio\": \"professionalBio-ejemplo\",\n  \"acceptsNewPatients\": true,\n  \"telehealthAvailable\": true,\n  \"name\": \"name-ejemplo\",\n  \"middleName\": \"middleName-ejemplo\",\n  \"lastName\": \"lastName-ejemplo\",\n  \"motherLastName\": \"motherLastName-ejemplo\",\n  \"birthDate\": {},\n  \"sexAtBirth\": \"MALE\",\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"phone\": \"phone-ejemplo\",\n  \"workEmail\": \"usuario@example.test\",\n  \"personalEmail\": \"usuario@example.test\",\n  \"mobilePhone\": \"mobilePhone-ejemplo\",\n  \"workMobilePhone\": \"workMobilePhone-ejemplo\",\n  \"workLandline\": \"workLandline-ejemplo\",\n  \"taxId\": \"taxId-ejemplo\",\n  \"taxHolderName\": \"taxHolderName-ejemplo\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"homeLatitude\": {},\n  \"homeLongitude\": {},\n  \"workAddressLines\": \"workAddressLines-ejemplo\",\n  \"workLatitude\": {},\n  \"workLongitude\": {},\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\",\n  \"languages\": [\n    {\n      \"languageConceptId\": \"<languageConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"proficiencyConceptId\": \"<proficiencyConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"clinicalInterpretationAllowed\": true\n    }\n  ]\n}",
+                  "raw": "{\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"professionalBio\": \"professionalBio-ejemplo\",\n  \"acceptsNewPatients\": true,\n  \"telehealthAvailable\": true,\n  \"name\": \"name-ejemplo\",\n  \"middleName\": \"middleName-ejemplo\",\n  \"lastName\": \"lastName-ejemplo\",\n  \"motherLastName\": \"motherLastName-ejemplo\",\n  \"birthDate\": {},\n  \"sexAtBirth\": \"MALE\",\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"phone\": \"phone-ejemplo\",\n  \"workEmail\": \"usuario@example.test\",\n  \"personalEmail\": \"usuario@example.test\",\n  \"mobilePhone\": \"mobilePhone-ejemplo\",\n  \"workMobilePhone\": \"workMobilePhone-ejemplo\",\n  \"workLandline\": \"workLandline-ejemplo\",\n  \"taxId\": \"taxId-ejemplo\",\n  \"taxHolderName\": \"taxHolderName-ejemplo\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"homeLatitude\": {},\n  \"homeLongitude\": {},\n  \"workAddressLines\": \"workAddressLines-ejemplo\",\n  \"homeDistrict\": \"homeDistrict-ejemplo\",\n  \"workDistrict\": \"workDistrict-ejemplo\",\n  \"workLatitude\": {},\n  \"workLongitude\": {},\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\",\n  \"languages\": [\n    {\n      \"languageConceptId\": \"<languageConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"proficiencyConceptId\": \"<proficiencyConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"clinicalInterpretationAllowed\": true\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -78768,7 +79794,7 @@
                 "description": "`403` si quien pide no es el titular ni plataforma. `409` `NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY` si se corrige el número del documento de una identidad verificada o con un caso de verificación en curso.\n\n`PATCH /profiles/practitioners/{profileId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `ProfilesPractitionersController_updatePractitionerProfile`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"professionalBio\": \"professionalBio-ejemplo\",\n  \"acceptsNewPatients\": true,\n  \"telehealthAvailable\": true,\n  \"name\": \"name-ejemplo\",\n  \"middleName\": \"middleName-ejemplo\",\n  \"lastName\": \"lastName-ejemplo\",\n  \"motherLastName\": \"motherLastName-ejemplo\",\n  \"birthDate\": {},\n  \"sexAtBirth\": \"MALE\",\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"phone\": \"phone-ejemplo\",\n  \"workEmail\": \"usuario@example.test\",\n  \"personalEmail\": \"usuario@example.test\",\n  \"mobilePhone\": \"mobilePhone-ejemplo\",\n  \"workMobilePhone\": \"workMobilePhone-ejemplo\",\n  \"workLandline\": \"workLandline-ejemplo\",\n  \"taxId\": \"taxId-ejemplo\",\n  \"taxHolderName\": \"taxHolderName-ejemplo\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"homeLatitude\": {},\n  \"homeLongitude\": {},\n  \"workAddressLines\": \"workAddressLines-ejemplo\",\n  \"workLatitude\": {},\n  \"workLongitude\": {},\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\",\n  \"languages\": [\n    {\n      \"languageConceptId\": \"<languageConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"proficiencyConceptId\": \"<proficiencyConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"clinicalInterpretationAllowed\": true\n    }\n  ]\n}",
+                  "raw": "{\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"professionalBio\": \"professionalBio-ejemplo\",\n  \"acceptsNewPatients\": true,\n  \"telehealthAvailable\": true,\n  \"name\": \"name-ejemplo\",\n  \"middleName\": \"middleName-ejemplo\",\n  \"lastName\": \"lastName-ejemplo\",\n  \"motherLastName\": \"motherLastName-ejemplo\",\n  \"birthDate\": {},\n  \"sexAtBirth\": \"MALE\",\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"phone\": \"phone-ejemplo\",\n  \"workEmail\": \"usuario@example.test\",\n  \"personalEmail\": \"usuario@example.test\",\n  \"mobilePhone\": \"mobilePhone-ejemplo\",\n  \"workMobilePhone\": \"workMobilePhone-ejemplo\",\n  \"workLandline\": \"workLandline-ejemplo\",\n  \"taxId\": \"taxId-ejemplo\",\n  \"taxHolderName\": \"taxHolderName-ejemplo\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"homeLatitude\": {},\n  \"homeLongitude\": {},\n  \"workAddressLines\": \"workAddressLines-ejemplo\",\n  \"homeDistrict\": \"homeDistrict-ejemplo\",\n  \"workDistrict\": \"workDistrict-ejemplo\",\n  \"workLatitude\": {},\n  \"workLongitude\": {},\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\",\n  \"languages\": [\n    {\n      \"languageConceptId\": \"<languageConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"proficiencyConceptId\": \"<proficiencyConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"clinicalInterpretationAllowed\": true\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -79080,6 +80106,218 @@
                   ]
                 },
                 "description": "Quitar la foto del perfil profesional. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`DELETE /profiles/practitioners/{profileId}/photo`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `ProfilesPractitionersController_removePractitionerPhoto`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "profiles-primary-practitioner",
+          "item": [
+            {
+              "name": "GET /profiles/patients/me/primary-practitioner · Consultar el propio médico de cabecera",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/primary-practitioner",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "primary-practitioner"
+                  ]
+                },
+                "description": "Consultar el propio médico de cabecera. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /profiles/patients/me/primary-practitioner`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `PrimaryPractitionerController_getOwn`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.patients || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('patientId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /profiles/practitioners/me/primary-patients · Listar los pacientes que me eligieron como médico de cabecera",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/practitioners/me/primary-patients",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "practitioners",
+                    "me",
+                    "primary-patients"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "offset",
+                      "value": "0",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Nombre, código de paciente y desde cuándo: ningún dato del expediente.\n\n`GET /profiles/practitioners/me/primary-patients`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `PrimaryPractitionerController_listOwnPatients`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.primaryPatients || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('primaryPatientId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /profiles/patients/me/primary-practitioner · Elegir o cambiar el propio médico de cabecera",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/primary-practitioner",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "primary-practitioner"
+                  ]
+                },
+                "description": "Cierra la elección vigente (si la hay) y abre otra. Elegir al que ya es el vigente no cambia nada. No concede acceso clínico.\n\n`PUT /profiles/patients/me/primary-practitioner`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `PrimaryPractitionerController_setOwn`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"practitionerProfileId\": \"{{practitionerProfileId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "DELETE /profiles/patients/me/primary-practitioner · Quitar el propio médico de cabecera",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/primary-practitioner",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "primary-practitioner"
+                  ]
+                },
+                "description": "Quitar el propio médico de cabecera. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`DELETE /profiles/patients/me/primary-practitioner`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 422, 429, 500, 504\n\noperationId: `PrimaryPractitionerController_removeOwn`"
               },
               "response": [],
               "event": [
@@ -79409,7 +80647,7 @@
       ]
     },
     {
-      "name": "public (26)",
+      "name": "public (27)",
       "item": [
         {
           "name": "clinical-prescriptions-public",
@@ -80464,6 +81702,68 @@
                       "  const list = Array.isArray(body) ? body : (body.reviews || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('reviewId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "geo",
+          "item": [
+            {
+              "name": "POST /public/geo/reverse · Nombre de la calle de un punto del mapa",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/public/geo/reverse",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "public",
+                    "geo",
+                    "reverse"
+                  ]
+                },
+                "description": "Sin sesión. 503 si el proveedor no responde: el alta sigue con la calle a mano. Nunca inventa una dirección.\n\n`POST /public/geo/reverse`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500, 504\n\noperationId: `ReverseGeocodingController_reverse`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"latitude\": -90,\n  \"longitude\": -180\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{reverseId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.reverseId);",
+                      "  if (id) pm.environment.set('reverseId', id);",
                       "}"
                     ]
                   }
@@ -83433,291 +84733,584 @@
       ]
     },
     {
-      "name": "referrals (5)",
+      "name": "referrals (10)",
       "item": [
         {
-          "name": "GET /referrals · Listar derivaciones de un paciente",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/referrals?patientProfileId=patientProfileId-ejemplo",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "referrals"
-              ],
-              "query": [
-                {
-                  "key": "patientProfileId",
-                  "value": "patientProfileId-ejemplo",
-                  "description": "",
-                  "disabled": false
-                }
-              ]
-            },
-            "description": "Listar derivaciones de un paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /referrals`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `ReferralsController_listByPatient`"
-          },
-          "response": [],
-          "event": [
+          "name": "clinical-ext-referrals",
+          "item": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
-                  "if (pm.response.code === 200) {",
-                  "  const body = pm.response.json();",
-                  "  const list = Array.isArray(body) ? body : (body.referrals || body.items || body.data || body.results);",
-                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
-                  "  if (first && first.id) pm.environment.set('referralId', first.id);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "GET /referrals/me · Mis derivaciones",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/referrals/me",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "referrals",
-                "me"
-              ]
-            },
-            "description": "Mis derivaciones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /referrals/me`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `ReferralsController_listMine`"
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
-                  "if (pm.response.code === 200) {",
-                  "  const body = pm.response.json();",
-                  "  const list = Array.isArray(body) ? body : (body.referrals || body.items || body.data || body.results);",
-                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
-                  "  if (first && first.id) pm.environment.set('referralId', first.id);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "POST /referrals · Emitir una referencia desde un encuentro",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
+              "name": "GET /referrals · Listar derivaciones de un paciente",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/referrals?patientProfileId=patientProfileId-ejemplo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "referrals"
+                  ],
+                  "query": [
+                    {
+                      "key": "patientProfileId",
+                      "value": "patientProfileId-ejemplo",
+                      "description": "",
+                      "disabled": false
+                    }
+                  ]
+                },
+                "description": "Listar derivaciones de un paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /referrals`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `ReferralsController_listByPatient`"
               },
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/referrals",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "referrals"
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.referrals || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('referralId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
               ]
             },
-            "description": "Emitir una referencia desde un encuentro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /referrals`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `ReferralsController_create`",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"reasonText\": \"reasonText-ejemplo\",\n  \"validUntil\": \"2026-01-01\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [],
-          "event": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 201', function () {",
-                  "  pm.response.to.have.status(201);",
-                  "});",
-                  "",
-                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{referralId}}.",
-                  "if (pm.response.code < 300) {",
-                  "  const body = pm.response.json();",
-                  "  const id = body && (body.id || body.referralId);",
-                  "  if (id) pm.environment.set('referralId', id);",
-                  "}"
-                ]
-              }
+              "name": "GET /referrals/me · Mis derivaciones",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/referrals/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "referrals",
+                    "me"
+                  ]
+                },
+                "description": "Mis derivaciones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /referrals/me`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `ReferralsController_listMine`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.referrals || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('referralId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /referrals/target-services · Servicios activos de un destino de derivación",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/referrals/target-services",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "referrals",
+                    "target-services"
+                  ],
+                  "query": [
+                    {
+                      "key": "targetProfileId",
+                      "value": "<targetProfileId: uuid existente>",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "targetTenantId",
+                      "value": "<targetTenantId: uuid existente>",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Servicios activos de un destino de derivación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /referrals/target-services`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `ReferralsController_listTargetServices`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.targetServices || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('targetServiceId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /referrals/targets · Buscar destinos de derivación",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/referrals/targets?q=q-ejemplo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "referrals",
+                    "targets"
+                  ],
+                  "query": [
+                    {
+                      "key": "q",
+                      "value": "q-ejemplo",
+                      "description": "",
+                      "disabled": false
+                    },
+                    {
+                      "key": "kind",
+                      "value": "PRACTITIONER",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Buscar destinos de derivación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /referrals/targets`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `ReferralsController_searchTargets`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.targets || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('targetId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /referrals · Emitir una referencia desde un encuentro",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/referrals",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "referrals"
+                  ]
+                },
+                "description": "Emitir una referencia desde un encuentro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /referrals`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `ReferralsController_create`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"reasonText\": \"reasonText-ejemplo\",\n  \"validUntil\": \"2026-01-01\",\n  \"referralType\": \"CONSULTATION\",\n  \"targetExternalName\": \"targetExternalName-ejemplo\",\n  \"targetExternalContact\": \"targetExternalContact-ejemplo\",\n  \"requestedServiceText\": \"requestedServiceText-ejemplo\",\n  \"diagnosisText\": \"diagnosisText-ejemplo\",\n  \"clinicalSummary\": \"clinicalSummary-ejemplo\",\n  \"treatmentGivenText\": \"treatmentGivenText-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{referralId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.referralId);",
+                      "  if (id) pm.environment.set('referralId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /referrals/{id} · Leer una derivación",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/referrals/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "referrals",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{referralId}}",
+                      "description": "Identificador de ruta · variable `{{referralId}}`"
+                    }
+                  ]
+                },
+                "description": "Leer una derivación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /referrals/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `ReferralsController_get`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.referrals || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('referralId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PATCH /referrals/{id}/cancel · Anular una derivación",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/referrals/:id/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "referrals",
+                    ":id",
+                    "cancel"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{referralId}}",
+                      "description": "Identificador de ruta · variable `{{referralId}}`"
+                    }
+                  ]
+                },
+                "description": "Anular una derivación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /referrals/{id}/cancel`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `ReferralsController_cancel`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PATCH /referrals/{id}/counter-referral · Registrar la contrarreferencia de una derivación",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/referrals/:id/counter-referral",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "referrals",
+                    ":id",
+                    "counter-referral"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{referralId}}",
+                      "description": "Identificador de ruta · variable `{{referralId}}`"
+                    }
+                  ]
+                },
+                "description": "Registrar la contrarreferencia de una derivación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /referrals/{id}/counter-referral`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `ReferralsController_counterReferral`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"counterReferralText\": \"counterReferralText-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PATCH /referrals/{id}/respond · Responder / aceptar una referencia inter-tenant",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/referrals/:id/respond",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "referrals",
+                    ":id",
+                    "respond"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{referralId}}",
+                      "description": "Identificador de ruta · variable `{{referralId}}`"
+                    }
+                  ]
+                },
+                "description": "Responder / aceptar una referencia inter-tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /referrals/{id}/respond`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `ReferralsController_respond`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"decision\": \"ACCEPT\",\n  \"rejectReason\": \"rejectReason-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             }
           ]
         },
         {
-          "name": "POST /referrals/{id}/qualify · Calificar el referido y premiar a ambas partes",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
+          "name": "loyalty",
+          "item": [
+            {
+              "name": "POST /referrals/{id}/qualify · Calificar el referido y premiar a ambas partes",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/referrals/:id/qualify",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "referrals",
+                    ":id",
+                    "qualify"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{referralId}}",
+                      "description": "Identificador de ruta · variable `{{referralId}}`"
+                    }
+                  ]
+                },
+                "description": "Idempotente por referido: reentregar el evento no duplica la recompensa.\n\n`POST /referrals/{id}/qualify`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `LoyaltyController_qualifyReferral`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"refereeUserId\": \"<refereeUserId: uuid existente>\",\n  \"qualifyingEvent\": \"SIGNUP\",\n  \"referrerMembershipId\": \"<referrerMembershipId: uuid existente>\",\n  \"refereeMembershipId\": \"<refereeMembershipId: uuid existente>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
               },
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/referrals/:id/qualify",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "referrals",
-                ":id",
-                "qualify"
-              ],
-              "variable": [
+              "response": [],
+              "event": [
                 {
-                  "key": "id",
-                  "value": "{{referralId}}",
-                  "description": "Identificador de ruta · variable `{{referralId}}`"
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{referralId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.referralId);",
+                      "  if (id) pm.environment.set('referralId', id);",
+                      "}"
+                    ]
+                  }
                 }
               ]
-            },
-            "description": "Idempotente por referido: reentregar el evento no duplica la recompensa.\n\n`POST /referrals/{id}/qualify`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `LoyaltyController_qualifyReferral`",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"refereeUserId\": \"<refereeUserId: uuid existente>\",\n  \"qualifyingEvent\": \"SIGNUP\",\n  \"referrerMembershipId\": \"<referrerMembershipId: uuid existente>\",\n  \"refereeMembershipId\": \"<refereeMembershipId: uuid existente>\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{referralId}}.",
-                  "if (pm.response.code < 300) {",
-                  "  const body = pm.response.json();",
-                  "  const id = body && (body.id || body.referralId);",
-                  "  if (id) pm.environment.set('referralId', id);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "PATCH /referrals/{id}/respond · Responder / aceptar una referencia inter-tenant",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/referrals/:id/respond",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "referrals",
-                ":id",
-                "respond"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "{{referralId}}",
-                  "description": "Identificador de ruta · variable `{{referralId}}`"
-                }
-              ]
-            },
-            "description": "Responder / aceptar una referencia inter-tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /referrals/{id}/respond`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `ReferralsController_respond`",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"decision\": \"ACCEPT\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});"
-                ]
-              }
             }
           ]
         }
@@ -85314,7 +86907,7 @@
       ]
     },
     {
-      "name": "scheduling (60)",
+      "name": "scheduling (65)",
       "item": [
         {
           "name": "scheduling",
@@ -86478,7 +88071,7 @@
                 "description": "Publicar una plantilla de agenda con sus franjas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /scheduling/resources/{id}/templates`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `SchedulingController_createTemplate`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"rules\": [\n    {\n      \"dayOfWeek\": 0,\n      \"startTime\": \"08:00:00\",\n      \"endTime\": \"12:00:00\",\n      \"slotMinutes\": 1,\n      \"capacityPerSlot\": 1,\n      \"gapMinutes\": 0,\n      \"bookingMode\": \"CONSULTATIONS\"\n    }\n  ],\n  \"slotMinutes\": 30,\n  \"bookingPolicyId\": \"{{bookingPolicyId}}\",\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"validTo\": \"2026-01-01T00:00:00.000Z\",\n  \"flexibleHours\": false\n}",
+                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"rules\": [\n    {\n      \"dayOfWeek\": 0,\n      \"startTime\": \"08:00:00\",\n      \"endTime\": \"12:00:00\",\n      \"slotMinutes\": 1,\n      \"capacityPerSlot\": 1,\n      \"gapMinutes\": 0,\n      \"bookingMode\": \"CONSULTATIONS\",\n      \"telemedicineEnabled\": false,\n      \"flexibleHours\": false\n    }\n  ],\n  \"slotMinutes\": 30,\n  \"bookingPolicyId\": \"{{bookingPolicyId}}\",\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"validTo\": \"2026-01-01T00:00:00.000Z\",\n  \"flexibleHours\": false\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -87328,7 +88921,7 @@
                 "description": "Todo opcional; lo que no se manda se conserva. `rules`, si viene, reemplaza el conjunto entero y no toca los cupos ya materializados.\n\n`PATCH /scheduling/templates/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `SchedulingController_updateTemplate`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"rules\": [\n    {\n      \"dayOfWeek\": 0,\n      \"startTime\": \"08:00:00\",\n      \"endTime\": \"12:00:00\",\n      \"slotMinutes\": 1,\n      \"capacityPerSlot\": 1,\n      \"gapMinutes\": 0,\n      \"bookingMode\": \"CONSULTATIONS\"\n    }\n  ],\n  \"slotMinutes\": 1,\n  \"bookingPolicyId\": \"{{bookingPolicyId}}\",\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"validTo\": \"2026-01-01T00:00:00.000Z\"\n}",
+                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"rules\": [\n    {\n      \"dayOfWeek\": 0,\n      \"startTime\": \"08:00:00\",\n      \"endTime\": \"12:00:00\",\n      \"slotMinutes\": 1,\n      \"capacityPerSlot\": 1,\n      \"gapMinutes\": 0,\n      \"bookingMode\": \"CONSULTATIONS\",\n      \"telemedicineEnabled\": false,\n      \"flexibleHours\": false\n    }\n  ],\n  \"slotMinutes\": 1,\n  \"bookingPolicyId\": \"{{bookingPolicyId}}\",\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"validTo\": \"2026-01-01T00:00:00.000Z\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -88021,6 +89614,211 @@
               ]
             },
             {
+              "name": "POST /scheduling/bookings/{id}/payment-receipts · Subir el comprobante de pago de una cita",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/bookings/:id/payment-receipts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "bookings",
+                    ":id",
+                    "payment-receipts"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{bookingId}}",
+                      "description": "Identificador de ruta · variable `{{bookingId}}`"
+                    }
+                  ]
+                },
+                "description": "El paciente adjunta un archivo propio (png, jpeg, webp o pdf, hasta 5 MB). 404 si la cita no es suya; 422 si el archivo no sirve o la cita está cancelada o rechazada; 409 si la cita ya está pagada.\n\n`POST /scheduling/bookings/{id}/payment-receipts`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `SchedulingBookingsController_uploadPaymentReceipt`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fileId\": \"{{fileId}}\",\n  \"amount\": \"150.00\",\n  \"paidAt\": \"2026-01-01T00:00:00.000Z\",\n  \"note\": \"note-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{paymentReceiptId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.paymentReceiptId);",
+                      "  if (id) pm.environment.set('paymentReceiptId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm · Confirmar un comprobante de pago",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/bookings/:id/payment-receipts/:receiptId/confirm",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "bookings",
+                    ":id",
+                    "payment-receipts",
+                    ":receiptId",
+                    "confirm"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{bookingId}}",
+                      "description": "Identificador de ruta · variable `{{bookingId}}`"
+                    },
+                    {
+                      "key": "receiptId",
+                      "value": "{{receiptId}}",
+                      "description": "Identificador de ruta · variable `{{receiptId}}`"
+                    }
+                  ]
+                },
+                "description": "Deja el comprobante confirmado y la cita pagada. 409 si el comprobante ya se rechazó; 422 si la cita está cancelada o rechazada.\n\n`POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `SchedulingBookingsController_confirmPaymentReceipt`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{paymentReceiptId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.paymentReceiptId);",
+                      "  if (id) pm.environment.set('paymentReceiptId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject · Rechazar un comprobante de pago",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/bookings/:id/payment-receipts/:receiptId/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "bookings",
+                    ":id",
+                    "payment-receipts",
+                    ":receiptId",
+                    "reject"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{bookingId}}",
+                      "description": "Identificador de ruta · variable `{{bookingId}}`"
+                    },
+                    {
+                      "key": "receiptId",
+                      "value": "{{receiptId}}",
+                      "description": "Identificador de ruta · variable `{{receiptId}}`"
+                    }
+                  ]
+                },
+                "description": "Guarda el motivo, que el paciente recibe en el aviso. 409 si el comprobante ya se confirmó.\n\n`POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `SchedulingBookingsController_rejectPaymentReceipt`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"reason-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{paymentReceiptId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.paymentReceiptId);",
+                      "  if (id) pm.environment.set('paymentReceiptId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "POST /scheduling/bookings/{id}/propose-schedule · Proponer otro horario para la solicitud",
               "request": {
                 "method": "POST",
@@ -88464,6 +90262,125 @@
                       "  const list = Array.isArray(body) ? body : (body.bookings || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('bookingId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /scheduling/bookings/{id}/payment-receipts · Listar los comprobantes de pago de una cita",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/bookings/:id/payment-receipts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "bookings",
+                    ":id",
+                    "payment-receipts"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{bookingId}}",
+                      "description": "Identificador de ruta · variable `{{bookingId}}`"
+                    }
+                  ]
+                },
+                "description": "Los ve el paciente de la cita y el prestador de esa agenda. Cualquier otro recibe 404.\n\n`GET /scheduling/bookings/{id}/payment-receipts`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `SchedulingBookingsController_listPaymentReceipts`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.paymentReceipts || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('paymentReceiptId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /scheduling/bookings/{id}/payment-receipts/{receiptId}/content · Descargar el archivo de un comprobante de pago",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/bookings/:id/payment-receipts/:receiptId/content",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "bookings",
+                    ":id",
+                    "payment-receipts",
+                    ":receiptId",
+                    "content"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{bookingId}}",
+                      "description": "Identificador de ruta · variable `{{bookingId}}`"
+                    },
+                    {
+                      "key": "receiptId",
+                      "value": "{{receiptId}}",
+                      "description": "Identificador de ruta · variable `{{receiptId}}`"
+                    }
+                  ]
+                },
+                "description": "Mismos permisos que la lista de comprobantes.\n\n`GET /scheduling/bookings/{id}/payment-receipts/{receiptId}/content`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `SchedulingBookingsController_paymentReceiptContent`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.paymentReceipts || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('paymentReceiptId', first.id);",
                       "}"
                     ]
                   }
@@ -89581,7 +91498,7 @@
       ]
     },
     {
-      "name": "surveys (17)",
+      "name": "surveys (18)",
       "item": [
         {
           "name": "surveys-assignments",
@@ -89698,6 +91615,78 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.invitationId);",
                       "  if (id) pm.environment.set('invitationId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "surveys-insights",
+          "item": [
+            {
+              "name": "GET /surveys/insights · Resumen general de mis encuestas (agregado, sin pacientes)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/surveys/insights",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "surveys",
+                    "insights"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-08-01",
+                      "description": "Primer día de un mes (YYYY-MM-01, UTC). Cualquier otro día, o una hora, se rechaza con 400. Se filtra por la fecha de emisión del cuestionario. Sin valor: 11 meses antes del mes de `to` (ventana de 12 meses).",
+                      "disabled": true
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-10-31",
+                      "description": "Último día de un mes (p. ej. 2026-10-31, UTC). Cualquier otro día, o una hora, se rechaza con 400. No puede ser anterior a `from` y el periodo no puede pasar de 12 meses. Sin valor: el último día del mes en curso.",
+                      "disabled": true
+                    },
+                    {
+                      "key": "serviceId",
+                      "value": "{{serviceId}}",
+                      "description": "Acota el resumen a los cuestionarios emitidos por atenciones de este servicio del catálogo.",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Totales, tasa de respuesta, NPS, promedio y distribución por pregunta, tendencia, alertas de seguridad y comentarios abiertos (texto y día). Incluye las encuestas propias y las de sistema emitidas por las atenciones del profesional.\n\n`GET /surveys/insights`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `SurveysInsightsController_getInsights`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.insights || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('insightId', first.id);",
                       "}"
                     ]
                   }
@@ -92330,6 +94319,15 @@
                   ]
                 },
                 "description": "Captura eventos de telemetría de alta y avance en formularios de registro. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /telemetry/onboarding-events`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500, 504\n\noperationId: `TelemetryOnboardingAnalyticsController_recordEvents`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"events\": [\n    {\n      \"eventType\": \"start\",\n      \"formType\": \"formType-ejemplo\",\n      \"draftId\": \"draftId-ejemplo\",\n      \"stepIndex\": 1,\n      \"stepKey\": \"stepKey-ejemplo\",\n      \"fieldKey\": \"fieldKey-ejemplo\",\n      \"interactionType\": \"focus\",\n      \"errorCategory\": \"errorCategory-ejemplo\",\n      \"durationMs\": 1,\n      \"timestamp\": \"timestamp-ejemplo\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "auth": {
                   "type": "noauth"
                 }

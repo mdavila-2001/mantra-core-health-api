@@ -133,6 +133,7 @@ export class PatientAddressBookService {
         label: dto.label.trim(),
         municipalityConceptId: dto.municipalityConceptId,
         lines: this.cleanLines(dto.lines),
+        district: this.cleanLines(dto.district),
         latitude: dto.latitude,
         longitude: dto.longitude,
         isPreferred: preferred,
@@ -165,6 +166,7 @@ export class PatientAddressBookService {
             useConceptId: row.useConceptId!,
             municipalityConceptId: dto.municipalityConceptId,
             lines: dto.lines,
+            district: dto.district,
             latitude: dto.latitude,
             longitude: dto.longitude,
             actorUserId: actor.id,
@@ -187,6 +189,10 @@ export class PatientAddressBookService {
         dto.lines === undefined
           ? (row.lines ?? undefined)
           : this.cleanLines(dto.lines);
+      const district =
+        dto.district === undefined
+          ? (row.districtText ?? undefined)
+          : this.cleanLines(dto.district);
       const latitude =
         dto.latitude === undefined
           ? numberOrUndefined(row.latitude)
@@ -207,6 +213,7 @@ export class PatientAddressBookService {
         municipalityConceptId:
           dto.municipalityConceptId ?? row.municipalityConceptId!,
         lines,
+        district,
         latitude,
         longitude,
         isPreferred: row.isPreferred,
@@ -364,6 +371,10 @@ export class PatientAddressBookService {
           ...(row.municipalityConceptId
             ? { municipalityConceptId: row.municipalityConceptId }
             : {}),
+          ...(row.administrativeArea2ConceptId
+            ? { administrativeArea2ConceptId: row.administrativeArea2ConceptId }
+            : {}),
+          ...(row.districtText ? { district: row.districtText } : {}),
           ...(latitude === undefined || longitude === undefined
             ? {}
             : { latitude, longitude }),

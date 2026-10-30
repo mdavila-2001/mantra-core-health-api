@@ -102,6 +102,7 @@ interface PatientAddressRecord {
   readonly lines?: string;
   readonly city?: string;
   readonly municipalityConceptId?: string;
+  readonly districtText?: string | null;
   readonly latitude?: number | string | null;
   readonly longitude?: number | string | null;
 }
@@ -252,6 +253,8 @@ function toAddress(
     lines?: string;
     city?: string;
     municipalityConceptId?: string;
+    administrativeArea2ConceptId?: string | null;
+    districtText?: string | null;
     latitude?: number | string | null;
     longitude?: number | string | null;
   } | null,
@@ -263,6 +266,10 @@ function toAddress(
     ...(row.municipalityConceptId === undefined
       ? {}
       : { municipalityConceptId: row.municipalityConceptId }),
+    ...(row.administrativeArea2ConceptId == null
+      ? {}
+      : { administrativeArea2ConceptId: row.administrativeArea2ConceptId }),
+    ...(row.districtText == null ? {} : { district: row.districtText }),
     // Las coordenadas viajan juntas o no viajan: media coordenada no ubica nada.
     //
     // Se compara con `== null` y no con `=== undefined`: la columna es nullable y
@@ -702,6 +709,7 @@ export class ProfilesPatientsService {
       if (
         dto.residenceMunicipalityConceptId !== undefined ||
         dto.homeAddressLines !== undefined ||
+        dto.homeDistrict !== undefined ||
         // `null` también cuenta: quitar el punto es un cambio.
         dto.homeLatitude !== undefined ||
         dto.homeLongitude !== undefined
@@ -713,6 +721,7 @@ export class ProfilesPatientsService {
           {
             municipio: dto.residenceMunicipalityConceptId,
             lines: dto.homeAddressLines,
+            district: dto.homeDistrict,
             latitude: dto.homeLatitude,
             longitude: dto.homeLongitude,
           },
@@ -724,6 +733,7 @@ export class ProfilesPatientsService {
       if (
         dto.workMunicipalityConceptId !== undefined ||
         dto.workAddressLines !== undefined ||
+        dto.workDistrict !== undefined ||
         dto.workLatitude !== undefined ||
         dto.workLongitude !== undefined
       ) {
@@ -734,6 +744,7 @@ export class ProfilesPatientsService {
           {
             municipio: dto.workMunicipalityConceptId,
             lines: dto.workAddressLines,
+            district: dto.workDistrict,
             latitude: dto.workLatitude,
             longitude: dto.workLongitude,
           },
@@ -1457,6 +1468,8 @@ export class ProfilesPatientsService {
     changes: {
       municipio?: string;
       lines?: string;
+      /** Distrito o zona; mismos tres estados que `lines` (`''` lo borra). */
+      district?: string;
       /**
        * `undefined` no toca el punto; `null` en los dos lo **quita**.
        *
@@ -1485,6 +1498,12 @@ export class ProfilesPatientsService {
         : changes.lines.trim() === ''
           ? undefined
           : changes.lines.trim();
+    const district =
+      changes.district === undefined
+        ? (current?.districtText ?? undefined)
+        : changes.district.trim() === ''
+          ? undefined
+          : changes.district.trim();
     // Quitar el punto: los dos extremos en `null`. `undefined` a undefined
     // porque la columna es nullable y es lo que la escritura espera para
     // «sin dato»; el DTO ya rechazó los `null` a medias.
@@ -1507,6 +1526,7 @@ export class ProfilesPatientsService {
     const withoutChanges =
       (current?.municipalityConceptId ?? undefined) === municipality &&
       (current?.lines ?? undefined) === lines &&
+      (current?.districtText ?? undefined) === district &&
       columnNumber(current?.latitude) === latitude &&
       columnNumber(current?.longitude) === longitude;
     if (withoutChanges) return;
@@ -1520,6 +1540,7 @@ export class ProfilesPatientsService {
       useConceptId: usageConceptId,
       municipalityConceptId: municipality,
       lines,
+      district,
       latitude,
       longitude,
       actorUserId,

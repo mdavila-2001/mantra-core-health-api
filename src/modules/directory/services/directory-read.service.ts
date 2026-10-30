@@ -30,6 +30,11 @@ import {
   type RepresentativeRole,
 } from '../legal-representatives';
 import { AffiliationDocumentConceptsService } from './affiliation-document-concepts.service';
+import {
+  AFFILIATION_DOCUMENT_ROLES,
+  DOCUMENT_TYPE_CODE_BY_ROLE,
+} from '../affiliation-documents';
+import { LEGAL_ENTITY_TYPE_BY_CONCEPT_ID } from '../../../common/constants/legal-entity-types';
 
 import type {
   ListBranchAssignmentsResponseDto,
@@ -280,6 +285,10 @@ export class DirectoryReadService {
       }
 
       const representation = await this.loadRepresentation(em, tenant.id);
+      const legalFolder = await this.loadLegalDocuments(em, tenant.id);
+      const legalEntityType = LEGAL_ENTITY_TYPE_BY_CONCEPT_ID.get(
+        tenant.legalEntityTypeConceptId,
+      )?.code;
 
       items.push({
         id: tenant.id,
@@ -304,6 +313,8 @@ export class DirectoryReadService {
           tenant.verificationStatusConceptId === CONCEPTS.TENANT_VERIFIED,
         ...(payer ? { payer } : {}),
         ...representation,
+        ...(legalEntityType ? { legalEntityType } : {}),
+        ...legalFolder,
       });
     }
 
@@ -666,6 +677,75 @@ export class DirectoryReadService {
     return {
       ...(legalRepresentative ? { legalRepresentative } : {}),
       ...(executives.length > 0 ? { executives } : {}),
+    };
+  }
+  /**
+   * La carpeta legal de la organización: qué papeles presentó y en qué estado
+   * está cada uno, más el NIT que declaró con el suyo.
+   *
+   * Uno por rol: ante dos filas del mismo tipo —un papel rechazado y su
+   * reemplazo— gana la más reciente, que es la que la plataforma revisa. Las
+   * filas dadas de baja no se cuentan. Un tipo de documento que el catálogo
+   * no reconoce se omite en vez de romper la ficha.
+   *
+   * @param em - Contexto de persistencia de esta lectura.
+   * @param tenantId - La organización.
+   * @returns Las claves a mezclar en la ficha; vacío si no hay papeles.
+   */
+  private async loadLegalDocuments(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<Pick<MyOrganizationDto, 'legalDocuments' | 'taxIdentifier'>> {
+    const rows = await this.legalRepo.listAffiliationDocsByTenant(em, tenantId);
+    const live = rows.filter(
+      (row) => row.statusConceptId === CONCEPTS.STATE_ACTIVE,
+    );
+    if (live.length === 0) return {};
+
+    const concepts = await this.concepts.resolve(em);
+    const roleByConcept = new Map<string, string>();
+    for (const role of AFFILIATION_DOCUMENT_ROLES) {
+      const conceptId = concepts.documentType.get(
+        DOCUMENT_TYPE_CODE_BY_ROLE[role],
+      );
+      if (conceptId) roleByConcept.set(conceptId, role);
+    }
+    const verificationByConcept = new Map<string, string>();
+    for (const [code, conceptId] of concepts.verificationStatus) {
+      verificationByConcept.set(conceptId, code);
+    }
+
+    const newest = new Map<string, (typeof live)[number]>();
+    for (const row of live) {
+      const role = roleByConcept.get(row.documentTypeConceptId);
+      if (!role) continue;
+      const previous = newest.get(role);
+      if (previous && previous.createdAt >= row.createdAt) continue;
+      newest.set(role, row);
+    }
+    if (newest.size === 0) return {};
+
+    const legalDocuments = AFFILIATION_DOCUMENT_ROLES.filter((role) =>
+      newest.has(role),
+    ).map((role) => {
+      const row = newest.get(role)!;
+      return {
+        role,
+        verificationStatus:
+          verificationByConcept.get(row.verificationStatusConceptId) ??
+          'PENDIENTE',
+        ...(row.documentNumber == null
+          ? {}
+          : { documentNumber: row.documentNumber }),
+        ...(row.registeredAt == null ? {} : { registeredAt: row.registeredAt }),
+        ...(row.validTo == null ? {} : { validTo: row.validTo }),
+      };
+    });
+    const taxIdentifier = newest.get('TAX_IDENTIFIER_DOC')?.documentNumber;
+
+    return {
+      legalDocuments,
+      ...(taxIdentifier ? { taxIdentifier } : {}),
     };
   }
 }

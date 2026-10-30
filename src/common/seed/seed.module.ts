@@ -54,13 +54,16 @@ import { AudioTemplates } from '../../modules/audio_assets/entities';
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
 import { QaFlowsSeedService } from './qa-flows-seed.service';
 import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
+import { InsurerAccountsSeedService } from './insurer-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.service';
 import { TelemetryUxHeatmapSeedService } from './telemetry-ux-heatmap-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
+import { AdminDivisionsSeedService } from './admin-divisions-seed.service';
 import { LegalEntityTypesSeedService } from './legal-entity-types-seed.service';
 import { AffiliationCatalogsSeedService } from './affiliation-catalogs-seed.service';
+import { AdmissionRequirementsSeedService } from './admission-requirements-seed.service';
 import { BoEmployersSeedService } from './bo-employers-seed.service';
 import { BoOccupationsSeedService } from './bo-occupations-seed.service';
 import { BoMedicalSpecialtiesSeedService } from './bo-medical-specialties-seed.service';
@@ -85,6 +88,13 @@ import { PracticeModule } from '../../modules/practice/practice.module';
 import { ProfilesModule } from '../../modules/profiles/profiles.module';
 import { StickerPackSeedService } from './sticker-pack-seed.service';
 import { Files, FileVersions } from '../../modules/common/entities';
+import { DirectoryModule } from '../../modules/directory/directory.module';
+import { CommonModule } from '../../modules/common/common.module';
+import { CommunityModule } from '../../modules/community/community.module';
+import { PadronOrganizationsSeedService } from './padron-organizations-seed.service';
+import { PadronOrgAdminsSeedService } from './padron-org-admins-seed.service';
+import { PractitionerShowcaseSeed } from './practitioner-showcase-seed';
+import { SeedCensusService } from './seed-census.service';
 
 /**
  * Módulo de datos estructurales iniciales. Registra los seeds (catálogo de
@@ -153,6 +163,9 @@ import { Files, FileVersions } from '../../modules/common/entities';
     InsuranceModule,
     PracticeModule,
     ProfilesModule,
+    DirectoryModule,
+    CommonModule,
+    CommunityModule,
   ],
   providers: [
     TerminologySeedService,
@@ -161,8 +174,10 @@ import { Files, FileVersions } from '../../modules/common/entities';
     TelemetryUxHeatmapSeedService,
     GlossarySeedService,
     BoGeographySeedService,
+    AdminDivisionsSeedService,
     LegalEntityTypesSeedService,
     AffiliationCatalogsSeedService,
+    AdmissionRequirementsSeedService,
     BoOccupationsSeedService,
     BoProfessionsSeedService,
     BoEmployersSeedService,
@@ -178,6 +193,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     BootstrapAdminSeedService,
     QaFlowsSeedService,
     ProviderAccountsSeedService,
+    InsurerAccountsSeedService,
     SeedBootstrapService,
     SeedCoreState,
     ClinicalFormsSeedService,
@@ -186,6 +202,10 @@ import { Files, FileVersions } from '../../modules/common/entities';
     PeopleSeedService,
     DirectoryNetworksSeedService,
     StickerPackSeedService,
+    PadronOrganizationsSeedService,
+    PadronOrgAdminsSeedService,
+    PractitionerShowcaseSeed,
+    SeedCensusService,
   ],
   exports: [
     SeedBootstrapService,
@@ -196,8 +216,10 @@ import { Files, FileVersions } from '../../modules/common/entities';
     TelemetryUxHeatmapSeedService,
     GlossarySeedService,
     BoGeographySeedService,
+    AdminDivisionsSeedService,
     LegalEntityTypesSeedService,
     AffiliationCatalogsSeedService,
+    AdmissionRequirementsSeedService,
     BoOccupationsSeedService,
     BoProfessionsSeedService,
     BoEmployersSeedService,
@@ -213,12 +235,17 @@ import { Files, FileVersions } from '../../modules/common/entities';
     BootstrapAdminSeedService,
     QaFlowsSeedService,
     ProviderAccountsSeedService,
+    InsurerAccountsSeedService,
     ClinicalFormsSeedService,
     BoMedicalSpecialtiesSeedService,
     PracticeDefaultServicesSeedService,
     PeopleSeedService,
     DirectoryNetworksSeedService,
     StickerPackSeedService,
+    PadronOrganizationsSeedService,
+    PadronOrgAdminsSeedService,
+    PractitionerShowcaseSeed,
+    SeedCensusService,
   ],
 })
 export class SeedModule {}

@@ -104,8 +104,10 @@ describe('DiagnosticsOrdersService', () => {
     });
 
     // P40 amplía el requisito: la orden de análisis «otro» de C2 también es
-    // de esta ficha. Siguen fuera procedimientos, derivaciones e interconsultas.
-    it('pide las dos categorías diagnósticas y la orden de análisis «otro» (P40)', async () => {
+    // de esta ficha, y también los estudios cardiológicos, de patología y la
+    // imagen de `clinical` que el formulario de la ficha pide. Siguen fuera
+    // procedimientos, derivaciones e interconsultas.
+    it('pide las categorías de estudio que la ficha pide (P40)', async () => {
       const d = build();
 
       await d.service.getPatientOrders(TENANT, PATIENT, 50);
@@ -114,6 +116,9 @@ describe('DiagnosticsOrdersService', () => {
       expect(categories).toEqual([
         CLIN.SERVICE_REQUEST_CATEGORY_LAB,
         DIAG.SERVICE_REQUEST_CATEGORY_IMAGING,
+        CLIN.SERVICE_REQUEST_CATEGORY_IMAGING,
+        CLIN.SERVICE_REQUEST_CATEGORY_CARDIO,
+        CLIN.SERVICE_REQUEST_CATEGORY_PATHOLOGY,
         CLIN.SERVICE_REQUEST_CATEGORY_OTHER,
       ]);
       expect(categories).not.toContain(CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE);

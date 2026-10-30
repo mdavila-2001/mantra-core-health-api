@@ -14,7 +14,16 @@ import type {
   RegisterPractitionerDto,
   RegisterPatientDto,
 } from '../../modules/iam/presentation/dto';
+import {
+  JurisdictionAuthorizations,
+  PatientProfiles,
+  PersonAccountLinks,
+  Persons,
+} from '../../modules/profiles/entities';
+import { PROF } from '../../modules/profiles/profiles.concepts';
 import { tableRows, column, type MarkdownTableRow } from './markdown-table';
+import { demoGateSkip } from './demo-gate';
+import { PractitionerShowcaseSeed } from './practitioner-showcase-seed';
 import {
   syntheticNationalId,
   syntheticMobilePhone,
@@ -35,12 +44,53 @@ const PATIENTS_FILE = 'USUARIO_PACIENTES_1.md';
 export interface PeopleSeedResult {
   practitionersCreated: number;
   practitionersExisting: number;
+  /**
+   * Médicos de una carga anterior que se tomaron como propios: misma matrícula
+   * del Ministerio y mismo nombre, aunque su cuenta tenga otro correo.
+   */
+  practitionersAdopted: number;
   patientsCreated: number;
   patientsExisting: number;
+  /** Pacientes de una carga anterior tomados como propios por su nombre completo. */
+  patientsAdopted: number;
+  /** Vitrinas públicas de médicos creadas en esta pasada. */
+  showcasesCreated: number;
   /** Filas del padrón con nombre, que no alcanzaron a darse de alta. */
   skipped: string[];
   /** Por qué no se hizo nada, si se saltó todo el paso. */
-  reason?: 'not-configured' | 'source-not-found';
+  reason?: 'not-configured' | 'production-not-allowed' | 'source-not-found';
+}
+
+/** Cómo quedó el alta de un médico, con lo que la vitrina necesita. */
+interface PractitionerOutcome {
+  /** `created`, `existing` o el mensaje del error. */
+  outcome: string;
+  userId?: string;
+  practitionerProfileId?: string;
+}
+
+/** Nombre completo normalizado: la clave con que se reconoce a una persona ya cargada. */
+function nameKey(person: {
+  name?: string;
+  middleName?: string;
+  lastName?: string;
+  motherLastName?: string;
+}): string {
+  return [
+    person.name,
+    person.middleName,
+    person.lastName,
+    person.motherLastName,
+  ]
+    .map((part) =>
+      (part ?? '')
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toUpperCase()
+        .replace(/\s+/g, ' ')
+        .trim(),
+    )
+    .join('|');
 }
 
 interface CommonCandidate {
@@ -94,28 +144,38 @@ export class PeopleSeedService {
     private readonly practitionerRegistration: IamPractitionerSelfRegistrationService,
     private readonly patientRegistration: IamPatientSelfRegistrationService,
     private readonly logger: PinoLogger,
+    private readonly showcases: PractitionerShowcaseSeed,
   ) {
     this.logger.setContext(PeopleSeedService.name);
   }
 
   async run(
     enabled = process.env.SEED_PEOPLE_ENABLED === 'true',
-    password = process.env.SEED_PEOPLE_PASSWORD,
+    // La contraseña es la compartida de las cuentas de demostración y pasa por
+    // el mismo candado que las demás (`demo-gate.ts`): en producción no se crean.
+    password = process.env.SEED_DEMO_PASSWORD,
     // Ruta del padrón. Sin valor, se resuelve MÁS ABAJO y sólo si el seed está
     // activo: como valor por defecto del parámetro se evaluaba SIEMPRE, y bajo
     // Jest en ESM (`test:integration`) `__dirname` no existe, así que cada
     // arranque del harness fallaba aunque `SEED_PEOPLE_ENABLED` estuviera apagado.
     sourceDir = process.env.SEED_PEOPLE_SOURCE_DIR,
+    nodeEnv = process.env.NODE_ENV,
+    allowProduction = process.env.SEED_DEMO_ALLOW_PRODUCTION === 'true',
   ): Promise<PeopleSeedResult> {
     const empty: PeopleSeedResult = {
       practitionersCreated: 0,
       practitionersExisting: 0,
+      practitionersAdopted: 0,
       patientsCreated: 0,
       patientsExisting: 0,
+      patientsAdopted: 0,
+      showcasesCreated: 0,
       skipped: [],
     };
-    if (!enabled || !password) {
-      return { ...empty, reason: 'not-configured' };
+    if (!enabled) return { ...empty, reason: 'not-configured' };
+    const gate = demoGateSkip({ password, nodeEnv, allowProduction });
+    if (gate || !password) {
+      return { ...empty, reason: gate ?? 'not-configured' };
     }
 
     // `__dirname` en runtime es `dist/src/common/seed` (Nest compila a
@@ -156,6 +216,7 @@ export class PeopleSeedService {
     }
 
     const result: PeopleSeedResult = { ...empty };
+    this.patientPool = undefined;
 
     for (const [i, row] of tableRows(textDoctors).entries()) {
       const candidate = this.commonCandidate(row, DOCTORS_FILE, i);
@@ -190,9 +251,22 @@ export class PeopleSeedService {
       };
 
       const created = await this.registrationPractitioner(dto);
-      if (created === 'created') result.practitionersCreated++;
-      else if (created === 'existing') result.practitionersExisting++;
-      else result.skipped.push(`${DOCTORS_FILE}#${i}: ${created}`);
+      if (created.outcome === 'created') result.practitionersCreated++;
+      else if (created.outcome === 'existing') result.practitionersExisting++;
+      else if (created.outcome === 'adopted') result.practitionersAdopted++;
+      else {
+        result.skipped.push(`${DOCTORS_FILE}#${i}: ${created.outcome}`);
+        continue;
+      }
+      await this.ensureShowcase(created, dto, result);
+    }
+
+    // Las cédulas sintéticas de todo el archivo: quien entra con una de ellas ya
+    // es una fila de este paso, no una cuenta de una carga anterior.
+    const ownSubjects = new Set<string>();
+    for (const [i, row] of tableRows(textPatients).entries()) {
+      const candidate = this.commonCandidate(row, PATIENTS_FILE, i);
+      if (candidate) ownSubjects.add(syntheticNationalId(candidate.key));
     }
 
     for (const [i, row] of tableRows(textPatients).entries()) {
@@ -220,9 +294,10 @@ export class PeopleSeedService {
         occupationFreeText: occupation ? occupation.slice(0, 120) : undefined,
       };
 
-      const created = await this.registrationPatient(dto);
+      const created = await this.registrationPatient(dto, ownSubjects);
       if (created === 'created') result.patientsCreated++;
       else if (created === 'existing') result.patientsExisting++;
+      else if (created === 'adopted') result.patientsAdopted++;
       else result.skipped.push(`${PATIENTS_FILE}#${i}: ${created}`);
     }
 
@@ -231,8 +306,11 @@ export class PeopleSeedService {
         operation: 'seed.people',
         practitionersCreated: result.practitionersCreated,
         practitionersExisting: result.practitionersExisting,
+        practitionersAdopted: result.practitionersAdopted,
         patientsCreated: result.patientsCreated,
         patientsExisting: result.patientsExisting,
+        patientsAdopted: result.patientsAdopted,
+        showcasesCreated: result.showcasesCreated,
         skippedCount: result.skipped.length,
       },
       'Padrón de personas sembrado',
@@ -284,28 +362,203 @@ export class PeopleSeedService {
     return existing !== null;
   }
 
-  /** Devuelve 'created', 'existing' o el mensaje del error si no se pudo dar de alta. */
+  /**
+   * Da de alta al médico y devuelve cómo quedó: `created`, `existing` o el
+   * mensaje del error si no se pudo, con las ids de cuenta y de perfil que la
+   * vitrina necesita.
+   */
   private async registrationPractitioner(
     dto: RegisterPractitionerDto,
-  ): Promise<string> {
-    if (await this.existsCredential(dto.email)) return 'existing';
+  ): Promise<PractitionerOutcome> {
+    const previous = await this.orm.em
+      .fork()
+      .findOne(AuthenticationCredentials, { externalSubject: dto.email });
+    if (previous) {
+      return { outcome: 'existing', ...(await this.idsOf(previous.userId)) };
+    }
+    const adopted = await this.adoptPractitioner(dto);
+    if (adopted) return adopted;
     try {
-      await this.practitionerRegistration.registerPractitioner(dto);
-      return 'created';
+      const registered =
+        await this.practitionerRegistration.registerPractitioner(dto);
+      return {
+        outcome: 'created',
+        userId: registered.userId,
+        practitionerProfileId: registered.practitionerProfileId,
+      };
     } catch (error) {
-      if (error instanceof ConflictException) return 'existing';
+      if (error instanceof ConflictException) return { outcome: 'existing' };
       const message = error instanceof Error ? error.message : String(error);
       this.logger.warn(
         { operation: 'seed.people.practitioner', err: error },
         'No se pudo dar de alta un médico del padrón',
       );
-      return message;
+      return { outcome: message };
     }
   }
 
-  /** Devuelve 'created', 'existing' o el mensaje del error si no se pudo dar de alta. */
-  private async registrationPatient(dto: RegisterPatientDto): Promise<string> {
+  /**
+   * Reconoce a un médico de una carga anterior: misma matrícula del Ministerio
+   * y mismo nombre completo. Dev y test se cargaron con otro generador de
+   * correos, así que su cuenta no se encuentra por el correo sintético; la
+   * matrícula es la credencial profesional y no cambia.
+   *
+   * @returns El médico adoptado (`adopted`), un aviso si la matrícula y el
+   *   nombre coinciden con más de una persona (no se crea otro), o `undefined`
+   *   si no hay ninguno.
+   */
+  private async adoptPractitioner(
+    dto: RegisterPractitionerDto,
+  ): Promise<PractitionerOutcome | undefined> {
+    const em = this.orm.em.fork();
+    const licenses = await em.find(JurisdictionAuthorizations, {
+      licenseNumber: dto.licenseNumber,
+    });
+    if (licenses.length === 0) return undefined;
+    const persons = await em.find(Persons, {
+      id: { $in: [...new Set(licenses.map((l) => l.practitionerProfileId))] },
+    });
+    const wanted = nameKey(dto);
+    const same = persons.filter((person) => nameKey(person) === wanted);
+    if (same.length === 0) return undefined;
+    if (same.length > 1) {
+      return {
+        outcome: `la matrícula ${dto.licenseNumber} y el nombre coinciden con más de una persona: no se crea otra`,
+      };
+    }
+    const link = await em.findOne(PersonAccountLinks, {
+      personId: same[0].id,
+      statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+    });
+    return {
+      outcome: 'adopted',
+      userId: link?.userId,
+      practitionerProfileId: same[0].id,
+    };
+  }
+
+  /** Cuenta y perfil profesional de un médico ya dado de alta. */
+  private async idsOf(
+    userId: string | undefined,
+  ): Promise<{ userId?: string; practitionerProfileId?: string }> {
+    if (!userId) return {};
+    const link = await this.orm.em.fork().findOne(PersonAccountLinks, {
+      userId,
+      statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+    });
+    return { userId, practitionerProfileId: link?.personId };
+  }
+
+  /**
+   * La vitrina pública del médico, para que el directorio lo muestre. Si no se
+   * pudo resolver su perfil profesional, lo deja dicho y sigue.
+   */
+  private async ensureShowcase(
+    outcome: PractitionerOutcome,
+    dto: RegisterPractitionerDto,
+    result: PeopleSeedResult,
+  ): Promise<void> {
+    if (!outcome.userId || !outcome.practitionerProfileId) {
+      result.skipped.push(
+        `${dto.email}: sin perfil profesional resuelto, no se creó la vitrina`,
+      );
+      return;
+    }
+    try {
+      const created = await this.showcases.ensure({
+        userId: outcome.userId,
+        practitionerProfileId: outcome.practitionerProfileId,
+        displayName: [
+          dto.name,
+          dto.middleName,
+          dto.lastName,
+          dto.motherLastName,
+        ]
+          .filter(Boolean)
+          .join(' '),
+        email: dto.email,
+        headline: dto.professionalTitle,
+      });
+      if (created) result.showcasesCreated++;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      result.skipped.push(
+        `${dto.email}: no se pudo crear la vitrina (${message})`,
+      );
+    }
+  }
+
+  /**
+   * Pacientes de una carga anterior aún sin reclamar por una fila, por nombre
+   * completo normalizado → cuántos quedan. Se carga una vez por corrida.
+   */
+  private patientPool?: Map<string, number>;
+
+  /**
+   * Los pacientes con cuenta que no son de este paso: sin los que entran con la
+   * cédula sintética de alguna fila. Un paciente es la persona de un perfil de
+   * paciente con un vínculo de cuenta activo.
+   */
+  private async loadPatientPool(
+    ownSubjects: ReadonlySet<string>,
+  ): Promise<Map<string, number>> {
+    const em = this.orm.em.fork();
+    const profiles = await em.find(PatientProfiles, {});
+    const personIds = profiles.map((p) => p.profileId);
+    if (personIds.length === 0) return new Map();
+    const persons = await em.find(Persons, { id: { $in: personIds } });
+    const links = await em.find(PersonAccountLinks, {
+      personId: { $in: personIds },
+      statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+    });
+    const credentials = await em.find(AuthenticationCredentials, {
+      userId: { $in: links.map((l) => l.userId) },
+    });
+    const ownUsers = new Set(
+      credentials
+        .filter((c) => ownSubjects.has(c.externalSubject ?? ''))
+        .map((c) => c.userId),
+    );
+    const adoptable = new Set(
+      links.filter((l) => !ownUsers.has(l.userId)).map((l) => l.personId),
+    );
+    const pool = new Map<string, number>();
+    for (const person of persons) {
+      if (!adoptable.has(person.id)) continue;
+      const key = nameKey(person);
+      pool.set(key, (pool.get(key) ?? 0) + 1);
+    }
+    return pool;
+  }
+
+  /**
+   * Reconoce a un paciente de una carga anterior por su nombre completo.
+   *
+   * Es lo único estable: la cédula y el correo de esas cuentas se reemplazaron
+   * por otros valores inventados. Cada persona ya cargada responde por una sola
+   * fila (el conteo baja al adoptarla), así que dos filas con el mismo nombre
+   * no se funden en una. No distingue por municipio: el perfil de paciente no
+   * lo guarda donde el paso pueda leerlo de forma fiable.
+   */
+  private async adoptPatient(
+    dto: RegisterPatientDto,
+    ownSubjects: ReadonlySet<string>,
+  ): Promise<boolean> {
+    this.patientPool ??= await this.loadPatientPool(ownSubjects);
+    const key = nameKey(dto);
+    const left = this.patientPool.get(key) ?? 0;
+    if (left === 0) return false;
+    this.patientPool.set(key, left - 1);
+    return true;
+  }
+
+  /** Devuelve 'created', 'existing', 'adopted' o el mensaje del error si no se pudo dar de alta. */
+  private async registrationPatient(
+    dto: RegisterPatientDto,
+    ownSubjects: ReadonlySet<string>,
+  ): Promise<string> {
     if (await this.existsCredential(dto.nationalId)) return 'existing';
+    if (await this.adoptPatient(dto, ownSubjects)) return 'adopted';
     try {
       await this.patientRegistration.registerPatient(dto);
       return 'created';

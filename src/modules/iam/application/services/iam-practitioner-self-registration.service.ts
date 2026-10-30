@@ -11,10 +11,12 @@ import {
 import {
   CONCEPTS,
   ConflictException,
+  LOGO_IMAGE_MIME_TYPES,
   PreconditionFailedException,
   SEED,
   TokenService,
   UPLOAD_MIME_ALLOWLIST,
+  assertLogoImage,
   sniffMimeType,
   type AuthenticatedUser,
 } from '../../../../common';
@@ -445,6 +447,43 @@ export class IamPractitionerSelfRegistrationService {
         { field: 'sedesLicenseFileId' },
       );
     }
+    // La fecha del SEDES es de SU fila, igual que su archivo.
+    if (
+      dto.sedesLicenseIssueDate !== undefined &&
+      dto.sedesLicenseNumber === undefined
+    ) {
+      throw new PreconditionFailedException(
+        'La fecha del registro del SEDES necesita su número de registro',
+        { field: 'sedesLicenseIssueDate' },
+      );
+    }
+    // El registro del colegio, con las mismas reglas: su fecha, su colegio y su
+    // archivo van pegados a su número, y su archivo no es el de otra fila.
+    if (dto.collegeLicenseNumber === undefined) {
+      const suelto = (
+        [
+          'collegeName',
+          'collegeLicenseIssueDate',
+          'collegeLicenseFileId',
+        ] as const
+      ).find((campo) => dto[campo] !== undefined);
+      if (suelto !== undefined) {
+        throw new PreconditionFailedException(
+          'Los datos del registro del colegio necesitan su número de registro',
+          { field: suelto },
+        );
+      }
+    }
+    if (
+      dto.collegeLicenseFileId !== undefined &&
+      (dto.collegeLicenseFileId === dto.licenseFileId ||
+        dto.collegeLicenseFileId === dto.sedesLicenseFileId)
+    ) {
+      throw new PreconditionFailedException(
+        'El registro del colegio no puede compartir el archivo de otra habilitación',
+        { field: 'collegeLicenseFileId' },
+      );
+    }
 
     // Una foto que no se puede leer se rechaza acá, antes de escribir nada.
     // Antes se descartaba en silencio y el alta respondía 201 sin la foto que
@@ -572,6 +611,14 @@ export class IamPractitionerSelfRegistrationService {
         ? await this.claimProfilePhoto(tx, uploadedPhotoId, user.id)
         : undefined;
 
+      // 1.6) Logo del consultorio propio, si vino: una pre-carga anónima que
+      // pasa a ser de la cuenta nueva, igual que la foto. Se reclama antes de
+      // escribir la persona: un logo que no sirve aborta el alta entera (422)
+      // y no queda ni la persona ni la sede.
+      if (dto.ownSite?.logoFileId) {
+        await this.claimOwnSiteLogo(tx, dto.ownSite.logoFileId, user.id);
+      }
+
       // 2) Persona con sus datos demográficos. El código legible del DTO se
       // traduce aquí al concepto de terminología que persiste la columna.
       const person = this.profiles.createPerson(tx, {
@@ -671,6 +718,12 @@ export class IamPractitionerSelfRegistrationService {
         user.id,
         'El registro del SEDES',
       );
+      const collegeLicenseFileId = await this.claimLicenseDocument(
+        tx,
+        dto.collegeLicenseFileId,
+        user.id,
+        'El registro del colegio',
+      );
       const license = this.profiles.createJurisdictionAuthorization(tx, {
         practitionerProfileId: person.id,
         jurisdictionConceptId:
@@ -701,8 +754,29 @@ export class IamPractitionerSelfRegistrationService {
               practitionerProfileId: person.id,
               jurisdictionConceptId: PROF.JURISDICTION_SEDES_SANTA_CRUZ,
               licenseNumber: dto.sedesLicenseNumber,
+              validFrom: dto.sedesLicenseIssueDate
+                ? new Date(dto.sedesLicenseIssueDate)
+                : undefined,
               stateConceptId: PROF.AUTH_PENDING,
               fileId: sedesLicenseFileId,
+              actorUserId: user.id,
+            });
+      // El registro en el colegio de la profesión: la tercera habilitación,
+      // con su fecha y su respaldo. El nombre del colegio viaja como texto en
+      // `regulatoryAuthority`, como el de la matrícula.
+      const collegeLicense =
+        dto.collegeLicenseNumber === undefined
+          ? undefined
+          : this.profiles.createJurisdictionAuthorization(tx, {
+              practitionerProfileId: person.id,
+              jurisdictionConceptId: PROF.JURISDICTION_PROFESSIONAL_COLLEGE,
+              licenseNumber: dto.collegeLicenseNumber,
+              regulatoryAuthority: dto.collegeName,
+              validFrom: dto.collegeLicenseIssueDate
+                ? new Date(dto.collegeLicenseIssueDate)
+                : undefined,
+              stateConceptId: PROF.AUTH_PENDING,
+              fileId: collegeLicenseFileId,
               actorUserId: user.id,
             });
       // La credencial sólo nace si se declara un título de verdad. Dejó de ser
@@ -852,6 +926,7 @@ export class IamPractitionerSelfRegistrationService {
         personId: person.id,
         municipalityConceptId: dto.residenceMunicipalityConceptId,
         lines: dto.homeAddressLines,
+        district: dto.homeDistrict,
         latitude: dto.homeLatitude,
         longitude: dto.homeLongitude,
         actorUserId: user.id,
@@ -917,6 +992,29 @@ export class IamPractitionerSelfRegistrationService {
             assisted?.actor.id ?? user.id,
           )
         : null;
+
+      // 7c) La solicitud de admisión (verificación del alta). Va en ESTA
+      // transacción: si no se puede abrir, el alta entera se revierte en vez de
+      // dejar a un profesional pendiente que nadie va a ver en la bandeja. Se abre
+      // con todas las fichas ya creadas, porque la foto del formulario las toma.
+      // Si pidió atestación, el texto y la fecha quedan con la solicitud.
+      if (dto.attestationAccepted === true && !dto.attestationTextVersion) {
+        throw new PreconditionFailedException(
+          'La atestación necesita la versión del texto aceptado',
+          { field: 'attestationTextVersion' },
+        );
+      }
+      await this.profiles.openPractitionerAdmission(tx, {
+        practitionerProfileId: person.id,
+        actorUserId: assisted?.actor.id ?? user.id,
+        attestation:
+          dto.attestationAccepted === true && dto.attestationTextVersion
+            ? {
+                acceptedAt: new Date(),
+                textVersion: dto.attestationTextVersion,
+              }
+            : undefined,
+      });
 
       // 8) Verificación del correo. No condiciona el acceso.
       const { raw, hash } = this.tokenService.issueRefreshToken();
@@ -996,6 +1094,7 @@ export class IamPractitionerSelfRegistrationService {
         licenseId: license.id,
         credentialId: credential?.id,
         sedesLicenseId: sitesLicense?.id,
+        collegeLicenseId: collegeLicense?.id,
         photoFileId,
         emailVerificationToken: raw,
         activacion: activation,
@@ -1034,6 +1133,9 @@ export class IamPractitionerSelfRegistrationService {
       ...(created.credentialId ? { credentialId: created.credentialId } : {}),
       ...(created.sedesLicenseId
         ? { sedesLicenseId: created.sedesLicenseId }
+        : {}),
+      ...(created.collegeLicenseId
+        ? { collegeLicenseId: created.collegeLicenseId }
         : {}),
       verificationStatus: 'PENDING',
       emailVerificationSent,
@@ -1172,6 +1274,40 @@ export class IamPractitionerSelfRegistrationService {
       );
       return undefined;
     }
+  }
+
+  /**
+   * Reclama el logo del consultorio propio para la cuenta recién creada y
+   * comprueba que sirve como logo: png, jpeg o webp de categoría IMAGE,
+   * sensibilidad NORMAL y hasta 2 MB —las reglas del logo de una
+   * organización—. Va en la transacción del alta: si algo falla, el archivo
+   * vuelve a quedar sin dueño y no se crea nada.
+   *
+   * @param tx - Transacción del alta.
+   * @param fileId - Pre-carga anónima del logo.
+   * @param userId - Cuenta recién creada.
+   * @throws PreconditionFailedException (422) si el archivo no sirve como logo.
+   */
+  private async claimOwnSiteLogo(
+    tx: EntityManager,
+    fileId: string,
+    userId: string,
+  ): Promise<void> {
+    const { file, version } = await this.files.claimAnonymousUpload(
+      tx,
+      fileId,
+      { ownerUserId: userId, tenantId: SEED.tenantId },
+      {
+        allowedMimeTypes: LOGO_IMAGE_MIME_TYPES,
+        allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+        operation: 'iam.auth.register-practitioner.own-site-logo',
+      },
+      {
+        subject: 'El logo del consultorio',
+        notFound: 'El logo del consultorio no existe',
+      },
+    );
+    assertLogoImage(file, version);
   }
 
   /**

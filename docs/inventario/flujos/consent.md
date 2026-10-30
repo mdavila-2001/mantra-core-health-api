@@ -3,12 +3,12 @@
 # Flujos del módulo `consent`
 
 - **Procesos:** 2 · **Máquinas de estado:** 0
-- **Operaciones:** 22 (16 con decisiones propias, 6 sin ellas)
+- **Operaciones:** 27 (22 con decisiones propias, 5 sin ellas)
 - Inventario de endpoints del módulo: [consent](../endpoints/consent.md)
 
 ## Proceso: Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence)
 
-- **Código:** `consent` · **Agrupación:** MIXTO · **Operaciones:** 22
+- **Código:** `consent` · **Agrupación:** MIXTO · **Operaciones:** 27
 - **Actores:** CLINICIAN · PATIENT · PRACTITIONER · SECURITY_ADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/consent/README.md`
@@ -30,7 +30,7 @@ _Fuente: `src/modules/consent/README.md:3`_
 | `UC-07-05` | Revocar autorización HIPAA | POST /consent/hipaa-authorizations/{id}/revoke | SECURITY_ADMIN | MEDIO | 2 |
 | `UC-07-06` | Establecer/versionar base legal (supersede la anterior) | POST /consent/processing-legal-bases | SECURITY_ADMIN | MEDIO | 3 |
 | `UC-07-07` | Aplicar restricción de privacidad que afecta RLS clínico | POST /consent/privacy-restrictions | SECURITY_ADMIN | MEDIO | 3 |
-| `UC-07-08` | Capturar consentimiento informado de tratamiento | POST /consent/treatment-informed-consents | SECURITY_ADMIN | MEDIO | 2 |
+| `UC-07-08` | Capturar consentimiento informado de tratamiento | POST /consent/treatment-informed-consents | SECURITY_ADMIN · CLINICIAN · PRACTITIONER | MEDIO | 21 |
 | `UC-07-09` | Actualizar provisiones granulares (soft-close + insert) | PATCH /consent/consents/{id}/provisions | SECURITY_ADMIN | MEDIO | 5 |
 | `UC-07-10` | Registrar evidencia inmutable (append-only) | POST /consent/consent-evidence | SECURITY_ADMIN | MEDIO | 1 |
 | `UC-07-11` | Barrido de expiraciones (worker) | POST /consent/internal/expiration-sweep | SYSTEM · SECURITY_ADMIN | MEDIO | 7 |
@@ -41,19 +41,25 @@ _Fuente: `src/modules/consent/README.md:3`_
 |  |  | GET /consent/me/objections | PATIENT | BAJO | 4 |
 |  |  | GET /consent/me/treatment-informed-consents | PATIENT | BAJO | 3 |
 | `ctrl:EncounterInformedConsentsController` | Operaciones de EncounterInformedConsentsController que el README no asigna a un caso de uso | GET /consent/encounters/{encounterId}/informed-consent | CLINICIAN · PRACTITIONER | BAJO | 20 |
-|  |  | POST /consent/encounters/{encounterId}/informed-consent | CLINICIAN · PRACTITIONER | MEDIO | 19 |
+|  |  | POST /consent/encounters/{encounterId}/informed-consent | CLINICIAN · PRACTITIONER | MEDIO | 21 |
 | `ctrl:PractitionerAccessRequestsController` | Operaciones de PractitionerAccessRequestsController que el README no asigna a un caso de uso | POST /consent/practitioner-access-requests | PRACTITIONER · CLINICIAN | MEDIO | 21 |
 |  |  | POST /consent/practitioner-access-requests/{id}/decision | PATIENT | MEDIO | 25 |
 |  |  | GET /consent/practitioner-access-requests/mine | PATIENT | BAJO | 4 |
+| `ctrl:TreatmentInformedConsentsController` | Operaciones de TreatmentInformedConsentsController que el README no asigna a un caso de uso | GET /consent/treatment-informed-consents | CLINICIAN · PRACTITIONER | BAJO | 20 |
+|  |  | GET /consent/treatment-informed-consents/{id} | CLINICIAN · PRACTITIONER | BAJO | 20 |
+|  |  | POST /consent/treatment-informed-consents/{id}/evidence | CLINICIAN · PRACTITIONER | MEDIO | 18 |
+|  |  | PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | CLINICIAN · PRACTITIONER | MEDIO | 19 |
+|  |  | PATCH /consent/treatment-informed-consents/{id}/withdraw | CLINICIAN · PRACTITIONER | MEDIO | 22 |
 
 ### Diagrama 1 de 2 — etapas `UC-07-01`, `UC-07-02`, `UC-07-03`…
 
 ```mermaid
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
-  a28(["SYSTEM · SECURITY_ADMIN"]):::actor
-  a32(["PATIENT"]):::actor
-  a40(["CLINICIAN · PRACTITIONER"]):::actor
+  a23(["SECURITY_ADMIN · CLINICIAN · PRACTITIONER"]):::actor
+  a34(["SYSTEM · SECURITY_ADMIN"]):::actor
+  a38(["PATIENT"]):::actor
+  a47(["CLINICIAN · PRACTITIONER"]):::actor
   t3[("consent.consent_events")]:::tabla
   t4[("consent.consent_provisions")]:::tabla
   t5[("consent.consents")]:::tabla
@@ -65,14 +71,14 @@ flowchart LR
   t15[("consent.privacy_restrictions")]:::tabla
   t17[("consent.hipaa_authorizations")]:::tabla
   t18[("profiles.patient_profiles")]:::tabla
-  t23[("consent.treatment_informed_consents")]:::tabla
-  t26[("consent.consent_evidence")]:::tabla
-  t33[("profiles.person_account_links")]:::tabla
-  t41[("authz.access_policies")]:::tabla
-  t42[("authz.care_relationships")]:::tabla
-  t43[("authz.field_permissions")]:::tabla
-  t44[("authz.patient_legal_representations")]:::tabla
-  t45[("authz.permissions")]:::tabla
+  t24[("authz.access_policies")]:::tabla
+  t25[("authz.care_relationships")]:::tabla
+  t26[("authz.field_permissions")]:::tabla
+  t27[("authz.patient_legal_representations")]:::tabla
+  t28[("authz.permissions")]:::tabla
+  t32[("consent.consent_evidence")]:::tabla
+  t39[("profiles.person_account_links")]:::tabla
+  t45[("consent.treatment_informed_consents")]:::tabla
   t8[("+1 tablas más")]
   subgraph s0["UC-07-01 · Capturar consentimiento de directiva de privacidad (+ provisiones +…"]
     o1["POST /consent/consents"]:::op
@@ -96,35 +102,36 @@ flowchart LR
   subgraph s6["UC-07-07 · Aplicar restricción de privacidad que afecta RLS clínico"]
     o21["POST /consent/privacy-restrictions"]:::op
   end
+  t29[("+15 tablas más")]
   subgraph s7["UC-07-08 · Capturar consentimiento informado de tratamiento"]
     o22["POST /consent/treatment-informed-consents"]:::op
   end
   subgraph s8["UC-07-09 · Actualizar provisiones granulares (soft-close + insert)"]
-    o24["PATCH /consent/consents/{id}/provisions"]:::op
+    o30["PATCH /consent/consents/{id}/provisions"]:::op
   end
   subgraph s9["UC-07-10 · Registrar evidencia inmutable (append-only)"]
-    o25["POST /consent/consent-evidence"]:::op
+    o31["POST /consent/consent-evidence"]:::op
   end
-  t29[("+1 tablas más")]
+  t35[("+1 tablas más")]
   subgraph s10["UC-07-11 · Barrido de expiraciones (worker)"]
-    o27["POST /consent/internal/expiration-sweep"]:::op
+    o33["POST /consent/internal/expiration-sweep"]:::op
   end
   subgraph s11["UC-07-12 · Resolver objeción (upheld/rejected)"]
-    o30["POST /consent/patient-objections/{id}/resolve"]:::op
+    o36["POST /consent/patient-objections/{id}/resolve"]:::op
   end
-  t35[("+3 tablas más")]
+  t41[("+3 tablas más")]
   subgraph s12["ctrl:ConsentMeController · Operaciones de ConsentMeController que el README no…"]
-    o31["GET /consent/me/consents"]:::op
-    o34["POST /consent/me/consents/{id}/withdraw"]:::op
-    o36["GET /consent/me/hipaa-authorizations"]:::op
-    o37["GET /consent/me/objections"]:::op
-    o38["GET /consent/me/treatment-informed-consents"]:::op
+    o37["GET /consent/me/consents"]:::op
+    o40["POST /consent/me/consents/{id}/withdraw"]:::op
+    o42["GET /consent/me/hipaa-authorizations"]:::op
+    o43["GET /consent/me/objections"]:::op
+    o44["GET /consent/me/treatment-informed-consents"]:::op
   end
-  t46[("+14 tablas más")]
-  t48[("+13 tablas más")]
+  t48[("+14 tablas más")]
+  t50[("+15 tablas más")]
   subgraph s13["ctrl:EncounterInformedConsentsController · Operaciones de EncounterInformedCons…"]
-    o39["GET /consent/encounters/{encounterId}/informed-consent"]:::op
-    o47["POST /consent/encounters/{encounterId}/informed-consent"]:::op
+    o46["GET /consent/encounters/{encounterId}/informed-consent"]:::op
+    o49["POST /consent/encounters/{encounterId}/informed-consent"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -164,86 +171,92 @@ flowchart LR
   o21 -->|"CREA"| t3
   o21 -->|"CREA"| t15
   o21 -->|"LEE"| t18
-  a2 --> o22
-  o22 -->|"CREA"| t3
-  o22 -->|"CREA"| t23
-  a2 --> o24
-  o24 -->|"CREA"| t3
-  o24 -->|"ACTUALIZA"| t4
-  o24 -->|"CREA"| t4
-  o24 -->|"LEE"| t4
-  o24 -->|"LEE"| t5
-  a2 --> o25
-  o25 -->|"CREA"| t26
-  a28 --> o27
-  o27 -->|"CREA"| t3
-  o27 -->|"ACTUALIZA"| t5
-  o27 -->|"LEE"| t5
-  o27 -->|"ACTUALIZA"| t17
-  o27 -->|"LEE"| t17
-  o27 -->|"ACTUALIZA"| t15
-  o27 -.-> t29
+  a23 --> o22
+  o22 -->|"LEE"| t24
+  o22 -->|"LEE"| t25
+  o22 -->|"LEE"| t11
+  o22 -->|"LEE"| t26
+  o22 -->|"LEE"| t27
+  o22 -->|"LEE"| t28
+  o22 -.-> t29
   a2 --> o30
   o30 -->|"CREA"| t3
-  o30 -->|"ACTUALIZA"| t14
-  o30 -->|"LEE"| t14
-  o30 -->|"ACTUALIZA"| t15
-  o30 -->|"LEE"| t15
-  a32 --> o31
-  o31 -->|"LEE"| t5
-  o31 -->|"LEE"| t7
-  o31 -->|"LEE"| t18
-  o31 -->|"LEE"| t33
-  a32 --> o34
-  o34 -->|"CREA"| t10
-  o34 -->|"LEE"| t10
-  o34 -->|"ACTUALIZA"| t11
-  o34 -->|"LEE"| t11
-  o34 -->|"CREA"| t3
-  o34 -->|"LEE"| t5
-  o34 -.-> t35
-  a32 --> o36
-  o36 -->|"LEE"| t17
-  o36 -->|"LEE"| t7
-  o36 -->|"LEE"| t18
-  o36 -->|"LEE"| t33
-  a32 --> o37
-  o37 -->|"LEE"| t14
+  o30 -->|"ACTUALIZA"| t4
+  o30 -->|"CREA"| t4
+  o30 -->|"LEE"| t4
+  o30 -->|"LEE"| t5
+  a2 --> o31
+  o31 -->|"CREA"| t32
+  a34 --> o33
+  o33 -->|"CREA"| t3
+  o33 -->|"ACTUALIZA"| t5
+  o33 -->|"LEE"| t5
+  o33 -->|"ACTUALIZA"| t17
+  o33 -->|"LEE"| t17
+  o33 -->|"ACTUALIZA"| t15
+  o33 -.-> t35
+  a2 --> o36
+  o36 -->|"CREA"| t3
+  o36 -->|"ACTUALIZA"| t14
+  o36 -->|"LEE"| t14
+  o36 -->|"ACTUALIZA"| t15
+  o36 -->|"LEE"| t15
+  a38 --> o37
+  o37 -->|"LEE"| t5
   o37 -->|"LEE"| t7
   o37 -->|"LEE"| t18
-  o37 -->|"LEE"| t33
-  a32 --> o38
-  o38 -->|"LEE"| t23
-  o38 -->|"LEE"| t18
-  o38 -->|"LEE"| t33
-  a40 --> o39
-  o39 -->|"LEE"| t41
-  o39 -->|"LEE"| t42
-  o39 -->|"LEE"| t11
-  o39 -->|"LEE"| t43
-  o39 -->|"LEE"| t44
-  o39 -->|"LEE"| t45
-  o39 -.-> t46
-  a40 --> o47
-  o47 -->|"LEE"| t41
-  o47 -->|"LEE"| t42
-  o47 -->|"LEE"| t11
-  o47 -->|"LEE"| t43
-  o47 -->|"LEE"| t44
-  o47 -->|"LEE"| t45
-  o47 -.-> t48
+  o37 -->|"LEE"| t39
+  a38 --> o40
+  o40 -->|"CREA"| t10
+  o40 -->|"LEE"| t10
+  o40 -->|"ACTUALIZA"| t11
+  o40 -->|"LEE"| t11
+  o40 -->|"CREA"| t3
+  o40 -->|"LEE"| t5
+  o40 -.-> t41
+  a38 --> o42
+  o42 -->|"LEE"| t17
+  o42 -->|"LEE"| t7
+  o42 -->|"LEE"| t18
+  o42 -->|"LEE"| t39
+  a38 --> o43
+  o43 -->|"LEE"| t14
+  o43 -->|"LEE"| t7
+  o43 -->|"LEE"| t18
+  o43 -->|"LEE"| t39
+  a38 --> o44
+  o44 -->|"LEE"| t45
+  o44 -->|"LEE"| t18
+  o44 -->|"LEE"| t39
+  a47 --> o46
+  o46 -->|"LEE"| t24
+  o46 -->|"LEE"| t25
+  o46 -->|"LEE"| t11
+  o46 -->|"LEE"| t26
+  o46 -->|"LEE"| t27
+  o46 -->|"LEE"| t28
+  o46 -.-> t48
+  a47 --> o49
+  o49 -->|"LEE"| t24
+  o49 -->|"LEE"| t25
+  o49 -->|"LEE"| t11
+  o49 -->|"LEE"| t26
+  o49 -->|"LEE"| t27
+  o49 -->|"LEE"| t28
+  o49 -.-> t50
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 2 de 2 — etapas `ctrl:PractitionerAccessRequestsController`
+### Diagrama 2 de 2 — etapas `ctrl:PractitionerAccessRequestsController`, `ctrl:TreatmentInformedConsentsController`
 
 ```mermaid
 flowchart LR
   a2(["PRACTITIONER · CLINICIAN"]):::actor
   a9(["PATIENT"]):::actor
+  a16(["CLINICIAN · PRACTITIONER"]):::actor
   t3[("audit.audit_log")]:::tabla
   t4[("consent.consent_events")]:::tabla
   t5[("consent.consent_provisions")]:::tabla
@@ -251,12 +264,29 @@ flowchart LR
   t10[("authz.clinical_access_grants")]:::tabla
   t13[("profiles.patient_profiles")]:::tabla
   t14[("profiles.person_account_links")]:::tabla
+  t17[("authz.access_policies")]:::tabla
+  t18[("authz.care_relationships")]:::tabla
+  t19[("authz.field_permissions")]:::tabla
+  t20[("authz.patient_legal_representations")]:::tabla
+  t21[("authz.permissions")]:::tabla
   t7[("+15 tablas más")]
   t11[("+19 tablas más")]
   subgraph s0["ctrl:PractitionerAccessRequestsController · Operaciones de PractitionerAccessRe…"]
     o1["POST /consent/practitioner-access-requests"]:::op
     o8["POST /consent/practitioner-access-requests/{id}/decision"]:::op
     o12["GET /consent/practitioner-access-requests/mine"]:::op
+  end
+  t22[("+14 tablas más")]
+  t24[("+14 tablas más")]
+  t26[("+12 tablas más")]
+  t28[("+13 tablas más")]
+  t30[("+16 tablas más")]
+  subgraph s1["ctrl:TreatmentInformedConsentsController · Operaciones de TreatmentInformedCons…"]
+    o15["GET /consent/treatment-informed-consents"]:::op
+    o23["GET /consent/treatment-informed-consents/{id}"]:::op
+    o25["POST /consent/treatment-informed-consents/{id}/evidence"]:::op
+    o27["PATCH /consent/treatment-informed-consents/{id}/post-emergency-inform…"]:::op
+    o29["PATCH /consent/treatment-informed-consents/{id}/withdraw"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -279,6 +309,46 @@ flowchart LR
   o12 -->|"LEE"| t6
   o12 -->|"LEE"| t13
   o12 -->|"LEE"| t14
+  a16 --> o15
+  o15 -->|"LEE"| t17
+  o15 -->|"LEE"| t18
+  o15 -->|"LEE"| t10
+  o15 -->|"LEE"| t19
+  o15 -->|"LEE"| t20
+  o15 -->|"LEE"| t21
+  o15 -.-> t22
+  a16 --> o23
+  o23 -->|"LEE"| t17
+  o23 -->|"LEE"| t18
+  o23 -->|"LEE"| t10
+  o23 -->|"LEE"| t19
+  o23 -->|"LEE"| t20
+  o23 -->|"LEE"| t21
+  o23 -.-> t24
+  a16 --> o25
+  o25 -->|"LEE"| t17
+  o25 -->|"LEE"| t18
+  o25 -->|"LEE"| t10
+  o25 -->|"LEE"| t19
+  o25 -->|"LEE"| t20
+  o25 -->|"LEE"| t21
+  o25 -.-> t26
+  a16 --> o27
+  o27 -->|"LEE"| t17
+  o27 -->|"LEE"| t18
+  o27 -->|"LEE"| t10
+  o27 -->|"LEE"| t19
+  o27 -->|"LEE"| t20
+  o27 -->|"LEE"| t21
+  o27 -.-> t28
+  a16 --> o29
+  o29 -->|"LEE"| t17
+  o29 -->|"LEE"| t18
+  o29 -->|"LEE"| t10
+  o29 -->|"LEE"| t19
+  o29 -->|"LEE"| t20
+  o29 -->|"LEE"| t21
+  o29 -.-> t30
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -762,7 +832,7 @@ Registrar el consentimiento informado del encuentro
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado; ResourceNotFoundException: El objeto consentido no existe |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -802,18 +872,77 @@ flowchart TD
   n16 --> n17
   n9 -->|"no"| n17
   n18["Llama a TreatmentInformedConsentsService.sign"]:::llamada
-  n19["Transacción: transactional(…)"]:::transaccion
+  n19["Llama a TreatmentInformedConsentsService.assertContentRules"]:::llamada
   n18 --> n19
-  n20["Llama a TreatmentInformedConsentsRepository.create"]:::llamada
+  n20{"Boolean(dto.targetType) !== Boolean(dto.targetId)"}:::decision
   n19 --> n20
-  n21[("CREA consent.treatment_informed_consents")]:::efecto
-  n20 --> n21
-  n22["Llama a ConsentEventsRepository.record"]:::llamada
-  n21 --> n22
-  n23[("CREA consent.consent_events")]:::efecto
-  n22 --> n23
-  n24(("201 Responde con éxito")):::ok
-  n23 --> n24
+  n21(["↩ (relanza el error capturado)"]):::error
+  n20 -->|"sí"| n21
+  n22{"dto.exceptionType && !dto.exceptionJustification?.trim()"}:::decision
+  n20 -->|"no"| n22
+  n23(["↩ (relanza el error capturado)"]):::error
+  n22 -->|"sí"| n23
+  n24{"dto.targetType && !dto.exceptionType"}:::decision
+  n22 -->|"no"| n24
+  n25{"missing.length › 0"}:::decision
+  n24 -->|"sí"| n25
+  n26(["↩ (relanza el error capturado)"]):::error
+  n25 -->|"sí"| n26
+  n27{"dto.grantedBy && dto.grantedBy !== 'PATIENT'"}:::decision
+  n25 -->|"no"| n27
+  n24 -->|"no"| n27
+  n28{"missing.length › 0"}:::decision
+  n27 -->|"sí"| n28
+  n29(["↩ (relanza el error capturado)"]):::error
+  n28 -->|"sí"| n29
+  n30{"typeof dto.assentObtained !== 'boolean'"}:::decision
+  n28 -->|"no"| n30
+  n31(["↩ (relanza el error capturado)"]):::error
+  n30 -->|"sí"| n31
+  n32{"dto.decision === 'ACCEPTED' && dto.targetType && dto.exceptionType !== 'EMERGENCY' && dto.revocationRightInfo…"}:::decision
+  n30 -->|"no"| n32
+  n27 -->|"no"| n32
+  n33(["↩ (relanza el error capturado)"]):::error
+  n32 -->|"sí"| n33
+  n34["Transacción: transactional(…)"]:::transaccion
+  n32 -->|"no"| n34
+  n35{"dto.targetType && dto.targetId"}:::decision
+  n34 --> n35
+  n36["Llama a TreatmentInformedConsentsService.assertTargetOfPatient"]:::llamada
+  n35 -->|"sí"| n36
+  n37{"!target"}:::decision
+  n36 --> n37
+  n38(["404 NOT_FOUND El objeto consentido no existe"]):::error
+  n37 -->|"sí"| n38
+  n39{"target.patientProfileId !== patientProfileId"}:::decision
+  n37 -->|"no"| n39
+  n40(["↩ (relanza el error capturado)"]):::error
+  n39 -->|"sí"| n40
+  n41["Llama a TreatmentInformedConsentsRepository.create"]:::llamada
+  n39 -->|"no"| n41
+  n35 -->|"no"| n41
+  n42[("CREA consent.treatment_informed_consents")]:::efecto
+  n41 --> n42
+  n43{"dto.targetType === 'REFERRAL' && dto.decision !== 'DECLINED' && target"}:::decision
+  n42 --> n43
+  n44["Llama a TreatmentInformedConsentsService.linkReferral"]:::llamada
+  n43 -->|"sí"| n44
+  n45{"referral.informedConsentId"}:::decision
+  n44 --> n45
+  n46["Llama a TreatmentInformedConsentsRepository.findById"]:::llamada
+  n45 -->|"sí"| n46
+  n47[("LEE consent.treatment_informed_consents")]:::efecto
+  n46 --> n47
+  n48[("ACTUALIZA clinical_ext.referrals")]:::efecto
+  n47 --> n48
+  n45 -->|"no"| n48
+  n49["Llama a ConsentEventsRepository.record"]:::llamada
+  n48 --> n49
+  n43 -->|"no"| n49
+  n50[("CREA consent.consent_events")]:::efecto
+  n49 --> n50
+  n51(("201 Responde con éxito")):::ok
+  n50 --> n51
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1664,6 +1793,590 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
+#### 17. GET /consent/treatment-informed-consents
+
+Listar consentimientos informados de tratamiento
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a TreatmentInformedConsentsService.list"]:::llamada
+  n2 --> n3
+  n4["Llama a ClinicalReadService.assertCanReadHistory"]:::llamada
+  n3 --> n4
+  n5{"!actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
+  n4 --> n5
+  n6["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n5 -->|"sí"| n6
+  n7["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n6 --> n7
+  n8[("LEE profiles.person_account_links")]:::efecto
+  n7 --> n8
+  n9["Llama a PatientProfilesRepository.findById"]:::llamada
+  n8 --> n9
+  n10[("LEE profiles.patient_profiles")]:::efecto
+  n9 --> n10
+  n11{"!link || !profile || profile.profileId !== link.personId"}:::decision
+  n10 --> n11
+  n12(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n11 -->|"no"| n13
+  n5 -->|"no"| n13
+  n14[("LEE profiles.person_account_links")]:::efecto
+  n13 --> n14
+  n15["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n14 --> n15
+  n16[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n15 --> n16
+  n17["Llama a ClinicalReadService.isAttending"]:::llamada
+  n16 --> n17
+  n18["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
+  n17 --> n18
+  n19[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
+  n18 --> n19
+  n20["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n19 --> n20
+  n21["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n20 --> n21
+  n22[("LEE profiles.person_account_links")]:::efecto
+  n21 --> n22
+  n23["Llama a PatientProfilesRepository.findById"]:::llamada
+  n22 --> n23
+  n24[("LEE profiles.patient_profiles")]:::efecto
+  n23 --> n24
+  n25{"!link || !profile || profile.profileId !== link.personId"}:::decision
+  n24 --> n25
+  n26(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a TreatmentInformedConsentsRepository.findByPatient"]:::llamada
+  n25 -->|"no"| n27
+  n28[("LEE consent.treatment_informed_consents")]:::efecto
+  n27 --> n28
+  n29["Llama a ConsentEvidenceRepository.findBySubjects"]:::llamada
+  n28 --> n29
+  n30[("LEE consent.consent_evidence")]:::efecto
+  n29 --> n30
+  n31(("200 Responde con éxito")):::ok
+  n30 --> n31
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 18. POST /consent/treatment-informed-consents
+
+Capturar consentimiento informado de tratamiento
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: El objeto consentido no existe; ResourceNotFoundException: Encuentro no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a TreatmentInformedConsentsService.create"]:::llamada
+  n2 --> n3
+  n4{"actor.roles.some((role) =› ADMIN_ROLES.includes(role))"}:::decision
+  n3 --> n4
+  n5["Llama a TreatmentInformedConsentsService.sign"]:::llamada
+  n4 -->|"sí"| n5
+  n6["Llama a TreatmentInformedConsentsService.assertContentRules"]:::llamada
+  n5 --> n6
+  n7{"Boolean(dto.targetType) !== Boolean(dto.targetId)"}:::decision
+  n6 --> n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n7 -->|"sí"| n8
+  n9{"dto.exceptionType && !dto.exceptionJustification?.trim()"}:::decision
+  n7 -->|"no"| n9
+  n10(["↩ (relanza el error capturado)"]):::error
+  n9 -->|"sí"| n10
+  n11{"dto.targetType && !dto.exceptionType"}:::decision
+  n9 -->|"no"| n11
+  n12{"missing.length › 0"}:::decision
+  n11 -->|"sí"| n12
+  n13(["↩ (relanza el error capturado)"]):::error
+  n12 -->|"sí"| n13
+  n14{"dto.grantedBy && dto.grantedBy !== 'PATIENT'"}:::decision
+  n12 -->|"no"| n14
+  n11 -->|"no"| n14
+  n15{"missing.length › 0"}:::decision
+  n14 -->|"sí"| n15
+  n16(["↩ (relanza el error capturado)"]):::error
+  n15 -->|"sí"| n16
+  n17{"typeof dto.assentObtained !== 'boolean'"}:::decision
+  n15 -->|"no"| n17
+  n18(["↩ (relanza el error capturado)"]):::error
+  n17 -->|"sí"| n18
+  n19{"dto.decision === 'ACCEPTED' && dto.targetType && dto.exceptionType !== 'EMERGENCY' && dto.revocationRightInfo…"}:::decision
+  n17 -->|"no"| n19
+  n14 -->|"no"| n19
+  n20(["↩ (relanza el error capturado)"]):::error
+  n19 -->|"sí"| n20
+  n21["Transacción: transactional(…)"]:::transaccion
+  n19 -->|"no"| n21
+  n22{"dto.targetType && dto.targetId"}:::decision
+  n21 --> n22
+  n23["Llama a TreatmentInformedConsentsService.assertTargetOfPatient"]:::llamada
+  n22 -->|"sí"| n23
+  n24{"!target"}:::decision
+  n23 --> n24
+  n25(["404 NOT_FOUND El objeto consentido no existe"]):::error
+  n24 -->|"sí"| n25
+  n26{"target.patientProfileId !== patientProfileId"}:::decision
+  n24 -->|"no"| n26
+  n27(["↩ (relanza el error capturado)"]):::error
+  n26 -->|"sí"| n27
+  n28["Llama a TreatmentInformedConsentsRepository.create"]:::llamada
+  n26 -->|"no"| n28
+  n22 -->|"no"| n28
+  n29[("CREA consent.treatment_informed_consents")]:::efecto
+  n28 --> n29
+  n30{"dto.targetType === 'REFERRAL' && dto.decision !== 'DECLINED' && target"}:::decision
+  n29 --> n30
+  n31["Llama a TreatmentInformedConsentsService.linkReferral"]:::llamada
+  n30 -->|"sí"| n31
+  n32{"referral.informedConsentId"}:::decision
+  n31 --> n32
+  n33["Llama a TreatmentInformedConsentsRepository.findById"]:::llamada
+  n32 -->|"sí"| n33
+  n34[("LEE consent.treatment_informed_consents")]:::efecto
+  n33 --> n34
+  n35[("ACTUALIZA clinical_ext.referrals")]:::efecto
+  n34 --> n35
+  n32 -->|"no"| n35
+  n36["Llama a ConsentEventsRepository.record"]:::llamada
+  n35 --> n36
+  n30 -->|"no"| n36
+  n37[("CREA consent.consent_events")]:::efecto
+  n36 --> n37
+  n38["Llama a EncountersRepository.findById"]:::llamada
+  n37 --> n38
+  n4 -->|"no"| n38
+  n39[("LEE clinical.encounters")]:::efecto
+  n38 --> n39
+  n40{"!encounter"}:::decision
+  n39 --> n40
+  n41(["404 NOT_FOUND Encuentro no encontrado"]):::error
+  n40 -->|"sí"| n41
+  n42{"encounter.patientProfileId !== dto.patientProfileId"}:::decision
+  n40 -->|"no"| n42
+  n43(["↩ (relanza el error capturado)"]):::error
+  n42 -->|"sí"| n43
+  n44["Llama a ClinicalReadService.assertCanWriteHistory"]:::llamada
+  n42 -->|"no"| n44
+  n45{"actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
+  n44 --> n45
+  n46["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n45 -->|"sí"| n46
+  n47[("LEE profiles.person_account_links")]:::efecto
+  n46 --> n47
+  n48["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n47 --> n48
+  n49[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n48 --> n49
+  n50["Llama a ClinicalReadService.isAttending"]:::llamada
+  n49 --> n50
+  n51["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
+  n50 --> n51
+  n52[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
+  n51 --> n52
+  n53(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n52 --> n53
+  n45 -->|"no"| n53
+  n54["Llama a TreatmentInformedConsentsService.sign"]:::llamada
+  n55["Llama a TreatmentInformedConsentsService.assertContentRules"]:::llamada
+  n54 --> n55
+  n56{"Boolean(dto.targetType) !== Boolean(dto.targetId)"}:::decision
+  n55 --> n56
+  n57(["↩ (relanza el error capturado)"]):::error
+  n56 -->|"sí"| n57
+  n58{"dto.exceptionType && !dto.exceptionJustification?.trim()"}:::decision
+  n56 -->|"no"| n58
+  n59(["↩ (relanza el error capturado)"]):::error
+  n58 -->|"sí"| n59
+  n60{"dto.targetType && !dto.exceptionType"}:::decision
+  n58 -->|"no"| n60
+  n61{"missing.length › 0"}:::decision
+  n60 -->|"sí"| n61
+  n62(["↩ (relanza el error capturado)"]):::error
+  n61 -->|"sí"| n62
+  n63{"dto.grantedBy && dto.grantedBy !== 'PATIENT'"}:::decision
+  n61 -->|"no"| n63
+  n60 -->|"no"| n63
+  n64{"missing.length › 0"}:::decision
+  n63 -->|"sí"| n64
+  n65(["↩ (relanza el error capturado)"]):::error
+  n64 -->|"sí"| n65
+  n66{"typeof dto.assentObtained !== 'boolean'"}:::decision
+  n64 -->|"no"| n66
+  n67(["↩ (relanza el error capturado)"]):::error
+  n66 -->|"sí"| n67
+  n68{"dto.decision === 'ACCEPTED' && dto.targetType && dto.exceptionType !== 'EMERGENCY' && dto.revocationRightInfo…"}:::decision
+  n66 -->|"no"| n68
+  n63 -->|"no"| n68
+  n69(["↩ (relanza el error capturado)"]):::error
+  n68 -->|"sí"| n69
+  n70["Transacción: transactional(…)"]:::transaccion
+  n68 -->|"no"| n70
+  n71["… el resto del árbol (16 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 19. GET /consent/treatment-informed-consents/{id}
+
+Leer un consentimiento informado de tratamiento
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento informado no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a TreatmentInformedConsentsService.get"]:::llamada
+  n2 --> n3
+  n4["Llama a TreatmentInformedConsentsService.findOrFail"]:::llamada
+  n3 --> n4
+  n5["Llama a TreatmentInformedConsentsRepository.findById"]:::llamada
+  n4 --> n5
+  n6[("LEE consent.treatment_informed_consents")]:::efecto
+  n5 --> n6
+  n7{"!row"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Consentimiento informado no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a ClinicalReadService.assertCanReadHistory"]:::llamada
+  n7 -->|"no"| n9
+  n10{"!actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
+  n9 --> n10
+  n11["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n10 -->|"sí"| n11
+  n12["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n11 --> n12
+  n13[("LEE profiles.person_account_links")]:::efecto
+  n12 --> n13
+  n14["Llama a PatientProfilesRepository.findById"]:::llamada
+  n13 --> n14
+  n15[("LEE profiles.patient_profiles")]:::efecto
+  n14 --> n15
+  n16{"!link || !profile || profile.profileId !== link.personId"}:::decision
+  n15 --> n16
+  n17(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n16 -->|"no"| n18
+  n10 -->|"no"| n18
+  n19[("LEE profiles.person_account_links")]:::efecto
+  n18 --> n19
+  n20["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n19 --> n20
+  n21[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n20 --> n21
+  n22["Llama a ClinicalReadService.isAttending"]:::llamada
+  n21 --> n22
+  n23["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
+  n22 --> n23
+  n24[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
+  n23 --> n24
+  n25["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n24 --> n25
+  n26["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n25 --> n26
+  n27[("LEE profiles.person_account_links")]:::efecto
+  n26 --> n27
+  n28["Llama a PatientProfilesRepository.findById"]:::llamada
+  n27 --> n28
+  n29[("LEE profiles.patient_profiles")]:::efecto
+  n28 --> n29
+  n30{"!link || !profile || profile.profileId !== link.personId"}:::decision
+  n29 --> n30
+  n31(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n30 -->|"sí"| n31
+  n32["Llama a ConsentEvidenceRepository.findBySubjects"]:::llamada
+  n30 -->|"no"| n32
+  n33[("LEE consent.consent_evidence")]:::efecto
+  n32 --> n33
+  n34(("200 Responde con éxito")):::ok
+  n33 --> n34
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 20. POST /consent/treatment-informed-consents/{id}/evidence
+
+Adjuntar evidencia de firma al consentimiento de tratamiento
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento informado no encontrado |
+| 409 | `CONFLICT` | ConflictException: El consentimiento está revocado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a TreatmentInformedConsentsService.recordEvidence"]:::llamada
+  n2 --> n3
+  n4["Llama a TreatmentInformedConsentsService.findOrFail"]:::llamada
+  n3 --> n4
+  n5["Llama a TreatmentInformedConsentsRepository.findById"]:::llamada
+  n4 --> n5
+  n6[("LEE consent.treatment_informed_consents")]:::efecto
+  n5 --> n6
+  n7{"!row"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Consentimiento informado no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a ClinicalReadService.assertCanWriteHistory"]:::llamada
+  n7 -->|"no"| n9
+  n10{"actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
+  n9 --> n10
+  n11["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n10 -->|"sí"| n11
+  n12[("LEE profiles.person_account_links")]:::efecto
+  n11 --> n12
+  n13["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n12 --> n13
+  n14[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n13 --> n14
+  n15["Llama a ClinicalReadService.isAttending"]:::llamada
+  n14 --> n15
+  n16["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
+  n15 --> n16
+  n17[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
+  n16 --> n17
+  n18(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n17 --> n18
+  n10 -->|"no"| n18
+  n19{"row.withdrawnAt"}:::decision
+  n20(["409 CONFLICT El consentimiento está revocado"]):::error
+  n19 -->|"sí"| n20
+  n21["Llama a ConsentEvidenceService.record"]:::llamada
+  n19 -->|"no"| n21
+  n22["Transacción: transactional(…)"]:::transaccion
+  n21 --> n22
+  n23["Llama a ConsentEvidenceRepository.create"]:::llamada
+  n22 --> n23
+  n24[("CREA consent.consent_evidence")]:::efecto
+  n23 --> n24
+  n25(("201 Responde con éxito")):::ok
+  n24 --> n25
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 21. PATCH /consent/treatment-informed-consents/{id}/post-emergency-information
+
+Registrar la información posterior a una emergencia
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento informado no encontrado |
+| 409 | `CONFLICT` | ConflictException: La información posterior a la emergencia ya estaba registrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La información posterior sólo aplica a la excepción de emergencia |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a TreatmentInformedConsentsService.recordPostEmergencyInformation"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a TreatmentInformedConsentsService.findOrFail"]:::llamada
+  n4 --> n5
+  n6["Llama a TreatmentInformedConsentsRepository.findById"]:::llamada
+  n5 --> n6
+  n7[("LEE consent.treatment_informed_consents")]:::efecto
+  n6 --> n7
+  n8{"!row"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Consentimiento informado no encontrado"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a ClinicalReadService.assertCanWriteHistory"]:::llamada
+  n8 -->|"no"| n10
+  n11{"actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
+  n10 --> n11
+  n12["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n11 -->|"sí"| n12
+  n13[("LEE profiles.person_account_links")]:::efecto
+  n12 --> n13
+  n14["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n13 --> n14
+  n15[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n14 --> n15
+  n16["Llama a ClinicalReadService.isAttending"]:::llamada
+  n15 --> n16
+  n17["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
+  n16 --> n17
+  n18[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
+  n17 --> n18
+  n19(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n18 --> n19
+  n11 -->|"no"| n19
+  n20{"row.exceptionType !== 'EMERGENCY'"}:::decision
+  n21(["422 PRECONDITION_FAILED La información posterior sólo aplica a la excepción de emergencia"]):::error
+  n20 -->|"sí"| n21
+  n22{"row.postEmergencyInformedAt"}:::decision
+  n20 -->|"no"| n22
+  n23(["409 CONFLICT La información posterior a la emergencia ya estaba registrada"]):::error
+  n22 -->|"sí"| n23
+  n24{"Number.isNaN(informedAt.getTime()) || informedAt.getTime() › now.getTime() || (floor && informedAt.getTime()…"}:::decision
+  n22 -->|"no"| n24
+  n25(["↩ (relanza el error capturado)"]):::error
+  n24 -->|"sí"| n25
+  n26[("ACTUALIZA consent.treatment_informed_consents")]:::efecto
+  n24 -->|"no"| n26
+  n27["Llama a ConsentEvidenceRepository.findBySubjects"]:::llamada
+  n26 --> n27
+  n28[("LEE consent.consent_evidence")]:::efecto
+  n27 --> n28
+  n29(("200 Responde con éxito")):::ok
+  n28 --> n29
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 22. PATCH /consent/treatment-informed-consents/{id}/withdraw
+
+Revocar un consentimiento informado de tratamiento
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento informado no encontrado |
+| 409 | `CONFLICT` | ConflictException: El consentimiento ya estaba revocado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a TreatmentInformedConsentsService.withdraw"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a TreatmentInformedConsentsService.findOrFail"]:::llamada
+  n4 --> n5
+  n6["Llama a TreatmentInformedConsentsRepository.findById"]:::llamada
+  n5 --> n6
+  n7[("LEE consent.treatment_informed_consents")]:::efecto
+  n6 --> n7
+  n8{"!row"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Consentimiento informado no encontrado"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a ClinicalReadService.assertCanWriteHistory"]:::llamada
+  n8 -->|"no"| n10
+  n11{"actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
+  n10 --> n11
+  n12["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n11 -->|"sí"| n12
+  n13[("LEE profiles.person_account_links")]:::efecto
+  n12 --> n13
+  n14["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n13 --> n14
+  n15[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n14 --> n15
+  n16["Llama a ClinicalReadService.isAttending"]:::llamada
+  n15 --> n16
+  n17["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
+  n16 --> n17
+  n18[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
+  n17 --> n18
+  n19(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n18 --> n19
+  n11 -->|"no"| n19
+  n20{"row.withdrawnAt"}:::decision
+  n21(["409 CONFLICT El consentimiento ya estaba revocado"]):::error
+  n20 -->|"sí"| n21
+  n22[("ACTUALIZA consent.treatment_informed_consents · ACTUALIZA consent.treatment_informed_consents · ACTUALIZA con…")]:::efecto
+  n20 -->|"no"| n22
+  n23["Repite: por cada const referral de linked"]:::bucle
+  n22 --> n23
+  n24[("ACTUALIZA clinical_ext.referrals")]:::efecto
+  n23 -->|"cada elemento"| n24
+  n25["Llama a ConsentEventsRepository.record"]:::llamada
+  n24 --> n25
+  n23 -->|"al terminar"| n25
+  n26[("CREA consent.consent_events")]:::efecto
+  n25 --> n26
+  n27["Llama a ConsentEvidenceRepository.findBySubjects"]:::llamada
+  n26 --> n27
+  n28[("LEE consent.consent_evidence")]:::efecto
+  n27 --> n28
+  n29(("200 Responde con éxito")):::ok
+  n28 --> n29
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
 ### Operaciones sin decisiones propias
 
 Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su detalle está en la ficha de endpoints.
@@ -1675,4 +2388,3 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | GET /consent/me/hipaa-authorizations | 200, 401, 403, 429 | 4 |
 | GET /consent/me/objections | 200, 401, 403, 429 | 4 |
 | GET /consent/me/treatment-informed-consents | 200, 401, 403, 429 | 3 |
-| POST /consent/treatment-informed-consents | 201, 400, 401, 403, 429 | 2 |

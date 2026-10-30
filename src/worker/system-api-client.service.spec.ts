@@ -34,6 +34,7 @@ const ENV: WorkerEnv = {
   googleOAuthClientSecret: '',
   googleOAuthRefreshToken: '',
   googleSenderEmail: '',
+  emailAllowedRecipientDomains: [],
 };
 
 /** Error de axios con status, como el que produce una respuesta de error real. */

@@ -362,6 +362,24 @@ export class ScheduleRuleDto {
   @IsOptional()
   @IsBoolean()
   telemedicineEnabled?: boolean;
+
+  /**
+   * Horario flexible de **esta** franja (v4.2.64): «el lunes doy turnos de 30,
+   * el martes atiendo a la hora que me pidan».
+   *
+   * **Ausente ≡ `false`** (turnos fijos). Una franja flexible no lleva
+   * `slotMinutes`, `capacityPerSlot` ni `gapMinutes`: el tiempo por paciente es
+   * el `slotMinutes` de la plantilla. Si la plantilla declara
+   * `flexibleHours: true`, todas sus franjas son flexibles, digan lo que digan.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Horario flexible de esta franja: sin turnos fijos, el paciente elige la hora. No admite slotMinutes, capacityPerSlot ni gapMinutes. Ausente ≡ false',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  flexibleHours?: boolean;
 }
 
 /**
@@ -564,6 +582,13 @@ export class TemplateRuleDto {
    */
   @ApiProperty({ default: false })
   telemedicineEnabled!: boolean;
+
+  /**
+   * La franja es de horario flexible. Se emite siempre, ya resuelto: `true`
+   * si lo declara la franja o si la plantilla entera es flexible.
+   */
+  @ApiProperty({ default: false })
+  flexibleHours!: boolean;
 }
 
 /**

@@ -88,6 +88,12 @@ export class ScheduleRules {
   telemedicineEnabled!: boolean;
 
   /**
+   * Valor de flexible hours mantenido por la instancia.
+   */
+  @Property({ fieldName: 'flexible_hours', type: 'boolean', default: false })
+  flexibleHours!: boolean;
+
+  /**
    * Valor de valid from mantenido por la instancia.
    */
   @Property({ fieldName: 'valid_from', columnType: 'date', nullable: true })

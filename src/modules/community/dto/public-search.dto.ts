@@ -1,3 +1,4 @@
+import { PractitionerVerificationDto } from '../../profiles/presentation/dto/practitioner-verification.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /**
@@ -58,11 +59,12 @@ export class PublicLocationDto {
  */
 export class PublicVerifiedBadgeDto {
   @ApiProperty({
-    enum: ['VERIFIED', 'EXPIRED', 'NONE'],
+    enum: ['VERIFIED', 'IN_REVIEW', 'EXPIRED', 'NONE'],
     description:
-      '`VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció',
+      '`VERIFIED` sólo con respaldo vigente; `IN_REVIEW` si pidió la verificación y ' +
+      'todavía no se resolvió (nunca para un padrón sin solicitud); `EXPIRED` si lo hubo y venció',
   })
-  status!: 'VERIFIED' | 'EXPIRED' | 'NONE';
+  status!: 'VERIFIED' | 'IN_REVIEW' | 'EXPIRED' | 'NONE';
 
   @ApiProperty({ nullable: true, description: 'Qué se verificó' })
   badgeTypeConceptId!: string | null;
@@ -115,6 +117,14 @@ export class PublicSearchResultDto {
       'mantiene por compatibilidad: `verified === (verifiedBadge.status === "VERIFIED")`.',
   })
   verifiedBadge!: PublicVerifiedBadgeDto;
+
+  @ApiProperty({
+    type: PractitionerVerificationDto,
+    description:
+      'El mismo sello en la forma `verification` de los DTO de profesional ' +
+      '(`NONE` se dice `UNVERIFIED`). Derivado de `verifiedBadge`, no una segunda verdad.',
+  })
+  verification!: PractitionerVerificationDto;
 
   @ApiProperty({
     description:
@@ -458,6 +468,13 @@ export class PublicDirectoryProfileDto {
     description: 'El mismo sello y la misma semántica que en el buscador',
   })
   verifiedBadge!: PublicVerifiedBadgeDto;
+
+  @ApiProperty({
+    type: PractitionerVerificationDto,
+    description:
+      'El mismo sello en la forma `verification`, derivado de `verifiedBadge`.',
+  })
+  verification!: PractitionerVerificationDto;
 
   @ApiProperty({ description: 'Si tiene agenda publicada' })
   hasPublishedAgenda!: boolean;

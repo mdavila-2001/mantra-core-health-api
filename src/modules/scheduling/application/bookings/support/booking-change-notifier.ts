@@ -11,6 +11,8 @@ import {
 import type { BookingActorKind } from '../../../domain/booking/booking-transition';
 import {
   bookingChangeNotice,
+  receiptReviewedNotice,
+  receiptUploadedNotice,
   requestNoticeForPatient,
   requestNoticeForPractitioner,
   type BookingChange,
@@ -162,5 +164,96 @@ export class BookingChangeNotifier {
           : { patientProfileId: booking.patientProfileId },
       ),
     );
+  }
+
+  /**
+   * Avisa al médico de la agenda que el paciente subió un comprobante.
+   *
+   * Corre después de la transacción y no lanza: un canal caído no deshace la
+   * subida. Un recurso sin profesional —una sala— no tiene a quién avisarle.
+   *
+   * @param bookingId - La cita del comprobante.
+   * @param receiptId - El comprobante subido.
+   */
+  async notifyReceiptUploaded(
+    bookingId: string,
+    receiptId: string,
+  ): Promise<void> {
+    await this.safely(
+      'scheduling.notice.payment-receipt-uploaded',
+      bookingId,
+      async () => {
+        const em = this.em.fork();
+        const booking = await this.noticeRepo.describeBooking(em, bookingId);
+        if (!booking) return;
+        const practitioner = await this.noticeRepo.findResourceAccount(
+          em,
+          booking.resourceId,
+        );
+        if (practitioner === null) return;
+        const patient = await this.noticeRepo.findDisplayNameForProfile(
+          em,
+          booking.patientProfileId,
+        );
+        await this.notices.emit(
+          receiptUploadedNotice(
+            booking,
+            patient ?? undefined,
+            practitioner,
+            receiptId,
+          ),
+        );
+      },
+    );
+  }
+
+  /**
+   * Avisa al paciente que su comprobante se confirmó o se rechazó, con el
+   * motivo si se rechazó. Corre después de la transacción y no lanza.
+   *
+   * @param bookingId - La cita del comprobante.
+   * @param receiptId - El comprobante revisado.
+   * @param confirmed - `true` si se confirmó.
+   * @param reason - El motivo del rechazo.
+   */
+  async notifyReceiptReviewed(
+    bookingId: string,
+    receiptId: string,
+    confirmed: boolean,
+    reason?: string,
+  ): Promise<void> {
+    await this.safely(
+      'scheduling.notice.payment-receipt-reviewed',
+      bookingId,
+      async () => {
+        const booking = await this.noticeRepo.describeBooking(
+          this.em.fork(),
+          bookingId,
+        );
+        if (!booking) return;
+        await this.notices.emit(
+          receiptReviewedNotice(booking, receiptId, confirmed, reason),
+        );
+      },
+    );
+  }
+
+  /**
+   * Corre un aviso sin dejar que su fallo suba: la operación que lo originó ya
+   * se confirmó, y un aviso que no sale no puede volverla un error.
+   */
+  private async safely(
+    operation: string,
+    bookingId: string,
+    send: () => Promise<void>,
+  ): Promise<void> {
+    try {
+      await send();
+    } catch (error: unknown) {
+      this.logger.warn(
+        { operation, bookingId, err: error },
+        'No se pudo emitir el aviso del comprobante',
+      );
+    }
   }
 }

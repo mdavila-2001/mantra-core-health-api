@@ -28,7 +28,7 @@ export const schemaCatalog: readonly SchemaSpec[] = [
   ['delegated_access', 29, 'delegated_access', 7],
   ['diagnostic_units', 23, 'diagnostic_units', 10],
   ['diagnostics', 20, 'diagnostics', 36],
-  ['directory', 4, 'directory', 7],
+  ['directory', 4, 'directory', 9],
   ['education', 47, 'education', 15],
   ['erp', 38, 'erp', 51],
   ['forms', 9, 'forms', 16],

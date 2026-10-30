@@ -9,7 +9,11 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { CONCEPTS } from '../../../common';
-import { boDepartmentConceptId } from '../../../common/seed/bo-geography.catalog';
+import { boProvinceConceptId } from '../../../common/seed/admin-divisions.catalog';
+import {
+  boDepartmentConceptId,
+  boMunicipalityConceptId,
+} from '../../../common/seed/bo-geography.catalog';
 import {
   createResidenceAddress,
   replaceResidenceAddress,
@@ -255,5 +259,150 @@ describe('replaceResidenceAddress · quitar el punto del mapa', () => {
     );
 
     expect(written).toHaveLength(0);
+  });
+});
+
+describe('ADR-0028 · provincia deducida y distrito', () => {
+  const tx = {} as any;
+  const SANTA_CRUZ = boMunicipalityConceptId('070101');
+  const concepts = () =>
+    buildConcepts({
+      [SANTA_CRUZ]: {
+        code: 'geo:bo:municipality:070101',
+        display: 'Santa Cruz de la Sierra',
+      },
+      'mun-modelo': { code: 'SC-SANTA_CRUZ', display: 'Santa Cruz' },
+    });
+
+  it('correcto: del municipio deduce la provincia, sin recibirla, y guarda el distrito', async () => {
+    const { repo, rows } = buildRepo();
+
+    await createResidenceAddress(repo, tx, concepts(), {
+      personId: 'person-1',
+      municipalityConceptId: SANTA_CRUZ,
+      lines: 'Calle Guapay 3861',
+      district: '  Equipetrol  ',
+      actorUserId: 'user-1',
+    });
+
+    expect(rows[0]).toMatchObject({
+      administrativeAreaConceptId: boDepartmentConceptId('SC'),
+      administrativeArea2ConceptId: boProvinceConceptId('0701'),
+      districtText: 'Equipetrol',
+      lines: 'Calle Guapay 3861',
+    });
+  });
+
+  it('límite: un municipio fuera del árbol (código del paquete del modelo) queda sin provincia, no se adivina', async () => {
+    const { repo, rows } = buildRepo();
+
+    await createResidenceAddress(repo, tx, concepts(), {
+      personId: 'person-1',
+      municipalityConceptId: 'mun-modelo',
+      actorUserId: 'user-1',
+    });
+
+    expect(rows[0].administrativeAreaConceptId).toBe(
+      boDepartmentConceptId('SC'),
+    );
+    expect(rows[0].administrativeArea2ConceptId).toBeUndefined();
+  });
+
+  it('límite: un distrito en blanco no se guarda', async () => {
+    const { repo, rows } = buildRepo();
+
+    await createResidenceAddress(repo, tx, concepts(), {
+      personId: 'person-1',
+      municipalityConceptId: SANTA_CRUZ,
+      district: '   ',
+      actorUserId: 'user-1',
+    });
+
+    expect(rows[0].districtText).toBeUndefined();
+  });
+
+  it('límite: el distrito solo no alcanza para crear una dirección', async () => {
+    const { repo, rows } = buildRepo();
+
+    const wrote = await createResidenceAddress(repo, tx, concepts(), {
+      personId: 'person-1',
+      district: 'Equipetrol',
+      actorUserId: 'user-1',
+    });
+
+    expect(wrote).toBe(false);
+    expect(rows).toHaveLength(0);
+  });
+
+  describe('al reemplazar', () => {
+    const CURRENT = {
+      id: 'addr-1',
+      municipalityConceptId: SANTA_CRUZ,
+      lines: 'Calle Guapay 3861',
+      districtText: 'Equipetrol',
+    };
+    function withCurrent() {
+      const written: any[] = [];
+      return {
+        written,
+        repo: {
+          findCurrentByOwnerAndUse: mockFn(async () => CURRENT),
+          closeCurrent: mockFn(),
+          create: mockFn((_tx: any, data: any) => written.push(data)),
+        } as any,
+      };
+    }
+    const reemplazar = (repo: any, district?: string) =>
+      replaceResidenceAddress(
+        repo,
+        tx,
+        concepts(),
+        {
+          personId: 'person-1',
+          useConceptId: CONCEPTS.ADDR_USE_HOME,
+          ...(district === undefined ? {} : { district }),
+          actorUserId: 'user-1',
+        },
+        new Date('2026-10-27T12:00:00.000Z'),
+      );
+
+    it('correcto: un distrito nuevo abre otra fila con él', async () => {
+      const { repo, written } = withCurrent();
+      await reemplazar(repo, 'Centro');
+      expect(written).toHaveLength(1);
+      expect(written[0].districtText).toBe('Centro');
+      expect(written[0].lines).toBe('Calle Guapay 3861');
+    });
+
+    it('límite: el mismo distrito no escribe nada', async () => {
+      const { repo, written } = withCurrent();
+      await reemplazar(repo, 'Equipetrol');
+      expect(written).toHaveLength(0);
+    });
+
+    it("límite: '' borra el distrito y conserva el resto", async () => {
+      const { repo, written } = withCurrent();
+      await reemplazar(repo, '');
+      expect(written).toHaveLength(1);
+      expect(written[0].districtText).toBeUndefined();
+      expect(written[0].lines).toBe('Calle Guapay 3861');
+    });
+
+    it('límite: sin distrito en el cuerpo, se conserva el vigente', async () => {
+      const { repo, written } = withCurrent();
+      await replaceResidenceAddress(
+        repo,
+        tx,
+        concepts(),
+        {
+          personId: 'person-1',
+          useConceptId: CONCEPTS.ADDR_USE_HOME,
+          lines: 'Calle Guapay 3900',
+          actorUserId: 'user-1',
+        },
+        new Date('2026-10-27T12:00:00.000Z'),
+      );
+      expect(written[0].districtText).toBe('Equipetrol');
+    });
   });
 });

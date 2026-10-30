@@ -1447,11 +1447,11 @@
 |---|---|---:|---|:---:|---|
 | `survey_answers` | `SurveyAnswers` | 12 | `id` | ✅ | Conserva respuestas por pregunta para permitir análisis de experiencia sin mezclar resultados con reseñas públicas. |
 | `survey_assignments` | `SurveyAssignments` | 11 | `id` | ✅ | Asocia versiones de encuestas a profesionales o tipos de atención que deben utilizarlas. |
-| `survey_invitations` | `SurveyInvitations` | 15 | `id` | ✅ | Emite invitaciones para responder una encuesta a un paciente después de una atención y controla su vigencia. |
+| `survey_invitations` | `SurveyInvitations` | 18 | `id` | ✅ | Emite invitaciones para responder una encuesta a un paciente después de una atención y controla su vigencia. |
 | `survey_questions` | `SurveyQuestions` | 14 | `id` | ✅ | Define preguntas que componen cada versión de un cuestionario post-visita. |
 | `survey_responses` | `SurveyResponses` | 11 | `id` | ✅ | Registra respuestas privadas de pacientes a encuestas post-visita sin alimentar la calificación pública de prestadores. |
-| `survey_templates` | `SurveyTemplates` | 11 | `id` | ✅ | Define cuestionarios post-atención que profesionales pueden usar para consultar la experiencia del paciente. |
-| `survey_versions` | `SurveyVersions` | 13 | `id` | ✅ | Preserva versiones inmutables de cuestionarios para conocer qué preguntas se presentaron en cada atención. |
+| `survey_templates` | `SurveyTemplates` | 13 | `id` | ✅ | Define cuestionarios post-atención que profesionales pueden usar para consultar la experiencia del paciente. |
+| `survey_versions` | `SurveyVersions` | 14 | `id` | ✅ | Preserva versiones inmutables de cuestionarios para conocer qué preguntas se presentaron en cada atención. |
 
 ### `system_context` (9 entidades, módulo `system_context`)
 

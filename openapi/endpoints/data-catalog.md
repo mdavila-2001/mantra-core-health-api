@@ -59,7 +59,7 @@ Referencia exhaustiva de 38 operación(es) del módulo `data_catalog`, derivada 
 - **Nombre:** Aprueba o rechaza la revisión vigente de una ficha
 - **Operation ID:** `AdminCatalogController_review`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminCatalogController.review](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+- **Implementación:** [AdminCatalogController.review](../../src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -150,11 +150,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Ficha no encontrada | Excepción explícita en src/modules/data_catalog/services/catalog-governance.service.ts |
-| 409 | `CONCURRENCY_CONFLICT` | message | Excepción explícita en src/modules/data_catalog/services/catalog-governance.service.ts |
-| 409 | `CONCURRENCY_CONFLICT` | La ficha cambió mientras se revisaba | Excepción explícita en src/modules/data_catalog/services/catalog-governance.service.ts |
+| 404 | `NOT_FOUND` | Ficha no encontrada | Excepción explícita en src/modules/data_catalog/application/catalog-governance.service.ts |
+| 409 | `CONCURRENCY_CONFLICT` | message | Excepción explícita en src/modules/data_catalog/application/catalog-governance.service.ts |
+| 409 | `CONCURRENCY_CONFLICT` | La ficha cambió mientras se revisaba | Excepción explícita en src/modules/data_catalog/application/catalog-governance.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | message | Excepción explícita en src/modules/data_catalog/services/catalog-governance.service.ts |
+| 422 | `PRECONDITION_FAILED` | message | Excepción explícita en src/modules/data_catalog/application/catalog-governance.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -179,7 +179,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Corre la clasificación automática de sensibilidad sobre las columnas observadas
 - **Operation ID:** `AdminCatalogController_runClassification`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminCatalogController.runClassification](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+- **Implementación:** [AdminCatalogController.runClassification](../../src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -313,7 +313,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Crea o edita la ficha de una columna (con versión esperada); guardar a mano saca la ficha de AUTO_DETECTED
 - **Operation ID:** `AdminCatalogController_saveColumnAnnotation`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminCatalogController.saveColumnAnnotation](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+- **Implementación:** [AdminCatalogController.saveColumnAnnotation](../../src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -448,8 +448,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Columna del catálogo no encontrada | Excepción explícita en src/modules/data_catalog/services/catalog-governance.service.ts |
-| 409 | `CONCURRENCY_CONFLICT` | La ficha cambió desde que se leyó | Excepción explícita en src/modules/data_catalog/services/catalog-governance.service.ts |
+| 404 | `NOT_FOUND` | Columna del catálogo no encontrada | Excepción explícita en src/modules/data_catalog/application/catalog-governance.service.ts |
+| 409 | `CONCURRENCY_CONFLICT` | La ficha cambió desde que se leyó | Excepción explícita en src/modules/data_catalog/application/catalog-governance.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -475,7 +475,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Evidencia enlazada a una columna
 - **Operation ID:** `AdminCatalogController_columnEvidence`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminCatalogController.columnEvidence](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+- **Implementación:** [AdminCatalogController.columnEvidence](../../src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -545,7 +545,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Columna del catálogo no encontrada | Excepción explícita en src/modules/data_catalog/services/catalog-read.service.ts |
+| 404 | `NOT_FOUND` | Columna del catálogo no encontrada | Excepción explícita en src/modules/data_catalog/application/catalog-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -570,7 +570,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Enlaza evidencia a una columna
 - **Operation ID:** `AdminCatalogController_addColumnEvidence`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminCatalogController.addColumnEvidence](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+- **Implementación:** [AdminCatalogController.addColumnEvidence](../../src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -663,7 +663,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Columna del catálogo no encontrada | Excepción explícita en src/modules/data_catalog/services/catalog-governance.service.ts |
+| 404 | `NOT_FOUND` | Columna del catálogo no encontrada | Excepción explícita en src/modules/data_catalog/application/catalog-governance.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -689,7 +689,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Cobertura del catálogo por dimensión, calculada por el servidor
 - **Operation ID:** `AdminCatalogController_coverage`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminCatalogController.coverage](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+- **Implementación:** [AdminCatalogController.coverage](../../src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -782,7 +782,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Objetos del catálogo, paginados por cursor
 - **Operation ID:** `AdminCatalogController_objects`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminCatalogController.objects](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+- **Implementación:** [AdminCatalogController.objects](../../src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -856,7 +856,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
-| 400 | `VALIDATION_FAILED` | El cursor de paginación no es válido | Excepción explícita en src/modules/data_catalog/services/catalog-read.service.ts |
+| 400 | `VALIDATION_FAILED` | El cursor de paginación no es válido | Excepción explícita en src/modules/data_catalog/application/catalog-read.service.ts |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -883,7 +883,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Ficha técnica, observación, ficha curada, cobertura y gobierno de un objeto
 - **Operation ID:** `AdminCatalogController_object`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminCatalogController.object](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+- **Implementación:** [AdminCatalogController.object](../../src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -953,7 +953,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/services/catalog-read.service.ts |
+| 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/application/catalog-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -978,7 +978,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Crea o edita la ficha de un objeto (con versión esperada)
 - **Operation ID:** `AdminCatalogController_saveAnnotation`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminCatalogController.saveAnnotation](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+- **Implementación:** [AdminCatalogController.saveAnnotation](../../src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -1113,8 +1113,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/services/catalog-governance.service.ts |
-| 409 | `CONCURRENCY_CONFLICT` | La ficha cambió desde que se leyó | Excepción explícita en src/modules/data_catalog/services/catalog-governance.service.ts |
+| 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/application/catalog-governance.service.ts |
+| 409 | `CONCURRENCY_CONFLICT` | La ficha cambió desde que se leyó | Excepción explícita en src/modules/data_catalog/application/catalog-governance.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1140,7 +1140,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Cambios que los escaneos detectaron en un objeto
 - **Operation ID:** `AdminCatalogController_changes`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminCatalogController.changes](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+- **Implementación:** [AdminCatalogController.changes](../../src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -1212,7 +1212,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/services/catalog-read.service.ts |
+| 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/application/catalog-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1237,7 +1237,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Columnas observadas de un objeto, con su ficha si la tienen
 - **Operation ID:** `AdminCatalogController_columns`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminCatalogController.columns](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+- **Implementación:** [AdminCatalogController.columns](../../src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -1307,7 +1307,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/services/catalog-read.service.ts |
+| 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/application/catalog-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1332,7 +1332,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Evidencia enlazada a un objeto
 - **Operation ID:** `AdminCatalogController_evidence`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminCatalogController.evidence](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+- **Implementación:** [AdminCatalogController.evidence](../../src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -1402,7 +1402,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/services/catalog-read.service.ts |
+| 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/application/catalog-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1427,7 +1427,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Enlaza evidencia a un objeto
 - **Operation ID:** `AdminCatalogController_addEvidence`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminCatalogController.addEvidence](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+- **Implementación:** [AdminCatalogController.addEvidence](../../src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -1520,7 +1520,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/services/catalog-governance.service.ts |
+| 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/application/catalog-governance.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1546,7 +1546,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Revisiones y decisiones de la ficha de un objeto
 - **Operation ID:** `AdminCatalogController_history`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminCatalogController.history](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+- **Implementación:** [AdminCatalogController.history](../../src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -1616,7 +1616,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/services/catalog-read.service.ts |
+| 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/application/catalog-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1641,7 +1641,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Quién referencia a un objeto y a quién referencia, por claves foráneas observadas
 - **Operation ID:** `AdminCatalogController_impact`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminCatalogController.impact](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+- **Implementación:** [AdminCatalogController.impact](../../src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -1713,7 +1713,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/services/catalog-read.service.ts |
+| 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/application/catalog-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1738,7 +1738,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Deriva de permisos: roles que las rutas exigen contra los que la API siembra
 - **Operation ID:** `AdminCatalogController_permissionDrift`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminCatalogController.permissionDrift](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+- **Implementación:** [AdminCatalogController.permissionDrift](../../src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -1828,7 +1828,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Escaneos, del más reciente al más antiguo
 - **Operation ID:** `AdminCatalogController_listScans`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminCatalogController.listScans](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+- **Implementación:** [AdminCatalogController.listScans](../../src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -1922,7 +1922,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Pide un escaneo de la base primaria (se ejecuta fuera de la petición)
 - **Operation ID:** `AdminCatalogController_requestScan`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminCatalogController.requestScan](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+- **Implementación:** [AdminCatalogController.requestScan](../../src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -2015,7 +2015,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | Ya hay un escaneo en curso de esta fuente | Excepción explícita en src/modules/data_catalog/services/catalog-scan.service.ts |
+| 409 | `CONFLICT` | Ya hay un escaneo en curso de esta fuente | Excepción explícita en src/modules/data_catalog/application/catalog-scan.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2040,7 +2040,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Un escaneo
 - **Operation ID:** `AdminCatalogController_scan`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminCatalogController.scan](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+- **Implementación:** [AdminCatalogController.scan](../../src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -2110,7 +2110,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Escaneo no encontrado | Excepción explícita en src/modules/data_catalog/services/catalog-read.service.ts |
+| 404 | `NOT_FOUND` | Escaneo no encontrado | Excepción explícita en src/modules/data_catalog/application/catalog-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2135,7 +2135,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Schemas observados, con cuántos objetos tienen ficha y cuántos están aprobados
 - **Operation ID:** `AdminCatalogController_schemas`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminCatalogController.schemas](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+- **Implementación:** [AdminCatalogController.schemas](../../src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -2225,7 +2225,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Deriva entre el DDL del modelo y las entidades del ORM
 - **Operation ID:** `AdminPortalController_deriva`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminPortalController.deriva](../../src/modules/data_catalog/controllers/admin-portal.controller.ts)
+- **Implementación:** [AdminPortalController.deriva](../../src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts)
 
 ### Descripción de negocio
 
@@ -2335,7 +2335,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Listar las tablas del catálogo de datos
 - **Operation ID:** `AdminPortalController_listarTablas`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminPortalController.listarTablas](../../src/modules/data_catalog/controllers/admin-portal.controller.ts)
+- **Implementación:** [AdminPortalController.listarTablas](../../src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts)
 
 ### Descripción de negocio
 
@@ -2474,7 +2474,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Ver la ficha de una tabla
 - **Operation ID:** `AdminPortalController_fichaDeTabla`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminPortalController.fichaDeTabla](../../src/modules/data_catalog/controllers/admin-portal.controller.ts)
+- **Implementación:** [AdminPortalController.fichaDeTabla](../../src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts)
 
 ### Descripción de negocio
 
@@ -2615,7 +2615,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Tabla no encontrada en el catálogo | Excepción explícita en src/modules/data_catalog/services/portal-inventory.service.ts |
+| 404 | `NOT_FOUND` | Tabla no encontrada en el catálogo | Excepción explícita en src/modules/data_catalog/application/portal-inventory.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2640,7 +2640,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Listar los procesos de negocio
 - **Operation ID:** `AdminPortalController_listarProcesos`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminPortalController.listarProcesos](../../src/modules/data_catalog/controllers/admin-portal.controller.ts)
+- **Implementación:** [AdminPortalController.listarProcesos](../../src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts)
 
 ### Descripción de negocio
 
@@ -2787,7 +2787,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Ver un proceso con sus etapas y máquinas de estado
 - **Operation ID:** `AdminPortalController_detalleDeProceso`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminPortalController.detalleDeProceso](../../src/modules/data_catalog/controllers/admin-portal.controller.ts)
+- **Implementación:** [AdminPortalController.detalleDeProceso](../../src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts)
 
 ### Descripción de negocio
 
@@ -2957,7 +2957,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Proceso no encontrado en el inventario | Excepción explícita en src/modules/data_catalog/services/portal-inventory.service.ts |
+| 404 | `NOT_FOUND` | Proceso no encontrado en el inventario | Excepción explícita en src/modules/data_catalog/application/portal-inventory.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2982,7 +2982,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Ver el grafo de un proceso
 - **Operation ID:** `AdminPortalController_grafo`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminPortalController.grafo](../../src/modules/data_catalog/controllers/admin-portal.controller.ts)
+- **Implementación:** [AdminPortalController.grafo](../../src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts)
 
 ### Descripción de negocio
 
@@ -3084,7 +3084,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Proceso no encontrado en el inventario | Excepción explícita en src/modules/data_catalog/services/portal-inventory.service.ts |
+| 404 | `NOT_FOUND` | Proceso no encontrado en el inventario | Excepción explícita en src/modules/data_catalog/application/portal-inventory.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3109,7 +3109,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Resumen de hallazgos del mapa
 - **Operation ID:** `AdminPortalController_hallazgos`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminPortalController.hallazgos](../../src/modules/data_catalog/controllers/admin-portal.controller.ts)
+- **Implementación:** [AdminPortalController.hallazgos](../../src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts)
 
 ### Descripción de negocio
 
@@ -3217,7 +3217,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Ver los casos de un hallazgo
 - **Operation ID:** `AdminPortalController_detalleDeHallazgo`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminPortalController.detalleDeHallazgo](../../src/modules/data_catalog/controllers/admin-portal.controller.ts)
+- **Implementación:** [AdminPortalController.detalleDeHallazgo](../../src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts)
 
 ### Descripción de negocio
 
@@ -3321,7 +3321,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Hallazgo no encontrado | Excepción explícita en src/modules/data_catalog/services/portal-inventory.service.ts |
+| 404 | `NOT_FOUND` | Hallazgo no encontrado | Excepción explícita en src/modules/data_catalog/application/portal-inventory.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3346,7 +3346,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Mapa de operaciones con sus señales
 - **Operation ID:** `AdminPortalController_mapa`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminPortalController.mapa](../../src/modules/data_catalog/controllers/admin-portal.controller.ts)
+- **Implementación:** [AdminPortalController.mapa](../../src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts)
 
 ### Descripción de negocio
 
@@ -3501,7 +3501,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Buscar en el glosario
 - **Operation ID:** `AdminPortalController_glosario`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminPortalController.glosario](../../src/modules/data_catalog/controllers/admin-portal.controller.ts)
+- **Implementación:** [AdminPortalController.glosario](../../src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts)
 
 ### Descripción de negocio
 
@@ -3629,7 +3629,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Métricas del linaje de datos
 - **Operation ID:** `AdminPortalController_linaje`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminPortalController.linaje](../../src/modules/data_catalog/controllers/admin-portal.controller.ts)
+- **Implementación:** [AdminPortalController.linaje](../../src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts)
 
 ### Descripción de negocio
 
@@ -3746,7 +3746,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Linaje de una tabla
 - **Operation ID:** `AdminPortalController_linajeDeTabla`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminPortalController.linajeDeTabla](../../src/modules/data_catalog/controllers/admin-portal.controller.ts)
+- **Implementación:** [AdminPortalController.linajeDeTabla](../../src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts)
 
 ### Descripción de negocio
 
@@ -3845,7 +3845,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Tabla no encontrada en el linaje | Excepción explícita en src/modules/data_catalog/services/portal-inventory.service.ts |
+| 404 | `NOT_FOUND` | Tabla no encontrada en el linaje | Excepción explícita en src/modules/data_catalog/application/portal-inventory.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3870,7 +3870,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Listar las operaciones HTTP del sistema
 - **Operation ID:** `AdminPortalController_listarOperaciones`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminPortalController.listarOperaciones](../../src/modules/data_catalog/controllers/admin-portal.controller.ts)
+- **Implementación:** [AdminPortalController.listarOperaciones](../../src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts)
 
 ### Descripción de negocio
 
@@ -4033,7 +4033,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Ver la ficha de una operación
 - **Operation ID:** `AdminPortalController_detalleDeOperacion`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminPortalController.detalleDeOperacion](../../src/modules/data_catalog/controllers/admin-portal.controller.ts)
+- **Implementación:** [AdminPortalController.detalleDeOperacion](../../src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts)
 
 ### Descripción de negocio
 
@@ -4328,7 +4328,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Operación no encontrada en el inventario | Excepción explícita en src/modules/data_catalog/services/portal-inventory.service.ts |
+| 404 | `NOT_FOUND` | Operación no encontrada en el inventario | Excepción explícita en src/modules/data_catalog/application/portal-inventory.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4353,7 +4353,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Ver el árbol de decisión de una operación
 - **Operation ID:** `AdminPortalController_arbol`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminPortalController.arbol](../../src/modules/data_catalog/controllers/admin-portal.controller.ts)
+- **Implementación:** [AdminPortalController.arbol](../../src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts)
 
 ### Descripción de negocio
 
@@ -4458,8 +4458,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | La operación no tiene árbol de decisión | Excepción explícita en src/modules/data_catalog/services/portal-inventory.service.ts |
-| 404 | `NOT_FOUND` | Operación no encontrada en el inventario | Excepción explícita en src/modules/data_catalog/services/portal-inventory.service.ts |
+| 404 | `NOT_FOUND` | La operación no tiene árbol de decisión | Excepción explícita en src/modules/data_catalog/application/portal-inventory.service.ts |
+| 404 | `NOT_FOUND` | Operación no encontrada en el inventario | Excepción explícita en src/modules/data_catalog/application/portal-inventory.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4484,7 +4484,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Versión y tamaño del inventario publicado
 - **Operation ID:** `AdminPortalController_version`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AdminPortalController.version](../../src/modules/data_catalog/controllers/admin-portal.controller.ts)
+- **Implementación:** [AdminPortalController.version](../../src/modules/data_catalog/presentation/controllers/admin-portal.controller.ts)
 
 ### Descripción de negocio
 
@@ -4598,7 +4598,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Importa el inventario de la API a las tablas de operaciones y procesos (worker)
 - **Operation ID:** `InternalCatalogInventoryController_importInventory`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InternalCatalogInventoryController.importInventory](../../src/modules/data_catalog/controllers/internal-catalog.controller.ts)
+- **Implementación:** [InternalCatalogInventoryController.importInventory](../../src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -4753,7 +4753,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Sonda: reclama y ejecuta el siguiente escaneo (worker)
 - **Operation ID:** `InternalCatalogScansController_runNext`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InternalCatalogScansController.runNext](../../src/modules/data_catalog/controllers/internal-catalog.controller.ts)
+- **Implementación:** [InternalCatalogScansController.runNext](../../src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -4839,7 +4839,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | Ya hay un escaneo en curso de esta fuente | Excepción explícita en src/modules/data_catalog/services/catalog-scan.service.ts |
+| 409 | `CONFLICT` | Ya hay un escaneo en curso de esta fuente | Excepción explícita en src/modules/data_catalog/application/catalog-scan.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

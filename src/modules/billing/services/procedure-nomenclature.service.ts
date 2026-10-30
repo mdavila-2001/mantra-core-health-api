@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { decodeKeysetCursor, encodeKeysetCursor } from '../../../common';
+import {
+  containsPattern,
+  normalizeSearchText,
+  sqlSearchKey,
+} from '../../terminology/repositories/glossary-search.sql';
 import type {
   ProcedureNomenclatureItemDto,
   ProcedureNomenclatureResponseDto,
@@ -28,6 +33,48 @@ const PROP = {
 
 /** Entradas por página cuando el cliente no pide otra cosa. */
 const DEFAULT_LIMIT = 25;
+
+/** Separador de varias especialidades en un mismo filtro (`A|B` = A o B). */
+const SPECIALTY_SEPARATOR = '|';
+
+/** Tope de palabras que se consideran de `q`: acota el SQL que arma un texto largo. */
+const MAX_TOKENS = 8;
+
+/** Tope de especialidades alternativas en un filtro. */
+const MAX_SPECIALTIES = 50;
+
+/**
+ * Parte el texto libre en palabras comparables.
+ *
+ * Normaliza (sin tildes ni mayúsculas) y divide por espacios. Las palabras de
+ * un solo carácter se descartan —ruido: «de», «a» ya filtran poco y «a» sola
+ * coincide con casi todo— salvo que no quede ninguna más larga, para que
+ * buscar «x» siga devolviendo algo.
+ *
+ * @param query - Lo que escribió la persona.
+ * @returns Las palabras normalizadas, sin repetidas.
+ */
+function searchTokens(query: string): string[] {
+  const all = [
+    ...new Set(normalizeSearchText(query).split(/\s+/).filter(Boolean)),
+  ];
+  const long = all.filter((token) => [...token].length > 1);
+  return (long.length > 0 ? long : all).slice(0, MAX_TOKENS);
+}
+
+/**
+ * Parte el filtro de especialidad en sus alternativas normalizadas.
+ *
+ * @param specialty - Una o varias especialidades separadas por `|`.
+ * @returns Las alternativas sin tildes ni mayúsculas, sin vacías ni repetidas.
+ */
+function specialtyKeys(specialty: string): string[] {
+  const keys = specialty
+    .split(SPECIALTY_SEPARATOR)
+    .map((part) => normalizeSearchText(part))
+    .filter(Boolean);
+  return [...new Set(keys)].slice(0, MAX_SPECIALTIES);
+}
 
 /**
  * Lectura del nomenclador de procedimientos (`VS_BO_MEDICAL_PROCEDURE`).
@@ -106,9 +153,15 @@ export class ProcedureNomenclatureService {
    * @returns La página, con el cursor de la siguiente.
    */
   async search(options: {
-    /** Especialidad exacta, tal cual la publica el arancel. */
+    /**
+     * Especialidad del arancel; sin distinguir tildes ni mayúsculas. Admite
+     * varias separadas por `|` (basta que coincida una).
+     */
     specialty?: string;
-    /** Texto libre sobre el nombre del procedimiento. */
+    /**
+     * Texto libre. Se divide en palabras y **todas** deben aparecer, cada una
+     * en el nombre, el código, el grupo o la especialidad (sin tildes).
+     */
     query?: string;
     /** Cursor opaco devuelto por la página anterior. */
     cursor?: string;
@@ -124,21 +177,35 @@ export class ProcedureNomenclatureService {
     const conditions: string[] = ['c.code LIKE ?'];
     const params: unknown[] = [`${PREFIX}%`];
 
-    if (options.specialty !== undefined && options.specialty !== '') {
+    const specialties = specialtyKeys(options.specialty ?? '');
+    if (specialties.length > 0) {
       // La especialidad se compara contra la propiedad, no contra el código:
       // el código del arancel no la contiene de forma fiable.
       conditions.push(
         `EXISTS (SELECT 1 FROM terminology.concept_properties sp
                   WHERE sp.concept_id = c.id
                     AND sp.property_code = ?
-                    AND sp.value_json #>> '{}' = ?)`,
+                    AND ${sqlSearchKey("sp.value_json #>> '{}'")} IN (${specialties
+                      .map(() => '?')
+                      .join(', ')}))`,
       );
-      params.push(PROP.especialidad, options.specialty);
+      params.push(PROP.especialidad, ...specialties);
     }
 
-    if (options.query !== undefined && options.query.trim() !== '') {
-      conditions.push('c.display ILIKE ?');
-      params.push(`%${options.query.trim()}%`);
+    // AND entre palabras; cada una puede estar en el nombre, el código, el
+    // grupo o la especialidad. El nombre de muchas filas es genérico
+    // («General», «Cervical») y el contexto vive en las propiedades.
+    for (const token of searchTokens(options.query ?? '')) {
+      const pattern = containsPattern(token);
+      conditions.push(
+        `(${sqlSearchKey('c.display')} LIKE ?
+          OR ${sqlSearchKey('c.code')} LIKE ?
+          OR EXISTS (SELECT 1 FROM terminology.concept_properties tp
+                      WHERE tp.concept_id = c.id
+                        AND tp.property_code IN (?, ?)
+                        AND ${sqlSearchKey("tp.value_json #>> '{}'")} LIKE ?))`,
+      );
+      params.push(pattern, pattern, PROP.grupo, PROP.especialidad, pattern);
     }
 
     if (fromCode !== undefined) {

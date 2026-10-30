@@ -76,7 +76,7 @@ _Fuente: `src/modules/procedures_perioperative/README.md:117`_
 |  |  | POST /procedure-cases/{id}/confirm | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 9 |
 |  |  | POST /procedure-cases/{id}/findings | SURGEON · PERIOP_ADMIN | MEDIO | 4 |
 |  |  | POST /procedure-cases/{id}/operative-reports/{reportId}/sign | SURGEON · PERIOP_ADMIN | MEDIO | 7 |
-|  |  | POST /procedure-cases/{id}/preoperative-orders | ANESTHESIOLOGIST · SURGEON · PERIOP_ADMIN | MEDIO | 28 |
+|  |  | POST /procedure-cases/{id}/preoperative-orders | ANESTHESIOLOGIST · SURGEON · PERIOP_ADMIN | MEDIO | 30 |
 |  |  | POST /procedure-cases/{id}/specimens | SURGEON · PERIOP_NURSE · PERIOP_ADMIN | MEDIO | 2 |
 |  |  | GET /procedure-cases/{id}/team-members | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | BAJO | 2 |
 |  |  | POST /procedure-cases/{id}/team-members | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 8 |
@@ -285,7 +285,7 @@ flowchart LR
   a22(["SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN"]):::actor
   a38(["SURGEON · PERIOP_ADMIN"]):::actor
   a49(["ANESTHESIOLOGIST · SURGEON · PERIOP_ADMIN"]):::actor
-  a58(["SURGEON · PERIOP_NURSE · PERIOP_ADMIN"]):::actor
+  a59(["SURGEON · PERIOP_NURSE · PERIOP_ADMIN"]):::actor
   t3[("procedures_perioperative.pacu_assessments")]:::tabla
   t4[("procedures_perioperative.pacu_stays")]:::tabla
   t7[("procedures_perioperative.postoperative_followups")]:::tabla
@@ -316,21 +316,22 @@ flowchart LR
   t45[("procedures_perioperative.operative_reports")]:::tabla
   t46[("procedures_perioperative.procedure_case_milestones")]:::tabla
   t50[("billing.service_catalog")]:::tabla
-  t51[("clinical.diagnostic_reports")]:::tabla
-  t52[("clinical.encounters")]:::tabla
-  t53[("clinical.service_requests")]:::tabla
-  t54[("diagnostics.diagnostic_report_versions")]:::tabla
-  e56>"ServiceRequestPlaced"]:::evento
-  t59[("procedures_perioperative.procedure_specimens")]:::tabla
-  t64[("profiles.professional_credentials")]:::tabla
-  e67>"periop.case.team_participation_declined"]:::evento
+  t51[("chart.clinical_note_headers")]:::tabla
+  t52[("clinical.diagnostic_reports")]:::tabla
+  t53[("clinical.encounters")]:::tabla
+  t54[("clinical.service_request_notes")]:::tabla
+  t55[("clinical.service_requests")]:::tabla
+  e57>"ServiceRequestPlaced"]:::evento
+  t60[("procedures_perioperative.procedure_specimens")]:::tabla
+  t65[("profiles.professional_credentials")]:::tabla
+  e68>"periop.case.team_participation_declined"]:::evento
   t20[("+24 tablas más")]
   t28[("+2 tablas más")]
   t35[("+3 tablas más")]
   t47[("+1 tablas más")]
-  t55[("+22 tablas más")]
-  t62[("+2 tablas más")]
-  t66[("+1 tablas más")]
+  t56[("+24 tablas más")]
+  t63[("+2 tablas más")]
+  t67[("+1 tablas más")]
   subgraph s0["ctrl:PeriopController · Operaciones de PeriopController que el README no asigna…"]
     o1["POST /pacu-stays/{stayId}/assessments"]:::op
     o5["POST /pacu-stays/{stayId}/discharge"]:::op
@@ -342,11 +343,11 @@ flowchart LR
     o37["POST /procedure-cases/{id}/findings"]:::op
     o42["POST /procedure-cases/{id}/operative-reports/{reportId}/sign"]:::op
     o48["POST /procedure-cases/{id}/preoperative-orders"]:::op
-    o57["POST /procedure-cases/{id}/specimens"]:::op
-    o60["GET /procedure-cases/{id}/team-members"]:::op
-    o61["POST /procedure-cases/{id}/team-members"]:::op
-    o63["POST /procedure-cases/{id}/team-members/{memberId}/accept"]:::op
-    o65["POST /procedure-cases/{id}/team-members/{memberId}/respond"]:::op
+    o58["POST /procedure-cases/{id}/specimens"]:::op
+    o61["GET /procedure-cases/{id}/team-members"]:::op
+    o62["POST /procedure-cases/{id}/team-members"]:::op
+    o64["POST /procedure-cases/{id}/team-members/{memberId}/accept"]:::op
+    o66["POST /procedure-cases/{id}/team-members/{memberId}/respond"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -406,38 +407,38 @@ flowchart LR
   o48 -->|"LEE"| t50
   o48 -->|"LEE"| t51
   o48 -->|"LEE"| t52
-  o48 -->|"CREA"| t53
   o48 -->|"LEE"| t53
-  o48 -->|"LEE"| t54
-  o48 -.-> t55
-  o48 -->|"evento"| e56
-  a58 --> o57
-  o57 -->|"LEE"| t40
-  o57 -->|"CREA"| t59
-  a11 --> o60
-  o60 -->|"LEE"| t27
-  o60 -->|"LEE"| t12
-  a22 --> o61
-  o61 -->|"CREA"| t23
-  o61 -->|"CREA"| t24
-  o61 -->|"LEE"| t24
-  o61 -->|"CREA"| t26
-  o61 -->|"ACTUALIZA"| t27
-  o61 -->|"CREA"| t27
-  o61 -.-> t62
-  o61 -->|"evento"| e29
-  a11 --> o63
-  o63 -->|"LEE"| t27
-  o63 -->|"LEE"| t64
-  a11 --> o65
-  o65 -->|"CREA"| t33
-  o65 -->|"LEE"| t33
-  o65 -->|"LEE"| t34
-  o65 -->|"CREA"| t23
-  o65 -->|"CREA"| t24
-  o65 -->|"LEE"| t24
-  o65 -.-> t66
-  o65 -->|"evento"| e67
+  o48 -->|"CREA"| t54
+  o48 -->|"CREA"| t55
+  o48 -.-> t56
+  o48 -->|"evento"| e57
+  a59 --> o58
+  o58 -->|"LEE"| t40
+  o58 -->|"CREA"| t60
+  a11 --> o61
+  o61 -->|"LEE"| t27
+  o61 -->|"LEE"| t12
+  a22 --> o62
+  o62 -->|"CREA"| t23
+  o62 -->|"CREA"| t24
+  o62 -->|"LEE"| t24
+  o62 -->|"CREA"| t26
+  o62 -->|"ACTUALIZA"| t27
+  o62 -->|"CREA"| t27
+  o62 -.-> t63
+  o62 -->|"evento"| e29
+  a11 --> o64
+  o64 -->|"LEE"| t27
+  o64 -->|"LEE"| t65
+  a11 --> o66
+  o66 -->|"CREA"| t33
+  o66 -->|"LEE"| t33
+  o66 -->|"LEE"| t34
+  o66 -->|"CREA"| t23
+  o66 -->|"CREA"| t24
+  o66 -->|"LEE"| t24
+  o66 -.-> t67
+  o66 -->|"evento"| e68
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -2079,7 +2080,7 @@ Indicar una orden preoperatoria para el caso
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indique la orden por `serviceRequestId` o por `serviceRequestCodeConceptId`; PreconditionFailedException: El caso está cancelado; PreconditionFailedException: El modo de ejecutor no es válido; PreconditionFailedException: Si elige el paciente, la orden no lleva médico ni sede sugeridos; PreconditionFailedException: La orden necesita la sede sugerida; PreconditionFailedException: Si se recomienda un centro, la orden no lleva médico ejecutor; PreconditionFailedException: Si lo hace el médico, la orden necesita el médico ejecutor; PreconditionFailedException: El médico ejecutor debe ser quien pide la orden; PreconditionFailedException: La sede sugerida no ofrece ese procedimiento con precio; PreconditionFailedException: El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida; PreconditionFailedException: El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición; PreconditionFailedException: El informe previo indicado no coincide con el duplicado detectado; PreconditionFailedException: El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición; PreconditionFailedException: No se detectó ningún estudio duplicado para justificar |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indique la orden por `serviceRequestId` o por `serviceRequestCodeConceptId`; PreconditionFailedException: El caso está cancelado; PreconditionFailedException: La categoría indicada no corresponde al concepto de categoría; PreconditionFailedException: La nota médica citada no está disponible como motivo de esta orden; PreconditionFailedException: La nota médica citada pertenece a otra consulta; PreconditionFailedException: El modo de ejecutor no es válido; PreconditionFailedException: Si elige el paciente, la orden no lleva médico ni sede sugeridos; PreconditionFailedException: La orden necesita la sede sugerida; PreconditionFailedException: Si se recomienda un centro, la orden no lleva médico ejecutor; PreconditionFailedException: Si lo hace el médico, la orden necesita el médico ejecutor; PreconditionFailedException: El médico ejecutor debe ser quien pide la orden; PreconditionFailedException: La sede sugerida no ofrece ese procedimiento con precio; PreconditionFailedException: El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida; PreconditionFailedException: El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición; PreconditionFailedException: El informe previo indicado no coincide con el duplicado detectado; PreconditionFailedException: El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición; PreconditionFailedException: No se detectó ningún estudio duplicado para justificar |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -2101,137 +2102,137 @@ flowchart TD
   n7 -->|"sí"| n8
   n9["Llama a ServiceRequestsService.create"]:::llamada
   n7 -->|"no"| n9
-  n10["Transacción: transactional(…)"]:::transaccion
+  n10["Llama a ServiceRequestsService.resolveCategoryConceptId"]:::llamada
   n9 --> n10
-  n11["Llama a ServiceRequestsService.assertEncounterBelongsToPatient"]:::llamada
+  n11{"analysisCategoryOf(dto.categoryConceptId) !== dto.category"}:::decision
   n10 --> n11
-  n12["Llama a EncountersRepository.findById"]:::llamada
-  n11 --> n12
-  n13[("LEE clinical.encounters")]:::efecto
-  n12 --> n13
-  n14{"!encounter || encounter.patientProfileId !== dto.patientProfileId || encounter.tenantId !== dto.custodianTena…"}:::decision
+  n12(["422 PRECONDITION_FAILED La categoría indicada no corresponde al concepto de categoría"]):::error
+  n11 -->|"sí"| n12
+  n13["Transacción: transactional(…)"]:::transaccion
+  n11 -->|"no"| n13
+  n14["Llama a ServiceRequestsService.assertEncounterBelongsToPatient"]:::llamada
   n13 --> n14
-  n15(["404 NOT_FOUND Encuentro no encontrado"]):::error
-  n14 -->|"sí"| n15
-  n16{"dto.formInstanceId !== undefined"}:::decision
-  n14 -->|"no"| n16
-  n17["Llama a FormInstanceOriginValidator.assertUsableOrigin"]:::llamada
-  n16 -->|"sí"| n17
-  n18[("LEE forms.form_instances")]:::efecto
-  n17 --> n18
-  n19{"!instance"}:::decision
-  n18 --> n19
-  n20(["↩ (relanza el error capturado)"]):::error
+  n15["Llama a EncountersRepository.findById"]:::llamada
+  n14 --> n15
+  n16[("LEE clinical.encounters")]:::efecto
+  n15 --> n16
+  n17{"!encounter || encounter.patientProfileId !== dto.patientProfileId || encounter.tenantId !== dto.custodianTena…"}:::decision
+  n16 --> n17
+  n18(["404 NOT_FOUND Encuentro no encontrado"]):::error
+  n17 -->|"sí"| n18
+  n19{"basedOnNoteIds.length › 0"}:::decision
+  n17 -->|"no"| n19
+  n20["Llama a ServiceRequestNotesService.assertUsable"]:::llamada
   n19 -->|"sí"| n20
-  n21{"instance.stateConceptId !== FORMS.INSTANCE_CLOSED"}:::decision
-  n19 -->|"no"| n21
-  n22(["↩ (relanza el error capturado)"]):::error
-  n21 -->|"sí"| n22
-  n23{"encounterId && instance.resourceId !== encounterId"}:::decision
-  n21 -->|"no"| n23
-  n24(["↩ (relanza el error capturado)"]):::error
+  n21[("LEE chart.clinical_note_headers · LEE clinical.encounters")]:::efecto
+  n20 --> n21
+  n22["Repite: por cada const noteId de noteIds"]:::bucle
+  n21 --> n22
+  n23{"!usable"}:::decision
+  n22 -->|"cada elemento"| n23
+  n24(["422 PRECONDITION_FAILED La nota médica citada no está disponible como motivo de esta orden"]):::error
   n23 -->|"sí"| n24
-  n25["Llama a PerformerSelectionValidator.resolve"]:::llamada
+  n25{"encounterId && note.encounterId !== encounterId"}:::decision
   n23 -->|"no"| n25
-  n16 -->|"no"| n25
-  n26{"!mode"}:::decision
-  n25 --> n26
-  n27(["422 PRECONDITION_FAILED El modo de ejecutor no es válido"]):::error
-  n26 -->|"sí"| n27
-  n28{"mode === 'PATIENT_CHOICE'"}:::decision
-  n26 -->|"no"| n28
-  n29{"doctor !== undefined || suggestedPracticeSiteId !== undefined"}:::decision
-  n28 -->|"sí"| n29
-  n30(["422 PRECONDITION_FAILED Si elige el paciente, la orden no lleva médico ni sede sugeridos"]):::error
-  n29 -->|"sí"| n30
-  n31{"suggestedPracticeSiteId === undefined"}:::decision
-  n29 -->|"no"| n31
-  n28 -->|"no"| n31
-  n32(["422 PRECONDITION_FAILED La orden necesita la sede sugerida"]):::error
-  n31 -->|"sí"| n32
-  n33{"mode === 'ORGANIZATION'"}:::decision
-  n31 -->|"no"| n33
-  n34{"doctor !== undefined"}:::decision
-  n33 -->|"sí"| n34
-  n35(["422 PRECONDITION_FAILED Si se recomienda un centro, la orden no lleva médico ejecutor"]):::error
+  n26(["422 PRECONDITION_FAILED La nota médica citada pertenece a otra consulta"]):::error
+  n25 -->|"sí"| n26
+  n27{"dto.formInstanceId !== undefined"}:::decision
+  n25 -->|"no"| n27
+  n22 -->|"al terminar"| n27
+  n19 -->|"no"| n27
+  n28["Llama a FormInstanceOriginValidator.assertUsableOrigin"]:::llamada
+  n27 -->|"sí"| n28
+  n29[("LEE forms.form_instances")]:::efecto
+  n28 --> n29
+  n30{"!instance"}:::decision
+  n29 --> n30
+  n31(["↩ (relanza el error capturado)"]):::error
+  n30 -->|"sí"| n31
+  n32{"instance.stateConceptId !== FORMS.INSTANCE_CLOSED"}:::decision
+  n30 -->|"no"| n32
+  n33(["↩ (relanza el error capturado)"]):::error
+  n32 -->|"sí"| n33
+  n34{"encounterId && instance.resourceId !== encounterId"}:::decision
+  n32 -->|"no"| n34
+  n35(["↩ (relanza el error capturado)"]):::error
   n34 -->|"sí"| n35
-  n36{"doctor === undefined"}:::decision
-  n33 -->|"no"| n36
-  n37(["422 PRECONDITION_FAILED Si lo hace el médico, la orden necesita el médico ejecutor"]):::error
-  n36 -->|"sí"| n37
-  n38{"input.requesterProfileId === undefined || doctor !== input.requesterProfileId"}:::decision
-  n36 -->|"no"| n38
-  n39(["422 PRECONDITION_FAILED El médico ejecutor debe ser quien pide la orden"]):::error
-  n38 -->|"sí"| n39
-  n40["Llama a PerformerSiteDbReader.offersProcedureWithPrice"]:::llamada
-  n34 -->|"no"| n40
-  n38 -->|"no"| n40
-  n41[("LEE practice.practice_sites · LEE practice.healthcare_services · LEE billing.service_catalog")]:::efecto
-  n40 --> n41
-  n42{"!offered"}:::decision
-  n41 --> n42
-  n43(["422 PRECONDITION_FAILED La sede sugerida no ofrece ese procedimiento con precio"]):::error
+  n36["Llama a PerformerSelectionValidator.resolve"]:::llamada
+  n34 -->|"no"| n36
+  n27 -->|"no"| n36
+  n37{"!mode"}:::decision
+  n36 --> n37
+  n38(["422 PRECONDITION_FAILED El modo de ejecutor no es válido"]):::error
+  n37 -->|"sí"| n38
+  n39{"mode === 'PATIENT_CHOICE'"}:::decision
+  n37 -->|"no"| n39
+  n40{"doctor !== undefined || suggestedPracticeSiteId !== undefined"}:::decision
+  n39 -->|"sí"| n40
+  n41(["422 PRECONDITION_FAILED Si elige el paciente, la orden no lleva médico ni sede sugeridos"]):::error
+  n40 -->|"sí"| n41
+  n42{"suggestedPracticeSiteId === undefined"}:::decision
+  n40 -->|"no"| n42
+  n39 -->|"no"| n42
+  n43(["422 PRECONDITION_FAILED La orden necesita la sede sugerida"]):::error
   n42 -->|"sí"| n43
-  n44{"mode === 'SELF'"}:::decision
+  n44{"mode === 'ORGANIZATION'"}:::decision
   n42 -->|"no"| n44
-  n45["Llama a PerformerSiteDbReader.isActivelyAffiliated"]:::llamada
+  n45{"doctor !== undefined"}:::decision
   n44 -->|"sí"| n45
-  n46[("LEE practice.practitioner_role_assignments · LEE practice.healthcare_services")]:::efecto
-  n45 --> n46
-  n47{"!affiliated"}:::decision
-  n46 --> n47
-  n48(["422 PRECONDITION_FAILED El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida"]):::error
+  n46(["422 PRECONDITION_FAILED Si se recomienda un centro, la orden no lleva médico ejecutor"]):::error
+  n45 -->|"sí"| n46
+  n47{"doctor === undefined"}:::decision
+  n44 -->|"no"| n47
+  n48(["422 PRECONDITION_FAILED Si lo hace el médico, la orden necesita el médico ejecutor"]):::error
   n47 -->|"sí"| n48
-  n49["Llama a ServiceRequestsService.resolveDuplicateDecision"]:::llamada
+  n49{"input.requesterProfileId === undefined || doctor !== input.requesterProfileId"}:::decision
   n47 -->|"no"| n49
-  n44 -->|"no"| n49
-  n50["Llama a DuplicateStudyDetector.findDuplicate"]:::llamada
-  n49 --> n50
-  n51[("LEE clinical.diagnostic_reports · LEE diagnostics.diagnostic_report_versions · LEE clinical.service_requests…")]:::efecto
-  n50 --> n51
-  n52{"match"}:::decision
+  n50(["422 PRECONDITION_FAILED El médico ejecutor debe ser quien pide la orden"]):::error
+  n49 -->|"sí"| n50
+  n51["Llama a PerformerSiteDbReader.offersProcedureWithPrice"]:::llamada
+  n45 -->|"no"| n51
+  n49 -->|"no"| n51
+  n52[("LEE practice.practice_sites · LEE practice.healthcare_services · LEE billing.service_catalog")]:::efecto
   n51 --> n52
-  n53{"!dto.previousDiagnosticReportId"}:::decision
-  n52 -->|"sí"| n53
-  n54(["422 PRECONDITION_FAILED El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el info…"]):::error
+  n53{"!offered"}:::decision
+  n52 --> n53
+  n54(["422 PRECONDITION_FAILED La sede sugerida no ofrece ese procedimiento con precio"]):::error
   n53 -->|"sí"| n54
-  n55{"dto.previousDiagnosticReportId !== match.report.id"}:::decision
+  n55{"mode === 'SELF'"}:::decision
   n53 -->|"no"| n55
-  n56(["422 PRECONDITION_FAILED El informe previo indicado no coincide con el duplicado detectado"]):::error
+  n56["Llama a PerformerSiteDbReader.isActivelyAffiliated"]:::llamada
   n55 -->|"sí"| n56
-  n57{"!dto.previousDiagnosticReportId"}:::decision
-  n55 -->|"no"| n57
-  n52 -->|"no"| n57
-  n58["Llama a DuplicateStudyDetector.findActiveOrderWithoutReport"]:::llamada
-  n57 -->|"sí"| n58
-  n59[("LEE clinical.service_requests · LEE clinical.diagnostic_reports")]:::efecto
-  n58 --> n59
-  n60{"activa"}:::decision
-  n59 --> n60
-  n61{"dto.reusePreviousReport === true || dto.duplicateOverrideReason === undefined"}:::decision
-  n60 -->|"sí"| n61
-  n62(["422 PRECONDITION_FAILED El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justif…"]):::error
-  n61 -->|"sí"| n62
-  n63{"dto.previousDiagnosticReportId"}:::decision
-  n61 -->|"no"| n63
-  n60 -->|"no"| n63
-  n57 -->|"no"| n63
-  n64(["422 PRECONDITION_FAILED No se detectó ningún estudio duplicado para justificar"]):::error
+  n57[("LEE practice.practitioner_role_assignments · LEE practice.healthcare_services")]:::efecto
+  n56 --> n57
+  n58{"!affiliated"}:::decision
+  n57 --> n58
+  n59(["422 PRECONDITION_FAILED El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida"]):::error
+  n58 -->|"sí"| n59
+  n60["Llama a ServiceRequestsService.resolveDuplicateDecision"]:::llamada
+  n58 -->|"no"| n60
+  n55 -->|"no"| n60
+  n61["Llama a DuplicateStudyDetector.findDuplicate"]:::llamada
+  n60 --> n61
+  n62[("LEE clinical.diagnostic_reports · LEE diagnostics.diagnostic_report_versions · LEE clinical.service_requests…")]:::efecto
+  n61 --> n62
+  n63{"match"}:::decision
+  n62 --> n63
+  n64{"!dto.previousDiagnosticReportId"}:::decision
   n63 -->|"sí"| n64
-  n65["Llama a ServiceRequestsRepository.create"]:::llamada
-  n63 -->|"no"| n65
-  n66[("CREA clinical.service_requests")]:::efecto
-  n65 --> n66
-  n67["Llama a OutboxService.publishDomainEvent"]:::llamada
-  n66 --> n67
-  n68["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
-  n67 --> n68
-  n69["Transacción: startActiveSpan(…)"]:::transaccion
-  n68 --> n69
-  n70["Intenta"]:::intento
+  n65(["422 PRECONDITION_FAILED El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el info…"]):::error
+  n64 -->|"sí"| n65
+  n66{"dto.previousDiagnosticReportId !== match.report.id"}:::decision
+  n64 -->|"no"| n66
+  n67(["422 PRECONDITION_FAILED El informe previo indicado no coincide con el duplicado detectado"]):::error
+  n66 -->|"sí"| n67
+  n68{"!dto.previousDiagnosticReportId"}:::decision
+  n66 -->|"no"| n68
+  n63 -->|"no"| n68
+  n69["Llama a DuplicateStudyDetector.findActiveOrderWithoutReport"]:::llamada
+  n68 -->|"sí"| n69
+  n70[("LEE clinical.service_requests · LEE clinical.diagnostic_reports")]:::efecto
   n69 --> n70
-  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
-  n70 -->|"si falla"| n71
+  n71["… el resto del árbol (3 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

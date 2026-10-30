@@ -7,7 +7,10 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
-import { CommunityMessagingGateway } from './community-messaging.gateway';
+import {
+  CommunityMessagingGateway,
+  STAFF_GRANT_RECHECK_MS,
+} from './community-messaging.gateway';
 
 const user = { id: 'u1', roles: [] } as any;
 
@@ -16,6 +19,7 @@ function socket(rooms: string[] = [], profileIds: string[] = []) {
   const issuedToOther = mockFn();
   const client = {
     id: 's-1',
+    connected: true,
     rooms: new Set(rooms),
     data: { user, profileIds: new Set(profileIds) },
     join: mockFn(async (room: string) => {
@@ -52,7 +56,7 @@ function build() {
     ]),
   };
   const visibility = {
-    assertOwnProfile: mockFn().mockResolvedValue(undefined),
+    assertOwnMessagingProfile: mockFn().mockResolvedValue(undefined),
   };
   const presence = {
     markInLine: mockFn().mockResolvedValue(true),
@@ -60,7 +64,7 @@ function build() {
       new Date('2026-09-09T10:00:00Z'),
     ),
   };
-  const logger = { setContext: mockFn(), warn: mockFn() };
+  const logger = { setContext: mockFn(), warn: mockFn(), info: mockFn() };
   const gateway = new CommunityMessagingGateway(
     em as any,
     wsAuth as any,
@@ -79,6 +83,7 @@ function build() {
     conversationsRepo,
     presence,
     visibility,
+    logger,
   };
 }
 
@@ -176,7 +181,7 @@ describe('CommunityMessagingGateway', () => {
 
     it('un perfil ajeno no entra a la bandeja ni marca presencia', async () => {
       const d = build();
-      d.visibility.assertOwnProfile.mockRejectedValue(new Error('no'));
+      d.visibility.assertOwnMessagingProfile.mockRejectedValue(new Error('no'));
       const { client } = socket();
 
       await d.gateway.handleJoinInbox(client as any, { profileId: 'p-ajeno' });
@@ -271,6 +276,172 @@ describe('CommunityMessagingGateway', () => {
           [],
         ),
       ).not.toThrow();
+    });
+  });
+  describe('bandeja de organización: membresía revocable', () => {
+    /** Une un socket de personal a la bandeja y a un hilo de la farmacia. */
+    async function joinedAsStaff(d: ReturnType<typeof build>) {
+      d.visibility.assertOwnMessagingProfile.mockResolvedValue(
+        'ORGANIZATION_STAFF',
+      );
+      const { client } = socket();
+      await d.gateway.handleJoinInbox(client as any, {
+        profileId: 'p-farmacia',
+      });
+      await d.gateway.handleJoinConversation(client as any, {
+        conversationId: 'c-1',
+        profileId: 'p-farmacia',
+      });
+      return client;
+    }
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('al perder la membresía, el socket sale de la bandeja y de los hilos', async () => {
+      const d = build();
+      const client = await joinedAsStaff(d);
+      expect(client.rooms.has('profile:p-farmacia')).toBe(true);
+      expect(client.rooms.has('conversation:c-1')).toBe(true);
+
+      d.visibility.assertOwnMessagingProfile.mockRejectedValue(
+        new Error('sin membresía'),
+      );
+      await d.gateway.recheckStaffGrants(client as any);
+
+      expect(client.rooms.has('profile:p-farmacia')).toBe(false);
+      expect(client.rooms.has('conversation:c-1')).toBe(false);
+      expect(client.data.profileIds.has('p-farmacia')).toBe(false);
+      expect(client.emit).toHaveBeenCalledWith('error', {
+        code: 'NOT_OWN_PROFILE',
+        event: 'membership:recheck',
+        profileId: 'p-farmacia',
+      });
+      // Sin concesiones vivas, deja de revalidar.
+      expect((client.data as any).staffRecheck).toBeUndefined();
+    });
+
+    it('con la membresía vigente, conserva las salas', async () => {
+      const d = build();
+      const client = await joinedAsStaff(d);
+
+      await d.gateway.recheckStaffGrants(client as any);
+
+      expect(client.rooms.has('profile:p-farmacia')).toBe(true);
+      expect(client.rooms.has('conversation:c-1')).toBe(true);
+      expect(client.leave).not.toHaveBeenCalled();
+      await d.gateway.handleDisconnect(client as any);
+    });
+
+    it('la revalidación corre sola con el plazo, aunque el cliente no mande nada', async () => {
+      jest.useFakeTimers();
+      const d = build();
+      const client = await joinedAsStaff(d);
+      d.visibility.assertOwnMessagingProfile.mockRejectedValue(
+        new Error('membresía dada de baja'),
+      );
+
+      await jest.advanceTimersByTimeAsync(STAFF_GRANT_RECHECK_MS);
+
+      expect(client.leave).toHaveBeenCalledWith('profile:p-farmacia');
+      expect(client.leave).toHaveBeenCalledWith('conversation:c-1');
+    });
+
+    it('el titular no queda sujeto a revalidación', async () => {
+      const d = build();
+      d.visibility.assertOwnMessagingProfile.mockResolvedValue('HOLDER');
+      const { client } = socket();
+
+      await d.gateway.handleJoinInbox(client as any, { profileId: 'p-1' });
+
+      expect((client.data as any).staffGrants).toBeUndefined();
+      expect((client.data as any).staffRecheck).toBeUndefined();
+    });
+
+    it('desconectar detiene la revalidación', async () => {
+      jest.useFakeTimers();
+      const d = build();
+      const client = await joinedAsStaff(d);
+      await d.gateway.handleDisconnect(client as any);
+      d.visibility.assertOwnMessagingProfile.mockClear();
+
+      await jest.advanceTimersByTimeAsync(STAFF_GRANT_RECHECK_MS * 2);
+
+      expect(d.visibility.assertOwnMessagingProfile).not.toHaveBeenCalled();
+    });
+
+    it('una unión que termina después de desconectar no deja salas ni temporizador', async () => {
+      const d = build();
+      d.visibility.assertOwnMessagingProfile.mockImplementation(async () => {
+        // El socket se cae mientras se valida la membresía.
+        client.connected = false;
+        return 'ORGANIZATION_STAFF';
+      });
+      const { client } = socket();
+
+      await d.gateway.handleJoinInbox(client as any, {
+        profileId: 'p-farmacia',
+      });
+      await d.gateway.handleJoinConversation(client as any, {
+        conversationId: 'c-1',
+        profileId: 'p-farmacia',
+      });
+
+      expect(client.join).not.toHaveBeenCalled();
+      expect((client.data as any).staffGrants).toBeUndefined();
+      expect((client.data as any).staffRecheck).toBeUndefined();
+    });
+
+    it('la revalidación de un socket desconectado no consulta y se detiene', async () => {
+      const d = build();
+      const client = await joinedAsStaff(d);
+      client.connected = false;
+      d.visibility.assertOwnMessagingProfile.mockClear();
+
+      await d.gateway.recheckStaffGrants(client as any);
+
+      expect(d.visibility.assertOwnMessagingProfile).not.toHaveBeenCalled();
+      expect((client.data as any).staffRecheck).toBeUndefined();
+    });
+
+    it('un fallo inesperado de la revalidación se registra y no se escapa del temporizador', async () => {
+      jest.useFakeTimers();
+      const d = build();
+      const client = await joinedAsStaff(d);
+      // `leave` revienta durante la revocación: el rechazo no puede escapar.
+      d.visibility.assertOwnMessagingProfile.mockRejectedValue(new Error('no'));
+      client.leave.mockRejectedValue(new Error('adapter caído'));
+
+      await jest.advanceTimersByTimeAsync(STAFF_GRANT_RECHECK_MS);
+
+      expect(d.logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operation: 'community.gateway.staff-grant.recheck',
+        }),
+        expect.any(String),
+      );
+      await d.gateway.handleDisconnect(client as any);
+    });
+
+    it('dos vueltas no se solapan mientras la anterior espera a la base', async () => {
+      jest.useFakeTimers();
+      const d = build();
+      const client = await joinedAsStaff(d);
+      let release: () => void = () => undefined;
+      d.visibility.assertOwnMessagingProfile.mockClear();
+      d.visibility.assertOwnMessagingProfile.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            release = () => resolve('ORGANIZATION_STAFF');
+          }),
+      );
+
+      await jest.advanceTimersByTimeAsync(STAFF_GRANT_RECHECK_MS * 3);
+
+      expect(d.visibility.assertOwnMessagingProfile).toHaveBeenCalledTimes(1);
+      release();
+      await d.gateway.handleDisconnect(client as any);
     });
   });
 });

@@ -10,6 +10,8 @@ import {
   carrierProductId,
   declaredPlanSector,
 } from '../../../../common/seed/bolivia-insurance.catalog';
+import { CONCEPTS } from '../../../../common/constants/concepts';
+import { DIR } from '../../../directory/directory.concepts';
 import { INS } from '../../domain/insurance.concepts';
 import { InsuranceCatalogService } from './insurance-catalog.service';
 
@@ -28,7 +30,16 @@ function build(rows: {
   carriers: unknown[];
   products: unknown[];
   plans: unknown[];
+  /** Códigos de privadas que la consulta de cuenta devuelve (por defecto, todas las pedidas). */
+  withAccount?: string[];
 }) {
+  const execute = mockFn((sql: string, params: unknown[]) => {
+    const asked = params.slice(0, -7) as string[];
+    const keep = rows.withAccount
+      ? asked.filter((id) => rows.withAccount!.some((c) => carrierId(c) === id))
+      : asked;
+    return Promise.resolve(keep.map((id) => ({ id })));
+  });
   const find = mockFn((entity: { name: string }) => {
     if (entity.name === 'InsuranceCarriers')
       return Promise.resolve(rows.carriers);
@@ -36,8 +47,11 @@ function build(rows: {
       return Promise.resolve(rows.products);
     return Promise.resolve(rows.plans);
   });
-  const service = new InsuranceCatalogService({ find } as never);
-  return { service, find };
+  const service = new InsuranceCatalogService({
+    find,
+    getConnection: () => ({ execute }),
+  } as never);
+  return { service, find, execute };
 }
 
 /** Una aseguradora tal como la devuelve la base. */
@@ -129,6 +143,8 @@ describe('InsuranceCatalogService', () => {
     const d = build({ carriers: [], products: [], plans: [] });
 
     await d.service.listHealthCatalog();
+    // Las privadas con cuenta se resuelven en una sola consulta con `exists`.
+    expect(d.execute).toHaveBeenCalledTimes(1);
 
     const filter = d.find.mock.calls[0][1] as {
       id: { $in: string[] };
@@ -140,6 +156,87 @@ describe('InsuranceCatalogService', () => {
         BOLIVIA_PUBLIC_INSURERS.length,
     );
     expect(filter.statusConceptId).toBe(INS.CARRIER_ACTIVE);
+  });
+
+  describe('seguro privado sólo con cuenta registrada', () => {
+    it('ofrece la privada con cuenta y omite la que no la tiene', async () => {
+      const d = build({
+        carriers: [],
+        products: [],
+        plans: [],
+        withAccount: [BISA],
+      });
+
+      await d.service.listHealthCatalog();
+
+      const ids = (d.find.mock.calls[0][1] as { id: { $in: string[] } }).id.$in;
+      expect(ids).toContain(carrierId(BISA));
+      const sinCuenta = BOLIVIA_CARRIERS.find((c) => c.code !== BISA)!;
+      expect(ids).not.toContain(carrierId(sinCuenta.code));
+    });
+
+    it('no ofrece ninguna privada si ninguna tiene cuenta, pero sí las públicas', async () => {
+      const d = build({
+        carriers: [],
+        products: [],
+        plans: [],
+        withAccount: [],
+      });
+
+      await d.service.listHealthCatalog();
+
+      const ids = (d.find.mock.calls[0][1] as { id: { $in: string[] } }).id.$in;
+      expect(ids).toHaveLength(BOLIVIA_PUBLIC_INSURERS.length);
+      expect(ids).toContain(carrierId(CNS));
+    });
+
+    it('la consulta exige tenant activo, membresía OWNER/ADMIN vigente, usuario y credencial activos', async () => {
+      const d = build({ carriers: [], products: [], plans: [] });
+
+      await d.service.listHealthCatalog();
+
+      const [sql, params] = d.execute.mock.calls[0] as [string, unknown[]];
+      expect(sql).toContain('cr.tenant_id is not null');
+      expect(sql).toContain('t.status_concept_id = ?');
+      expect(sql).toContain('tm.status_concept_id = ?');
+      expect(sql).toContain('tm.tenant_role_concept_id in (?, ?)');
+      expect(sql).toContain('tm.start_date <= now()');
+      expect(sql).toContain('tm.end_date is null or tm.end_date > now()');
+      expect(sql).toContain('u.status_concept_id = ?');
+      expect(sql).toContain('ac.state_concept_id = ?');
+      expect(sql).toContain('ac.expires_at is null or ac.expires_at > now()');
+      expect(params.slice(-7)).toEqual([
+        INS.CARRIER_ACTIVE,
+        CONCEPTS.TENANT_ACTIVE,
+        DIR.MEMBERSHIP_ACTIVE,
+        DIR.ROLE_OWNER,
+        DIR.ROLE_ADMIN,
+        CONCEPTS.USER_ACTIVE,
+        CONCEPTS.STATE_ACTIVE,
+      ]);
+    });
+
+    it('una pública sin cuenta sigue apareciendo, con la misma forma de respuesta', async () => {
+      const d = build({
+        carriers: [carrierRow(CNS, 'CNS')],
+        products: [],
+        plans: [],
+        withAccount: [],
+      });
+
+      const { carriers } = await d.service.listHealthCatalog();
+
+      expect(carriers).toEqual([
+        {
+          id: carrierId(CNS),
+          code: CNS,
+          name: 'CNS S.A. - CNS',
+          legalName: 'CNS S.A.',
+          isPublic: true,
+          plans: [],
+        },
+      ]);
+    });
   });
 
   it('no consulta productos ni planes si no hay aseguradoras', async () => {

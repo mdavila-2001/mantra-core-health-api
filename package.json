@@ -23,7 +23,7 @@
     "proxy-addr@npm:^2.0.7": "2.0.8"
   },
   "scripts": {
-    "build": "nest build",
+    "build": "node scripts/with-heap.mjs nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "seed:boot": "nest start --entryFile seed-cli",
@@ -61,6 +61,8 @@
     "start:worker:qa_lab:dev": "nest start --watch --entryFile worker-qa_lab",
     "start:worker:community": "node dist/src/worker-community",
     "start:worker:community:dev": "nest start --watch --entryFile worker-community",
+    "start:worker:profiles": "node dist/src/worker-profiles",
+    "start:worker:profiles:dev": "nest start --watch --entryFile worker-profiles",
     "start:worker:read_models": "node dist/src/worker-read_models",
     "start:worker:read_models:dev": "nest start --watch --entryFile worker-read_models",
     "start:worker:reporting": "node dist/src/worker-reporting",

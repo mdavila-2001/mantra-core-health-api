@@ -37,6 +37,7 @@ import {
   PersonProfilesRepository,
   PatientProfilesRepository,
   PersonAccountLinksRepository,
+  PatientPrimaryPractitionersRepository,
   HealthPractitionerProfilesRepository,
   JurisdictionAuthorizationsRepository,
   ProfessionalCredentialsRepository,
@@ -47,6 +48,10 @@ import {
   PatientMergeEventsRepository,
   RelatedPersonsRepository,
   PatientPortalProxiesRepository,
+  PractitionerAdmissionsRepository,
+  PractitionerAdmissionEventsRepository,
+  PractitionerAdmissionReviewsRepository,
+  AdmissionRequirementsRepository,
 } from './infrastructure/repositories';
 import { ProfileOwnershipService } from './application/services';
 import { PatientRepresentationService } from './application/services/patient-representation.service';
@@ -72,11 +77,34 @@ import { PATIENT_ADDRESS_BOOK_PORT } from './application/ports/patient-address-b
 import { PatientAddressBookAdapter } from './infrastructure/adapters/patient-address-book.adapter';
 import { PatientAddressBookService } from './application/services/patient-address-book.service';
 import { PatientAddressBookController } from './presentation/controllers/patient-address-book.controller';
+import { PrimaryPractitionerService } from './application/services/primary-practitioner.service';
+import { PrimaryPractitionerController } from './presentation/controllers/primary-practitioner.controller';
 import { PersonRecordsAdapter } from './infrastructure/adapters/person-records.adapter';
 import { PATIENT_COVERAGES_PORT } from './application/ports/patient-coverages.port';
 import { PatientCoveragesAdapter } from './infrastructure/adapters/patient-coverages.adapter';
 import { ClinicalPatientHistoryAdapter } from './infrastructure/adapters/clinical-patient-history.adapter';
 import { CLINICAL_PATIENT_HISTORY_PORT } from './application/ports/clinical-patient-history.port';
+// Admisiones de profesionales (v4.2.67): la verificación del alta de médicos.
+// `CommunityModule` da el sello público (se concede al verificar y se baja al
+// suspender o vencer); no cierra ciclo: ya es alcanzable desde `DirectoryModule`.
+import { CommunityModule } from '../community/community.module';
+import { AdmissionsController } from './presentation/controllers/admissions.controller';
+import { OwnAdmissionController } from './presentation/controllers/own-admission.controller';
+import { ADMISSION_NOTICE_PORT } from './application/ports/admission-notice.port';
+import { ADMISSION_FOREIGN_READS_PORT } from './application/ports/admission-foreign-reads.port';
+import { ADMISSION_FILES_PORT } from './application/ports/admission-files.port';
+import { PUBLIC_VERIFICATION_SEAL_PORT } from './application/ports/public-verification-seal.port';
+import { AdmissionForeignReadsAdapter } from './infrastructure/adapters/admission-foreign-reads.adapter';
+import { AdmissionFilesAdapter } from './infrastructure/adapters/admission-files.adapter';
+import { CommunityVerificationSealAdapter } from './infrastructure/adapters/community-verification-seal.adapter';
+import { MessagingAdmissionNoticeAdapter } from './infrastructure/adapters/messaging-admission-notice.adapter';
+import { PractitionerAdmissionsService } from './application/services/practitioner-admissions.service';
+import { PractitionerAdmissionsReadService } from './application/services/practitioner-admissions-read.service';
+import { PractitionerVerificationReader } from './application/services/practitioner-verification-reader.service';
+import { PractitionerAdmissionChecklistService } from './application/services/practitioner-admission-checklist.service';
+import { PractitionerAdmissionEvidenceService } from './application/services/practitioner-admission-evidence.service';
+import { PractitionerAdmissionDocumentsService } from './application/services/practitioner-admission-documents.service';
+import { PractitionerVerificationProjector } from './application/services/practitioner-verification-projector.service';
 
 /**
  * Módulo Profiles (05): personas, pacientes y fuerza laboral de salud. Cubre alta
@@ -99,11 +127,17 @@ import { CLINICAL_PATIENT_HISTORY_PORT } from './application/ports/clinical-pati
     DirectoryModule,
     MessagingModule,
     InsuranceModule,
+    CommunityModule,
   ],
   controllers: [
+    // Las rutas `me` de la admisión van antes que las de `ProfilesPractitionersController`
+    // (`practitioners/:id/...`) para que `me` no se lea como un id.
+    OwnAdmissionController,
+    AdmissionsController,
     PractitionerSignatureAssetsController,
     ProfilesPatientsController,
     PatientAddressBookController,
+    PrimaryPractitionerController,
     ProfilesDependentRequestsController,
     ProfilesPractitionersController,
     TenantPractitionerRequestsController,
@@ -158,6 +192,7 @@ import { CLINICAL_PATIENT_HISTORY_PORT } from './application/ports/clinical-pati
     },
     PatientAddressBookService,
     PatientAddressBookAdapter,
+    PrimaryPractitionerService,
     {
       provide: PATIENT_ADDRESS_BOOK_PORT,
       useExisting: PatientAddressBookAdapter,
@@ -190,6 +225,32 @@ import { CLINICAL_PATIENT_HISTORY_PORT } from './application/ports/clinical-pati
     PatientMergeEventsRepository,
     RelatedPersonsRepository,
     PatientPortalProxiesRepository,
+    PatientPrimaryPractitionersRepository,
+    PractitionerAdmissionsRepository,
+    PractitionerAdmissionEventsRepository,
+    PractitionerAdmissionReviewsRepository,
+    AdmissionRequirementsRepository,
+    // Admisiones de profesionales: el único escritor de PRACT_VERIF_* es el proyector.
+    {
+      provide: ADMISSION_NOTICE_PORT,
+      useClass: MessagingAdmissionNoticeAdapter,
+    },
+    {
+      provide: ADMISSION_FOREIGN_READS_PORT,
+      useClass: AdmissionForeignReadsAdapter,
+    },
+    { provide: ADMISSION_FILES_PORT, useClass: AdmissionFilesAdapter },
+    {
+      provide: PUBLIC_VERIFICATION_SEAL_PORT,
+      useClass: CommunityVerificationSealAdapter,
+    },
+    PractitionerAdmissionEvidenceService,
+    PractitionerAdmissionChecklistService,
+    PractitionerVerificationProjector,
+    PractitionerAdmissionsReadService,
+    PractitionerVerificationReader,
+    PractitionerAdmissionsService,
+    PractitionerAdmissionDocumentsService,
     // Servicios
     ProfilesPatientsService,
     ProfilesPractitionersService,
@@ -230,6 +291,13 @@ import { CLINICAL_PATIENT_HISTORY_PORT } from './application/ports/clinical-pati
     // regla vive acá porque la representación es un dato de perfiles.
     PatientRepresentationService,
     PatientPortalProxiesRepository,
+    // El alta (iam), la verificación heredada de credenciales y el efecto de M27
+    // (identity_assurance) pasan por la admisión; los lectores de DTO de
+    // profesional (guía, ficha, buscador) piden el estado visible.
+    PractitionerAdmissionsService,
+    PractitionerAdmissionsReadService,
+    // El sello solo, para quien no puede importar este módulo (`community`).
+    PractitionerVerificationReader,
   ],
 })
 export class ProfilesModule {}
