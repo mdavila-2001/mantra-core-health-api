@@ -9,3 +9,8 @@ export * from './practitioner-sites.service';
 export * from './own-site-provisioning.service';
 export * from './practice-organization-read.service';
 export * from './practice-access.service';
+export * from './structure-access.service';
+export * from './care-spaces-admin.service';
+export * from './clinical-units-admin.service';
+export * from './site-establishment.service';
+export * from './infrastructure-read.service';

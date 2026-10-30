@@ -186,14 +186,14 @@ describe('PracticesController', () => {
 
 describe('SitesController', () => {
   it('delegates clinical unit and care space (UC-14-04/05)', async () => {
-    const structureService = {
-      createClinicalUnit: mockFn(),
-      createCareSpace: mockFn(),
-    };
+    const structureService = { createClinicalUnit: mockFn() };
+    // F1: el alta de espacios la hace `CareSpacesAdminService`.
+    const spacesAdmin = { create: mockFn() };
     const sitesService = { listCareSpaces: mockFn().mockResolvedValue([]) };
     const controller = new SitesController(
       structureService as any,
       sitesService as any,
+      spacesAdmin as any,
     );
     await runWithTenant('tenant-1', () =>
       controller.createClinicalUnit('s1', { code: 'U', name: 'N' }, actor),
@@ -207,7 +207,7 @@ describe('SitesController', () => {
     await runWithTenant('tenant-1', () =>
       controller.createCareSpace('s1', { code: 'C', name: 'N' }, actor),
     );
-    expect(structureService.createCareSpace).toHaveBeenCalledWith(
+    expect(spacesAdmin.create).toHaveBeenCalledWith(
       's1',
       { code: 'C', name: 'N' },
       actor,
@@ -216,18 +216,21 @@ describe('SitesController', () => {
   });
 
   it('sin tenant activo las escrituras de estructura fallan cerradas', () => {
-    const structureService = {
-      createClinicalUnit: mockFn(),
-      createCareSpace: mockFn(),
-    };
+    const structureService = { createClinicalUnit: mockFn() };
+    const spacesAdmin = { create: mockFn() };
     const controller = new SitesController(
       structureService as any,
       { listCareSpaces: mockFn() } as any,
+      spacesAdmin as any,
     );
     expect(() =>
       controller.createCareSpace('s1', { code: 'C', name: 'N' }, actor),
     ).toThrow();
-    expect(structureService.createCareSpace).not.toHaveBeenCalled();
+    expect(() =>
+      controller.createClinicalUnit('s1', { code: 'U', name: 'N' }, actor),
+    ).toThrow();
+    expect(spacesAdmin.create).not.toHaveBeenCalled();
+    expect(structureService.createClinicalUnit).not.toHaveBeenCalled();
   });
 });
 

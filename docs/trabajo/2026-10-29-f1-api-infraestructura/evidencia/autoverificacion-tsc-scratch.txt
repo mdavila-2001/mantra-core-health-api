@@ -1,0 +1,19 @@
+# AUTOVERIFICACIÓN FUERA DEL GATE (no es yarn typecheck)
+# deps: npm install --ignore-scripts de package.json SIN xlsx en scratch; tsc del repo con preserveSymlinks
+$ tsc -p <scratch>/tsconfig.json (src/**/*.ts)
+src/modules/terminology/import/xlsx-parser.spec.ts(4,23): error TS2307: Cannot find module 'xlsx' or its corresponding type declarations.
+src/modules/terminology/import/xlsx-parser.ts(10,23): error TS2307: Cannot find module 'xlsx' or its corresponding type declarations.
+src/modules/terminology/import/xlsx-parser.ts(11,44): error TS2307: Cannot find module 'xlsx' or its corresponding type declarations.
+src/modules/terminology/import/xlsx-parser.ts(110,42): error TS7006: Parameter 'record' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(110,50): error TS7006: Parameter 'recordIndex' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(128,33): error TS7006: Parameter 'cell' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(129,21): error TS7006: Parameter 'cell' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(129,27): error TS7006: Parameter 'index' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(139,24): error TS7006: Parameter 'column' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(154,39): error TS7006: Parameter 'record' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(154,47): error TS7006: Parameter 'index' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(155,25): error TS7006: Parameter 'cell' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(158,23): error TS7006: Parameter 'cell' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(158,29): error TS7006: Parameter 'indexColumn' implicitly has an 'any' type.
+src/modules/terminology/services/concept-file-import.service.spec.ts(13,23): error TS2307: Cannot find module 'xlsx' or its corresponding type declarations.
+EXIT=2

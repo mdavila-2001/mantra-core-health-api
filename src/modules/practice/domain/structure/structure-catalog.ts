@@ -307,8 +307,6 @@ export const PRACTICE_CONCEPT_BY_CODE: ReadonlyMap<string, ConceptRef> =
 /** Grupos de conceptos que el catálogo expone, por prefijo de código. */
 export const CONCEPT_GROUPS = {
   forms: 'LOC_FORM_',
-  lifecycle: 'SPACE_',
-  unitLifecycle: 'UNIT_',
   asepsis: 'ASEPSIS_',
   pressure: 'PRESSURE_',
   sex: 'SEX_',

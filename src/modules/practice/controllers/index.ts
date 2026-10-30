@@ -4,3 +4,7 @@ export * from './accreditations.controller';
 export * from './practitioner-sites.controller';
 export * from './role-assignments.controller';
 export * from './inventory-items.controller';
+export * from './care-spaces.controller';
+export * from './clinical-units.controller';
+export * from './site-infrastructure.controller';
+export * from './infrastructure-catalog.controller';

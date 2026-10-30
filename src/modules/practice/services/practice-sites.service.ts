@@ -31,7 +31,7 @@ import {
   StatusResultDto,
 } from '../dto';
 import { BranchesRepository } from '../../directory/repositories/branches.repository';
-import { TenantAdministrationService } from '../../directory/services/tenant-administration.service';
+import { StructureAccessService } from './structure-access.service';
 import { HistoryRepository } from '../../audit/repositories';
 import { AUD } from '../../audit/audit.concepts';
 import { appendStructureRevision } from './structure-history';
@@ -58,7 +58,7 @@ export class PracticeSitesService {
    * @param rolesRepo - Valor de roles repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
    * @param access - Alcance de lectura de un profesional.
-   * @param tenantAdmin - Regla de quién administra una organización (OWNER/ADMIN o plataforma).
+   * @param structureAccess - Quién administra la organización entera (OWNER, ADMIN de toda la org o plataforma; F1).
    * @param branchesRepo - Sucursales del directorio, para validar `branchId`.
    * @param historyRepo - Versionado append-only en `audit.*_history`.
    */
@@ -73,7 +73,7 @@ export class PracticeSitesService {
     private readonly serviceCatalogRepo: ServiceCatalogRepository,
     private readonly logger: PinoLogger,
     private readonly access: PracticeAccessService,
-    private readonly tenantAdmin: TenantAdministrationService,
+    private readonly structureAccess: StructureAccessService,
     private readonly branchesRepo: BranchesRepository,
     private readonly historyRepo: HistoryRepository,
   ) {
@@ -255,7 +255,11 @@ export class PracticeSitesService {
         throw new ResourceNotFoundException('Práctica no encontrada', {
           practiceId,
         });
-      await this.tenantAdmin.assertCanAdminister(tx, tenantId, actor);
+      await this.structureAccess.assertCanAdministerOrganization(
+        tx,
+        tenantId,
+        actor,
+      );
       if (practice.statusConceptId !== PRAC.PRACTICE_ACTIVE) {
         throw new PreconditionFailedException('La práctica no está activa', {
           practiceId,
@@ -360,7 +364,11 @@ export class PracticeSitesService {
           { practiceId, siteId },
         );
       }
-      await this.tenantAdmin.assertCanAdminister(tx, tenantId, actor);
+      await this.structureAccess.assertCanAdministerOrganization(
+        tx,
+        tenantId,
+        actor,
+      );
       if (site.statusConceptId === PRAC.SITE_RETIRED) {
         throw new ConflictException('El sitio ya está retirado', { siteId });
       }

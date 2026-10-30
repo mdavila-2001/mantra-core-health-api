@@ -8,6 +8,11 @@ import {
   PractitionerSitesController,
   RoleAssignmentsController,
   InventoryItemsController,
+  CareSpacesController,
+  ClinicalUnitsController,
+  SiteInfrastructureController,
+  InfrastructureCatalogController,
+  SiteLicensesController,
 } from './controllers';
 import {
   PracticeSitesService,
@@ -21,6 +26,11 @@ import {
   OwnSiteProvisioningService,
   PracticeOrganizationReadService,
   PracticeAccessService,
+  StructureAccessService,
+  CareSpacesAdminService,
+  ClinicalUnitsAdminService,
+  SiteEstablishmentService,
+  InfrastructureReadService,
 } from './services';
 import {
   PracticesRepository,
@@ -35,7 +45,19 @@ import {
   InventoryItemsRepository,
   InventoryMovementsRepository,
   PracticeOrganizationReadRepository,
+  StructureRulesRepository,
+  SpaceUnitAssignmentsRepository,
+  SiteDeclaredCapacitiesRepository,
+  RetireBlockersRepository,
 } from './repositories';
+// F1 infraestructura: las habilitaciones de la sede son
+// `organization_extensions.facility_licenses` (orden del orquestador, no una
+// tabla nueva). Mismo criterio que `ServiceCatalogRepository`: se registra el
+// repositorio sin estado, no el módulo (que no exporta nada).
+import { FacilityLicensesRepository } from '../organization_extensions/repositories/facility-licenses.repository';
+// Eventos `practice.*` por outbox, en la transacción de cada mutación.
+// `messaging` no importa `practice`: no cierra ciclo.
+import { MessagingModule } from '../messaging/messaging.module';
 import { ServiceCatalogRepository } from '../billing/repositories';
 // F0 infraestructura hospitalaria: la estructura (sede, unidad, espacio) se
 // autoriza con la regla de organización —OWNER/ADMIN del tenant o plataforma—
@@ -70,6 +92,7 @@ import {
     MikroOrmModule.forFeature(Object.values(entities)),
     DirectoryAuthorizationModule,
     AuditModule,
+    MessagingModule,
   ],
   controllers: [
     PracticesController,
@@ -78,6 +101,11 @@ import {
     PractitionerSitesController,
     RoleAssignmentsController,
     InventoryItemsController,
+    CareSpacesController,
+    ClinicalUnitsController,
+    SiteInfrastructureController,
+    InfrastructureCatalogController,
+    SiteLicensesController,
   ],
   providers: [
     // Repositorios
@@ -93,6 +121,11 @@ import {
     InventoryItemsRepository,
     InventoryMovementsRepository,
     PracticeOrganizationReadRepository,
+    StructureRulesRepository,
+    SpaceUnitAssignmentsRepository,
+    SiteDeclaredCapacitiesRepository,
+    RetireBlockersRepository,
+    FacilityLicensesRepository,
     // El catálogo de servicios es de `billing`, pero acá se registra la clase y
     // no se importa `BillingModule`: la dependencia entre los dos módulos ya va
     // en el otro sentido (billing → practice, por `PracticeTenantLookupService`)
@@ -117,6 +150,11 @@ import {
     OwnSiteProvisioningService,
     PracticeOrganizationReadService,
     PracticeAccessService,
+    StructureAccessService,
+    CareSpacesAdminService,
+    ClinicalUnitsAdminService,
+    SiteEstablishmentService,
+    InfrastructureReadService,
   ],
   // `scheduling` resuelve con esto la sede de cada recurso agendable: el dato
   // vive acá y no se duplica allá. `practice` no importa `scheduling`, así que

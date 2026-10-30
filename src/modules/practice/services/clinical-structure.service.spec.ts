@@ -27,7 +27,6 @@ const OTHER_TENANT = 'tenant-b';
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  // Por defecto la sede es de una práctica del tenant activo.
   const practicesRepo = {
     findById: mockFn().mockResolvedValue({ id: 'p1', tenantId: TENANT }),
   };
@@ -37,27 +36,33 @@ function build() {
     findBySite: mockFn().mockResolvedValue([]),
     create: mockFn(),
   };
-  const spacesRepo = {
-    findById: mockFn(),
-    findBySite: mockFn().mockResolvedValue([]),
-    create: mockFn(),
-  };
   const servicesRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const tenantAdmin = {
-    assertCanAdminister: mockFn().mockResolvedValue(undefined),
+  // F1: la pertenencia la resuelve `StructureAccessService` con el
+  // `tenant_id` de la sede; el doble reproduce su contrato (404 si la sede
+  // no es del tenant activo) sobre `sitesRepo`.
+  const access = {
+    requireSite: mockFn(async (_tx: any, siteId: string, tenantId: string) => {
+      const site = await sitesRepo.findById(_tx, siteId);
+      if (!site || site.tenantId !== tenantId) {
+        throw new ResourceNotFoundException('Sitio no encontrado', { siteId });
+      }
+      return site;
+    }),
+    assertCanWriteSite: mockFn().mockResolvedValue(undefined),
   };
   const historyRepo = { append: mockFn().mockResolvedValue(undefined) };
+  const outbox = { publishDomainEvent: mockFn().mockResolvedValue({}) };
   const service = new ClinicalStructureService(
     em as any,
     practicesRepo as any,
     sitesRepo as any,
-    unitsRepo,
-    spacesRepo,
+    unitsRepo as any,
     servicesRepo as any,
     logger as any,
-    tenantAdmin as any,
+    access as any,
     historyRepo as any,
+    outbox as any,
   );
   return {
     service,
@@ -65,16 +70,17 @@ function build() {
     practicesRepo,
     sitesRepo,
     unitsRepo,
-    spacesRepo,
     servicesRepo,
-    tenantAdmin,
+    access,
     historyRepo,
+    outbox,
   };
 }
 
 const activeSite = {
   id: 's1',
   practiceId: 'p1',
+  tenantId: TENANT,
   statusConceptId: PRAC.SITE_ACTIVE,
 };
 
@@ -116,6 +122,7 @@ describe('ClinicalStructureService', () => {
       const created = {
         id: 'u1',
         practiceSiteId: 's1',
+        tenantId: TENANT,
         code: 'U-1',
         statusConceptId: PRAC.UNIT_ACTIVE,
         createdAt: new Date(),
@@ -128,45 +135,6 @@ describe('ClinicalStructureService', () => {
         TENANT,
       );
       expect(res.status).toBe(PRAC.UNIT_ACTIVE);
-    });
-  });
-
-  describe('createCareSpace (UC-14-05)', () => {
-    it('rejects when the site is not active', async () => {
-      const d = build();
-      d.sitesRepo.findById.mockResolvedValue({
-        id: 's1',
-        statusConceptId: 'other',
-      });
-      await expect(
-        d.service.createCareSpace(
-          's1',
-          { code: 'C-1', name: 'Room' } as any,
-          actor,
-          TENANT,
-        ),
-      ).rejects.toBeInstanceOf(PreconditionFailedException);
-    });
-
-    it('creates an available space', async () => {
-      const d = build();
-      d.sitesRepo.findById.mockResolvedValue(activeSite);
-      const created = {
-        id: 'c1',
-        practiceSiteId: 's1',
-        code: 'C-1',
-        statusConceptId: PRAC.SPACE_ACTIVE,
-        operationalStatusConceptId: PRAC.SPACE_OP_AVAILABLE,
-        createdAt: new Date(),
-      };
-      d.spacesRepo.create.mockReturnValue(created);
-      const res = await d.service.createCareSpace(
-        's1',
-        { code: 'C-1', name: 'Room' },
-        actor,
-        TENANT,
-      );
-      expect(res.operationalStatus).toBe(PRAC.SPACE_OP_AVAILABLE);
     });
   });
 
@@ -186,28 +154,9 @@ describe('ClinicalStructureService', () => {
         created: {
           id: 'u1',
           practiceSiteId: 's1',
+          tenantId: TENANT,
           code: 'U-1',
           statusConceptId: PRAC.UNIT_ACTIVE,
-          createdAt: new Date(),
-        },
-      },
-      {
-        name: 'createCareSpace',
-        run: (d: ReturnType<typeof build>, tenantId: string) =>
-          d.service.createCareSpace(
-            's1',
-            { code: 'C-1', name: 'Room' } as any,
-            actor,
-            tenantId,
-          ),
-        repo: (d: ReturnType<typeof build>) => d.spacesRepo,
-        history: 'care_spaces',
-        created: {
-          id: 'c1',
-          practiceSiteId: 's1',
-          code: 'C-1',
-          statusConceptId: PRAC.SPACE_ACTIVE,
-          operationalStatusConceptId: PRAC.SPACE_OP_AVAILABLE,
           createdAt: new Date(),
         },
       },
@@ -217,32 +166,30 @@ describe('ClinicalStructureService', () => {
       describe(c.name, () => {
         it('sede de otro tenant: 404, sin autorizar ni crear', async () => {
           const d = build();
-          d.sitesRepo.findById.mockResolvedValue(activeSite);
-          d.practicesRepo.findById.mockResolvedValue({
-            id: 'p1',
+          d.sitesRepo.findById.mockResolvedValue({
+            ...activeSite,
             tenantId: OTHER_TENANT,
           });
           await expect(c.run(d, TENANT)).rejects.toBeInstanceOf(
             ResourceNotFoundException,
           );
-          expect(d.tenantAdmin.assertCanAdminister).not.toHaveBeenCalled();
+          expect(d.access.assertCanWriteSite).not.toHaveBeenCalled();
           expect(c.repo(d).create).not.toHaveBeenCalled();
         });
 
-        it('práctica de la sede inexistente: 404 (fail-closed)', async () => {
+        it('sede inexistente: 404 (fail-closed)', async () => {
           const d = build();
-          d.sitesRepo.findById.mockResolvedValue(activeSite);
-          d.practicesRepo.findById.mockResolvedValue(null);
+          d.sitesRepo.findById.mockResolvedValue(null);
           await expect(c.run(d, TENANT)).rejects.toBeInstanceOf(
             ResourceNotFoundException,
           );
           expect(c.repo(d).create).not.toHaveBeenCalled();
         });
 
-        it('sin ser OWNER/ADMIN del tenant: 403 y no crea', async () => {
+        it('sin administrar la org ni la sucursal: 403 y no crea', async () => {
           const d = build();
           d.sitesRepo.findById.mockResolvedValue(activeSite);
-          d.tenantAdmin.assertCanAdminister.mockRejectedValue(
+          d.access.assertCanWriteSite.mockRejectedValue(
             new ForbiddenException('no'),
           );
           await expect(c.run(d, TENANT)).rejects.toBeInstanceOf(
@@ -250,6 +197,7 @@ describe('ClinicalStructureService', () => {
           );
           expect(c.repo(d).create).not.toHaveBeenCalled();
           expect(d.historyRepo.append).not.toHaveBeenCalled();
+          expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
         });
 
         it('admin del tenant: crea, autoriza contra ese tenant y versiona', async () => {
@@ -257,10 +205,22 @@ describe('ClinicalStructureService', () => {
           d.sitesRepo.findById.mockResolvedValue(activeSite);
           c.repo(d).create.mockReturnValue(c.created);
           await c.run(d, TENANT);
-          expect(d.tenantAdmin.assertCanAdminister).toHaveBeenCalledWith(
+          expect(d.access.assertCanWriteSite).toHaveBeenCalledWith(
             d.tx,
-            TENANT,
+            activeSite,
             actor,
+          );
+          expect(c.repo(d).create).toHaveBeenCalledWith(
+            d.tx,
+            expect.objectContaining({ tenantId: TENANT }),
+          );
+          expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+            d.tx,
+            expect.objectContaining({
+              eventType: 'practice.clinical_unit.created',
+              tenantId: TENANT,
+              aggregateId: c.created.id,
+            }),
           );
           expect(d.historyRepo.append).toHaveBeenCalledWith(
             d.tx,
@@ -269,6 +229,7 @@ describe('ClinicalStructureService', () => {
             expect.objectContaining({
               operationConceptId: AUD.OPERATION_INSERT,
               changedByUserId: actor.id,
+              tenantId: TENANT,
               dataSnapshot: expect.objectContaining({ id: c.created.id }),
             }),
           );

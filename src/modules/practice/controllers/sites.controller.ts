@@ -8,7 +8,12 @@ import {
   ParseUUIDPipe,
   Post,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   Audited,
   CurrentUser,
@@ -16,12 +21,16 @@ import {
   requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
-import { ClinicalStructureService, PracticeSitesService } from '../services';
+import {
+  CareSpacesAdminService,
+  ClinicalStructureService,
+  PracticeSitesService,
+} from '../services';
 import {
   CreateClinicalUnitDto,
   CreateCareSpaceDto,
   ClinicalUnitResponseDto,
-  CareSpaceResponseDto,
+  CareSpaceDetailDto,
   CareSpaceSummaryDto,
 } from '../dto';
 
@@ -35,10 +44,12 @@ export class SitesController {
    *
    * @param structureService - Valor de structure service requerido por la operación.
    * @param sitesService - Lecturas de la estructura (prácticas, sedes, espacios).
+   * @param spacesAdmin - Árbol físico (F1): alta con reglas padre→hijo y tipología.
    */
   constructor(
     private readonly structureService: ClinicalStructureService,
     private readonly sitesService: PracticeSitesService,
+    private readonly spacesAdmin: CareSpacesAdminService,
   ) {}
 
   /**
@@ -94,7 +105,12 @@ export class SitesController {
     return this.sitesService.listCareSpaces(siteId, requireTenantId());
   }
 
-  /** UC-14-05. Misma autorización que `createClinicalUnit`. */
+  /**
+   * UC-14-05 extendido en F1 (contrato §3): forma, función, atributos y
+   * reglas; nace PLANNED salvo `activate`. Sin `formCode`/`functionCode`
+   * (clientes de F0) se comporta como antes: local genérico y ACTIVO.
+   * Autorización: admin de la organización o de la sucursal de la sede.
+   */
   @Audited({
     action: 'CARE_SPACE_CREATED',
     entity: 'care_space',
@@ -105,12 +121,13 @@ export class SitesController {
   @ApiOperation({
     summary: 'Crear un espacio de atención bajo una unidad/sitio',
   })
+  @ApiCreatedResponse({ type: CareSpaceDetailDto })
   createCareSpace(
     @Param('siteId', ParseUUIDPipe) siteId: string,
     @Body() dto: CreateCareSpaceDto,
     @CurrentUser() actor: AuthenticatedUser,
-  ): Promise<CareSpaceResponseDto> {
-    return this.structureService.createCareSpace(
+  ): Promise<CareSpaceDetailDto> {
+    return this.spacesAdmin.create(
       siteId,
       dto,
       actor,

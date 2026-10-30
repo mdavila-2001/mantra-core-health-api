@@ -26,6 +26,7 @@ import { VademecumSeedService } from './vademecum-seed.service';
 import { TerminologySeedService } from './terminology-seed.service';
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
 import { PracticeDefaultServicesSeedService } from './practice-default-services-seed.service';
+import { PracticeInfrastructureSeedService } from './practice-infrastructure-seed.service';
 import { PeopleSeedService } from './people-seed.service';
 import { DirectoryNetworksSeedService } from './directory-networks-seed.service';
 import { loadSeedBootEnv } from './seed-boot.env';
@@ -189,6 +190,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly providerAccounts: ProviderAccountsSeedService,
     private readonly clinicalForms: ClinicalFormsSeedService,
     private readonly practiceDefaultServices: PracticeDefaultServicesSeedService,
+    private readonly practiceInfrastructure: PracticeInfrastructureSeedService,
     private readonly people: PeopleSeedService,
     private readonly directoryNetworks: DirectoryNetworksSeedService,
     private readonly qaFlows: QaFlowsSeedService,
@@ -484,6 +486,16 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'directorio de redes de aseguradoras',
         kind: 'content',
         run: () => this.directoryNetworks.run(),
+      },
+      // F1 de infraestructura hospitalaria: reglas padre→hijo y de tipología
+      // (concept ids de `practice.concepts.ts`, que el catálogo acaba de
+      // materializar) y forma `LOC_FORM_ROOM` en los espacios anteriores. Es
+      // núcleo: sin reglas, toda alta de espacio que cuelgue de un padre
+      // responde 422 `SPACE_PARENT_RULE_VIOLATION`.
+      {
+        name: 'reglas de infraestructura hospitalaria',
+        kind: 'core',
+        run: () => this.practiceInfrastructure.run(),
       },
       // El último, y no por importancia: es el único paso que siembra **sobre
       // filas de negocio que ya existen** —una por práctica— en vez de

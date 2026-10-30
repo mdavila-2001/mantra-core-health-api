@@ -76,6 +76,7 @@ import {
 } from '../../modules/forms/entities';
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
 import { PracticeDefaultServicesSeedService } from './practice-default-services-seed.service';
+import { PracticeInfrastructureSeedService } from './practice-infrastructure-seed.service';
 import { PeopleSeedService } from './people-seed.service';
 import { DirectoryNetworksSeedService } from './directory-networks-seed.service';
 import { InsuranceModule } from '../../modules/insurance/insurance.module';
@@ -180,6 +181,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     SeedBootstrapService,
     ClinicalFormsSeedService,
     PracticeDefaultServicesSeedService,
+    PracticeInfrastructureSeedService,
     PeopleSeedService,
     DirectoryNetworksSeedService,
     StickerPackSeedService,
@@ -211,6 +213,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     ProviderAccountsSeedService,
     ClinicalFormsSeedService,
     PracticeDefaultServicesSeedService,
+    PracticeInfrastructureSeedService,
     PeopleSeedService,
     DirectoryNetworksSeedService,
     StickerPackSeedService,

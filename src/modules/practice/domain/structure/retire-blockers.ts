@@ -21,7 +21,7 @@ export type BlockerKind =
 export interface Blocker {
   readonly kind: BlockerKind;
   readonly count: number;
-  readonly sampleIds: readonly string[];
+  readonly sampleIds: string[];
   readonly nextAction: string;
 }
 

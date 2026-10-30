@@ -1,9 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { plainToInstance } from 'class-transformer';
-import { validateSync } from 'class-validator';
+import {
+  IsBoolean,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+  validateSync,
+} from 'class-validator';
 import { PinoLogger } from 'nestjs-pino';
-import { touch, type AuthenticatedUser } from '../../../common';
+import {
+  ResourceNotFoundException,
+  touch,
+  type AuthenticatedUser,
+} from '../../../common';
 import { AUD } from '../../audit/audit.concepts';
 import { HistoryRepository } from '../../audit/repositories';
 import { OutboxService } from '../../messaging/services/outbox.service';
@@ -37,7 +48,6 @@ import {
   type SpaceUnitAssignmentDto,
   type UpdateCareSpaceDto,
 } from '../dto';
-import { IsBoolean, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 import {
   PRACTICE_CONCEPT_BY_CODE,
   type FormCode,
@@ -678,7 +688,7 @@ export class CareSpacesAdminService {
       const { space, site } = await this.writableSpace(tx, spaceId, tenantId, actor, true);
       const assignment = await this.assignmentsRepo.findById(tx, assignmentId);
       if (!assignment || assignment.careSpaceId !== space.id || assignment.tenantId !== tenantId || assignment.validTo) {
-        throw new (await import('../../../common')).ResourceNotFoundException('Vínculo no encontrado', { assignmentId });
+        throw new ResourceNotFoundException('Vínculo no encontrado', { assignmentId });
       }
       assignment.validTo = new Date();
       touch(assignment, actor.id);
@@ -726,7 +736,7 @@ export class CareSpacesAdminService {
   private sameSiteSpace(siteSpaces: readonly CareSpaces[], id: string, field: string): CareSpaces {
     const found = siteSpaces.find((s) => s.id === id);
     if (!found) {
-      throw new ResourceNotFoundExceptionLazy('Espacio no encontrado', { [field]: id });
+      throw new ResourceNotFoundException('Espacio no encontrado', { [field]: id });
     }
     if (found.statusConceptId === PRAC.SPACE_RETIRED) {
       throw ruleException(PracticeErrorReason.PARENT_NOT_ACTIVE, { [field]: id, parentStatus: 'RETIRED' });
@@ -738,7 +748,7 @@ export class CareSpacesAdminService {
   private async sameSiteUnit(tx: EntityManager, site: PracticeSites, unitId: string): Promise<ClinicalUnits> {
     const unit = await this.unitsRepo.findById(tx, unitId);
     if (!unit || unit.practiceSiteId !== site.id || unit.tenantId !== site.tenantId) {
-      throw new ResourceNotFoundExceptionLazy('Unidad clínica no encontrada', { clinicalUnitId: unitId });
+      throw new ResourceNotFoundException('Unidad clínica no encontrada', { clinicalUnitId: unitId });
     }
     if (unit.statusConceptId === PRAC.UNIT_RETIRED) {
       throw ruleException(PracticeErrorReason.CROSS_SITE_REFERENCE, { clinicalUnitId: unitId, status: 'RETIRED' });
@@ -820,7 +830,7 @@ export class CareSpacesAdminService {
       formConceptId: formIdOf(data.formCode),
       spaceTypeConceptId: functionIdOf(data.functionCode)!,
       statusConceptId: SPACE_STATUS[data.target],
-      operationalStatusConceptId: op ?? (undefined as unknown as string),
+      operationalStatusConceptId: op ?? undefined,
       validFrom: data.target === 'ACTIVE' ? new Date() : undefined,
       capacity: a.capacity ?? undefined,
       description: a.description ?? undefined,
@@ -890,6 +900,3 @@ export class CareSpacesAdminService {
     return toSpaceDetail(space, [...others, space], assignments);
   }
 }
-
-/** Alias local para no repetir el import del barril en cada lanzamiento. */
-import { ResourceNotFoundException as ResourceNotFoundExceptionLazy } from '../../../common';

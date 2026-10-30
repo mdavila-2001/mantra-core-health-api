@@ -77,10 +77,10 @@ export enum PracticeErrorReason {
   SNIS_CODE_UNAVAILABLE = 'SNIS_CODE_UNAVAILABLE',
   /** No hay código SNIS declarado que verificar. */
   SNIS_CODE_MISSING = 'SNIS_CODE_MISSING',
+  /** Ya hay una habilitación del tenant con ese número de resolución. */
+  LICENSE_NUMBER_TAKEN = 'LICENSE_NUMBER_TAKEN',
   /** Estado de habilitación que `facility_licenses` no puede guardar. */
   LICENSE_STATUS_UNSUPPORTED = 'LICENSE_STATUS_UNSUPPORTED',
-  /** Sólo la plataforma decide la verificación de una habilitación. */
-  LICENSE_STATUS_PLATFORM_ONLY = 'LICENSE_STATUS_PLATFORM_ONLY',
 }
 
 /**

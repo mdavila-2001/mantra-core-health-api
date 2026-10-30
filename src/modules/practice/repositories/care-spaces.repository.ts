@@ -26,9 +26,10 @@ export interface CreateCareSpaceData {
    */
   statusConceptId: string;
   /**
-   * Identificador asociado a operational status concept.
+   * Identificador asociado a operational status concept. Nulo mientras el
+   * espacio está PLANNED (F1).
    */
-  operationalStatusConceptId: string;
+  operationalStatusConceptId?: string;
   /**
    * Identificador asociado a clinical unit.
    */
