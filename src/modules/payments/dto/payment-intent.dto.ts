@@ -13,6 +13,12 @@ import {
   BOUNDED_DECIMAL_MESSAGE,
   BOUNDED_DECIMAL_REGEX,
 } from '../services/payment-money';
+import {
+  GATEWAY_PAYMENT_METHOD_TYPES,
+  type GatewayNextAction,
+  type GatewayPaymentIntentStatus,
+  type GatewayPaymentMethodType,
+} from '../gateway/payments-gateway.types';
 
 /** Propósito del cobro; determina el `purpose_concept_id` del intent. */
 export type PaymentPurpose = 'INVOICE' | 'DEBT' | 'OTHER';
@@ -147,6 +153,18 @@ export class CreatePaymentIntentDto {
   @IsOptional()
   @IsISO8601()
   expiresAt?: string;
+
+  /**
+   * Medio de pago en la pasarela (sólo con `payments.via_gateway`).
+   */
+  @ApiPropertyOptional({
+    description:
+      'Medio de pago en la pasarela. Obligatorio sólo con `payments.via_gateway` encendido; sin el flag se ignora.',
+    enum: GATEWAY_PAYMENT_METHOD_TYPES,
+  })
+  @IsOptional()
+  @IsIn(GATEWAY_PAYMENT_METHOD_TYPES as readonly string[])
+  paymentMethodType?: GatewayPaymentMethodType;
 }
 
 /** Representación de un intent devuelta por la API. */
@@ -189,4 +207,52 @@ export class PaymentIntentResponseDto {
       'true si la petición reutilizó un intent ya existente (reintento idempotente)',
   })
   reused!: boolean;
+
+  /**
+   * Cobro creado en la pasarela; ausente en el camino previo.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Presente sólo cuando el cobro se creó por la pasarela (`payments.via_gateway`)',
+    type: () => PaymentIntentGatewayDto,
+  })
+  gateway?: PaymentIntentGatewayDto;
+}
+
+/** Cobro creado en la pasarela (sólo con `payments.via_gateway` encendido). */
+export class PaymentIntentGatewayDto {
+  /**
+   * Identificador del cobro en la pasarela.
+   */
+  @ApiProperty({
+    description: 'Identificador del cobro en la pasarela (`pi_…`)',
+  })
+  paymentIntentId!: string;
+
+  /**
+   * Estado del cobro en la pasarela.
+   */
+  @ApiProperty({
+    description: 'Estado del cobro en la pasarela',
+    enum: [
+      'requires_action',
+      'processing',
+      'succeeded',
+      'failed',
+      'canceled',
+      'expired',
+    ],
+  })
+  status!: GatewayPaymentIntentStatus;
+
+  /**
+   * Qué tiene que hacer el pagador, si hay algo pendiente.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Qué tiene que hacer el pagador: mostrar el QR, transferir con una referencia o ir al formulario del banco',
+    type: 'object',
+    additionalProperties: true,
+  })
+  nextAction?: GatewayNextAction;
 }
