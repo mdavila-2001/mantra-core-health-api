@@ -11,7 +11,6 @@ import {
   numericQuantity,
   recomputeAvailableQuantity,
 } from '../../domain/counting/stock-quantity';
-import { initialSiteQuantity } from '../../domain/site-availability/initial-quantity';
 import type { SiteScope } from '../scope/pharmacy-inventory-scope.policy';
 
 /** Código y nombre de la ubicación que se crea si la sede no tiene ninguna. */
@@ -47,18 +46,14 @@ export interface SiteStockWriteResult {
  * Escribe el stock de una sede por el libro de inventario, dentro de una
  * transacción **ya abierta** por el caso de uso que lo llama.
  *
- * La regla de disponibilidad (`domain/site-product-availability.ts`) pasa una
- * sede entera a «modo libro» en cuanto tiene una posición, y desde ese momento
- * un producto sin posición deja de estar disponible ahí. Por eso cada escritura
- * completa primero, en la misma transacción, la posición de cada producto no
- * retirado que falte, con lo que declara el catálogo: el primer cambio de una
- * sede la inicializa y ningún producto desaparece de rebote; los siguientes
- * cubren lo publicado después (D-06-3).
+ * Sólo escribe los productos que se le piden: la regla de disponibilidad
+ * (`domain/site-product-availability.ts`) decide por producto, y uno sin
+ * posición en la sede sigue lo que declara el catálogo (D-06-3).
  *
  * Cada cambio de existencia deja su asiento en `inventory_ledger_entries`. La
  * secuencia se pide una sola vez por escritura (bajo el candado por farmacia de
- * `LedgerRepository.nextSequence`) y se numera en memoria, así inicializar una
- * sede con cientos de productos no hace una lectura por asiento.
+ * `LedgerRepository.nextSequence`) y se numera en memoria, así sincronizar
+ * cientos de productos no hace una lectura por asiento.
  */
 @Injectable()
 export class SiteStockWriter {
@@ -75,41 +70,13 @@ export class SiteStockWriter {
     movement: SiteStockMovement,
   ): Promise<SiteStockWriteResult[]> {
     // Una escritura por sede a la vez: la tabla de posiciones no tiene índice
-    // único por ubicación-producto-lote, y dos inicializaciones simultáneas
-    // duplicarían posiciones.
+    // único por ubicación-producto-lote, y dos altas simultáneas del mismo
+    // producto duplicarían su posición.
     await tx.execute('select pg_advisory_xact_lock(hashtext(?))', [
       `pharmacy_inventory.site:${site.siteId}`,
     ]);
     const locationId = await this.defaultLocationId(tx, site, movement);
     const sequences = new SequenceBlock(tx, this.ledger, site.pharmacyId);
-
-    const missing = await this.positions.findProductsWithoutPositionInSite(
-      tx,
-      site.pharmacyId,
-      site.siteId,
-    );
-    for (const product of missing) {
-      const quantity = initialSiteQuantity(product);
-      const sequence = quantity === 0 ? '0' : await sequences.next();
-      if (quantity !== 0) {
-        this.append(tx, site, locationId, product.productId, {
-          sequence,
-          delta: quantity,
-          movement: {
-            ...movement,
-            movementTypeConceptId: PINV.MV_COUNT_ADJUSTMENT,
-          },
-        });
-      }
-      this.positions.create(tx, {
-        inventoryLocationId: locationId,
-        pharmacyProductId: product.productId,
-        onHandQuantity: String(quantity),
-        availableQuantity: String(quantity),
-        lastLedgerSequence: sequence,
-      });
-    }
-    if (missing.length > 0) await tx.flush();
 
     const results: SiteStockWriteResult[] = [];
     for (const target of targets) {
