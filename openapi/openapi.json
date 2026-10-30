@@ -123390,6 +123390,9 @@
             "type": "number",
             "nullable": true
           },
+          "outOfStockDeclared": {
+            "type": "boolean"
+          },
           "imageFileIds": {
             "type": "array",
             "items": {

@@ -43,8 +43,8 @@ function rejected(
  *
  * Resuelve farmacia → sede → producto dentro del ámbito del actor (lo ajeno y
  * lo inexistente responden el mismo 404), rechaza sin escribir lo que la sede
- * no puede decidir y escribe por `SiteStockWriter`, que inicializa la sede en
- * la misma transacción.
+ * no puede decidir y escribe por `SiteStockWriter` sólo ese producto: los demás
+ * siguen lo que declara el catálogo.
  */
 @Injectable()
 export class SetSiteProductAvailabilityUseCase {
