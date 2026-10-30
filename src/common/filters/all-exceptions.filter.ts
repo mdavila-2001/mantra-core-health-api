@@ -18,7 +18,7 @@ import type { Request, Response } from 'express';
 import { ErrorCode } from '../errors/error-codes';
 import { SystemErrorReason } from '../errors/system-error-reasons';
 import { SecretCipherError } from '../errors/secret-cipher.error';
-import { redactShareTokenInUrl } from '../../logging/pino-options';
+import { redactShareTokenInUrl } from '../../logging/share-token-redaction';
 import {
   APP_ATTR,
   TracingService,
@@ -146,6 +146,19 @@ function pathOf(request: { url?: string }): string {
 }
 
 /**
+ * El mismo registro con `message` redactado si lleva el token de un enlace
+ * compartido de receta. Lo usan el diagnóstico (`API_ERROR_DIAGNOSTICS`) y el
+ * `err` del log de un 5xx, que copian el mensaje de la excepción original.
+ */
+function withShareTokenSafeMessage<T extends { message?: unknown }>(
+  record: T,
+): T {
+  if (typeof record.message !== 'string') return record;
+  const message = redactShareTokenInUrl(record.message);
+  return message === record.message ? record : { ...record, message };
+}
+
+/**
  * El usuario autenticado de la petición, si lo hay.
  *
  * Lo deja `JwtAuthGuard` en `request.user`, que Express tipa como `any`; se lee
@@ -256,7 +269,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         {
           // Nunca `err: exception`: pino volcaría `detail`, parámetros y el SQL
           // con valores. Ver `safeErrorForLog`.
-          err: safeErrorForLog(exception, internals),
+          err: withShareTokenSafeMessage(safeErrorForLog(exception, internals)),
           code,
           reason,
           correlationId,
@@ -303,7 +316,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // Después de la censura de los 5xx a propósito: el diagnóstico es para
     // quien depura, y sólo existe con el interruptor encendido.
     if (errorDiagnosticsEnabled()) {
-      body.diagnostics = describeForDiagnostics(exception, internals);
+      body.diagnostics = withShareTokenSafeMessage(
+        describeForDiagnostics(exception, internals),
+      );
     }
 
     response.status(status).json(body);

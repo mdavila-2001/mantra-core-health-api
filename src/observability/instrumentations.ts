@@ -1,4 +1,5 @@
 import type { IncomingMessage } from 'node:http';
+import type { Attributes, SpanOptions, Tracer } from '@opentelemetry/api';
 import type { Instrumentation } from '@opentelemetry/instrumentation';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import {
@@ -10,6 +11,11 @@ import { PgInstrumentation } from '@opentelemetry/instrumentation-pg';
 import { IORedisInstrumentation } from '@opentelemetry/instrumentation-ioredis';
 import { MongoDBInstrumentation } from '@opentelemetry/instrumentation-mongodb';
 import { UndiciInstrumentation } from '@opentelemetry/instrumentation-undici';
+import {
+  ATTR_URL_FULL,
+  ATTR_URL_PATH,
+} from '@opentelemetry/semantic-conventions';
+import { redactShareTokenInUrl } from '../logging/share-token-redaction';
 import { EXCLUDED_HTTP_PATHS } from './telemetry.constants';
 
 /**
@@ -54,6 +60,63 @@ export function redisStatementSerializer(cmdName: string): string {
   return cmdName;
 }
 
+/**
+ * Atributos que pisan los del span HTTP de servidor antes de crearlo
+ * (`startIncomingSpanHook`: la instrumentación los mezcla al final, sobre los
+ * suyos). Si la ruta lleva el token de un enlace compartido de receta (S-6),
+ * `url.path` sale con `[token]`; si no, no se pisa nada. El nombre del span
+ * es el verbo y después la plantilla de la ruta (`…/:token`), y el token
+ * nunca viaja en el query: no hay otro atributo que lo lleve.
+ *
+ * @param request - Petición entrante.
+ * @returns `{ 'url.path': <ruta redactada> }`, o `{}`.
+ */
+export function shareTokenSafeIncomingAttributes(
+  request: IncomingMessage,
+): Attributes {
+  const path = (request.url ?? '').split('?')[0];
+  const redacted = redactShareTokenInUrl(path);
+  return redacted === path ? {} : { [ATTR_URL_PATH]: redacted };
+}
+
+/**
+ * Las opciones de un span con `url.full` redactado si lleva el token de un
+ * enlace compartido de receta.
+ *
+ * @param options - Opciones con las que se abre el span.
+ * @returns Las mismas opciones, o una copia con `url.full` redactado.
+ */
+export function withShareTokenSafeUrl(
+  options: SpanOptions | undefined,
+): SpanOptions | undefined {
+  const full = options?.attributes?.[ATTR_URL_FULL];
+  if (typeof full !== 'string') return options;
+  const redacted = redactShareTokenInUrl(full);
+  if (redacted === full) return options;
+  return {
+    ...options,
+    attributes: { ...options?.attributes, [ATTR_URL_FULL]: redacted },
+  };
+}
+
+/**
+ * `NestInstrumentation` escribe `url.full` con `req.originalUrl` en el span de
+ * cada handler y no ofrece ningún hook (0.67). Esta variante le da un tracer
+ * que redacta ese atributo antes de abrir el span; el resto de la
+ * instrumentación es la misma.
+ */
+class ShareTokenSafeNestInstrumentation extends NestInstrumentation {
+  protected override get tracer(): Tracer {
+    const tracer = super.tracer;
+    return {
+      startSpan: (name, options, context) =>
+        tracer.startSpan(name, withShareTokenSafeUrl(options), context),
+      // `NestInstrumentation` solo abre spans con `startSpan`.
+      startActiveSpan: tracer.startActiveSpan.bind(tracer),
+    };
+  }
+}
+
 /** Construye la lista de instrumentaciones activas. */
 export function buildInstrumentations(): Instrumentation[] {
   return [
@@ -67,6 +130,8 @@ export function buildInstrumentations(): Instrumentation[] {
       // cookies de sesión en el almacén de trazas.
       requireParentforOutgoingSpans: false,
       requireParentforIncomingSpans: false,
+      // El token de un enlace compartido de receta no llega a `url.path`.
+      startIncomingSpanHook: shareTokenSafeIncomingAttributes,
     }),
 
     new ExpressInstrumentation({
@@ -81,7 +146,7 @@ export function buildInstrumentations(): Instrumentation[] {
 
     // Aporta el controller y el handler concretos que atendieron la petición,
     // que es justo lo que Express por sí solo no sabe.
-    new NestInstrumentation(),
+    new ShareTokenSafeNestInstrumentation(),
 
     new PgInstrumentation({
       // `false` es el valor por defecto y se declara explícitamente porque aquí

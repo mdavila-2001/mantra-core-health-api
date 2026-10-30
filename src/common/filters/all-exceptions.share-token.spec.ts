@@ -15,6 +15,7 @@ import type { Request, Response } from 'express';
 import type { PinoLogger } from 'nestjs-pino';
 import type { TracingService } from '../../observability';
 import { ResourceNotFoundException } from '../errors/domain.exception';
+import { ERROR_DIAGNOSTICS_ENV } from './error-diagnostics';
 import { AllExceptionsFilter } from './all-exceptions.filter';
 
 /** Un token con la forma de los emitidos (43 caracteres base64url), sintético. */
@@ -162,6 +163,64 @@ describe('AllExceptionsFilter · token del enlace compartido de receta', () => {
     const exception = new HttpException('caído', HttpStatus.BAD_GATEWAY);
     filter.catch(exception, host);
     expect(tracing.recordException).toHaveBeenCalledWith(exception);
+  });
+});
+
+describe('AllExceptionsFilter · diagnóstico encendido (API_ERROR_DIAGNOSTICS)', () => {
+  const previous = process.env[ERROR_DIAGNOSTICS_ENV];
+
+  beforeEach(() => {
+    process.env[ERROR_DIAGNOSTICS_ENV] = 'true';
+  });
+
+  afterEach(() => {
+    if (previous === undefined) delete process.env[ERROR_DIAGNOSTICS_ENV];
+    else process.env[ERROR_DIAGNOSTICS_ENV] = previous;
+  });
+
+  it('diagnostics.message de un 404 de ruta sale con [token]', () => {
+    const url = `/public/prescription-shares/${TOKEN}`;
+    const { filter, host, response, logger } = build(url);
+    filter.catch(new NotFoundException(`Cannot GET ${url}`), host);
+
+    const body = response.json.mock.calls[0][0] as {
+      diagnostics?: { message?: string };
+    };
+    expect(body.diagnostics?.message).toBe(
+      'Cannot GET /public/prescription-shares/[token]',
+    );
+    expect(JSON.stringify(response.json.mock.calls)).not.toContain(TOKEN);
+    expect(everythingLogged(logger)).not.toContain(TOKEN);
+  });
+
+  it('el err.message del log y el diagnóstico de un 5xx salen con [token]', () => {
+    const url = `/clinical/prescription-shares/by-token/${TOKEN}`;
+    const { filter, host, response, logger } = build(url);
+    filter.catch(new Error(`fallo sintético en ${url}`), host);
+
+    const [fields] = logger.error.mock.calls[0] as [
+      { err: { message?: string } },
+    ];
+    expect(fields.err.message).toBe(
+      'fallo sintético en /clinical/prescription-shares/by-token/[token]',
+    );
+    const body = response.json.mock.calls[0][0] as {
+      diagnostics?: { message?: string };
+    };
+    expect(body.diagnostics?.message).toBe(
+      'fallo sintético en /clinical/prescription-shares/by-token/[token]',
+    );
+    expect(everythingLogged(logger)).not.toContain(TOKEN);
+    expect(JSON.stringify(response.json.mock.calls)).not.toContain(TOKEN);
+  });
+
+  it('un mensaje sin token queda igual', () => {
+    const { filter, host, response } = build('/iam/users');
+    filter.catch(new Error('fallo sintético'), host);
+    const body = response.json.mock.calls[0][0] as {
+      diagnostics?: { message?: string };
+    };
+    expect(body.diagnostics?.message).toBe('fallo sintético');
   });
 });
 
