@@ -110,6 +110,27 @@ savepoint, desde `ClinicalNotificationsService.serviceRequestPlaced`.
 |---|---|
 | `OrderPlaced` | `outbox.service.ts` |
 
+### `practice` (12 eventos)
+
+Agregados en F1 de infraestructura hospitalaria (2026-10-30); no entran en el
+recuento de la Fase 12 de arriba. Esquema en `asyncapi/asyncapi.yaml`
+(`PracticeStructureEvent`).
+
+| Evento | Servicio productor |
+|---|---|
+| `practice.care_space.created` | `care-spaces-admin.service.ts` |
+| `practice.care_space.updated` | `care-spaces-admin.service.ts` |
+| `practice.care_space.moved` | `care-spaces-admin.service.ts` |
+| `practice.care_space.lifecycle_changed` | `care-spaces-admin.service.ts` |
+| `practice.clinical_unit.created` | `clinical-structure.service.ts` |
+| `practice.clinical_unit.updated` | `clinical-units-admin.service.ts` |
+| `practice.clinical_unit.lifecycle_changed` | `clinical-units-admin.service.ts` |
+| `practice.site_license.created` | `site-establishment.service.ts` |
+| `practice.site_license.updated` | `site-establishment.service.ts` |
+| `practice.site.regulatory_updated` | `site-establishment.service.ts` |
+| `practice.site.snis_verified` | `site-establishment.service.ts` |
+| `practice.site.capacity_declared` | `site-establishment.service.ts` |
+
 ### `procedures_perioperative` (1 evento)
 
 | Evento | Servicio productor |

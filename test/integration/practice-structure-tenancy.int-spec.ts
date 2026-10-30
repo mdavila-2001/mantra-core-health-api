@@ -22,7 +22,8 @@ import { PROF } from '../../src/modules/profiles/profiles.concepts';
  *
  * - El OWNER de A crea sede, unidad y espacio en A (201) sin rol de plataforma.
  * - Desde A, la práctica y la sede de B responden 404, igual que una
- *   inexistente; y un `branchId` de B responde 422.
+ *   inexistente; y un `branchId` de B también 404 (F1, contrato §3: el 422 de
+ *   F0 confirmaba que el id existía).
  * - Cada alta deja su fila en `audit.audit_log` con la acción de negocio y su
  *   revisión en `audit.*_history`.
  */
@@ -165,7 +166,7 @@ describe('Practice · estructura aislada por tenant (F0)', () => {
     expect(rows[0].n).toBe(0);
   });
 
-  it('un branchId de B en una sede de A responde 422', async () => {
+  it('un branchId de B en una sede de A responde 404 (F1)', async () => {
     const branch = await http()
       .post(`/tenants/${orgB.tenantId}/branches`)
       .set(como(orgB))
@@ -179,7 +180,7 @@ describe('Practice · estructura aislada por tenant (F0)', () => {
         name: 'Con sucursal ajena',
         branchId: branch.body.id,
       })
-      .expect(422);
+      .expect(404);
   });
 
   it('desde A, unidad y espacio en la sede de B responden 404', async () => {

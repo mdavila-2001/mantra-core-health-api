@@ -35,6 +35,8 @@ channels:
     messages:
       domainEvent:
         $ref: '#/components/messages/DomainEvent'
+      practiceStructureEvent:
+        $ref: '#/components/messages/PracticeStructureEvent'
 
   outboxRelay:
     address: /internal/outbox/relay/run
@@ -132,6 +134,21 @@ components:
       payload:
         $ref: '#/components/schemas/DomainEventPayload'
 
+    PracticeStructureEvent:
+      name: PracticeStructureEvent
+      title: Evento de estructura del establecimiento (practice, F1)
+      summary: >
+        Cambios del árbol físico (care_spaces), del árbol organizativo
+        (clinical_units), de las habilitaciones (fachada sobre
+        organization_extensions.facility_licenses) y de los datos regulatorios
+        de la sede. Se publican en la misma transacción que el cambio
+        (src/modules/practice/services/structure-events.ts). El payload lleva
+        ids, códigos y la rowVersion resultante; nunca texto libre (el motivo
+        de un cambio de ciclo de vida queda en audit.*_history, el evento sólo
+        dice reasonProvided).
+      payload:
+        $ref: '#/components/schemas/PracticeStructureEventPayload'
+
     OutboxMessage:
       name: OutboxMessage
       title: Mensaje de outbox
@@ -224,3 +241,52 @@ components:
             Sin JSON Schema validado por tipo de evento en código
             (Record<string, unknown> en TypeScript) — objeto genérico aquí a
             propósito, no se fabrica un schema por evento sin evidencia.
+
+    PracticeStructureEventPayload:
+      type: object
+      required: [eventType, aggregateType, aggregateId, payloadJson]
+      properties:
+        eventType:
+          type: string
+          enum:
+            - practice.care_space.created
+            - practice.care_space.updated
+            - practice.care_space.moved
+            - practice.care_space.lifecycle_changed
+            - practice.clinical_unit.created
+            - practice.clinical_unit.updated
+            - practice.clinical_unit.lifecycle_changed
+            - practice.site_license.created
+            - practice.site_license.updated
+            - practice.site.regulatory_updated
+            - practice.site.snis_verified
+            - practice.site.capacity_declared
+        aggregateType:
+          type: string
+          enum:
+            - practice.care_spaces
+            - practice.clinical_units
+            - organization_extensions.facility_licenses
+            - practice.practice_sites
+        aggregateId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        payloadJson:
+          type: object
+          additionalProperties: true
+          description: >
+            Siempre `siteId`; según el evento, `spaceId`/`unitId`/`licenseId`,
+            `changes` (campos tocados), `parentId`/`fromParentId`/`toParentId`,
+            `action`/`from`/`to`/`reasonProvided` (ciclo de vida),
+            `assignmentId`/`op`/`roleCode` (vínculos espacio↔unidad),
+            `code`/`formCode`/`functionCode`/`statusCode` (altas) y
+            `rowVersion`.
+          properties:
+            siteId:
+              type: string
+              format: uuid
+            rowVersion:
+              type: integer
