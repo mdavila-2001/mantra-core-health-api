@@ -32,6 +32,9 @@ const ACTOR = 'usr-1';
  *
  * @returns Resultado de build.
  */
+/** Cuántas preguntas tiene la encuesta base de consulta. */
+const CONSULTATION_COUNT = SYSTEM_BASE_SURVEYS.CONSULTATION.questions.length;
+
 function build(store: { complete?: boolean; olderVersion?: any } = {}) {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const forked: any = {
@@ -110,19 +113,43 @@ describe('systemSurveyIds', () => {
 });
 
 describe('contenido de la encuesta base (banco de preguntas 28/10/2026)', () => {
-  it('consulta: 9 preguntas, las 8 primeras obligatorias y el comentario libre opcional', () => {
+  it('consulta (v2): 12 preguntas, obligatorias salvo la medicación y el comentario libre', () => {
     const { questions } = SYSTEM_BASE_SURVEYS.CONSULTATION;
-    expect(questions).toHaveLength(9);
-    expect(questions.slice(0, 8).every((q) => q.required)).toBe(true);
-    expect(questions[8]).toMatchObject({
-      position: 9,
+    expect(questions).toHaveLength(12);
+    expect(
+      questions.filter((q) => !q.required).map((q) => q.dimension),
+    ).toEqual(['revision_medicacion', 'comentario_abierto']);
+    expect(questions[11]).toMatchObject({
+      position: 12,
       answerType: 'TEXT',
       required: false,
       dimension: 'comentario_abierto',
     });
     expect(questions.map((q) => q.position)).toEqual([
-      1, 2, 3, 4, 5, 6, 7, 8, 9,
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
     ]);
+  });
+
+  it('v2 suma los ítems CAHPS con el enunciado oficial de CMS en castellano', () => {
+    const porDimension = (d: string) =>
+      SYSTEM_BASE_SURVEYS.CONSULTATION.questions.find((q) => q.dimension === d);
+    expect(SYSTEM_BASE_SURVEY_VERSION).toBe(2);
+    expect(porDimension('tiempo_suficiente')?.text).toContain(
+      'pasó suficiente tiempo con usted',
+    );
+    expect(porDimension('inquietudes_resueltas')?.text).toContain(
+      'todas sus inquietudes o preguntas habían sido contestadas del todo',
+    );
+    expect(porDimension('revision_medicacion')).toMatchObject({
+      text: '¿Hablaron usted y el profesional sobre todas las medicinas recetadas que estaba tomando?',
+      answerType: 'SINGLE_CHOICE',
+      options: [
+        'Sí, definitivamente',
+        'Sí, hasta cierto punto',
+        'No',
+        'No estoy tomando medicinas recetadas',
+      ],
+    });
   });
 
   it('servicio: 7 preguntas, todas opcionales', () => {
@@ -165,10 +192,12 @@ describe('contenido de la encuesta base (banco de preguntas 28/10/2026)', () => 
     expect(c.questions[0].text).toBe(
       '¿Qué tan fácil le resultó tener esta consulta, desde pedir la cita hasta que comenzó la atención? (1 = Muy difícil, 5 = Muy fácil)',
     );
-    expect(c.questions[7].text).toBe(
+    // Los enunciados de la v1 siguen idénticos en la v2: el resumen agrupa el
+    // histórico por texto.
+    expect(c.questions[10].text).toBe(
       '¿Qué tan probable es que usted recomiende a este profesional a un familiar o a un amigo que necesite una atención parecida? (0 = Nada probable, 10 = Totalmente probable)',
     );
-    expect(c.questions[8].text).toBe(
+    expect(c.questions[11].text).toBe(
       'Si lo desea, cuéntenos qué podríamos hacer mejor.',
     );
     const s = SYSTEM_BASE_SURVEYS.SERVICE;
@@ -204,7 +233,7 @@ describe('SurveysSystemTemplatesService.ensureSystemTemplate', () => {
     expect(d.templatesRepo.createTemplate).not.toHaveBeenCalled();
   });
 
-  it('en un tenant sin base crea plantilla de sistema, versión publicada, 9 preguntas y asignación', async () => {
+  it('en un tenant sin base crea plantilla de sistema, versión publicada, todas las preguntas y asignación', async () => {
     const d = build();
     // Tras materializar, la segunda lectura ya la ve completa.
     d.templatesRepo.findVersionById
@@ -219,7 +248,7 @@ describe('SurveysSystemTemplatesService.ensureSystemTemplate', () => {
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce(null)
       .mockResolvedValue({ id: d.ids.assignmentId });
-    d.templatesRepo.countQuestions.mockResolvedValue(9);
+    d.templatesRepo.countQuestions.mockResolvedValue(CONSULTATION_COUNT);
 
     const res = await d.service.ensureSystemTemplate(
       TENANT,
@@ -253,13 +282,19 @@ describe('SurveysSystemTemplatesService.ensureSystemTemplate', () => {
       }),
     );
 
-    expect(d.templatesRepo.createQuestion).toHaveBeenCalledTimes(9);
+    expect(d.templatesRepo.createQuestion).toHaveBeenCalledTimes(
+      CONSULTATION_COUNT,
+    );
     const questions = d.templatesRepo.createQuestion.mock.calls.map(
       ([, data]: [unknown, any]) => data,
     );
     expect(questions.map((q: any) => q.id)).toEqual(
-      Array.from({ length: 9 }, (_, i) => d.ids.questionId(i + 1)),
+      Array.from({ length: CONSULTATION_COUNT }, (_, i) =>
+        d.ids.questionId(i + 1),
+      ),
     );
+    // Cada pregunta se materializa con la obligatoriedad de la definición:
+    // todas salvo la medicación (posición 8) y el comentario libre (12).
     expect(questions.map((q: any) => q.required)).toEqual([
       true,
       true,
@@ -268,10 +303,13 @@ describe('SurveysSystemTemplatesService.ensureSystemTemplate', () => {
       true,
       true,
       true,
+      false,
+      true,
+      true,
       true,
       false,
     ]);
-    expect(questions[7]).toMatchObject({
+    expect(questions[10]).toMatchObject({
       answerTypeConceptId: ANSWER_TYPE_BY_CODE.SCALE,
       scaleMin: 0,
       scaleMax: 10,
@@ -335,7 +373,7 @@ describe('SurveysSystemTemplatesService.ensureSystemTemplate', () => {
       description: 'x',
     });
     d.templatesRepo.findQuestionById.mockResolvedValue({ id: 'q' });
-    d.templatesRepo.countQuestions.mockResolvedValue(9);
+    d.templatesRepo.countQuestions.mockResolvedValue(CONSULTATION_COUNT);
     d.templatesRepo.findVersionById
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce({ id: d.ids.versionId })
@@ -380,7 +418,7 @@ describe('SurveysSystemTemplatesService.ensureSystemTemplate', () => {
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce(null)
       .mockResolvedValue({ id: d.ids.assignmentId });
-    d.templatesRepo.countQuestions.mockResolvedValue(9);
+    d.templatesRepo.countQuestions.mockResolvedValue(CONSULTATION_COUNT);
 
     await d.service.ensureSystemTemplate(TENANT, 'CONSULTATION', ACTOR);
 
@@ -405,7 +443,7 @@ describe('SurveysSystemTemplatesService.ensureSystemTemplate', () => {
     d.assignmentsRepo.findById
       .mockResolvedValueOnce(null)
       .mockResolvedValue({ id: d.ids.assignmentId });
-    d.templatesRepo.countQuestions.mockResolvedValue(9);
+    d.templatesRepo.countQuestions.mockResolvedValue(CONSULTATION_COUNT);
 
     const res = await d.service.ensureSystemTemplate(
       TENANT,

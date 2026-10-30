@@ -133,8 +133,13 @@ Es un riesgo residual aceptado.
 
 - **Hay una encuesta base del sistema, y es de todos.** ALOVIDA define en código
   (`surveys.base-definitions.ts`, constante versionada) dos instrumentos: la de
-  *consulta* (9 preguntas; las 8 primeras obligatorias, el comentario final libre y
-  opcional) y la de *servicio* (7 preguntas, todas opcionales). Se materializan de
+  *consulta* (12 preguntas en la versión 2; obligatorias todas salvo la revisión de
+  la medicación y el comentario final libre) y la de *servicio* (7 preguntas, todas
+  opcionales). La versión 2 (29/10/2026) suma a la consulta tres ítems del núcleo
+  CAHPS —tiempo suficiente, inquietudes contestadas y revisión de la medicación—
+  con el enunciado de la traducción oficial al castellano de CMS (Medicare CAHPS,
+  OMB 0938-0732, dominio público); los enunciados de la versión 1 no cambian para
+  que el resumen siga agrupando el histórico. Se materializan de
   forma perezosa e idempotente en cada tenant, con ids deterministas
   (`SurveysSystemTemplatesService.ensureSystemTemplate`): una plantilla sin
   profesional dueño (dueño tipado `SYSTEM_BASE_CONSULTATION` / `SYSTEM_BASE_SERVICE`,

@@ -62,7 +62,172 @@ const ALARMA_OBSTETRICA = [
   'Ninguno',
 ];
 
+/**
+ * Cómo termina una cita: es lo que decide si hace falta fecha de control,
+ * referencia o nada más.
+ */
+const DESTINO_DE_LA_CITA = [
+  'Alta, sin control',
+  'Control programado',
+  'Referencia a otro establecimiento',
+  'Derivación a emergencia',
+  'Internación',
+];
+
 export const OTRAS = {
+  /*
+   * La ficha por defecto de toda cita: lo que se registra en cualquier consulta
+   * ambulatoria, de cualquier especialidad, en el orden en que pasa (SOAP de la
+   * NT 022). Es corta a propósito —motivo, lo imprescindible para no dañar
+   * (alergias, medicación, embarazo), signos vitales, examen dirigido,
+   * diagnóstico y plan—: lo propio de cada especialidad está en su ficha base.
+   */
+  TRANSV_CITA_MEDICA: () => [
+    seccion('Datos de la cita', [
+      obl(
+        una('tipo_de_consulta', 'Tipo de consulta', [
+          'Primera vez',
+          'Control o seguimiento',
+          'Reconsulta por el mismo problema',
+          'Consulta de urgencia',
+        ]),
+      ),
+      obl(
+        una('modalidad', 'Modalidad', [
+          'Presencial',
+          'Telemedicina (videollamada)',
+          'Visita domiciliaria',
+        ]),
+      ),
+      una('quien_informa', '¿Quién da la información?', [
+        'El paciente',
+        'Un familiar o acompañante',
+        'El paciente y su acompañante',
+      ]),
+      ...si(
+        'quien_informa',
+        ['Un familiar o acompañante', 'El paciente y su acompañante'],
+        [
+          s('acompanante_parentesco', 'Parentesco o relación del acompañante', {
+            ayuda: 'Por ejemplo: madre, hijo, cuidador.',
+          }),
+        ],
+      ),
+    ]),
+    seccion('Motivo de consulta', [
+      motivo({ relato: 'enfermedad_actual' }),
+      b('tiene_dolor', '¿Tiene dolor?'),
+      ...si('tiene_dolor', true, [
+        s('dolor_localizacion', 'Dolor — ¿dónde se localiza?', { req: true }),
+        i('dolor_intensidad', 'Dolor — intensidad (0 a 10, escala numérica)', {
+          req: true,
+          ayuda: '0 = sin dolor; 10 = el peor dolor imaginable.',
+        }),
+      ]),
+    ]),
+    seccion('Antecedentes relevantes', [
+      antecedentes(),
+      alergias(),
+      medicacion(),
+      una(
+        'embarazo_posible',
+        '¿Está embarazada o podría estarlo?',
+        ['No', 'Sí', 'No sabe', 'No corresponde'],
+        {
+          ayuda:
+            'Antes de indicar medicamentos o estudios con radiación. «No corresponde»: varón o fuera de la edad fértil.',
+        },
+      ),
+      ...si('embarazo_posible', 'Sí', [
+        i('semanas_de_gestacion', 'Semanas de gestación', { req: true }),
+      ]),
+    ]),
+    seccion('Signos vitales', [vitales({}, ['pas', 'pad', 'fc'])]),
+    seccion('Examen físico', [
+      una('estado_general', 'Estado general', ['Bueno', 'Regular', 'Malo']),
+      obl(
+        t('examen_fisico_dirigido', 'Examen físico dirigido', {
+          ayuda:
+            'Lo explorado según el motivo de consulta: hallazgos positivos y negativos relevantes.',
+        }),
+      ),
+    ]),
+    seccion('Diagnóstico', [
+      obl(t('diagnostico', 'Diagnóstico (con código CIE-10 si se conoce)')),
+      obl(
+        una(
+          'tipo_de_diagnostico',
+          'Tipo de diagnóstico',
+          ['Presuntivo', 'Definitivo', 'Repetido (ya registrado antes)'],
+          { ayuda: 'Clasificación P / D / R de la NT 022.' },
+        ),
+      ),
+      t('diagnosticos_secundarios', 'Otros diagnósticos o problemas activos'),
+    ]),
+    seccion('Plan e indicaciones', [
+      t('tratamiento_indicado', 'Tratamiento indicado', {
+        ayuda:
+          'Medicamento, dosis, vía, frecuencia y duración; o medidas no farmacológicas.',
+      }),
+      varias(
+        'examenes_solicitados',
+        'Exámenes solicitados',
+        [
+          'Laboratorio',
+          'Imagenología',
+          'Electrocardiograma',
+          'Anatomía patológica',
+          'Ninguno',
+        ],
+        { otro: true },
+      ),
+      ...si(
+        'examenes_solicitados',
+        [
+          'Laboratorio',
+          'Imagenología',
+          'Electrocardiograma',
+          'Anatomía patológica',
+        ],
+        [t('examenes_detalle', '¿Cuáles?', { req: true })],
+      ),
+      b('requiere_interconsulta', '¿Requiere interconsulta?'),
+      ...si('requiere_interconsulta', true, [
+        s('interconsulta_especialidad', '¿Con qué especialidad y por qué?', {
+          req: true,
+        }),
+      ]),
+      obl(
+        b(
+          'signos_de_alarma_explicados',
+          'Se explicaron los signos de alarma y cuándo volver antes',
+        ),
+      ),
+      b(
+        'comprension_verificada',
+        'El paciente repitió con sus palabras las indicaciones (método «teach-back»)',
+        {
+          ayuda:
+            'Herramienta 5 del Health Literacy Universal Precautions Toolkit (AHRQ, dominio público). Traducción propia, no oficial.',
+        },
+      ),
+      b('requiere_reposo', '¿Requiere reposo o certificado médico?'),
+      ...si('requiere_reposo', true, [
+        i('dias_de_reposo', 'Días de reposo', { req: true }),
+      ]),
+      obl(una('destino', 'Destino al terminar la cita', DESTINO_DE_LA_CITA)),
+      ...si('destino', 'Control programado', [
+        f('fecha_de_control', 'Fecha del próximo control', { req: true }),
+      ]),
+      ...si(
+        'destino',
+        ['Referencia a otro establecimiento', 'Derivación a emergencia'],
+        [t('motivo_de_referencia', 'Motivo de la referencia', { req: true })],
+      ),
+      t('observaciones', 'Observaciones'),
+    ]),
+  ],
+
   TRANSV_ANAMNESIS_GENERAL: () => [
     seccion(
       'Motivo de consulta',
